@@ -1,0 +1,14 @@
+FROM microsoft/dotnet:2.2-sdk as build-env
+WORKDIR /app
+
+RUN apt-get update
+RUN apt-get -y install curl gnupg
+RUN curl -sL https://deb.nodesource.com/setup_10.x  | bash -
+RUN apt-get -y install nodejs
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+FROM microsoft/dotnet:2.2-aspnetcore-runtime
+WORKDIR /app
+COPY --from=build-env /app/src/RetailDemo.Web.Api/out .
+ENTRYPOINT ["dotnet", "RetailDemo.Web.Api.dll"]

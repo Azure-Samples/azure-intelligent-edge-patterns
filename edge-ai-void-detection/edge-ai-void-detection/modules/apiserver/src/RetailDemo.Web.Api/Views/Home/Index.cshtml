@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Clean DDD Architecture Sample";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>Retail Demo Tools</h2>
+        <ul>
+            <li><a asp-area="" asp-controller="Tools" asp-action="Populate">Load Sample Data</a> (API call returning just a number)</li>
+            <li><a href="/swagger">API Documentation (Swagger)</a></li>
+        </ul>
+        <h2>Retail Demo Tools using Razor Pages</h2>
+        <ul>
+            <li><a asp-page="/ToolsRazorPage/Populate">Load Sample Data Option 2</a></li>
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <h2>About Retail Demo</h2>
+        <ul>
+            <li><a href="https://github.com">GitHub for this code</a></li>
+        </ul>
+    </div>
+</div>

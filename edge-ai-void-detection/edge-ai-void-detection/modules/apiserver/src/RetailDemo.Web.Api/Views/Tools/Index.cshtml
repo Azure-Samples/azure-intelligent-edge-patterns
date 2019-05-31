@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Items List";
+}
+@model IEnumerable<RetailDemo.Core.Entities.ImageEvent>
+<h2>To Do Items (MVC View)</h2>
+<ul>
+@foreach (var item in Model)
+{
+    <li>@item.EdgeDeviceName<br />@item.CaptureTime<br />@item.Body.Dest_img</li>
+}
+</ul>

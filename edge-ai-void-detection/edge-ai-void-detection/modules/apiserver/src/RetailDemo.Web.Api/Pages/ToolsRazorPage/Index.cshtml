@@ -1,0 +1,10 @@
+﻿@page
+@model RetailDemo.Web.Pages.ToDoRazorPage.IndexModel
+
+<h2>Retail Demo Tools</h2>
+<ul>
+    @foreach (var item in Model.ImageEventItems)
+    {
+    <li>@item.EdgeDeviceName<br />@item.CaptureTime<br />@item.Body.Dest_img</li>
+    }
+</ul>
