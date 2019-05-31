@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": { "value": "adminuser" },
+    "adminPassword": { "value": "STraining#000" },
+    "storageAccountNamePrefix": { "value": "mongoubstorage" },
+    "storageAccountType": { "value": "Standard_LRS" },
+    "vmSize": { "value": "Standard_D1" },
+    "virtualNetworkName_HA": { "value": "mongoVnet" },
+
+    "virtualNetworkName_DR": { "value": "mongoDRVnet" },
+    "subnetName_HA": { "value": "mongodbsubnet" },
+    "addressPrefix_HA": { "value": "10.0.0.0/16" },
+    "subnetPrefix_HA": { "value": "10.0.0.0/24" },
+
+    "gatewaysubnetPrefix_HA": { "value": "10.0.2.0/24" },
+    "gatewayPublicIpName_HA": { "value": "Ha_vng_ip" },
+    "subnetName_DR": { "value": "mongodbDRsubnet" },
+    "addressPrefix_DR": { "value": "10.1.0.0/16" },
+    "subnetPrefix_DR": { "value": "10.1.0.0/24" },
+    "gatewaysubnetPrefix_DR": { "value": "10.1.2.0/24" },
+    "gatewayPublicIpName_DR": { "value": "DR_vng_ip" },
+
+    "nodeaddressPrefix_HA": {
+
+      "value": "10.0.0.1"
+    },
+    "nodeaddressPrefix_DR": {
+
+      "value": "10.1.0.1"
+    },
+    "jumpbox": {
+      "value": "Enabled"
+    },
+    "osFamily": {
+      "value": "Ubuntu"
+    },
+    "mongodbVersion": {
+
+      "value": "3.0.2"
+    },
+    "replicaSetName": {
+      "value": "rs0"
+    },
+    "replicaSetKey": {
+
+      "value": "abc123"
+    },
+    "location": {
+      "value": "[resourceGroup().location]"
+    },
+    "sharedkey": { "value": "abc123" },
+    "gatewayname_HA": { "value": "Mongo_HA_VNG" }
+
+  }
+}
+

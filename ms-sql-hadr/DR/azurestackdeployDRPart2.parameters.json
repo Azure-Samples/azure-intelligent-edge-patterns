@@ -1,0 +1,66 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlvmname": {
+            "value": "sqldrVM0"
+        },
+        "adminUsername": {
+            "value": "adminuser"
+        },
+        "adminPassword": {
+            "value": "Password#1234"
+        },
+        "subnetName": {
+            "value": "subnet1"
+        },
+        "dnsNameForPublicIP": {
+            "value": "sqldns"
+        },
+        "domaintoJoin": {
+            "value": "hadr9.local"
+        },
+        "domainUsername": {
+            "value": "adminuser"
+        },
+        "domainPassword": {
+            "value": "Password#1234"
+        },
+        "ouPath": {
+            "value": ""
+        },
+        "sqlAOEPName": {
+            "value": "aodns"
+        },
+        "sqlServerServiceAccountUserName": {
+            "value": "sqlservice"
+        },
+        "sqlServerServiceAccountPassword": {
+            "value": "Password#1234"
+        },
+        "domainJoinOptions": {
+            "value": 3
+        },
+        "numberOfDisks": {
+            "value": 2
+        },
+        "workloadType": {
+            "value": "General"
+        },
+        "sqlStorageAccountType": {
+            "value": "Standard_LRS"
+        },
+        "publicIPAddressName": {
+            "value": "mypublicIp"
+        },
+        "virtualNetworkName": {
+            "value": "AzureVirtualNetwork"
+        },
+        "sqlVMSize": {
+            "value": "Standard_DS2_v2"
+        },
+        "vmDiskSize": {
+            "value": "128"
+        }
+    }
+}

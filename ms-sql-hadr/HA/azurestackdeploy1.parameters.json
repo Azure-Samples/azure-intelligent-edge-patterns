@@ -1,0 +1,130 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+    "domainName": {
+      "value": "fabrikam.local"
+    },
+    "adminPassword": {
+      "value": "Password#1234"
+    },
+  
+    "adVMSize": {
+      "value": "Standard_D2_v2"
+    },
+    "witnessVMSize": {
+      "value": "Standard_D1_v2"
+    },
+    
+    "dnsSuffix": {
+      "value": "stackpoc.com"
+    },
+    "virtualNetworkAddressRange": {
+      "value": "10.0.0.0/16"
+    },
+    "staticSubnet": {
+      "value": "10.0.0.0/24"
+    },
+    "sqlSubnet": {
+      "value": "10.0.1.0/26"
+    },
+    "adPDCNICIPAddress": {
+      "value": "10.0.0.250"
+    },
+    "deploymentPrefix": {
+      "value": "aodns"
+    },
+    "sqlServerOffer": {
+      "value": "SQL2016SP2-WS2016"
+    },
+    "sqlServerSku": {
+      "value": "Enterprise"
+    },
+    "sqlVMSize": {
+      "value": "Standard_DS2_v2"
+    },
+    "sqlAOAGName": {
+      "value": "sqlaa-ag"
+    },
+    "sqlAOListenerPort": {
+      "value": "1433"
+    },
+    "workloadType": {
+      "value": "GENERAL"
+    },
+    "vmDiskSize": {
+      "value": "128"
+    },
+    
+   
+    "virtualNetworkName": {
+      "value": "sqlhaVNET"
+    },
+    "azureVNetAddressPrefix": {
+      "value": "10.3.0.0/16"
+    },
+    "subnetPrefix": {
+      "value": "10.3.0.0/24"
+    },
+    "gatewaySubnetPrefix": {
+      "value": "10.3.200.0/29"
+    },
+    
+    "gatewayPublicIPName": {
+      "value": "azureGatewayIP"
+    },
+    "gatewayName": {
+      "value": "azureGateway"
+    },
+    "gatewaySku": {
+      "value": "Basic"
+    },
+    
+    "localGatewayName": {
+      "value": "localGateway"
+    },
+    "localGatewayIpAddress": {
+      "value": "1.1.1.1"
+    },
+    "localAddressPrefix": {
+      "value": "192.168.0.0/16"
+    },
+    "connectionName": {
+      "value": "Azure2Other"
+    },
+    "vpnType": {
+      "value": "RouteBased"
+    },
+    "sharedKey": {
+      "value": "abc123"
+    },
+    "sqlServerServiceAccountUserName": {
+      "value": "sqlservice"
+    },
+    "sqlServerServiceAccountPassword": {
+      "value": "Password#1234"
+    },
+    "sqlAuthUserName": {
+      "value": "sqlsa"
+    },
+    "sqlAuthPassword": {
+      "value": "Password#1234"
+    },
+    "sqlStorageAccountType": {
+      "value": "Standard_LRS"
+    },
+    "numberOfSqlVMDisks": {
+      "value": 2
+    },
+    "sampleDatabaseName": {
+      "value": "AutoHa-sample"
+    },
+    "autoPatchingDay": {
+      "value": "Sunday"
+    },
+    "autoPatchingStartHour": {
+      "value": "2"
+    }
+  }
+}

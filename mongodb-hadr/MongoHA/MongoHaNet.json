@@ -1,0 +1,283 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {
+    "vmName": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Name of the VM"
+      }
+    },
+    "virtualNetworkName_HA": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Name of the existing VNET"
+      }
+    },
+    "nodeaddressPrefix_DR": {"type": "string"},
+    "subnetName_HA": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Name of the subnet in the virtual network you want to use"
+      }
+    },
+
+    "vpnType": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Name of the type of VPN to use"
+      }
+    },
+    "localGatewayName": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Arbitrary name for gateway resource representing "
+      }
+    },
+
+    "virtualNetworkName_DR": { "type": "string" },
+    "subnetName_DR": { "type": "string" },
+    "addressPrefix_DR": { "type": "string" },
+    "subnetPrefix_DR": { "type": "string" },
+    "gatewaysubnetPrefix_DR": { "type": "string" },
+    "gatewayPublicIpName_DR": { "type": "string" },
+    "localGatewayIpAddress": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Public IP of your StrongSwan Instance"
+      }
+    },
+    "localaddressPrefix_HA": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet"
+      }
+    },
+    "gatewayPublicIpName_HA": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Arbitrary name for public IP resource used for the new azure gateway"
+      }
+    },
+    "gatewayName_HA": {
+      "defaultValue": "VNG",
+      "type": "String",
+      "metadata": {
+        "description": "Arbitrary name for the new gateway"
+      }
+    },
+    "connectionName": {
+      "defaultValue": "Azure2Other",
+      "type": "String",
+      "metadata": {
+        "description": "Arbitrary name for the new connection between Azure VNet and other network"
+      }
+    },
+    "sharedKey": {
+      "defaultValue": "",
+      "type": "SecureString",
+      "metadata": {
+        "description": "Shared key (PSK) for IPSec tunnel"
+      }
+    },
+    "azureVnet1addressPrefix_HA": {
+      "type": "String",
+      "defaultValue": "",
+      "metadata": {
+        "description": "HA Vnet addressPrefix_HA."
+      }
+    },
+    "location": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "vmSize": {
+      "defaultValue": "Standard_D2s_v3",
+      "type": "String",
+      "metadata": {
+        "description": "Size of the VM"
+      }
+    },
+
+    "storageAccountNamePrefix": { "type": "String" },
+    "storageAccountType": { "type": "String" },
+    "addressPrefix_HA": { "type": "String" },
+    "subnetPrefix_HA": { "type": "String" },
+    "gatewaysubnetPrefix_HA": { "type": "String" },
+    "adminUsername": {
+      "type": "String",
+      "metadata": {
+        "description": "User name for the Virtual Machine."
+      }
+    },
+    "nodeaddressPrefix_HA": {
+
+      "type": "String"
+    },
+
+    "jumpbox": {
+      "type": "String"
+    },
+    "osFamily": {
+      "type": "String"
+    },
+    "mongodbVersion": {
+
+      "type": "String"
+    },
+    "replicaSetName": {
+      "type": "String"
+    },
+    "replicaSetKey": {
+      "type": "String"
+    },
+    "adminPassword": {
+      "type": "SecureString",
+      "metadata": {
+        "description": "Password or ssh key for the Virtual Machine."
+      }
+    }
+
+  },
+  "variables": {
+    "gatewaySubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName_HA'), 'GatewaySubnet')]",
+    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName_HA'),parameters('subnetName_HA'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('gatewayPublicIpName_HA')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "type": "Microsoft.Network/localNetworkGateways",
+      "name": "tempLng",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "localNetworkAddressSpace": {
+          "addressPrefix_HA": [
+            "192.0.0.0/16"
+          ]
+        },
+        "gatewayIpAddress": "192.0.0.1"
+      }
+    },
+    {
+      "name": "TempConn",
+      "type": "Microsoft.Network/connections",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworkGateways/', parameters('gatewayName_HA'))]",
+        "[concat('Microsoft.Network/localNetworkGateways/','tempLng')]"
+      ],
+      "properties": {
+        "virtualNetworkGateway1": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName_HA'))]"
+        },
+        "localNetworkGateway2": {
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways', 'tempLng')]"
+        },
+        "connectionType": "IPsec",
+        "routingWeight": 10,
+        "sharedKey": "[parameters('sharedKey')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "name": "[parameters('gatewayName_HA')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('gatewayPublicIpName_HA'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('gatewaySubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('gatewayPublicIpName_HA'))]"
+              }
+            },
+            "name": "vnetGatewayConfig"
+          }
+        ],
+        "sku": {
+          "name": "Basic",
+          "tier": "Basic"
+        },
+        "gatewayType": "Vpn",
+        "vpnType": "RouteBased",
+        "enableBgp": "false"
+      }
+    }
+
+
+  ],
+  "outputs": {
+
+    "gatewayPublicIpName_HA": {
+      "type": "string",
+      "value": "[parameters('gatewayPublicIpName_HA')]"
+    },
+    "sharedKey": {
+      "type": "string",
+      "value": "[parameters('sharedKey')]"
+    },
+    "vnetgw": {
+      "type": "string",
+      "value": "[parameters('gatewayName_HA')]"
+    },
+    "virtualNetworkName_DR": {
+      "type": "string",
+      "value": "[parameters('virtualNetworkName_DR')]"
+    },
+    "subnetName_DR": {
+      "type": "string",
+      "value": "[parameters('subnetName_DR')]"
+    },
+    "addressPrefix_DR": {
+      "type": "string",
+      "value": "[parameters('addressPrefix_DR')]"
+    },
+    "subnetPrefix_DR": {
+      "type": "string",
+      "value": "[parameters('subnetPrefix_DR')]"
+    },
+    "gatewaysubnetPrefix_DR": {
+      "type": "string",
+      "value": "[parameters('gatewaysubnetPrefix_DR')]"
+    },
+    "gatewayPublicIpName_DR": {
+      "type": "string",
+      "value": "[parameters('gatewayPublicIpName_DR')]"
+    },
+    "nodeaddressPrefix_DR": {
+      "type": "string",
+      "value": "[parameters('nodeaddressPrefix_DR')]"
+    },
+    "connectionName": {
+      "type": "string",
+      "value": "[parameters('connectionName')]"
+    }
+  }
+  }
+
+

@@ -1,0 +1,56 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"vmName": {
+			"value": "sqldrvm0"
+		},
+		"adminUsername": {
+			"value": "adminuser"
+		},
+		"adminPassword": {
+			"value": "Password#1234"
+		},
+		"azureVNetAddressPrefix": {
+			"value": "10.3.0.0/16"
+		},
+		"subnetName": {
+			"value": "Subnet1"
+		},
+		"subnetPrefix": {
+			"value": "10.3.1.0/24"
+		},
+		"gatewaySubnetPrefix": {
+			"value": "10.3.200.0/29"
+		},
+		"gatewayPublicIPName": {
+			"value": "azureGatewayIP"
+		},
+		"gatewayName": {
+			"value": "azureGateway"
+		},
+		"gatewaySku": {
+			"value": "Basic"
+		},
+		"sharedKey": {
+			"value": "abc123"
+		},
+		"dnsNameForPublicIP": {
+			"value": "dnspublicip"
+		},
+		"DNSServerAddress": {
+			"value": "10.0.0.11"
+		},
+		"vpnType": {
+			"value": "RouteBased"
+		},
+
+		"sqlVMSize": {
+			"value": "Standard_DS2_v2"
+		},
+		"vmDiskSize": {
+			"value": "128"
+		}
+		
+	}
+}

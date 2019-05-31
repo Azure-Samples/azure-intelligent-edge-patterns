@@ -1,0 +1,99 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": "adminuser"
+        },
+        "adminPassword": {
+            "value": ""
+        },
+        "sqlLBIPAddress": {
+            "value": "104.42.49.174"
+        },
+        "DRLBIPAddress": {
+            "value": "38.102.178.89"
+        },
+        "drvmname": {
+            "value": "drvm9"
+        },
+        "DRLBName": {
+            "value": "drloadbalancer"
+        },
+        "adpdcvmname": {
+            "value": "priDC-64"
+        },
+        "sqlwVMName": {
+            "value": "fsw-64re"
+        },
+        "sqlVMName": {
+            "value": "sql-64re"
+        },
+        "domainName": {
+            "value": "hadr9.local"
+        },
+        "dnsSuffix": {
+            "value": "azure.com"
+        },
+        "adPDCNICIPAddress": {
+            "value": "10.0.0.250"
+        },
+        "deploymentPrefix": {
+            "value": "aodns"
+        },
+        "sqlServerServiceAccountUserName": {
+            "value": "sqlservice"
+        },
+        "sqlServerServiceAccountPassword": {
+            "value": ""
+        },
+        "sqlAuthUserName": {
+            "value": "sqlsa"
+        },
+        "sqlAuthPassword": {
+            "value": ""
+        },
+        "sqlStorageAccountName": {
+            "value": "ge4ezihusql"
+        },
+        "sqlStorageAccountType": {
+            "value": "Standard_LRS"
+        },
+        "sqlServerOffer": {
+            "value": "SQL2016SP2-WS2016"
+        },
+        "sqlServerSku": {
+            "value": "Enterprise"
+        },
+        "sqlVMSize": {
+            "value": "Standard_DS2_v2"
+        },
+        "sqlAOAGName": {
+            "value": "sqlaa-ag"
+        },
+        "sqlAOListenerName": {
+            "value": "ao-listen-newharg3"
+        },
+        "sqlAOListenerPort": {
+            "value": "1433"
+        },
+        "workloadType": {
+            "value": "GENERAL"
+        },
+        "vmDiskSize": {
+            "value": "128"
+        },
+        "numberOfSqlVMDisks": {
+            "value": 2
+        },
+        "sampleDatabaseName": {
+            "value": "AutoHa-sample"
+        },
+        "autoPatchingDay": {
+            "value": "Sunday"
+        },
+        "autoPatchingStartHour": {
+            "value": "2"
+        }
+    }
+}

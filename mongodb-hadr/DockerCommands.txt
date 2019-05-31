@@ -1,0 +1,21 @@
+-- Build and Run commands
+docker build --tag mongohadr-demo .
+docker run -it mongohadr-demo powershell
+
+-- Tag and Push to DockerHub
+docker tag mongohadr-demo:latest harmeetsingh/dockerhub:mongohadr-demo
+docker push harmeetsingh/dockerhub:mongohadr-demo
+
+-- Pull from DockerHub
+docker pull harmeetsingh/dockerhub:mongohadr-demo
+docker run -it mongohadr-demo powershell
+
+-- remove
+docker rmi mongohadr-demo
+
+Use this
+docker images
+
+docker tag <imageid> <yourrepo>/dockerhub:mongohadr-demo
+
+docker push <yourrepo>/dockerhub:mongohadr-demo
