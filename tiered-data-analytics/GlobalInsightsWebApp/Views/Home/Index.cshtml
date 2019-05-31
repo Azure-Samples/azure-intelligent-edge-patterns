@@ -1,0 +1,90 @@
+﻿@model List<FilteredData>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    body {
+        background: none;
+    }
+
+    #datatable {
+        padding:20px;
+        background-color: #f7f7f7;
+    }
+
+    table {
+        background-color: white;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    thead {
+        background-color: #0d8ebd;
+        color: white;
+    }
+
+    #refreshbutton {
+        margin-bottom: 10px;
+        background-color: gray;
+        color:white;
+    }
+    #issuenumber {
+    font-size:2.4em;
+    margin-top:40px;
+    margin-bottom:10px;
+    }
+    #averagenumber {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+
+</style>
+
+
+<div class="row">
+    <h1  id="issuenumber" align="center">@ViewBag.Issues Issues Received</h1>
+
+    <table id="averagenumber" border="0" style="table-layout:fixed" align="center">
+        <tr>
+            <td width="500"><h2 align="center">Average Temperature: @ViewBag.AverageTemperature F</h2></td>
+            <td width="500"><h2 align="center">Average Humidity: @ViewBag.AverageHumidity%</h2></td>
+        </tr>
+    </table>
+    
+    <div id="datatable">
+        <form action="" method="post">
+            <input id="refreshbutton" type="button" class="btn btn-secondary" value="Refresh" onclick="location.href='@Url.Action("Index", "Home")'" />
+        </form>
+        <table class="table">
+            <thead>
+                <tr>
+                    @{
+                    var filteredDataHeaders = Model.Count == 0 ? new FilteredData() : Model[0];
+
+                    foreach (var property in filteredDataHeaders.GetType().GetProperties())
+                    {
+                        <th>@property.Name</th>
+                }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{ foreach (var filteredData in Model)
+                {
+                    <tr>
+                        @{
+                        foreach (var property in filteredData.GetType().GetProperties())
+                        {
+                            <td>@property.GetValue(filteredData, null)</td>
+                    }
+                        }
+                    </tr>
+            }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

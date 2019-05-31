@@ -1,0 +1,82 @@
+﻿@model List<UnfilteredData>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    body {
+        background: none;
+    }
+
+    #datatable {
+        padding: 20px;
+        background-color: #f7f7f7;
+    }
+
+    table {
+        background-color: white;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    thead {
+        background-color: #0d8ebd;
+        color: white;
+    }
+
+    #refreshbutton {
+        margin-bottom: 10px;
+        background-color: gray;
+        color: white;
+    }
+
+    #recordnumber {
+        font-size: 2.4em;
+        margin-top: 40px;
+        margin-bottom: 10px;
+    }
+
+    #issuefound {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="row">
+    <h1 id="recordnumber" align="center">@ViewBag.TotalRecords Records Processed</h1>
+    <h2 id="issuefound" align="center">@ViewBag.TotalIssues Issues Found</h2>
+    <div id="datatable">
+        <form action="" method="post">
+            <input id="refreshbutton" type="button" class="btn btn-secondary" value="Refresh" onclick="location.href='@Url.Action("Index", "Home")'" />
+        </form>
+        <table class="table">
+            <thead>
+                <tr>
+                    @{
+                    var unfilteredDataHeaders = new UnfilteredData();
+
+                    foreach (var property in unfilteredDataHeaders.GetType().GetProperties())
+                    {
+                        <th>@property.Name</th>
+                }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{ foreach (var unfilteredData in Model)
+                {
+                    <tr>
+                        @{
+                        foreach (var property in unfilteredData.GetType().GetProperties())
+                        {
+                            <td>@property.GetValue(unfilteredData, null)</td>
+                    }
+                        }
+                    </tr>
+            }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
