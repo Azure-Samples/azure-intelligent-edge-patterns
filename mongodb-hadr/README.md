@@ -16,7 +16,7 @@ You’ll learn how to:
 
 ### Architecture
 
-![](.\\mongo-media\\/media/image1.png)
+![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/mongodb-hadr/mongo-media/media/image1.png)
 
 ## How to run this sample
 ### Prerequisites

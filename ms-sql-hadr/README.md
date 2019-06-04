@@ -19,7 +19,7 @@ You’ll learn how to:
 
 ### Architecture 
 
-![](.\\sql-media\\/media/image1.png)
+![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/ms-sql-hadr/sql-media/media/image1.png)
 
 ## How to run this sample
 ### Prerequisites
@@ -105,7 +105,7 @@ exit
     environment and inspecting the Availability Group through SQL Server
     Management Studio (SSMS).
 
-![](.\\sql-media\\/media/image2.png)
+![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/ms-sql-hadr/sql-media/media/image2.png)
 
 ### Next Steps
 

@@ -18,7 +18,7 @@ In this tutorial, you’ll create a sample environment to:
 
 ### Architecture
 
-![](.\\stageddata-media\\/media/image1.png)
+![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/staged-data-analytics/stageddata-media/media/image1.png)
 
 ## How to run this sample
 ### Prerequisites
@@ -96,11 +96,11 @@ different versions of Azure PowerShell.
 
  Azure Web App
  
- ![](.\\stageddata-media\\/media/image2.png)
+ ![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/staged-data-analytics/stageddata-media/media/image2.png)
  
  AzureStack Web App
  
- ![](.\\stageddata-media\\/media/image3.png)
+ ![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/staged-data-analytics/stageddata-media/media/image3.png)
 
 ### Next Steps
 
