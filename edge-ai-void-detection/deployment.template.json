@@ -224,8 +224,7 @@
         "routes": {
           "CaptureImagesToProcessingImages": "FROM /messages/modules/captureimages/outputs/* INTO BrokeredEndpoint(\"/modules/processimages/inputs/input1\")",
           "ProcessingImagesToUploadImages": "FROM /messages/modules/processimages/outputs/* INTO BrokeredEndpoint(\"/modules/uploadimages/inputs/input1\")",
-          "UploadImagesToIotHub": "FROM /messages/modules/uploadimages/outputs/* INTO $upstream",
-          "voiddetectionbrainwaveToIoTHub": "FROM /messages/modules/voiddetectionbrainwave/outputs/* INTO $upstream"
+          "UploadImagesToIotHub": "FROM /messages/modules/uploadimages/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
