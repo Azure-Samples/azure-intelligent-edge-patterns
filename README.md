@@ -1,57 +1,15 @@
-# Project Name
+# Azure Intelligent Edge Patterns
 
-(short, 1-3 sentenced, description of the project)
+These samples demonstrate how to quickly get started developing for the Azure Intelligent Edge, using the Azure Data Box Edge and Azure Stack. Each sample is self-contained and may require extra hardware.
 
-## Features
-
-This project framework provides the following features:
-
-* Feature 1
-* Feature 2
-* ...
-
-## Getting Started
-
-### Prerequisites
-
-(ideally very short, if any)
-
-- OS
-- Library version
-- ...
-
-### Installation
-
-(ideally very short)
-
-- npm install [package name]
-- mvn install
-- ...
-
-### Quickstart
-(Add steps to get up and running quickly)
-
-1. git clone [repository clone url]
-2. cd [respository name]
-3. ...
-
-
-## Demo
-
-A demo app is included to show how to use the project.
-
-To run the demo, follow these steps:
-
-(Add steps to start up the demo)
-
-1.
-2.
-3.
+## List of Samples
+- Deploy an Edge-based Machine Learning solution
+- Deploy a Staged Data Analytics Solution
+- Deploy a SQL Server 2016 Enterprise Availability Group on 2 Azure Stacks
+- Deploy a Highly Available MongoDB Replica Set on 2 Azure Stacks
 
 ## Resources
-
-(Any additional resources or related projects)
-
-- Link to supporting information
-- Link to similar sample
-- ...
+  - Learn more about hybrid cloud applications, see [Hybrid Cloud
+    Solutions.](https://azure.microsoft.com/en-us/solutions/hybrid-cloud-app/)
+  - Learn more about Azure Stack, see [Azure Stack](https://azure.microsoft.com/en-us/overview/azure-stack/)
+  - Learn more about Data Box Edge, see [Data Box Edge](https://azure.microsoft.com/en-us/services/databox/edge/)
