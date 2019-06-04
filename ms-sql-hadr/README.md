@@ -8,6 +8,8 @@ environments. To learn more about SQL Server 2016 and high availability,
 go
 [here](https://docs.microsoft.com/en-us/sql/database-engine/availability-groups/windows/always-on-availability-groups-sql-server?view=sql-server-2016).
 
+This pattern and architecture was created through customer research by one of our summer interns, Suren Jamiyanaa.
+
 You’ll learn how to:
 
   - Orchestrate a deployment across two Azure Stacks
