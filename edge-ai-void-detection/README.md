@@ -11,7 +11,7 @@ In this article you learn how to:
     the edge.
 
 ### Architecture
-![](.\\edgeai-media\\/media/image1.png)
+![](/edgeai-media/media/image1.png)
 
 ## How to run this sample
 ### Prerequisites
