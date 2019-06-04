@@ -1,5 +1,5 @@
 FROM microsoft/windowsservercore
-MAINTAINER Harmeet Singh
+MAINTAINER anajod@microsoft.com
 
 COPY HA c:/SqlHADR/HA
 COPY DR c:/SqlHADR/DR

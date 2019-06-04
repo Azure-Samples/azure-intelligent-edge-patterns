@@ -1,5 +1,5 @@
 FROM microsoft/windowsservercore
-MAINTAINER Harmeet Singh
+MAINTAINER anajod@microsoft.com
 
 COPY Deploy-AzureResourceGroup.ps1 c:/MongoHADRDemo/
 COPY azurestackdeploy.parameters.json c:/MongoHADRDemo/
