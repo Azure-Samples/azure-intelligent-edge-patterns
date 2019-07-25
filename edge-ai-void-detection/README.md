@@ -57,7 +57,8 @@ Before you begin, make sure you have:
 ```
 ### Configure and Build Containers
 1.  Open the “edge-ai-void-detection” folder in Visual Studio Code.
-2.  Fill in the values in the .env.template file with your ACR credentials, URL
+2.  Fill in the values in the .env.template file with your ACR credentials, 
+	ACR registry name, URL
     for images, external IP address of the Data Box Edge compute role,
     and the name of the share you created earlier.
 3.  Rename the file to ".env".

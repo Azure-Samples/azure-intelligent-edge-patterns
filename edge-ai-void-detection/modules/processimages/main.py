@@ -62,7 +62,7 @@ tensor_outputs = [
     'ssd_300_vgg/block11_box/Reshape:0'
 ]
 
-client = PredictionClient(os.getenv('ML_MODULE_NAME','fpga-stock-module'), 50051)
+client = PredictionClient(os.getenv('ML_MODULE_NAME','voiddetectionbrainwave'), 50051)
 
 # Callback received when the message that we're forwarding is processed.
 def send_confirmation_callback(message, result, user_context):
