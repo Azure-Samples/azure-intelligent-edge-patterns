@@ -223,7 +223,8 @@
         "schemaVersion": "1.0",
         "routes": {
           "CaptureImagesToProcessingImages": "FROM /messages/modules/captureimages/outputs/* INTO BrokeredEndpoint(\"/modules/processimages/inputs/input1\")",
-          "ProcessingImagesToUploadImages": "FROM /messages/modules/processimages/outputs/* INTO BrokeredEndpoint(\"/modules/uploadimages/inputs/input1\")",
+          "ProcessingImagesToUploadImages": "FROM /messages/modules/processimages/outputs/output1 INTO BrokeredEndpoint(\"/modules/uploadimages/inputs/input1\")",
+          "ProcessingImagesToIotHub": "FROM /messages/modules/processimages/outputs/output2 INTO $upstream",
           "UploadImagesToIotHub": "FROM /messages/modules/uploadimages/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
@@ -239,7 +240,12 @@
       }
     },
     "processimages": {
-      "properties.desired": {}
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "blobStorageSasUrl": "$BLOB_STORAGE_SAS_URL",
+        "dataDestination": "$DATA_DESTINATION",
+        "cameraId": "$CAMERA_ID"
+      }
     },
     "uploadimages": {
       "properties.desired": {
