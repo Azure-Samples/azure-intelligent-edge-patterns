@@ -105,7 +105,7 @@
             },
             "env": {
               "ML_MODULE_NAME": {
-                "value": "yes"
+                "value": "voiddetectionbrainwave"
               }
             }
           },

@@ -2,7 +2,7 @@
   "$schema-version": "0.0.1",
   "description": "",
   "image": {
-    "repository": "$CONTAINER_REGISTRY_LOGIN_SERVER/captureimages",
+    "repository": "$CONTAINER_REGISTRY_LOGIN_SERVER/processimages",
     "tag": {
       "version": "1.0.0",
       "platforms": {
