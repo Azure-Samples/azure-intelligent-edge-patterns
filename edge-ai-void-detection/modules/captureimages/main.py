@@ -7,7 +7,6 @@ import random
 import time
 import sys
 from shutil import copyfile
-import tempfile
 import time
 
 import iothub_client
@@ -17,7 +16,6 @@ from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubE
 
 import requests
 import traceback
-import base64
 import json
 import importlib
 from PIL import Image
@@ -40,9 +38,6 @@ PROTOCOL = IoTHubTransportProvider.MQTT
 
 MODULE_ID=""
 IMAGE_URL=""
-print("image url" + IMAGE_URL )
-
-s = requests.Session()
 
 # Callback received when the message that we're forwarding is processed.
 def send_confirmation_callback(message, result, user_context):
@@ -53,19 +48,6 @@ def send_confirmation_callback(message, result, user_context):
     print ( "    Properties: %s" % key_value_pair )
     SEND_CALLBACKS += 1
     print ( "    Total calls confirmed: %d" % SEND_CALLBACKS )
-
-
-# receive_message_callback is invoked when an incoming message arrives on the specified 
-# input queue (in the case of this sample, "input1").  Because this is a filter module, 
-# we will forward this message onto the "output1" queue.
-def receive_message_callback(message, hubManager):
-    global RECEIVE_CALLBACKS    
-    message = json.dumps(FILE_PATH)
-    print("message to send is:")
-    pprint.pprint(message)
-    message = IoTHubMessage(message)
-    hubManager.forward_event_to_output("output1", message, 0)
-    return IoTHubMessageDispositionResult.ACCEPTED
 
 def module_twin_callback(update_state, payload, user_context):
     print ( "\nTwin callback called with:\nupdateStatus = %s\npayload = %s\ncontext = %s" % (update_state, payload, user_context) )
@@ -89,35 +71,30 @@ def get_twin_property(twin, proper_name):
 def get_image_url():
     retry_times =0
     while(retry_times <=3):
-        print("before if block image url function" + IMAGE_URL)
         if(IMAGE_URL == None or IMAGE_URL ==""):
-            print("in if block image url function" + IMAGE_URL)
-            print("CAN NOT GET IMAGE URL FROM CONFIG, USE DEFAULT URL")
+            print("Can't get image URL, will retry in 5 seconds.")
             time.sleep(5)
             print("retry for fetch image_url")
             retry_times=retry_times+1
         else:
             return IMAGE_URL
-        
-        print("ERROR GET IMAGE URL, WAIT FOR TWIN TO BE PARSED")
+    print("Can't get get image URL, need to wait for module twin to parsed.")
 
 
 def capture_single_image(img_url,hub_manager):
     start = time.time()
-    print(">>Capturing image: " + str(start))
+    filename = str(start) + ".jpg"
+    print(">> Capturing image: " + filename)
     img_data = get_image_data(img_url)
     pil_image = Image.open(BytesIO(img_data))
-    # Dimensions to crop image
-    # pil_image = pil_image.crop((1148,1039,1575,1415))
-    file_path = os.path.join("/imagefiles",str(start)+".jpg")
+    #CROP GOES HERE
+    file_path = os.path.join("/imagefiles",filename)
     pil_image.save(file_path)
     save_end = time.time()
-    print("Time - Capture to Save: " + str((save_end-start)))
-    print ("sending message...")
+    print("<< Done. Captured image in: " + str((save_end-start)) + " seconds.")
+    print("Sending message to processor.")
     message=IoTHubMessage(file_path)
     hub_manager.client.send_event_async("output1", message, send_confirmation_callback, 0)
-    print ("finished sending message...")
-    print("<<Completed. Start time: " + str(start))
 
 def loop_image_capture(hub_manager):
     while(True):
@@ -125,12 +102,8 @@ def loop_image_capture(hub_manager):
             img_url = get_image_url()
             if(not is_blank(img_url)):
                 capture_single_image(img_url,hub_manager)
-            else:
-                print("=============Could not fetch image url=====================")
-                time.sleep(5)
         except:
-            print("Un expected Error:", traceback.print_exc())
-    #time.sleep(1)
+            print("Unexpected Error:", traceback.print_exc())
     
 def parse_module_twin(twin):
     global IMAGE_URL, MODULE_ID
@@ -153,7 +126,6 @@ def parse_module_twin(twin):
 def is_blank (input):
     return not (input and input.strip())
 
-
 class HubManager(object):
 
     def __init__(
@@ -166,10 +138,6 @@ class HubManager(object):
         # set the time until a message times out
         self.client.set_option("messageTimeout", MESSAGE_TIMEOUT)
         self.client.set_module_twin_callback(module_twin_callback, self)
-        
-        # sets the callback when a message arrives on "input1" queue.  Messages sent to 
-        # other inputs or to the default will be silently discarded.
-        self.client.set_message_callback("input1", receive_message_callback, self)
 
     # Forwards the message received onto the next stage in the process.
     def forward_event_to_output(self, outputQueueName, event, send_context):
@@ -180,11 +148,11 @@ class HubManager(object):
 def main(protocol):
     try:
         print ( "\nPython %s\n" % sys.version )
-        print ( "IoT Hub Client for Python" )
+        print ( "HTTP Capture Module for IoT Edge" )
 
         hub_manager = HubManager(protocol)
 
-        print ( "The module is now waiting for messages and will indefinitely.  Press Ctrl-C to exit. ")
+        print ( "The module is capturing images and will indefinitely.  Press Ctrl-C to exit. ")
 
         loop_image_capture(hub_manager)
 

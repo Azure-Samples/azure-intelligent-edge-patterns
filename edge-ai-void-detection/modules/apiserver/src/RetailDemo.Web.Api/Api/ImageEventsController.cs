@@ -70,7 +70,8 @@ namespace RetailDemo.Web.Api
         {
             ImageEvent imageEvent = new ImageEvent();
 
-            var strGetData = _redisDb.GetEvent(edgeDevice);
+            // var strGetData = _redisDb.GetEvent(edgeDevice);
+            var strGetData = _redisDb.GetEvent("ImageEvent");
 
             if (String.IsNullOrEmpty(strGetData) || String.IsNullOrEmpty(edgeDevice))
             {

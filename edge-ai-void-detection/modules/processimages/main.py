@@ -37,7 +37,7 @@ from datetime import datetime
 # messageTimeout - the maximum time in milliseconds until a message times out.
 # The timeout period starts at IoTHubModuleClient.send_event_async.
 # By default, messages do not expire.
-MESSAGE_TIMEOUT = 1000
+MESSAGE_TIMEOUT = 20000
 
 # global counters
 RECEIVE_CALLBACKS = 0
@@ -45,7 +45,7 @@ SEND_CALLBACKS = 0
 # Choose HTTP, AMQP or MQTT as transport protocol.  Currently only MQTT is supported.
 PROTOCOL = IoTHubTransportProvider.MQTT
 
-CATEGORY_INDEX={1: {'id': 1, 'name': 'void'}}
+# CATEGORY_INDEX={1: {'id': 1, 'name': 'void'}}
 
 # Tensor outputs for retail model
 tensor_outputs = [
@@ -168,8 +168,6 @@ def send_iot_hub_message(hub_manager, message_dict, schema):
     hub_manager.client.send_event_async("output2", message, send_confirmation_callback, 0)
 
 
-#AREA For DETECTION
-
 def get_twin_property(twin, proper_name):
     result = None
     if "desired" in twin and proper_name in twin["desired"]:
@@ -272,7 +270,6 @@ class HubManager(object):
         
         # sets the callback when a message arrives on "input1" queue.  Messages sent to 
         # other inputs or to the default will be silently discarded.
-        print("before receive message callback")
         self.client.set_message_callback("input1", receive_message_callback, self)
 
     # Forwards the message received onto the next stage in the process.

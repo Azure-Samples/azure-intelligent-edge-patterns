@@ -4,7 +4,7 @@
   "image": {
     "repository": "$CONTAINER_REGISTRY_LOGIN_SERVER/uploadimages",
     "tag": {
-      "version": "1.0.0",
+      "version": "1.0.2",
       "platforms": {
         "amd64": "./Dockerfile.amd64"
       }

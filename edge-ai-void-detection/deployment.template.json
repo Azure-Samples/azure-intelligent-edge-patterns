@@ -256,10 +256,10 @@
     "redisdb": {
       "properties.desired": {}
     },
-    "api-server-site": {
+    "apiserver": {
       "properties.desired": {}
     },
-    "client-ui": {
+    "clientsite": {
       "properties.desired": {}
     }
   }

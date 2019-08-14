@@ -33,7 +33,7 @@ import datetime
 # messageTimeout - the maximum time in milliseconds until a message times out.
 # The timeout period starts at IoTHubModuleClient.send_event_async.
 # By default, messages do not expire.
-MESSAGE_TIMEOUT = 1000
+MESSAGE_TIMEOUT = 20000
 
 # global counters
 RECEIVE_CALLBACKS = 0
@@ -44,31 +44,18 @@ PROTOCOL = IoTHubTransportProvider.MQTT
 
 MODULE_ID="testdefaultdeploy"
 IMAGE_URL=""
-#ML_ENDPOINT="http://10.121.114.46:5001/score"
-print("ml_endpoint - global")
-#ML_ENDPOINT = 'http://127.0.0.1:50000'
-CATEGORY_INDEX={1: {'id': 1, 'name': 'void'}}
-STORAGE_CONNECTION=""
-STORAGE_ROOT=""
-CONTAINER="images"
 FILE_PATH = ""
 CAPTUREDTIME = None
 RESPONSE1 = None
-
 IP_ADDRESS=""
-
-
 redisConnection = redis.Redis(host='redisdb', port=6379, db=0)
-
 
 import cv2
 from matplotlib import pyplot as plt
-colors_tableau = [(255, 255, 255), (31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),(44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),(148, 103, 189), (197, 176, 213), (140, 86, 75), (196, 156, 148),(227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),(188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)]
 def draw_boxes_on_img(img, classes, scores, bboxes, thickness=2):
     shape = img.shape
     for i in range(bboxes.shape[0]):
         bbox = bboxes[i]
-        # color = colors_tableau[classes[i]]
         color = (26, 26, 224)
         # Draw bounding box...
         p1 = (int(bbox[0] * shape[0]), int(bbox[1] * shape[1]))
@@ -124,9 +111,8 @@ def module_twin_callback(update_state, payload, user_context):
     parse_module_twin(data)
     
 
-# #AREA For DETECTION
-
 def get_twin_property(twin, proper_name):
+    result = ""
     if "desired" in twin and proper_name in twin["desired"]:
         result = twin["desired"][proper_name]
     if proper_name in twin:
@@ -220,7 +206,7 @@ def convert_scores(response):
 
 def process_single_image(file_path, scoring_data):
     start = time.time()
-    print(">>Uploading Image: " + file_path + " at " + str(start))
+    print(">> Uploading Image: " + file_path + " at " + str(start))
     out_dict = convert_response(scoring_data)
     out_scores = convert_scores(scoring_data)
     img_data = cv2.imread(file_path, 1)
@@ -231,7 +217,6 @@ def process_single_image(file_path, scoring_data):
     return (src_img_url,dest_img_url, src_upload, vis_time, dest_upload)
 
 def parse_module_twin(twin):
-    print("inside parsing module twin")
     global IP_ADDRESS
 
     ip_address = get_twin_property(twin, "api_ip_address")
@@ -240,37 +225,6 @@ def parse_module_twin(twin):
         print("External IP Parsed", IP_ADDRESS)
     else:
         print("Error when get External IP")
-
-#     ml_url = get_twin_property(twin, "model_endpoint")
-#     if(not is_blank(ml_url)):
-#         ML_ENDPOINT = ml_url
-#         print("Model Endpoint Parsed", ML_ENDPOINT)
-#     else:
-#         print("Error when get model endpoint")
-
-#     storage_root = get_twin_property(twin, "storage_root")
-#     if(not is_blank(storage_root)):
-#         STORAGE_ROOT = storage_root
-#         print("STORAGE_ROOT Parsed", STORAGE_ROOT)
-#     else:
-#         print("Error when get STORAGE_ROOT")
-
-#     storage_connection = get_twin_property(twin, "storage_connection")
-#     if(not is_blank(storage_connection)):
-#         STORAGE_CONNECTION = storage_connection
-#         global blob_service
-#         blob_service = BlockBlobService(connection_string = STORAGE_CONNECTION)
-#         print("STORAGE_CONNECTION Parsed", STORAGE_CONNECTION)
-#     else:
-#         print("Error when get STORAGE_CONNECTION")
-
-#     img_url = get_twin_property(twin, "image_url")
-#     if(not is_blank(img_url)):
-#         IMAGE_URL = img_url
-#         print("IMAGE_URL Parsed", IMAGE_URL)
-#     else:
-#         print("Error when get IMAGE_URL")
-
 
 def is_blank (input):
     return not (input and input.strip())
