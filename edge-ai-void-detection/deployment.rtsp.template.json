@@ -1,0 +1,260 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "$CONTAINER_REGISTRY_NAME": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_LOGIN_SERVER"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "redisdb": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "bitnami/redis:latest",
+              "createOptions": {}
+            },
+            "env": {
+              "ALLOW_EMPTY_PASSWORD": {
+                "value": "yes"
+              }
+            }
+          },
+          "captureimagesrtsp": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.captureimagesrtsp}",
+              "createOptions": {
+                "HostConfig": {
+                  "Binds": [
+                    "/home/hcsshares/$SHARE_NAME:/imagefiles"
+                  ]
+                }
+              }
+            }
+          },
+          "processimages": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.processimages}",
+              "createOptions": {
+                "HostConfig": {
+                  "Binds": [
+                    "/home/hcsshares/$SHARE_NAME:/imagefiles"
+                  ]
+                }
+              }
+            },
+            "env": {
+              "ML_MODULE_NAME": {
+                "value": "voiddetectionbrainwave"
+              }
+            }
+          },
+          "uploadimages": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.uploadimages}",
+              "createOptions": {
+                "HostConfig": {
+                  "Binds": [
+                    "/home/hcsshares/$SHARE_NAME:/imagefiles"
+                  ]
+                }
+              }
+            }
+          },
+          "apiserver": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.apiserver}",
+              "createOptions": {
+                "ExposedPorts": {
+                  "80/tcp": {}
+                },
+                "HostConfig": {
+                  "Binds": [
+                    "/home/hcsshares/$SHARE_NAME/out:/app/wwwroot/images/output"
+                  ],
+                  "PortBindings": {
+                    "80/tcp": [
+                      {
+                        "HostPort": "3001"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "clientsite": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.clientsite}",
+              "createOptions": {
+                "ExposedPorts": {
+                  "80/tcp": {}
+                },
+                "HostConfig": {
+                  "Binds": [
+                    "/home/hcsshares/$SHARE_NAME:/imagefiles"
+                  ],
+                  "PortBindings": {
+                    "80/tcp": [
+                      {
+                        "HostPort": "3003"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "voiddetectionbrainwave": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "intelligentedge/void-detection-brainwave:1.0.0",
+              "createOptions": {
+                "ExposedPorts": {
+                  "50051/tcp": {}
+                },
+                "HostConfig": {
+                  "Privileged": true,
+                  "PortBindings": {
+                    "50051/tcp": [
+                      {
+                        "HostPort": "50051"
+                      }
+                    ]
+                  },
+                  "Binds": [
+                    "/etc/hosts:/etc/hosts",
+                    "/home/hcsshares/$SHARE_NAME:/imagefiles"
+                  ],
+                  "Devices": [
+                    {
+                      "PathOnHost": "/dev/catapult0",
+                      "PathInContainer": "/dev/catapult0"
+                    },
+                    {
+                      "PathOnHost": "/dev/catapult1",
+                      "PathInContainer": "/dev/catapult1"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "CaptureImagesToProcessingImages": "FROM /messages/modules/captureimagesrtsp/outputs/* INTO BrokeredEndpoint(\"/modules/processimages/inputs/input1\")",
+          "ProcessingImagesToUploadImages": "FROM /messages/modules/processimages/outputs/* INTO BrokeredEndpoint(\"/modules/uploadimages/inputs/input1\")",
+          "UploadImagesToIotHub": "FROM /messages/modules/uploadimages/outputs/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "captureimagesrtsp": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "module_id": "captureimagesrtsp",
+        "image_url": "$HTTP_IMAGE_URL"
+      }
+    },
+    "processimages": {
+      "properties.desired": {}
+    },
+    "uploadimages": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "api_ip_address": "$EXTERNAL_IP_ADDRESS"
+      }
+    },
+    "redisdb": {
+      "properties.desired": {}
+    },
+    "apiserver": {
+      "properties.desired": {}
+    },
+    "clientsite": {
+      "properties.desired": {}
+    }
+  }
+}
