@@ -1,3 +1,16 @@
+---
+page_type: sample
+languages:
+- csharp
+- javascript
+- python
+- powershell
+products:
+- azure
+description: "These samples demonstrate how to quickly get started developing for the Azure Intelligent Edge, using the Azure Data Box Edge and Azure Stack. Each sample is self-contained and may require extra hardware."
+urlFragment: azure-intelligent-edge-patterns
+---
+
 # Azure Intelligent Edge Patterns
 
 These samples demonstrate how to quickly get started developing for the Azure Intelligent Edge, using the Azure Data Box Edge and Azure Stack. Each sample is self-contained and may require extra hardware.
