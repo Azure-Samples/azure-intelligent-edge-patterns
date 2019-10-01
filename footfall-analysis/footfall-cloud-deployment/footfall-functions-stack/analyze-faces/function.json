@@ -1,0 +1,33 @@
+{
+  "bindings": [
+    {
+      "name": "myBlob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "fromcamera/{name}",
+      "connection": "storeimage_connection"
+    },
+    {
+      "type": "eventHub",
+      "name": "outputEventHubMessage",
+      "connection": "eventhubs_connection",
+      "path": "outeventhub",
+      "direction": "out"
+    },
+    {
+      "type": "blob",
+      "name": "outputBlob",
+      "path": "boundingbox/{name}",
+      "connection": "storeimage_connection",
+      "direction": "inout"
+    },
+    {
+      "type": "queue",
+      "name": "outputQueue",
+      "queueName": "latesturi",
+      "connection": "storeimage_connection",
+      "direction": "out"
+    }
+  ],
+  "disabled": false
+}

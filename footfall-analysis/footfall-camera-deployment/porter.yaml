@@ -1,0 +1,150 @@
+# This is the configuration for Porter
+# You must define steps for each action, but the rest is optional
+# See https://porter.sh/authoring-bundles for documentation on how to configure your bundle
+# Uncomment out the sections below to take full advantage of what Porter can do!
+
+name: footfall-camera-deployment
+version: 0.1.0
+description: "Deploys the containers for edge inferencing to correctly tagged cameras."
+invocationImage: intelligentedge/footfall-camera-deployment:0.1.0
+tag: intelligentedge/footfall-camera-deployment:0.1.0
+# Uncomment out the line below to use a template Dockerfile for your invocation image
+dockerfile: Dockerfile.tmpl
+
+mixins:
+  - exec
+  - az:
+      extensions:
+      - azure-cli-iot-ext
+
+customActions:
+  com.azure.iot.deployment.status:
+    description: "Getting the status of the Azure IoT deployments."
+    stateless: false
+    modifies: false
+
+install:
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_SUBSCRIPTION_ID}}"
+  - exec:
+      description: "Inject Storage Account String"
+      command: "bash"
+      arguments:
+        - ./injectstoragestring.sh
+        - "{{ bundle.credentials.IMAGE_STORAGE_ACCT_STRING}}"
+  - az:
+      description: "Deploy Camera Application"
+      arguments:
+        - iot
+        - edge
+        - deployment
+        - create
+      flags:
+        deployment-id: "footfallcam{{ bundle.parameters.deployment_suffix}}"
+        hub-name: "{{bundle.parameters.iot_hub_name}}"
+        content: deployment.json
+        target-condition: "tags.deploymenttype = 'footfall'"
+        priority: 2
+
+
+upgrade:
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+
+uninstall:
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+  - az:
+      description: "Remove Camera Application"
+      arguments:
+        - iot
+        - edge
+        - deployment
+        - create
+      flags:
+        deployment-id: "footfallcam{{ bundle.parameters.deployment_suffix}}"
+        hub-name: "{{bundle.parameters.iot_hub_name}}"
+        content: undeployment.json
+        target-condition: "tags.deploymenttype = 'footfall'"
+        priority: 2
+
+com.azure.iot.deployment.status:
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+
+  - exec: 
+      description: "Azure IoT Edge deployment: Querying the deployments."
+      command: "az"
+      arguments: 
+        - "iot"
+        - "edge"
+        - "deployment"
+        - "list"
+        - "--hub-name"
+        - "{{ bundle.parameters.iot_hub_name }}"
+        - "--query"
+        - "[].{ID:id,Priority:priority,Applied:systemMetrics.results.appliedCount,Targeted:systemMetrics.results.targetedCount,Failed:systemMetrics.results.reportedFailedCount,Succeeded:systemMetrics.results.reportedSuccessfulCount,Target:targetCondition,Created:createdTimeUtc,Updated:lastUpdatedTimeUtc}"
+        - "--output"
+        - "table"
+
+
+# See https://porter.sh/authoring-bundles/#dependencies
+#dependencies:
+#  mysql:
+#    tag: deislabs/porter-mysql:latest
+#    parameters:
+#      database-name: wordpress
+
+# See https://porter.sh/wiring/#credentials
+credentials:
+ - name: AZURE_SP_CLIENT_ID
+   env: AZURE_SP_CLIENT_ID
+ - name: AZURE_SP_PASSWORD
+   env: AZURE_SP_PASSWORD
+ - name: AZURE_SP_TENANT_DNS
+   env: AZURE_SP_TENANT_DNS
+ - name: AZURE_SUBSCRIPTION_ID
+   env: AZURE_SUBSCRIPTION_ID
+ - name: IMAGE_STORAGE_ACCT_STRING
+   env: IMAGE_STORAGE_ACCT_STRING
+
+parameters:
+ - name: iot_hub_name
+   type: string
+ - name: deployment_suffix
+   type: string

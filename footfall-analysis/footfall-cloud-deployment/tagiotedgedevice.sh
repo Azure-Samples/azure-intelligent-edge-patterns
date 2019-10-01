@@ -1,0 +1,1 @@
+az iot hub device-twin update --device-id $1 --hub-name $2 --output json --set tags='{"deploymenttype":"footfall"}'

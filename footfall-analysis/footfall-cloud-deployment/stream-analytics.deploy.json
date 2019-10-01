@@ -1,0 +1,109 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "streamanalytics_job_name": {
+            "defaultValue": "process-retail-traffic",
+            "type": "string"
+        },
+        "eventhub_namespace": {
+            "defaultValue": "process-retail-traffic",
+            "type": "string"
+        },
+        "eventhub_name": {
+            "defaultValue": "process-retail-traffic",
+            "type": "string"
+        },
+        "eventhub_key_name": {
+            "defaultValue": "process-retail-traffic",
+            "type": "string"
+        },
+        "eventhub_key_value": {
+            "defaultValue": "process-retail-traffic",
+            "type": "string"
+        },
+        "user_display_name": {
+            "defaultValue": "process-retail-traffic",
+            "type": "string"
+        },
+        "user_principal_name": {
+            "defaultValue": "process-retail-traffic",
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.StreamAnalytics/streamingjobs",
+            "apiVersion": "2016-03-01",
+            "name": "[parameters('streamanalytics_job_name')]",
+            "location": "West US 2",
+            "properties": {
+                "sku": {
+                    "name": "Standard"
+                },
+                "eventsOutOfOrderPolicy": "Adjust",
+                "outputErrorPolicy": "Stop",
+                "eventsOutOfOrderMaxDelayInSeconds": 0,
+                "eventsLateArrivalMaxDelayInSeconds": 5,
+                "dataLocale": "en-US",
+                "compatibilityLevel": "1.0",
+                "transformation":{
+                    "name": "Transformation",
+                    "properties":{
+                        "streamingUnits" : 3,
+                "query": "SELECT System.TimeStamp AS WindowEnd, SUM(analyzed) AS numberoffaces, SUM(newFace) as newFaces, ROUND(AVG(ROUND([traffic-data].faceAttributes.emotionScore,2)),2) AS emotionScore,AVG([traffic-data].faceAttributes.age) AS age, COUNT(CASE WHEN [traffic-data].faceAttributes.gender = 'male' THEN 1 ELSE NULL END) AS nummales, COUNT(CASE WHEN [traffic-data].faceAttributes.gender = 'female' THEN 1 ELSE NULL END) AS numfemales, 1.0 AS maxemotion, -1.0 AS minemotion \r\n INTO [traffic-output] \r\n FROM [traffic-data] TIMESTAMP BY EventEnqueuedUtcTime GROUP BY TumblingWindow(Duration(second, 7))"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.StreamAnalytics/streamingjobs/inputs",
+            "apiVersion": "2016-03-01",
+            "name": "[concat(parameters('streamanalytics_job_name'), '/traffic-data')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.StreamAnalytics/streamingjobs', parameters('streamanalytics_job_name'))]"
+            ],
+            "properties": {
+                "type": "Stream",
+                "datasource": {
+                    "type": "Microsoft.ServiceBus/EventHub",
+                    "properties": {
+                        "eventHubName": "[parameters('eventhub_name')]",
+                        "serviceBusNamespace": "[parameters('eventhub_namespace')]",
+                        "sharedAccessPolicyName": "[parameters('eventhub_key_name')]",
+                        "sharedAccessPolicyKey": "[parameters('eventhub_key_value')]"
+                    }
+                },
+                "serialization": {
+                    "type": "Json",
+                    "properties": {
+                        "encoding": "UTF8"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.StreamAnalytics/streamingjobs/outputs",
+            "apiVersion": "2016-03-01",
+            "name": "[concat(parameters('streamanalytics_job_name'), '/traffic-output')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.StreamAnalytics/streamingjobs', parameters('streamanalytics_job_name'))]"
+            ],
+            "properties": {
+                "datasource": {
+                    "type": "PowerBI",
+                    "properties": {
+                        "dataset": "footfall-dataset",
+                        "table": "footfall-dataset",
+                        "groupId": "",
+                        "groupName": "My workspace",
+                        "refreshToken": "dummystring",
+                        "tokenUserPrincipalName": "[parameters('user_principal_name')]",
+                        "tokenUserDisplayName": "[parameters('user_display_name')]"
+                    }
+                }
+            }
+        }
+    ]
+}

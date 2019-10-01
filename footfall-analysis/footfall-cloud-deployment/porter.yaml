@@ -1,0 +1,466 @@
+# This is the configuration for Porter
+# You must define steps for each action, but the rest is optional
+# See https://porter.sh/authoring-bundles for documentation on how to configure your bundle
+# Uncomment out the sections below to take full advantage of what Porter can do!
+
+name: footfall-cloud-deployment
+version: 0.1.0
+description: "Deploys the infrastructure for a footfall detection solution to Azure and Azure Stack."
+invocationImage: intelligentedge/footfall-cloud-deployment:0.1.0
+tag: intelligentedge/footfall-cloud-deployment:0.1.0
+
+# Uncomment out the line below to use a template Dockerfile for your invocation image
+dockerfile: Dockerfile.tmpl
+
+mixins:
+  - exec
+  - az:
+      extensions:
+      - azure-cli-iot-ext
+
+install:
+  - az:
+      description: "Register Azure Stack"
+      arguments:
+        - cloud
+        - register 
+      flags:
+        name: "AzureStack"
+        endpoint-resource-manager: "{{ bundle.parameters.azure_stack_tenant_arm}}"
+        suffix-storage-endpoint: "{{ bundle.parameters.azure_stack_storage_suffix}}"
+        suffix-keyvault-dns: "{{ bundle.parameters.azure_stack_keyvault_suffix}}"
+        endpoint-vm-image-alias-doc: "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json"
+  - az:
+      description: "Set Azure Stack Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureStack"
+  - az:
+      description: "Update Azure Stack Profile"
+      arguments:
+        - cloud
+        - update
+      flags:
+        profile: "{{ bundle.parameters.azure_stack_profile}}"
+  - az:
+      description: "Set Azure Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureCloud"
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_SUBSCRIPTION_ID}}"
+  - az:
+      description: "Create resource group in Azure"
+      arguments:
+        - group
+        - create
+      flags:
+        name: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_location}}"
+  - az:
+      description: "Create IoT Hub in Azure"
+      arguments:
+        - iot
+        - hub
+        - create
+      flags:
+        name: "footfall-detection-iot-hub{{ bundle.parameters.resource_suffix}}"
+        resource-group: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_location}}"
+        sku: "S1"
+  - az:
+      description: "Create IoT Edge Device for camera"
+      arguments:
+        - iot
+        - hub
+        - device-identity
+        - create
+      flags:
+        device-id: "edgecamera{{ bundle.parameters.resource_suffix}}"
+        hub-name: "footfall-detection-iot-hub{{ bundle.parameters.resource_suffix}}"
+        edge-enabled:
+  - exec:
+      description: "Tag Iot Edge Device for Deployment"
+      command: "bash"
+      arguments:
+        - "./tagiotedgedevice.sh"
+        - "edgecamera{{ bundle.parameters.resource_suffix}}"
+        - "footfall-detection-iot-hub{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Get IoT Edge device connection string"
+      arguments:
+        - iot
+        - hub
+        - device-identity
+        - show-connection-string
+      flags:
+        device-id: "edgecamera{{ bundle.parameters.resource_suffix}}"
+        hub-name: "footfall-detection-iot-hub{{ bundle.parameters.resource_suffix}}"
+        resource-group: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+      outputs:
+        - name: "camera-connection-string"
+          jsonPath: "$.connectionString"
+  - az:
+      description: "Create Event Hub Namespace"
+      arguments:
+        - eventhubs
+        - namespace
+        - create
+      flags:
+        name: "footfall-eventhub-namespace{{ bundle.parameters.resource_suffix}}"
+        resource-group: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_location}}"
+  - az:
+      description: "Create Event Hub"
+      arguments:
+        - eventhubs
+        - eventhub
+        - create
+      flags:
+        name: "footfall-eventhub{{ bundle.parameters.resource_suffix}}"
+        resource-group: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+        namespace-name: "footfall-eventhub-namespace{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Get Event Hub Keys"
+      arguments:
+        - eventhubs
+        - namespace
+        - authorization-rule
+        - keys
+        - list
+      flags:
+        name: "RootManageSharedAccessKey"
+        namespace-name: "footfall-eventhub-namespace{{ bundle.parameters.resource_suffix}}"
+        resource-group: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+      outputs:
+        - name: "eventhub_access_key"
+          jsonPath: "$.primaryConnectionString"
+  - exec:
+      description: "Create Stream Analytics Parameters File"
+      command: "bash"
+      arguments:
+        - ./createparameters.sh
+        - "process-footfall{{ bundle.parameters.resource_suffix}}"
+        - "footfall-eventhub-namespace{{ bundle.parameters.resource_suffix}}"
+        - "footfall-eventhub{{ bundle.parameters.resource_suffix}}"
+        - "RootManageSharedAccessKey"
+        - "{{ bundle.outputs.eventhub_access_key}}"
+        - "{{ bundle.parameters.powerbi_display_name}}"
+        - "{{ bundle.parameters.powerbi_principal_name}}"
+  - az:
+      description: "Deploy Stream Analytics Template"
+      arguments:
+        - group
+        - deployment
+        - create
+      flags:
+        resource-group: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+        template-file: "stream-analytics.deploy.json"
+        parameters: "@stream-analytics.deploy.parameters.json"
+  - az:
+      description: "Set Azure Stack Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureStack"
+  - az:
+      description: "Login to Azure Stack"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_STACK_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_STACK_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_STACK_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Stack Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_STACK_SUBSCRIPTION_ID}}"
+  - az:
+      description: "Create resource group in Azure Stack"
+      arguments:
+        - group
+        - create
+      flags:
+        name: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_stack_location}}"
+  - az:
+      description: "Create webjobs storage account in Azure Stack"
+      arguments:
+        - storage
+        - account
+        - create
+      flags:
+        name: "footfall-fx{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_stack_location}}"
+        sku: "Standard_LRS"
+        resource-group: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Create image storage account in Azure Stack"
+      arguments:
+        - storage
+        - account
+        - create
+      flags:
+        name: "footfall-images{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_stack_location}}"
+        sku: "Standard_LRS"
+        resource-group: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Get connection string for webjobs account"
+      arguments:
+        - storage
+        - account
+        - show-connection-string
+      flags:
+        name: "footfall-fx{{ bundle.parameters.resource_suffix}}"
+        resource-group: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+      outputs:
+        - name: "webjobs_connection"
+          jsonPath: "$.connectionString"
+  - az:
+      description: "Get connection string for images account"
+      arguments:
+        - storage
+        - account
+        - show-connection-string
+      flags:
+        name: "footfall-images{{ bundle.parameters.resource_suffix}}"
+        resource-group: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+      outputs:
+        - name: "images_connection"
+          jsonPath: "$.connectionString"
+  - exec:
+      description: "Create Function Parameters File"
+      command: "bash"
+      arguments:
+        - ./createfunctionparameters.sh
+        - "footfall-fx-plan{{ bundle.parameters.resource_suffix}}"
+        - "footfall-fx-app{{ bundle.parameters.resource_suffix}}"
+        - "{{ bundle.outputs.webjobs_connection}}"
+        - "{{ bundle.outputs.images_connection}}"
+        - "{{ bundle.outputs.eventhub_access_key}}"
+        - "{{ bundle.credentials.FACE_API_ENDPOINT}}"
+        - "{{ bundle.credentials.FACE_API_KEY}}"
+  - az:
+      description: "Deploy Azure Function App"
+      arguments:
+        - group
+        - deployment
+        - create
+      flags:
+        resource-group: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+        template-file: "footfall-function.deploy.json"
+        parameters: "@footfall-function.params.json"
+  - exec:
+      description: "Publishing Credentials"
+      command: "az"
+      arguments:
+        - "resource"
+        - "invoke-action"
+      flags:
+        action: "list"
+        api-version: "2015-08-01"
+        resource-type: "Microsoft.Web/sites/config"
+        name: "footfall-fx-app{{ bundle.parameters.resource_suffix}}/config/publishingcredentials"
+        resource-group: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+      outputs:
+        - name: "publishingcreds"
+          regex: "(.*)"
+  - exec:
+      description: "Extract Credentials"
+      command: "bash"
+      arguments: 
+        - ./getpublishurl.sh
+        - "{{ bundle.outputs.publishingcreds}}"
+      outputs:
+        - name: "publish_url"
+          regex: "(.*)"
+  - exec:
+      description: "Zip Function"
+      command: "bash"
+      arguments:
+        - ./zipfunction.sh
+  - exec:
+      description: "Zip Deploy Function"
+      command: "bash"
+      arguments:
+        - ./zipdeploy.sh
+        - "{{ bundle.outputs.publish_url}}"
+  - exec:
+      description: "Output variables for device installer"
+      command: "echo"
+      flags:
+        e: "Device Connection String for Camera: {{ bundle.outputs.camera-connection-string}} \n Storage Account Connection String: {{bundle.outputs.images_connection}} \n Resources deployed to: footfall-detection-rg{{ bundle.parameters.resource_suffix}} on Azure and footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}} on Azure Stack. \n Remember to start the Stream Analytics job, and authorize PowerBI"
+upgrade:
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_SUBSCRIPTION_ID}}"
+
+uninstall:
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_SUBSCRIPTION_ID}}"
+  - az:
+      description: "Remove Azure Resource Group"
+      arguments:
+        - group
+        - delete
+      flags:
+        "yes":
+        name: "footfall-detection-rg{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Register Azure Stack"
+      arguments:
+        - cloud
+        - register 
+      flags:
+        name: "AzureStack"
+        endpoint-resource-manager: "{{ bundle.parameters.azure_stack_tenant_arm}}"
+        suffix-storage-endpoint: "{{ bundle.parameters.azure_stack_storage_suffix}}"
+        suffix-keyvault-dns: "{{ bundle.parameters.azure_stack_keyvault_suffix}}"
+        endpoint-vm-image-alias-doc: "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json"
+  - az:
+      description: "Set Azure Stack Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureStack"
+  - az:
+      description: "Update Azure Stack Profile"
+      arguments:
+        - cloud
+        - update
+      flags:
+        profile: "{{ bundle.parameters.azure_stack_profile}}"
+  - az:
+      description: "Login to Azure Stack"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_STACK_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_STACK_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_STACK_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Stack Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_STACK_SUBSCRIPTION_ID}}"
+  - az:
+      description: "Remove Azure Stack Resource Group"
+      arguments:
+        - group
+        - delete
+      flags:
+        "yes":
+        name: "footfall-detection-stack-rg{{ bundle.parameters.resource_suffix}}"
+
+# See https://porter.sh/authoring-bundles/#dependencies
+#dependencies:
+#  mysql:
+#    tag: deislabs/porter-mysql:latest
+#    parameters:
+#      database-name: wordpress
+
+# See https://porter.sh/wiring/#credentials
+credentials:
+ - name: AZURE_SP_CLIENT_ID
+   env: AZURE_SP_CLIENT_ID
+ - name: AZURE_SP_PASSWORD
+   env: AZURE_SP_PASSWORD
+ - name: AZURE_SP_TENANT_DNS
+   env: AZURE_SP_TENANT_DNS
+ - name: AZURE_SUBSCRIPTION_ID
+   env: AZURE_SUBSCRIPTION_ID
+ - name: AZURE_STACK_SP_CLIENT_ID
+   env: AZURE_STACK_SP_CLIENT_ID
+ - name: AZURE_STACK_SP_PASSWORD
+   env: AZURE_STACK_SP_PASSWORD
+ - name: AZURE_STACK_SP_TENANT_DNS
+   env: AZURE_STACK_SP_TENANT_DNS
+ - name: AZURE_STACK_SUBSCRIPTION_ID
+   env: AZURE_STACK_SUBSCRIPTION_ID
+ - name: FACE_API_ENDPOINT
+   env: FACE_API_ENDPOINT
+ - name: FACE_API_KEY
+   env: FACE_API_KEY
+
+parameters:
+ - name: azure_stack_tenant_arm
+   type: string
+   default: "https://management.local.azurestack.external"
+ - name: azure_stack_storage_suffix
+   type: string
+   default: "local.azurestack.external"
+ - name: azure_stack_keyvault_suffix
+   type: string
+   default: ".vault.local.azurestack.external"
+ - name: azure_stack_profile
+   type: string
+   default: "2019-03-01-hybrid"
+ - name: resource_suffix
+   type: string
+ - name: azure_location
+   type: string
+ - name: azure_stack_location
+   type: string
+ - name: powerbi_display_name
+   type: string
+   default: "John Doe"
+ - name: powerbi_principal_name
+   type: string
+   default: "john.doe@example.com"
+#  - name: azure_stack_location
+#    type: string

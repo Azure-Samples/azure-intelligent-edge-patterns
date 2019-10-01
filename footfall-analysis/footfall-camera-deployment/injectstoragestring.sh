@@ -1,0 +1,2 @@
+#! /bin/bash
+cat ./deployment.template.json | jq --arg STORAGE_ACCOUNT_STRING "$1" '.modulesContent.$edgeAgent.properties.desired.modules.inferencemodule.env.STORAGE_ACCOUNT_CONNECTION_STRING.value=$STORAGE_ACCOUNT_STRING' > deployment.json
