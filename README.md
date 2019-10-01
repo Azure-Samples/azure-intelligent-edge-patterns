@@ -17,6 +17,7 @@ These samples demonstrate how to quickly get started developing for the Azure In
 
 ## List of Samples
 - Deploy an Edge-based Machine Learning solution
+- Deploy a Footfall Analysis solution
 - Deploy a Staged Data Analytics Solution
 - Deploy a SQL Server 2016 Enterprise Availability Group on 2 Azure Stacks
 - Deploy a Highly Available MongoDB Replica Set on 2 Azure Stacks
