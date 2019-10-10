@@ -8,6 +8,7 @@ param
         [String] $SharedSecret
     )
 
+
 $VerbosePreference="continue"
 
 $S2SName = ($TargetIPRange.Replace('.','')).Replace('/','')
