@@ -1,0 +1,174 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2019-03-01-hybrid",
+  "parameters": {
+    "SharedSecret": {
+      "defaultValue": "ilovestack!",
+      "type": "string",
+      "metadata": {
+        "description": "The Shared Secret phrase for the tunnel"
+      }
+    },
+    "RRASvmName": {
+      "defaultValue":"MyNet-RRAS1",
+      "type": "string",
+      "metadata": {
+        "description": "RRAS Azure resource name"
+      }
+    },
+    "VNetName": {
+      "defaultValue":"VNet",
+      "type": "string",
+      "metadata": {
+        "description": "The name of VNet.  THis will be used to label the resources"
+      }
+    },
+    "VNetAddressSpace": {
+      "defaultValue":"10.10.0.0/16",
+      "type": "string",
+      "metadata": {
+        "description": "Address Space for VNet"
+      }
+    },
+    "VNetInternalSubnetName": {
+      "defaultValue": "Internal",
+      "type": "string",
+      "metadata": {
+        "description": "Address Range for VNet Tunnel Subnet"
+      }
+    },
+    "VNetInternalSubnetRange": {
+      "defaultValue":"10.10.1.0/24",
+      "type": "string",
+      "metadata": {
+        "description": "Address Range for VNet Internal Subnet"
+      }      
+    },
+    "VNetInternalGW": {
+      "defaultValue":"10.10.1.4",
+      "type": "string",
+      "metadata": {
+        "description": "Static Address for VNet RRAS Server.  Used for User defined route in Route table."
+      }
+    },
+    "RemoteTunnelEndpoint": {
+      "defaultValue": "38.102.180.81",
+      "type": "string",
+      "metadata": {
+        "description": ""
+      }
+    }, 
+    "RemoteVNetAddressSpace": {
+      "defaultValue":"10.10.2.0/24",
+      "type": "string",
+      "metadata": {
+        "description": ""
+      }
+    }, 
+    "RemoteVNetGatewy": {
+      "defaultValue":"10.10.2.4",
+      "type": "string",
+      "metadata": {
+        "description": ""
+      }
+    }, 
+    "_artifactsLocation": {
+      "defaultValue": "https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/",
+      "type": "string",
+      "metadata": {
+        "description": "The location of resources, such as templates and DSC modules, that the template depends on"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "defaultValue": "",
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access _artifactsLocation"
+      }
+    }
+  },
+
+  "variables": {
+    "deploymentApiVersion": "2018-09-01",
+    "routetableApiVersion": "2017-10-01",
+    "computeApiVersion" : "2017-12-01",
+    "vmName": "-RRAS",
+    "VNetVMName": "[concat(variables('VNet'),variables('vmName'))]",
+
+    "VNet": "[parameters('VNetName')]",
+    "VNetInternalSubnetName": "[parameters('VNetInternalSubnetName')]",
+    "VNetAddressSpace": "[parameters('VNetAddressSpace')]",
+    "VNetInternalSubnetRange": "[parameters('VNetInternalSubnetRange')]",
+    "VNetInternalGW": "[parameters('VNetInternalGW')]",
+    
+    "TunnelSubnetName": "Tunnel",            
+    "VNetName": "[concat(variables('VNet'),'-vnet' )]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]",
+    "TunnelSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('TunnelSubnetName'))]",
+    "InternalSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('VNetInternalSubnetName'))]",
+    "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
+    
+    "scriptfilename": "Add-Site2Site.ps1",
+    "scriptfilepath": "[concat(parameters('_artifactsLocation'), variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
+ 
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "ConfigureS2SVPNTunnel",
+      "apiVersion": "[variables('deploymentApiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "parameters": {},
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Network/routeTables",
+              "name": "[variables('RouteTable1Name')]",
+              "apiVersion": "[variables('routetableApiVersion')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "routes": [
+                  {
+                    "name": "[variables('RouteTable1Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('RemoteVNetAddressSpace')]",
+                      "nextHopType": "VirtualAppliance",
+                      "nextHopIpAddress": "[parameters('RemoteVNetGatewy')]"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "name": "[concat(parameters('RRASvmName'),'/CustomScriptExtension')]",
+              "apiVersion": "[variables('computeApiVersion')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "[variables('scriptFilepath')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  parameters('RemoteTunnelEndpoint'), ' -TargetIPRange ', parameters('RemoteVNetAddressSpace'),' -SharedSecret ', parameters('SharedSecret'))]"
+                }
+              }
+            }
+          ]
+        }
+      }
+
+    }
+  ],
+  "outputs": {
+    
+  }
+}

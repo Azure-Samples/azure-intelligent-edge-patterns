@@ -3,14 +3,6 @@
   "contentVersion": "1.0.0.0",
   "apiProfile": "2019-03-01-hybrid",
   "parameters": {
-    "WindowsImageSKU": {
-      "defaultValue": "2016-Datacenter",
-      "type": "string",
-      "allowedValues": [ "2016-Datacenter", "2016-Datacenter-Server-Core" ],
-      "metadata": {
-        "description": "The name of the Administrator of the new VMs"
-      }      
-    },
     "adminUsername": {
       "defaultValue": "rrasadmin",
       "type": "string",
@@ -117,7 +109,7 @@
       }
     },  
     "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/vnetpeering/master/",
+      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-ike-vnet-vnet/",
       "type": "string",
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
@@ -133,7 +125,7 @@
   },
 
   "variables": {
-    "WindowsImageSKU": "[parameters('WindowsImageSKU')]",
+    "WindowsImageSKU": "2016-Datacenter",
     "storageAccountType": "Standard_LRS",
     "ManagedOSDiskType": "Premium_LRS",
     "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
