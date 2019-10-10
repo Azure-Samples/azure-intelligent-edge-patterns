@@ -224,7 +224,7 @@
       "name": "[variables('VNetTunnelPIPName')]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "publicIPAllocationMethod": "Static"       
+        "publicIPAllocationMethod": "Static"
       },
       "dependsOn": [
         "[variables('vnetID')]"
@@ -371,7 +371,7 @@
   "outputs": {
     "VNetVMName": {
       "type": "string",
-      "value": "[concat(variables('VNet'),variables('vmName'))]"
+      "value": "[concat(variables('VNet'),variables('vmName'),'1')]"
     },
     "adminUsername": {
       "type": "string",
@@ -396,6 +396,10 @@
     "InternalSubnetRefVNet":{
       "type": "string",
       "value": "[variables('InternalSubnetRefVNet')]"
+    },
+    "VPNTunnelEndpointIPAddress": {
+        "value": "[reference(concat('Microsoft.Network/publicIPAddresses/', variables('VNetTunnelPIPName')), '2016-03-30').ipaddress]",
+        "type" : "string"
     }
   }
 }

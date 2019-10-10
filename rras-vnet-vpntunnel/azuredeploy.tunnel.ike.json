@@ -74,7 +74,7 @@
       }
     }, 
     "_artifactsLocation": {
-      "defaultValue": "https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/",
+      "defaultValue": "https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Scripts/",
       "type": "string",
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
@@ -102,16 +102,11 @@
     "VNetInternalSubnetRange": "[parameters('VNetInternalSubnetRange')]",
     "VNetInternalGW": "[parameters('VNetInternalGW')]",
     
-    "TunnelSubnetName": "Tunnel",            
     "VNetName": "[concat(variables('VNet'),'-vnet' )]",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]",
-    "TunnelSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('TunnelSubnetName'))]",
-    "InternalSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('VNetInternalSubnetName'))]",
     "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
     
     "scriptfilename": "Add-Site2Site.ps1",
     "scriptfilepath": "[concat(parameters('_artifactsLocation'), variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
- 
   },
 
   "resources": [

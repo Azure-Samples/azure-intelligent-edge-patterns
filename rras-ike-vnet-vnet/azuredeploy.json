@@ -3,6 +3,13 @@
   "contentVersion": "1.0.0.0",
   "apiProfile": "2019-03-01-hybrid",
   "parameters": {
+    "WindowsImageSKU": {
+      "defaultValue": "2016-Datacenter",
+      "allowedValues": [ "2016-Datacenter","2019-Datacenter" ],
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Administrator of the new VMs"
+    },   
     "adminUsername": {
       "defaultValue": "rrasadmin",
       "type": "string",
@@ -125,7 +132,7 @@
   },
 
   "variables": {
-    "WindowsImageSKU": "2016-Datacenter",
+    "WindowsImageSKU": "[parameters('WindowsImageSKU')]",
     "storageAccountType": "Standard_LRS",
     "ManagedOSDiskType": "Premium_LRS",
     "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
