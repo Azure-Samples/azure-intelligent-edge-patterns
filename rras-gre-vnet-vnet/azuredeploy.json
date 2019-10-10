@@ -17,13 +17,6 @@
         "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
       }
     },
-    "SharedSecret": {
-      "defaultValue": "ilovestack!",
-      "type": "string",
-      "metadata": {
-        "description": "The Shared Secret phrase for the tunnel"
-      }
-    },
     "VNet1Name": {
       "defaultValue":"VNet1",
       "type": "string",
@@ -174,7 +167,6 @@
     "VNet1TunnelPIPName": "[concat(variables('VNet1'),'-',variables('TunnelSubnetName'),'-pip')]",    
     "VNet2TunnelPIPName": "[concat(variables('VNet2'),'-',variables('TunnelSubnetName'),'-pip')]",    
     
-    "SharedSecret": "[parameters('SharedSecret')]",
     "InstallRRASDSC": "[concat(parameters('_artifactsLocation'), 'DSC/InstallRRAS.zip', parameters('_artifactsLocationSasToken'))]",
     "InstallRRAS": "InstallRRAS.ps1\\InstallRRAS",
     "scriptfilename": "Add-Site2Site.ps1",
@@ -668,7 +660,7 @@
             "fileUris": [
               "[variables('scriptFilepath')]"
               ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet2TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet2AddressSpace'),' -SharedSecret ', variables('SharedSecret'))]"
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet2TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet2AddressSpace'),' -SourceRRASIP ', variables('VNet2TunnelGW'))]"
           }
         },
         "dependsOn": [
@@ -688,7 +680,7 @@
             "fileUris": [
                 "[variables('scriptFilepath')]"
             ],
-            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet1TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet1AddressSpace'),' -SharedSecret ', variables('SharedSecret')) ]"
+            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet1TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet1AddressSpace'),' -SourceRRASIP ', variables('VNet1TunnelGW')) ]"
           }
         },
         "dependsOn": [

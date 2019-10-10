@@ -5,7 +5,7 @@ param
         [Parameter(Mandatory=$true,Position=2)]
         [String] $TargetIPRange,
         [Parameter(Mandatory=$true,Position=3)]     
-        [String] $SharedSecret
+        [String] $SourceRRASIP
     )
 
 
@@ -64,8 +64,7 @@ if ($exsiting.name -eq $S2SName)
 try 
 {
     Write-verbose "Configuring Tunnel $S2SName"
-    Add-VpnS2SInterface -Name $S2SName $TargetRRASIP -Protocol IKEv2 -AuthenticationMethod PSKOnly -SharedSecret $SharedSecret -IPv4Subnet $TargetIPRangeMetric -persistent -AutoConnectEnabled $true -Verbose
-    Set-VpnS2SInterface -Name $S2SName -InitiateConfigPayload $false -Verbose
+    Add-VpnS2SInterface -GreTunnel -Name REMOTE -SourceIpAddress $SourceRRASIP -Destination $TargetRRASIP -IPv4Subnet $TargetIPRange -PassThru
     start-sleep 5
     $result = get-VpnS2SInterface -name $S2SName -Verbose
     Write-verbose "Tunnel Created, Status: $($result.ConnectionState)"
