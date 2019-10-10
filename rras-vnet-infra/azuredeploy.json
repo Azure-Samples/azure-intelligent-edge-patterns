@@ -17,95 +17,53 @@
         "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
       }
     },
-    "SharedSecret": {
-      "defaultValue": "ilovestack!",
+    "VNetName": {
+      "defaultValue":"VNet",
       "type": "string",
       "metadata": {
-        "description": "The Shared Secret phrase for the tunnel"
+        "description": "The name of VNet.  THis will be used to label the resources"
       }
     },
-    "VNet1Name": {
-      "defaultValue":"VNet1",
+    "VNetAddressSpace": {
+      "defaultValue":"10.10.0.0/16",
       "type": "string",
       "metadata": {
-        "description": "The name of VNet1.  THis will be used to label the resources"
+        "description": "Address Space for VNet"
       }
     },
-    "VNet1AddressSpace": {
-      "defaultValue":"10.1.0.0/16",
+    "VNetInternalSubnetName": {
+      "defaultValue": "Internal",
       "type": "string",
       "metadata": {
-        "description": "Address Space for VNet1"
+        "description": "Address Range for VNet Tunnel Subnet"
       }
     },
-    "VNet1TunnelSubnetRange": {
-      "defaultValue":"10.1.254.0/24",
+    "VNetTunnelSubnetRange": {
+      "defaultValue":"10.10.254.0/24",
       "type": "string",
       "metadata": {
-        "description": "Address Range for VNet1 Tunnel Subnet"
+        "description": "Address Range for VNet Tunnel Subnet"
       }
     },
-    "VNet1TunnelGW": {
-      "defaultValue":"10.1.254.4",
+    "VNetTunnelGW": {
+      "defaultValue":"10.10.254.4",
       "type": "string",
       "metadata": {
-        "description": "Static Address for VNet1 RRAS Server. "
+        "description": "Static Address for VNet RRAS Server. "
       }
     },
-    "VNet1InternalSubnetRange": {
-      "defaultValue":"10.1.1.0/24",
+    "VNetInternalSubnetRange": {
+      "defaultValue":"10.10.1.0/24",
       "type": "string",
       "metadata": {
-        "description": "Address Range for VNet1 Internal Subnet"
+        "description": "Address Range for VNet Internal Subnet"
       }      
     },
-    "VNet1InternalGW": {
-      "defaultValue":"10.1.1.4",
+    "VNetInternalGW": {
+      "defaultValue":"10.10.1.4",
       "type": "string",
       "metadata": {
-        "description": "Static Address for VNet1 RRAS Server.  Used for User defined route in Route table."
-      }
-    },
-    "VNet2Name": {
-      "defaultValue":"VNet2",
-      "type": "string",
-      "metadata": {
-        "description": "The name of VNet1.  THis will e used to label the resources"
-      }
-    },
-    "VNet2AddressSpace": {
-      "defaultValue":"10.2.0.0/16",
-      "type": "string",
-      "metadata": {
-        "description": "Address Space for VNet2"
-      }
-    },
-    "VNet2TunnelSubnetRange": {
-      "defaultValue":"10.2.254.0/24",
-      "type": "string",
-      "metadata": {
-        "description": "Address Range for VNet2 Tunnel Subnet"
-      }
-    },
-    "VNet2TunnelGW": {
-      "defaultValue":"10.2.254.4",
-      "type": "string",
-      "metadata": {
-        "description": "Static Address for VNet2 RRAS Server. "
-      }
-    },
-    "VNet2InternalSubnetRange": {
-      "defaultValue":"10.2.1.0/24",
-      "type": "string",
-      "metadata": {
-        "description": "Address Range for VNet2 Internal Subnet"
-      }
-    },
-    "VNet2InternalGW": {
-      "defaultValue":"10.2.1.4",
-      "type": "string",
-      "metadata": {
-        "description": "Static Address for VNet2 RRAS Server.  Used for User defined route in Route table."
+        "description": "Static Address for VNet RRAS Server.  Used for User defined route in Route table."
       }
     },  
     "_artifactsLocation": {
@@ -134,51 +92,29 @@
     "windowsImageOffer": "WindowsServer",
     "windowsImageVersion": "latest",   
     "vmName": "-RRAS",
-    "VNet1VMName": "[concat(variables('VNet1'),variables('vmName'))]",
-    "VNet2VMName": "[concat(variables('VNet2'),variables('vmName'))]",
+    "VNetVMName": "[concat(variables('VNet'),variables('vmName'))]",
 
-    "VNet1": "[parameters('VNet1Name')]",
-    "VNet2": "[parameters('VNet2Name')]",
-    "VNet1AddressSpace": "[parameters('VNet1AddressSpace')]",
-    "VNet1TunnelSubnetRange": "[parameters('VNet1TunnelSubnetRange')]",
-    "VNet1TunnelGW": "[parameters('VNet1TunnelGW')]",
-    "VNet1InternalSubnetRange": "[parameters('VNet1InternalSubnetRange')]",
-    "VNet1InternalGW": "[parameters('VNet1InternalGW')]",
-    "VNet2AddressSpace": "[parameters('VNet2AddressSpace')]",
-    "VNet2TunnelSubnetRange": "[parameters('VNet2TunnelSubnetRange')]",
-    "VNet2TunnelGW": "[parameters('VNet2TunnelGW')]",
-    "VNet2InternalSubnetRange": "[parameters('VNet2InternalSubnetRange')]",
-    "VNet2InternalGW": "[parameters('VNet2InternalGW')]",
+    "VNet": "[parameters('VNetName')]",
+    "VNetInternalSubnetName": "[parameters('VNetInternalSubnetName')]",
+    "VNetAddressSpace": "[parameters('VNetAddressSpace')]",
+    "VNetTunnelSubnetRange": "[parameters('VNetTunnelSubnetRange')]",
+    "VNetTunnelGW": "[parameters('VNetTunnelGW')]",
+    "VNetInternalSubnetRange": "[parameters('VNetInternalSubnetRange')]",
+    "VNetInternalGW": "[parameters('VNetInternalGW')]",
     
-    "TunnelSubnetName": "Tunnel",
-    "VNet1InternalSubnetName": "Internal",
-    "VNet2InternalSubnetName": "Internal",              
-            
-    "VNet1Name": "[concat(variables('vnet1'),'-vnet' )]",
-    "VNet2Name": "[concat(variables('vnet2'),'-vnet')]",
-    "vnetID1": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNet1Name'))]",
-    "vnetID2": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNet2Name'))]",    
-    
-    "TunnelSubnetRefVNet1": "[concat(variables('vnetID1'),'/subnets/',variables('TunnelSubnetName'))]",
-    "InternalSubnetRefVNet1": "[concat(variables('vnetID1'),'/subnets/',variables('VNet1InternalSubnetName'))]",
-    "TunnelSubnetRefVNet2": "[concat(variables('vnetID2'),'/subnets/',variables('TunnelSubnetName'))]",
-    "InternalSubnetRefVNet2": "[concat(variables('vnetID2'),'/subnets/',variables('VNet2InternalSubnetName'))]",
-
-    "RouteTable1Name": "[concat('RoutesFor',variables('VNet1'),'-rt' )]",
-    "RouteTable2Name": "[concat('RoutesFor',variables('VNet2'),'-rt' )]",
-    
+    "TunnelSubnetName": "Tunnel",            
+    "VNetName": "[concat(variables('VNet'),'-vnet' )]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]",
+    "TunnelSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('TunnelSubnetName'))]",
+    "InternalSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('VNetInternalSubnetName'))]",
+    "RouteTable1Name": "[concat('RoutesFor',variables('VNet'),'-rt' )]",
     "TunnelnsgName": "[concat(variables('TunnelSubnetName'),'-nsg' )]",
     "TunnelnsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('TunnelnsgName'))]",    
-    "NICPrefixVNet1": "[concat(variables('VNet1'),variables('vmName'))]",
-    "NICPrefixVNet2": "[concat(variables('VNet2'),variables('vmName'))]",
-    "VNet1TunnelPIPName": "[concat(variables('VNet1'),'-',variables('TunnelSubnetName'),'-pip')]",    
-    "VNet2TunnelPIPName": "[concat(variables('VNet2'),'-',variables('TunnelSubnetName'),'-pip')]",    
-    
-    "SharedSecret": "[parameters('SharedSecret')]",
+    "NICPrefixVNet": "[concat(variables('VNet'),variables('vmName'))]",
+    "VNetTunnelPIPName": "[concat(variables('VNet'),'-',variables('TunnelSubnetName'),'-pip')]",    
+
     "InstallRRASDSC": "[concat(parameters('_artifactsLocation'), 'DSC/InstallRRAS.zip', parameters('_artifactsLocationSasToken'))]",
-    "InstallRRAS": "InstallRRAS.ps1\\InstallRRAS",
-    "scriptfilename": "Add-Site2Site.ps1",
-    "scriptfilepath": "[concat(parameters('_artifactsLocation'), variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
+    "InstallRRAS": "InstallRRAS.ps1\\InstallRRAS"
   },
 
   "resources": [
@@ -222,7 +158,7 @@
               "destinationPortRange": "3389",
               "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "*",
-              "access": "Deny",
+              "access": "Allow",
               "priority": 130,
               "direction": "Inbound"
             }
@@ -236,34 +172,7 @@
       "name": "[variables('RouteTable1Name')]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "routes": [
-          {
-            "name": "[variables('RouteTable1Name')]",
-            "properties": {
-              "addressPrefix": "[variables('VNet2AddressSpace')]",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('VNet2InternalGW')]"
-            }
-          }
-        ]
-      }
-    },
 
-    {
-      "type": "Microsoft.Network/routeTables",
-      "name": "[variables('RouteTable2Name')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "routes": [
-          {
-            "name": "[variables('RouteTable2Name')]",
-            "properties": {
-              "addressPrefix": "[variables('VNet1AddressSpace')]",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('VNet1InternalGW')]"
-            }
-          }
-        ]
       }
     },
 
@@ -279,28 +188,28 @@
 
     {
       "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('VNet1Name')]",
+      "name": "[variables('VNetName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[variables('VNet1AddressSpace')]"
+            "[variables('VNetAddressSpace')]"
           ]
         },
         "subnets": [
           {
             "name": "[variables('TunnelSubnetName')]",
             "properties": {
-              "addressPrefix": "[variables('VNet1TunnelSubnetRange')]",
+              "addressPrefix": "[variables('VNetTunnelSubnetRange')]",
               "networkSecurityGroup": {
                 "id": "[variables('TunnelnsgID')]"
               }              
             }
           },
           {
-            "name": "[variables('VNet1InternalSubnetName')]",
+            "name": "[variables('VNetInternalSubnetName')]",
             "properties": {
-              "addressPrefix": "[variables('VNet1InternalSubnetRange')]",
+              "addressPrefix": "[variables('VNetInternalSubnetRange')]",
               "routeTable": {
                 "id": "[resourceId('Microsoft.Network/routeTables', variables('RouteTable1Name'))]"
               }
@@ -313,71 +222,22 @@
         "[concat('Microsoft.Network/routeTables/', variables('RouteTable1Name'))]"
       ]
     },
-    
-    {
-        "type": "Microsoft.Network/virtualNetworks",
-        "name": "[variables('VNet2Name')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "addressSpace": {
-            "addressPrefixes": [
-              "[variables('VNet2AddressSpace')]"
-            ]
-          },
-          "subnets": [
-            {
-              "name": "[variables('TunnelSubnetName')]",
-              "properties": {
-                "addressPrefix": "[variables('VNet2TunnelSubnetRange')]",
-                "networkSecurityGroup": {
-                  "id": "[variables('TunnelnsgID')]"
-                }                
-              }
-            },
-            {
-              "name": "[variables('VNet2InternalSubnetName')]",
-              "properties": {
-                "addressPrefix": "[variables('VNet2InternalSubnetRange')]",
-                "routeTable": {
-                  "id": "[resourceId('Microsoft.Network/routeTables', variables('RouteTable2Name'))]"
-                }
-                }
-              }
-          ]
-        },
-        "dependsOn": [
-          "[variables('TunnelnsgID')]",
-          "[concat('Microsoft.Network/routeTables/', variables('RouteTable2Name'))]"
-        ]
-      },
-     
+      
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('VNet1TunnelPIPName')]",
+      "name": "[variables('VNetTunnelPIPName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "publicIPAllocationMethod": "Static"       
       },
       "dependsOn": [
-        "[variables('vnetID1')]"
+        "[variables('vnetID')]"
       ]
     },
 
     {
-        "type": "Microsoft.Network/publicIPAddresses",
-        "name": "[variables('VNet2TunnelPIPName')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "publicIPAllocationMethod": "Static"          
-        },
-        "dependsOn": [
-          "[variables('vnetID2')]"
-        ]
-      },
-
-    {
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(variables('NICPrefixVNet1'),'1-', variables('TunnelSubnetName'),'-nic')]",
+      "name": "[concat(variables('NICPrefixVNet'),'1-', variables('TunnelSubnetName'),'-nic')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "enableIPForwarding":true,  
@@ -386,26 +246,26 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('VNet1TunnelGW')]",
+              "privateIPAddress": "[variables('VNetTunnelGW')]",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNet1TunnelPIPName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetTunnelPIPName'))]"
               },
               "subnet": {
-                "id": "[variables('TunnelSubnetRefVNet1')]"
+                "id": "[variables('TunnelSubnetRefVNet')]"
               }          
             }
           }
         ]
       },
       "dependsOn": [
-        "[variables('vnetID1')]",
-        "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNet1TunnelPIPName'))]"
+        "[variables('vnetID')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetTunnelPIPName'))]"
       ]
     },
 
     {
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(variables('NICPrefixVNet1'),'1-', variables('VNet1InternalSubnetName'),'-nic')]",
+      "name": "[concat(variables('NICPrefixVNet'),'1-', variables('VNetInternalSubnetName'),'-nic')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "enableIPForwarding":true,
@@ -414,78 +274,27 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('VNet1InternalGW')]",
+              "privateIPAddress": "[variables('VNetInternalGW')]",
               "subnet": {
-                "id": "[variables('InternalSubnetRefVNet1')]"
+                "id": "[variables('InternalSubnetRefVNet')]"
               }
             }
           }
         ]
       },
       "dependsOn": [
-        "[variables('vnetID1')]"
+        "[variables('vnetID')]"
       ]
     },
 
-    {
-        "type": "Microsoft.Network/networkInterfaces",
-        "name": "[concat(variables('NICPrefixVNet2'),'1-', variables('TunnelSubnetName'),'-nic')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-            "enableIPForwarding":true,
-            "ipConfigurations": [
-            {
-              "name": "ipconfig1",
-              "properties": {
-                "privateIPAllocationMethod": "Static",
-                "privateIPAddress": "[variables('VNet2TunnelGW')]",
-                "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNet2TunnelPIPName'))]"
-              },
-                "subnet": {
-                  "id": "[variables('TunnelSubnetRefVNet2')]"
-                }
-              }
-            }
-          ]
-        },
-        "dependsOn": [
-          "[variables('vnetID2')]",
-          "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNet2TunnelPIPName'))]"
-        ]
-      },
-
-      {
-        "type": "Microsoft.Network/networkInterfaces",
-        "name": "[concat(variables('NICPrefixVNet2'),'1-', variables('VNet2InternalSubnetName'),'-nic')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-            "enableIPForwarding":true,
-            "ipConfigurations": [
-            {
-              "name": "ipconfig1",
-              "properties": {
-                "privateIPAllocationMethod": "Static",
-                "privateIPAddress": "[variables('VNet2InternalGW')]",
-                "subnet": {
-                  "id": "[variables('InternalSubnetRefVNet2')]"
-                }
-              }
-            }
-          ]
-        },
-        "dependsOn": [
-          "[variables('vnetID2')]"
-        ]
-      },
-
+   
       {
         "type": "Microsoft.Compute/virtualMachines",
-        "name": "[concat(variables('VNet1VMName'), '1')]",
+        "name": "[concat(variables('VNetVMName'), '1')]",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-            "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet1'), '1-', variables('TunnelSubnetName'),'-nic'))]",
-            "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet1'), '1-', variables('VNet1InternalSubnetName'),'-nic'))]",
+            "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'), '1-', variables('TunnelSubnetName'),'-nic'))]",
+            "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'), '1-', variables('VNetInternalSubnetName'),'-nic'))]",
             "[resourceId('Microsoft.Storage/storageAccounts',concat(variables('storageName')))]"
           ],
         "properties": {
@@ -493,7 +302,7 @@
             "vmSize": "[variables('vmSize')]"
           },
           "osProfile": {
-            "computerName": "[concat(variables('VNet1VMName'), '1')]",
+            "computerName": "[concat(variables('VNetVMName'), '1')]",
             "adminUsername": "[parameters('adminUsername')]",
             "adminPassword": "[parameters('adminPassword')]",
              "windowsConfiguration": {
@@ -508,7 +317,7 @@
               "version": "[variables('windowsImageVersion')]"
             },
             "osDisk": {
-              "name": "[concat(variables('VNet1VMName'), '1-osdisk')]",
+              "name": "[concat(variables('VNetVMName'), '1-osdisk')]",
               "managedDisk": {
                 "storageAccountType": "[variables('ManagedOSDiskType')]"
               }, 
@@ -522,13 +331,13 @@
                 "properties": {
                   "primary": true
                 },
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet1'),'1-', variables('TunnelSubnetName'),'-nic'))]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'),'1-', variables('TunnelSubnetName'),'-nic'))]"
               },
               {
                 "properties": {
                   "primary": false
                 },
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet1'),'1-', variables('VNet1InternalSubnetName'),'-nic'))]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'),'1-', variables('VNetInternalSubnetName'),'-nic'))]"
               }
             ]
           },
@@ -542,72 +351,11 @@
         }       
       },
 
-    {
-        "type": "Microsoft.Compute/virtualMachines",
-        "name": "[concat(variables('VNet2VMName'), '1')]",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet2'), '1-', variables('TunnelSubnetName'),'-nic'))]",
-            "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet2'), '1-', variables('VNet2InternalSubnetName'),'-nic'))]",
-            "[resourceId('Microsoft.Storage/storageAccounts',concat(variables('storageName')))]"
-          ],
-        "properties": {
-          "hardwareProfile": {
-            "vmSize": "[variables('vmSize')]"
-          },
-          "osProfile": {
-            "computerName": "[concat(variables('VNet2VMName'), '1')]",
-            "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]",
-            "windowsConfiguration": {
-              "provisionVmAgent": "true"
-            }
-          },
-          "storageProfile": {
-            "imageReference": {
-              "publisher": "[variables('windowsImagePublisher')]",
-              "offer": "[variables('windowsImageOffer')]",
-              "sku": "[variables('windowsImageSKU')]",
-              "version": "[variables('windowsImageVersion')]"
-            },
-            "osDisk": {
-              "name": "[concat(variables('VNet2VMName'), '1-osdisk')]",
-              "managedDisk": {
-                "storageAccountType": "[variables('ManagedOSDiskType')]"
-              }, 
-              "caching": "ReadWrite",
-              "createOption": "FromImage"
-            }
-          },         
-          "networkProfile": {
-            "networkInterfaces": [
-              {
-                "properties": {
-                  "primary": true
-                },
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet2'),'1-', variables('TunnelSubnetName'),'-nic'))]"
-              },
-              {
-                "properties": {
-                  "primary": false
-                },
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet2'),'1-', variables('VNet2InternalSubnetName'),'-nic'))]"
-              }
-            ]
-          },
-          "licenseType": "Windows_Server",
-           "diagnosticsProfile": {
-            "bootDiagnostics": {
-                "enabled": true,
-                "storageUri": "[reference(resourceId(resourcegroup().name, 'Microsoft.Storage/storageAccounts', variables('storageName')), '2015-06-15').primaryEndpoints['blob']]"
-            }
-          }
-        }       
-      },
+    
      
       {
         "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(concat(variables('VNet1VMName'), '1','/InstallRRAS'))]",
+        "name": "[concat(concat(variables('VNetVMName'), '1','/InstallRRAS'))]",
         "location": "[resourceGroup().location]",
         "tags": {
           "displayName": "InstallRRAS"
@@ -627,87 +375,40 @@
           }
         },
         "dependsOn": [
-          "[resourceId('Microsoft.Compute/virtualMachines',concat(concat(variables('VNet1VMName'), '1')))]"
+          "[resourceId('Microsoft.Compute/virtualMachines',concat(concat(variables('VNetVMName'), '1')))]"
         ]
-      },
-      {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(concat(variables('VNet2VMName'), '1','/InstallRRAS'))]",
-        "location": "[resourceGroup().location]",
-        "tags": {
-          "displayName": "InstallRRAS"
-        },
-        "properties": {
-          "publisher": "Microsoft.Powershell",
-          "type": "DSC",
-          "typeHandlerVersion": "2.77",
-          "autoUpgradeMinorVersion": true,
-          "settings": {
-            "modulesUrl": "[variables('InstallRRASDSC')]",
-            "configurationFunction": "[variables('InstallRRAS')]"
-          },
-          "protectedSettings": {
-            "Items": {
-            }
-          }
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Compute/virtualMachines',concat(concat(variables('VNet2VMName'), '1')))]"
-        ]
-      },
-      {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(variables('VNet1VMName'), '1','/CustomScriptExtension')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "publisher": "Microsoft.Compute",
-          "type": "CustomScriptExtension",
-          "typeHandlerVersion": "1.8",
-          "autoUpgradeMinorVersion": true,
-          "settings": {
-            "fileUris": [
-              "[variables('scriptFilepath')]"
-              ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet2TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet2AddressSpace'),' -SharedSecret ', variables('SharedSecret'))]"
-          }
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Compute/virtualMachines/extensions',concat(variables('VNet1VMName'), '1'),'InstallRRAS')]"
-        ]
-      },
-      {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "name": "[concat(variables('VNet2VMName'), '1','/CustomScriptExtension')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "publisher": "Microsoft.Compute",
-          "type": "CustomScriptExtension",
-          "typeHandlerVersion": "1.8",
-          "autoUpgradeMinorVersion": true,
-          "settings": {
-            "fileUris": [
-                "[variables('scriptFilepath')]"
-            ],
-            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet1TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet1AddressSpace'),' -SharedSecret ', variables('SharedSecret')) ]"
-          }
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Compute/virtualMachines/extensions',concat(variables('VNet2VMName'), '1'),'InstallRRAS')]"
-        ]     
       }
+ 
+   
   ],
   "outputs": {
+    "VNetVMName": {
+      "type": "string",
+      "value": "[concat(variables('VNet'),variables('vmName'))]"
+    },
     "adminUsername": {
       "type": "string",
       "value": "[parameters('adminUsername')]"
     },
-    "InternalSubnetRefVNet1":{
+    "VNet": {
       "type": "string",
-      "value":"[variables('InternalSubnetRefVNet1')]"
+      "value": "[variables('VNetName')]"
     },
-    "InternalSubnetRefVNet2":{
+    "VNetAddressSpace": {
       "type": "string",
-      "value":"[variables('InternalSubnetRefVNet2')]"
+      "value": "[variables('VNetAddressSpace')]"
+    },
+    "VNetInternalSubnetName": {
+      "type": "string",
+      "value": "[variables('VNetInternalSubnetName')]"
+    },
+    "VNetInternalGW":{
+      "type": "string",
+      "value": "[variables('VNetInternalGW')]"
+    },
+    "InternalSubnetRefVNet":{
+      "type": "string",
+      "value": "[variables('InternalSubnetRefVNet')]"
     }
-   }
+  }
 }
