@@ -102,7 +102,7 @@
       }
     },  
     "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-ike-vnet-vnet/",
+      "defaultValue": "https://github.com/Inttruder/azure-intelligent-edge-patterns/tree/master/rras-gre-vnet-vnet/",
       "type": "string",
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
