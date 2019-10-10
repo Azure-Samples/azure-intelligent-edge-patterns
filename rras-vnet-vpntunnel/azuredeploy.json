@@ -67,7 +67,7 @@
       }
     },  
     "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/vnetpeering/master/",
+      "defaultValue": "https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/",
       "type": "string",
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
