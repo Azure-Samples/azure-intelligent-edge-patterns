@@ -9,6 +9,7 @@
       "type": "string",
       "metadata": {
         "description": "The name of the Administrator of the new VMs"
+      }
     },   
     "adminUsername": {
       "defaultValue": "rrasadmin",

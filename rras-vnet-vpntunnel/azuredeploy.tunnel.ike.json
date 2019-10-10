@@ -11,7 +11,7 @@
       }
     },
     "RRASvmName": {
-      "defaultValue":"MyNet-RRAS1",
+      "defaultValue":"VNet-RRAS1",
       "type": "string",
       "metadata": {
         "description": "RRAS Azure resource name"
@@ -24,34 +24,6 @@
         "description": "The name of VNet.  THis will be used to label the resources"
       }
     },
-    "VNetAddressSpace": {
-      "defaultValue":"10.10.0.0/16",
-      "type": "string",
-      "metadata": {
-        "description": "Address Space for VNet"
-      }
-    },
-    "VNetInternalSubnetName": {
-      "defaultValue": "Internal",
-      "type": "string",
-      "metadata": {
-        "description": "Address Range for VNet Tunnel Subnet"
-      }
-    },
-    "VNetInternalSubnetRange": {
-      "defaultValue":"10.10.1.0/24",
-      "type": "string",
-      "metadata": {
-        "description": "Address Range for VNet Internal Subnet"
-      }      
-    },
-    "VNetInternalGW": {
-      "defaultValue":"10.10.1.4",
-      "type": "string",
-      "metadata": {
-        "description": "Static Address for VNet RRAS Server.  Used for User defined route in Route table."
-      }
-    },
     "RemoteTunnelEndpoint": {
       "defaultValue": "38.102.180.81",
       "type": "string",
@@ -60,21 +32,21 @@
       }
     }, 
     "RemoteVNetAddressSpace": {
-      "defaultValue":"10.10.2.0/24",
+      "defaultValue":"10.10.3.0/24",
       "type": "string",
       "metadata": {
         "description": ""
       }
     }, 
-    "RemoteVNetGatewy": {
-      "defaultValue":"10.10.2.4",
+    "RemoteVNetGateway": {
+      "defaultValue":"10.10.3.4",
       "type": "string",
       "metadata": {
-        "description": ""
+        "description": "The gateway of the server on the remote tunnel endpoint"
       }
     }, 
     "_artifactsLocation": {
-      "defaultValue": "https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Scripts/",
+      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/",
       "type": "string",
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
@@ -93,20 +65,10 @@
     "deploymentApiVersion": "2018-09-01",
     "routetableApiVersion": "2017-10-01",
     "computeApiVersion" : "2017-12-01",
-    "vmName": "-RRAS",
-    "VNetVMName": "[concat(variables('VNet'),variables('vmName'))]",
-
-    "VNet": "[parameters('VNetName')]",
-    "VNetInternalSubnetName": "[parameters('VNetInternalSubnetName')]",
-    "VNetAddressSpace": "[parameters('VNetAddressSpace')]",
-    "VNetInternalSubnetRange": "[parameters('VNetInternalSubnetRange')]",
-    "VNetInternalGW": "[parameters('VNetInternalGW')]",
     
-    "VNetName": "[concat(variables('VNet'),'-vnet' )]",
     "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
-    
     "scriptfilename": "Add-Site2Site.ps1",
-    "scriptfilepath": "[concat(parameters('_artifactsLocation'), variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
+    "scriptfilepath": "[concat(parameters('_artifactsLocation'), 'Scripts/',variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
   },
 
   "resources": [
@@ -133,7 +95,7 @@
                     "properties": {
                       "addressPrefix": "[parameters('RemoteVNetAddressSpace')]",
                       "nextHopType": "VirtualAppliance",
-                      "nextHopIpAddress": "[parameters('RemoteVNetGatewy')]"
+                      "nextHopIpAddress": "[parameters('RemoteVNetGateway')]"
                     }
                   }
                 ]
