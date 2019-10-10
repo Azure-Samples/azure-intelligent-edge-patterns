@@ -19,7 +19,7 @@
       }
     },
     "VNetName": {
-      "defaultValue":"MyNet",
+      "defaultValue":"VNet",
       "type": "string",
       "metadata": {
         "description": "The name of VNet.  THis will be used to label the resources"
@@ -89,7 +89,7 @@
       }
     }, 
     "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/vnetpeering/master/",
+      "defaultValue": "https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/",
       "type": "string",
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
@@ -108,14 +108,6 @@
     "deploymentApiVersion": "2018-09-01",
     "routetableApiVersion": "2017-10-01",
     "computeApiVersion" : "2017-12-01",
-    "WindowsImageSKU": "2016-Datacenter",
-    "storageAccountType": "Standard_LRS",
-    "ManagedOSDiskType": "Premium_LRS",
-    "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
-    "VMSize": "Standard_DS3_v2",    
-    "windowsImagePublisher": "MicrosoftWindowsServer",
-    "windowsImageOffer": "WindowsServer",
-    "windowsImageVersion": "latest",   
     "vmName": "-RRAS",
     "VNetVMName": "[concat(variables('VNet'),variables('vmName'))]",
 
@@ -130,7 +122,7 @@
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]",
     "TunnelSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('TunnelSubnetName'))]",
     "InternalSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('VNetInternalSubnetName'))]",
-    "RouteTable1Name": "[concat('RoutesFor',variables('VNet'),'-rt' )]",
+    "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
     
     "scriptfilename": "Add-Site2Site.ps1",
     "scriptfilepath": "[concat(parameters('_artifactsLocation'), variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"

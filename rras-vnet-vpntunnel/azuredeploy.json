@@ -67,7 +67,7 @@
       }
     },  
     "_artifactsLocation": {
-      "defaultValue": "https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Scripts/",
+      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Scripts/",
       "type": "string",
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
@@ -107,7 +107,7 @@
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]",
     "TunnelSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('TunnelSubnetName'))]",
     "InternalSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('VNetInternalSubnetName'))]",
-    "RouteTable1Name": "[concat('RoutesFor',variables('VNet'),'-rt' )]",
+    "RouteTableName": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
     "TunnelnsgName": "[concat(variables('TunnelSubnetName'),'-nsg' )]",
     "TunnelnsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('TunnelnsgName'))]",    
     "NICPrefixVNet": "[concat(variables('VNet'),variables('vmName'))]",
@@ -168,7 +168,7 @@
     },
     {
       "type": "Microsoft.Network/routeTables",
-      "name": "[variables('RouteTable1Name')]",
+      "name": "[variables('RouteTableName')]",
       "location": "[resourceGroup().location]",
       "properties": {
 
@@ -208,7 +208,7 @@
             "properties": {
               "addressPrefix": "[variables('VNetInternalSubnetRange')]",
               "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('RouteTable1Name'))]"
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('RouteTableName'))]"
               }
               }
             }
@@ -216,7 +216,7 @@
       },
       "dependsOn": [
         "[variables('TunnelnsgID')]",
-        "[concat('Microsoft.Network/routeTables/', variables('RouteTable1Name'))]"
+        "[concat('Microsoft.Network/routeTables/', variables('RouteTableName'))]"
       ]
     }, 
     {
