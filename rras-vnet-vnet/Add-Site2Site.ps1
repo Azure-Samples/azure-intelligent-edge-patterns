@@ -34,7 +34,7 @@ else
         $RAService = get-service -name remoteaccess
         Write-verbose 'Set Automatic Start for RemoateAccess'
         Set-Service -Name "remoteaccess" -StartupType Automatic -Confirm:$false -Verbose
-        Write-verbose 'Start RemoateAccess Service '
+        Write-verbose 'Start RemoteAccess Service '
         Start-Service -Name "remoteaccess" -Confirm:$false -Verbose
         start-sleep 10
     } while ($RAService.status -ne 'Running')
@@ -53,19 +53,18 @@ else
     write-verbose 'VpnS2S Installed'
 }
 
-$existing = get-VpnS2SInterface | where {$_.name -eq $S2SName}
-if ($existing.name -eq $S2SName)
+$exsiting = get-VpnS2SInterface | where-object {$_.name -eq $S2SName}
+if ($exsiting.name -eq $S2SName)
 {
     Write-verbose "Existing Tunnel $S2SName Found, Deleting..."
     disconnect-VpnS2SInterface -Name $S2SName -Confirm:$false -Force -Verbose
     remove-VpnS2SInterface -Name $S2SName -Confirm:$false -Force -Verbose
 }
-
-Write-verbose "Configuring Tunnel $S2SName"
 try 
 {
+    Write-verbose "Configuring Tunnel $S2SName"
     Add-VpnS2SInterface -Name $S2SName $TargetRRASIP -Protocol IKEv2 -AuthenticationMethod PSKOnly -SharedSecret $SharedSecret -IPv4Subnet $TargetIPRangeMetric -persistent -AutoConnectEnabled $true -Verbose
-    Set-VpnS2SInterface -Name $S2SName  -InitiateConfigPayload $false -Verbose
+    Set-VpnS2SInterface -Name $S2SName -InitiateConfigPayload $false -Verbose
     start-sleep 5
     $result = get-VpnS2SInterface -name $S2SName -Verbose
     Write-verbose "Tunnel Created, Status: $($result.ConnectionState)"
