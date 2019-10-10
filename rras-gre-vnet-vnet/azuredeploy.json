@@ -660,7 +660,7 @@
             "fileUris": [
               "[variables('scriptFilepath')]"
               ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet2TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet2AddressSpace'),' -SourceRRASIP ', variables('VNet2TunnelGW'))]"
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet2TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet2AddressSpace'),' -SourceRRASIP ', variables('VNet1TunnelGW'))]"
           }
         },
         "dependsOn": [
@@ -680,7 +680,7 @@
             "fileUris": [
                 "[variables('scriptFilepath')]"
             ],
-            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet1TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet1AddressSpace'),' -SourceRRASIP ', variables('VNet1TunnelGW')) ]"
+            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  reference(variables('VNet1TunnelPIPName')).ipAddress, ' -TargetIPRange ', variables('VNet1AddressSpace'),' -SourceRRASIP ', variables('VNet2TunnelGW')) ]"
           }
         },
         "dependsOn": [
