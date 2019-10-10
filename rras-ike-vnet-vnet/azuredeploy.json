@@ -4,11 +4,11 @@
   "apiProfile": "2019-03-01-hybrid",
   "parameters": {
     "WindowsImageSKU": {
-      "defaultValue": "2016-Datacenter",
+      "defaultValue": "2019-Datacenter",
       "allowedValues": [ "2016-Datacenter","2019-Datacenter" ],
       "type": "string",
       "metadata": {
-        "description": "The name of the Administrator of the new VMs"
+        "description": "Please select the base Windows VM image"
       }
     },   
     "adminUsername": {
