@@ -3,27 +3,6 @@
   "contentVersion": "1.0.0.0",
   "apiProfile": "2019-03-01-hybrid",
   "parameters": {
-    "SharedSecret": {
-      "defaultValue": "ilovestack!",
-      "type": "string",
-      "metadata": {
-        "description": "The Shared Secret phrase for the tunnel"
-      }
-    },
-    "RRASvmName": {
-      "defaultValue":"VNet-RRAS1",
-      "type": "string",
-      "metadata": {
-        "description": "RRAS Azure resource name"
-      }
-    },
-    "VNetName": {
-      "defaultValue":"VNet",
-      "type": "string",
-      "metadata": {
-        "description": "The name of VNet.  THis will be used to label the resources"
-      }
-    },
     "RemoteTunnelEndpoint": {
       "defaultValue": "38.102.180.81",
       "type": "string",
@@ -52,6 +31,13 @@
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
       }
     },
+    "SharedSecret": {
+      "defaultValue": "ilovestack!",
+      "type": "string",
+      "metadata": {
+        "description": "The Shared Secret phrase for the tunnel"
+      }
+    },
     "_artifactsLocationSasToken": {
       "defaultValue": "",
       "type": "securestring",
@@ -65,7 +51,8 @@
     "deploymentApiVersion": "2018-09-01",
     "routetableApiVersion": "2017-10-01",
     "computeApiVersion" : "2017-12-01",
-    
+    "vmName": "-RRAS1",
+    "VNetVMName": "[concat(resourcegroup().name,variables('vmName'))]",
     "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
     "scriptfilename": "Add-Site2Site.ps1",
     "scriptfilepath": "[concat(parameters('_artifactsLocation'), 'Scripts/',variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
@@ -103,7 +90,7 @@
             },
             {
               "type": "Microsoft.Compute/virtualMachines/extensions",
-              "name": "[concat(parameters('RRASvmName'),'/CustomScriptExtension')]",
+              "name": "[concat(variables('VNetVMName'),'/CustomScriptExtension')]",
               "apiVersion": "[variables('computeApiVersion')]",
               "location": "[resourceGroup().location]",
               "properties": {
@@ -129,3 +116,4 @@
     
   }
 }
+/

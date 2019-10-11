@@ -100,7 +100,7 @@
     "windowsImageOffer": "WindowsServer",
     "windowsImageVersion": "latest",   
     "vmName": "-RRAS",
-    "VNetVMName": "[concat(variables('VNet'),variables('vmName'))]",
+    "VNetVMName": "[concat(resourcegroup().name,variables('vmName'))]",
 
     "VNet": "[parameters('VNetName')]",
     "VNetInternalSubnetName": "[parameters('VNetInternalSubnetName')]",
@@ -377,9 +377,17 @@
     }
   ],
   "outputs": {
-    "VNetVMName": {
+    "LocalTunnelEndpoint": {
+        "value": "[reference(concat('Microsoft.Network/publicIPAddresses/', variables('VNetTunnelPIPName')), '2016-03-30').ipaddress]",
+        "type" : "string"
+    },
+    "LocalVNetAddressSpace": {
       "type": "string",
-      "value": "[concat(variables('VNet'),variables('vmName'),'1')]"
+      "value": "[variables('VNetAddressSpace')]"
+    },
+    "LocalVNetGateway":{
+      "type": "string",
+      "value": "[variables('VNetInternalGW')]"
     },
     "adminUsername": {
       "type": "string",
@@ -389,25 +397,18 @@
       "type": "string",
       "value": "[variables('VNetName')]"
     },
-    "VNetAddressSpace": {
+    "InternalRefVNet":{
       "type": "string",
-      "value": "[variables('VNetAddressSpace')]"
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]"
     },
     "VNetInternalSubnetName": {
       "type": "string",
       "value": "[variables('VNetInternalSubnetName')]"
     },
-    "VNetInternalGW":{
-      "type": "string",
-      "value": "[variables('VNetInternalGW')]"
-    },
     "InternalSubnetRefVNet":{
       "type": "string",
       "value": "[variables('InternalSubnetRefVNet')]"
     },
-    "VPNTunnelEndpointIPAddress": {
-        "value": "[reference(concat('Microsoft.Network/publicIPAddresses/', variables('VNetTunnelPIPName')), '2016-03-30').ipaddress]",
-        "type" : "string"
-    }
+
   }
 }
