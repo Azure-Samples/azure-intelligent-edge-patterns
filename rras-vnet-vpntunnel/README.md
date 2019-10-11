@@ -70,23 +70,23 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Inputs for azuredeploy.tunnel.ike.json
 
-|**Inputs**|
-|-------------|
-|RemoteTunnelEndpoint
-|RemoteVNetAddressSpace
-|RemoteVNetGateway
-|SharedSecret
-|_artifactsLocation
-|_artifactsLocationSasToken
+|**Inputs**|**Output**|
+|-------------|-----------|
+|RemoteTunnelEndpoint|LocalTunnelEndpoint|
+|RemoteVNetAddressSpace|LocalVNetAddressSpace|
+|RemoteVNetGateway|LocalVNetGateway|
+|SharedSecret|
+|_artifactsLocation|
+|_artifactsLocationSasToken|
 
 ### Inputs for azuredeploy.tunnel.gre.json
 
-|**Inputs**|
-|-------------|
-|RemoteTunnelEndpoint
-|RemoteVNetAddressSpace
-|RemoteVNetGateway
-|RemoteTunnelGateway
+|**Inputs**|**Output**|
+|-------------|-----------|
+|RemoteTunnelEndpoint|LocalTunnelEndpoint|
+|RemoteVNetAddressSpace|LocalVNetAddressSpace|
+|RemoteVNetGateway|LocalVNetGateway|
+|RemoteTunnelGateway|LocalTunnelGateway|
 |_artifactsLocation
 |_artifactsLocationSasToken
 
