@@ -64,7 +64,7 @@ if ($exsiting.name -eq $S2SName)
 try 
 {
     Write-verbose "Configuring Tunnel $S2SName"
-    Add-VpnS2SInterface -Name $S2SName -GreTunnel -SourceIpAddress $SourceRRASIP -Destination $TargetRRASIP -IPv4Subnet $TargetIPRange -PassThru -verbose
+    Add-VpnS2SInterface -Name $S2SName -GreTunnel -SourceIpAddress $SourceRRASIP -Destination $TargetRRASIP -IPv4Subnet $TargetIPRangeMetric -PassThru -verbose
     start-sleep 5
     $result = get-VpnS2SInterface -name $S2SName -Verbose
     Write-verbose "Tunnel Created, Status: $($result.ConnectionState)"
