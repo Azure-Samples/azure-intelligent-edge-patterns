@@ -3,6 +3,22 @@
   "contentVersion": "1.0.0.0",
   "apiProfile": "2019-03-01-hybrid",
   "parameters": {
+    "WindowsImageSKU": {
+      "defaultValue": "2019-Datacenter",
+      "allowedValues": [ "2016-Datacenter","2019-Datacenter" ],
+      "type": "string",
+      "metadata": {
+        "description": "Please select the base Windows VM image"
+      }
+    },
+    "VMSize": {
+      "defaultValue": "Standard_DS3_v2",
+      "allowedValues": [ "Standard_DS3_v2","Standard_DS4_v2","Standard_F8s_v2","Standard_F16s_v2" ],
+      "type": "string",
+      "metadata": {
+        "description": "Please select the VM size"
+      }
+    },
     "adminUsername": {
       "defaultValue": "rrasadmin",
       "type": "string",
@@ -101,22 +117,6 @@
         "description": "Static Address for VNet2 RRAS Server.  Used for User defined route in Route table."
       }
     },  
-    "WindowsImageSKU": {
-      "defaultValue": "2019-Datacenter",
-      "allowedValues": [ "2016-Datacenter","2019-Datacenter" ],
-      "type": "string",
-      "metadata": {
-        "description": "Please select the base Windows VM image"
-      }
-    },
-    "VMSize": {
-      "defaultValue": "Standard_DS3_v2",
-      "allowedValues": [ "Standard_DS3_v2","Standard_DS4_v2","Standard_F8s_v2","Standard_F16s_v2" ],
-      "type": "string",
-      "metadata": {
-        "description": "Please select the VM size"
-      }
-    },
     "_artifactsLocation": {
       "defaultValue": "https://raw.githubusercontent.com/Inttruder/azure-intelligent-edge-patterns/master/rras-gre-vnet-vnet/",
       "type": "string",

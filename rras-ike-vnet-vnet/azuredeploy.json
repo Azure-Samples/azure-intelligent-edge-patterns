@@ -11,6 +11,14 @@
         "description": "Please select the base Windows VM image"
       }
     },   
+    "VMSize": {
+      "defaultValue": "Standard_DS3_v2",
+      "allowedValues": [ "Standard_DS3_v2","Standard_DS4_v2","Standard_F8s_v2","Standard_F16s_v2" ],
+      "type": "string",
+      "metadata": {
+        "description": "Please select the VM size"
+      }
+    },
     "adminUsername": {
       "defaultValue": "rrasadmin",
       "type": "string",
@@ -137,7 +145,7 @@
     "storageAccountType": "Standard_LRS",
     "ManagedOSDiskType": "Premium_LRS",
     "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
-    "VMSize": "Standard_DS3_v2",    
+    "VMSize": "[parameters('VMSize')]",  
     "windowsImagePublisher": "MicrosoftWindowsServer",
     "windowsImageOffer": "WindowsServer",
     "windowsImageVersion": "latest",   
