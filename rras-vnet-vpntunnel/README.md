@@ -1,4 +1,4 @@
-# AzureStack-Modular-S2SVPN
+# AzureStack Modular Site-2-Site VPN
 
 ***This template is intended for use in an Azure Stack environment.***
 
@@ -27,9 +27,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/TheProcess.jpg)
 
-
-
-Requirements:
+## Requirements:
 
 - ASDK or Azure Stack Integrated System with latest updates applied. 
 - Required Azure Stack Marketplace items:
@@ -37,22 +35,98 @@ Requirements:
 	-  PowerShell DSC extension
     -  Custom Script Extension
 
-Things to Consider:
+## Template Inputs & Outputs
+
+**Input**           **Default**         **description**
+WindowsImageSKU     2019-Datacenter     Please select the base Windows VM image
+adminUsername       rrasadmin           The name of the Administrator of the new VMs"
+      }
+    },
+    "adminPassword": {
+      "defaultValue": "[subscription().subscriptionId]",
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
+      }
+    },
+    "VNetName": {
+      "defaultValue":"VNet",
+      "type": "string",
+      "metadata": {
+        "description": "The name of VNet.  THis will be used to label the resources"
+      }
+    },
+    "VNetAddressSpace": {
+      "defaultValue":"10.10.0.0/16",
+      "type": "string",
+      "metadata": {
+        "description": "Address Space for VNet"
+      }
+    },
+    "VNetInternalSubnetName": {
+      "defaultValue": "Internal",
+      "type": "string",
+      "metadata": {
+        "description": "Address Range for VNet Tunnel Subnet"
+      }
+    },
+    "VNetTunnelSubnetRange": {
+      "defaultValue":"10.10.254.0/24",
+      "type": "string",
+      "metadata": {
+        "description": "Address Range for VNet Tunnel Subnet"
+      }
+    },
+    "VNetTunnelGW": {
+      "defaultValue":"10.10.254.4",
+      "type": "string",
+      "metadata": {
+        "description": "Static Address for VNet RRAS Server. "
+      }
+    },
+    "VNetInternalSubnetRange": {
+      "defaultValue":"10.10.1.0/24",
+      "type": "string",
+      "metadata": {
+        "description": "Address Range for VNet Internal Subnet"
+      }      
+    },
+    "VNetInternalGW": {
+      "defaultValue":"10.10.1.4",
+      "type": "string",
+      "metadata": {
+        "description": "Static Address for VNet RRAS Server.  Used for User defined route in Route table."
+      }
+    },  
+    "_artifactsLocation": {
+      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/",
+      "type": "string",
+      "metadata": {
+        "description": "The location of resources, such as templates and DSC modules, that the template depends on"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "defaultValue": "",
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access _artifactsLocation"
+      }
+    }
+## Things to Consider:
 
 - A Network Security Group is applied to the template Tunnel Subnet.  It is recommended to secure the internal subnet in each VNet with an additional NSG.
 - An RDP Deny rule is applied to the Tunnel NSG and will need to be set to allow if you intend to access the VMs via the Public IP address
 - This solution does not take into account DNS resolution
-- The combination of VNet name and vmName must be less than 15 characters
-- This template is designed to have the VNet names customized for VNet1 and VNet2
-- This template is using BYOL windows
+- The resource group name is used for the VM and for the route table so that the Tunnel template can find the RRAS VM and RouteTable resources easily without user input.  The user can however label the VNet and Subnets to make this more relervant to its usage.
+- The combination of Resource Group and vmName must be less than 15 characters.  Eg 'Resourcegr-RRAS'
+- This template is using BYOL Windows License
 - When deleting the resource group, currently on (1907) you have to manually detach the NSG's from the tunnel subnet to ensure the delete resource group completes
 - This template is using a DS3v2 vm.  The RRAS service installs and run Windows internal SQL Server.  This can cause memory issues if your VM size is too small.  Validate performance before reducing the VM size.
 - This is not a highly avaliable solution.  If you require a more HA style solution you can add a second VM, you would have to manually Change the route in the route table to the internal IP of the secondary interface.  You would also need to configure the mutliple Tunnels to cross connect.
 
-Optionial:
+## Optionial:
 
 - You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters
-- There are two outputs on this template INTERNALSUBNETREFVNET1 and INTERNALSUBNETREFVNET2 which are the Resource IDs for the internel subnets, if you want to use this in a pipeline style deployment pattern.
 
 This template provides default values for VNet naming and IP addressing.  It requires a password for the administrator (rrasadmin) and also offers the ability to use your own storage blob with SAS token.  Be careful to keep these values within legal ranges as deployment may fail.  The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed.  The custom script extension run the following script and Add-Site2Site.ps1 configures the VPNS2S tunnel between the two RRAS servers with a shared key.  You can view the detailed output from the custom script extension to see the results of the VPN tunnel configuration
 
