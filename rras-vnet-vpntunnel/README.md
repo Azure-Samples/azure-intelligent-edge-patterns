@@ -12,13 +12,10 @@ This template has been designed to enable a number of different scenarios for Az
 
 ## Architecture
 
-### Networking Overview
-This is an overview of the networking components that are deployed 
+### Network Overview & Resource Group
+This is an overview of the networking components that are deployed and a detailed view of all the components in the infrastructre template
 
-![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Overview.jpg)
-
-### Detailed Azure Resources
-This is a detailed view of all the components in the infrastructre template
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Combined.jpg)
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/S2SVPNTunnel.jpg)
 
