@@ -1,4 +1,4 @@
-# AzureStack-S2SVPN
+# AzureStack-Modular-S2SVPN
 
 ***This template is intended for use in an Azure Stack environment.***
 
@@ -6,12 +6,18 @@ The purpose of this template is to offer a modular solution to connect vnets and
 
 This template has been designed to enable a number of different scenarios for Azure Stack connectivity.  It has been designed in a modular with 3 templates so that you can deploy the infrastructure and then deploy an IKE or GRE tunnel on top of that infrastructure meaning you can deploy the tunnel endpoint in different locations such as different in resource groups, across subscriptions, across different Azure Stack instances and even from Azure Stack to on-premises.  
 
+## Scenarios
+
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Scenarios.jpg)
 
+## Architecture
+
+### Overview
 This is an overview of the networking components that are deployed 
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Overview.jpg)
 
+### Detailed 
 This is a detailed view of all the components in the infrastructre template
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/S2SVPNTunnel.jpg)
