@@ -39,19 +39,19 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Inputs for azuredeploy.json
 
-**Parameters**               **Default**         **description**
-WindowsImageSKU         2019-Datacenter     Please select the base Windows VM image
-adminUsername           rrasadmin           The name of the Administrator of the new VMs"
-adminPassword                           The password for the Administrator account of the new VMs
-VNetName                VNet                The name of VNet.  THis will be used to label the resources
-VNetAddressSpace        10.10.0.0/16        Address Space for VNet
-VNetInternalSubnetName  Internal            VNet Internal Subnet Name
-VNetTunnelSubnetRange   10.10.254.0/24      VNet Tunnel Subnet Range
-VNetTunnelGW            10.10.254.4         Static Address for VNet RRAS Server
-VNetInternalSubnetRange 10.10.1.0/24        Address Range for VNet Internal Subnet
-VNetInternalGW          10.10.1.4           Static Address for VNet RRAS Server.  Used for User defined route in Route table
-_artifactsLocation      
-_artifactsLocationSasToken
+|**Parameters**-----|**Default**----------|**description**
+|WindowsImageSKU         |2019-Datacenter   |Please select the base Windows VM image
+|adminUsername           |rrasadmin         |The name of the Administrator of the new VMs"
+|adminPassword           |                  |The password for the Administrator account of the new VMs
+|VNetName                |VNet              |The name of VNet.  THis will be used to label the resources
+|VNetAddressSpace        |10.10.0.0/16      |Address Space for VNet
+|VNetInternalSubnetName  |Internal          |VNet Internal Subnet Name
+|VNetTunnelSubnetRange   |10.10.254.0/24    |VNet Tunnel Subnet Range
+|VNetTunnelGW            |10.10.254.4       |Static Address for VNet RRAS Server
+|VNetInternalSubnetRange |10.10.1.0/24      |Address Range for VNet Internal Subnet
+|VNetInternalGW          |10.10.1.4         |Static Address for VNet RRAS Server.  Used for User defined route in Route table
+|_artifactsLocation      ||
+|_artifactsLocationSasToken||
 
 ### Outputs from azuredeploy.json
 
