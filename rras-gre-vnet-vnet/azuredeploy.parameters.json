@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+        "value": "rrasadmin"
+    },
+    "adminPassword": {
+        "value": "[subscription().subscriptionId]"
+    },
+    "SharedSecret": {
+        "value": "ilovestack!"
+    },
+    "VNet1Name": {
+        "value":"VNet1"
+    },
+    "VNet1AddressSpace": {
+        "value":"10.1.0.0/16"
+    },
+    "VNet1TunnelSubnetRange": {
+        "value":"10.1.254.0/24"
+    },
+    "VNet1TunnelGW": {
+        "value":"10.1.254.4"
+    },
+    "VNet1InternalSubnetRange": {
+        "value":"10.1.1.0/24"
+    },
+    "VNet1InternalGW": {
+        "value":"10.1.1.4"
+    },
+    "VNet2Name": {
+        "value":"VNet2"
+    },
+    "VNet2AddressSpace": {
+        "value":"10.2.0.0/16"
+    },
+    "VNet2TunnelSubnetRange": {
+        "value":"10.2.254.0/24"
+    },
+    "VNet2TunnelGW": {
+        "value":"10.2.254.4"
+    },
+    "WindowsImageSKU": {
+        "value":"2019-Datacenter"
+    },
+    "VMSize": {
+        "value":"Standard_DS3_v2"
+    },
+    "VNet2InternalSubnetRange": {
+        "value":"10.2.1.0/24"
+    },
+    "VNet2InternalGW": {
+        "value":"10.2.1.4"
+    },
+    "_artifactsLocation": {
+        "value": "https://raw.githubusercontent.com/Inttruder/azure-intelligent-edge-patterns/master/rras-gre-vnet-vnet/"
+    },
+    "_artifactsLocationSasToken": {
+        "value": ""
+    }  
+  }
+}
