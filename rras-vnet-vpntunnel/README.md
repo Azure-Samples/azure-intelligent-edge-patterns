@@ -39,7 +39,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Inputs for azuredeploy.json
 
-|**Parameters**|**Default**|**description**|
+|**Parameters**|**default**|**description**|
 |------------------|---------------|------------------------------|
 |WindowsImageSKU         |2019-Datacenter   |Please select the base Windows VM image
 |adminUsername           |rrasadmin         |The name of the Administrator of the new VMs"
@@ -56,33 +56,39 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Outputs from azuredeploy.json
 
-LocalTunnelEndpoint
-LocalVNetAddressSpace
-LocalVNetGateway
-LocalTunnelGateway
-adminUsername
-VNet
-InternalRefVNet
-VNetInternalSubnetName
-InternalSubnetRefVNet
+|**Output**|
+|-------------|
+|LocalTunnelEndpoint
+|LocalVNetAddressSpace
+|LocalVNetGateway
+|LocalTunnelGateway
+|adminUsername
+|VNet
+|InternalRefVNet
+|VNetInternalSubnetName
+|InternalSubnetRefVNet
 
 ### Inputs for azuredeploy.tunnel.ike.json
 
-RemoteTunnelEndpoint
-RemoteVNetAddressSpace
-RemoteVNetGateway
-SharedSecret
-_artifactsLocation
-_artifactsLocationSasToken
+|**Inputs**|
+|-------------|
+|RemoteTunnelEndpoint
+|RemoteVNetAddressSpace
+|RemoteVNetGateway
+|SharedSecret
+|_artifactsLocation
+|_artifactsLocationSasToken
 
 ### Inputs for azuredeploy.tunnel.gre.json
 
-RemoteTunnelEndpoint
-RemoteVNetAddressSpace
-RemoteVNetGateway
-RemoteTunnelGateway
-_artifactsLocation
-_artifactsLocationSasToken
+|**Inputs**|
+|-------------|
+|RemoteTunnelEndpoint
+|RemoteVNetAddressSpace
+|RemoteVNetGateway
+|RemoteTunnelGateway
+|_artifactsLocation
+|_artifactsLocationSasToken
 
 ## Things to Consider
 
