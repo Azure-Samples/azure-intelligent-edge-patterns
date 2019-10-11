@@ -408,7 +408,6 @@
     "InternalSubnetRefVNet":{
       "type": "string",
       "value": "[variables('InternalSubnetRefVNet')]"
-    },
-
+    }
   }
 }

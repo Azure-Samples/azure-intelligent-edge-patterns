@@ -24,18 +24,18 @@
         "description": "The gateway of the server on the remote tunnel endpoint"
       }
     }, 
-    "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/",
-      "type": "string",
-      "metadata": {
-        "description": "The location of resources, such as templates and DSC modules, that the template depends on"
-      }
-    },
     "SharedSecret": {
       "defaultValue": "ilovestack!",
       "type": "string",
       "metadata": {
         "description": "The Shared Secret phrase for the tunnel"
+      }
+    },
+    "_artifactsLocation": {
+      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/",
+      "type": "string",
+      "metadata": {
+        "description": "The location of resources, such as templates and DSC modules, that the template depends on"
       }
     },
     "_artifactsLocationSasToken": {
@@ -51,6 +51,7 @@
     "deploymentApiVersion": "2018-09-01",
     "routetableApiVersion": "2017-10-01",
     "computeApiVersion" : "2017-12-01",
+    "Endpoint": "[replace(parameters('RemoteTunnelEndpoint'),'.','')]",
     "vmName": "-RRAS1",
     "VNetVMName": "[concat(resourcegroup().name,variables('vmName'))]",
     "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
@@ -61,7 +62,7 @@
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
-      "name": "ConfigureS2SVPNTunnel",
+      "name": "[concat('ConfigureS2SVPNTunnel',variables('Endpoint'))]",
       "apiVersion": "[variables('deploymentApiVersion')]",
       "properties": {
         "mode": "Incremental",
@@ -116,4 +117,3 @@
     
   }
 }
-/
