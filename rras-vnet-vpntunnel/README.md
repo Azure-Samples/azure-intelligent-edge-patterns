@@ -27,7 +27,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/TheProcess.jpg)
 
-## Requirements:
+## Requirements
 
 - ASDK or Azure Stack Integrated System with latest updates applied. 
 - Required Azure Stack Marketplace items:
@@ -102,7 +102,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 - This template is using a DS3v2 vm as default there other options but you many want to change the allowed values.  The RRAS service installs and run Windows internal SQL Server.  This can cause memory issues if your VM size is too small.  Validate performance before reducing the VM size.
 - This is not a highly avaliable solution.  If you require a more HA style solution you can add a second VM, you would have to manually Change the route in the route table to the internal IP of the secondary interface.  You would also need to configure the mutliple Tunnels to cross connect.
 
-## Optionial
+## Optional
 
 - You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters the ability to use your own storage blob with SAS token.
 - This template provides default values for VNet naming and IP addressing.  You will need to change the address space for each side
