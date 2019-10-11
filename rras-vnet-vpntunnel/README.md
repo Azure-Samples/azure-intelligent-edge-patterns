@@ -17,8 +17,6 @@ This is an overview of the networking components that are deployed and a detaile
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Combined.jpg)
 
-![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/S2SVPNTunnel.jpg)
-
 ## The deployment process
 
 Now we have an understanding of the architecture it is import to understand the deployment process.  These templates have been designed in such a way they can be deployed use automation.  THere is one template for the infrastrcuture components and a template to configure the site-2-site VPN tunnel on the infrastucture.  The infrastructure templates will generate output which is meant to be the input for the tunnel template.
