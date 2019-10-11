@@ -8,7 +8,7 @@ param
         [String] $SourceRRASIP
     )
 
-
+Import-Module remoteaccess
 $VerbosePreference="continue"
 
 $S2SName = ($TargetIPRange.Replace('.','')).Replace('/','')
