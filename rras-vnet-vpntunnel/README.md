@@ -104,11 +104,13 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ## Optionial
 
-- You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters
+- You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters the ability to use your own storage blob with SAS token.
+- This template provides default values for VNet naming and IP addressing.  You will need to change the address space for each side
+- Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
+- The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/ https://github.com/mgreenegit/xRemoteAccess/.  xRemoteAccess is present but not used currently.
+- The custom script extension runs the following script Add-Site2SiteIKE.ps1 and Add-Site2SiteGRE.ps1 and configures the VPNS2S tunnel between the two RRAS servers.  You can view the detailed output from the custom script extension to see the results of the VPN tunnel configuration
 
-This template provides default values for VNet naming and IP addressing.  It requires a password for the administrator (rrasadmin) and also offers the ability to use your own storage blob with SAS token.  Be careful to keep these values within legal ranges as deployment may fail.  The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed.  The custom script extension run the following script and Add-Site2Site.ps1 configures the VPNS2S tunnel between the two RRAS servers with a shared key.  You can view the detailed output from the custom script extension to see the results of the VPN tunnel configuration
 
-![alt text](https://github.com/lucidqdreams/vnetpeering/blob/master/Images/S2SVPNTunnel.jpg)
 
 
 
