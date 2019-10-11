@@ -6,13 +6,13 @@ The purpose of this template is to demonstrate the ability to interconnect two A
 
 This deployment pattern is the foundation that will allow VPN Tunnels to be created not only within an Azure Stack instance but also between Azure Stack Instances and to other resources such as onpremise networks with the use of the Windows RRAS S2S VPN Tunnels.
 
-![alt text](https://github.com/lucidqdreams/vnetpeering/blob/master/Images/Overview.jpg)
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-ike-vnet-vnet/Images/Overview.jpg)
 
 Requirements:
 
 - ASDK or Azure Stack Integrated System with latest updates applied. 
 - Required Azure Stack Marketplace items:
-    -  Windows Server 2016 Datacenter (latest build recommended)
+    -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
 	-  Custom Script Extension
 
 Things to Consider:

@@ -52,10 +52,10 @@
     "routetableApiVersion": "2017-10-01",
     "computeApiVersion" : "2017-12-01",
     "Endpoint": "[replace(parameters('RemoteTunnelEndpoint'),'.','')]",
-    "vmName": "-RRAS1",
+    "vmName": "-RRAS",
     "VNetVMName": "[concat(resourcegroup().name,variables('vmName'))]",
     "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
-    "scriptfilename": "Add-Site2Site.ps1",
+    "scriptfilename": "Add-Site2SiteIKE.ps1",
     "scriptfilepath": "[concat(parameters('_artifactsLocation'), 'Scripts/',variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
   },
 

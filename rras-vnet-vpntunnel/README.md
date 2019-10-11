@@ -2,13 +2,20 @@
 
 ***This template is intended for use in an Azure Stack environment.***
 
-The purpose of this template is to offer a modular solution to connect vnets and networks across resource groups, across subscriptions, across azure stack instances and from Azure stack to other networks such as on-premises.  It is currently not possible to inteconnect Azure Stack VNets to one another using the built-in Virtual Network Gateway:  https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-network-differences.  Support for this is coming soon but for now one must use NVA appliances to create a VPN tunnel between two Azure Stack VNets.
+The purpose of this template is to offer a modular solution to connect vnets and networks across resource groups, across subscriptions, across azure stack instances and from Azure stack to other networks such as on-premises.  It is currently not possible to inteconnect Azure Stack VNets to one another using the built-in Virtual Network Gateway:  https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-network-differences.  Support for this is coming soon but for now one must use NVA appliances to create a VPN tunnel between two Azure Stack VNets.  You my also want to refer to the single template deployment version that can be found here https://github.com/lucidqdreams/azure-intelligent-edge-patterns/tree/master/rras-ike-vnet-vnet
 
-This template has been designed to enable a number of different scenarios for Azure Stack connectivity.  This pattern has been designed in a modular fashion with 3 templates so that you can deploy the infrastructure and then deploy and IKE or GRE tunnel on top meaning you can deploy the tunnel endpoint in different locations such as different resource groups, across different Azure Stack instances and from Azure Stack to on-premises.  
-
-
+This template has been designed to enable a number of different scenarios for Azure Stack connectivity.  It has been designed in a modular with 3 templates so that you can deploy the infrastructure and then deploy an IKE or GRE tunnel on top of that infrastructure meaning you can deploy the tunnel endpoint in different locations such as different in resource groups, across subscriptions, across different Azure Stack instances and even from Azure Stack to on-premises.  
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Scenarios.jpg)
+
+This is an overview of the networking components that are deployed 
+
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Overview.jpg)
+
+This is a detailed view of all the components in the infrastructre template
+
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/S2SVPNTunnel.jpg)
+
 
 Requirements:
 

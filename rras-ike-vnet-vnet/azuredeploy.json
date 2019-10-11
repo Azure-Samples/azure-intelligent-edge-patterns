@@ -185,7 +185,7 @@
     "SharedSecret": "[parameters('SharedSecret')]",
     "InstallRRASDSC": "[concat(parameters('_artifactsLocation'), 'DSC/InstallRRAS.zip', parameters('_artifactsLocationSasToken'))]",
     "InstallRRAS": "InstallRRAS.ps1\\InstallRRAS",
-    "scriptfilename": "Add-Site2Site.ps1",
+    "scriptfilename": "Add-Site2SiteIKE.ps1",
     "scriptfilepath": "[concat(parameters('_artifactsLocation'), variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
   },
 

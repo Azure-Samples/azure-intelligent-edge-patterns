@@ -290,14 +290,14 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(variables('VNetVMName'), '1')]",
+      "name": "[concat(variables('VNetVMName'))]",
       "location": "[resourceGroup().location]",
       "properties": {
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
       },
       "osProfile": {
-        "computerName": "[concat(variables('VNetVMName'), '1')]",
+        "computerName": "[concat(variables('VNetVMName'))]",
         "adminUsername": "[parameters('adminUsername')]",
         "adminPassword": "[parameters('adminPassword')]",
           "windowsConfiguration": {
@@ -352,7 +352,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(concat(variables('VNetVMName'), '1','/InstallRRAS'))]",
+      "name": "[concat(concat(variables('VNetVMName'), '/InstallRRAS'))]",
       "location": "[resourceGroup().location]",
       "tags": {
         "displayName": "InstallRRAS"
@@ -372,7 +372,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/virtualMachines',concat(concat(variables('VNetVMName'), '1')))]"
+        "[resourceId('Microsoft.Compute/virtualMachines',concat(concat(variables('VNetVMName'))))]"
       ]
     }
   ],
