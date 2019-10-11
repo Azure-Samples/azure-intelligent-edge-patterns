@@ -11,26 +11,34 @@
       }
     }, 
     "RemoteVNetAddressSpace": {
-      "defaultValue":"10.10.3.0/24",
+      "defaultValue":"10.20.3.0/24",
       "type": "string",
       "metadata": {
         "description": ""
       }
     }, 
     "RemoteVNetGateway": {
-      "defaultValue":"10.10.3.4",
+      "defaultValue":"10.20.3.4",
       "type": "string",
       "metadata": {
         "description": "The gateway of the server on the remote tunnel endpoint"
       }
     }, 
     "RemoteTunnelGateway": {
+      "defaultValue":"10.20.254.4",
+      "type": "string",
+      "metadata": {
+        "description": "The gateway of the server on the remote tunnel endpoint"
+      }
+    }, 
+    "LocalVNetGateway": {
       "defaultValue":"10.10.254.4",
       "type": "string",
       "metadata": {
         "description": "The gateway of the server on the remote tunnel endpoint"
       }
     }, 
+    
     "_artifactsLocation": {
       "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/",
       "type": "string",
@@ -103,7 +111,7 @@
                   "fileUris": [
                     "[variables('scriptFilepath')]"
                     ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  parameters('RemoteTunnelEndpoint'), ' -TargetIPRange ', parameters('RemoteVNetAddressSpace'),' -SourceRRASIP ', parameters('RemoteTunnelGateway')) ]"
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  parameters('RemoteTunnelEndpoint'), ' -TargetIPRange ', parameters('RemoteVNetAddressSpace'),' -SourceRRASIP ', parameters('LocalVNetGateway')) ]"
                 }
               }
             }
