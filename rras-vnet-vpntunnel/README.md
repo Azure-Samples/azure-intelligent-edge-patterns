@@ -2,18 +2,21 @@
 
 ***This template is intended for use in an Azure Stack environment.***
 
-The purpose of this template is to demonstrate the ability to interconnect two Azure Stack VNets to one another within the same Azure Stack environment.  It is currently not possible to inteconnect Azure Stack VNets to one another using the built-in Virtual Network Gateway:  https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-network-differences.  Support for this is coming soon but for now one must use NVA appliances to create a VPN tunnel between two Azure Stack VNets.  In this template, two Windows Server 2016 VMs are deployed with RRAS installed.  The two RRAS servers are configured to implement a S2SVPN IKEv2 tunnel between two VNETs.  The appropriate NSG and UDR rules are created to allow routing between the subents on each VNET designated as 'internal'.  
+The purpose of this template is to offer a modular solution to connect vnets and networks across resource groups, across subscriptions, across azure stack instances and from Azure stack to other networks such as on-premises.  It is currently not possible to inteconnect Azure Stack VNets to one another using the built-in Virtual Network Gateway:  https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-network-differences.  Support for this is coming soon but for now one must use NVA appliances to create a VPN tunnel between two Azure Stack VNets.
 
-This deployment pattern is the foundation that will allow VPN Tunnels to be created not only within an Azure Stack instance but also between Azure Stack Instances and to other resources such as onpremise networks with the use of the Windows RRAS S2S VPN Tunnels.
+This template has been designed to enable a number of different scenarios for Azure Stack connectivity.  This pattern has been designed in a modular fashion with 3 templates so that you can deploy the infrastructure and then deploy and IKE or GRE tunnel on top meaning you can deploy the tunnel endpoint in different locations such as different resource groups, across different Azure Stack instances and from Azure Stack to on-premises.  
 
-![alt text](https://github.com/lucidqdreams/vnetpeering/blob/master/Images/Overview.jpg)
+
+
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Scenarios.jpg)
 
 Requirements:
 
 - ASDK or Azure Stack Integrated System with latest updates applied. 
 - Required Azure Stack Marketplace items:
-    -  Windows Server 2016 Datacenter (latest build recommended)
-	-  Custom Script Extension
+    -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
+	-  PowerShell DSC extension
+    -  Custom Script Extension
 
 Things to Consider:
 
