@@ -39,7 +39,8 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Inputs for azuredeploy.json
 
-|**Parameters**-----|**Default**----------|**description**
+|**Parameters**|**Default**|**description**|
+|------------------|---------------|------------------------------|
 |WindowsImageSKU         |2019-Datacenter   |Please select the base Windows VM image
 |adminUsername           |rrasadmin         |The name of the Administrator of the new VMs"
 |adminPassword           |                  |The password for the Administrator account of the new VMs
