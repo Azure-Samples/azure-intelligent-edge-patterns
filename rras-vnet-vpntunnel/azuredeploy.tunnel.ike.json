@@ -4,21 +4,21 @@
   "apiProfile": "2019-03-01-hybrid",
   "parameters": {
     "RemoteTunnelEndpoint": {
-      "defaultValue": "38.102.180.81",
+      "defaultValue": "1.1.1.1",
       "type": "string",
       "metadata": {
-        "description": ""
+        "description": "The remote public endpoint of the VPN tunnel"
       }
     }, 
     "RemoteVNetAddressSpace": {
-      "defaultValue":"10.10.3.0/24",
+      "defaultValue":"10.10.2.0/24",
       "type": "string",
       "metadata": {
         "description": ""
       }
     }, 
     "RemoteVNetGateway": {
-      "defaultValue":"10.10.3.4",
+      "defaultValue":"10.10.2.4",
       "type": "string",
       "metadata": {
         "description": "The gateway of the server on the remote tunnel endpoint"

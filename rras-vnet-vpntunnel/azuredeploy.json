@@ -51,14 +51,14 @@
       "defaultValue": "Internal",
       "type": "string",
       "metadata": {
-        "description": "Address Range for VNet Tunnel Subnet"
+        "description": "VNet Internal Subnet Name"
       }
     },
     "VNetTunnelSubnetRange": {
       "defaultValue":"10.10.254.0/24",
       "type": "string",
       "metadata": {
-        "description": "Address Range for VNet Tunnel Subnet"
+        "description": "Tunnel Subnet Range"
       }
     },
     "VNetTunnelGW": {

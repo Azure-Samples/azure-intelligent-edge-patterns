@@ -4,7 +4,7 @@
   "apiProfile": "2019-03-01-hybrid",
   "parameters": {
     "RemoteTunnelEndpoint": {
-      "defaultValue": "38.102.180.81",
+      "defaultValue": "1.1.1.2",
       "type": "string",
       "metadata": {
         "description": ""

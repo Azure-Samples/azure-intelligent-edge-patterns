@@ -37,82 +37,53 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ## Template Inputs & Outputs
 
-**Input**           **Default**         **description**
-WindowsImageSKU     2019-Datacenter     Please select the base Windows VM image
-adminUsername       rrasadmin           The name of the Administrator of the new VMs"
-      }
-    },
-    "adminPassword": {
-      "defaultValue": "[subscription().subscriptionId]",
-      "type": "securestring",
-      "metadata": {
-        "description": "The password for the Administrator account of the new VMs. Default value is subscription id"
-      }
-    },
-    "VNetName": {
-      "defaultValue":"VNet",
-      "type": "string",
-      "metadata": {
-        "description": "The name of VNet.  THis will be used to label the resources"
-      }
-    },
-    "VNetAddressSpace": {
-      "defaultValue":"10.10.0.0/16",
-      "type": "string",
-      "metadata": {
-        "description": "Address Space for VNet"
-      }
-    },
-    "VNetInternalSubnetName": {
-      "defaultValue": "Internal",
-      "type": "string",
-      "metadata": {
-        "description": "Address Range for VNet Tunnel Subnet"
-      }
-    },
-    "VNetTunnelSubnetRange": {
-      "defaultValue":"10.10.254.0/24",
-      "type": "string",
-      "metadata": {
-        "description": "Address Range for VNet Tunnel Subnet"
-      }
-    },
-    "VNetTunnelGW": {
-      "defaultValue":"10.10.254.4",
-      "type": "string",
-      "metadata": {
-        "description": "Static Address for VNet RRAS Server. "
-      }
-    },
-    "VNetInternalSubnetRange": {
-      "defaultValue":"10.10.1.0/24",
-      "type": "string",
-      "metadata": {
-        "description": "Address Range for VNet Internal Subnet"
-      }      
-    },
-    "VNetInternalGW": {
-      "defaultValue":"10.10.1.4",
-      "type": "string",
-      "metadata": {
-        "description": "Static Address for VNet RRAS Server.  Used for User defined route in Route table."
-      }
-    },  
-    "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/",
-      "type": "string",
-      "metadata": {
-        "description": "The location of resources, such as templates and DSC modules, that the template depends on"
-      }
-    },
-    "_artifactsLocationSasToken": {
-      "defaultValue": "",
-      "type": "securestring",
-      "metadata": {
-        "description": "Auto-generated token to access _artifactsLocation"
-      }
-    }
-## Things to Consider:
+### Inputs for azuredeploy.json
+
+**Parameters**               **Default**         **description**
+WindowsImageSKU         2019-Datacenter     Please select the base Windows VM image
+adminUsername           rrasadmin           The name of the Administrator of the new VMs"
+adminPassword                           The password for the Administrator account of the new VMs
+VNetName                VNet                The name of VNet.  THis will be used to label the resources
+VNetAddressSpace        10.10.0.0/16        Address Space for VNet
+VNetInternalSubnetName  Internal            VNet Internal Subnet Name
+VNetTunnelSubnetRange   10.10.254.0/24      VNet Tunnel Subnet Range
+VNetTunnelGW            10.10.254.4         Static Address for VNet RRAS Server
+VNetInternalSubnetRange 10.10.1.0/24        Address Range for VNet Internal Subnet
+VNetInternalGW          10.10.1.4           Static Address for VNet RRAS Server.  Used for User defined route in Route table
+_artifactsLocation      
+_artifactsLocationSasToken
+
+### Outputs from azuredeploy.json
+
+LocalTunnelEndpoint
+LocalVNetAddressSpace
+LocalVNetGateway
+LocalTunnelGateway
+adminUsername
+VNet
+InternalRefVNet
+VNetInternalSubnetName
+InternalSubnetRefVNet
+
+### Inputs for azuredeploy.tunnel.ike.json
+
+RemoteTunnelEndpoint
+RemoteVNetAddressSpace
+RemoteVNetGateway
+SharedSecret
+_artifactsLocation
+_artifactsLocationSasToken
+
+### Inputs for azuredeploy.tunnel.gre.json
+
+RemoteTunnelEndpoint
+RemoteVNetAddressSpace
+RemoteVNetGateway
+RemoteTunnelGateway
+_artifactsLocation
+_artifactsLocationSasToken
+
+## Things to Consider
 
 - A Network Security Group is applied to the template Tunnel Subnet.  It is recommended to secure the internal subnet in each VNet with an additional NSG.
 - An RDP Deny rule is applied to the Tunnel NSG and will need to be set to allow if you intend to access the VMs via the Public IP address
@@ -124,7 +95,7 @@ adminUsername       rrasadmin           The name of the Administrator of the new
 - This template is using a DS3v2 vm.  The RRAS service installs and run Windows internal SQL Server.  This can cause memory issues if your VM size is too small.  Validate performance before reducing the VM size.
 - This is not a highly avaliable solution.  If you require a more HA style solution you can add a second VM, you would have to manually Change the route in the route table to the internal IP of the secondary interface.  You would also need to configure the mutliple Tunnels to cross connect.
 
-## Optionial:
+## Optionial
 
 - You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters
 
