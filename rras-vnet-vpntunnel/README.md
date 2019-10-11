@@ -99,7 +99,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 - The combination of Resource Group and vmName must be less than 15 characters.  Eg 'Resourcegr-RRAS'
 - This template is using BYOL Windows License
 - When deleting the resource group, currently on (1907) you have to manually detach the NSG's from the tunnel subnet to ensure the delete resource group completes
-- This template is using a DS3v2 vm.  The RRAS service installs and run Windows internal SQL Server.  This can cause memory issues if your VM size is too small.  Validate performance before reducing the VM size.
+- This template is using a DS3v2 vm as default there other options but you many want to change the allowed values.  The RRAS service installs and run Windows internal SQL Server.  This can cause memory issues if your VM size is too small.  Validate performance before reducing the VM size.
 - This is not a highly avaliable solution.  If you require a more HA style solution you can add a second VM, you would have to manually Change the route in the route table to the internal IP of the secondary interface.  You would also need to configure the mutliple Tunnels to cross connect.
 
 ## Optionial
@@ -109,9 +109,3 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 - Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
 - The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/ https://github.com/mgreenegit/xRemoteAccess/.  xRemoteAccess is present but not used currently.
 - The custom script extension runs the following script Add-Site2SiteIKE.ps1 and Add-Site2SiteGRE.ps1 and configures the VPNS2S tunnel between the two RRAS servers.  You can view the detailed output from the custom script extension to see the results of the VPN tunnel configuration
-
-
-
-
-
-
