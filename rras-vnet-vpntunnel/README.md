@@ -70,7 +70,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Inputs for azuredeploy.tunnel.ike.json
 
-|**Inputs**|**Outputs**|
+|**Inputs**|**Outputs from azuredeploy.json**|
 |-------------|-----------|
 |RemoteTunnelEndpoint|LocalTunnelEndpoint|
 |RemoteVNetAddressSpace|LocalVNetAddressSpace|
@@ -81,7 +81,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Inputs for azuredeploy.tunnel.gre.json
 
-|**Inputs**|**Outputs**|
+|**Inputs**|**Outputs from azuredeploy.json**|
 |-------------|-----------|
 |RemoteTunnelEndpoint|LocalTunnelEndpoint|
 |RemoteVNetAddressSpace|LocalVNetAddressSpace|
