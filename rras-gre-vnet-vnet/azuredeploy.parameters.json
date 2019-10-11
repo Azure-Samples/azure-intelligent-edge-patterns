@@ -41,6 +41,12 @@
     "VNet2TunnelGW": {
         "value":"10.2.254.4"
     },
+    "WindowsImageSKU": {
+        "value":"2019-Datacenter"
+    },
+    "VMSize": {
+        "value":"Standard_DS3_v2"
+    },
     "VNet2InternalSubnetRange": {
         "value":"10.2.1.0/24"
     },
@@ -48,7 +54,7 @@
         "value":"10.2.1.4"
     },
     "_artifactsLocation": {
-        "value": "https://raw.githubusercontent.com/lucidqdreams/vnetpeering/master/"
+        "value": "https://raw.githubusercontent.com/Inttruder/azure-intelligent-edge-patterns/master/rras-gre-vnet-vnet/"
     },
     "_artifactsLocationSasToken": {
         "value": ""
