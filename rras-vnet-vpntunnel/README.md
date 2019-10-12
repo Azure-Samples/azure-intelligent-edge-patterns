@@ -86,10 +86,9 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 |RemoteTunnelEndpoint|LocalTunnelEndpoint|
 |RemoteVNetAddressSpace|LocalVNetAddressSpace|
 |RemoteVNetGateway|LocalVNetGateway|
-|RemoteTunnelGateway|LocalTunnelGateway|
 |LocalVNetGateway|
-|_artifactsLocation
-|_artifactsLocationSasToken
+|_artifactsLocation|
+|_artifactsLocationSasToken|
 
 ## Things to Consider
 

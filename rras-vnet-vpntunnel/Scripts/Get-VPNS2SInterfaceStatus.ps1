@@ -1,3 +1,4 @@
+Import-Module remoteacess
 $VerbosePreference="continue"
 $S2SInterfaces = @(Get-VpnS2SInterface)
 if ($S2SInterfaces.count -eq 0)

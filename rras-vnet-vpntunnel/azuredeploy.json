@@ -397,10 +397,6 @@
       "type": "string",
       "value": "[variables('VNetInternalGW')]"
     },
-    "LocalTunnelGateway":{
-      "type": "string",
-      "value": "[variables('VNetTunnelGW')]"
-    },
     "adminUsername": {
       "type": "string",
       "value": "[parameters('adminUsername')]"

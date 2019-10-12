@@ -11,21 +11,14 @@
       }
     }, 
     "RemoteVNetAddressSpace": {
-      "defaultValue":"10.20.3.0/24",
+      "defaultValue":"10.20.0.0/24",
       "type": "string",
       "metadata": {
         "description": ""
       }
     }, 
     "RemoteVNetGateway": {
-      "defaultValue":"10.20.3.4",
-      "type": "string",
-      "metadata": {
-        "description": "The gateway of the server on the remote tunnel endpoint"
-      }
-    }, 
-    "RemoteTunnelGateway": {
-      "defaultValue":"10.20.254.4",
+      "defaultValue":"10.20.0.4",
       "type": "string",
       "metadata": {
         "description": "The gateway of the server on the remote tunnel endpoint"
