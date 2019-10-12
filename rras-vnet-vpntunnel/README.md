@@ -23,7 +23,7 @@ Now we have an understanding of the architecture it is import to understand the 
 
 ### Process Example
 
-For this example lets say we want to deploy a site-2-site VPN between two Azure Stack instances, Instance-A and Instance-B.  You would need to deploy infrastructure template for Instance-A first, then deploy infrastructure for Instance-B. Next you use the outputs with the tunnel template. from Instance-B to configure the Tunnel template for Instance-A and the output from Instance-A to configure the tunnel for Instance-B
+For this example lets say we want to deploy a site-2-site VPN between two Azure Stack instances, Instance-A and Instance-B.  You would need to deploy infrastructure template for Instance-A first, then deploy infrastructure for Instance-B. Next you use the outputs with the tunnel template. from Instance-B to configure the Tunnel template for Instance-A and the output from Instance-A to configure the tunnel for Instance-B.  The Tunnel templates use the input values to run the script to create the interface tunnel on the VM and also create the routes in the route table for the subnet.
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/TheProcess.jpg)
 
@@ -87,6 +87,7 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 |RemoteVNetAddressSpace|LocalVNetAddressSpace|
 |RemoteVNetGateway|LocalVNetGateway|
 |RemoteTunnelGateway|LocalTunnelGateway|
+|LocalVNetGateway|
 |_artifactsLocation
 |_artifactsLocationSasToken
 

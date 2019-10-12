@@ -8,6 +8,7 @@ param
         [String] $SharedSecret
     )
 
+Import-Module remoteaccess
 $VerbosePreference="continue"
 
 $S2SName = ($TargetIPRange.Replace('.','')).Replace('/','')
@@ -71,10 +72,13 @@ try
 }
 catch
 {
-
+    write-host $error
+    write-host $error[0].Exception
+    write-error "An error has occurred creating the S2S interface"
 }
 Finally
 {
+    write-host "Finally block"
     start-sleep 60
     $result = get-VpnS2SInterface -name $S2SName -Verbose
     write-verbose "Tunnel Status: $($result.ConnectionState)"
