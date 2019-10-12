@@ -63,7 +63,6 @@ There are several JSON parameters files with default values to assist you in dep
 |LocalTunnelEndpoint
 |LocalVNetAddressSpace
 |LocalVNetGateway
-|LocalTunnelGateway
 |adminUsername
 |VNet
 |InternalRefVNet
@@ -90,7 +89,7 @@ the LocalVNetGateway is from the resourcegroup you are deploying to not from the
 |RemoteTunnelEndpoint|LocalTunnelEndpoint|
 |RemoteVNetAddressSpace|LocalVNetAddressSpace|
 |RemoteVNetGateway|LocalVNetGateway|
-|LocalVNetGateway|
+|LocalTunnelGateway|
 |_artifactsLocation|
 |_artifactsLocationSasToken|
 
