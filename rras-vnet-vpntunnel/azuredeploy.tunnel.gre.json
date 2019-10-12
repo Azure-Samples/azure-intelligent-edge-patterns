@@ -24,7 +24,7 @@
         "description": "The gateway of the server on the remote tunnel endpoint"
       }
     }, 
-    "LocalVNetGateway": {
+    "LocalTunnelGateway": {
       "defaultValue":"10.10.254.4",
       "type": "string",
       "metadata": {
@@ -103,7 +103,7 @@
                   "fileUris": [
                     "[variables('scriptFilepath')]"
                     ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  parameters('RemoteTunnelEndpoint'), ' -TargetIPRange ', parameters('RemoteVNetAddressSpace'),' -SourceRRASIP ', parameters('LocalVNetGateway')) ]"
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  parameters('RemoteTunnelEndpoint'), ' -TargetIPRange ', parameters('RemoteVNetAddressSpace'),' -SourceRRASIP ', parameters('LocalTunnelGateway')) ]"
                 }
               }
             }

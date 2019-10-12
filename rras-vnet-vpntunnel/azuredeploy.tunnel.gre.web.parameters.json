@@ -11,7 +11,7 @@
     "RemoteVNetGateway": {
         "value":"10.20.1.4"
     }, 
-    "LocalVNetGateway": {
+    "LocalTunnelGateway": {
         "value":"10.10.254.4"
     },
     "_artifactsLocation": {
