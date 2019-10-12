@@ -81,6 +81,8 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ### Inputs for azuredeploy.tunnel.gre.json
 
+the LocalVNetGateway is from the resourcegroup you are deploying to not from the remote resource group
+
 |**Inputs**|**Outputs from azuredeploy.json**|
 |-------------|-----------|
 |RemoteTunnelEndpoint|LocalTunnelEndpoint|

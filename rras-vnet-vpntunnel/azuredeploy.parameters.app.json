@@ -14,26 +14,29 @@
     "adminPassword": {
         "value": "[subscription().subscriptionId]"
     },
-    "VNet1Name": {
-        "value":"VNet1"
+    "SharedSecret": {
+        "value": "ilovestack!"
     },
-    "VNet1AddressSpace": {
-        "value":"10.10.0.0/16"
+    "VNetName": {
+        "value":"AppServers"
     },
-    "VNet1TunnelSubnetRange": {
-        "value":"10.10.254.0/24"
+    "VNetAddressSpace": {
+        "value":"10.20.0.0/16"
     },
-    "VNet1TunnelGW": {
-        "value":"10.10.254.4"
+    "VNetTunnelSubnetRange": {
+        "value":"10.20.254.0/24"
     },
-    "VNet1InternalSubnetRange": {
-        "value":"10.10.1.0/24"
+    "VNetTunnelGW": {
+        "value":"10.20.254.4"
     },
-    "VNet1InternalGW": {
-        "value":"10.10.1.4"
+    "VNetInternalSubnetRange": {
+        "value":"10.20.1.0/24"
+    },
+    "VNetInternalGW": {
+        "value":"10.20.1.4"
     },
     "_artifactsLocation": {
-        "value": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/"
+        "value": "https://raw.githubusercontent.com/lucidqdreams/vnetpeering/master/"
     },
     "_artifactsLocationSasToken": {
         "value": ""

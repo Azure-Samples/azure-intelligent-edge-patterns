@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "RemoteTunnelEndpoint": {
+          "value": "1.1.1.1"
+      }, 
+      "RemoteVNetAddressSpace": {
+          "value":"10.10.0.0/24"
+      }, 
+      "RemoteVNetGateway": {
+          "value":"10.10.1.4"
+      }, 
+      "LocalVNetGateway": {
+          "value":"10.20.254.4"
+      },
+      "_artifactsLocation": {
+          "value": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/"
+      },
+      "_artifactsLocationSasToken": {
+          "value": ""
+      }  
+    }
+  }
