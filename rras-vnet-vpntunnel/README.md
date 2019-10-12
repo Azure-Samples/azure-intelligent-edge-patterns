@@ -37,6 +37,8 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ## Template Inputs & Outputs
 
+There are several JSON parameters files with default values to assist you in deploying this in your own environments.
+
 ### Inputs for azuredeploy.json
 
 |**Parameters**|**default**|**description**|
