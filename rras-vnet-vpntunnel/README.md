@@ -27,6 +27,14 @@ For this example lets say we want to deploy a site-2-site VPN between two Azure 
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/TheProcess.jpg)
 
+### Deployment Steps
+
+1. Deploy Infrastructure to Instance A using azuredeploy.json
+2. Deploy Infrastructure to Instance B using azuredeploy.json
+3. Use outputs from step 2 to deploy azuredeploy.tunnel.gre.json or azuredeploy.tunnel.ike.json to Instance A
+4. Use outputs from step 1 to deploy azuredeploy.tunnel.gre.json or azuredeploy.tunnel.ike.json to Instance B
+5. Tunnel will connnect between endpoints
+
 ## Requirements
 
 - ASDK or Azure Stack Integrated System with latest updates applied. 
