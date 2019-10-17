@@ -1,0 +1,8 @@
+azure-iothub-device-client~=1.4.3
+azure.storage.blob
+google
+tensorflow~=1.14.0
+tensorflow-serving-api
+grpcio
+grpcio-tools
+numpy
