@@ -31,7 +31,7 @@ blob_uploader = None
 hub_manager = None
 
 
-class BlobUploader(object):
+class BlobUploader:
     """
     A simple helper class for uploading image data to blob storage.
     """
@@ -48,7 +48,7 @@ class BlobUploader(object):
 
 
 def module_twin_callback(update_state, payload, user_context):
-    print("\nTwin callback called with:\nupdate_state = {}\npayload = {}".format(update_state, payload))
+    print("\nTwin callback called with:\nupdate_state = {}".format(update_state))
     data = json.loads(payload)
     if "desired" in data:
         data = data["desired"]
@@ -121,8 +121,8 @@ def send_recognition_messages(rec, image_body):
     for i in range(len(classes)):
         try:
             info = Info()
-            info.cameraId = image_body.CameraId
-            info.time = image_body.Time
+            info.cameraId = image_body.cameraId
+            info.time = image_body.time
             info.cls = classes[i]
             info.score = scores[i]
             info.bbymin = bboxes[i][0]
@@ -132,25 +132,26 @@ def send_recognition_messages(rec, image_body):
             msg = json.dumps(info.__dict__)
             send_iot_hub_message(msg, "recognition:v1")
         except Exception as ex:
-            print("Exception caught in send_recognition_messages: {}".format(ex)
+            print("Exception caught in send_recognition_messages: {}".format(ex))
 
 
 def send_image_message(feature_count, image_body, msec, processor_type):
+    """Helper function for sending messages to the IoT Hub."""
     class Info:
         pass
     
     try:
         info = Info()
-        info.cameraId = image_body.CameraId
-        info.time = image_body.Time
-        info.type = image_body.Type
+        info.cameraId = image_body.cameraId
+        info.time = image_body.time
+        info.type = image_body.type
         info.featureCount = feature_count
         info.procType = processor_type
         info.procMsec = msec
         msg = json.dumps(info.__dict__)
         send_iot_hub_message(msg, "image-upload;v1")
     except Exception as ex:
-        print("Exception caught in send_image_message: {}".format(ex)
+        print("Exception caught in send_image_message: {}".format(ex))
 
 
 def process_next_image():
@@ -166,7 +167,7 @@ def process_next_image():
                 print("processed results:")
                 print(result)
                 if result:
-                    blob_uploader.upload(image_body.camera_id,
+                    blob_uploader.upload(image_body.cameraId,
                                          image_body.time,
                                          image_body.type,
                                          bytes(image_body.image))
@@ -192,7 +193,7 @@ def main(protocol, port):
         ImageProcessorGrpc_pb2_grpc.add_GrpcChannelServicer_to_server(ImageServicer(image_buffer),
                                                                       server)
 
-        print("using port {}')".format(port))
+        print("using port {}".format(port))
         server.add_insecure_port('[::]:{}'.format(port))
 
         server.start()

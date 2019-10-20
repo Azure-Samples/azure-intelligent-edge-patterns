@@ -4,7 +4,9 @@
 
 import cv2
 from datetime import datetime
+import numpy as np
 import requests
+
 import ImageProcessorGrpc_pb2
 
 def format_image_utc_time(time: datetime = None):
@@ -14,7 +16,7 @@ def format_image_utc_time(time: datetime = None):
     """
     if time is None:
         time = datetime.utcnow()
-    return time.isoformat(timespec='milliseconds') + 'Z'
+    return time.isoformat()[0:-3] + 'Z'
 
 class SingleImageSource:
     """A camera image source that provides a single canned image."""

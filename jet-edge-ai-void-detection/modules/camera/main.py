@@ -16,8 +16,8 @@ from processorclient import ProcessorClient
 
 camera = None
 sleeptime = 1
-#processor_address = "VideoProcessorModule"
-processor_address = "localhost"
+processor_address = "VideoProcessorModule"
+#processor_address = "localhost"
 processor_client = ProcessorClient(processor_address,
                                    ImageProcessorGrpc_pb2.CameraToVideoProcessorPort)
 

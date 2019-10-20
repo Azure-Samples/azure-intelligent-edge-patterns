@@ -28,6 +28,7 @@ class ProcessorClient:
             service_name = ""
 
         host = "{0}:{1}".format(serverhost, port)
+        print("ProcessorClient: host = '{}'".format(host))
 
         self.metadata = [("authorization", "Bearer {}".format(access_token)),
                          ("x-ms-aml-grpc-service-route", service_name)]

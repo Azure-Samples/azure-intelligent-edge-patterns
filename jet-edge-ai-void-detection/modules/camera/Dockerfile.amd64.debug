@@ -1,4 +1,5 @@
-FROM ubuntu:xenial
+# FROM ubuntu:xenial
+FROM dymat/opencv
 
 WORKDIR /app
 
@@ -8,6 +9,7 @@ RUN apt-get update && \
 
 RUN pip3 install --upgrade pip
 RUN pip install setuptools
+RUN pip install opencv-python
 RUN pip install ptvsd==4.1.3
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
