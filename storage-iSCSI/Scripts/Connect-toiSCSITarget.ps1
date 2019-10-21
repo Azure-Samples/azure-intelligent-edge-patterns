@@ -56,16 +56,15 @@ Enable-MSDSMAutomaticClaim -BusType iscsi
 Write-Verbose "Set the disk timeout to 60 seconds"
 Set-MPIOSetting -NewDiskTimeout 60
 
-<#
 Foreach ($TargetPortalAddress in $TargetPortalAddresses)
 {
     foreach ($LocaliSCSIAddress in $LocaliSCSIAddresses)
     {
-        New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
+        New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress -ErrorAction SilentlyContinue
     }
 }
-#>
-$LocaliSCSIAddress=$LocaliSCSIAddresses[0]
+
+
 Foreach ($TargetPortalAddress in $TargetPortalAddresses){
     New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
 }
