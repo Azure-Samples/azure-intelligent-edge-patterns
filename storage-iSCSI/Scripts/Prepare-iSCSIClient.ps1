@@ -1,9 +1,3 @@
-param(
-    $TargetPortalAddresses = @("172.20.14.64","172.20.14.79"),
-    $LocaliSCSIAddresses = @("10.10.0.4","10.10.0.5"),
-    $LoadBalancePolicy = "LQD"
-)
-
 <#
     None = Clears any currently configured default load balance policy.
     FOO = Fail Over Only.
