@@ -65,7 +65,7 @@ Foreach ($TargetPortalAddress in $TargetPortalAddresses)
     }
 }
 #>
-
+$LocaliSCSIAddress=$LocaliSCSIAddresses[0]
 Foreach ($TargetPortalAddress in $TargetPortalAddresses){
     New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
 }
