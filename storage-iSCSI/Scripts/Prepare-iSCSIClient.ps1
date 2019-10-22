@@ -9,7 +9,7 @@
 
 $VerbosePreference="silentlycontinue"
 Import-Module ServerManager
-Import-Module MPIO
+Import-Module Storage
 Import-Module IscsiTarget
 $VerbosePreference="continue"
 
@@ -24,6 +24,10 @@ else
     Write-verbose 'Installing MultiPath-IO'
     Enable-WindowsOptionalFeature -Online -FeatureName MultipathIO 
 }
+
+$VerbosePreference="silentlycontinue"
+Import-Module MPIO
+$VerbosePreference="continue"
 
 $MSiSCSI = get-service -name MSiSCSI
 do {
