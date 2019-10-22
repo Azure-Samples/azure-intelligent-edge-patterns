@@ -3,7 +3,7 @@ param
 (
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $RemoteServer = "fileservices",
+        $RemoteServer = "FileServer",
         [Parameter(ParameterSetName='iSCSIDisk')]
         [Array]
         $RemoteServerIPs = @("1.1.1.1","1.1.1.2"),
