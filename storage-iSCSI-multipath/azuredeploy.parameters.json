@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "WindowsImageSKU": {
+        "value": "2019-Datacenter"
+    },
+    "VMSize": {
+        "value": "Standard_DS3_v2"
+    },
+    "adminUsername": {
+        "value": "rrasadmin"
+    },
+    "adminPassword": {
+        "value": "[subscription().subscriptionId]"
+    },
+    "SharedSecret": {
+        "value": "ilovestack!"
+    },
+    "VNetName": {
+        "value":"AppServers"
+    },
+    "VNetAddressSpace": {
+        "value":"10.20.0.0/16"
+    },
+    "VNetTunnelSubnetRange": {
+        "value":"10.20.254.0/24"
+    },
+    "VNetTunnelGW": {
+        "value":"10.20.254.4"
+    },
+    "VNetInternalSubnetRange": {
+        "value":"10.20.1.0/24"
+    },
+    "VNetInternalGW": {
+        "value":"10.20.1.4"
+    },
+    "_artifactsLocation": {
+        "value": "https://raw.githubusercontent.com/lucidqdreams/vnetpeering/master/"
+    },
+    "_artifactsLocationSasToken": {
+        "value": ""
+    }  
+  }
+}

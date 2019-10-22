@@ -252,9 +252,71 @@
         "[variables('vnetID')]"
       ]
     },
-     ,
-    ,
-    ,
+     {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('VNetStoragePIPName2')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      },
+      "dependsOn": [
+        "[variables('vnetID')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('NICPrefixVNet'),'-',variables('iSCSISubnetName'),'-nic1')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding":true,  
+        "ipConfigurations": [
+           {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('iSCSIStorageIP1')]",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetStoragePIPName1'))]"
+              },
+              "subnet": {
+                "id": "[variables('StorageSubnetRefVNet')]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[variables('vnetID')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetStoragePIPName1'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('NICPrefixVNet'),'-',variables('iSCSISubnetName'),'-nic2')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding":true,  
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('iSCSIStorageIP2')]",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetStoragePIPName2'))]"
+              },
+              "subnet": {
+                "id": "[variables('StorageSubnetRefVNet')]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[variables('vnetID')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetStoragePIPName2'))]"
+      ]
+    },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('NICPrefixVNet'),'-', variables('VNetInternalSubnetName'),'-nic')]",
