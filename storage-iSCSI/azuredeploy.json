@@ -61,6 +61,13 @@
         "description": "VNet Internal Subnet Name"
       }
     },
+    "VNetInternalSubnetRange": {
+      "defaultValue":"10.10.1.0/24",
+      "type": "string",
+      "metadata": {
+        "description": "Address Range for VNet Internal Subnet"
+      }      
+    },  
     "InternalVNetIP": {
       "defaultValue":"10.10.1.4",
       "type": "string",
@@ -75,13 +82,20 @@
         "description": "Storage Subnet Range"
       }
     },
-    "VNetInternalSubnetRange": {
-      "defaultValue":"10.10.1.0/24",
+    "iSCSIStorageIP1": {
+      "defaultValue":"10.10.0.4",
       "type": "string",
       "metadata": {
-        "description": "Address Range for VNet Internal Subnet"
-      }      
-    },  
+        "description": "Static Address for the iSCSI adapter 1"
+      }
+    },
+    "iSCSIStorageIP2": {
+      "defaultValue":"10.10.0.5",
+      "type": "string",
+      "metadata": {
+        "description": "Static Address for the iSCSI adapter 2 "
+      }
+    },
     "_artifactsLocation": {
       "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/",
       "type": "string",
@@ -256,16 +270,17 @@
       "properties": {
         "enableIPForwarding":true,  
         "ipConfigurations": [
-          {
+           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('iSCSIStorageIP1')]",
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetStoragePIPName1'))]"
               },
               "subnet": {
                 "id": "[variables('StorageSubnetRefVNet')]"
-              }          
+              }
             }
           }
         ]
@@ -285,13 +300,14 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('iSCSIStorageIP2')]",
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('VNetStoragePIPName2'))]"
               },
               "subnet": {
                 "id": "[variables('StorageSubnetRefVNet')]"
-              }          
+              }
             }
           }
         ]
