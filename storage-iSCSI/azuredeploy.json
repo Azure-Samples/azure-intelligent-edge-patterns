@@ -133,8 +133,8 @@
     "ConfigureVM": "ConfigureVM.ps1\\ConfigureVM",
 
     "scriptfilename": "Prepare-iSCSIClient.ps1",
-    "scriptDirectory": "Scripts",
-    "scriptfilepath": "[concat(parameters('_artifactsLocation'), concat(variables('scriptDirectory'),'/',variables('scriptfilename')), parameters('_artifactsLocationSasToken'))]"
+    "scriptDirectory": "Scripts/",
+    "scriptfilepath": "[concat(parameters('_artifactsLocation'), concat(variables('scriptDirectory'),variables('scriptfilename')), parameters('_artifactsLocationSasToken'))]"
   },
 
   "resources": [
