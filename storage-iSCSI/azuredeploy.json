@@ -110,14 +110,14 @@
     "VNetInternalSubnetRange": "[parameters('VNetInternalSubnetRange')]",
     "InternalVNetIP": "[parameters('InternalVNetIP')]",
     
-    "iSCSISubnetName": "iSCSI",            
+
     "VNetName": "[concat(variables('VNet'),'-vnet' )]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]",
     "InternalSubnetRefVNet": "[concat(variables('vnetID'),'/subnets/',variables('VNetInternalSubnetName'))]",
-    "StoragensgName": "[concat(parameters('VNetName'),'-',variables('iSCSISubnetName'),'-nsg' )]",
+    "StoragensgName": "[concat(parameters('VNetName'),'-nsg' )]",
     "StoragensgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('StoragensgName'))]",    
     "NICPrefixVNet": "Storage",
-    "PIPName": "[concat(variables('VNet'),'-',variables('iSCSISubnetName'),'-pip1')]",  
+    "PIPName": "[concat(variables('VNet'),'-',variables('VNetInternalSubnetName'),'-pip')]",  
 
     "ConfigureVMDSC": "[concat(parameters('_artifactsLocation'), 'DSC/ConfigureVM.zip', parameters('_artifactsLocationSasToken'))]",
     "ConfigureVM": "ConfigureVM.ps1\\ConfigureVM",
@@ -242,7 +242,8 @@
         ]
       },
       "dependsOn": [
-        "[variables('vnetID')]"
+        "[variables('vnetID')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('PIPName'))]"
       ]
     },
     {
