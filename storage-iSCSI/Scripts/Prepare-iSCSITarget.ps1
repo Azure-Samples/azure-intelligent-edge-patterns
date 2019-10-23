@@ -41,9 +41,9 @@ else
     install-windowsfeature FS-iSCSITarget-server -IncludeManagementTools -Confirm:$false 
     start-sleep 10
 
-    $WinTarget = get-service -name MSiSCSI
+    $WinTarget = get-service -name wintarget
     do {
-        $WinTarget = get-service -name MSiSCSI
+        $WinTarget = get-service -name wintarget
         Write-verbose 'Set Automatic Start for WinTarget'
         Set-Service -Name "WinTarget" -StartupType Automatic -Confirm:$false -Verbose
         Write-verbose 'Start WinTarget Service'
@@ -62,7 +62,7 @@ if ($Installation.Installed)
 else
 {
     Write-verbose 'Installing MultiPath-IO'
-    Enable-WindowsOptionalFeature -Online -FeatureName MultipathIO 
+    Enable-WindowsOptionalFeature -Online -FeatureName MultipathIO -norestart
 }
 
 $MSiSCSI = get-service -name MSiSCSI
@@ -117,9 +117,8 @@ else
 
 Add-IscsiVirtualDiskTargetMapping -TargetName $TargetName  -Path $VirtualDisk
 Set-IscsiServerTarget -TargetName $TargetName
-    
 
-
+restart-computer -confirm:$false -force
 <#
 
 remove-iscsiservertarget -TargetName $TargetName 
