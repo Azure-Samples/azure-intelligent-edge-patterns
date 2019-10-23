@@ -7,9 +7,6 @@ param(
     [Array]
     $LocalIPAddresses = @("10.10.1.4"),
     [Parameter()]
-    [Array]
-    $LoadBalancePolicy = "LQD",
-    [Parameter()]
     [String]
     $ChapUsername = "username",
     [Parameter()]
