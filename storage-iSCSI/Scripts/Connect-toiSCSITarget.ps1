@@ -33,9 +33,6 @@ else
     write-error "The length of CHAP or reverse CHAP secret must be at least 12 characters, but no more than 16 characters."
     exit
 }
-$Password = ConvertTo-SecureString -AsPlainText -Force $ChapPassword
-$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$Password)
-
 
 $VerbosePreference="silentlycontinue"
 Import-Module ServerManager
