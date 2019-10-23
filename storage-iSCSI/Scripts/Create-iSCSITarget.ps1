@@ -22,7 +22,7 @@ param
         [String]
         $ChapUsername = "username",
         [Parameter(ParameterSetName='iSCSIDisk')]
-        [String]
+        [securestring]
         $ChapPassword = "userP@ssw0rd!"
 )
 
@@ -141,8 +141,7 @@ else
 
 Add-IscsiVirtualDiskTargetMapping -TargetName $TargetName -Path $VirtualDisk
 
-$Password = ConvertTo-SecureString -string $ChapPassword -AsPlainText -Force
-$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$Password)
+$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$ChapPassword)
 Set-IscsiServerTarget -TargetName $TargetName -EnableChap $true -Chap $ChapAuth
 
 
