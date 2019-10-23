@@ -1,6 +1,6 @@
 param(
-    $TargetPortalAddresses = @("172.20.14.64","172.20.14.79"),
-    $LocaliSCSIAddresses = @("10.10.0.4","10.10.0.5"),
+    $TargetPortalAddresses = @("1.1.1.1"),
+    $LocaliSCSIAddresses = @("10.10.1.4"),
     $LoadBalancePolicy = "LQD"
 )
 
@@ -22,24 +22,31 @@ $VerbosePreference="continue"
 
 
 
+
 Foreach ($TargetPortalAddress in $TargetPortalAddresses)
 {
     foreach ($LocaliSCSIAddress in $LocaliSCSIAddresses)
     {
-        New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress -ErrorAction SilentlyContinue
+        New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
     }
 }
 
-
+<#
 Foreach ($TargetPortalAddress in $TargetPortalAddresses){
     New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
 }
+#>
 
  
 Foreach ($TargetPortalAddress in $TargetPortalAddresses){
+    write-verbose "connecting to iSCSI Target $TargetPortalAddress from $LocaliSCSIAddress "
     Get-IscsiTarget | Connect-IscsiTarget -IsMultipathEnabled $true -TargetPortalAddress $TargetPortalAddress -InitiatorPortalAddress $LocaliSCSIAddress -IsPersistent $true
 }
 
+write-verbose "Register iSCSI sessions"
+Get-IscsiSession | Register-IscsiSession
+
+<#
 switch  ($LoadBalancePolicy) 
 {
     "FOO" {write-verbose "Load Balance Policy Set to 'FOO' Fail Over Only."}
@@ -47,15 +54,22 @@ switch  ($LoadBalancePolicy)
     "LQD" {write-verbose "Load Balance Policy Set to 'LQD' Least Queue Depth."}
     "LB" {write-verbose "Load Balance Policy Set to 'LB' Least Blocks."}
 }
-
-Get-IscsiSession | Register-IscsiSession
 Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy $LoadBalancePolicy
+#>
 
-$RawDisks = @(Get-iSCSISession | Get-Disk | Where partitionstyle -eq ‘raw’ | select -Unique Number).number
+
+
+$RawDisks = @(Get-iSCSISession | Get-Disk | Where partitionstyle -eq "raw" | select -Unique Number).number
+
+write-verbose "$($rawdisks).count raw disks found"
 
 foreach ($RawDisk in $RawDisks)
 {
-    Get-Disk -Number $RawDisk | Initialize-Disk -PartitionStyle MBR -PassThru |    New-Partition -AssignDriveLetter -UseMaximumSize |  Format-Volume -FileSystem NTFS -NewFileSystemLabel "Disk$RawDisk" -Confirm:$false
+    write-verbose "Initializing disk $rawdisk"
+    $result = Get-Disk -Number $RawDisk | Initialize-Disk -PartitionStyle MBR -PassThru |    New-Partition -AssignDriveLetter -UseMaximumSize |  Format-Volume -FileSystem NTFS -NewFileSystemLabel "Disk$RawDisk" -Confirm:$false
+    write-verbose "Drive Letter $($result.DriveLetter)"
+    write-verbose "Drive Size $($result.Size/1gb)"
+
 }
 
  
