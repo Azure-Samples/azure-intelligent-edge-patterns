@@ -1,16 +1,43 @@
+[cmdletbinding()]
 param(
-    $TargetPortalAddresses = @("1.1.1.1"),
-    $LocaliSCSIAddresses = @("10.10.1.4"),
-    $LoadBalancePolicy = "RR"
+    [Parameter()]
+    [Array]
+    $TargetiSCSIAddresses = @("172.20.14.64","172.20.14.79"),
+    [Parameter()]
+    [Array]
+    $LocalIPAddresses = @("10.10.1.4"),
+    [Parameter()]
+    [Array]
+    $LoadBalancePolicy = "LQD",
+    [Parameter()]
+    [String]
+    $ChapUsername = "username",
+    [Parameter()]
+    [String]
+    $ChapPassword = "userP@ssw0rd!"
 )
 
+## $LoadBalancePolicy = 'RR'
 <#
+    
     None = Clears any currently configured default load balance policy.
     FOO = Fail Over Only.
     RR = Round Robin.
     LQD = Least Queue Depth.
     LB = Least Blocks.
 #>
+
+if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
+{
+    Write-Verbose "Chap password is a valid length"
+}
+else
+{
+    write-error "The length of CHAP or reverse CHAP secret must be at least 12 characters, but no more than 16 characters."
+    exit
+}
+$Password = ConvertTo-SecureString -AsPlainText -Force $ChapPassword
+$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$Password)
 
 
 $VerbosePreference="silentlycontinue"
@@ -21,15 +48,36 @@ Import-Module IscsiTarget
 $VerbosePreference="continue"
 
 
+$iSCSIMPIO = @(Get-MSDSMSupportedHW | ? {$_.ProductId -eq 'iSCSIBusType_0x9'})
+if (if $iSCSIMPIO.count -ne 1)
+{
+    write-verbose "This line enabled MPIO support for iSCSI"
+    New-MSDSMSupportedHW -VendorId MSFT2005 -ProductId iSCSIBusType_0x9
+}
+else
+{
+    write-verbose "MPIO multi pathing enabled"
+}
 
-Foreach ($TargetPortalAddress in $TargetPortalAddresses){
-    New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
+Write-Verbose "Creating iSCSI target Portals"
+write-verbose "$($TargetiSCSIAddresses.count) target iSCSI addresses found"
+write-verbose "$($LocalIPAddresses.count) source iSCSI addresses found"
+Foreach ($TargetiSCSIAddress in $TargetiSCSIAddresses)
+{
+    foreach ($LocalIPAddress in $LocalIPAddresses)
+    {
+        write-verbose "mapping target from $TargetiSCSIAddress via port 3260 to $LocaliSCSIAddress"
+        New-IscsiTargetPortal -TargetPortalAddress $TargetiSCSIAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocalIPAddress
+    }
 }
 
  
-Foreach ($TargetPortalAddress in $TargetPortalAddresses){
-    write-verbose "connecting to iSCSI Target $TargetPortalAddress from $LocaliSCSIAddress "
-    Get-IscsiTarget | Connect-IscsiTarget -IsMultipathEnabled $true -TargetPortalAddress $TargetPortalAddress -InitiatorPortalAddress $LocaliSCSIAddress -IsPersistent $true
+Foreach ($TargetiSCSIAddress in $TargetiSCSIAddresses){
+    foreach ($LocalIPAddress in $LocalIPAddresses)
+    {
+        write-verbose "connecting to iSCSI Target $TargetiSCSIAddress from $LocalIPAddress "
+        Get-IscsiTarget | Connect-IscsiTarget -IsMultipathEnabled $true -TargetPortalAddress $TargetiSCSIAddress -InitiatorPortalAddress $LocalIPAddress -IsPersistent $true -AuthenticationType ONEWAYCHAP  -ChapUsername $ChapUsername -ChapSecret $ChapPassword
+    }
 }
 
 write-verbose "Register iSCSI sessions"
@@ -43,14 +91,13 @@ switch  ($LoadBalancePolicy)
     "LQD" {write-verbose "Load Balance Policy Set to 'LQD' Least Queue Depth."}
     "LB" {write-verbose "Load Balance Policy Set to 'LB' Least Blocks."}
 }
-Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy $LoadBalancePolicy
+Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR -Verbose
 #>
-
 
 
 $RawDisks = @(Get-iSCSISession | Get-Disk | Where partitionstyle -eq "raw" | select -Unique Number).number
 
-write-verbose "$($rawdisks).count raw disks found"
+write-verbose "$($rawdisks.count) raw disks found"
 
 foreach ($RawDisk in $RawDisks)
 {
@@ -59,7 +106,7 @@ foreach ($RawDisk in $RawDisks)
     write-verbose "Read only disk set to false"
     Set-Disk -Number $RawDisk -IsReadOnly $false
     write-verbose "Initializing disk $rawdisk"
-    $result = Get-Disk -Number $RawDisk | Initialize-Disk -PartitionStyle MBR -PassThru |    New-Partition -AssignDriveLetter -UseMaximumSize |  Format-Volume -FileSystem NTFS -NewFileSystemLabel "Disk$RawDisk" -Confirm:$false
+    $result = Get-Disk -Number $RawDisk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -AssignDriveLetter -UseMaximumSize |  Format-Volume -FileSystem NTFS -NewFileSystemLabel "Disk$RawDisk" -Confirm:$false
     write-verbose "Drive Letter $($result.DriveLetter)"
     write-verbose "Drive Size $($result.Size/1gb)"
 }

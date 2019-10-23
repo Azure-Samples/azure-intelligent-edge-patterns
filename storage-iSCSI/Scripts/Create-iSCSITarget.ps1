@@ -6,13 +6,13 @@ param
         $RemoteServer = "FileServer",
         [Parameter(ParameterSetName='iSCSIDisk')]
         [Array]
-        $RemoteServerIPs = @("1.1.1.1"),
+        $RemoteServerIPs = @("38.102.180.38"),
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
         $DiskFolder = 'C:\iSCSIVirtualDisks',    
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $DiskName= "DiskName01",
+        $DiskName= "DiskName",
         [Parameter(ParameterSetName='iSCSIDisk')]
         $DiskSize =  5GB,   
         [Parameter(ParameterSetName='iSCSIDisk')]
@@ -22,12 +22,12 @@ param
         [String]
         $ChapUsername = "username",
         [Parameter(ParameterSetName='iSCSIDisk')]
-        [securestring]
+        [String]
         $ChapPassword = "userP@ssw0rd!"
 )
 
 
-if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
+if ($ChapPassword.Length -ge $ChapPassword.Length -lt 16)
 {
     Write-Verbose "Chap password is a valid length"
 }
@@ -36,6 +36,8 @@ else
     write-error "The length of CHAP or reverse CHAP secret must be at least 12 characters, but no more than 16 characters."
     exit
 }
+$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$ChapPassword)
+
 
 $VerbosePreference="silentlycontinue"
 Import-Module ServerManager
@@ -141,7 +143,7 @@ else
 
 Add-IscsiVirtualDiskTargetMapping -TargetName $TargetName -Path $VirtualDisk
 
-$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$ChapPassword)
+
 Set-IscsiServerTarget -TargetName $TargetName -EnableChap $true -Chap $ChapAuth
 
 
