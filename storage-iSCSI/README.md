@@ -1,4 +1,4 @@
-# AzureStack Modular Site-2-Site VPN
+# AzureStack Connect iSCSI Storage
 
 ***This template is intended for use in an Azure Stack environment.***
 
