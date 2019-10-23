@@ -378,6 +378,12 @@
               "properties": {
                 "primary": true
               },
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'),'-', variables('VNetInternalSubnetName'),'-nic'))]"
+            },
+            {
+              "properties": {
+                "primary": false
+              },
               "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'),'-',variables('iSCSISubnetName'),'-nic1'))]"
             },
             {
@@ -385,12 +391,6 @@
                 "primary": false
               },
               "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'),'-',variables('iSCSISubnetName'),'-nic2'))]"
-            },
-            {
-              "properties": {
-                "primary": false
-              },
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NICPrefixVNet'),'-', variables('VNetInternalSubnetName'),'-nic'))]"
             }
           ]
         },
