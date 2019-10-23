@@ -1,7 +1,7 @@
 param(
     $TargetPortalAddresses = @("1.1.1.1"),
     $LocaliSCSIAddresses = @("10.10.1.4"),
-    $LoadBalancePolicy = "LQD"
+    $LoadBalancePolicy = "RR"
 )
 
 <#
@@ -22,20 +22,9 @@ $VerbosePreference="continue"
 
 
 
-
-Foreach ($TargetPortalAddress in $TargetPortalAddresses)
-{
-    foreach ($LocaliSCSIAddress in $LocaliSCSIAddresses)
-    {
-        New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
-    }
-}
-
-<#
 Foreach ($TargetPortalAddress in $TargetPortalAddresses){
     New-IscsiTargetPortal -TargetPortalAddress $TargetPortalAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocaliSCSIAddress
 }
-#>
 
  
 Foreach ($TargetPortalAddress in $TargetPortalAddresses){
@@ -65,12 +54,16 @@ write-verbose "$($rawdisks).count raw disks found"
 
 foreach ($RawDisk in $RawDisks)
 {
+    write-verbose "set isOffline to false"
+    Set-Disk -Number $RawDisk -IsOffline $false 
+    write-verbose "Read only disk set to false"
+    Set-Disk -Number $RawDisk -IsReadOnly $false
     write-verbose "Initializing disk $rawdisk"
     $result = Get-Disk -Number $RawDisk | Initialize-Disk -PartitionStyle MBR -PassThru |    New-Partition -AssignDriveLetter -UseMaximumSize |  Format-Volume -FileSystem NTFS -NewFileSystemLabel "Disk$RawDisk" -Confirm:$false
     write-verbose "Drive Letter $($result.DriveLetter)"
     write-verbose "Drive Size $($result.Size/1gb)"
-
 }
+
 
  
 Get-IscsiConnection

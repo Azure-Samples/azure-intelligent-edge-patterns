@@ -9,18 +9,35 @@ param
         $RemoteServerIPs = @("1.1.1.1"),
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $DiskFolder = 'C:\iscsishare',    
+        $DiskFolder = 'C:\iSCSIVirtualDisks',    
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $DiskName= "DiskName",
+        $DiskName= "DiskName01",
         [Parameter(ParameterSetName='iSCSIDisk')]
-        $DiskSize =  10GB,   
+        $DiskSize =  5GB,   
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $TargetName = "RemoteTarget01"
+        $TargetName = "RemoteTarget01",
+        [Parameter(ParameterSetName='iSCSIDisk')]
+        [String]
+        $ChapUsername = "username",
+        [Parameter(ParameterSetName='iSCSIDisk')]
+        [String]
+        $ChapPassword = "userP@ssw0rd!"
 )
 
-$VerbosePreference="silentlycontinueshare "
+
+if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
+{
+    Write-Verbose "Chap password is a valid length"
+}
+else
+{
+    write-error "The length of CHAP or reverse CHAP secret must be at least 12 characters, but no more than 16 characters."
+    exit
+}
+
+$VerbosePreference="silentlycontinue"
 Import-Module ServerManager
 Import-Module MPIO
 Import-Module IscsiTarget
@@ -41,15 +58,16 @@ else
     install-windowsfeature FS-iSCSITarget-server -IncludeManagementTools -Confirm:$false 
     start-sleep 10
 
-    $WinTarget = get-service -name wintarget
-    do {
-        $WinTarget = get-service -name wintarget
+    $WinTarget = get-service -name WinTarget
+    while ($WinTarget.status -ne 'Running')
+    {
+        $WinTarget = get-service -name WinTarget
         Write-verbose 'Set Automatic Start for WinTarget'
         Set-Service -Name "WinTarget" -StartupType Automatic -Confirm:$false -Verbose
         Write-verbose 'Start WinTarget Service'
         Start-Service -Name "WinTarget" -Confirm:$false -Verbose
         start-sleep 3
-    } while ($WinTarget.status -ne 'Running')
+    } 
 }
 
 
@@ -62,33 +80,38 @@ if ($Installation.Installed)
 else
 {
     Write-verbose 'Installing MultiPath-IO'
-    Enable-WindowsOptionalFeature -Online -FeatureName MultipathIO -norestart
+    Enable-WindowsOptionalFeature -Online -FeatureName MultipathIO 
 }
 
 $MSiSCSI = get-service -name MSiSCSI
-do {
-    $MSiSCSI = get-service -name MSiSCSI
+while ($MSiSCSI.status -ne 'Running')
+{
     Write-verbose 'Set Automatic Start for MSiSCSI'
     Set-Service -Name "MSiSCSI" -StartupType Automatic -Confirm:$false -Verbose
     Write-verbose 'Start MSiSCSI Service'
     Start-Service -Name "MSiSCSI" -Confirm:$false -Verbose
     start-sleep 3
-} while ($MSiSCSI.status -ne 'Running')
+    $MSiSCSI = get-service -name MSiSCSI
+}
 
 
 
 $IPTargets = $RemoteServerIPs | % {"IPAddress:" + $_} 
 $iqnprefix = "iqn:iqn.1991-05.com.microsoft:"
-$IDs = $iqnprefix +  $RemoteServer
+$ID = $iqnprefix +  $RemoteServer.ToLower()
 
 $RemoteInitiators = @()
-$RemoteInitiators += $IDs 
+$RemoteInitiators += $ID
 $RemoteInitiators += $IPTargets 
 
 $ExistingTarget = get-iscsiservertarget | ? {$_.TargetName -eq $TargetName}
 if ($ExistingTarget -eq $null){
-    
+    write-verbose "iSCSI target not found. Creating $TargetName"
     new-iscsiservertarget -targetname $TargetName -InitiatorIds $RemoteInitiators
+}
+else
+{
+    write-verbose "iSCSI target $TargetName found."
 }
 
 
@@ -115,16 +138,28 @@ else
     Write-verbose "Disk $($VirtualDisk) already exists "
 }
 
-Add-IscsiVirtualDiskTargetMapping -TargetName $TargetName  -Path $VirtualDisk
-Set-IscsiServerTarget -TargetName $TargetName
 
-restart-computer -confirm:$false -force
+Add-IscsiVirtualDiskTargetMapping -TargetName $TargetName -Path $VirtualDisk
+
+$Password = ConvertTo-SecureString -string $ChapPassword -AsPlainText -Force
+$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$Password)
+Set-IscsiServerTarget -TargetName $TargetName -EnableChap $true -Chap $ChapAuth
+
+
+$StorageIPs = (Get-NetIPAddress |? {$_.addressfamily -eq 'IPv4' -and $_.ipaddress -ne '127.0.0.1'}).IPAddress
+
+#get-IscsiServerTarget
+
 <#
 
 remove-iscsiservertarget -TargetName $TargetName 
+
+
 new-iscsiservertarget -targetname $iSCSITargetName  -InitiatorIds  $IDs
 
-# -EnableChap $True -Chap (New-Object PSCredential("username", (ConvertTo-SecureString -AsPlainText "UserP@ssw0rd01" -Force))) -PassThru 
+
+ # -EnableChap $True -Chap (New-Object PSCredential("username", (ConvertTo-SecureString -AsPlainText "UserP@ssw0rd01" -Force))) -PassThru 
+
 
 $results = Get-IscsiServerTarget -TargetName $iSCSITargetName
 
