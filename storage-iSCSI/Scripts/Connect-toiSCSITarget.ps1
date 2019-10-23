@@ -14,7 +14,6 @@ param(
     $ChapPassword = "userP@ssw0rd!"
 )
 
-## $LoadBalancePolicy = 'RR'
 <#
     
     None = Clears any currently configured default load balance policy.
@@ -23,6 +22,7 @@ param(
     LQD = Least Queue Depth.
     LB = Least Blocks.
 #>
+## $LoadBalancePolicy = 'RR'
 
 if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
 {
@@ -40,7 +40,6 @@ Import-Module MPIO
 Import-Module Storage
 Import-Module IscsiTarget
 $VerbosePreference="continue"
-
 
 $iSCSIMPIO = @(Get-MSDSMSupportedHW | ? {$_.ProductId -eq 'iSCSIBusType_0x9'})
 if (if $iSCSIMPIO.count -ne 1)
@@ -64,7 +63,6 @@ Foreach ($TargetiSCSIAddress in $TargetiSCSIAddresses)
         New-IscsiTargetPortal -TargetPortalAddress $TargetiSCSIAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocalIPAddress
     }
 }
-
  
 Foreach ($TargetiSCSIAddress in $TargetiSCSIAddresses){
     foreach ($LocalIPAddress in $LocalIPAddresses)
@@ -88,11 +86,8 @@ switch  ($LoadBalancePolicy)
 Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR -Verbose
 #>
 
-
 $RawDisks = @(Get-iSCSISession | Get-Disk | Where partitionstyle -eq "raw" | select -Unique Number).number
-
 write-verbose "$($rawdisks.count) raw disks found"
-
 foreach ($RawDisk in $RawDisks)
 {
     write-verbose "set isOffline to false"
@@ -105,7 +100,5 @@ foreach ($RawDisk in $RawDisks)
     write-verbose "Drive Size $($result.Size/1gb)"
 }
 
-
- 
 Get-IscsiConnection
 Get-IscsiSession
