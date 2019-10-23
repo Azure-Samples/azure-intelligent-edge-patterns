@@ -2,42 +2,32 @@
 
 ***This template is intended for use in an Azure Stack environment.***
 
-The purpose of this template is to offer a modular solution to connect vnets and networks across resource groups, across subscriptions, across azure stack instances and from Azure stack to other networks such as on-premises.  It is currently not possible to inteconnect Azure Stack VNets to one another using the built-in Virtual Network Gateway:  https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-network-differences.  Support for this is coming soon but for now one must use NVA appliances to create a VPN tunnel between two Azure Stack VNets.  You my also want to refer to the single template deployment version that can be found here https://github.com/lucidqdreams/azure-intelligent-edge-patterns/tree/master/rras-ike-vnet-vnet
+The purpose of this template is to offer a solution to connect an Azure Stack vm to an on-premises iSCSI target enabling that Azure Stack vm to use on premise storage.  
 
-This template has been designed to enable a number of different scenarios for Azure Stack connectivity.  It has been designed in a modular with 3 templates so that you can deploy the infrastructure and then deploy an IKE or GRE tunnel on top of that infrastructure meaning you can deploy the tunnel endpoint in different locations such as different in resource groups, across subscriptions, across different Azure Stack instances and even from Azure Stack to on-premises.  
+This template has been designed to setup up the infrastructure necessary on the Azure Stack side to connect to an iSCSI target.  This includes a virtual machine that will act as the iSCSI Initiator along with its accompanying VNet, NSG, PIP and storage. After the template has been deployed two PowerShell scripts need to be run to complete the configuration. One script will be run on the on premise vm(target) and one will be run on the Azure Stack vm (Initiator). Once these are completed you will have on premise storage added to your Azure Stack vm.
+## Infrastructure Overview
 
-## Scenarios
-
-![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Scenarios.jpg)
-
-## Architecture
-
-### Network Overview & Resource Group
-This is an overview of the networking components that are deployed and a detailed view of all the components in the infrastructre template
-
-![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/Combined.jpg)
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/iSCSIFileServer.jpg)
 
 ## The deployment process
 
-Now we have an understanding of the architecture it is import to understand the deployment process.  These templates have been designed in such a way they can be deployed use automation.  THere is one template for the infrastrcuture components and a template to configure the site-2-site VPN tunnel on the infrastucture.  The infrastructure templates will generate output which is meant to be the input for the tunnel template.
+Now we have an understanding of the architecture it is import to understand the deployment process.  The infrastructure template will generate output which is meant to be the input for the tunnel template.
 
 ### Process Example
 
-For this example lets say we want to deploy a site-2-site VPN between two Azure Stack instances, Instance-A and Instance-B.  You would need to deploy infrastructure template for Instance-A first, then deploy infrastructure for Instance-B. Next you use the outputs with the tunnel template. from Instance-B to configure the Tunnel template for Instance-A and the output from Instance-A to configure the tunnel for Instance-B.  The Tunnel templates use the input values to run the script to create the interface tunnel on the VM and also create the routes in the route table for the subnet.
+For this example lets say we want to deploy connect an Azure Stack vm to a vm hosted on VMWare on premise. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 script on the VMWare on premise vm using the output from the infrastrucutre template. Next you would use the IP address of the on premise VMWare vm and run the Connect-toiSCSITarget.ps1 script.  
 
-![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/Images/TheProcess.jpg)
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/TheProcess.jpg)
 
 ### Deployment Steps
 
-1. Deploy Infrastructure to Instance A using azuredeploy.json
-2. Deploy Infrastructure to Instance B using azuredeploy.json
-3. Use outputs from step 2 to deploy azuredeploy.tunnel.gre.json or azuredeploy.tunnel.ike.json to Instance A
-4. Use outputs from step 1 to deploy azuredeploy.tunnel.gre.json or azuredeploy.tunnel.ike.json to Instance B
-5. Tunnel will connnect between endpoints
+1. Deploy Infrastructure using azuredeploy.json
+2. Run Create-iSCSITarget.ps1 on the on premise server
+3. Run Connect-toiSCSITarget.ps1 on the on premise server
 
 ## Requirements
 
-- ASDK or Azure Stack Integrated System with latest updates applied. 
+- An on premise virtual machine running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
 - Required Azure Stack Marketplace items:
     -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
 	-  PowerShell DSC extension
@@ -52,15 +42,15 @@ There are several JSON parameters files with default values to assist you in dep
 |**Parameters**|**default**|**description**|
 |------------------|---------------|------------------------------|
 |WindowsImageSKU         |2019-Datacenter   |Please select the base Windows VM image
-|adminUsername           |rrasadmin         |The name of the Administrator of the new VMs"
-|adminPassword           |                  |The password for the Administrator account of the new VMs
-|VNetName                |VNet              |The name of VNet.  THis will be used to label the resources
-|VNetAddressSpace        |10.10.0.0/16      |Address Space for VNet
+|VMSize                  |Standard_F8s_v2   |Please select the VM size
+|VMName                  |FileServer        |VM name
+|adminUsername           |storageadmin      |The name of the Administrator of the new VM
+|adminPassword           |Subscription id   |The password for the Administrator account of the new VMs. Default value is subscription id
+|VNetName                |Storage           |The name of VNet.  This will be used to label the resources
+|VNetAddressSpace        |10.10.0.0/23      |Address Space for VNet
 |VNetInternalSubnetName  |Internal          |VNet Internal Subnet Name
-|VNetTunnelSubnetRange   |10.10.254.0/24    |VNet Tunnel Subnet Range
-|VNetTunnelGW            |10.10.254.4       |Static Address for VNet RRAS Server
 |VNetInternalSubnetRange |10.10.1.0/24      |Address Range for VNet Internal Subnet
-|VNetInternalGW          |10.10.1.4         |Static Address for VNet RRAS Server.  Used for User defined route in Route table
+|InternalVNetIP          |10.10.1.4         |Static Address for the internal IP of the File Server.
 |_artifactsLocation      ||
 |_artifactsLocationSasToken||
 
@@ -68,38 +58,31 @@ There are several JSON parameters files with default values to assist you in dep
 
 |**Output**|
 |-------------|
-|LocalTunnelEndpoint
+|VMName
+|PublicEndpoint
 |LocalVNetAddressSpace
-|LocalVNetGateway
 |adminUsername
 |VNet
 |InternalRefVNet
 |VNetInternalSubnetName
 |InternalSubnetRefVNet
+|InternalSubnetIP
 
-### Inputs for azuredeploy.tunnel.ike.json
-
-|**Inputs**|**Outputs from azuredeploy.json**|
-|-------------|-----------|
-|RemoteTunnelEndpoint|LocalTunnelEndpoint|
-|RemoteVNetAddressSpace|LocalVNetAddressSpace|
-|RemoteVNetGateway|LocalVNetGateway|
-|SharedSecret|
-|_artifactsLocation|
-|_artifactsLocationSasToken|
-
-### Inputs for azuredeploy.tunnel.gre.json
-
-the LocalVNetGateway is from the resourcegroup you are deploying to not from the remote resource group
+### Inputs for Create-iSCSITarget.ps1
 
 |**Inputs**|**Outputs from azuredeploy.json**|
 |-------------|-----------|
-|RemoteTunnelEndpoint|LocalTunnelEndpoint|
-|RemoteVNetAddressSpace|LocalVNetAddressSpace|
-|RemoteVNetGateway|LocalVNetGateway|
-|LocalTunnelGateway|
-|_artifactsLocation|
-|_artifactsLocationSasToken|
+|$RemoteServerIPs|PublicEndpoint|
+
+
+
+### Inputs for Connect-toiSCSITarget.ps1
+
+|**Inputs**|**Outputs from Connect-toiSCSITarget.ps1**|
+|-------------|-----------|
+|IP address of on premise iSCSI target vm|$TargetPortalAddresses|
+|IP address of Azure Stack iSCSI initiator vm|$LocaliSCSIAddresses|
+
 
 ## Things to Consider
 
@@ -116,7 +99,7 @@ the LocalVNetGateway is from the resourcegroup you are deploying to not from the
 ## Optional
 
 - You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters the ability to use your own storage blob with SAS token.
-- This template provides default values for VNet naming and IP addressing.  You will need to change the address space for each side
+- This template provides default values for VNet naming and IP addressing.  You will need to change the address space.
 - Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
 - The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/ https://github.com/mgreenegit/xRemoteAccess/.  xRemoteAccess is present but not used currently.
 - The custom script extension runs the following script Add-Site2SiteIKE.ps1 and Add-Site2SiteGRE.ps1 and configures the VPNS2S tunnel between the two RRAS servers.  You can view the detailed output from the custom script extension to see the results of the VPN tunnel configuration
