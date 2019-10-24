@@ -12,7 +12,7 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/Overview.jpg)
 
-## Requirements
+### Requirements
 
 - An on premise machine (physical or virtual)running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
 - Required Azure Stack Marketplace items:
@@ -20,7 +20,7 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 	-  PowerShell DSC extension
     -  Custom Script Extension
 
-## Things to Consider
+### Things to Consider
 
 - A Network Security Group is applied to the template Subnet.  It is recommended to review this and make additional allowances as needed.
 - An RDP Deny rule is applied to the Tunnel NSG and will need to be set to allow if you intend to access the VMs via the Public IP address
@@ -29,26 +29,22 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 - This template is using BYOL Windows License
 - This template is using a F8s_v2 vm as default there other options but you many want to change the allowed values.   Validate performance before reducing the VM size.
 
-## Optional
+### Optional
 
 - You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters the ability to use your own storage blob with SAS token.
 - This template provides default values for VNet naming and IP addressing.  You will need to change the address space.
 - Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
 - The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/
 
-## Resource Group Template (iSCSI Client)
+### Resource Group Template (iSCSI Client)
 
 This is the detailed diagram of the resources deployed from the template to create the iSCSI client you can use to connect to the iSCSI target.  This template will deploy the VM and other resources, in addition it will run the prepare-iSCSIClient.ps1 and reboot the VM.
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/iSCSIFileServer.jpg)
 
-## The Deployment process
+### The Deployment process
 
-Now we have an understanding of the architecture it is import to understand the deployment process.  The resource group template will generate output which is meant to be the input for the next step as input.  It is mainly focus on the server name and the Azure stack public IP address where the iSCSI traffic comes from.
-
-### Process Example
-
-For this example lets say we want to deploy connect an Azure Stack VM to a vm hosted elsewhere in your datacenter. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 using the IP address and server name outputs from the template as inout parameters for the script on the iSCSI target which can be a virtual machine or physical server.  Next you would use the external IP address or adresses of the iSCSI Target server as inputs to run the Connect-toiSCSITarget.ps1 script.  
+Now we have an understanding of the architecture it is import to understand the deployment process.  The resource group template will generate output which is meant to be the input for the next step as input.  It is mainly focus on the server name and the Azure stack public IP address where the iSCSI traffic comes from.  For this example lets say we want to deploy connect an Azure Stack VM to a vm hosted elsewhere in your datacenter. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 using the IP address and server name outputs from the template as inout parameters for the script on the iSCSI target which can be a virtual machine or physical server.  Next you would use the external IP address or adresses of the iSCSI Target server as inputs to run the Connect-toiSCSITarget.ps1 script.  
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/TheProcess.jpg)
 
