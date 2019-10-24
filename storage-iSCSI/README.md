@@ -4,7 +4,7 @@
 
 The purpose of this template is to offer a solution to connect an Azure Stack vm to an on-premises iSCSI target enabling that Azure Stack vm to use on premise storage.  
 
-This template has been designed to setup up the infrastructure necessary on the Azure Stack side to connect to an iSCSI target.  This includes a virtual machine that will act as the iSCSI Initiator along with its accompanying VNet, NSG, PIP and storage. After the template has been deployed two PowerShell scripts need to be run to complete the configuration. One script will be run on the on premise vm(target) and one will be run on the Azure Stack vm (Initiator). Once these are completed you will have on premise storage added to your Azure Stack vm.
+This template has been designed to setup up the infrastructure necessary on the Azure Stack side to connect to an iSCSI target.  This includes a virtual machine that will act as the iSCSI Initiator along with its accompanying VNet, NSG, PIP and storage. After the template has been deployed two PowerShell scripts need to be run to complete the configuration. One script will be run on the on premise vm(target) and one will be run on the Azure Stack vm (Initiator). Once these are completed you will have on premise storage added to your Azure Stack vm.  You can of course also connect your windows clients  to SAN hoste iSCSI storage but that is not coverd in this document.
 
 ## Overview
 
@@ -12,21 +12,44 @@ This diagram shows IaaS system hosted on Azure Stack IaaS connect to a Windows V
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/Overview.jpg)
 
+## Requirements
+
+- An on premise virtual machine running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
+- Required Azure Stack Marketplace items:
+    -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
+	-  PowerShell DSC extension
+    -  Custom Script Extension
+
+## Things to Consider
+
+- A Network Security Group is applied to the template Subnet.  It is recommended to review this and make additional allowances as needed.
+- An RDP Deny rule is applied to the Tunnel NSG and will need to be set to allow if you intend to access the VMs via the Public IP address
+- This solution does not take into account DNS resolution
+- You should change your chap username and chappassword.  The Chappassword must be 12 to 16 characters in length.
+- This template is using BYOL Windows License
+- This template is using a F8s_v2 vm as default there other options but you many want to change the allowed values.   Validate performance before reducing the VM size.
+
 ## Resource Group Template (iSCSI Client)
 
-This is the detailed diagram of the resources deployed from the template to createthe iSCSI client. 
+This is the detailed diagram of the resources deployed from the template to create the iSCSI client you can use to connect to the iSCSI target.  This template will deploy the VM and other resources, in addition it will run the prepare-iSCSIClient.ps1 and reboot the VM.
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/iSCSIFileServer.jpg)
 
-## The deployment process
+## The Deployment process
 
-Now we have an understanding of the architecture it is import to understand the deployment process.  The infrastructure template will generate output which is meant to be the input for the tunnel template.
+Now we have an understanding of the architecture it is import to understand the deployment process.  The resource group template will generate output which is meant to be the input for the next step as input.  It is mainly focus on the server name and the Azure stack public IP address where the iSCSI traffic comes from.
 
 ### Process Example
 
-For this example lets say we want to deploy connect an Azure Stack vm to a vm hosted on VMWare on premise. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 script on the iSCSI target which can be a virtual machine or physical server on premise.  Using the output from the infrastrucutre template. Next you would use the IP address of the on premise VMWare vm and run the Connect-toiSCSITarget.ps1 script.  
+For this example lets say we want to deploy connect an Azure Stack VM to a vm hosted elsewhere in your datacenter. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 using the IP address and server name outputs from the template as inout parameters for the script on the iSCSI target which can be a virtual machine or physical server.  Next you would use the external IP address or adresses of the iSCSI Target server as inputs to run the Connect-toiSCSITarget.ps1 script.  
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/TheProcess.jpg)
+
+### Deployment Steps
+
+1. Deploy iSCSI client Infrastructure using azuredeploy.json
+2. Run Create-iSCSITarget.ps1 on the on premise server iSCSI target
+3. Run Connect-toiSCSITarget.ps1 on the on iSCSI client server
 
 ## Adding iSCSI storage to existing VMs
 
@@ -37,7 +60,7 @@ You can also run the scripts on an existing Virtual Machine to connect from the 
 ### Prepare-iSCSIClient.ps1
 
 This script installs the prerequistes on the iSCSI client, this includes;
-- installation of Multipath-io services
+- installation of Multipath-IO services
 - setting the iSCSI initiator service startup to automatic
 - enabling support for multipath MPIO to iSCSI
 - Enable automatic claiming of all iSCSI volumes
@@ -50,41 +73,25 @@ It is important to reboot the system after installation of these prerequistes.  
 inputs from the script
 |**Input**|**default**|**description**|
 |------------------|---------------|------------------------------|
-|RemoteServer         |FileServer   |The name of the server connecting to the iSCSI Target
-|RemoteServerIPs      |1.1.1.1      |This is the IP Address the iSCSI traffic will be coming from
-|DiskFolder      |C:\iSCSIVirtualDisks     |This is the IP Address the iSCSI traffic will be coming from
-|DiskName      |DiskName     |This is the IP Address the iSCSI traffic will be coming from
-|DiskSize      |5GB     |This is the IP Address the iSCSI traffic will be coming from
-|TargetName      |RemoteTarget01     |This is the IP Address the iSCSI traffic will be coming from
-|ChapUsername      |username      |This is the username name for Chap authentication
-|ChapPassword      |userP@ssw0rd!      |This is the password name for Chap authentication. It must be 12 to 16 characters
-
-
+|RemoteServer         |FileServer               |The name of the server connecting to the iSCSI Target
+|RemoteServerIPs      |1.1.1.1                  |This is the IP Address the iSCSI traffic will be coming from
+|DiskFolder           |C:\iSCSIVirtualDisks     |This is the IP Address the iSCSI traffic will be coming from
+|DiskName             |DiskName                 |This is the IP Address the iSCSI traffic will be coming from
+|DiskSize             |5GB                      |This is the IP Address the iSCSI traffic will be coming from
+|TargetName           |RemoteTarget01           |This is the IP Address the iSCSI traffic will be coming from
+|ChapUsername         |username                 |This is the username name for Chap authentication
+|ChapPassword         |userP@ssw0rd!            |This is the password name for Chap authentication. It must be 12 to 16 characters
 
 ### Connect-toiSCSITarget.ps1
 
 inputs from the script
 |**Input**|**default**|**description**|
 |------------------|---------------|------------------------------|
-|TargetiSCSIAddresses         |"2.2.2.2","2.2.2.3"   |The name of the server connecting to the iSCSI Target
-|LocalIPAddresses      |"10.10.1.4"      |This is the IP Address the iSCSI traffic will be coming from
-|LoadBalancePolicy      |C:\iSCSIVirtualDisks     |This is the IP Address the iSCSI traffic will be coming from
-|ChapUsername      |username      |This is the username name for Chap authentication
-|ChapPassword      |userP@ssw0rd!      |This is the password name for Chap authentication. It must be 12 to 16 characters
-
-### Deployment Steps
-
-1. Deploy Infrastructure using azuredeploy.json
-2. Run Create-iSCSITarget.ps1 on the on premise server
-3. Run Connect-toiSCSITarget.ps1 on the on premise server
-
-## Requirements
-
-- An on premise virtual machine running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
-- Required Azure Stack Marketplace items:
-    -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
-	-  PowerShell DSC extension
-    -  Custom Script Extension
+|TargetiSCSIAddresses   |"2.2.2.2","2.2.2.3"    |The name of the server connecting to the iSCSI Target
+|LocalIPAddresses       |"10.10.1.4"            |This is the IP Address the iSCSI traffic will be coming from
+|LoadBalancePolicy      |C:\iSCSIVirtualDisks   |This is the IP Address the iSCSI traffic will be coming from
+|ChapUsername           |username               |This is the username name for Chap authentication
+|ChapPassword           |userP@ssw0rd!          |This is the password name for Chap authentication. It must be 12 to 16 characters
 
 ## Template Inputs & Outputs
 
