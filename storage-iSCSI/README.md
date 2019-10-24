@@ -121,5 +121,5 @@ This is the final script which is run on the iSCSI client and mounts the disk pr
 
 ## Walkthrough
 
-A detailed walkthrough for some iSCSI storage examples can be found here.  In addition there are some steps for reviewing the iSCSI connections and show that mulitpathing is setup.
+A detailed walkthrough for some iSCSI storage examples can be found here. 
 https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Source/ExtendingYourStorageUsingiSCSI.docx?raw=true
