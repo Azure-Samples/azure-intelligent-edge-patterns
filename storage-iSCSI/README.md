@@ -19,6 +19,7 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
     -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
 	-  PowerShell DSC extension
     -  Custom Script Extension
+    -  An existing virtual or physical machine.  Ideally this machine will have two network adapters.  This coul also be another iSCSI target served out a SAN for instance.
 
 ### Things to Consider
 
@@ -70,6 +71,9 @@ Now we have an understanding of the architecture it is import to understand the 
 |InternalVNetIP          |10.10.1.4         |Static Address for the internal IP of the File Server.
 |_artifactsLocation      ||
 |_artifactsLocationSasToken||
+
+2. Once the template completes, you will need to run the Create-iSCSITarget.ps1 on the on premise server iSCSI target with the outputs from the first step
+3. You can then finally run the Connect-toiSCSITarget.ps1 on the on iSCSI client with the details of the iSCSI target
 
 ## Adding iSCSI storage to existing VMs
 
