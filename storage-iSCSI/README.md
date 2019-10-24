@@ -12,7 +12,7 @@ This diagram shows IaaS system hosted on Azure Stack IaaS connect to a Windows V
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/Overview.jpg)
 
-## Resource Group Template 
+## Resource Group Template
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/iSCSIFileServer.jpg)
 
