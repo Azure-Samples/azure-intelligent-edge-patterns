@@ -79,7 +79,14 @@ if ($LoadBalancePolicy -ne $CurrentPolicy )
         "LQD" {write-verbose "Load Balance Policy Set to 'LQD' Least Queue Depth."}
         "LB" {write-verbose "Load Balance Policy Set to 'LB' Least Blocks."}
     }
-    Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy $LoadBalancePolicy
+    try 
+    {
+      Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy $LoadBalancePolicy
+    }
+    catch 
+    {}
+    finally
+    {}
 }
 else
 {
