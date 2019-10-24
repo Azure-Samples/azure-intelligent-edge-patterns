@@ -27,7 +27,7 @@ param
 )
 
 
-if ($ChapPassword.Length -ge $ChapPassword.Length -lt 16)
+if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
 {
     Write-Verbose "Chap password is a valid length"
 }

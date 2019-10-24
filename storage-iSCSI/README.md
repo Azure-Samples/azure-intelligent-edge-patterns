@@ -29,6 +29,13 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 - This template is using BYOL Windows License
 - This template is using a F8s_v2 vm as default there other options but you many want to change the allowed values.   Validate performance before reducing the VM size.
 
+## Optional
+
+- You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters the ability to use your own storage blob with SAS token.
+- This template provides default values for VNet naming and IP addressing.  You will need to change the address space.
+- Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
+- The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/
+
 ## Resource Group Template (iSCSI Client)
 
 This is the detailed diagram of the resources deployed from the template to create the iSCSI client you can use to connect to the iSCSI target.  This template will deploy the VM and other resources, in addition it will run the prepare-iSCSIClient.ps1 and reboot the VM.
@@ -51,6 +58,23 @@ For this example lets say we want to deploy connect an Azure Stack VM to a vm ho
 2. Run Create-iSCSITarget.ps1 on the on premise server iSCSI target
 3. Run Connect-toiSCSITarget.ps1 on the on iSCSI client
 
+### Inputs for azuredeploy.json
+
+|**Parameters**|**default**|**description**|
+|------------------|---------------|------------------------------|
+|WindowsImageSKU         |2019-Datacenter   |Please select the base Windows VM image
+|VMSize                  |Standard_D2_v2    |Please enter the VM size
+|VMName                  |FileServer        |VM name
+|adminUsername           |storageadmin      |The name of the Administrator of the new VM
+|adminPassword           |                  |The password for the Administrator account of the new VMs. Default value is subscription id
+|VNetName                |Storage           |The name of VNet.  This will be used to label the resources
+|VNetAddressSpace        |10.10.0.0/23      |Address Space for VNet
+|VNetInternalSubnetName  |Internal          |VNet Internal Subnet Name
+|VNetInternalSubnetRange |10.10.1.0/24      |Address Range for VNet Internal Subnet
+|InternalVNetIP          |10.10.1.4         |Static Address for the internal IP of the File Server.
+|_artifactsLocation      ||
+|_artifactsLocationSasToken||
+
 ## Adding iSCSI storage to existing VMs
 
 You can also run the scripts on an existing Virtual Machine to connect from the iSCSI client to a iSCSI target.  This flow is if you are creating the iSCSI target yourself.  This diagram shows the execution flow of the PowerShell scripts. These scripts can be found in the Script directory
@@ -70,7 +94,6 @@ It is important to reboot the system after installation of these prerequistes.  
 
 ### Create-iSCSITarget.ps1
 
-inputs from the script
 |**Input**|**default**|**description**|
 |------------------|---------------|------------------------------|
 |RemoteServer         |FileServer               |The name of the server connecting to the iSCSI Target
@@ -84,7 +107,6 @@ inputs from the script
 
 ### Connect-toiSCSITarget.ps1
 
-inputs from the script
 |**Input**|**default**|**description**|
 |------------------|---------------|------------------------------|
 |TargetiSCSIAddresses   |"2.2.2.2","2.2.2.3"    |The name of the server connecting to the iSCSI Target
@@ -93,78 +115,7 @@ inputs from the script
 |ChapUsername           |username               |This is the username name for Chap authentication
 |ChapPassword           |userP@ssw0rd!          |This is the password name for Chap authentication. It must be 12 to 16 characters
 
-## Template Inputs & Outputs
-
-There are several JSON parameters files with default values to assist you in deploying this in your own environments.
-
-### Inputs for azuredeploy.json
-
-|**Parameters**|**default**|**description**|
-|------------------|---------------|------------------------------|
-|WindowsImageSKU         |2019-Datacenter   |Please select the base Windows VM image
-|VMSize                  |Standard_F8s_v2   |Please select the VM size
-|VMName                  |FileServer        |VM name
-|adminUsername           |storageadmin      |The name of the Administrator of the new VM
-|adminPassword           |Subscription id   |The password for the Administrator account of the new VMs. Default value is subscription id
-|VNetName                |Storage           |The name of VNet.  This will be used to label the resources
-|VNetAddressSpace        |10.10.0.0/23      |Address Space for VNet
-|VNetInternalSubnetName  |Internal          |VNet Internal Subnet Name
-|VNetInternalSubnetRange |10.10.1.0/24      |Address Range for VNet Internal Subnet
-|InternalVNetIP          |10.10.1.4         |Static Address for the internal IP of the File Server.
-|_artifactsLocation      ||
-|_artifactsLocationSasToken||
-
-### Outputs from azuredeploy.json
-
-|**Output**|
-|-------------|
-|VMName
-|PublicEndpoint
-|LocalVNetAddressSpace
-|adminUsername
-|VNet
-|InternalRefVNet
-|VNetInternalSubnetName
-|InternalSubnetRefVNet
-|InternalSubnetIP
-
-### Inputs for Create-iSCSITarget.ps1
-
-|**Inputs**|**Outputs from azuredeploy.json**|
-|-------------|-----------|
-|$RemoteServerIPs|PublicEndpoint|
-
-
-
-### Inputs for Connect-toiSCSITarget.ps1
-
-|**Inputs**|**Outputs from Connect-toiSCSITarget.ps1**|
-|-------------|-----------|
-|IP address of on premise iSCSI target vm|$TargetPortalAddresses|
-|IP address of Azure Stack iSCSI initiator vm|$LocaliSCSIAddresses|
-
-
-## Things to Consider
-
-- A Network Security Group is applied to the template Tunnel Subnet.  It is recommended to secure the internal subnet in each VNet with an additional NSG.
-- An RDP Deny rule is applied to the Tunnel NSG and will need to be set to allow if you intend to access the VMs via the Public IP address
-- This solution does not take into account DNS resolution
-- The resource group name is used for the VM and for the route table so that the Tunnel template can find the RRAS VM and RouteTable resources easily without user input.  The user can however label the VNet and Subnets to make this more relervant to its usage.
-- The combination of Resource Group and vmName must be less than 15 characters.  Eg 'Resourcegr-RRAS'
-- This template is using BYOL Windows License
-- When deleting the resource group, currently on (1907) you have to manually detach the NSG's from the tunnel subnet to ensure the delete resource group completes
-- This template is using a F8s_v2 vm as default there other options but you many want to change the allowed values.   Validate performance before reducing the VM size.
-
-
-## Optional
-
-- You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters the ability to use your own storage blob with SAS token.
-- This template provides default values for VNet naming and IP addressing.  You will need to change the address space.
-- Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
-- The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/ https://github.com/mgreenegit/xRemoteAccess/.  xRemoteAccess is present but not used currently.
-- The custom script extension runs the following script Add-Site2SiteIKE.ps1 and Add-Site2SiteGRE.ps1 and configures the VPNS2S tunnel between the two RRAS servers.  You can view the detailed output from the custom script extension to see the results of the VPN tunnel configuration
-
 ## Walkthrough
 
-A detailed guide for the Mutliple VPN tunnel walkthrough can be found here
-https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Source/Walkthrough-Multiple-VPN-Tunnels.docx?raw=true
+A detailed walkthrough for some iSCSI storage examples can be found here
+https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Source/ExtendingYourStorageUsingiSCSI.docx?raw=true
