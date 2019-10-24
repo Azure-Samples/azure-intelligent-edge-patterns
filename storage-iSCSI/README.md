@@ -28,9 +28,9 @@ For this example lets say we want to deploy connect an Azure Stack vm to a vm ho
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/TheProcess.jpg)
 
-### PowerShell Script Flow
+### Adding iSCSI storage to existing VMs
 
-You can also run the scripts on an existing Virtual Machine to connect from the client to a iSCSI target.  This flow is if you are creating the iSCSI target yourself.
+You can also run the scripts on an existing Virtual Machine to connect from the iSCSI client to a iSCSI target.  This flow is if you are creating the iSCSI target yourself.  This diagram shos the execution flow of the PowerShell scripts. These scripts can be found in the Script directory
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/ScriptFlow.jpg)
 

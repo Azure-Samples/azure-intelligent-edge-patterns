@@ -6,7 +6,7 @@ param
         $RemoteServer = "FileServer",
         [Parameter(ParameterSetName='iSCSIDisk')]
         [Array]
-        $RemoteServerIPs = @("38.102.180.38"),
+        $RemoteServerIPs = @("1.1.1.1"),
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
         $DiskFolder = 'C:\iSCSIVirtualDisks',    

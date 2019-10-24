@@ -54,6 +54,7 @@ Enable-MSDSMAutomaticClaim -BusType iscsi
 Write-Verbose "Set the disk timeout to 60 seconds"
 Set-MPIOSetting -NewDiskTimeout 60
 
+write-host "Please remember to reboot to ensure the MPIO load balancing policy can be set correctly in the final step"
 <#
 Foreach ($TargetPortalAddress in $TargetPortalAddresses)
 {
