@@ -5,7 +5,12 @@
 The purpose of this template is to offer a solution to connect an Azure Stack vm to an on-premises iSCSI target enabling that Azure Stack vm to use on premise storage.  
 
 This template has been designed to setup up the infrastructure necessary on the Azure Stack side to connect to an iSCSI target.  This includes a virtual machine that will act as the iSCSI Initiator along with its accompanying VNet, NSG, PIP and storage. After the template has been deployed two PowerShell scripts need to be run to complete the configuration. One script will be run on the on premise vm(target) and one will be run on the Azure Stack vm (Initiator). Once these are completed you will have on premise storage added to your Azure Stack vm.
-## Infrastructure Overview
+
+## Overview
+
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/Overview.jpg)
+
+## Resource Group Template 
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/iSCSIFileServer.jpg)
 
@@ -18,6 +23,13 @@ Now we have an understanding of the architecture it is import to understand the 
 For this example lets say we want to deploy connect an Azure Stack vm to a vm hosted on VMWare on premise. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 script on the VMWare on premise vm using the output from the infrastrucutre template. Next you would use the IP address of the on premise VMWare vm and run the Connect-toiSCSITarget.ps1 script.  
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/TheProcess.jpg)
+
+### PowerShell Script Flow
+
+You can also run the scripts on an existing Virtual Machine to connect from the client to a iSCSI target.  This flow is if you are creating the iSCSI target yourself.
+
+![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/ScriptFlow.jpg)
+
 
 ### Deployment Steps
 
