@@ -130,7 +130,7 @@ def send_recognition_messages(rec, image_body):
             info.bbymax = bboxes[i][2]
             info.bbxmax = bboxes[i][3]
             msg = json.dumps(info.__dict__)
-            send_iot_hub_message(msg, "recognition:v1")
+            send_iot_hub_message(msg, "recognition;v1")
         except Exception as ex:
             print("Exception caught in send_recognition_messages: {}".format(ex))
 
