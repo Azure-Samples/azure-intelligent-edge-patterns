@@ -1,4 +1,4 @@
-# AzureStack Connect iSCSI Storage
+# Azure Stack Extended Storage (Connect to iSCSI Storage)
 
 ***This template is intended for use in an Azure Stack environment.***
 
