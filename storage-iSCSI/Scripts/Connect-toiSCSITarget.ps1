@@ -2,7 +2,7 @@
 param(
     [Parameter()]
     [Array]
-    $TargetiSCSIAddresses = @("172.20.14.64","172.20.14.79"),
+    $TargetiSCSIAddresses = @("2.2.2.2","2.2.2.3"),
     [Parameter()]
     [Array]
     $LocalIPAddresses = @("10.10.1.4"),
@@ -79,14 +79,7 @@ if ($LoadBalancePolicy -ne $CurrentPolicy )
         "LQD" {write-verbose "Load Balance Policy Set to 'LQD' Least Queue Depth."}
         "LB" {write-verbose "Load Balance Policy Set to 'LB' Least Blocks."}
     }
-    try 
-    {
-      Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy $LoadBalancePolicy
-    }
-    catch 
-    {}
-    finally
-    {}
+    Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy $LoadBalancePolicy
 }
 else
 {

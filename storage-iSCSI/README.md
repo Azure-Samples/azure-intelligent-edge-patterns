@@ -24,7 +24,7 @@ Now we have an understanding of the architecture it is import to understand the 
 
 ### Process Example
 
-For this example lets say we want to deploy connect an Azure Stack vm to a vm hosted on VMWare on premise. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 script on the VMWare on premise vm using the output from the infrastrucutre template. Next you would use the IP address of the on premise VMWare vm and run the Connect-toiSCSITarget.ps1 script.  
+For this example lets say we want to deploy connect an Azure Stack vm to a vm hosted on VMWare on premise. You would need to deploy the infrastructure template first. Then run the Create-iSCSITarget.ps1 script on the iSCSI target which can be a virtual machine or physical server on premise.  Using the output from the infrastrucutre template. Next you would use the IP address of the on premise VMWare vm and run the Connect-toiSCSITarget.ps1 script.  
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/TheProcess.jpg)
 
@@ -37,7 +37,7 @@ You can also run the scripts on an existing Virtual Machine to connect from the 
 ### Prepare-iSCSIClient.ps1
 
 This script installs the prerequistes on the iSCSI client, this includes;
-- installation of Multipath-io
+- installation of Multipath-io services
 - setting the iSCSI initiator service startup to automatic
 - enabling support for multipath MPIO to iSCSI
 - Enable automatic claiming of all iSCSI volumes
@@ -47,8 +47,30 @@ It is important to reboot the system after installation of these prerequistes.  
 
 ### Create-iSCSITarget.ps1
 
+inputs from the script
+|**Input**|**default**|**description**|
+|------------------|---------------|------------------------------|
+|RemoteServer         |FileServer   |The name of the server connecting to the iSCSI Target
+|RemoteServerIPs      |1.1.1.1      |This is the IP Address the iSCSI traffic will be coming from
+|DiskFolder      |C:\iSCSIVirtualDisks     |This is the IP Address the iSCSI traffic will be coming from
+|DiskName      |DiskName     |This is the IP Address the iSCSI traffic will be coming from
+|DiskSize      |5GB     |This is the IP Address the iSCSI traffic will be coming from
+|TargetName      |RemoteTarget01     |This is the IP Address the iSCSI traffic will be coming from
+|ChapUsername      |username      |This is the username name for Chap authentication
+|ChapPassword      |userP@ssw0rd!      |This is the password name for Chap authentication. It must be 12 to 16 characters
+
+
+
 ### Connect-toiSCSITarget.ps1
 
+inputs from the script
+|**Input**|**default**|**description**|
+|------------------|---------------|------------------------------|
+|TargetiSCSIAddresses         |"2.2.2.2","2.2.2.3"   |The name of the server connecting to the iSCSI Target
+|LocalIPAddresses      |"10.10.1.4"      |This is the IP Address the iSCSI traffic will be coming from
+|LoadBalancePolicy      |C:\iSCSIVirtualDisks     |This is the IP Address the iSCSI traffic will be coming from
+|ChapUsername      |username      |This is the username name for Chap authentication
+|ChapPassword      |userP@ssw0rd!      |This is the password name for Chap authentication. It must be 12 to 16 characters
 
 ### Deployment Steps
 
