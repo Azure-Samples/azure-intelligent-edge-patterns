@@ -8,6 +8,8 @@ This template has been designed to setup up the infrastructure necessary on the 
 
 ## Overview
 
+This diagram shows IaaS system hosted on Azure Stack IaaS connect to a Windows VM (Physical or Virtual providing storage external to the Azure Stack stamp over the iSCSI protocol
+
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/Overview.jpg)
 
 ## Resource Group Template 
