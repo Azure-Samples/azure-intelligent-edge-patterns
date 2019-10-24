@@ -8,6 +8,9 @@ param(
     $LocalIPAddresses = @("10.10.1.4"),
     [Parameter()]
     [String]
+    $LoadBalancePolicy = 'LQD',
+    [Parameter()]
+    [String]
     $ChapUsername = "username",
     [Parameter()]
     [String]
@@ -15,14 +18,12 @@ param(
 )
 
 <#
-    
     None = Clears any currently configured default load balance policy.
     FOO = Fail Over Only.
     RR = Round Robin.
     LQD = Least Queue Depth.
     LB = Least Blocks.
 #>
-## $LoadBalancePolicy = 'RR'
 
 if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
 {
@@ -41,17 +42,6 @@ Import-Module Storage
 Import-Module IscsiTarget
 $VerbosePreference="continue"
 
-$iSCSIMPIO = @(Get-MSDSMSupportedHW | ? {$_.ProductId -eq 'iSCSIBusType_0x9'})
-if (if $iSCSIMPIO.count -ne 1)
-{
-    write-verbose "This line enabled MPIO support for iSCSI"
-    New-MSDSMSupportedHW -VendorId MSFT2005 -ProductId iSCSIBusType_0x9
-}
-else
-{
-    write-verbose "MPIO multi pathing enabled"
-}
-
 Write-Verbose "Creating iSCSI target Portals"
 write-verbose "$($TargetiSCSIAddresses.count) target iSCSI addresses found"
 write-verbose "$($LocalIPAddresses.count) source iSCSI addresses found"
@@ -63,28 +53,38 @@ Foreach ($TargetiSCSIAddress in $TargetiSCSIAddresses)
         New-IscsiTargetPortal -TargetPortalAddress $TargetiSCSIAddress -TargetPortalPortNumber 3260 -InitiatorPortalAddress $LocalIPAddress
     }
 }
- 
-Foreach ($TargetiSCSIAddress in $TargetiSCSIAddresses){
-    foreach ($LocalIPAddress in $LocalIPAddresses)
-    {
-        write-verbose "connecting to iSCSI Target $TargetiSCSIAddress from $LocalIPAddress "
-        Get-IscsiTarget | Connect-IscsiTarget -IsMultipathEnabled $true -TargetPortalAddress $TargetiSCSIAddress -InitiatorPortalAddress $LocalIPAddress -IsPersistent $true -AuthenticationType ONEWAYCHAP  -ChapUsername $ChapUsername -ChapSecret $ChapPassword
-    }
-}
 
-write-verbose "Register iSCSI sessions"
-Get-IscsiSession | Register-IscsiSession
-
-<#
-switch  ($LoadBalancePolicy) 
+$iSCSITargets = @(Get-IscsiTarget | where {$_.IsConnected -ne 'True'})
+foreach ($iSCSITarget in $iSCSITargets)
 {
-    "FOO" {write-verbose "Load Balance Policy Set to 'FOO' Fail Over Only."}
-    "RR" {write-verbose "Load Balance Policy Set to 'RR' Round Robin."}
-    "LQD" {write-verbose "Load Balance Policy Set to 'LQD' Least Queue Depth."}
-    "LB" {write-verbose "Load Balance Policy Set to 'LB' Least Blocks."}
+    Foreach ($TargetiSCSIAddress in $TargetiSCSIAddresses){
+        foreach ($LocalIPAddress in $LocalIPAddresses)
+        {
+            write-verbose "connecting to iSCSI Target $TargetiSCSIAddress from $LocalIPAddress "
+            $iSCSITarget | Connect-IscsiTarget -IsMultipathEnabled $true -TargetPortalAddress $TargetiSCSIAddress -InitiatorPortalAddress $LocalIPAddress -IsPersistent $true -AuthenticationType ONEWAYCHAP  -ChapUsername $ChapUsername -ChapSecret $ChapPassword  | Register-IscsiSession
+
+        }
+    }
+
 }
-Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR -Verbose
-#>
+
+Write-Verbose "check load balancing policy"
+$CurrentPolicy = get-MSDSMGlobalDefaultLoadBalancePolicy
+if ($LoadBalancePolicy -ne $CurrentPolicy )
+{
+    switch  ($LoadBalancePolicy) 
+    {
+        "FOO" {write-verbose "Load Balance Policy Set to 'FOO' Fail Over Only."}
+        "RR" {write-verbose "Load Balance Policy Set to 'RR' Round Robin."}
+        "LQD" {write-verbose "Load Balance Policy Set to 'LQD' Least Queue Depth."}
+        "LB" {write-verbose "Load Balance Policy Set to 'LB' Least Blocks."}
+    }
+    Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy $LoadBalancePolicy
+}
+else
+{
+    write-verbose "load balancing policy is set to $CurrentPolicy"
+}
 
 $RawDisks = @(Get-iSCSISession | Get-Disk | Where partitionstyle -eq "raw" | select -Unique Number).number
 write-verbose "$($rawdisks.count) raw disks found"
@@ -100,5 +100,5 @@ foreach ($RawDisk in $RawDisks)
     write-verbose "Drive Size $($result.Size/1gb)"
 }
 
-Get-IscsiConnection
-Get-IscsiSession
+write-verbose "$((Get-IscsiConnection | measure ).count) iSCSI connections found"
+
