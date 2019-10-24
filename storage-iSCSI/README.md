@@ -94,28 +94,32 @@ It is important to reboot the system after installation of these prerequistes.  
 
 ### Create-iSCSITarget.ps1
 
+This script is to be run on the system which is serving the storage.  You can create multiple disks and tagerts restricted by initiators.  You can run this script multiple times to create many virtual disks you can attach to different targets.  You can connect mutli disks to one target. 
+
 |**Input**|**default**|**description**|
 |------------------|---------------|------------------------------|
 |RemoteServer         |FileServer               |The name of the server connecting to the iSCSI Target
 |RemoteServerIPs      |1.1.1.1                  |This is the IP Address the iSCSI traffic will be coming from
-|DiskFolder           |C:\iSCSIVirtualDisks     |This is the IP Address the iSCSI traffic will be coming from
-|DiskName             |DiskName                 |This is the IP Address the iSCSI traffic will be coming from
-|DiskSize             |5GB                      |This is the IP Address the iSCSI traffic will be coming from
-|TargetName           |RemoteTarget01           |This is the IP Address the iSCSI traffic will be coming from
+|DiskFolder           |C:\iSCSIVirtualDisks     |This is the folder and drive where the virtual disks will be stored
+|DiskName             |DiskName                 |This is the name of the disk VHDX file
+|DiskSize             |5GB                      |This is the VHDX disk size
+|TargetName           |RemoteTarget01           |This is the target name used to define the target configuration for the iSCSI client. 
 |ChapUsername         |username                 |This is the username name for Chap authentication
 |ChapPassword         |userP@ssw0rd!            |This is the password name for Chap authentication. It must be 12 to 16 characters
 
 ### Connect-toiSCSITarget.ps1
 
+This is the final script which is run on the iSCSI client and mounts the disk presented by the iSCSI target to the iSCSI client.
+
 |**Input**|**default**|**description**|
 |------------------|---------------|------------------------------|
-|TargetiSCSIAddresses   |"2.2.2.2","2.2.2.3"    |The name of the server connecting to the iSCSI Target
-|LocalIPAddresses       |"10.10.1.4"            |This is the IP Address the iSCSI traffic will be coming from
+|TargetiSCSIAddresses   |"2.2.2.2","2.2.2.3"    |The IP addresses of the iSCSI target
+|LocalIPAddresses       |"10.10.1.4"            |This is internal IP Address the iSCSI traffic will be coming from
 |LoadBalancePolicy      |C:\iSCSIVirtualDisks   |This is the IP Address the iSCSI traffic will be coming from
 |ChapUsername           |username               |This is the username name for Chap authentication
 |ChapPassword           |userP@ssw0rd!          |This is the password name for Chap authentication. It must be 12 to 16 characters
 
 ## Walkthrough
 
-A detailed walkthrough for some iSCSI storage examples can be found here
+A detailed walkthrough for some iSCSI storage examples can be found here.  In addition there are some steps for reviewing the iSCSI connections and show that mulitpathing is setup.
 https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Source/ExtendingYourStorageUsingiSCSI.docx?raw=true
