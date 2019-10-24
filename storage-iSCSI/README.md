@@ -14,7 +14,7 @@ This diagram shows IaaS system hosted on Azure Stack IaaS connect to a Windows V
 
 ## Resource Group Template (iSCSI Client)
 
-This is the detailed diagram of the resource deployed in the iSCSI client side 
+This is the detailed diagram of the resources deployed from the template to createthe iSCSI client. 
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/iSCSIFileServer.jpg)
 
@@ -28,11 +28,26 @@ For this example lets say we want to deploy connect an Azure Stack vm to a vm ho
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/TheProcess.jpg)
 
-### Adding iSCSI storage to existing VMs
+## Adding iSCSI storage to existing VMs
 
-You can also run the scripts on an existing Virtual Machine to connect from the iSCSI client to a iSCSI target.  This flow is if you are creating the iSCSI target yourself.  This diagram shos the execution flow of the PowerShell scripts. These scripts can be found in the Script directory
+You can also run the scripts on an existing Virtual Machine to connect from the iSCSI client to a iSCSI target.  This flow is if you are creating the iSCSI target yourself.  This diagram shows the execution flow of the PowerShell scripts. These scripts can be found in the Script directory
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/ScriptFlow.jpg)
+
+### Prepare-iSCSIClient.ps1
+
+This script installs the prerequistes on the iSCSI client, this includes;
+- installation of Multipath-io
+- setting the iSCSI initiator service startup to automatic
+- enabling support for multipath MPIO to iSCSI
+- Enable automatic claiming of all iSCSI volumes
+- Set the disk timeout to 60 seconds
+
+It is important to reboot the system after installation of these prerequistes.  The MPIO load balancing policy requires a reboot so that it can be set.
+
+### Create-iSCSITarget.ps1
+
+### Connect-toiSCSITarget.ps1
 
 
 ### Deployment Steps
