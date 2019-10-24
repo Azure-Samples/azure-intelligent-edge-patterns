@@ -12,11 +12,10 @@
       }
     },   
     "VMSize": {
-      "defaultValue": "Standard_F8s_v2",
-      "allowedValues": ["Standard_A4_v2", "Standard_DS3_v2","Standard_DS4_v2","Standard_F8s_v2","Standard_F16s_v2" ],
+      "defaultValue": "Standard_D2_v2",
       "type": "string",
       "metadata": {
-        "description": "Please select the VM size"
+        "description": "Please enter the VM size"
       }
     },
     "VMName": {
@@ -142,7 +141,7 @@
               "destinationPortRange": "3389",
               "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "*",
-              "access": "Allow",
+              "access": "Deny",
               "priority": 130,
               "direction": "Inbound"
             }

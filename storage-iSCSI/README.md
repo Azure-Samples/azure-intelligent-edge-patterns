@@ -2,19 +2,19 @@
 
 ***This template is intended for use in an Azure Stack environment.***
 
-The purpose of this template is to offer a solution to connect an Azure Stack vm to an on-premises iSCSI target enabling that Azure Stack vm to use on premise storage.  
+The purpose of this template is to offer a solution to connect an Azure Stack VM to an on-premises iSCSI target enabling that VM to utilize off stamp storage hosted else where in your datacenter. This document covers using a Windows machine as the iSCSI target, you can of course also connect to SAN hosted iSCSI storage but that is not coverd in this document.
 
-This template has been designed to setup up the infrastructure necessary on the Azure Stack side to connect to an iSCSI target.  This includes a virtual machine that will act as the iSCSI Initiator along with its accompanying VNet, NSG, PIP and storage. After the template has been deployed two PowerShell scripts need to be run to complete the configuration. One script will be run on the on premise vm(target) and one will be run on the Azure Stack vm (Initiator). Once these are completed you will have on premise storage added to your Azure Stack vm.  You can of course also connect your windows clients  to SAN hoste iSCSI storage but that is not coverd in this document.
+This template has been designed to setup up the infrastructure necessary on the Azure Stack side to connect to an iSCSI target.  This includes a virtual machine that will act as the iSCSI Initiator along with its accompanying VNet, NSG, PIP and storage. After the template has been deployed two PowerShell scripts need to be run to complete the configuration. One script will be run on the on premise vm(target) and one will be run on the Azure Stack vm (Initiator). Once these are completed you will have on premise storage added to your Azure Stack vm.  
 
 ## Overview
 
-This diagram shows IaaS system hosted on Azure Stack IaaS connect to a Windows VM (Physical or Virtual providing storage external to the Azure Stack stamp over the iSCSI protocol
+This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a Windows Machine on premises (physical or virtual) allowing storage external to Azure Stack to be mounted inside you Azure Stack hosted VM over the iSCSI protocol
 
 ![alt text](https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/Images/Overview.jpg)
 
 ## Requirements
 
-- An on premise virtual machine running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
+- An on premise machine (physical or virtual)running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
 - Required Azure Stack Marketplace items:
     -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
 	-  PowerShell DSC extension
@@ -49,7 +49,7 @@ For this example lets say we want to deploy connect an Azure Stack VM to a vm ho
 
 1. Deploy iSCSI client Infrastructure using azuredeploy.json
 2. Run Create-iSCSITarget.ps1 on the on premise server iSCSI target
-3. Run Connect-toiSCSITarget.ps1 on the on iSCSI client server
+3. Run Connect-toiSCSITarget.ps1 on the on iSCSI client
 
 ## Adding iSCSI storage to existing VMs
 
