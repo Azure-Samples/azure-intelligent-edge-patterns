@@ -28,7 +28,7 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 - This solution does not take into account DNS resolution
 - You should change your chap username and chappassword.  The Chappassword must be 12 to 16 characters in length.
 - This template is using BYOL Windows License
-- This template is using a F8s_v2 vm as default there other options but you many want to change the allowed values.   Validate performance before reducing the VM size.
+- This configuration only has one iSCSI nic coming from the iSCSI client. We had tested a number of configurations to utilize seperate subnets and NICs however ran into issues with multiple gateways and trying to create a seperate storage subnet to isolate traffic and actually be truely redundant.  
 
 ### Optional
 
