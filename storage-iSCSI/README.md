@@ -122,4 +122,4 @@ This is the final script which is run on the iSCSI client and mounts the disk pr
 ## Walkthrough
 
 A detailed walkthrough for some iSCSI storage examples can be found here. Including some help showing where to look at your iSCSI configuration and view iSCSI sessions and multipathing settings.
-https://github.com/lucidqdreams/azure-intelligent-edge-patterns/blob/master/rras-vnet-vpntunnel/Source/Extending_Your_Storage_Using_iSCSI.docx?raw=true
+https://github.com/lucidqdreams/azure-intelligent-edge-patterns/tree/master/storage-iSCSI/Source/Extending_Your_Storage_Using_iSCSI.docx?raw=true
