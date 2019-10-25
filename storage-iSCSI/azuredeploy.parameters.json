@@ -6,40 +6,34 @@
         "value": "2019-Datacenter"
     },
     "VMSize": {
-        "value": "Standard_DS3_v2"
+        "value": "Standard_D2_v2"
+    },
+    "VMName": {
+        "value": "FileServer"
     },
     "adminUsername": {
-        "value": "rrasadmin"
-    },
-    "adminPassword": {
-        "value": "[subscription().subscriptionId]"
-    },
-    "SharedSecret": {
-        "value": "ilovestack!"
+        "value": "storageadmin"
     },
     "VNetName": {
-        "value":"AppServers"
+        "value":"Storage"
     },
     "VNetAddressSpace": {
-        "value":"10.20.0.0/16"
+        "value":"10.10.0.0/23"
     },
-    "VNetTunnelSubnetRange": {
-        "value":"10.20.254.0/24"
-    },
-    "VNetTunnelGW": {
-        "value":"10.20.254.4"
+    "VNetInternalSubnetName": {
+        "value": "Internal"
     },
     "VNetInternalSubnetRange": {
-        "value":"10.20.1.0/24"
-    },
-    "VNetInternalGW": {
-        "value":"10.20.1.4"
+        "value":"10.10.1.0/24"
+    },  
+    "InternalVNetIP": {
+        "value":"10.10.1.4"
     },
     "_artifactsLocation": {
-        "value": "https://raw.githubusercontent.com/lucidqdreams/vnetpeering/master/"
+        "value": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/"
     },
     "_artifactsLocationSasToken": {
         "value": ""
-    }  
+    }
   }
 }
