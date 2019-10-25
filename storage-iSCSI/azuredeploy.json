@@ -95,7 +95,7 @@
 
     "WindowsImageSKU": "[parameters('WindowsImageSKU')]",
     "storageAccountType": "Standard_LRS",
-    "ManagedOSDiskType": "Premium_LRS",
+    "ManagedOSDiskType": "Standard_LRS",
     "storageName": "[concat('sa', uniquestring(resourceGroup().id))]",
     "VMSize": "[parameters('VMSize')]",    
     "windowsImagePublisher": "MicrosoftWindowsServer",
