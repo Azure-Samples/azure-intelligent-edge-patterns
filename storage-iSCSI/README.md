@@ -14,12 +14,12 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 
 ### Requirements
 
-- An on premise machine (physical or virtual)running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
+- An on premise machine (physical or virtual) running Windows Server 2016 Datacenter or Windows Server 2019 Datacenter
 - Required Azure Stack Marketplace items:
     -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
 	-  PowerShell DSC extension
     -  Custom Script Extension
-    -  An existing virtual or physical machine.  Ideally this machine will have two network adapters.  This coul also be another iSCSI target served out a SAN for instance.
+    -  An existing virtual or physical machine.  Ideally this machine will have two network adapters.  This could also be another iSCSI target served out a SAN for instance.
 
 ### Things to Consider
 
