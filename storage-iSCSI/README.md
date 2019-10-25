@@ -29,6 +29,7 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 - You should change your Chapusername and Chappassword.  The Chappassword must be 12 to 16 characters in length.
 - This template is using a static IP address for the VM as the iSCSI connection uses the local address in the configuration
 - This template is using BYOL Windows License
+- You can also connect Linux based systems to the iSCSI targets here are some general steps https://help.ubuntu.com/lts/serverguide/iscsi-initiator.html
 
 ### Optional
 
