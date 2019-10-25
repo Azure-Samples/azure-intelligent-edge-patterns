@@ -19,21 +19,22 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
     -  Windows Server 2016 Datacenter or Windows Server 2019 Datacenter (latest build recommended)
 	-  PowerShell DSC extension
     -  Custom Script Extension
-    -  An existing virtual or physical machine.  Ideally this machine will have two network adapters.  This could also be another iSCSI target served out a SAN for instance.
+    -  An existing virtual or physical machine.  Ideally this machine will have two network adapters.  This could also be another iSCSI target such as a SAN for instance.
 
 ### Things to Consider
 
 - A Network Security Group is applied to the template Subnet.  It is recommended to review this and make additional allowances as needed.
 - An RDP Deny rule is applied to the Tunnel NSG and will need to be set to allow if you intend to access the VMs via the Public IP address
 - This solution does not take into account DNS resolution
-- You should change your chap username and chappassword.  The Chappassword must be 12 to 16 characters in length.
+- You should change your Chapusername and Chappassword.  The Chappassword must be 12 to 16 characters in length.
+- This template is using a static IP address for the VM as the iSCSI connection uses the local address in the configuration
 - This template is using BYOL Windows License
-- This configuration only has one iSCSI nic coming from the iSCSI client. We had tested a number of configurations to utilize seperate subnets and NICs however ran into issues with multiple gateways and trying to create a seperate storage subnet to isolate traffic and actually be truely redundant.  
 
 ### Optional
 
 - You can use your own Blob storage account and SAS token using the _artifactsLocation and _artifactsLocationSasToken parameters the ability to use your own storage blob with SAS token.
-- This template provides default values for VNet naming and IP addressing.  You will need to change the address space.
+- This template provides default values for VNet naming and IP addressing.
+- This configuration only has one iSCSI nic coming from the iSCSI client. We had tested a number of configurations to utilize seperate subnets and NICs however ran into issues with multiple gateways and trying to create a seperate storage subnet to isolate traffic and actually be truely redundant.  
 - Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
 - The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/
 
