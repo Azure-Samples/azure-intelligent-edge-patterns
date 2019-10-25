@@ -1,0 +1,119 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2019-03-01-hybrid",
+  "parameters": {
+    "RemoteTunnelEndpoint": {
+      "defaultValue": "1.1.1.2",
+      "type": "string",
+      "metadata": {
+        "description": ""
+      }
+    }, 
+    "RemoteVNetAddressSpace": {
+      "defaultValue":"10.20.0.0/16",
+      "type": "string",
+      "metadata": {
+        "description": ""
+      }
+    }, 
+    "RemoteVNetGateway": {
+      "defaultValue":"10.20.1.4",
+      "type": "string",
+      "metadata": {
+        "description": "The gateway of the server on the remote tunnel endpoint"
+      }
+    }, 
+    "LocalTunnelGateway": {
+      "defaultValue":"10.10.254.4",
+      "type": "string",
+      "metadata": {
+        "description": "The gateway of the server on the remote tunnel endpoint"
+      }
+    }, 
+    "_artifactsLocation": {
+      "defaultValue": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/rras-vnet-vpntunnel/",
+      "type": "string",
+      "metadata": {
+        "description": "The location of resources, such as templates and DSC modules, that the template depends on"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "defaultValue": "",
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access _artifactsLocation"
+      }
+    }
+  },
+
+  "variables": {
+    "deploymentApiVersion": "2018-09-01",
+    "routetableApiVersion": "2017-10-01",
+    "computeApiVersion" : "2017-12-01",
+    "Endpoint": "[replace(parameters('RemoteTunnelEndpoint'),'.','')]",
+    "vmName": "-RRAS",
+    "VNetVMName": "[concat(resourcegroup().name,variables('vmName'))]",
+    "RouteTable1Name": "[concat('RoutesFor',resourcegroup().name,'-rt' )]",
+    "scriptfilename": "Add-Site2SiteGRE.ps1",
+    "scriptfilepath": "[concat(parameters('_artifactsLocation'), 'Scripts/',variables('scriptfilename'), parameters('_artifactsLocationSasToken'))]"
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "[concat('ConfigureS2SVPNTunnel',variables('Endpoint'))]",
+      "apiVersion": "[variables('deploymentApiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "parameters": {},
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Network/routeTables",
+              "name": "[variables('RouteTable1Name')]",
+              "apiVersion": "[variables('routetableApiVersion')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "routes": [
+                  {
+                    "name": "[variables('RouteTable1Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('RemoteVNetAddressSpace')]",
+                      "nextHopType": "VirtualAppliance",
+                      "nextHopIpAddress": "[parameters('RemoteVNetGateway')]"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "name": "[concat(variables('VNetVMName'),'/CustomScriptExtension')]",
+              "apiVersion": "[variables('computeApiVersion')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "[variables('scriptFilepath')]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('scriptFilename'), ' ', '-TargetRRASIP ',  parameters('RemoteTunnelEndpoint'), ' -TargetIPRange ', parameters('RemoteVNetAddressSpace'),' -SourceRRASIP ', parameters('LocalTunnelGateway')) ]"
+                }
+              }
+            }
+          ]
+        }
+      }
+
+    }
+  ],
+  "outputs": {
+    
+  }
+}

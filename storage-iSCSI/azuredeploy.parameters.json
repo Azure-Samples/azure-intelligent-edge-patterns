@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "WindowsImageSKU": {
+        "value": "2019-Datacenter"
+    },
+    "VMSize": {
+        "value": "Standard_D2_v2"
+    },
+    "VMName": {
+        "value": "FileServer"
+    },
+    "adminUsername": {
+        "value": "storageadmin"
+    },
+    "VNetName": {
+        "value":"Storage"
+    },
+    "VNetAddressSpace": {
+        "value":"10.10.0.0/23"
+    },
+    "VNetInternalSubnetName": {
+        "value": "Internal"
+    },
+    "VNetInternalSubnetRange": {
+        "value":"10.10.1.0/24"
+    },  
+    "InternalVNetIP": {
+        "value":"10.10.1.4"
+    },
+    "_artifactsLocation": {
+        "value": "https://raw.githubusercontent.com/lucidqdreams/azure-intelligent-edge-patterns/master/storage-iSCSI/"
+    },
+    "_artifactsLocationSasToken": {
+        "value": ""
+    }
+  }
+}
