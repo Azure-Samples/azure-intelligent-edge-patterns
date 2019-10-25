@@ -36,7 +36,7 @@ This diagram shows a VM hosted on Azure Stack with an iSCSI mounted disk from a 
 - This template provides default values for VNet naming and IP addressing.
 - This configuration only has one iSCSI nic coming from the iSCSI client. We had tested a number of configurations to utilize seperate subnets and NICs however ran into issues with multiple gateways and trying to create a seperate storage subnet to isolate traffic and actually be truely redundant.  
 - Be careful to keep these values within legal subnet and address ranges as deployment may fail.  
-- The powershell DSC package is executed on each RRAS VM and installing routing and all required dependent services and features.  This DSC can be customized further if needed. These are the two DSC packages present https://github.com/PowerShell/ComputerManagementDsc/
+- The powershell DSC packages primary purpose is to check for pending reboots. This DSC can be customized further if needed. https://github.com/PowerShell/ComputerManagementDsc/
 
 ### Resource Group Template (iSCSI Client)
 
