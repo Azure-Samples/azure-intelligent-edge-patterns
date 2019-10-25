@@ -3,7 +3,7 @@ param
 (
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $RemoteServer = "FileServer",
+        $RemoteServer = "iSCSI",
         [Parameter(ParameterSetName='iSCSIDisk')]
         [Array]
         $RemoteServerIPs = @("1.1.1.1"),
@@ -12,12 +12,12 @@ param
         $DiskFolder = 'C:\iSCSIVirtualDisks',    
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $DiskName= "DiskName",
+        $DiskName= "LeetDisk01",
         [Parameter(ParameterSetName='iSCSIDisk')]
         $DiskSize =  5GB,   
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $TargetName = "RemoteTarget01",
+        $TargetName = "RemoteTarget03",
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
         $ChapUsername = "username",
@@ -26,6 +26,7 @@ param
         $ChapPassword = "userP@ssw0rd!"
 )
 
+$mycreds = New-Object System.Management.Automation.PSCredential ("username", $secpasswd)
 
 if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
 {
@@ -36,7 +37,8 @@ else
     write-error "The length of CHAP or reverse CHAP secret must be at least 12 characters, but no more than 16 characters."
     exit
 }
-$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$ChapPassword)
+$secpasswd = ConvertTo-SecureString $ChapPAssword -AsPlainText -Force
+$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$secpasswd)
 
 
 $VerbosePreference="silentlycontinue"
