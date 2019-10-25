@@ -3,7 +3,7 @@ param
 (
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $RemoteServer = "iSCSI",
+        $RemoteServer = "FileServer",
         [Parameter(ParameterSetName='iSCSIDisk')]
         [Array]
         $RemoteServerIPs = @("1.1.1.1"),
@@ -12,12 +12,12 @@ param
         $DiskFolder = 'C:\iSCSIVirtualDisks',    
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $DiskName= "LeetDisk01",
+        $DiskName= "DiskName",
         [Parameter(ParameterSetName='iSCSIDisk')]
         $DiskSize =  5GB,   
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
-        $TargetName = "RemoteTarget03",
+        $TargetName = "RemoteTarget01",
         [Parameter(ParameterSetName='iSCSIDisk')]
         [String]
         $ChapUsername = "username",
@@ -26,7 +26,6 @@ param
         $ChapPassword = "userP@ssw0rd!"
 )
 
-$mycreds = New-Object System.Management.Automation.PSCredential ("username", $secpasswd)
 
 if ($ChapPassword.Length -ge 12 -and $ChapPassword.Length -lt 16)
 {
@@ -37,8 +36,8 @@ else
     write-error "The length of CHAP or reverse CHAP secret must be at least 12 characters, but no more than 16 characters."
     exit
 }
-$secpasswd = ConvertTo-SecureString $ChapPAssword -AsPlainText -Force
-$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$secpasswd)
+$secpasswd = ConvertTo-SecureString $ChapPassword -AsPlainText -Force
+$ChapAuth = New-Object System.Management.Automation.PSCredential($ChapUsername,$secpasswd )
 
 
 $VerbosePreference="silentlycontinue"
@@ -131,6 +130,11 @@ else
 }
 
 $VirtualDisk = Join-Path $DiskFolder "$DiskName.vhdx"
+if (Test-Path $VirtualDisk )
+{
+    Write-Error "$VirtualDisk already exists, please clean up yours files"
+}
+
 $Existing = get-IscsiVirtualDisk | ? {$_.path -eq $virtualdisk }
 if (!($Existing ))
 {
@@ -142,31 +146,10 @@ else
     Write-verbose "Disk $($VirtualDisk) already exists "
 }
 
-
+write-verbose "Adding virtual disk mapping from $VirtualDisk to target $TargetName"
 Add-IscsiVirtualDiskTargetMapping -TargetName $TargetName -Path $VirtualDisk
 
-
+Write-Verbose "Enabling Chap Authentication"
 Set-IscsiServerTarget -TargetName $TargetName -EnableChap $true -Chap $ChapAuth
 
-
 $StorageIPs = (Get-NetIPAddress |? {$_.addressfamily -eq 'IPv4' -and $_.ipaddress -ne '127.0.0.1'}).IPAddress
-
-#get-IscsiServerTarget
-
-<#
-
-remove-iscsiservertarget -TargetName $TargetName 
-
-
-new-iscsiservertarget -targetname $iSCSITargetName  -InitiatorIds  $IDs
-
-
- # -EnableChap $True -Chap (New-Object PSCredential("username", (ConvertTo-SecureString -AsPlainText "UserP@ssw0rd01" -Force))) -PassThru 
-
-
-$results = Get-IscsiServerTarget -TargetName $iSCSITargetName
-
-$results
-$results.TargetIqn
-
-#>
