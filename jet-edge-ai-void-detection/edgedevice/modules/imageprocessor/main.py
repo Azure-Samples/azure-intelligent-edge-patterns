@@ -25,6 +25,9 @@ from imagebuffer import ImageBuffer
 from fpgaimageprocessor import FPGAImageProcessor
 from cpuimageprocessor import CPUImageProcessor
 
+from BoundingBox import draw_boxes_on_img
+
+
 image_buffer = ImageBuffer()
 image_processor = None
 blob_uploader = None
@@ -45,6 +48,7 @@ class BlobUploader:
         self.block_blob_service.create_blob_from_bytes(self.container_name,
                                                        blob_name,
                                                        data)
+        print("uploaded", blob_name)
 
 
 def module_twin_callback(update_state, payload, user_context):
@@ -167,10 +171,16 @@ def process_next_image():
                 print("processed results:")
                 print(result)
                 if result:
+                    bbox_jpeg = draw_boxes_on_img(image_body.smallImageRGB,
+                                                  result["classes"], result["scores"], result["bboxes"])
                     blob_uploader.upload(image_body.cameraId,
                                          image_body.time,
                                          image_body.type,
                                          bytes(image_body.image))
+                    blob_uploader.upload(image_body.cameraId,
+                                         image_body.time + "_bbox",
+                                         "jpg",
+                                         bytes(bbox_jpeg))
                     send_recognition_messages(result, image_body)
                     send_image_message(len(result["classes"]),
                                            image_body,
