@@ -6,11 +6,11 @@ import grpc
 import time
 from datetime import datetime, timedelta
 
-import ImageProcessorGrpc_pb2
-import ImageProcessorGrpc_pb2_grpc
+import BoundingBoxProcessorGrpc_pb2
+import BoundingBoxProcessorGrpc_pb2_grpc
 
-class ProcessorClient:
-    """Provides a gRPC client for submitting an image to the image processor module."""
+class BoundingBoxClient:
+    """Provides a gRPC client for submitting an image to the bounding box processor module."""
     def __init__(self, serverhost, port=None, use_ssl=False, access_token=None,
                  service_name=None, channel_shutdown_timeout=timedelta(minutes=2)):
         if serverhost is None:
@@ -28,7 +28,7 @@ class ProcessorClient:
             service_name = ""
 
         host = "{0}:{1}".format(serverhost, port)
-        print("ProcessorClient: host = '{}'".format(host))
+        print("BoundingBoxClient: host = '{}'".format(host))
 
         self.metadata = [("authorization", "Bearer {}".format(access_token)),
                          ("x-ms-aml-grpc-service-route", service_name)]
@@ -54,14 +54,21 @@ class ProcessorClient:
         if self.__channel is not None:
             self.__channel.close()
         self.__channel = self._channel_func()
-        self.__stub = ImageProcessorGrpc_pb2_grpc.GrpcChannelStub(self.__channel)
+        self.__stub = BoundingBoxProcessorGrpc_pb2_grpc.GrpcChannelStub(self.__channel)
 
-    def send_to_image_processor(self, image_body):
+    def send_to_bbox_processor(self, image_data):
         try:
-            result = self._get_grpc_stub().SubmitImage(image_body)
+            print("{}: calling bbox processor's SubmitImage".format(datetime.now()))
+            result = self._get_grpc_stub().SubmitImage(image_data)
+            print("SubmitImage returned")
+            print("type of result is", type(result))
+            print("type of result.boxedImage is", type(result.boxedImage))
             if result.error:
                 print("Error {}".format(result.error))
+            else:
+                return result.boxedImage
         except grpc.RpcError as ex:
             print("SubmitImage failed. Error code {0}, {1}".format(ex.code(), ex.details()))
         except Exception as ex:
             print("Unknown error: {0}".format(ex))
+        return None

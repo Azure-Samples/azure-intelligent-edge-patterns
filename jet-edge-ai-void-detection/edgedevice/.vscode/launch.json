@@ -69,6 +69,29 @@
           }
         ]
       }
+    },
+    {
+      "name": "boundingboxprocessor Remote Debug (Python)",
+      "type": "python",
+      "request": "attach",
+      "port": 5678,
+      "host": "localhost",
+      "logToFile": true,
+      "redirectOutput": true,
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/modules/boundingboxprocessor",
+          "remoteRoot": "/app"
+        }
+      ],
+      "windows": {
+        "pathMappings": [
+          {
+            "localRoot": "${workspaceFolder}\\modules\\boundingboxprocessor",
+            "remoteRoot": "/app"
+          }
+        ]
+      }
     }
   ]
 }

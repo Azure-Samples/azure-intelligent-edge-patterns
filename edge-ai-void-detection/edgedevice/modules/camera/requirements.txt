@@ -1,0 +1,5 @@
+azure-iothub-device-client~=1.4.3
+google
+grpcio
+grpcio-tools
+requests

@@ -96,6 +96,16 @@
               "image": "${MODULES.camera}",
               "createOptions": {}
             }
+          },
+          "boundingboxprocessor": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.boundingboxprocessor}",
+              "createOptions": {}
+            }
           }
         }
       }
@@ -107,7 +117,8 @@
           "ImageProcessorToIoTHub": "FROM /messages/modules/ImageProcessor/outputs/* INTO $upstream",
           "sensorToImageProcessor": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/ImageProcessor/inputs/input1\")",
           "imageprocessorToIoTHub": "FROM /messages/modules/imageprocessor/outputs/* INTO $upstream",
-          "cameraToIoTHub": "FROM /messages/modules/camera/outputs/* INTO $upstream"
+          "cameraToIoTHub": "FROM /messages/modules/camera/outputs/* INTO $upstream",
+          "boundingboxprocessorToIoTHub": "FROM /messages/modules/boundingboxprocessor/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
