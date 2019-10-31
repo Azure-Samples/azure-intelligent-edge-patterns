@@ -4,7 +4,7 @@
   "image": {
     "repository": "jetcontainerregistry.azurecr.io/boundingboxprocessor",
     "tag": {
-      "version": "0.0.33",
+      "version": "0.1.0",
       "platforms": {
         "amd64": "./Dockerfile.amd64",
         "amd64.debug": "./Dockerfile.amd64.debug",
