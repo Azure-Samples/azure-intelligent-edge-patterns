@@ -1,0 +1,50 @@
+{
+    "supportsHighlight" : false,
+    "dataRoles": [
+        {
+            "displayName": "Values",
+            "name": "values",
+            "kind": "Grouping"
+        }
+    ],
+    "objects": {
+        "visuals": {
+            "displayName": "Settings",
+            "properties": {
+                "blobSasUrl": {
+                    "displayName": "Blob SAS URL",
+                    "type": { "text": true }
+                },
+                "blobContainerName": {
+                    "displayName": "Blob Container Name",
+                    "type": { "text": true }
+                },
+                "strokeColor": {
+                    "displayName": "Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "lineWidth": {
+                   "displayName": "Line Thickness",
+                   "type": { "numeric": true }
+               }
+            }
+        }
+    },
+    "dataViewMappings": [
+        {
+            "table": {
+                "rows": {
+                    "for": {
+                        "in": "values"
+                    }
+                }
+            }
+        }
+    ]
+}
