@@ -119,6 +119,4 @@ receive the deployment.
 
 ## Test Your Solution
 
-1.  Go to the viewer app and watch images with voids appear.
-
-2.  Check the share on the Data Box Edge and watch raw images appear.
+See results with a [PowerBi Report](../PowerBi/PowerBi.md)
