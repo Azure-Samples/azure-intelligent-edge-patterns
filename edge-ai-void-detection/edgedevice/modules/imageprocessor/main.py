@@ -180,9 +180,12 @@ def rgb_to_np_array(img_rgb):
 def process_next_image():
     """Fetch the next image, if any, from the queue and process it."""
     if blob_uploader:
+        print("Have blob_loader")
         image_body = image_buffer.get_next()
         if image_body:
+            print("Have image_body")
             if image_processor:
+                print("Have image_processor")
                 process_start_time = datetime.now()
                 result = image_processor.process_image(image_body)
                 diff = datetime.now() - process_start_time

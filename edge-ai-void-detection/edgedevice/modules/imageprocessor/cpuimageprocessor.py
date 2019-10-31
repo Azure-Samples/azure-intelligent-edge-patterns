@@ -50,8 +50,6 @@ class CPUImageProcessor:
             headers = {"Content-Type": "application/json"}
             response = requests.post(url, json_image, headers=headers)
             result = json.loads(response.text)
-            #TODO: implement CPU model processing
-            #pass
             return result
         except Exception as ex:
             print("Unexpected error:", ex)
