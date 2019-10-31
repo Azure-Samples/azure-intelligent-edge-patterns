@@ -21,6 +21,7 @@ Before you begin, make sure you have:
       - An Azure Container Registry (ACR).
           - **Make a note of the ACR login server, username, and
             password.**
+  - [A Time Series Insights environment](https://docs.microsoft.com/en-us/azure/time-series-insights/time-series-insights-get-started)
   - A camera that presents an HTTP or RTSP endpoint for getting images.
   - The following development resources:
       - Azure CLI 2.0    
@@ -32,10 +33,21 @@ Before you begin, make sure you have:
       - Pip for installing Python packages (typically included with your
         Python installation).
 
+### Create an Azure Storage Account and a Shared Access Signature (SAS) token
+
+1. Login to https://portal.azure.com with the same account you used to setup the Time Series Insights Environment
+1. Create a new storage account, recommended that you create the storage in the same Resource Group as your TSI instance but this is not required
+1. Select the Storage Account
+1. Under **Blob Service**, select **Containers**
+1. Create a new Container called **still-images**, set **Public access level** to **Private**
+1. Under **Settings** select **Shared Access signature**
+1. Change the **End** date to a future date and click **Generate SAS and connection string**
+1. From the results, save the **Connection String** value, you will use it later.
+
 ## Prepare the IoT Edge VM
 
 1.  Make a note of the virtual machine's IP address.
-2.  Create a folder on the IoT Edge VM for images from the camera.
+1.  Create a folder on the IoT Edge VM for images from the camera.
 
 ## Get the Code
 
@@ -45,21 +57,23 @@ Before you begin, make sure you have:
 ```
 ## Configure and Build Containers
 1.  Open the “edge-ai-void-detection” folder in Visual Studio Code.
-2.  Fill in the values in the .env.template file with your ACR credentials, 
+1.  Fill in the values in the .env.template file with your ACR credentials, 
 	ACR registry name, URL
     for images, public IP address of the IoT Edge VM,
     and the name of the folder you created earlier.<br/>
-3.  Rename the file to ".env".
-4.  Sign into Docker by entering the following command in the Visual
-    Studio Code integrated terminal. Push your module image to your
-    Azure container registry. Use the username, password, and login
+1.  Replace the value for BLOB_STORAGE_SAS_URL with the Connection String created when you created the SAS token for the Storage Account.
+1.  Set ML_MODEL_TYPE to CPU
+1.  Rename the file to ".env".
+1.  Sign into Docker by entering the following command in the Visual Studio Code integrated 
+    terminal. Use the username, password, and login
     server that you copied from your Azure container registry in the
     first section. You can also retrieve these values from the Access
     keys section of your registry in the Azure portal.    
 `docker login -u 'ACR username' -p 'ACR password' 'ACR login
         server'`
-5.  In the VS Code explorer, right-click the deployment.iotedgevm.template.json
-    file and select Build and Push IoT Edge solution.
+1.  In the VS Code explorer, right-click the deployment.iotedgevm.template.json
+    file and select Build and Push IoT Edge solution.  The containers will be
+    pushed to the container registry.
 
 ## Deploy to Azure Stack
 
@@ -71,19 +85,19 @@ receive the deployment.
 
 1.  In the VS Code command palette, run Azure IoT Hub: Select IoT Hub.
 
-2.  Choose the subscription and IoT hub that contain the IoT Edge device
+1.  Choose the subscription and IoT hub that contain the IoT Edge device
     that you want to configure.
 
-3.  In the VS Code explorer, expand the Azure IoT Hub Devices section.
+1.  In the VS Code explorer, expand the Azure IoT Hub Devices section.
 
-4.  Right-click the name of your IoT Edge device, then select Create
+1.  Right-click the name of your IoT Edge device, then select Create
     Deployment for Single Device.
 
-5.  Select the `deployment.iotedgevm.amd64.json` file in the config folder and then click
+1.  Select the `deployment.iotedgevm.amd64.json` file in the config folder and then click
     Select Edge Deployment Manifest. Do not use the
     `deployment.iotedgevm.template.json` file.
 
-6.  Click the refresh button. You should see \[modules running\]
+1.  Click the refresh button. You should see \[modules running\]
 
 ## Test Your Solution
 
