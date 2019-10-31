@@ -10,7 +10,7 @@
             "minDockerVersion": "v1.25",
             "loggingOptions": "",
             "registryCredentials": {
-              "$CONTAINER_REGISTRY_NAME": {
+              "jetcontainerregistry": {
                 "username": "$CONTAINER_REGISTRY_USERNAME",
                 "password": "$CONTAINER_REGISTRY_PASSWORD",
                 "address": "$CONTAINER_REGISTRY_LOGIN_SERVER"
@@ -72,59 +72,6 @@
               }
             }
           },
-          "captureimages": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "${MODULES.captureimages}",
-              "createOptions": {
-                "HostConfig": {
-                  "Binds": [
-                    "$SHARE_NAME:/imagefiles"
-                  ]
-                }
-              }
-            }
-          },
-          "processimages": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "${MODULES.processimages}",
-              "createOptions": {
-                "HostConfig": {
-                  "Binds": [
-                    "$SHARE_NAME:/imagefiles"
-                  ]
-                }
-              }
-            },
-            "env": {
-              "ML_MODULE_NAME": {
-                "value": "void-detection-cpu"
-              }
-            }
-          },
-          "uploadimages": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "${MODULES.uploadimages}",
-              "createOptions": {
-                "HostConfig": {
-                  "Binds": [
-                    "$SHARE_NAME:/imagefiles"
-                  ]
-                }
-              }
-            }
-          },
           "apiserver": {
             "version": "1.0",
             "type": "docker",
@@ -138,7 +85,7 @@
                 },
                 "HostConfig": {
                   "Binds": [
-                    "$SHARE_NAME/out:/app/wwwroot/images/output"
+                    "/$SHARE_NAME/out:/app/wwwroot/images/output"
                   ],
                   "PortBindings": {
                     "80/tcp": [
@@ -177,31 +124,50 @@
               }
             }
           },
-          "voiddetectionbrainwave": {
+          "grocerymodel": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/void-detection-cpu:1.0.0",
+              "image": "jetcontainerregistry.azurecr.io/grocerymodelquiet:0.0.1",
+              "createOptions": {}
+            }
+          },
+          "imageprocessor": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.imageprocessor.debug}",
               "createOptions": {
-                "ExposedPorts": {
-                  "80/tcp": {}
-                },
+              }
+            }
+          },
+          "camera": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.camera.debug}",
+              "createOptions": {
+              }
+            }
+          },
+          "boundingboxprocessor": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.boundingboxprocessor.debug}",
+              "createOptions": {
                 "HostConfig": {
-                  "Privileged": true,
-                  "PortBindings": {
-                    "80/tcp": [
-                      {
-                        "HostPort": "80"
-                      }
-                    ]
-                  },
                   "Binds": [
-                    "/etc/hosts:/etc/hosts",
-                    "$SHARE_NAME:/imagefiles"
-                  ],
-
+                    "/imagefiles:/imagefiles"
+                  ]
                 }
               }
             }
@@ -213,35 +179,11 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "CaptureImagesToProcessingImages": "FROM /messages/modules/captureimages/outputs/* INTO BrokeredEndpoint(\"/modules/processimages/inputs/input1\")",
-          "ProcessingImagesToUploadImages": "FROM /messages/modules/processimages/outputs/output1 INTO BrokeredEndpoint(\"/modules/uploadimages/inputs/input1\")",
-          "ProcessingImagesToIotHub": "FROM /messages/modules/processimages/outputs/output2 INTO $upstream",
-          "UploadImagesToIotHub": "FROM /messages/modules/uploadimages/outputs/* INTO $upstream"
+          "imageprocessorToIoTHub": "FROM /messages/modules/imageprocessor/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
-      }
-    },
-    "captureimages": {
-      "properties.desired": {
-        "schemaVersion": "1.0",
-        "module_id": "captureimages",
-        "image_url": "$HTTP_IMAGE_URL"
-      }
-    },
-    "processimages": {
-      "properties.desired": {
-        "schemaVersion": "1.0",
-        "blobStorageSasUrl": "$BLOB_STORAGE_SAS_URL",
-        "dataDestination": "$DATA_DESTINATION",
-        "cameraId": "$CAMERA_ID"
-      }
-    },
-    "uploadimages": {
-      "properties.desired": {
-        "schemaVersion": "1.0",
-        "api_ip_address": "$EXTERNAL_IP_ADDRESS"
       }
     },
     "redisdb": {
@@ -252,6 +194,31 @@
     },
     "clientsite": {
       "properties.desired": {}
+    },
+    "camera": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "camera": {
+          "port": "counter",
+          "id": "camera_fixed_image",
+          "type": "simulator",
+          "secondsBetweenImages": 10,
+          "disabled": false
+        }
+      }
+    },
+    "imageprocessor": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "blobStorageSasUrl": "$BLOB_STORAGE_SAS_URL",
+        "mlModelType": "$ML_MODEL_TYPE"
+      }
+    },
+    "boundingboxprocessor": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "api_ip_address": "$EXTERNAL_IP_ADDRESS"
+      }
     }
   }
 }
