@@ -199,9 +199,9 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "camera": {
-          "port": "counter",
-          "id": "camera_fixed_image",
-          "type": "simulator",
+          "url": "$CAMERA_IMAGE_URL",
+          "id": "$CAMERA_ID",
+          "type": "$CAMERA_TYPE",
           "secondsBetweenImages": 10,
           "disabled": false
         }

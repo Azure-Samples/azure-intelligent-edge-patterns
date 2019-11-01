@@ -8,6 +8,9 @@ import numpy as np
 import requests
 
 import ImageProcessorGrpc_pb2
+import VideoStream
+from VideoStream import VideoStream
+
 
 def format_image_utc_time(time: datetime = None):
     """
@@ -41,6 +44,16 @@ class HTTPSource:
         return None
 
 
+class RTSPSource:
+    """A camera image source that retrieves an image from an RTSP camera."""
+    def __init__(self, url):
+        self.url = url
+        self.capture = VideoStream(url).start()
+
+    def get_image(self):
+        return self.capture.read()
+
+
 class Camera:
     """Represents a single camera.
 
@@ -49,13 +62,15 @@ class Camera:
     def __init__(self, camera_info):
         self.id = camera_info["id"]
         self.type = camera_info["type"]
-        self.port = camera_info["port"]
+        self.url = camera_info["url"]
         self.seconds_between_images = camera_info["secondsBetweenImages"]
         self.image_source = None
-        if self.type == "simulator":
+        if self.type.lower() == "simulator":
             self.image_source = SingleImageSource()
-        elif self.type == "http":
-            self.image_source = HTTPSource(self.port)
+        elif self.type.lower() == "http":
+            self.image_source = HTTPSource(self.url)
+        elif self.type.lower() == "rtsp"
+            self.image_source = RTSPSource(self.url)
         else:
             print('Unrecognized camera type "{}"'.format(self.type))
 
