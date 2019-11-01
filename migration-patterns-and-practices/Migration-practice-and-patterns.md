@@ -46,7 +46,7 @@ These are the online materials that can help your teams ramp up on the basics an
 
 Every organization is different. As a result each migration process is different and has its own specific challenges. At a high level, these can be broken down into three key phases:
 
-![](media\Migration-practice-and-patterns/media/image2.png)
+![](./media/image2.png)
 
 **Assess**
 
@@ -88,7 +88,7 @@ Based on Microsoft’s experience working with customers directly by way of cust
 
 The drivers of the migration effort are varied and having a good understanding of them and the motive behind them, will guide the project towards a successful implementation:
 
-![](media\Migration-practice-and-patterns/media/image4.png)
+![](./media/image4.png)
 
   ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   Area                        Envisioning
@@ -337,7 +337,7 @@ There are cases where certain "low hanging fruit"applications are identified for
        
            -   Are there ISVs involved with the customer needs contact to confirm support statements?
        
-       ![](media\Migration-practice-and-patterns/media/image5.png)
+ ![](./media/image5.png)
        
   Desired outcome checklist   -   Deep technical understanding of the foundational elements of Azure and Azure Stack
        
@@ -588,7 +588,7 @@ In the optimization phase, the application and datasets running in their new env
 
 Azure Stack is an extension of Microsoft Azure, which also means it is different than the traditional virtualization platforms (more info in [this](https://myignite.techcommunity.microsoft.com/sessions/65842?source=sessions) Ignite 2018 session). It offers PaaS services which are consistent with Azure, but also goes beyond virtualization platforms which offer VMs, by offering IaaS capabilities which are consistent with Azure. These capabilities enable a number of scenarios around the IaaS platform itself:
 
-![](media\Migration-practice-and-patterns/media/image6.png)
+![](./media/image6.png)
 
 These topics are explored in the "Azure Stack at its core is an IaaS platform"blog series:
 
@@ -614,7 +614,7 @@ In the modernization phase, customers have an opportunity to retrofit a migrated
 
 Other customers may have decided to postpone attaching additional services to or modernizing these applications. In either case there is an opportunity to introduce modernizations without changing the design of the application or requiring another migration to a new platform.
 
-![](media\Migration-practice-and-patterns/media/image7.png)
+![](./media/image7.png)
 
 Modernization could start with something as trivial as creating a template for certain VMs in the solution and building on that to achieve a "Infrastructure as Code"deployment and management approach – where the entire environment is managed through declarative and imperative scripts.
 
