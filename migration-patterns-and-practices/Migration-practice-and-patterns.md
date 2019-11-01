@@ -155,11 +155,11 @@ The drivers of the migration effort are varied and having a good understanding o
        -   Leadership level agreement on migration and modernization strategy and level of investment for each (retain, retire, re-host, re-platform, re-purchase, re-factor)
        
 
-  Useful links                -   [BRK2367 - Azure Stack Overview and Roadmap](https://myignite.techcommunity.microsoft.com/sessions/65842)
+  Useful links
        
        -   [Azure Stack capacity planning](https://docs.microsoft.com/azure/azure-stack/capacity-planning)
        
-       -   [BRK3317 - Best Practices for Planning Azure Stack deployment and post-deployment integrations with Azure](https://myignite.techcommunity.microsoft.com/sessions/65844)
+       -   [Azure Stack: Considerations for business continuity and disaster recovery](https://azure.microsoft.com/en-ca/resources/azure-stack-considerations-for-business-continuity-and-disaster-recovery/)
        
        -   [Cloud Migration and Modernization](https://assets.microsoft.com/en-us/mpn-playbook-cloud-migration.pdf) playbook \["How is the Cloud Different?"chapter\]
        
