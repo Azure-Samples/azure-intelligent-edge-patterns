@@ -62,8 +62,18 @@ def module_twin_callback(update_state, payload, user_context):
     data = json.loads(payload)
     if "desired" in data:
         data = data["desired"]
+        uploadToBlobStorage = True
+        if "uploadToBlobStorage" in data:
+            value = str(data["uploadToBlobStorage"])
+            if value.lower() == "no":
+                uploadToBlobStorage = False
         if "blobStorageSasUrl" in data:
             sasKey = str(data["blobStorageSasUrl"])
+            if is_blank(sasKey):
+                uploadToBlobStorage = False
+        else:
+            uploadToBlobStorage = False
+        if uploadToBlobStorage:
             print("Creating new BlobUploader")
             global blob_uploader
             blob_uploader = BlobUploader("still-images", sasKey)
@@ -80,6 +90,9 @@ def module_twin_callback(update_state, payload, user_context):
             else:
                 print("unrecognized mlModelType:", modelType)
                 image_processor = None
+
+def is_blank (input):
+    return not (input and input.strip())
 
 
 class HubManager(object):
@@ -179,32 +192,32 @@ def rgb_to_np_array(img_rgb):
 
 def process_next_image():
     """Fetch the next image, if any, from the queue and process it."""
-    if blob_uploader:
-        print("Have blob_loader")
-        image_body = image_buffer.get_next()
-        if image_body:
-            print("Have image_body")
-            if image_processor:
-                print("Have image_processor")
-                process_start_time = datetime.now()
-                result = image_processor.process_image(image_body)
-                diff = datetime.now() - process_start_time
-                msec = (diff.days * 86400000) + (diff.seconds * 1000) + (diff.microseconds / 1000)
-                print("processed results:")
-                print(result)
-                if result:
-                    # Call gRPC server to handle bounding boxes
-                    image_data = BoundingBoxProcessorGrpc_pb2.ImageData()
-                    image_data.cameraId = image_body.cameraId
-                    image_data.time = image_body.time
-                    image_data.type = image_body.type
-                    print("type of smallImageRGB:", type(image_body.smallImageRGB))
-                    image_data.image = bytes(rgb_to_np_array(image_body.smallImageRGB))
-                    image_data.scoringData = json.dumps(result)
-                    print("Calling bounding box gRPC server")
-                    bbox_jpeg = processor_client.send_to_bbox_processor(image_data)
-                    print("type of bbox_jpeg:", type(bbox_jpeg))
-                    if bbox_jpeg is not None:
+    image_body = image_buffer.get_next()
+    if image_body:
+        print("Have image_body")
+        if image_processor:
+            print("Have image_processor")
+            process_start_time = datetime.now()
+            result = image_processor.process_image(image_body)
+            diff = datetime.now() - process_start_time
+            msec = (diff.days * 86400000) + (diff.seconds * 1000) + (diff.microseconds / 1000)
+            print("processed results:")
+            print(result)
+            if result:
+                # Call gRPC server to handle bounding boxes
+                image_data = BoundingBoxProcessorGrpc_pb2.ImageData()
+                image_data.cameraId = image_body.cameraId
+                image_data.time = image_body.time
+                image_data.type = image_body.type
+                print("type of smallImageRGB:", type(image_body.smallImageRGB))
+                image_data.image = bytes(rgb_to_np_array(image_body.smallImageRGB))
+                image_data.scoringData = json.dumps(result)
+                print("Calling bounding box gRPC server")
+                bbox_jpeg = processor_client.send_to_bbox_processor(image_data)
+                print("type of bbox_jpeg:", type(bbox_jpeg))
+                if bbox_jpeg is not None:
+                    if blob_uploader:
+                        print("Have blob uploader")
                         blob_uploader.upload(image_body.cameraId,
                                             image_body.time,
                                             image_body.type,
@@ -213,11 +226,13 @@ def process_next_image():
                                             image_body.time + "_bbox",
                                             "jpg",
                                             bytes(bbox_jpeg))
-                        send_recognition_messages(result, image_body)
-                        send_image_message(len(result["classes"]),
-                                            image_body,
-                                            msec,
-                                            image_processor.processor_type)
+                    else:
+                        print("No blob uploader, not uploading images to blob storage")
+                    send_recognition_messages(result, image_body)
+                    send_image_message(len(result["classes"]),
+                                        image_body,
+                                        msec,
+                                        image_processor.processor_type)
 
 
 def main(protocol, port):

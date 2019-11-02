@@ -69,7 +69,7 @@ class Camera:
             self.image_source = SingleImageSource()
         elif self.type.lower() == "http":
             self.image_source = HTTPSource(self.url)
-        elif self.type.lower() == "rtsp"
+        elif self.type.lower() == "rtsp":
             self.image_source = RTSPSource(self.url)
         else:
             print('Unrecognized camera type "{}"'.format(self.type))
