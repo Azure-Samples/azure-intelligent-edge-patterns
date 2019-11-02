@@ -44,10 +44,22 @@ Before you begin, make sure you have:
 1. Change the **End** date to a future date and click **Generate SAS and connection string**
 1. From the results, save the **Connection String** value, you will use it later.
 
+
+## Add a device to the the IoT Hub
+1.  Open the settings for the IoT Hub in the Azure Portal
+1.  Under **Automatic Device Management**, select **IoT Edge**
+1.  Add an IoT Edge Device, give the device a meaninful Device ID
+1.  Copy the **Primary Connection String**
+
+
 ## Prepare the IoT Edge VM
 
 1.  Make a note of the virtual machine's IP address.
 1.  Create a folder on the IoT Edge VM for images from the camera.
+1.  Edit the **/etc/iotedge/config.yaml** file, under provisioning, set the device_connection_string to the **Primary Connection String** from the last section
+1.  Save the file
+1.  Restart the iotedge daemon, type:  `sudo systemctl restart iotedge`
+
 
 ## Get the Code
 
