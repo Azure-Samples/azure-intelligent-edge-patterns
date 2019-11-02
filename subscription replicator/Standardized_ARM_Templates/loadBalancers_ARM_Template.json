@@ -1,0 +1,50 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "armAPIVersion": {
+            "type": "String"
+        },
+        "location": {
+            "type": "String"
+        },
+        "loadBalancerName": {
+            "type": "String"
+        },
+        "sku": {
+            "type": "String"
+        },
+        "subnetId": {
+            "type": "String"
+        },
+        "privateIPAllocationMethod": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "[parameters('armAPIVersion')]",
+            "name": "[parameters('loadBalancerName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "sku": {
+                "name": "[parameters('sku')]"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LoadBalancerFrontEnd",
+                        "properties": {
+                            "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
+                            "subnet": {
+                                "id": "[parameters('subnetId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

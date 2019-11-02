@@ -1,0 +1,48 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "armAPIVersion": {
+        "type": "string"
+    },
+    "location": {
+        "type": "string"
+    },
+    "storageAccountName": {
+        "type": "string"
+    },
+    "accountType": {
+        "type": "string"
+    },
+    "kind": {
+        "type": "string"
+    },
+    "accessTier": {
+        "type": "string"
+    },
+    "supportsHttpsTrafficOnly": {
+        "type": "bool"
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+        "name": "[parameters('storageAccountName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "[parameters('armAPIVersion')]",
+        "location": "[parameters('location')]",
+        "properties": {
+            "accessTier": "[parameters('accessTier')]",
+            "supportsHttpsTrafficOnly": "[parameters('supportsHttpsTrafficOnly')]"
+        },
+        "dependsOn": [],
+        "sku": {
+            "name": "[parameters('accountType')]"
+        },
+        "kind": "[parameters('kind')]"
+    }
+  ],
+  "outputs": {
+  }
+}

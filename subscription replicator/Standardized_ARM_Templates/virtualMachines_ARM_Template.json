@@ -1,0 +1,163 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "armAPIVersion": {
+        "type": "string"
+      },
+      "nicArmAPIVersion": {
+        "type": "string"
+      },
+      "location": {
+        "type": "String"
+      },
+      "virtualMachineName": {
+        "type": "String"
+      },
+      "virtualMachineSize": {
+        "type": "String"
+      },
+      "adminUsername": {
+        "type": "String"
+      },
+      "adminPassword": {
+        "type": "SecureString"
+      },
+      "publisher": {
+        "type": "String"
+      },
+      "offer": {
+        "type": "String"
+      },
+      "sku": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "createOption": {
+        "type": "String"
+      },
+      "storageAccountType": {
+        "type": "String"
+      },
+      "datadisk_name": {
+          "type": "Array"
+      },
+      "datadisk_diskSizeGB": {
+        "type": "Array"
+      },
+      "datadisk_lun": {
+        "type": "Array"
+      },
+      "datadisk_createOption": {
+        "type": "Array"
+      },
+      "networkInterfaceName": {
+        "type": "String"
+      },
+      "ipConfigurations_Name": {
+          "type": "String"
+      },
+      "subnetId": {
+        "type": "String"
+      },  
+      "ipConfigurations_privateIPAllocationMethod": {
+        "type": "String"
+      },
+      "ipConfigurations_privateIPAddress": {
+        "type": "String"
+      },
+      "ipConfigurations_privateIPAddressVersion": {
+        "type": "String"
+      }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[parameters('virtualMachineName')]",
+        "apiVersion": "[parameters('armAPIVersion')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "osProfile": {
+            "computerName": "[parameters('virtualMachineName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "windowsConfiguration": {
+              "provisionVmAgent": "true"
+            }
+          },
+          "hardwareProfile": {
+            "vmSize": "[parameters('virtualMachineSize')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[parameters('publisher')]",
+              "offer": "[parameters('offer')]",
+              "sku": "[parameters('sku')]",
+              "version": "[parameters('version')]"
+            },
+            "osDisk": {
+              "createOption": "[parameters('createOption')]",
+              "managedDisk": {
+                "storageAccountType": "[parameters('storageAccountType')]"
+              }
+            },
+            "copy":[
+                {
+                    "name": "dataDisks",
+                    "count": "[length(parameters('datadisk_name'))]",
+                    "input": {
+                        "name": "[parameters('datadisk_name')[copyIndex('dataDisks')]]",
+                        "diskSizeGB": "[parameters('datadisk_diskSizeGB')[copyIndex('dataDisks')]]",
+                        "lun": "[parameters('datadisk_lun')[copyIndex('dataDisks')]]",
+                        "createOption": "[parameters('datadisk_createOption')[copyIndex('dataDisks')]]"
+                    }
+                }
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+              }
+            ]
+          }
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[parameters('networkInterfaceName')]",
+        "apiVersion": "[parameters('nicArmAPIVersion')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "[parameters('ipConfigurations_Name')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('subnetId')]"
+                },
+                "privateIPAllocationMethod": "[parameters('ipConfigurations_privateIPAllocationMethod')]",
+                "privateIPAddress": "[parameters('ipConfigurations_privateIPAddress')]",
+                "privateIPAddressVersion": "[parameters('ipConfigurations_privateIPAddressVersion')]"
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+        ]
+      }
+  ],
+  "outputs": {
+    "adminUsername": {
+        "type": "String",
+        "value": "[parameters('adminUsername')]"
+      }
+  }
+}

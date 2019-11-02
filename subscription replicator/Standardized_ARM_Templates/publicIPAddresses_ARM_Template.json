@@ -1,0 +1,39 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "armAPIVersion": {
+        "type": "String"
+    },
+    "location": {
+      "type": "String"
+    },
+    "publicIpAddressName": {
+      "type": "String"
+    },
+    "publicIpAddressType": {
+      "type": "String"
+    },
+    "publicIpAddressSku": {
+      "type": "String"
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+        "type": "Microsoft.Network/publicIpAddresses",
+        "sku": {
+          "name": "[parameters('publicIpAddressSku')]"
+        },
+        "name": "[parameters('publicIpAddressName')]",
+        "apiVersion": "[parameters('armAPIVersion')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+        }
+      }
+  ],
+  "outputs": {
+  }
+}

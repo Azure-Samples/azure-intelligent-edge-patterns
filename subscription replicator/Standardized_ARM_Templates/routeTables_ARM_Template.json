@@ -1,0 +1,30 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "armAPIVersion": {
+            "type": "String"
+        },
+        "location": {
+            "type": "String"
+        },
+        "routeTableName": {
+            "type": "String"
+        },
+        "disableBgpRoutePropagation": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "[parameters('armAPIVersion')]",
+            "name": "[parameters('routeTableName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "properties": {
+                "disableBgpRoutePropagation": "[parameters('disableBgpRoutePropagation')]"
+            }
+        }
+    ]
+}

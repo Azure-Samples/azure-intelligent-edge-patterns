@@ -1,0 +1,76 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "armAPIVersion": {
+            "type": "string"
+        },
+        "vaultName": {
+            "type": "String"
+        },
+        "location": {
+            "type": "String"
+        },
+        "sku": {
+            "defaultValue": "Standard",
+            "allowedValues": [
+                "Standard",
+                "standard",
+                "Premium",
+                "premium"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "SKU for the vault"
+            }
+        },
+        "family": {
+            "type": "String"
+        },
+        "accessPolicies": {
+            "defaultValue": [],
+            "type": "Array",
+            "metadata": {
+                "description": "The access policies defined for this vault."
+            }
+        },
+        "tenant": {
+            "type": "String"
+        },
+        "enabledForDeployment": {
+            "type": "Bool"
+        },
+        "enabledForTemplateDeployment": {
+            "type": "Bool"
+        },
+        "enabledForDiskEncryption": {
+            "type": "Bool"
+        },
+        "networkAcls": {
+            "type": "Object",
+            "metadata": {
+                "description": "The network firewall defined for this vault."
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "[parameters('armAPIVersion')]",
+            "name": "[parameters('vaultName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "enabledForDeployment": "[parameters('enabledForDeployment')]",
+                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+                "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
+                "accessPolicies": "[parameters('accessPolicies')]",
+                "tenantId": "[parameters('tenant')]",
+                "sku": {
+                    "name": "[parameters('sku')]",
+                    "family": "[parameters('family')]"
+                },
+                "networkAcls": "[parameters('networkAcls')]"
+            }
+        }
+    ]
+}
