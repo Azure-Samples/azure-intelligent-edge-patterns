@@ -130,7 +130,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "jetcontainerregistry.azurecr.io/grocerymodelquiet:0.0.1",
+              "image": "patterntest.azurecr.io/out-of-stock-cpu:0.1.0",
               "createOptions": {}
             }
           },
