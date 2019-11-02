@@ -62,6 +62,9 @@ Before you begin, make sure you have:
     for images, public IP address of the IoT Edge VM,
     and the name of the folder you created earlier.<br/>
 1.  Replace the value for BLOB_STORAGE_SAS_URL with the Connection String created when you created the SAS token for the Storage Account.
+1.  If you want to disable uploading images to Azure blobl storage, replace the value for
+    UPLOAD_TO_BLOB_STORAGE with NO.
+1.  Set CAMERA_TYPE to one of "HTTP", "RTSP", or "simulator".
 1.  Set ML_MODEL_TYPE to CPU
 1.  Rename the file to ".env".
 1.  Sign into Docker by entering the following command in the Visual Studio Code integrated 
