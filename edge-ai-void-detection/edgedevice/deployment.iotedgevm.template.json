@@ -130,7 +130,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "patterntest.azurecr.io/out-of-stock-cpu:0.1.0",
+              "image": "intelligentedge/out-of-stock-cpu:0.1.0",
               "createOptions": {}
             }
           },
