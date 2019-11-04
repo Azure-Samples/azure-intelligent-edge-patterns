@@ -46,7 +46,7 @@ Setup your Azure Environment by following these [steps](./azure-resources.md)
 
 1.  Make a note of the virtual machine's IP address.
 1.  Create a folder on the IoT Edge VM for images from the camera.
-1.  Edit the **/etc/iotedge/config.yaml** file, under provisioning, set the device_connection_string to the **Primary Connection String** from the last section
+1.  Edit the `/etc/iotedge/config.yaml` file, under **provisioning**, set the **device_connection_string** to the **Primary Connection String** from the last section
 1.  Save the file
 1.  Restart the iotedge daemon, type:  `sudo systemctl restart iotedge`
 

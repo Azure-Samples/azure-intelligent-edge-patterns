@@ -1,43 +1,17 @@
 # Azure Resources
 
-**NOTE** When creating resources, the Basic pricing tier will suffice for this tutorial
-
-
-## Create an Event Hub
-Follow this [Quickstart](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create) to setup an event hub and namespace
-
-After creating the event hub and namespace, open the event hub namespace
-1.  Under **Entities**, click **Event Hubs**
-1.  Create a new Event Hub called actions-eventhub (or similar)
-1.  In the new event hub, under **Settings** click **Shared access policies**
-1.  Create a new policy called actionroutes-action-eventhub (or similar), enable **Send** and **Listen**
 
 
 ## Create an IoT Hub
-Use one of these [methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create an IoT hub in the same Resource Group that contains the Event Hub
+Use one of these [methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create an IoT hub.  It's recommended that you keep all resources for this walk-through in the same Resource Group but it's not required.  Use the default settings in the hub creation.
 
-### Add Message Routing
 
-#### Create a custom endpoint
+### Add a Consumer Group to your IoT hub
+1.  See this [link](https://docs.microsoft.com/en-us/azure/time-series-insights/time-series-insights-how-to-add-an-event-source-iothub#add-a-consumer-group-to-your-iot-hub) for more details
 1.  Open the newly deployed IoT hub in the Azure Portal
-1.  Under **Messaging**, select **Message routing**
-1.  Select the **Custom endpoints** tab
-1.  Click Add, then Event hubs
-    * Set **Endpoint name** to `DeviceNotifications`
-    * Set the **Event hub namespace** to the event hub namespace created in the previous section
-    * Set the **Event hub instance** to event hub created in the previous section
+1.  Under **Settings** select **Built-in endpoints**
+1.  Under **Events**, **Consumer Groups**, create a new consumer group, you'll use this consumer group again later when creating the TSI instance
 
-#### Add routes
-1.  Still in **Message routing**, click the **Routes tab**
-1.  Click **Add**
-1.  Set the route **Name** to `TwinRoute`
-1.  Set the **Endpoint** to `Device Notifications`
-1.  Set the **Data source** to `Device Twin Change Events`
-1.  Save
-1.  Repeat with the following values :
-    * **Name** to `LifecycleRoute`
-    * **Endpoint** to `Device Notifications`
-    * **Data source** to `Device Lifecycle Events`
 
 ## Create a Time Series Insights environment
 
@@ -50,7 +24,7 @@ Use these instructions to create a [Time Series Insights environment](https://do
     * Set **Subscription** to your subscription
     * Set **IoT Hub Name** to the hub you created earlier
     * Set **Iot Hub access** policy to `service`
-1.  Set the **IoT Hub consumer group** to `$Default`
+1.  In the **CONSUMER GROUP** section, great a new group for the the **IoT Hub consumer group**
 1.  Set the **TIMESTAMP** property name to `iothub-creation-time-utc`
 1.  Create the resource
 
@@ -59,6 +33,8 @@ Use these instructions to create a [Time Series Insights environment](https://do
 
 1. Login to https://portal.azure.com with the same account you used to setup the Time Series Insights Environment
 1. Create a new storage account, recommended that you create the storage in the same Resource Group as your TSI instance but this is not required
+    * Account kind : Storage (general purpose v1)
+    * Replication : Locally-redundant storage (LRS)
 1. Select the Storage Account
 1. Under **Blob Service**, select **Containers**
 1. Create a new Container called **still-images**, set **Public access level** to **Private**
