@@ -1,0 +1,13 @@
+{
+  "name": "hybrid-replay-sample",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Azure/azure-relay-node.git"
+  },
+  "dependencies": {
+    "optimist": "^0.3.1",
+    "hyco-websocket": "^1.0.4",
+    "wordwrap": "^0.0.2"
+  }
+}

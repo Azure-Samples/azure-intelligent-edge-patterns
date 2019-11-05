@@ -1,0 +1,313 @@
+# This is the configuration for Porter
+# You must define steps for each action, but the rest is optional
+# See https://porter.sh/authoring-bundles for documentation on how to configure your bundle
+# Uncomment out the sections below to take full advantage of what Porter can do!
+
+name: hybrid-relay-deployment
+version: 0.1.0
+description: "Deploys a hybrid relay across Azure and Azure Stack."
+invocationImage: intelligentedge/hybrid-relay-deployment:0.1.0
+tag: intelligentedge/hybrid-relay-deployment:0.1.0
+
+# Uncomment out the line below to use a template Dockerfile for your invocation image
+#dockerfile: Dockerfile.tmpl
+
+mixins:
+  - exec
+  - az:
+      extensions:
+      - azure-cli-ml
+
+install:
+  - az:
+      description: "Register Azure Stack"
+      arguments:
+        - cloud
+        - register 
+      flags:
+        name: "AzureStack"
+        endpoint-resource-manager: "{{ bundle.parameters.azure_stack_tenant_arm}}"
+        suffix-storage-endpoint: "{{ bundle.parameters.azure_stack_storage_suffix}}"
+        suffix-keyvault-dns: "{{ bundle.parameters.azure_stack_keyvault_suffix}}"
+        endpoint-vm-image-alias-doc: "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json"
+  - az:
+      description: "Set Azure Stack Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureStack"
+  - az:
+      description: "Update Azure Stack Profile"
+      arguments:
+        - cloud
+        - update
+      flags:
+        profile: "{{ bundle.parameters.azure_stack_profile}}"
+  - az:
+      description: "Set Azure Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureCloud"
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}" 
+  - az:
+      description: "Set Azure Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_SUBSCRIPTION_ID}}"
+  - az:
+      description: "Create resource group in Azure"
+      arguments:
+        - group
+        - create
+      flags:
+        name: "hybrid-relay-rg{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_location}}"
+  - az:
+      description: "Create relay server VM on Azure."
+      arguments:
+        - vm
+        - create
+      flags:
+        name: "relayserver{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_location}}"
+        image: "UbuntuLTS"
+        admin-username: "adminuser"
+        admin-password: "{{ bundle.credentials.VM_PASSWORD}}"
+        resource-group: "hybrid-relay-rg{{ bundle.parameters.resource_suffix}}"
+      outputs:
+        - name: "azure_vm_public_ip"
+          jsonPath: "$.publicIpAddress"
+  - az:
+      description: "Open port 22 for SSH"
+      arguments:
+        - vm
+        - open-port
+      flags:
+        name: "relayserver{{ bundle.parameters.resource_suffix}}"
+        port: 22
+        resource-group: "hybrid-relay-rg{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Install Node and set up dependencies in Azure."
+      arguments:
+        - vm
+        - extension
+        - set
+      flags:
+        vm-name: "relayserver{{ bundle.parameters.resource_suffix}}"
+        name: "customScript"
+        publisher: "Microsoft.Azure.Extensions"
+        settings: "script-config.json"
+        resource-group: "edge-training-rg{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Set Azure Stack Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureStack"
+  - az:
+      description: "Login to Azure Stack"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_STACK_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_STACK_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_STACK_SP_TENANT_DNS}}"
+  - az:
+      description: "Create resource group in Azure Stack"
+      arguments:
+        - group
+        - create
+      flags:
+        name: "hybrid-relay-stack-rg{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_location}}"
+  - az:
+      description: "Create relay client VM on Azure Stack."
+      arguments:
+        - vm
+        - create
+      flags:
+        name: "relayclient{{ bundle.parameters.resource_suffix}}"
+        location: "{{ bundle.parameters.azure_location}}"
+        image: "UbuntuLTS"
+        admin-username: "adminuser"
+        admin-password: "{{ bundle.credentials.VM_PASSWORD}}"
+        resource-group: "hybrid-relay-stack-rg{{ bundle.parameters.resource_suffix}}"
+      outputs:
+        - name: "azure_stack_vm_public_ip"
+          jsonPath: "$.publicIpAddress"
+  - az:
+      description: "Open port 22 for SSH"
+      arguments:
+        - vm
+        - open-port
+      flags:
+        name: "relayclient{{ bundle.parameters.resource_suffix}}"
+        port: 22
+        resource-group: "hybrid-relay-stack-rg{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Install Node and set up dependencies in Azure Stack."
+      arguments:
+        - vm
+        - extension
+        - set
+      flags:
+        vm-name: "relayclient{{ bundle.parameters.resource_suffix}}"
+        name: "customScript"
+        publisher: "Microsoft.Azure.Extensions"
+        settings: "script-config.json"
+        resource-group: "hybrid-relay-stack-rg{{ bundle.parameters.resource_suffix}}"
+  - exec:
+        description: "Output completion."
+        command: "echo"
+        flags:
+          e: "Deployment of Hybrid Relay resources are complete. Azure VM is located at {{ bundle.outputs.azure_vm_public_ip}} and the Azure Stack VM is located at  {{ bundle.outputs.azure_stack_vm_public_ip}}. Remember to complete the rest of the tutorial."
+
+upgrade:
+  - exec:
+        description: "Output upgrade message."
+        command: "echo"
+        flags:
+          e: "Upgrade not implemented."
+
+uninstall:
+  - az:
+      description: "Login to Azure"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_SUBSCRIPTION_ID}}"
+  - az:
+      description: "Remove Azure Resource Group"
+      arguments:
+        - group
+        - delete
+      flags:
+        "yes":
+        name: "hybrid-relay-rg{{ bundle.parameters.resource_suffix}}"
+  - az:
+      description: "Register Azure Stack"
+      arguments:
+        - cloud
+        - register 
+      flags:
+        name: "AzureStack"
+        endpoint-resource-manager: "{{ bundle.parameters.azure_stack_tenant_arm}}"
+        suffix-storage-endpoint: "{{ bundle.parameters.azure_stack_storage_suffix}}"
+        suffix-keyvault-dns: "{{ bundle.parameters.azure_stack_keyvault_suffix}}"
+        endpoint-vm-image-alias-doc: "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json"
+  - az:
+      description: "Set Azure Stack Cloud"
+      arguments:
+        - cloud
+        - set
+      flags:
+        name: "AzureStack"
+  - az:
+      description: "Update Azure Stack Profile"
+      arguments:
+        - cloud
+        - update
+      flags:
+        profile: "{{ bundle.parameters.azure_stack_profile}}"
+  - az:
+      description: "Login to Azure Stack"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZURE_STACK_SP_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZURE_STACK_SP_PASSWORD}}"
+        tenant: "{{ bundle.credentials.AZURE_STACK_SP_TENANT_DNS}}"
+  - az:
+      description: "Set Azure Stack Subscription"
+      arguments:
+        - account
+        - set
+      flags:
+        subscription: "{{ bundle.credentials.AZURE_STACK_SUBSCRIPTION_ID}}"
+  - az:
+      description: "Remove Azure Stack Resource Group"
+      arguments:
+        - group
+        - delete
+      flags:
+        "yes":
+        name: "hybrid-relay-stack-rg{{ bundle.parameters.resource_suffix}}"
+
+
+# See https://porter.sh/authoring-bundles/#dependencies
+#dependencies:
+#  mysql:
+#    tag: deislabs/porter-mysql:latest
+#    parameters:
+#      database-name: wordpress
+
+# See https://porter.sh/wiring/#credentials
+#credentials:
+#  - name: kubeconfig
+#    path: /root/.kube/config
+credentials:
+ - name: AZURE_SP_CLIENT_ID
+   env: AZURE_SP_CLIENT_ID
+ - name: AZURE_SP_PASSWORD
+   env: AZURE_SP_PASSWORD
+ - name: AZURE_SP_TENANT_DNS
+   env: AZURE_SP_TENANT_DNS
+ - name: AZURE_SUBSCRIPTION_ID
+   env: AZURE_SUBSCRIPTION_ID
+ - name: AZURE_STACK_SP_CLIENT_ID
+   env: AZURE_STACK_SP_CLIENT_ID
+ - name: AZURE_STACK_SP_PASSWORD
+   env: AZURE_STACK_SP_PASSWORD
+ - name: AZURE_STACK_SP_TENANT_DNS
+   env: AZURE_STACK_SP_TENANT_DNS
+ - name: AZURE_STACK_SUBSCRIPTION_ID
+   env: AZURE_STACK_SUBSCRIPTION_ID
+ - name: VM_PASSWORD
+   env: VM_PASSWORD
+
+
+parameters:
+ - name: azure_stack_tenant_arm
+   type: string
+   default: "https://management.local.azurestack.external"
+ - name: azure_stack_storage_suffix
+   type: string
+   default: "local.azurestack.external"
+ - name: azure_stack_keyvault_suffix
+   type: string
+   default: ".vault.local.azurestack.external"
+ - name: azure_stack_profile
+   type: string
+   default: "2019-03-01-hybrid"
+ - name: resource_suffix
+   type: string
+ - name: azure_location
+   type: string
+ - name: azure_stack_location
+   type: string

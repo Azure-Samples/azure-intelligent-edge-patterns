@@ -1,0 +1,3 @@
+{
+    "commandToExecute" : "curl -fsSL https://get.docker.com | bash && usermod -aG docker azureuser"
+}
