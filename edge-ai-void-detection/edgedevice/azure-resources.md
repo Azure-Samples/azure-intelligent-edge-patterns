@@ -24,7 +24,7 @@ Use these instructions to create a [Time Series Insights environment](https://do
     * Set **Subscription** to your subscription
     * Set **IoT Hub Name** to the hub you created earlier
     * Set **Iot Hub access** policy to `service`
-1.  In the **CONSUMER GROUP** section, great a new group for the the **IoT Hub consumer group**
+1.  In the **CONSUMER GROUP** section, set the **IoT Hub consumer group** to the consumer group you created for the IoT Hub in the previous section
 1.  Set the **TIMESTAMP** property name to `iothub-creation-time-utc`
 1.  Create the resource
 

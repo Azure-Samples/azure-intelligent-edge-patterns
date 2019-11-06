@@ -62,7 +62,7 @@ Setup your Azure Environment by following these [steps](./azure-resources.md)
 1.  Fill in the values in the .env.template file :
     * Set the CONTAINER_REGISTRY_* values with your ACR credentials, 	registry name, and login server
     * Set EXTERNAL_IP_ADDRESS to the public IP address of the IoT Edge VM
-    * Set SHARE_NAME to name of the folder you created earlier.
+    * Set SHARE_NAME to name of the folder you created earlier on the VM.
     * Replace the value for BLOB_STORAGE_SAS_URL with the Connection String created when you created the SAS token for the Storage Account.
     * If you want to disable uploading images to Azure blobl storage, replace the value for UPLOAD_TO_BLOB_STORAGE with NO.
     * Set CAMERA_TYPE to one of "HTTP", "RTSP", or "simulator".
@@ -75,8 +75,8 @@ Setup your Azure Environment by following these [steps](./azure-resources.md)
     keys section of your registry in the Azure portal.    
 `docker login -u 'ACR username' -p 'ACR password' 'ACR login
         server'`
-1.  In the VS Code explorer, right-click the deployment.iotedgevm.template.json
-    file and select Build and Push IoT Edge solution.  The containers will be
+1.  In the VS Code explorer, right-click the `deployment.iotedgevm.template.json`
+    file and select **Build and Push IoT Edge solution**.  The containers will be
     pushed to the container registry.
 
 ## Deploy to Azure Stack
@@ -99,7 +99,8 @@ receive the deployment.
 
 1.  Select the `deployment.iotedgevm.amd64.json` file in the config folder and then click
     Select Edge Deployment Manifest. Do not use the
-    `deployment.iotedgevm.template.json` file.
+    `deployment.iotedgevm.template.json` file.<br/>
+    Note it can take some time for the modules to sync to the VM.
 
 1.  Click the refresh button. You should see \[modules running\]
 

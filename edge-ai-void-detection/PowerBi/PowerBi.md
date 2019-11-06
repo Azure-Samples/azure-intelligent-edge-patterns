@@ -24,7 +24,7 @@ An Edge-based Machine Learning Solution with one of the following setups:
 #### Create a client secret for the Service Principal
 1. In the settings for the Service Principal, under **Manage** click **Certificates and secrets**
 1. click the **+ New client secret** button
-1. Give a Description and a time frame, click Add
+1. Give a Description and a Time Frame, click **Add**
 1. Make a copy of the value, you'll need it later
 
 #### Give the Service Principal API permissions
@@ -36,8 +36,8 @@ An Edge-based Machine Learning Solution with one of the following setups:
 
 #### Give the Service Principal access to the TSI instance
 1. Open the Times Series Insights Environment in the Azure Portal
-1. In the Overview section, make note of the **Data Access FQDN**, you'll need this later
-1. Under Settings, click Data Access Policies
+1. In the **Overview** section, make note of the **Data Access FQDN**, you'll need this later
+1. Under **Settings**, click **Data Access Policies**
 1. Give the Service Principal you created earlier **Reader** access
 
 
