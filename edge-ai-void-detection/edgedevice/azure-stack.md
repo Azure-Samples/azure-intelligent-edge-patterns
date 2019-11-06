@@ -21,8 +21,6 @@ Before you begin, make sure you have:
       - An Azure Container Registry (ACR).
           - **Make a note of the ACR login server, username, and
             password.**
-  - [A Time Series Insights environment](https://docs.microsoft.com/en-us/azure/time-series-insights/time-series-insights-get-started)
-  - A camera that presents an HTTP or RTSP endpoint for getting images.
   - The following development resources:
       - Azure CLI 2.0    
       - Docker CE.    
@@ -33,16 +31,8 @@ Before you begin, make sure you have:
       - Pip for installing Python packages (typically included with your
         Python installation).
 
-### Create an Azure Storage Account and a Shared Access Signature (SAS) token
-
-1. Login to https://portal.azure.com with the same account you used to setup the Time Series Insights Environment
-1. Create a new storage account, recommended that you create the storage in the same Resource Group as your TSI instance but this is not required
-1. Select the Storage Account
-1. Under **Blob Service**, select **Containers**
-1. Create a new Container called **still-images**, set **Public access level** to **Private**
-1. Under **Settings** select **Shared Access signature**
-1. Change the **End** date to a future date and click **Generate SAS and connection string**
-1. From the results, save the **Connection String** value, you will use it later.
+## Azure Environment
+Setup your Azure Environment by following these [steps](./azure-resources.md)
 
 
 ## Add a device to the the IoT Hub
@@ -56,7 +46,7 @@ Before you begin, make sure you have:
 
 1.  Make a note of the virtual machine's IP address.
 1.  Create a folder on the IoT Edge VM for images from the camera.
-1.  Edit the **/etc/iotedge/config.yaml** file, under provisioning, set the device_connection_string to the **Primary Connection String** from the last section
+1.  Edit the `/etc/iotedge/config.yaml` file, under **provisioning**, set the **device_connection_string** to the **Primary Connection String** from the last section
 1.  Save the file
 1.  Restart the iotedge daemon, type:  `sudo systemctl restart iotedge`
 
@@ -69,15 +59,14 @@ Before you begin, make sure you have:
 ```
 ## Configure and Build Containers
 1.  Open the “edge-ai-void-detection” folder in Visual Studio Code.
-1.  Fill in the values in the .env.template file with your ACR credentials, 
-	ACR registry name, URL
-    for images, public IP address of the IoT Edge VM,
-    and the name of the folder you created earlier.<br/>
-1.  Replace the value for BLOB_STORAGE_SAS_URL with the Connection String created when you created the SAS token for the Storage Account.
-1.  If you want to disable uploading images to Azure blobl storage, replace the value for
-    UPLOAD_TO_BLOB_STORAGE with NO.
-1.  Set CAMERA_TYPE to one of "HTTP", "RTSP", or "simulator".
-1.  Set ML_MODEL_TYPE to CPU
+1.  Fill in the values in the .env.template file :
+    * Set the CONTAINER_REGISTRY_* values with your ACR credentials, 	registry name, and login server
+    * Set EXTERNAL_IP_ADDRESS to the public IP address of the IoT Edge VM
+    * Set SHARE_NAME to name of the folder you created earlier.
+    * Replace the value for BLOB_STORAGE_SAS_URL with the Connection String created when you created the SAS token for the Storage Account.
+    * If you want to disable uploading images to Azure blobl storage, replace the value for UPLOAD_TO_BLOB_STORAGE with NO.
+    * Set CAMERA_TYPE to one of "HTTP", "RTSP", or "simulator".
+    * Set ML_MODEL_TYPE to CPU
 1.  Rename the file to ".env".
 1.  Sign into Docker by entering the following command in the Visual Studio Code integrated 
     terminal. Use the username, password, and login
