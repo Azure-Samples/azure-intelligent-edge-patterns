@@ -94,6 +94,19 @@ def module_twin_callback(update_state, payload, user_context):
 def is_blank (input):
     return not (input and input.strip())
 
+SEND_CALLBACKS = 0
+def send_confirmation_callback(message, result, user_context):
+    global SEND_CALLBACKS
+    print("Confirmation[%d] received for message with result = %s" % (user_context, result))
+    map_properties = message.properties()
+    print("    message_id: %s" % message.message_id)
+    print("    correlation_id: %s" % message.correlation_id)
+    print("    message text:", message.get_string())
+    key_value_pair = map_properties.get_internals()
+    print("    Properties: %s" % key_value_pair)
+    SEND_CALLBACKS += 1
+    print("    Total calls confirmed: %d" % SEND_CALLBACKS)
+
 
 class HubManager(object):
     def __init__(self, protocol=IoTHubTransportProvider.MQTT):
@@ -109,8 +122,18 @@ class HubManager(object):
 
             message:    An IoTHubMessage object
         """
-        self.client.send_event_async(message, (lambda x, y, z: None), None)
+        #self.client.send_event_async(message, (lambda x, y, z: None), None)
+        self.client.send_event_async(message, send_confirmation_callback, SEND_CALLBACKS)
 
+
+def format_image_utc_time(time: datetime = None):
+    """
+    Format a datetime object to millisecond precision, suitable for the
+    basename of a file for upload to blob storage.
+    """
+    if time is None:
+        time = datetime.utcnow()
+    return time.isoformat()[0:-3] + 'Z'
 
 def send_iot_hub_message(message, schema):
     """Send a message to the IoT Hub, with custom properties for message
@@ -123,7 +146,7 @@ def send_iot_hub_message(message, schema):
     msg = IoTHubMessage(message)
     prop_map = msg.properties()
     prop_map.add("MessageSchema", schema)
-    prop_map.add("CreationTimeUtc", '') #TODO: set date/time
+    prop_map.add("CreationTimeUtc", format_image_utc_time())
     hub_manager.send_hub_message(msg)
 
 
@@ -153,6 +176,7 @@ def send_recognition_messages(rec, image_body):
             info.bbymax = bboxes[i][2]
             info.bbxmax = bboxes[i][3]
             msg = json.dumps(info.__dict__)
+            print("recognition message:", msg)
             send_iot_hub_message(msg, "recognition;v1")
         except Exception as ex:
             print("Exception caught in send_recognition_messages: {}".format(ex))
@@ -172,6 +196,7 @@ def send_image_message(feature_count, image_body, msec, processor_type):
         info.procType = processor_type
         info.procMsec = msec
         msg = json.dumps(info.__dict__)
+        print("image message:", msg)
         send_iot_hub_message(msg, "image-upload;v1")
     except Exception as ex:
         print("Exception caught in send_image_message: {}".format(ex))
@@ -244,6 +269,9 @@ def main(protocol, port):
         hub_manager = HubManager(protocol)
 
         print("Talking to IoT Hub using protocol %s..." % hub_manager.client_protocol)
+        msg = IoTHubMessage('{"fred": "barney"}')
+        hub_manager.send_hub_message(msg)
+
 
         #Start the gRPC server and prepare it for servicing incoming connections.
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

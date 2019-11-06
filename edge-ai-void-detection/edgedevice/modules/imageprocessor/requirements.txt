@@ -1,5 +1,5 @@
 azure-iothub-device-client~=1.4.3
-azure.storage.blob
+azure.storage.blob~=2.1.0
 google
 tensorflow~=1.14.0
 tensorflow-serving-api
