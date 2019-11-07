@@ -41,3 +41,17 @@ Use these instructions to create a [Time Series Insights environment](https://do
 1. Under **Settings** select **Shared Access signature**
 1. Change the **End** date to a future date and click **Generate SAS and connection string**
 1. From the results, save the Connection String value, you will use it later.
+
+## Create a Container Registry
+
+Use these instructions to create a [Container Registry](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal) in the Azure portal.
+
+Once the resouce has been created, to get the settings for the container registry
+1.  Open the resource in the azure portal
+1.  Under **Settings** select **Access keys**
+1.  Enable **Admin user**
+1.  All of the information you need to login to the registry and configure your .env file will be on this page :
+    * Registry name
+    * Login server
+    * Username
+    * Password
