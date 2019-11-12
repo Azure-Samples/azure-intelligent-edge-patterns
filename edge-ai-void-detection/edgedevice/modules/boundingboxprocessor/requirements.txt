@@ -1,0 +1,4 @@
+azure-iothub-device-client~=1.4.3
+grpcio
+grpcio-tools
+redis

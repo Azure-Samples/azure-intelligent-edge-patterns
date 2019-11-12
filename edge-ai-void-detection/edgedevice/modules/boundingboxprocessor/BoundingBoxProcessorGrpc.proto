@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package BoundingBoxProcessorGrpc;
+
+enum PortNumbers {
+  Unused = 0;
+  ImageProcessorToBoundingBoxPort = 28970;
+}
+
+// The BoundingBoxProcessorGrpc service definition.
+service GrpcChannel {
+  // Sends an image
+  rpc SubmitImage (ImageData) returns (ImageReply) {}
+}
+
+// The request message
+message ImageData {
+  string cameraId = 1;
+  string time = 2;
+  string type = 3;
+  bytes image = 4;
+  string scoringData = 5;
+}
+
+// The response message
+// error is null for success, non-null for error
+message ImageReply {
+  string error = 1;     // null on success, non-null on error
+  bytes boxedImage = 2; // image with drawn bounding boxes
+}

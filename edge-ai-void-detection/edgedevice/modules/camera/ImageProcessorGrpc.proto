@@ -1,0 +1,28 @@
+﻿syntax = "proto3";
+
+package ImageProcessorGrpc;
+
+enum PortNumbers {
+  Unused = 0;
+  CameraToVideoProcessorPort = 28960;
+}
+
+// The ImageProcessorGrpc service definition.
+service GrpcChannel {
+  // Sends an image
+  rpc SubmitImage (ImageBody) returns (ImageReply) {}
+}
+
+// The request message
+message ImageBody {
+  string cameraId = 1;
+  string time = 2;
+  string type = 3;
+  bytes image = 4;
+  bytes smallImageRGB = 5;
+}
+
+// The response message is null for success, non-null for error
+message ImageReply {
+  string error = 1;
+}

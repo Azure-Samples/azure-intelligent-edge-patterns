@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+edge-ai-void-detection/PowerBi/intlEdgeVisual/node_modules/.bin/csv2json
+edge-ai-void-detection/PowerBi/intlEdgeVisual/node_modules/
+edge-ai-void-detection/PowerBi/intlEdgeVisual/.tmp/
+edge-ai-void-detection/PowerBi/intlEdgeVisual/.vscode/
