@@ -1,0 +1,62 @@
+﻿<UserControl
+    x:Class="IntelligentKioskSample.Controls.Ignite.CustomerRegistrationControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IntelligentKioskSample"
+    xmlns:controls="using:IntelligentKioskSample.Controls"
+    xmlns:controlsIgnite="using:IntelligentKioskSample.Controls.Ignite"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="RegistrationControl"
+    AllowFocusOnInteraction="True"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <controls:BooleanToVisibilityConverter x:Key="bolleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Button>
+            <Button.Flyout>
+                <Flyout x:Name="cameraCaptureFlyout" Opened="OnCameraFlyoutOpened" Closed="OnCameraFlyoutClosed" >
+                    <Grid Width="400" MinHeight="380">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid Visibility="{x:Bind ViewModel.IsRegistrationMode, Mode=OneWay}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,10,0" Text="FIRST NAME" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.FirstName, Mode=TwoWay}" />
+                            <TextBlock Grid.Row="1" Grid.Column="0"  Margin="0,2,10,0" Text="LAST NAME" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,2,0,0" Text="{x:Bind ViewModel.LastName, Mode=TwoWay}"/>
+                        </Grid>
+                        <controls:CameraControl x:Name="cameraControl" Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" ShowDialogOnApiErrors="False" FlowDirection="LeftToRight" ImageCaptured="OnCameraImageCaptured" />
+                        <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,12,0,0" >
+                            <Button Content="REGISTER" HorizontalAlignment="Stretch" 
+                                Visibility="{x:Bind ViewModel.IsRegistrationMode, Mode=OneWay}"
+                                IsEnabled="{x:Bind ViewModel.IsRegistrationEnabled, Mode=OneWay}"
+                                Click="{x:Bind ViewModel.Register}">
+                            </Button>
+                            <TextBlock Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                               HorizontalAlignment="Stretch" TextAlignment="Center"
+                               Foreground="{x:Bind ViewModel.StatusTextColor, Mode=OneWay}"/>
+                        </StackPanel>
+                    </Grid>
+                </Flyout>
+            </Button.Flyout>
+            <TextBlock Text="{x:Bind ButtonText}"/>
+        </Button>
+    </Grid>
+</UserControl>

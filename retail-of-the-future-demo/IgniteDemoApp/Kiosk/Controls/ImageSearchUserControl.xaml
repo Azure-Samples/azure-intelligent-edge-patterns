@@ -1,0 +1,83 @@
+﻿<UserControl
+    x:Class="IntelligentKioskSample.Controls.ImageSearchUserControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:IntelligentKioskSample.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Height="300"
+    Width="400"
+    x:Name="SearchControl"
+    AllowFocusOnInteraction="True"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <controls:BooleanToVisibilityConverter x:Key="bolleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+
+            <AutoSuggestBox x:Name="autoSuggestBox" HorizontalAlignment="Stretch" Margin="0" QueryIcon="Find" PlaceholderText="Search Bing Images" QuerySubmitted="onQuerySubmitted" TextChanged="onTextChanged"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Rectangle Width="2" Fill="White" Opacity="0.2" Margin="20,3,10,3"></Rectangle>
+                <Button Background="Transparent" Click="LoadImagesFromFileClicked" ToolTipService.ToolTip="Browse local files">
+                    <SymbolIcon Symbol="Pictures"/>
+                </Button>
+
+                <Button Background="Transparent" ToolTipService.ToolTip="Take photo from webcam" Visibility="{Binding ElementName=SearchControl, Path=EnableCameraCapture, Converter={StaticResource bolleanToVisibilityConverter}}" >
+                    <Button.Flyout>
+                        <Flyout x:Name="cameraCaptureFlyout" Opened="OnCameraFlyoutOpened" Closed="OnCameraFlyoutClosed" >
+                            <Grid Width="400" MinHeight="380">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Margin="0,0,0,12" Text="Click on the camera button to capture a photo and use it as input." TextWrapping="WrapWholeWords"/>
+                                <controls:CameraControl Grid.Row="1" x:Name="cameraControl" ImageCaptured="OnCameraImageCaptured" HorizontalAlignment="Center" VerticalAlignment="Center" ShowDialogOnApiErrors="False" FlowDirection="LeftToRight"/>
+                                <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,12,0,0" >
+                                    <TextBlock Text="You can also flip this switch and start a loop that will keep auto-capturing a photo every second. The loop will stop once you close this panel or turn the switch off." TextWrapping="WrapWholeWords"/>
+                                    <ToggleSwitch x:Name="autoCaptureToggle" Toggled="OnCameraAutoCaptureToggleChanged"/>
+                                </StackPanel>
+                            </Grid>
+                        </Flyout>
+                    </Button.Flyout>
+                    <SymbolIcon Symbol="Video"/>
+                </Button>
+
+            </StackPanel>
+
+        </Grid>
+
+        <GridView x:Name="imageResultsGrid" SelectionMode="{Binding ElementName=SearchControl, Path=ImageSelectionMode}" 
+                  Margin="0,10" Grid.Row="1" IsMultiSelectCheckBoxEnabled="False" SelectionChanged="OnImageResultSelectionChanged">
+            <GridView.ItemTemplate>
+                <DataTemplate>
+                    <controls:ImageWithFaceBorderUserControl DataContext="{Binding}" DetectFacesOnLoad="{Binding ElementName=SearchControl, Path=DetectFacesOnLoad}" Width="120" Height="90" />
+                </DataTemplate>
+            </GridView.ItemTemplate>
+        </GridView>
+
+        <ProgressRing x:Name="progressRing" Grid.Row="1"/>
+
+        <CommandBar VerticalAlignment="Bottom" Grid.Row="2">
+            <AppBarButton x:Name="addSelectedPhotosButton" Icon="Accept" Label="Add selected photos" Click="OnAcceptButtonClicked" IsEnabled="False" />
+            <AppBarButton Icon="Cancel" Label="Cancel" Click="OnCancelButtonClicked" />
+        </CommandBar>
+
+    </Grid>
+</UserControl>

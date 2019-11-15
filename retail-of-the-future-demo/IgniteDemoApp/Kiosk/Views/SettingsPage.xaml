@@ -1,0 +1,243 @@
+﻿<Page
+    x:Class="IntelligentKioskSample.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IntelligentKioskSample.Views"
+    xmlns:ctl="using:IntelligentKioskSample.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <ctl:StringMatchToVisibilityConverter x:Key="StringMatchToVisibilityConverter"/>
+        <ctl:StringContainsToVisibilityConverter x:Key="StringContainsToVisibilityConverter"/>
+        <x:String x:Key="CustomEndpointName">Custom</x:String>
+        <x:String x:Key="LocalHost">://localhost</x:String>
+        <Style TargetType="Button" x:Key="LocalHostSetupButtonStyle">
+            <Style.Setters>
+                <Setter Property="Foreground" Value="OrangeRed"/>
+                <Setter Property="Margin" Value="0,0,0,-8"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="VerticalAlignment" Value="Bottom"/>
+                <Setter Property="Content" Value="Click here for extra setup steps&#x0a;when targeting localhost endpoints."/>
+                <Setter Property="Flyout">
+                    <Setter.Value>
+                        <Flyout>
+                            <StackPanel Orientation="Vertical" Width="350">
+                                <TextBlock Text="In order for the kiosk app to make http requests to another process in the local machine, such as a Docker application running a container, Windows needs to be configured to enable it.&#x0a;&#x0a;Please run the following command from an admin command line prompt in your machine (you can select and copy the text below to the clipboard):" TextWrapping="Wrap"/>
+                                <TextBlock IsTextSelectionEnabled="True" FontStyle="Italic" Foreground="OrangeRed" Margin="0,16,0,0" Text="CheckNetIsolation.exe LoopbackExempt -a -n=intelligentkiosksample_csqyw2evbp0ke" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Flyout>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+    </Page.Resources>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+          EntranceNavigationTransitionInfo.IsTargetElement="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <CommandBar x:Name="commandBar" DefaultLabelPosition="Right" >
+            <AppBarButton Icon="Undo" Label="Reset Settings" Click="OnResetSettingsClick"/>
+
+            <CommandBar.Content>
+                <TextBlock Text="Settings" Style="{ThemeResource PageTitleTextBlockStyle}" Margin="14,10,12,0"/>
+            </CommandBar.Content>
+        </CommandBar>
+
+        <ScrollViewer Grid.Row="1">
+
+            <StackPanel Orientation="Vertical" Margin="12,12" >
+                <StackPanel>
+
+                    <TextBlock Text="Cognitive Services Keys" Style="{StaticResource SubheaderTextBlockStyle}" VerticalAlignment="Center"/>
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox Header="Face API Key" Password="{Binding FaceApiKey, Mode=TwoWay}" VerticalAlignment="Top" />
+                        <ComboBox Grid.Column="1" Margin="10,0,6,0" Header="Endpoint" Width="355"
+                                  x:Name="faceApiEndpointCombobox"
+                                  ItemsSource="{Binding AvailableApiEndpoints}" 
+                                  SelectedItem="{Binding BindingFaceApiKeyEndpoint, Mode=TwoWay}"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                    Visibility="{Binding ElementName=faceApiEndpointCombobox, Path=SelectedValue, Converter={StaticResource StringMatchToVisibilityConverter}, ConverterParameter={StaticResource CustomEndpointName}}">
+                            <TextBox Header="Custom Face API Endpoint" MaxWidth="450" x:Name="faceApiEndpointTextBox"
+                                 PlaceholderText="Custom endpoint (e.g. https://virginia.api.cognitive.microsoft.us)" 
+                                 Text="{Binding CustomFaceApiEndpoint, Mode=TwoWay}" />
+                            <Button Style="{StaticResource LocalHostSetupButtonStyle}" Visibility="{Binding ElementName=faceApiEndpointTextBox, Path=Text, Converter={StaticResource StringContainsToVisibilityConverter}, ConverterParameter={StaticResource LocalHost}}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox Header="Text To Speech API Key" Password="{Binding TextToSpeechApiKey, Mode=TwoWay}"/>
+                        <ComboBox Grid.Column="1" Margin="10,0,6,0" Header="Endpoint" Width="355"
+                                  x:Name="textToSpeechApiEndpointCombobox"
+                                  ItemsSource="{Binding AvailableTextToSpeechApiEndpoints}" 
+                                  SelectedItem="{Binding BindingTextToSpeechApiKeyEndpoint, Mode=TwoWay}"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                    Visibility="{Binding ElementName=textToSpeechApiEndpointCombobox, Path=SelectedValue, Converter={StaticResource StringMatchToVisibilityConverter}, ConverterParameter={StaticResource CustomEndpointName}}">
+                            <TextBox Header="Custom Text To Speech API Endpoint" MaxWidth="450" x:Name="textToSpeechApiEndpointTextBox"
+                                 PlaceholderText="Custom endpoint (e.g. https://virginia.api.cognitive.microsoft.us)" 
+                                 Text="{Binding CustomTextToSpeechApiEndpoint, Mode=TwoWay}" />
+                            <Button Style="{StaticResource LocalHostSetupButtonStyle}" Visibility="{Binding ElementName=textToSpeechApiEndpointTextBox, Path=Text, Converter={StaticResource StringContainsToVisibilityConverter}, ConverterParameter={StaticResource LocalHost}}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox Header="Speech To Text API Key" Password="{Binding SpeechToTextApiKey, Mode=TwoWay}"/>
+                        <ComboBox Grid.Column="1" Margin="10,0,6,0" Header="Endpoint" Width="355"
+                                  x:Name="speechToTextApiEndpointCombobox"
+                                  ItemsSource="{Binding AvailableSpeechToTextApiEndpoints}" 
+                                  SelectedItem="{Binding BindingSpeechToTextApiKeyEndpoint, Mode=TwoWay}"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                    Visibility="{Binding ElementName=speechToTextApiEndpointCombobox, Path=SelectedValue, Converter={StaticResource StringMatchToVisibilityConverter}, ConverterParameter={StaticResource CustomEndpointName}}">
+                            <TextBox Header="Custom Speech API Endpoint" MaxWidth="450" x:Name="speechToTextApiEndpointTextBox"
+                                 PlaceholderText="Custom endpoint (e.g. https://virginia.api.cognitive.microsoft.us)" 
+                                 Text="{Binding CustomSpeechToTextApiEndpoint, Mode=TwoWay}" />
+                            <Button Style="{StaticResource LocalHostSetupButtonStyle}" Visibility="{Binding ElementName=speechToTextApiEndpointTextBox, Path=Text, Converter={StaticResource StringContainsToVisibilityConverter}, ConverterParameter={StaticResource LocalHost}}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox Header="LUIS API Key" Password="{Binding LuisApiKey, Mode=TwoWay}"/>
+                        <ComboBox Grid.Column="1" Margin="10,0,6,0" Header="Endpoint" Width="355"
+                                  x:Name="luisApiEndpointCombobox"
+                                  ItemsSource="{Binding AvailableApiEndpoints}" 
+                                  SelectedItem="{Binding BindingLuisApiKeyEndpoint, Mode=TwoWay}"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                    Visibility="{Binding ElementName=luisApiEndpointCombobox, Path=SelectedValue, Converter={StaticResource StringMatchToVisibilityConverter}, ConverterParameter={StaticResource CustomEndpointName}}">
+                            <TextBox Header="Custom LUIS API Endpoint" MaxWidth="450" x:Name="luisApiEndpointTextBox"
+                                 PlaceholderText="Custom endpoint (e.g. https://virginia.api.cognitive.microsoft.us)" 
+                                 Text="{Binding CustomLuisApiEndpoint, Mode=TwoWay}" />
+                            <Button Style="{StaticResource LocalHostSetupButtonStyle}" Visibility="{Binding ElementName=luisApiEndpointTextBox, Path=Text, Converter={StaticResource StringContainsToVisibilityConverter}, ConverterParameter={StaticResource LocalHost}}"/>
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                        <Button VerticalAlignment="Bottom" Content="Click here if you need keys" >
+                            <Button.Flyout>
+                                <Flyout>
+                                    <StackPanel Width="400">
+                                        <TextBlock TextWrapping="Wrap" Text="We recommend getting S0 level keys from your Azure Subscription. Below are some handy deep links for creating the keys depending on your needs. For keys that support multiple regions, make sure to set the corresponding region when entering your keys in the kiosk settings."/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesFace" Content="Face"/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesComputerVision" Content="Computer Vision"/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesCustomVision" Content="Custom Vision"/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesBingSearch-v7" Content="Bing Search"/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesBingAutosuggest-v7" Content="Bing Autosuggest"/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics" Content="Text Analytics"/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesTextTranslation" Content="Translator Text"/>
+                                        <HyperlinkButton NavigateUri="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesAnomalyDetector" Content="Anomaly Detector"/>
+
+                                        <TextBlock TextWrapping="WrapWholeWords" Foreground="OrangeRed" Margin="0,10,0,0" Text="Important: The free-tier (F0) keys provided by Azure won't support the load from the real-time demos in the kiosk. For the best experience upgrade to a paid key if using those demos."/>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+
+                        <Button Margin="24,0,0,0" Content="Run Key Validation Test">
+                            <Button.Flyout>
+                                <Flyout Opened="KeyTestFlyoutOpened">
+                                    <StackPanel Width="400">
+                                        <TextBlock Text="Running Cognitive Services API key tests:"/>
+                                        <TextBox x:Name="keyTestResultTextBox" Margin="0,6,0,0" Height="150" AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True"></TextBox>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Margin="0,50,0,0">
+                    <TextBlock Text="Miscellaneous" Style="{StaticResource SubheaderTextBlockStyle}"/>
+                    <Button Margin="0,10,0,0" Content="Toggle Full Screen" Click="{x:Bind OnToggleFullScreenClicked}" ></Button>
+                    <Grid Margin="0,6,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <PasswordBox Header="LUIS App ID" Password="{Binding LuisAppId, Mode=TwoWay}" HorizontalAlignment="Left" Width ="300"/>
+                            <Button Margin="10,0,0,0" Content="Test LUIS App"  VerticalAlignment="Bottom">
+                                <Button.Flyout>
+                                    <Flyout Opened="OnTestLuisAppFlyoutOpened">
+                                        <StackPanel Width="400">
+                                            <TextBlock Text="Running LUIS App tests:"></TextBlock>
+                                            <TextBox x:Name="luisAppTestResultTextBox" Margin="0,6,0,0" Height="150" AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True"></TextBox>
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Header="Workspace Name" PlaceholderText="Something like JoeKiosk, or use the button to create an unique name" Text="{Binding WorkspaceKey, Mode=TwoWay}"  />
+                        <Button Content="Generate Name" Grid.Column="1" Margin="10,0,6,0" Click="OnGenerateNewKeyClicked" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                    </Grid>
+                    <TextBlock Foreground="Gray" FontStyle="Italic" Text="Tip: If you would like to share face identification models between multiple kiosk instances, just enter the same Face API Key and Workspace Name for them." />
+
+                    <ComboBox Margin="0,6,0,0" x:Name="cameraSourceComboBox" Header="Camera Source"  SelectionChanged="OnCameraSourceSelectionChanged"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Header="Shelf Camera" Text="{Binding ShelfCamera, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="300"/>
+                        <TextBox Header="Detection Delay" Text="{Binding DetectionDelay, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="100" Margin="20,0,0,0" />
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <ToggleSwitch IsOn="{Binding ShowDebugInfo, Mode=TwoWay}" Header="Show debug info:" Margin="0,6,0,0"/>
+                        <ToggleSwitch IsOn="{Binding UseSpeech, Mode=TwoWay}" Header="Use speech:" Margin="0,6,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Slider x:Name="MinDetectableFaceSizeSlider" Minimum="0" Maximum="100" Value="{Binding MinDetectableFaceCoveragePercentage, Mode=TwoWay}" SmallChange="1" LargeChange="5" Header="Minimum detectable face size (as % of image height):" HorizontalAlignment="Left" Margin="0,0,0,0" StepFrequency="1"/>
+                        <TextBlock Text="{Binding ElementName=MinDetectableFaceSizeSlider, Path=Value}" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBox Header="NFC Zone ID" Text="{Binding ZoneId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="100" />
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Header="Customer Counter Endpoint" Text="{Binding CustomerCounterEndpoint, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="300" />
+                    <TextBox Margin="10,0,0,0" Header="Customer Counter Timing (s)" Text="{Binding CustomerCounterTiming, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="200" />
+                    <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                        <TextBox Header="Customer Counter Reset Value" Text="{Binding CustomerCounterResetValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="200" />
+                        <Button Margin="10,0,0,0" Content="Reset Customer Counter"  VerticalAlignment="Bottom" Click="{x:Bind OnResetCustomerCounterClicked}" ></Button>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <PasswordBox Header="DB Connection" Password="{Binding BackendConnection, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="510"/>
+                    <!--<PasswordBox Margin="10,0,0,0" Header="Password" Password="{Binding BackendPassword, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="200" />-->
+                    <Button Margin="10,0,0,0" Content="Test DB"  VerticalAlignment="Bottom">
+                        <Button.Flyout>
+                            <Flyout Opened="OnTestBackendFlyoutOpened">
+                                <StackPanel Width="400">
+                                    <TextBlock Text="Running DB tests:"></TextBlock>
+                                    <TextBox x:Name="backendTestResultTextBox" Margin="0,6,0,0" Height="150" AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True"></TextBox>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+
+        </ScrollViewer>
+
+    </Grid>
+</Page>

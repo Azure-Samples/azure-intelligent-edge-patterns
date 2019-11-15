@@ -1,0 +1,395 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{B08D337A-AF9F-4705-B8C1-C7F07FACD8C5}</ProjectGuid>
+    <OutputType>AppContainerExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IntelligentKioskSample</RootNamespace>
+    <AssemblyName>IntelligentRetailExperience</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.18362.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
+    <PackageCertificateThumbprint>a3c772a4046598b34695682a113d38b3ff323c71</PackageCertificateThumbprint>
+    <PackageCertificateKeyFile>IgniteDemoApp_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <ApplicationInsightsResourceId />
+    <RuntimeIdentifiers>win10-arm;win10-arm-aot;win10-x86;win10-x86-aot;win10-x64;win10-x64-aot</RuntimeIdentifiers>
+    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UAP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UAP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UAP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UAP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UAP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UAP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Assets\Ignite\Black_Hat.png" />
+    <Content Include="Assets\Ignite\DemoApp\BadgeLogo.scale-100.png" />
+    <Content Include="Assets\Ignite\AzureSquare.png" />
+    <Content Include="Assets\Ignite\DemoApp\LargeTile.scale-100.png" />
+    <Content Include="Assets\Ignite\DemoApp\SmallTile.scale-100.png" />
+    <Content Include="Assets\Ignite\DemoApp\splash.scale-100.png" />
+    <Content Include="Assets\Ignite\DemoApp\splash.scale-200.png" />
+    <Content Include="Assets\Ignite\DemoApp\splash.scale-400.png" />
+    <Content Include="Assets\Ignite\DemoApp\squaretile-sdk-44.altform-lightunplated_targetsize-16.png" />
+    <Content Include="Assets\Ignite\DemoApp\squaretile-sdk-44.altform-unplated_targetsize-16.png" />
+    <Content Include="Assets\Ignite\DemoApp\squaretile-sdk-44.scale-100.png" />
+    <Content Include="Assets\Ignite\DemoApp\squaretile-sdk-44.targetsize-16.png" />
+    <Content Include="Assets\Ignite\DemoApp\squaretile-sdk.scale-100.png" />
+    <Content Include="Assets\Ignite\DemoApp\StoreLogo.scale-100.png" />
+    <Content Include="Assets\Ignite\DemoApp\WideTile.scale-100.png" />
+    <Content Include="Assets\Ignite\DemoLogo.png" />
+    <Content Include="Assets\Ignite\HatButtonHR2.png" />
+    <Content Include="Assets\Ignite\HatStackedHR1.png" />
+    <Content Include="Assets\Ignite\Black_Malibu.png" />
+    <Content Include="Assets\Ignite\InterlayStacked.png" />
+    <Content Include="Assets\Ignite\DemoWelcomeLeftEdge.png" />
+    <Content Include="Assets\Ignite\DirectionLeft.png" />
+    <Content Include="Assets\Ignite\DirectionRight.png" />
+    <Content Include="Assets\Ignite\Graphite_Hat.png" />
+    <Content Include="Assets\Ignite\intel_rgb_3000.png" />
+    <Content Include="Assets\Ignite\LeftArrow.png" />
+    <Content Include="Assets\Ignite\Microsoft-logo_rgb_c-gray.png" />
+    <Content Include="Assets\Ignite\microsoft_intel_logo.png" />
+    <Content Include="Assets\Ignite\PromoTag.png" />
+    <Content Include="Assets\Ignite\RightArrow.png" />
+    <Content Include="Assets\Ignite\Shoeprint2.png" />
+    <Content Include="Assets\Ignite\Shopper.png" />
+    <Content Include="Assets\Ignite\SunglassesButtonHR2.png" />
+    <Content Include="Assets\Ignite\SunglassesStackedHR1.png" />
+    <Content Include="Assets\Ignite\Wood_Grain_Malibu.png" />
+    <None Include="IgniteDemoApp_TemporaryKey.pfx" />
+    <None Include="packages.config" />
+    <Content Include="Data\FaqZone1.html" />
+    <Content Include="Data\FaqZone2.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\EmotionEmojiControl.xaml.cs">
+      <DependentUpon>EmotionEmojiControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\EmotionMeterControl.xaml.cs">
+      <DependentUpon>EmotionMeterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Ignite\CustomerCounterControl.xaml.cs">
+      <DependentUpon>CustomerCounterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Ignite\CustomerCounterVisControl.xaml.cs">
+      <DependentUpon>CustomerCounterVisControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Ignite\CustomerRegistrationControl.xaml.cs">
+      <DependentUpon>CustomerRegistrationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\OCRBorder.xaml.cs">
+      <DependentUpon>OCRBorder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealTimeFaceIdentificationBorder.xaml.cs">
+      <DependentUpon>RealTimeFaceIdentificationBorder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\IgniteDataAccess.cs" />
+    <Compile Include="Data\ProductCatalog.cs" />
+    <Compile Include="DemoAppShell.xaml.cs">
+      <DependentUpon>DemoAppShell.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CognitiveServiceApiKeyTester.cs" />
+    <Compile Include="Controls\Converters.cs" />
+    <Compile Include="Controls\ImagePickerControl.xaml.cs">
+      <DependentUpon>ImagePickerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\IgniteDataServices.cs" />
+    <Compile Include="Controls\CameraControl.xaml.cs">
+      <DependentUpon>CameraControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FaceIdentificationBorder.xaml.cs">
+      <DependentUpon>FaceIdentificationBorder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ImageWithFaceBorderUserControl.xaml.cs">
+      <DependentUpon>ImageWithFaceBorderUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\BaseViewModel.cs" />
+    <Compile Include="Models\CheckoutViewModel.cs" />
+    <Compile Include="Models\CustomerCounterViewModel.cs" />
+    <Compile Include="Models\CustomerCounterVisViewModel.cs" />
+    <Compile Include="Models\CustomerRegistrationViewModel.cs" />
+    <Compile Include="Models\CustomVisionModelData.cs" />
+    <Compile Include="Models\DemoWelcomeViewModel.cs" />
+    <Compile Include="Models\ProductViewModel.cs" />
+    <Compile Include="Models\FaqViewModel.cs" />
+    <Compile Include="Models\IgniteDataModel.cs" />
+    <Compile Include="Models\InsightsViewModel.cs" />
+    <Compile Include="NavMenuItem.cs" />
+    <Compile Include="SettingsHelper.cs" />
+    <Compile Include="Util.cs" />
+    <Compile Include="Views\FaceIdentificationSetup.xaml.cs">
+      <DependentUpon>FaceIdentificationSetup.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GreetingKiosk.xaml.cs">
+      <DependentUpon>GreetingKiosk.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Ignite\CheckoutPage.xaml.cs">
+      <DependentUpon>CheckoutPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Ignite\FaqPage.xaml.cs">
+      <DependentUpon>FaqPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Ignite\DemoWelcomePage.xaml.cs">
+      <DependentUpon>DemoWelcomePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Ignite\InsightsPage.xaml.cs">
+      <DependentUpon>InsightsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controls\ImageSearchUserControl.xaml.cs">
+      <DependentUpon>ImageSearchUserControl.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\Default.rd.xml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="Controls\EmotionEmojiControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\EmotionMeterControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Ignite\CustomerCounterControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Ignite\CustomerCounterVisControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Ignite\CustomerRegistrationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\OCRBorder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RealTimeFaceIdentificationBorder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DemoAppShell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ImagePickerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\CameraControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FaceIdentificationBorder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ImageWithFaceBorderUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Styles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
+    <Page Include="Views\FaceIdentificationSetup.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\GreetingKiosk.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Ignite\CheckoutPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Ignite\FaqPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Ignite\DemoWelcomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Ignite\InsightsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SettingsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ImageSearchUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\RFID\wrapper\Nfc\NfcHceBackgroundTask\NfcHceBackgroundTask.vcxproj">
+      <Project>{01b62e30-f727-5879-bde5-91b7dba6a8d2}</Project>
+      <Name>NfcHceBackgroundTask</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\RFID\wrapper\Nfc\PcscSdk\PcscSdk.csproj">
+      <Project>{1a12691c-0ff0-529f-a893-7bfc9a76fe9a}</Project>
+      <Name>PcscSdk</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\RFID\wrapper\Nfc\ServiceListener\ServiceListener.csproj">
+      <Project>{9c305f02-3d5c-4a84-958f-dc1fa160518a}</Project>
+      <Name>ServiceListener</Name>
+    </ProjectReference>
+    <ProjectReference Include="KioskRuntimeComponent\KioskRuntimeComponent.csproj">
+      <Project>{fc5a0250-b742-40a8-82ca-bec2df66982f}</Project>
+      <Name>KioskRuntimeComponent</Name>
+    </ProjectReference>
+    <ProjectReference Include="ServiceHelpers\ServiceHelpers.csproj">
+      <Project>{568b29f2-d125-4bc4-b07e-f7b385dbb6d9}</Project>
+      <Name>ServiceHelpers</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.CognitiveServices.Language.LUIS.Runtime">
+      <Version>2.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.ComputerVision">
+      <Version>5.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction">
+      <Version>0.12.0-preview</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.CustomVision.Training">
+      <Version>0.13.0-preview</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.Face">
+      <Version>2.2.0-preview</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CognitiveServices.Speech">
+      <Version>1.7.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>6.2.8</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Rest.ClientRuntime">
+      <Version>2.3.20</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>12.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="WriteableBitmapEx">
+      <Version>1.6.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
