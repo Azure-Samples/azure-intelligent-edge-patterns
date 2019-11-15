@@ -19,4 +19,5 @@ The UX used at Ignite is a consolidated application separated into several views
 * Insights: shows how merchandise is moving, foot traffic dynamics through visual people counters, shelf gaps (out-of-stock) detection
 
 See [UX Setup Guide](IgniteDemoApp/README.md) for more details on installing/running the demo UX.  
-See [Container Setup Guide](IgniteSolution/README.md) for more on installing the containers enabling the demo.
+See [Container Setup Guide](IgniteSolution/README.md) for more on installing the containers enabling the demo.  
+See [SQL DB Setup Guide](sql-backend/README.md) for details on setting up the Insights database.

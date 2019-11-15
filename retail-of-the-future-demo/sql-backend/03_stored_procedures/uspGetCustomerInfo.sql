@@ -4,7 +4,10 @@
 USE retailexperience;
 GO
 
-ALTER PROCEDURE uspGetCustomerInfo
+DROP PROCEDURE IF EXISTS uspGetCustomerInfo;
+GO
+
+CREATE PROCEDURE uspGetCustomerInfo
 	@customer_id nvarchar(50)
 AS
 

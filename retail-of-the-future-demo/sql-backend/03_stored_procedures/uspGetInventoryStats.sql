@@ -1,4 +1,7 @@
-ALTER PROCEDURE uspGetInventoryStats
+DROP PROCEDURE IF EXISTS uspGetInventoryStats;
+GO
+
+CREATE PROCEDURE uspGetInventoryStats
 
 AS
 

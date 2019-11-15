@@ -1,6 +1,9 @@
 /*
 	INSERT NEW TRANSACTION INFORMATION
 */
+DROP PROCEDURE IF EXISTS uspCreateNewTransaction;
+GO
+
 CREATE PROCEDURE uspCreateNewTransaction
 	@item_id int,
 	@item_qty int,

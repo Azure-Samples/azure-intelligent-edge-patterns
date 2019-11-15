@@ -1,8 +1,10 @@
 /*
 	INSERT NEW CUSTOMER RECORD
 */
+DROP PROCEDURE IF EXISTS uspCreateCustomerRecord;
+GO
 
-ALTER PROCEDURE uspCreateCustomerRecord
+CREATE PROCEDURE uspCreateCustomerRecord
 	@customer_face_hash nvarchar(50),
 	@customer_name nvarchar(50)
 AS
@@ -14,5 +16,4 @@ INSERT into customers
 VALUES(@customer_face_hash, @customer_name, @register_date)
 GO
 
--- exec uspCreateCustomerRecord 'aaaa-bbbb-cccc-dddd', 'edwin'
--- exec uspCreateCustomerRecord 'wwww-xxxx-yyyy-zzzz', 'jota'
+-- exec uspCreateCustomerRecord 'aaaa-bbbb-cccc-dddd', 'john doe'
