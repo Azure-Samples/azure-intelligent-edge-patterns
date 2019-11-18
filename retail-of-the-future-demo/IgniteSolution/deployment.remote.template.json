@@ -1,0 +1,443 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "docker": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_LOGIN_SERVER"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "Face": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/microsoft/cognitive-services-face",
+              "createOptions": {
+                "Cmd": [
+                  "Eula=accept",
+                  "Billing={v1.0 Billing endpoint}",
+                  "ApiKey={API KEY}",
+                  "Logging:Console:LogLevel:Default=Information",
+                  "CloudAI:Storage:StorageScenario=Azure",
+                  "CloudAI:Storage:ConnectionStringOfCosmosMongo=$COSMOSDB_FACE",
+                  "CloudAI:Storage:ConnectionStringOfAzureStorage=$STORAGE_FACE"
+
+                ],
+                "ExposedPorts": {
+                  "5000/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "luis": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azure-cognitive-services/luis:latest",
+              "createOptions": {
+                "Cmd": [
+                  "Eula=accept",
+                  "Billing=https://eastus.api.cognitive.microsoft.com/",
+                  "ApiKey={API KEY}"
+                ],
+                "ExposedPorts": {
+                  "5000/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5010"
+                      }
+                    ]
+                  },
+                  "Binds": 
+                      ["/home/hcsshares/input:/input"]
+                }
+              }
+            }
+          },
+          "text2speech": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/microsoft/cognitive-services-text-to-speech:latest",
+              "createOptions": {
+                "Cmd": [
+                  "Eula=accept",
+                  "Billing=https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
+                  "ApiKey={API KEY}"
+                ],
+                "ExposedPorts": {
+                  "5000/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5012"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "speech2text": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/microsoft/cognitive-services-speech-to-text:latest",
+              "createOptions": {
+                "Cmd": [
+                  "Eula=accept",
+                  "Billing=https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
+                  "ApiKey={API KEY}"
+                ],
+                "ExposedPorts": {
+                  "5000/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5011"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+
+          "inventorycam": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/camerastream",
+              "createOptions": {
+                "Cmd": [
+                  "./camera-stream/run_camera.sh camera.py rtsp://admin:IgniteDemo2019@192.168.0.223/cam/realmonitor?channel=1?subtype=1"
+                ],
+                "ExposedPorts": {
+                  "50011/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "50011/tcp": [
+                      {
+                        "HostPort": "50011"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "Counting1": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/counting",
+              "createOptions": {
+                "Cmd": [
+                  "./people-counting/exec_count.sh people_counter.py -i rtsp://admin:IgniteDemo2019@192.168.0.222:554/cam/realmonitor?channel=1?subtype=0 -c 0.3 --direction left -s 15 --id cam1 --set-count"
+                ],
+                "ExposedPorts": {
+                  "5680/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5680/tcp": [
+                      {
+                        "HostPort": "5680"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "Counting2": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/counting",
+              "createOptions": {
+                "Cmd": [
+                  "./people-counting/exec_count.sh people_counter.py -i rtsp://admin:IgniteDemo2019@192.168.0.221:554/cam/realmonitor?channel=1?subtype=0 -c 0.3 --direction left -s 15 --id cam2"
+                ],
+                "ExposedPorts": {
+                  "5681/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5681/tcp": [
+                      {
+                        "HostPort": "5681"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "Counting3": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/counting",
+              "createOptions": {
+                "Cmd": [
+                  "./people-counting/exec_count.sh people_counter.py -i rtsp://admin:IgniteDemo2019@192.168.0.220:554/cam/realmonitor?channel=1?subtype=0 -c 0.3 --direction right -s 15 --id cam3"
+                ],
+                "ExposedPorts": {
+                  "5682/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5682/tcp": [
+                      {
+                        "HostPort": "5682"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "CountingAgg": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/counting",
+              "createOptions": {
+                "Cmd": [
+                  "./people-counting/exec_count.sh count-agg.py --interval 2 --port 5001"
+                ],
+                "ExposedPorts": {
+                  "5678/tcp": {},
+                  "5001/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5678/tcp": [
+                      {
+                        "HostPort": "5678"
+                      }
+                    ],
+                    "5001/tcp": [
+                      {
+                        "HostPort": "5001"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "grocerymodel": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "azureaivideo/grocerymodelquiet:0.0.1",
+              "createOptions": {}
+            }
+          },
+          "VideoProcessorModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/videoprocessormodule:0.1.3-amd64",
+              "createOptions": {}
+            }
+          },
+          "CameraModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/cameramodule:0.1.2-amd64",
+              "createOptions": {}
+            }
+          },
+          "voiddetectionbrainwave": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "intelligentedge/void-detection-brainwave:1.0.0",
+              "createOptions": {
+                "ExposedPorts": {
+                  "50051/tcp": {}
+                },
+                "HostConfig": {
+                  "Privileged": true,
+                  "PortBindings": {
+                    "50051/tcp": [
+                      {
+                        "HostPort": "50051"
+                      }
+                    ]
+                  },
+                  "Binds": [
+                    "/etc/hosts:/etc/hosts"
+                  ],
+                  "Devices": [
+                    {
+                      "PathOnHost": "/dev/catapult0",
+                      "PathInContainer": "/dev/catapult0"
+                    },
+                    {
+                      "PathOnHost": "/dev/catapult1",
+                      "PathInContainer": "/dev/catapult1"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "VideoProcessorModuleToIoTHub": "FROM /* INTO $upstream",
+          "Counting1ToCountingAgg": "FROM /messages/modules/Counting1/outputs/peopleCount INTO BrokeredEndpoint(\"/modules/CountingAgg/inputs/inputCountAgg\")",
+          "Counting2ToCountingAgg": "FROM /messages/modules/Counting2/outputs/peopleCount INTO BrokeredEndpoint(\"/modules/CountingAgg/inputs/inputCountAgg\")",
+          "Counting3ToCountingAgg": "FROM /messages/modules/Counting3/outputs/peopleCount INTO BrokeredEndpoint(\"/modules/CountingAgg/inputs/inputCountAgg\")",
+          "CountingAggToCounting1": "FROM /messages/modules/CountingAgg/outputs/feedback INTO BrokeredEndpoint(\"/modules/Counting1/inputs/feedback\")",
+          "CountingAggToCounting2": "FROM /messages/modules/CountingAgg/outputs/feedback INTO BrokeredEndpoint(\"/modules/Counting2/inputs/feedback\")",
+          "CountingAggToCounting3": "FROM /messages/modules/CountingAgg/outputs/feedback INTO BrokeredEndpoint(\"/modules/Counting3/inputs/feedback\")"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "VideoProcessorModule": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "blobStorageSasUrl": "$BLOB_STORAGE_SAS_URL",
+        "mlModelType": "CPU",
+        "FPGA": {
+          "rgbRefLevel": "104, 117, 123"
+        }
+      }
+    },
+    "CameraModule": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "cameras": {
+          "cam001": {
+            "port": "counter",
+            "id": "$CAMERA_ID_FIXED_IMAGE",
+            "type": "simulator",
+            "secondsBetweenImages": 10,
+            "disabled": false
+          },
+          "cam002": {
+            "port": "cycle-0",
+            "id": "$CAMERA_ID_CYCLE_IMAGES",
+            "type": "simulator",
+            "secondsBetweenImages": 10,
+            "disabled": false
+          },
+          "cam003": {
+            "port": "http://inventorycam:50011/image/700",
+            "id": "gap_images_camera_1",
+            "type": "http",
+            "secondsBetweenImages": 1,
+            "skipMLProcessing": false,
+            "disabled": false
+          }
+        }
+      }
+    }
+  }
+}

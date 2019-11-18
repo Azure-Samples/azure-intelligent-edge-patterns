@@ -1,0 +1,11 @@
+INSERT INTO recommendations 
+VALUES (17776, 11110)
+
+INSERT INTO recommendations 
+VALUES (18887, 16665)
+
+INSERT INTO recommendations 
+VALUES (11110, 17776)
+
+INSERT INTO recommendations 
+VALUES (16665, 18887)

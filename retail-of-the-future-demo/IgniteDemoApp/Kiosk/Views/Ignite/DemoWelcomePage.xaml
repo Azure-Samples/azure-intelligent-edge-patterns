@@ -1,0 +1,405 @@
+﻿<Page
+    x:Class="IntelligentKioskSample.Views.Ignite.DemoWelcomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IntelligentKioskSample.Views"
+    xmlns:ctl="using:IntelligentKioskSample.Controls"
+    xmlns:ctlIgnite="using:IntelligentKioskSample.Controls.Ignite"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    SizeChanged="OnPageSizeChanged"
+    x:DefaultBindMode="OneWay"
+    mc:Ignorable="d"
+    d:DesignWidth="4500"
+    d:DesignHeight="3000"
+    Background="White">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ButtonBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Gray"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="LightGray"/>
+                    <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Gray"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <Style x:Key="navButtonStyle" TargetType="Button">
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="LightGray" />
+            </Style>
+
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#686868" />
+                <Setter Property="FontFamily" Value="Open Sans" />
+                <Setter Property="FontWeight" Value="Light" />
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid>
+
+        <!-- Background -->
+        <!--<Grid Visibility="Collapsed">-->
+        <Grid Visibility="{x:Bind ViewModel.IsStandHere(ViewModel.CurrentScreenState)}">
+            <Image Source="ms-appx:///Assets/Ignite/DemoWelcomeLeftEdge.png" HorizontalAlignment="Left" />
+        </Grid>
+        
+        <!-- Debug Info -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.95*"></RowDefinition>
+                <RowDefinition Height="0.05*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.05*"></ColumnDefinition>
+                <ColumnDefinition Width="0.95*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="debugInfo" Grid.Row="1" Grid.Column="1"></TextBlock>
+        </Grid>
+        
+        <!-- Logos -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2708*"></RowDefinition>
+                <RowDefinition Height="292*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2739*"></ColumnDefinition>
+                <ColumnDefinition Width="1095*"></ColumnDefinition>
+                <ColumnDefinition Width="666*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Row="1" Grid.Column="1" Source="ms-appx:///Assets/Ignite/microsoft_intel_logo.png" VerticalAlignment="Top"></Image>
+        </Grid>
+
+        <!-- Customer Counter -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="139*"></RowDefinition>
+                <RowDefinition Height="245*"></RowDefinition>
+                <RowDefinition Height="2176*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="119*"></ColumnDefinition>
+                <ColumnDefinition Width="202*"></ColumnDefinition>
+                <ColumnDefinition Width="4179*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <ctlIgnite:CustomerCounterControl x:Name="customerCounterControl" Grid.Row="1" Grid.Column="1"></ctlIgnite:CustomerCounterControl>
+        </Grid>
+
+        <!-- Camera -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="126*" />
+                <RowDefinition Height="353*" />
+                <RowDefinition Height="2521*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4374*"></ColumnDefinition>
+                <ColumnDefinition Width="126*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <!--cameraHostGrid width is set in code behind for correct aspect ratio-->
+            <Grid x:Name="cameraHostGrid" Grid.Row="1" HorizontalAlignment="Right">
+                <ctl:CameraControl x:Name="cameraControl"/>
+            </Grid>
+        </Grid>
+
+        <!-- 1. Stand Here Content -->
+        <!--<Grid Visibility="Collapsed">-->
+        <Grid  Visibility="{x:Bind ViewModel.IsStandHere(ViewModel.CurrentScreenState)}">
+
+            <!-- Shopper image-->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="231*"></RowDefinition>
+                    <RowDefinition Height="2769*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2479*"></ColumnDefinition>
+                    <ColumnDefinition Width="2021*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Row="1" Source="ms-appx:///Assets/Ignite/Shopper.png" HorizontalAlignment="Right" Stretch="UniformToFill"  />
+            </Grid>
+
+            <!-- Stand here message and sign -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="873*"></RowDefinition>
+                    <RowDefinition Height="712*"></RowDefinition>
+                    <RowDefinition Height="1445*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2142*"></ColumnDefinition>
+                    <ColumnDefinition Width="1426*"></ColumnDefinition>
+                    <ColumnDefinition Width="272*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="1.5*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Viewbox Grid.Row="0">
+                        <TextBlock  Width="200" TextWrapping="WrapWholeWords" TextAlignment="Center" FontFamily="Open Sans" 
+                       FontWeight="Normal" Foreground="#404040">Stand <Run Foreground="#F25022">here</Run> to<LineBreak></LineBreak>participate in the</TextBlock>
+                    </Viewbox>
+                    <Viewbox Grid.Row="1">
+                        <TextBlock  Width="200" TextWrapping="WrapWholeWords" TextAlignment="Center" FontFamily="Raleway" 
+                       FontWeight="SemiBold" Foreground="#404040">Intelligent Retail Experience</TextBlock>
+                    </Viewbox>
+                </Grid>
+
+                <Grid Grid.Row="2" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="151*"></RowDefinition>
+                        <RowDefinition Height="499*"></RowDefinition>
+                        <RowDefinition Height="765*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="1" Source="ms-appx:///Assets/Ignite/Shoeprint2.png"></Image>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- 2. Greeting Content -->
+        <!--<Grid Visibility="Collapsed">-->
+        <Grid Visibility="{x:Bind ViewModel.IsGreeting(ViewModel.CurrentScreenState)}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="803*" ></RowDefinition>
+                <RowDefinition Height="1251*"></RowDefinition>
+                <RowDefinition Height="946*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2155*"></ColumnDefinition>
+                <ColumnDefinition Width="1816*"></ColumnDefinition>
+                <ColumnDefinition Width="529*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <!-- Greeting message -->
+            <Viewbox Grid.Row="1" Grid.Column="1" >
+                <TextBlock TextWrapping="WrapWholeWords"
+                           LineHeight="30"
+                           TextAlignment="Left"
+                           Foreground="#404040"
+                           Width="250">Hello and welcome to the <Run FontWeight="SemiBold">Intelligent Retail Experience</Run> brought to you by Intel and Microsoft.
+                                       Enjoy the immersive edge to cloud experience, powered by the latest tech available today.
+                </TextBlock>
+            </Viewbox>
+
+            <!-- Product image stack -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="441*"></RowDefinition>
+                    <RowDefinition Height="206*"></RowDefinition>
+                    <RowDefinition Height="441*"></RowDefinition>
+                    <RowDefinition Height="50*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="519*"></ColumnDefinition>
+                    <ColumnDefinition Width="619*"></ColumnDefinition>
+                    <ColumnDefinition Width="248*"></ColumnDefinition>
+                    <ColumnDefinition Width="619*"></ColumnDefinition>
+                    <ColumnDefinition Width="150*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Row="1" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="2"
+                    Source="ms-appx:///Assets/Ignite/HatStackedHR1.png"></Image>
+                <Image Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2"
+                    Source="ms-appx:///Assets/Ignite/InterlayStacked.png"></Image>
+                <Image Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2"
+                    Source="ms-appx:///Assets/Ignite/SunglassesStackedHR1.png"></Image>
+            </Grid>
+
+            <!-- 'Next' button -->
+            <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="154*"></RowDefinition>
+                    <RowDefinition Height="178*"></RowDefinition>
+                    <RowDefinition Height="614*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1706*"></ColumnDefinition>
+                    <ColumnDefinition Width="1130*"></ColumnDefinition>
+                    <ColumnDefinition Width="1665*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="1" Grid.Column="1" CornerRadius="20" Style="{StaticResource navButtonStyle}"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="NextButton_Click">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="3*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Viewbox Grid.Row="1">
+                            <TextBlock FontWeight="Normal">Next</TextBlock>
+                        </Viewbox>
+                    </Grid>
+                </Button>
+            </Grid>
+        </Grid>
+
+        <!-- 3. Selection Content -->
+        <!--<Grid Visibility="Collapsed">-->
+        <Grid Visibility="{x:Bind ViewModel.IsSelectionOrSelected(ViewModel.CurrentScreenState)}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1121*"></RowDefinition>
+                <RowDefinition Height="1162*"></RowDefinition>
+                <RowDefinition Height="717*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="592*"></ColumnDefinition>
+                <ColumnDefinition Width="1557*"></ColumnDefinition>
+                <ColumnDefinition Width="202*"></ColumnDefinition>
+                <ColumnDefinition Width="1557*"></ColumnDefinition>
+                <ColumnDefinition Width="592*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <!-- Selection offered message -->
+            <!--<Grid Visibility="Collapsed" Grid.ColumnSpan="5">-->
+            <Grid Visibility="{x:Bind ViewModel.IsSelection(ViewModel.CurrentScreenState)}" Grid.ColumnSpan="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="591*"></RowDefinition>
+                    <RowDefinition Height="295*"></RowDefinition>
+                    <RowDefinition Height="235*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="682*"></ColumnDefinition>
+                    <ColumnDefinition Width="2993*"></ColumnDefinition>
+                    <ColumnDefinition Width="625*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Viewbox Grid.Row="1" Grid.Column="1">
+                    <TextBlock>To begin, please <Run Foreground="#F25022" FontWeight="Normal">Select</Run> a product <Run Text="{x:Bind ViewModel.CustomerPromptMode}"></Run>.</TextBlock>
+                </Viewbox>
+            </Grid>
+
+            <!-- Choice made message -->
+            <!--<Grid Visibility="Collapsed" Grid.Column="1" Grid.ColumnSpan="3">-->
+            <Grid Visibility="{x:Bind ViewModel.IsLeftOrRightSelected(ViewModel.CurrentScreenState)}" Grid.Column="1" Grid.ColumnSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="400*"></RowDefinition>
+                    <RowDefinition Height="160*"></RowDefinition>
+                    <RowDefinition Height="100*"></RowDefinition>
+                    <RowDefinition Height="150*"></RowDefinition>
+                    <RowDefinition Height="120*"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Viewbox Grid.Row="1">
+                    <TextBlock FontWeight="Normal" >Great!!</TextBlock>
+                </Viewbox>
+                <Viewbox Grid.Row="3">
+                    <TextBlock>You can find our <Run Text="{x:Bind ViewModel.ProductSelected}" FontWeight="Normal"></Run> to the <Run Text="{x:Bind ViewModel.Direction}" Foreground="#F25022" FontWeight="Normal"></Run>. Enjoy your visit!</TextBlock>
+                </Viewbox>
+            </Grid>
+
+            <!-- Left button -->
+            <Button Visibility="{x:Bind ViewModel.IsLeftButton}" Grid.Row="1" Grid.Column="1" Padding="0"  Background="Transparent" Click="LeftButton_Click" HorizontalAlignment="Center">
+                <Image Source="{x:Bind ViewModel.ImageSourceLeft}" Stretch="Uniform"></Image>
+            </Button>
+
+            <!-- Right button -->
+            <Button Visibility="{x:Bind ViewModel.IsRightButton}" Grid.Row="1" Grid.Column="3" Padding="0" Background="Transparent" Click="RightButton_Click" HorizontalAlignment="Center">
+                <Image Source="{x:Bind ViewModel.ImageSourceRight}" Stretch="Uniform"></Image>
+            </Button>
+
+            <!-- Left directions -->
+            <Grid Visibility="{x:Bind ViewModel.IsLeftArrow}"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Image Grid.Row="1" Source="ms-appx:///Assets/Ignite/DirectionLeft.png"></Image>
+            </Grid>
+
+            <!-- Right directions -->
+            <Grid Visibility="{x:Bind ViewModel.IsRightArrow}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Image Grid.Row="1" Source="ms-appx:///Assets/Ignite/DirectionRight.png"></Image>
+            </Grid>
+
+            <!-- Go Back button -->
+            <Grid Visibility="{x:Bind ViewModel.IsSelectionOrSelected(ViewModel.CurrentScreenState)}" Grid.Row="2" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0.5*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.6*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="1" Grid.Column="0" CornerRadius="20" Style="{StaticResource navButtonStyle}"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="GoBackButton_Click">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="3*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Viewbox Grid.Row="1">
+                            <TextBlock FontWeight="Normal">Go Back</TextBlock>
+                        </Viewbox>
+                    </Grid>
+                </Button>
+            </Grid>
+            
+        </Grid>
+
+        <!-- 4. Recognized Customer Screen -->
+        <!--<Grid Visibility="Collapsed">-->
+        <Grid Visibility="{x:Bind ViewModel.IsRecognized(ViewModel.CurrentScreenState)}" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="692*"></RowDefinition>
+                <RowDefinition Height="1323*"></RowDefinition>
+                <RowDefinition Height="985*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="541*"></ColumnDefinition>
+                <ColumnDefinition Width="1772*"></ColumnDefinition>
+                <ColumnDefinition Width="280*"></ColumnDefinition>
+                <ColumnDefinition Width="1367*"></ColumnDefinition>
+                <ColumnDefinition Width="541*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <!-- Recommended product image -->
+            <Image Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Top"
+                   Source="{x:Bind ViewModel.ImageSourceSuggestion}">
+            </Image>
+
+            <!-- Direction -->
+            <!-- -->
+
+            <!-- Welcome back message -->
+            <Grid Grid.Row="1" Grid.Column="3" Grid.RowSpan="2">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="0.06*"></RowDefinition>
+                        <RowDefinition Height="60"></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Viewbox Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <TextBlock Foreground="#F25022" FontWeight="SemiBold" 
+                                   HorizontalTextAlignment="Left" >Hello <Run Text="{x:Bind ViewModel.CustomerName}"></Run>!</TextBlock>
+                    </Viewbox>
+                    <Viewbox Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <TextBlock Width="270" TextWrapping="WrapWholeWords" HorizontalTextAlignment="Left"
+                                   LineHeight="30">                            
+                            Welcome back to the <Run FontWeight="SemiBold">Intelligent Retail Experience</Run> with Intel and Microsoft.
+                            We hope you are liking the <Run Text="{x:Bind ViewModel.ProductPrevious}" FontWeight="SemiBold"></Run>.
+                            We invite you to check out the <Run Text="{x:Bind ViewModel.ProductSuggestion}" FontWeight="SemiBold"></Run> next.
+                            You can find it by proceeding to the <Run Text="{x:Bind ViewModel.Direction}" Foreground="#F25022" FontWeight="SemiBold"></Run>.
+                        </TextBlock>
+                    </Viewbox>
+                </Grid>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</Page>

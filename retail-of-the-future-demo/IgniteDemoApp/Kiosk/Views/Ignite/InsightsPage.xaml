@@ -1,0 +1,74 @@
+﻿<Page
+    x:Class="IntelligentKioskSample.Views.Ignite.InsightsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IntelligentKioskSample.Views.Ignite"
+    xmlns:ctl="using:IntelligentKioskSample.Controls.Ignite"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DefaultBindMode="OneWay"
+    mc:Ignorable="d"
+    d:DesignWidth="1800"
+    d:DesignHeight="1200"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="Margin" Value="4" />
+            </Style>
+        </Grid.Resources>
+
+        <TextBlock Grid.ColumnSpan="2" Text="Retail Insights" Margin="0,5,0,20" HorizontalAlignment="Center" VerticalAlignment="Top"  FontSize="22" FontWeight="SemiBold" />
+
+        <StackPanel Grid.Row="1" Margin="20">
+            <TextBlock><Bold>Sales Summary:</Bold></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.LeftProductSoldToday}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.RightProductSoldToday}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.LeftProductSoldLastHr}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.RightProductSoldLastHr}"></TextBlock>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="20">
+            <TextBlock><Bold>Inventory Summary:</Bold></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.LeftProductOnFloor}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.RightProductOnFloor}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.LeftProductInWarehouse}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.RightProductInWarehouse}"></TextBlock>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="20">
+            <TextBlock><Bold>Registration Summary:</Bold></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.CustomersToday}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.CustomersLastHr}"></TextBlock>
+            <TextBlock></TextBlock>
+            <ctl:CustomerCounterVisControl x:Name="counterVis" MaxBarWidth="200" Width="555" HorizontalAlignment="Left"></ctl:CustomerCounterVisControl>
+        </StackPanel>
+
+        <!-- Gap detection -->
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Canvas Name="ShelfCanvas" HorizontalAlignment="Left">
+                <Image Margin="0" Name="ShelfImage"/>
+            </Canvas>
+            <!--<StackPanel Grid.Row="1" Margin="20">
+                <TextBlock Grid.Row="1"><Bold>Alert:</Bold></TextBlock>
+                <TextBlock Grid.Row="2" Foreground="Red">1 empty shelf slot(s)</TextBlock>
+            </StackPanel>-->
+                
+        </Grid>
+    </Grid>
+</Page>

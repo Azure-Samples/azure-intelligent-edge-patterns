@@ -1,0 +1,39 @@
+﻿<Page
+    x:Class="IntelligentKioskSample.DemoAppShell"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IntelligentKioskSample"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="navMenuItemTemplate" x:DataType="local:NavMenuItem">
+            <Grid HorizontalAlignment="Left" Height="40" Margin="-20,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Viewbox Grid.Column="0" Margin="16,12">
+                    <FontIcon  FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind Glyph}" />
+                </Viewbox>
+                <ContentPresenter Content="{x:Bind Label}" Grid.Column="1" VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+    
+    <Grid>
+        <NavigationView x:Name="nvTopLevelNav"
+                MenuItemsSource="{x:Bind DemoMenuItems, Mode=OneWay}"        
+                MenuItemTemplate="{StaticResource navMenuItemTemplate}" 
+                Loaded="nvTopLevelNav_Loaded"
+                SelectionChanged="nvTopLevelNav_SelectionChanged"
+                ItemInvoked="nvTopLevelNav_ItemInvoked"
+                IsPaneOpen="False"        
+                PaneDisplayMode="LeftCompact"
+                IsBackButtonVisible="Collapsed">
+            <Frame x:Name="contentFrame"></Frame>
+        </NavigationView>
+    </Grid>
+</Page>

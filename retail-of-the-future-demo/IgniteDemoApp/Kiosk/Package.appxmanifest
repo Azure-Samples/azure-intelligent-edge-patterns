@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" IgnorableNamespaces="uap mp uap3">
+  <Identity Name="IgniteDemoApp" Publisher="CN=Neal Analytics" Version="1.0.0.0" />
+  <mp:PhoneIdentity PhoneProductId="bdf9127b-7e32-469b-a6ed-f57a0a80ae23" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Properties>
+    <DisplayName>IgniteDemoApp</DisplayName>
+    <PublisherDisplayName>Neal Analytics</PublisherDisplayName>
+    <Logo>Assets\Ignite\DemoApp\StoreLogo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="IgniteDemoApp.App">
+      <uap:VisualElements DisplayName="Ignite Demo" Square44x44Logo="Assets\Ignite\DemoApp\squaretile-sdk-44.png" Square150x150Logo="Assets\Ignite\DemoApp\squaretile-sdk.png" Description="Ignite Demo" BackgroundColor="#00B2F0">
+        <uap:SplashScreen BackgroundColor="#00B2F0"  Image="Assets\Ignite\DemoApp\splash.png"/>
+        <uap:DefaultTile Square71x71Logo="Assets\Ignite\DemoApp\SmallTile.png" Wide310x150Logo="Assets\Ignite\DemoApp\WideTile.png" Square310x310Logo="Assets\Ignite\DemoApp\LargeTile.png"/>
+        <uap:LockScreen BadgeLogo="Assets\Ignite\DemoApp\BadgeLogo.png" Notification="badge"/>
+      </uap:VisualElements>
+      <Extensions>
+        <Extension Category="windows.backgroundTasks" EntryPoint="NfcHceBackgroundTask.BgTask">
+          <BackgroundTasks>
+            <Task Type="systemEvent"/>
+          </BackgroundTasks>
+        </Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <uap:Capability Name="picturesLibrary" />
+    <uap3:Capability Name="backgroundMediaPlayback"/>
+    <uap:Capability Name="sharedUserCertificates"/>
+    <DeviceCapability Name="webcam" />
+    <DeviceCapability Name="microphone" />
+    <DeviceCapability Name="proximity"/>
+  </Capabilities>
+</Package>

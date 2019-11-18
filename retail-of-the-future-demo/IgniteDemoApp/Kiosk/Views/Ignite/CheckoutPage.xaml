@@ -1,0 +1,195 @@
+﻿<Page
+    x:Class="IntelligentKioskSample.Views.Ignite.CheckoutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IntelligentKioskSample"
+    xmlns:ctl="using:IntelligentKioskSample.Controls"
+    xmlns:ctlIgnite="using:IntelligentKioskSample.Controls.Ignite"
+    xmlns:models="using:IntelligentKioskSample.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="1800"
+    d:DesignHeight="1200"
+    x:DefaultBindMode="OneWay"
+    >
+
+    <Page.Resources>
+        <ctl:NullToVisibilityConverter x:Key="nullToVisibilityConverter"/>
+    </Page.Resources>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="2" Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="6*"/>
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2.8*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="18*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Image Margin="-27,0,0,0" Source="ms-appx:///Assets/Ignite/Microsoft-logo_rgb_c-gray.png"></Image>
+                <Image Grid.Column="1" Source="ms-appx:///Assets/Ignite/intel_rgb_3000.png"></Image>
+            </Grid>
+
+            <StackPanel Grid.Row="1" Orientation="Vertical">
+                <TextBlock Margin="0,20,0,10" Text="CUSTOMER CHECKOUT" FontSize="18" FontWeight="Bold"></TextBlock>
+                <Border Margin="0,0,0,10" BorderThickness="1" BorderBrush="Black" Background="Black"></Border>
+            </StackPanel>
+
+            <ProgressRing Grid.Row="2" x:Name="progressControl" Width="100" Height="100"></ProgressRing>
+
+            <!-- Unrecognozed customer -->
+            <StackPanel Grid.Row="2" Visibility="{x:Bind ViewModel.IsUnrecognized}" Orientation="Horizontal">
+                <TextBlock Text="Loyalty Program Member?" Margin="10" VerticalAlignment="Center"></TextBlock>
+                <ctlIgnite:CustomerRegistrationControl x:Name="signinControl"
+                                                       Margin="10"
+                                                       ButtonText="SIGN IN"
+                                                       RegistrationMode="False"
+                                                       OnRegistrationComplete="OnCustomerUpdate"/>
+                <ctlIgnite:CustomerRegistrationControl x:Name="registrationControl" 
+                                                       Margin="10"
+                                                       ButtonText="SIGN UP"
+                                                       RegistrationMode="True"
+                                                       OnRegistrationComplete="OnCustomerUpdate"/>
+            </StackPanel>
+
+            <!-- Recognized customer -->
+            <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.IsRecognized, Mode=OneWay}" Margin="0,10,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock>Cutomer Name:</TextBlock>
+                <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{x:Bind ViewModel.CustomerName}"></TextBlock>
+                <TextBlock Grid.Row="1">Date of Last Visit:</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10,0,0,0" Text="{x:Bind ViewModel.VisitDateStr}"></TextBlock>
+                <TextBlock Grid.Row="2">Previous Purchase:</TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="1" Margin="10,0,0,0" Text="{x:Bind ViewModel.PreviousPurchase}"></TextBlock>
+                <StackPanel Grid.Row="3" Grid.ColumnSpan="3">
+                    <TextBlock  FontWeight="Bold">Recommended Actions:</TextBlock>
+                    <TextBlock Text="{x:Bind ViewModel.RecommendedActions}" TextWrapping="Wrap"></TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="3">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                    </Grid>
+                    <StackPanel Grid.Row="1" Margin="0,0,30,0" Orientation="Vertical">
+                        <TextBlock Margin="0,20,0,10" FontSize="16" FontWeight="Bold">(<Run Text="{x:Bind ViewModel.TotalItems.ToString()}"></Run>) ITEMS</TextBlock>
+                        <Border Margin="0,0,0,10" BorderThickness="1" BorderBrush="Black" Background="Black"></Border>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{x:Bind ViewModel.ItemGiveaway.ProductImageSrc}" Margin="10" Width="150"></Image>
+                            <StackPanel Margin="20,10" Orientation="Vertical">
+                                <TextBlock Text="{x:Bind ViewModel.ItemGiveaway.PromoTitle}" FontSize="14" FontWeight="SemiBold" TextWrapping="WrapWholeWords"></TextBlock>
+                                <TextBlock Text="{x:Bind ViewModel.ItemGiveaway.ProductStyle}"></TextBlock>
+                                <TextBlock Text="{x:Bind ViewModel.ItemGiveaway.ProductColor}"></TextBlock>
+                                <TextBlock >Qty:&#160;&#160;&#160;&#160;&#160;<Run Text="{x:Bind ViewModel.ItemGiveaway.ProductQty.ToString()}"></Run></TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <HyperlinkButton Margin="0,10,0,0"  VerticalAlignment="Center" Content="Change" Click="OnEdit_Click">
+                                        <FlyoutBase.AttachedFlyout>
+                                            <Flyout x:Name="productSelectionFlyout" Opened="OnSelectionFlyout_Opened" Closed="OnSelectionFlyout_Closed">
+                                                
+                                                <ListView x:Name="choicesList"  ItemsSource="{x:Bind ViewModel.ProductChoices}">
+                                                    <ListView.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal"></StackPanel>
+                                                        </ItemsPanelTemplate>
+                                                    </ListView.ItemsPanel>
+                                                    <ListView.ItemTemplate>
+                                                        <DataTemplate x:DataType="models:Product">
+                                                            <Grid Width="100" Height="100">
+                                                                <Image Source="{x:Bind ProductImageSrc, Mode=OneTime}"></Image>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListView.ItemTemplate>
+                                                </ListView>
+                                                
+                                            </Flyout>
+                                        </FlyoutBase.AttachedFlyout>
+                                    </HyperlinkButton>
+                                    <TextBlock Margin="10,10,0,0" Text="|" VerticalAlignment="Center"></TextBlock>
+                                    <HyperlinkButton Margin="10,10,0,0"  VerticalAlignment="Center"
+                                                     Click="OnAdd_Click">Add Qty</HyperlinkButton>
+                                    <TextBlock Margin="10,10,0,0" Text="|" VerticalAlignment="Center"></TextBlock>
+                                    <HyperlinkButton Margin="10,10,0,0"  VerticalAlignment="Center"
+                                                     IsEnabled="{x:Bind ViewModel.IsRemovable(ViewModel.ItemGiveaway.ProductQty)}"
+                                                     Click="OnRemove_Click">Remove</HyperlinkButton>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Column="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                    </Grid>
+                    <StackPanel Grid.Row="1" Orientation="Vertical">
+                        <TextBlock Margin="0,20,0,10" Text="ORDER SUMMARY" FontSize="16" FontWeight="Bold"></TextBlock>
+                        <Border Margin="0,0,0,10" BorderThickness="1" BorderBrush="Black" Background="Black"></Border>
+                        <Border Margin="0,10,0,0" BorderThickness="1" BorderBrush="Gray">
+                            <StackPanel Padding="20" Orientation="Horizontal">
+                                <Image Source="ms-appx:///Assets/Ignite/PromoTag.png"></Image>
+                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Foreground="DarkGreen" FontWeight="SemiBold">PROMO CODE "IGNITE19" APPLIED</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Column="0" Margin="0,15,0,0">Merchandise:</TextBlock>
+                            <TextBlock Grid.Column="1" Margin="0,15,20,0" HorizontalAlignment="Right">$0.00</TextBlock>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,5,0,0">Estimated Tax:</TextBlock>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,5,20,0" HorizontalAlignment="Right">$0.00</TextBlock>
+                            <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,15,0,5" BorderThickness="1" BorderBrush="Gray" Background="Gray"></Border>
+                            <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">ORDER TOTAL:</TextBlock>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,20,0"  HorizontalAlignment="Right">$0.00</TextBlock>
+                            <Button Grid.Row="4" Grid.ColumnSpan="2" Margin="0,10,0,0" HorizontalAlignment="Stretch" 
+                                    Background="Black" Foreground="White" 
+                                    Click="CheckoutButton_Click">CHECKOUT</Button>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>
