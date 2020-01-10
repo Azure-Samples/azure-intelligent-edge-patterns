@@ -200,8 +200,7 @@
                   "Binds": [
                     "/etc/hosts:/etc/hosts",
                     "$SHARE_NAME:/imagefiles"
-                  ],
-
+                  ]
                 }
               }
             }
