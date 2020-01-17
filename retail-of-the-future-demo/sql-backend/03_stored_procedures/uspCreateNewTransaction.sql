@@ -11,7 +11,7 @@ CREATE PROCEDURE uspCreateNewTransaction
 AS
 
 DECLARE @time_zone nvarchar(50) = 'Pacific Standard Time';
-DECLARE @transaction_time datetime = (getdate() at time zone 'UTC') at time zone @time_zone;
+DECLARE @transaction_time datetime = (getutcdate() at time zone 'UTC') at time zone @time_zone;
 
 INSERT INTO transactions
 VALUES(@transaction_time, @item_id, @item_qty, @customer_face_hash)

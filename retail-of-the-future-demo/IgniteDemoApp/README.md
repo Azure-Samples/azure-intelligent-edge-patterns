@@ -92,4 +92,4 @@ See the [Counters and Gap Detection](../IgniteSolution/docs/counters_and_gap_det
 
 ### DB Connection
 
-Connection string to the Retail Insights database
+Connection string to the Retail Insights database. See [SQL Database Configuration](../sql-backend/README.md) for instructions to configure the SQL DB backend.

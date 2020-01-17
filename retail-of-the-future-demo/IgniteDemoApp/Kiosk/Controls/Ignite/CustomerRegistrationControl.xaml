@@ -15,6 +15,10 @@
 
     <UserControl.Resources>
         <controls:BooleanToVisibilityConverter x:Key="bolleanToVisibilityConverter"/>
+        <Style x:Key="registrationButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Black" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -38,16 +42,19 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,10,0" Text="FIRST NAME" VerticalAlignment="Center"/>
-                            <TextBox Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.FirstName, Mode=TwoWay}" />
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="CustomerNameChanged"/>
                             <TextBlock Grid.Row="1" Grid.Column="0"  Margin="0,2,10,0" Text="LAST NAME" VerticalAlignment="Center"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,2,0,0" Text="{x:Bind ViewModel.LastName, Mode=TwoWay}"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,2,0,0" Text="{x:Bind ViewModel.LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="CustomerNameChanged"/>
                         </Grid>
-                        <controls:CameraControl x:Name="cameraControl" Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" ShowDialogOnApiErrors="False" FlowDirection="LeftToRight" ImageCaptured="OnCameraImageCaptured" />
+                        <controls:CameraControl x:Name="cameraControl" Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                ShowDialogOnApiErrors="False" FlowDirection="LeftToRight" ImageCaptured="OnCameraImageCaptured"
+                                                CameraButtonClicked="OnCameraButtonClicked"/>
+                        <ProgressRing x:Name="regProgressControl" Grid.Row="1" Width="75" Height="75" Margin="0,8,0,0"></ProgressRing>
                         <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,12,0,0" >
-                            <Button Content="REGISTER" HorizontalAlignment="Stretch" 
+                            <Button Content="REGISTER" HorizontalAlignment="Stretch" Style="{StaticResource registrationButtonStyle}"
                                 Visibility="{x:Bind ViewModel.IsRegistrationMode, Mode=OneWay}"
                                 IsEnabled="{x:Bind ViewModel.IsRegistrationEnabled, Mode=OneWay}"
-                                Click="{x:Bind ViewModel.Register}">
+                                Click="OnRegister">
                             </Button>
                             <TextBlock Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
                                HorizontalAlignment="Stretch" TextAlignment="Center"

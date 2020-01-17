@@ -4,7 +4,8 @@ import iothub_client
 from iothub_client import IoTHubModuleClient, IoTHubClientError, IoTHubTransportProvider
 from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError
 
-import os, time, queue, logging, threading
+import os, time, queue, logging, threading, json
+from datetime import datetime
 
 logging.basicConfig(format='%(asctime)s  %(levelname)-10s %(message)s', datefmt="%Y-%m-%d-%H-%M-%S",
     level=logging.INFO)
@@ -41,11 +42,12 @@ class IoTMessaging:
         if self.input_queue is not None:
             self.client.set_message_callback(self.input_queue, receive_message, receive_msg_callback)
 
-    def send_event(self, event, send_context):
+    def send_event(self, event, send_context, to_output_queue=True):
 
-        self.client.send_event_async(
-            self.output_queue, event, send_confirmation_callback, send_context)
+        self.client.send_event_async(self.output_queue, event, send_confirmation_callback, send_context)
         
+    def send_to_output(self, event, output_name, send_context):
+        self.client.send_event_async(output_name, event, send_confirmation_callback, send_context)
 
 class IoTCountMessenger(IoTMessaging):
 
@@ -79,6 +81,28 @@ class IoTCountMessenger(IoTMessaging):
         self.send_event(message, context)
         logging.info(f"Sent message '{message_str}', context: {context}")
     
+    def send_traffic_details(self, walk_in, walk_out, source):
+        '''
+        Report in/out traffic to the IoT Hub
+        Params: 
+          walk_in: number of walkings
+          walk_out: number of walkouts
+          source: prod or test
+        '''
+
+        msg = dict()
+        msg["id"] = self.id
+        msg["in"] = walk_in
+        msg["out"] = walk_out
+        msg["time"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        msg["title"] = "traffic"
+        msg["source"] = source
+
+        msg_text = json.dumps(msg)
+        # route message to the iot hub
+        self.send_to_output(IoTHubMessage(msg_text), "iotHub", self.id)
+        logging.info(f"Traffic: {msg_text}")
+        
     def update_count(self, cnt):
         if self.should_reset():
             return

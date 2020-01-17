@@ -15,6 +15,9 @@ namespace IntelligentKioskSample.Models
 {
     public class CustomerRegistrationViewModel : BaseViewModel
     {
+        public event EventHandler PauseCamera;
+        public event EventHandler ResumeCamera;
+
         private CustomerRegistrationInfo customerInfo { get; set; }
         private ImageAnalyzer customerFace;
 
@@ -78,25 +81,55 @@ namespace IntelligentKioskSample.Models
             StatusTextColor = Util.ToBrush("black");
         }
 
+        private void UpdateRegistrationStatus()
+        {
+            if (FullName.Length > 0 && customerFace != null)
+            {
+                IsRegistrationEnabled = true;
+                StatusText = "";
+                StatusTextColor = Util.ToBrush("black");
+            }
+            else
+            {
+                IsRegistrationEnabled = false;
+                if (FullName.Length > 0 && customerFace == null)
+                {
+                    StatusText = "Please take a picture";
+                }
+                else if (FullName.Length == 0 && customerFace != null)
+                {
+                    StatusText = "Please enter the first and last name";
+                }
+                else
+                {
+                    StatusText = "Please enter the first and last name and take a picture";
+                }
+                StatusTextColor = Util.ToBrush("red");
+            }
+        }
+
         public async Task UpdateFaceCaptured(ImageAnalyzer img)
         {
             customerFace = img;
             if (IsRegistrationMode)
             {
-                if (FullName.Length > 0 && img != null)
+                UpdateRegistrationStatus();
+                if (img != null)
                 {
-                    IsRegistrationEnabled = true;
-                    StatusText = "";
-                }
-                else
-                {
-                    IsRegistrationEnabled = false;
-                    StatusText = "Please enter the first and last name and take a picture";
+                    PauseCamera?.Invoke(this, EventArgs.Empty);
                 }
             }
             else
             {
                 await SignIn();
+            }
+        }
+
+        public void UpdateNameChanged()
+        {
+            if (IsRegistrationMode)
+            {
+                UpdateRegistrationStatus();
             }
         }
 
@@ -111,8 +144,9 @@ namespace IntelligentKioskSample.Models
         private Person CurrentPerson { get; set; }
         private PersistedFace CurrentFace { get; set; }
 
-        public async void Register()
+        public async Task Register()
         {
+            IsRegistrationEnabled = false;
             try
             {
                 IEnumerable<PersonGroup> PersonGroups = null;
@@ -187,21 +221,25 @@ namespace IntelligentKioskSample.Models
                 // 6. Update status
                 if (trainingSucceeded && recordAdded)
                 {
-                    StatusTextColor = Util.ToBrush("green");
                     StatusText = "Success!";
+                    StatusTextColor = Util.ToBrush("green");
                 }
                 else
                 {
                     customerInfo = null;
-                    StatusTextColor = Util.ToBrush("red");
+                    IsRegistrationEnabled = true;
                     StatusText = "Please try again later";
+                    StatusTextColor = Util.ToBrush("red");
+                    ResumeCamera?.Invoke(this, EventArgs.Empty);
                 }
             }
             catch (Exception)
             {
                 customerInfo = null;
-                StatusTextColor = Util.ToBrush("red");
+                IsRegistrationEnabled = true;
                 StatusText = "Please try again";
+                StatusTextColor = Util.ToBrush("red");
+                ResumeCamera?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -223,14 +261,16 @@ namespace IntelligentKioskSample.Models
                 customerInfo.RegistrationDate = dbCustomerInfo.PreviousVisitDate;
 
                 // 3. Update status
-                StatusTextColor = Util.ToBrush("green");
                 StatusText = $"Welcome, {customerInfo.CustomerName}!";
+                StatusTextColor = Util.ToBrush("green");
+                PauseCamera?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception)
             {
                 customerInfo = null;
-                StatusTextColor = Util.ToBrush("red");
                 StatusText = "Please try again.";
+                StatusTextColor = Util.ToBrush("red");
+                ResumeCamera?.Invoke(this, EventArgs.Empty);
             }
         }
     }

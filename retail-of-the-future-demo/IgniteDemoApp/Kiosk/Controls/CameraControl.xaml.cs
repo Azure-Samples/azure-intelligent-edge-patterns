@@ -84,6 +84,7 @@ namespace IntelligentKioskSample.Controls
         public event EventHandler<AutoCaptureState> AutoCaptureStateChanged;
         public event EventHandler CameraRestarted;
         public event EventHandler CameraAspectRatioChanged;
+        public event EventHandler CameraButtonClicked;
 
         public static readonly DependencyProperty ShowDialogOnApiErrorsProperty =
             DependencyProperty.Register(
@@ -393,13 +394,13 @@ namespace IntelligentKioskSample.Controls
                             if (identifiedPerson != null && identifiedPerson.Person != null)
                             {
                                 // age, gender and id available
-                                faceBorder.ShowIdentificationData(detectedFace.FaceAttributes.Age.GetValueOrDefault(), 
+                                faceBorder.ShowIdentificationData(detectedFace.FaceAttributes.Age.GetValueOrDefault(),
                                     detectedFace.FaceAttributes.Gender?.ToString(), (uint)Math.Round(identifiedPerson.Confidence * 100), identifiedPerson.Person.Name, uniqueId: uniqueId);
                             }
                             else
                             {
                                 // only age and gender available
-                                faceBorder.ShowIdentificationData(detectedFace.FaceAttributes.Age.GetValueOrDefault(), 
+                                faceBorder.ShowIdentificationData(detectedFace.FaceAttributes.Age.GetValueOrDefault(),
                                     detectedFace.FaceAttributes.Gender?.ToString(), 0, null, uniqueId: uniqueId);
                             }
 
@@ -513,7 +514,7 @@ namespace IntelligentKioskSample.Controls
             this.OnAutoCaptureStateChanged(this.autoCaptureState);
         }
 
-        private bool AreFacesStill(IEnumerable<Windows.Media.FaceAnalysis.DetectedFace> detectedFacesFromPreviousFrame, 
+        private bool AreFacesStill(IEnumerable<Windows.Media.FaceAnalysis.DetectedFace> detectedFacesFromPreviousFrame,
             IEnumerable<Windows.Media.FaceAnalysis.DetectedFace> detectedFacesFromCurrentFrame)
         {
             int horizontalMovementThreshold = (int)(videoProperties.Width * 0.02);
@@ -565,8 +566,9 @@ namespace IntelligentKioskSample.Controls
                     {
                         this.FaceTrackingVisualizationCanvas.Children.Clear();
                     }
-                    
+
                     this.webCamCaptureElement.Visibility = Visibility.Collapsed;
+                    this.cameraSwitchButton.Visibility = Visibility.Collapsed;
                 }
             }
             catch (Exception)
@@ -641,11 +643,9 @@ namespace IntelligentKioskSample.Controls
         {
             if (this.captureManager.CameraStreamState == CameraStreamState.Streaming)
             {
+                this.CameraButtonClicked?.Invoke(this, EventArgs.Empty);
                 var img = await CaptureFrameAsync();
-                if (img != null)
-                {
-                    this.OnImageCaptured(img);
-                }
+                this.OnImageCaptured(img);
             }
             else
             {

@@ -136,16 +136,16 @@ namespace IntelligentKioskSample.Models
             {
                 if (customerRegistrationInfo == null)  // unregistered customer 
                 {
-                    IgniteDataAccess.CreateNewTransaction(DateTime.Now, ItemGiveaway.ItemId, ItemGiveaway.ProductQty, IgniteDataAccess.UNREGISTERED_CUSTOMERID);
+                    IgniteDataAccess.CreateNewTransaction(ItemGiveaway.ItemId, ItemGiveaway.ProductQty, IgniteDataAccess.UNREGISTERED_CUSTOMERID);
                 }
                 else
                 {
-                    IgniteDataAccess.CreateNewTransaction(DateTime.Now, ItemGiveaway.ItemId, ItemGiveaway.ProductQty, customerRegistrationInfo.CustomerFaceHash);
+                    IgniteDataAccess.CreateNewTransaction(ItemGiveaway.ItemId, ItemGiveaway.ProductQty, customerRegistrationInfo.CustomerFaceHash);
                 }
             }
             else
             {
-                IgniteDataAccess.CreateNewTransaction(DateTime.Now, ItemGiveaway.ItemId, ItemGiveaway.ProductQty, customerInfo.CustomerFaceHash);
+                IgniteDataAccess.CreateNewTransaction(ItemGiveaway.ItemId, ItemGiveaway.ProductQty, customerInfo.CustomerFaceHash);
             }
             // TODO: report transaction success status 
             

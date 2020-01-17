@@ -122,6 +122,7 @@
   <ItemGroup>
     <Compile Include="CounterListener.cs" />
     <Compile Include="GapConfig.cs" />
+    <Compile Include="GapListener.cs" />
     <Compile Include="GapListenerHub.cs" />
     <Compile Include="NfcListener.cs" />
     <Compile Include="NfcUtils.cs" />

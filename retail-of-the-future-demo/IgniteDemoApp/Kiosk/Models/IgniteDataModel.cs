@@ -60,10 +60,12 @@ namespace IntelligentKioskSample.Models
         public int RecommendationItemId { get; set; }
     }
 
+    public class Arrival
+    {
+        public DateTime ArrivalDate {get;set;}
+        public int ArrivalHour { get; set; }
+        public int Arrivals { get; set; }
 
-    
-
-
-
+    }
 
 }

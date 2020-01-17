@@ -153,7 +153,7 @@ namespace IntelligentKioskSample.Data
         /// <param name="itemQty"></param>
         /// <param name="customerGuid"></param>
         /// <returns></returns>
-        public static bool CreateNewTransaction(DateTime transactionTime, int itemId, int itemQty, string customerGuid)
+        public static bool CreateNewTransaction(int itemId, int itemQty, string customerGuid)
         {
             try
             {
@@ -162,7 +162,6 @@ namespace IntelligentKioskSample.Data
                     conn.Open();
                     SqlCommand cmd = new SqlCommand("uspCreateNewTransaction", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("transaction_time", DateTime.Now);  // TODO this shouldn't be needed
                     cmd.Parameters.AddWithValue("item_id", itemId);
                     cmd.Parameters.AddWithValue("item_qty", itemQty);
                     cmd.Parameters.AddWithValue("customer_face_hash", customerGuid);
@@ -227,5 +226,37 @@ namespace IntelligentKioskSample.Data
             return res;
         }
 
+        public static List<Arrival> GetArrivalCounts(string seriesId, int lastHours)
+        {
+            var res = new List<Arrival>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(ConnectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand("uspGetArrivalCounts", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("seriesId", seriesId);
+                    cmd.Parameters.AddWithValue("lastHours", lastHours);
+
+                    using (SqlDataReader rdr = cmd.ExecuteReader()) 
+                    {
+                        while (rdr.Read()) 
+                        {
+                            var arrival = new Arrival();
+                            arrival.ArrivalDate = rdr.GetDateTime(rdr.GetOrdinal("ArrivalDate"));
+                            arrival.ArrivalHour = rdr.GetInt32(rdr.GetOrdinal("ArrivalHour"));
+                            arrival.Arrivals = rdr.GetInt32(rdr.GetOrdinal("Arrivals"));
+                            res.Add(arrival);
+                        }
+                    }
+                }
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+            }
+            return res;
+        }
     }
 }

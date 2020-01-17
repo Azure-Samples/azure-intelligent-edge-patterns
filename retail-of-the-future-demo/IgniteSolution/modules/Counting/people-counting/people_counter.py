@@ -76,6 +76,7 @@ def main(args, total=0):
         raise ValueError(f"Unkonwn detector: {args['detector']}. Use 'opencv' or 'onnx'")
 
     is_rtsp = args["input"] is not None and args["input"].startswith("rtsp://")
+    source = "prod" if is_rtsp else "test"
 
     # if a video path was not supplied, grab a reference to the webcam
     logging.info("starting video stream...")
@@ -112,6 +113,10 @@ def main(args, total=0):
     totalFrames = 0
     totalDown = total if store_count and (in_direction == MoveDirection.DOWN or in_direction == MoveDirection.RIGHT) else 0
     totalUp = total if store_count and (in_direction == MoveDirection.UP or in_direction == MoveDirection.LEFT) else 0
+
+    # detailed counters of foot traffic
+    currentIn = 0
+    currentOut = 0
 
     # report counts from this camera
     messageEvery = args["report_count"]
@@ -240,12 +245,14 @@ def main(args, total=0):
                 # line, count the object
                 if direction < 0:
                     totalUp += 1
+                    currentOut += 1
 
                 # if the direction is positive (indicating the object
                 # is moving down/right) AND the centroid is below the
                 # center line, count the object
                 elif direction > 0:
                     totalDown += 1
+                    currentIn += 1
 
             # store the trackable object in our dictionary
             trackableObjects[objectID] = trackableObject
@@ -260,14 +267,24 @@ def main(args, total=0):
 
         # up or down counting - based on what we have parameterized
         total = totalDown - totalUp
+
         if in_direction == MoveDirection.UP or in_direction == MoveDirection.LEFT:
             total = -total
+            # swap current "in" and "out" counters depending on direction
+            tmp = currentIn
+            currentIn = currentOut
+            currentOut = tmp
 
         messenger.update_count(total)
 
         if totalFrames % messageEvery == 0:
             # messenger has been initialized with resettableCount
             messenger.send_count()
+
+            # send current "in" and "out" foot traffic and update direction
+            messenger.send_traffic_details(currentIn, currentOut, source)
+ 
+            currentIn = currentOut = 0
 
         if is_visual:
             # construct a tuple of information we will be displaying on the

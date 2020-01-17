@@ -65,6 +65,10 @@ namespace IntelligentKioskSample.Models
         {
             return dss == DemoScreenState.Recognized ? Visibility.Visible : Visibility.Collapsed;
         }
+        public Visibility IsFace(DemoScreenState dss)
+        {
+            return dss != DemoScreenState.NoFace ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         // Properties for various substates 
         private bool _isLeftButton;
@@ -186,14 +190,24 @@ namespace IntelligentKioskSample.Models
             set { Set(ref _customerPrompt, value); }
         }
 
-        private static string customerPromptNoRecognized =
-            "Hello and welcome to the Intelligent Retail Experience brought to you by Intel and Microsoft. " +
-            "Enjoy the immersive, edge to cloud experience, powered by the latest tech available today.";
+        private string _customerPromptNoRecognized = "";
+        public string CustomerPromptNoRecognized
+        {
+            get { return _customerPromptNoRecognized; }
+            set { Set(ref _customerPromptNoRecognized, value); }
+        }
+
+        private static string _customerPromptRecognized = "";
+        public string CustomerPromptRecognized
+        {
+            get { return _customerPromptRecognized; }
+            set { Set(ref _customerPromptRecognized, value); }
+        }
 
         private static string customerPromptRecognizedFmt =
-            "Hello {0}!  Welcome back to the Intelligent Retail Experience with Intel and Microsoft. " +
-            "We hope you are liking the {1}. We invite you to check out the {2} next. " +
-            "You can find it by proceeding to the {3}.";
+            "Hello {0}! {1} "+
+            "We hope you are liking the {2}. We invite you to check out the {3} next. " +
+            "You can find it by proceeding to the {4}.";
 
         private static string customerPromptSelectionOffer = "To begin, please select a product";
         private static string customerPromptModeWithSpeech = "by speaking or touching the screen";
@@ -212,9 +226,28 @@ namespace IntelligentKioskSample.Models
         private CustomerInfo lastCustomerInfo = null;
 
         private bool isUsingSpeech;
+
         public DemoWelcomeViewModel(bool withSpeech)
         {
             isUsingSpeech = withSpeech;
+
+            if (!string.IsNullOrWhiteSpace(SettingsHelper.Instance.AltGreetingText))
+            {
+                CustomerPromptNoRecognized = SettingsHelper.Instance.AltGreetingText;
+            }
+            else
+            {
+                CustomerPromptNoRecognized = SettingsHelper.GreetingTextDefault;
+            }
+
+            if (!string.IsNullOrWhiteSpace(SettingsHelper.Instance.AltReturnGreetingText))
+            {
+                CustomerPromptRecognized = SettingsHelper.Instance.AltReturnGreetingText;
+            }
+            else 
+            {
+                CustomerPromptRecognized = SettingsHelper.ReturnGreetingTextDefault;
+            }
         }
 
         /// <summary>
@@ -282,7 +315,7 @@ namespace IntelligentKioskSample.Models
                     case DemoScreenState.RightSelected:
                         if (newState != DemoScreenState.Selection)
                         {
-                            if (sinceLastUpdate.TotalMilliseconds < 12000)
+                            if (sinceLastUpdate.TotalMilliseconds < 9000)
                             {
                                 return false; // let user to read directions, unless they chose to go back to selection
                             }
@@ -306,7 +339,7 @@ namespace IntelligentKioskSample.Models
                     CustomerPrompt = "";
                     break;
                 case DemoScreenState.Greeting:
-                    CustomerPrompt = customerPromptNoRecognized;
+                    CustomerPrompt = CustomerPromptNoRecognized;
                     break;
                 case DemoScreenState.Selection:
                     UpdateSelectionOfferedSubstate();
@@ -368,7 +401,7 @@ namespace IntelligentKioskSample.Models
 
             Direction = direction;
             CustomerName = ci.CustomerName;  // TODO: use first name only? 
-            CustomerPrompt = string.Format(customerPromptRecognizedFmt, CustomerName, ProductPrevious, ProductSuggestion, Direction);
+            CustomerPrompt = string.Format(customerPromptRecognizedFmt, CustomerName, CustomerPromptRecognized, ProductPrevious, ProductSuggestion, Direction);
         }
 
         private void UpdateSelectedSubstate(string direction)

@@ -6,7 +6,9 @@
     xmlns:ctl="using:IntelligentKioskSample.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    d:DesignWidth="1800"
+    d:DesignHeight="1200">
 
     <Page.Resources>
         <ctl:StringMatchToVisibilityConverter x:Key="StringMatchToVisibilityConverter"/>
@@ -198,7 +200,7 @@
                         <TextBox Header="Shelf Camera" Text="{Binding ShelfCamera, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="300"/>
                         <TextBox Header="Detection Delay" Text="{Binding DetectionDelay, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="100" Margin="20,0,0,0" />
                     </StackPanel>
-                    
+
                     <StackPanel Orientation="Horizontal">
                         <ToggleSwitch IsOn="{Binding ShowDebugInfo, Mode=TwoWay}" Header="Show debug info:" Margin="0,6,0,0"/>
                         <ToggleSwitch IsOn="{Binding UseSpeech, Mode=TwoWay}" Header="Use speech:" Margin="0,6,0,0"/>
@@ -219,6 +221,7 @@
                         <TextBox Header="Customer Counter Reset Value" Text="{Binding CustomerCounterResetValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="200" />
                         <Button Margin="10,0,0,0" Content="Reset Customer Counter"  VerticalAlignment="Bottom" Click="{x:Bind OnResetCustomerCounterClicked}" ></Button>
                     </StackPanel>
+                    <TextBox Margin="10,0,0,0" Header="Counter Source ID" Text="{Binding CustomerCounterSourceId, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="115" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
@@ -234,6 +237,13 @@
                             </Flyout>
                         </Button.Flyout>
                     </Button>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Margin="0,6,0,0" Header="Alternative Greeting Text" Text="{Binding AltGreetingText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         HorizontalAlignment="Left" Width="510" Height="95" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <TextBox Margin="10,6,0,0" Header="Alternative Return Greeting Text" Text="{Binding AltReturnGreetingText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         HorizontalAlignment="Left" Width="510" Height="95" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                 </StackPanel>
             </StackPanel>
 

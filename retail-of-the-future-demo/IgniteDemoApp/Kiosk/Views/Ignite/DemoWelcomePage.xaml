@@ -179,12 +179,13 @@
 
             <!-- Greeting message -->
             <Viewbox Grid.Row="1" Grid.Column="1" >
-                <TextBlock TextWrapping="WrapWholeWords"
+                <TextBlock 
+                           Text="{x:Bind ViewModel.CustomerPromptNoRecognized}" 
+                           TextWrapping="WrapWholeWords"
                            LineHeight="30"
                            TextAlignment="Left"
                            Foreground="#404040"
-                           Width="250">Hello and welcome to the <Run FontWeight="SemiBold">Intelligent Retail Experience</Run> brought to you by Intel and Microsoft.
-                                       Enjoy the immersive edge to cloud experience, powered by the latest tech available today.
+                           Width="252">
                 </TextBlock>
             </Viewbox>
 
@@ -237,6 +238,50 @@
                     </Grid>
                 </Button>
             </Grid>
+        </Grid>
+        
+        <!-- Restart button (aligns with Go Back Button when that button is visible) -->
+        <Grid Visibility="{x:Bind ViewModel.IsFace(ViewModel.CurrentScreenState)}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1121*"></RowDefinition>
+                <RowDefinition Height="1162*"></RowDefinition>
+                <RowDefinition Height="717*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="592*"></ColumnDefinition>
+                <ColumnDefinition Width="1557*"></ColumnDefinition>
+                <ColumnDefinition Width="202*"></ColumnDefinition>
+                <ColumnDefinition Width="1557*"></ColumnDefinition>
+                <ColumnDefinition Width="592*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Row="2" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0.5*"></RowDefinition>
+                    <RowDefinition Height="0.1*"></RowDefinition>
+                    <RowDefinition Height="0.5*"></RowDefinition>
+                    <RowDefinition Height="0.4*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.6*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="3" Grid.Column="0" CornerRadius="20" Style="{StaticResource navButtonStyle}"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RestartButton_Click">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="3*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Viewbox Grid.Row="1">
+                            <TextBlock FontWeight="Normal">Restart</TextBlock>
+                        </Viewbox>
+                    </Grid>
+                </Button>
+            </Grid>
+            
         </Grid>
 
         <!-- 3. Selection Content -->
@@ -323,12 +368,14 @@
                 <Image Grid.Row="1" Source="ms-appx:///Assets/Ignite/DirectionRight.png"></Image>
             </Grid>
 
-            <!-- Go Back button -->
+            <!-- Go Back and Restart buttons -->
             <Grid Visibility="{x:Bind ViewModel.IsSelectionOrSelected(ViewModel.CurrentScreenState)}" Grid.Row="2" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="0.5*"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0.1*"></RowDefinition>
+                    <RowDefinition Height="0.5*"></RowDefinition>
+                    <RowDefinition Height="0.4*"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.6*"></ColumnDefinition>
@@ -347,6 +394,19 @@
                         </Viewbox>
                     </Grid>
                 </Button>
+                <!--<Button Grid.Row="3" Grid.Column="0" CornerRadius="20" Style="{StaticResource navButtonStyle}"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RestartButton_Click">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="3*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Viewbox Grid.Row="1">
+                            <TextBlock FontWeight="Normal">Restart</TextBlock>
+                        </Viewbox>
+                    </Grid>
+                </Button>-->
             </Grid>
             
         </Grid>
@@ -391,8 +451,7 @@
                     <Viewbox Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Top">
                         <TextBlock Width="270" TextWrapping="WrapWholeWords" HorizontalTextAlignment="Left"
                                    LineHeight="30">                            
-                            Welcome back to the <Run FontWeight="SemiBold">Intelligent Retail Experience</Run> with Intel and Microsoft.
-                            We hope you are liking the <Run Text="{x:Bind ViewModel.ProductPrevious}" FontWeight="SemiBold"></Run>.
+                            <Run Text="{x:Bind ViewModel.CustomerPromptRecognized}"></Run> We hope you are liking the <Run Text="{x:Bind ViewModel.ProductPrevious}" FontWeight="SemiBold"></Run>.
                             We invite you to check out the <Run Text="{x:Bind ViewModel.ProductSuggestion}" FontWeight="SemiBold"></Run> next.
                             You can find it by proceeding to the <Run Text="{x:Bind ViewModel.Direction}" Foreground="#F25022" FontWeight="SemiBold"></Run>.
                         </TextBlock>

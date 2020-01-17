@@ -25,6 +25,7 @@ namespace IntelligentKioskSample.Data
             }
             return null;
         }
+
         public Product GetRecommendedProduct(Product prod)
         {
             foreach (Product p in Products) 

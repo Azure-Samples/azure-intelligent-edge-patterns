@@ -67,8 +67,8 @@
               "createOptions": {
                 "Cmd": [
                   "Eula=accept",
-                  "Billing={v1.0 Billing endpoint}",
-                  "ApiKey={API KEY}",
+                  "Billing=https://ignitedemo-face.cognitiveservices.azure.com/face/v1.0",
+                  "ApiKey=65f4251b14de4ceaab3326ecda436aac",
                   "Logging:Console:LogLevel:Default=Information",
                   "CloudAI:Storage:StorageScenario=Azure",
                   "CloudAI:Storage:ConnectionStringOfCosmosMongo=$COSMOSDB_FACE",
@@ -101,7 +101,7 @@
                 "Cmd": [
                   "Eula=accept",
                   "Billing=https://eastus.api.cognitive.microsoft.com/",
-                  "ApiKey={API KEY}"
+                  "ApiKey=a94e2d0efff74edca3c5fe6ed25f315a"
                 ],
                 "ExposedPorts": {
                   "5000/tcp": {}
@@ -131,7 +131,7 @@
                 "Cmd": [
                   "Eula=accept",
                   "Billing=https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
-                  "ApiKey={API KEY}"
+                  "ApiKey=bf05482149804c2584ee011ce88ce587"
                 ],
                 "ExposedPorts": {
                   "5000/tcp": {}
@@ -159,7 +159,7 @@
                 "Cmd": [
                   "Eula=accept",
                   "Billing=https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
-                  "ApiKey={API KEY}"
+                  "ApiKey=bf05482149804c2584ee011ce88ce587"
                 ],
                 "ExposedPorts": {
                   "5000/tcp": {}
@@ -212,7 +212,7 @@
               "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/counting",
               "createOptions": {
                 "Cmd": [
-                  "./people-counting/exec_count.sh people_counter.py -i rtsp://admin:IgniteDemo2019@192.168.0.222:554/cam/realmonitor?channel=1?subtype=0 -c 0.3 --direction left -s 15 --id cam1 --set-count"
+                  "./people-counting/exec_count.sh people_counter.py -i videos/example_01.mp4 -s 15 --id cam1 --set-count"
                 ],
                 "ExposedPorts": {
                   "5680/tcp": {}
@@ -238,7 +238,7 @@
               "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/counting",
               "createOptions": {
                 "Cmd": [
-                  "./people-counting/exec_count.sh people_counter.py -i rtsp://admin:IgniteDemo2019@192.168.0.221:554/cam/realmonitor?channel=1?subtype=0 -c 0.3 --direction left -s 15 --id cam2"
+                  "./people-counting/exec_count.sh people_counter.py -i videos/example_01.mp4 -s 15 --id cam2"
                 ],
                 "ExposedPorts": {
                   "5681/tcp": {}
@@ -264,7 +264,7 @@
               "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/counting",
               "createOptions": {
                 "Cmd": [
-                  "./people-counting/exec_count.sh people_counter.py -i rtsp://admin:IgniteDemo2019@192.168.0.220:554/cam/realmonitor?channel=1?subtype=0 -c 0.3 --direction right -s 15 --id cam3"
+                  "./people-counting/exec_count.sh people_counter.py -i videos/example_01.mp4 -s 15 --id cam3"
                 ],
                 "ExposedPorts": {
                   "5682/tcp": {}

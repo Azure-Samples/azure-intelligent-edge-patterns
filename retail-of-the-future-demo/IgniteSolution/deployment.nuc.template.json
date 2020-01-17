@@ -1,0 +1,175 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "docker": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_LOGIN_SERVER"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+
+          "inventorycam": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/camerastream",
+              "createOptions": {
+                "Cmd": [
+                  "./camera-stream/run_camera.sh camera.py rtsp://admin:IgniteDemo2019@10.0.0.3/cam/realmonitor?channel=1?subtype=1 50011" 
+                ],
+                "ExposedPorts": {
+                  "50011/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "50011/tcp": [
+                      {
+                        "HostPort": "50011"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "grocerymodel": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "azureaivideo/grocerymodelquiet:0.0.1",
+              "createOptions": {}
+            }
+          },
+          "VideoProcessorModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/videoprocessormodule:0.1.3-amd64",
+              "createOptions": {}
+            }
+          },
+          "CameraModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/cameramodule:0.1.2-amd64",
+              "createOptions": {}
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "VideoProcessorModuleToIoTHub": "FROM /* INTO $upstream",
+          "Counting1ToCountingAgg": "FROM /messages/modules/Counting1/outputs/peopleCount INTO BrokeredEndpoint(\"/modules/CountingAgg/inputs/inputCountAgg\")",
+          "Counting1ToIoTHub": "FROM /messages/modules/Counting1/outputs/iotHub INTO $upstream",
+
+          "CountingAggToCounting1": "FROM /messages/modules/CountingAgg/outputs/feedback INTO BrokeredEndpoint(\"/modules/Counting1/inputs/feedback\")"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "VideoProcessorModule": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "blobStorageSasUrl": "$NUC_BLOB_STORAGE_SAS_URL",
+        "mlModelType": "CPU",
+        "FPGA": {
+          "rgbRefLevel": "104, 117, 123"
+        }
+      }
+    },
+    "CameraModule": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "cameras": {
+          "cam001": {
+            "port": "counter",
+            "id": "$CAMERA_ID_FIXED_IMAGE",
+            "type": "simulator",
+            "secondsBetweenImages": 10,
+            "disabled": false
+          },
+          "cam002": {
+            "port": "cycle-0",
+            "id": "$CAMERA_ID_CYCLE_IMAGES",
+            "type": "simulator",
+            "secondsBetweenImages": 10,
+            "disabled": false
+          },
+          "cam003": {
+            "port": "http://inventorycam:50011/image/700",
+            "id": "gap_images_nuc",
+            "type": "http",
+            "secondsBetweenImages": 1,
+            "skipMLProcessing": false,
+            "disabled": false
+          }
+        }
+      }
+    }
+  }
+}
