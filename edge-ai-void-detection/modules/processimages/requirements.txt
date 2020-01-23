@@ -5,4 +5,4 @@ grpcio
 statistics
 matplotlib
 azure-storage
-azure-storage-blob
+azure-storage-blob==2.1.0
