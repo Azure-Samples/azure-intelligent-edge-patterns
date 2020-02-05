@@ -26,7 +26,7 @@
             </Button>
             <Button x:Name="cameraSwitchButton" HorizontalAlignment="Left" Background="Transparent" BorderBrush="Transparent" Click="CameraSwitchtButtonClick" CornerRadius="20" Padding="0">
                 <Grid>
-                    <Ellipse Width="40" Height="40" Fill="#ff222222"/>
+                    <Ellipse Width="40" Height="40" Fill="White"/>
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE89E;" />
                 </Grid>
             </Button>

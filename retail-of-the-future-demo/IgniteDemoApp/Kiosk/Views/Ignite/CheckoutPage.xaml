@@ -183,7 +183,7 @@
                             <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,15,0,5" BorderThickness="1" BorderBrush="Gray" Background="Gray"></Border>
                             <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">ORDER TOTAL:</TextBlock>
                             <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,20,0"  HorizontalAlignment="Right">$0.00</TextBlock>
-                            <Button Grid.Row="4" Grid.ColumnSpan="2" Margin="0,10,0,0" HorizontalAlignment="Stretch" 
+                            <Button x:Name="checkoutBtn" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,10,0,0" HorizontalAlignment="Stretch" 
                                     Background="Black" Foreground="White" 
                                     Click="CheckoutButton_Click">CHECKOUT</Button>
                         </Grid>

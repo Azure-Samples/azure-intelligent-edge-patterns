@@ -90,12 +90,22 @@ namespace IntelligentKioskSample.Controls.Ignite
             this.ViewModel = new CustomerRegistrationViewModel();
             // Defer to loaded event to set the mode from markup 
             //this.Loaded += delegate { this.ViewModel.ResetRegistrationMode(RegistrationMode); };
+            this.ViewModel.PauseCamera += OnPauseCamera;
+            this.ViewModel.ResumeCamera += OnResumeCamera;
+        }
+
+        private async void OnPauseCamera(object sender, EventArgs e)
+        {
+            await this.cameraControl.StopStreamAsync();
+        }
+
+        private async void OnResumeCamera(object sender, EventArgs e)
+        {
+            await this.cameraControl.StartStreamAsync();
         }
 
         private async void OnCameraImageCaptured(object sender, ImageAnalyzer img)
         {
-            //this.cameraCaptureFlyout.Hide();
-            //await this.HandleTrainingImageCapture(e);
             var croppedImage = img;
             try
             {
@@ -105,8 +115,7 @@ namespace IntelligentKioskSample.Controls.Ignite
             {
                 croppedImage = null;
             }
-
-            // REVIEW: do we need uncropped image for identification on sign-in?
+            this.regProgressControl.IsActive = false;
             await this.ViewModel.UpdateFaceCaptured(croppedImage);
         }
 
@@ -155,6 +164,23 @@ namespace IntelligentKioskSample.Controls.Ignite
         {
             await this.cameraControl.StopStreamAsync();
             this.OnRegistrationComplete?.Invoke(this, this.ViewModel.GetCustomerInfo());
+        }
+
+        private void OnCameraButtonClicked(object sender, EventArgs e)
+        {
+            this.regProgressControl.IsActive = true;
+        }
+
+        private void CustomerNameChanged(object sender, TextChangedEventArgs e)
+        {
+            this.ViewModel.UpdateNameChanged();
+        }
+
+        private async void OnRegister(object sender, RoutedEventArgs e)
+        {
+            this.regProgressControl.IsActive = true;
+            await this.ViewModel.Register();
+            this.regProgressControl.IsActive = false;
         }
     }
 }

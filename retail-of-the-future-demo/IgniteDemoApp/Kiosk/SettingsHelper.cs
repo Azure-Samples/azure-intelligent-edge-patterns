@@ -141,6 +141,18 @@ namespace IntelligentKioskSample
                 this.ZoneId = value.ToString();
             }
 
+            value = ApplicationData.Current.RoamingSettings.Values["AltGreetingText"];
+            if (value != null && !string.IsNullOrWhiteSpace(value.ToString()))
+            {
+                this.AltGreetingText = value.ToString();
+            }
+
+            value = ApplicationData.Current.RoamingSettings.Values["AltReturnGreetingText"];
+            if (value != null && !string.IsNullOrWhiteSpace(value.ToString()))
+            {
+                this.AltReturnGreetingText = value.ToString();
+            }
+
             value = ApplicationData.Current.RoamingSettings.Values["CustomerCounterEndpoint"];
             if (value != null)
             {
@@ -157,6 +169,12 @@ namespace IntelligentKioskSample
             if (value != null)
             {
                 this.CustomerCounterResetValue = value.ToString();
+            }
+
+            value = ApplicationData.Current.RoamingSettings.Values["CustomerCounterSourceId"];
+            if (value != null)
+            {
+                this.CustomerCounterSourceId = value.ToString();
             }
 
             value = ApplicationData.Current.RoamingSettings.Values["BackendConnection"];
@@ -458,6 +476,33 @@ namespace IntelligentKioskSample
             }
         }
 
+        public static string GreetingTextDefault =  
+            "Hello and welcome to the Intelligent Retail Experience brought to you by Intel and Microsoft. " +
+            "Enjoy the immersive, edge to cloud experience, powered by the latest tech available today.";
+        private string altGreetingText = GreetingTextDefault;           
+        public string AltGreetingText
+        {
+            get { return this.altGreetingText; }
+            set
+            {
+                this.altGreetingText = value;
+                this.OnSettingChanged("AltGreetingText", value);
+            }
+        }
+
+        public static string ReturnGreetingTextDefault =
+            "Welcome back to the Intelligent Retail Experience with Intel and Microsoft.";
+        private string altReturnGreetingText = ReturnGreetingTextDefault;
+        public string AltReturnGreetingText
+        {
+            get { return this.altReturnGreetingText; }
+            set
+            {
+                this.altReturnGreetingText = value;
+                this.OnSettingChanged("AltReturnGreetingText", value);
+            }
+        }
+
         private string customerCounterEndpoint = string.Empty;
         public string CustomerCounterEndpoint
         {
@@ -466,6 +511,17 @@ namespace IntelligentKioskSample
             {
                 this.customerCounterEndpoint = value;
                 this.OnSettingChanged("CustomerCounterEndpoint", value);
+            }
+        }
+
+        private string customerCounterSourceId = string.Empty;
+        public string CustomerCounterSourceId
+        {
+            get { return this.customerCounterSourceId; }
+            set
+            {
+                this.customerCounterSourceId = value;
+                this.OnSettingChanged("CustomerCounterSourceId", value);
             }
         }
 

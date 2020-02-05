@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:IntelligentKioskSample.Views.Ignite"
     xmlns:ctl="using:IntelligentKioskSample.Controls.Ignite"
+    xmlns:charting="using:WinRTXamlToolkit.Controls.DataVisualization.Charting"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:DefaultBindMode="OneWay"
@@ -11,6 +12,13 @@
     d:DesignWidth="1800"
     d:DesignHeight="1200"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <Style TargetType="charting:Chart">
+            <Setter Property="FontSize" Value="16"></Setter>
+            <Setter Property="FontWeight" Value="Normal"></Setter>
+        </Style>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -24,36 +32,110 @@
         </Grid.ColumnDefinitions>
         <Grid.Resources>
             <Style TargetType="TextBlock">
-                <Setter Property="FontSize" Value="16" />
-                <Setter Property="Margin" Value="4" />
+                <Setter Property="FontSize" Value="18" />
             </Style>
         </Grid.Resources>
 
         <TextBlock Grid.ColumnSpan="2" Text="Retail Insights" Margin="0,5,0,20" HorizontalAlignment="Center" VerticalAlignment="Top"  FontSize="22" FontWeight="SemiBold" />
 
         <StackPanel Grid.Row="1" Margin="20">
-            <TextBlock><Bold>Sales Summary:</Bold></TextBlock>
-            <TextBlock Text="{x:Bind ViewModel.LeftProductSoldToday}"></TextBlock>
+            <TextBlock><Bold>Sales:</Bold></TextBlock>
+            <!--<TextBlock Text="{x:Bind ViewModel.LeftProductSoldToday}"></TextBlock>
             <TextBlock Text="{x:Bind ViewModel.RightProductSoldToday}"></TextBlock>
             <TextBlock Text="{x:Bind ViewModel.LeftProductSoldLastHr}"></TextBlock>
-            <TextBlock Text="{x:Bind ViewModel.RightProductSoldLastHr}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.RightProductSoldLastHr}"></TextBlock>-->
+            <charting:Chart
+                x:Name="BarChartSales"
+                Height="210"
+                Width="450"
+                Margin="0,-40,0,0">
+                <charting:BarSeries
+                    IndependentValuePath="Label"
+                    DependentValuePath="Value"
+                    IsSelectionEnabled="False"
+                    Margin="0,0,0,0">
+                </charting:BarSeries>
+            </charting:Chart>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="20">
-            <TextBlock><Bold>Inventory Summary:</Bold></TextBlock>
-            <TextBlock Text="{x:Bind ViewModel.LeftProductOnFloor}"></TextBlock>
+            <TextBlock><Bold>Inventory:</Bold></TextBlock>
+            <!--<TextBlock Text="{x:Bind ViewModel.LeftProductOnFloor}"></TextBlock>
             <TextBlock Text="{x:Bind ViewModel.RightProductOnFloor}"></TextBlock>
             <TextBlock Text="{x:Bind ViewModel.LeftProductInWarehouse}"></TextBlock>
-            <TextBlock Text="{x:Bind ViewModel.RightProductInWarehouse}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.RightProductInWarehouse}"></TextBlock>-->
+            <charting:Chart
+                x:Name="BarChartInventory"
+                Height="210"
+                Width="500"
+                Margin="0,-40,0,0">
+                <charting:BarSeries
+                    IndependentValuePath="Label"
+                    DependentValuePath="Value"
+                    IsSelectionEnabled="False"
+                    Margin="0,0,0,0">
+                </charting:BarSeries>
+            </charting:Chart>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Margin="20">
-            <TextBlock><Bold>Registration Summary:</Bold></TextBlock>
-            <TextBlock Text="{x:Bind ViewModel.CustomersToday}"></TextBlock>
-            <TextBlock Text="{x:Bind ViewModel.CustomersLastHr}"></TextBlock>
+        <StackPanel Grid.Row="2" Margin="20,-10,20,20">
+            <TextBlock><Bold>New Customer Registrations:</Bold></TextBlock>
+            <!--<TextBlock Text="{x:Bind ViewModel.CustomersToday}"></TextBlock>
+            <TextBlock Text="{x:Bind ViewModel.CustomersLastHr}"></TextBlock>-->
+            <charting:Chart
+                x:Name="BarChartRegistrations"
+                Height="155"
+                Width="410"
+                Margin="40,-40,0,0">
+                <charting:BarSeries
+                    IndependentValuePath="Label"
+                    DependentValuePath="Value"
+                    IsSelectionEnabled="False"
+                    Margin="0,0,0,0">
+                    <charting:BarSeries.DataPointStyle>
+                        <Style TargetType="charting:BarDataPoint">
+                            <Setter Property="Background" Value="Green"/>
+                        </Style>
+                    </charting:BarSeries.DataPointStyle>
+                </charting:BarSeries>
+            </charting:Chart>
             <TextBlock></TextBlock>
-            <ctl:CustomerCounterVisControl x:Name="counterVis" MaxBarWidth="200" Width="555" HorizontalAlignment="Left"></ctl:CustomerCounterVisControl>
+            <!--<ctl:CustomerCounterVisControl x:Name="counterVis" MaxBarWidth="200" Width="555" HorizontalAlignment="Left"></ctl:CustomerCounterVisControl>-->
+            <TextBlock><Bold>Customer Arrivals:</Bold></TextBlock>
+            <charting:Chart
+                x:Name="LineChartArrivals"
+                Height="300"
+                Width="380"
+                Margin="60,-20,0,0">
+                <charting:LineSeries
+                    IndependentValuePath="Label"
+                    DependentValuePath="Value"
+                    IsSelectionEnabled="False"
+                    Margin="0,0,0,0">
+                </charting:LineSeries>
+            </charting:Chart>
+            <TextBlock></TextBlock>
         </StackPanel>
+
+        <!-- Customer Counter -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"></RowDefinition>
+                <RowDefinition Height="0.6*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="FontSize" Value="14" />
+                </Style>
+            </Grid.Resources>
+            <ctl:CustomerCounterControl x:Name="customerCounterControl" Grid.Row="1"></ctl:CustomerCounterControl>
+        </Grid>
 
         <!-- Gap detection -->
         <Grid Grid.Row="2" Grid.Column="1">
@@ -64,11 +146,6 @@
             <Canvas Name="ShelfCanvas" HorizontalAlignment="Left">
                 <Image Margin="0" Name="ShelfImage"/>
             </Canvas>
-            <!--<StackPanel Grid.Row="1" Margin="20">
-                <TextBlock Grid.Row="1"><Bold>Alert:</Bold></TextBlock>
-                <TextBlock Grid.Row="2" Foreground="Red">1 empty shelf slot(s)</TextBlock>
-            </StackPanel>-->
-                
         </Grid>
     </Grid>
 </Page>

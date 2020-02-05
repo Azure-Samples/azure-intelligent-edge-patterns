@@ -186,7 +186,7 @@
               "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/ignite/camerastream",
               "createOptions": {
                 "Cmd": [
-                  "./camera-stream/run_camera.sh camera.py rtsp://admin:IgniteDemo2019@192.168.0.223/cam/realmonitor?channel=1?subtype=1"
+                  "./camera-stream/run_camera.sh camera.py rtsp://admin:IgniteDemo2019@192.168.0.223/cam/realmonitor?channel=1?subtype=1 50011"
                 ],
                 "ExposedPorts": {
                   "50011/tcp": {}
@@ -391,6 +391,11 @@
           "Counting1ToCountingAgg": "FROM /messages/modules/Counting1/outputs/peopleCount INTO BrokeredEndpoint(\"/modules/CountingAgg/inputs/inputCountAgg\")",
           "Counting2ToCountingAgg": "FROM /messages/modules/Counting2/outputs/peopleCount INTO BrokeredEndpoint(\"/modules/CountingAgg/inputs/inputCountAgg\")",
           "Counting3ToCountingAgg": "FROM /messages/modules/Counting3/outputs/peopleCount INTO BrokeredEndpoint(\"/modules/CountingAgg/inputs/inputCountAgg\")",
+
+          "Counting1ToIoTHub": "FROM /messages/modules/Counting1/outputs/iotHub INTO $upstream",
+          "Counting2ToIoTHub": "FROM /messages/modules/Counting2/outputs/iotHub INTO $upstream",
+          "Counting3ToIoTHub": "FROM /messages/modules/Counting3/outputs/iotHub INTO $upstream",
+
           "CountingAggToCounting1": "FROM /messages/modules/CountingAgg/outputs/feedback INTO BrokeredEndpoint(\"/modules/Counting1/inputs/feedback\")",
           "CountingAggToCounting2": "FROM /messages/modules/CountingAgg/outputs/feedback INTO BrokeredEndpoint(\"/modules/Counting2/inputs/feedback\")",
           "CountingAggToCounting3": "FROM /messages/modules/CountingAgg/outputs/feedback INTO BrokeredEndpoint(\"/modules/Counting3/inputs/feedback\")"

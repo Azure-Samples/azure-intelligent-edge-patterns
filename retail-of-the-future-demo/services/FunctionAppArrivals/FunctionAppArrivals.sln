@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionAppArrivals", "FunctionAppArrivals\FunctionAppArrivals.csproj", "{5F359AE8-EA5F-4722-A9DC-32837A88F753}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5F359AE8-EA5F-4722-A9DC-32837A88F753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F359AE8-EA5F-4722-A9DC-32837A88F753}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F359AE8-EA5F-4722-A9DC-32837A88F753}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F359AE8-EA5F-4722-A9DC-32837A88F753}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15F502E1-ED31-41B6-9B38-800CA3771EE2}
+	EndGlobalSection
+EndGlobal

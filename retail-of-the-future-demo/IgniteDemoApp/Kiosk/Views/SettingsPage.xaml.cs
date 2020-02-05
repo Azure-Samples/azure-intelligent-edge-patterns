@@ -206,15 +206,15 @@ namespace IntelligentKioskSample.Views
                 // Run DB tests
                 var customers = IgniteDataAccess.GetCustomers();
                 string testGetCustomers = (customers != null) ? customers.Count.ToString() : "FAIL";
+                string unregCustomerGuid = "00000000-0000-0000-0000-000000000000";
 
-                bool createCustomerRes = IgniteDataAccess.CreateCustomerRecord("00000000-0000-0000-0000-000000000000", "UNREGISTERED");
+                bool createCustomerRes = IgniteDataAccess.CreateCustomerRecord(unregCustomerGuid, "UNREGISTERED");
                 string testCreateCustomerRecord = createCustomerRes ? "OK" : "FAIL";
 
-                bool createNewTransactionRes = IgniteDataAccess.CreateNewTransaction(DateTime.Now,
-                    11110, 1, "00000000-0000-0000-0000-000000000000");
-                string testCreateNewTransaction = createCustomerRes ? "OK" : "FAIL";
+                bool createNewTransactionRes = IgniteDataAccess.CreateNewTransaction(11110, 1, unregCustomerGuid);
+                string testCreateNewTransaction = createNewTransactionRes ? "OK" : "FAIL";
 
-                var customerInfo = IgniteDataAccess.GetCustomerInfo("00000000-0000-0000-0000-000000000000");
+                var customerInfo = IgniteDataAccess.GetCustomerInfo(unregCustomerGuid);
                 string testGetCustomerInfo = (customerInfo?.CustomerName == "UNREGISTERED" &&
                     customerInfo?.SourceItemId == 11110) ? "OK" : "FAIL";
 

@@ -19,6 +19,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
+using WinRTXamlToolkit.Controls.DataVisualization.Charting;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -50,12 +51,23 @@ namespace IntelligentKioskSample.Views.Ignite
             {
                 gapListener = new GapListenerHub(int.Parse(SettingsHelper.Instance.DetectionDelay), SettingsHelper.Instance.ShelfCamera);
             }
+
+            try
+            {
+                this.UpdateCharts();
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.ToString());
+            }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             this.StartUpdateLoop();
-            this.counterVis.StartListening();
+            //this.counterVis.StartListening();
+            this.customerCounterControl.StartListening();
+            this.customerCounterControl.ViewModel.CounterColor = Util.ToBrush("Black");
 
             if (hasGapDetection)
             {
@@ -71,6 +83,69 @@ namespace IntelligentKioskSample.Views.Ignite
             Task.Run(() => this.UpdateLoop());
         }
 
+        private void UpdateCharts()
+        {
+            // determine appropriate common range for all bar charts
+            int maxRange = 100;
+            maxRange = Math.Max(maxRange, this.ViewModel.SeriesSales.Max(i => i.Value));
+            maxRange = Math.Max(maxRange, this.ViewModel.SeriesInventory.Max(i => i.Value));
+            maxRange = Math.Max(maxRange, this.ViewModel.SeriesRegistrations.Max(i => i.Value));
+            int interval = maxRange / 5;
+
+            (this.BarChartSales.Series[0] as BarSeries).ItemsSource = this.ViewModel.SeriesSales.OrderByDescending(i => i.Id);
+            (this.BarChartSales.Series[0] as BarSeries).DependentRangeAxis =
+                new LinearAxis
+                {
+                    Minimum = 1,
+                    Maximum = maxRange,
+                    Orientation = AxisOrientation.X,
+                    Interval = interval,
+                    ShowGridLines = false
+                };
+            this.BarChartSales.LegendItems.Clear();
+
+            (this.BarChartInventory.Series[0] as BarSeries).ItemsSource = this.ViewModel.SeriesInventory.OrderByDescending(i => i.Id);
+            (this.BarChartInventory.Series[0] as BarSeries).DependentRangeAxis =
+                new LinearAxis
+                {
+                    Minimum = 1,
+                    Maximum = maxRange,
+                    Orientation = AxisOrientation.X,
+                    Interval = interval,
+                    ShowGridLines = false
+                };
+            this.BarChartInventory.LegendItems.Clear();
+
+            (this.BarChartRegistrations.Series[0] as BarSeries).ItemsSource = this.ViewModel.SeriesRegistrations.OrderByDescending(i => i.Id);
+            (this.BarChartRegistrations.Series[0] as BarSeries).DependentRangeAxis =
+                new LinearAxis
+                {
+                    Minimum = 1,
+                    Maximum = maxRange,
+                    Orientation = AxisOrientation.X,
+                    Interval = interval,
+                    ShowGridLines = false
+                };
+            this.BarChartRegistrations.LegendItems.Clear();
+
+            int maxRangeLC = this.ViewModel.SeriesArrivals.Max(i => i.Value);
+            maxRangeLC += (int)(0.2 * maxRangeLC);
+            maxRangeLC = Math.Max(10, maxRangeLC);
+            int intervalLC = Math.Max(5, maxRangeLC / 5 / 5 * 5);
+
+            (this.LineChartArrivals.Series[0] as LineSeries).ItemsSource = this.ViewModel.SeriesArrivals.OrderByDescending(i => i.Id);
+            (this.LineChartArrivals.Series[0] as LineSeries).DependentRangeAxis =
+                 new LinearAxis
+                 {
+                     Minimum = 0,
+                     Maximum = maxRangeLC,
+                     Orientation = AxisOrientation.Y,
+                     Interval = intervalLC,
+                     ShowGridLines = true
+                 };
+            this.LineChartArrivals.LegendItems.Clear();
+        }
+
         private async Task UpdateLoop()
         {
             while (this.isUpdating)
@@ -80,6 +155,14 @@ namespace IntelligentKioskSample.Views.Ignite
                 await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
                     this.ViewModel.OnUpdate();
+                    try
+                    {
+                        this.UpdateCharts();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine(e.ToString());
+                    }
                 });
             }
         }
@@ -141,7 +224,8 @@ namespace IntelligentKioskSample.Views.Ignite
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
             this.isUpdating = false;
-            this.counterVis.StopListening();
+            //this.counterVis.StopListening();
+            this.customerCounterControl.StopListening();
             if (hasGapDetection)
             {
                 this.gapListener.StopListening();

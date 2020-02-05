@@ -10,7 +10,7 @@ CREATE PROCEDURE uspCreateCustomerRecord
 AS
 
 DECLARE @time_zone nvarchar(50) = 'Pacific Standard Time';
-DECLARE @register_date datetime = (getdate() at time zone 'UTC') at time zone @time_zone;
+DECLARE @register_date datetime = (getutcdate() at time zone 'UTC') at time zone @time_zone;
 
 INSERT into customers 
 VALUES(@customer_face_hash, @customer_name, @register_date)

@@ -48,18 +48,45 @@ def video_image():
     response = Response(jpeg.tobytes(), headers={"content-length": len(jpeg)}, mimetype="image/jpeg")
     return response
 
-def start_app(fast):
+@app.route('/image/800')
+def video_image_and_inference():
+    frame = grab_image_from_stream()
+    frame = cv2.resize(frame, (300, 300))
+
+    _, jpeg = cv2.imencode('.jpg', frame)
+    resp_img = jpeg.tobytes()
+
+    scoring_url = "http://grocerymodel:5001/score"
+    json_img = json.dumps({"img": frame.tolist()})
+    input_data = json_img
+    headers = {'Content-Type':'application/json'}
+    resp = requests.post(scoring_url, input_data, headers=headers)
+    logging.info(f'received response: {resp.status_code}')
+    resp_json = json.loads(resp.content)
+
+    resp_json["img"] = str(base64.b64encode(resp_img), "utf-8")
+
+    return jsonify(resp_json)
+
+def start_app():
     # set protocol to 1.1 so we keep the connection open
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
-    app.run(debug=False)
+    if args.fast:
+        logging.info("Running the `fast` version")
+
+        app.run(host="0.0.0.0", port=args.port)
+    else:
+        logging.info(f"Staring regular inventory cam. Port: {args.port}")
+        app.run(debug=False)
 
 if __name__ == "__main__":
     from cmdline import cmd_args
 
     args = cmd_args.parse_camera_args()
 
-    app.config['SERVER_NAME'] = 'inventorycam:50011'
+    if not args.fast:
+        app.config['SERVER_NAME'] = f'inventorycam:{args.port}'
 
     if args.debug:
         logging.info("Please attach a debugger to port 5678")
@@ -70,4 +97,4 @@ if __name__ == "__main__":
         ptvsd.break_into_debugger()
 
 
-    start_app(args.fast)
+    start_app()

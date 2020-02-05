@@ -198,8 +198,16 @@ namespace IntelligentKioskSample.Views.Ignite
                 this.isEngagingCustomer = true;
                 this.allowSendingOffMsg = true;
 
-                await SpeakWhileCheckingPresence(this.ViewModel.CustomerPrompt);
-                await DelayWhileHaveCustomer(5000);
+                if (this.isUsingSpeech)
+                {
+                    await SpeakWhileCheckingPresence(this.ViewModel.CustomerPrompt);
+                    this.allowSendingOffMsg = false;
+                    await DelayWhileHaveCustomer(3000);
+                }
+                else 
+                {
+                    await DelayWhileHaveCustomer(5000);
+                }
                 this.isEngagingCustomer = false;
             }
         }
@@ -222,14 +230,14 @@ namespace IntelligentKioskSample.Views.Ignite
 
                 if (this.isUsingSpeech)
                 {
-                    await SpeakWithDelay(this.ViewModel.CustomerPrompt);
+                    await SpeakWhileCheckingPresence(this.ViewModel.CustomerPrompt);
                 }
                 else
                 {
-                    await Task.Delay(15000);
+                    await DelayWhileHaveCustomer(10000);
                 }
 
-                if (!this.isSkippingGreeting && !this.isGoingBack)
+                if (!this.isSkippingGreeting && !this.isGoingBack && this.isEngagingCustomer)
                 {
                     entity = await OfferChoiceCancelPrevious();
                     if (!string.IsNullOrEmpty(entity) && this.isSelecting)
@@ -318,7 +326,7 @@ namespace IntelligentKioskSample.Views.Ignite
             this.isDelaying = true;
             DateTime startDelayTime = DateTime.Now;
             DateTime endDelayTime = startDelayTime.AddMilliseconds(msDelay);
-            while (DateTime.Now < endDelayTime && this.isDelaying)
+            while (DateTime.Now < endDelayTime && this.isDelaying && this.isEngagingCustomer)
             {
                 if (await SendOffIfNoFace())
                 {
@@ -432,6 +440,21 @@ namespace IntelligentKioskSample.Views.Ignite
             }
         }
 
+        private async void RestartButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.allowSendingOffMsg = false;
+            this.isDelaying = false;
+
+            this.isSelecting = false;
+            if (this.ctsOffer != null)
+            {
+                this.ctsOffer.Cancel();
+            }
+            this.ViewModel.Update(DemoScreenState.NoFace, force: true);
+            await SpeakWithDelay("");
+            this.isEngagingCustomer = false; 
+        }
+
         #region Speech Processing Helpers
         // Simply say what is to be said
         public async Task SpeakWithDelay(string prompt)
@@ -488,7 +511,7 @@ namespace IntelligentKioskSample.Views.Ignite
                 int msTimeToSpeak = await TextToSpeechServiceHelper.SpeakTextAsync(prompt);
                 DateTime startSpeakTime = DateTime.Now;
                 DateTime endSpeakTime = startSpeakTime.AddMilliseconds(msTimeToSpeak);
-                while (DateTime.Now < endSpeakTime)
+                while (DateTime.Now < endSpeakTime && this.isEngagingCustomer)
                 {
                     if (await SendOffIfNoFace())
                     {

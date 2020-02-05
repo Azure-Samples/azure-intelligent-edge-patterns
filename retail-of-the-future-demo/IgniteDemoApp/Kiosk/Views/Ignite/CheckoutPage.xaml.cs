@@ -108,9 +108,11 @@ namespace IntelligentKioskSample.Views.Ignite
         private async void CheckoutButton_Click(object sender, RoutedEventArgs e)
         {
             this.progressControl.IsActive = true;
+            this.checkoutBtn.IsEnabled = false;
             await Task.Delay(1);   // allow progress animation to start
             this.ViewModel.Checkout();
-            await Task.Delay(500); // ensure perceptible visual feedback
+            await Task.Delay(100); // ensure perceptible visual feedback
+            this.checkoutBtn.IsEnabled = true;
             this.progressControl.IsActive = false;
         }
     }
