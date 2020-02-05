@@ -1,0 +1,5 @@
+azure-iot-device
+torch
+torchvision
+#tensorflow==1.15.0
+#numpy
