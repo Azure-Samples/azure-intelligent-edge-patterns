@@ -39,7 +39,7 @@ def benchmark_pt(device_name="cpu",in_shape=10000):
             return 0
         with torch.cuda.device(0):
             startTime = datetime.now()
-            random_matrix = torch.FloatTensor(shape).uniform_(0,1)
+            random_matrix = torch.cuda.FloatTensor(shape).uniform_(0,1)
             dot_operation = random_matrix * random_matrix.t()
             sum_operation = torch.sum(dot_operation)
             timetaken = datetime.now() - startTime

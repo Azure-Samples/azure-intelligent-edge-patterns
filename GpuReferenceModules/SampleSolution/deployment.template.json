@@ -84,6 +84,13 @@
           "timeToLiveSecs": 7200
         }
       }
+    },
+    "GPUModule": {
+      "properties.desired": {
+        "RunExecutionCount": 3,
+        "WarmUpCount": 3,
+        "Shape": 5000
+      }
     }
   }
 }
