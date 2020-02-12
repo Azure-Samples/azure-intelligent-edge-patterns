@@ -47,18 +47,18 @@ namespace ServiceListener
         public const int BlobMaxSize = 1024 * 1024 * 3;
         // Event Hub-compatible endpoint
         // az iot hub show --query properties.eventHubEndpoints.events.endpoint --name {your IoT Hub name}
-        public const string EventHubsCompatibleEndpoint = "sb://iothub-ns-iothub-235-2293953-f7991010b9.servicebus.windows.net/";
+        public const string EventHubsCompatibleEndpoint = "{EVENT_HUB_ENDPOINT}";
 
         // Event Hub-compatible name
         // az iot hub show --query properties.eventHubEndpoints.events.path --name {your IoT Hub name}
-        public const string EventHubsCompatiblePath = "iothub-235un";
+        public const string EventHubsCompatiblePath = "{IOT_HUB}";
 
         // az iot hub policy show --name service --query primaryKey --hub-name {your IoT Hub name}
-        public const string IotHubSasKey = "kmv88qp/A1lZZrDpcnmzMtj3lZHoLLs37JoN5hHUHVQ=";
+        public const string IotHubSasKey = "{IOT_HUB_KEY}";
         public const string IotHubSasKeyName = "service";
 
         // container
-        public const string ContainerConnectionString = "DefaultEndpointsProtocol=https;AccountName=storage235un;AccountKey=KLrA9L5pBFK1ETUVZzLuX7Lc0CQRJ8uMpuaQ1o0h+dw7ZRk7mZaiOyXZN/bXtCLZ6+a8FWhwzJhnhLC9gM8qGw==;EndpointSuffix=core.windows.net";
+        public const string ContainerConnectionString = "{STORAGE_CONTAINER_CONNECTION_STRING}";
         public const string ContainerName = "still-images";
 
     }
