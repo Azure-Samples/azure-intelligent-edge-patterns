@@ -61,19 +61,37 @@ $bootDiagnostics_storageUri = $resourceJSON.Properties.diagnosticsProfile.bootDi
 $nsgId = $nicObject.Properties.networkSecurityGroup.id
 $publicIpId = $nicObject.Properties.ipConfigurations.properties.publicIPAddress.id
 
-#check storageAccountType, if source uses unmanaged disks this will not properly populate
-#if that's the case we fix it here
+#check storageAccountType, if the source VM is Powered Off, or if it uses unmanaged disks this will be Null 
+#if that's the case, we fix it here
 if(!$storageAccountType){
+  #Unmanaged Disk
   $vhdUri = $resourceJSON.Properties.storageProfile.osDisk.vhd.uri
-  $vhdName = $vhdUri.Substring(8, $vhdUri.IndexOf(".") - 8)
-  $osDiskStorageAccount = Get-AzureRmStorageAccount -ResourceGroupName $resourceJSON.ResourceGroupName -Name $vhdName
-  $storageAccountType = $osDiskStorageAccount.Sku.Name.ToString()
+  if($vhdUri){
+    $osDiskStorageAccountName = $vhdUri.Substring(8, $vhdUri.IndexOf(".") - 8)
+    $osDiskStorageAccountRG = (Get-AzureRmStorageAccount | Where-Object { $PSItem.StorageAccountName -eq $osDiskStorageAccountName }).ResourceGroupName
+    $osDiskStorageAccount = Get-AzureRmStorageAccount -ResourceGroupName $osDiskStorageAccountRG -Name $osDiskStorageAccountName
+    $storageAccountType = $osDiskStorageAccount.Sku.Name.ToString()
+  } else {
+    #Powered Off VM (with Managed OS Disk)
+    $osDiskName = $resourceJSON.Properties.StorageProfile.OsDisk.Name
+    $storageAccountType = (Get-AzureRmDisk -DiskName $osDiskName).Sku.Name
+  }
   if(!($storageAccountType -like "*_*")){
     $storageAccountType = $storageAccountType.Insert($storageAccountType.Length - 3, "_")
   }
 }
 
-#clean up values
+#if data disks exist, check the size property in case the VM is Powered Off (Managed Disks)
+if($datadisk_name){
+  #check if the '$datadisk_diskSizeGB' is null, if so, loop for each object to get the size
+  if(!($datadisk_diskSizeGB -match '[0-9]')){
+    foreach($datadisk in $resourceJSON.Properties.storageProfile.dataDisks.name){
+      [array]$datadisk_sizes += (Get-AzureRMDisk -DiskName $datadisk).DiskSizeGB
+    }
+    $datadisk_diskSizeGB = "[""$(($datadisk_sizes) -join {", "})""]"
+  }
+}
+#set the data disk "createOption" property to Empty
 if($datadisk_createOption){
   $datadisk_createOption = $datadisk_createOption.Replace("Attach", "Empty")
 }
