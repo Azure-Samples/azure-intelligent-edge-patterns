@@ -1,1 +1,1 @@
-SPace for new edge vision Pattern
+SPace for new edge vision manufacturing Pattern
