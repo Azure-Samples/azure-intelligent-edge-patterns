@@ -1,17 +1,7 @@
 import React from 'react';
-import {
-  Flex,
-  Input,
-  TextArea,
-  Button,
-  Text,
-  Dropdown,
-  Image,
-  Video,
-  Menu,
-  Grid,
-} from '@fluentui/react-northstar';
+import { Flex, Input, TextArea, Button, Text, Menu, Grid } from '@fluentui/react-northstar';
 import { Link, useLocation, Switch, Route, Redirect } from 'react-router-dom';
+import { CapturePhotos } from '../components/CapturePhoto';
 
 export const Parts = (): JSX.Element => {
   return (
@@ -43,14 +33,10 @@ const RightPanel = (): JSX.Element => {
     <Flex column gap="gap.small" styles={{ gridColumn: '5 / span 8' }}>
       <Tab />
       <Switch>
-        <Route path="/parts/capturePhoto">
-          <CameraSelector />
-          <RTSPVideo />
-          <CapturedImagesContainer />
-        </Route>
+        <Route path="/parts/capturePhotos" component={CapturePhotos} />
         <Route path="/parts/uploadPhotos" component={null} />
         <Route path="/parts">
-          <Redirect to="/parts/capturePhoto" />
+          <Redirect to="/parts/capturePhotos" />
         </Route>
       </Switch>
     </Flex>
@@ -66,9 +52,9 @@ const Tab = (): JSX.Element => {
       content: 'Upload Photos',
     },
     {
-      key: 'capturePhoto',
+      key: 'capturePhotos',
       as: Link,
-      to: '/parts/capturePhoto',
+      to: '/parts/capturePhotos',
       content: 'Capture Photo',
     },
   ];
@@ -77,64 +63,4 @@ const Tab = (): JSX.Element => {
   const activeIndex = items.findIndex((ele) => ele.to === pathname);
 
   return <Menu items={items} activeIndex={activeIndex} pointing primary />;
-};
-
-const CameraSelector = (): JSX.Element => {
-  // TODO: Get available cameras from server
-  const availableCameras = ['camera1', 'camera2', 'camera3', 'camera4'];
-
-  return (
-    <Flex gap="gap.small" vAlign="center">
-      <Text>Select Camera</Text>
-      <Dropdown items={availableCameras} />
-      <Link to="/addCamera">Add Camera</Link>
-    </Flex>
-  );
-};
-
-const RTSPVideo = (): JSX.Element => {
-  return (
-    <>
-      <Video
-        // autoPlay
-        controls={false}
-        src="https://raw.githubusercontent.com/bower-media-samples/big-buck-bunny-480p-30s/master/video.mp4"
-        design={{ width: '100%' }}
-      />
-      <Button content="Capture" fluid loader="Generate feed" primary />
-    </>
-  );
-};
-
-const CapturedImagesContainer = (): JSX.Element => {
-  const imageSrcs = [
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-    'https://s3.amazonaws.com/uifaces/faces/twitter/elliotnolten/128.jpg',
-  ];
-
-  return (
-    <Flex styles={{ overflow: 'scroll' }}>
-      {imageSrcs.map((src, i) => (
-        <Image key={i} src={src} />
-      ))}
-    </Flex>
-  );
 };
