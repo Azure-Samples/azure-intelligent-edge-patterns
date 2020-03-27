@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
@@ -74,7 +74,8 @@ const RTSPVideo = ({ setCapturePhotos, selectedCameraId }): JSX.Element => {
       });
   };
 
-  const onDisconnect = (): void => {
+  const onDisconnect = useCallback((): void => {
+    setStreamId('');
     fetch(`/streams/${streamId}/disconnect`)
       .then((response) => response.json())
       .then((data) => {
@@ -84,7 +85,14 @@ const RTSPVideo = ({ setCapturePhotos, selectedCameraId }): JSX.Element => {
       .catch((err) => {
         console.error(err);
       });
-  };
+  }, [streamId]);
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', onDisconnect);
+    return (): void => {
+      window.removeEventListener('beforeunload', onDisconnect);
+    };
+  }, [onDisconnect]);
 
   const src = streamId
     ? `http://localhost:8000/streams/${streamId}/video_feed`
