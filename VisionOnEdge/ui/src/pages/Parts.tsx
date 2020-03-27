@@ -1,19 +1,30 @@
 import React from 'react';
-import { Flex, Input, TextArea, Button, Text, Dropdown, Image, Video, Menu } from '@fluentui/react-northstar';
-import { Link } from 'react-router-dom';
+import {
+  Flex,
+  Input,
+  TextArea,
+  Button,
+  Text,
+  Dropdown,
+  Image,
+  Video,
+  Menu,
+  Grid,
+} from '@fluentui/react-northstar';
+import { Link, useLocation, Switch, Route, Redirect } from 'react-router-dom';
 
 export const Parts = (): JSX.Element => {
   return (
-    <Flex gap="gap.large" styles={{ height: '100%' }}>
+    <Grid columns={'repeat(12, 1fr)'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       <LeftPanel />
       <RightPanel />
-    </Flex>
+    </Grid>
   );
 };
 
 const LeftPanel = (): JSX.Element => {
   return (
-    <Flex column space="around" styles={{ flexGrow: 1 }}>
+    <Flex column space="around" styles={{ gridColumn: '1 / span 4' }}>
       <Input fluid styles={{ fontSize: '2em' }} />
       <Flex column gap="gap.small" design={{ height: '80%' }}>
         <Text content="Description" size="medium" />
@@ -29,17 +40,43 @@ const LeftPanel = (): JSX.Element => {
 
 const RightPanel = (): JSX.Element => {
   return (
-    <Flex column gap="gap.small" styles={{ flexGrow: 3 }}>
+    <Flex column gap="gap.small" styles={{ gridColumn: '5 / span 8' }}>
       <Tab />
-      <CameraSelector />
-      <RTSPVideo />
-      <CapturedImagesContainer />
+      <Switch>
+        <Route path="/parts/capturePhoto">
+          <CameraSelector />
+          <RTSPVideo />
+          <CapturedImagesContainer />
+        </Route>
+        <Route path="/parts/uploadPhotos" component={null} />
+        <Route path="/parts">
+          <Redirect to="/parts/capturePhoto" />
+        </Route>
+      </Switch>
     </Flex>
   );
 };
 
 const Tab = (): JSX.Element => {
-  return <Menu items={['Upload Photos', 'Capture Photo']} pointing primary />;
+  const items = [
+    {
+      key: 'uploadPhotos',
+      as: Link,
+      to: '/parts/uploadPhotos',
+      content: 'Upload Photos',
+    },
+    {
+      key: 'capturePhoto',
+      as: Link,
+      to: '/parts/capturePhoto',
+      content: 'Capture Photo',
+    },
+  ];
+
+  const { pathname } = useLocation();
+  const activeIndex = items.findIndex((ele) => ele.to === pathname);
+
+  return <Menu items={items} activeIndex={activeIndex} pointing primary />;
 };
 
 const CameraSelector = (): JSX.Element => {
@@ -94,7 +131,7 @@ const CapturedImagesContainer = (): JSX.Element => {
   ];
 
   return (
-    <Flex styles={{ maxWidth: '1000px', overflow: 'scroll' }}>
+    <Flex styles={{ overflow: 'scroll' }}>
       {imageSrcs.map((src, i) => (
         <Image key={i} src={src} />
       ))}
