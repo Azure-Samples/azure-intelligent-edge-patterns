@@ -1,38 +1,54 @@
 import React, { useState } from 'react';
-import { Flex, Dropdown, Button, Image, Text } from '@fluentui/react-northstar';
+import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
 import { useCameras } from '../../hooks/useCameras';
+import { Camera } from '../../State';
 
 export const CapturePhotos: React.FC = () => {
   const [capturedPhotos, setCapturePhotos] = useState<string[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
 
   return (
     <>
-      <CameraSelector />
-      <RTSPVideo setCapturePhotos={setCapturePhotos} />
+      <CameraSelector setSelectedCamera={setSelectedCamera} />
+      <RTSPVideo setCapturePhotos={setCapturePhotos} selectedCameraId={selectedCamera?.id} />
       <CapturedImagesContainer captruedPhotos={capturedPhotos} />
     </>
   );
 };
 
-const CameraSelector = (): JSX.Element => {
-  const availableCameraNames = useCameras().map((ele) => ele.name);
+const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
+  const availableCameras = useCameras();
+
+  const items: DropdownItemProps[] = availableCameras.map((ele) => ({
+    header: ele.name,
+    content: {
+      key: ele.id,
+    },
+  }));
+
+  const onDropdownChange = (_, data): void => {
+    const { key } = data.value.content;
+    const selectedCamera = availableCameras.find((ele) => ele.id === key);
+    if (selectedCamera) setSelectedCamera(selectedCamera);
+  };
 
   return (
     <Flex gap="gap.small" vAlign="center">
       <Text>Select Camera</Text>
-      <Dropdown items={availableCameraNames} />
+      <Dropdown items={items} onChange={onDropdownChange} />
       <Link to="/addCamera">Add Camera</Link>
     </Flex>
   );
 };
 
-const RTSPVideo = ({ setCapturePhotos }): JSX.Element => {
+const RTSPVideo = ({ setCapturePhotos, selectedCameraId }): JSX.Element => {
   const [streamId, setStreamId] = useState<string>('');
 
   const onCreateStream = (): void => {
-    fetch(`/streams/connect?camera_id=0`)
+    // TODO: Use `selectedCameraId` when BE is ready
+    fetch(`/streams/connect?camera_id=${0}`)
       .then((response) => response.json())
       .then((data) => {
         if (data?.status === 'ok') {
@@ -97,7 +113,7 @@ const RTSPVideo = ({ setCapturePhotos }): JSX.Element => {
 
 const CapturedImagesContainer = ({ captruedPhotos }): JSX.Element => {
   return (
-    <Flex styles={{ overflow: 'scroll' }}>
+    <Flex styles={{ overflow: 'scroll' }} gap="gap.small">
       {captruedPhotos.map((src, i) => (
         <Image key={i} src={src} />
       ))}
