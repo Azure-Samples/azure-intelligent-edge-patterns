@@ -21,7 +21,7 @@ $datadisk_names = $resourceJSON.Properties.storageProfile.dataDisks.name
 $availabilitySetId = $resourceJSON.Properties.availabilitySet.id
 $bootDiagnostics_storageUri = $resourceJSON.Properties.diagnosticsProfile.bootDiagnostics.storageUri
 $nsgId = $nicObject.Properties.networkSecurityGroup.id
-$publicIpId = $nicObject.Properties.ipConfigurations.properties.publicIPAddress
+$publicIpId = $nicObject.Properties.ipConfigurations.properties.publicIPAddress.id
 $WindowsOS = $resourceJSON.Properties.OSProfile.WindowsConfiguration
 
 #datadisks
