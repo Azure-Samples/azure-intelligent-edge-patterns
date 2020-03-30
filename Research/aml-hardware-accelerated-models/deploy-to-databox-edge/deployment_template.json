@@ -1,0 +1,85 @@
+{
+    "modulesContent": {
+        "$edgeAgent": {
+            "properties.desired": {
+                "schemaVersion": "1.0",
+                "runtime": {
+                    "type": "docker",
+                    "settings": {
+                        "loggingOptions": "",
+                        "minDockerVersion": "v1.25",
+                        "registryCredentials": {
+                            "$ACR_NAME": {
+                                "address": "$ACR_NAME.azurecr.io",
+                                "password": "$ACR_PASSWORD",
+                                "username": "$ACR_NAME"
+                            }
+                        }
+                    }
+                },
+                "systemModules": {
+                    "edgeAgent": {
+                        "type": "docker",
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+                            "createOptions": ""
+                        }
+                    },
+                    "edgeHub": {
+                        "type": "docker",
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+                            "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}],\"5671/tcp\":[{\"HostPort\":\"5671\"}]}}}"
+                        },
+                        "status": "running",
+                        "restartPolicy": "always"
+                    }
+                },
+                "modules": {
+                    "azureml-host": {
+                        "type": "docker",
+                        "settings": {
+                            "image": "$HOST_URL",
+                            "createOptions": "{\"HostConfig\":{\"Binds\":[\"/etc/hosts:/etc/hosts\"],\"Privileged\":true,\"PortBindings\":{\"50051/tcp\":[{\"HostPort\":\"50051\"}]},\"Devices\":[{\"PathOnHost\":\"/dev/catapult0\",\"PathInContainer\":\"/dev/catapult0\"},{\"PathOnHost\":\"/dev/catapult1\",\"PathInContainer\":\"/dev/catapult1\"}]}}"
+                        },
+                        "version": "1.0",
+                        "status": "$HOST_STATUS",
+                        "restartPolicy": "always"
+                    },
+                    "azureml-client": {
+                        "type": "docker",
+                        "settings": {
+                            "image": "$CLIENT_URL",
+                            "createOptions": "{\"Tty\":true,\"Cmd\":[\"--input-tensors\",\"$INPUT_TENSOR\",\"--output-tensors\",\"$OUTPUT_TENSOR\",\"--wait\",\"10\"]}"
+                        },
+                        "version": "1.0",
+                        "env": {
+                            "DEVICE_CONNECTION_STRING": {
+                                "value": "$DEVICE_CONNECTION_STRING"
+                            }
+                        },
+                        "status": "$CLIENT_STATUS",
+                        "restartPolicy": "always"
+                    }
+                }
+            }
+        },
+        "$edgeHub": {
+            "properties.desired": {
+                "schemaVersion": "1.0",
+                "routes": {
+                    "route": "FROM /messages/* INTO $upstream"
+                },
+                "storeAndForwardConfiguration": {
+                    "timeToLiveSecs": 7200
+                }
+            }
+        },
+        "azureml-host": {
+            "properties.desired": {}
+        },
+        "azureml-client": {
+            "properties.desired": {}
+        }
+    }
+}

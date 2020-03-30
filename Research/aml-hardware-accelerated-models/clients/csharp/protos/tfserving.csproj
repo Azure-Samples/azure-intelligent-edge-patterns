@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+ <ItemGroup>
+    <ProtoPath Include="../../protos/" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProtoBuf Include="../../protos/tensorflow/core/framework/tensor.proto" GrpcServices="none" ProtoRoot="@(ProtoPath)" />
+    <ProtoBuf Include="../../protos/tensorflow/core/framework/types.proto" GrpcServices="none" ProtoRoot="@(ProtoPath)" />
+    <ProtoBuf Include="../../protos/tensorflow/core/framework/resource_handle.proto" GrpcServices="none" ProtoRoot="@(ProtoPath)" />
+    <ProtoBuf Include="../../protos/tensorflow/core/framework/tensor_shape.proto" GrpcServices="none" ProtoRoot="@(ProtoPath)" />
+    <ProtoBuf Include="../../protos/tensorflow_serving/apis/predict.proto" GrpcServices="none" ProtoRoot="@(ProtoPath)" />
+    <ProtoBuf Include="../../protos/tensorflow_serving/apis/model.proto" GrpcServices="none" ProtoRoot="@(ProtoPath)" />
+    <ProtoBuf Include="../../protos/tensorflow_serving/apis/prediction_service.proto" ProtoRoot="@(ProtoPath)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.8.0" />
+    <PackageReference Include="Grpc" Version="1.22.0" />
+    <PackageReference Include="Grpc.Tools" Version="1.22.0" PrivateAssets="All" />
+      </ItemGroup>
+
+</Project>
