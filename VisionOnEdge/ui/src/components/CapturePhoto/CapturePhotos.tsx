@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
-import { Camera } from '../../State';
+import { Camera, Part, State } from '../../State';
+import { thunkGetCapturedImages } from '../../actions/part';
 
 export const CapturePhotos: React.FC = () => {
-  const [capturedPhotos, setCapturePhotos] = useState<string[]>([]);
+  const { capturedImages } = useSelector<State, Part>((state) => state.part);
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
 
   return (
     <>
       <CameraSelector setSelectedCamera={setSelectedCamera} />
-      <RTSPVideo setCapturePhotos={setCapturePhotos} selectedCameraId={selectedCamera?.id} />
-      <CapturedImagesContainer captruedPhotos={capturedPhotos} />
+      <RTSPVideo selectedCameraId={selectedCamera?.id} />
+      <CapturedImagesContainer captruedImages={capturedImages} />
     </>
   );
 };
@@ -43,8 +45,9 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
   );
 };
 
-const RTSPVideo = ({ setCapturePhotos, selectedCameraId }): JSX.Element => {
+const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
   const [streamId, setStreamId] = useState<string>('');
+  const dispatch = useDispatch();
 
   const onCreateStream = (): void => {
     // TODO: Use `selectedCameraId` when BE is ready
@@ -62,16 +65,7 @@ const RTSPVideo = ({ setCapturePhotos, selectedCameraId }): JSX.Element => {
   };
 
   const onCapturePhoto = (): void => {
-    fetch(`/streams/${streamId}/capture`)
-      .then((response) => response.json())
-      .then(() => {
-        // TODO Append image url from server
-        setCapturePhotos((prev) => [...prev, 'https://via.placeholder.com/150']);
-        return null;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    dispatch(thunkGetCapturedImages(streamId));
   };
 
   const onDisconnect = useCallback((): void => {
@@ -119,10 +113,10 @@ const RTSPVideo = ({ setCapturePhotos, selectedCameraId }): JSX.Element => {
   );
 };
 
-const CapturedImagesContainer = ({ captruedPhotos }): JSX.Element => {
+const CapturedImagesContainer = ({ captruedImages }): JSX.Element => {
   return (
     <Flex styles={{ overflow: 'scroll' }} gap="gap.small">
-      {captruedPhotos.map((src, i) => (
+      {captruedImages.map((src, i) => (
         <Image key={i} src={src} />
       ))}
     </Flex>
