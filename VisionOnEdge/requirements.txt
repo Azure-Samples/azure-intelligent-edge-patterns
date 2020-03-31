@@ -1,0 +1,4 @@
+django
+djangorestframework
+cv2
+pillow
