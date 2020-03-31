@@ -1,5 +1,5 @@
-import React from 'react';
-import { Flex, Input, TextArea, Button, Text, Menu, Grid } from '@fluentui/react-northstar';
+import React, { useState } from 'react';
+import { Flex, Input, TextArea, Button, Menu, Grid } from '@fluentui/react-northstar';
 import { Link, useLocation, Switch, Route, Redirect } from 'react-router-dom';
 import { CapturePhotos } from '../components/CapturePhoto';
 
@@ -13,15 +13,34 @@ export const Parts = (): JSX.Element => {
 };
 
 const LeftPanel = (): JSX.Element => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+
+  const onSave = (): void => {
+    // TODO
+  };
+
   return (
     <Flex column space="around" styles={{ gridColumn: '1 / span 4' }}>
-      <Input fluid styles={{ fontSize: '2em' }} />
-      <Flex column gap="gap.small" design={{ height: '80%' }}>
-        <Text content="Description" size="medium" />
-        <TextArea design={{ height: '100%' }} />
-      </Flex>
+      <Input
+        placeholder="Enter Part Name..."
+        fluid
+        styles={{ fontSize: '2em' }}
+        value={name}
+        onChange={(_, newProps): void => {
+          setName(newProps.value);
+        }}
+      />
+      <TextArea
+        placeholder="Enter Description..."
+        design={{ height: '80%' }}
+        value={description}
+        onChange={(_, newProps): void => {
+          setDescription(newProps.value);
+        }}
+      />
       <Flex space="around">
-        <Button content="Save" primary />
+        <Button content="Save" primary onClick={onSave} />
         <Button content="Cancel" />
       </Flex>
     </Flex>
