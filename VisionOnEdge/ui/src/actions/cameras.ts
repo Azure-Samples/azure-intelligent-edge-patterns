@@ -1,14 +1,14 @@
 import { Camera } from '../State';
 
 export const GET_CAMERA_SUCCESS = 'GET_CAMERA_SUCCESS';
-export const GET_CAMERA_FAILURE = 'GET_CAMERA_FAILURE';
 export const POST_CAMERA_SUCCESS = 'POST_CAMERA_SUCCESS';
+export const REQUEST_CAMERA_FAILURE = 'REQUEST_CAMERA_FAILURE';
 
 const getCamerasSuccess = (data: Camera[]): any => ({ type: GET_CAMERA_SUCCESS, payload: data });
 
 const requestCamerasFailure = (error: any): any => {
   console.error(error);
-  return { type: GET_CAMERA_FAILURE };
+  return { type: REQUEST_CAMERA_FAILURE };
 };
 
 const postCamerasSuccess = (data: Camera[]): any => ({ type: POST_CAMERA_SUCCESS, payload: data });
