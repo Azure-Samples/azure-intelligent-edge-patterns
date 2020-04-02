@@ -38,7 +38,10 @@ def send_iothub_message(iothub_client, msg):
         print ( "Unexpected error %s from IoTHub" % iothub_error )
         return
     except KeyboardInterrupt:
-        print ( "IoTHubClient sample stopped" ) 
+        print ( "IoTHubClient sample stopped" )
+def get_images_from_video(path="./assets/video.mp4"):
+    
+
 
 def main(args):
     prediction_client = PredictionClient(args.address, args.port)
@@ -48,38 +51,42 @@ def main(args):
     classes_entries = ["Person","NotPerson"]
 
     while True:
-        for image in os.listdir(args.image_dir):
-            # score image
-            try:
-                start_time = time.time()
-                results = prediction_client.score_file(path=os.path.join(args.image_dir, image), 
-                                                        input_name=args.input_tensors, 
-                                                        outputs=args.output_tensors)
-                inference_time = (time.time() - start_time) * 1000
-                # map results [class_id] => [confidence]
-                results = enumerate(results)
-                # sort results by confidence
-                sorted_results = sorted(results, key=lambda x: x[1], reverse=True)
-                top_result = sorted_results[0]
-                msg_string = "(%.0f ms) The image %s was classified as %s with confidence %s." % (inference_time, os.path.join(args.image_dir, image), 
-                                                                                            classes_entries[top_result[0]], 
-                                                                                            top_result[1])
-                print(msg_string)
-            except: 
-                tb = traceback.format_exc()
-                if "StatusCode.UNAVAILABLE" in tb:
-                    msg_string = "Unable to inference because AzureML host container is not done flashing the FPGA. If still not available in 5 minutes, check logs of module."
-                elif "Object reference not set to an instance of an object" in tb:
-                    msg_string = "Unable to inference because the names of the input and output tensors used for scoring are incorrect.\n" + \
-                                "Please update the docker CMD arguments to include the correct --input-tensors and --output-tensors parameters."
-                else: 
-                    msg_string = "Unable to inference for unknown reason. See stack trace below:\n{}".format(tb)
-                print(msg_string)
-                print("Trying again in {} seconds...".format(args.wait))
-            
-            if DEVICE_CONNECTION_STRING and not args.suppress_messages:
-                send_iothub_message(iothub_client, msg_string)
-            time.sleep(args.wait)
+        if(args.video):
+            print("Video Path ")
+
+        else:
+            for image in os.listdir(args.image_dir):
+                # score image
+                try:
+                    start_time = time.time()
+                    results = prediction_client.score_file(path=os.path.join(args.image_dir, image), 
+                                                            input_name=args.input_tensors, 
+                                                            outputs=args.output_tensors)
+                    inference_time = (time.time() - start_time) * 1000
+                    # map results [class_id] => [confidence]
+                    results = enumerate(results)
+                    # sort results by confidence
+                    sorted_results = sorted(results, key=lambda x: x[1], reverse=True)
+                    top_result = sorted_results[0]
+                    msg_string = "(%.0f ms) The image %s was classified as %s with confidence %s." % (inference_time, os.path.join(args.image_dir, image), 
+                                                                                                classes_entries[top_result[0]], 
+                                                                                                top_result[1])
+                    print(msg_string)
+                except: 
+                    tb = traceback.format_exc()
+                    if "StatusCode.UNAVAILABLE" in tb:
+                        msg_string = "Unable to inference because AzureML host container is not done flashing the FPGA. If still not available in 5 minutes, check logs of module."
+                    elif "Object reference not set to an instance of an object" in tb:
+                        msg_string = "Unable to inference because the names of the input and output tensors used for scoring are incorrect.\n" + \
+                                    "Please update the docker CMD arguments to include the correct --input-tensors and --output-tensors parameters."
+                    else: 
+                        msg_string = "Unable to inference for unknown reason. See stack trace below:\n{}".format(tb)
+                    print(msg_string)
+                    print("Trying again in {} seconds...".format(args.wait))
+                
+        if DEVICE_CONNECTION_STRING and not args.suppress_messages:
+            send_iothub_message(iothub_client, msg_string)
+        time.sleep(args.wait)
 
 if __name__ == "__main__":
     # Parse arguments
@@ -102,6 +109,9 @@ if __name__ == "__main__":
     parser.add_argument("-w", "--wait", default=10, type=int,
                         help="Time to wait between each inference call. \n" +
                              "Default: 10.")
+    parser.add_argument("-v", "--video", default=False, type=bool,
+                    help="use video instead of photos for infernce. \n" +
+                            "Default: False.")
     parser.add_argument("-s", "--suppress-messages", action='store_true', dest='suppress_messages',
                         help="Flag to suppress IOT Hub messages. Default: False.\n" + \
                              "Use --wait flag to lessen or this flag to turn off IOT hub messaging to avoid reaching your limit of IOT Hub messages.")
