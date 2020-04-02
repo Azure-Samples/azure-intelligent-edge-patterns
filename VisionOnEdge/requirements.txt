@@ -1,0 +1,4 @@
+django
+djangorestframework
+opencv-python
+pillow
