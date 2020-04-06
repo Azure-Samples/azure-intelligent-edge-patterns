@@ -1,5 +1,5 @@
-import { initialState, Part } from '../State';
-import { PartActionTypes, ADD_CAPTURED_IMAGE, UPDATE_CAPTURED_IMAGES } from '../actions/part';
+import { initialState } from '../State';
+import { PartActionTypes, ADD_CAPTURED_IMAGE, Part, UPDATE_CAPTURED_IMAGES } from './partTypes';
 
 const partReducer = (state = initialState.part, action: PartActionTypes): Part => {
   switch (action.type) {

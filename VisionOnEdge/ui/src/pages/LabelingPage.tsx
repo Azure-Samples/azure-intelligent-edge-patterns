@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Text, Flex, FlexItem, Button } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
-import { State } from '../State';
+import { State } from '../store/State';
 
 const LabelingPage: FC = () => {
   const imageUrls = useSelector<State, string[]>((state) => state.part.capturedImages);

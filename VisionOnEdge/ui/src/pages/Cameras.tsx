@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Text, Flex, Button, Dialog, Input, Image, Icon, FlexItem, Grid } from '@fluentui/react-northstar';
 
-import { postCameras } from '../actions/cameras';
-import { Camera } from '../State';
 import { useCameras } from '../hooks/useCameras';
+import { Camera } from '../store/camera/cameraTypes';
+import { postCameras } from '../store/camera/cameraActions';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
