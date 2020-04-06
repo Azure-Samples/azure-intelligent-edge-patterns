@@ -1,5 +1,5 @@
 import React, { FC, useState, useEffect, useRef } from 'react';
-import { Text } from '@fluentui/react-northstar';
+import { Text, Button } from '@fluentui/react-northstar';
 import { Stage, Layer, Image } from 'react-konva';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -7,7 +7,12 @@ import useImage from './util/useImage';
 import { Box2d } from './Box';
 import { Size2D, Annotation, Position2D, WorkState } from './types';
 import { State } from '../../State';
-import { createAnnotation, updateCreatingAnnotation, finishCreatingAnnotation } from '../../actions/labelingPage';
+import {
+  createAnnotation,
+  updateCreatingAnnotation,
+  finishCreatingAnnotation,
+  removeAnnotation,
+} from '../../actions/labelingPage';
 
 interface SceneProps {
   url?: string;
@@ -56,7 +61,7 @@ const Scene: FC<SceneProps> = ({ url = '' }) => {
       const pos = getCursorPosition(stageRef.current, layerRef.current);
       dispatch(updateCreatingAnnotation(pos));
     }
-  }
+  };
 
   const onMouseUp = (): void => {
     if (workState === WorkState.Creating) {
@@ -70,42 +75,53 @@ const Scene: FC<SceneProps> = ({ url = '' }) => {
     setWorkState(WorkState.Selecting);
   };
 
-  // useEffect(() => {
-  //   setImageSize(size);
-  // }, [size]);
+  useEffect(() => {
+    if (workState === WorkState.None) setSelectedAnnotationIndex(null);
+  }, [workState]);
+  useEffect(() => {
+    setImageSize(size);
+  }, [size]);
 
   if (imageSize.height === 0 && imageSize.width === 0) return <Text color="red">Loading...</Text>;
 
   return (
-    <Stage
-      ref={stageRef}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      width={imageSize.width}
-      height={imageSize.height}
-    >
-      <Layer ref={layerRef}>
-        <Image
-          image={image}
-          onClick={(): void => {
-            setSelectedAnnotationIndex(null);
-            setWorkState(WorkState.Creating);
-          }}
-        />
-        {annotations.map((annotation, i) => (
-          <Box2d
-            key={i}
-            annotation={annotation}
-            scale={1}
-            annotationIndex={i}
-            onSelect={onSelect}
-            selected={i === selectedAnnotationIndex}
-            dispatch={dispatch}
+    <div style={{ margin: 3 }}>
+      <Stage
+        ref={stageRef}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        width={imageSize.width}
+        height={imageSize.height}
+      >
+        <Layer ref={layerRef}>
+          <Image
+            image={image}
+            onClick={(): void => {
+              setSelectedAnnotationIndex(null);
+              setWorkState(WorkState.Creating);
+            }}
           />
-        ))}
-      </Layer>
-    </Stage>
+          {annotations.map((annotation, i) => (
+            <Box2d
+              key={i}
+              annotation={annotation}
+              scale={1}
+              annotationIndex={i}
+              onSelect={onSelect}
+              selected={i === selectedAnnotationIndex}
+              dispatch={dispatch}
+            />
+          ))}
+        </Layer>
+      </Stage>
+      <Button
+        content={selectedAnnotationIndex === null ? 'Clear' : 'Remove'}
+        onClick={(): void => {
+          dispatch(removeAnnotation(selectedAnnotationIndex));
+        }}
+      />
+    </div>
   );
 };
 

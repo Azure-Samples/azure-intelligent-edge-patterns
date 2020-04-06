@@ -1,6 +1,6 @@
 import { Annotation, AnnotationState, BoxObject, Position2D } from '../components/LabelingPage/types';
 
-// * Fetch Operation
+// * Request Operation
 export const REQUEST_ANNOTATION_FAILURE = 'REQUEST_ANNOTATION_FAILURE';
 type RequestAnnotationSuccessAction = { type: typeof REQUEST_ANNOTATION_SUCCESS; payload: any };
 export const REQUEST_ANNOTATION_SUCCESS = 'REQUEST_ANNOTATION_SUCCESS';
@@ -67,6 +67,11 @@ type UpdateAnnotationAction = {
   type: typeof UPDATE_ANNOTATION;
   payload: { annotation: Annotation; index: number };
 };
+export const REMOVE_ANNOTATION = 'REMOVE_ANNOTATION';
+type RemoveAnnotationAction = {
+  type: typeof REMOVE_ANNOTATION;
+  payload: { index: number };
+};
 
 export const createAnnotation = (pos: Position2D): CreateAnnotationAction => {
   const annotation = BoxObj.createWithPoint(pos, '');
@@ -93,6 +98,11 @@ export const finishCreatingAnnotation = (): FinishCreatingAnnotationAction => {
 export const updateAnnotation = (index: number = null, annotation: Annotation): UpdateAnnotationAction => ({
   type: UPDATE_ANNOTATION,
   payload: { index, annotation: BoxObj.setVerticesToValidValue(annotation) },
+});
+
+export const removeAnnotation = (index: number = null): RemoveAnnotationAction => ({
+  type: REMOVE_ANNOTATION,
+  payload: { index },
 });
 
 // * Annotation Functions

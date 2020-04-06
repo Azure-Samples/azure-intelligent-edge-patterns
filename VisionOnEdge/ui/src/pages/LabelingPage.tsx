@@ -5,9 +5,6 @@ import { Text, Flex, FlexItem, Button } from '@fluentui/react-northstar';
 import Scene from '../components/LabelingPage/Scene';
 import { State } from '../State';
 
-// interface LabelingPageProps {
-
-// }
 const LabelingPage: FC = () => {
   const imageUrls = useSelector<State, string[]>((state) => state.part.capturedImages);
   const [frameIndex, setFrameIndex] = useState<number>(0);
@@ -19,7 +16,6 @@ const LabelingPage: FC = () => {
       </FlexItem>
       <Scene url={imageUrls[frameIndex]} />
       <Flex gap="gap.medium">
-        <Button content="Clear" />
         <Button primary content="Save" />
         <Button
           content="Previous"
