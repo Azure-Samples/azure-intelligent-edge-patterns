@@ -22,11 +22,12 @@ export const addCapturedImages = (newCapturedImage: string): AddCapturedImageAct
 });
 
 export const thunkGetCapturedImages = (streamId: string): PartThunk => async (dispatch): Promise<void> => {
-  fetch(`/streams/${streamId}/capture`)
+  fetch(`/api/streams/${streamId}/capture`)
     .then((response) => response.json())
-    .then(() => {
-      // TODO Append image url from server
-      dispatch(addCapturedImages('https://via.placeholder.com/150'));
+    .then((data) => {
+      if(data.status === 'ok'){
+        dispatch(addCapturedImages(data.image.image));
+      }
       return null;
     })
     .catch((err) => {
