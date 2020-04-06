@@ -1,5 +1,3 @@
-import { FC } from 'react';
-
 export type Position2D = {
   x: number;
   y: number;
@@ -14,10 +12,10 @@ export type Size2D = { width: number; height: number };
 export type Annotation = {
   label: BoxLabel;
   attribute: string;
-  creatingState: CreatingState;
+  annotationState: AnnotationState;
 };
 
-export enum CreatingState {
+export enum AnnotationState {
   Empty = 'Empty',
   P1Added = 'P1Added',
   Finish = 'Finish',
@@ -25,11 +23,13 @@ export enum CreatingState {
 
 export interface Box2dComponentProps {
   annotation: Annotation;
-  cursorPosition: Position2D;
+  // cursorPosition: Position2D;
   annotationIndex: number;
-  // selected: boolean;
+  onSelect: Function;
+  selected: boolean;
   scale: number;
   visible?: boolean;
+  dispatch: any;
   // instanceID: number;
 }
 export type BoxObject = {
@@ -39,7 +39,12 @@ export type BoxObject = {
   setVerticesToValidValue: (arg0: Annotation) => Annotation;
   setVerticesToInt: (arg0: Annotation) => Annotation;
   setVerticesPointsOrder: (arg0: Annotation) => Annotation;
-  component: FC<Box2dComponentProps>;
   // setStateCreated: (arg0: number, arg1: Annotation[]) => Annotation[];
   // setFinished: (arg0: Annotation) => Annotation;
 };
+
+export enum WorkState {
+  Creating = 'Creating',
+  Selecting = 'Selecting',
+  None = 'None',
+}
