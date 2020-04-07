@@ -20,8 +20,7 @@ interface SceneProps {
 const Scene: FC<SceneProps> = ({ url = '' }) => {
   const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
   const [imageSize, setImageSize] = useState<Size2D>({ width: 1000, height: 300 });
-  const [image, status, size] = useImage(url, 'anonymous');
-  // const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const stageRef = useRef(null);
@@ -30,11 +29,7 @@ const Scene: FC<SceneProps> = ({ url = '' }) => {
 
   const getCursorPosition = (stage, layer): Position2D => {
     if (stage === null && layer === null) throw new Error('Stage & layer refering failed');
-    const { x, y } = layer
-      .getTransform()
-      .copy()
-      .invert()
-      .point(stage.getPointerPosition());
+    const { x, y } = layer.getTransform().copy().invert().point(stage.getPointerPosition());
 
     const cursorPos = { x: Math.round(x), y: Math.round(y) };
 
@@ -99,7 +94,6 @@ const Scene: FC<SceneProps> = ({ url = '' }) => {
             image={image}
             onClick={(): void => {
               setSelectedAnnotationIndex(null);
-              setWorkState(WorkState.Creating);
             }}
           />
           {annotations.map((annotation, i) => (
