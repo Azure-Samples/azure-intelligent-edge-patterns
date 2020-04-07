@@ -1,7 +1,7 @@
 import React, { useState, FC } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { List, Text, Flex, ListItemProps, Button, Dialog, Input, Image } from '@fluentui/react-northstar';
+import { Text, Flex, Button, Dialog, Input, Image, Icon, FlexItem, Grid } from '@fluentui/react-northstar';
 
 import { postCameras } from '../actions/cameras';
 import { Camera } from '../State';
@@ -11,27 +11,36 @@ const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
   const cameras = useCameras();
   const [cameraInput, setCameraInput] = useState<Camera>({ name: '', rtsp: '', model_name: '' });
-  const [selectedListIdx, setSelectedListIdx] = useState(-1);
-  const cameraItems: ListItemProps[] = cameras.map((camera) => ({
-    key: camera.id,
-    media: <Image src="/defalutCamera.png" avatar />,
-    header: camera.name,
-    content: `Model Name: ${camera.model_name}`,
-  }));
-
-  if (selectedListIdx !== -1) return <Redirect to={`/cameras/${cameras[selectedListIdx].name}`} />;
 
   return (
-    <>
-      <Flex hAlign="center">
+    <Flex column gap="gap.large" padding="padding.medium">
+      <FlexItem align="center">
         <Text size="larger" weight="semibold">
           Camera
         </Text>
-      </Flex>
+      </FlexItem>
+      <Grid columns="8">
+        {cameras.map((camera, i) => (
+          <Flex key={i} column styles={{ maxWidth: '300px' }}>
+            <Link to={`/cameras/${camera.name}`}>
+              <Image src="/defalutCamera.png" fluid />
+            </Link>
+            <Text size="larger" align="center">
+              {camera.name}
+            </Text>
+          </Flex>
+        ))}
+      </Grid>
       <Dialog
         trigger={
-          <Flex hAlign="end" padding="padding.medium">
-            <Button content="Add Camera" />
+          <Flex hAlign="end">
+            <Button
+              primary
+              fluid
+              circular
+              content={<Icon name="add" size="largest" circular />}
+              style={{ width: 100, height: 100 }}
+            />
           </Flex>
         }
         confirmButton="Submit"
@@ -62,15 +71,7 @@ const Cameras: FC = (): JSX.Element => {
           </Flex>
         }
       />
-      <List
-        items={cameraItems}
-        selectable
-        selectedIndex={selectedListIdx}
-        onSelectedIndexChange={(_, newProps): void => {
-          setSelectedListIdx(newProps.selectedIndex);
-        }}
-      />
-    </>
+    </Flex>
   );
 };
 
