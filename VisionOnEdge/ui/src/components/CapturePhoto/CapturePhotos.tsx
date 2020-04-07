@@ -5,17 +5,16 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
 import { Camera, Part, State } from '../../State';
-import { thunkGetCapturedImages } from '../../actions/part';
+import { thunkAddCapturedImages, thunkGetCapturedImages } from '../../actions/part';
 
 export const CapturePhotos: React.FC = () => {
-  const { capturedImages } = useSelector<State, Part>((state) => state.part);
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
 
   return (
     <>
       <CameraSelector setSelectedCamera={setSelectedCamera} />
       <RTSPVideo selectedCameraId={selectedCamera?.id} />
-      <CapturedImagesContainer captruedImages={capturedImages} />
+      <CapturedImagesContainer />
     </>
   );
 };
@@ -51,7 +50,7 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
 
   const onCreateStream = (): void => {
     // TODO: Use `selectedCameraId` when BE is ready
-    fetch(`/streams/connect?camera_id=${0}`)
+    fetch(`/api/streams/connect`)
       .then((response) => response.json())
       .then((data) => {
         if (data?.status === 'ok') {
@@ -65,12 +64,12 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
   };
 
   const onCapturePhoto = (): void => {
-    dispatch(thunkGetCapturedImages(streamId));
+    dispatch(thunkAddCapturedImages(streamId));
   };
 
   const onDisconnect = useCallback((): void => {
     setStreamId('');
-    fetch(`/streams/${streamId}/disconnect`)
+    fetch(`/api/streams/${streamId}/disconnect`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -88,13 +87,13 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
     };
   }, [onDisconnect]);
 
-  const src = streamId
-    ? `http://localhost:8000/streams/${streamId}/video_feed`
-    : 'https://via.placeholder.com/1600x900';
+  const src = streamId ? `http://localhost:8000/api/streams/${streamId}/video_feed` : '';
 
   return (
     <>
-      <Image src={src} design={{ width: '100%' }} />
+      <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
+        {src ? <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
+      </div>
       <Button.Group
         styles={{ alignSelf: 'center' }}
         buttons={[
@@ -113,11 +112,22 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
   );
 };
 
-const CapturedImagesContainer = ({ captruedImages }): JSX.Element => {
+const CapturedImagesContainer = (): JSX.Element => {
+  const dispatch = useDispatch();
+  const { capturedImages } = useSelector<State, Part>((state) => state.part);
+
+  useEffect(() => {
+    dispatch(thunkGetCapturedImages());
+  }, [dispatch]);
+
   return (
-    <Flex styles={{ overflow: 'scroll' }} gap="gap.small">
-      {captruedImages.map((src, i) => (
-        <Image key={i} src={src} />
+    <Flex
+      styles={{ overflow: 'scroll', border: '1px solid grey', height: '150px' }}
+      gap="gap.small"
+      vAlign="center"
+    >
+      {capturedImages.map((src) => (
+        <Image key={src} src={src} design={{ maxWidth: '150px' }} />
       ))}
     </Flex>
   );
