@@ -14,10 +14,26 @@ export const MainLayout: React.FC = ({ children }) => {
         color="brand"
         content="Vision On Edge" // consider using Flex for the topnav
         inverted
-        styles={{ gridColumn: '1 / span 2' }}
+        styles={{
+          gridColumn: '1 / span 2',
+          boxShadow: '0px 1px 10px 0px rgba(0,0,0,0.75)',
+          zIndex: 2,
+          padding: 0,
+          fontSize: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: '1em',
+        }}
       />
-      <Nav styles={{ gridColumn: '1 / span 1', gridRow: '2 / span 1' }} />
-      <Segment styles={{ gridColumn: 'span 1' }}>{children}</Segment>
+      <Nav
+        styles={{
+          gridColumn: '1 / span 1',
+          gridRow: '2 / span 1',
+          boxShadow: '1px 0px 10px 0px rgba(0,0,0,0.75)',
+          zIndex: 1,
+        }}
+      />
+      <Segment styles={{ gridColumn: 'span 1', padding: '30px' }}>{children}</Segment>
     </Grid>
   );
 };
