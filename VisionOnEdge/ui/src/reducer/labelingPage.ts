@@ -7,11 +7,15 @@ import {
   FINISH_CREATING_ANNOTATION,
   BoxObj,
   REMOVE_ANNOTATION,
+  AnnotationAction,
 } from '../actions/labelingPage';
 import { initialState, LabelingPageState } from '../State';
 import { AnnotationState } from '../components/LabelingPage/types';
 
-const labelingPageStateReducer = (state = initialState.labelingPageState, action): LabelingPageState => {
+const labelingPageStateReducer = (
+  state = initialState.labelingPageState,
+  action: AnnotationAction,
+): LabelingPageState => {
   const newState = state;
   switch (action.type) {
     case REQUEST_ANNOTATION_SUCCESS:
@@ -55,10 +59,12 @@ const labelingPageStateReducer = (state = initialState.labelingPageState, action
     case REMOVE_ANNOTATION:
       if (action.payload.index === null) {
         const clear = window.confirm('Are you going to remove all annotations?');
-        if (clear) newState.annotations = []; 
+        if (clear) newState.annotations = [];
       }
-      newState.annotations = newState.annotations.slice(0, action.payload.index).concat(newState.annotations.slice(action.payload.index + 1));
-      
+      newState.annotations = newState.annotations
+        .slice(0, action.payload.index)
+        .concat(newState.annotations.slice(action.payload.index + 1));
+
       break;
     default:
       return state;

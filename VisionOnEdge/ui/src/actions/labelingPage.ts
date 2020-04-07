@@ -105,6 +105,15 @@ export const removeAnnotation = (index: number = null): RemoveAnnotationAction =
   payload: { index },
 });
 
+export type AnnotationAction =
+  | RequestAnnotationSuccessAction
+  | RequestAnnotationFailureAction
+  | CreateAnnotationAction
+  | UpdateCreatingAnnotationAction
+  | FinishCreatingAnnotationAction
+  | UpdateAnnotationAction
+  | RemoveAnnotationAction;
+
 // * Annotation Functions
 export const BoxObj: BoxObject = {
   init(): Annotation {

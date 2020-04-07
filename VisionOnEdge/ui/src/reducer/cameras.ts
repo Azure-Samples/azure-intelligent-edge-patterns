@@ -1,7 +1,12 @@
-import { GET_CAMERA_SUCCESS, REQUEST_CAMERA_FAILURE, POST_CAMERA_SUCCESS } from '../actions/cameras';
+import {
+  GET_CAMERA_SUCCESS,
+  REQUEST_CAMERA_FAILURE,
+  POST_CAMERA_SUCCESS,
+  CameraAction,
+} from '../actions/cameras';
 import { initialState, Camera } from '../State';
 
-const camerasReducer = (state = initialState.cameras, action): Camera[] => {
+const camerasReducer = (state = initialState.cameras, action: CameraAction): Camera[] => {
   switch (action.type) {
     case GET_CAMERA_SUCCESS:
       return action.payload;
