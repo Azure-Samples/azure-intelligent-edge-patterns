@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 type ImageState = {
-  image: any;
+  image: HTMLImageElement;
   status: string;
   size: { width: number; height: number };
 };
@@ -15,11 +15,11 @@ const usePrevious = <T>(value: T): T => {
   const ref = useRef<T>();
   useEffect(() => {
     ref.current = value;
-  });
+  }, [value]);
   return ref.current;
 };
 
-const useImage = (url: string, crossOrigin: string): [any, string, { width: number; height: number }] => {
+const useImage = (url: string, crossOrigin: string): [HTMLImageElement, string, { width: number; height: number }] => {
   const [imageState, setImageState] = useState<ImageState>(defaultState);
   const { image, status, size } = imageState;
 
