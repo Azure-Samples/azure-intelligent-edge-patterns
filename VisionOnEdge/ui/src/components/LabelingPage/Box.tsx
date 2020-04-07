@@ -1,5 +1,7 @@
 import React, { useState, useEffect, FC } from 'react';
-import { Line, Group, Circle } from 'react-konva';
+import { Line, Group, Circle } from 'react-konva'
+import { KonvaEventObject } from 'konva/types/Node';
+
 import { BoxLabel, Box2dComponentProps } from './types';
 import { updateAnnotation } from '../../actions/labelingPage';
 
@@ -22,7 +24,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
     dispatch(updateAnnotation(annotationIndex, newAnnotation));
   };
 
-  const onDragAnchor = ({ xi = 'x1', yi = 'y1' }) => (e: any): void => {
+  const onDragAnchor = ({ xi = 'x1', yi = 'y1' }) => (e: KonvaEventObject<DragEvent>): void => {
     const x = Math.round(e.target.position().x);
     const y = Math.round(e.target.position().y);
 

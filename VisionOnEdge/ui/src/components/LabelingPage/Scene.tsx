@@ -113,6 +113,7 @@ const Scene: FC<SceneProps> = ({ url = '' }) => {
         content={selectedAnnotationIndex === null ? 'Clear' : 'Remove'}
         onClick={(): void => {
           dispatch(removeAnnotation(selectedAnnotationIndex));
+          setSelectedAnnotationIndex(null);
         }}
       />
     </div>
