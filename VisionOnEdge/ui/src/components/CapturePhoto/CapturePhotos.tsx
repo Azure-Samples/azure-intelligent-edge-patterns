@@ -4,8 +4,10 @@ import { Link, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
-import { Camera, Part, State } from '../../State';
-import { thunkAddCapturedImages, thunkGetCapturedImages } from '../../actions/part';
+import { State } from '../../store/State';
+import { Part } from '../../store/part/partTypes';
+import { Camera } from '../../store/camera/cameraTypes';
+import { thunkGetCapturedImages, thunkAddCapturedImages } from '../../store/part/partActions';
 
 export const CapturePhotos: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);

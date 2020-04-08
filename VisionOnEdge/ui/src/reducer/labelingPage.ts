@@ -7,7 +7,7 @@ import {
   REMOVE_ANNOTATION,
   AnnotationAction,
 } from '../actions/labelingPage';
-import { initialState, LabelingPageState } from '../State';
+import { initialState, LabelingPageState } from '../store/State';
 import { AnnotationState } from '../components/LabelingPage/types';
 
 const labelingPageStateReducer = (

@@ -2,9 +2,10 @@ import {
   GET_CAMERA_SUCCESS,
   REQUEST_CAMERA_FAILURE,
   POST_CAMERA_SUCCESS,
+  Camera,
   CameraAction,
-} from '../actions/cameras';
-import { initialState, Camera } from '../State';
+} from './cameraTypes';
+import { initialState } from '../State';
 
 const camerasReducer = (state = initialState.cameras, action: CameraAction): Camera[] => {
   switch (action.type) {

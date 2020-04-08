@@ -1,28 +1,10 @@
-import { ThunkAction } from 'redux-thunk';
-import { Action } from 'redux';
-
-import { Part } from '../State';
-
-export const ADD_CAPTURED_IMAGE = 'ADD_CAPTURED_IMAGE';
-export const UPDATE_CAPTURED_IMAGES = 'UPDATE_CAPTURED_IMAGES';
-
-type AddCapturedImageAction = {
-  type: typeof ADD_CAPTURED_IMAGE;
-  payload: {
-    newCapturedImage: string;
-  };
-};
-
-type UpdateCapturedImageAction = {
-  type: typeof UPDATE_CAPTURED_IMAGES;
-  payload: {
-    capturedImages: string[];
-  };
-};
-
-type PartThunk<ReturnType = void> = ThunkAction<ReturnType, Part, unknown, Action<string>>;
-
-export type PartActionTypes = AddCapturedImageAction | UpdateCapturedImageAction;
+import {
+  AddCapturedImageAction,
+  ADD_CAPTURED_IMAGE,
+  PartThunk,
+  UpdateCapturedImageAction,
+  UPDATE_CAPTURED_IMAGES,
+} from './partTypes';
 
 export const addCapturedImages = (newCapturedImage: string): AddCapturedImageAction => ({
   type: ADD_CAPTURED_IMAGE,
