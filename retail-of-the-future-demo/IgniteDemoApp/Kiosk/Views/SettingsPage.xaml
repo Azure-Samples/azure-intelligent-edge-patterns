@@ -199,6 +199,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBox Header="Shelf Camera" Text="{Binding ShelfCamera, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="300"/>
                         <TextBox Header="Detection Delay" Text="{Binding DetectionDelay, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="100" Margin="20,0,0,0" />
+                        <TextBox Header="Eye Tracker" Text="{Binding EyeTracker, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Width="300" Margin="20,0,0,0"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">

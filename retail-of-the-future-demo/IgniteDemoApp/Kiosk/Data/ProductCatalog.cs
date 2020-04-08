@@ -12,7 +12,9 @@ namespace IntelligentKioskSample.Data
     {
         public List<Product> Products { get; private set; }
         public Product LeftProduct { get; private set; }
+        public Product LeftAltProduct { get; private set; }
         public Product RightProduct { get; private set; }
+        public Product RightAltProduct { get; private set; }
 
         public Product GetProductById(int id)
         {
@@ -56,7 +58,9 @@ namespace IntelligentKioskSample.Data
             ProductCatalog ctlg = new ProductCatalog();
             ctlg.Products = presetIgniteDemoProducts; // TODO: get from DB
             ctlg.LeftProduct = presetLeftProduct; // TODO: get from app settings
+            ctlg.LeftAltProduct = presetLeftAltProduct; // TODO: get from app settings
             ctlg.RightProduct = presetRightProduct; // TODO: set according to recommendation for left product
+            ctlg.RightAltProduct = presetRightAltProduct; // TODO: set according to recommendation for left product
             // TODO: Ensure all uri strings loaded from DB are valid (to avoid exceptions with binding)
             return ctlg;
         }
@@ -184,5 +188,17 @@ namespace IntelligentKioskSample.Data
             }
             return prod;
         }
-    }
+
+        static public string[] leftPromoLines = new string[] 
+        {
+          "• Our sunglasses come in wood grain and in black",
+          "• Our sunglasses provide eye protection from UV rays",
+          "• Our protective case is made from canvas"
+        };
+
+        static public string[] rightPromoLines = new string[]
+        { "• Our hats come in all black and tone on tone graphite colors",
+          "• Our hats come in one size. It is an adjustable one size fits most",
+          "• Our hats are made of cotton fabric and polyester mesh panels"};
+        }
 }

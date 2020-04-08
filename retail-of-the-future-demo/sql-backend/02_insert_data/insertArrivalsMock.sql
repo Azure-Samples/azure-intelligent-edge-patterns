@@ -1,3 +1,4 @@
+-- Arrivals table uses UTC time
 DECLARE @date DATETIME
 SET @date = DATEADD(HOUR, -8, GETDATE())  
 
