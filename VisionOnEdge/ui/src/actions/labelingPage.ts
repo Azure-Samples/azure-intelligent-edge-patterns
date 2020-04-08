@@ -58,10 +58,6 @@ type UpdateCreatingAnnotationAction = {
   type: typeof UPDATE_CREATING_ANNOTATION;
   payload: { updater: (annotation: Annotation) => Annotation };
 };
-export const FINISH_CREATING_ANNOTATION = 'FINISH_CREATING_ANNOTATION';
-type FinishCreatingAnnotationAction = {
-  type: typeof FINISH_CREATING_ANNOTATION;
-};
 export const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
 type UpdateAnnotationAction = {
   type: typeof UPDATE_ANNOTATION;
@@ -89,12 +85,6 @@ export const updateCreatingAnnotation = (pos: Position2D): UpdateCreatingAnnotat
   };
 };
 
-export const finishCreatingAnnotation = (): FinishCreatingAnnotationAction => {
-  return {
-    type: FINISH_CREATING_ANNOTATION,
-  };
-};
-
 export const updateAnnotation = (index: number = null, annotation: Annotation): UpdateAnnotationAction => ({
   type: UPDATE_ANNOTATION,
   payload: { index, annotation: BoxObj.setVerticesToValidValue(annotation) },
@@ -110,7 +100,6 @@ export type AnnotationAction =
   | RequestAnnotationFailureAction
   | CreateAnnotationAction
   | UpdateCreatingAnnotationAction
-  | FinishCreatingAnnotationAction
   | UpdateAnnotationAction
   | RemoveAnnotationAction;
 
@@ -143,9 +132,10 @@ export const BoxObj: BoxObject = {
     } else if (obj.annotationState === AnnotationState.P1Added) {
       newObj.label.x2 = x;
       newObj.label.y2 = y;
+      newObj.annotationState = AnnotationState.Finish;
     }
 
-    return this.setVerticesToInt(newObj);
+    return this.setVerticesToValidValue(newObj);
   },
   setVerticesToInt(obj: Annotation): Annotation {
     const newObj = { ...obj };

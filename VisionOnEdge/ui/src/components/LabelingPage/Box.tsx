@@ -1,12 +1,14 @@
 import React, { useState, useEffect, FC } from 'react';
-import { Line, Group, Circle } from 'react-konva'
+import { Line, Group, Circle } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import { BoxLabel, Box2dComponentProps } from './types';
+import { BoxLabel, Box2dComponentProps, WorkState } from './types';
 import { updateAnnotation } from '../../actions/labelingPage';
 
 export const Box2d: FC<Box2dComponentProps> = ({
   scale,
+  workState,
+  cursorPosition,
   onSelect,
   selected,
   annotationIndex,
@@ -27,10 +29,9 @@ export const Box2d: FC<Box2dComponentProps> = ({
   const onDragAnchor = ({ xi = 'x1', yi = 'y1' }) => (e: KonvaEventObject<DragEvent>): void => {
     const x = Math.round(e.target.position().x);
     const y = Math.round(e.target.position().y);
-
-    // Round the anchor(circle) position so user can only drag anchor on interger.
-    // e.target.setAttr('x', x);
-    // e.target.setAttr('y', y);
+    // * Round the anchor (circle) position so user can only drag anchor on integer.
+    e.target.setAttr('x', x);
+    e.target.setAttr('y', y);
 
     setVertices((prevVertices) => ({ ...prevVertices, [xi]: x, [yi]: y }));
   };
@@ -38,6 +39,12 @@ export const Box2d: FC<Box2dComponentProps> = ({
   useEffect(() => {
     setVertices(annotation.label);
   }, [annotation.label]);
+
+  useEffect(() => {
+    if (workState === WorkState.Creating && selected) {
+      setVertices((prev) => ({ ...prev, x2: cursorPosition.x, y2: cursorPosition.y }));
+    }
+  }, [workState, selected, cursorPosition, setVertices]);
 
   return (
     <Group

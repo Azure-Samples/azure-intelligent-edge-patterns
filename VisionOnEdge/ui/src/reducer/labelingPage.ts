@@ -4,8 +4,6 @@ import {
   REQUEST_ANNOTATION_SUCCESS,
   CREATE_ANNOTATION,
   UPDATE_CREATING_ANNOTATION,
-  FINISH_CREATING_ANNOTATION,
-  BoxObj,
   REMOVE_ANNOTATION,
   AnnotationAction,
 } from '../actions/labelingPage';
@@ -27,29 +25,21 @@ const labelingPageStateReducer = (
       newState.annotations.push(action.payload.annotation);
       break;
     case UPDATE_CREATING_ANNOTATION:
-      newState.annotations[newState.annotations.length - 1] = action.payload.updater(
-        newState.annotations[newState.annotations.length - 1],
-      );
-      newState.annotations = [...newState.annotations];
-
-      break;
-    case FINISH_CREATING_ANNOTATION:
       {
-        const creatingAnnotation = newState.annotations[newState.annotations.length - 1];
-        if (creatingAnnotation.annotationState === AnnotationState.P1Added) {
+        const creatingAnnotation = action.payload.updater(
+          newState.annotations[newState.annotations.length - 1],
+        );
+
+        if (creatingAnnotation.annotationState === AnnotationState.Finish) {
           if (
             (creatingAnnotation.label.x1 | 0) === (creatingAnnotation.label.x2 | 0) &&
             (creatingAnnotation.label.y1 | 0) === (creatingAnnotation.label.y2 | 0)
           ) {
             newState.annotations.pop();
           } else {
-            newState.annotations[newState.annotations.length - 1] = BoxObj.setVerticesToValidValue(
-              newState.annotations[newState.annotations.length - 1],
-            );
-            newState.annotations[newState.annotations.length - 1].annotationState = AnnotationState.Finish;
+            newState.annotations[newState.annotations.length - 1] = creatingAnnotation;
+            newState.annotations = [...newState.annotations];
           }
-        } else {
-          throw new Error('Wrong Annotation State');
         }
       }
       break;

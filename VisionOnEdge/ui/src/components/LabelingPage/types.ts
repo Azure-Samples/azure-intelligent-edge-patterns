@@ -22,12 +22,13 @@ export enum AnnotationState {
 }
 
 export interface Box2dComponentProps {
-  annotation: Annotation;
-  // cursorPosition: Position2D;
-  annotationIndex: number;
-  onSelect: Function;
-  selected: boolean;
+  workState: WorkState;
+  cursorPosition: Position2D;
   scale: number;
+  onSelect: Function;
+  annotation: Annotation;
+  annotationIndex: number;
+  selected: boolean;
   visible?: boolean;
   dispatch: any;
   // instanceID: number;

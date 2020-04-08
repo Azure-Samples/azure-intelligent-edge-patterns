@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
@@ -114,6 +114,7 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
 
 const CapturedImagesContainer = (): JSX.Element => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const { capturedImages } = useSelector<State, Part>((state) => state.part);
 
   useEffect(() => {
@@ -132,9 +133,14 @@ const CapturedImagesContainer = (): JSX.Element => {
         ))}
       </Flex>
       <Flex hAlign="end">
-        <Link to="/label">
-          <Button primary content="Label" disabled={capturedImages.length > 0} />
-        </Link>
+        <Button
+          primary
+          content="Label"
+          disabled={capturedImages.length === 0}
+          onClick={(): void => {
+            history.push('/label');
+          }}
+        />
       </Flex>
     </Flex>
   );
