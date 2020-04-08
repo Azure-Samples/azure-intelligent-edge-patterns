@@ -1,4 +1,4 @@
-#
+
 
 param(
     [Parameter(Mandatory=$true)]
@@ -36,46 +36,72 @@ param(
 
 $nicObject = Get-AzureRmResource -ResourceId $resourceJSON.Properties.networkProfile.networkInterfaces.id
 
-$location = "$($resourceJSON.Location)"
-$virtualMachineName = "$($resourceJSON.Name)"
-$virtualMachineSize = "$($resourceJSON.Properties.hardwareProfile.vmSize)"
-$adminUsername = "$($resourceJSON.Properties.osProfile.adminUsername)"
-$publisher = "$($resourceJSON.Properties.storageProfile.imageReference.publisher)"
-$offer = "$($resourceJSON.Properties.storageProfile.imageReference.offer)"
-$sku = "$($resourceJSON.Properties.storageProfile.imageReference.sku)"
-$version = "$($resourceJSON.Properties.storageProfile.imageReference.version)"
-$createOption = "$($resourceJSON.Properties.storageProfile.osDisk.createOption)"
-$storageAccountType = "$($resourceJSON.Properties.storageProfile.osDisk.managedDisk.storageAccountType)"
-$datadisk_name = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.name) -join {", "})""]"
-$datadisk_diskSizeGB = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.diskSizeGB) -join {", "})""]"
-$datadisk_lun = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.lun) -join {", "})""]"
-$datadisk_createOption = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.createOption) -join {", "})""]"
-$networkInterfaceName = "$($nicObject.Name)"
-$ipConfigurations_Name = "$($nicObject.Properties.ipConfigurations.name)"
-$subnetId = "$($nicObject.Properties.ipConfigurations.properties.subnet.id)"
-$ipConfigurations_privateIPAllocationMethod = "$($nicObject.Properties.ipConfigurations.properties.privateIPAllocationMethod)"
-$ipConfigurations_privateIPAddress = "$($nicObject.Properties.ipConfigurations.properties.privateIPAddress)"
-$ipConfigurations_privateIPAddressVersion = "$($nicObject.Properties.ipConfigurations.properties.privateIPAddressVersion)"
-$availabilitySetId = $resourceJSON.Properties.availabilitySet.id
-$bootDiagnostics_storageUri = $resourceJSON.Properties.diagnosticsProfile.bootDiagnostics.storageUri
-$nsgId = $nicObject.Properties.networkSecurityGroup.id
-$publicIpId = $nicObject.Properties.ipConfigurations.properties.publicIPAddress.id
+[string]$location = "$($resourceJSON.Location)"
+[string]$virtualMachineName = "$($resourceJSON.Name)"
+[string]$virtualMachineSize = "$($resourceJSON.Properties.hardwareProfile.vmSize)"
+[string]$adminUsername = "$($resourceJSON.Properties.osProfile.adminUsername)"
+[string]$publisher = "$($resourceJSON.Properties.storageProfile.imageReference.publisher)"
+[string]$offer = "$($resourceJSON.Properties.storageProfile.imageReference.offer)"
+[string]$sku = "$($resourceJSON.Properties.storageProfile.imageReference.sku)"
+[string]$version = "$($resourceJSON.Properties.storageProfile.imageReference.version)"
+[string]$createOption = "$($resourceJSON.Properties.storageProfile.osDisk.createOption)"
+[string]$storageAccountType = "$($resourceJSON.Properties.storageProfile.osDisk.managedDisk.storageAccountType)"
+[string]$datadisk_name = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.name) -join {", "})""]"
+[string]$datadisk_diskSizeGB = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.diskSizeGB) -join {", "})""]"
+[string]$datadisk_lun = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.lun) -join {", "})""]"
+[string]$datadisk_createOption = "[""$(($resourceJSON.Properties.storageProfile.dataDisks.createOption) -join {", "})""]"
+[string]$networkInterfaceName = "$($nicObject.Name)"
+[string]$ipConfigurations_Name = "$($nicObject.Properties.ipConfigurations.name)"
+[string]$subnetId = "$($nicObject.Properties.ipConfigurations.properties.subnet.id)"
+[string]$ipConfigurations_privateIPAllocationMethod = "$($nicObject.Properties.ipConfigurations.properties.privateIPAllocationMethod)"
+[string]$ipConfigurations_privateIPAddress = "$($nicObject.Properties.ipConfigurations.properties.privateIPAddress)"
+[string]$ipConfigurations_privateIPAddressVersion = "$($nicObject.Properties.ipConfigurations.properties.privateIPAddressVersion)"
+[string]$availabilitySetId = $resourceJSON.Properties.availabilitySet.id
+[string]$bootDiagnostics_storageUri = $resourceJSON.Properties.diagnosticsProfile.bootDiagnostics.storageUri
+[string]$nsgId = $nicObject.Properties.networkSecurityGroup.id
+[string]$publicIpId = $nicObject.Properties.ipConfigurations.properties.publicIPAddress.id
 
-#check storageAccountType, if source uses unmanaged disks this will not properly populate
-#if that's the case we fix it here
+#check storageAccountType, if the source VM is Powered Off, or if it uses unmanaged disks this will be Null 
+#if that's the case, we fix it here
 if(!$storageAccountType){
+  #Unmanaged Disk
   $vhdUri = $resourceJSON.Properties.storageProfile.osDisk.vhd.uri
-  $vhdName = $vhdUri.Substring(8, $vhdUri.IndexOf(".") - 8)
-  $osDiskStorageAccount = Get-AzureRmStorageAccount -ResourceGroupName $resourceJSON.ResourceGroupName -Name $vhdName
-  $storageAccountType = $osDiskStorageAccount.Sku.Name.ToString()
+  if($vhdUri){
+    $osDiskStorageAccountName = $vhdUri.Substring(8, $vhdUri.IndexOf(".") - 8)
+    $osDiskStorageAccountRG = (Get-AzureRmStorageAccount | Where-Object { $PSItem.StorageAccountName -eq $osDiskStorageAccountName }).ResourceGroupName
+    $osDiskStorageAccount = Get-AzureRmStorageAccount -ResourceGroupName $osDiskStorageAccountRG -Name $osDiskStorageAccountName
+    [string]$storageAccountType = $osDiskStorageAccount.Sku.Name.ToString()
+  } else {
+    #Powered Off VM (with Managed OS Disk)
+    $osDiskName = $resourceJSON.Properties.StorageProfile.OsDisk.Name
+    $osDiskResourceID = $resourceJSON.Properties.StorageProfile.OsDisk.ManagedDisk.Id
+    $OsDiskResourceGroup = ($osDiskResourceID.Split("/"))[4]
+    [string]$storageAccountType = (Get-AzureRmDisk -Name $osDiskName -ResourceGroupName $OsDiskResourceGroup).Sku.Name
+  }
+  #Insert an underscore "_" in the storageAccountType if missing, include error checking for length
   if(!($storageAccountType -like "*_*")){
-    $storageAccountType = $storageAccountType.Insert($storageAccountType.Length - 3, "_")
+    if($storageAccountType.Length -ge 8){
+      [string]$storageAccountType = $storageAccountType.Insert($storageAccountType.Length - 3, "_")
+    } else {
+      Write-Error "Invalid Storage Account Type data retrieved for VM $($virtualMachineName)"
+    }
   }
 }
 
-#clean up values
+#if data disks exist, check the size property in case the VM is Powered Off (Managed Disks)
+if($datadisk_name){
+  #check if the '$datadisk_diskSizeGB' is null, if so, loop for each object to get the size
+  if(!($datadisk_diskSizeGB -match '[0-9]')){
+    [array]$datadisk_sizes = @()
+    foreach($datadisk in $resourceJSON.Properties.storageProfile.dataDisks.name){
+      [array]$datadisk_sizes += (Get-AzureRMDisk | Where-Object {$PSItem.Name -eq $datadisk} | Select-Object DiskSizeGB)
+    }
+    [string]$datadisk_diskSizeGB = "[""$(($datadisk_sizes.DiskSizeGB) -join {", "})""]"
+  }
+}
+#set the data disk "createOption" property to Empty
 if($datadisk_createOption){
-  $datadisk_createOption = $datadisk_createOption.Replace("Attach", "Empty")
+  [string]$datadisk_createOption = $datadisk_createOption.Replace("Attach", "Empty")
 }
 
 #special case

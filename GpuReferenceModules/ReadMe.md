@@ -20,7 +20,7 @@ Before you begin, make sure you have:
       - An Azure Container Registry (ACR)
           - **Make a note of the ACR login server, username, and
             password**
-  - A camera that presents an HTTP or RTSP endpoint for getting images.
+
   - The following development resources:
       - Azure CLI 2.0   
       - Docker CE 
