@@ -1,16 +1,12 @@
 import React, { FC, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Flex, Text, Image, FlexItem, Input, TextArea, Button } from '@fluentui/react-northstar';
-
-type LocationRegisterInput = {
-  locationName: string;
-  coordinates: string;
-  description: string;
-};
+import { Location } from '../store/location/locationTypes';
+import { postLocation } from '../store/location/locationActions';
 
 const LocationRegister: FC = () => {
   const dispatch = useDispatch();
-  const [locationRegisterInput, setLocationRegisterInput] = useState<LocationRegisterInput>({
+  const [locationRegisterInput, setLocationRegisterInput] = useState<Location>({
     locationName: '',
     coordinates: '',
     description: '',
@@ -55,7 +51,9 @@ const LocationRegister: FC = () => {
         <Button
           primary
           disabled={Object.values(locationRegisterInput).some((value) => value.length === 0)}
-          onClick={(): void => {}}
+          onClick={(): void => {
+            dispatch(postLocation(locationRegisterInput));
+          }}
           content="Save"
         />
         <Button content="Cancel" />
