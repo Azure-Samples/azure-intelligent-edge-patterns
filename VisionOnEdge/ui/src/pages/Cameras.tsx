@@ -21,9 +21,9 @@ const Cameras: FC = (): JSX.Element => {
       </FlexItem>
       <Grid columns="8">
         {cameras.map((camera, i) => (
-          <Flex key={i} column styles={{ maxWidth: '300px' }}>
+          <Flex key={i} column styles={{ maxWidth: '300px', padding: '20px' }}>
             <Link to={`/cameras/${camera.name}`}>
-              <Image src="/defalutCamera.png" fluid />
+              <Image src="/defaultCamera.png" fluid />
             </Link>
             <Text size="larger" align="center">
               {camera.name}
