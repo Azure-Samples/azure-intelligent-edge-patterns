@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
@@ -114,6 +114,7 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
 
 const CapturedImagesContainer = (): JSX.Element => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const { capturedImages } = useSelector<State, Part>((state) => state.part);
 
   useEffect(() => {
@@ -121,14 +122,26 @@ const CapturedImagesContainer = (): JSX.Element => {
   }, [dispatch]);
 
   return (
-    <Flex
-      styles={{ overflow: 'scroll', border: '1px solid grey', height: '150px' }}
-      gap="gap.small"
-      vAlign="center"
-    >
-      {capturedImages.map((src) => (
-        <Image key={src} src={src} design={{ maxWidth: '150px' }} />
-      ))}
+    <Flex column gap="gap.small">
+      <Flex
+        styles={{ overflow: 'scroll', border: '1px solid grey', height: '150px' }}
+        gap="gap.small"
+        vAlign="center"
+      >
+        {capturedImages.map((src) => (
+          <Image key={src} src={src} design={{ maxWidth: '150px' }} />
+        ))}
+      </Flex>
+      <Flex hAlign="end">
+        <Button
+          primary
+          content="Label"
+          disabled={capturedImages.length === 0}
+          onClick={(): void => {
+            history.push('/label');
+          }}
+        />
+      </Flex>
     </Flex>
   );
 };
