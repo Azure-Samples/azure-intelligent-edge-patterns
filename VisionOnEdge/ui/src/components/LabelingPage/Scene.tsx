@@ -6,9 +6,13 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
 import { Box2d } from './Box';
-import { Size2D, Annotation, Position2D, WorkState } from './types';
+import { Size2D, Annotation, Position2D, WorkState } from '../../store/labelingPage/labelingPageTypes';
 import { State } from '../../store/State';
-import { createAnnotation, updateCreatingAnnotation, removeAnnotation } from '../../actions/labelingPage';
+import {
+  createAnnotation,
+  updateCreatingAnnotation,
+  removeAnnotation,
+} from '../../store/labelingPage/labelingPageActions';
 
 interface SceneProps {
   url?: string;

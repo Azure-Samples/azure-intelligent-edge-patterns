@@ -5,7 +5,7 @@ import { Text, Flex, Button, Dialog, Input, Image, Icon, FlexItem, Grid } from '
 
 import { useCameras } from '../hooks/useCameras';
 import { Camera } from '../store/camera/cameraTypes';
-import { postCameras } from '../store/camera/cameraActions';
+import { postCamera } from '../store/camera/cameraActions';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
@@ -45,7 +45,7 @@ const Cameras: FC = (): JSX.Element => {
         }
         confirmButton="Submit"
         onConfirm={(): void => {
-          dispatch(postCameras(cameraInput));
+          dispatch(postCamera(cameraInput));
         }}
         cancelButton="Cancel"
         header="Add Camera"

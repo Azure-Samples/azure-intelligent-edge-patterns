@@ -1,10 +1,21 @@
-import { Annotation, AnnotationState, BoxObject, Position2D } from '../components/LabelingPage/types';
-
-// * Request Operation
-export const REQUEST_ANNOTATION_FAILURE = 'REQUEST_ANNOTATION_FAILURE';
-type RequestAnnotationSuccessAction = { type: typeof REQUEST_ANNOTATION_SUCCESS; payload: any };
-export const REQUEST_ANNOTATION_SUCCESS = 'REQUEST_ANNOTATION_SUCCESS';
-type RequestAnnotationFailureAction = { type: typeof REQUEST_ANNOTATION_FAILURE };
+import {
+  Annotation,
+  AnnotationState,
+  BoxObject,
+  Position2D,
+  REQUEST_ANNOTATION_FAILURE,
+  REQUEST_ANNOTATION_SUCCESS,
+  REMOVE_ANNOTATION,
+  CREATE_ANNOTATION,
+  UPDATE_CREATING_ANNOTATION,
+  UPDATE_ANNOTATION,
+  RequestAnnotationSuccessAction,
+  RequestAnnotationFailureAction,
+  CreateAnnotationAction,
+  UpdateAnnotationAction,
+  UpdateCreatingAnnotationAction,
+  RemoveAnnotationAction,
+} from './labelingPageTypes';
 
 const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotationSuccessAction => ({
   type: REQUEST_ANNOTATION_SUCCESS,
@@ -50,25 +61,6 @@ export const postAnnotations = (annotations: Annotation[]) => (dispatch): Promis
     });
 };
 
-// * Store Operation
-export const CREATE_ANNOTATION = 'CREATE_ANNOTATION';
-type CreateAnnotationAction = { type: typeof CREATE_ANNOTATION; payload: { annotation: Annotation } };
-export const UPDATE_CREATING_ANNOTATION = 'UPDATE_CREATING_ANNOTATION';
-type UpdateCreatingAnnotationAction = {
-  type: typeof UPDATE_CREATING_ANNOTATION;
-  payload: { updater: (annotation: Annotation) => Annotation };
-};
-export const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
-type UpdateAnnotationAction = {
-  type: typeof UPDATE_ANNOTATION;
-  payload: { annotation: Annotation; index: number };
-};
-export const REMOVE_ANNOTATION = 'REMOVE_ANNOTATION';
-type RemoveAnnotationAction = {
-  type: typeof REMOVE_ANNOTATION;
-  payload: { index: number };
-};
-
 export const createAnnotation = (pos: Position2D): CreateAnnotationAction => {
   const annotation = BoxObj.createWithPoint(pos, '');
   return {
@@ -94,14 +86,6 @@ export const removeAnnotation = (index: number = null): RemoveAnnotationAction =
   type: REMOVE_ANNOTATION,
   payload: { index },
 });
-
-export type AnnotationAction =
-  | RequestAnnotationSuccessAction
-  | RequestAnnotationFailureAction
-  | CreateAnnotationAction
-  | UpdateCreatingAnnotationAction
-  | UpdateAnnotationAction
-  | RemoveAnnotationAction;
 
 // * Annotation Functions
 export const BoxObj: BoxObject = {

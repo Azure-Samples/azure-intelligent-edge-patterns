@@ -6,9 +6,9 @@ import {
   UPDATE_CREATING_ANNOTATION,
   REMOVE_ANNOTATION,
   AnnotationAction,
-} from '../actions/labelingPage';
-import { initialState, LabelingPageState } from '../store/State';
-import { AnnotationState } from '../components/LabelingPage/types';
+} from './labelingPageActions';
+import { initialState, LabelingPageState } from '../State';
+import { AnnotationState } from './labelingPageTypes';
 
 const labelingPageStateReducer = (
   state = initialState.labelingPageState,

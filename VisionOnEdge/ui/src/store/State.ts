@@ -1,4 +1,4 @@
-import { Annotation } from '../components/LabelingPage/types';
+import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
 import { Part } from './part/partTypes';
 
