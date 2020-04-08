@@ -4,10 +4,14 @@ import Cameras from '../pages/Cameras';
 import CameraDetails from '../pages/CameraDetails';
 import { Parts } from '../pages/Parts';
 import LabelingPage from '../pages/LabelingPage';
+import Location from '../pages/Location';
+import LocationRegister from '../pages/LocationRegister';
 
 export const RootRouter: React.FC = () => {
   return (
     <Switch>
+      <Route path="/location/register" component={LocationRegister} />
+      <Route path="/location" component={Location} />
       <Route path="/label" component={LabelingPage} />
       <Route path="/cameras/:name" component={CameraDetails} />
       <Route path="/cameras" component={Cameras} />
