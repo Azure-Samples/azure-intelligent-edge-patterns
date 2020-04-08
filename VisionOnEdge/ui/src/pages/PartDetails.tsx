@@ -3,7 +3,7 @@ import { Flex, Input, TextArea, Button, Menu, Grid } from '@fluentui/react-north
 import { Link, useLocation, Switch, Route, Redirect } from 'react-router-dom';
 import { CapturePhotos } from '../components/CapturePhoto';
 
-export const Parts = (): JSX.Element => {
+export const PartDetails = (): JSX.Element => {
   return (
     <Grid columns={'repeat(12, 1fr)'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       <LeftPanel />
