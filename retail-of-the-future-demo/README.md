@@ -9,6 +9,14 @@ The demo consists of the containers deployed on Azure Stack Edge performing:
 * Distributed people counters
 * Out-of-stock (empty shelf space) detection
 
+![Ignite Retail Architecture Diagram](imgs/Architecture-Diagram.jpg)
+
+
+## Setup Instructions
+Please see [this guide](setup_instructions.md) for detailed instructions on setting up this solution.
+
+## Other useful resources
+
 For instructions on deploying these containers please see [Container Readme](IgniteSolution/README.md).
 
 The UX used at Ignite is a consolidated application separated into several views enabling:

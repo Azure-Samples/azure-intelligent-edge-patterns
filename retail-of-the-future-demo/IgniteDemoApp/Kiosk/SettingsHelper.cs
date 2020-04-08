@@ -327,6 +327,12 @@ namespace IntelligentKioskSample
                 this.DetectionDelay = value.ToString();
             }
 
+            value = ApplicationData.Current.RoamingSettings.Values["EyeTracker"];
+            if (value != null)
+            {
+                this.EyeTracker = value.ToString();
+            }
+
             value = ApplicationData.Current.RoamingSettings.Values["MinDetectableFaceCoveragePercentage"];
             if (value != null)
             {
@@ -544,6 +550,17 @@ namespace IntelligentKioskSample
             {
                 this.detectionDelay = value;
                 this.OnSettingChanged("DetectionDelay", value);
+            }
+        }
+
+        private string eyeTracker = string.Empty;
+        public string EyeTracker
+        {
+            get { return this.eyeTracker; }
+            set
+            {
+                this.eyeTracker = value;
+                this.OnSettingChanged("EyeTracker", value);
             }
         }
 

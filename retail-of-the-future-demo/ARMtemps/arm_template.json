@@ -1,0 +1,3410 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "aadTenantId": {
+            "type": "string",
+            "defaultValue": "fakevalue",
+            "metadata": {
+                "description": "The AAD tenant identifier (GUID)"
+            }
+        },
+        "dataBoxEdgeDevices_dbe_test_name": {
+            "defaultValue": "retailASE",
+            "type": "String"
+        },
+        "streamingjobs_StreamingJob_Arrivals_name": {
+            "defaultValue": "StreamingJob-Arrivals",
+            "type": "String"
+        },
+        "solutionName": {
+            "type": "string",
+            "defaultValue": "igniteshelf",
+            "metadata": {
+                "description": "The name of the solution"
+            }
+        },
+        "uniqueID": {
+            "type": "string",
+            "defaultValue": "[take(uniqueString(subscription().subscriptionId, resourceGroup().id, parameters('solutionName')), 5)]"
+        },
+        "sites_FunctionAppArrivals_name": {
+            "defaultValue": "[concat('FunctionAppArrivals-', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "components_FunctionAppArrivals_name": {
+            "defaultValue": "FunctionAppArrivals",
+            "type": "String"
+        },
+        "serverfarms_EastUS2Plan_name": {
+            "defaultValue": "EastUS2Plan",
+            "type": "String"
+        },
+        "documentDBName": {
+            "type": "string",
+            "defaultValue": "[concat(parameters('uniqueID'), '-documentdb')]",
+            "metadata": {
+                "description": "The name of the documentDB"
+            }
+        },
+        "docDBConsistencyLevel": {
+            "type": "string",
+            "allowedValues": [
+                "Strong",
+                "BoundedStaleness",
+                "Session",
+                "ConsistentPrefix",
+                "Eventual"
+            ],
+            "defaultValue": "Strong",
+            "metadata": {
+                "description": "The documentDB deault consistency level for this account."
+            }
+        },
+        "docDBMaxStalenessPrefix": {
+            "type": "int",
+            "minValue": 10,
+            "maxValue": 1000,
+            "defaultValue": 10,
+            "metadata": {
+                "description": "When documentDB consistencyLevel is set to BoundedStaleness, then this value is required, else it can be ignored."
+            }
+        },
+        "docDBMaxIntervalInSeconds": {
+            "type": "int",
+            "minValue": 5,
+            "maxValue": 600,
+            "defaultValue": 5,
+            "metadata": {
+                "description": "When documentDB consistencyLevel is set to BoundedStaleness, then this value is required, else it can be ignored."
+            }
+        },
+        "eventHubName": {
+            "type": "string",
+            "defaultValue": "[concat('eventhub-', parameters('uniqueID'))]", 
+            "metadata": {
+                "description": "The name of the Event Hub"
+            }
+        },
+        "eventHubRetentionInDays": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The event hub message retention in days"
+            }
+        },
+        "eventHubPartitionCount": {
+            "type": "int",
+            "defaultValue": 2,
+            "metadata": {
+                "description": "The event hub partition count"
+            }
+        },
+        "eventHubNamespaceName": {
+            "type": "string",
+            "defaultValue": "[concat('eventhubnamespace-', parameters('uniqueID'))]", 
+            "metadata": {
+                "description": "The name of the Event Hub"
+            }
+        },
+        "eventHubSkuTier": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic", "Standard"
+            ],
+            "metadata": {
+                "description": "The Azure Event Hub SKU Tier"
+            }
+        },
+        "eventHubSkuCapacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The Azure Event Hub SKU Capacity"
+            }
+        },
+        "eventHubAuthorizationName": {
+            "type": "string",
+            "defaultValue": "[concat('iothubroutes-', parameters('iotHubName'))]",
+            "metadata": {
+                "description": "Authorization Rule Name for Event Hub endpoint in Iot Hub"
+            }
+        },
+        "actionsEventHubName": {
+            "type": "string",
+            "defaultValue": "[concat('actions-eventhub-', parameters('uniqueID'))]",
+            "metadata": {
+                "description": "The name of the Event Hub for actions"
+            }
+        },
+        "actionsEventHubAuthorizationName": {
+            "type": "string",
+            "defaultValue": "[concat('streamAnalytics-', parameters('actionsEventHubName'))]",
+            "metadata": {
+                "description": "Authorization Rule Name for Event Hub endpoint in Stream Analytics"
+            }
+        },
+        "serviceBusEndpointSuffix": {
+            "type": "string",
+            "defaultValue": "servicebus.windows.net",
+            "allowedValues": [
+                "servicebus.windows.net",
+                "servicebus.chinacloudapi.cn"
+            ],
+            "metadata": {
+                "description": "Suffix added to Service Bus endpoint"
+            }
+        },
+        "iotHubName": {
+            "type": "string",
+            "defaultValue": "[concat(parameters('uniqueID'), '-hub')]",
+            "metadata": {
+                "description": "The name of Azure IoT Hub"
+            }
+        },
+        "iotHubSku": {
+            "type": "string",
+            "defaultValue": "S2",
+            "metadata": {
+                "description": "The Azure IoT Hub SKU"
+            }
+        },
+        "iotHubTier": {
+            "type": "string",
+            "defaultValue": "Standard",
+            "metadata": {
+                "description": "The Azure IoT Hub tier"
+            }
+        },
+        "provisioningServiceLocation": {
+            "type": "string",
+            "defaultValue": "westus",
+            "allowedValues": [
+                "eastus",
+                "westus",
+                "northeurope",
+                "westeurope",
+                "eastasia",
+                "southeastasia"
+            ],
+            "metadata": {
+                "description": "The location which supports Device Provisioning Service resource"
+            }
+        },
+        "provisioningServiceName": {
+            "type": "string",
+            "defaultValue": "[concat('dps-', parameters('uniqueID'))]",
+            "metadata": {
+                "description": "The name of Azure IoT Hub Device Provisioning Service"
+            }
+        },
+        "provisioningServiceSku": {
+            "type": "string",
+            "defaultValue": "S1",
+            "allowedValues": [
+                "S1"
+            ],
+            "metadata": {
+                "description": "The Azure IoT Hub Device Provisioning Service SKU"
+            }
+        },
+        "streamingJobsName": {
+            "type": "string",
+            "defaultValue": "[concat('streamingjobs-', parameters('uniqueID'))]",
+            "metadata": {
+                "description": "The name of Azure StreamingJobs"
+            }
+        },
+        "streamingJobsEventsOutOfOrderPolicy": {
+            "type": "string",
+            "defaultValue": "Adjust",
+            "allowedValues": [
+                "Adjust",
+                "Drop"
+            ],
+            "metadata": {
+                "description": "Events that arrive outside the delay window will be dropped or adjusted based on the value selected"
+            }
+        },
+        "streamingJobsInputContainerName": {
+            "type": "string",
+            "defaultValue": "referenceinput",
+            "metadata": {
+                "description": "The container name of reference input for the streamingjobs"
+            }
+        },
+        "numberOfStreamingUnits": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 48,
+            "defaultValue": 3,
+            "allowedValues": [
+              1, 3, 6, 12, 18, 24, 30, 36, 42, 48
+            ],
+            "metadata": {
+                "description": "Number of Streaming Units"
+              }
+        },
+        "servicePrincipalSecret": {
+            "metadata": {
+                "description": "The Service Principal Client Secret."
+            },
+            "type": "securestring",
+            "defaultValue": "n/a"
+        },
+        "pcsReleaseVersion": {
+            "type": "string",
+            "defaultValue": "2.2.0",
+            "metadata": {
+                "description": "The release version is used for repoURL for reverse-proxy-dotnet and vmScriptUri"
+            }
+        },
+        "azureWebsiteName": {
+            "type": "string",
+            "defaultValue": "[concat('ignite', parameters('uniqueID'))]",
+            "metadata": {
+                "description": "The name of the azure website that you want to create. It will be of format {azureWebsiteName}.azurewebsites.net"
+            }
+        },
+        "remoteEndpointSSLThumbprint": {
+            "type": "securestring",
+            "metadata": {
+                "description": "This is the thumbprint of the HTTPS SSL Certificate"
+            },
+            "defaultValue": "secretkey"
+        },
+        "storageName": {
+            "type": "string",
+            "defaultValue": "[concat(parameters('uniqueID'), 'storage')]",
+            "metadata": {
+                "description": "The name of the storageAccount"
+            }
+        },
+        "storageSkuName": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "The storage SKU name"
+            }
+        },
+        "storageEndpointSuffix": {
+            "type": "string",
+            "defaultValue": "core.windows.net",
+            "allowedValues": [
+                "core.windows.net",
+                "core.chinacloudapi.cn",
+                "core.cloudapi.de"
+            ],
+            "metadata": {
+                "description": "Suffix added to Azure Storage hostname"
+            }
+        },
+        "telemetryStorageType": {
+            "type": "string",
+            "defaultValue": "cosmosdb",
+            "allowedValues": [
+                "cosmosdb",
+                "tsi"
+            ],
+            "metadata": {
+                "description": "Storage type for telemetry messages, supports TSI and CosmosDb"
+            }
+        },
+        "tsiEnvironmentName": {
+            "type": "string",
+            "defaultValue": "[concat('tsi-', parameters('uniqueID'))]",
+            "metadata": {
+                "description": "TSI environment name"
+            }
+        },
+        "tsiEnvironmentDataRetentionTime": {
+            "type": "string",
+            "defaultValue": "P180D",
+            "metadata": {
+                "description": "The minimum timespan the environment’s events will be available for query. The value must be specified in the ISO 8601 format, e.g. \"P180D\" for a retention policy of 180 days."
+            }
+        },
+        "tsiEventSourceTimestampPropertyName": {
+            "type": "string",
+            "defaultValue": "",
+            "maxLength": 90,
+            "metadata": {
+                "description": "The event property that will be used as the event source's timestamp. If a value isn't specified for timestampPropertyName, or if null or empty-string is specified, the event creation time will be used."
+            }
+        },
+        "userPrincipalObjectId": {
+            "type": "string",
+            "defaultValue": "fakevalue",
+            "metadata": {
+                "description": "Object Id of the AAD user that will have access to the environment. Available from the Get-AzureRMADUser or the Get-AzureRMADServicePrincipal cmdlets"
+            }
+        },
+        "aadClientServicePrincipalId": {
+            "type": "string",
+            "defaultValue": "fakevalue",
+            "metadata": {
+                "description": "Service principal Id of the AAD application that will have access to the environment. Available from the Get-AzureRMADServicePrincipal cmdlets"
+            }
+        },
+        "azurePortalUrl": {
+            "type": "string",
+            "defaultValue": "https://portal.azure.com",
+            "metadata": {
+                "description": "Azure portal url"
+            }
+        },
+        "workspaces_shelfgaplogs_name": {
+            "type": "string",
+            "defaultValue": "[concat('shelfgaplogs-', parameters('uniqueID'))]" 
+        },
+        "networkSecurityGroups_IgniteShelf_nsg_name": {
+            "defaultValue": "IgniteShelf-nsg",
+            "type": "String"
+        },
+        "virtualMachines_vm_235un_name": {
+            "defaultValue": "[concat('vm-235un-', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "networkInterfaces_IgniteShelf_nic_name": {
+            "defaultValue": "IgniteShelf-nic",
+            "type": "String"
+        },
+        "virtualNetworks_IgniteShelf_vnet_name": {
+            "defaultValue": "IgniteShelf-vnet",
+            "type": "String"
+        },
+        "networkInterfaces_iotedge10_name": {
+            "defaultValue": "iotedge10",
+            "type": "String"
+        },
+        "publicIPAddresses_iotedge_ip_name": {
+            "defaultValue": "iotedge-ip",
+            "type": "String"
+        },
+        "registries_ignitecr_name": {
+            "defaultValue": "[concat('ignitecr', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "databaseAccounts_facedbedb_name": {
+            "defaultValue": "[concat('facedbedb-', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "storageAccounts_storagedbeface_name": {
+            "defaultValue": "[concat('storagedbeface', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "networkInterfaces_ignite_dev524_name": {
+            "defaultValue": "ignite-dev524",
+            "type": "String"
+        },
+        "publicIPAddresses_ignite_dev_ip_name": {
+            "defaultValue": "ignite-dev-ip",
+            "type": "String"
+        },
+        "virtualNetworks_ignitedemo_vnet_name": {
+            "defaultValue": "ignitedemo-vnet",
+            "type": "String"
+        },
+        "networkSecurityGroups_iotedge_nsg_name": {
+            "defaultValue": "iotedge-nsg",
+            "type": "String"
+        },
+        "virtualNetworks_ignitedemovnet501_name": {
+            "defaultValue": "ignitedemovnet501",
+            "type": "String"
+        },
+        "virtualNetworks_ignitedemovnet906_name": {
+            "defaultValue": "ignitedemovnet906",
+            "type": "String"
+        },
+        "storageAccounts_ignitedemodiag301_name": {
+            "defaultValue": "[concat('ignitedemodiag301', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "storageAccounts_ignitedemodiag474_name": {
+            "defaultValue": "[concat('ignitedemodiag474', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "storageAccounts_ignitedemodiag493_name": {
+            "defaultValue": "[concat('ignitedemodiag493', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "accounts_ignitedemo_face_name": {
+            "defaultValue": "[concat(parameters('uniqueID'), '-face')]",
+            "type": "String"
+        },
+        "accounts_ignitedemo_luis_name": {
+            "defaultValue": "[concat('ignitedemo-luis-', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "accounts_ignitedemo_speech_name": {
+            "defaultValue": "ignitedemo-speech",
+            "type": "String"
+        },
+        "networkSecurityGroups_ignite_dev_nsg_name": {
+            "defaultValue": "ignite-dev-nsg",
+            "type": "String"
+        },
+        "accounts_ignitedemo_luisauthoring_name": {
+            "defaultValue": "[concat('ignitedemo-luisauthoring-', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "accounts_ignitedemo_luis_Authoring_name": {
+            "defaultValue": "[concat('ignitedemo-luis-Authoring-', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "accounts_ignitedemo_cognitiveservices_name": {
+            "defaultValue": "ignitedemo-cognitiveservices",
+            "type": "String"
+        },
+        "smartdetectoralertrules_failure_anomalies___ignitedemoapp_name": {
+            "defaultValue": "failure anomalies - ignitedemoapp",
+            "type": "String"
+        },
+        "sites_ignitedemoappupdate_name": {
+            "defaultValue": "[concat('demoappupdate', parameters('uniqueID'))]" ,
+            "type": "String"
+        },
+        "serverfarms_ASP_ignitedemo_a762_name": {
+            "defaultValue": "ASP-ignitedemo-a762",
+            "type": "String"
+        },
+        "components_ignitedemoappupdate_name": {
+            "defaultValue": "ignitedemoappupdate",
+            "type": "String"
+        },
+        "components_ignitedemoapp_externalid": {
+            "defaultValue": "/subscriptions/1978aaea-b65a-481a-84c1-2cc217cbca60/resourceGroups/ignitedemo/providers/microsoft.insights/components/ignitedemoapp",
+            "type": "String"
+        },
+        "actiongroups_application_20insights_20smart_20detection_externalid": {
+            "defaultValue": "/subscriptions/1978aaea-b65a-481a-84c1-2cc217cbca60/resourceGroups/ignitedemo/providers/microsoft.insights/actiongroups/application%20insights%20smart%20detection",
+            "type": "String"
+        },
+
+        "servers_igniteretaildemo_name": {
+
+        "type": "string",
+
+        "defaultValue": "[concat('igniteretaildemo-', parameters('uniqueID'))]",
+
+        "metadata": {
+
+            "description": "The name of the primary SQL Server."
+            }
+        },
+
+        "username": {
+
+        "type": "string"
+
+        },
+
+        "password": {
+
+        "type": "securestring"
+        
+        },
+        
+        "location": {
+
+        "type": "string",
+
+        "defaultValue": "westus",
+
+        "metadata": {
+
+            "description": "Location for all resources."
+
+            }
+
+        }
+    },
+    "variables": {
+        "documentDBApiVersion": "2015-04-08",
+        "documentDBResourceId": "[resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('documentDBName'))]",
+        "eventHubApiVersion": "2017-04-01",
+        "eventHubKeyName": "RootManageSharedAccessKey",
+        "eventHubKeyResourceId": "[resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', parameters('eventHubNamespaceName'), variables('eventHubKeyName'))]",
+        "eventHubNamespaceResourceId": "[resourceId('Microsoft.EventHub/namespaces', parameters('eventHubNamespaceName'))]",
+        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('eventHubNamespaceName'), parameters('eventHubName'))]",
+        "eventHubRouteKeyResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs/AuthorizationRules', parameters('eventHubNamespaceName'), parameters('eventHubName'), parameters('eventHubAuthorizationName'))]",
+        "actionsEventHubKeyName": "RootManageSharedAccessKey",
+        "actionsEventHubKeyResourceId": "[resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', parameters('eventHubNamespaceName'), variables('actionsEventHubKeyName'))]",
+        "actionsEventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('eventHubNamespaceName'), parameters('actionsEventHubName'))]",
+        "actionsEventHubAuthorizationResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', parameters('eventHubNamespaceName'), parameters('actionsEventHubName'), parameters('actionsEventHubAuthorizationName'))]",
+        "iotHubApiVersion": "2019-11-04",
+        "iotHubResourceId": "[resourceId('Microsoft.Devices/Iothubs', parameters('iotHubName'))]",
+        "iotHubKeyName": "iothubowner",
+        "iotHubKeyResource": "[resourceId('Microsoft.Devices/Iothubs/Iothubkeys', parameters('iotHubName'), variables('iotHubKeyName'))]",
+        "iotHubServiceKeyName": "service",
+        "iotHubServiceKeyResource": "[resourceId('Microsoft.Devices/Iothubs/Iothubkeys', parameters('iotHubName'), variables('iotHubServiceKeyName'))]",
+        "iotHubDefaultEndpoint": "events",
+        "provisioningServiceApiVersion": "2017-11-15",
+        "deviceNotificationRouteName": "DeviceNotifications",
+        "streamAnalyticsApiVersion": "2016-03-01",
+        "consumerGroupName": "streamingJobsConsumerGroup",
+        "streamingJobsOutputDBName": "pcs-iothub-stream",
+        "tsiConsumerGroupName": "timeSeriesInsightsConsumerGroup",
+        "tsiEventSourceName": "[parameters('iotHubName')]",
+        "tsiApiVersion": "2018-08-15-preview",
+        "tsiApplicationAccessPolicy": "[concat(parameters('tsiEnvironmentName'), '-application-policy')]",
+        "tsiUserAccessPolicy": "[concat(parameters('tsiEnvironmentName'), '-user-policy')]",
+        "tsiReaderRole": "Reader",
+        "tsiContributorRole": "Contributor",
+        "solutionType": "RemoteMonitoring",
+        "publicIPName": "[concat(parameters('uniqueID'), '-public-ip')]",
+        "domainNameLabel": "[concat('agent-', parameters('uniqueID'))]",
+        "sku": "S1",
+        "workerSize": "0",
+        "repoURL": "https://github.com/Azure/reverse-proxy-dotnet.git",
+        "branch": "[parameters('pcsReleaseVersion')]",
+        "hostingPlanName": "[parameters('azureWebsiteName')]",
+        "storageResourceId": "[resourceId('Microsoft.Storage/storageAccounts/',  parameters('storageName'))]",
+        "storageApiVersion": "2017-06-01",
+        "azureMapsName": "[concat(parameters('uniqueID'), '-map')]",
+        "azureMapsVersion": "2017-01-01-preview",
+        "azureMapsPricingSpec": "S0",
+        "logicAppName": "[concat('logicapp-', parameters('uniqueID'))]",
+        "logicAppApiVersion": "2016-06-01",
+        "logicAppConnectionApiVersion": "2016-06-01",
+        "office365ConnectionName": "office365-connector",
+        "office365ConnectionDisplayName": "Office365 Connector",
+        "office365ConnectionUrl": "[concat(parameters('azurePortalUrl'), '/#@', parameters('aadTenantId'), '/resource/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/connections/', variables('office365ConnectionName'), '/edit' )]",
+        "streamingJobsQuery": {
+            "applyRuleFilterJsUdf": "function main(record) {\n    let ruleFunction = new Function('record', record.__rulefilterjs);\n    return ruleFunction(record);\n}",
+            "flattenMeasurementsJsUdf": "function main(record) {\n\n    let flatRecord = {\n        '__deviceid': record.__deviceid,\n        '__ruleid': record.__ruleid\n    };\n\n    record.measurements.forEach(function (item) {\n        if (item.hasOwnProperty('measurementvalue')) {\n            flatRecord[item.measurementname] = item.measurementvalue;\n        }\n        else {\n            flatRecord[item.measurementname] = {\n                'avg': item.avg,\n                'max': item.max,\n                'min': item.min,\n                'count': item.count\n            };\n        }\n    });\n\n    return flatRecord;\n}",
+            "removeUnusedPropertiesJsUdf": "function main(record) {\n    if (record) {\n        record.IoTHub && delete record.IoTHub;\n        record.PartitionId && delete record.PartitionId;\n        record.EventEnqueuedUtcTime && delete record.EventEnqueuedUtcTime;\n        record.EventProcessedUtcTime && delete record.EventProcessedUtcTime;\n    }\n    return record;\n}",
+            "transformQuery": "WITH TelemetryAndRules AS\n(\n    SELECT\n        T.IotHub.ConnectionDeviceId as __deviceid,\n        T.PartitionId,\n        T.EventEnqueuedUtcTime as __receivedtime,\n        R.Id as __ruleid,\n        R.AggregationWindow,\n        Fields.ArrayValue as MeasurementName,\n        GetRecordPropertyValue(T, Fields.ArrayValue) as MeasurementValue\n    FROM\n        DeviceTelemetry T PARTITION BY PartitionId TIMESTAMP BY T.EventEnqueuedUtcTime\n        JOIN DeviceGroups G ON T.IoTHub.ConnectionDeviceId = G.DeviceId\n        JOIN Rules R ON R.GroupId = G.GroupId\n        CROSS APPLY GetArrayElements(R.Fields) AS Fields\n),\nAggregateMultipleWindows AS (\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        AVG(TR.MeasurementValue),\n        MAX(TR.MeasurementValue),\n        MIN(TR.MeasurementValue),\n        COUNT(TR.MeasurementValue),\n        MAX(DATEDIFF(millisecond, '1970-01-01T00:00:00Z', TR.__receivedtime)) as __lastReceivedTime\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'tumblingwindow1minutes'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        TumblingWindow(minute, 1)\n\n    UNION\n\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        AVG(TR.MeasurementValue),\n        MAX(TR.MeasurementValue),\n        MIN(TR.MeasurementValue),\n        COUNT(TR.MeasurementValue),\n        MAX(DATEDIFF(millisecond, '1970-01-01T00:00:00Z', TR.__receivedtime)) as __lastReceivedTime\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'tumblingwindow5minutes'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        TumblingWindow(minute, 5)\n\n    UNION\n\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        AVG(TR.MeasurementValue),\n        MAX(TR.MeasurementValue),\n        MIN(TR.MeasurementValue),\n        COUNT(TR.MeasurementValue),\n        MAX(DATEDIFF(millisecond, '1970-01-01T00:00:00Z', TR.__receivedtime)) as __lastReceivedTime\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'tumblingwindow10minutes'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        TumblingWindow(minute, 10)\n),\nGroupAggregatedMeasurements AS (\n    SELECT\n        AM.__deviceid,\n        AM.__ruleid,\n        AM.PartitionId,\n        AM.__lastReceivedTime,\n        Collect() AS Measurements\n    FROM\n        AggregateMultipleWindows AM PARTITION BY PartitionId\n    GROUP BY\n        AM.__deviceid,\n        AM.__ruleid,\n        AM.PartitionId,\n        AM.__lastReceivedTime,\n        System.Timestamp\n),\nFlatAggregatedMeasurements AS (\n    SELECT\n        GA.__deviceid,\n        GA.__ruleid,\n        GA.__lastReceivedTime,\n        udf.flattenMeasurements(GA) AS __aggregates\n    FROM\n        GroupAggregatedMeasurements GA PARTITION BY PartitionId\n),\nCombineAggregatedMeasurementsAndRules AS (\n    SELECT\n        FA.__deviceid,\n        FA.__ruleid,\n        FA.__aggregates,\n        FA.__lastReceivedTime,\n        R.Description as __description,\n        R.Severity as __severity,\n        R.Actions as __actions,\n        R.__rulefilterjs as __rulefilterjs\n    FROM\n        FlatAggregatedMeasurements FA PARTITION BY PartitionId\n        JOIN Rules R ON FA.__ruleid = R.Id\n),\nApplyAggregatedRuleFilters AS\n(\n    SELECT\n        CMR.*\n    FROM\n        CombineAggregatedMeasurementsAndRules CMR PARTITION BY PartitionId\n    WHERE TRY_CAST(udf.applyRuleFilter(CMR) AS bigint) = 1\n),\nGroupInstantMeasurements AS (\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.__receivedTime,\n        Collect() AS Measurements\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'instant'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.__receivedTime,\n        System.Timestamp\n),\nFlatInstantMeasurements AS (\n    SELECT\n        GI.__deviceid,\n        GI.__ruleid,\n        GI.__receivedTime,\n        udf.flattenMeasurements(GI) AS __aggregates\n    FROM\n        GroupInstantMeasurements GI PARTITION BY PartitionId\n),\nCombineInstantMeasurementsAndRules as\n(\n    SELECT\n        FI.__deviceid,\n        FI.__ruleid,\n        FI.__receivedtime,\n        FI.__aggregates,\n        R.Description as __description,\n        R.Severity as __severity,\n        R.Actions as __actions,\n        R.__rulefilterjs as __rulefilterjs\n    FROM\n        FlatInstantMeasurements FI PARTITION BY PartitionId\n        JOIN Rules R ON FI.__ruleid = R.Id\n),\nApplyInstantRuleFilters as\n(\n    SELECT\n        CI.*\n    FROM\n        CombineInstantMeasurementsAndRules CI PARTITION BY PartitionId\n    WHERE TRY_CAST(udf.applyRuleFilter(CI) AS bigint) = 1\n),\nCombineAlarms as\n(\n    SELECT\n        1 as [doc.schemaVersion],\n        'alarm' as [doc.schema],\n        'open' as [status],\n        '1Rule-1Device-NMessage' as [logic],\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as created,\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as modified,\n        AA.__description as [rule.description],\n        AA.__severity as [rule.severity],\n        AA.__actions as [rule.actions],\n        AA.__ruleid as [rule.id],\n        AA.__deviceId as [device.id],\n        AA.__aggregates,\n        AA.__lastReceivedTime as [device.msg.received]\n    FROM\n        ApplyAggregatedRuleFilters AA PARTITION BY PartitionId\n\n    UNION\n\n    SELECT\n        1 as [doc.schemaVersion],\n        'alarm' as [doc.schema],\n        'open' as [status],\n        '1Rule-1Device-1Message' as [logic],\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as created,\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as modified,\n        AI.__description as [rule.description],\n        AI.__severity as [rule.severity],\n        AI.__actions as [rule.actions],\n        AI.__ruleid as [rule.id],\n        AI.__deviceId as [device.id],\n        AI.__aggregates,\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', AI.__receivedTime) as [device.msg.received]\n    FROM\n        ApplyInstantRuleFilters AI PARTITION BY PartitionId\n)\n\nSELECT\n    CA.[doc.schemaVersion],\n    CA.[doc.schema],\n    CA.[status],\n    CA.[logic],\n    CA.[created],\n    CA.[modified],\n    CA.[rule.description],\n    CA.[rule.severity],\n    CA.[rule.id],\n    CA.[device.id],\n    CA.[device.msg.received]\nINTO\n    Alarms\nFROM\n    CombineAlarms CA PARTITION BY PartitionId\n\nSELECT\n    CA.[created],\n    CA.[modified],\n    CA.[rule.description],\n    CA.[rule.severity],\n    CA.[rule.id],\n    CA.[rule.actions],\n    CA.[device.id],\n    CA.[device.msg.received]\nINTO\n    Actions\nFROM\n    CombineAlarms CA PARTITION BY __partitionid\nWHERE\n    CA.[rule.actions] IS NOT NULL\n\nSELECT\n        CONCAT(T.IoTHub.ConnectionDeviceId, ';', CAST(DATEDIFF(millisecond, '1970-01-01T00:00:00Z', T.EventEnqueuedUtcTime) AS nvarchar(max))) as id,\n        1 as [doc.schemaVersion],\n        'd2cmessage' as [doc.schema],\n        T.IoTHub.ConnectionDeviceId as [device.id],\n        'device-sensors;v1' as [device.msg.schema],\n        'StreamingJobs' as [data.schema],\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as [device.msg.created],\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', T.EventEnqueuedUtcTime) as [device.msg.received],\n        udf.removeUnusedProperties(T) as Data\nINTO\n    Messages\nFROM\n    DeviceTelemetry T PARTITION BY PartitionId TIMESTAMP BY T.EventEnqueuedUtcTime",
+            "alarmsOnlyQuery": "WITH TelemetryAndRules AS\n(\n    SELECT\n        T.IotHub.ConnectionDeviceId as __deviceid,\n        T.PartitionId,\n        T.EventEnqueuedUtcTime as __receivedtime,\n        R.Id as __ruleid,\n        R.AggregationWindow,\n        Fields.ArrayValue as MeasurementName,\n        GetRecordPropertyValue(T, Fields.ArrayValue) as MeasurementValue\n    FROM\n        DeviceTelemetry T PARTITION BY PartitionId TIMESTAMP BY T.EventEnqueuedUtcTime\n        JOIN DeviceGroups G ON T.IoTHub.ConnectionDeviceId = G.DeviceId\n        JOIN Rules R ON R.GroupId = G.GroupId\n        CROSS APPLY GetArrayElements(R.Fields) AS Fields\n),\nAggregateMultipleWindows AS (\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        AVG(TR.MeasurementValue),\n        MAX(TR.MeasurementValue),\n        MIN(TR.MeasurementValue),\n        COUNT(TR.MeasurementValue),\n        MAX(DATEDIFF(millisecond, '1970-01-01T00:00:00Z', TR.__receivedtime)) as __lastReceivedTime\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'tumblingwindow1minutes'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        TumblingWindow(minute, 1)\n\n    UNION\n\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        AVG(TR.MeasurementValue),\n        MAX(TR.MeasurementValue),\n        MIN(TR.MeasurementValue),\n        COUNT(TR.MeasurementValue),\n        MAX(DATEDIFF(millisecond, '1970-01-01T00:00:00Z', TR.__receivedtime)) as __lastReceivedTime\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'tumblingwindow5minutes'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        TumblingWindow(minute, 5)\n\n    UNION\n\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        AVG(TR.MeasurementValue),\n        MAX(TR.MeasurementValue),\n        MIN(TR.MeasurementValue),\n        COUNT(TR.MeasurementValue),\n        MAX(DATEDIFF(millisecond, '1970-01-01T00:00:00Z', TR.__receivedtime)) as __lastReceivedTime\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'tumblingwindow10minutes'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.MeasurementName,\n        TumblingWindow(minute, 10)\n),\nGroupAggregatedMeasurements AS (\n    SELECT\n        AM.__deviceid,\n        AM.__ruleid,\n        AM.PartitionId,\n        AM.__lastReceivedTime,\n        Collect() AS Measurements\n    FROM\n        AggregateMultipleWindows AM PARTITION BY PartitionId\n    GROUP BY\n        AM.__deviceid,\n        AM.__ruleid,\n        AM.PartitionId,\n        AM.__lastReceivedTime,\n        System.Timestamp\n),\nFlatAggregatedMeasurements AS (\n    SELECT\n        GA.__deviceid,\n        GA.__ruleid,\n        GA.__lastReceivedTime,\n        udf.flattenMeasurements(GA) AS __aggregates\n    FROM\n        GroupAggregatedMeasurements GA PARTITION BY PartitionId\n),\nCombineAggregatedMeasurementsAndRules AS (\n    SELECT\n        FA.__deviceid,\n        FA.__ruleid,\n        FA.__aggregates,\n        FA.__lastReceivedTime,\n        R.Description as __description,\n        R.Severity as __severity,\n        R.Actions as __actions,\n        R.__rulefilterjs as __rulefilterjs\n    FROM\n        FlatAggregatedMeasurements FA PARTITION BY PartitionId\n        JOIN Rules R ON FA.__ruleid = R.Id\n),\nApplyAggregatedRuleFilters AS\n(\n    SELECT\n        CMR.*\n    FROM\n        CombineAggregatedMeasurementsAndRules CMR PARTITION BY PartitionId\n    WHERE TRY_CAST(udf.applyRuleFilter(CMR) AS bigint) = 1\n),\nGroupInstantMeasurements AS (\n    SELECT\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.__receivedTime,\n        Collect() AS Measurements\n    FROM\n        TelemetryAndRules TR PARTITION BY PartitionId\n    WHERE\n        TR.AggregationWindow = 'instant'\n    GROUP BY\n        TR.__deviceid,\n        TR.__ruleid,\n        TR.PartitionId,\n        TR.__receivedTime,\n        System.Timestamp\n),\nFlatInstantMeasurements AS (\n    SELECT\n        GI.__deviceid,\n        GI.__ruleid,\n        GI.__receivedTime,\n        udf.flattenMeasurements(GI) AS __aggregates\n    FROM\n        GroupInstantMeasurements GI PARTITION BY PartitionId\n),\nCombineInstantMeasurementsAndRules as\n(\n    SELECT\n        FI.__deviceid,\n        FI.__ruleid,\n        FI.__receivedtime,\n        FI.__aggregates,\n        R.Description as __description,\n        R.Severity as __severity,\n        R.Actions as __actions,\n        R.__rulefilterjs as __rulefilterjs\n    FROM\n        FlatInstantMeasurements FI PARTITION BY PartitionId\n        JOIN Rules R ON FI.__ruleid = R.Id\n),\nApplyInstantRuleFilters as\n(\n    SELECT\n        CI.*\n    FROM\n        CombineInstantMeasurementsAndRules CI PARTITION BY PartitionId\n    WHERE TRY_CAST(udf.applyRuleFilter(CI) AS bigint) = 1\n),\nCombineAlarms as\n(\n    SELECT\n        1 as [doc.schemaVersion],\n        'alarm' as [doc.schema],\n        'open' as [status],\n        '1Rule-1Device-NMessage' as [logic],\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as created,\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as modified,\n        AA.__description as [rule.description],\n        AA.__severity as [rule.severity],\n        AA.__actions as [rule.actions],\n        AA.__ruleid as [rule.id],\n        AA.__deviceId as [device.id],\n        AA.__aggregates,\n        AA.__lastReceivedTime as [device.msg.received]\n    FROM\n        ApplyAggregatedRuleFilters AA PARTITION BY PartitionId\n\n    UNION\n\n    SELECT\n        1 as [doc.schemaVersion],\n        'alarm' as [doc.schema],\n        'open' as [status],\n        '1Rule-1Device-1Message' as [logic],\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as created,\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', System.Timestamp) as modified,\n        AI.__description as [rule.description],\n        AI.__severity as [rule.severity],\n        AI.__actions as [rule.actions],\n        AI.__ruleid as [rule.id],\n        AI.__deviceId as [device.id],\n        AI.__aggregates,\n        DATEDIFF(millisecond, '1970-01-01T00:00:00Z', AI.__receivedTime) as [device.msg.received]\n    FROM\n        ApplyInstantRuleFilters AI PARTITION BY PartitionId\n)\n\nSELECT\n    CA.[doc.schemaVersion],\n    CA.[doc.schema],\n    CA.[status],\n    CA.[logic],\n    CA.[created],\n    CA.[modified],\n    CA.[rule.description],\n    CA.[rule.severity],\n    CA.[rule.id],\n    CA.[device.id],\n    CA.[device.msg.received]\nINTO\n    Alarms\nFROM\n    CombineAlarms CA PARTITION BY PartitionId\n\nSELECT\n    CA.[created],\n    CA.[modified],\n    CA.[rule.description],\n    CA.[rule.severity],\n    CA.[rule.id],\n    CA.[rule.actions],\n    CA.[device.id],\n    CA.[device.msg.received]\nINTO\n    Actions\nFROM\n    CombineAlarms CA PARTITION BY __partitionid\nWHERE\n    CA.[rule.actions] IS NOT NULL",
+            "arrivalsQuery": "SELECT\n System.Timestamp() AS ArrivalTime,\n CAST(SUM(\"in\") AS BIGINT) AS ArrivalCount,\n \"source\" AS SeriesId\n INTO arrivals\n FROM dbe TIMESTAMP BY \"time\"\n WHERE \"in\" > 0\n GROUP BY \"source\", TUMBLINGWINDOW(s, 5)"
+        },
+        "sqlDatabaseName": "retailexperience",
+
+        "sqlDatabaseServiceObjective": "Basic",
+
+        "sqlDatabaseEdition": "Basic"
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-02-01",
+            "name": "pid-8db6bde3-9a9c-5d75-894e-6cb26b5547c7",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPName')]",
+            "apiVersion": "2016-11-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(variables('domainNameLabel'))]"
+                }
+            }
+        },
+        {
+            "comments": "AppService plan to host the Application Gateway Web App",
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "name": "[variables('sku')]",
+                "capacity": "[variables('workerSize')]"
+            },
+            "name": "[variables('hostingPlanName')]",
+            "apiVersion": "2015-08-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "name": "[variables('hostingPlanName')]"
+            }
+        },
+        {
+            "comments": "Application Gateway Web App",
+            "type": "Microsoft.Web/sites",
+            "name": "[parameters('azureWebsiteName')]",
+            "apiVersion": "2015-08-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "enabled": true,
+                "clientAffinityEnabled": false,
+                "serverFarmId": "[variables('hostingPlanName')]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "REMOTE_ENDPOINT",
+                            "value": "[concat('https://', reference(variables('publicIPName')).dnsSettings.fqdn)]"
+                        },
+                        {
+                            "name": "REMOTE_ENDPOINT_SSL_THUMBPRINT",
+                            "value": "[parameters('remoteEndpointSSLThumbprint')]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "sourcecontrols",
+                    "name": "web",
+                    "apiVersion": "2015-08-01",
+                    "properties": {
+                        "RepoUrl": "[variables('repoURL')]",
+                        "branch": "[variables('branch')]",
+                        "IsManualIntegration": true
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('azureWebsiteName'))]"
+                    ]
+                }
+            ],
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
+            ]
+        },
+        {
+            "comments": "Azure CosmosDb",
+            "apiVersion": "[variables('documentDBApiVersion')]",
+            "type": "Microsoft.DocumentDb/databaseAccounts",
+            "name": "[parameters('documentDBName')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "properties": {
+                "name": "[parameters('documentDBName')]",
+                "databaseAccountOfferType": "standard",
+                "consistencyPolicy": {
+                    "defaultConsistencyLevel": "[parameters('docDBConsistencyLevel')]",
+                    "maxStalenessPrefix": "[parameters('docDBMaxStalenessPrefix')]",
+                    "maxIntervalInSeconds": "[parameters('docDBMaxIntervalInSeconds')]"
+                }
+            }
+        },
+        {
+            "comments": "Azure Event Hub Namespace",
+            "apiVersion": "[variables('eventHubApiVersion')]",
+            "type": "Microsoft.EventHub/namespaces",
+            "name": "[parameters('eventHubNamespaceName')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "sku": {
+                "name": "[parameters('eventHubSkuTier')]",
+                "tier": "[parameters('eventHubSkuTier')]",
+                "capacity": "[parameters('eventHubSkuCapacity')]"
+            },
+            "properties": {
+                "isAutoInflateEnabled": false,
+                "maximumThroughputUnits": 0
+            }
+        },
+        {
+            "comments": "Azure Event Hub",
+            "type": "Microsoft.EventHub/namespaces/eventhubs",
+            "name": "[concat(parameters('eventHubNamespaceName'), '/', parameters('eventHubName'))]",
+            "apiVersion": "[variables('eventHubApiVersion')]",
+            "location": "[Parameters('location')]",
+            "properties": {
+                "messageRetentionInDays": "[parameters('eventHubRetentionInDays')]",
+                "partitionCount": "[parameters('eventHubPartitionCount')]",
+                "status": "Active"
+            },
+            "dependsOn": [
+                "[variables('eventHubNamespaceResourceId')]"
+            ]
+        },        
+        {
+            "comments": "Event Hub Authorization for Iot Hub",
+            "type": "Microsoft.EventHub/namespaces/eventhubs/authorizationRules",
+            "name": "[concat(parameters('eventHubNamespaceName'), '/', parameters('eventHubName'), '/', parameters('eventHubAuthorizationName'))]",
+            "apiVersion":  "[variables('eventHubApiVersion')]",
+            "location": "[Parameters('location')]",
+            "properties": {
+                "rights": [
+                    "Send"
+                ]
+            },
+            "dependsOn": [
+                "[variables('eventHubNamespaceResourceId')]",
+                "[variables('eventHubResourceId')]"
+            ]
+        },
+        {
+            "comments": "Azure Event Hub For Triggering Actions",
+            "type": "Microsoft.EventHub/namespaces/eventhubs",
+            "name": "[concat(parameters('eventHubNamespaceName'), '/', parameters('actionsEventHubName'))]",
+            "apiVersion": "[variables('eventHubApiVersion')]",
+            "location": "[Parameters('location')]",
+            "properties": {
+                "messageRetentionInDays": "[parameters('eventHubRetentionInDays')]",
+                "partitionCount": "[parameters('eventHubPartitionCount')]",
+                "status": "Active"
+            },
+            "dependsOn": [
+                "[variables('eventHubNamespaceResourceId')]"
+            ]
+        },
+        {
+            "comments": "Event Hub Authorization for Actions",
+            "type": "Microsoft.EventHub/namespaces/eventhubs/authorizationRules",
+            "name": "[concat(parameters('eventHubNamespaceName'), '/', parameters('actionsEventHubName'), '/', parameters('actionsEventHubAuthorizationName'))]",
+            "apiVersion": "[variables('eventHubApiVersion')]",
+            "location": "[Parameters('location')]",
+            "properties": {
+                "rights": [
+                    "Send",
+                    "Listen"
+                ]
+            },
+            "dependsOn": [
+                "[variables('eventHubNamespaceResourceId')]",
+                "[variables('actionsEventHubResourceId')]"
+            ]
+        },
+        {
+            "comments": "Azure IoT Hub",
+            "apiVersion": "[variables('iotHubApiVersion')]",
+            "type": "Microsoft.Devices/Iothubs",
+            "name": "[parameters('iotHubName')]",
+            "location": "[Parameters('location')]",
+            "sku": {
+                "name": "[parameters('iotHubSku')]",
+                "tier": "[parameters('iotHubTier')]",
+                "capacity": 1
+            },
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "properties": {
+                "location": "[Parameters('location')]",
+                "routing": {
+                    "endpoints": {
+                        "eventHubs": [
+                            {
+                                "connectionString": "[concat('Endpoint=sb://', parameters('eventHubNamespaceName'), '.', parameters('serviceBusEndpointSuffix'), '/;SharedAccessKeyName=', parameters('eventHubAuthorizationName'), ';SharedAccessKey=', listkeys(variables('eventHubRouteKeyResourceId'), variables('eventHubApiVersion')).primaryKey, ';EntityPath=',  parameters('eventHubName'))]",
+                                "name": "[variables('deviceNotificationRouteName')]",
+                                "subscriptionId": "[subscription().subscriptionId]",
+                                "resourceGroup": "[resourceGroup().name]"
+                            }
+                        ]
+                    },
+                    "routes": [
+                        {
+                            "name": "TwinRoute",
+                            "source": "TwinChangeEvents",
+                            "condition": "true",
+                            "endpointNames": [
+                                "[variables('deviceNotificationRouteName')]"
+                            ],
+                            "isEnabled": true
+                        },
+                        {
+                            "name": "LifecycleRoute",
+                            "source": "DeviceLifecycleEvents",
+                            "condition": "true",
+                            "endpointNames": [
+                                "[variables('deviceNotificationRouteName')]"
+                            ],
+                            "isEnabled": true
+                        }
+                    ],
+                    "fallbackRoute": {
+                        "name": "$fallback",
+                        "source": "DeviceMessages",
+                        "condition": "true",
+                        "endpointNames": [
+                            "[variables('iotHubDefaultEndpoint')]"
+                        ],
+                        "isEnabled": true
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('eventHubResourceId')]"
+            ]
+        },
+        {
+            "name": "[parameters('provisioningServiceName')]",
+            "type": "Microsoft.Devices/provisioningServices",
+            "apiVersion": "[variables('provisioningServiceApiVersion')]",
+            "location": "[parameters('provisioningServiceLocation')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "properties": {
+                "iotHubs": [
+                    {
+                        "connectionString": "[concat('HostName=', reference(variables('iotHubResourceId')).hostName, ';SharedAccessKeyName=', variables('iotHubKeyName'), ';SharedAccessKey=', listkeys(variables('iotHubKeyResource'), variables('iotHubApiVersion')).primaryKey)]",
+                        "location": "[Parameters('location')]"
+                    }
+                ]
+            },
+            "sku": {
+                "name": "[parameters('provisioningServiceSku')]",
+                "capacity": 1
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Devices/Iothubs/', parameters('iotHubName'))]"
+            ]
+        },
+        {
+            "comments": "Consumer Group of IoT Hub",
+            "apiVersion": "[variables('iotHubApiVersion')]",
+            "name": "[concat(parameters('iotHubName'), '/events/', variables('consumerGroupName'))]",
+            "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
+            "dependsOn": [
+                "[concat('Microsoft.Devices/Iothubs/', parameters('iotHubName'))]"
+            ]
+        },
+        {
+            "comments": "Consumer Group of IoT Hub",
+            "apiVersion": "[variables('iotHubApiVersion')]",
+            "name": "[concat(parameters('iotHubName'), '/events/', 'arrivalsstreamingjobconsumergroup')]",
+            "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
+            "dependsOn": [
+                "[concat('Microsoft.Devices/Iothubs/', parameters('iotHubName'))]"
+            ]
+        },
+        {
+            "comments": "Consumer Group of IoT Hub",
+            "condition": "[equals(parameters('telemetryStorageType'), 'tsi')]",
+            "apiVersion": "[variables('iotHubApiVersion')]",
+            "name": "[concat(parameters('iotHubName'), '/events/', variables('tsiConsumerGroupName'))]",
+            "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
+            "dependsOn": [
+                "[concat('Microsoft.Devices/Iothubs/', parameters('iotHubName'))]"
+            ]
+        },
+        {
+            "comments": "Azure Time Series Insights",
+            "type": "Microsoft.TimeSeriesInsights/environments",
+            "name": "[parameters('tsiEnvironmentName')]",
+            "apiVersion": "[variables('tsiApiVersion')]",
+            "location": "[Parameters('location')]",
+            "properties": {
+                "dataRetentionTime": "[parameters('tsiEnvironmentDataRetentionTime')]",
+                "storageLimitExceededBehavior": "PurgeOldData"
+            },
+            "sku": {
+                "name": "S1",
+                "capacity": 1
+            },
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "kind": "Standard",
+            "resources": [
+                {
+                    "type": "eventsources",
+                    "name": "[variables('tsiEventSourceName')]",
+                    "apiVersion": "[variables('tsiApiVersion')]",
+                    "location": "[Parameters('location')]",
+                    "kind": "Microsoft.IoTHub",
+                    "properties": {
+                        "eventSourceResourceId": "[variables('iotHubResourceId')]",
+                        "iotHubName": "[parameters('iotHubName')]",
+                        "consumerGroupName": "[variables('tsiConsumerGroupName')]",
+                        "keyName": "[variables('iotHubServiceKeyName')]",
+                        "sharedAccessKey": "[concat(listkeys(variables('iotHubServiceKeyResource'), variables('iotHubApiVersion')).primaryKey)]",
+                        "timestampPropertyName": "[parameters('tsiEventSourceTimestampPropertyName')]"
+                    },
+                        "dependsOn": [
+                            "[resourceId('Microsoft.TimeSeriesInsights/environments', parameters('tsiEnvironmentName'))]"
+                        ]
+                },
+                {
+                    "type": "accessPolicies",
+                    "name": "[variables('tsiApplicationAccessPolicy')]",
+                    "apiVersion": "[variables('tsiApiVersion')]",
+                    "properties": {
+                        "principalObjectId": "[parameters('aadClientServicePrincipalId')]",
+                        "roles": [
+                            "[variables('tsiReaderRole')]"
+                        ]
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.TimeSeriesInsights/environments/', parameters('tsiEnvironmentName'))]"
+                    ]
+                },
+                {
+                    "condition": "[equals(parameters('telemetryStorageType'), 'tsi')]",
+                    "type": "accessPolicies",
+                    "name": "[variables('tsiUserAccessPolicy')]",
+                    "apiVersion": "[variables('tsiApiVersion')]",
+                    "properties": {
+                        "principalObjectId": "[parameters('userPrincipalObjectId')]",
+                        "roles": [
+                            "[variables('tsiContributorRole')]"
+                        ]
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.TimeSeriesInsights/environments/', parameters('tsiEnvironmentName'))]"
+                    ]
+                }
+            ],
+            "dependsOn": [
+                "[concat('Microsoft.Devices/Iothubs/', parameters('iotHubName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageName')]",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "kind": "Storage",
+            "sku": {
+                "name": "[parameters('storageSkuName')]"
+            },
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            }
+        },
+        {
+            "comments": "Azure Maps service",
+            "type": "Microsoft.Maps/accounts",
+            "sku": {
+                "name": "[variables('azureMapsPricingSpec')]"
+            },
+            "name": "[variables('azureMapsName')]",
+            "apiVersion": "[variables('azureMapsVersion')]",
+            "location": "global",
+            "properties": {}
+        },
+        {
+            "comments": "Azure Logic Apps",
+            "type": "Microsoft.Logic/workflows",
+            "name": "[variables('logicAppName')]",
+            "apiVersion": "[variables('logicAppApiVersion')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "actions": {
+                        "For_each": {
+                            "actions": {
+                                "Send_an_email": {
+                                    "inputs": {
+                                        "body": {
+                                            "Body": "@body('Parse_JSON')?['body']",
+                                            "Importance": "Normal",
+                                            "IsHtml": true,
+                                            "Subject": "@body('Parse_JSON')?['subject']",
+                                            "To": "@items('For_each')"
+                                        },
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['office365']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/Mail"
+                                    },
+                                    "runAfter": {},
+                                    "type": "ApiConnection"
+                                }
+                            },
+                            "foreach": "@body('Parse_JSON')?['recipients']",
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "Parse_JSON": {
+                            "inputs": {
+                                "content": "@triggerBody()",
+                                "schema": {
+                                    "properties": {
+                                        "body": {
+                                            "type": "string"
+                                        },
+                                        "recipients": {
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        },
+                                        "subject": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "runAfter": {},
+                            "type": "ParseJson"
+                        }
+                    },
+                    "contentVersion": "1.0.0.0",
+                    "outputs": {},
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "inputs": {
+                                "schema": {
+                                    "properties": {
+                                        "body": {
+                                            "type": "string"
+                                        },
+                                        "recipients": {
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        },
+                                        "subject": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "kind": "Http",
+                            "type": "Request"
+                        }
+                    }
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "office365": {
+                                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/office365')]",
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('office365ConnectionName'))]",
+                                "connectionName": "[variables('office365ConnectionName')]"
+                            }
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('office365ConnectionName'))]"
+            ]
+        },
+        {
+            "comments": "Azure Logic Apps Connector",
+            "type": "Microsoft.Web/Connections",
+            "name": "[variables('office365ConnectionName')]",
+            "apiVersion": "[variables('logicAppConnectionApiVersion')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "properties": {
+                "api": {
+                    "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/office365')]"
+                },
+                "displayName": "[variables('office365ConnectionDisplayName')]"
+            }
+        },
+        {
+            "type": "microsoft.operationalinsights/workspaces",
+            "apiVersion": "2015-11-01-preview",
+            "name": "[parameters('workspaces_shelfgaplogs_name')]",
+            "location": "[Parameters('location')]",
+            "properties": {
+                "sku": {
+                    "name": "pergb2018"
+                },
+                "retentionInDays": 30
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkSecurityGroups_IgniteShelf_nsg_name')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "RemoteMonitoring"
+            },
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "HTTPS",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "SSH",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Deny",
+                            "priority": 101,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_IgniteShelf_nsg_name'), '/HTTPS')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_IgniteShelf_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "443",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_IgniteShelf_nsg_name'), '/SSH')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_IgniteShelf_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Deny",
+                "priority": 101,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "name": "[parameters('virtualMachines_vm_235un_name')]",
+            "location": "[Parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_IgniteShelf_nic_name'))]"
+            ],
+            "tags": {
+                "IotSuiteType": "RemoteMonitoring"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D1_v2"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04.0-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "osdisk1",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        },
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_vm_235un_name')]",
+                    "adminUsername": "[parameters('username')]",
+                    "adminPassword": "[parameters('password')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    },
+                    "secrets": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_IgniteShelf_nic_name'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkInterfaces_IgniteShelf_nic_name')]",
+            "location": "[Parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_IgniteShelf_vnet_name'), 'default')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_IgniteShelf_nsg_name'))]"
+            ],
+            "tags": {
+                "IotSuiteType": "RemoteMonitoring"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.0.0.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_IgniteShelf_vnet_name'), 'default')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_IgniteShelf_nsg_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('virtualNetworks_IgniteShelf_vnet_name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "IotSuiteType": "RemoteMonitoring"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('virtualNetworks_IgniteShelf_vnet_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_IgniteShelf_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.0.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+
+        "type": "Microsoft.Sql/servers",
+
+        "kind": "v12.0",
+
+        "name": "[parameters('servers_igniteretaildemo_name')]",
+
+        "apiVersion": "2015-05-01-preview",
+
+        "location": "[parameters('location')]",
+
+        "properties": {
+
+            "administratorLogin": "[parameters('username')]",
+
+            "administratorLoginPassword": "[parameters('password')]",
+
+            "version": "12.0"
+
+        },
+
+        "resources": [
+
+            {
+
+            "name": "[variables('sqlDatabaseName')]",
+
+            "type": "databases",
+
+            "apiVersion": "2015-05-01-preview",
+
+            "location": "[parameters('location')]",
+
+            "dependsOn": [
+
+                "[parameters('servers_igniteretaildemo_name')]"
+
+            ],
+
+            "properties": {
+
+                "edition": "[variables('sqlDatabaseEdition')]",
+
+                "requestedServiceObjectiveName": "[variables('sqlDatabaseServiceObjective')]"
+
+            }
+
+            }
+
+        ]
+
+        },
+        {
+            "type": "microsoft.alertsmanagement/smartdetectoralertrules",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('smartdetectoralertrules_failure_anomalies___ignitedemoapp_name')]",
+            "location": "global",
+            "properties": {
+                "description": "Failure Anomalies notifies you of an unusual rise in the rate of failed HTTP requests or dependency calls.",
+                "state": "Enabled",
+                "severity": "Sev3",
+                "frequency": "PT1M",
+                "detector": {
+                    "id": "FailureAnomaliesDetector"
+                },
+                "scope": [
+                    "[parameters('components_ignitedemoapp_externalid')]"
+                ],
+                "actionGroups": {
+                    "groupIds": [
+                        "[parameters('actiongroups_application_20insights_20smart_20detection_externalid')]"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[parameters('accounts_ignitedemo_cognitiveservices_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "CognitiveServices",
+            "properties": {
+                "apiProperties": {
+                    "statisticsEnabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[parameters('accounts_ignitedemo_face_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "Face",
+            "properties": {
+                "customSubDomainName": "[parameters('accounts_ignitedemo_face_name')]"
+            }
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[parameters('accounts_ignitedemo_luis_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "LUIS",
+            "properties": {
+                "customSubDomainName": "[parameters('accounts_ignitedemo_luis_name')]"
+            }
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[parameters('accounts_ignitedemo_luisauthoring_name')]",
+            "location":"westus", 
+            "sku": {
+                "name": "F0"
+            },
+            "kind": "LUIS.Authoring",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[parameters('accounts_ignitedemo_luis_Authoring_name')]",
+            "location": "westus" ,
+            "sku": {
+                "name": "F0"
+            },
+            "kind": "LUIS.Authoring",
+            "properties": {
+                "customSubDomainName": "[parameters('accounts_ignitedemo_luis_Authoring_name')]"
+            }
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[parameters('accounts_ignitedemo_speech_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "SpeechServices",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2019-05-01",
+            "name": "[parameters('registries_ignitecr_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard"
+            },
+            "properties": {
+                "adminUserEnabled": true,
+                "policies": {
+                    "quarantinePolicy": {
+                        "status": "disabled"
+                    },
+                    "trustPolicy": {
+                        "type": "Notary",
+                        "status": "disabled"
+                    },
+                    "retentionPolicy": {
+                        "days": 7,
+                        "status": "disabled"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts",
+            "apiVersion": "2019-08-01",
+            "name": "[parameters('databaseAccounts_facedbedb_name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "defaultExperience": "Azure Cosmos DB for MongoDB API"
+            },
+            "kind": "MongoDB",
+            "properties": {
+                "enableAutomaticFailover": false,
+                "enableMultipleWriteLocations": false,
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [],
+                "disableKeyBasedMetadataWriteAccess": false,
+                "databaseAccountOfferType": "Standard",
+                "consistencyPolicy": {
+                    "defaultConsistencyLevel": "Session",
+                    "maxIntervalInSeconds": 5,
+                    "maxStalenessPrefix": 100
+                },
+                "locations": [
+                    {
+                        "locationName": "[parameters('location')]",
+                        "provisioningState": "Succeeded",
+                        "failoverPriority": 0,
+                        "isZoneRedundant": false
+                    }
+                ],
+                "capabilities": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkSecurityGroups_ignite_dev_nsg_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "JupyterHub",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8000",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1010,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "RStudio_Server",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8787",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1020,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "SSH",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1030,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Port_5000",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5000",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1040,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkSecurityGroups_iotedge_nsg_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Port_22",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Port_5000",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5000",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 120,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Port_5001",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5001-5003",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 130,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Port_50011",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "50011-50012",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 140,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Ports_Speech",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5010-5012",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 150,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('publicIPAddresses_ignite_dev_ip_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "52.151.30.39",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('publicIPAddresses_iotedge_ip_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "13.93.154.123",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('virtualNetworks_ignitedemo_vnet_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('virtualNetworks_ignitedemovnet501_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.1.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.1.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('virtualNetworks_ignitedemovnet906_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.2.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.2.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('storageAccounts_ignitedemodiag301_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('storageAccounts_ignitedemodiag474_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('storageAccounts_ignitedemodiag493_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('storageAccounts_storagedbeface_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_RAGRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "facemetadata"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_ignite_dev_nsg_name'), '/JupyterHub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_ignite_dev_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "8000",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1010,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_iotedge_nsg_name'), '/Port_22')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_iotedge_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_ignite_dev_nsg_name'), '/Port_5000')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_ignite_dev_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "5000",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1040,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_iotedge_nsg_name'), '/Port_5000')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_iotedge_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "5000",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 120,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_iotedge_nsg_name'), '/Port_5001')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_iotedge_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "5001-5003",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 130,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_iotedge_nsg_name'), '/Port_50011')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_iotedge_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "50011-50012",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 140,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_iotedge_nsg_name'), '/Ports_Speech')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_iotedge_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "5010-5012",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 150,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_ignite_dev_nsg_name'), '/RStudio_Server')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_ignite_dev_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "8787",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1020,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_ignite_dev_nsg_name'), '/SSH')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_ignite_dev_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1030,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('virtualNetworks_ignitedemo_vnet_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_ignitedemo_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.0.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('virtualNetworks_ignitedemovnet501_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_ignitedemovnet501_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.1.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('virtualNetworks_ignitedemovnet906_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_ignitedemovnet906_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.2.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_ignitedemodiag301_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_ignitedemodiag301_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_ignitedemodiag474_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_ignitedemodiag474_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_ignitedemodiag493_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_ignitedemodiag493_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_storagedbeface_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storagedbeface_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_RAGRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/facefeature')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "facefeature"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/fl')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "fl"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/lfl')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "lfl"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/lpg')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "lpg"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/pg')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "pg"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/pg161870ce')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "pg161870ce"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/pge4e49f67')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "pge4e49f67"
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_ignitedemodiag474_name'), '/default/bootdiagnostics-container-766a8efd-e593-47b7-b991-d9be310a7006')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_ignitedemodiag474_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_ignitedemodiag474_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_ignitedemodiag301_name'), '/default/bootdiagnostics-ignitedev-9bd66803-0617-40ab-bb78-bd62a116c908')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_ignitedemodiag301_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_ignitedemodiag301_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_ignitedemodiag301_name'), '/default/bootdiagnostics-ignitetes-6d5cb0a6-a8de-43c4-ad4c-6d5285838452')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_ignitedemodiag301_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_ignitedemodiag301_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_ignitedemodiag493_name'), '/default/bootdiagnostics-iotedge-ca03c369-930b-41a7-92c3-153065e83a23')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_ignitedemodiag493_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_ignitedemodiag493_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageName'), '/default/still-images')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_storagedbeface_name'), '/default/pgtr')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_storagedbeface_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storagedbeface_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/facefeature/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections', parameters('databaseAccounts_facedbedb_name'), 'facemetadata', 'facefeature')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 1000
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/fl/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections', parameters('databaseAccounts_facedbedb_name'), 'facemetadata', 'fl')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 1000
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/lfl/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections', parameters('databaseAccounts_facedbedb_name'), 'facemetadata', 'lfl')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 1000
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/lpg/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections', parameters('databaseAccounts_facedbedb_name'), 'facemetadata', 'lpg')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 1000
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/pg/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections', parameters('databaseAccounts_facedbedb_name'), 'facemetadata', 'pg')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 1000
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/pg161870ce/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections', parameters('databaseAccounts_facedbedb_name'), 'facemetadata', 'pg161870ce')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 1000
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('databaseAccounts_facedbedb_name'), '/facemetadata/pge4e49f67/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections', parameters('databaseAccounts_facedbedb_name'), 'facemetadata', 'pge4e49f67')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases', parameters('databaseAccounts_facedbedb_name'), 'facemetadata')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_facedbedb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 1000
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkInterfaces_ignite_dev524_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_ignite_dev_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_ignitedemovnet501_name'), 'default')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_ignite_dev_nsg_name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.0.1.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_ignite_dev_ip_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_ignitedemovnet501_name'), 'default')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_ignite_dev_nsg_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkInterfaces_iotedge10_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_iotedge_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_ignitedemovnet906_name'), 'default')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_iotedge_nsg_name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.0.2.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_iotedge_ip_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_ignitedemovnet906_name'), 'default')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_iotedge_nsg_name'))]"
+                }
+            }
+        },
+        {
+            "comments": "Azure Stream Analytics streamingjobs",
+            "apiVersion": "[variables('streamAnalyticsApiVersion')]",
+            "type": "Microsoft.StreamAnalytics/streamingjobs",
+            "name": "[parameters('streamingJobsName')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageName'))]",
+                "[concat('Microsoft.Devices/Iothubs/', parameters('iotHubName'))]",
+                "[variables('actionsEventHubAuthorizationResourceId')]",
+                "[variables('documentDBResourceId')]"
+            ],
+            "properties": {
+                "sku": {
+                    "name": "standard"
+                },
+                "eventsOutOfOrderMaxDelayInSeconds": 10,
+                "eventsOutOfOrderPolicy": "[parameters('streamingJobsEventsOutOfOrderPolicy')]",
+                "inputs": [
+                    {
+                        "name": "DeviceTelemetry",
+                        "properties": {
+                            "datasource": {
+                                "properties": {
+                                    "consumerGroupName": "[variables('consumerGroupName')]",
+                                    "iotHubNamespace": "[parameters('iotHubName')]",
+                                    "sharedAccessPolicyKey": "[listkeys(variables('iotHubKeyResource'), variables('iotHubApiVersion')).primaryKey]",
+                                    "sharedAccessPolicyName": "[variables('iotHubKeyName')]",
+                                    "endpoint": "messages/events"
+                                },
+                                "type": "Microsoft.Devices/IotHubs"
+                            },
+                            "serialization": {
+                                "properties": {
+                                    "encoding": "UTF8"
+                                },
+                                "type": "Json"
+                            },
+                            "type": "Stream"
+                        }
+                    },
+                    {
+                        "name": "DeviceGroups",
+                        "properties": {
+                            "datasource": {
+                                "properties": {
+                                    "container": "[parameters('streamingJobsInputContainerName')]",
+                                    "dateFormat": "yyyy-MM-dd",
+                                    "timeFormat": "HH-mm",
+                                    "pathPattern": "{date}/{time}/devicegroups.csv",
+                                    "storageAccounts": [
+                                        {
+                                            "accountKey": "[listkeys(variables('storageResourceId'), variables('storageApiVersion')).keys[0].value]",
+                                            "accountName": "[parameters('storageName')]"
+                                        }
+                                    ]
+                                },
+                                "type": "Microsoft.Storage/Blob"
+                            },
+                            "serialization": {
+                                "properties": {
+                                    "fieldDelimiter": ",",
+                                    "encoding": "UTF8"
+                                },
+                                "type": "Csv"
+                            },
+                            "type": "Reference"
+                        }
+                    },
+                    {
+                        "name": "Rules",
+                        "properties": {
+                            "datasource": {
+                                "properties": {
+                                    "container": "[parameters('streamingJobsInputContainerName')]",
+                                    "dateFormat": "yyyy-MM-dd",
+                                    "timeFormat": "HH-mm",
+                                    "pathPattern": "{date}/{time}/rules.json",
+                                    "storageAccounts": [
+                                        {
+                                            "accountKey": "[listkeys(variables('storageResourceId'), variables('storageApiVersion')).keys[0].value]",
+                                            "accountName": "[parameters('storageName')]"
+                                        }
+                                    ]
+                                },
+                                "type": "Microsoft.Storage/Blob"
+                            },
+                            "serialization": {
+                                "properties": {
+                                    "encoding": "UTF8"
+                                },
+                                "type": "Json"
+                            },
+                            "type": "Reference"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "Alarms",
+                        "properties": {
+                            "datasource": {
+                                "type": "Microsoft.Storage/DocumentDB",
+                                "properties": {
+                                    "accountId": "[parameters('documentDbName')]",
+                                    "accountKey": "[listkeys(variables('documentDBResourceId'), variables('documentDBApiVersion')).primaryMasterKey]",
+                                    "database": "[variables('streamingJobsOutputDBName')]",
+                                    "collectionNamePattern": "alarms"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Messages",
+                        "properties": {
+                            "datasource": {
+                                "type": "Microsoft.Storage/DocumentDB",
+                                "properties": {
+                                    "accountId": "[parameters('documentDbName')]",
+                                    "accountKey": "[listkeys(variables('documentDBResourceId'), variables('documentDBApiVersion')).primaryMasterKey]",
+                                    "database": "[variables('streamingJobsOutputDBName')]",
+                                    "collectionNamePattern": "[if(equals(parameters('telemetryStorageType'), 'tsi'), 'alarms', 'messages')]"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Actions",
+                        "properties": {
+                            "datasource": {
+                                "type": "Microsoft.ServiceBus/EventHub",
+                                "properties": {
+                                    "serviceBusNamespace": "[parameters('eventHubNamespaceName')]",
+                                    "sharedAccessPolicyName": "[parameters('actionsEventHubAuthorizationName')]",
+                                    "sharedAccessPolicyKey": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', parameters('eventHubNamespaceName'), parameters('actionsEventHubName'), parameters('actionsEventHubAuthorizationName')), variables('eventHubApiVersion')).primaryKey]",
+                                    "eventHubName": "[parameters('actionsEventHubName')]"
+                                }
+                            },
+                            "serialization": {
+                                "type": "Json",
+                                "properties": {
+                                    "encoding": "UTF8",
+                                    "format": "LineSeparated"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "functions": [
+                    {
+                        "name": "flattenMeasurements",
+                        "properties": {
+                            "type": "Scalar",
+                            "properties": {
+                                "inputs": [
+                                    {
+                                        "dataType": "record"
+                                    }
+                                ],
+                                "output": {
+                                    "dataType": "any"
+                                },
+                                "binding": {
+                                    "type": "Microsoft.StreamAnalytics/JavascriptUdf",
+                                    "properties": {
+                                        "script": "[variables('streamingJobsQuery').flattenMeasurementsJsUdf]"
+                                    }
+                                }
+                          }
+                        }
+                    },
+                    {
+                        "name": "applyRuleFilter",
+                        "properties": {
+                            "type": "Scalar",
+                            "properties": {
+                                "inputs": [
+                                    {
+                                        "dataType": "record"
+                                    }
+                                ],
+                                "output": {
+                                    "dataType": "any"
+                                },
+                                "binding": {
+                                    "type": "Microsoft.StreamAnalytics/JavascriptUdf",
+                                    "properties": {
+                                        "script": "[variables('streamingJobsQuery').applyRuleFilterJsUdf]"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "removeUnusedProperties",
+                        "properties": {
+                            "type": "Scalar",
+                            "properties": {
+                                "inputs": [
+                                    {
+                                        "dataType": "record"
+                                    }
+                                ],
+                                "output": {
+                                    "dataType": "any"
+                                },
+                                "binding": {
+                                    "type": "Microsoft.StreamAnalytics/JavascriptUdf",
+                                    "properties": {
+                                        "script": "[variables('streamingJobsQuery').removeUnusedPropertiesJsUdf]"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "transformation": {
+                    "name": "Alarms",
+                    "properties": {
+                        "query": "[if(equals(parameters('telemetryStorageType'), 'tsi'), variables('streamingJobsQuery').alarmsOnlyQuery, variables('streamingJobsQuery').transformQuery)]",
+                        "streamingUnits": "[parameters('numberOfStreamingUnits')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.StreamAnalytics/streamingjobs",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('streamingjobs_StreamingJob_Arrivals_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "sku": {
+                    "name": "Standard"
+                },
+                "inputs": [
+                    {
+                        "name": "dbe",
+                        "properties": {
+                            "datasource": {
+                                "properties": {
+                                    "consumerGroupName": "arrivalsstreamingjobconsumergroup",
+                                    "iotHubNamespace": "[parameters('iotHubName')]",
+                                    "sharedAccessPolicyKey": "[listkeys(variables('iotHubKeyResource'), variables('iotHubApiVersion')).primaryKey]",
+                                    "sharedAccessPolicyName": "[variables('iotHubKeyName')]",
+                                    "endpoint": "messages/events"
+                                },
+                                "type": "Microsoft.Devices/IotHubs"
+                            },
+                            "serialization": {
+                                "properties": {
+                                    "encoding": "UTF8"
+                                },
+                                "type": "Json"
+                            },
+                            "type": "Stream"
+                        }
+                    }],
+                "outputs": [
+                    {
+                        "name": "Arrivals",
+                        "properties": {
+                            "datasource": {
+                            "type": "Microsoft.Sql/Server/Database",
+                            "properties": {
+                                "table": "dbo.arrivals",
+                                "server": "[concat(parameters('servers_igniteretaildemo_name'), '.database.windows.net')]",
+                                "database": "retailexperience",
+                                "user": "[parameters('username')]",
+                                "password": "[parameters('password')]"
+                                }
+                            }
+                        }
+                    }
+                    ],
+                "transformation": {
+                    "name": "get_arrivals",
+                    "properties": {
+                        "query": "[variables('streamingJobsQuery').arrivalsQuery]",
+                        "streamingUnits": "[parameters('numberOfStreamingUnits')]"
+                    }
+                },
+                "outputStartMode": "JobStartTime",
+                "eventsOutOfOrderPolicy": "Adjust",
+                "outputErrorPolicy": "Stop",
+                "eventsOutOfOrderMaxDelayInSeconds": 0,
+                "eventsLateArrivalMaxDelayInSeconds": 5,
+                "dataLocale": "en-US",
+                "compatibilityLevel": "1.1"
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('serverfarms_EastUS2Plan_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "kind": "functionapp",
+            "properties": {
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2015-05-01",
+            "name": "[parameters('components_FunctionAppArrivals_name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "hidden-link:/subscriptions/1978aaea-b65a-481a-84c1-2cc217cbca60/resourceGroups/IgniteShelf/providers/Microsoft.Web/sites/FunctionAppArrivals": "Resource"
+            },
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Flow_Type": "Bluefield",
+                "Request_Source": "rest"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('sites_FunctionAppArrivals_name')]",
+            "location": "[parameters('location')]",
+            "kind": "functionapp",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "functionapparrivals.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "functionapparrivals.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_EastUS2Plan_name'))]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 1536,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None"
+            },
+            "dependsOn": [
+             "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_EastUS2Plan_name'))]"]
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_FunctionAppArrivals_name'), '/web')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_FunctionAppArrivals_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$FunctionAppArrivals",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "cors": {
+                    "allowedOrigins": [
+                        "https://functions.azure.com",
+                        "https://functions-staging.azure.com",
+                        "https://functions-next.azure.com"
+                    ],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_FunctionAppArrivals_name'), '/', parameters('sites_FunctionAppArrivals_name'), '.azurewebsites.net')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_FunctionAppArrivals_name'))]"
+            ],
+            "properties": {
+                "siteName": "FunctionAppArrivals",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2015-05-01",
+            "name": "[parameters('components_ignitedemoappupdate_name')]",
+            "location": "[parameters('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Request_Source": "IbizaWebAppExtensionCreate"
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('serverfarms_ASP_ignitedemo_a762_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "properties": {
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('sites_ignitedemoappupdate_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_ignitedemo_a762_name'))]"
+            ],
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_ignitedemoappupdate_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_ignitedemoappupdate_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_ignitedemo_a762_name'))]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_ignitedemoappupdate_name'), '/web')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_ignitedemoappupdate_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$ignitedemoappupdate",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": true
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_ignitedemoappupdate_name'), '/', parameters('sites_ignitedemoappupdate_name'), '.azurewebsites.net')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_ignitedemoappupdate_name'))]"
+            ],
+            "properties": {
+                "siteName": "ignitedemoappupdate",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.DataBoxEdge/dataBoxEdgeDevices",
+            "apiVersion": "2019-08-01",
+            "name": "[parameters('dataBoxEdgeDevices_dbe_test_name')]",
+            "location": "eastus",
+            "sku": {
+                "name": "Edge",
+                "tier": "Standard"
+            }
+        }
+    ],
+    "outputs": {
+        "subscriptionId": {
+            "type": "string",
+            "value": "[subscription().subscriptionId]"
+        },
+        "resourceGroup": {
+            "type": "string",
+            "value": "[resourceGroup().name]"
+        },
+        "iotHubHostName": {
+            "type": "string",
+            "value": "[parameters('iotHubName')]"
+        },
+        "iotHubConnectionString": {
+            "type": "string",
+            "value": "[concat('HostName=', reference(variables('iotHubResourceId')).hostName, ';SharedAccessKeyName=', variables('iotHubKeyName'), ';SharedAccessKey=', listkeys(variables('iotHubKeyResource'), variables('iotHubApiVersion')).primaryKey)]"
+        },
+        "documentDBConnectionString": {
+            "type": "string",
+            "value": "[concat('AccountEndpoint=', reference(variables('documentDBResourceId')).documentEndpoint, ';AccountKey=', listkeys(variables('documentDBResourceId'), '2015-04-08').primaryMasterKey, ';')]"
+        },
+        "publicIPResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]"
+        },
+        "loadBalancerIp": {
+            "type": "string",
+            "value": "[reference(variables('publicIPName')).ipAddress]"
+        },
+        "agentFQDN": {
+            "type": "string",
+            "value": "[reference(variables('publicIPName')).dnsSettings.fqdn]"
+        },
+        "azureWebsite": {
+            "type": "string",
+            "value": "[concat('https://', parameters('azureWebsiteName'), '.azurewebsites.net')]"
+        },
+        "eventHubPartitions": {
+            "type": "int",
+            "value": "[reference(variables('iotHubResourceId')).eventHubEndpoints.events.partitionCount]"
+        },
+        "eventHubName": {
+            "type": "string",
+            "value": "[reference(variables('iotHubResourceId')).eventHubEndpoints.events.path]"
+        },
+        "eventHubEndpoint": {
+            "type": "string",
+            "value": "[reference(variables('iotHubResourceId')).eventHubEndpoints.events.endpoint]"
+        },
+        "storageAccountName": {
+            "type": "string",
+            "value": "[parameters('storageName')]"
+        },
+        "storageAccountKey": {
+            "type": "string",
+            "value": "[listKeys(variables('storageResourceId'), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+        },
+        "storageConnectionString": {
+            "type": "string",
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageName'), ';AccountKey=', listkeys(variables('storageResourceId'), variables('storageApiVersion')).keys[0].value, ';EndpointSuffix=', parameters('storageEndpointSuffix'))]"
+        },
+        "azureMapsKey": {
+            "type": "string",
+            "value": "[listkeys(variables('azureMapsName'), variables('azureMapsVersion')).primaryKey]"
+        },
+        "messagesEventHubConnectionString": {
+            "type": "string",
+            "value": "[concat('Endpoint=sb://', parameters('eventHubNamespaceName'), '.', parameters('serviceBusEndpointSuffix'), '/;SharedAccessKeyName=', variables('eventHubKeyName'), ';SharedAccessKey=', listkeys(variables('eventHubKeyResourceId'), variables('eventHubApiVersion')).primaryKey)]"
+        },
+        "messagesEventHubName": {
+            "type": "string",
+            "value": "[parameters('eventHubName')]"
+        },
+        "actionsEventHubConnectionString": {
+            "type": "string",
+            "value": "[concat('Endpoint=sb://', parameters('eventHubNamespaceName'), '.', parameters('serviceBusEndpointSuffix'), '/;SharedAccessKeyName=', variables('actionsEventHubKeyName'), ';SharedAccessKey=', listkeys(variables('actionsEventHubKeyResourceId'), variables('eventHubApiVersion')).primaryKey)]"
+        },
+        "actionsEventHubName": {
+            "type": "string",
+            "value": "[parameters('actionsEventHubName')]"
+        },
+        "streamingJobsName": {
+            "type": "string",
+            "value": "[parameters('streamingJobsName')]"
+        },
+        "servicePrincipalSecret": {
+            "type": "string",
+            "value": "[parameters('servicePrincipalSecret')]"
+        },
+        "telemetryStorageType": {
+            "type": "string",
+            "value": "[parameters('telemetryStorageType')]"
+        },
+        "tsiDataAccessFQDN": {
+            "type": "string",
+            "value": "[if(equals(parameters('telemetryStorageType'), 'tsi'), reference(resourceId('Microsoft.TimeSeriesInsights/environments', parameters('tsiEnvironmentName'))).dataAccessFQDN, 'Undefined')]"
+        },
+        "office365ConnectionUrl": {
+            "type": "string",
+            "value": "[variables('office365ConnectionUrl')]"
+        },
+        "logicAppEndpointUrl": {
+            "type": "string",
+            "value": "[concat(listCallbackURL(resourceId('Microsoft.Logic/workflows/triggers', variables('logicAppName'), 'manual'), variables('logicAppApiVersion')).value)]"
+        }
+    }
+}

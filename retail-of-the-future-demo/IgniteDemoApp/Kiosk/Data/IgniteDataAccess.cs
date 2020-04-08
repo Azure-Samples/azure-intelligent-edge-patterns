@@ -201,6 +201,9 @@ namespace IntelligentKioskSample.Data
                     conn.Open();
                     SqlCommand cmd = new SqlCommand("uspGetInventoryStats", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
+                    // local today start datetime expressed as utc datetime
+                    DateTime utcds = DateTime.Now.Date.ToUniversalTime();
+                    cmd.Parameters.AddWithValue("today_start_utc", utcds);
                     using (SqlDataReader rdr = cmd.ExecuteReader())
                     {
                         while (rdr.Read())

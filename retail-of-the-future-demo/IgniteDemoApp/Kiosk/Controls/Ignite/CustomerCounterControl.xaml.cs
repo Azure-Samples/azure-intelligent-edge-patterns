@@ -78,7 +78,8 @@ namespace IntelligentKioskSample.Controls.Ignite
         {
             try
             {
-                counterListener.StartListening(OnReceivedCount, null);
+                counterListener.StartListening();
+                counterListener.ReceivedCountEvent += OnReceivedCount;
             }
             catch (Exception ex)
             {
@@ -91,6 +92,7 @@ namespace IntelligentKioskSample.Controls.Ignite
             try
             {
                 counterListener.StopListening();
+                counterListener.ReceivedCountEvent -= OnReceivedCount;
             }
             catch (Exception ex)
             {
