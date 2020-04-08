@@ -1,6 +1,6 @@
 // Describing the shape of the loaction's slice of state
 export type Location = {
-  locationName: string;
+  name: string;
   coordinates: string;
   description: string;
 };

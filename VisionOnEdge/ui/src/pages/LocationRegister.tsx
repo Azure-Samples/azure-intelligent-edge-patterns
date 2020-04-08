@@ -7,7 +7,7 @@ import { postLocation } from '../store/location/locationActions';
 const LocationRegister: FC = () => {
   const dispatch = useDispatch();
   const [locationRegisterInput, setLocationRegisterInput] = useState<Location>({
-    locationName: '',
+    name: '',
     coordinates: '',
     description: '',
   });
@@ -23,9 +23,9 @@ const LocationRegister: FC = () => {
         </FlexItem>
         <Input
           placeholder="Location Name"
-          value={locationRegisterInput.locationName}
+          value={locationRegisterInput.name}
           onChange={(_, newProps): void =>
-            setLocationRegisterInput((prev) => ({ ...prev, locationName: newProps.value }))
+            setLocationRegisterInput((prev) => ({ ...prev, name: newProps.value }))
           }
         />
       </Flex>
@@ -50,7 +50,7 @@ const LocationRegister: FC = () => {
       <Flex gap="gap.medium">
         <Button
           primary
-          disabled={Object.values(locationRegisterInput).some((value) => value.length === 0)}
+          disabled={Object.values(locationRegisterInput).includes('')}
           onClick={(): void => {
             dispatch(postLocation(locationRegisterInput));
           }}
