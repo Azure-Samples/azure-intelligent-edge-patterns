@@ -23,9 +23,12 @@ const ImageLink: FC<ImageLinkProps> = ({
   return (
     <Flex column styles={{ width }}>
       <Link to={to}>
-        <FlexItem styles={{ height }}>
-          <Image src={imgSrc ?? defaultSrc} fluid styles={{ padding: imgPadding }} />
-        </FlexItem>
+        <div style={{ height }}>
+          <Image
+            src={imgSrc ?? defaultSrc}
+            styles={{ padding: imgPadding, width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        </div>
       </Link>
       <Text align="center">{label}</Text>
     </Flex>

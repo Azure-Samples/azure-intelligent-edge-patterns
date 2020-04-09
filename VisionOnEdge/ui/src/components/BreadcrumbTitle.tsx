@@ -24,7 +24,7 @@ const BreadcrumbTitle: FC<{ title: string }> = ({ title }) => {
         return (
           <>
             <Link key={`link${i}`} to={table[e]}>
-              <Text>{e}</Text>
+              <Text styles={{ color: '#0094d8' }}>{e}</Text>
             </Link>
             <Text key={`arrow${i}`} styles={{ color: 'black', cursor: 'default' }}>
               {'>'}
