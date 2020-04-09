@@ -42,7 +42,7 @@ const TopNav: FC = () => {
       <NavLink to={'/'} style={{ textDecoration: 'none' }}>
         <Text color="white">Vision on Edge</Text>
       </NavLink>
-      <Flex vAlign="center" space="evenly" styles={{ height: '100%' }}>
+      <Flex vAlign="center" space="evenly" styles={{ height: '100%', width: '15%' }}>
         <Image styles={{ height: '100%' }} src="/icons/setting.png" />
         <Text color="white">User</Text>
       </Flex>

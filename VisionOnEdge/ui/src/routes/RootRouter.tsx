@@ -13,7 +13,7 @@ export const RootRouter: React.FC = () => {
     <Switch>
       <Route path="/location/register" component={LocationRegister} />
       <Route path="/location" component={Locations} />
-      <Route path="/label" component={LabelingPage} />
+      <Route path="/label/:imageIndex" component={LabelingPage} />
       <Route path="/cameras/:name" component={CameraDetails} />
       <Route path="/cameras" component={Cameras} />
       <Route path="/parts" component={Parts} />

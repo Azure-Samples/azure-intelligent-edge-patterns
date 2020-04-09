@@ -6,7 +6,13 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
 import { Box2d } from './Box';
-import { Size2D, Annotation, Position2D, WorkState } from '../../store/labelingPage/labelingPageTypes';
+import {
+  Size2D,
+  Annotation,
+  Position2D,
+  WorkState,
+  LabelingType,
+} from '../../store/labelingPage/labelingPageTypes';
 import { State } from '../../store/State';
 import {
   createAnnotation,
@@ -16,8 +22,9 @@ import {
 
 interface SceneProps {
   url?: string;
+  labelingType: LabelingType;
 }
-const Scene: FC<SceneProps> = ({ url = '' }) => {
+const Scene: FC<SceneProps> = ({ url = '', labelingType }) => {
   const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
   const [imageSize, setImageSize] = useState<Size2D>({ width: 1000, height: 300 });
   const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
@@ -29,7 +36,7 @@ const Scene: FC<SceneProps> = ({ url = '' }) => {
   const dispatch = useDispatch();
 
   // const getCursorPosition = (stage, layer): Position2D => {
-  //   if (stage === null && layer === null) throw new Error('Stage & layer refering failed');
+  //   if (stage === null && layer === null) throw new Error('Stage & layer referring failed');
   //   const { x, y } = layer
   //     .getTransform()
   //     .copy()
@@ -47,6 +54,9 @@ const Scene: FC<SceneProps> = ({ url = '' }) => {
   // };
 
   const onMouseDown = (): void => {
+    // * Single bounding box labeling type condition
+    if (labelingType === LabelingType.SingleAnnotation && annotations.length === 1) return;
+
     if (selectedAnnotationIndex !== null && workState === WorkState.None) {
       setSelectedAnnotationIndex(null);
     } else {

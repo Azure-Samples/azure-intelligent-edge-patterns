@@ -82,3 +82,8 @@ export enum WorkState {
   Selecting = 'Selecting',
   None = 'None',
 }
+
+export enum LabelingType {
+  SingleAnnotation = 0,
+  MultiAnnotation = 1,
+}

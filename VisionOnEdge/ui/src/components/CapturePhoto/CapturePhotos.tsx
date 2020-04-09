@@ -124,26 +124,16 @@ const CapturedImagesContainer = (): JSX.Element => {
   }, [dispatch]);
 
   return (
-    <Flex column gap="gap.small">
-      <Flex
-        styles={{ overflow: 'scroll', border: '1px solid grey', height: '150px' }}
-        gap="gap.small"
-        vAlign="center"
-      >
-        {capturedImages.map((src) => (
+    <Flex
+      styles={{ overflow: 'scroll', border: '1px solid grey', height: '150px' }}
+      gap="gap.small"
+      vAlign="center"
+    >
+      {capturedImages.map((src, i) => (
+        <Link key={i} to={`/label/${i}`}>
           <Image key={src} src={src} design={{ maxWidth: '150px' }} />
-        ))}
-      </Flex>
-      <Flex hAlign="end">
-        <Button
-          primary
-          content="Label"
-          disabled={capturedImages.length === 0}
-          onClick={(): void => {
-            history.push('/label');
-          }}
-        />
-      </Flex>
+        </Link>
+      ))}
     </Flex>
   );
 };
