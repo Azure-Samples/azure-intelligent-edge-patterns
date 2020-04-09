@@ -55,24 +55,6 @@ const TopNav: FC = () => {
   );
 };
 
-// const TopNav: FC = () => (
-//   <Segment
-//     color="brand"
-//     content="Vision On Edge" // consider using Flex for the topnav
-//     inverted
-//     styles={{
-//       gridColumn: '1 / span 2',
-//       boxShadow: '0px 1px 10px 0px rgba(0,0,0,0.75)',
-//       zIndex: 2,
-//       padding: 0,
-//       fontSize: '20px',
-//       display: 'flex',
-//       alignItems: 'center',
-//       paddingLeft: '1em',
-//     }}
-//   />
-// );
-
 const LeftNav = ({ styles }): JSX.Element => {
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>

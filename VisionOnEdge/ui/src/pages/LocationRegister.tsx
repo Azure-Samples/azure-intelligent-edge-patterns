@@ -30,25 +30,23 @@ const LocationRegister: FC = () => {
         Register Location
       </Text>
       <Divider color="black" />
-      <Flex styles={{ width: '30%' }} space="between">
-        <FlexItem styles={{ width: '100px', height: '100px', padding: '10px' }}>
-          <Image src="/defaultCamera.png" fluid />
-        </FlexItem>
-        <Input
-          styles={{ paddingTop: '10px', height: '100px' }}
-          placeholder="Location Name"
-          value={locationRegisterInput.name}
-          onChange={(_, newProps): void =>
-            setLocationRegisterInput((prev) => ({ ...prev, name: newProps.value }))
-          }
-        />
-      </Flex>
       <Grid columns="15% 3fr 2fr" styles={{ height: '60%' }}>
         <Flex column gap="gap.large">
+          <FlexItem styles={{ width: '100px', height: '100px', padding: '10px' }}>
+            <Image src="/defaultCamera.png" fluid />
+          </FlexItem>
           <Text>Coordinates:</Text>
           <Text>Description:</Text>
         </Flex>
         <Flex column gap="gap.large">
+          <Input
+            styles={{ paddingTop: '10px', minHeight: '100px' }}
+            placeholder="Location Name"
+            value={locationRegisterInput.name}
+            onChange={(_, newProps): void =>
+              setLocationRegisterInput((prev) => ({ ...prev, name: newProps.value }))
+            }
+          />
           <Input
             value={locationRegisterInput.coordinates}
             onChange={(_, newProps): void =>
