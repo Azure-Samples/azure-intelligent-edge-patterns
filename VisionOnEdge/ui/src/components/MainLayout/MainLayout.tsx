@@ -1,5 +1,5 @@
-import React from 'react';
-import { Grid, Segment, Image, Flex } from '@fluentui/react-northstar';
+import React, { FC } from 'react';
+import { Grid, Segment, Image, Flex, Text } from '@fluentui/react-northstar';
 import { NavLink } from 'react-router-dom';
 
 export const MainLayout: React.FC = ({ children }) => {
@@ -10,22 +10,8 @@ export const MainLayout: React.FC = ({ children }) => {
       design={{ height: '100vh' }}
       styles={{ justifyContent: 'stretch' }}
     >
-      <Segment
-        color="brand"
-        content="Vision On Edge" // consider using Flex for the topnav
-        inverted
-        styles={{
-          gridColumn: '1 / span 2',
-          boxShadow: '0px 1px 10px 0px rgba(0,0,0,0.75)',
-          zIndex: 2,
-          padding: 0,
-          fontSize: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: '1em',
-        }}
-      />
-      <Nav
+      <TopNav />
+      <LeftNav
         styles={{
           gridColumn: '1 / span 1',
           gridRow: '2 / span 1',
@@ -38,7 +24,51 @@ export const MainLayout: React.FC = ({ children }) => {
   );
 };
 
-const Nav = ({ styles }): JSX.Element => {
+const TopNav: FC = () => {
+  return (
+    <Flex
+      space="between"
+      vAlign="center"
+      padding="padding.medium"
+      styles={{
+        backgroundColor: '#0094d8',
+        gridColumn: '1 / span 2',
+        boxShadow: '0px 1px 10px 0px rgba(0,0,0,0.75)',
+        zIndex: 2,
+        fontSize: '20px',
+        paddingLeft: '1em',
+      }}
+    >
+      <NavLink to={'/'} style={{ textDecoration: 'none' }}>
+        <Text color="white">Vision On Edge</Text>
+      </NavLink>
+      <Flex vAlign="center" space="evenly" styles={{ height: '100%' }}>
+        <Image styles={{ height: '100%' }} src="/icons/setting.png" />
+        <Text color="white">User</Text>
+      </Flex>
+    </Flex>
+  );
+};
+
+// const TopNav: FC = () => (
+//   <Segment
+//     color="brand"
+//     content="Vision On Edge" // consider using Flex for the topnav
+//     inverted
+//     styles={{
+//       gridColumn: '1 / span 2',
+//       boxShadow: '0px 1px 10px 0px rgba(0,0,0,0.75)',
+//       zIndex: 2,
+//       padding: 0,
+//       fontSize: '20px',
+//       display: 'flex',
+//       alignItems: 'center',
+//       paddingLeft: '1em',
+//     }}
+//   />
+// );
+
+const LeftNav = ({ styles }): JSX.Element => {
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
       <Flex column gap="gap.large" hAlign="center">

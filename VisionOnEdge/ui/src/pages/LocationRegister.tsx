@@ -1,4 +1,5 @@
 import React, { FC, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Flex, Text, Image, FlexItem, Input, TextArea, Button, Grid } from '@fluentui/react-northstar';
 import { Location } from '../store/location/locationTypes';
@@ -6,6 +7,7 @@ import { postLocation } from '../store/location/locationActions';
 
 const LocationRegister: FC = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const [locationRegisterInput, setLocationRegisterInput] = useState<Location>({
     name: '',
     coordinates: '',
@@ -60,7 +62,12 @@ const LocationRegister: FC = () => {
           }}
           content="Save"
         />
-        <Button content="Cancel" />
+        <Button
+          content="Cancel"
+          onClick={(): void => {
+            history.push('/location');
+          }}
+        />
       </Flex>
     </>
   );

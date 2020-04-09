@@ -1,5 +1,6 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
+import Home from '../pages/Home';
 import Cameras from '../pages/Cameras';
 import CameraDetails from '../pages/CameraDetails';
 import { Parts } from '../pages/Parts';
@@ -16,7 +17,7 @@ export const RootRouter: React.FC = () => {
       <Route path="/cameras/:name" component={CameraDetails} />
       <Route path="/cameras" component={Cameras} />
       <Route path="/parts" component={Parts} />
-      <Route path="/" component={null} />
+      <Route path="/" component={Home} />
     </Switch>
   );
 };
