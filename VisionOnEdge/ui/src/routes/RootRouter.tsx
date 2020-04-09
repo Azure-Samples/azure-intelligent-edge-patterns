@@ -7,6 +7,7 @@ import { PartDetails } from '../pages/PartDetails';
 import LabelingPage from '../pages/LabelingPage';
 import Locations from '../pages/Locations';
 import LocationRegister from '../pages/LocationRegister';
+import { Parts } from '../pages/Parts';
 
 export const RootRouter: FC = () => {
   return (
@@ -16,7 +17,8 @@ export const RootRouter: FC = () => {
       <Route path="/label/:imageIndex" component={LabelingPage} />
       <Route path="/cameras/:name" component={CameraDetails} />
       <Route path="/cameras" component={Cameras} />
-      <Route path="/parts" component={PartDetails} />
+      <Route path="/parts/detail" component={PartDetails} />
+      <Route path="/parts" component={Parts} />
       <Route path="/" component={Home} />
     </Switch>
   );

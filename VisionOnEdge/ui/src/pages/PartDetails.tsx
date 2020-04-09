@@ -52,10 +52,10 @@ const RightPanel = (): JSX.Element => {
     <Flex column gap="gap.small" styles={{ gridColumn: '5 / span 8' }}>
       <Tab />
       <Switch>
-        <Route path="/parts/capturePhotos" component={CapturePhotos} />
-        <Route path="/parts/uploadPhotos" component={null} />
-        <Route path="/parts">
-          <Redirect to="/parts/capturePhotos" />
+        <Route path="/parts/detail/capturePhotos" component={CapturePhotos} />
+        <Route path="/parts/detail/uploadPhotos" component={null} />
+        <Route path="/parts/detail">
+          <Redirect to="/parts/detail/capturePhotos" />
         </Route>
       </Switch>
     </Flex>
@@ -67,13 +67,13 @@ const Tab = (): JSX.Element => {
     {
       key: 'uploadPhotos',
       as: Link,
-      to: '/parts/uploadPhotos',
+      to: '/parts/detail/uploadPhotos',
       content: 'Upload Photos',
     },
     {
       key: 'capturePhotos',
       as: Link,
-      to: '/parts/capturePhotos',
+      to: '/parts/detail/capturePhotos',
       content: 'Capture Photo',
     },
   ];
