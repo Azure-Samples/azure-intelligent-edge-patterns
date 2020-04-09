@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Text, Flex, FlexItem, Grid } from '@fluentui/react-northstar';
+import { Flex, Grid } from '@fluentui/react-northstar';
 import { useSelector } from 'react-redux';
 import { State } from '../store/State';
 import { Location } from '../store/location/locationTypes';
@@ -9,11 +9,6 @@ const Locations: FC = () => {
   const locations = useSelector<State, Location[]>((state) => state.locations);
   return (
     <Flex column gap="gap.large" padding="padding.medium">
-      <FlexItem align="center">
-        <Text size="larger" weight="semibold">
-          Location
-        </Text>
-      </FlexItem>
       <Grid columns="8">
         {locations.map((location, i) => (
           <ImageLink

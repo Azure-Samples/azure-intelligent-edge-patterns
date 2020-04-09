@@ -1,6 +1,6 @@
 import React, { useState, FC } from 'react';
 import { useDispatch } from 'react-redux';
-import { Text, Flex, Button, Dialog, Input, Icon, FlexItem, Grid } from '@fluentui/react-northstar';
+import { Flex, Button, Dialog, Input, Icon, Grid } from '@fluentui/react-northstar';
 
 import { useCameras } from '../hooks/useCameras';
 import { Camera } from '../store/camera/cameraTypes';
@@ -14,11 +14,6 @@ const Cameras: FC = (): JSX.Element => {
 
   return (
     <Flex column gap="gap.large" padding="padding.medium" styles={{ height: '100%' }}>
-      <FlexItem align="center">
-        <Text size="larger" weight="semibold">
-          Camera
-        </Text>
-      </FlexItem>
       <Grid columns="8" styles={{ height: '80%' }}>
         {cameras.map((camera, i) => (
           <ImageLink
