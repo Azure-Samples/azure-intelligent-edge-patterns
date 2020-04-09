@@ -1,7 +1,17 @@
 import React, { FC, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Flex, Text, Image, FlexItem, Input, TextArea, Button, Grid } from '@fluentui/react-northstar';
+import {
+  Flex,
+  Text,
+  Image,
+  FlexItem,
+  Input,
+  TextArea,
+  Button,
+  Grid,
+  Divider,
+} from '@fluentui/react-northstar';
 import { Location } from '../store/location/locationTypes';
 import { postLocation } from '../store/location/locationActions';
 
@@ -19,6 +29,7 @@ const LocationRegister: FC = () => {
       <Text size="larger" weight="semibold">
         Register Location
       </Text>
+      <Divider color="black" />
       <Flex styles={{ width: '30%' }} space="between">
         <FlexItem styles={{ width: '100px', height: '100px', padding: '10px' }}>
           <Image src="/defaultCamera.png" fluid />
