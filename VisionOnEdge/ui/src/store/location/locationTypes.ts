@@ -1,8 +1,10 @@
 // Describing the shape of the loaction's slice of state
 export type Location = {
+  id?: number;
   name: string;
   coordinates: string;
   description: string;
+  projectId?: number;
 };
 
 // Describing the different ACTION NAMES available
