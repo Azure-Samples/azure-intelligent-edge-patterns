@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Flex, Text, Status, Button, Icon } from '@fluentui/react-northstar';
+import { Flex, Text, Status, Button, Image } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
 export const CameraConfigureInfo: React.FC = () => {
   const [configureInfo, setConfigureInfo] = useState({
+    status: 'online',
     parts: ['part1', 'part2'],
     successRate: 95,
     successfulInferences: 300,
@@ -17,17 +18,7 @@ export const CameraConfigureInfo: React.FC = () => {
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
-      <ListItem
-        title="Status"
-        content={
-          <Flex gap="gap.smaller" vAlign="center">
-            <Status state="success" />
-            <Text styles={{ margin: '5px' }} size="large">
-              Online
-            </Text>
-          </Flex>
-        }
-      />
+      <ListItem title="Status" content={<CameraStatus online={configureInfo.status === 'online'} />} />
       <ListItem title="Configured for" content={configureInfo.parts.join(', ')} />
       <Flex column gap="gap.small">
         <Text styles={{ width: '150px' }} size="large">
@@ -42,7 +33,7 @@ export const CameraConfigureInfo: React.FC = () => {
           vAlign="center"
           hAlign="center"
         >
-          <Icon name="play" circular bordered size="largest" />
+          <Image src="/icons/Play.png" styles={{ ':hover': { cursor: 'pointer' } }} />
         </Flex>
       </Flex>
       <ListItem
@@ -98,6 +89,20 @@ const ListItem = ({ title, content }): JSX.Element => {
     <Flex vAlign="center">
       <Text styles={{ width: '200px' }} size="large">{`${title}: `}</Text>
       {getContent()}
+    </Flex>
+  );
+};
+
+const CameraStatus = ({ online }): JSX.Element => {
+  const text = online ? 'Online' : 'Offline';
+  const state = online ? 'success' : 'unknown';
+
+  return (
+    <Flex gap="gap.smaller" vAlign="center">
+      <Status state={state} />
+      <Text styles={{ margin: '5px' }} size="large">
+        {text}
+      </Text>
     </Flex>
   );
 };

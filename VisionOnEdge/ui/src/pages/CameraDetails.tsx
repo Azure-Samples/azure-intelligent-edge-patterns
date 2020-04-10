@@ -13,7 +13,7 @@ const CameraDetails: FC = (): JSX.Element => {
   const camera = useSelector<State, Camera>((state) => state.cameras.find((e) => e.name === name));
 
   // TODO use projectId to determine which ui should be show in 'Configuration'
-  const hasProject = false;
+  const hasProject = true;
 
   return (
     <Grid columns="2" design={{ height: '100%' }}>
