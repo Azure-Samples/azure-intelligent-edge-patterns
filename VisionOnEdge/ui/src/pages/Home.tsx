@@ -38,7 +38,12 @@ const Home: FC = () => {
         SELECT FROM THE FOLLOWING TASKS:
       </Text>
       <Flex gap="gap.large">
-        <ImageLink imgSrc="/icons/doubleCube.png" to="/" label="Identify Parts" width="100px" />
+        <ImageLink
+          imgSrc="/icons/doubleCube.png"
+          to="/partIdentification"
+          label="Identify Parts"
+          width="100px"
+        />
         <ImageLink imgSrc="/icons/defects.png" to="/" label="Identify Defects" width="100px" />
         <ImageLink imgSrc="/icons/manual-filled.png" to="/" label="Identify items manually" width="100px" />
       </Flex>
