@@ -1,9 +1,9 @@
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { Flex, FlexItem, Text, Image } from '@fluentui/react-northstar';
+import { Flex, Text, Image } from '@fluentui/react-northstar';
 
 interface ImageLinkProps {
-  to: string;
+  to?: string;
   imgSrc?: string;
   defaultSrc?: string;
   label?: string;
@@ -12,7 +12,7 @@ interface ImageLinkProps {
   height?: string;
 }
 const ImageLink: FC<ImageLinkProps> = ({
-  to,
+  to = '',
   imgSrc,
   defaultSrc,
   label = '',
@@ -22,14 +22,23 @@ const ImageLink: FC<ImageLinkProps> = ({
 }) => {
   return (
     <Flex column styles={{ width }}>
-      <Link to={to}>
+      {to === '' ? (
         <div style={{ height }}>
           <Image
             src={imgSrc ?? defaultSrc}
             styles={{ padding: imgPadding, width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </div>
-      </Link>
+      ) : (
+        <Link to={to}>
+          <div style={{ height }}>
+            <Image
+              src={imgSrc ?? defaultSrc}
+              styles={{ padding: imgPadding, width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          </div>
+        </Link>
+      )}
       <Text align="center">{label}</Text>
     </Flex>
   );

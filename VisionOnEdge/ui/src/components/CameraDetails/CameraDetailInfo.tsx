@@ -1,5 +1,7 @@
 import React, { FC } from 'react';
-import { Flex, FlexItem, Text, Image } from '@fluentui/react-northstar';
+import { Flex, Text } from '@fluentui/react-northstar';
+
+import ImageLink from '../ImageLink';
 
 interface CameraDetailInfoProps {
   name: string;
@@ -13,9 +15,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ name, rtsp, modelName }) 
         <Text size="larger" weight="semibold">
           Details
         </Text>
-        <FlexItem styles={{ width: '100px', height: '100px', padding: '10px' }}>
-          <Image src="/defaultCamera.png" fluid />
-        </FlexItem>
+        <ImageLink defaultSrc="/defaultCamera.png" width="100px" height="100px" />
       </Flex>
       <Flex padding="padding.medium" gap="gap.large">
         <Flex column>

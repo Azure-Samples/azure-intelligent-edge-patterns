@@ -4,14 +4,13 @@ import { useDispatch } from 'react-redux';
 import {
   Flex,
   Text,
-  Image,
-  FlexItem,
   Input,
   TextArea,
   Button,
   Grid,
   Divider,
 } from '@fluentui/react-northstar';
+import ImageLink from '../components/ImageLink';
 import { Location } from '../store/location/locationTypes';
 import { postLocation } from '../store/location/locationActions';
 
@@ -32,9 +31,7 @@ const LocationRegister: FC = () => {
       <Divider color="black" />
       <Grid columns="15% 3fr 2fr" styles={{ height: '60%' }}>
         <Flex column gap="gap.large">
-          <FlexItem styles={{ width: '100px', height: '100px', padding: '10px' }}>
-            <Image src="/defaultCamera.png" fluid />
-          </FlexItem>
+          <ImageLink defaultSrc="/defaultLocation.png" width="100px" height="100px" />
           <Text>Coordinates:</Text>
           <Text>Description:</Text>
         </Flex>
