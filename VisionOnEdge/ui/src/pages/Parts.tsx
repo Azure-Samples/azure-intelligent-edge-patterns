@@ -34,6 +34,8 @@ export const Parts: React.FC = () => {
           right: '100px',
           bottom: '100px',
         }}
+        as={Link}
+        to="/parts/detail"
       />
     </div>
   );
