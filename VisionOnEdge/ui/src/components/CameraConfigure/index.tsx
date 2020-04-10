@@ -1,3 +1,4 @@
-import { CameraConfigure } from './CameraConfigure';
+import { CameraConfigureInfo } from './CameraConfigureInfo';
+import { CreateCameraConfig } from './CreateCameraConfig';
 
-export { CameraConfigure };
+export { CameraConfigureInfo, CreateCameraConfig };

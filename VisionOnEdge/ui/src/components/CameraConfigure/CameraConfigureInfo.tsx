@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Flex, Text, Status, Button, Icon } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
-export const CameraConfigure: React.FC = () => {
+export const CameraConfigureInfo: React.FC = () => {
   const [configureInfo, setConfigureInfo] = useState({
     successRate: 95,
     successfulInferences: 300,
