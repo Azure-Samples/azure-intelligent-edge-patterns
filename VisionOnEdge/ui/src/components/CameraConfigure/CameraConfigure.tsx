@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Flex, Text, Status, Button, Icon } from '@fluentui/react-northstar';
+import { Link } from 'react-router-dom';
 
 export const CameraConfigure: React.FC = () => {
+  const [configureInfo, setConfigureInfo] = useState({
+    successRate: 95,
+    successfulInferences: 300,
+    unIdetifiedItems: 15,
+  });
+
+  const onDeleteConfigure = (): void => {
+    // TODO
+  };
+
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
@@ -36,18 +47,18 @@ export const CameraConfigure: React.FC = () => {
       <ListItem
         title="Success Rate"
         content={
-          <Text color="orange" size="large">
-            95%
+          <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
+            {`${configureInfo.successRate}%`}
           </Text>
         }
       />
-      <ListItem title="Successful Inferences" content="300" />
+      <ListItem title="Successful Inferences" content={configureInfo.successfulInferences} />
       <ListItem
         title="Unidentified Items"
         content={
           <>
             <Text styles={{ margin: '5px' }} size="large">
-              15
+              {configureInfo.unIdetifiedItems}
             </Text>
             <Button
               content="Identify Manually"
@@ -62,11 +73,15 @@ export const CameraConfigure: React.FC = () => {
                   backgroundColor: '#8E192E',
                 },
               }}
+              as={Link}
+              to="/"
             />
           </>
         }
       />
-      <Button primary>Delete Configuration</Button>
+      <Button primary onClick={onDeleteConfigure}>
+        Delete Configuration
+      </Button>
     </Flex>
   );
 };
