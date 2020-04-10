@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Text, Flex } from '@fluentui/react-northstar';
 
-const getTitle = (pathname): string => {
+const getTitle = (pathname: string): string => {
   if (!Number.isNaN(parseInt(pathname, 10))) {
     return 'Details';
   }
@@ -18,6 +18,8 @@ const getTitle = (pathname): string => {
       return 'Register';
     case 'label':
       return 'Label';
+    case 'manual':
+      return 'Identify Manually'
     default:
       return null;
   }
@@ -28,7 +30,7 @@ const Breadcrumb: FC = () => {
 
   if (pathname === '/') return <Text color="black">Home</Text>;
 
-  const pathTitles = pathname.split('/');
+  const pathTitles = pathname.split('/').slice(1);
 
   return (
     <Flex gap="gap.smaller">
@@ -38,22 +40,20 @@ const Breadcrumb: FC = () => {
       {pathTitles.map((e, i, arr) => {
         const title = getTitle(e);
 
-        if (i === arr.length - 1) {
-          return (
-            <Text key={i} color="black">
-              {title}
-            </Text>
-          );
-        }
-
         return (
           <>
-            <Link key={`link${i}`} to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
-              <Text>{title}</Text>
-            </Link>
-            <Text key={`arrow${i}`} styles={{ color: 'black', cursor: 'default' }}>
+            <Text key={i} color="black">
               {'>'}
             </Text>
+            {i === arr.length - 1 ? (
+              <Text key={`title-${i}`} color="black">
+                {title}
+              </Text>
+            ) : (
+              <Link key={`title-${i}`} to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
+                <Text>{title}</Text>
+              </Link>
+            )}
           </>
         );
       })}
