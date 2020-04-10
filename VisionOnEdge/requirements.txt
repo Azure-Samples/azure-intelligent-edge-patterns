@@ -1,4 +1,4 @@
 django
 djangorestframework
-cv2
+opencv-python
 pillow

@@ -1,17 +1,27 @@
-import { Camera } from '../State';
+import {
+  GET_CAMERA_SUCCESS,
+  POST_CAMERA_SUCCESS,
+  REQUEST_CAMERA_FAILURE,
+  GetCamerasSuccess,
+  RequestCamerasFailure,
+  PostCameraSuccess,
+  Camera,
+} from './cameraTypes';
 
-export const GET_CAMERA_SUCCESS = 'GET_CAMERA_SUCCESS';
-export const GET_CAMERA_FAILURE = 'GET_CAMERA_FAILURE';
-export const POST_CAMERA_SUCCESS = 'POST_CAMERA_SUCCESS';
+const getCamerasSuccess = (data: Camera[]): GetCamerasSuccess => ({
+  type: GET_CAMERA_SUCCESS,
+  payload: data,
+});
 
-const getCamerasSuccess = (data: Camera[]): any => ({ type: GET_CAMERA_SUCCESS, payload: data });
-
-const requestCamerasFailure = (error: any): any => {
+const requestCamerasFailure = (error: any): RequestCamerasFailure => {
   console.error(error);
-  return { type: GET_CAMERA_FAILURE };
+  return { type: REQUEST_CAMERA_FAILURE };
 };
 
-const postCamerasSuccess = (data: Camera[]): any => ({ type: POST_CAMERA_SUCCESS, payload: data });
+const postCameraSuccess = (data: Camera): PostCameraSuccess => ({
+  type: POST_CAMERA_SUCCESS,
+  payload: data,
+});
 
 export const getCameras = () => (dispatch): Promise<void> => {
   return fetch('/api/cameras/')
@@ -27,7 +37,7 @@ export const getCameras = () => (dispatch): Promise<void> => {
     });
 };
 
-export const postCameras = (newCamera: Camera) => (dispatch): Promise<void> => {
+export const postCamera = (newCamera: Camera) => (dispatch): Promise<void> => {
   return fetch('/api/cameras/', {
     method: 'POST',
     headers: {
@@ -39,7 +49,7 @@ export const postCameras = (newCamera: Camera) => (dispatch): Promise<void> => {
       return res.json();
     })
     .then((data) => {
-      dispatch(postCamerasSuccess(data));
+      dispatch(postCameraSuccess(data));
       return void 0;
     })
     .catch((err) => {
