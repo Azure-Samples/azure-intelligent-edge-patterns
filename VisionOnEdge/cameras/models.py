@@ -3,6 +3,16 @@ import cv2
 
 
 # Create your models here.
+class Part(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=1000)
+    def __str__(self):
+        return self.name
+
+class Location(models.Model):
+    name = models.CharField(max_length=200)
+    def __str__(self):
+        return self.name
 
 class Camera(models.Model):
     name = models.CharField(max_length=200)
@@ -11,14 +21,22 @@ class Camera(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/')
+    part = models.ForeignKey(Part, on_delete=models.CASCADE)
+    labels = models.CharField(max_length=1000, null=True)
+
+class Project(models.Model):
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    parts = models.ManyToManyField(
+                Part, related_name='part')
 
 
 # FIXME consider move this out of models.py
 class Stream(object):
-    def __init__(self, rtsp):
+    def __init__(self, rtsp, part_id=None):
         if rtsp == '0': self.rtsp = 0
         elif rtsp == '1': self.rtsp = 1
         else: self.rtsp = rtsp
+        self.part_id = part_id
 
         #self.last_active = datetime.datetime.now()
         self.status = 'init'

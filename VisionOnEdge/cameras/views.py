@@ -5,27 +5,63 @@ import io
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.core.files.images import ImageFile
+from django.core.exceptions import ObjectDoesNotExist
 
 #from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework import serializers, viewsets
 
-from .models import Camera, Stream, Image
+from .models import Camera, Stream, Image, Location, Project, Part
 
 import cv2
 
 #
+# Part Views
+#
+class PartSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Part
+        fields = ['id', 'name']
+
+class PartViewSet(viewsets.ModelViewSet):
+    queryset = Part.objects.all()
+    serializer_class = PartSerializer
+
+#
+# Location Views
+#
+class LocationSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Location
+        fields = ['id', 'name']
+
+class LocationViewSet(viewsets.ModelViewSet):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+#
 # Camera Views
 #
+
 class CameraSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Camera
-        fields = ['id', 'name', 'rtsp', 'model_name']
+        fields = ['id', 'name', 'rtsp']
 
 class CameraViewSet(viewsets.ModelViewSet):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
 
+#
+# Projects Views
+#
+class ProjectSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'location', 'parts']
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
 #
 # Image Views
@@ -33,7 +69,7 @@ class CameraViewSet(viewsets.ModelViewSet):
 class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Image
-        fields = ['id', 'image']
+        fields = ['id', 'image', 'labels']
 
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
@@ -47,9 +83,17 @@ class ImageViewSet(viewsets.ModelViewSet):
 streams = []
 @api_view()
 def connect_stream(request):
-    s = Stream(0)
-    streams.append(s)
-    return JsonResponse({'status': 'ok', 'stream_id': s.id})
+    part_id = request.query_params.get('part_id')
+    if part_id is None:
+        return JsonResponse({'status': 'failed', 'reason': 'part_id is missing'})
+
+    try:
+        Part.objects.get(pk=int(part_id))
+        s = Stream(0)
+        streams.append(s)
+        return JsonResponse({'status': 'ok', 'stream_id': s.id})
+    except ObjectDoesNotExist:
+        return JsonResponse({'status': 'failed', 'reason': 'part_id doesnt exist'})
 
 
 @api_view()
@@ -77,7 +121,7 @@ def capture(request, stream_id):
             img_io = io.BytesIO(img_data)
             img = ImageFile(img_io)
             img.name = datetime.datetime.utcnow().isoformat() + '.jpg'
-            img_obj = Image(image=img)
+            img_obj = Image(image=img, part_id=stream.part_id)
             img_obj.save()
             img_serialized = ImageSerializer(img_obj, context={'request': request})
 
