@@ -6,6 +6,7 @@ import CameraDetailInfo from '../components/CameraDetails/CameraDetailInfo';
 
 import { State } from '../store/State';
 import { Camera } from '../store/camera/cameraTypes';
+import { CameraConfigure } from '../components/CameraConfigure';
 
 const CameraDetails: FC = (): JSX.Element => {
   const { name } = useParams();
@@ -14,6 +15,7 @@ const CameraDetails: FC = (): JSX.Element => {
   return (
     <Grid columns="2">
       <CameraDetailInfo name={name} rtsp={camera.rtsp} modelName={camera.model_name} />
+      <CameraConfigure />
     </Grid>
   );
 };
