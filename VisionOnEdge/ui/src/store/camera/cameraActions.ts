@@ -4,7 +4,7 @@ import {
   REQUEST_CAMERA_FAILURE,
   GetCamerasSuccess,
   RequestCamerasFailure,
-  PostCamerasSuccess,
+  PostCameraSuccess,
   Camera,
 } from './cameraTypes';
 
@@ -18,7 +18,7 @@ const requestCamerasFailure = (error: any): RequestCamerasFailure => {
   return { type: REQUEST_CAMERA_FAILURE };
 };
 
-const postCamerasSuccess = (data: Camera): PostCamerasSuccess => ({
+const postCameraSuccess = (data: Camera): PostCameraSuccess => ({
   type: POST_CAMERA_SUCCESS,
   payload: data,
 });
@@ -37,7 +37,7 @@ export const getCameras = () => (dispatch): Promise<void> => {
     });
 };
 
-export const postCameras = (newCamera: Camera) => (dispatch): Promise<void> => {
+export const postCamera = (newCamera: Camera) => (dispatch): Promise<void> => {
   return fetch('/api/cameras/', {
     method: 'POST',
     headers: {
@@ -49,7 +49,7 @@ export const postCameras = (newCamera: Camera) => (dispatch): Promise<void> => {
       return res.json();
     })
     .then((data) => {
-      dispatch(postCamerasSuccess(data));
+      dispatch(postCameraSuccess(data));
       return void 0;
     })
     .catch((err) => {

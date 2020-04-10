@@ -1,4 +1,5 @@
 import {
+  AnnotationState,
   UPDATE_ANNOTATION,
   REQUEST_ANNOTATION_FAILURE,
   REQUEST_ANNOTATION_SUCCESS,
@@ -6,9 +7,8 @@ import {
   UPDATE_CREATING_ANNOTATION,
   REMOVE_ANNOTATION,
   AnnotationAction,
-} from '../actions/labelingPage';
-import { initialState, LabelingPageState } from '../store/State';
-import { AnnotationState } from '../components/LabelingPage/types';
+} from './labelingPageTypes';
+import { initialState, LabelingPageState } from '../State';
 
 const labelingPageStateReducer = (
   state = initialState.labelingPageState,

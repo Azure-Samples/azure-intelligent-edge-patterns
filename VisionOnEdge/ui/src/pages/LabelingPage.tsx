@@ -1,32 +1,36 @@
-import React, { useState, FC } from 'react';
+import React, { FC } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Text, Flex, FlexItem, Button } from '@fluentui/react-northstar';
+import { Text, Flex, Button } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
+import { LabelingType } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 
-const LabelingPage: FC = () => {
+interface LabelingPageProps {
+  labelingType: LabelingType;
+}
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType }) => {
   const imageUrls = useSelector<State, string[]>((state) => state.part.capturedImages);
-  const [frameIndex, setFrameIndex] = useState<number>(0);
+  const history = useHistory();
+  const { imageIndex } = useParams();
 
   return (
-    <Flex column>
-      <FlexItem align="center">
-        <Text size="larger">DRAW A RECTANGLE AROUND THE PART</Text>
-      </FlexItem>
-      <Scene url={imageUrls[frameIndex]} />
+    <Flex column hAlign="center">
+      <Text size="larger" align="center">
+        DRAW A RECTANGLE AROUND THE PART
+      </Text>
+      <Scene url={imageUrls[parseInt(imageIndex, 10)]} labelingType={labelingType} />
       <Flex gap="gap.medium">
-        <Button primary content="Save" />
-        <Button
-          content="Previous"
-          disabled={imageUrls.length < 2}
-          onClick={(): void => setFrameIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length)}
-        />
-        <Button
-          content="Next"
-          disabled={imageUrls.length < 2}
-          onClick={(): void => setFrameIndex((prev) => (prev + 1) % imageUrls.length)}
-        />
+        <Flex gap="gap.medium">
+          <Button primary content="Save" />
+          <Button
+            content="Cancel"
+            onClick={(): void => {
+              history.push('/parts');
+            }}
+          />
+        </Flex>
       </Flex>
     </Flex>
   );

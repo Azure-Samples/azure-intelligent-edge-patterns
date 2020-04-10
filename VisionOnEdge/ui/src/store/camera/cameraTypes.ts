@@ -8,6 +8,6 @@ export const POST_CAMERA_SUCCESS = 'POST_CAMERA_SUCCESS';
 
 export type GetCamerasSuccess = { type: typeof GET_CAMERA_SUCCESS; payload: Camera[] };
 export type RequestCamerasFailure = { type: typeof REQUEST_CAMERA_FAILURE };
-export type PostCamerasSuccess = { type: typeof POST_CAMERA_SUCCESS; payload: Camera };
+export type PostCameraSuccess = { type: typeof POST_CAMERA_SUCCESS; payload: Camera };
 
-export type CameraAction = GetCamerasSuccess | RequestCamerasFailure | PostCamerasSuccess;
+export type CameraAction = GetCamerasSuccess | RequestCamerasFailure | PostCameraSuccess;

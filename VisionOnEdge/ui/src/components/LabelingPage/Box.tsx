@@ -2,8 +2,8 @@ import React, { useState, useEffect, FC } from 'react';
 import { Line, Group, Circle } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import { BoxLabel, Box2dComponentProps, WorkState } from './types';
-import { updateAnnotation } from '../../actions/labelingPage';
+import { BoxLabel, Box2dComponentProps, WorkState } from '../../store/labelingPage/labelingPageTypes';
+import { updateAnnotation } from '../../store/labelingPage/labelingPageActions';
 
 export const Box2d: FC<Box2dComponentProps> = ({
   scale,
