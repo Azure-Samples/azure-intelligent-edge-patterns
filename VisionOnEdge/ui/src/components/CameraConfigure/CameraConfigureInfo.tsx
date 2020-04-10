@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 export const CameraConfigureInfo: React.FC = () => {
   const [configureInfo, setConfigureInfo] = useState({
+    parts: ['part1', 'part2'],
     successRate: 95,
     successfulInferences: 300,
     unIdetifiedItems: 15,
@@ -27,7 +28,7 @@ export const CameraConfigureInfo: React.FC = () => {
           </Flex>
         }
       />
-      <ListItem title="Configured for" content="Part Identification" />
+      <ListItem title="Configured for" content={configureInfo.parts.join(', ')} />
       <Flex column gap="gap.small">
         <Text styles={{ width: '150px' }} size="large">
           Live View:
