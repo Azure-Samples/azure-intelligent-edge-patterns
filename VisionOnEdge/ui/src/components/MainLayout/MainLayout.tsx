@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Grid, Segment, Image, Flex, Text } from '@fluentui/react-northstar';
-import { Breadcrumbs } from 'react-breadcrumbs';
 import { NavLink } from 'react-router-dom';
+import Breadcrumb from '../Breadcrumb';
 
 export const MainLayout: React.FC = ({ children }) => {
   return (
@@ -22,7 +22,7 @@ export const MainLayout: React.FC = ({ children }) => {
       />
 
       <Segment styles={{ gridColumn: 'span 1', padding: '30px' }}>
-        <Breadcrumbs />
+        <Breadcrumb />
         {children}
       </Segment>
     </Grid>

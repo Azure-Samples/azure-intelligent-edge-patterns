@@ -125,7 +125,8 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType }) => {
         </Layer>
       </Stage>
       <Button
-        content={selectedAnnotationIndex === null ? 'Clear' : 'Remove'}
+        disabled={annotations.length === 0}
+        content={selectedAnnotationIndex === null && annotations.length > 1 ? 'Clear' : 'Remove'}
         onClick={(): void => {
           dispatch(removeAnnotation(selectedAnnotationIndex));
           setSelectedAnnotationIndex(null);
