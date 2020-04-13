@@ -7,12 +7,14 @@ import { PartDetails } from '../pages/PartDetails';
 import LabelingPage from '../pages/LabelingPage';
 import Locations from '../pages/Locations';
 import LocationRegister from '../pages/LocationRegister';
+import ManualIdentification from '../pages/ManualIdentification';
 import { Parts } from '../pages/Parts';
 import { PartIdentification } from '../pages/PartIdentification';
 
 export const RootRouter: FC = () => {
   return (
     <Switch>
+      <Route path="/manual" component={ManualIdentification} />
       <Route path="/location/register" component={LocationRegister} />
       <Route path="/location" component={Locations} />
       <Route path="/label/:imageIndex" component={LabelingPage} />
