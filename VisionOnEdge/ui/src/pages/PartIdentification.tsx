@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Divider, Text, Flex, Dropdown, Button, DropdownItemProps } from '@fluentui/react-northstar';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 export const PartIdentification: React.FC = () => {
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
@@ -10,6 +10,7 @@ export const PartIdentification: React.FC = () => {
   const [locationLoading, dropDownLocations, selectedLocations, setSelectedLocationById] = useDropdownItems<
     any
   >('locations');
+  const history = useHistory();
 
   const projectId = useRef<number>(null);
   useEffect(() => {
@@ -43,7 +44,14 @@ export const PartIdentification: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    })
+      .then(() => {
+        history.push(`/cameras/${selectedCamera.name}`);
+        return void 0;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (
@@ -75,7 +83,11 @@ export const PartIdentification: React.FC = () => {
           items={dropDownLocations}
         />
         <Link to="">Advanced Configuration</Link>
-        <Button primary onClick={handleSubmitConfigure}>
+        <Button
+          primary
+          onClick={handleSubmitConfigure}
+          disabled={!selectedCamera || !selectedLocations || !selectedParts}
+        >
           Configure
         </Button>
       </Flex>
