@@ -1,3 +1,4 @@
+import json
 import time
 import datetime
 import io
@@ -177,10 +178,50 @@ def train(request, project_id):
 
     images = Image.objects.all()
     img_entries = []
+
+    tags = trainer.get_tags(customvision_project_id)
+    tag_dict = {}
+    for tag in tags:
+        tag_dict[tag.name] = tag.id
+
     for image_obj in images:
-        image = image_obj.image
-        image.open()
-        img_entry = ImageFileCreateEntry(name=image.name, contents=image.read())
+        print('*** image', image_obj)
+
+        part = image_obj.part
+        part_name = part.name
+        if part_name not in tag_dict:
+            print('part_name', part_name)
+            tag = trainer.create_tag(customvision_project_id, part_name)
+            tag_dict[tag.name] = tag.id
+
+        tag_id = tag_dict[part_name]
+
+        name = 'img-' + datetime.datetime.utcnow().isoformat()
+        regions = []
+        try:
+            print(0)
+            annotation = image_obj.annotation
+            print(1)
+            print(annotation)
+            print(annotation.labels)
+            labels = json.loads(annotation.labels)
+            print(2)
+            for label in labels:
+                x = label['x1'] / 1280
+                y = label['y1'] / 720
+                w = (label['x2'] - label['x1']) / 1280
+                h = (label['y2'] - label['y1']) / 720
+                region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
+                print(region)
+                regions.append(region)
+            print(3)
+
+            image = image_obj.image
+            image.open()
+            img_entry = ImageFileCreateEntry(name=name, contents=image.read(), regions=regions)
+            img_entries.append(img_entry)
+        except:
+            pass
     print('uploading...')
     upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
     print(upload_result)
