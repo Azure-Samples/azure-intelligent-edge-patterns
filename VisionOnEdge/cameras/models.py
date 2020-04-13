@@ -1,5 +1,22 @@
+import datetime
+
 from django.db import models
+from django.db.models.signals import post_save, post_delete, pre_save
 import cv2
+
+from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
+from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+
+from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
+trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
+
+is_trainer_valid = True
+
+try:
+    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General")
+except:
+    is_trainer_valid = False
+
 
 
 # Create your models here.
@@ -26,11 +43,30 @@ class Image(models.Model):
     part = models.ForeignKey(Part, on_delete=models.CASCADE)
     labels = models.CharField(max_length=1000, null=True)
 
+class Annotation(models.Model):
+    image = models.OneToOneField(Image, on_delete=models.CASCADE)
+    labels = models.CharField(max_length=1000, null=True)
+
 class Project(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     parts = models.ManyToManyField(
                 Part, related_name='part')
-    name = models.CharField(max_length=200)
+    customvision_project_id = models.CharField(max_length=200)
+    customvision_project_name = models.CharField(max_length=200)
+
+    @staticmethod
+    def pre_save(sender, instance, **kwargs):
+        print('[INFO] Creating Project on Custom Vision')
+        name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
+        instance.customvision_project_name = name
+
+        if is_trainer_valid:
+            project = trainer.create_project(name, domain_id=obj_detection_domain.id)
+            instance.customvision_project_id = project.id
+        else:
+            instance.customvision_project_id = 'DUMMY-PROJECT-ID'
+
+pre_save.connect(Project.pre_save, Project, dispatch_uid='Project')
 
 
 

@@ -8,10 +8,29 @@ from django.core.files.images import ImageFile
 from django.core.exceptions import ObjectDoesNotExist
 
 #from rest_framework.views import APIView
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import serializers, viewsets
+from rest_framework import status
 
-from .models import Camera, Stream, Image, Location, Project, Part
+from .models import Camera, Stream, Image, Location, Project, Part, Annotation
+
+# FIXME move these to views
+from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
+from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+
+from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
+trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
+
+is_trainer_valid = True
+
+try:
+    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General")
+except:
+    is_trainer_valid = False
+# FIXME
+
 
 import cv2
 
@@ -59,6 +78,11 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         model = Project
         fields = ['id', 'location', 'parts']
 
+class ProjectSerializer2(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'location', 'parts']
+
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -74,6 +98,21 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+
+
+#
+# Annotation Views
+#
+class AnnotationSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Annotation
+        fields = ['id', 'image', 'labels']
+
+class AnnotationViewSet(viewsets.ModelViewSet):
+    queryset = Annotation.objects.all()
+    serializer_class = AnnotationSerializer
+
+
 
 
 
@@ -130,3 +169,21 @@ def capture(request, stream_id):
             return JsonResponse({'status': 'ok', 'image': img_serialized.data})
 
     return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
+
+@api_view()
+def train(request, project_id):
+    project_obj = Project.objects.get(pk=project_id)
+    customvision_project_id = project_obj.customvision_project_id
+
+    images = Image.objects.all()
+    img_entries = []
+    for image_obj in images:
+        image = image_obj.image
+        image.open()
+        img_entry = ImageFileCreateEntry(name=image.name, contents=image.read())
+    print('uploading...')
+    upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
+    print(upload_result)
+
+    return JsonResponse({'status': 'ok'})
+

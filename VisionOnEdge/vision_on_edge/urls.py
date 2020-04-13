@@ -29,6 +29,7 @@ router.register('api/parts', views.PartViewSet)
 router.register('api/images', views.ImageViewSet)
 router.register('api/projects', views.ProjectViewSet)
 router.register('api/locations', views.LocationViewSet)
+router.register('api/annotations', views.AnnotationViewSet)
 
 urlpatterns = [
     url('^', include(router.urls)),
@@ -36,5 +37,6 @@ urlpatterns = [
     path('api/streams/<int:stream_id>/disconnect', views.disconnect_stream),
     path('api/streams/<int:stream_id>/video_feed', views.video_feed),
     path('api/streams/<int:stream_id>/capture', views.capture),
+    path('api/projects/<int:project_id>/train', views.train),
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
