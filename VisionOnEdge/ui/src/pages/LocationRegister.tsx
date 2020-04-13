@@ -68,13 +68,14 @@ const LocationRegister: FC = () => {
           disabled={Object.values(locationRegisterInput).includes('')}
           onClick={(): void => {
             dispatch(postLocation(locationRegisterInput));
+            history.push('/location');
           }}
           content="Save"
         />
         <Button
           content="Cancel"
           onClick={(): void => {
-            history.push('/location');
+            history.push('/');
           }}
         />
       </Flex>
