@@ -9,11 +9,10 @@ import { Camera } from '../store/camera/cameraTypes';
 import { CameraConfigureInfo, CreateCameraConfig } from '../components/CameraConfigure';
 
 const CameraDetails: FC = (): JSX.Element => {
-  const { name } = useParams();
+  const { name, projectId } = useParams();
   const camera = useSelector<State, Camera>((state) => state.cameras.find((e) => e.name === name));
 
-  // TODO use projectId to determine which ui should be show in 'Configuration'
-  const hasProject = true;
+  const hasProject = !!projectId;
 
   return (
     <Grid columns="2" design={{ height: '100%' }}>

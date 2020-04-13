@@ -21,7 +21,7 @@ export const PartIdentification: React.FC = () => {
           if (data.length > 0) {
             projectId.current = data[0].id;
             setSelectedLocationById(data[0].location.split('/')[5]);
-            setSelectedPartsById(data[0].parts[0].split('/')[5]);
+            setSelectedPartsById(data[0].parts.map((ele) => ele.split('/')[5]));
           }
           return void 0;
         })
@@ -38,7 +38,7 @@ export const PartIdentification: React.FC = () => {
     fetch(url, {
       body: JSON.stringify({
         location: `http://localhost:8000/api/locations/${selectedLocations.id}/`,
-        parts: [`http://localhost:8000/api/parts/${selectedParts.id}/`],
+        parts: selectedParts.map((e) => `http://localhost:8000/api/parts/${e.id}/`),
       }),
       method: isProjectEmpty ? 'POST' : 'PUT',
       headers: {
@@ -46,7 +46,7 @@ export const PartIdentification: React.FC = () => {
       },
     })
       .then(() => {
-        history.push(`/cameras/${selectedCamera.name}`);
+        history.push(`/cameras/${selectedCamera.name}/${projectId}`);
         return void 0;
       })
       .catch((err) => {
@@ -64,23 +64,26 @@ export const PartIdentification: React.FC = () => {
         <ModuleSelector
           moduleName="cameras"
           to="/cameras"
-          value={selectedCamera?.name}
+          value={selectedCamera}
           setSelectedModuleItem={setSelectedCameraById}
           items={dropDownCameras}
+          isMultiple={false}
         />
         <ModuleSelector
           moduleName="parts"
           to="/parts"
-          value={selectedParts?.name}
+          value={selectedParts}
           setSelectedModuleItem={setSelectedPartsById}
           items={dropDownParts}
+          isMultiple={true}
         />
         <ModuleSelector
           moduleName="locations"
           to="/locations"
-          value={selectedLocations?.name}
+          value={selectedLocations}
           setSelectedModuleItem={setSelectedLocationById}
           items={dropDownLocations}
+          isMultiple={false}
         />
         <Link to="">Advanced Configuration</Link>
         <Button
@@ -124,25 +127,59 @@ function useDropdownItems<T>(moduleName: string): [boolean, DropdownItemProps[],
       });
   }, [moduleName]);
 
-  const setSelectedItemById = useCallback((id: string): void => {
-    const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === id.toString());
-    if (correspondedItem) setSelectedItem(correspondedItem);
+  const setSelectedItemById = useCallback((id: string | string[]): void => {
+    if (Array.isArray(id)) {
+      const correspondedItems = id.reduce((acc, cur) => {
+        const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === cur.toString());
+        if (correspondedItem) acc.push(correspondedItem);
+        return acc;
+      }, []);
+      setSelectedItem(correspondedItems as any);
+    } else {
+      const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === id.toString());
+      if (correspondedItem) setSelectedItem(correspondedItem);
+    }
   }, []);
 
   return [loading, dropDownItems, selectedItem, setSelectedItemById];
 }
 
-const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items }): JSX.Element => {
+const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items, isMultiple }): JSX.Element => {
   const onDropdownChange = (_, data): void => {
-    const { key } = data.value.content;
-    setSelectedModuleItem(key);
+    if (Array.isArray(data.value)) {
+      const ids = data.value.map((ele) => ele.content.key);
+      setSelectedModuleItem(ids);
+    } else {
+      const { key } = data.value.content;
+      setSelectedModuleItem(key);
+    }
   };
 
   return (
     <Flex vAlign="center" gap="gap.medium">
       <Text styles={{ width: '150px' }}>{`Select ${moduleName}`}</Text>
-      <Dropdown items={items} onChange={onDropdownChange} value={value} />
+      <Dropdown items={items} onChange={onDropdownChange} value={formatValue(value)} multiple={isMultiple} />
       <Link to={to}>{`Add ${moduleName}`}</Link>
     </Flex>
   );
+};
+
+const formatValue = (value): DropdownItemProps | DropdownItemProps[] => {
+  if (Array.isArray(value)) {
+    return value.map((e) => ({
+      header: e.name,
+      content: {
+        key: e.id,
+      },
+    }));
+  }
+  if (value) {
+    return {
+      header: value.name,
+      content: {
+        key: value.id,
+      },
+    };
+  }
+  return null;
 };
