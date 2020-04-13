@@ -8,6 +8,7 @@ import { State } from '../../store/State';
 import { Part } from '../../store/part/partTypes';
 import { Camera } from '../../store/camera/cameraTypes';
 import { thunkGetCapturedImages, thunkAddCapturedImages } from '../../store/part/partActions';
+import LabelingPageDialog from '../LabelingPageDialog';
 
 export const CapturePhotos: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
@@ -116,7 +117,6 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
 
 const CapturedImagesContainer = (): JSX.Element => {
   const dispatch = useDispatch();
-  const history = useHistory();
   const { capturedImages } = useSelector<State, Part>((state) => state.part);
 
   useEffect(() => {
@@ -130,9 +130,11 @@ const CapturedImagesContainer = (): JSX.Element => {
       vAlign="center"
     >
       {capturedImages.map((src, i) => (
-        <Link key={i} to={`/label/${i}`}>
-          <Image key={src} src={src} design={{ maxWidth: '150px' }} />
-        </Link>
+        <LabelingPageDialog
+          key={i}
+          imageIndex={i}
+          trigger={<Image src={src} styles={{ cursor: 'pointer' }} design={{ maxWidth: '150px' }} />}
+        />
       ))}
     </Flex>
   );

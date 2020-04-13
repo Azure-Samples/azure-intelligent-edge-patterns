@@ -70,19 +70,21 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType = LabelingType.SingleAnn
   }, [workState]);
   useEffect(() => {
     const scaleX = imageSize.width / size.width;
-    scale.current = { x: scaleX, y: scaleX  };
-    setImageSize(prev => ({...prev, height: size.height * scaleX}));
-  }, [size, imageSize]);
+    if (scaleX === scale.current.x) return;
+    scale.current = { x: scaleX, y: scaleX };
+    setImageSize((prev) => ({ ...prev, height: size.height * scaleX }));
+  }, [imageSize, size]);
 
-  if (imageSize.height === 0 && imageSize.width === 0) return <Text align="center" color="red">Loading...</Text>;
+  if (status === 'loading' || (imageSize.height === 0 && imageSize.width === 0))
+    return (
+      <Text align="center" color="red">
+        Loading...
+      </Text>
+    );
 
   return (
     <div style={{ margin: 3 }}>
-      <Stage
-        width={imageSize.width}
-        height={imageSize.height}
-        scale={scale.current}
-      >
+      <Stage width={imageSize.width} height={imageSize.height} scale={scale.current}>
         <Layer
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
