@@ -89,7 +89,7 @@ def connect_stream(request):
 
     try:
         Part.objects.get(pk=int(part_id))
-        s = Stream(0)
+        s = Stream(0, part_id=part_id)
         streams.append(s)
         return JsonResponse({'status': 'ok', 'stream_id': s.id})
     except ObjectDoesNotExist:
@@ -121,6 +121,8 @@ def capture(request, stream_id):
             img_io = io.BytesIO(img_data)
             img = ImageFile(img_io)
             img.name = datetime.datetime.utcnow().isoformat() + '.jpg'
+            print(stream)
+            print(stream.part_id)
             img_obj = Image(image=img, part_id=stream.part_id)
             img_obj.save()
             img_serialized = ImageSerializer(img_obj, context={'request': request})
