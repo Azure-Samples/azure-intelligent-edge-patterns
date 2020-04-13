@@ -129,11 +129,11 @@ const CapturedImagesContainer = (): JSX.Element => {
       gap="gap.small"
       vAlign="center"
     >
-      {capturedImages.map((src, i) => (
+      {capturedImages.map((image, i) => (
         <LabelingPageDialog
           key={i}
           imageIndex={i}
-          trigger={<Image src={src} styles={{ cursor: 'pointer' }} design={{ maxWidth: '150px' }} />}
+          trigger={<Image src={image.image} styles={{ cursor: 'pointer' }} design={{ maxWidth: '150px' }} />}
         />
       ))}
     </Flex>
