@@ -51,14 +51,14 @@ const Breadcrumb: FC = () => {
         }
 
         return (
-          <>
-            <Link key={`link${i}`} to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
+          <Flex key={i} gap="gap.smaller">
+            <Link to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
               <Text>{title}</Text>
             </Link>
-            <Text key={`arrow${i}`} styles={{ color: 'black', cursor: 'default' }}>
+            <Text styles={{ color: 'black', cursor: 'default' }}>
               {'>'}
             </Text>
-          </>
+          </Flex>
         );
       })}
     </Flex>

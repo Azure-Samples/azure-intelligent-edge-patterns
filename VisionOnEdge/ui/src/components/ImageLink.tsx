@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { Flex, FlexItem, Text, Image } from '@fluentui/react-northstar';
+import { Flex, Text, Image } from '@fluentui/react-northstar';
 
 interface ImageLinkProps {
   to: string;
