@@ -23,13 +23,20 @@ export type RemoveAnnotationAction = {
   payload: { index: number };
 };
 
+export const SAVE_ANNOTATION = 'SAVE_ANNOTATION';
+export type SaveAnnotationAction = {
+  type: typeof SAVE_ANNOTATION;
+  payload: { imageId: number, annotations: Annotation[] };
+};
+
 export type AnnotationAction =
   | RequestAnnotationSuccessAction
   | RequestAnnotationFailureAction
   | CreateAnnotationAction
   | UpdateCreatingAnnotationAction
   | UpdateAnnotationAction
-  | RemoveAnnotationAction;
+  | RemoveAnnotationAction
+  | SaveAnnotationAction;
 
 export type Position2D = {
   x: number;

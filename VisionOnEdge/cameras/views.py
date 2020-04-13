@@ -5,27 +5,87 @@ import io
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.core.files.images import ImageFile
+from django.core.exceptions import ObjectDoesNotExist
 
 #from rest_framework.views import APIView
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import serializers, viewsets
+from rest_framework import status
 
-from .models import Camera, Stream, Image
+from .models import Camera, Stream, Image, Location, Project, Part, Annotation
+
+# FIXME move these to views
+from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
+from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+
+from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
+trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
+
+is_trainer_valid = True
+
+try:
+    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General")
+except:
+    is_trainer_valid = False
+# FIXME
+
 
 import cv2
 
 #
+# Part Views
+#
+class PartSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Part
+        fields = ['id', 'name']
+
+class PartViewSet(viewsets.ModelViewSet):
+    queryset = Part.objects.all()
+    serializer_class = PartSerializer
+
+#
+# Location Views
+#
+class LocationSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Location
+        fields = ['id', 'name', 'description', 'coordinates']
+
+class LocationViewSet(viewsets.ModelViewSet):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+#
 # Camera Views
 #
+
 class CameraSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Camera
-        fields = ['id', 'name', 'rtsp', 'model_name']
+        fields = ['id', 'name', 'rtsp']
 
 class CameraViewSet(viewsets.ModelViewSet):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
 
+#
+# Projects Views
+#
+class ProjectSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'location', 'parts']
+
+class ProjectSerializer2(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'location', 'parts']
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
 #
 # Image Views
@@ -33,11 +93,26 @@ class CameraViewSet(viewsets.ModelViewSet):
 class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Image
-        fields = ['id', 'image']
+        fields = ['id', 'image', 'labels']
 
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+
+
+#
+# Annotation Views
+#
+class AnnotationSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Annotation
+        fields = ['id', 'image', 'labels']
+
+class AnnotationViewSet(viewsets.ModelViewSet):
+    queryset = Annotation.objects.all()
+    serializer_class = AnnotationSerializer
+
+
 
 
 
@@ -47,9 +122,17 @@ class ImageViewSet(viewsets.ModelViewSet):
 streams = []
 @api_view()
 def connect_stream(request):
-    s = Stream(0)
-    streams.append(s)
-    return JsonResponse({'status': 'ok', 'stream_id': s.id})
+    part_id = request.query_params.get('part_id')
+    if part_id is None:
+        return JsonResponse({'status': 'failed', 'reason': 'part_id is missing'})
+
+    try:
+        Part.objects.get(pk=int(part_id))
+        s = Stream(0, part_id=part_id)
+        streams.append(s)
+        return JsonResponse({'status': 'ok', 'stream_id': s.id})
+    except ObjectDoesNotExist:
+        return JsonResponse({'status': 'failed', 'reason': 'part_id doesnt exist'})
 
 
 @api_view()
@@ -77,10 +160,30 @@ def capture(request, stream_id):
             img_io = io.BytesIO(img_data)
             img = ImageFile(img_io)
             img.name = datetime.datetime.utcnow().isoformat() + '.jpg'
-            img_obj = Image(image=img)
+            print(stream)
+            print(stream.part_id)
+            img_obj = Image(image=img, part_id=stream.part_id)
             img_obj.save()
             img_serialized = ImageSerializer(img_obj, context={'request': request})
 
             return JsonResponse({'status': 'ok', 'image': img_serialized.data})
 
     return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
+
+@api_view()
+def train(request, project_id):
+    project_obj = Project.objects.get(pk=project_id)
+    customvision_project_id = project_obj.customvision_project_id
+
+    images = Image.objects.all()
+    img_entries = []
+    for image_obj in images:
+        image = image_obj.image
+        image.open()
+        img_entry = ImageFileCreateEntry(name=image.name, contents=image.read())
+    print('uploading...')
+    upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
+    print(upload_result)
+
+    return JsonResponse({'status': 'ok'})
+

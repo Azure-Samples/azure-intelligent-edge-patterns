@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
@@ -8,6 +8,7 @@ import { State } from '../../store/State';
 import { Part } from '../../store/part/partTypes';
 import { Camera } from '../../store/camera/cameraTypes';
 import { thunkGetCapturedImages, thunkAddCapturedImages } from '../../store/part/partActions';
+import LabelingPageDialog from '../LabelingPageDialog';
 
 export const CapturePhotos: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
@@ -49,10 +50,10 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
 const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
   const [streamId, setStreamId] = useState<string>('');
   const dispatch = useDispatch();
+  const { partId } = useParams();
 
   const onCreateStream = (): void => {
-    // TODO: Use `selectedCameraId` when BE is ready
-    fetch(`/api/streams/connect`)
+    fetch(`/api/streams/connect/?part_id=${partId}`)
       .then((response) => response.json())
       .then((data) => {
         if (data?.status === 'ok') {
@@ -116,7 +117,6 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
 
 const CapturedImagesContainer = (): JSX.Element => {
   const dispatch = useDispatch();
-  const history = useHistory();
   const { capturedImages } = useSelector<State, Part>((state) => state.part);
 
   useEffect(() => {
@@ -129,10 +129,12 @@ const CapturedImagesContainer = (): JSX.Element => {
       gap="gap.small"
       vAlign="center"
     >
-      {capturedImages.map((src, i) => (
-        <Link key={i} to={`/label/${i}`}>
-          <Image key={src} src={src} design={{ maxWidth: '150px' }} />
-        </Link>
+      {capturedImages.map((image, i) => (
+        <LabelingPageDialog
+          key={i}
+          imageIndex={i}
+          trigger={<Image src={image.image} styles={{ cursor: 'pointer' }} design={{ maxWidth: '150px' }} />}
+        />
       ))}
     </Flex>
   );

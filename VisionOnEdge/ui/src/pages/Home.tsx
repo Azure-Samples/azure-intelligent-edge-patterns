@@ -32,13 +32,23 @@ const Home: FC = () => {
           width="100px"
           imgPadding="10px 3px 10px 3px"
         />
-        <ImageLink imgSrc="/icons/part-filled.png" to="/parts" label="Register a new Part" width="100px" />
+        <ImageLink
+          imgSrc="/icons/part-filled.png"
+          to="/parts/detail"
+          label="Register a new Part"
+          width="100px"
+        />
       </Flex>
       <Text color="white" styles={{ backgroundColor: '#373644', padding: '2px 2px 2px 10px' }}>
         SELECT FROM THE FOLLOWING TASKS:
       </Text>
       <Flex gap="gap.large">
-        <ImageLink imgSrc="/icons/doubleCube.png" to="/" label="Identify Parts" width="100px" />
+        <ImageLink
+          imgSrc="/icons/doubleCube.png"
+          to="/partIdentification"
+          label="Identify Parts"
+          width="100px"
+        />
         <ImageLink imgSrc="/icons/defects.png" to="/" label="Identify Defects" width="100px" />
         <ImageLink imgSrc="/icons/manual-filled.png" to="/manual" label="Identify items manually" width="100px" />
       </Flex>

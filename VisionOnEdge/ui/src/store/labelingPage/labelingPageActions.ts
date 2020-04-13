@@ -9,13 +9,16 @@ import {
   CREATE_ANNOTATION,
   UPDATE_CREATING_ANNOTATION,
   UPDATE_ANNOTATION,
+  SAVE_ANNOTATION,
   RequestAnnotationSuccessAction,
   RequestAnnotationFailureAction,
   CreateAnnotationAction,
   UpdateAnnotationAction,
   UpdateCreatingAnnotationAction,
   RemoveAnnotationAction,
+  SaveAnnotationAction,
 } from './labelingPageTypes';
+import { LabelImage } from '../part/partTypes';
 
 const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotationSuccessAction => ({
   type: REQUEST_ANNOTATION_SUCCESS,
@@ -28,7 +31,7 @@ const requestAnnotationsFailure = (error: any): RequestAnnotationFailureAction =
 };
 
 export const getAnnotations = () => (dispatch): Promise<void> => {
-  return fetch('/api/cameras/')
+  return fetch('/api/annotations/')
     .then((res) => {
       return res.json();
     })
@@ -86,6 +89,34 @@ export const removeAnnotation = (index: number = null): RemoveAnnotationAction =
   type: REMOVE_ANNOTATION,
   payload: { index },
 });
+
+// const saveAnnotationSuccess = (data): SaveAnnotationAction => ({
+//   type: SAVE_ANNOTATION,
+//   payload: data,
+// });
+export const saveAnnotation = (image: LabelImage, annotations: Annotation[]) => (dispatch): Promise<void> => {
+  return fetch(`/api/annotations/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      image: `http://localhost:8000/api/images/${image.id}/`,
+      labels: JSON.stringify(annotations.map((e) => e.label)),
+    }),
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      console.log(data);
+      // dispatch(requestAnnotationsSuccess(data));
+      return void 0;
+    })
+    .catch((err) => {
+      dispatch(requestAnnotationsFailure(err));
+    });
+};
 
 // * Annotation Functions
 export const BoxObj: BoxObject = {
