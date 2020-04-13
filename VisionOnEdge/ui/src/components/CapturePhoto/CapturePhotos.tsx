@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
@@ -49,10 +49,10 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
 const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
   const [streamId, setStreamId] = useState<string>('');
   const dispatch = useDispatch();
+  const { partId } = useParams();
 
   const onCreateStream = (): void => {
-    // TODO: Use `selectedCameraId` when BE is ready
-    fetch(`/api/streams/connect`)
+    fetch(`/api/streams/connect/?part_id=${partId}`)
       .then((response) => response.json())
       .then((data) => {
         if (data?.status === 'ok') {
