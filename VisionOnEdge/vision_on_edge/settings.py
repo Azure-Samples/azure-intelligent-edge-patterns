@@ -124,3 +124,7 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+import config
+TRAINING_KEY = config.TRAINING_KEY
+ENDPOINT = config.ENDPOINT
