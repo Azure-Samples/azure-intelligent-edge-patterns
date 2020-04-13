@@ -11,6 +11,8 @@ class Part(models.Model):
 
 class Location(models.Model):
     name = models.CharField(max_length=200)
+    description = models.CharField(max_length=1000)
+    coordinates = models.CharField(max_length=200)
     def __str__(self):
         return self.name
 
@@ -28,6 +30,8 @@ class Project(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     parts = models.ManyToManyField(
                 Part, related_name='part')
+    name = models.CharField(max_length=200)
+
 
 
 # FIXME consider move this out of models.py

@@ -33,7 +33,7 @@ class PartViewSet(viewsets.ModelViewSet):
 class LocationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Location
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'description', 'coordinates']
 
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
