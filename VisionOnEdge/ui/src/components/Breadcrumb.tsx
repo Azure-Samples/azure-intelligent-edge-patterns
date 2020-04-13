@@ -18,6 +18,10 @@ const getTitle = (pathname): string => {
       return 'Register';
     case 'label':
       return 'Label';
+    case 'detail':
+      return 'Register Part';
+    case 'partIdentification':
+      return 'Job Configuration';
     default:
       return null;
   }
