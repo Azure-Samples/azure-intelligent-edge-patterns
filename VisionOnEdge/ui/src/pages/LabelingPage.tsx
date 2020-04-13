@@ -6,7 +6,7 @@ import Scene from '../components/LabelingPage/Scene';
 import { LabelingType, Annotation, AnnotationState } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/part/partTypes';
-import { saveAnnotation, getAnnotations, updateAnnotation } from '../store/labelingPage/labelingPageActions';
+import { saveAnnotation, updateAnnotation } from '../store/labelingPage/labelingPageActions';
 
 interface LabelingPageProps {
   labelingType: LabelingType;

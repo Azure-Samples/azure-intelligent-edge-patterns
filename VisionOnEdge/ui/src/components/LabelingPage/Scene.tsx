@@ -69,10 +69,13 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType = LabelingType.SingleAnn
     if (workState === WorkState.None) setSelectedAnnotationIndex(null);
   }, [workState]);
   useEffect(() => {
-    const scaleX = imageSize.width / size.width;
-    if (scaleX === scale.current.x) return;
-    scale.current = { x: scaleX, y: scaleX };
-    setImageSize((prev) => ({ ...prev, height: size.height * scaleX }));
+    if (size.width !== 0) {
+      const scaleX = imageSize.width / size.width;
+      if (scaleX !== scale.current.x) {
+        scale.current = { x: scaleX, y: scaleX };
+        setImageSize((prev) => ({ ...prev, height: size.height * scaleX }));
+      }
+    }
   }, [imageSize, size]);
 
   if (status === 'loading' || (imageSize.height === 0 && imageSize.width === 0))
