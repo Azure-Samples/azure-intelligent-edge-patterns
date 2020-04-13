@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useRef } from 'react';
 import { Text, Button } from '@fluentui/react-northstar';
 import { Stage, Layer, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -24,34 +24,15 @@ interface SceneProps {
   url?: string;
   labelingType: LabelingType;
 }
-const Scene: FC<SceneProps> = ({ url = '', labelingType }) => {
+const Scene: FC<SceneProps> = ({ url = '', labelingType = LabelingType.SingleAnnotation }) => {
   const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
-  const [imageSize, setImageSize] = useState<Size2D>({ width: 1000, height: 300 });
+  const [imageSize, setImageSize] = useState<Size2D>({ width: 900, height: 600 });
   const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [cursorPosition, setCursorPosition] = useState<Position2D>({ x: 0, y: 0 });
-  // const stageRef = useRef(null);
-  // const layerRef = useRef(null);
+  const scale = useRef<Position2D>({ x: 1, y: 1 });
   const dispatch = useDispatch();
-
-  // const getCursorPosition = (stage, layer): Position2D => {
-  //   if (stage === null && layer === null) throw new Error('Stage & layer referring failed');
-  //   const { x, y } = layer
-  //     .getTransform()
-  //     .copy()
-  //     .invert()
-  //     .point(stage.getPointerPosition());
-
-  //   const cursorPos = { x: Math.round(x), y: Math.round(y) };
-
-  //   if (x <= 0) cursorPos.x = 0;
-  //   if (x >= imageSize.width) cursorPos.x = imageSize.width;
-  //   if (y <= 0) cursorPos.y = 0;
-  //   if (y >= imageSize.height) cursorPos.y = imageSize.height;
-
-  //   return cursorPos;
-  // };
 
   const onMouseDown = (): void => {
     // * Single bounding box labeling type condition
@@ -88,24 +69,25 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType }) => {
     if (workState === WorkState.None) setSelectedAnnotationIndex(null);
   }, [workState]);
   useEffect(() => {
-    setImageSize(size);
-  }, [size]);
+    const scaleX = imageSize.width / size.width;
+    scale.current = { x: scaleX, y: scaleX  };
+    setImageSize(prev => ({...prev, height: size.height * scaleX}));
+  }, [size, imageSize]);
 
-  if (imageSize.height === 0 && imageSize.width === 0) return <Text color="red">Loading...</Text>;
+  if (imageSize.height === 0 && imageSize.width === 0) return <Text align="center" color="red">Loading...</Text>;
 
   return (
     <div style={{ margin: 3 }}>
       <Stage
-        // ref={stageRef}
         width={imageSize.width}
         height={imageSize.height}
+        scale={scale.current}
       >
         <Layer
-          // ref={layerRef}
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
           onMouseMove={(e: KonvaEventObject<MouseEvent>): void => {
-            setCursorPosition({ x: e.evt.offsetX, y: e.evt.offsetY });
+            setCursorPosition({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y });
           }}
         >
           <Image image={image} />
