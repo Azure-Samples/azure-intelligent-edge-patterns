@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flex, Input, TextArea, Button, Menu, Grid } from '@fluentui/react-northstar';
-import { Link, useLocation, Switch, Route, Redirect } from 'react-router-dom';
+import { Link, useLocation, Switch, Route, Redirect, useParams, useHistory } from 'react-router-dom';
 import { CapturePhotos } from '../components/CapturePhoto';
 
 export const PartDetails = (): JSX.Element => {
@@ -15,9 +15,46 @@ export const PartDetails = (): JSX.Element => {
 const LeftPanel = (): JSX.Element => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const { partId } = useParams();
+  const history = useHistory();
+
+  useEffect(() => {
+    if (partId) {
+      fetch(`/api/parts/${partId}/`)
+        .then((res) => res.json())
+        .then((data) => {
+          setName(data.name);
+          setDescription(data.description);
+          return void 0;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, [partId]);
 
   const onSave = (): void => {
-    // TODO
+    const hasPartId = partId !== 'undefined';
+    const url = hasPartId ? `/api/parts/${partId}/` : `/api/parts/`;
+
+    fetch(url, {
+      body: JSON.stringify({
+        name,
+        description,
+      }),
+      method: hasPartId ? 'PUT' : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        history.push(`/parts/detail/${data.id}/capturePhotos`);
+        return void 0;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (
@@ -48,32 +85,34 @@ const LeftPanel = (): JSX.Element => {
 };
 
 const RightPanel = (): JSX.Element => {
+  const { partId } = useParams();
+
   return (
     <Flex column gap="gap.small" styles={{ gridColumn: '5 / span 8' }}>
-      <Tab />
+      <Tab partId={partId} />
       <Switch>
-        <Route path="/parts/detail/capturePhotos" component={CapturePhotos} />
-        <Route path="/parts/detail/uploadPhotos" component={null} />
-        <Route path="/parts/detail">
-          <Redirect to="/parts/detail/capturePhotos" />
+        <Route path="/parts/detail/:partId/capturePhotos" component={CapturePhotos} />
+        <Route path="/parts/detail/:partId/uploadPhotos" component={null} />
+        <Route path="/parts/detail/">
+          <Redirect to={`/parts/detail/${partId}/capturePhotos`} />
         </Route>
       </Switch>
     </Flex>
   );
 };
 
-const Tab = (): JSX.Element => {
+const Tab = ({ partId }): JSX.Element => {
   const items = [
     {
       key: 'uploadPhotos',
       as: Link,
-      to: '/parts/detail/uploadPhotos',
+      to: `/parts/detail/${partId}/uploadPhotos`,
       content: 'Upload Photos',
     },
     {
       key: 'capturePhotos',
       as: Link,
-      to: '/parts/detail/capturePhotos',
+      to: `/parts/detail/${partId}/capturePhotos`,
       content: 'Capture Photo',
     },
   ];

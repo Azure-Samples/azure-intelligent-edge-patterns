@@ -19,7 +19,7 @@ export const Parts: React.FC = () => {
     <div style={{ position: 'relative', height: '100%' }}>
       <Flex gap="gap.large" wrap>
         {parts.map((ele) => (
-          <Item key={ele.id} src={ele.images[0]} name={ele.name} />
+          <Item key={ele.id} src={ele.images[0]} id={ele.id} name={ele.name} />
         ))}
       </Flex>
       <Button
@@ -41,9 +41,9 @@ export const Parts: React.FC = () => {
   );
 };
 
-const Item = ({ src, name }): JSX.Element => {
+const Item = ({ src, id, name }): JSX.Element => {
   return (
-    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/${name}`}>
+    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/${id}`}>
       <div style={{ width: '250px', height: '250px' }}>
         <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>

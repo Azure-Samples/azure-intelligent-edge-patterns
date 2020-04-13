@@ -17,7 +17,8 @@ export const RootRouter: FC = () => {
       <Route path="/label/:imageIndex" component={LabelingPage} />
       <Route path="/cameras/:name" component={CameraDetails} />
       <Route path="/cameras" component={Cameras} />
-      <Route path="/parts/detail" component={PartDetails} />
+      <Route path="/parts/detail/:partId" component={PartDetails} />
+      <Route path="/parts/detail/" component={PartDetails} />
       <Route path="/parts" component={Parts} />
       <Route path="/" component={Home} />
     </Switch>
