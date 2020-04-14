@@ -1,3 +1,5 @@
+import { MutableRefObject } from 'react';
+
 import {
   Annotation,
   AnnotationState,
@@ -20,7 +22,7 @@ import {
 } from './labelingPageTypes';
 import { LabelImage } from '../part/partTypes';
 
-const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotationSuccessAction => ({
+export const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotationSuccessAction => ({
   type: REQUEST_ANNOTATION_SUCCESS,
   payload: { annotations: data },
 });
@@ -31,16 +33,17 @@ const requestAnnotationsFailure = (error: any): RequestAnnotationFailureAction =
 };
 
 export const getAnnotations = (id: number) => (dispatch): Promise<void> => {
-  return fetch(`/api/annotations/${id === undefined ? '' : id}`)
+  return fetch(`/api/images/${id === undefined ? '' : id}`)
     .then((res) => res.json())
-    .then((data) => JSON.parse(data?.labels))
+    .then((data) => {
+      return JSON.parse(data?.labels);
+    })
     .then((labels) => {
       const annotations = labels.map((e) => ({
         label: e,
         attribute: '',
         annotationState: AnnotationState.Finish,
       }));
-
       dispatch(requestAnnotationsSuccess(annotations));
       return void 0;
     })
@@ -75,27 +78,25 @@ export const removeAnnotation = (index: number = null): RemoveAnnotationAction =
   payload: { index },
 });
 
-export const saveAnnotation = (image: LabelImage, annotations: Annotation[], existed: boolean) => (
+export const saveAnnotation = (imageId: number, annotations: Annotation[]) => (
   dispatch,
 ): Promise<void> => {
-  const annoUrl = existed ? `/api/annotations/${image.id}/` : `/api/annotations/`;
-
+  const annoUrl =  `/api/images/${imageId}/`;
   return fetch(annoUrl, {
-    method: existed ? 'PUT' : 'POST',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      image: `http://localhost:8000/api/images/${image.id}/`,
       labels: JSON.stringify(annotations.map((e) => e.label)),
     }),
   })
     .then((res) => {
       return res.json();
     })
-    .then((data) => {
+    .then(() => {
       console.log('Save successfully');
-      // dispatch(requestAnnotationsSuccess(data));
+      dispatch(requestAnnotationsSuccess(annotations));
       return void 0;
     })
     .catch((err) => {

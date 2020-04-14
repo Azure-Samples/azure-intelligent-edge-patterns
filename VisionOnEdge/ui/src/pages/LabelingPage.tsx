@@ -6,7 +6,7 @@ import Scene from '../components/LabelingPage/Scene';
 import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/part/partTypes';
-import { saveAnnotation, getAnnotations } from '../store/labelingPage/labelingPageActions';
+import { saveAnnotation, getAnnotations,requestAnnotationsSuccess } from '../store/labelingPage/labelingPageActions';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
@@ -23,18 +23,13 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
   const imageUrl = images[imageIndex].image;
   const imageId = images[imageIndex].id;
   const dispatch = useDispatch();
-  const exist = useRef<boolean>(false);
 
   useEffect(() => {
-    exist.current = false;
     dispatch(getAnnotations(imageId));
-  }, [dispatch, imageId]);
-
-  useEffect(() => {
-    if (annotations.length > 0) {
-      exist.current = true;
+    return (): void => {
+      dispatch(requestAnnotationsSuccess([]));
     }
-  }, [annotations]);
+  }, [dispatch, imageId]);
 
   return (
     <Flex column hAlign="center">
@@ -48,7 +43,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
             primary
             content="Save"
             onClick={(): void => {
-              dispatch(saveAnnotation(images[imageIndex], annotations, exist.current));
+              dispatch(saveAnnotation(images[imageIndex].id, annotations));
               closeDialog();
             }}
           />
