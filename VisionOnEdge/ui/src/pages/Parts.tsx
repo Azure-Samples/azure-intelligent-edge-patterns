@@ -1,85 +1,53 @@
-import React, { useState } from 'react';
-import { Flex, Input, TextArea, Button, Menu, Grid } from '@fluentui/react-northstar';
-import { Link, useLocation, Switch, Route, Redirect } from 'react-router-dom';
-import { CapturePhotos } from '../components/CapturePhoto';
+import React, { useEffect, useState } from 'react';
+import { Flex, Image, Text, Button, Icon } from '@fluentui/react-northstar';
+import { Link } from 'react-router-dom';
 
-export const Parts = (): JSX.Element => {
-  return (
-    <Grid columns={'repeat(12, 1fr)'} styles={{ gridColumnGap: '20px', height: '100%' }}>
-      <LeftPanel />
-      <RightPanel />
-    </Grid>
-  );
-};
+export const Parts: React.FC = () => {
+  const [parts, setParts] = useState([]);
 
-const LeftPanel = (): JSX.Element => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-
-  const onSave = (): void => {
-    // TODO
-  };
+  useEffect(() => {
+    fetch('/api/parts')
+      .then((res) => res.json())
+      .then((data) => {
+        setParts(data.map((ele) => ({ ...ele, images: [] })));
+        return void 0;
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
-    <Flex column space="around" styles={{ gridColumn: '1 / span 4' }}>
-      <Input
-        placeholder="Enter Part Name..."
-        fluid
-        styles={{ fontSize: '2em' }}
-        value={name}
-        onChange={(_, newProps): void => {
-          setName(newProps.value);
-        }}
-      />
-      <TextArea
-        placeholder="Enter Description..."
-        design={{ height: '80%' }}
-        value={description}
-        onChange={(_, newProps): void => {
-          setDescription(newProps.value);
-        }}
-      />
-      <Flex space="around">
-        <Button content="Save" primary onClick={onSave} />
-        <Button content="Cancel" />
+    <div style={{ position: 'relative', height: '100%' }}>
+      <Flex gap="gap.large" wrap>
+        {parts.map((ele) => (
+          <Item key={ele.id} src={ele.images[0]} id={ele.id} name={ele.name} />
+        ))}
       </Flex>
-    </Flex>
+      <Button
+        primary
+        fluid
+        circular
+        content={<Icon name="add" size="largest" circular />}
+        style={{
+          width: 100,
+          height: 100,
+          position: 'fixed',
+          right: '100px',
+          bottom: '100px',
+        }}
+        as={Link}
+        to="/parts/detail"
+      />
+    </div>
   );
 };
 
-const RightPanel = (): JSX.Element => {
+const Item = ({ src, id, name }): JSX.Element => {
   return (
-    <Flex column gap="gap.small" styles={{ gridColumn: '5 / span 8' }}>
-      <Tab />
-      <Switch>
-        <Route path="/parts/capturePhotos" component={CapturePhotos} />
-        <Route path="/parts/uploadPhotos" component={null} />
-        <Route path="/parts">
-          <Redirect to="/parts/capturePhotos" />
-        </Route>
-      </Switch>
+    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/${id}`}>
+      <div style={{ width: '250px', height: '250px' }}>
+        <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+      <Text size="larger">{name}</Text>
     </Flex>
   );
-};
-
-const Tab = (): JSX.Element => {
-  const items = [
-    {
-      key: 'uploadPhotos',
-      as: Link,
-      to: '/parts/uploadPhotos',
-      content: 'Upload Photos',
-    },
-    {
-      key: 'capturePhotos',
-      as: Link,
-      to: '/parts/capturePhotos',
-      content: 'Capture Photo',
-    },
-  ];
-
-  const { pathname } = useLocation();
-  const activeIndex = items.findIndex((ele) => ele.to === pathname);
-
-  return <Menu items={items} activeIndex={activeIndex} pointing primary />;
 };

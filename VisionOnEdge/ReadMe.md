@@ -6,7 +6,9 @@
 
 #### Initial
 
-    python manage.py makemigrations object_parts cameras
+Following steps will create new tables in sqlite.db
+
+    python manage.py makemigrations cameras
     python manage.py migrate
 
 #### Dev
@@ -34,11 +36,11 @@
 
 
 
-
-
 #### Migrate DB
 
-    python manage.py makemigrations object_parts cameras
+If the database exists but table schema changes, please do followings to migrate the database
+
+    python manage.py makemigrations cameras
     python manage.py migrate
 
 ## Front end
@@ -47,9 +49,13 @@
 
 #### Initial
 
+To install needed packages
+
     yarn
 
 #### Dev
+
+This will launch a ui site in localhost:3000
 
     yarn start
 

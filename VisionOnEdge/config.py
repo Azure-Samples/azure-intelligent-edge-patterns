@@ -1,0 +1,2 @@
+TRAINING_KEY = ''
+ENDPOINT = ''

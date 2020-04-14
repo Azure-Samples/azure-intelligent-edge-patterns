@@ -1,42 +1,52 @@
 import React, { useState, FC } from 'react';
-import { Redirect } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { List, Text, Flex, ListItemProps, Button, Dialog, Input, Image } from '@fluentui/react-northstar';
+import { Flex, Button, Dialog, Input, Icon, Grid } from '@fluentui/react-northstar';
 
-import { postCameras } from '../actions/cameras';
-import { Camera } from '../State';
 import { useCameras } from '../hooks/useCameras';
+import { Camera } from '../store/camera/cameraTypes';
+import { postCamera } from '../store/camera/cameraActions';
+import ImageLink from '../components/ImageLink';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
   const cameras = useCameras();
   const [cameraInput, setCameraInput] = useState<Camera>({ name: '', rtsp: '', model_name: '' });
-  const [selectedListIdx, setSelectedListIdx] = useState(-1);
-  const cameraItems: ListItemProps[] = cameras.map((camera) => ({
-    key: camera.id,
-    media: <Image src="/defalutCamera.png" avatar />,
-    header: camera.name,
-    content: `Model Name: ${camera.model_name}`,
-  }));
-
-  if (selectedListIdx !== -1) return <Redirect to={`/cameras/${cameras[selectedListIdx].name}`} />;
 
   return (
-    <>
-      <Flex hAlign="center">
-        <Text size="larger" weight="semibold">
-          Camera
-        </Text>
-      </Flex>
+    <Flex column gap="gap.large" padding="padding.medium" styles={{ height: '100%' }}>
+      <Grid columns="8" styles={{ height: '80%' }}>
+        {cameras.map((camera, i) => (
+          <ImageLink
+            key={i}
+            to={`/cameras/${camera.name}`}
+            defaultSrc="/Play.png"
+            bgImgSrc="/defaultCamera.png"
+            width="100px"
+            height="100px"
+            bgImgStyle={{
+              backgroundSize: '60%',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+            label={camera.name}
+          />
+        ))}
+      </Grid>
       <Dialog
         trigger={
-          <Flex hAlign="end" padding="padding.medium">
-            <Button content="Add Camera" />
+          <Flex hAlign="end">
+            <Button
+              primary
+              fluid
+              circular
+              content={<Icon name="add" size="largest" circular />}
+              style={{ width: 100, height: 100 }}
+            />
           </Flex>
         }
         confirmButton="Submit"
         onConfirm={(): void => {
-          dispatch(postCameras(cameraInput));
+          dispatch(postCamera(cameraInput));
         }}
         cancelButton="Cancel"
         header="Add Camera"
@@ -62,15 +72,7 @@ const Cameras: FC = (): JSX.Element => {
           </Flex>
         }
       />
-      <List
-        items={cameraItems}
-        selectable
-        selectedIndex={selectedListIdx}
-        onSelectedIndexChange={(_, newProps): void => {
-          setSelectedListIdx(newProps.selectedIndex);
-        }}
-      />
-    </>
+    </Flex>
   );
 };
 
