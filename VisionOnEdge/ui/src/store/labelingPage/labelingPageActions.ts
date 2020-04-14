@@ -22,7 +22,7 @@ import { LabelImage } from '../part/partTypes';
 
 const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotationSuccessAction => ({
   type: REQUEST_ANNOTATION_SUCCESS,
-  payload: data,
+  payload: { annotations: data },
 });
 
 const requestAnnotationsFailure = (error: any): RequestAnnotationFailureAction => {
@@ -30,33 +30,18 @@ const requestAnnotationsFailure = (error: any): RequestAnnotationFailureAction =
   return { type: REQUEST_ANNOTATION_FAILURE };
 };
 
-export const getAnnotations = () => (dispatch): Promise<void> => {
-  return fetch('/api/annotations/')
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
-      dispatch(requestAnnotationsSuccess(data));
-      return void 0;
-    })
-    .catch((err) => {
-      dispatch(requestAnnotationsFailure(err));
-    });
-};
+export const getAnnotations = (id: number) => (dispatch): Promise<void> => {
+  return fetch(`/api/annotations/${id === undefined ? '' : id}`)
+    .then((res) => res.json())
+    .then((data) => JSON.parse(data?.labels))
+    .then((labels) => {
+      const annotations = labels.map((e) => ({
+        label: e,
+        attribute: '',
+        annotationState: AnnotationState.Finish,
+      }));
 
-export const postAnnotations = (annotations: Annotation[]) => (dispatch): Promise<void> => {
-  return fetch('/api/cameras/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(annotations),
-  })
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
-      dispatch(requestAnnotationsSuccess(data));
+      dispatch(requestAnnotationsSuccess(annotations));
       return void 0;
     })
     .catch((err) => {
@@ -90,13 +75,13 @@ export const removeAnnotation = (index: number = null): RemoveAnnotationAction =
   payload: { index },
 });
 
-// const saveAnnotationSuccess = (data): SaveAnnotationAction => ({
-//   type: SAVE_ANNOTATION,
-//   payload: data,
-// });
-export const saveAnnotation = (image: LabelImage, annotations: Annotation[]) => (dispatch): Promise<void> => {
-  return fetch(`/api/annotations/`, {
-    method: 'POST',
+export const saveAnnotation = (image: LabelImage, annotations: Annotation[], existed: boolean) => (
+  dispatch,
+): Promise<void> => {
+  const annoUrl = existed ? `/api/annotations/${image.id}/` : `/api/annotations/`;
+
+  return fetch(annoUrl, {
+    method: existed ? 'PUT' : 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -109,7 +94,7 @@ export const saveAnnotation = (image: LabelImage, annotations: Annotation[]) => 
       return res.json();
     })
     .then((data) => {
-      console.log(data);
+      console.log('Save successfully');
       // dispatch(requestAnnotationsSuccess(data));
       return void 0;
     })
