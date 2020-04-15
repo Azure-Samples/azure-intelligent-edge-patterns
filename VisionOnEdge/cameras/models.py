@@ -1,8 +1,9 @@
 import datetime
 
 from django.db import models
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_save, post_delete, pre_save, post_save
 import cv2
+import requests
 
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
@@ -12,8 +13,9 @@ trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 
 is_trainer_valid = True
 
+# Classification, General (compact) for classiciation
 try:
-    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General")
+    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General (compact)")
 except:
     is_trainer_valid = False
 
@@ -48,6 +50,7 @@ class Annotation(models.Model):
     labels = models.CharField(max_length=1000, null=True)
 
 class Project(models.Model):
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     parts = models.ManyToManyField(
                 Part, related_name='part')
@@ -62,11 +65,20 @@ class Project(models.Model):
 
         if is_trainer_valid:
             project = trainer.create_project(name, domain_id=obj_detection_domain.id)
+            print('[INFO] Got Custom Vision Project ID', project.id)
             instance.customvision_project_id = project.id
         else:
+            print('[INFO] Has not set the key, Got DUMMY PRJ ID')
             instance.customvision_project_id = 'DUMMY-PROJECT-ID'
 
-pre_save.connect(Project.pre_save, Project, dispatch_uid='Project')
+    @staticmethod
+    def post_save(sender, instance, **kwargs):
+        print('post!')
+        project_id = instance.id
+        requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
+
+pre_save.connect(Project.pre_save, Project, dispatch_uid='Project_pre')
+post_save.connect(Project.post_save, Project, dispatch_uid='Project_post')
 
 
 
@@ -98,9 +110,11 @@ class Stream(object):
 
     def get_frame(self):
         print('[INFO] get frame', self)
-        b, img = self.cap.read()
-        if b: return cv2.imencode('.jpg', img)[1].tobytes()
-        else : return None
+        #b, img = self.cap.read()
+        img = self.last_img.copy()
+        #if b: return cv2.imencode('.jpg', img)[1].tobytes()
+        #else : return None
+        return cv2.imencode('.jpg', img)[1].tobytes()
 
 
     def close(self):

@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect, useRef } from 'react';
 import { Text, Button } from '@fluentui/react-northstar';
 import { Stage, Layer, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
 import { Box2d } from './Box';
@@ -13,7 +13,6 @@ import {
   WorkState,
   LabelingType,
 } from '../../store/labelingPage/labelingPageTypes';
-import { State } from '../../store/State';
 import {
   createAnnotation,
   updateCreatingAnnotation,
@@ -23,16 +22,16 @@ import {
 interface SceneProps {
   url?: string;
   labelingType: LabelingType;
+  annotations: Annotation[];
 }
-const Scene: FC<SceneProps> = ({ url = '', labelingType = LabelingType.SingleAnnotation }) => {
-  const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
+const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
+  const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>({ width: 900, height: 600 });
   const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [cursorPosition, setCursorPosition] = useState<Position2D>({ x: 0, y: 0 });
   const scale = useRef<Position2D>({ x: 1, y: 1 });
-  const dispatch = useDispatch();
 
   const onMouseDown = (): void => {
     // * Single bounding box labeling type condition
@@ -65,6 +64,11 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType = LabelingType.SingleAnn
     setWorkState(WorkState.Selecting);
   };
 
+  useEffect(() => {
+    // * Single bounding box labeling type condition
+    if (labelingType === LabelingType.SingleAnnotation && annotations.length === 1)
+      setSelectedAnnotationIndex(0);
+  }, [annotations, labelingType]);
   useEffect(() => {
     if (workState === WorkState.None) setSelectedAnnotationIndex(null);
   }, [workState]);

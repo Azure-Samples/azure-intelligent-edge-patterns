@@ -16,7 +16,7 @@ export const CapturePhotos: React.FC = () => {
   return (
     <>
       <CameraSelector setSelectedCamera={setSelectedCamera} />
-      <RTSPVideo selectedCameraId={selectedCamera?.id} />
+      <RTSPVideo selectedCamera={selectedCamera} />
       <CapturedImagesContainer />
     </>
   );
@@ -47,13 +47,13 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
   );
 };
 
-const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
+const RTSPVideo = ({ selectedCamera }): JSX.Element => {
   const [streamId, setStreamId] = useState<string>('');
   const dispatch = useDispatch();
   const { partId } = useParams();
 
   const onCreateStream = (): void => {
-    fetch(`/api/streams/connect/?part_id=${partId}`)
+    fetch(`/api/streams/connect/?part_id=${partId}&rtsp=${selectedCamera.rtsp}`)
       .then((response) => response.json())
       .then((data) => {
         if (data?.status === 'ok') {
@@ -100,7 +100,13 @@ const RTSPVideo = ({ selectedCameraId }): JSX.Element => {
       <Button.Group
         styles={{ alignSelf: 'center' }}
         buttons={[
-          { key: 'start', icon: 'play', iconOnly: true, onClick: onCreateStream },
+          {
+            key: 'start',
+            icon: 'play',
+            iconOnly: true,
+            onClick: onCreateStream,
+            disabled: selectedCamera === null,
+          },
           {
             key: 'capture',
             icon: 'call-control-present-new',

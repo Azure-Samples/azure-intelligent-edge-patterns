@@ -7,6 +7,7 @@ import {
   UPDATE_CREATING_ANNOTATION,
   REMOVE_ANNOTATION,
   AnnotationAction,
+  RESET_ANNOTATION,
 } from './labelingPageTypes';
 import { initialState, LabelingPageState } from '../State';
 
@@ -54,7 +55,9 @@ const labelingPageStateReducer = (
       newState.annotations = newState.annotations
         .slice(0, action.payload.index)
         .concat(newState.annotations.slice(action.payload.index + 1));
-
+      break;
+    case RESET_ANNOTATION:
+      newState.annotations = initialState.labelingPageState.annotations;
       break;
     default:
       return state;

@@ -26,8 +26,9 @@ trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 
 is_trainer_valid = True
 
+# Classification, General (compact) for classiciation
 try:
-    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General")
+    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General (compact)")
 except:
     is_trainer_valid = False
 # FIXME
@@ -77,12 +78,8 @@ class CameraViewSet(viewsets.ModelViewSet):
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'location', 'parts']
+        fields = ['id', 'camera', 'location', 'parts']
 
-class ProjectSerializer2(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Project
-        fields = ['id', 'location', 'parts']
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -124,12 +121,13 @@ streams = []
 @api_view()
 def connect_stream(request):
     part_id = request.query_params.get('part_id')
+    rtsp = request.query_params.get('rtsp') or '0'
     if part_id is None:
         return JsonResponse({'status': 'failed', 'reason': 'part_id is missing'})
 
     try:
         Part.objects.get(pk=int(part_id))
-        s = Stream(0, part_id=part_id)
+        s = Stream(rtsp, part_id=part_id)
         streams.append(s)
         return JsonResponse({'status': 'ok', 'stream_id': s.id})
     except ObjectDoesNotExist:
@@ -171,12 +169,13 @@ def capture(request, stream_id):
 
     return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
 
-@api_view()
-def train(request, project_id):
+def _train(project_id):
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
 
-    images = Image.objects.all()
+    part_ids = [part.id for part in project_obj.parts.all()]
+
+    images = Image.objects.filter(part_id__in=part_ids).all()
     img_entries = []
 
     tags = trainer.get_tags(customvision_project_id)
@@ -199,22 +198,14 @@ def train(request, project_id):
         name = 'img-' + datetime.datetime.utcnow().isoformat()
         regions = []
         try:
-            print(0)
-            annotation = image_obj.annotation
-            print(1)
-            print(annotation)
-            print(annotation.labels)
-            labels = json.loads(annotation.labels)
-            print(2)
+            labels = json.loads(image_obj.labels)
             for label in labels:
                 x = label['x1'] / 1280
                 y = label['y1'] / 720
                 w = (label['x2'] - label['x1']) / 1280
                 h = (label['y2'] - label['y1']) / 720
                 region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
-                print(region)
                 regions.append(region)
-            print(3)
 
             image = image_obj.image
             image.open()
@@ -226,5 +217,10 @@ def train(request, project_id):
     upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
     print(upload_result)
 
+    trainer.train_project(customvision_project_id)
+
     return JsonResponse({'status': 'ok'})
 
+@api_view()
+def train(request, project_id):
+    return _train(project_id)
