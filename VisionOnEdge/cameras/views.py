@@ -77,12 +77,8 @@ class CameraViewSet(viewsets.ModelViewSet):
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'location', 'parts']
+        fields = ['id', 'camera', 'location', 'parts']
 
-class ProjectSerializer2(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Project
-        fields = ['id', 'location', 'parts']
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
