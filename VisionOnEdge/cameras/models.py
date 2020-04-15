@@ -13,8 +13,9 @@ trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 
 is_trainer_valid = True
 
+# Classification, General (compact) for classiciation
 try:
-    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General")
+    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General (compact)")
 except:
     is_trainer_valid = False
 

@@ -26,8 +26,9 @@ trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 
 is_trainer_valid = True
 
+# Classification, General (compact) for classiciation
 try:
-    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General")
+    obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General (compact)")
 except:
     is_trainer_valid = False
 # FIXME
@@ -172,7 +173,9 @@ def _train(project_id):
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
 
-    images = Image.objects.all()
+    part_ids = [part.id for part in project_obj.parts.all()]
+
+    images = Image.objects.filter(part_id__in=part_ids).all()
     img_entries = []
 
     tags = trainer.get_tags(customvision_project_id)
