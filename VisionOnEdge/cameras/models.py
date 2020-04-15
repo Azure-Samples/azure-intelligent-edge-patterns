@@ -1,8 +1,9 @@
 import datetime
 
 from django.db import models
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_save, post_delete, pre_save, post_save
 import cv2
+import requests
 
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
@@ -63,11 +64,20 @@ class Project(models.Model):
 
         if is_trainer_valid:
             project = trainer.create_project(name, domain_id=obj_detection_domain.id)
+            print('[INFO] Got Custom Vision Project ID', project.id)
             instance.customvision_project_id = project.id
         else:
+            print('[INFO] Has not set the key, Got DUMMY PRJ ID')
             instance.customvision_project_id = 'DUMMY-PROJECT-ID'
 
-pre_save.connect(Project.pre_save, Project, dispatch_uid='Project')
+    @staticmethod
+    def post_save(sender, instance, **kwargs):
+        print('post!')
+        project_id = instance.id
+        requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
+
+pre_save.connect(Project.pre_save, Project, dispatch_uid='Project_pre')
+post_save.connect(Project.post_save, Project, dispatch_uid='Project_post')
 
 
 

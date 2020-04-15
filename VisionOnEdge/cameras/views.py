@@ -168,8 +168,7 @@ def capture(request, stream_id):
 
     return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
 
-@api_view()
-def train(request, project_id):
+def _train(project_id):
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
 
@@ -196,22 +195,14 @@ def train(request, project_id):
         name = 'img-' + datetime.datetime.utcnow().isoformat()
         regions = []
         try:
-            print(0)
-            annotation = image_obj.annotation
-            print(1)
-            print(annotation)
-            print(annotation.labels)
-            labels = json.loads(annotation.labels)
-            print(2)
+            labels = json.loads(image_obj.labels)
             for label in labels:
                 x = label['x1'] / 1280
                 y = label['y1'] / 720
                 w = (label['x2'] - label['x1']) / 1280
                 h = (label['y2'] - label['y1']) / 720
                 region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
-                print(region)
                 regions.append(region)
-            print(3)
 
             image = image_obj.image
             image.open()
@@ -223,5 +214,10 @@ def train(request, project_id):
     upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
     print(upload_result)
 
+    trainer.train_project(customvision_project_id)
+
     return JsonResponse({'status': 'ok'})
 
+@api_view()
+def train(request, project_id):
+    return _train(project_id)
