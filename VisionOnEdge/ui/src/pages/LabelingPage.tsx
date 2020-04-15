@@ -36,7 +36,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
       <Text size="larger" weight="semibold">
         DRAW A RECTANGLE AROUND THE PART
       </Text>
-      <Scene url={imageUrl} labelingType={labelingType} />
+      <Scene url={imageUrl} annotations={annotations} labelingType={labelingType} />
       <Flex gap="gap.medium">
         <Flex gap="gap.medium">
           <Button
