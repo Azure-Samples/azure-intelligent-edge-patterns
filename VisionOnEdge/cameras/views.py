@@ -124,12 +124,13 @@ streams = []
 @api_view()
 def connect_stream(request):
     part_id = request.query_params.get('part_id')
+    rtsp = request.query_params.get('rtsp') or '0'
     if part_id is None:
         return JsonResponse({'status': 'failed', 'reason': 'part_id is missing'})
 
     try:
         Part.objects.get(pk=int(part_id))
-        s = Stream(0, part_id=part_id)
+        s = Stream(rtsp, part_id=part_id)
         streams.append(s)
         return JsonResponse({'status': 'ok', 'stream_id': s.id})
     except ObjectDoesNotExist:
