@@ -48,6 +48,7 @@ class Annotation(models.Model):
     labels = models.CharField(max_length=1000, null=True)
 
 class Project(models.Model):
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     parts = models.ManyToManyField(
                 Part, related_name='part')
