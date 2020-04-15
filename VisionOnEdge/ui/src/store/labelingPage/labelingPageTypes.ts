@@ -22,11 +22,9 @@ export type RemoveAnnotationAction = {
   type: typeof REMOVE_ANNOTATION;
   payload: { index: number };
 };
-
-export const SAVE_ANNOTATION = 'SAVE_ANNOTATION';
-export type SaveAnnotationAction = {
-  type: typeof SAVE_ANNOTATION;
-  payload: { imageId: number, annotations: Annotation[] };
+export const RESET_ANNOTATION = 'RESET_ANNOTATION';
+export type ResetAnnotationAction = {
+  type: typeof RESET_ANNOTATION;
 };
 
 export type AnnotationAction =
@@ -36,7 +34,7 @@ export type AnnotationAction =
   | UpdateCreatingAnnotationAction
   | UpdateAnnotationAction
   | RemoveAnnotationAction
-  | SaveAnnotationAction;
+  | ResetAnnotationAction;
 
 export type Position2D = {
   x: number;
