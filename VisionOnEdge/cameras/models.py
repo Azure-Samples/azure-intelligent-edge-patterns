@@ -109,9 +109,11 @@ class Stream(object):
 
     def get_frame(self):
         print('[INFO] get frame', self)
-        b, img = self.cap.read()
-        if b: return cv2.imencode('.jpg', img)[1].tobytes()
-        else : return None
+        #b, img = self.cap.read()
+        img = self.last_img.copy()
+        #if b: return cv2.imencode('.jpg', img)[1].tobytes()
+        #else : return None
+        return cv2.imencode('.jpg', img)[1].tobytes()
 
 
     def close(self):
