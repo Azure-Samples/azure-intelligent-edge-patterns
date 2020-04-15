@@ -34,7 +34,7 @@ const LeftPanel = (): JSX.Element => {
   }, [partId]);
 
   const onSave = (): void => {
-    const hasPartId = partId !== 'undefined';
+    const hasPartId = partId !== undefined;
     const url = hasPartId ? `/api/parts/${partId}/` : `/api/parts/`;
 
     fetch(url, {
@@ -89,13 +89,10 @@ const RightPanel = (): JSX.Element => {
 
   return (
     <Flex column gap="gap.small" styles={{ gridColumn: '5 / span 8' }}>
-      <Tab partId={partId} />
+      {partId ? <Tab partId={partId} /> : null}
       <Switch>
         <Route path="/parts/detail/:partId/capturePhotos" component={CapturePhotos} />
         <Route path="/parts/detail/:partId/uploadPhotos" component={null} />
-        <Route path="/parts/detail/">
-          <Redirect to={`/parts/detail/${partId}/capturePhotos`} />
-        </Route>
       </Switch>
     </Flex>
   );
