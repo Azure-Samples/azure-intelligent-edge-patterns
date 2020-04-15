@@ -100,7 +100,13 @@ const RTSPVideo = ({ selectedCamera }): JSX.Element => {
       <Button.Group
         styles={{ alignSelf: 'center' }}
         buttons={[
-          { key: 'start', icon: 'play', iconOnly: true, onClick: onCreateStream },
+          {
+            key: 'start',
+            icon: 'play',
+            iconOnly: true,
+            onClick: onCreateStream,
+            disabled: selectedCamera === null,
+          },
           {
             key: 'capture',
             icon: 'call-control-present-new',
