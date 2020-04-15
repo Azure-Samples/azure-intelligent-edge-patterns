@@ -28,7 +28,17 @@ export type UpdateCapturedImageAction = {
   };
 };
 
-export type PartActionTypes = AddCapturedImageAction | UpdateCapturedImageAction;
+export const UPDATE_IMAGE_LABEL = 'UPDATE_IMAGE_LABEL';
+
+export type UpdateImageLabelAction = {
+  type: typeof UPDATE_IMAGE_LABEL;
+  payload: {
+    id: number;
+    labels: any;
+  };
+};
+
+export type PartActionTypes = AddCapturedImageAction | UpdateCapturedImageAction | UpdateImageLabelAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type PartThunk<ReturnType = void> = ThunkAction<ReturnType, Part, unknown, Action<string>>;

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text } from '@fluentui/react-northstar';
 
@@ -6,7 +6,7 @@ import Scene from '../components/LabelingPage/Scene';
 import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/part/partTypes';
-import { saveAnnotation, getAnnotations,requestAnnotationsSuccess } from '../store/labelingPage/labelingPageActions';
+import { saveAnnotation, getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
@@ -14,6 +14,7 @@ interface LabelingPageProps {
   closeDialog: () => void;
 }
 const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDialog }) => {
+  const dispatch = useDispatch();
   const { images, annotations } = useSelector<State, { images: LabelImage[]; annotations: Annotation[] }>(
     (state) => ({
       images: state.part.capturedImages,
@@ -22,12 +23,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
   );
   const imageUrl = images[imageIndex].image;
   const imageId = images[imageIndex].id;
-  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getAnnotations(imageId));
     return (): void => {
-      dispatch(requestAnnotationsSuccess([]));
+      dispatch(resetAnnotation());
     }
   }, [dispatch, imageId]);
 
