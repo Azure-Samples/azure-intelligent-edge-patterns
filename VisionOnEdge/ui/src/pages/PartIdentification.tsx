@@ -6,7 +6,10 @@ export const PartIdentification: React.FC = () => {
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
   );
-  const [partLoading, dropDownParts, selectedParts, setSelectedPartsById] = useDropdownItems<any>('parts');
+  const [partLoading, dropDownParts, selectedParts, setSelectedPartsById] = useDropdownItems<any>(
+    'parts',
+    true,
+  );
   const [locationLoading, dropDownLocations, selectedLocations, setSelectedLocationById] = useDropdownItems<
     any
   >('locations');
@@ -22,6 +25,7 @@ export const PartIdentification: React.FC = () => {
             projectId.current = data[0].id;
             setSelectedLocationById(data[0].location.split('/')[5]);
             setSelectedPartsById(data[0].parts.map((ele) => ele.split('/')[5]));
+            setSelectedCameraById(data[0].camera.split('/')[5]);
           }
           return void 0;
         })
@@ -29,7 +33,14 @@ export const PartIdentification: React.FC = () => {
           console.error(err);
         });
     }
-  }, [cameraLoading, locationLoading, partLoading, setSelectedLocationById, setSelectedPartsById]);
+  }, [
+    cameraLoading,
+    locationLoading,
+    partLoading,
+    setSelectedCameraById,
+    setSelectedLocationById,
+    setSelectedPartsById,
+  ]);
 
   const handleSubmitConfigure = (): void => {
     const isProjectEmpty = projectId.current === null;
@@ -39,6 +50,7 @@ export const PartIdentification: React.FC = () => {
       body: JSON.stringify({
         location: `http://localhost:8000/api/locations/${selectedLocations.id}/`,
         parts: selectedParts.map((e) => `http://localhost:8000/api/parts/${e.id}/`),
+        camera: `http://localhost:8000/api/cameras/${selectedCamera.id}/`,
       }),
       method: isProjectEmpty ? 'POST' : 'PUT',
       headers: {
@@ -98,10 +110,13 @@ export const PartIdentification: React.FC = () => {
   );
 };
 
-function useDropdownItems<T>(moduleName: string): [boolean, DropdownItemProps[], T, (id: string) => void] {
+function useDropdownItems<T>(
+  moduleName: string,
+  isMultiple?: boolean,
+): [boolean, DropdownItemProps[], T | T[], (id: string) => void] {
   const originItems = useRef<(T & { id: number })[]>([]);
   const [dropDownItems, setDropDownItems] = useState<DropdownItemProps[]>([]);
-  const [selectedItem, setSelectedItem] = useState<T>(null);
+  const [selectedItem, setSelectedItem] = useState<T | T[]>(isMultiple ? [] : null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
