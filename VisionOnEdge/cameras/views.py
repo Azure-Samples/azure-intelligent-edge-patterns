@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 import json
 import time
 import datetime
@@ -15,7 +16,9 @@ from rest_framework.decorators import api_view
 from rest_framework import serializers, viewsets
 from rest_framework import status
 
+
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation
+
 
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
@@ -31,10 +34,59 @@ try:
     obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General (compact)")
 except:
     is_trainer_valid = False
-# FIXME
+
+
 
 
 import cv2
+@api_view()
+def export(request, project_id):
+    project_obj = Project.objects.get(pk=project_id)
+    customvision_project_id = project_obj.customvision_project_id
+
+    iterations = trainer.get_iterations(customvision_project_id)
+    if len(iterations) == 0:
+        print('not yet training ...')
+        return JsonResponse({'status': 'waiting training'})
+
+    iteration = iterations[-1]
+
+    if iteration.exportable == False or iteration.status != 'Completed':
+        print('waiting training ...')
+        return JsonResponse({'status': 'waiting training'})
+
+    exports = trainer.get_exports(customvision_project_id, iteration.id)
+    if len(exports) == 0:
+        print('exporting ...')
+        trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
+        return JsonResponse({'status': 'exporting'})
+
+    project_obj.download_uri = exports[-1].download_uri
+    project_obj.save(update_fields=['download_uri'])
+    return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
+
+@api_view()
+def _export(project_id):
+    print(project_id)
+    print(len(exports), 'exports')
+    if len(exports) == 0:
+        print('exporting ...')
+        trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
+
+    while True:
+        print('waiting for exporting ...')
+        exports = trainer.get_exports(customvision_project_id, iteration.id)
+        export = exports[-1]
+        if export.download_uri is None:
+            time.sleep(5)
+            continue
+        break
+
+    project_obj.download_uri = export.download_uri
+    project_obj.save()
+    print('Download URI:', project_obj.download_uri)
+
+
 
 #
 # Part Views
@@ -78,7 +130,9 @@ class CameraViewSet(viewsets.ModelViewSet):
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'camera', 'location', 'parts']
+        #fields = ['id', 'camera', 'location', 'parts', 'download_uri']
+        fields = ['id', 'camera', 'location', 'parts', 'download_uri']
+        extra_kwargs = {'download_uri': {'required': False}}
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -197,13 +251,15 @@ def _train(project_id):
 
         name = 'img-' + datetime.datetime.utcnow().isoformat()
         regions = []
+        width = image_obj.image.width
+        height = image_obj.image.height
         try:
             labels = json.loads(image_obj.labels)
             for label in labels:
-                x = label['x1'] / 1280
-                y = label['y1'] / 720
-                w = (label['x2'] - label['x1']) / 1280
-                h = (label['y2'] - label['y1']) / 720
+                x = label['x1'] / width
+                y = label['y1'] / height
+                w = (label['x2'] - label['x1']) / width
+                h = (label['y2'] - label['y1']) / height
                 region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
                 regions.append(region)
 
@@ -215,8 +271,10 @@ def _train(project_id):
             pass
     print('uploading...')
     upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
-    print(upload_result)
+    print('batch success:', upload_result.is_batch_successful)
+    #print(upload_result)
 
+    print('training...')
     trainer.train_project(customvision_project_id)
 
     return JsonResponse({'status': 'ok'})
@@ -224,3 +282,12 @@ def _train(project_id):
 @api_view()
 def train(request, project_id):
     return _train(project_id)
+
+
+#@api_export()
+#def export(request, project_id):
+#    project_obj = Project.objects.get(pk=project_id)
+#    customvision_project_id = project_obj.customvision_project_id
+#
+#    iterations = trainer.get_iterations(project_id)
+#    if len(iterations) == 0:

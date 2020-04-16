@@ -51,6 +51,7 @@ export const PartIdentification: React.FC = () => {
         location: `http://localhost:8000/api/locations/${selectedLocations.id}/`,
         parts: selectedParts.map((e) => `http://localhost:8000/api/parts/${e.id}/`),
         camera: `http://localhost:8000/api/cameras/${selectedCamera.id}/`,
+        download_uri: '',
       }),
       method: isProjectEmpty ? 'POST' : 'PUT',
       headers: {

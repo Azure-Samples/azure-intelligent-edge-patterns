@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Flex, Text, Status, Button, Image, Loader } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import { useInterval } from '../../hooks/useInterval';
+import { useParams } from 'react-router-dom';
 
 export const CameraConfigureInfo: React.FC = () => {
   const [configureInfo, setConfigureInfo] = useState({
@@ -13,21 +14,34 @@ export const CameraConfigureInfo: React.FC = () => {
     unIdetifiedItems: 15,
   });
 
+  const { projectId } = useParams();
+
   const onDeleteConfigure = (): void => {
     // TODO
   };
 
   useInterval(
     () => {
+      fetch('/api/projects/'+projectId+'/export')
+        .then(() => {})
+        .catch((err) => {})
+    },
+    5000
+  )
+
+  useInterval(
+    () => {
       fetch('/api/projects/')
         .then((res) => res.json())
         .then((data) => {
+          console.log('wew');
           if (data.length > 0) {
-            const curProjectId = data[0].id;
+            const curProject = data[0];
+            console.log(curProject);
             setConfigureInfo((prev) => ({
               ...prev,
-              modelUrl: curProjectId.modelUrl,
-              parts: curProjectId.parts,
+              modelUrl: curProject.download_uri,
+              parts: curProject.parts,
             }));
           }
           return void 0;

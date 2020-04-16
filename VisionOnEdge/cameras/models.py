@@ -56,9 +56,13 @@ class Project(models.Model):
                 Part, related_name='part')
     customvision_project_id = models.CharField(max_length=200)
     customvision_project_name = models.CharField(max_length=200)
+    download_uri = models.CharField(max_length=1000, null=True, blank=True)
 
     @staticmethod
-    def pre_save(sender, instance, **kwargs):
+    def pre_save(sender, instance, update_fields, **kwargs):
+        if update_fields is not None: return
+        print('update_fields:', update_fields)
+        if instance.id is not None: return
         print('[INFO] Creating Project on Custom Vision')
         name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
         instance.customvision_project_name = name
@@ -72,8 +76,11 @@ class Project(models.Model):
             instance.customvision_project_id = 'DUMMY-PROJECT-ID'
 
     @staticmethod
-    def post_save(sender, instance, **kwargs):
+    def post_save(sender, instance, update_fields, **kwargs):
+        if update_fields is not None: return
         print('post!')
+        print('instance:', instance.id, instance)
+        print(update_fields)
         project_id = instance.id
         requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
 
