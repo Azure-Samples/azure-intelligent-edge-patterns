@@ -38,5 +38,6 @@ urlpatterns = [
     path('api/streams/<int:stream_id>/video_feed', views.video_feed),
     path('api/streams/<int:stream_id>/capture', views.capture),
     path('api/projects/<int:project_id>/train', views.train),
+    path('api/projects/<int:project_id>/export', views.export),
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

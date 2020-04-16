@@ -2,5 +2,4 @@ django
 djangorestframework
 opencv-python
 pillow
-cv2
 azure-cognitiveservices-vision-customvision==1.0.0

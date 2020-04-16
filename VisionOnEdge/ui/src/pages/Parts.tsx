@@ -43,7 +43,7 @@ export const Parts: React.FC = () => {
 
 const Item = ({ src, id, name }): JSX.Element => {
   return (
-    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/${id}`}>
+    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/${id}/capturePhotos`}>
       <div style={{ width: '250px', height: '250px' }}>
         <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
