@@ -48,6 +48,8 @@ export const CameraConfigureInfo: React.FC = () => {
         <>
           <ListItem title="Status" content={<CameraStatus online={configureInfo.status === 'online'} />} />
           <ListItem title="Configured for" content={configureInfo.parts.join(', ')} />
+          <span>Model Url: </span>
+          <a href={configureInfo.modelUrl}>{configureInfo.modelUrl}</a>
           <Flex column gap="gap.small">
             <Text styles={{ width: '150px' }} size="large">
               Live View:
