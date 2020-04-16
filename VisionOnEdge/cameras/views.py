@@ -91,7 +91,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Image
-        fields = ['id', 'image', 'labels']
+        fields = ['id', 'image', 'labels', 'part']
 
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
