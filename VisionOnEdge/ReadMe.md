@@ -6,6 +6,8 @@
 
 #### Initial
 
+Use the editor to modify the ```config.py```, fill in the customvision training key and endpoint
+
 Following steps will create new tables in sqlite.db
 
     python manage.py makemigrations cameras
@@ -14,26 +16,6 @@ Following steps will create new tables in sqlite.db
 #### Dev
 
     python manage.py runserver
-
-#### APIs
-
-    CRUD by Django Restful :
-    Cameras: <http://localhost:8000/api/cameras/>
-    Parts: <http://localhost:8000/api/parts/>
-    Images: <http://localhost:8000/api/images/>
-    
-    Streams:
-    Connect a new stream <http://localhost:8000/api/streams/connect>
-    This will return a json with stream_id
-
-    Get the real time video feed <http://localhost:8000/api/streams/STREAM_ID/video_feed>
-    This will return a dynamic image which can put input <img> directly
-
-    Capture a image <http://localhost:8000/api/streams/STREAM_ID/capture>
-    This will return a json with captured image id and url
-
-    Disconnect a stream <http://localhost:8000/api/streams/STREAM_ID/disconnect>
-
 
 
 #### Migrate DB
@@ -59,3 +41,30 @@ This will launch a ui site in localhost:3000
 
     yarn start
 
+
+#### APIs
+
+    CRUD by Django Restful :
+    Cameras: <http://localhost:8000/api/cameras/>
+    Parts: <http://localhost:8000/api/parts/>
+    Images: <http://localhost:8000/api/images/>
+    
+    Streams:
+    Connect a new stream <http://localhost:8000/api/streams/connect>
+    This will return a json with stream_id
+
+    Get the real time video feed <http://localhost:8000/api/streams/STREAM_ID/video_feed>
+    This will return a dynamic image which can put input <img> directly
+
+    Capture a image <http://localhost:8000/api/streams/STREAM_ID/capture>
+    This will return a json with captured image id and url
+
+    Disconnect a stream <http://localhost:8000/api/streams/STREAM_ID/disconnect>
+
+
+
+### Trouble shooting
+
+If you see the error log like this while doing ```yarn start```
+Please increase the inotify amount
+<https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers#the-technical-details>
