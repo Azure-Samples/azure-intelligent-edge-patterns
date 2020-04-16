@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Flex, Input, TextArea, Button, Menu, Grid } from '@fluentui/react-northstar';
-import { Link, useLocation, Switch, Route, Redirect, useParams, useHistory } from 'react-router-dom';
+import { Link, useLocation, Switch, Route, useParams, useHistory } from 'react-router-dom';
 import { CapturePhotos } from '../components/CapturePhoto';
+import { UploadPhotos } from '../components/UploadPhotos';
 
 export const PartDetails = (): JSX.Element => {
   return (
@@ -92,7 +93,9 @@ const RightPanel = (): JSX.Element => {
       {partId ? <Tab partId={partId} /> : null}
       <Switch>
         <Route path="/parts/detail/:partId/capturePhotos" component={CapturePhotos} />
-        <Route path="/parts/detail/:partId/uploadPhotos" component={null} />
+        <Route path="/parts/detail/:partId/uploadPhotos">
+          <UploadPhotos partId={partId} />
+        </Route>
       </Switch>
     </Flex>
   );
