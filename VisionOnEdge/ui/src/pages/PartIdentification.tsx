@@ -58,7 +58,7 @@ export const PartIdentification: React.FC = () => {
       },
     })
       .then(() => {
-        history.push(`/cameras/${selectedCamera.name}/${projectId}`);
+        history.push(`/cameras/${selectedCamera.name}/${projectId.current}`);
         return void 0;
       })
       .catch((err) => {
