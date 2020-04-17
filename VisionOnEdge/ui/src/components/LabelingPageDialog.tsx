@@ -1,4 +1,4 @@
-import React, { memo, FC, useState } from 'react';
+import React, { memo, FC, useState, Dispatch, useEffect } from 'react';
 import { Dialog } from '@fluentui/react-northstar';
 
 import LabelingPage from '../pages/LabelingPage';
@@ -8,7 +8,7 @@ const LabelingPageDialog: FC<{ trigger: JSX.Element; imageIndex: number }> = ({
   trigger,
   imageIndex,
 }): JSX.Element => {
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
   return (
     <Dialog
       trigger={trigger}

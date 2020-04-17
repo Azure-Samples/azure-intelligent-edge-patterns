@@ -1,5 +1,3 @@
-import { MutableRefObject } from 'react';
-
 import {
   Annotation,
   AnnotationState,
