@@ -10,6 +10,7 @@ import LocationRegister from '../pages/LocationRegister';
 import ManualIdentification from '../pages/ManualIdentification';
 import { Parts } from '../pages/Parts';
 import { PartIdentification } from '../pages/PartIdentification';
+import { Setting } from '../pages/Setting';
 
 export const RootRouter: FC = () => {
   return (
@@ -25,6 +26,7 @@ export const RootRouter: FC = () => {
       <Route path="/parts/detail/" component={PartDetails} />
       <Route path="/parts" component={Parts} />
       <Route path="/partIdentification" component={PartIdentification} />
+      <Route path="/setting" component={Setting} />
       <Route path="/" component={Home} />
     </Switch>
   );
