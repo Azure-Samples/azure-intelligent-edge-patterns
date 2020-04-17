@@ -21,6 +21,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
   const strokeWidth: number = 2 / scale;
 
   const dispatchLabel = (): void => {
+    if (!dispatch) return;
     const newAnnotation = { ...annotation };
     newAnnotation.label = vertices;
     dispatch(updateAnnotation(annotationIndex, newAnnotation));

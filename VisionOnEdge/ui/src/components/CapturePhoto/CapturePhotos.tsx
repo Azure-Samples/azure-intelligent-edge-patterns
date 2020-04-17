@@ -141,7 +141,7 @@ const CapturedImagesContainer = (): JSX.Element => {
           key={i}
           imageIndex={i}
           trigger={
-            <LabelDisplayImage imgSrc={image.image} pointerCursor width={300} height={150} imgPadding="0" />
+            <LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />
           }
         />
       ))}
