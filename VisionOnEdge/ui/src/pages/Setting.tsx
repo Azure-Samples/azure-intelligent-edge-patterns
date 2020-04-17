@@ -30,7 +30,7 @@ export const Setting = (): JSX.Element => {
       </Text>
       <Flex vAlign="center">
         <Text size="large" design={{ width: '300px' }}>
-          Name Space:
+          Namespace:
         </Text>
         <Input value={namespace} onChange={(_, { value }): void => setNamespace(value)} />
       </Flex>
