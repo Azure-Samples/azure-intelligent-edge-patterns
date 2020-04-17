@@ -17,9 +17,8 @@ interface ImageLinkProps {
   width: string;
   height?: string;
   bgImgStyle?: BgImgStyle;
-  hasAnnotation?: boolean;
   pointerCursor?: boolean;
-  onClick?: (event: any) => void
+  onClick?: (event: any) => void;
 }
 const ImageLink: FC<ImageLinkProps> = ({
   to = '',
@@ -31,15 +30,28 @@ const ImageLink: FC<ImageLinkProps> = ({
   width = '100px',
   height = '100px',
   bgImgStyle,
-  hasAnnotation = false,
   pointerCursor = false,
   onClick,
 }) => {
-  if (!hasAnnotation)
-    return (
-      <Flex column styles={{ width }}>
-        {to === '' ? (
-          <div style={{ height }} onClick={onClick}>
+  return (
+    <Flex column styles={{ width }}>
+      {to === '' ? (
+        <div style={{ height }} onClick={onClick}>
+          <Image
+            src={imgSrc ?? defaultSrc}
+            styles={{
+              padding: imgPadding,
+              height: '100%',
+              objectFit: 'contain',
+              backgroundImage: `url(${bgImgSrc})`,
+              cursor: pointerCursor ? 'pointer' : 'default',
+              ...bgImgStyle,
+            }}
+          />
+        </div>
+      ) : (
+        <Link to={to}>
+          <div style={{ height }}>
             <Image
               src={imgSrc ?? defaultSrc}
               styles={{
@@ -47,32 +59,15 @@ const ImageLink: FC<ImageLinkProps> = ({
                 height: '100%',
                 objectFit: 'contain',
                 backgroundImage: `url(${bgImgSrc})`,
-                cursor: pointerCursor? 'pointer': 'default',
                 ...bgImgStyle,
               }}
             />
           </div>
-        ) : (
-          <Link to={to}>
-            <div style={{ height }}>
-              <Image
-                src={imgSrc ?? defaultSrc}
-                styles={{
-                  padding: imgPadding,
-                  height: '100%',
-                  objectFit: 'contain',
-                  backgroundImage: `url(${bgImgSrc})`,
-                  ...bgImgStyle,
-                }}
-              />
-            </div>
-          </Link>
-        )}
-        <Text align="center">{label}</Text>
-      </Flex>
-    );
-
-  return <div>Annotation Image</div>;
+        </Link>
+      )}
+      <Text align="center">{label}</Text>
+    </Flex>
+  );
 };
 
 export default ImageLink;
