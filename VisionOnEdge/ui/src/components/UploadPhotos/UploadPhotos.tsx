@@ -6,7 +6,7 @@ import { State } from '../../store/State';
 import { Part } from '../../store/part/partTypes';
 import { thunkGetCapturedImages, addCapturedImages } from '../../store/part/partActions';
 import LabelingPageDialog from '../LabelingPageDialog';
-import ImageLink from '../ImageLink';
+import LabelDisplayImage from '../LabelDisplayImage';
 
 export const UploadPhotos = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
@@ -47,7 +47,7 @@ const CapturedImagesContainer = ({ capturedImages }): JSX.Element => {
           key={i}
           imageIndex={i}
           trigger={
-            <ImageLink imgSrc={image.image} pointerCursor width="300px" height="150px" imgPadding="0" />
+            <LabelDisplayImage imgSrc={image.image} pointerCursor width={300} height={150} imgPadding="0" />
           }
         />
       ))}
