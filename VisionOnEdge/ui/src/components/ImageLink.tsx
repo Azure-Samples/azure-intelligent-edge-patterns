@@ -19,6 +19,7 @@ interface ImageLinkProps {
   bgImgStyle?: BgImgStyle;
   hasAnnotation?: boolean;
   pointerCursor?: boolean;
+  onClick?: (event: any) => void
 }
 const ImageLink: FC<ImageLinkProps> = ({
   to = '',
@@ -32,12 +33,13 @@ const ImageLink: FC<ImageLinkProps> = ({
   bgImgStyle,
   hasAnnotation = false,
   pointerCursor = false,
+  onClick,
 }) => {
   if (!hasAnnotation)
     return (
       <Flex column styles={{ width }}>
         {to === '' ? (
-          <div style={{ height }}>
+          <div style={{ height }} onClick={onClick}>
             <Image
               src={imgSrc ?? defaultSrc}
               styles={{
