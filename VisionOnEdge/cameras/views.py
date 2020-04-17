@@ -49,7 +49,7 @@ def export(request, project_id):
         print('not yet training ...')
         return JsonResponse({'status': 'waiting training'})
 
-    iteration = iterations[-1]
+    iteration = iterations[0]
 
     if iteration.exportable == False or iteration.status != 'Completed':
         print('waiting training ...')
@@ -61,7 +61,7 @@ def export(request, project_id):
         trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
         return JsonResponse({'status': 'exporting'})
 
-    project_obj.download_uri = exports[-1].download_uri
+    project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
