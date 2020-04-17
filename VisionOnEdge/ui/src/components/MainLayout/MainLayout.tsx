@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Grid, Segment, Image, Flex, Text } from '@fluentui/react-northstar';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import Breadcrumb from '../Breadcrumb';
 
 export const MainLayout: React.FC = ({ children }) => {
@@ -47,8 +47,10 @@ const TopNav: FC = () => {
       <NavLink to={'/'} style={{ textDecoration: 'none' }}>
         <Text color="white">Vision on Edge</Text>
       </NavLink>
-      <Flex vAlign="center" space="evenly" styles={{ height: '100%', width: '15%' }}>
-        <Image styles={{ height: '100%' }} src="/icons/setting.png" />
+      <Flex vAlign="center" gap="gap.medium" styles={{ height: '100%', width: '15%' }}>
+        <Link to="/setting" style={{ height: '100%' }}>
+          <Image styles={{ height: '100%' }} src="/icons/setting.png" />
+        </Link>
         <Text color="white">User</Text>
       </Flex>
     </Flex>
