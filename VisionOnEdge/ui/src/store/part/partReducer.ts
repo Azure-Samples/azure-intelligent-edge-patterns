@@ -16,7 +16,10 @@ const partReducer = (state = initialState.part, action: PartActionTypes): Part =
     case UPDATE_IMAGE_LABEL: {
       const newState = { ...state };
       const updatedImageIdx = newState.capturedImages.findIndex((e) => e.id === action.payload.id);
-      newState.capturedImages[updatedImageIdx].labels = action.payload.labels;
+      newState.capturedImages[updatedImageIdx] = {
+        ...newState.capturedImages[updatedImageIdx],
+        labels: action.payload.labels,
+      };
       return newState;
     }
     default:

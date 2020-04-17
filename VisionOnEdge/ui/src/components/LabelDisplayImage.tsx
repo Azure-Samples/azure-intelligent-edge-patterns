@@ -7,7 +7,7 @@ import { Position2D, Size2D, WorkState, AnnotationState } from '../store/labelin
 import { LabelImage } from '../store/part/partTypes';
 import { Box2d } from './LabelingPage/Box';
 
-interface ImageLinkProps {
+interface LabelDisplayImageProps {
   labelImage: LabelImage;
   labelText?: string;
   width: number;
@@ -15,7 +15,7 @@ interface ImageLinkProps {
   pointerCursor?: boolean;
   onClick?: (event: any) => void;
 }
-const ImageLink: FC<ImageLinkProps> = ({
+const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   labelImage,
   labelText = '',
   width = 300,
@@ -56,6 +56,7 @@ const ImageLink: FC<ImageLinkProps> = ({
             {annotations.map((annotation, i) => (
               <Box2d
                 key={i}
+                display={true}
                 workState={WorkState.None}
                 cursorPosition={{ x: 0, y: 0 }}
                 onSelect={(): void => void 0}
@@ -74,4 +75,4 @@ const ImageLink: FC<ImageLinkProps> = ({
   );
 };
 
-export default ImageLink;
+export default LabelDisplayImage;
