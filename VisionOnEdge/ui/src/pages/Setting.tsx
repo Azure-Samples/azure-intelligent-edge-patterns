@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Divider, Flex, Text, Input, Button } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
@@ -6,9 +6,47 @@ export const Setting = (): JSX.Element => {
   const [confidence, setConfidence] = useState(0);
   const [namespace, setNamespace] = useState('');
   const [key, setKey] = useState('');
+  const [projectData, setProjectData] = useState(null);
+  const projectId = projectData?.id || null;
+
+  useEffect(() => {
+    fetch('/api/projects/')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length > 0) {
+          setProjectData(data[0]);
+          setNamespace(data[0]?.endpoint);
+          setKey(data[0]?.training_key);
+        }
+        return void 0;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   const onSave = (): void => {
-    // TODO
+    const isProjectEmpty = projectId === null;
+    const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
+
+    fetch(url, {
+      body: JSON.stringify({
+        ...projectData,
+        training_key: key,
+        endpoint: namespace,
+      }),
+      method: isProjectEmpty ? 'POST' : 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        console.log('success');
+        return void 0;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (

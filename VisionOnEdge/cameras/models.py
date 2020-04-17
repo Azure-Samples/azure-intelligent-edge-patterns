@@ -57,6 +57,8 @@ class Project(models.Model):
     customvision_project_id = models.CharField(max_length=200)
     customvision_project_name = models.CharField(max_length=200)
     download_uri = models.CharField(max_length=1000, null=True, blank=True)
+    training_key = models.CharField(max_length=1000, blank=True)
+    endpoint = models.CharField(max_length=1000, blank=True)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
