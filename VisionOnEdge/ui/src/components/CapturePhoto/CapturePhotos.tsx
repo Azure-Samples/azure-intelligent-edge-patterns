@@ -13,12 +13,13 @@ import LabelDisplayImage from '../LabelDisplayImage';
 
 export const CapturePhotos: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
+  const { partId } = useParams();
 
   return (
     <>
       <CameraSelector setSelectedCamera={setSelectedCamera} />
-      <RTSPVideo selectedCamera={selectedCamera} />
-      <CapturedImagesContainer />
+      <RTSPVideo selectedCamera={selectedCamera} partId={partId} />
+      <CapturedImagesContainer partId={partId} />
     </>
   );
 };
@@ -48,10 +49,9 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
   );
 };
 
-const RTSPVideo = ({ selectedCamera }): JSX.Element => {
+const RTSPVideo = ({ selectedCamera, partId }): JSX.Element => {
   const [streamId, setStreamId] = useState<string>('');
   const dispatch = useDispatch();
-  const { partId } = useParams();
 
   const onCreateStream = (): void => {
     fetch(`/api/streams/connect/?part_id=${partId}&rtsp=${selectedCamera.rtsp}`)
@@ -122,29 +122,35 @@ const RTSPVideo = ({ selectedCamera }): JSX.Element => {
   );
 };
 
-const CapturedImagesContainer = (): JSX.Element => {
+const CapturedImagesContainer = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
-  const { capturedImages } = useSelector<State, Part>((state) => state.part);
+  const { capturedImages, isValid } = useSelector<State, Part>((state) => state.part);
 
   useEffect(() => {
-    dispatch(thunkGetCapturedImages());
-  }, [dispatch]);
+    dispatch(thunkGetCapturedImages(partId));
+  }, [dispatch, partId]);
 
   return (
-    <Flex
-      styles={{ overflow: 'scroll', border: '1px solid grey', height: '150px' }}
-      gap="gap.small"
-      vAlign="center"
-    >
-      {capturedImages.map((image, i) => (
-        <LabelingPageDialog
-          key={i}
-          imageIndex={i}
-          trigger={
-            <LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />
-          }
-        />
-      ))}
-    </Flex>
+    <>
+      {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
+      <Flex
+        styles={{
+          overflow: 'scroll',
+          border: '1px solid grey',
+          height: '150px',
+          borderColor: isValid ? '' : 'red',
+        }}
+        gap="gap.small"
+        vAlign="center"
+      >
+        {capturedImages.map((image, i) => (
+          <LabelingPageDialog
+            key={i}
+            imageIndex={i}
+            trigger={<LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />}
+          />
+        ))}
+      </Flex>
+    </>
   );
 };
