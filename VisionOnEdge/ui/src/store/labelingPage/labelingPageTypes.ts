@@ -60,6 +60,7 @@ export enum AnnotationState {
 }
 
 export interface Box2dComponentProps {
+  display?: boolean;
   workState: WorkState;
   cursorPosition: Position2D;
   scale: number;

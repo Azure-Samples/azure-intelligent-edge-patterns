@@ -6,6 +6,7 @@ import { BoxLabel, Box2dComponentProps, WorkState } from '../../store/labelingPa
 import { updateAnnotation } from '../../store/labelingPage/labelingPageActions';
 
 export const Box2d: FC<Box2dComponentProps> = ({
+  display = false,
   scale,
   workState,
   cursorPosition,
@@ -17,8 +18,8 @@ export const Box2d: FC<Box2dComponentProps> = ({
   dispatch,
 }) => {
   const [vertices, setVertices] = useState<BoxLabel>(annotation.label);
-  const anchorRadius: number = 5 / scale;
-  const strokeWidth: number = 2 / scale;
+  const anchorRadius: number = (display ? 10 : 5) / scale;
+  const strokeWidth: number = (display ? 4 : 2) / scale;
 
   const dispatchLabel = (): void => {
     if (!dispatch) return;
