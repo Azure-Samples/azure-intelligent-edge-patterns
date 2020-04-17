@@ -131,8 +131,8 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
         #fields = ['id', 'camera', 'location', 'parts', 'download_uri']
-        fields = ['id', 'camera', 'location', 'parts', 'download_uri']
-        extra_kwargs = {'download_uri': {'required': False}}
+        fields = ['id', 'camera', 'location', 'parts', 'download_uri', 'training_key', 'endpoint']
+        extra_kwargs = {'download_uri': {'required': False}, 'training_key': {'required': False}, 'endpoint': {'required': False}}
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
