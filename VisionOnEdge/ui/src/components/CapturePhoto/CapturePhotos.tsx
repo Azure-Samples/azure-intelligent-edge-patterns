@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
@@ -9,6 +9,7 @@ import { Part } from '../../store/part/partTypes';
 import { Camera } from '../../store/camera/cameraTypes';
 import { thunkGetCapturedImages, thunkAddCapturedImages } from '../../store/part/partActions';
 import LabelingPageDialog from '../LabelingPageDialog';
+import LabelDisplayImage from '../LabelDisplayImage';
 
 export const CapturePhotos: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
@@ -139,7 +140,9 @@ const CapturedImagesContainer = (): JSX.Element => {
         <LabelingPageDialog
           key={i}
           imageIndex={i}
-          trigger={<Image src={image.image} styles={{ cursor: 'pointer' }} design={{ maxWidth: '150px' }} />}
+          trigger={
+            <LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />
+          }
         />
       ))}
     </Flex>
