@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 import torch
 from datetime import datetime
+from time import time
 
 #device_name = sys.argv[1]  # Choose device from cmd line. Options: gpu or cpu
 #shape = (int(sys.argv[2]), int(sys.argv[2]))
@@ -51,6 +52,36 @@ def benchmark_pt(device_name="cpu",in_shape=10000):
         dot_operation = random_matrix * random_matrix.t()
         sum_operation = torch.sum(dot_operation)
         timetaken = datetime.now() - startTime
+    print("\n" * 5)
+    print("Shape:", shape, "Device:", device_name)
+    print(device_name," time taken on :", str(timetaken))
+    return timetaken
+
+def benchmark_pt_nv(device_name="cpu",in_shape=10000):
+    shape = (in_shape/10, in_shape/10)
+    timetaken = None
+    #Iter = 100000
+    if device_name == "gpu":
+        if(not torch.cuda.is_available()):
+            print("Gpu not detected returning ...")
+            return 0
+        tensor1 = torch.cuda.FloatTensor(shape)
+        tensor2 = torch.cuda.FloatTensor(shape)
+        startTime = datetime.now()
+        for i in range(1,100000):
+            tensor3 = tensor1.matmul(tensor2)
+            sum = torch.sum(tensor3)
+        timetaken = datetime.now() - startTime
+
+    elif device_name == "cpu":
+            tensor1 = torch.FloatTensor(shape)
+            tensor2 = torch.FloatTensor(shape)
+            startTime = datetime.now()
+            for i in range(1,100000):
+                tensor3 = tensor1.matmul(tensor2)
+                sum = torch.sum(tensor3)
+            timetaken = datetime.now() - startTime
+
     print("\n" * 5)
     print("Shape:", shape, "Device:", device_name)
     print(device_name," time taken on :", str(timetaken))

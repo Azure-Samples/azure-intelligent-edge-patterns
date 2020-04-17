@@ -11,7 +11,7 @@ import threading
 import random
 from azure.iot.device import Message
 from azure.iot.device.aio import IoTHubModuleClient
-from utility import benchmark_tf,benchmark_pt
+from utility import benchmark_tf,benchmark_pt,benchmark_pt_nv
 
 import sys
 
@@ -19,7 +19,7 @@ import sys
 RUNEXECUTION_COUNT = 0
 TWIN_CALLBACKS = 0
 RECEIVED_MESSAGES = 0
-SHAPE=7000
+SHAPE=5000
 WARMUP_ITERATIONS = 3
 
 async def main():
@@ -115,23 +115,24 @@ async def main():
                 print("Time taken on cpu is :: " + str(final_cputime) + "Time taken on gpu is " + str(final_gputime))
                 time.sleep(1)
 
-            msg_to_cloud = "On Tensorflow CPU took :: " + str(final_cputime) + " and GPU took :: " + str(final_gputime)
+            msg_to_cloud_tf = "On Tensorflow CPU took :: " + str(final_cputime) + " and GPU took :: " + str(final_gputime)
 
-            print(msg_to_cloud)
-            # Schedule task for sending message
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))
+            print(msg_to_cloud_tf)
+            
 
             #Running on pytorch 
             for i in range(1,iter):
-                final_gputime = benchmark_pt("gpu",shape)
-                final_cputime = benchmark_pt("cpu",shape)
+                final_gputime = benchmark_pt_nv("gpu",shape)
+                final_cputime = benchmark_pt_nv("cpu",shape)
                 print("Time taken on cpu is :: " + str(final_cputime) + "Time taken on gpu is " + str(final_gputime))
                 time.sleep(1)
 
             msg_to_cloud = "On Pytorch CPU took :: " + str(final_cputime) + " and GPU took :: " + str(final_gputime)
             print(msg_to_cloud)
             # Schedule task for sending message
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))    
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))  
+            # Schedule task for sending message
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_tf))  
 
         # Send a custom message to cloud 
         async def send_msg_to_cloud(module_client,input_message):
