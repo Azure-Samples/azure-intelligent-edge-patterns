@@ -38,11 +38,15 @@ export const updateImageLabels = (imageId: number, labels: any): UpdateImageLabe
   payload: { id: imageId, labels },
 });
 
-export const thunkGetCapturedImages = (): PartThunk => async (dispatch): Promise<void> => {
+export const thunkGetCapturedImages = (partId: string): PartThunk => async (dispatch): Promise<void> => {
   fetch(`/api/images`)
     .then((response) => response.json())
     .then((data) => {
-      dispatch(updateCapturedImages(data));
+      const imagesWithRelatedPart = data.reduce((acc, cur) => {
+        if (cur.part.split('/')[5] === partId) acc.push(cur);
+        return acc;
+      }, []);
+      dispatch(updateCapturedImages(imagesWithRelatedPart));
       return null;
     })
     .catch((err) => {
