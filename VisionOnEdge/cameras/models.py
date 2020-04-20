@@ -1,7 +1,10 @@
 import datetime
+import time
+import threading
+
 
 from django.db import models
-from django.db.models.signals import post_save, post_delete, pre_save, post_save
+from django.db.models.signals import post_save, post_delete, pre_save, post_save, m2m_changed
 import cv2
 import requests
 
@@ -49,6 +52,10 @@ class Annotation(models.Model):
     image = models.OneToOneField(Image, on_delete=models.CASCADE)
     labels = models.CharField(max_length=1000, null=True)
 
+class Setting(models.Model):
+    training_key = models.CharField(max_length=1000, blank=True)
+    endpoint = models.CharField(max_length=1000, blank=True)
+
 class Project(models.Model):
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
@@ -57,6 +64,8 @@ class Project(models.Model):
     customvision_project_id = models.CharField(max_length=200)
     customvision_project_name = models.CharField(max_length=200)
     download_uri = models.CharField(max_length=1000, null=True, blank=True)
+    training_key = models.CharField(max_length=1000, blank=True)
+    endpoint = models.CharField(max_length=1000, blank=True)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -66,6 +75,7 @@ class Project(models.Model):
         print('[INFO] Creating Project on Custom Vision')
         name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
         instance.customvision_project_name = name
+        print('instance pre:', instance)
 
         if is_trainer_valid:
             project = trainer.create_project(name, domain_id=obj_detection_domain.id)
@@ -78,14 +88,29 @@ class Project(models.Model):
     @staticmethod
     def post_save(sender, instance, update_fields, **kwargs):
         if update_fields is not None: return
-        print('post!')
-        print('instance:', instance.id, instance)
-        print(update_fields)
+        print('[INFO] POST_SAVE')
         project_id = instance.id
+        #if instance.parts.count() > 0:
+
+        #def run(project_id):
+        #    time.sleep(3)
+        #    requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
+        #    print('request training...')
+        #threading.Thread(target=run, args=(project_id,)).start()
+        #print('ok')
         requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
+
+
+    #@staticmethod
+    #def m2m_changed(sender, instance, action, **kwargs):
+    #    print('[INFO] M2M_CHANGED')
+    #    project_id = instance.id
+    #    #print(instance.parts)
+    #    requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
 
 pre_save.connect(Project.pre_save, Project, dispatch_uid='Project_pre')
 post_save.connect(Project.post_save, Project, dispatch_uid='Project_post')
+#m2m_changed.connect(Project.m2m_changed, Project.parts.through, dispatch_uid='Project_m2m')
 
 
 

@@ -16,8 +16,10 @@ from rest_framework.decorators import api_view
 from rest_framework import serializers, viewsets
 from rest_framework import status
 
+import requests
 
-from .models import Camera, Stream, Image, Location, Project, Part, Annotation
+
+from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting
 
 
 # FIXME move these to views
@@ -36,7 +38,11 @@ except:
     is_trainer_valid = False
 
 
+def export_iterationv3_2(project_id, iteration_id):
+    url = ENDPOINT+'customvision/v3.2/training/projects/'+project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
+    res = requests.post(url, '{body}', headers={'Training-key': TRAINING_KEY})
 
+    return res
 
 import cv2
 @api_view()
@@ -49,7 +55,7 @@ def export(request, project_id):
         print('not yet training ...')
         return JsonResponse({'status': 'waiting training'})
 
-    iteration = iterations[-1]
+    iteration = iterations[0]
 
     if iteration.exportable == False or iteration.status != 'Completed':
         print('waiting training ...')
@@ -58,10 +64,12 @@ def export(request, project_id):
     exports = trainer.get_exports(customvision_project_id, iteration.id)
     if len(exports) == 0:
         print('exporting ...')
-        trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
+        #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
+        res = export_iterationv3_2(customvision_project_id, iteration.id)
+        print(res.json())
         return JsonResponse({'status': 'exporting'})
 
-    project_obj.download_uri = exports[-1].download_uri
+    project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
@@ -94,7 +102,7 @@ def _export(project_id):
 class PartSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Part
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'description']
 
 class PartViewSet(viewsets.ModelViewSet):
     queryset = Part.objects.all()
@@ -124,13 +132,25 @@ class CameraViewSet(viewsets.ModelViewSet):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
 
+
+#
+# Settings Views
+#
+class SettingSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Setting
+        fields = ['id', 'training_key', 'endpoint']
+
+class SettingViewSet(viewsets.ModelViewSet):
+    queryset = Setting.objects.all()
+    serializer_class = SettingSerializer
+
 #
 # Projects Views
 #
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
-        #fields = ['id', 'camera', 'location', 'parts', 'download_uri']
         fields = ['id', 'camera', 'location', 'parts', 'download_uri']
         extra_kwargs = {'download_uri': {'required': False}}
 
@@ -227,8 +247,17 @@ def _train(project_id):
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
 
-    part_ids = [part.id for part in project_obj.parts.all()]
+    count = 10
+    while count > 0:
+        part_ids = [part.id for part in project_obj.parts.all()]
+        if len(part_ids) > 0: break
+        print('waiting parts...')
+        time.sleep(1)
+        count -= 1
 
+
+    print(project_obj.id)
+    print('_____>>>>', part_ids)
     images = Image.objects.filter(part_id__in=part_ids).all()
     img_entries = []
 
@@ -281,6 +310,7 @@ def _train(project_id):
 
 @api_view()
 def train(request, project_id):
+    print('sleeping')
     return _train(project_id)
 
 

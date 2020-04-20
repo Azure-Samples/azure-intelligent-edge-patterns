@@ -5,9 +5,9 @@ export type LabelImage = {
   id?: number;
   image: string;
   labels: any;
-}
+};
 // Describing the shape of the chat's slice of state
-export type Part = { capturedImages: LabelImage[] };
+export type Part = { capturedImages: LabelImage[]; isValid: boolean };
 
 // Describing the different ACTION NAMES available
 export const ADD_CAPTURED_IMAGE = 'ADD_CAPTURED_IMAGE';

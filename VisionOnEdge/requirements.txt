@@ -3,3 +3,4 @@ djangorestframework
 opencv-python
 pillow
 azure-cognitiveservices-vision-customvision==1.0.0
+requests

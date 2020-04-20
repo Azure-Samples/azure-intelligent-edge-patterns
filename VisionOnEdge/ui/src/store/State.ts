@@ -18,5 +18,6 @@ export const initialState: State = {
   labelingPageState: { annotations: [] },
   part: {
     capturedImages: [],
+    isValid: true,
   },
 };

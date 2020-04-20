@@ -1,5 +1,3 @@
-import { MutableRefObject } from 'react';
-
 import {
   Annotation,
   AnnotationState,
@@ -32,7 +30,7 @@ const requestAnnotationsFailure = (error: any): RequestAnnotationFailureAction =
   return { type: REQUEST_ANNOTATION_FAILURE };
 };
 
-export const getAnnotations = (imageId: number) => async (dispatch, getState): Promise<void> => {
+export const getAnnotations = (imageId: number) => (dispatch, getState): void => {
   const {
     part: { capturedImages },
   } = getState();
@@ -41,10 +39,8 @@ export const getAnnotations = (imageId: number) => async (dispatch, getState): P
   if (labels === null) {
     dispatch(requestAnnotationsSuccess([]));
   } else {
-    const parsedLabels = await JSON.parse(labels);
-
-    const annotations = parsedLabels.map((e) => ({
-      label: e,
+    const annotations = JSON.parse(labels).map((parsedLabels) => ({
+      label: parsedLabels,
       attribute: '',
       annotationState: AnnotationState.Finish,
     }));

@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { Flex, Text, Image } from '@fluentui/react-northstar';
 
 type BgImgStyle = {
-  backgroundSize?: '60%',
-  backgroundPosition?: 'center',
-  backgroundRepeat?: 'no-repeat',
-}
+  backgroundSize?: '60%';
+  backgroundPosition?: 'center';
+  backgroundRepeat?: 'no-repeat';
+};
 interface ImageLinkProps {
   to?: string;
   imgSrc?: string;
@@ -16,7 +16,9 @@ interface ImageLinkProps {
   imgPadding?: string;
   width: string;
   height?: string;
-  bgImgStyle?: BgImgStyle
+  bgImgStyle?: BgImgStyle;
+  pointerCursor?: boolean;
+  onClick?: (event: any) => void;
 }
 const ImageLink: FC<ImageLinkProps> = ({
   to = '',
@@ -28,20 +30,22 @@ const ImageLink: FC<ImageLinkProps> = ({
   width = '100px',
   height = '100px',
   bgImgStyle,
+  pointerCursor = false,
+  onClick,
 }) => {
   return (
     <Flex column styles={{ width }}>
       {to === '' ? (
-        <div style={{ height }}>
+        <div style={{ height }} onClick={onClick}>
           <Image
             src={imgSrc ?? defaultSrc}
             styles={{
               padding: imgPadding,
-              width: '100%',
               height: '100%',
               objectFit: 'contain',
               backgroundImage: `url(${bgImgSrc})`,
-              ...bgImgStyle
+              cursor: pointerCursor ? 'pointer' : 'default',
+              ...bgImgStyle,
             }}
           />
         </div>
@@ -52,11 +56,10 @@ const ImageLink: FC<ImageLinkProps> = ({
               src={imgSrc ?? defaultSrc}
               styles={{
                 padding: imgPadding,
-                width: '100%',
                 height: '100%',
                 objectFit: 'contain',
                 backgroundImage: `url(${bgImgSrc})`,
-                ...bgImgStyle
+                ...bgImgStyle,
               }}
             />
           </div>

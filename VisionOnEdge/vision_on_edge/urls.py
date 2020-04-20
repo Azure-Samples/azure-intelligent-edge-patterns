@@ -30,6 +30,7 @@ router.register('api/images', views.ImageViewSet)
 router.register('api/projects', views.ProjectViewSet)
 router.register('api/locations', views.LocationViewSet)
 router.register('api/annotations', views.AnnotationViewSet)
+router.register('api/settings', views.SettingViewSet)
 
 urlpatterns = [
     url('^', include(router.urls)),
