@@ -102,7 +102,7 @@ def _export(project_id):
 class PartSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Part
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'description']
 
 class PartViewSet(viewsets.ModelViewSet):
     queryset = Part.objects.all()
