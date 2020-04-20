@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Flex, Text, Input, Button } from '@fluentui/react-northstar';
+import { Divider, Flex, Text, Input, Button, Alert } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
 export const Setting = (): JSX.Element => {
-  const [confidence, setConfidence] = useState(0);
-  const [namespace, setNamespace] = useState('');
-  const [key, setKey] = useState('');
-  const [projectData, setProjectData] = useState(null);
-  const projectId = projectData?.id || null;
+  const [settingData, setSettingData] = useState({
+    id: null,
+    key: '',
+    namespace: '',
+  });
+  const [saveStatus, setSaveStatus] = useState({
+    success: false,
+    content: '',
+  });
 
   useEffect(() => {
-    fetch('/api/projects/')
+    fetch('/api/settings/')
       .then((res) => res.json())
       .then((data) => {
         if (data.length > 0) {
-          setProjectData(data[0]);
-          setNamespace(data[0]?.endpoint);
-          setKey(data[0]?.training_key);
+          setSettingData({
+            id: data[0].id,
+            key: data[0].training_key,
+            namespace: data[0].endpoint,
+          });
         }
         return void 0;
       })
@@ -26,26 +32,26 @@ export const Setting = (): JSX.Element => {
   }, []);
 
   const onSave = (): void => {
-    const isProjectEmpty = projectId === null;
-    const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
+    const isSettingEmpty = settingData.id === null;
+    const url = isSettingEmpty ? `/api/settings/` : `/api/settings/${settingData.id}/`;
 
     fetch(url, {
       body: JSON.stringify({
-        ...projectData,
-        training_key: key,
-        endpoint: namespace,
+        training_key: settingData.key,
+        endpoint: settingData.namespace,
       }),
-      method: isProjectEmpty ? 'POST' : 'PUT',
+      method: isSettingEmpty ? 'POST' : 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
     })
+      .then((res) => res.json())
       .then(() => {
-        console.log('success');
+        setSaveStatus({ success: true, content: 'Save Setting Successfully' });
         return void 0;
       })
       .catch((err) => {
-        console.error(err);
+        setSaveStatus({ success: false, content: `Fail to save settings: /n ${err.toString()}` });
       });
   };
 
@@ -53,16 +59,6 @@ export const Setting = (): JSX.Element => {
     <Flex column gap="gap.large">
       <h1>Setting</h1>
       <Divider color="grey" />
-      <Flex vAlign="center">
-        <Text size="large" design={{ width: '300px' }}>
-          Identification Confidence%:
-        </Text>
-        <Input
-          type="number"
-          value={confidence}
-          onChange={(_, { value }): void => setConfidence(parseInt(value, 10))}
-        />
-      </Flex>
       <Text size="large" weight="bold">
         Azure Cognitive Services Settings:{' '}
       </Text>
@@ -70,13 +66,19 @@ export const Setting = (): JSX.Element => {
         <Text size="large" design={{ width: '300px' }}>
           Namespace:
         </Text>
-        <Input value={namespace} onChange={(_, { value }): void => setNamespace(value)} />
+        <Input
+          value={settingData.namespace}
+          onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, namespace: value }))}
+        />
       </Flex>
       <Flex vAlign="center">
         <Text size="large" design={{ width: '300px' }}>
           Key:
         </Text>
-        <Input value={key} onChange={(_, { value }): void => setKey(value)} />
+        <Input
+          value={settingData.key}
+          onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, key: value }))}
+        />
       </Flex>
       <Flex gap="gap.large">
         <Button primary onClick={onSave}>
@@ -86,6 +88,14 @@ export const Setting = (): JSX.Element => {
           Cancel
         </Button>
       </Flex>
+      {saveStatus.content ? (
+        <Alert
+          success={saveStatus.success}
+          danger={!saveStatus.success}
+          content={saveStatus.content}
+          dismissible
+        />
+      ) : null}
     </Flex>
   );
 };
