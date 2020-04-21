@@ -1,4 +1,7 @@
-
+  
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for
+# full license information.
 
 import numpy as np    # we're going to use numpy to process input and output data
 import onnxruntime    # to inference ONNX models, we use the ONNX Runtime
