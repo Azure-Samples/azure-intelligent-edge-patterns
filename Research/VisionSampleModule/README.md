@@ -1,10 +1,6 @@
 ## Azure ML Training and Deployement on Intel Edge device (RRK)
 
-##Pre-requisites:
- - Intel powered Edge device (UP^2) with Ubuntu 16.04
- - USB webcam (/dev/video0)
- - OpenVINO installation with ORT (ONX Runtime) execution provider
- - Python OpenCV 
+
 
 ##Folders:
  #models (models.onnx, labesl.txt)
