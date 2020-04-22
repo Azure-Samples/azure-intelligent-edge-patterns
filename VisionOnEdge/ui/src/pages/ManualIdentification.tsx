@@ -63,7 +63,7 @@ const ManualIdentification: FC = () => {
             <Dropdown items={partItems} onChange={onDropdownChange} />
           </Flex>
           <Flex vAlign="center" gap="gap.smaller">
-            <Text truncated>Confidence Level:</Text>
+            <Text>Confidence Level:</Text>
             <Range
               value={confidenceLevelRange}
               allowCross={false}
