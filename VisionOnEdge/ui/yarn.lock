@@ -2916,7 +2916,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@2.x, classnames@^2.2.5, classnames@^2.2.6:
+classnames@^2.2.5, classnames@^2.2.6:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
   integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
@@ -3830,7 +3830,7 @@ dom-accessibility-api@^0.3.0:
   resolved "https://registry.yarnpkg.com/dom-accessibility-api/-/dom-accessibility-api-0.3.0.tgz#511e5993dd673b97c87ea47dba0e3892f7e0c983"
   integrity sha512-PzwHEmsRP3IGY4gv/Ug+rMeaTIyTJvadCb+ujYXYeIylbHJezIyNToe8KfEgHTCEYyC+/bUghYOGg8yMGlZ6vA==
 
-dom-align@^1.7.0:
+dom-align@1.x:
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/dom-align/-/dom-align-1.11.1.tgz#7592be99a660a36cdedc1d6eeb22b8109d758cae"
   integrity sha512-hN42DmUgtweBx0iBjDLO4WtKOMcK8yBmPx/fgdsgQadLuzPu/8co3oLdK5yMmeM/vnUd3yDyV6qV8/NzxBexQg==
@@ -9008,15 +9008,15 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-rc-align@^3.0.0-rc.0:
-  version "3.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/rc-align/-/rc-align-3.0.0-rc.1.tgz#32d1fac860d12bb85e9b8cafbbdef79f3f537674"
-  integrity sha512-GbofumhCUb7SxP410j/fbtR2M9Zml+eoZSdaliZh6R3NhfEj5zP4jcO3HG3S9C9KIcXQQtd/cwVHkb9Y0KU7Hg==
+rc-align@2.3.5, rc-align@^3.0.0-rc.0:
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/rc-align/-/rc-align-2.3.5.tgz#5085cfa4d685ee9d030b9afd2971eb370c5e80a1"
+  integrity sha512-V1AN/gMNiJ3vOzbY/H3CTxhzYH+Ri2KlsEpo1SN8/SYmI4I/ZfQpScFAgmERuIGcLStA2sOEeBNVpH2FaOd2hA==
   dependencies:
-    classnames "2.x"
-    dom-align "^1.7.0"
-    rc-util "^4.12.0"
-    resize-observer-polyfill "^1.5.1"
+    babel-runtime "^6.26.0"
+    dom-align "1.x"
+    prop-types "^15.5.8"
+    rc-util "^4.0.4"
 
 rc-animate@^2.10.2:
   version "2.10.3"
@@ -9062,7 +9062,7 @@ rc-trigger@^4.0.0:
     rc-animate "^2.10.2"
     rc-util "^4.20.0"
 
-rc-util@^4.0.4, rc-util@^4.12.0, rc-util@^4.15.3, rc-util@^4.20.0:
+rc-util@^4.0.4, rc-util@^4.15.3, rc-util@^4.20.0:
   version "4.20.3"
   resolved "https://registry.yarnpkg.com/rc-util/-/rc-util-4.20.3.tgz#c4d4ee6171cf685dc75572752a764310325888d3"
   integrity sha512-NBBc9Ad5yGAVTp4jV+pD7tXQGqHxGM2onPSZFyVoJ5fuvRF+ZgzSjZ6RXLPE0pVVISRJ07h+APgLJPBcAeZQlg==
@@ -9588,11 +9588,6 @@ requires-port@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
-
-resize-observer-polyfill@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
-  integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
 
 resolve-cwd@^2.0.0:
   version "2.0.0"

@@ -27,6 +27,7 @@
     "redux-thunk": "^2.3.0",
     "typescript": "^3.8.3"
   },
+  "resolutions": { "rc-align": "2.3.5" },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
