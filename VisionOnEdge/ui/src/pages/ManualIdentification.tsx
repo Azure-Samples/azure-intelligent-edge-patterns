@@ -1,25 +1,29 @@
-import React, { useState, FC } from 'react';
+import React, { useState, useMemo, FC } from 'react';
 import {
   Dropdown,
   DropdownItemProps,
-  Slider,
   Grid,
   Flex,
   Text,
   Divider,
-  Label,
   Button,
+  RadioGroup,
 } from '@fluentui/react-northstar';
 import { useSelector } from 'react-redux';
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap.css';
+import { Range, Handle } from 'rc-slider';
+import '../rc-slider.css';
 import { State } from '../store/State';
 import { Camera } from '../store/camera/cameraTypes';
 import ImageLink from '../components/ImageLink';
+import { useParts } from '../hooks/useParts';
 
 const ManualIdentification: FC = () => {
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
-  const images = [...new Array(20)];
+  const parts = useParts();
 
-  const cameraItems: DropdownItemProps[] = cameras.map((ele) => ({
+  const partItems: DropdownItemProps[] = parts.map((ele) => ({
     header: ele.name,
     content: {
       key: ele.id,
@@ -27,8 +31,18 @@ const ManualIdentification: FC = () => {
   }));
 
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const [confidenceLevel, setConfidenceLevel] = useState<number>(90);
+  const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([70, 90]);
   const [ascend, setAscend] = useState<boolean>(true);
+
+  const images = useMemo(
+    () =>
+      [...new Array(20)]
+        .map(() => ({ confidenceLevel: 80, src: '/Play.png' }))
+        .filter(
+          (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
+        ),
+    [confidenceLevelRange],
+  );
 
   const onDropdownChange = (_, data): void => {
     const { key } = data.value.content;
@@ -45,18 +59,29 @@ const ManualIdentification: FC = () => {
       <Flex column gap="gap.medium" space="between" styles={{ height: '75vh', padding: '1em' }}>
         <Grid columns="3" styles={{ columnGap: '1em' }}>
           <Flex vAlign="center" gap="gap.smaller">
-            <Text truncated>Select Camera:</Text>
-            <Dropdown items={cameraItems} onChange={onDropdownChange} />
+            <Text truncated>Select Part:</Text>
+            <Dropdown items={partItems} onChange={onDropdownChange} />
           </Flex>
           <Flex vAlign="center" gap="gap.smaller">
             <Text truncated>Confidence Level:</Text>
-            <Slider
-              value={confidenceLevel.toString()}
-              onChange={(_, data): void => {
-                setConfidenceLevel(parseInt(data.value, 10));
+            <Range
+              value={confidenceLevelRange}
+              allowCross={false}
+              onChange={(e): void => setConfidenceLevelRange(e)}
+              handle={({ value, dragging, index, ...restProps }): JSX.Element => {
+                return (
+                  <Tooltip
+                    prefixCls="rc-slider-tooltip"
+                    overlay={`${value}%`}
+                    visible={dragging}
+                    placement="top"
+                    key={index}
+                  >
+                    <Handle value={value} {...restProps} />
+                  </Tooltip>
+                );
               }}
             />
-            <Label content={`${confidenceLevel}%`} />
           </Flex>
           <Flex vAlign="center">
             <Text truncated>Sort:</Text>
@@ -80,8 +105,8 @@ const ManualIdentification: FC = () => {
             borderWidth: '1px',
           }}
         >
-          {images.map((_, i) => (
-            <ImageIdentificationItem key={i} />
+          {images.map((e, i) => (
+            <ImageIdentificationItem key={i} confidenceLevel={e.confidenceLevel} src={e.src} />
           ))}
         </Grid>
         <Button content="Update" styles={{ width: '15%' }} primary disabled />
@@ -90,26 +115,37 @@ const ManualIdentification: FC = () => {
   );
 };
 
-const ImageIdentificationItem: FC<any> = () => {
-  const parts = [];
-  const [selectedPart, setSelectedPart] = useState<number>(null);
-
-  const onDropdownChange = (_, data): void => {
-    const { key } = data.value.content;
-    const currentPart = parts.find((ele) => ele.id === key);
-    if (selectedPart) setSelectedPart(currentPart);
-  };
+interface ImageIdentificationItemProps {
+  confidenceLevel: number;
+  src: string;
+}
+const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, src }) => {
+  const [isPart, setIsPart] = useState<number>(null);
 
   return (
     <Flex hAlign="center" padding="padding.medium">
-      <ImageLink defaultSrc="/Play.png" width="120px" height="120px" />
+      <ImageLink defaultSrc={src} width="7.5rem" height="7.5rem" />
       <Flex column gap="gap.smaller" styles={{ width: '40%' }}>
-        <Text truncated>Confidence Level: 30%</Text>
+        <Text truncated>Confidence Level: {confidenceLevel}%</Text>
         <Flex column>
-          <Text>Select Part:</Text>
-          <Dropdown items={parts} fluid onChange={onDropdownChange} />
+          <RadioGroup
+            checkedValue={isPart}
+            onCheckedValueChange={(_, newProps): void => setIsPart(newProps.value as number)}
+            items={[
+              {
+                key: '1',
+                label: 'Yes',
+                value: 1,
+              },
+              {
+                key: '0',
+                label: 'No',
+                value: 0,
+              },
+            ]}
+          />
         </Flex>
-        <Button primary content="Identify" />
+        <Button primary content="Identify" disabled={!isPart} />
       </Flex>
     </Flex>
   );

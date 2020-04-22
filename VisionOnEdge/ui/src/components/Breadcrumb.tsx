@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Text, Flex } from '@fluentui/react-northstar';
 
@@ -45,20 +45,20 @@ const Breadcrumb: FC = () => {
         const title = getTitle(e);
 
         return (
-          <>
-            <Text key={i} color="black">
+          <Fragment key={i}>
+            <Text color="black">
               {'>'}
             </Text>
             {i === arr.length - 1 ? (
-              <Text key={`title-${i}`} color="black">
+              <Text color="black">
                 {title}
               </Text>
             ) : (
-              <Link key={`title-${i}`} to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
+              <Link to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
                 <Text>{title}</Text>
               </Link>
             )}
-          </>
+          </ Fragment>
         );
       })}
     </Flex>
