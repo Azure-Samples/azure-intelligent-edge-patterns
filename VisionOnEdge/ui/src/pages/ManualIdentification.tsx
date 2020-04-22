@@ -1,17 +1,19 @@
-import React, { useState, FC } from 'react';
+import React, { useState, useMemo, FC } from 'react';
 import {
   Dropdown,
   DropdownItemProps,
-  Slider,
   Grid,
   Flex,
   Text,
   Divider,
-  Label,
   Button,
   RadioGroup,
 } from '@fluentui/react-northstar';
 import { useSelector } from 'react-redux';
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap.css';
+import { Range, Handle } from 'rc-slider';
+import '../rc-slider.css';
 import { State } from '../store/State';
 import { Camera } from '../store/camera/cameraTypes';
 import ImageLink from '../components/ImageLink';
@@ -20,7 +22,6 @@ import { useParts } from '../hooks/useParts';
 const ManualIdentification: FC = () => {
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
   const parts = useParts();
-  const images = [...new Array(20)].map(() => ({ confidenceLevel: 30, src: '/Play.png' }));
 
   const partItems: DropdownItemProps[] = parts.map((ele) => ({
     header: ele.name,
@@ -30,8 +31,18 @@ const ManualIdentification: FC = () => {
   }));
 
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const [confidenceLevel, setConfidenceLevel] = useState<number>(90);
+  const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([70, 90]);
   const [ascend, setAscend] = useState<boolean>(true);
+
+  const images = useMemo(
+    () =>
+      [...new Array(20)]
+        .map(() => ({ confidenceLevel: 80, src: '/Play.png' }))
+        .filter(
+          (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
+        ),
+    [confidenceLevelRange],
+  );
 
   const onDropdownChange = (_, data): void => {
     const { key } = data.value.content;
@@ -53,13 +64,24 @@ const ManualIdentification: FC = () => {
           </Flex>
           <Flex vAlign="center" gap="gap.smaller">
             <Text truncated>Confidence Level:</Text>
-            <Slider
-              value={confidenceLevel.toString()}
-              onChange={(_, data): void => {
-                setConfidenceLevel(parseInt(data.value, 10));
+            <Range
+              value={confidenceLevelRange}
+              allowCross={false}
+              onChange={(e): void => setConfidenceLevelRange(e)}
+              handle={({ value, dragging, index, ...restProps }): JSX.Element => {
+                return (
+                  <Tooltip
+                    prefixCls="rc-slider-tooltip"
+                    overlay={`${value}%`}
+                    visible={dragging}
+                    placement="top"
+                    key={index}
+                  >
+                    <Handle value={value} {...restProps} />
+                  </Tooltip>
+                );
               }}
             />
-            <Label content={`${confidenceLevel}%`} />
           </Flex>
           <Flex vAlign="center">
             <Text truncated>Sort:</Text>
