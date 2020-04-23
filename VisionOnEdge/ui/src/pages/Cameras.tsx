@@ -1,6 +1,6 @@
 import React, { useState, FC } from 'react';
 import { useDispatch } from 'react-redux';
-import { Flex, Button, Dialog, Input, Icon, Grid } from '@fluentui/react-northstar';
+import { Flex, Button, Dialog, Input, Grid, AddIcon } from '@fluentui/react-northstar';
 
 import { useCameras } from '../hooks/useCameras';
 import { Camera } from '../store/camera/cameraTypes';
@@ -39,7 +39,7 @@ const Cameras: FC = (): JSX.Element => {
               primary
               fluid
               circular
-              content={<Icon name="add" size="largest" circular />}
+              content={<AddIcon size="largest" circular />}
               style={{ width: 100, height: 100 }}
             />
           </Flex>
@@ -50,6 +50,7 @@ const Cameras: FC = (): JSX.Element => {
         }}
         cancelButton="Cancel"
         header="Add Camera"
+        closeOnOutsideClick={false}
         content={
           <Flex column gap="gap.small">
             <Input

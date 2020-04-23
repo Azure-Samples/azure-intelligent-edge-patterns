@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Icon, Flex } from '@fluentui/react-northstar';
+import { Button, Flex, AddIcon } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
 export const CreateCameraConfig: React.FC = () => {
@@ -10,7 +10,7 @@ export const CreateCameraConfig: React.FC = () => {
         <Button
           fluid
           circular
-          content={<Icon name="add" size="largest" circular color="brand" />}
+          content={<AddIcon size="largest" circular color="brand" />}
           style={{ width: 100, height: 100, border: '5px solid #0094d8' }}
           color="brand"
           as={Link}

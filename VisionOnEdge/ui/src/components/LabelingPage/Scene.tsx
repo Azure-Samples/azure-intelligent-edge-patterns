@@ -1,5 +1,5 @@
 import React, { FC, useState, useEffect, useRef } from 'react';
-import { Text, Button } from '@fluentui/react-northstar';
+import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
@@ -117,7 +117,10 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
       </Stage>
       <Button
         disabled={annotations.length === 0}
-        content={selectedAnnotationIndex === null && annotations.length > 1 ? 'Clear' : 'Remove'}
+        iconOnly
+        text
+        styles={{ color: annotations.length === 0 ? 'grey' : 'red', ':hover': { color: 'red' } }}
+        content={<CloseIcon size="large" />}
         onClick={(): void => {
           dispatch(removeAnnotation(selectedAnnotationIndex));
           setSelectedAnnotationIndex(null);

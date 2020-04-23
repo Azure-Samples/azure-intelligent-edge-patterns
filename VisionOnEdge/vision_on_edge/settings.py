@@ -69,7 +69,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
+#WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
+ASGI_APPLICATION = 'vision_on_edge.asgi.application'
 
 
 # Database
@@ -127,3 +128,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 import config
 TRAINING_KEY = config.TRAINING_KEY
 ENDPOINT = config.ENDPOINT
+IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
+DEVICE_ID = config.DEVICE_ID
+MODULE_ID = config.MODULE_ID
