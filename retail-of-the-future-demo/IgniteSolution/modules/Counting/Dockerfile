@@ -1,4 +1,4 @@
-FROM  intelligentretail/base:latest
+FROM  ignite/base:latest
 
 COPY ./people-counting /people-counting
 RUN /bin/bash -c "chmod +x ./people-counting/exec_count.sh"
