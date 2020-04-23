@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Divider, Text, Flex, Dropdown, Button, DropdownItemProps } from '@fluentui/react-northstar';
+import {
+  Divider,
+  Text,
+  Flex,
+  Dropdown,
+  Button,
+  DropdownItemProps,
+  Checkbox,
+  Input,
+} from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 
 export const PartIdentification: React.FC = () => {
@@ -14,6 +23,9 @@ export const PartIdentification: React.FC = () => {
     any
   >('locations');
   const history = useHistory();
+  const [needRetraining, setNeedRetraining] = useState(true);
+  const [max, setMax] = useState(80);
+  const [min, setMin] = useState(60);
 
   const projectId = useRef<number>(null);
   useEffect(() => {
@@ -98,6 +110,34 @@ export const PartIdentification: React.FC = () => {
           items={dropDownLocations}
           isMultiple={false}
         />
+        <Checkbox
+          label="Set up retraining"
+          checked={needRetraining}
+          onChange={(_, data): void => setNeedRetraining(data.checked)}
+        />
+        <Text disabled={!needRetraining}>Accuracy Range</Text>
+        <Text disabled={!needRetraining}>
+          Minimum:{' '}
+          <Input
+            type="number"
+            disabled={!needRetraining}
+            inline
+            value={min}
+            onChange={(_, { value }): void => setMin(value as any)}
+          />
+          %
+        </Text>
+        <Text disabled={!needRetraining}>
+          Maximum:{' '}
+          <Input
+            type="number"
+            disabled={!needRetraining}
+            inline
+            value={max}
+            onChange={(_, { value }): void => setMax(value as any)}
+          />
+          %
+        </Text>
         <Link to="">Advanced Configuration</Link>
         <Button
           primary
