@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Text } from '@fluentui/react-northstar';
+import { Flex, Text, Grid } from '@fluentui/react-northstar';
 
 import ImageLink from '../ImageLink';
 
@@ -10,14 +10,14 @@ interface CameraDetailInfoProps {
 }
 const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ name, rtsp, modelName }) => {
   return (
-    <Flex style={{ margin: 30 }} column gap="gap.medium">
-      <Flex space="between">
+    <Flex styles={{ padding: "1rem 2rem" }} column gap="gap.large">
+      <Grid columns="2">
         <Text size="larger" weight="semibold">
           Details
         </Text>
         <ImageLink defaultSrc="/defaultCamera.png" width="100px" height="100px" />
-      </Flex>
-      <Flex padding="padding.medium" gap="gap.large">
+      </Grid>
+      <Grid columns="2">
         <Flex column>
           <Text size="large" content={'Name:'} />
           <Text size="large" content={'RTSP Url:'} />
@@ -28,7 +28,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ name, rtsp, modelName }) 
           <Text size="large" content={rtsp} />
           <Text size="large" content={modelName} />
         </Flex>
-      </Flex>
+      </Grid>
     </Flex>
   );
 };
