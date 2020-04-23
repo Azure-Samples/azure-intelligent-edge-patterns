@@ -35,7 +35,7 @@ Before you begin, make sure you have:
 
 1.  Clone or download the code.
 ```
-  git clone https://github.com/garvitarai/gpu-testing/tree/yadavmchanges/GpuReferenceModules
+  git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
 ```
 ## Configure and Build Containers
 1.  Open the “GpuReferenceModules” folder in Visual Studio Code.
