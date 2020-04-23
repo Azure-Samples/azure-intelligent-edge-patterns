@@ -4,10 +4,11 @@ import { Dialog } from '@fluentui/react-northstar';
 import LabelingPage from '../pages/LabelingPage';
 import { LabelingType } from '../store/labelingPage/labelingPageTypes';
 
-const LabelingPageDialog: FC<{ trigger: JSX.Element; imageIndex: number }> = ({
-  trigger,
-  imageIndex,
-}): JSX.Element => {
+interface LabelingPageDialogProps {
+  trigger: JSX.Element;
+  imageIndex: number;
+}
+const LabelingPageDialog: FC<LabelingPageDialogProps> = ({ trigger, imageIndex }): JSX.Element => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog

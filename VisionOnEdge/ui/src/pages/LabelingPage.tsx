@@ -22,11 +22,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
       annotations: state.labelingPageState.annotations,
     }),
   );
-  const imageUrl = images[index].image;
-  const imageId = images[index].id;
+  const imageUrl = images?.[index]?.image;
+  const imageId = images?.[index]?.id;
 
   useEffect(() => {
-    dispatch(getAnnotations(imageId));
+    if (typeof imageId === 'number') dispatch(getAnnotations(imageId));
     return (): void => {
       dispatch(resetAnnotation());
     };
