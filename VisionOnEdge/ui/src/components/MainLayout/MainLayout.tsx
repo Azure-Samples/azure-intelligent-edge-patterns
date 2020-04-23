@@ -65,6 +65,7 @@ const LeftNav = ({ styles }): JSX.Element => {
         <NavItem src="/icons/camera.png" to="/cameras"></NavItem>
         <NavItem src="/icons/part.png" to="/parts"></NavItem>
         <NavItem src="/icons/manual.png" to="/manual"></NavItem>
+        <NavItem src="/icons/partIdentification.png" to="/partIdentification"></NavItem>
       </Flex>
     </Segment>
   );
