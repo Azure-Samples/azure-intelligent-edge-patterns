@@ -21,12 +21,19 @@ import requests
 
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting
 
+from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
 
-from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
+from azure.iot.hub import IoTHubRegistryManager
+from azure.iot.hub.models import Twin, TwinProperties
+try:
+    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
+except:
+    iot = None
+
 trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 
 is_trainer_valid = True
@@ -71,28 +78,10 @@ def export(request, project_id):
 
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
+
+    update_twin(iteration.id, exports[0].download_uri)
+
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
-
-@api_view()
-def _export(project_id):
-    print(project_id)
-    print(len(exports), 'exports')
-    if len(exports) == 0:
-        print('exporting ...')
-        trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
-
-    while True:
-        print('waiting for exporting ...')
-        exports = trainer.get_exports(customvision_project_id, iteration.id)
-        export = exports[-1]
-        if export.download_uri is None:
-            time.sleep(5)
-            continue
-        break
-
-    project_obj.download_uri = export.download_uri
-    project_obj.save()
-    print('Download URI:', project_obj.download_uri)
 
 
 
@@ -314,10 +303,30 @@ def train(request, project_id):
     return _train(project_id)
 
 
-#@api_export()
-#def export(request, project_id):
-#    project_obj = Project.objects.get(pk=project_id)
-#    customvision_project_id = project_obj.customvision_project_id
-#
-#    iterations = trainer.get_iterations(project_id)
-#    if len(iterations) == 0:
+
+# FIXME will need to find a better way to deal with this
+iteration_ids = set([])
+def update_twin(iteration_id, download_uri):
+
+    if iot is None: return
+
+    if iteration_id in iteration_ids:
+        print('[INFO] This iteration already deployed in the Edge')
+        return
+
+    try:
+        module = iot.get_module(DEVICE_ID, MODULE_ID)
+    except:
+        print('[ERROR] module does not exist', DEVICE_ID, MODULE_ID)
+        return
+
+    twin = Twin()
+    twin.properties = TwinProperties(desired={'inference_files_zip_url': download_uri})
+
+    iot.update_module_twin(DEVICE_ID, MODULE_ID, twin, module.etag)
+
+    print('[INFO] Updated IoT Module Twin with uri', download_uri)
+
+    iteration_ids.add(iteration_id)
+
+

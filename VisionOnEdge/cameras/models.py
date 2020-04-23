@@ -90,14 +90,6 @@ class Project(models.Model):
         if update_fields is not None: return
         print('[INFO] POST_SAVE')
         project_id = instance.id
-        #if instance.parts.count() > 0:
-
-        #def run(project_id):
-        #    time.sleep(3)
-        #    requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
-        #    print('request training...')
-        #threading.Thread(target=run, args=(project_id,)).start()
-        #print('ok')
         requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
 
 
