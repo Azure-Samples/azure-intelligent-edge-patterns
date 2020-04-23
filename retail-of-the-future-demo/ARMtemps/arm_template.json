@@ -42,6 +42,7 @@
             "defaultValue": "EastUS2Plan",
             "type": "String"
         },
+        // need to move to variables
         "sites_FunctionAppArrivals_name": {
             "defaultValue": "[concat('FunctionAppArrivals-', parameters('uniqueID'))]",
             "type": "String"
