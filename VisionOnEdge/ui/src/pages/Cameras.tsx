@@ -50,6 +50,7 @@ const Cameras: FC = (): JSX.Element => {
         }}
         cancelButton="Cancel"
         header="Add Camera"
+        closeOnOutsideClick={false}
         content={
           <Flex column gap="gap.small">
             <Input
