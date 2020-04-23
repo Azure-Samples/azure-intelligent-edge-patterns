@@ -2,6 +2,32 @@
 
 Below are two methods for deploying the required Azure resources.
 
+## Resources To Be Created:
+
+- IoT Hub
+- IoT Hub Consumer Group
+- Azure Container Registry
+- Storage Accounts
+    - Storage for Stockout Images
+    - Storage for persisting Face API data
+    - Storage for diagnostics
+- SQL Server
+- SQL Database
+- Cognitive Services Account
+- LUIS Authoring Account
+- Custom Speec Account
+- Cosmos DB
+- ASA Job
+- Azure Function
+    - Server Farm
+    - App Insights
+    - Web App
+    - Web App Configuration
+    - Host Name Binding
+
+
+
+
 ## Method 1: Via Clickable Shortcut (Recommended)
 
 This is the quickest and easiest way to deploy.
