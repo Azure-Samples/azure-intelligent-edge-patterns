@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Flex, Dropdown, Button, Image, Text, DropdownItemProps } from '@fluentui/react-northstar';
+import {
+  Flex,
+  Dropdown,
+  Button,
+  Image,
+  Text,
+  DropdownItemProps,
+  PlayIcon,
+  CallControlPresentNewIcon,
+  PauseThickIcon,
+} from '@fluentui/react-northstar';
 import { Link, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -103,19 +113,25 @@ const RTSPVideo = ({ selectedCamera, partId }): JSX.Element => {
         buttons={[
           {
             key: 'start',
-            icon: 'play',
+            icon: <PlayIcon />,
             iconOnly: true,
             onClick: onCreateStream,
             disabled: selectedCamera === null,
           },
           {
             key: 'capture',
-            icon: 'call-control-present-new',
+            icon: <CallControlPresentNewIcon />,
             iconOnly: true,
             onClick: onCapturePhoto,
             disabled: !streamId,
           },
-          { key: 'stop', icon: 'pause-thick', iconOnly: true, onClick: onDisconnect, disabled: !streamId },
+          {
+            key: 'stop',
+            icon: <PauseThickIcon />,
+            iconOnly: true,
+            onClick: onDisconnect,
+            disabled: !streamId,
+          },
         ]}
       />
     </>

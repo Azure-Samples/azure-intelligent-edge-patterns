@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Image, Text, Button, Icon } from '@fluentui/react-northstar';
+import { Flex, Image, Text, Button, AddIcon } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
 export const Parts: React.FC = () => {
@@ -26,7 +26,7 @@ export const Parts: React.FC = () => {
         primary
         fluid
         circular
-        content={<Icon name="add" size="largest" circular />}
+        content={<AddIcon size="largest" circular />}
         style={{
           width: 100,
           height: 100,

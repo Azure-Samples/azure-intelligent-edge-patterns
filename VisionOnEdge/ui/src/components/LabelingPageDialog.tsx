@@ -1,4 +1,4 @@
-import React, { memo, FC, useState, Dispatch, useEffect } from 'react';
+import React, { memo, FC, useState } from 'react';
 import { Dialog } from '@fluentui/react-northstar';
 
 import LabelingPage from '../pages/LabelingPage';
