@@ -67,7 +67,7 @@
               "createOptions": {
                 "Cmd": [
                   "Eula=accept",
-                  "Billing=https://westus.api.cognitive.microsoft.com/",
+                  "Billing=https://$COGNITIVE_SERVICES_LOCATION.api.cognitive.microsoft.com/",
                   "ApiKey=$API_KEY",
                   "Logging:Console:LogLevel:Default=Information",
                   "CloudAI:Storage:StorageScenario=Azure",
@@ -100,8 +100,8 @@
               "createOptions": {
                 "Cmd": [
                   "Eula=accept",
-                  "Billing=https://westus.api.cognitive.microsoft.com/",
-                  "ApiKey=$API_KEY"
+                  "Billing=https://$LUIS_LOCATION.api.cognitive.microsoft.com/",
+                  "ApiKey=$LUIS_KEY"
                 ],
                 "ExposedPorts": {
                   "5000/tcp": {}
@@ -130,7 +130,7 @@
               "createOptions": {
                 "Cmd": [
                   "Eula=accept",
-                  "Billing=https://westus.api.cognitive.microsoft.com/",
+                  "Billing=https://$COGNITIVE_SERVICES_LOCATION.api.cognitive.microsoft.com/",
                   "ApiKey=$API_KEY"
                 ],
                 "ExposedPorts": {
@@ -158,7 +158,7 @@
               "createOptions": {
                 "Cmd": [
                   "Eula=accept",
-                  "Billing=https://westus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
+                  "Billing=https://$COGNITIVE_SERVICES_LOCATION.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
                   "ApiKey=$API_KEY"
                 ],
                 "ExposedPorts": {
@@ -289,43 +289,6 @@
             "settings": {
               "image": "$CONTAINER_REGISTRY_LOGIN_SERVER/cameramodule:0.1.2-amd64",
               "createOptions": {}
-            }
-          },
-          "voiddetectionbrainwave": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "intelligentedge/void-detection-brainwave:1.0.0",
-              "createOptions": {
-                "ExposedPorts": {
-                  "50051/tcp": {}
-                },
-                "HostConfig": {
-                  "Privileged": true,
-                  "PortBindings": {
-                    "50051/tcp": [
-                      {
-                        "HostPort": "50051"
-                      }
-                    ]
-                  },
-                  "Binds": [
-                    "/etc/hosts:/etc/hosts"
-                  ],
-                  "Devices": [
-                    {
-                      "PathOnHost": "/dev/catapult0",
-                      "PathInContainer": "/dev/catapult0"
-                    },
-                    {
-                      "PathOnHost": "/dev/catapult1",
-                      "PathInContainer": "/dev/catapult1"
-                    }
-                  ]
-                }
-              }
             }
           }
         }
