@@ -22,13 +22,17 @@ export const Box2d: FC<Box2dComponentProps> = ({
   annotation,
   dispatch,
   setCursorState = null,
+  noMoreCreate,
 }) => {
   const [vertices, setVertices] = useState<BoxLabel>(annotation.label);
   const anchorRadius: number = (display ? 10 : 5) / scale;
   const strokeWidth: number = (display ? 4 : 2) / scale;
 
   const dispatchLabel = (): void => {
-    if (!display) setCursorState(LabelingCursorStates.default);
+    if (display) return;
+
+    if (noMoreCreate) setCursorState(LabelingCursorStates.default);
+    else setCursorState(LabelingCursorStates.crosshair);
 
     if (!dispatch) return;
     const newAnnotation = { ...annotation };
@@ -37,34 +41,33 @@ export const Box2d: FC<Box2dComponentProps> = ({
   };
 
   const onDragAnchor = ({ xi = 'x1', yi = 'y1' }) => (e: KonvaEventObject<DragEvent>): void => {
+    if (display) return;
     const x = Math.round(e.target.position().x);
     const y = Math.round(e.target.position().y);
     // * Round the anchor (circle) position so user can only drag anchor on integer.
     e.target.setAttr('x', x);
     e.target.setAttr('y', y);
 
-    if (!display) {
-      const anotherPosXArr = ['x1', 'x2'];
-      const anotherPosYArr = ['y1', 'y2'];
-      anotherPosXArr.splice(
-        anotherPosXArr.findIndex((xx) => xx === xi),
-        1,
-      );
-      anotherPosYArr.splice(
-        anotherPosYArr.findIndex((yy) => yy === yi),
-        1,
-      );
-      if (vertices[anotherPosXArr[0]] > vertices[xi]) {
-        if (vertices[anotherPosYArr[0]] > vertices[yi]) {
-          setCursorState(LabelingCursorStates.nwseResize);
-        } else {
-          setCursorState(LabelingCursorStates.neswResize);
-        }
-      } else if (vertices[anotherPosYArr[0]] > vertices[yi]) {
-        setCursorState(LabelingCursorStates.neswResize);
-      } else {
+    const anotherPosXArr = ['x1', 'x2'];
+    const anotherPosYArr = ['y1', 'y2'];
+    anotherPosXArr.splice(
+      anotherPosXArr.findIndex((xx) => xx === xi),
+      1,
+    );
+    anotherPosYArr.splice(
+      anotherPosYArr.findIndex((yy) => yy === yi),
+      1,
+    );
+    if (vertices[anotherPosXArr[0]] > vertices[xi]) {
+      if (vertices[anotherPosYArr[0]] > vertices[yi]) {
         setCursorState(LabelingCursorStates.nwseResize);
+      } else {
+        setCursorState(LabelingCursorStates.neswResize);
       }
+    } else if (vertices[anotherPosYArr[0]] > vertices[yi]) {
+      setCursorState(LabelingCursorStates.neswResize);
+    } else {
+      setCursorState(LabelingCursorStates.nwseResize);
     }
 
     setVertices((prevVertices) => ({ ...prevVertices, [xi]: x, [yi]: y }));
@@ -116,6 +119,14 @@ export const Box2d: FC<Box2dComponentProps> = ({
           draggable={true}
           onDragMove={onDragAnchor({ xi: 'x1', yi: 'y1' })}
           onDragEnd={dispatchLabel}
+          onMouseEnter={(): void => {
+            if (display) return;
+            setCursorState(LabelingCursorStates.nwseResize);
+          }}
+          onMouseLeave={(): void => {
+            if (display) return;
+            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+          }}
         />
         <Circle
           key={'anchor-1'}
@@ -127,6 +138,14 @@ export const Box2d: FC<Box2dComponentProps> = ({
           draggable={true}
           onDragMove={onDragAnchor({ xi: 'x2', yi: 'y1' })}
           onDragEnd={dispatchLabel}
+          onMouseEnter={(): void => {
+            if (display) return;
+            setCursorState(LabelingCursorStates.neswResize);
+          }}
+          onMouseLeave={(): void => {
+            if (display) return;
+            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+          }}
         />
         <Circle
           key={'anchor-2'}
@@ -138,6 +157,14 @@ export const Box2d: FC<Box2dComponentProps> = ({
           draggable={true}
           onDragMove={onDragAnchor({ xi: 'x2', yi: 'y2' })}
           onDragEnd={dispatchLabel}
+          onMouseEnter={(): void => {
+            if (display) return;
+            setCursorState(LabelingCursorStates.nwseResize);
+          }}
+          onMouseLeave={(): void => {
+            if (display) return;
+            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+          }}
         />
         <Circle
           key={'anchor-3'}
@@ -149,6 +176,14 @@ export const Box2d: FC<Box2dComponentProps> = ({
           draggable={true}
           onDragMove={onDragAnchor({ xi: 'x1', yi: 'y2' })}
           onDragEnd={dispatchLabel}
+          onMouseEnter={(): void => {
+            if (display) return;
+            setCursorState(LabelingCursorStates.neswResize);
+          }}
+          onMouseLeave={(): void => {
+            if (display) return;
+            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+          }}
         />
       </Group>
     </Group>

@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect, useRef } from 'react';
+import React, { FC, useState, useEffect, useRef, useMemo } from 'react';
 import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -33,6 +33,10 @@ interface SceneProps {
 const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
+  const noMoreCreate = useMemo(
+    () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
+    [labelingType, annotations],
+  );
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
@@ -42,7 +46,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   const onMouseDown = (): void => {
     // * Single bounding box labeling type condition
-    if (labelingType === LabelingType.SingleAnnotation && annotations.length === 1) return;
+    if (noMoreCreate) return;
 
     if (selectedAnnotationIndex !== null && workState === WorkState.None) {
       setSelectedAnnotationIndex(null);
@@ -72,9 +76,13 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   useEffect(() => {
     // * Single bounding box labeling type condition
-    if (labelingType === LabelingType.SingleAnnotation && annotations.length === 1)
+    if (noMoreCreate) {
+      setCursorState(LabelingCursorStates.default);
       setSelectedAnnotationIndex(0);
-  }, [annotations, labelingType]);
+    } else {
+      setCursorState(LabelingCursorStates.crosshair);
+    }
+  }, [annotations, labelingType, noMoreCreate]);
   useEffect(() => {
     if (workState === WorkState.None) setSelectedAnnotationIndex(null);
   }, [workState]);
@@ -123,6 +131,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
               selected={i === selectedAnnotationIndex}
               dispatch={dispatch}
               setCursorState={setCursorState}
+              noMoreCreate={noMoreCreate}
             />
           ))}
         </Layer>

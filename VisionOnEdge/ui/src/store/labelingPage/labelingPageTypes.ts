@@ -80,6 +80,7 @@ export interface Box2dComponentProps {
   visible?: boolean;
   dispatch: any;
   setCursorState?: Dispatch<LabelingCursorStates>;
+  noMoreCreate?: boolean;
   // instanceID: number;
 }
 export type BoxObject = {
