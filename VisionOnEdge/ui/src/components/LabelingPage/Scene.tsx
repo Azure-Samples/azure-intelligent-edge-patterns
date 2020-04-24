@@ -53,7 +53,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const onMouseUp = (): void => {
     if (workState === WorkState.Creating) {
       dispatch(updateCreatingAnnotation(cursorPosition));
-      // dispatch(finishCreatingAnnotation());
       if (annotations.length - 1 === selectedAnnotationIndex) {
         setWorkState(WorkState.Selecting);
       } else {
