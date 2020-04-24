@@ -1,8 +1,6 @@
 # Kubeflow on Azure Stack
 
-Module `kubeflow-on-azure` describes how to create a Kubeflow cluster on Azure, as well as gives review of Kubernetes and Docker for GPU-consuming applications.
-
-This module demonstrates how to create a Kubeflow cluster on Azure Stack, which is a detached from public cloud on-prem hardware.
+This module demonstrates how to create a Kubeflow cluster on Azure Stack.
 
 Main differences of the detached mode include limitations on:
 
@@ -24,7 +22,7 @@ The reader is expected to be familiar with the following:
 You need to have an Azure Subscription, or create one. With the subscription you will have the
 tenant ID, Service Principal ID and secret.
 
-## Login to the local cloud
+## Login to the desired cloud
 
 If you do not already have Azure CLI, install it. See [Install Azure CLI with apt](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest) if you are using Ubuntu, or similar for other OSes.
 
@@ -48,7 +46,7 @@ It may be helpful to update it to the desired API version:
 
     $ az cloud update --profile 2019-03-01-hybrid
 
-Login to the local cloud:
+Login to the desired cloud:
 
     $ az login --tenant stackdemo.example.com --service-principal -u 1234567-1234-123-123 -p SUPERSECRET
     [
