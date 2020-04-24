@@ -1,3 +1,5 @@
+import { Dispatch } from "react";
+
 // * Request Operation
 export const REQUEST_ANNOTATION_FAILURE = 'REQUEST_ANNOTATION_FAILURE';
 export type RequestAnnotationSuccessAction = { type: typeof REQUEST_ANNOTATION_SUCCESS; payload: any };
@@ -59,6 +61,13 @@ export enum AnnotationState {
   Finish = 'Finish',
 }
 
+export enum LabelingCursorStates {
+  default = 'default',
+  pointer = 'pointer',
+  crosshair = 'crosshair',
+  neswResize = 'nesw-resize',
+  nwseResize = 'nwse-resize',
+}
 export interface Box2dComponentProps {
   display?: boolean;
   workState: WorkState;
@@ -70,6 +79,8 @@ export interface Box2dComponentProps {
   selected: boolean;
   visible?: boolean;
   dispatch: any;
+  setCursorState?: Dispatch<LabelingCursorStates>;
+  noMoreCreate?: boolean;
   // instanceID: number;
 }
 export type BoxObject = {

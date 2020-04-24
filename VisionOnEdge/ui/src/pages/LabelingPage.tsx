@@ -46,7 +46,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
             setIndex((prev) => (prev - 1 + images.length) % images.length);
           }}
         />
-        <Scene url={imageUrl} annotations={annotations} labelingType={labelingType} />
+        <Scene url={imageUrl ?? '/icons/Play.png'} annotations={annotations} labelingType={labelingType} />
         <Button
           text
           disabled={index === images.length - 1}
