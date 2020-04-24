@@ -10,8 +10,14 @@ import {
   Input,
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { thunkGetProject } from '../store/project/projectActions';
+import { Project } from '../store/project/projectTypes';
+import { State } from '../store/State';
 
 export const PartIdentification: React.FC = () => {
+  const dispatch = useDispatch();
+  const { id, camera, location, parts } = useSelector<State, Project>((state) => state.project);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
   );
@@ -32,29 +38,16 @@ export const PartIdentification: React.FC = () => {
   const projectId = useRef<number>(null);
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
-      fetch('/api/projects/')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.length > 0) {
-            projectId.current = data[0].id;
-            setSelectedLocationById(data[0].location.split('/')[5]);
-            setSelectedPartsById(data[0].parts.map((ele) => ele.split('/')[5]));
-            setSelectedCameraById(data[0].camera.split('/')[5]);
-          }
-          return void 0;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      dispatch(thunkGetProject());
     }
-  }, [
-    cameraLoading,
-    locationLoading,
-    partLoading,
-    setSelectedCameraById,
-    setSelectedLocationById,
-    setSelectedPartsById,
-  ]);
+  }, [dispatch, cameraLoading, locationLoading, partLoading]);
+
+  useEffect(() => {
+    projectId.current = id;
+    if (location) setSelectedLocationById(location.split('/')[5]);
+    if (parts.length) setSelectedPartsById(parts.map((ele) => ele.split('/')[5]));
+    if (camera) setSelectedCameraById(camera.split('/')[5]);
+  }, [camera, id, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
 
   const handleSubmitConfigure = (): void => {
     const isProjectEmpty = projectId.current === null;
@@ -171,7 +164,7 @@ export const PartIdentification: React.FC = () => {
 function useDropdownItems<T>(
   moduleName: string,
   isMultiple?: boolean,
-): [boolean, DropdownItemProps[], T | T[], (id: string) => void] {
+): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => void] {
   const originItems = useRef<(T & { id: number })[]>([]);
   const [dropDownItems, setDropDownItems] = useState<DropdownItemProps[]>([]);
   const [selectedItem, setSelectedItem] = useState<T | T[]>(isMultiple ? [] : null);
