@@ -19,7 +19,7 @@ const Cameras: FC = (): JSX.Element => {
 
   return (
     <Flex column gap="gap.large" padding="padding.medium" styles={{ height: '100%' }}>
-      <Grid columns="8" styles={{ height: '80%' }}>
+      <Grid columns="8" styles={{ height: '75%' }}>
         {cameras.map((camera, i) => (
           <ImageLink
             key={i}

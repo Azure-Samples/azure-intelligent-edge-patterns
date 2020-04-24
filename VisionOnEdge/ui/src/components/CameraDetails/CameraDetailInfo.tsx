@@ -32,7 +32,6 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, modelName
           <Text size="large" content={modelName} />
         </Flex>
       </Grid>
-
       <Button
         primary
         content="Delete Camera"

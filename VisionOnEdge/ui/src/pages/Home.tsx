@@ -24,7 +24,7 @@ const Home: FC = () => {
       <Flex gap="gap.large">
         <ImageLink
           imgSrc="/icons/location-filled.png"
-          to="/location/register"
+          to="/locations/register"
           label="Register a new Location"
           width="100px"
         />

@@ -1,6 +1,8 @@
 import React, { useEffect, FC } from 'react';
-import { Flex, Grid } from '@fluentui/react-northstar';
+import { Flex, Grid, Button, AddIcon } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+
 import { State } from '../store/State';
 import { Location } from '../store/location/locationTypes';
 import ImageLink from '../components/ImageLink';
@@ -14,8 +16,8 @@ const Locations: FC = () => {
     dispatch(getLocations());
   }, [dispatch]);
   return (
-    <Flex column gap="gap.large" padding="padding.medium">
-      <Grid columns="8">
+    <Flex column gap="gap.large" padding="padding.medium" styles={{ height: '100%' }}>
+      <Grid columns="8" styles={{ height: '75%' }}>
         {locations.map((location, i) => (
           <ImageLink
             key={i}
@@ -27,6 +29,17 @@ const Locations: FC = () => {
           />
         ))}
       </Grid>
+      <Flex hAlign="end">
+      <Link to="/locations/register">
+        <Button
+          primary
+          fluid
+          circular
+          content={<AddIcon size="largest" circular />}
+          style={{ width: '6rem', height: '6rem' }}
+        />
+        </Link>
+      </Flex>
     </Flex>
   );
 };

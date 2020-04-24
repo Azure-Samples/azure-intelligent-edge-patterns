@@ -3,16 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Text, Flex } from '@fluentui/react-northstar';
 
 const getTitle = (pathname: string): string => {
-  if (/[0-9]/.test(pathname)) {
-    return 'Details';
-  }
-
   switch (pathname) {
     case 'cameras':
       return 'Camera';
     case 'parts':
       return 'Part';
-    case 'location':
+    case 'locations':
       return 'Location';
     case 'register':
       return 'Register';
@@ -24,7 +20,12 @@ const getTitle = (pathname: string): string => {
       return 'Register Part';
     case 'partIdentification':
       return 'Job Configuration';
+    case 'capturePhotos':
+      return null;
+    case 'uploadPhotos':
+      return null;
     default:
+      if (typeof pathname === 'string') return 'Details';      
       return null;
   }
 };
