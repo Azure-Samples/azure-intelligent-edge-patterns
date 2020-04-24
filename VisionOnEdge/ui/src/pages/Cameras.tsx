@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import React, { useState, FC } from 'react';
 import { useDispatch } from 'react-redux';
 import { Flex, Button, Dialog, Input, Grid, AddIcon } from '@fluentui/react-northstar';
