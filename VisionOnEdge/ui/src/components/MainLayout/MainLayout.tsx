@@ -61,7 +61,7 @@ const LeftNav = ({ styles }): JSX.Element => {
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
       <Flex column gap="gap.large" hAlign="center">
-        <NavItem src="/icons/location.png" to="/location/register"></NavItem>
+        <NavItem src="/icons/location.png" to="/locations"></NavItem>
         <NavItem src="/icons/camera.png" to="/cameras"></NavItem>
         <NavItem src="/icons/part.png" to="/parts"></NavItem>
         <NavItem src="/icons/manual.png" to="/manual"></NavItem>

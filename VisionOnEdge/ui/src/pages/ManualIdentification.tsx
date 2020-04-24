@@ -137,7 +137,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
   return (
     <Flex hAlign="center" padding="padding.medium">
       <ImageLink defaultSrc={src} width="7.5rem" height="7.5rem" />
-      <Flex column gap="gap.smaller" styles={{ width: '40%' }}>
+      <Flex column gap="gap.smaller" styles={{ width: '30%' }}>
         <Text truncated>Confidence Level: {confidenceLevel}%</Text>
         <Flex column>
           <RadioGroup

@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Grid } from '@fluentui/react-northstar';
 import CameraDetailInfo from '../components/CameraDetails/CameraDetailInfo';
@@ -11,12 +11,13 @@ import { CameraConfigureInfo, CreateCameraConfig } from '../components/CameraCon
 const CameraDetails: FC = (): JSX.Element => {
   const { name, projectId } = useParams();
   const camera = useSelector<State, Camera>((state) => state.cameras.find((e) => e.name === name));
-
   const hasProject = !!projectId;
+
+  if (camera === undefined) return <Redirect to="/cameras" />;
 
   return (
     <Grid columns="2" design={{ height: '100%' }}>
-      <CameraDetailInfo name={name} rtsp={camera.rtsp} modelName={camera.model_name} />
+      <CameraDetailInfo id={camera.id} name={name} rtsp={camera.rtsp} modelName={camera.model_name} />
       {hasProject ? <CameraConfigureInfo /> : <CreateCameraConfig />}
     </Grid>
   );
