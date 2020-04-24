@@ -26,6 +26,8 @@ export const PartIdentification: React.FC = () => {
   const [needRetraining, setNeedRetraining] = useState(true);
   const [max, setMax] = useState(80);
   const [min, setMin] = useState(60);
+  const [maxImgCount, setMaxImgCount] = useState(15);
+  const [maxImgCountError, setMaxImgCountError] = useState(false);
 
   const projectId = useRef<number>(null);
   useEffect(() => {
@@ -137,6 +139,21 @@ export const PartIdentification: React.FC = () => {
             onChange={(_, { value }): void => setMax(value as any)}
           />
           %
+        </Text>
+        <Text disabled={!needRetraining}>
+          Maximum Images:{' '}
+          <Input
+            type="number"
+            disabled={!needRetraining}
+            inline
+            value={maxImgCount}
+            onChange={(_, { value }): void => {
+              if ((value as any) < 15) setMaxImgCountError(true);
+              else setMaxImgCountError(false);
+              setMaxImgCount(value as any);
+            }}
+          />
+          {maxImgCountError && <Text error>Cannot be less than 15</Text>}
         </Text>
         <Link to="">Advanced Configuration</Link>
         <Button
