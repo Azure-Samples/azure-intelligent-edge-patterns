@@ -79,7 +79,41 @@ def export(request, project_id):
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
 
-    update_twin(iteration.id, exports[0].download_uri)
+    if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
+        update_twin(iteration.id, exports[0].download_uri)
+
+    return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
+
+# FIXME tmp workaround
+@api_view()
+def export_null(request):
+    project_obj = Project.objects.all()[0]
+    customvision_project_id = project_obj.customvision_project_id
+
+    iterations = trainer.get_iterations(customvision_project_id)
+    if len(iterations) == 0:
+        print('not yet training ...')
+        return JsonResponse({'status': 'waiting training'})
+
+    iteration = iterations[0]
+
+    if iteration.exportable == False or iteration.status != 'Completed':
+        print('waiting training ...')
+        return JsonResponse({'status': 'waiting training'})
+
+    exports = trainer.get_exports(customvision_project_id, iteration.id)
+    if len(exports) == 0:
+        print('exporting ...')
+        #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
+        res = export_iterationv3_2(customvision_project_id, iteration.id)
+        print(res.json())
+        return JsonResponse({'status': 'exporting'})
+
+    project_obj.download_uri = exports[0].download_uri
+    project_obj.save(update_fields=['download_uri'])
+
+    if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
+        update_twin(iteration.id, exports[0].download_uri)
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
