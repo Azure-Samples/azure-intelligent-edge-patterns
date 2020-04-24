@@ -12,6 +12,7 @@ import {
   Position2D,
   WorkState,
   LabelingType,
+  LabelingCursorStates,
 } from '../../store/labelingPage/labelingPageTypes';
 import {
   createAnnotation,
@@ -23,6 +24,7 @@ const defaultSize: Size2D = {
   width: 900,
   height: 600,
 };
+
 interface SceneProps {
   url?: string;
   labelingType: LabelingType;
@@ -31,6 +33,7 @@ interface SceneProps {
 const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
+  const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -94,7 +97,12 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   return (
     <div style={{ margin: 3 }}>
-      <Stage width={imageSize.width} height={imageSize.height} scale={scale.current}>
+      <Stage
+        width={imageSize.width}
+        height={imageSize.height}
+        scale={scale.current}
+        style={{ cursor: cursorState }}
+      >
         <Layer
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
@@ -114,6 +122,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
               annotationIndex={i}
               selected={i === selectedAnnotationIndex}
               dispatch={dispatch}
+              setCursorState={setCursorState}
             />
           ))}
         </Layer>
