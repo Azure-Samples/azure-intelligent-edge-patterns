@@ -20,21 +20,33 @@ import '../rc-slider.css';
 import LabelingPageDialog from '../components/LabelingPageDialog';
 import { State } from '../store/State';
 import { Camera } from '../store/camera/cameraTypes';
-import ImageLink from '../components/ImageLink';
 import { useParts } from '../hooks/useParts';
+import LabelDisplayImage from '../components/LabelDisplayImage';
+import { Project } from '../store/project/projectTypes';
 
 let sorting = false;
 
 const ManualIdentification: FC = () => {
+  const project = useSelector<State, Project>((state) => state.project);
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
   const parts = useParts();
 
-  const partItems: DropdownItemProps[] = parts.map((ele) => ({
-    header: ele.name,
-    content: {
-      key: ele.id,
-    },
-  }));
+  const partItems = useMemo<DropdownItemProps[]>(() => {
+    if (parts.length === 0 || project.parts.length === 0) return [];
+
+    return project.parts.map((partId) => {
+      const part = parts.find((e) => e.id === partId);
+
+      return {
+        header: part.name,
+        content: {
+          key: part.id,
+        },
+      };
+    });
+  }, [parts, project]);
+
+
 
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([70, 90]);
@@ -98,6 +110,7 @@ const ManualIdentification: FC = () => {
             <Text truncated>Sort:</Text>
             <Button
               icon={ascend ? <ArrowDownIcon /> : <ArrowUpIcon />}
+              styles={{ color: sorting ? '#0094d8' : 'grey' }}
               text
               iconOnly
               onClick={(): void => {
@@ -136,8 +149,10 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
 
   return (
     <Flex hAlign="center" padding="padding.medium">
-      <ImageLink defaultSrc={src} width="7.5rem" height="7.5rem" />
-      <Flex column gap="gap.smaller" styles={{ width: '40%' }}>
+      <div style={{ margin: '0.2rem' }}>
+        <LabelDisplayImage labelImage={{ image: src, labels: null }} width={100} height={100} />
+      </div>
+      <Flex column gap="gap.smaller" styles={{ width: '30%' }}>
         <Text truncated>Confidence Level: {confidenceLevel}%</Text>
         <Flex column>
           <RadioGroup
@@ -158,7 +173,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
           />
         </Flex>
         <LabelingPageDialog
-          imageIndex={0}
+          imageIndex={1000}
           trigger={<Button primary content="Identify" disabled={!isPart} />}
         />
       </Flex>

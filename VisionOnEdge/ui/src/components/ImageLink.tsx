@@ -51,7 +51,7 @@ const ImageLink: FC<ImageLinkProps> = ({
         </div>
       ) : (
         <Link to={to}>
-          <div style={{ height }}>
+          <div style={{ height }} onClick={onClick}>
             <Image
               src={imgSrc ?? defaultSrc}
               styles={{

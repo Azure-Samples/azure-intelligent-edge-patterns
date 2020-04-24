@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   GET_CAMERA_SUCCESS,
   POST_CAMERA_SUCCESS,
@@ -6,11 +7,18 @@ import {
   RequestCamerasFailure,
   PostCameraSuccess,
   Camera,
+  DELETE_CAMERA_SUCCESS,
+  DeleteCameraSuccess,
 } from './cameraTypes';
 
 const getCamerasSuccess = (data: Camera[]): GetCamerasSuccess => ({
   type: GET_CAMERA_SUCCESS,
   payload: data,
+});
+
+const deleteCameraSuccess = (id: number): DeleteCameraSuccess => ({
+  type: DELETE_CAMERA_SUCCESS,
+  payload: { id },
 });
 
 const requestCamerasFailure = (error: any): RequestCamerasFailure => {
@@ -24,11 +32,8 @@ const postCameraSuccess = (data: Camera): PostCameraSuccess => ({
 });
 
 export const getCameras = () => (dispatch): Promise<void> => {
-  return fetch('/api/cameras/')
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
+  return axios('/api/cameras/')
+    .then(({ data }) => {
       dispatch(getCamerasSuccess(data));
       return void 0;
     })
@@ -38,18 +43,25 @@ export const getCameras = () => (dispatch): Promise<void> => {
 };
 
 export const postCamera = (newCamera: Camera) => (dispatch): Promise<void> => {
-  return fetch('/api/cameras/', {
+  return axios('/api/cameras/', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(newCamera),
+    data: newCamera,
   })
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
+    .then(({ data }) => {
       dispatch(postCameraSuccess(data));
+      return void 0;
+    })
+    .catch((err) => {
+      dispatch(requestCamerasFailure(err));
+    });
+};
+
+export const deleteCamera = (id: number) => (dispatch): Promise<void> => {
+  return axios(`/api/cameras/${id}/`, {
+    method: 'DELETE',
+  })
+    .then(() => {
+      dispatch(deleteCameraSuccess(id));
       return void 0;
     })
     .catch((err) => {

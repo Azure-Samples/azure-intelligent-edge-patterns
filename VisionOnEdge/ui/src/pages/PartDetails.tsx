@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Input, TextArea, Button, Menu, Grid } from '@fluentui/react-northstar';
+import { Flex, Input, TextArea, Button, Menu, Grid, Alert } from '@fluentui/react-northstar';
 import { Link, useLocation, Switch, Route, useParams, useHistory } from 'react-router-dom';
+import axios from 'axios';
+
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
 
@@ -16,14 +18,15 @@ export const PartDetails = (): JSX.Element => {
 const LeftPanel = (): JSX.Element => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [error, setError] = useState('');
   const { partId } = useParams();
   const history = useHistory();
 
   useEffect(() => {
     if (partId) {
-      fetch(`/api/parts/${partId}/`)
-        .then((res) => res.json())
-        .then((data) => {
+      axios
+        .get(`/api/parts/${partId}/`)
+        .then(({ data }) => {
           setName(data.name);
           setDescription(data.description);
           return void 0;
@@ -38,23 +41,20 @@ const LeftPanel = (): JSX.Element => {
     const hasPartId = partId !== undefined;
     const url = hasPartId ? `/api/parts/${partId}/` : `/api/parts/`;
 
-    fetch(url, {
-      body: JSON.stringify({
+    axios({
+      method: hasPartId ? 'PUT' : 'POST',
+      url,
+      data: {
         name,
         description,
-      }),
-      method: hasPartId ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
       },
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(({ data }) => {
         history.push(`/parts/detail/${data.id}/capturePhotos`);
         return void 0;
       })
       .catch((err) => {
-        console.error(err);
+        setError(JSON.stringify(err.response.data));
       });
   };
 
@@ -78,9 +78,10 @@ const LeftPanel = (): JSX.Element => {
         }}
       />
       <Flex space="around">
-        <Button content="Save" primary onClick={onSave} />
+        <Button content="Save" primary onClick={onSave} disabled={!name || !description} />
         <Button content="Cancel" />
       </Flex>
+      {!!error && <Alert danger content={error} dismissible />}
     </Flex>
   );
 };

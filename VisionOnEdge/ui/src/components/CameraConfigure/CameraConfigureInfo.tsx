@@ -1,69 +1,55 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Flex, Text, Status, Button, Image, Loader } from '@fluentui/react-northstar';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import Axios from 'axios';
+
 import { useInterval } from '../../hooks/useInterval';
-import { useParams } from 'react-router-dom';
+import { thunkDeleteProject, thunkGetProject } from '../../store/project/projectActions';
+import { Project } from '../../store/project/projectTypes';
+import { State } from '../../store/State';
 
 export const CameraConfigureInfo: React.FC = () => {
-  const [configureInfo, setConfigureInfo] = useState({
-    modelUrl: '',
-    status: 'online',
-    parts: ['part1', 'part2'],
-    successRate: 95,
-    successfulInferences: 300,
-    unIdetifiedItems: 15,
-  });
-
-  const { projectId } = useParams();
+  const project = useSelector<State, Project>((state) => state.project);
+  const dispatch = useDispatch();
+  const { projectId, name } = useParams();
+  const history = useHistory();
 
   const onDeleteConfigure = (): void => {
-    // TODO
+    const result = (dispatch(thunkDeleteProject(projectId)) as unknown) as Promise<any>;
+    result
+      .then((data) => {
+        if (data) return history.push(`/cameras/${name}`);
+        return void 0;
+      })
+      .catch((err) => console.error(err));
   };
 
-  useInterval(
-    () => {
-      fetch('/api/projects/'+projectId+'/export')
-        .then(() => {})
-        .catch((err) => {})
-    },
-    5000
-  )
+  /**
+   * Call custom Vision to export
+   */
+  useInterval(() => {
+    Axios.get(`/api/projects/${projectId}/export`);
+  }, 5000);
 
   useInterval(
     () => {
-      fetch('/api/projects/')
-        .then((res) => res.json())
-        .then((data) => {
-          console.log('wew');
-          if (data.length > 0) {
-            const curProject = data[0];
-            console.log(curProject);
-            setConfigureInfo((prev) => ({
-              ...prev,
-              modelUrl: curProject.download_uri,
-              parts: curProject.parts,
-            }));
-          }
-          return void 0;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      dispatch(thunkGetProject());
     },
-    configureInfo.modelUrl ? null : 5000,
+    project.modelUrl ? null : 5000,
   );
 
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
-      {!configureInfo.modelUrl ? (
+      {project.modelUrl ? (
         <Loader size="largest" label="Trainning" labelPosition="below" design={{ paddingTop: '300px' }} />
       ) : (
         <>
-          <ListItem title="Status" content={<CameraStatus online={configureInfo.status === 'online'} />} />
-          <ListItem title="Configured for" content={configureInfo.parts.join(', ')} />
+          <ListItem title="Status" content={<CameraStatus online={project.status === 'online'} />} />
+          <ListItem title="Configured for" content={project.parts.join(', ')} />
           <span>Model Url: </span>
-          <a href={configureInfo.modelUrl}>{configureInfo.modelUrl}</a>
+          <a href={project.modelUrl}>{project.modelUrl}</a>
           <Flex column gap="gap.small">
             <Text styles={{ width: '150px' }} size="large">
               Live View:
@@ -84,17 +70,17 @@ export const CameraConfigureInfo: React.FC = () => {
             title="Success Rate"
             content={
               <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-                {`${configureInfo.successRate}%`}
+                {`${project.successRate}%`}
               </Text>
             }
           />
-          <ListItem title="Successful Inferences" content={configureInfo.successfulInferences} />
+          <ListItem title="Successful Inferences" content={project.successfulInferences} />
           <ListItem
             title="Unidentified Items"
             content={
               <>
                 <Text styles={{ margin: '5px' }} size="large">
-                  {configureInfo.unIdetifiedItems}
+                  {project.unIdetifiedItems}
                 </Text>
                 <Button
                   content="Identify Manually"

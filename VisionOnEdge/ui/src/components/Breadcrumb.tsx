@@ -3,28 +3,29 @@ import { Link, useLocation } from 'react-router-dom';
 import { Text, Flex } from '@fluentui/react-northstar';
 
 const getTitle = (pathname: string): string => {
-  if (!Number.isNaN(parseInt(pathname, 10))) {
-    return 'Details';
-  }
-
   switch (pathname) {
     case 'cameras':
       return 'Camera';
     case 'parts':
       return 'Part';
-    case 'location':
+    case 'locations':
       return 'Location';
     case 'register':
       return 'Register';
     case 'label':
       return 'Label';
     case 'manual':
-      return 'Identify Manually'
+      return 'Identify Manually';
     case 'detail':
       return 'Register Part';
     case 'partIdentification':
       return 'Job Configuration';
+    case 'capturePhotos':
+      return null;
+    case 'uploadPhotos':
+      return null;
     default:
+      if (typeof pathname === 'string') return 'Details';      
       return null;
   }
 };
@@ -46,19 +47,15 @@ const Breadcrumb: FC = () => {
 
         return (
           <Fragment key={i}>
-            <Text color="black">
-              {'>'}
-            </Text>
+            <Text color="black">{'>'}</Text>
             {i === arr.length - 1 ? (
-              <Text color="black">
-                {title}
-              </Text>
+              <Text color="black">{title}</Text>
             ) : (
               <Link to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
                 <Text>{title}</Text>
               </Link>
             )}
-          </ Fragment>
+          </Fragment>
         );
       })}
     </Flex>

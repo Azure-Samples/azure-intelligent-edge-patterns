@@ -4,6 +4,7 @@ import {
   POST_CAMERA_SUCCESS,
   Camera,
   CameraAction,
+  DELETE_CAMERA_SUCCESS,
 } from './cameraTypes';
 import { initialState } from '../State';
 
@@ -15,6 +16,11 @@ const camerasReducer = (state = initialState.cameras, action: CameraAction): Cam
       return state;
     case POST_CAMERA_SUCCESS:
       return state.concat(action.payload);
+    case DELETE_CAMERA_SUCCESS: {
+      const idx = state.findIndex((e) => e.id === action.payload.id);
+      if (idx !== -1) return state.slice(0, idx).concat(state.slice(idx + 1));
+      return state;
+    }
     default:
       return state;
   }
