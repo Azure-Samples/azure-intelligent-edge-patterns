@@ -7,6 +7,10 @@ export type Project = {
   location: any;
   parts: any[];
   modelUrl: string;
+  status: string;
+  successRate: number;
+  successfulInferences: number;
+  unIdetifiedItems: number;
 };
 
 // Describing the different ACTION NAMES available

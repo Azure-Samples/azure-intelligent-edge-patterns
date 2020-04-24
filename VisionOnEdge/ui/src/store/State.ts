@@ -30,5 +30,9 @@ export const initialState: State = {
     location: null,
     parts: [],
     modelUrl: '',
+    status: '',
+    successRate: null,
+    successfulInferences: null,
+    unIdetifiedItems: null,
   },
 };

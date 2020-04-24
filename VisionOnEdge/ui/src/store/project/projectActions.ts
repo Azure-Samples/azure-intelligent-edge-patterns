@@ -10,6 +10,10 @@ import {
   POST_PROJECT_SUCCESS,
   POST_PROJECT_FALIED,
   PostProjectFaliedAction,
+  DeleteProjectSuccessAction,
+  DELETE_PROJECT_SUCCESS,
+  DeleteProjectFaliedAction,
+  DELETE_PROJECT_FALIED,
 } from './projectTypes';
 
 const getProjectSuccess = (project: Project): GetProjectSuccessAction => ({
@@ -23,6 +27,12 @@ const postProjectSuccess = (): PostProjectSuccessAction => ({ type: POST_PROJECT
 
 const postProjectFail = (): PostProjectFaliedAction => ({ type: POST_PROJECT_FALIED });
 
+const deleteProjectSuccess = (): DeleteProjectSuccessAction => ({ type: DELETE_PROJECT_SUCCESS });
+
+const deleteProjectFailed = (): DeleteProjectFaliedAction => ({
+  type: DELETE_PROJECT_FALIED,
+});
+
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
   return Axios.get('/api/projects/')
     .then(({ data }) => {
@@ -32,6 +42,10 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         location: data[0]?.location || null,
         parts: data[0]?.parts || [],
         modelUrl: data[0]?.training_uri || '',
+        status: data[0]?.status || 'offline',
+        successRate: data[0]?.successRate || 0,
+        successfulInferences: data[0]?.successfulInferences || 0,
+        unIdetifiedItems: data[0]?.unIdetifiedItems || 0,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -70,4 +84,15 @@ export const thunkPostProject = (
       dispatch(postProjectFail());
       console.error(err);
     }) as Promise<void>;
+};
+
+export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {
+  return Axios.delete(`/api/projects/${projectId}/`)
+    .then(() => {
+      return dispatch(deleteProjectSuccess());
+    })
+    .catch((err) => {
+      alert(err);
+      dispatch(deleteProjectFailed());
+    });
 };

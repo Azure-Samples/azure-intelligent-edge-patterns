@@ -21,7 +21,17 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case POST_PROJECT_FALIED:
       return { ...state };
     case DELETE_PROJECT_SUCCESS:
-      return { id: null, camera: null, location: null, parts: [], modelUrl: '' };
+      return {
+        id: null,
+        camera: null,
+        location: null,
+        parts: [],
+        modelUrl: '',
+        status: '',
+        successRate: null,
+        successfulInferences: null,
+        unIdetifiedItems: null,
+      };
     case DELETE_PROJECT_FALIED:
       return { ...state };
     default:
