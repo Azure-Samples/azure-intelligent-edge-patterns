@@ -8,41 +8,64 @@ import {
   Divider,
   Button,
   RadioGroup,
+  ArrowDownIcon,
+  ArrowUpIcon,
 } from '@fluentui/react-northstar';
 import { useSelector } from 'react-redux';
 import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap.css';
 import { Range, Handle } from 'rc-slider';
+import 'rc-tooltip/assets/bootstrap.css';
 import '../rc-slider.css';
+
+import LabelingPageDialog from '../components/LabelingPageDialog';
 import { State } from '../store/State';
 import { Camera } from '../store/camera/cameraTypes';
-import ImageLink from '../components/ImageLink';
 import { useParts } from '../hooks/useParts';
+import LabelDisplayImage from '../components/LabelDisplayImage';
+import { Project } from '../store/project/projectTypes';
+
+let sorting = false;
 
 const ManualIdentification: FC = () => {
+  const project = useSelector<State, Project>((state) => state.project);
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
   const parts = useParts();
 
-  const partItems: DropdownItemProps[] = parts.map((ele) => ({
-    header: ele.name,
-    content: {
-      key: ele.id,
-    },
-  }));
+  const partItems = useMemo<DropdownItemProps[]>(() => {
+    if (parts.length === 0 || project.parts.length === 0) return [];
+
+    return project.parts.map((partId) => {
+      const part = parts.find((e) => e.id === partId);
+
+      return {
+        header: part.name,
+        content: {
+          key: part.id,
+        },
+      };
+    });
+  }, [parts, project]);
+
+
 
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([70, 90]);
-  const [ascend, setAscend] = useState<boolean>(true);
+  const [ascend, setAscend] = useState<boolean>(false);
 
-  const images = useMemo(
-    () =>
-      [...new Array(20)]
-        .map(() => ({ confidenceLevel: 80, src: '/Play.png' }))
-        .filter(
-          (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
-        ),
-    [confidenceLevelRange],
-  );
+  const images = useMemo(() => {
+    // TODO: Get real images here
+    const imgs = [...new Array(20)]
+      .map((_, i) => ({ confidenceLevel: i * 4, src: '/Play.png' }))
+      .filter(
+        (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
+      );
+
+    if (sorting) {
+      if (ascend) imgs.sort((a, b) => a.confidenceLevel - b.confidenceLevel);
+      else imgs.sort((a, b) => b.confidenceLevel - a.confidenceLevel);
+    }
+    return imgs;
+  }, [confidenceLevelRange, ascend]);
 
   const onDropdownChange = (_, data): void => {
     const { key } = data.value.content;
@@ -86,10 +109,12 @@ const ManualIdentification: FC = () => {
           <Flex vAlign="center">
             <Text truncated>Sort:</Text>
             <Button
-              icon={ascend ? 'arrow-down' : 'arrow-up'}
+              icon={ascend ? <ArrowDownIcon /> : <ArrowUpIcon />}
+              styles={{ color: sorting ? '#0094d8' : 'grey' }}
               text
               iconOnly
               onClick={(): void => {
+                sorting = true;
                 setAscend((prev) => !prev);
               }}
             />
@@ -124,8 +149,10 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
 
   return (
     <Flex hAlign="center" padding="padding.medium">
-      <ImageLink defaultSrc={src} width="7.5rem" height="7.5rem" />
-      <Flex column gap="gap.smaller" styles={{ width: '40%' }}>
+      <div style={{ margin: '0.2rem' }}>
+        <LabelDisplayImage labelImage={{ image: src, labels: null }} width={100} height={100} />
+      </div>
+      <Flex column gap="gap.smaller" styles={{ width: '30%' }}>
         <Text truncated>Confidence Level: {confidenceLevel}%</Text>
         <Flex column>
           <RadioGroup
@@ -145,7 +172,10 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
             ]}
           />
         </Flex>
-        <Button primary content="Identify" disabled={!isPart} />
+        <LabelingPageDialog
+          imageIndex={1000}
+          trigger={<Button primary content="Identify" disabled={!isPart} />}
+        />
       </Flex>
     </Flex>
   );

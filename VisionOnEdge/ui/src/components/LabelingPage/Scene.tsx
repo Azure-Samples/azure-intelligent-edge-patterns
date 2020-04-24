@@ -1,5 +1,5 @@
-import React, { FC, useState, useEffect, useRef } from 'react';
-import { Text, Button } from '@fluentui/react-northstar';
+import React, { FC, useState, useEffect, useRef, useMemo } from 'react';
+import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
@@ -12,12 +12,18 @@ import {
   Position2D,
   WorkState,
   LabelingType,
+  LabelingCursorStates,
 } from '../../store/labelingPage/labelingPageTypes';
 import {
   createAnnotation,
   updateCreatingAnnotation,
   removeAnnotation,
 } from '../../store/labelingPage/labelingPageActions';
+
+const defaultSize: Size2D = {
+  width: 900,
+  height: 600,
+};
 
 interface SceneProps {
   url?: string;
@@ -26,7 +32,12 @@ interface SceneProps {
 }
 const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const dispatch = useDispatch();
-  const [imageSize, setImageSize] = useState<Size2D>({ width: 900, height: 600 });
+  const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
+  const noMoreCreate = useMemo(
+    () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
+    [labelingType, annotations],
+  );
+  const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -35,7 +46,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   const onMouseDown = (): void => {
     // * Single bounding box labeling type condition
-    if (labelingType === LabelingType.SingleAnnotation && annotations.length === 1) return;
+    if (noMoreCreate) return;
 
     if (selectedAnnotationIndex !== null && workState === WorkState.None) {
       setSelectedAnnotationIndex(null);
@@ -49,7 +60,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const onMouseUp = (): void => {
     if (workState === WorkState.Creating) {
       dispatch(updateCreatingAnnotation(cursorPosition));
-      // dispatch(finishCreatingAnnotation());
       if (annotations.length - 1 === selectedAnnotationIndex) {
         setWorkState(WorkState.Selecting);
       } else {
@@ -66,21 +76,25 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   useEffect(() => {
     // * Single bounding box labeling type condition
-    if (labelingType === LabelingType.SingleAnnotation && annotations.length === 1)
+    if (noMoreCreate) {
+      setCursorState(LabelingCursorStates.default);
       setSelectedAnnotationIndex(0);
-  }, [annotations, labelingType]);
+    } else {
+      setCursorState(LabelingCursorStates.crosshair);
+    }
+  }, [annotations, labelingType, noMoreCreate]);
   useEffect(() => {
     if (workState === WorkState.None) setSelectedAnnotationIndex(null);
   }, [workState]);
   useEffect(() => {
     if (size.width !== 0) {
-      const scaleX = imageSize.width / size.width;
+      const scaleX = defaultSize.width / size.width;
       if (scaleX !== scale.current.x) {
         scale.current = { x: scaleX, y: scaleX };
         setImageSize((prev) => ({ ...prev, height: size.height * scaleX }));
       }
     }
-  }, [imageSize, size]);
+  }, [size]);
 
   if (status === 'loading' || (imageSize.height === 0 && imageSize.width === 0))
     return (
@@ -91,7 +105,12 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   return (
     <div style={{ margin: 3 }}>
-      <Stage width={imageSize.width} height={imageSize.height} scale={scale.current}>
+      <Stage
+        width={imageSize.width}
+        height={imageSize.height}
+        scale={scale.current}
+        style={{ cursor: cursorState }}
+      >
         <Layer
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
@@ -107,17 +126,22 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
               cursorPosition={cursorPosition}
               onSelect={onSelect}
               annotation={annotation}
-              scale={1}
+              scale={scale.current.x}
               annotationIndex={i}
               selected={i === selectedAnnotationIndex}
               dispatch={dispatch}
+              setCursorState={setCursorState}
+              noMoreCreate={noMoreCreate}
             />
           ))}
         </Layer>
       </Stage>
       <Button
         disabled={annotations.length === 0}
-        content={selectedAnnotationIndex === null && annotations.length > 1 ? 'Clear' : 'Remove'}
+        iconOnly
+        text
+        styles={{ color: annotations.length === 0 ? 'grey' : 'red', ':hover': { color: 'red' } }}
+        content={<CloseIcon size="large" />}
         onClick={(): void => {
           dispatch(removeAnnotation(selectedAnnotationIndex));
           setSelectedAnnotationIndex(null);

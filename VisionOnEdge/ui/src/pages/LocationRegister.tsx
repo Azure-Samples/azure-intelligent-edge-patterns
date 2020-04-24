@@ -1,27 +1,16 @@
 import React, { FC, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import {
-  Flex,
-  Text,
-  Input,
-  TextArea,
-  Button,
-  Grid,
-  Divider,
-} from '@fluentui/react-northstar';
+import { Flex, Text, Input, TextArea, Button, Grid, Divider } from '@fluentui/react-northstar';
 import ImageLink from '../components/ImageLink';
-import { Location } from '../store/location/locationTypes';
 import { postLocation } from '../store/location/locationActions';
 
 const LocationRegister: FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const [locationRegisterInput, setLocationRegisterInput] = useState<Location>({
-    name: '',
-    coordinates: '',
-    description: '',
-  });
+  const [name, setName] = useState<string>('');
+  const [coordinates, setCoordinates] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
 
   return (
     <>
@@ -39,40 +28,31 @@ const LocationRegister: FC = () => {
           <Input
             styles={{ paddingTop: '10px', minHeight: '100px' }}
             placeholder="Location Name"
-            value={locationRegisterInput.name}
-            onChange={(_, newProps): void =>
-              setLocationRegisterInput((prev) => ({ ...prev, name: newProps.value }))
-            }
+            value={name}
+            onChange={(_, newProps): void => setName(newProps.value)}
           />
-          <Input
-            value={locationRegisterInput.coordinates}
-            onChange={(_, newProps): void =>
-              setLocationRegisterInput((prev) => ({ ...prev, coordinates: newProps.value }))
-            }
-          />
+          <Input value={coordinates} onChange={(_, newProps): void => setCoordinates(newProps.value)} />
           <TextArea
             styles={{ height: '60%' }}
-            value={locationRegisterInput.description}
-            onChange={(_, newProps): void =>
-              setLocationRegisterInput((prev) => ({ ...prev, description: newProps.value }))
-            }
+            value={description}
+            onChange={(_, newProps): void => setDescription(newProps.value)}
           />
         </Flex>
       </Grid>
       <Flex gap="gap.medium" padding="padding.medium">
         <Button
           primary
-          disabled={Object.values(locationRegisterInput).includes('')}
+          disabled={[name, coordinates, description].includes('')}
           onClick={(): void => {
-            dispatch(postLocation(locationRegisterInput));
-            history.push('/location');
+            dispatch(postLocation({ name, coordinates, description }));
+            history.push('/locations');
           }}
           content="Save"
         />
         <Button
           content="Cancel"
           onClick={(): void => {
-            history.push('/');
+            history.push('/locations');
           }}
         />
       </Flex>
