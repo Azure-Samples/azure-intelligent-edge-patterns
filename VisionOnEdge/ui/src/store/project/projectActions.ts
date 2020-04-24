@@ -6,6 +6,10 @@ import {
   Project,
   GetProjectFailedAction,
   GET_PROJECT_FAILED,
+  PostProjectSuccessAction,
+  POST_PROJECT_SUCCESS,
+  POST_PROJECT_FALIED,
+  PostProjectFaliedAction,
 } from './projectTypes';
 
 const getProjectSuccess = (project: Project): GetProjectSuccessAction => ({
@@ -14,6 +18,10 @@ const getProjectSuccess = (project: Project): GetProjectSuccessAction => ({
 });
 
 const getProjectFailed = (): GetProjectFailedAction => ({ type: GET_PROJECT_FAILED });
+
+const postProjectSuccess = (): PostProjectSuccessAction => ({ type: POST_PROJECT_SUCCESS });
+
+const postProjectFail = (): PostProjectFaliedAction => ({ type: POST_PROJECT_FALIED });
 
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
   return Axios.get('/api/projects/')
@@ -32,4 +40,34 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
       console.error(err);
       dispatch(getProjectFailed());
     });
+};
+
+export const thunkPostProject = (
+  projectId,
+  selectedLocations,
+  selectedParts,
+  selectedCamera,
+): ProjectThunk => (dispatch): Promise<void> => {
+  const isProjectEmpty = projectId === null;
+  const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
+
+  return Axios(url, {
+    data: {
+      location: `http://localhost:8000/api/locations/${selectedLocations.id}/`,
+      parts: selectedParts.map((e) => `http://localhost:8000/api/parts/${e.id}/`),
+      camera: `http://localhost:8000/api/cameras/${selectedCamera.id}/`,
+      download_uri: '',
+    },
+    method: isProjectEmpty ? 'POST' : 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(() => {
+      return dispatch(postProjectSuccess());
+    })
+    .catch((err) => {
+      dispatch(postProjectFail());
+      console.error(err);
+    }) as Promise<void>;
 };

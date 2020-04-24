@@ -11,7 +11,7 @@ import {
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { thunkGetProject } from '../store/project/projectActions';
+import { thunkGetProject, thunkPostProject } from '../store/project/projectActions';
 import { Project } from '../store/project/projectTypes';
 import { State } from '../store/State';
 
@@ -50,28 +50,11 @@ export const PartIdentification: React.FC = () => {
   }, [camera, id, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
 
   const handleSubmitConfigure = (): void => {
-    const isProjectEmpty = projectId.current === null;
-    const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId.current}/`;
-
-    fetch(url, {
-      body: JSON.stringify({
-        location: `http://localhost:8000/api/locations/${selectedLocations.id}/`,
-        parts: selectedParts.map((e) => `http://localhost:8000/api/parts/${e.id}/`),
-        camera: `http://localhost:8000/api/cameras/${selectedCamera.id}/`,
-        download_uri: '',
-      }),
-      method: isProjectEmpty ? 'POST' : 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(() => {
-        history.push(`/cameras/${selectedCamera.name}/${projectId.current}`);
-        return void 0;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    ((dispatch(
+      thunkPostProject(projectId.current, selectedLocations, selectedParts, selectedCamera),
+    ) as unknown) as Promise<void>)
+      .then(() => history.push(`/cameras/${selectedCamera.name}/${projectId.current}`))
+      .catch((err) => console.log(err));
   };
 
   return (
