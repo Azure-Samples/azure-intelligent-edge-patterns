@@ -35,6 +35,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, modelName
       <Button
         primary
         content="Delete Camera"
+        styles={{ backgroundColor: '#C4314B', ':hover': { backgroundColor: '#A72037' } }}
         onClick={(): void => {
           dispatch(deleteCamera(id));
         }}

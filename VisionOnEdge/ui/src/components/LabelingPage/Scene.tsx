@@ -19,6 +19,10 @@ import {
   removeAnnotation,
 } from '../../store/labelingPage/labelingPageActions';
 
+const defaultSize: Size2D = {
+  width: 900,
+  height: 600,
+};
 interface SceneProps {
   url?: string;
   labelingType: LabelingType;
@@ -26,7 +30,7 @@ interface SceneProps {
 }
 const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const dispatch = useDispatch();
-  const [imageSize, setImageSize] = useState<Size2D>({ width: 900, height: 600 });
+  const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
   const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -74,13 +78,13 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   }, [workState]);
   useEffect(() => {
     if (size.width !== 0) {
-      const scaleX = imageSize.width / size.width;
+      const scaleX = defaultSize.width / size.width;
       if (scaleX !== scale.current.x) {
         scale.current = { x: scaleX, y: scaleX };
         setImageSize((prev) => ({ ...prev, height: size.height * scaleX }));
       }
     }
-  }, [imageSize, size]);
+  }, [size]);
 
   if (status === 'loading' || (imageSize.height === 0 && imageSize.width === 0))
     return (
@@ -107,7 +111,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
               cursorPosition={cursorPosition}
               onSelect={onSelect}
               annotation={annotation}
-              scale={1}
+              scale={scale.current.x}
               annotationIndex={i}
               selected={i === selectedAnnotationIndex}
               dispatch={dispatch}

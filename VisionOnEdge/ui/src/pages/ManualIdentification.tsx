@@ -98,6 +98,7 @@ const ManualIdentification: FC = () => {
             <Text truncated>Sort:</Text>
             <Button
               icon={ascend ? <ArrowDownIcon /> : <ArrowUpIcon />}
+              styles={{ color: sorting ? '#0094d8' : 'grey' }}
               text
               iconOnly
               onClick={(): void => {
@@ -158,7 +159,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
           />
         </Flex>
         <LabelingPageDialog
-          imageIndex={0}
+          imageIndex={1000}
           trigger={<Button primary content="Identify" disabled={!isPart} />}
         />
       </Flex>
