@@ -1,17 +1,21 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React, { useState, FC } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Flex, Button, Dialog, Input, Grid, AddIcon } from '@fluentui/react-northstar';
 
 import { useCameras } from '../hooks/useCameras';
-import { Camera } from '../store/camera/cameraTypes';
 import { postCamera } from '../store/camera/cameraActions';
 import ImageLink from '../components/ImageLink';
+import { State } from '../store/State';
+import { closeDialog, openDialog } from '../store/dialog/dialogIsOpenActions';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
+  const dialogIsOpen = useSelector<State, boolean>((state) => state.dialogIsOpen);
   const cameras = useCameras();
-  const [cameraInput, setCameraInput] = useState<Camera>({ name: '', rtsp: '', model_name: '' });
+  const [name, setName] = useState<string>('');
+  const [rtsp, setRtsp] = useState<string>('');
+  const [model_name, setModel_name] = useState<string>('');
 
   return (
     <Flex column gap="gap.large" padding="padding.medium" styles={{ height: '100%' }}>
@@ -41,35 +45,40 @@ const Cameras: FC = (): JSX.Element => {
               fluid
               circular
               content={<AddIcon size="largest" circular />}
-              style={{ width: 100, height: 100 }}
+              style={{ width: '6rem', height: '6rem' }}
             />
           </Flex>
         }
         confirmButton="Submit"
         onConfirm={(): void => {
-          dispatch(postCamera(cameraInput));
+          dispatch(postCamera({ name, rtsp, model_name }));
+          dispatch(closeDialog());
         }}
         cancelButton="Cancel"
         header="Add Camera"
-        closeOnOutsideClick={false}
+        open={dialogIsOpen}
+        onOpen={(): void => {
+          dispatch(openDialog());
+        }}
+        onCancel={(): void => {
+          dispatch(closeDialog());
+        }}
         content={
           <Flex column gap="gap.small">
             <Input
               placeholder="Name"
-              value={cameraInput.name}
-              onChange={(_, newProps): void => setCameraInput((prev) => ({ ...prev, name: newProps.value }))}
+              value={name}
+              onChange={(_, newProps): void => setName(newProps.value)}
             />
             <Input
               placeholder="RTSP URL"
-              value={cameraInput.rtsp}
-              onChange={(_, newProps): void => setCameraInput((prev) => ({ ...prev, rtsp: newProps.value }))}
+              value={rtsp}
+              onChange={(_, newProps): void => setRtsp(newProps.value)}
             />
             <Input
               placeholder="Model Name"
-              value={cameraInput.model_name}
-              onChange={(_, newProps): void =>
-                setCameraInput((prev) => ({ ...prev, model_name: newProps.value }))
-              }
+              value={model_name}
+              onChange={(_, newProps): void => setModel_name(newProps.value)}
             />
           </Flex>
         }
