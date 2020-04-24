@@ -1,8 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Divider, Text, Flex, Dropdown, Button, DropdownItemProps } from '@fluentui/react-northstar';
+import {
+  Divider,
+  Text,
+  Flex,
+  Dropdown,
+  Button,
+  DropdownItemProps,
+  Checkbox,
+  Input,
+} from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { thunkGetProject, thunkPostProject } from '../store/project/projectActions';
+import { Project } from '../store/project/projectTypes';
+import { State } from '../store/State';
 
 export const PartIdentification: React.FC = () => {
+  const dispatch = useDispatch();
+  const { id, camera, location, parts } = useSelector<State, Project>((state) => state.project);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
   );
@@ -14,57 +29,32 @@ export const PartIdentification: React.FC = () => {
     any
   >('locations');
   const history = useHistory();
+  const [needRetraining, setNeedRetraining] = useState(true);
+  const [max, setMax] = useState(80);
+  const [min, setMin] = useState(60);
+  const [maxImgCount, setMaxImgCount] = useState(15);
+  const [maxImgCountError, setMaxImgCountError] = useState(false);
 
   const projectId = useRef<number>(null);
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
-      fetch('/api/projects/')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.length > 0) {
-            projectId.current = data[0].id;
-            setSelectedLocationById(data[0].location.split('/')[5]);
-            setSelectedPartsById(data[0].parts.map((ele) => ele.split('/')[5]));
-            setSelectedCameraById(data[0].camera.split('/')[5]);
-          }
-          return void 0;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      dispatch(thunkGetProject());
     }
-  }, [
-    cameraLoading,
-    locationLoading,
-    partLoading,
-    setSelectedCameraById,
-    setSelectedLocationById,
-    setSelectedPartsById,
-  ]);
+  }, [dispatch, cameraLoading, locationLoading, partLoading]);
+
+  useEffect(() => {
+    projectId.current = id;
+    if (location) setSelectedLocationById(location);
+    if (parts.length) setSelectedPartsById(parts);
+    if (camera) setSelectedCameraById(camera);
+  }, [camera, id, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
 
   const handleSubmitConfigure = (): void => {
-    const isProjectEmpty = projectId.current === null;
-    const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId.current}/`;
-
-    fetch(url, {
-      body: JSON.stringify({
-        location: `http://localhost:8000/api/locations/${selectedLocations.id}/`,
-        parts: selectedParts.map((e) => `http://localhost:8000/api/parts/${e.id}/`),
-        camera: `http://localhost:8000/api/cameras/${selectedCamera.id}/`,
-        download_uri: '',
-      }),
-      method: isProjectEmpty ? 'POST' : 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(() => {
-        history.push(`/cameras/${selectedCamera.name}/${projectId.current}`);
-        return void 0;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    ((dispatch(
+      thunkPostProject(projectId.current, selectedLocations, selectedParts, selectedCamera),
+    ) as unknown) as Promise<void>)
+      .then(() => history.push(`/cameras/${selectedCamera.name}/${projectId.current}`))
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -98,6 +88,49 @@ export const PartIdentification: React.FC = () => {
           items={dropDownLocations}
           isMultiple={false}
         />
+        <Checkbox
+          label="Set up retraining"
+          checked={needRetraining}
+          onChange={(_, data): void => setNeedRetraining(data.checked)}
+        />
+        <Text disabled={!needRetraining}>Accuracy Range</Text>
+        <Text disabled={!needRetraining}>
+          Minimum:{' '}
+          <Input
+            type="number"
+            disabled={!needRetraining}
+            inline
+            value={min}
+            onChange={(_, { value }): void => setMin(value as any)}
+          />
+          %
+        </Text>
+        <Text disabled={!needRetraining}>
+          Maximum:{' '}
+          <Input
+            type="number"
+            disabled={!needRetraining}
+            inline
+            value={max}
+            onChange={(_, { value }): void => setMax(value as any)}
+          />
+          %
+        </Text>
+        <Text disabled={!needRetraining}>
+          Maximum Images:{' '}
+          <Input
+            type="number"
+            disabled={!needRetraining}
+            inline
+            value={maxImgCount}
+            onChange={(_, { value }): void => {
+              if ((value as any) < 15) setMaxImgCountError(true);
+              else setMaxImgCountError(false);
+              setMaxImgCount(value as any);
+            }}
+          />
+          {maxImgCountError && <Text error>Cannot be less than 15</Text>}
+        </Text>
         <Link to="">Advanced Configuration</Link>
         <Button
           primary
@@ -114,7 +147,7 @@ export const PartIdentification: React.FC = () => {
 function useDropdownItems<T>(
   moduleName: string,
   isMultiple?: boolean,
-): [boolean, DropdownItemProps[], T | T[], (id: string) => void] {
+): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => void] {
   const originItems = useRef<(T & { id: number })[]>([]);
   const [dropDownItems, setDropDownItems] = useState<DropdownItemProps[]>([]);
   const [selectedItem, setSelectedItem] = useState<T | T[]>(isMultiple ? [] : null);

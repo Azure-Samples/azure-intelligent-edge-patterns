@@ -7,6 +7,7 @@ import partReducer from './part/partReducer';
 import labelingPageStateReducer from './labelingPage/labelingPageReducer';
 import locationsReducer from './location/locationReducer';
 import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
+import projectReducer from './project/projectReducer';
 
 const rootReducer = combineReducers({
   cameras: camerasReducer,
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
   part: partReducer,
   labelingPageState: labelingPageStateReducer,
   dialogIsOpen: dialogIsOpenReducer,
+  project: projectReducer,
 });
 
 const persistConfig = {
