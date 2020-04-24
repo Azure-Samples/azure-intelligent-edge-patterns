@@ -44,9 +44,9 @@ export const PartIdentification: React.FC = () => {
 
   useEffect(() => {
     projectId.current = id;
-    if (location) setSelectedLocationById(location.split('/')[5]);
-    if (parts.length) setSelectedPartsById(parts.map((ele) => ele.split('/')[5]));
-    if (camera) setSelectedCameraById(camera.split('/')[5]);
+    if (location) setSelectedLocationById(location);
+    if (parts.length) setSelectedPartsById(parts);
+    if (camera) setSelectedCameraById(camera);
   }, [camera, id, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
 
   const handleSubmitConfigure = (): void => {

@@ -36,16 +36,17 @@ const deleteProjectFailed = (): DeleteProjectFaliedAction => ({
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
   return Axios.get('/api/projects/')
     .then(({ data }) => {
+      console.log(data);
       const project: Project = {
-        id: data[0]?.id || null,
-        camera: data[0]?.camera || null,
-        location: data[0]?.location || null,
-        parts: data[0]?.parts || [],
-        modelUrl: data[0]?.training_uri || '',
-        status: data[0]?.status || 'offline',
-        successRate: data[0]?.successRate || 0,
-        successfulInferences: data[0]?.successfulInferences || 0,
-        unIdetifiedItems: data[0]?.unIdetifiedItems || 0,
+        id: data[0]?.id ?? null,
+        camera: parseInt(data[0]?.camera.split('/')[5], 10) ?? null,
+        location: parseInt(data[0]?.location.split('/')[5], 10) ?? null,
+        parts: data[0]?.parts.map((ele) => parseInt(ele.split('/')[5], 10)) ?? [],
+        modelUrl: data[0]?.training_uri ?? '',
+        status: data[0]?.status ?? 'offline',
+        successRate: data[0]?.successRate ?? 0,
+        successfulInferences: data[0]?.successfulInferences ?? 0,
+        unIdetifiedItems: data[0]?.unIdetifiedItems ?? 0,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
