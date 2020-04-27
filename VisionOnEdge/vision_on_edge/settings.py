@@ -37,11 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'cameras',
     'rest_framework',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,6 +70,8 @@ TEMPLATES = [
         },
     },
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 #WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
 ASGI_APPLICATION = 'vision_on_edge.asgi.application'
@@ -120,10 +124,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+UI_DIR = os.path.join(BASE_DIR, 'ui')
+STATICFILES_DIRS = [
+    os.path.join(UI_DIR, 'build', 'static'),
+]
+
 STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+ICON_URL = '/icons/'
+ICON_ROOT = os.path.join(UI_DIR, 'build', 'icons')
 
 import config
 TRAINING_KEY = config.TRAINING_KEY

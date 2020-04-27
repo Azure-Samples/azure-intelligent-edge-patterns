@@ -5,3 +5,4 @@ pillow
 azure-cognitiveservices-vision-customvision==1.0.0
 requests
 azure-iot-hub
+django-cors-headers

@@ -22,24 +22,35 @@ from django.conf import settings
 from rest_framework import routers
 
 from cameras import views
+from . import views as site_views
 
-router = routers.DefaultRouter()
-router.register('api/cameras', views.CameraViewSet)
-router.register('api/parts', views.PartViewSet)
-router.register('api/images', views.ImageViewSet)
-router.register('api/projects', views.ProjectViewSet)
-router.register('api/locations', views.LocationViewSet)
-router.register('api/annotations', views.AnnotationViewSet)
-router.register('api/settings', views.SettingViewSet)
+class OptionalSlashRouter(routers.DefaultRouter):
+    def __init__(self):
+        super(routers.DefaultRouter, self).__init__()
+        self.trailing_slash = '/?'
 
-urlpatterns = [
-    url('^', include(router.urls)),
-    url('api/streams/connect', views.connect_stream),
-    path('api/streams/<int:stream_id>/disconnect', views.disconnect_stream),
-    path('api/streams/<int:stream_id>/video_feed', views.video_feed),
-    path('api/streams/<int:stream_id>/capture', views.capture),
-    path('api/projects/<int:project_id>/train', views.train),
-    path('api/projects/<int:project_id>/export', views.export),
-    path('api/projects/null/export', views.export_null),
-    path('admin/', admin.site.urls),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+#router = ters.DefaultRouter(trailing_slash=False)
+router = OptionalSlashRouter()
+router.register('cameras', views.CameraViewSet)
+router.register('parts', views.PartViewSet)
+router.register('images', views.ImageViewSet)
+router.register('projects', views.ProjectViewSet)
+router.register('locations', views.LocationViewSet)
+router.register('annotations', views.AnnotationViewSet)
+router.register('settings', views.SettingViewSet)
+
+urlpatterns = \
+    static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
+    static(settings.ICON_URL, document_root=settings.ICON_ROOT) + \
+    [
+        url('^api/', include(router.urls)),
+        url('api/streams/connect', views.connect_stream),
+        path('api/streams/<int:stream_id>/disconnect', views.disconnect_stream),
+        path('api/streams/<int:stream_id>/video_feed', views.video_feed),
+        path('api/streams/<int:stream_id>/capture', views.capture),
+        path('api/projects/<int:project_id>/train', views.train),
+        path('api/projects/<int:project_id>/export', views.export),
+        path('api/projects/null/export', views.export_null),
+        path('admin/', admin.site.urls),
+        url('^', site_views.UIAppView.as_view())
+    ]
