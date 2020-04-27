@@ -62,7 +62,7 @@ export const thunkPostProject = (
   selectedLocations,
   selectedParts,
   selectedCamera,
-): ProjectThunk => (dispatch): Promise<void> => {
+): ProjectThunk => (dispatch): Promise<number> => {
   const isProjectEmpty = projectId === null;
   const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
 
@@ -78,13 +78,14 @@ export const thunkPostProject = (
       'Content-Type': 'application/json',
     },
   })
-    .then(() => {
-      return dispatch(postProjectSuccess());
+    .then(({ data }) => {
+      dispatch(postProjectSuccess());
+      return data.id;
     })
     .catch((err) => {
       dispatch(postProjectFail());
       console.error(err);
-    }) as Promise<void>;
+    }) as Promise<number>;
 };
 
 export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {
