@@ -62,6 +62,13 @@ This will launch a ui site in localhost:3000
     Disconnect a stream <http://localhost:8000/api/streams/STREAM_ID/disconnect>
 
 
+### Containerized
+
+currently, backend and frontend are built in one container
+
+    docker build -t vision .
+    docker run -p 8000:8000 vision
+
 
 ### Trouble shooting
 
