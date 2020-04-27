@@ -22,7 +22,7 @@ const Locations: FC = () => {
           <ImageLink
             key={i}
             to={`/locations/${location.name}`}
-            defaultSrc="/defaultLocation.png"
+            defaultSrc="/icons/defaultLocation.png"
             width="100px"
             height="100px"
             label={location.name}
