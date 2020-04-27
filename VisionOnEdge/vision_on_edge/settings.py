@@ -124,7 +124,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-UI_DIR = os.path.join(BASE_DIR, 'ui')
+UI_DIR = os.path.join(BASE_DIR, 'ui_production')
 STATICFILES_DIRS = [
     os.path.join(UI_DIR, 'build', 'static'),
 ]
