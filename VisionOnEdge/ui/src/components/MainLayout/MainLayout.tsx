@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Grid, Segment, Image, Flex, Text } from '@fluentui/react-northstar';
+import { Grid, Segment, Image, Flex, Text, MenuIcon } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
 import Breadcrumb from '../Breadcrumb';
 
@@ -41,13 +41,16 @@ const TopNav: FC = () => {
         boxShadow: '0px 1px 10px 0px rgba(0,0,0,0.75)',
         zIndex: 2,
         fontSize: '20px',
-        paddingLeft: '1em',
+        padding: '0.5rem 1rem',
       }}
     >
-      <NavLink to={'/'} style={{ textDecoration: 'none' }}>
-        <Text color="white">Vision on Edge</Text>
-      </NavLink>
-      <Flex vAlign="center" gap="gap.medium" styles={{ height: '100%', width: '15%' }}>
+      <Flex gap="gap.large" vAlign="center">
+        <MenuIcon size="large" styles={{ color: 'white' }} />
+        <NavLink to={'/'} style={{ textDecoration: 'none' }}>
+          <Text color="white">Vision on Edge</Text>
+        </NavLink>
+      </Flex>
+      <Flex vAlign="center" hAlign="end" gap="gap.medium" styles={{ height: '100%' }}>
         <Link to="/setting" style={{ height: '100%' }}>
           <Image styles={{ height: '100%' }} src="/icons/setting.png" />
         </Link>
@@ -57,7 +60,7 @@ const TopNav: FC = () => {
   );
 };
 
-const LeftNav = ({ styles }): JSX.Element => {
+const LeftNav: FC<any> = ({ styles }): JSX.Element => {
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
       <Flex column gap="gap.large" hAlign="center">
