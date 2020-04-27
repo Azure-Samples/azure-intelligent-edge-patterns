@@ -38,7 +38,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     [labelingType, annotations],
   );
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
-  const [image, status, size] = useImage(url.replace('8000', '3000'), 'anonymous');
+  const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [cursorPosition, setCursorPosition] = useState<Position2D>({ x: 0, y: 0 });

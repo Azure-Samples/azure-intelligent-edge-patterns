@@ -23,7 +23,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   pointerCursor = false,
   onClick,
 }) => {
-  const [image, _, size] = useImage(labelImage.image.replace('8000', '3000'), 'anonymous');
+  const [image, _, size] = useImage(labelImage.image, 'anonymous');
   const [imageSize, setImageSize] = useState<Size2D>({ width, height });
   const scale = useRef<Position2D>({ x: 1, y: 1 });
 
