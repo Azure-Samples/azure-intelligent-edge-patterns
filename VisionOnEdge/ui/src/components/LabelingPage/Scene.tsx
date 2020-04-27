@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect, useRef, useMemo } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -43,7 +43,20 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [cursorPosition, setCursorPosition] = useState<Position2D>({ x: 0, y: 0 });
   const scale = useRef<Position2D>({ x: 1, y: 1 });
-
+  const changeCursorState = useCallback(
+    (cursorType?: LabelingCursorStates): void => {
+      if (!cursorType) {
+        if (noMoreCreate) {
+          setCursorState(LabelingCursorStates.default);
+        } else {
+          setCursorState(LabelingCursorStates.crosshair);
+        }
+      } else {
+        setCursorState(cursorType);
+      }
+    },
+    [noMoreCreate],
+  );
   const onMouseDown = (): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate) return;
@@ -77,12 +90,12 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   useEffect(() => {
     // * Single bounding box labeling type condition
     if (noMoreCreate) {
-      setCursorState(LabelingCursorStates.default);
+      changeCursorState();
       setSelectedAnnotationIndex(0);
     } else {
-      setCursorState(LabelingCursorStates.crosshair);
+      changeCursorState();
     }
-  }, [annotations, labelingType, noMoreCreate]);
+  }, [noMoreCreate, changeCursorState]);
   useEffect(() => {
     if (workState === WorkState.None) setSelectedAnnotationIndex(null);
   }, [workState]);
@@ -130,8 +143,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
               annotationIndex={i}
               selected={i === selectedAnnotationIndex}
               dispatch={dispatch}
-              setCursorState={setCursorState}
-              noMoreCreate={noMoreCreate}
+              changeCursorState={changeCursorState}
             />
           ))}
         </Layer>

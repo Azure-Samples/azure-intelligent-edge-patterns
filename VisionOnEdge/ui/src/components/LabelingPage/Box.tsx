@@ -21,8 +21,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
   visible = true,
   annotation,
   dispatch,
-  setCursorState = null,
-  noMoreCreate,
+  changeCursorState = null,
 }) => {
   const [vertices, setVertices] = useState<BoxLabel>(annotation.label);
   const anchorRadius: number = (display ? 10 : 5) / scale;
@@ -30,9 +29,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
 
   const dispatchLabel = (): void => {
     if (display) return;
-
-    if (noMoreCreate) setCursorState(LabelingCursorStates.default);
-    else setCursorState(LabelingCursorStates.crosshair);
+    changeCursorState();
 
     if (!dispatch) return;
     const newAnnotation = { ...annotation };
@@ -60,14 +57,14 @@ export const Box2d: FC<Box2dComponentProps> = ({
     );
     if (vertices[anotherPosXArr[0]] > vertices[xi]) {
       if (vertices[anotherPosYArr[0]] > vertices[yi]) {
-        setCursorState(LabelingCursorStates.nwseResize);
+        changeCursorState(LabelingCursorStates.nwseResize);
       } else {
-        setCursorState(LabelingCursorStates.neswResize);
+        changeCursorState(LabelingCursorStates.neswResize);
       }
     } else if (vertices[anotherPosYArr[0]] > vertices[yi]) {
-      setCursorState(LabelingCursorStates.neswResize);
+      changeCursorState(LabelingCursorStates.neswResize);
     } else {
-      setCursorState(LabelingCursorStates.nwseResize);
+      changeCursorState(LabelingCursorStates.nwseResize);
     }
 
     setVertices((prevVertices) => ({ ...prevVertices, [xi]: x, [yi]: y }));
@@ -121,11 +118,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            setCursorState(LabelingCursorStates.nwseResize);
+            changeCursorState(LabelingCursorStates.nwseResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;
-            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+            changeCursorState();
           }}
         />
         <Circle
@@ -140,11 +137,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            setCursorState(LabelingCursorStates.neswResize);
+            changeCursorState(LabelingCursorStates.neswResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;
-            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+            changeCursorState();
           }}
         />
         <Circle
@@ -159,11 +156,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            setCursorState(LabelingCursorStates.nwseResize);
+            changeCursorState(LabelingCursorStates.nwseResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;
-            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+            changeCursorState();
           }}
         />
         <Circle
@@ -178,11 +175,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            setCursorState(LabelingCursorStates.neswResize);
+            changeCursorState(LabelingCursorStates.neswResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;
-            setCursorState(noMoreCreate ? LabelingCursorStates.default : LabelingCursorStates.crosshair);
+            changeCursorState();
           }}
         />
       </Group>
