@@ -24,8 +24,8 @@ const Cameras: FC = (): JSX.Element => {
           <ImageLink
             key={i}
             to={`/cameras/${camera.name}`}
-            defaultSrc="/Play.png"
-            bgImgSrc="/defaultCamera.png"
+            defaultSrc="/icons/Play.png"
+            bgImgSrc="/icons/defaultCamera.png"
             width="100px"
             height="100px"
             bgImgStyle={{

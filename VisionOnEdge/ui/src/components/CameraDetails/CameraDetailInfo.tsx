@@ -20,7 +20,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, modelName
         <Text size="larger" weight="semibold">
           Details
         </Text>
-        <ImageLink defaultSrc="/defaultCamera.png" width="100px" height="100px" />
+        <ImageLink defaultSrc="/icons/defaultCamera.png" width="100px" height="100px" />
         <Flex column gap="gap.small">
           <Text size="large" content={'Name:'} />
           <Text size="large" content={'RTSP Url:'} />

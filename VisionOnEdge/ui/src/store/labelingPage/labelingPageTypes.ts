@@ -79,8 +79,7 @@ export interface Box2dComponentProps {
   selected: boolean;
   visible?: boolean;
   dispatch: any;
-  setCursorState?: Dispatch<LabelingCursorStates>;
-  noMoreCreate?: boolean;
+  changeCursorState?: (cursorType?: LabelingCursorStates) => void;
   // instanceID: number;
 }
 export type BoxObject = {

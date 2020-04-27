@@ -16,6 +16,9 @@ export const CameraConfigureInfo: React.FC = () => {
   const history = useHistory();
 
   const onDeleteConfigure = (): void => {
+    // eslint-disable-next-line no-restricted-globals
+    const sureDelete = confirm('Delete this configuration?');
+    if (!sureDelete) return;
     const result = (dispatch(thunkDeleteProject(projectId)) as unknown) as Promise<any>;
     result
       .then((data) => {
@@ -42,7 +45,7 @@ export const CameraConfigureInfo: React.FC = () => {
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
-      {project.modelUrl ? (
+      {!project.modelUrl ? (
         <Loader size="largest" label="Trainning" labelPosition="below" design={{ paddingTop: '300px' }} />
       ) : (
         <>

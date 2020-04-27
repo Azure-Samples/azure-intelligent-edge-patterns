@@ -53,7 +53,7 @@ export const PartIdentification: React.FC = () => {
     ((dispatch(
       thunkPostProject(projectId.current, selectedLocations, selectedParts, selectedCamera),
     ) as unknown) as Promise<void>)
-      .then(() => history.push(`/cameras/${selectedCamera.name}/${projectId.current}`))
+      .then((id) => history.push(`/cameras/${selectedCamera.name}/${id}`))
       .catch((err) => console.log(err));
   };
 

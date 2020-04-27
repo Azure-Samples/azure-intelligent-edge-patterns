@@ -46,8 +46,6 @@ const ManualIdentification: FC = () => {
     });
   }, [parts, project]);
 
-
-
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([70, 90]);
   const [ascend, setAscend] = useState<boolean>(false);
@@ -55,7 +53,7 @@ const ManualIdentification: FC = () => {
   const images = useMemo(() => {
     // TODO: Get real images here
     const imgs = [...new Array(20)]
-      .map((_, i) => ({ confidenceLevel: i * 4, src: '/Play.png' }))
+      .map((_, i) => ({ confidenceLevel: i * 4, src: '/icons/Play.png' }))
       .filter(
         (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
       );
