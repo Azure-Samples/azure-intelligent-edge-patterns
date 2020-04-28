@@ -14,14 +14,15 @@ import {
   DELETE_PROJECT_SUCCESS,
   DeleteProjectFaliedAction,
   DELETE_PROJECT_FALIED,
+  ProjectData,
 } from './projectTypes';
 
-const getProjectSuccess = (project: Project): GetProjectSuccessAction => ({
+const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
   type: GET_PROJECT_SUCCESS,
   payload: { project },
 });
 
-const getProjectFailed = (): GetProjectFailedAction => ({ type: GET_PROJECT_FAILED });
+const getProjectFailed = (error: Error): GetProjectFailedAction => ({ type: GET_PROJECT_FAILED, error });
 
 const postProjectSuccess = (): PostProjectSuccessAction => ({ type: POST_PROJECT_SUCCESS });
 
@@ -36,8 +37,7 @@ const deleteProjectFailed = (): DeleteProjectFaliedAction => ({
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
   return Axios.get('/api/projects/')
     .then(({ data }) => {
-      console.log(data);
-      const project: Project = {
+      const project: ProjectData = {
         id: data[0]?.id ?? null,
         camera: parseInt(data[0]?.camera.split('/')[5], 10) ?? null,
         location: parseInt(data[0]?.location.split('/')[5], 10) ?? null,
@@ -53,7 +53,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
     })
     .catch((err) => {
       console.error(err);
-      dispatch(getProjectFailed());
+      dispatch(getProjectFailed(err));
     });
 };
 

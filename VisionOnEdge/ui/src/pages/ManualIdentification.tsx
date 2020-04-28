@@ -27,7 +27,7 @@ import { Project } from '../store/project/projectTypes';
 let sorting = false;
 
 const ManualIdentification: FC = () => {
-  const project = useSelector<State, Project>((state) => state.project);
+  const { data: project } = useSelector<State, Project>((state) => state.project);
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
   const parts = useParts();
 

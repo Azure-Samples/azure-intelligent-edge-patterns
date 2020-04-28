@@ -2,6 +2,12 @@ import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
 
 export type Project = {
+  status: 'idle' | 'pending' | 'resolved' | 'reject';
+  data: ProjectData;
+  error: Error;
+};
+
+export type ProjectData = {
   id: number;
   camera: any;
   location: any;
@@ -14,17 +20,23 @@ export type Project = {
 };
 
 // Describing the different ACTION NAMES available
+export const GET_PROJECT_REQUEST = 'GET_PROJECT_REQUEST';
+export type GetProjectRequestAction = {
+  type: typeof GET_PROJECT_REQUEST;
+};
+
 export const GET_PROJECT_SUCCESS = 'GET_PROJECT_SUCCESS';
 export type GetProjectSuccessAction = {
   type: typeof GET_PROJECT_SUCCESS;
   payload: {
-    project: Project;
+    project: ProjectData;
   };
 };
 
 export const GET_PROJECT_FAILED = 'GET_PROJECT_FAILED';
 export type GetProjectFailedAction = {
   type: typeof GET_PROJECT_FAILED;
+  error: Error;
 };
 
 export const POST_PROJECT_SUCCESS = 'POST_PROJECT_SUCCESS';
@@ -48,6 +60,7 @@ export type DeleteProjectFaliedAction = {
 };
 
 export type ProjectActionTypes =
+  | GetProjectRequestAction
   | GetProjectSuccessAction
   | GetProjectFailedAction
   | PostProjectSuccessAction

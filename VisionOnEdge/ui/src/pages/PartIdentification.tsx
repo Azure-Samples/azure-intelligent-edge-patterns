@@ -8,6 +8,7 @@ import {
   DropdownItemProps,
   Checkbox,
   Input,
+  Alert,
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,7 +18,11 @@ import { State } from '../store/State';
 
 export const PartIdentification: React.FC = () => {
   const dispatch = useDispatch();
-  const { id, camera, location, parts } = useSelector<State, Project>((state) => state.project);
+  const {
+    status,
+    error,
+    data: { id: projectId, camera, location, parts },
+  } = useSelector<State, Project>((state) => state.project);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
   );
@@ -35,7 +40,6 @@ export const PartIdentification: React.FC = () => {
   const [maxImgCount, setMaxImgCount] = useState(15);
   const [maxImgCountError, setMaxImgCountError] = useState(false);
 
-  const projectId = useRef<number>(null);
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
       dispatch(thunkGetProject());
@@ -43,22 +47,24 @@ export const PartIdentification: React.FC = () => {
   }, [dispatch, cameraLoading, locationLoading, partLoading]);
 
   useEffect(() => {
-    projectId.current = id;
     if (location) setSelectedLocationById(location);
     if (parts.length) setSelectedPartsById(parts);
     if (camera) setSelectedCameraById(camera);
-  }, [camera, id, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
+  }, [camera, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
 
   const handleSubmitConfigure = (): void => {
     ((dispatch(
-      thunkPostProject(projectId.current, selectedLocations, selectedParts, selectedCamera),
-    ) as unknown) as Promise<void>)
+      thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera),
+    ) as unknown) as Promise<number>)
       .then((id) => history.push(`/cameras/${selectedCamera.name}/${id}`))
       .catch((err) => console.log(err));
   };
 
+  if (status === 'idle' || status === 'pending') return <span>Loading...</span>;
+
   return (
     <>
+      {error && <Alert danger content={`${error.name}: ${error.message}`} />}
       <Text size="larger" weight="semibold">
         Part Identification
       </Text>
