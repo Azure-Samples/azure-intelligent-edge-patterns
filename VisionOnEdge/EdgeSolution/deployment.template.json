@@ -10,12 +10,12 @@
             "minDockerVersion": "v1.25",
             "loggingOptions": "",
             "registryCredentials": {
-              "linkeriotedge": {
-                "username": "$CONTAINER_REGISTRY_USERNAME_linkeriotedge",
-                "password": "$CONTAINER_REGISTRY_PASSWORD_linkeriotedge",
-                "address": "linkeriotedge.azurecr.io"
-              }
-            }
+              "intelcustomvision": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_NAME"
+              }   
+            } 
           }
         },
         "systemModules": {
@@ -57,34 +57,34 @@
           }
         },
         "modules": {
-          "alertModule": {
+          "WebModule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "linkeriotedge.azurecr.io/alertmanager:0.0.1",
-              "createOptions": {}
-            }
-          },
-          "visionModule": {
-            "version": "1.03",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "linkeriotedge.azurecr.io/vision-on-edge:0.0.1",
+              "image": "${MODULES.WebModule}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
                     "8000/tcp": [
                       {
-                        "HostPort": "8002"
+                        "HostPort": "8000"
                       }
                     ]
                   }
                 }
-              }
+              }        
+            }
+          },
+          "SimulatedTemperatureSensor": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
+              "createOptions": {}
             }
           }
         }
@@ -94,12 +94,17 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "alertModuleToIoTHub": "FROM /messages/modules/alertModule/outputs/* INTO $upstream",
-          "visionModuleToIoTHub": "FROM /messages/modules/visionModule/outputs/* INTO $upstream"
+          "WebModuleToIoTHub": "FROM /messages/modules/WebModule/outputs/* INTO $upstream",
+          "sensorToWebModule": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/WebModule/inputs/input1\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
+      }
+    },
+    "WebModule": {
+      "properties.desired": {
+        "TemperatureThreshold": 25
       }
     }
   }
