@@ -126,7 +126,7 @@ USE_TZ = True
 
 UI_DIR = os.path.join(BASE_DIR, 'ui_production')
 STATICFILES_DIRS = [
-    os.path.join(UI_DIR, 'build', 'static'),
+    os.path.join(UI_DIR, 'static'),
 ]
 
 STATIC_URL = '/static/'
@@ -135,7 +135,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ICON_URL = '/icons/'
-ICON_ROOT = os.path.join(UI_DIR, 'build', 'icons')
+ICON_ROOT = os.path.join(UI_DIR, 'icons')
 
 import config
 TRAINING_KEY = config.TRAINING_KEY

@@ -9,7 +9,7 @@ class UIAppView(View):
 
     def get(self, request):
         try:
-            with open(os.path.join(settings.UI_DIR, 'build', 'index.html')) as f:
+            with open(os.path.join(settings.UI_DIR, 'index.html')) as f:
                 return HttpResponse(f.read())
         except FileNotFoundError:
             logging.exception('Production build of app not found')
