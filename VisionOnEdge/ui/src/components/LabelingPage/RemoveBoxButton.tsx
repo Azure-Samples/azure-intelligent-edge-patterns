@@ -62,7 +62,10 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
         setColor('#F9526B');
         setStrokeWidth(1.5 / scale);
       }}
-      onClick={removeBox}
+      onClick={(e): void => {
+        removeBox();
+        e.cancelBubble = true;
+      }}
     >
       <Rect x={-5 / scale} y={-5 / scale} width={10 / scale} height={10 / scale} />
       <Line

@@ -94,8 +94,10 @@ export const Box2d: FC<Box2dComponentProps> = ({
     <Group
       visible={visible}
       onMouseDown={(e): void => {
-        onSelect(annotationIndex);
-        e.cancelBubble = true;
+        if (workState === WorkState.None) {
+          onSelect(annotationIndex);
+          e.cancelBubble = true;
+        }
       }}
     >
       <Line

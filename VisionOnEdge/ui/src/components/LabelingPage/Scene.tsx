@@ -62,21 +62,17 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   );
   const removeBox = useCallback((): void => {
     dispatch(removeAnnotation(selectedAnnotationIndex));
-    setSelectedAnnotationIndex(null);
+    setWorkState(WorkState.None);
     setShowOuterRemoveButton(false);
-  }, [dispatch, selectedAnnotationIndex, setSelectedAnnotationIndex, setShowOuterRemoveButton]);
-
+  }, [dispatch, selectedAnnotationIndex, setWorkState, setShowOuterRemoveButton]);
+  // console.log(workState, cursorPosition, annotations);
   const onMouseDown = (): void => {
     // * Single bounding box labeling type condition
-    if (noMoreCreate) return;
+    if (noMoreCreate || workState === WorkState.Creating) return;
 
-    if (selectedAnnotationIndex !== null && workState === WorkState.None) {
-      setSelectedAnnotationIndex(null);
-    } else {
-      dispatch(createAnnotation(cursorPosition));
-      setSelectedAnnotationIndex(annotations.length - 1);
-      setWorkState(WorkState.Creating);
-    }
+    dispatch(createAnnotation(cursorPosition));
+    setSelectedAnnotationIndex(annotations.length - 1);
+    setWorkState(WorkState.Creating);
   };
 
   const onMouseUp = (): void => {
@@ -86,7 +82,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
         setWorkState(WorkState.Selecting);
       } else {
         setWorkState(WorkState.None);
-        setSelectedAnnotationIndex(null);
       }
     }
   };
@@ -127,7 +122,10 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   return (
     <div style={{ margin: 3 }}>
-      {annotations.length !== 0 && showOuterRemoveButton && !isDragging ? (
+      {annotations.length !== 0 &&
+      showOuterRemoveButton &&
+      !isDragging &&
+      workState !== WorkState.Creating ? (
         <Button
           iconOnly
           text
@@ -153,14 +151,16 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
           onDragStart={(): void => {
             setIsDragging(true);
           }}
-          onDragEnd={(): void => setIsDragging(false)}
+          onDragEnd={(): void => {
+            setIsDragging(false);
+          }}
         >
           <Image image={image} />
           {annotations.map((annotation, i) => (
             <Group key={i}>
               <RemoveBoxButton
                 imageSize={imageSize}
-                visible={!isDragging && i === selectedAnnotationIndex}
+                visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
                 label={annotation.label}
                 changeCursorState={changeCursorState}
                 scale={scale.current.x}
