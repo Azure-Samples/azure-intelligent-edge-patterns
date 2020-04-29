@@ -1,8 +1,9 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
+import { State } from '../State';
 
 export type Project = {
-  status: 'idle' | 'pending' | 'resolved' | 'reject';
+  isLoading: boolean;
   data: ProjectData;
   error: Error;
 };
@@ -12,6 +13,10 @@ export type ProjectData = {
   camera: any;
   location: any;
   parts: any[];
+  needRetraining: boolean;
+  accuracyRangeMin: number;
+  accuracyRangeMax: number;
+  maxImages: number;
   modelUrl: string;
   status: string;
   successRate: number;
@@ -39,6 +44,11 @@ export type GetProjectFailedAction = {
   error: Error;
 };
 
+export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
+export type PostProjectRequestAction = {
+  type: typeof POST_PROJECT_REQUEST;
+};
+
 export const POST_PROJECT_SUCCESS = 'POST_PROJECT_SUCCESS';
 export type PostProjectSuccessAction = {
   type: typeof POST_PROJECT_SUCCESS;
@@ -47,6 +57,7 @@ export type PostProjectSuccessAction = {
 export const POST_PROJECT_FALIED = 'POST_PROJECT_FALIED';
 export type PostProjectFaliedAction = {
   type: typeof POST_PROJECT_FALIED;
+  error: Error;
 };
 
 export const DELETE_PROJECT_SUCCESS = 'DELETE_PROJECT_SUCCESS';
@@ -59,14 +70,22 @@ export type DeleteProjectFaliedAction = {
   type: typeof DELETE_PROJECT_FALIED;
 };
 
+export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
+export type UpdateProjectDataAction = {
+  type: typeof UPDATE_PROJECT_DATA;
+  payload: ProjectData;
+};
+
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
   | GetProjectFailedAction
+  | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction
   | DeleteProjectSuccessAction
-  | DeleteProjectFaliedAction;
+  | DeleteProjectFaliedAction
+  | UpdateProjectDataAction;
 
 // Describing the different THUNK ACTION NAMES available
-export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, Project, unknown, Action<string>>;
+export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

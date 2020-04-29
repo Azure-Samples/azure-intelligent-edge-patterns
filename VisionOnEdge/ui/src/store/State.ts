@@ -25,12 +25,16 @@ export const initialState: State = {
     isValid: true,
   },
   project: {
-    status: 'idle',
+    isLoading: false,
     data: {
       id: null,
       camera: null,
       location: null,
       parts: [],
+      needRetraining: true,
+      accuracyRangeMin: 60,
+      accuracyRangeMax: 80,
+      maxImages: 50,
       modelUrl: '',
       status: '',
       successRate: null,

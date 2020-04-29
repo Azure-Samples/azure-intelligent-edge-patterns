@@ -10,7 +10,7 @@ import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 
 export const CameraConfigureInfo: React.FC = () => {
-  const { status, error, data: project } = useSelector<State, Project>((state) => state.project);
+  const { isLoading, error, data: project } = useSelector<State, Project>((state) => state.project);
   const dispatch = useDispatch();
   const { projectId, name } = useParams();
   const history = useHistory();
