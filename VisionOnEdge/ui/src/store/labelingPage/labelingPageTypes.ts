@@ -1,5 +1,3 @@
-import { Dispatch } from "react";
-
 // * Request Operation
 export const REQUEST_ANNOTATION_FAILURE = 'REQUEST_ANNOTATION_FAILURE';
 export type RequestAnnotationSuccessAction = { type: typeof REQUEST_ANNOTATION_SUCCESS; payload: any };

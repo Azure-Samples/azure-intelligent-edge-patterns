@@ -10,7 +10,7 @@ import {
   CallControlPresentNewIcon,
   PauseThickIcon,
 } from '@fluentui/react-northstar';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
@@ -160,13 +160,20 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
         vAlign="center"
       >
         {capturedImages.map((image, i) => (
-          <LabelingPageDialog
-            key={i}
-            imageIndex={i}
-            trigger={<LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />}
-          />
+          <div key={image.id}>
+            <span>{i + 1}</span>
+            <LabelingPageDialog
+              key={i}
+              imageIndex={i}
+              trigger={<LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />}
+            />
+          </div>
         ))}
       </Flex>
+      <Prompt
+        when={capturedImages.length < 15}
+        message="The count of images is less than 15, which may cause error when confugure part idetification. Sure you want to leave?"
+      />
     </>
   );
 };
