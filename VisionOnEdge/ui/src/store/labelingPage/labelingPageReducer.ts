@@ -48,10 +48,6 @@ const labelingPageStateReducer = (
       newState.annotations[action.payload.index] = action.payload.annotation;
       break;
     case REMOVE_ANNOTATION:
-      if (action.payload.index === null) {
-        const clear = window.confirm('Are you going to remove all annotations?');
-        if (clear) newState.annotations = [];
-      }
       newState.annotations = newState.annotations
         .slice(0, action.payload.index)
         .concat(newState.annotations.slice(action.payload.index + 1));
