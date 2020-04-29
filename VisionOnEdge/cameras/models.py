@@ -69,6 +69,10 @@ class Project(models.Model):
     download_uri = models.CharField(max_length=1000, null=True, blank=True)
     training_key = models.CharField(max_length=1000, blank=True)
     endpoint = models.CharField(max_length=1000, blank=True)
+    needRetraining = models.BooleanField(default=False)
+    accuracyRangeMin = models.IntegerField()
+    accuracyRangeMax = models.IntegerField()
+    maxImages = models.IntegerField()
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):

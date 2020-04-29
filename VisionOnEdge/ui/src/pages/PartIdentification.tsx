@@ -8,16 +8,27 @@ import {
   DropdownItemProps,
   Checkbox,
   Input,
+  Alert,
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { thunkGetProject, thunkPostProject } from '../store/project/projectActions';
-import { Project } from '../store/project/projectTypes';
+import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/project/projectActions';
+import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
 
 export const PartIdentification: React.FC = () => {
   const dispatch = useDispatch();
-  const { id, camera, location, parts } = useSelector<State, Project>((state) => state.project);
+  const { isLoading, error, data } = useSelector<State, Project>((state) => state.project);
+  const {
+    id: projectId,
+    camera,
+    location,
+    parts,
+    needRetraining,
+    accuracyRangeMin,
+    accuracyRangeMax,
+    maxImages: maxImage,
+  } = data;
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
   );
@@ -29,13 +40,8 @@ export const PartIdentification: React.FC = () => {
     any
   >('locations');
   const history = useHistory();
-  const [needRetraining, setNeedRetraining] = useState(true);
-  const [max, setMax] = useState(80);
-  const [min, setMin] = useState(60);
-  const [maxImgCount, setMaxImgCount] = useState(15);
   const [maxImgCountError, setMaxImgCountError] = useState(false);
 
-  const projectId = useRef<number>(null);
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
       dispatch(thunkGetProject());
@@ -43,18 +49,24 @@ export const PartIdentification: React.FC = () => {
   }, [dispatch, cameraLoading, locationLoading, partLoading]);
 
   useEffect(() => {
-    projectId.current = id;
     if (location) setSelectedLocationById(location);
     if (parts.length) setSelectedPartsById(parts);
     if (camera) setSelectedCameraById(camera);
-  }, [camera, id, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
+  }, [camera, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
 
   const handleSubmitConfigure = (): void => {
     ((dispatch(
-      thunkPostProject(projectId.current, selectedLocations, selectedParts, selectedCamera),
-    ) as unknown) as Promise<void>)
-      .then((id) => history.push(`/cameras/${selectedCamera.name}/${id}`))
-      .catch((err) => console.log(err));
+      thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera),
+    ) as unknown) as Promise<number>)
+      .then((id) => {
+        if (typeof id !== 'undefined') history.push(`/cameras/${selectedCamera.name}/${id}`);
+        return void 0;
+      })
+      .catch((e) => e);
+  };
+
+  const setData = (keyName: keyof ProjectData, value: ProjectData[keyof ProjectData]): void => {
+    dispatch(updateProjectData({ ...data, [keyName]: value }));
   };
 
   return (
@@ -63,6 +75,9 @@ export const PartIdentification: React.FC = () => {
         Part Identification
       </Text>
       <Divider color="black" />
+      {error && (
+        <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
+      )}
       <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
         <ModuleSelector
           moduleName="cameras"
@@ -91,7 +106,7 @@ export const PartIdentification: React.FC = () => {
         <Checkbox
           label="Set up retraining"
           checked={needRetraining}
-          onChange={(_, data): void => setNeedRetraining(data.checked)}
+          onChange={(_, { checked }): void => setData('needRetraining', checked)}
         />
         <Text disabled={!needRetraining}>Accuracy Range</Text>
         <Text disabled={!needRetraining}>
@@ -100,8 +115,8 @@ export const PartIdentification: React.FC = () => {
             type="number"
             disabled={!needRetraining}
             inline
-            value={min}
-            onChange={(_, { value }): void => setMin(value as any)}
+            value={accuracyRangeMin}
+            onChange={(_, { value }): void => setData('accuracyRangeMin', value)}
           />
           %
         </Text>
@@ -111,8 +126,8 @@ export const PartIdentification: React.FC = () => {
             type="number"
             disabled={!needRetraining}
             inline
-            value={max}
-            onChange={(_, { value }): void => setMax(value as any)}
+            value={accuracyRangeMax}
+            onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
           />
           %
         </Text>
@@ -122,28 +137,29 @@ export const PartIdentification: React.FC = () => {
             type="number"
             disabled={!needRetraining}
             inline
-            value={maxImgCount}
+            value={maxImage}
             onChange={(_, { value }): void => {
               if ((value as any) < 15) setMaxImgCountError(true);
               else setMaxImgCountError(false);
-              setMaxImgCount(value as any);
+              setData('maxImages', value);
             }}
           />
           {maxImgCountError && <Text error>Cannot be less than 15</Text>}
         </Text>
         <Link to="">Advanced Configuration</Link>
         <Button
+          content="Configure"
           primary
           onClick={handleSubmitConfigure}
-          disabled={!selectedCamera || !selectedLocations || !selectedParts}
-        >
-          Configure
-        </Button>
+          disabled={!selectedCamera || !selectedLocations || !selectedParts || isLoading}
+          loading={isLoading}
+        />
       </Flex>
     </>
   );
 };
 
+// TODO Make this integrate with Redux
 function useDropdownItems<T>(
   moduleName: string,
   isMultiple?: boolean,

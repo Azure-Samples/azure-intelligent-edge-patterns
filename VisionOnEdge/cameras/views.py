@@ -162,7 +162,14 @@ class CameraViewSet(viewsets.ModelViewSet):
 class SettingSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Setting
-        fields = ['id', 'training_key', 'endpoint']
+        fields = [
+            'id', 
+            'training_key', 
+            'endpoint', 
+            'iot_hub_connection_string', 
+            'device_id', 
+            'module_id'
+        ]
 
 class SettingViewSet(viewsets.ModelViewSet):
     queryset = Setting.objects.all()
@@ -174,7 +181,17 @@ class SettingViewSet(viewsets.ModelViewSet):
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'camera', 'location', 'parts', 'download_uri']
+        fields = [
+            'id', 
+            'camera', 
+            'location', 
+            'parts', 
+            'download_uri', 
+            'needRetraining', 
+            'accuracyRangeMin',
+            'accuracyRangeMax',
+            'maxImages'
+        ]
         extra_kwargs = {'download_uri': {'required': False}}
 
 

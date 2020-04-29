@@ -22,13 +22,15 @@ import { State } from '../store/State';
 import { Camera } from '../store/camera/cameraTypes';
 import { useParts } from '../hooks/useParts';
 import LabelDisplayImage from '../components/LabelDisplayImage';
-import { Project } from '../store/project/projectTypes';
+import { ProjectData } from '../store/project/projectTypes';
 
 let sorting = false;
 
 const ManualIdentification: FC = () => {
-  const project = useSelector<State, Project>((state) => state.project);
-  const cameras = useSelector<State, Camera[]>((state) => state.cameras);
+  const { project, cameras } = useSelector<State, { project: ProjectData; cameras: Camera[] }>((state) => ({
+    project: state.project.data,
+    cameras: state.cameras,
+  }));
   const parts = useParts();
 
   const partItems = useMemo<DropdownItemProps[]>(() => {
@@ -47,7 +49,10 @@ const ManualIdentification: FC = () => {
   }, [parts, project]);
 
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([70, 90]);
+  const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([
+    project.accuracyRangeMin,
+    project.accuracyRangeMax,
+  ]);
   const [ascend, setAscend] = useState<boolean>(false);
 
   const images = useMemo(() => {
