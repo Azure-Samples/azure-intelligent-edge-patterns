@@ -60,6 +60,12 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     },
     [noMoreCreate],
   );
+  const removeBox = useCallback((): void => {
+    dispatch(removeAnnotation(selectedAnnotationIndex));
+    setSelectedAnnotationIndex(null);
+    setShowOuterRemoveButton(false);
+  }, [dispatch, selectedAnnotationIndex, setSelectedAnnotationIndex, setShowOuterRemoveButton]);
+
   const onMouseDown = (): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate) return;
@@ -127,12 +133,11 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
           text
           styles={{ color: '#F9526B', ':hover': { color: '#E73550' } }}
           content={<CloseIcon size="large" />}
-          onClick={(): void => {
-            dispatch(removeAnnotation(selectedAnnotationIndex));
-            setSelectedAnnotationIndex(null);
-          }}
+          onClick={removeBox}
         />
-      ) : <div style={{height: '2rem'}} />}
+      ) : (
+        <div style={{ height: '2rem' }} />
+      )}
       <Stage
         width={imageSize.width}
         height={imageSize.height}
@@ -160,6 +165,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
                 changeCursorState={changeCursorState}
                 scale={scale.current.x}
                 setShowOuterRemoveButton={setShowOuterRemoveButton}
+                removeBox={removeBox}
               />
               <Box2d
                 workState={workState}
