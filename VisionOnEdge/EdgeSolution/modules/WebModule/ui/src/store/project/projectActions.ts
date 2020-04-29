@@ -52,7 +52,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         camera: parseInt(data[0]?.camera.split('/')[5], 10) ?? null,
         location: parseInt(data[0]?.location.split('/')[5], 10) ?? null,
         parts: data[0]?.parts.map((ele) => parseInt(ele.split('/')[5], 10)) ?? [],
-        modelUrl: data[0]?.training_uri ?? '',
+        modelUrl: data[0]?.download_uri ?? '',
         status: data[0]?.status ?? 'offline',
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,

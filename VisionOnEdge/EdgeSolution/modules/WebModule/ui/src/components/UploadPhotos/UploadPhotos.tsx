@@ -20,7 +20,7 @@ export const UploadPhotos = ({ partId }): JSX.Element => {
     for (let i = 0; i < e.target.files.length; i++) {
       const formData = new FormData();
       formData.append('image', e.target.files[i]);
-      formData.append('part', `http://localhost:8000/api/parts/${partId}/`);
+      formData.append('part', `/api/parts/${partId}/`);
       fetch(`/api/images/`, {
         method: 'POST',
         body: formData,

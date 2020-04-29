@@ -42,6 +42,7 @@ export const CameraConfigureInfo: React.FC = () => {
     project.modelUrl ? null : 5000,
   );
 
+
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>

@@ -101,7 +101,7 @@ const RTSPVideo = ({ selectedCamera, partId }): JSX.Element => {
     };
   }, [onDisconnect]);
 
-  const src = streamId ? `http://localhost:8000/api/streams/${streamId}/video_feed` : '';
+  const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
   return (
     <>
