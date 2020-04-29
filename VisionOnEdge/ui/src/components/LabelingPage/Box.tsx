@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, FC, useCallback } from 'react';
 import { Line, Group, Circle } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
@@ -37,38 +37,48 @@ export const Box2d: FC<Box2dComponentProps> = ({
     dispatch(updateAnnotation(annotationIndex, newAnnotation));
   };
 
-  const onDragAnchor = ({ xi = 'x1', yi = 'y1' }) => (e: KonvaEventObject<DragEvent>): void => {
-    if (display) return;
-    const x = Math.round(e.target.position().x);
-    const y = Math.round(e.target.position().y);
-    // * Round the anchor (circle) position so user can only drag anchor on integer.
-    e.target.setAttr('x', x);
-    e.target.setAttr('y', y);
+  const onDragAnchor = useCallback(
+    ({ xi = 'x1', yi = 'y1' }) => (e: KonvaEventObject<DragEvent>): void => {
+      if (display) return;
+      const stage = e.target.getStage();
+      const { width, height } = stage.getSize();
+      let x = Math.round(e.target.position().x);
+      let y = Math.round(e.target.position().y);
 
-    const anotherPosXArr = ['x1', 'x2'];
-    const anotherPosYArr = ['y1', 'y2'];
-    anotherPosXArr.splice(
-      anotherPosXArr.findIndex((xx) => xx === xi),
-      1,
-    );
-    anotherPosYArr.splice(
-      anotherPosYArr.findIndex((yy) => yy === yi),
-      1,
-    );
-    if (vertices[anotherPosXArr[0]] > vertices[xi]) {
-      if (vertices[anotherPosYArr[0]] > vertices[yi]) {
-        changeCursorState(LabelingCursorStates.nwseResize);
-      } else {
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+      if (x > width / scale) x = width / scale;
+      if (y > height / scale) y = height / scale;
+      // * Round the anchor (circle) position so user can only drag anchor on integer.
+      e.target.setAttr('x', x);
+      e.target.setAttr('y', y);
+
+      const anotherPosXArr = ['x1', 'x2'];
+      const anotherPosYArr = ['y1', 'y2'];
+      anotherPosXArr.splice(
+        anotherPosXArr.findIndex((xx) => xx === xi),
+        1,
+      );
+      anotherPosYArr.splice(
+        anotherPosYArr.findIndex((yy) => yy === yi),
+        1,
+      );
+      if (vertices[anotherPosXArr[0]] > vertices[xi]) {
+        if (vertices[anotherPosYArr[0]] > vertices[yi]) {
+          changeCursorState(LabelingCursorStates.nwseResize);
+        } else {
+          changeCursorState(LabelingCursorStates.neswResize);
+        }
+      } else if (vertices[anotherPosYArr[0]] > vertices[yi]) {
         changeCursorState(LabelingCursorStates.neswResize);
+      } else {
+        changeCursorState(LabelingCursorStates.nwseResize);
       }
-    } else if (vertices[anotherPosYArr[0]] > vertices[yi]) {
-      changeCursorState(LabelingCursorStates.neswResize);
-    } else {
-      changeCursorState(LabelingCursorStates.nwseResize);
-    }
 
-    setVertices((prevVertices) => ({ ...prevVertices, [xi]: x, [yi]: y }));
-  };
+      setVertices((prevVertices) => ({ ...prevVertices, [xi]: x, [yi]: y }));
+    },
+    [display, changeCursorState, scale, vertices],
+  );
 
   useEffect(() => {
     setVertices(annotation.label);

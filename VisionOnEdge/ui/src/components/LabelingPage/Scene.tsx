@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
-import { Stage, Layer, Image } from 'react-konva';
+import { Stage, Layer, Image, Group } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
@@ -19,9 +19,10 @@ import {
   updateCreatingAnnotation,
   removeAnnotation,
 } from '../../store/labelingPage/labelingPageActions';
+import RemoveBoxButton from './RemoveBoxButton';
 
 const defaultSize: Size2D = {
-  width: 900,
+  width: 800,
   height: 600,
 };
 
@@ -42,6 +43,8 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [cursorPosition, setCursorPosition] = useState<Position2D>({ x: 0, y: 0 });
+  const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<Position2D>({ x: 1, y: 1 });
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
@@ -118,6 +121,18 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
 
   return (
     <div style={{ margin: 3 }}>
+      {annotations.length !== 0 && showOuterRemoveButton && !isDragging ? (
+        <Button
+          iconOnly
+          text
+          styles={{ color: '#F9526B', ':hover': { color: '#E73550' } }}
+          content={<CloseIcon size="large" />}
+          onClick={(): void => {
+            dispatch(removeAnnotation(selectedAnnotationIndex));
+            setSelectedAnnotationIndex(null);
+          }}
+        />
+      ) : <div style={{height: '2rem'}} />}
       <Stage
         width={imageSize.width}
         height={imageSize.height}
@@ -130,35 +145,37 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
           onMouseMove={(e: KonvaEventObject<MouseEvent>): void => {
             setCursorPosition({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y });
           }}
+          onDragStart={(): void => {
+            setIsDragging(true);
+          }}
+          onDragEnd={(): void => setIsDragging(false)}
         >
           <Image image={image} />
           {annotations.map((annotation, i) => (
-            <Box2d
-              key={i}
-              workState={workState}
-              cursorPosition={cursorPosition}
-              onSelect={onSelect}
-              annotation={annotation}
-              scale={scale.current.x}
-              annotationIndex={i}
-              selected={i === selectedAnnotationIndex}
-              dispatch={dispatch}
-              changeCursorState={changeCursorState}
-            />
+            <Group key={i}>
+              <RemoveBoxButton
+                imageSize={imageSize}
+                visible={!isDragging && i === selectedAnnotationIndex}
+                label={annotation.label}
+                changeCursorState={changeCursorState}
+                scale={scale.current.x}
+                setShowOuterRemoveButton={setShowOuterRemoveButton}
+              />
+              <Box2d
+                workState={workState}
+                cursorPosition={cursorPosition}
+                onSelect={onSelect}
+                annotation={annotation}
+                scale={scale.current.x}
+                annotationIndex={i}
+                selected={i === selectedAnnotationIndex}
+                dispatch={dispatch}
+                changeCursorState={changeCursorState}
+              />
+            </Group>
           ))}
         </Layer>
       </Stage>
-      <Button
-        disabled={annotations.length === 0}
-        iconOnly
-        text
-        styles={{ color: annotations.length === 0 ? 'grey' : 'red', ':hover': { color: 'red' } }}
-        content={<CloseIcon size="large" />}
-        onClick={(): void => {
-          dispatch(removeAnnotation(selectedAnnotationIndex));
-          setSelectedAnnotationIndex(null);
-        }}
-      />
     </div>
   );
 };
