@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, Text, Status, Button, Image, Loader } from '@fluentui/react-northstar';
+import { Flex, Text, Status, Button, Loader } from '@fluentui/react-northstar';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
@@ -8,11 +8,13 @@ import { useInterval } from '../../hooks/useInterval';
 import { thunkDeleteProject, thunkGetProject } from '../../store/project/projectActions';
 import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
+import { Camera } from '../../store/camera/cameraTypes';
+import { RTSPVideo } from '../RTSPVideo';
 
-export const CameraConfigureInfo: React.FC = () => {
+export const CameraConfigureInfo: React.FC<{camera: Camera; projectId: number}> = ({camera, projectId}) => {
   const { isLoading, error, data: project } = useSelector<State, Project>((state) => state.project);
   const dispatch = useDispatch();
-  const { projectId, name } = useParams();
+  const { name } = useParams();
   const history = useHistory();
 
   const onDeleteConfigure = (): void => {
@@ -33,7 +35,7 @@ export const CameraConfigureInfo: React.FC = () => {
    */
   useInterval(() => {
     Axios.get(`/api/projects/${projectId}/export`);
-  }, 5000);
+  }, project.modelUrl ? null : 5000);
 
   useInterval(
     () => {
@@ -41,7 +43,6 @@ export const CameraConfigureInfo: React.FC = () => {
     },
     project.modelUrl ? null : 5000,
   );
-
 
   return (
     <Flex column gap="gap.large">
@@ -58,17 +59,7 @@ export const CameraConfigureInfo: React.FC = () => {
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <Flex
-              styles={{
-                width: '80%',
-                height: '400px',
-                backgroundColor: 'rgb(188, 188, 188)',
-              }}
-              vAlign="center"
-              hAlign="center"
-            >
-              <Image src="/icons/Play.png" styles={{ ':hover': { cursor: 'pointer' } }} />
-            </Flex>
+            <RTSPVideo selectedCamera={camera} partId={project.parts[0]} canCapture={false}/>
           </Flex>
           <ListItem
             title="Success Rate"

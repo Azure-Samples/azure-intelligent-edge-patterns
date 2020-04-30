@@ -1,25 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Flex, Image, Text, Button, AddIcon } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
+import Axios from 'axios';
+import { getIdFromUrl } from '../util/GetIDFromUrl';
 
 export const Parts: React.FC = () => {
   const [parts, setParts] = useState([]);
 
+  const partsAPI = Axios.get('/api/parts/');
+  const imagesAPI = Axios.get('/api/images/');
+
   useEffect(() => {
-    fetch('/api/parts')
-      .then((res) => res.json())
-      .then((data) => {
-        setParts(data.map((ele) => ({ ...ele, images: [] })));
-        return void 0;
-      })
-      .catch((err) => console.error(err));
+    Axios.all([partsAPI, imagesAPI]).then(
+      Axios.spread((...responses) => {
+        const {data: parts} = responses[0];
+        const {data: images} = responses[1];
+        setParts(parts.map(e => ({...e, images: images.find(img => getIdFromUrl(img.part) === e.id)?.image })))
+      }),
+    ).catch(err => console.error(err));
   }, []);
 
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <Flex gap="gap.large" wrap>
         {parts.map((ele) => (
-          <Item key={ele.id} src={ele.images[0]} id={ele.id} name={ele.name} />
+          <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
         ))}
       </Flex>
       <Button
