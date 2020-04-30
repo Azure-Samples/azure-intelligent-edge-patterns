@@ -12,6 +12,8 @@ import requests
 
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+from azure.iot.device import IoTHubModuleClient
+
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
 trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
@@ -121,11 +123,12 @@ post_save.connect(Project.post_save, Project, dispatch_uid='Project_post')
 
 # FIXME consider move this out of models.py
 class Stream(object):
-    def __init__(self, rtsp, part_id=None):
+    def __init__(self, rtsp, part_id=None, inference=False):
         if rtsp == '0': self.rtsp = 0
         elif rtsp == '1': self.rtsp = 1
         else: self.rtsp = rtsp
         self.part_id = part_id
+
 
         #self.last_active = datetime.datetime.now()
         self.status = 'init'
@@ -134,14 +137,29 @@ class Stream(object):
 
         self.mutex = threading.Lock()
         self.bboxes = []
+        self.inference = inference
+
+
+        try:
+            self.iot = IoTHubModuleClient.create_from_edge_environment()
+        except:
+            self.iot = None
+
+        print('inference', self.inference)
+        print('iot', self.iot)
 
         def _listener(self):
+            #if self.iot is None: return
+            if not self.inference: return
             while True:
                 self.mutex.acquire()
+                print('receive inference')
+                #iot.receive_message_on_input('inference')   
                 r = random.randint(0, 100)
                 self.bboxes = [[(100+r, 100+r), (300+r, 300+r)]]
                 self.mutex.release()
-                time.sleep(1)
+                time.sleep(0.01)
+
         threading.Thread(target=_listener, args=(self,)).start()
 
     def gen(self):
