@@ -8,8 +8,9 @@ import { useInterval } from '../../hooks/useInterval';
 import { thunkDeleteProject, thunkGetProject } from '../../store/project/projectActions';
 import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
+import { Camera } from '../../store/camera/cameraTypes';
 
-export const CameraConfigureInfo: React.FC = () => {
+export const CameraConfigureInfo: React.FC<{camera: Camera}> = ({camera}) => {
   const { isLoading, error, data: project } = useSelector<State, Project>((state) => state.project);
   const dispatch = useDispatch();
   const { projectId, name } = useParams();
@@ -58,7 +59,7 @@ export const CameraConfigureInfo: React.FC = () => {
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <Flex
+            {/* <Flex
               styles={{
                 width: '80%',
                 height: '400px',
@@ -68,7 +69,8 @@ export const CameraConfigureInfo: React.FC = () => {
               hAlign="center"
             >
               <Image src="/icons/Play.png" styles={{ ':hover': { cursor: 'pointer' } }} />
-            </Flex>
+            </Flex> */}
+            <Image src={`/api/stream/connect?rtps=${camera.rtsp}&inference=1`} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </Flex>
           <ListItem
             title="Success Rate"
