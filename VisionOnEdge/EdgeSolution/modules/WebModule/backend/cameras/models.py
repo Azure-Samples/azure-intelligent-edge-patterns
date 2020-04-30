@@ -1,8 +1,10 @@
+import json
 import datetime
 import time
 import threading
 import queue
 import random
+import sys
 
 
 from django.db import models
@@ -152,15 +154,29 @@ class Stream(object):
             #if self.iot is None: return
             if not self.inference: return
             while True:
-                self.mutex.acquire()
                 print('receive inference')
-                #iot.receive_message_on_input('inference')   
-                r = random.randint(0, 100)
-                self.bboxes = [[(100+r, 100+r), (300+r, 300+r)]]
-                self.mutex.release()
-                time.sleep(0.01)
+                sys.stdout.flush()
+                #inference = iot.receive_message_on_input('inference', timeout=1)
+                time.sleep(1)
+                inference = True
+                if not inference:
+                    self.mutex.acquire()
+                    self.bboxes = [{}]
+                    self.mutex.release()
+                else:
+                    data = json.loads(inference.data)
+                    #data = {'Label': 'tvmonitor', 'Confidence': '17', 'Position': [100, 200, 300, 400], 'TimeStamp': '2020-04-30 08:50:54'}
+                    self.mutex.acquire()
+                    self.bboxes = [{
+                        'label': data['Label'],
+                        'confidence': data['Confidence'] + '%',
+                        'p1': (data['Position'][0], data['Position'][1]),
+                        'p2': (data['Position'][2], data['Position'][3])
+                    }]
+                    self.mutex.release()
 
-        threading.Thread(target=_listener, args=(self,)).start()
+        if self.iot:
+            threading.Thread(target=_listener, args=(self,)).start()
 
     def gen(self):
         self.status = 'running'
@@ -173,8 +189,10 @@ class Stream(object):
             self.mutex.acquire()
             bboxes = list(self.bboxes)
             self.mutex.release()
+            #print('bboxes', bboxes)
             for bbox in bboxes:
-                img = cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 3)
+                cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
+                cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'], (bbox['p1'][0], bbox['p1'][1]-15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 255), 1)
             yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
         self.cap.release()
