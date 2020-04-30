@@ -13,10 +13,6 @@ const Home: FC = () => {
         Hello User!
       </Text>
       <Text>
-        I understand a ship to be made for the carrying and preservation of the cargo, and so long as the ship
-        can be saved, with the cargo, it should never be abandoned. This Union likewise should never be
-        abandoned unless it fails and the possibility of its preservation shall cease to exist, without
-        throwing passengers and cargo overboard.
       </Text>
       <Text color="white" styles={{ backgroundColor: '#373644', padding: '2px 2px 2px 10px' }}>
         GET STARTED:
