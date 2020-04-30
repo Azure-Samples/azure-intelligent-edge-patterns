@@ -132,7 +132,7 @@ class Stream(object):
         self.part_id = part_id
 
 
-        #self.last_active = datetime.datetime.now()
+        self.last_active = time.time()
         self.status = 'init'
         self.last_img = None
         self.id = id(self)
@@ -154,17 +154,18 @@ class Stream(object):
             #if self.iot is None: return
             if not self.inference: return
             while True:
-                print('receive inference')
+                if self.last_active + 10 < time.time():
+                    print('[INFO] stream finished')
+                    break
                 sys.stdout.flush()
-                #inference = iot.receive_message_on_input('inference', timeout=1)
-                time.sleep(1)
-                inference = True
+                inference = self.iot.receive_message_on_input('inference', timeout=1)
                 if not inference:
                     self.mutex.acquire()
-                    self.bboxes = [{}]
+                    self.bboxes = []
                     self.mutex.release()
                 else:
                     data = json.loads(inference.data)
+                    print('receive inference', data)
                     #data = {'Label': 'tvmonitor', 'Confidence': '17', 'Position': [100, 200, 300, 400], 'TimeStamp': '2020-04-30 08:50:54'}
                     self.mutex.acquire()
                     self.bboxes = [{
@@ -185,11 +186,12 @@ class Stream(object):
         while self.status == 'running':
             t, img = self.cap.read()
             img = cv2.resize(img, None, fx=0.5, fy=0.5)
+            self.last_active = time.time()
             self.last_img = img.copy()
             self.mutex.acquire()
-            bboxes = list(self.bboxes)
+            bboxes = list(bbox.copy() for bbox in self.bboxes)
             self.mutex.release()
-            #print('bboxes', bboxes)
+            print('bboxes', bboxes)
             for bbox in bboxes:
                 cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
                 cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'], (bbox['p1'][0], bbox['p1'][1]-15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 255), 1)
