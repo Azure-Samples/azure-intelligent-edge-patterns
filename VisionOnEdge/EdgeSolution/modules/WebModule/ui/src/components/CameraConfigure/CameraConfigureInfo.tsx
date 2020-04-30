@@ -10,9 +10,14 @@ import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
+import { useParts } from '../../hooks/useParts';
 
-export const CameraConfigureInfo: React.FC<{camera: Camera; projectId: number}> = ({camera, projectId}) => {
+export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }> = ({
+  camera,
+  projectId,
+}) => {
   const { isLoading, error, data: project } = useSelector<State, Project>((state) => state.project);
+  const parts = useParts();
   const dispatch = useDispatch();
   const { name } = useParams();
   const history = useHistory();
@@ -33,9 +38,12 @@ export const CameraConfigureInfo: React.FC<{camera: Camera; projectId: number}> 
   /**
    * Call custom Vision to export
    */
-  useInterval(() => {
-    Axios.get(`/api/projects/${projectId}/export`);
-  }, project.modelUrl ? null : 5000);
+  useInterval(
+    () => {
+      Axios.get(`/api/projects/${projectId}/export`);
+    },
+    project.modelUrl ? null : 5000,
+  );
 
   useInterval(
     () => {
@@ -52,14 +60,20 @@ export const CameraConfigureInfo: React.FC<{camera: Camera; projectId: number}> 
       ) : (
         <>
           <ListItem title="Status" content={<CameraStatus online={project.status === 'online'} />} />
-          <ListItem title="Configured for" content={project.parts.join(', ')} />
+          <ListItem
+            title="Configured for"
+            content={parts
+              .filter((e) => project.parts.includes(e.id))
+              .map((e) => e.name)
+              .join(', ')}
+          />
           <span>Model Url: </span>
           <a href={project.modelUrl}>{project.modelUrl}</a>
           <Flex column gap="gap.small">
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <RTSPVideo selectedCamera={camera} partId={project.parts[0]} canCapture={false}/>
+            <RTSPVideo selectedCamera={camera} partId={project.parts[0]} canCapture={false} />
           </Flex>
           <ListItem
             title="Success Rate"
