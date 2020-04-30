@@ -33,7 +33,7 @@ export const CameraConfigureInfo: React.FC = () => {
    */
   useInterval(() => {
     Axios.get(`/api/projects/${projectId}/export`);
-  }, 5000);
+  }, project.modelUrl ? null : 5000);
 
   useInterval(
     () => {
