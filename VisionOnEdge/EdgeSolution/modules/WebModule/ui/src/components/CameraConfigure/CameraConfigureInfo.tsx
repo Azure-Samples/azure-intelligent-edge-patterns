@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, Text, Status, Button, Image, Loader } from '@fluentui/react-northstar';
+import { Flex, Text, Status, Button, Loader } from '@fluentui/react-northstar';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
@@ -9,11 +9,12 @@ import { thunkDeleteProject, thunkGetProject } from '../../store/project/project
 import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
+import { RTSPVideo } from '../RTSPVideo';
 
-export const CameraConfigureInfo: React.FC<{camera: Camera}> = ({camera}) => {
+export const CameraConfigureInfo: React.FC<{camera: Camera; projectId: number}> = ({camera, projectId}) => {
   const { isLoading, error, data: project } = useSelector<State, Project>((state) => state.project);
   const dispatch = useDispatch();
-  const { projectId, name } = useParams();
+  const { name } = useParams();
   const history = useHistory();
 
   const onDeleteConfigure = (): void => {
@@ -43,7 +44,6 @@ export const CameraConfigureInfo: React.FC<{camera: Camera}> = ({camera}) => {
     project.modelUrl ? null : 5000,
   );
 
-
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
@@ -59,18 +59,7 @@ export const CameraConfigureInfo: React.FC<{camera: Camera}> = ({camera}) => {
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            {/* <Flex
-              styles={{
-                width: '80%',
-                height: '400px',
-                backgroundColor: 'rgb(188, 188, 188)',
-              }}
-              vAlign="center"
-              hAlign="center"
-            >
-              <Image src="/icons/Play.png" styles={{ ':hover': { cursor: 'pointer' } }} />
-            </Flex> */}
-            <Image src={`/api/stream/connect?rtps=${camera.rtsp}&inference=1`} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <RTSPVideo selectedCamera={camera} partId={project.parts[0]} canCapture={false}/>
           </Flex>
           <ListItem
             title="Success Rate"
