@@ -55,6 +55,10 @@ import cv2
 @api_view()
 def export(request, project_id):
     project_obj = Project.objects.get(pk=project_id)
+
+    camera_id = project_obj.camera_id
+    camera = Camera.objects.get(pk=camera_id)
+
     customvision_project_id = project_obj.customvision_project_id
 
     iterations = trainer.get_iterations(customvision_project_id)
@@ -80,7 +84,7 @@ def export(request, project_id):
     project_obj.save(update_fields=['download_uri'])
 
     if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        update_twin(iteration.id, exports[0].download_uri)
+        update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     print('export ok')
 
@@ -90,6 +94,10 @@ def export(request, project_id):
 @api_view()
 def export_null(request):
     project_obj = Project.objects.all()[0]
+
+    camera_id = project_obj.camera_id
+    camera = Camera.objects.get(pk=camera_id)
+
     customvision_project_id = project_obj.customvision_project_id
 
     iterations = trainer.get_iterations(customvision_project_id)
@@ -115,7 +123,7 @@ def export_null(request):
     project_obj.save(update_fields=['download_uri'])
 
     if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        update_twin(iteration.id, exports[0].download_uri)
+        update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
@@ -360,7 +368,7 @@ def train(request, project_id):
 
 # FIXME will need to find a better way to deal with this
 iteration_ids = set([])
-def update_twin(iteration_id, download_uri):
+def update_twin(iteration_id, download_uri, rtsp):
 
     if iot is None: return
 
@@ -375,11 +383,15 @@ def update_twin(iteration_id, download_uri):
         return
 
     twin = Twin()
-    twin.properties = TwinProperties(desired={'inference_files_zip_url': download_uri})
+    twin.properties = TwinProperties(desired={
+        'inference_files_zip_url': download_uri,
+        'cam_type': 'rtsp_stream',
+        'cam_source': rtsp
+    })
 
     iot.update_module_twin(DEVICE_ID, MODULE_ID, twin, module.etag)
 
-    print('[INFO] Updated IoT Module Twin with uri', download_uri)
+    print('[INFO] Updated IoT Module Twin with uri and rtsp', download_uri, rtsp)
 
     iteration_ids.add(iteration_id)
 
