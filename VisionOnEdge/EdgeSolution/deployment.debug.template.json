@@ -9,13 +9,7 @@
           "settings": {
             "minDockerVersion": "v1.25",
             "loggingOptions": "",
-            "registryCredentials": {
-              "linkeriotedge": {
-                "username": "$CONTAINER_REGISTRY_USERNAME_linkeriotedge",
-                "password": "$CONTAINER_REGISTRY_PASSWORD_linkeriotedge",
-                "address": "linkeriotedge.azurecr.io"
-              }
-            }
+            "registryCredentials": {}
           }
         },
         "systemModules": {
@@ -57,13 +51,36 @@
           }
         },
         "modules": {
-          "SampleModule": {
+          "WebModule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "linkeriotedge.azurecr.io/alertmanager:0.0.1",
+              "image": "${MODULES.WebModule.debug}",
+              "createOptions": {
+                "ExposedPorts": {
+                  "5678/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5678/tcp": [
+                      {
+                        "HostPort": "5678"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "SimulatedTemperatureSensor": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
               "createOptions": {}
             }
           }
@@ -74,7 +91,8 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "SampleModuleToIoTHub": "FROM /messages/modules/SampleModule/outputs/* INTO $upstream"
+          "WebModuleToIoTHub": "FROM /messages/modules/WebModule/outputs/* INTO $upstream",
+          "sensorToWebModule": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/WebModule/inputs/input1\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200

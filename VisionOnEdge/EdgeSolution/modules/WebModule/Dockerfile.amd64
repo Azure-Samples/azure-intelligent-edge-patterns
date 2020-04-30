@@ -1,0 +1,18 @@
+FROM amd64/python:3.8
+
+WORKDIR /app
+
+COPY backend/requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY backend/manage.py .
+COPY backend/config.py .
+COPY backend/cameras cameras
+COPY backend/ui_production ui_production
+COPY backend/vision_on_edge vision_on_edge
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+
+EXPOSE 8000
+
+CMD python manage.py runserver 0.0.0.0:8000
