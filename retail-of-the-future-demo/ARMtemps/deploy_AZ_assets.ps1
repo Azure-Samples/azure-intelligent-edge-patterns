@@ -6,5 +6,6 @@ if (-not (Get-Module -ListAvailable -Name Az.Resources)) {
 }
 Connect-AzAccount
 $RGname = Read-Host -Prompt 'ResourceGroup name'
-New-AzResourceGroup -Name $RGname -location westus 
+$rgRegion = Read-Host -Prompt 'ResourceGroup location'
+New-AzResourceGroup -Name $RGname -location $rgRegion 
 New-AzResourceGroupDeployment -ResourceGroupName $RGname -TemplateFile .\arm_template.json 
