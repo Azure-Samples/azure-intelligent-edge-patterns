@@ -105,13 +105,16 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
                     },
                   }}
                   as={Link}
-                  to="/"
+                  to="/manual"
                 />
               </>
             }
           />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
+          </Button>
+          <Button primary as={Link} to="/partIdentification">
+            Edit Configuration
           </Button>
         </>
       )}
