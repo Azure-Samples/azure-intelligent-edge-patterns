@@ -20,6 +20,12 @@ import {
   GET_PROJECT_REQUEST,
   UpdateProjectDataAction,
   UPDATE_PROJECT_DATA,
+  GetTrainingStatusRequesAction,
+  GET_TRAINING_STATUS_REQUEST,
+  GetTrainingStatusSuccessAction,
+  GET_TRAINING_STATUS_SUCCESS,
+  GetTrainingStatusFailedAction,
+  GET_TRAINING_STATUS_FAILED,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -28,6 +34,16 @@ const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
   payload: { project },
 });
 const getProjectFailed = (error: Error): GetProjectFailedAction => ({ type: GET_PROJECT_FAILED, error });
+
+const getTrainingStatusRequest = (): GetTrainingStatusRequesAction => ({ type: GET_TRAINING_STATUS_REQUEST });
+const getTrainingStatusSuccess = (trainingStatus: string): GetTrainingStatusSuccessAction => ({
+  type: GET_TRAINING_STATUS_SUCCESS,
+  payload: { trainingStatus },
+});
+const getTrainingStatusFailed = (error: Error): GetTrainingStatusFailedAction => ({
+  type: GET_TRAINING_STATUS_FAILED,
+  error,
+});
 
 const postProjectRequest = (): PostProjectRequestAction => ({ type: POST_PROJECT_REQUEST });
 const postProjectSuccess = (): PostProjectSuccessAction => ({ type: POST_PROJECT_SUCCESS });
@@ -116,4 +132,19 @@ export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promi
       alert(err);
       dispatch(deleteProjectFailed());
     });
+};
+
+export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise<any> => {
+  dispatch(getTrainingStatusRequest());
+
+  return Axios.get(`/api/projects/${projectId}/export`)
+    .then(({ data }) => {
+      if (data.status !== 'ok') dispatch(getTrainingStatusSuccess(data.status));
+      else {
+        dispatch(getTrainingStatusSuccess(data.status));
+        dispatch(thunkGetProject());
+      }
+      return void 0;
+    })
+    .catch((err) => dispatch(getTrainingStatusFailed(err)));
 };
