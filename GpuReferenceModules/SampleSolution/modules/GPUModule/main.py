@@ -11,7 +11,7 @@ import threading
 import random
 from azure.iot.device import Message
 from azure.iot.device.aio import IoTHubModuleClient
-from utility import benchmark_tf,benchmark_pt
+from utility import benchmark_tf,benchmark_pt,benchmark_pt_nv,device_info
 
 import sys
 
@@ -19,7 +19,7 @@ import sys
 RUNEXECUTION_COUNT = 0
 TWIN_CALLBACKS = 0
 RECEIVED_MESSAGES = 0
-SHAPE=7000
+SHAPE=500
 WARMUP_ITERATIONS = 3
 
 async def main():
@@ -36,8 +36,10 @@ async def main():
         await module_client.connect()
 
         ## update the reported properties
-        reported_properties = {"temperature": random.randint(320, 800) / 10}
-        print("Setting reported temperature to {}".format(reported_properties["temperature"]))
+        (gpu,cpu) = device_info()
+
+        reported_properties = {"gpu": gpu}
+        print("Setting reported gpu to {}".format(reported_properties["gpu"]))
         await module_client.patch_twin_reported_properties(reported_properties)
 
 
@@ -105,6 +107,18 @@ async def main():
             final_gputime = 0
             warmup = inwarmup
             iter = warmup + 1 
+            (gpu,cpu)= device_info()
+
+            #Running on pytorch 
+            final_gputime = benchmark_pt_nv("gpu",shape)
+            final_cputime = benchmark_pt_nv("cpu",shape)
+            print("On pytorch time taken on cpu ::" + cpu +" is ==" + str(final_cputime) + " Time taken on gpu  :: " + gpu + " is " + str(final_gputime))
+            time.sleep(1)
+
+            msg_to_cloud = "On pytorch time taken on cpu ::" + cpu +" is ==" + str(final_cputime) + " Time taken on gpu  :: " + gpu + " is " + str(final_gputime)
+            print(msg_to_cloud)
+            # Schedule task for sending message
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))  
 
             ## Runing on tensorflow 
             # We observved on first iteration GPU does not do very well but after 
@@ -112,26 +126,16 @@ async def main():
             for i in range(1,iter):
                 final_gputime = benchmark_tf("gpu",shape)
                 final_cputime = benchmark_tf("cpu",shape)
-                print("Time taken on cpu is :: " + str(final_cputime) + "Time taken on gpu is " + str(final_gputime))
+                print("On Tensor Flow time taken on cpu ::" + cpu +" is ==" + str(final_cputime) + " Time taken on gpu  :: " + gpu + " is " + str(final_gputime))
                 time.sleep(1)
 
-            msg_to_cloud = "On Tensorflow CPU took :: " + str(final_cputime) + " and GPU took :: " + str(final_gputime)
+            msg_to_cloud_tf = "On Tensor Flow time taken on cpu ::" + cpu +" is ==" + str(final_cputime) + " Time taken on gpu  :: " + gpu + " is " + str(final_gputime)
 
-            print(msg_to_cloud)
+            print(msg_to_cloud_tf)
+        
+
             # Schedule task for sending message
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))
-
-            #Running on pytorch 
-            for i in range(1,iter):
-                final_gputime = benchmark_pt("gpu",shape)
-                final_cputime = benchmark_pt("cpu",shape)
-                print("Time taken on cpu is :: " + str(final_cputime) + "Time taken on gpu is " + str(final_gputime))
-                time.sleep(1)
-
-            msg_to_cloud = "On Pytorch CPU took :: " + str(final_cputime) + " and GPU took :: " + str(final_gputime)
-            print(msg_to_cloud)
-            # Schedule task for sending message
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))    
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_tf))  
 
         # Send a custom message to cloud 
         async def send_msg_to_cloud(module_client,input_message):
