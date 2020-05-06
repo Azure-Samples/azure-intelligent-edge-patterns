@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Flex,
-  Dropdown,
-  Text,
-  DropdownItemProps,
-} from '@fluentui/react-northstar';
+import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
 import { Link, useParams, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -24,7 +19,7 @@ export const CapturePhotos: React.FC = () => {
   return (
     <>
       <CameraSelector setSelectedCamera={setSelectedCamera} />
-      <RTSPVideo selectedCamera={selectedCamera} partId={partId} canCapture={true}/>
+      <RTSPVideo selectedCamera={selectedCamera} partId={partId} canCapture={true} />
       <CapturedImagesContainer partId={partId} />
     </>
   );
@@ -63,8 +58,11 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
     dispatch(thunkGetCapturedImages(partId));
   }, [dispatch, partId]);
 
+  const imageCount = capturedImages.length;
+
   return (
     <>
+      <Text>Total: {imageCount}</Text>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
       <Flex
         styles={{
