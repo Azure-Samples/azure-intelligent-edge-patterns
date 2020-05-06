@@ -77,24 +77,14 @@
               }        
             }
           },
-          "VisionSampleModule": {
+          "InferenceModule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.VisionSampleModule.gpuamd64}",
+              "image": "${MODULES.InferenceModule.gpuamd64}",
               "createOptions": "{\"HostConfig\":{\"Binds\":[\"/tmp/.X11-unix:/tmp/.X11-unix\",\"/dev:/dev\"],\"NetworkMode\":\"host\",\"IpcMode\":\"host\",\"Privileged\":true},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}},\"Env\":[\"DISPLAY=:0\"]}"
-            }
-          },
-          "SimulatedTemperatureSensor": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
-              "createOptions": {}
             }
           }
         }
@@ -104,9 +94,6 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "WebModuleToIoTHub": "FROM /messages/modules/WebModule/outputs/* INTO $upstream",
-          "sensorToWebModule": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/WebModule/inputs/input1\")",
-          "VisionSampleModuleToWebModule" : "FROM /messages/modules/VisionSampleModule/outputs/inference INTO BrokeredEndpoint(\"/modules/WebModule/inputs/inference\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
@@ -115,16 +102,11 @@
     },
     "WebModule": {
       "properties.desired": {
-        "TemperatureThreshold": 25
       }
     },
     "VisionSampleModule": {
-      "properties.desired":{
-          "inference_files_zip_url":"https://yadavmmldiag.blob.core.windows.net/dbe/PascalVoCOnnx.zip",
-          "msg_per_minute": 10,
-          "object_of_interest":"ALL",
-          "cam_type":"rtsp_stream",
-          "cam_source":"rtsp://211.22.28.157:20554/s1"
+      "properties.desired": {
+        
       }
     }
   }

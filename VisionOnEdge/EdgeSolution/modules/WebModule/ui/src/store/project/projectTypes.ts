@@ -1,9 +1,10 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
-import { State } from '../State';
+import type { State } from '../State';
 
 export type Project = {
   isLoading: boolean;
+  trainingStatus: string;
   data: ProjectData;
   error: Error;
 };
@@ -44,6 +45,25 @@ export type GetProjectFailedAction = {
   error: Error;
 };
 
+export const GET_TRAINING_STATUS_REQUEST = 'GET_TRAINING_STATUS_REQUEST';
+export type GetTrainingStatusRequesAction = {
+  type: typeof GET_TRAINING_STATUS_REQUEST;
+};
+
+export const GET_TRAINING_STATUS_SUCCESS = 'GET_TRAINING_STATUS_SUCCESS';
+export type GetTrainingStatusSuccessAction = {
+  type: typeof GET_TRAINING_STATUS_SUCCESS;
+  payload: {
+    trainingStatus: string;
+  };
+};
+
+export const GET_TRAINING_STATUS_FAILED = 'GET_TRAINING_STATUS_FAILED';
+export type GetTrainingStatusFailedAction = {
+  type: typeof GET_TRAINING_STATUS_FAILED;
+  error: Error;
+};
+
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
 export type PostProjectRequestAction = {
   type: typeof POST_PROJECT_REQUEST;
@@ -80,6 +100,9 @@ export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
   | GetProjectFailedAction
+  | GetTrainingStatusRequesAction
+  | GetTrainingStatusSuccessAction
+  | GetTrainingStatusFailedAction
   | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction

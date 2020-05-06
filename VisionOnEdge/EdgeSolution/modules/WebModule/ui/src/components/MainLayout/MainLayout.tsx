@@ -41,7 +41,7 @@ const TopNav: FC = () => {
         boxShadow: '0px 1px 10px 0px rgba(0,0,0,0.75)',
         zIndex: 2,
         fontSize: '20px',
-        padding: '0.5rem 1rem',
+        padding: '0.5em 1em',
       }}
     >
       <Flex gap="gap.large" vAlign="center">

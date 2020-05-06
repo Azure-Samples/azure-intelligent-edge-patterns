@@ -17,6 +17,7 @@ from azure.cognitiveservices.vision.customvision.training.models import ImageFil
 from azure.iot.device import IoTHubModuleClient
 
 
+from azure.iot.device import IoTHubModuleClient
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
 trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 
@@ -27,6 +28,22 @@ try:
     obj_detection_domain = next(domain for domain in trainer.get_domains() if domain.type == "ObjectDetection" and domain.name == "General (compact)")
 except:
     is_trainer_valid = False
+
+try:
+    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
+except:
+    iot = None
+
+def is_edge():
+    try:
+        IoTHubModuleClient.create_from_edge_environment()
+        return True
+    except:
+        return False
+
+def inference_module_url():
+    if is_edge(): return '172.18.0.1:5000'
+    else: return 'localhost:5000'
 
 
 
@@ -53,6 +70,8 @@ class Image(models.Model):
     image = models.ImageField(upload_to='images/')
     part = models.ForeignKey(Part, on_delete=models.CASCADE)
     labels = models.CharField(max_length=1000, null=True)
+    is_relabel = models.BooleanField(default=False)
+    confidence = models.FloatField(default=0.0)
 
 class Annotation(models.Model):
     image = models.OneToOneField(Image, on_delete=models.CASCADE)
@@ -138,7 +157,7 @@ class Stream(object):
         self.id = id(self)
 
         self.mutex = threading.Lock()
-        self.bboxes = []
+        self.predictions = []
         self.inference = inference
 
 
@@ -151,33 +170,40 @@ class Stream(object):
         print('iot', self.iot)
 
         def _listener(self):
-            #if self.iot is None: return
             if not self.inference: return
             while True:
                 if self.last_active + 10 < time.time():
                     print('[INFO] stream finished')
                     break
                 sys.stdout.flush()
-                inference = self.iot.receive_message_on_input('inference', timeout=1)
-                if not inference:
-                    self.mutex.acquire()
-                    self.bboxes = []
-                    self.mutex.release()
-                else:
-                    data = json.loads(inference.data)
-                    print('receive inference', data)
-                    #data = {'Label': 'tvmonitor', 'Confidence': '17', 'Position': [100, 200, 300, 400], 'TimeStamp': '2020-04-30 08:50:54'}
-                    self.mutex.acquire()
-                    self.bboxes = [{
-                        'label': data['Label'],
-                        'confidence': data['Confidence'] + '%',
-                        'p1': (data['Position'][0], data['Position'][1]),
-                        'p2': (data['Position'][2], data['Position'][3])
-                    }]
-                    self.mutex.release()
+                res = requests.get('http://'+inference_module_url()+'/prediction')
 
-        if self.iot:
-            threading.Thread(target=_listener, args=(self,)).start()
+                self.mutex.acquire()
+                self.predictions = res.json()
+                self.mutex.release()
+                time.sleep(0.02)
+                #print('received p', self.predictions)
+
+
+                #inference = self.iot.receive_message_on_input('inference', timeout=1)
+                #if not inference:
+                #    self.mutex.acquire()
+                #    self.bboxes = []
+                #    self.mutex.release()
+                #else:
+                #    data = json.loads(inference.data)
+                #    print('receive inference', data)
+                #    self.mutex.acquire()
+                #    self.bboxes = [{
+                #        'label': data['Label'],
+                #        'confidence': data['Confidence'] + '%',
+                #        'p1': (data['Position'][0], data['Position'][1]),
+                #        'p2': (data['Position'][2], data['Position'][3])
+                #    }]
+                #    self.mutex.release()
+
+        #if self.iot:
+        threading.Thread(target=_listener, args=(self,)).start()
 
     def gen(self):
         self.status = 'running'
@@ -185,16 +211,33 @@ class Stream(object):
         self.cap = cv2.VideoCapture(self.rtsp)
         while self.status == 'running':
             t, img = self.cap.read()
+            # Need to add the video flag FIXME
+            if t == False:
+                self.cap = cv2.VideoCapture(self.rtsp)
+                time.sleep(1)
+                continue
+
             img = cv2.resize(img, None, fx=0.5, fy=0.5)
             self.last_active = time.time()
             self.last_img = img.copy()
             self.mutex.acquire()
-            bboxes = list(bbox.copy() for bbox in self.bboxes)
+            predictions = list(prediction.copy() for prediction in self.predictions)
             self.mutex.release()
-            print('bboxes', bboxes)
-            for bbox in bboxes:
-                cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
-                cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'], (bbox['p1'][0], bbox['p1'][1]-15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 255), 1)
+            #print('bboxes', bboxes)
+                #cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
+                #cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'], (bbox['p1'][0], bbox['p1'][1]-15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 255), 1)
+            height, width = img.shape[0], img.shape[1]
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 1
+            thickness = 3
+            for prediction in predictions:
+                if prediction['probability'] > 0.25:
+                    x1 = int(prediction['boundingBox']['left'] * width)
+                    y1 = int(prediction['boundingBox']['top'] * height)
+                    x2 = x1 + int(prediction['boundingBox']['width'] * width)
+                    y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                    img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    img = cv2.putText(img, prediction['tagName'], (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
             yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
         self.cap.release()

@@ -5,6 +5,7 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install -r requirements.txt
 
+COPY backend/sample_video sample_video
 COPY backend/manage.py .
 COPY backend/config.py .
 COPY backend/cameras cameras

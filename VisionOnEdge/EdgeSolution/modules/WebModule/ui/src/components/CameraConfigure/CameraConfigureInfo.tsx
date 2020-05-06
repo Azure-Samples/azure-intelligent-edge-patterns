@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Flex, Text, Status, Button, Loader } from '@fluentui/react-northstar';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import Axios from 'axios';
 
 import { useInterval } from '../../hooks/useInterval';
-import { thunkDeleteProject, thunkGetProject } from '../../store/project/projectActions';
+import { thunkDeleteProject, thunkGetTrainingStatus } from '../../store/project/projectActions';
 import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
@@ -16,7 +15,9 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   camera,
   projectId,
 }) => {
-  const { isLoading, error, data: project } = useSelector<State, Project>((state) => state.project);
+  const { isLoading, error, data: project, trainingStatus } = useSelector<State, Project>(
+    (state) => state.project,
+  );
   const parts = useParts();
   const dispatch = useDispatch();
   const { name } = useParams();
@@ -38,25 +39,26 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   /**
    * Call custom Vision to export
    */
+  useEffect(() => {
+    dispatch(thunkGetTrainingStatus(projectId));
+  }, [dispatch, projectId]);
   useInterval(
     () => {
-      Axios.get(`/api/projects/${projectId}/export`);
+      dispatch(thunkGetTrainingStatus(projectId));
     },
-    project.modelUrl ? null : 5000,
-  );
-
-  useInterval(
-    () => {
-      dispatch(thunkGetProject());
-    },
-    project.modelUrl ? null : 5000,
+    !trainingStatus ? null : 5000,
   );
 
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
-      {!project.modelUrl ? (
-        <Loader size="largest" label="Trainning" labelPosition="below" design={{ paddingTop: '300px' }} />
+      {trainingStatus ? (
+        <Loader
+          size="largest"
+          label={trainingStatus}
+          labelPosition="below"
+          design={{ paddingTop: '300px' }}
+        />
       ) : (
         <>
           <ListItem title="Status" content={<CameraStatus online={project.status === 'online'} />} />
@@ -105,13 +107,16 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
                     },
                   }}
                   as={Link}
-                  to="/"
+                  to="/manual"
                 />
               </>
             }
           />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
+          </Button>
+          <Button primary as={Link} to="/partIdentification">
+            Edit Configuration
           </Button>
         </>
       )}

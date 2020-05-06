@@ -3,6 +3,7 @@ import { Camera } from './camera/cameraTypes';
 import { Part } from './part/partTypes';
 import { Location } from './location/locationTypes';
 import { Project } from './project/projectTypes';
+import { LabelImage } from './image/imageTypes';
 
 export interface State {
   dialogIsOpen: boolean;
@@ -11,6 +12,7 @@ export interface State {
   labelingPageState: LabelingPageState;
   part: Part;
   project: Project;
+  images: LabelImage[];
 }
 
 export type LabelingPageState = { annotations: Annotation[] };
@@ -19,6 +21,7 @@ export const initialState: State = {
   dialogIsOpen: false,
   cameras: [],
   locations: [],
+  images: [],
   labelingPageState: { annotations: [] },
   part: {
     capturedImages: [],
@@ -42,5 +45,6 @@ export const initialState: State = {
       unIdetifiedItems: null,
     },
     error: null,
+    trainingStatus: '',
   },
 };

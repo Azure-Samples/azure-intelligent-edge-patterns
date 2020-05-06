@@ -1,21 +1,27 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import React, { useState, FC } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Flex, Button, Dialog, Input, Grid, AddIcon } from '@fluentui/react-northstar';
 
-import { useCameras } from '../hooks/useCameras';
-import { postCamera } from '../store/camera/cameraActions';
+import { postCamera, getCameras } from '../store/camera/cameraActions';
 import ImageLink from '../components/ImageLink';
 import { State } from '../store/State';
 import { closeDialog, openDialog } from '../store/dialog/dialogIsOpenActions';
+import { Camera } from '../store/camera/cameraTypes';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
-  const dialogIsOpen = useSelector<State, boolean>((state) => state.dialogIsOpen);
-  const cameras = useCameras();
+  const { dialogIsOpen, cameras } = useSelector<State, { dialogIsOpen: boolean; cameras: Camera[] }>(
+    (state) => ({ dialogIsOpen: state.dialogIsOpen, cameras: state.cameras }),
+  );
+
   const [name, setName] = useState<string>('');
   const [rtsp, setRtsp] = useState<string>('');
   const [model_name, setModel_name] = useState<string>('');
+
+  useEffect(() => {
+    dispatch(getCameras());
+  }, [dispatch]);
 
   return (
     <Flex column gap="gap.large" padding="padding.medium" styles={{ height: '100%' }}>
@@ -45,13 +51,16 @@ const Cameras: FC = (): JSX.Element => {
               fluid
               circular
               content={<AddIcon size="largest" circular />}
-              style={{ width: '6rem', height: '6rem' }}
+              style={{ width: '6em', height: '6em' }}
             />
           </Flex>
         }
         confirmButton="Submit"
         onConfirm={(): void => {
           dispatch(postCamera({ name, rtsp, model_name }));
+          setName('');
+          setRtsp('');
+          setModel_name('');
           dispatch(closeDialog());
         }}
         cancelButton="Cancel"

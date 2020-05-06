@@ -1,11 +1,7 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
+import { LabelImage } from '../image/imageTypes';
 
-export type LabelImage = {
-  id?: number;
-  image: string;
-  labels: any;
-};
 // Describing the shape of the chat's slice of state
 export type Part = { capturedImages: LabelImage[]; isValid: boolean };
 
@@ -28,17 +24,7 @@ export type UpdateCapturedImageAction = {
   };
 };
 
-export const UPDATE_IMAGE_LABEL = 'UPDATE_IMAGE_LABEL';
-
-export type UpdateImageLabelAction = {
-  type: typeof UPDATE_IMAGE_LABEL;
-  payload: {
-    id: number;
-    labels: any;
-  };
-};
-
-export type PartActionTypes = AddCapturedImageAction | UpdateCapturedImageAction | UpdateImageLabelAction;
+export type PartActionTypes = AddCapturedImageAction | UpdateCapturedImageAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type PartThunk<ReturnType = void> = ThunkAction<ReturnType, Part, unknown, Action<string>>;

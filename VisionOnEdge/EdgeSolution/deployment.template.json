@@ -14,8 +14,8 @@
                 "username": "$CONTAINER_REGISTRY_USERNAME",
                 "password": "$CONTAINER_REGISTRY_PASSWORD",
                 "address": "$CONTAINER_REGISTRY_NAME"
-              }   
-            } 
+              }
+            }
           }
         },
         "systemModules": {
@@ -74,7 +74,7 @@
                     ]
                   }
                 }
-              }        
+              }
             }
           },
           "SimulatedTemperatureSensor": {
@@ -86,6 +86,16 @@
               "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
               "createOptions": {}
             }
+          },
+          "InferenceModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.InferenceModule}",
+              "createOptions": {}
+            }
           }
         }
       }
@@ -95,7 +105,8 @@
         "schemaVersion": "1.0",
         "routes": {
           "WebModuleToIoTHub": "FROM /messages/modules/WebModule/outputs/* INTO $upstream",
-          "sensorToWebModule": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/WebModule/inputs/input1\")"
+          "sensorToWebModule": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/WebModule/inputs/input1\")",
+          "InferenceModuleToIoTHub": "FROM /messages/modules/InferenceModule/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200

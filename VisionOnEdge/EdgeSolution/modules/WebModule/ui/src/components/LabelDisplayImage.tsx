@@ -4,7 +4,7 @@ import { Flex, Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
 import { Position2D, Size2D, WorkState, AnnotationState } from '../store/labelingPage/labelingPageTypes';
-import { LabelImage } from '../store/part/partTypes';
+import { LabelImage } from '../store/image/imageTypes';
 import { Box2d } from './LabelingPage/Box';
 
 interface LabelDisplayImageProps {

@@ -11,6 +11,9 @@ import {
   GET_PROJECT_REQUEST,
   UPDATE_PROJECT_DATA,
   POST_PROJECT_REQUEST,
+  GET_TRAINING_STATUS_REQUEST,
+  GET_TRAINING_STATUS_SUCCESS,
+  GET_TRAINING_STATUS_FAILED,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -18,7 +21,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case GET_PROJECT_REQUEST:
       return { ...state, isLoading: true, error: null };
     case GET_PROJECT_SUCCESS:
-      return { isLoading: false, data: { ...action.payload.project }, error: null };
+      return { ...state, isLoading: false, data: { ...action.payload.project }, error: null };
     case GET_PROJECT_FAILED:
       return { ...state, isLoading: false, error: action.error };
     case POST_PROJECT_REQUEST:
@@ -29,6 +32,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state, isLoading: false, error: action.error };
     case DELETE_PROJECT_SUCCESS:
       return {
+        ...state,
         isLoading: false,
         data: {
           id: null,
@@ -51,6 +55,16 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state };
     case UPDATE_PROJECT_DATA:
       return { ...state, data: action.payload };
+    case GET_TRAINING_STATUS_REQUEST:
+      return {
+        ...state,
+        // if trainingStatus is ok originally, set it to 'not yet training' and get the exportin status from server again
+        trainingStatus: state.trainingStatus === '' ? 'not yet training' : state.trainingStatus,
+      };
+    case GET_TRAINING_STATUS_SUCCESS:
+      return { ...state, trainingStatus: action.payload.trainingStatus };
+    case GET_TRAINING_STATUS_FAILED:
+      return { ...state, error: action.error };
     default:
       return { ...state };
   }
