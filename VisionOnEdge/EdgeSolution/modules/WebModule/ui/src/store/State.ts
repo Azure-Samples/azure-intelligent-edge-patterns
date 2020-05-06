@@ -42,5 +42,6 @@ export const initialState: State = {
       unIdetifiedItems: null,
     },
     error: null,
+    trainingStatus: '',
   },
 };
