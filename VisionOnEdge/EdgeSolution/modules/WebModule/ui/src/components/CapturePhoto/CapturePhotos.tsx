@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
 import { State } from '../../store/State';
-import { Part } from '../../store/part/partTypes';
 import { Camera } from '../../store/camera/cameraTypes';
 import LabelingPageDialog from '../LabelingPageDialog';
 import LabelDisplayImage from '../LabelDisplayImage';
@@ -22,7 +21,7 @@ export const CapturePhotos: React.FC = () => {
     <>
       <CameraSelector setSelectedCamera={setSelectedCamera} />
       <RTSPVideo selectedCamera={selectedCamera} partId={partId} canCapture={true} />
-      <CapturedImagesContainer partId={partId} />
+      <CapturedImagesContainer partId={parseInt(partId, 10)} />
     </>
   );
 };
@@ -54,18 +53,15 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
 
 const CapturedImagesContainer = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
-  const {
-    part: { capturedImages, isValid },
-    images,
-  } = useSelector<State, { images: LabelImage[]; part: Part }>((state) => ({
-    part: state.part,
-    images: state.images,
-  }));
+  const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const filteredImages = getFilteredImages(images, { partId });
+  const isValid = filteredImages.filter((image) => image.labels).length >= 15;
+
   useEffect(() => {
     dispatch(getLabelImages());
-  }, [dispatch, partId]);
+  }, [dispatch]);
 
-  const imageCount = capturedImages.length;
+  const imageCount = filteredImages.length;
 
   return (
     <>
@@ -81,7 +77,7 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
         gap="gap.small"
         vAlign="center"
       >
-        {getFilteredImages(images, { partId }).map((image, i) => (
+        {filteredImages.map((image, i) => (
           <div key={image.id}>
             <span>{i + 1}</span>
             <LabelingPageDialog
@@ -94,7 +90,7 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
         ))}
       </Flex>
       <Prompt
-        when={capturedImages.length < 15}
+        when={imageCount < 15}
         message="The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?"
       />
     </>

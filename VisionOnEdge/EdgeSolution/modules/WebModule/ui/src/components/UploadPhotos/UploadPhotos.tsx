@@ -3,38 +3,35 @@ import { Text, Grid } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { State } from '../../store/State';
-import { Part } from '../../store/part/partTypes';
-import { thunkGetCapturedImages, addCapturedImages } from '../../store/part/partActions';
 import LabelingPageDialog from '../LabelingPageDialog';
 import LabelDisplayImage from '../LabelDisplayImage';
+import { getFilteredImages } from '../../util/getFilteredImages';
+import { LabelImage } from '../../store/image/imageTypes';
+import { getLabelImages, postLabelImage } from '../../store/image/imageActions';
 
 export const UploadPhotos = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
-  const { capturedImages, isValid } = useSelector<State, Part>((state) => state.part);
+  const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const filteredImages = getFilteredImages(images, { partId });
+  const isValid = filteredImages.filter((image) => image.labels).length >= 15;
 
   useEffect(() => {
-    dispatch(thunkGetCapturedImages(partId));
-  }, [dispatch, partId]);
+    dispatch(getLabelImages());
+  }, [dispatch]);
 
   function handleUpload(e: React.ChangeEvent<HTMLInputElement>): void {
     for (let i = 0; i < e.target.files.length; i++) {
       const formData = new FormData();
       formData.append('image', e.target.files[i]);
       formData.append('part', `/api/parts/${partId}/`);
-      fetch(`/api/images/`, {
-        method: 'POST',
-        body: formData,
-      })
-        .then((res) => res.json())
-        .then((data) => dispatch(addCapturedImages(data)))
-        .catch((err) => console.error(err));
+      dispatch(postLabelImage(formData));
     }
   }
 
   return (
     <>
       <input type="file" onChange={handleUpload} accept="image/*" multiple />
-      <CapturedImagesContainer capturedImages={capturedImages} isValid={isValid} />
+      <CapturedImagesContainer capturedImages={filteredImages} isValid={isValid} />
     </>
   );
 };

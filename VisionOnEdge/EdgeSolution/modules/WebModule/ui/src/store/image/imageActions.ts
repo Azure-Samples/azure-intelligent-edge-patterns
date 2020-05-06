@@ -45,7 +45,7 @@ export const getLabelImages = () => (dispatch): Promise<void> => {
 };
 
 
-export const postLabelImage = (newImage: LabelImage) => (dispatch): Promise<void> => {
+export const postLabelImage = (newImage: LabelImage | FormData) => (dispatch): Promise<void> => {
   return axios('/api/images/', {
     method: 'POST',
     data: newImage,

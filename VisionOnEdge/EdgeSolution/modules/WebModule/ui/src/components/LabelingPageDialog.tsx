@@ -7,7 +7,7 @@ import { LabelingType } from '../store/labelingPage/labelingPageTypes';
 interface LabelingPageDialogProps {
   trigger: JSX.Element;
   imageIndex: number;
-  partId?: string;
+  partId?: number;
 }
 const LabelingPageDialog: FC<LabelingPageDialogProps> = ({ trigger, imageIndex, partId }): JSX.Element => {
   const [open, setOpen] = useState(false);

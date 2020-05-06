@@ -95,7 +95,7 @@ const RightPanel = (): JSX.Element => {
       <Switch>
         <Route path="/parts/detail/:partId/capturePhotos" component={CapturePhotos} />
         <Route path="/parts/detail/:partId/uploadPhotos">
-          <UploadPhotos partId={partId} />
+          <UploadPhotos partId={parseInt(partId, 10)} />
         </Route>
       </Switch>
     </Flex>
