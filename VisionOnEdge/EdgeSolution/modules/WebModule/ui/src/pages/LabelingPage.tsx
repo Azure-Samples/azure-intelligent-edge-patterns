@@ -8,18 +8,20 @@ import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation } from '../store/image/imageActions';
+import { getFilteredImages } from '../util/getFilteredImages';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
   imageIndex: number;
   closeDialog: () => void;
+  partId?: string;
 }
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDialog }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDialog, partId }) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
   const { images, annotations } = useSelector<State, { images: LabelImage[]; annotations: Annotation[] }>(
     (state) => ({
-      images: state.part.capturedImages,
+      images: getFilteredImages(state.images, { partId }),
       annotations: state.labelingPageState.annotations,
     }),
   );

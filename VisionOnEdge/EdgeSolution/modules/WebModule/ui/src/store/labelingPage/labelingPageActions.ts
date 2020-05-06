@@ -23,10 +23,8 @@ export const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotation
 });
 
 export const getAnnotations = (imageId: number) => (dispatch, getState): void => {
-  const {
-    part: { capturedImages },
-  } = getState();
-  const { labels } = capturedImages.find((image) => image.id === imageId);
+  const { images } = getState();
+  const { labels } = images.find((image) => image.id === imageId);
 
   if (labels === null) {
     dispatch(requestAnnotationsSuccess([]));

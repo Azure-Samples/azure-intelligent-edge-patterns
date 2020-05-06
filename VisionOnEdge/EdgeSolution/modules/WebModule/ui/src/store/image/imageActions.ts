@@ -8,7 +8,8 @@ import {
   REQUEST_LABEL_IMAGE_FAILURE,
   PostLabelImageSuccess,
   POST_LABEL_IMAGE_SUCCESS,
-  updateLabelImageAnnotation,
+  UPDATE_LABEL_IMAGE_ANNOTATION,
+  UpdateLabelImageAnnotation,
 } from './imageTypes';
 import { Annotation } from '../labelingPage/labelingPageTypes';
 
@@ -83,7 +84,7 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
     },
   })
     .then(({ data }) => {
-      console.log('Save successfully');
+      console.info('Save successfully');
       dispatch(updateLabelImageAnnotation(data.id, data.labels));
       // dispatch(requestAnnotationsSuccess(annotations));
       return void 0;
@@ -92,3 +93,8 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
       dispatch(requestLabelImagesFailure(err));
     });
 };
+
+export const updateLabelImageAnnotation = (imageId: number, labels: any): UpdateLabelImageAnnotation => ({
+  type: UPDATE_LABEL_IMAGE_ANNOTATION,
+  payload: { id: imageId, labels },
+});

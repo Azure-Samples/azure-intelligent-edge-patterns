@@ -22,11 +22,6 @@ export type UpdateLabelImageAnnotation = {
   payload: { id: number; labels: any };
 };
 
-export const updateLabelImageAnnotation = (imageId: number, labels: any): UpdateLabelImageAnnotation => ({
-  type: UPDATE_LABEL_IMAGE_ANNOTATION,
-  payload: { id: imageId, labels },
-});
-
 export type LabelImageAction =
   | GetLabelImagesSuccess
   | PostLabelImageSuccess

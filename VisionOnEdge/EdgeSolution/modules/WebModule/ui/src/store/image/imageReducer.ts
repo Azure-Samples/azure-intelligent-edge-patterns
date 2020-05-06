@@ -23,7 +23,7 @@ const labelImagesReducer = (state = initialState.images, action: LabelImageActio
       return state;
     }
     case UPDATE_LABEL_IMAGE_ANNOTATION: {
-      const newState = { ...state };
+      const newState = [...state];
       const updatedImageIdx = newState.findIndex((e) => e.id === action.payload.id);
       newState[updatedImageIdx] = {
         ...newState[updatedImageIdx],
