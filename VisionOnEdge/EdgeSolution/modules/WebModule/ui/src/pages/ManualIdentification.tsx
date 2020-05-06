@@ -83,31 +83,33 @@ const ManualIdentification: FC = () => {
       </Text>
       <Divider color="black" />
       <Flex column gap="gap.medium" space="between" styles={{ height: '75vh', padding: '1em' }}>
-        <Grid columns="3" styles={{ columnGap: '1em' }}>
+        <Grid columns="3" styles={{ columnGap: '1em', justifyItems: 'center' }}>
           <Flex vAlign="center" gap="gap.smaller">
             <Text truncated>Select Part:</Text>
             <Dropdown items={partItems} onChange={onDropdownChange} />
           </Flex>
-          <Flex vAlign="center" gap="gap.smaller">
+          <Flex vAlign="center" gap="gap.smaller" styles={{ width: '80%' }}>
             <Text>Confidence Level:</Text>
-            <Range
-              value={confidenceLevelRange}
-              allowCross={false}
-              onChange={(e): void => setConfidenceLevelRange(e)}
-              handle={({ value, dragging, index, ...restProps }): JSX.Element => {
-                return (
-                  <Tooltip
-                    prefixCls="rc-slider-tooltip"
-                    overlay={`${value}%`}
-                    visible={dragging}
-                    placement="top"
-                    key={index}
-                  >
-                    <Handle value={value} {...restProps} />
-                  </Tooltip>
-                );
-              }}
-            />
+            <div style={{ width: '70%' }}>
+              <Range
+                value={confidenceLevelRange}
+                allowCross={false}
+                onChange={(e): void => setConfidenceLevelRange(e)}
+                handle={({ value, dragging, index, ...restProps }): JSX.Element => {
+                  return (
+                    <Tooltip
+                      prefixCls="rc-slider-tooltip"
+                      overlay={`${value}%`}
+                      visible={dragging}
+                      placement="top"
+                      key={index}
+                    >
+                      <Handle value={value} {...restProps} />
+                    </Tooltip>
+                  );
+                }}
+              />
+            </div>
           </Flex>
           <Flex vAlign="center">
             <Text truncated>Sort:</Text>
@@ -152,7 +154,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
 
   return (
     <Flex hAlign="center" padding="padding.medium">
-      <div style={{ margin: '0.2rem' }}>
+      <div style={{ margin: '0.2em' }}>
         <LabelDisplayImage labelImage={{ image: src, labels: null }} width={100} height={100} />
       </div>
       <Flex column gap="gap.smaller" styles={{ width: '30%' }}>

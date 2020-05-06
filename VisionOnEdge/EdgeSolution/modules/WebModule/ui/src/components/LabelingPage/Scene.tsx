@@ -134,7 +134,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
           onClick={removeBox}
         />
       ) : (
-        <div style={{ height: '2rem' }} />
+        <div style={{ height: '2em' }} />
       )}
       <Stage
         width={imageSize.width}

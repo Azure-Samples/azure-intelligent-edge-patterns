@@ -36,7 +36,7 @@ const Locations: FC = () => {
           fluid
           circular
           content={<AddIcon size="largest" circular />}
-          style={{ width: '6rem', height: '6rem' }}
+          style={{ width: '6em', height: '6em' }}
         />
         </Link>
       </Flex>
