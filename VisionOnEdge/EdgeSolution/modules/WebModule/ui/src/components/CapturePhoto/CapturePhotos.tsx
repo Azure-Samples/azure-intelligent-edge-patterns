@@ -11,6 +11,8 @@ import { thunkGetCapturedImages } from '../../store/part/partActions';
 import LabelingPageDialog from '../LabelingPageDialog';
 import LabelDisplayImage from '../LabelDisplayImage';
 import { RTSPVideo } from '../RTSPVideo';
+import { getLabelImages } from '../../store/image/imageActions';
+import { LabelImage } from '../../store/image/imageTypes';
 
 export const CapturePhotos: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
@@ -52,9 +54,16 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
 
 const CapturedImagesContainer = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
-  const { capturedImages, isValid } = useSelector<State, Part>((state) => state.part);
+  const {
+    part: { capturedImages, isValid },
+    images,
+  } = useSelector<State, { images: LabelImage[]; part: Part }>((state) => ({
+    part: state.part,
+    images: state.images,
+  }));
 
   useEffect(() => {
+    dispatch(getLabelImages());
     dispatch(thunkGetCapturedImages(partId));
   }, [dispatch, partId]);
 

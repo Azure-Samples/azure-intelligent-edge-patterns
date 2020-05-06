@@ -5,8 +5,9 @@ import { Flex, Button, Text, ChevronStartIcon, ChevronEndIcon } from '@fluentui/
 import Scene from '../components/LabelingPage/Scene';
 import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
-import { LabelImage } from '../store/part/partTypes';
-import { saveAnnotation, getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
+import { LabelImage } from '../store/image/imageTypes';
+import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
+import { saveLabelImageAnnotation } from '../store/image/imageActions';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
@@ -43,7 +44,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
           disabled={index === 0}
           icon={<ChevronStartIcon size="larger" />}
           onClick={(): void => {
-            dispatch(saveAnnotation(images[index].id, annotations));
+            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
             setIndex((prev) => (prev - 1 + images.length) % images.length);
           }}
         />
@@ -53,7 +54,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
           disabled={index === images.length - 1}
           icon={<ChevronEndIcon size="larger" />}
           onClick={(): void => {
-            dispatch(saveAnnotation(images[index].id, annotations));
+            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
             setIndex((prev) => (prev + 1) % images.length);
           }}
         />
@@ -63,7 +64,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
           primary
           content="Save"
           onClick={(): void => {
-            dispatch(saveAnnotation(images[index].id, annotations));
+            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
             closeDialog();
           }}
         />

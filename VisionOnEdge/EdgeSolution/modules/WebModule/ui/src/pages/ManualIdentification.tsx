@@ -23,20 +23,23 @@ import { Camera } from '../store/camera/cameraTypes';
 import { useParts } from '../hooks/useParts';
 import LabelDisplayImage from '../components/LabelDisplayImage';
 import { ProjectData } from '../store/project/projectTypes';
+import { LabelImage } from '../store/image/imageTypes';
 
 let sorting = false;
 
 const ManualIdentification: FC = () => {
-  const { project, cameras } = useSelector<State, { project: ProjectData; cameras: Camera[] }>((state) => ({
-    project: state.project.data,
-    cameras: state.cameras,
-  }));
+  const { projectData, cameras } = useSelector<State, { projectData: ProjectData; cameras: Camera[] }>(
+    (state) => ({
+      projectData: state.project.data,
+      cameras: state.cameras,
+    }),
+  );
   const parts = useParts();
 
   const partItems = useMemo<DropdownItemProps[]>(() => {
-    if (parts.length === 0 || project.parts.length === 0) return [];
+    if (parts.length === 0 || projectData.parts.length === 0) return [];
 
-    return project.parts.map((partId) => {
+    return projectData.parts.map((partId) => {
       const part = parts.find((e) => e.id === partId);
 
       return {
@@ -46,12 +49,12 @@ const ManualIdentification: FC = () => {
         },
       };
     });
-  }, [parts, project]);
+  }, [parts, projectData]);
 
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([
-    project.accuracyRangeMin,
-    project.accuracyRangeMax,
+    projectData.accuracyRangeMin,
+    projectData.accuracyRangeMax,
   ]);
   const [ascend, setAscend] = useState<boolean>(false);
 
@@ -136,7 +139,11 @@ const ManualIdentification: FC = () => {
           }}
         >
           {images.map((e, i) => (
-            <ImageIdentificationItem key={i} confidenceLevel={e.confidenceLevel} src={e.src} />
+            <ImageIdentificationItem
+              key={i}
+              confidenceLevel={e.confidenceLevel}
+              labelImage={{ id: 1, image: e.src, labels: null, part: 's' }}
+            />
           ))}
         </Grid>
         <Button content="Update" styles={{ width: '15%' }} primary disabled />
@@ -147,15 +154,15 @@ const ManualIdentification: FC = () => {
 
 interface ImageIdentificationItemProps {
   confidenceLevel: number;
-  src: string;
+  labelImage: LabelImage;
 }
-const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, src }) => {
+const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, labelImage }) => {
   const [isPart, setIsPart] = useState<number>(null);
 
   return (
     <Flex hAlign="center" padding="padding.medium">
       <div style={{ margin: '0.2em' }}>
-        <LabelDisplayImage labelImage={{ image: src, labels: null }} width={100} height={100} />
+        <LabelDisplayImage labelImage={labelImage} width={100} height={100} />
       </div>
       <Flex column gap="gap.smaller" styles={{ width: '30%' }}>
         <Text truncated>Confidence Level: {confidenceLevel}%</Text>

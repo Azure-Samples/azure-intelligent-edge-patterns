@@ -1,6 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
-import { State } from '../State';
+import type { State } from '../State';
 
 export type Project = {
   isLoading: boolean;
