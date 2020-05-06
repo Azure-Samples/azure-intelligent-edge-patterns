@@ -59,11 +59,14 @@ const ManualIdentification: FC = () => {
 
   const showImages = useMemo(() => {
     // TODO: Get real images here
-    const imgs = getFilteredImages(images, { partId: selectedPartId })
-      .map((e) => ({ ...e, confidenceLevel: 70 }))
+    console.log(images)
+    //const imgs = getFilteredImages(images, { partId: selectedPartId })
+    const imgs = getFilteredImages(images, {})
+      .map((e) => ({ ...e, confidenceLevel: e.confidence*100 }))
       .filter(
         (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
       );
+      console.log(imgs)
 
     if (sorting) {
       if (ascend) imgs.sort((a, b) => a.confidenceLevel - b.confidenceLevel);

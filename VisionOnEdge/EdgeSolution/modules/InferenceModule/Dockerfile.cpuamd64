@@ -24,12 +24,13 @@ RUN pip install -r requirements.txt && \
 
 ARG DEVICE
 
-#COPY main.py ./
-#COPY object_detection.py ./
-#COPY VideoStream.py ./
-#COPY iot_hub_manager.py ./
-#COPY image_classification.py ./
-#COPY utility.py ./
-#COPY model/cvexport.manifest model/
-#COPY model model/
-#CMD [ "python3", "-u", "./main.py" ]
+COPY main.py ./
+COPY object_detection.py ./
+COPY utility.py ./
+COPY default_model/cvexport.manifest default_model/
+COPY default_model default_model/
+COPY sample_video sample_video/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+CMD [ "python3", "main.py" ]
+

@@ -1,6 +1,7 @@
 import json
 import time
 import threading
+import base64
 
 import cv2
 import numpy as np
@@ -8,10 +9,24 @@ import onnxruntime
 from flask import Flask, request, Response
 import requests
 
+from azure.iot.device import IoTHubModuleClient
+
 from object_detection import ObjectDetection
 from utility import get_file_zip
 
 MODEL_DIR = 'model'
+UPLOAD_INTERVAL = 1 # sec
+
+def is_edge():
+    try:
+        IoTHubModuleClient.create_from_edge_environment()
+        return True
+    except:
+        return False
+
+def web_module_url():
+    if is_edge(): return '172.18.0.1:8080'
+    else: return 'localhost:8000'
 
 
 class ONNXRuntimeModelDeploy(ObjectDetection):
@@ -28,9 +43,18 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.cam = cv2.VideoCapture(cam_source)
 
         self.model = self.load_model(model_dir)
+        self.model_uri = None
 
         self.last_img = None
         self.last_prediction = []
+
+        self.confidence_min = 10 * 0.01
+        self.confidence_max = 90 * 0.01
+        self.max_images = 10
+        self.last_upload_time = 0
+        self.is_upload_image = False
+        self.current_uploaded_images = {}
+
 
     def restart_cam(self):
 
@@ -45,25 +69,18 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.lock.release()
 
 
-    def load_model(self, model_dir):
-
-        model = None
-
-        with open(model_dir + str('/cvexport.manifest')) as f:
-            data = json.load(f)
-
-
     def update_cam(self, cam_type, cam_source):
         print('[INFO] Updating Cam ...')
         #print('  cam_type', cam_type)
         #print('  cam_source', cam_source)
 
-        self.cam_type = cam_type
 
         if cam_source == '0': cam_source = 0
         elif cam_source == '1': cam_source = 1
         elif cam_source == '2': cam_source = 2
         elif cam_source == '3': cam_source = 3
+
+        if self.cam_type == cam_type and self.cam_source == cam_source: return
 
         self.cam_source = cam_source
         cam = cv2.VideoCapture(cam_source)
@@ -73,6 +90,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.cam.release()
         self.cam = cam
         self.lock.release()
+
 
     def load_model(self, model_dir):
         print('[INFO] Loading Model ...')
@@ -96,6 +114,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         # Protected by Mutex
         self.lock.acquire()
         self.model = model
+        self.current_uploaded_images = {}
+        self.is_upload_image = True
         self.lock.release()
 
 
@@ -118,6 +138,41 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                 if b:
                     self.last_img = img
                     self.last_prediction = self.predict(img)
+
+                    height, width = img.shape[0], img.shape[1]
+
+
+                    if self.is_upload_image:
+                        for prediction in self.last_prediction:
+                            if self.last_upload_time + UPLOAD_INTERVAL < time.time():
+                                if self.confidence_min <= prediction['probability'] <= self.confidence_max:
+                                    tag = prediction['tagName']
+
+                                    if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
+                                        pass
+                                    else:
+                                        x1 = int(prediction['boundingBox']['left'] * width)
+                                        y1 = int(prediction['boundingBox']['top'] * height)
+                                        x2 = x1 + int(prediction['boundingBox']['width'] * width)
+                                        y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                                        labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
+                                        self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
+                                        #print(tag, onnx.current_uploaded_images[tag], j) 
+                                        self.last_upload_time = time.time()
+                                        print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images[tag], labels)
+                                        jpg = cv2.imencode('.jpg', img)[1].tobytes()
+                                        try:
+                                            requests.post('http://'+web_module_url()+'/api/relabel', data={
+                                                'confidence': prediction['probability'],
+                                                'labels': labels,
+                                                'part_name': tag,
+                                                'is_relabel': True,
+                                                'img': base64.b64encode(jpg)
+                                            })
+                                        except:
+                                            print('[ERROR] Failed to update image for relabeling')
+
+
                 else:
                     if self.cam_type == 'video_file':
                         self.restart_cam()
@@ -146,7 +201,7 @@ onnx.start_session()
 app = Flask(__name__)
 @app.route('/prediction', methods=['GET'])
 def predict():
-    print(onnx.last_prediction)
+    #print(onnx.last_prediction)
     #onnx.last_prediction
     return json.dumps(onnx.last_prediction)
 
@@ -158,7 +213,12 @@ def update_model():
 
     print('[INFO] Update Model ...')
 
+    if model_uri == onnx.model_uri:
+        print('[INFO] Model Uri unchanged')
+        return 'ok'
+
     get_file_zip(model_uri, MODEL_DIR)
+    onnx.model_uri = model_uri
 
     onnx.update_model('model')
     print('[INFO] Update Finished ...')
@@ -196,20 +256,14 @@ def video_feed():
                 font_scale = 1
                 thickness = 3
                 for prediction in predictions:
-                    if prediction['probability'] > 0.7 and prediction['tagName'] == 'hat':
+                    #print(prediction['tagName'], prediction['probability'])
+                    #print(onnx.last_upload_time, time.time())
+
+                    if prediction['probability'] > 0.5:
                         x1 = int(prediction['boundingBox']['left'] * width)
                         y1 = int(prediction['boundingBox']['top'] * height)
                         x2 = x1 + int(prediction['boundingBox']['width'] * width)
                         y2 = y1 + int(prediction['boundingBox']['height'] * height)
-                        #print(x1, y1, x2, y2)
-                        img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                        img = cv2.putText(img, prediction['tagName'], (x1+10, y1+30), font, font_scale, (255, 0, 0), thickness)
-                    if prediction['probability'] > 0.4 and prediction['tagName'] == 'person':
-                        x1 = int(prediction['boundingBox']['left'] * width)
-                        y1 = int(prediction['boundingBox']['top'] * height)
-                        x2 = x1 + int(prediction['boundingBox']['width'] * width)
-                        y2 = y1 + int(prediction['boundingBox']['height'] * height)
-                        #print(x1, y1, x2, y2)
                         img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                         img = cv2.putText(img, prediction['tagName'], (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
 
@@ -223,7 +277,7 @@ def video_feed():
 
 def main():
 
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=False)
 
 if __name__ == '__main__':
     main()

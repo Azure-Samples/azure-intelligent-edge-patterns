@@ -1,7 +1,9 @@
 from __future__ import absolute_import, unicode_literals
+import base64
 import json
 import time
 import datetime
+import threading
 import io
 
 from django.shortcuts import render
@@ -27,12 +29,24 @@ from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_S
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
 
+from azure.iot.device import IoTHubModuleClient
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
 try:
     iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
 except:
     iot = None
+
+def is_edge():
+    try:
+        IoTHubModuleClient.create_from_edge_environment()
+        return True
+    except:
+        return False
+
+def inference_module_url():
+    if is_edge(): return '172.18.0.1:5000'
+    else: return 'localhost:5000'
 
 trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 
@@ -84,7 +98,12 @@ def export(request, project_id):
     project_obj.save(update_fields=['download_uri'])
 
     if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+        #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+        def _send(download_uri, rtsp):
+            # FIXME
+            requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type': 'rtsp', 'cam_source': rtsp})
+            requests.get('http://'+inference_module_url()+'/update_model', params={'model_uri': download_uri})
+        threading.Thread(target=_send, args=(exports[0].download_uri, camera.rtsp)).start()
 
     print('export ok')
 
@@ -215,7 +234,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Image
-        fields = ['id', 'image', 'labels', 'part']
+        fields = ['id', 'image', 'labels', 'part', 'is_relabel', 'confidence']
 
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
@@ -272,7 +291,7 @@ def video_feed(request, stream_id):
     for i in range(len(streams)):
         stream = streams[i]
         if stream.id == stream_id:
-            return StreamingHttpResponse(stream.gen(), content_type='multipart/x-mixed-replace;boundary=frame')
+                return StreamingHttpResponse(stream.gen(), content_type='multipart/x-mixed-replace;boundary=frame')
 
     return HttpResponse('<h1>Unknown Stream '+str(stream_id)+' </h1>')
 
@@ -289,6 +308,7 @@ def capture(request, stream_id):
             img_obj = Image(image=img, part_id=stream.part_id)
             img_obj.save()
             img_serialized = ImageSerializer(img_obj, context={'request': request})
+            print(img_serialized.data)
 
             return JsonResponse({'status': 'ok', 'image': img_serialized.data})
 
@@ -395,4 +415,25 @@ def update_twin(iteration_id, download_uri, rtsp):
 
     iteration_ids.add(iteration_id)
 
+@api_view(['POST'])
+def upload_relabel_image(request):
+    part_name = request.data['part_name']
+    labels = request.data['labels']
+    img_data = base64.b64decode(request.data['img'])
+    confidence = request.data['confidence']
+    is_relabel = request.data['is_relabel']
 
+    parts = Part.objects.filter(name=part_name)
+    if len(parts) == 0:
+        print('[ERROR] Unknown Part Name', part_name)
+        return JsonResponse({'status': 'failed'})
+
+
+    img_io = io.BytesIO(img_data)
+
+    img = ImageFile(img_io)
+    img.name = datetime.datetime.utcnow().isoformat() + '.jpg'
+    img_obj = Image(image=img, part_id=parts[0].id, labels=labels, confidence=confidence, is_relabel=True)
+    img_obj.save()
+
+    return JsonResponse({'status': 'ok'})

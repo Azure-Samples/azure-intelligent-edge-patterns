@@ -4,6 +4,8 @@ export type LabelImage = {
   image: string;
   labels: string;
   part: string;
+  is_relabel: boolean;
+  confidence: number;
 };
 
 // Describe the different ACTION NAMES available

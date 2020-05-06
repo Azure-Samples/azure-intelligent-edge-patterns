@@ -53,7 +53,7 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
 
 const CapturedImagesContainer = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
-  const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const images = useSelector<State, LabelImage[]>((state) => state.images).filter((image) => !image.is_relabel);
   const filteredImages = getFilteredImages(images, { partId });
   const isValid = filteredImages.filter((image) => image.labels).length >= 15;
 
