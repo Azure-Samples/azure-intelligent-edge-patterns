@@ -19,24 +19,26 @@ import '../rc-slider.css';
 
 import LabelingPageDialog from '../components/LabelingPageDialog';
 import { State } from '../store/State';
-import { Camera } from '../store/camera/cameraTypes';
 import { useParts } from '../hooks/useParts';
 import LabelDisplayImage from '../components/LabelDisplayImage';
 import { ProjectData } from '../store/project/projectTypes';
+import { LabelImage } from '../store/image/imageTypes';
+import { getFilteredImages } from '../util/getFilteredImages';
 
 let sorting = false;
 
 const ManualIdentification: FC = () => {
-  const { project, cameras } = useSelector<State, { project: ProjectData; cameras: Camera[] }>((state) => ({
-    project: state.project.data,
-    cameras: state.cameras,
-  }));
+  const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
+    (state) => ({
+      projectData: state.project.data,
+      images: state.images,
+    }),
+  );
   const parts = useParts();
-
   const partItems = useMemo<DropdownItemProps[]>(() => {
-    if (parts.length === 0 || project.parts.length === 0) return [];
+    if (parts.length === 0 || projectData.parts.length === 0) return [];
 
-    return project.parts.map((partId) => {
+    return projectData.parts.map((partId) => {
       const part = parts.find((e) => e.id === partId);
 
       return {
@@ -46,19 +48,19 @@ const ManualIdentification: FC = () => {
         },
       };
     });
-  }, [parts, project]);
+  }, [parts, projectData]);
 
-  const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
+  const [selectedPartId, setSelectedPartId] = useState<number>(null);
   const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([
-    project.accuracyRangeMin,
-    project.accuracyRangeMax,
+    projectData.accuracyRangeMin,
+    projectData.accuracyRangeMax,
   ]);
   const [ascend, setAscend] = useState<boolean>(false);
 
-  const images = useMemo(() => {
+  const showImages = useMemo(() => {
     // TODO: Get real images here
-    const imgs = [...new Array(20)]
-      .map((_, i) => ({ confidenceLevel: i * 4, src: '/icons/Play.png' }))
+    const imgs = getFilteredImages(images, { partId: selectedPartId })
+      .map((e) => ({ ...e, confidenceLevel: 70 }))
       .filter(
         (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
       );
@@ -67,17 +69,17 @@ const ManualIdentification: FC = () => {
       if (ascend) imgs.sort((a, b) => a.confidenceLevel - b.confidenceLevel);
       else imgs.sort((a, b) => b.confidenceLevel - a.confidenceLevel);
     }
+
     return imgs;
-  }, [confidenceLevelRange, ascend]);
+  }, [confidenceLevelRange, ascend, images, selectedPartId]);
 
   const onDropdownChange = (_, data): void => {
     const { key } = data.value.content;
-    const currentCamera = cameras.find((ele) => ele.id === key);
-    if (selectedCamera) setSelectedCamera(currentCamera);
+    setSelectedPartId(key);
   };
 
   return (
-    <>
+    <div>
       <Text size="larger" weight="semibold">
         Manual Identification
       </Text>
@@ -135,34 +137,35 @@ const ManualIdentification: FC = () => {
             borderWidth: '1px',
           }}
         >
-          {images.map((e, i) => (
-            <ImageIdentificationItem key={i} confidenceLevel={e.confidenceLevel} src={e.src} />
+          {showImages.map((e, i) => (
+            <ImageIdentificationItem key={i} confidenceLevel={e.confidenceLevel} imageIndex={i} labelImage={e} />
           ))}
         </Grid>
         <Button content="Update" styles={{ width: '15%' }} primary disabled />
       </Flex>
-    </>
+    </div>
   );
 };
 
 interface ImageIdentificationItemProps {
   confidenceLevel: number;
-  src: string;
+  labelImage: LabelImage;
+  imageIndex: number;
 }
-const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, src }) => {
-  const [isPart, setIsPart] = useState<number>(null);
+const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, labelImage,imageIndex }) => {
+  const [isPartCorrect, setIsPartCorrect] = useState<number>(null); // * 1: true, 0: false
 
   return (
     <Flex hAlign="center" padding="padding.medium">
       <div style={{ margin: '0.2em' }}>
-        <LabelDisplayImage labelImage={{ image: src, labels: null }} width={100} height={100} />
+        <LabelDisplayImage labelImage={labelImage} width={100} height={100} />
       </div>
       <Flex column gap="gap.smaller" styles={{ width: '30%' }}>
         <Text truncated>Confidence Level: {confidenceLevel}%</Text>
         <Flex column>
           <RadioGroup
-            checkedValue={isPart}
-            onCheckedValueChange={(_, newProps): void => setIsPart(newProps.value as number)}
+            checkedValue={isPartCorrect}
+            onCheckedValueChange={(_, newProps): void => setIsPartCorrect(newProps.value as number)}
             items={[
               {
                 key: '1',
@@ -178,8 +181,8 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
           />
         </Flex>
         <LabelingPageDialog
-          imageIndex={1000}
-          trigger={<Button primary content="Identify" disabled={!isPart} />}
+          imageIndex={imageIndex}
+          trigger={<Button primary content="Identify" disabled={!isPartCorrect} />}
         />
       </Flex>
     </Flex>

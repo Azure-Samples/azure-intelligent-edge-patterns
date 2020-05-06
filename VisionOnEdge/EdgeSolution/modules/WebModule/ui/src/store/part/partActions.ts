@@ -4,10 +4,9 @@ import {
   PartThunk,
   UpdateCapturedImageAction,
   UPDATE_CAPTURED_IMAGES,
-  UpdateImageLabelAction,
-  UPDATE_IMAGE_LABEL,
-  LabelImage,
 } from './partTypes';
+import { LabelImage } from '../image/imageTypes';
+import { postLabelImage } from '../image/imageActions';
 
 export const addCapturedImages = (newCapturedImage: LabelImage): AddCapturedImageAction => ({
   type: ADD_CAPTURED_IMAGE,
@@ -25,6 +24,7 @@ export const thunkAddCapturedImages = (streamId: string): PartThunk => async (di
     .then((data) => {
       if (data.status === 'ok') {
         dispatch(addCapturedImages(data.image));
+        dispatch(postLabelImage(data.image));
       }
       return null;
     })
@@ -32,11 +32,6 @@ export const thunkAddCapturedImages = (streamId: string): PartThunk => async (di
       console.error(err);
     });
 };
-
-export const updateImageLabels = (imageId: number, labels: any): UpdateImageLabelAction => ({
-  type: UPDATE_IMAGE_LABEL,
-  payload: { id: imageId, labels },
-});
 
 export const thunkGetCapturedImages = (partId: string): PartThunk => async (dispatch): Promise<void> => {
   fetch(`/api/images`)
