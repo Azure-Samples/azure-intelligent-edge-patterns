@@ -46,13 +46,13 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     () => {
       dispatch(thunkGetTrainingStatus(projectId));
     },
-    trainingStatus === 'ok' ? null : 5000,
+    !trainingStatus ? null : 5000,
   );
 
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
-      {trainingStatus !== 'ok' ? (
+      {trainingStatus ? (
         <Loader
           size="largest"
           label={trainingStatus}

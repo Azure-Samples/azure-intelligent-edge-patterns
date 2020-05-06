@@ -58,7 +58,8 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case GET_TRAINING_STATUS_REQUEST:
       return {
         ...state,
-        trainingStatus: state.trainingStatus === 'ok' ? 'not yet training' : state.trainingStatus,
+        // if trainingStatus is ok originally, set it to 'not yet training' and get the exportin status from server again
+        trainingStatus: state.trainingStatus === '' ? 'not yet training' : state.trainingStatus,
       };
     case GET_TRAINING_STATUS_SUCCESS:
       return { ...state, trainingStatus: action.payload.trainingStatus };
