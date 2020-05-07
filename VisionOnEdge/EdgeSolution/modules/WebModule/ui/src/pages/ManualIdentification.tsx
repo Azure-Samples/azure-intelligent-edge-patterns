@@ -58,22 +58,18 @@ const ManualIdentification: FC = () => {
   const [ascend, setAscend] = useState<boolean>(false);
 
   const showImages = useMemo(() => {
-    // TODO: Get real images here
-    console.log(images)
-    //const imgs = getFilteredImages(images, { partId: selectedPartId })
-    const imgs = getFilteredImages(images, {})
-      .map((e) => ({ ...e, confidenceLevel: e.confidence*100 }))
+    const filteredImages = getFilteredImages(images, { partId: selectedPartId, isRelabel: true })
+      .map((e) => ({ ...e, confidenceLevel: e.confidence * 100 }))
       .filter(
         (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
       );
-      console.log(imgs)
 
     if (sorting) {
-      if (ascend) imgs.sort((a, b) => a.confidenceLevel - b.confidenceLevel);
-      else imgs.sort((a, b) => b.confidenceLevel - a.confidenceLevel);
+      if (ascend) filteredImages.sort((a, b) => a.confidenceLevel - b.confidenceLevel);
+      else filteredImages.sort((a, b) => b.confidenceLevel - a.confidenceLevel);
     }
 
-    return imgs;
+    return filteredImages;
   }, [confidenceLevelRange, ascend, images, selectedPartId]);
 
   const onDropdownChange = (_, data): void => {
@@ -141,7 +137,12 @@ const ManualIdentification: FC = () => {
           }}
         >
           {showImages.map((e, i) => (
-            <ImageIdentificationItem key={i} confidenceLevel={e.confidenceLevel} imageIndex={i} labelImage={e} />
+            <ImageIdentificationItem
+              key={i}
+              confidenceLevel={e.confidenceLevel}
+              imageIndex={i}
+              labelImage={e}
+            />
           ))}
         </Grid>
         <Button content="Update" styles={{ width: '15%' }} primary disabled />
@@ -155,7 +156,11 @@ interface ImageIdentificationItemProps {
   labelImage: LabelImage;
   imageIndex: number;
 }
-const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, labelImage,imageIndex }) => {
+const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
+  confidenceLevel,
+  labelImage,
+  imageIndex,
+}) => {
   const [isPartCorrect, setIsPartCorrect] = useState<number>(null); // * 1: true, 0: false
 
   return (
@@ -185,6 +190,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
         </Flex>
         <LabelingPageDialog
           imageIndex={imageIndex}
+          isRelabel={true}
           trigger={<Button primary content="Identify" disabled={!isPartCorrect} />}
         />
       </Flex>
