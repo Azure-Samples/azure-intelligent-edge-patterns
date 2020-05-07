@@ -72,6 +72,7 @@ class Image(models.Model):
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)
+    uploaded = models.BooleanField(default=False)
 
 class Annotation(models.Model):
     image = models.OneToOneField(Image, on_delete=models.CASCADE)
@@ -98,6 +99,7 @@ class Project(models.Model):
     accuracyRangeMin = models.IntegerField(null=True)
     accuracyRangeMax = models.IntegerField(null=True)
     maxImages = models.IntegerField(null=True)
+    deployed = models.BooleanField(default=False)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -119,6 +121,7 @@ class Project(models.Model):
 
     @staticmethod
     def post_save(sender, instance, update_fields, **kwargs):
+        print('saving instance', instance, update_fields)
         if update_fields is not None: return
         print('[INFO] POST_SAVE')
         project_id = instance.id
@@ -154,6 +157,8 @@ class Stream(object):
         self.last_active = time.time()
         self.status = 'init'
         self.last_img = None
+        self.cur_img_index = 0
+        self.last_get_img_index = 0
         self.id = id(self)
 
         self.mutex = threading.Lock()
@@ -217,9 +222,11 @@ class Stream(object):
                 time.sleep(1)
                 continue
 
+
             img = cv2.resize(img, None, fx=0.5, fy=0.5)
             self.last_active = time.time()
             self.last_img = img.copy()
+            self.cur_img_index = (self.cur_img_index + 1) % 10000
             self.mutex.acquire()
             predictions = list(prediction.copy() for prediction in self.predictions)
             self.mutex.release()
@@ -246,6 +253,14 @@ class Stream(object):
     def get_frame(self):
         print('[INFO] get frame', self)
         #b, img = self.cap.read()
+        time_begin = time.time()
+        while True:
+            if time.time() - time_begin > 5: break
+            if self.last_get_img_index == self.cur_img_index:
+                time.sleep(0.01)
+            else:
+                break
+        self.last_get_img_index = self.cur_img_index
         img = self.last_img.copy()
         #if b: return cv2.imencode('.jpg', img)[1].tobytes()
         #else : return None

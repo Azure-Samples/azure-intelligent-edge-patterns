@@ -5,6 +5,7 @@ import time
 import datetime
 import threading
 import io
+import sys
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
@@ -28,6 +29,7 @@ from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_S
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import CustomVisionErrorException
 
 from azure.iot.device import IoTHubModuleClient
 from azure.iot.hub import IoTHubRegistryManager
@@ -95,16 +97,21 @@ def export(request, project_id):
         return JsonResponse({'status': 'exporting'})
 
     project_obj.download_uri = exports[0].download_uri
-    project_obj.save(update_fields=['download_uri'])
 
-    if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
-        def _send(download_uri, rtsp):
-            # FIXME
-            requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type': 'rtsp', 'cam_source': rtsp})
-            requests.get('http://'+inference_module_url()+'/update_model', params={'model_uri': download_uri})
-        threading.Thread(target=_send, args=(exports[0].download_uri, camera.rtsp)).start()
+    print('[INFO] is deployed before', project_obj.deployed)
+    if project_obj.deployed == False:
+        if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
+            #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+            def _send(download_uri, rtsp):
+                # FIXME
+                #print('update rtsp',  rtsp, flush=True)
+                #print('update model', download_uri, flush=True)
+                requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type': 'rtsp', 'cam_source': rtsp})
+                requests.get('http://'+inference_module_url()+'/update_model', params={'model_uri': download_uri})
+            threading.Thread(target=_send, args=(exports[0].download_uri, camera.rtsp)).start()
 
+            project_obj.deployed = True
+            project_obj.save(update_fields=['download_uri', 'deployed'])
     print('export ok')
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
@@ -319,6 +326,7 @@ def _train(project_id):
     customvision_project_id = project_obj.customvision_project_id
 
     count = 10
+
     while count > 0:
         part_ids = [part.id for part in project_obj.parts.all()]
         if len(part_ids) > 0: break
@@ -328,22 +336,26 @@ def _train(project_id):
 
 
     print(project_obj.id)
-    print('_____>>>>', part_ids)
-    images = Image.objects.filter(part_id__in=part_ids).all()
+    print('Part ids:', part_ids, flush=True)
+    images = Image.objects.filter(part_id__in=part_ids, is_relabel=False, uploaded=False).all()
     img_entries = []
+    img_objs = []
 
     tags = trainer.get_tags(customvision_project_id)
     tag_dict = {}
     for tag in tags:
         tag_dict[tag.name] = tag.id
 
-    for image_obj in images:
-        print('*** image', image_obj)
+    print('[INFO] Submit images and do the Training...')
+    count = 0
+    for index, image_obj in enumerate(images):
+        print('*** image', index+1, image_obj, flush=True)
 
         part = image_obj.part
         part_name = part.name
         if part_name not in tag_dict:
-            print('part_name', part_name)
+            print('new part name', part_name, flush=True)
+            print('creating new tag (part name)', flush=True)
             tag = trainer.create_tag(customvision_project_id, part_name)
             tag_dict[tag.name] = tag.id
 
@@ -355,6 +367,7 @@ def _train(project_id):
         height = image_obj.image.height
         try:
             labels = json.loads(image_obj.labels)
+            if len(labels) == 0: continue
             for label in labels:
                 x = label['x1'] / width
                 y = label['y1'] / height
@@ -366,16 +379,43 @@ def _train(project_id):
             image = image_obj.image
             image.open()
             img_entry = ImageFileCreateEntry(name=name, contents=image.read(), regions=regions)
+            img_objs.append(image_obj)
             img_entries.append(img_entry)
+            count += 1
         except:
-            pass
-    print('uploading...')
-    upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
-    print('batch success:', upload_result.is_batch_successful)
-    #print(upload_result)
+            print("[ERROR] Unexpected error:", sys.exc_info()[0], flush=True)
+            raise
 
-    print('training...')
-    trainer.train_project(customvision_project_id)
+        if len(img_entries) >= 5:
+            print('uploading...', flush=True)
+            upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
+            print('batch success:', upload_result.is_batch_successful, flush=True)
+            img_entries = []
+            for img_obj in img_objs:
+                img_obj.uploaded = True
+                img_obj.save()
+            img_objs = []
+
+    if len(img_entries) >= 1:
+        print('uploading...', flush=True)
+        upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
+        print('batch success:', upload_result.is_batch_successful, flush=True)
+        for img_obj in img_objs:
+            img_obj.uploaded = True
+            img_obj.save()
+
+    if count == 0:
+        print('Nothing changed, no training', flush=True)
+
+    else:
+        print('training...', flush=True)
+        try:
+            trainer.train_project(customvision_project_id)
+            project_obj.deployed = False
+            project_obj.save(update_fields=['deployed'])
+            print('[INFO] set deployed = False')
+        except CustomVisionErrorException:
+            print('[ERROR] From Custom Vision: Nothing changed since last training', flush=True)
 
     return JsonResponse({'status': 'ok'})
 
