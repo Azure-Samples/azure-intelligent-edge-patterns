@@ -54,7 +54,7 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
 const CapturedImagesContainer = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
   const images = useSelector<State, LabelImage[]>((state) => state.images).filter((image) => !image.is_relabel);
-  const filteredImages = getFilteredImages(images, { partId });
+  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
   const isValid = filteredImages.filter((image) => image.labels).length >= 15;
 
   useEffect(() => {
@@ -85,6 +85,7 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
               imageIndex={i}
               partId={partId}
               trigger={<LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />}
+              isRelabel={false}
             />
           </div>
         ))}
