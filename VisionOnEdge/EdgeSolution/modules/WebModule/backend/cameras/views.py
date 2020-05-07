@@ -437,3 +437,11 @@ def upload_relabel_image(request):
     img_obj.save()
 
     return JsonResponse({'status': 'ok'})
+
+@api_view(['POST'])
+def relabel_update(request):
+
+    print('update relabeling')
+    print(request.data['updates'])
+
+    return JsonResponse({'status': 'ok'})
