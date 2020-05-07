@@ -15,8 +15,9 @@ interface LabelingPageProps {
   imageIndex: number;
   closeDialog: () => void;
   partId?: number;
+  isRelabel: boolean;
 }
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDialog, partId }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDialog, partId, isRelabel }) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
   const { images, annotations } = useSelector<State, { images: LabelImage[]; annotations: Annotation[] }>(
@@ -25,7 +26,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
       annotations: state.labelingPageState.annotations,
     }),
   );
-  const filteredImages = getFilteredImages(images, { partId });
+  const filteredImages = getFilteredImages(images, { partId, isRelabel });
   const imageUrl = filteredImages[index]?.image;
   const imageId = filteredImages[index]?.id;
 

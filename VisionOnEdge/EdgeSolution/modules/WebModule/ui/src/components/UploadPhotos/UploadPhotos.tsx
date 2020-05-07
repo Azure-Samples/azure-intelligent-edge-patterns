@@ -12,7 +12,7 @@ import { getLabelImages, postLabelImage } from '../../store/image/imageActions';
 export const UploadPhotos = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
   const images = useSelector<State, LabelImage[]>((state) => state.images);
-  const filteredImages = getFilteredImages(images, { partId });
+  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
   const isValid = filteredImages.filter((image) => image.labels).length >= 15;
 
   useEffect(() => {
@@ -55,6 +55,7 @@ const CapturedImagesContainer = ({ capturedImages, isValid }): JSX.Element => {
             key={i}
             imageIndex={i}
             trigger={<LabelDisplayImage labelImage={image} pointerCursor width={300} height={150} />}
+            isRelabel={false}
           />
         ))}
       </Grid>
