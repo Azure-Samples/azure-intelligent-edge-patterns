@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import base64
 import json
 import time
+import threading
 import datetime
 import threading
 import io
@@ -21,7 +22,7 @@ from rest_framework import status
 import requests
 
 
-from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting
+from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 
@@ -65,49 +66,81 @@ def export_iterationv3_2(project_id, iteration_id):
 
     return res
 
-import cv2
+
+def update_train_status(project_id):
+    def _train_status_worker(project_id):
+        while True:
+            time.sleep(1)
+            project_obj = Project.objects.get(pk=project_id)
+            camera_id = project_obj.camera_id
+            customvision_project_id = project_obj.customvision_project_id
+            camera = Camera.objects.get(pk=camera_id)
+
+            iterations = trainer.get_iterations(customvision_project_id)
+            if len(iterations) == 0:
+                print('Training Status : Preparing')
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Training Status : Preparing', 'log': '', 'project':project_obj}
+                )
+                continue
+                #return JsonResponse({'status': 'waiting training'})
+
+            iteration = iterations[0]
+
+            if iteration.exportable == False or iteration.status != 'Completed':
+                print('Training Status : On-going')
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Training Status : On-going', 'log': '', 'project':project_obj}
+                )
+                continue
+                #return JsonResponse({'status': 'waiting training'})
+
+            exports = trainer.get_exports(customvision_project_id, iteration.id)
+            if len(exports) == 0:
+                print('Training Status : Exporting')
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Training Status : Exporting', 'log': '', 'project':project_obj}
+                )
+                #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
+                res = export_iterationv3_2(customvision_project_id, iteration.id)
+                print(res.json())
+                continue
+                #return JsonResponse({'status': 'exporting'})
+
+            project_obj.download_uri = exports[0].download_uri
+            project_obj.save(update_fields=['download_uri'])
+
+            if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
+                update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+
+            print('Training Status : Completed')
+            # @FIXME (Hugh): wrap it up
+            obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Training Status : Completed', 'log': '', 'project':project_obj}
+            )
+            break
+            #return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
+
+    threading.Thread(target=_train_status_worker, args=(project_id,)).start()
+
+
 @api_view()
 def export(request, project_id):
+    """get the status of train job sent to custom vision
+
+       @FIXME (Hugh): change the naming of this endpoint
+    """
     project_obj = Project.objects.get(pk=project_id)
+    train_obj = Train.objects.get(project_id=project_id)
 
-    camera_id = project_obj.camera_id
-    camera = Camera.objects.get(pk=camera_id)
-
-    customvision_project_id = project_obj.customvision_project_id
-
-    iterations = trainer.get_iterations(customvision_project_id)
-    if len(iterations) == 0:
-        print('not yet training ...')
-        return JsonResponse({'status': 'waiting training'})
-
-    iteration = iterations[0]
-
-    if iteration.exportable == False or iteration.status != 'Completed':
-        print('waiting training ...')
-        return JsonResponse({'status': 'waiting training'})
-
-    exports = trainer.get_exports(customvision_project_id, iteration.id)
-    if len(exports) == 0:
-        print('exporting ...')
-        #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
-        res = export_iterationv3_2(customvision_project_id, iteration.id)
-        print(res.json())
-        return JsonResponse({'status': 'exporting'})
-
-    project_obj.download_uri = exports[0].download_uri
-    project_obj.save(update_fields=['download_uri'])
-
-    if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
-        def _send(download_uri, rtsp):
-            # FIXME
-            requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type': 'rtsp', 'cam_source': rtsp})
-            requests.get('http://'+inference_module_url()+'/update_model', params={'model_uri': download_uri})
-        threading.Thread(target=_send, args=(exports[0].download_uri, camera.rtsp)).start()
-
-    print('export ok')
-
-    return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
+    return JsonResponse({'status': train_obj.status, 'download_uri': project_obj.download_uri})
 
 # FIXME tmp workaround
 @api_view()
@@ -192,11 +225,11 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Setting
         fields = [
-            'id', 
-            'training_key', 
-            'endpoint', 
-            'iot_hub_connection_string', 
-            'device_id', 
+            'id',
+            'training_key',
+            'endpoint',
+            'iot_hub_connection_string',
+            'device_id',
             'module_id'
         ]
 
@@ -211,12 +244,12 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
         fields = [
-            'id', 
-            'camera', 
-            'location', 
-            'parts', 
-            'download_uri', 
-            'needRetraining', 
+            'id',
+            'camera',
+            'location',
+            'parts',
+            'download_uri',
+            'needRetraining',
             'accuracyRangeMin',
             'accuracyRangeMax',
             'maxImages'
@@ -253,6 +286,17 @@ class AnnotationViewSet(viewsets.ModelViewSet):
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
 
+
+#
+# Train Views
+#
+class TrainSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Train
+        fields = ['id', 'status', 'log', 'project']
+class TrainViewSet(viewsets.ModelViewSet):
+    queryset = Train.objects.all()
+    serializer_class = TrainSerializer
 
 
 
@@ -318,6 +362,12 @@ def _train(project_id):
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
 
+    # @FIXME (Hugh): wrap it up
+    obj, created = Train.objects.update_or_create(
+        project=project_obj,
+        defaults={'status': 'Sending images and annotations', 'log': '', 'project':project_obj}
+    )
+
     count = 10
     while count > 0:
         part_ids = [part.id for part in project_obj.parts.all()]
@@ -376,6 +426,9 @@ def _train(project_id):
 
     print('training...')
     trainer.train_project(customvision_project_id)
+
+    print('start working status')
+    update_train_status(project_id)
 
     return JsonResponse({'status': 'ok'})
 
