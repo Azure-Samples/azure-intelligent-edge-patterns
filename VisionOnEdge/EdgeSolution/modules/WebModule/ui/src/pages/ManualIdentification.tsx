@@ -1,4 +1,4 @@
-import React, { useState, useMemo, FC, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, useMemo, FC, Dispatch, SetStateAction } from 'react';
 import {
   Dropdown,
   DropdownItemProps,
@@ -12,7 +12,7 @@ import {
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
 import 'rc-tooltip/assets/bootstrap.css';
@@ -25,11 +25,13 @@ import LabelDisplayImage from '../components/LabelDisplayImage';
 import { ProjectData } from '../store/project/projectTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { getFilteredImages } from '../util/getFilteredImages';
+import { thunkGetProject } from '../store/project/projectActions';
 
 let sorting = false;
 
 type JudgedImages = { correct: number[]; incorrect: number[] };
 const ManualIdentification: FC = () => {
+  const dispatch = useDispatch();
   const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
     (state) => ({
       projectData: state.project.data,
@@ -82,6 +84,10 @@ const ManualIdentification: FC = () => {
     const { key } = data.value.content;
     setSelectedPartId(key);
   };
+
+  useEffect(() => {
+    dispatch(thunkGetProject());
+  }, [dispatch]);
 
   return (
     <div>
