@@ -26,6 +26,7 @@ import { ProjectData } from '../store/project/projectTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { getFilteredImages } from '../util/getFilteredImages';
 import { thunkGetProject } from '../store/project/projectActions';
+import { getLabelImages } from '../store/image/imageActions';
 
 let sorting = false;
 
@@ -87,6 +88,7 @@ const ManualIdentification: FC = () => {
 
   useEffect(() => {
     dispatch(thunkGetProject());
+    dispatch(getLabelImages());
   }, [dispatch]);
 
   return (
