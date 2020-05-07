@@ -158,6 +158,7 @@ const ManualIdentification: FC = () => {
               labelImage={e}
               judgedImages={judgedImages}
               setJudgedImages={setJudgedImages}
+              partId={selectedPartId}
             />
           ))}
         </Grid>
@@ -188,6 +189,7 @@ interface ImageIdentificationItemProps {
   imageIndex: number;
   judgedImages: JudgedImages;
   setJudgedImages: Dispatch<SetStateAction<JudgedImages>>;
+  partId: number;
 }
 const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   confidenceLevel,
@@ -195,6 +197,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   imageIndex,
   judgedImages,
   setJudgedImages,
+  partId,
 }) => {
   let isPartCorrect: number;
   if (judgedImages.correct.indexOf(labelImage.id) >= 0) {
@@ -249,6 +252,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         <LabelingPageDialog
           imageIndex={imageIndex}
           isRelabel={true}
+          partId={partId}
           trigger={<Button primary content="Identify" disabled={!isPartCorrect} />}
         />
       </Flex>
