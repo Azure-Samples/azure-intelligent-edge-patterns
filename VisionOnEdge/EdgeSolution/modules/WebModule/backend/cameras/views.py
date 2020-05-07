@@ -442,6 +442,22 @@ def upload_relabel_image(request):
 def relabel_update(request):
 
     print('update relabeling')
-    print(request.data['updates'])
+    if 'correct' not in request.data:
+        print('missing correct')
+    if 'incorrect' not in request.data:
+        print('missing incorrect')
+
+    correct = request.data['correct']
+    for image_id in correct:
+        img_obj = Image.objects.get(pk=image_id)
+        img_obj.is_relabel = False
+        img_obj.save()
+        print('image', image_id, 'added from relabeling pool')
+
+    incorrect = request.data['incorrect']
+    for image_id in incorrect:
+        img_obj = Image.objects.get(pk=image_id)
+        img_obj.delete()
+        print('image', image_id, 'removed from relabeling pool')
 
     return JsonResponse({'status': 'ok'})
