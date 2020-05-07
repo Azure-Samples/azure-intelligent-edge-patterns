@@ -88,7 +88,6 @@ def update_train_status(project_id):
                 #return JsonResponse({'status': 'waiting training'})
 
             iteration = iterations[0]
-
             if iteration.exportable == False or iteration.status != 'Completed':
                 print('Training Status : On-going')
                 # @FIXME (Hugh): wrap it up
@@ -100,7 +99,7 @@ def update_train_status(project_id):
                 #return JsonResponse({'status': 'waiting training'})
 
             exports = trainer.get_exports(customvision_project_id, iteration.id)
-            if len(exports) == 0:
+            if len(exports) == 0 or not exports[0].download_uri:
                 print('Training Status : Exporting')
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
@@ -123,7 +122,7 @@ def update_train_status(project_id):
             # @FIXME (Hugh): wrap it up
             obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Training Status : Completed', 'log': '', 'project':project_obj}
+                    defaults={'status': 'ok', 'log': '', 'project':project_obj}
             )
             break
             #return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
@@ -368,64 +367,68 @@ def _train(project_id):
         defaults={'status': 'Sending images and annotations', 'log': '', 'project':project_obj}
     )
 
-    count = 10
-    while count > 0:
-        part_ids = [part.id for part in project_obj.parts.all()]
-        if len(part_ids) > 0: break
-        print('waiting parts...')
-        time.sleep(1)
-        count -= 1
+    try:
+        count = 10
+        while count > 0:
+            part_ids = [part.id for part in project_obj.parts.all()]
+            if len(part_ids) > 0: break
+            print('waiting parts...')
+            time.sleep(1)
+            count -= 1
 
 
-    print(project_obj.id)
-    print('_____>>>>', part_ids)
-    images = Image.objects.filter(part_id__in=part_ids).all()
-    img_entries = []
+        print(project_obj.id)
+        print('_____>>>>', part_ids)
+        images = Image.objects.filter(part_id__in=part_ids).all()
+        img_entries = []
 
-    tags = trainer.get_tags(customvision_project_id)
-    tag_dict = {}
-    for tag in tags:
-        tag_dict[tag.name] = tag.id
-
-    for image_obj in images:
-        print('*** image', image_obj)
-
-        part = image_obj.part
-        part_name = part.name
-        if part_name not in tag_dict:
-            print('part_name', part_name)
-            tag = trainer.create_tag(customvision_project_id, part_name)
+        tags = trainer.get_tags(customvision_project_id)
+        tag_dict = {}
+        for tag in tags:
             tag_dict[tag.name] = tag.id
 
-        tag_id = tag_dict[part_name]
+        for image_obj in images:
+            print('*** image', image_obj)
 
-        name = 'img-' + datetime.datetime.utcnow().isoformat()
-        regions = []
-        width = image_obj.image.width
-        height = image_obj.image.height
-        try:
-            labels = json.loads(image_obj.labels)
-            for label in labels:
-                x = label['x1'] / width
-                y = label['y1'] / height
-                w = (label['x2'] - label['x1']) / width
-                h = (label['y2'] - label['y1']) / height
-                region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
-                regions.append(region)
+            part = image_obj.part
+            part_name = part.name
+            if part_name not in tag_dict:
+                print('part_name', part_name)
+                tag = trainer.create_tag(customvision_project_id, part_name)
+                tag_dict[tag.name] = tag.id
 
-            image = image_obj.image
-            image.open()
-            img_entry = ImageFileCreateEntry(name=name, contents=image.read(), regions=regions)
-            img_entries.append(img_entry)
-        except:
-            pass
-    print('uploading...')
-    upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
-    print('batch success:', upload_result.is_batch_successful)
-    #print(upload_result)
+            tag_id = tag_dict[part_name]
 
-    print('training...')
-    trainer.train_project(customvision_project_id)
+            name = 'img-' + datetime.datetime.utcnow().isoformat()
+            regions = []
+            width = image_obj.image.width
+            height = image_obj.image.height
+            try:
+                labels = json.loads(image_obj.labels)
+                for label in labels:
+                    x = label['x1'] / width
+                    y = label['y1'] / height
+                    w = (label['x2'] - label['x1']) / width
+                    h = (label['y2'] - label['y1']) / height
+                    region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
+                    regions.append(region)
+
+                image = image_obj.image
+                image.open()
+                img_entry = ImageFileCreateEntry(name=name, contents=image.read(), regions=regions)
+                img_entries.append(img_entry)
+            except:
+                pass
+        print('uploading...')
+        upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
+        print('batch success:', upload_result.is_batch_successful)
+        #print(upload_result)
+
+        print('training...')
+        trainer.train_project(customvision_project_id)
+
+    except Exception as e:
+        print(f'Exception: {e}')
 
     print('start working status')
     update_train_status(project_id)
