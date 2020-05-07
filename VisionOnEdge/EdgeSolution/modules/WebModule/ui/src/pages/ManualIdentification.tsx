@@ -1,4 +1,4 @@
-import React, { useState, useMemo, FC } from 'react';
+import React, { useState, useMemo, FC, Dispatch, SetStateAction } from 'react';
 import {
   Dropdown,
   DropdownItemProps,
@@ -11,6 +11,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
+import axios from 'axios';
 import { useSelector } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
@@ -27,6 +28,7 @@ import { getFilteredImages } from '../util/getFilteredImages';
 
 let sorting = false;
 
+type JudgedImages = { correct: number[]; incorrect: number[] };
 const ManualIdentification: FC = () => {
   const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
     (state) => ({
@@ -56,6 +58,10 @@ const ManualIdentification: FC = () => {
     projectData.accuracyRangeMax,
   ]);
   const [ascend, setAscend] = useState<boolean>(false);
+  const [judgedImages, setJudgedImages] = useState<JudgedImages>({
+    correct: [],
+    incorrect: [],
+  });
 
   const showImages = useMemo(() => {
     const filteredImages = getFilteredImages(images, { partId: selectedPartId, isRelabel: true })
@@ -142,10 +148,27 @@ const ManualIdentification: FC = () => {
               confidenceLevel={e.confidenceLevel}
               imageIndex={i}
               labelImage={e}
+              judgedImages={judgedImages}
+              setJudgedImages={setJudgedImages}
             />
           ))}
         </Grid>
-        <Button content="Update" styles={{ width: '15%' }} primary disabled />
+        <Button
+          content="Update"
+          styles={{ width: '15%' }}
+          primary
+          disabled={judgedImages.correct.length === 0 && judgedImages.incorrect.length === 0}
+          onClick={(): void => {
+            axios({ method: 'POST', url: '/api/relabel/update', data: judgedImages })
+              .then((response) => {
+                console.info(response);
+                return void 0;
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+          }}
+        />
       </Flex>
     </div>
   );
@@ -155,13 +178,24 @@ interface ImageIdentificationItemProps {
   confidenceLevel: number;
   labelImage: LabelImage;
   imageIndex: number;
+  judgedImages: JudgedImages;
+  setJudgedImages: Dispatch<SetStateAction<JudgedImages>>;
 }
 const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   confidenceLevel,
   labelImage,
   imageIndex,
+  judgedImages,
+  setJudgedImages,
 }) => {
-  const [isPartCorrect, setIsPartCorrect] = useState<number>(null); // * 1: true, 0: false
+  let isPartCorrect: number;
+  if (judgedImages.correct.indexOf(labelImage.id) >= 0) {
+    isPartCorrect = 1;
+  } else if (judgedImages.incorrect.indexOf(labelImage.id) >= 0) {
+    isPartCorrect = 0;
+  } else {
+    isPartCorrect = null;
+  }
 
   return (
     <Flex hAlign="center" padding="padding.medium">
@@ -173,7 +207,23 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         <Flex column>
           <RadioGroup
             checkedValue={isPartCorrect}
-            onCheckedValueChange={(_, newProps): void => setIsPartCorrect(newProps.value as number)}
+            onCheckedValueChange={(_, newProps): void => {
+              setJudgedImages((prev) => {
+                if (newProps.value === 1) {
+                  const idxInIncorrect = prev.incorrect.indexOf(labelImage.id);
+                  const idxInCorrect = prev.correct.indexOf(labelImage.id);
+                  if (idxInIncorrect >= 0) prev.incorrect.splice(idxInIncorrect, 1);
+                  if (idxInCorrect === -1) prev.correct.push(labelImage.id);
+                }
+                if (newProps.value === 0) {
+                  const idxInCorrect = prev.correct.indexOf(labelImage.id);
+                  const idxInIncorrect = prev.incorrect.indexOf(labelImage.id);
+                  if (idxInCorrect >= 0) prev.correct.splice(idxInCorrect, 1);
+                  if (idxInIncorrect === -1) prev.incorrect.push(labelImage.id);
+                }
+                return { ...prev };
+              });
+            }}
             items={[
               {
                 key: '1',
