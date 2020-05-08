@@ -5,11 +5,11 @@ import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
+import getResizeImageFunction from './util/resizeImage';
 import { Box2d } from './Box';
 import {
   Size2D,
   Annotation,
-  Position2D,
   WorkState,
   LabelingType,
   LabelingCursorStates,
@@ -33,6 +33,7 @@ interface SceneProps {
 }
 const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const dispatch = useDispatch();
+  const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
   const noMoreCreate = useMemo(
     () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
@@ -44,7 +45,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const scale = useRef<Position2D>({ x: 1, y: 1 });
+  const scale = useRef<number>(1);
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
       if (!cursorType) {
@@ -68,7 +69,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
 
-    dispatch(createAnnotation({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y }));
+    dispatch(createAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
     setSelectedAnnotationIndex(annotations.length - 1);
     setWorkState(WorkState.Creating);
   };
@@ -76,7 +77,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const onMouseUp = (e: KonvaEventObject<MouseEvent>): void => {
     if (workState === WorkState.Creating) {
       dispatch(
-        updateCreatingAnnotation({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y }),
+        updateCreatingAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }),
       );
       if (annotations.length - 1 === selectedAnnotationIndex) {
         setWorkState(WorkState.Selecting);
@@ -104,22 +105,10 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     if (workState === WorkState.None) setSelectedAnnotationIndex(null);
   }, [workState]);
   useEffect(() => {
-    if (size.width !== 0) {
-      if (size.width > size.height) {
-        const scaleX = defaultSize.width / size.width;
-        if (scaleX !== scale.current.x) {
-          scale.current = { x: scaleX, y: scaleX };
-          setImageSize({ width: defaultSize.width, height: size.height * scaleX });
-        }
-      } else {
-        const scaleY = defaultSize.height / size.height;
-        if (scaleY !== scale.current.y) {
-          scale.current = { x: scaleY, y: scaleY };
-          setImageSize({ height: defaultSize.height, width: size.width * scaleY });
-        }
-      }
-    }
-  }, [size]);
+    const [outcomeSize, outcomeScale] = resizeImage(size);
+    setImageSize(outcomeSize);
+    scale.current = outcomeScale;
+  }, [size, resizeImage]);
 
   if (status === 'loading' || (imageSize.height === 0 && imageSize.width === 0))
     return (
@@ -147,7 +136,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
       <Stage
         width={imageSize.width}
         height={imageSize.height}
-        scale={scale.current}
+        scale={{ x: scale.current, y: scale.current }}
         style={{ cursor: cursorState }}
       >
         <Layer
@@ -167,8 +156,8 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
                 imageSize={imageSize}
                 visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
                 label={annotation.label}
+                scale={scale.current}
                 changeCursorState={changeCursorState}
-                scale={scale.current.x}
                 setShowOuterRemoveButton={setShowOuterRemoveButton}
                 removeBox={removeBox}
               />
@@ -176,7 +165,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
                 workState={workState}
                 onSelect={onSelect}
                 annotation={annotation}
-                scale={scale.current.x}
+                scale={scale.current}
                 annotationIndex={i}
                 selected={i === selectedAnnotationIndex}
                 dispatch={dispatch}

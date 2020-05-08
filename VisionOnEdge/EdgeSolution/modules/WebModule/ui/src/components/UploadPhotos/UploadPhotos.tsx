@@ -48,13 +48,15 @@ const CapturedImagesContainer = ({ capturedImages, isValid, partId }): JSX.Eleme
           gridGap: '10px',
           padding: '10px',
           borderColor: isValid ? '' : 'red',
+          justifyItems: 'center',
+          alignItems: 'center',
         }}
       >
         {capturedImages.map((image, i) => (
           <LabelingPageDialog
             key={i}
             imageIndex={i}
-            trigger={<LabelDisplayImage labelImage={image} pointerCursor width={300} height={150} />}
+            trigger={<LabelDisplayImage labelImage={image} pointerCursor width={300} height={225} />}
             partId={partId}
             isRelabel={false}
           />

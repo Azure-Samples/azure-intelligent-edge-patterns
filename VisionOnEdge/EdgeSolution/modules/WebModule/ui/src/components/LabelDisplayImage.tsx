@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect, FC, useMemo } from 'react';
+import React, { useState, useRef, useEffect, FC, useMemo, useCallback } from 'react';
 import { Stage, FastLayer, Image as KonvaImage } from 'react-konva';
 import { Flex, Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
-import { Position2D, Size2D, AnnotationState, Annotation } from '../store/labelingPage/labelingPageTypes';
+import { Size2D, AnnotationState, Annotation } from '../store/labelingPage/labelingPageTypes';
 import { DisplayBox } from './LabelingPage/Box';
 import { LabelImage } from '../store/image/imageTypes';
+import getResizeImageFunction from './LabelingPage/util/resizeImage';
 
 interface LabelDisplayImageProps {
   labelImage: LabelImage;
@@ -25,7 +26,8 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
 }) => {
   const [image, _, size] = useImage(labelImage.image, 'anonymous');
   const [imageSize, setImageSize] = useState<Size2D>({ width, height });
-  const scale = useRef<Position2D>({ x: 1, y: 1 });
+  const resizeImage = useCallback(getResizeImageFunction({ width, height }), [width, height]);
+  const scale = useRef<number>(1);
 
   const annotations = useMemo<Annotation[]>(() => {
     if (!labelImage?.labels) return [];
@@ -38,19 +40,20 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   }, [labelImage]);
 
   useEffect(() => {
-    if (size.width !== 0) {
-      const scaleX = imageSize.width / size.width;
-      if (scaleX !== scale.current.x) {
-        scale.current = { x: scaleX, y: scaleX };
-        setImageSize((prev) => ({ ...prev, height: size.height * scaleX }));
-      }
-    }
-  }, [imageSize, size]);
+    const [outcomeSize, outcomeScale] = resizeImage(size);
+    setImageSize(outcomeSize);
+
+    scale.current = outcomeScale;
+  }, [size, resizeImage]);
 
   return (
     <div onClick={onClick} style={{ cursor: pointerCursor ? 'pointer' : 'default' }}>
       <Flex column>
-        <Stage width={imageSize.width} height={imageSize.height} scale={scale.current}>
+        <Stage
+          width={imageSize.width}
+          height={imageSize.height}
+          scale={{ x: scale.current, y: scale.current }}
+        >
           <FastLayer>
             <KonvaImage image={image} />
             {annotations.map((annotation, i) => (
