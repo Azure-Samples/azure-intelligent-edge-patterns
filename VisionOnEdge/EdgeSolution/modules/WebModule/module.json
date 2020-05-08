@@ -4,7 +4,7 @@
   "image": {
     "repository": "mycapreg.azurecr.io/visionwebmodule",
     "tag": {
-      "version": "0.2.24",
+      "version": "0.3.29",
       "platforms": {
         "amd64": "./Dockerfile.amd64",
         "amd64.debug": "./Dockerfile.amd64.debug",

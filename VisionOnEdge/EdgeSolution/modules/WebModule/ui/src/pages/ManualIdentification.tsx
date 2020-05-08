@@ -1,4 +1,4 @@
-import React, { useState, useMemo, FC } from 'react';
+import React, { useState, useEffect, useMemo, FC, Dispatch, SetStateAction } from 'react';
 import {
   Dropdown,
   DropdownItemProps,
@@ -11,7 +11,8 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
-import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
 import 'rc-tooltip/assets/bootstrap.css';
@@ -24,10 +25,14 @@ import LabelDisplayImage from '../components/LabelDisplayImage';
 import { ProjectData } from '../store/project/projectTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { getFilteredImages } from '../util/getFilteredImages';
+import { thunkGetProject } from '../store/project/projectActions';
+import { getLabelImages } from '../store/image/imageActions';
 
 let sorting = false;
 
+type JudgedImages = { correct: number[]; incorrect: number[] };
 const ManualIdentification: FC = () => {
+  const dispatch = useDispatch();
   const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
     (state) => ({
       projectData: state.project.data,
@@ -56,30 +61,35 @@ const ManualIdentification: FC = () => {
     projectData.accuracyRangeMax,
   ]);
   const [ascend, setAscend] = useState<boolean>(false);
+  const [judgedImages, setJudgedImages] = useState<JudgedImages>({
+    correct: [],
+    incorrect: [],
+  });
 
   const showImages = useMemo(() => {
-    // TODO: Get real images here
-    console.log(images)
-    //const imgs = getFilteredImages(images, { partId: selectedPartId })
-    const imgs = getFilteredImages(images, {})
-      .map((e) => ({ ...e, confidenceLevel: e.confidence*100 }))
+    const filteredImages = getFilteredImages(images, { partId: selectedPartId, isRelabel: true })
+      .map((e) => ({ ...e, confidenceLevel: ((e.confidence * 1000) | 0) / 10 }))
       .filter(
         (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
       );
-      console.log(imgs)
 
     if (sorting) {
-      if (ascend) imgs.sort((a, b) => a.confidenceLevel - b.confidenceLevel);
-      else imgs.sort((a, b) => b.confidenceLevel - a.confidenceLevel);
+      if (ascend) filteredImages.sort((a, b) => a.confidenceLevel - b.confidenceLevel);
+      else filteredImages.sort((a, b) => b.confidenceLevel - a.confidenceLevel);
     }
 
-    return imgs;
+    return filteredImages;
   }, [confidenceLevelRange, ascend, images, selectedPartId]);
 
   const onDropdownChange = (_, data): void => {
     const { key } = data.value.content;
     setSelectedPartId(key);
   };
+
+  useEffect(() => {
+    dispatch(thunkGetProject());
+    dispatch(getLabelImages());
+  }, [dispatch]);
 
   return (
     <div>
@@ -141,10 +151,33 @@ const ManualIdentification: FC = () => {
           }}
         >
           {showImages.map((e, i) => (
-            <ImageIdentificationItem key={i} confidenceLevel={e.confidenceLevel} imageIndex={i} labelImage={e} />
+            <ImageIdentificationItem
+              key={i}
+              confidenceLevel={e.confidenceLevel}
+              imageIndex={i}
+              labelImage={e}
+              judgedImages={judgedImages}
+              setJudgedImages={setJudgedImages}
+              partId={selectedPartId}
+            />
           ))}
         </Grid>
-        <Button content="Update" styles={{ width: '15%' }} primary disabled />
+        <Button
+          content="Update"
+          styles={{ width: '15%' }}
+          primary
+          disabled={judgedImages.correct.length === 0 && judgedImages.incorrect.length === 0}
+          onClick={(): void => {
+            axios({ method: 'POST', url: '/api/relabel/update', data: judgedImages })
+              .then(() => {
+                dispatch(getLabelImages());
+                return void 0;
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+          }}
+        />
       </Flex>
     </div>
   );
@@ -154,9 +187,26 @@ interface ImageIdentificationItemProps {
   confidenceLevel: number;
   labelImage: LabelImage;
   imageIndex: number;
+  judgedImages: JudgedImages;
+  setJudgedImages: Dispatch<SetStateAction<JudgedImages>>;
+  partId: number;
 }
-const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, labelImage,imageIndex }) => {
-  const [isPartCorrect, setIsPartCorrect] = useState<number>(null); // * 1: true, 0: false
+const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
+  confidenceLevel,
+  labelImage,
+  imageIndex,
+  judgedImages,
+  setJudgedImages,
+  partId,
+}) => {
+  let isPartCorrect: number;
+  if (judgedImages.correct.indexOf(labelImage.id) >= 0) {
+    isPartCorrect = 1;
+  } else if (judgedImages.incorrect.indexOf(labelImage.id) >= 0) {
+    isPartCorrect = 0;
+  } else {
+    isPartCorrect = null;
+  }
 
   return (
     <Flex hAlign="center" padding="padding.medium">
@@ -168,7 +218,23 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
         <Flex column>
           <RadioGroup
             checkedValue={isPartCorrect}
-            onCheckedValueChange={(_, newProps): void => setIsPartCorrect(newProps.value as number)}
+            onCheckedValueChange={(_, newProps): void => {
+              setJudgedImages((prev) => {
+                if (newProps.value === 1) {
+                  const idxInIncorrect = prev.incorrect.indexOf(labelImage.id);
+                  const idxInCorrect = prev.correct.indexOf(labelImage.id);
+                  if (idxInIncorrect >= 0) prev.incorrect.splice(idxInIncorrect, 1);
+                  if (idxInCorrect === -1) prev.correct.push(labelImage.id);
+                }
+                if (newProps.value === 0) {
+                  const idxInCorrect = prev.correct.indexOf(labelImage.id);
+                  const idxInIncorrect = prev.incorrect.indexOf(labelImage.id);
+                  if (idxInCorrect >= 0) prev.correct.splice(idxInCorrect, 1);
+                  if (idxInIncorrect === -1) prev.incorrect.push(labelImage.id);
+                }
+                return { ...prev };
+              });
+            }}
             items={[
               {
                 key: '1',
@@ -185,6 +251,8 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
         </Flex>
         <LabelingPageDialog
           imageIndex={imageIndex}
+          isRelabel={true}
+          partId={partId}
           trigger={<Button primary content="Identify" disabled={!isPartCorrect} />}
         />
       </Flex>

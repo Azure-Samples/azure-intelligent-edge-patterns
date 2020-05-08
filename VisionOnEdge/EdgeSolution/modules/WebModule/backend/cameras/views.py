@@ -2,9 +2,11 @@ from __future__ import absolute_import, unicode_literals
 import base64
 import json
 import time
+import threading
 import datetime
 import threading
 import io
+import sys
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
@@ -21,13 +23,14 @@ from rest_framework import status
 import requests
 
 
-from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting
+from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import CustomVisionErrorException
 
 from azure.iot.device import IoTHubModuleClient
 from azure.iot.hub import IoTHubRegistryManager
@@ -65,49 +68,101 @@ def export_iterationv3_2(project_id, iteration_id):
 
     return res
 
-import cv2
+
+def update_train_status(project_id):
+    def _train_status_worker(project_id):
+        while True:
+            time.sleep(1)
+            project_obj = Project.objects.get(pk=project_id)
+            camera_id = project_obj.camera_id
+            customvision_project_id = project_obj.customvision_project_id
+            camera = Camera.objects.get(pk=camera_id)
+
+
+            iterations = trainer.get_iterations(customvision_project_id)
+            if len(iterations) == 0:
+                print('Status : preparing custom vision environment')
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Status : preparing custom vision environment', 'log': '', 'project':project_obj}
+                )
+                continue
+                #return JsonResponse({'status': 'waiting training'})
+
+            iteration = iterations[0]
+            if iteration.exportable == False or iteration.status != 'Completed':
+                print('Status : training')
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Status : training', 'log': '', 'project':project_obj}
+                )
+                continue
+                #return JsonResponse({'status': 'waiting training'})
+
+            exports = trainer.get_exports(customvision_project_id, iteration.id)
+            if len(exports) == 0 or not exports[0].download_uri:
+                print('Status : exporting model')
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Status : exporting model', 'log': '', 'project':project_obj}
+                )
+                #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
+                res = export_iterationv3_2(customvision_project_id, iteration.id)
+                print(res.json())
+                continue
+                #return JsonResponse({'status': 'exporting'})
+
+            project_obj.download_uri = exports[0].download_uri
+            project_obj.save(update_fields=['download_uri'])
+
+
+            print('[INFO] is deployed before', project_obj.deployed)
+            if not project_obj.deployed:
+                if exports[0].download_uri:
+                    #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+                    def _send(download_uri, rtsp):
+                        # FIXME
+                        #print('update rtsp',  rtsp, flush=True)
+                        #print('update model', download_uri, flush=True)
+                        requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type': 'rtsp', 'cam_source': rtsp})
+                        requests.get('http://'+inference_module_url()+'/update_model', params={'model_uri': download_uri})
+                    threading.Thread(target=_send, args=(exports[0].download_uri, camera.rtsp)).start()
+
+                    project_obj.deployed = True
+                    project_obj.save(update_fields=['download_uri', 'deployed'])
+
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Status : deploying model', 'log': '', 'project':project_obj}
+                )
+                continue
+
+            print('Training Status : Completed')
+            # @FIXME (Hugh): wrap it up
+            obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'ok', 'log': '', 'project':project_obj}
+            )
+            break
+            #return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
+
+    threading.Thread(target=_train_status_worker, args=(project_id,)).start()
+
+
 @api_view()
 def export(request, project_id):
+    """get the status of train job sent to custom vision
+
+       @FIXME (Hugh): change the naming of this endpoint
+    """
     project_obj = Project.objects.get(pk=project_id)
+    train_obj = Train.objects.get(project_id=project_id)
 
-    camera_id = project_obj.camera_id
-    camera = Camera.objects.get(pk=camera_id)
-
-    customvision_project_id = project_obj.customvision_project_id
-
-    iterations = trainer.get_iterations(customvision_project_id)
-    if len(iterations) == 0:
-        print('not yet training ...')
-        return JsonResponse({'status': 'waiting training'})
-
-    iteration = iterations[0]
-
-    if iteration.exportable == False or iteration.status != 'Completed':
-        print('waiting training ...')
-        return JsonResponse({'status': 'waiting training'})
-
-    exports = trainer.get_exports(customvision_project_id, iteration.id)
-    if len(exports) == 0:
-        print('exporting ...')
-        #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
-        res = export_iterationv3_2(customvision_project_id, iteration.id)
-        print(res.json())
-        return JsonResponse({'status': 'exporting'})
-
-    project_obj.download_uri = exports[0].download_uri
-    project_obj.save(update_fields=['download_uri'])
-
-    if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
-        def _send(download_uri, rtsp):
-            # FIXME
-            requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type': 'rtsp', 'cam_source': rtsp})
-            requests.get('http://'+inference_module_url()+'/update_model', params={'model_uri': download_uri})
-        threading.Thread(target=_send, args=(exports[0].download_uri, camera.rtsp)).start()
-
-    print('export ok')
-
-    return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
+    return JsonResponse({'status': train_obj.status, 'download_uri': project_obj.download_uri})
 
 # FIXME tmp workaround
 @api_view()
@@ -192,11 +247,11 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Setting
         fields = [
-            'id', 
-            'training_key', 
-            'endpoint', 
-            'iot_hub_connection_string', 
-            'device_id', 
+            'id',
+            'training_key',
+            'endpoint',
+            'iot_hub_connection_string',
+            'device_id',
             'module_id'
         ]
 
@@ -211,12 +266,12 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
         fields = [
-            'id', 
-            'camera', 
-            'location', 
-            'parts', 
-            'download_uri', 
-            'needRetraining', 
+            'id',
+            'camera',
+            'location',
+            'parts',
+            'download_uri',
+            'needRetraining',
             'accuracyRangeMin',
             'accuracyRangeMax',
             'maxImages'
@@ -253,6 +308,17 @@ class AnnotationViewSet(viewsets.ModelViewSet):
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
 
+
+#
+# Train Views
+#
+class TrainSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Train
+        fields = ['id', 'status', 'log', 'project']
+class TrainViewSet(viewsets.ModelViewSet):
+    queryset = Train.objects.all()
+    serializer_class = TrainSerializer
 
 
 
@@ -315,69 +381,126 @@ def capture(request, stream_id):
     return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
 
 def _train(project_id):
+
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
 
-    count = 10
-    while count > 0:
-        part_ids = [part.id for part in project_obj.parts.all()]
-        if len(part_ids) > 0: break
-        print('waiting parts...')
-        time.sleep(1)
-        count -= 1
+    try:
+        count = 10
+        while count > 0:
+            part_ids = [part.id for part in project_obj.parts.all()]
+            if len(part_ids) > 0: break
+            print('waiting parts...')
+            time.sleep(1)
+            count -= 1
 
+        # @FIXME (Hugh): wrap it up
+        obj, created = Train.objects.update_or_create(
+            project=project_obj,
+            defaults={'status': 'Status: send data (images and annotations)', 'log': '', 'project':project_obj}
+        )
 
-    print(project_obj.id)
-    print('_____>>>>', part_ids)
-    images = Image.objects.filter(part_id__in=part_ids).all()
-    img_entries = []
+        print(project_obj.id)
+        print('Part ids:', part_ids, flush=True)
+        images = Image.objects.filter(part_id__in=part_ids, is_relabel=False, uploaded=False).all()
+        img_entries = []
+        img_objs = []
 
-    tags = trainer.get_tags(customvision_project_id)
-    tag_dict = {}
-    for tag in tags:
-        tag_dict[tag.name] = tag.id
-
-    for image_obj in images:
-        print('*** image', image_obj)
-
-        part = image_obj.part
-        part_name = part.name
-        if part_name not in tag_dict:
-            print('part_name', part_name)
-            tag = trainer.create_tag(customvision_project_id, part_name)
+        tags = trainer.get_tags(customvision_project_id)
+        tag_dict = {}
+        for tag in tags:
             tag_dict[tag.name] = tag.id
 
-        tag_id = tag_dict[part_name]
+        print('[INFO] Submit images and do the Training...')
+        count = 0
+        for index, image_obj in enumerate(images):
+            print('*** image', index+1, image_obj, flush=True)
 
-        name = 'img-' + datetime.datetime.utcnow().isoformat()
-        regions = []
-        width = image_obj.image.width
-        height = image_obj.image.height
-        try:
-            labels = json.loads(image_obj.labels)
-            for label in labels:
-                x = label['x1'] / width
-                y = label['y1'] / height
-                w = (label['x2'] - label['x1']) / width
-                h = (label['y2'] - label['y1']) / height
-                region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
-                regions.append(region)
+            part = image_obj.part
+            part_name = part.name
+            if part_name not in tag_dict:
+                print('new part name', part_name, flush=True)
+                print('creating new tag (part name)', flush=True)
+                tag = trainer.create_tag(customvision_project_id, part_name)
+                tag_dict[tag.name] = tag.id
 
-            image = image_obj.image
-            image.open()
-            img_entry = ImageFileCreateEntry(name=name, contents=image.read(), regions=regions)
-            img_entries.append(img_entry)
-        except:
-            pass
-    print('uploading...')
-    upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
-    print('batch success:', upload_result.is_batch_successful)
-    #print(upload_result)
+            tag_id = tag_dict[part_name]
 
-    print('training...')
-    trainer.train_project(customvision_project_id)
+            name = 'img-' + datetime.datetime.utcnow().isoformat()
+            regions = []
+            width = image_obj.image.width
+            height = image_obj.image.height
+            try:
+                labels = json.loads(image_obj.labels)
+                if len(labels) == 0: continue
+                for label in labels:
+                    x = label['x1'] / width
+                    y = label['y1'] / height
+                    w = (label['x2'] - label['x1']) / width
+                    h = (label['y2'] - label['y1']) / height
+                    region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
+                    regions.append(region)
 
-    return JsonResponse({'status': 'ok'})
+                image = image_obj.image
+                image.open()
+                img_entry = ImageFileCreateEntry(name=name, contents=image.read(), regions=regions)
+                img_objs.append(image_obj)
+                img_entries.append(img_entry)
+                count += 1
+            except:
+                print("[ERROR] Unexpected error:", sys.exc_info()[0], flush=True)
+                raise
+
+            if len(img_entries) >= 5:
+                print('uploading...', flush=True)
+                upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
+                print('batch success:', upload_result.is_batch_successful, flush=True)
+                img_entries = []
+                for img_obj in img_objs:
+                    img_obj.uploaded = True
+                    img_obj.save()
+                img_objs = []
+
+        if len(img_entries) >= 1:
+            print('uploading...', flush=True)
+            upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
+            print('batch success:', upload_result.is_batch_successful, flush=True)
+            for img_obj in img_objs:
+                img_obj.uploaded = True
+                img_obj.save()
+
+        if count == 0:
+            print('Nothing changed, no training', flush=True)
+            # @FIXME (Hugh): wrap it up
+            obj, created = Train.objects.update_or_create(
+                project=project_obj,
+                defaults={'status': 'ok', 'log': '', 'project':project_obj}
+            )
+
+        else:
+            print('training...', flush=True)
+            try:
+                trainer.train_project(customvision_project_id)
+                project_obj.deployed = False
+                project_obj.save(update_fields=['deployed'])
+                update_train_status(project_id)
+                print('[INFO] set deployed = False')
+            except CustomVisionErrorException:
+                print('[ERROR] From Custom Vision: Nothing changed since last training', flush=True)
+                raise
+
+        return JsonResponse({'status': 'ok'})
+
+    except Exception as e:
+        print(f'Exception: {str(e)}')
+
+        # @FIXME (Hugh): wrap it up
+        obj, created = Train.objects.update_or_create(
+            project=project_obj,
+            defaults={'status': f'Status : failed {str(e)}', 'log': str(e), 'project':project_obj}
+        )
+
+        return JsonResponse({'status': f'failed: {str(e)}'})
 
 @api_view()
 def train(request, project_id):
@@ -435,5 +558,29 @@ def upload_relabel_image(request):
     img.name = datetime.datetime.utcnow().isoformat() + '.jpg'
     img_obj = Image(image=img, part_id=parts[0].id, labels=labels, confidence=confidence, is_relabel=True)
     img_obj.save()
+
+    return JsonResponse({'status': 'ok'})
+
+@api_view(['POST'])
+def relabel_update(request):
+
+    print('update relabeling')
+    if 'correct' not in request.data:
+        print('missing correct')
+    if 'incorrect' not in request.data:
+        print('missing incorrect')
+
+    correct = request.data['correct']
+    for image_id in correct:
+        img_obj = Image.objects.get(pk=image_id)
+        img_obj.is_relabel = False
+        img_obj.save()
+        print('image', image_id, 'added from relabeling pool')
+
+    incorrect = request.data['incorrect']
+    for image_id in incorrect:
+        img_obj = Image.objects.get(pk=image_id)
+        img_obj.delete()
+        print('image', image_id, 'removed from relabeling pool')
 
     return JsonResponse({'status': 'ok'})

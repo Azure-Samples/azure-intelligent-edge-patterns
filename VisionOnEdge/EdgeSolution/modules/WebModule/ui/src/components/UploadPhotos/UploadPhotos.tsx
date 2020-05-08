@@ -12,7 +12,7 @@ import { getLabelImages, postLabelImage } from '../../store/image/imageActions';
 export const UploadPhotos = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
   const images = useSelector<State, LabelImage[]>((state) => state.images);
-  const filteredImages = getFilteredImages(images, { partId });
+  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
   const isValid = filteredImages.filter((image) => image.labels).length >= 15;
 
   useEffect(() => {
@@ -31,12 +31,12 @@ export const UploadPhotos = ({ partId }): JSX.Element => {
   return (
     <>
       <input type="file" onChange={handleUpload} accept="image/*" multiple />
-      <CapturedImagesContainer capturedImages={filteredImages} isValid={isValid} />
+      <CapturedImagesContainer capturedImages={filteredImages} isValid={isValid} partId={partId} />
     </>
   );
 };
 
-const CapturedImagesContainer = ({ capturedImages, isValid }): JSX.Element => {
+const CapturedImagesContainer = ({ capturedImages, isValid, partId }): JSX.Element => {
   return (
     <>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
@@ -48,13 +48,17 @@ const CapturedImagesContainer = ({ capturedImages, isValid }): JSX.Element => {
           gridGap: '10px',
           padding: '10px',
           borderColor: isValid ? '' : 'red',
+          justifyItems: 'center',
+          alignItems: 'center',
         }}
       >
         {capturedImages.map((image, i) => (
           <LabelingPageDialog
             key={i}
             imageIndex={i}
-            trigger={<LabelDisplayImage labelImage={image} pointerCursor width={300} height={150} />}
+            trigger={<LabelDisplayImage labelImage={image} pointerCursor width={300} height={225} />}
+            partId={partId}
+            isRelabel={false}
           />
         ))}
       </Grid>

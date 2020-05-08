@@ -8,8 +8,9 @@ interface LabelingPageDialogProps {
   trigger: JSX.Element;
   imageIndex: number;
   partId?: number;
+  isRelabel: boolean;
 }
-const LabelingPageDialog: FC<LabelingPageDialogProps> = ({ trigger, imageIndex, partId }): JSX.Element => {
+const LabelingPageDialog: FC<LabelingPageDialogProps> = ({ trigger, imageIndex, partId, isRelabel }): JSX.Element => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog
@@ -23,6 +24,7 @@ const LabelingPageDialog: FC<LabelingPageDialogProps> = ({ trigger, imageIndex, 
           labelingType={LabelingType.SingleAnnotation}
           imageIndex={imageIndex}
           partId={partId}
+          isRelabel={isRelabel}
         />
       }
     />
