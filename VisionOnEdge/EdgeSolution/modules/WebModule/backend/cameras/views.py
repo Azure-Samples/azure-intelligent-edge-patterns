@@ -368,12 +368,6 @@ def _train(project_id):
     customvision_project_id = project_obj.customvision_project_id
 
     try:
-        # @FIXME (Hugh): wrap it up
-        obj, created = Train.objects.update_or_create(
-            project=project_obj,
-            defaults={'status': 'Sending images and annotations', 'log': '', 'project':project_obj}
-        )
-
         count = 10
         while count > 0:
             part_ids = [part.id for part in project_obj.parts.all()]
@@ -382,6 +376,11 @@ def _train(project_id):
             time.sleep(1)
             count -= 1
 
+        # @FIXME (Hugh): wrap it up
+        obj, created = Train.objects.update_or_create(
+            project=project_obj,
+            defaults={'status': 'Sending images and annotations', 'log': '', 'project':project_obj}
+        )
 
         print(project_obj.id)
         print('Part ids:', part_ids, flush=True)
@@ -454,6 +453,11 @@ def _train(project_id):
 
         if count == 0:
             print('Nothing changed, no training', flush=True)
+            # @FIXME (Hugh): wrap it up
+            obj, created = Train.objects.update_or_create(
+                project=project_obj,
+                defaults={'status': 'ok', 'log': '', 'project':project_obj}
+            )
 
         else:
             print('training...', flush=True)
