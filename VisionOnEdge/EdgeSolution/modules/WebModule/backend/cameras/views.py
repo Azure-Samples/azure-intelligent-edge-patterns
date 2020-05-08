@@ -81,33 +81,33 @@ def update_train_status(project_id):
 
             iterations = trainer.get_iterations(customvision_project_id)
             if len(iterations) == 0:
-                print('Training Status : Preparing')
+                print('Status : preparing custom vision environment')
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Training Status : Preparing', 'log': '', 'project':project_obj}
+                    defaults={'status': 'Status : preparing custom vision environment', 'log': '', 'project':project_obj}
                 )
                 continue
                 #return JsonResponse({'status': 'waiting training'})
 
             iteration = iterations[0]
             if iteration.exportable == False or iteration.status != 'Completed':
-                print('Training Status : On-going')
+                print('Status : training')
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Training Status : On-going', 'log': '', 'project':project_obj}
+                    defaults={'status': 'Status : training', 'log': '', 'project':project_obj}
                 )
                 continue
                 #return JsonResponse({'status': 'waiting training'})
 
             exports = trainer.get_exports(customvision_project_id, iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
-                print('Training Status : Exporting')
+                print('Status : exporting model')
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Training Status : Exporting', 'log': '', 'project':project_obj}
+                    defaults={'status': 'Status : exporting model', 'log': '', 'project':project_obj}
                 )
                 #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
                 res = export_iterationv3_2(customvision_project_id, iteration.id)
@@ -115,13 +115,31 @@ def update_train_status(project_id):
                 continue
                 #return JsonResponse({'status': 'exporting'})
 
-            project_obj.deployed = True
             project_obj.download_uri = exports[0].download_uri
-            project_obj.save(update_fields=['download_uri', 'deployed'])
+            project_obj.save(update_fields=['download_uri'])
 
 
-            if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-                update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+            print('[INFO] is deployed before', project_obj.deployed)
+            if not project_obj.deployed:
+                if exports[0].download_uri:
+                    #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+                    def _send(download_uri, rtsp):
+                        # FIXME
+                        #print('update rtsp',  rtsp, flush=True)
+                        #print('update model', download_uri, flush=True)
+                        requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type': 'rtsp', 'cam_source': rtsp})
+                        requests.get('http://'+inference_module_url()+'/update_model', params={'model_uri': download_uri})
+                    threading.Thread(target=_send, args=(exports[0].download_uri, camera.rtsp)).start()
+
+                    project_obj.deployed = True
+                    project_obj.save(update_fields=['download_uri', 'deployed'])
+
+                # @FIXME (Hugh): wrap it up
+                obj, created = Train.objects.update_or_create(
+                    project=project_obj,
+                    defaults={'status': 'Status : deploying model', 'log': '', 'project':project_obj}
+                )
+                continue
 
             print('Training Status : Completed')
             # @FIXME (Hugh): wrap it up
@@ -379,7 +397,7 @@ def _train(project_id):
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': 'Sending images and annotations', 'log': '', 'project':project_obj}
+            defaults={'status': 'Status: send data (images and annotations)', 'log': '', 'project':project_obj}
         )
 
         print(project_obj.id)
@@ -469,6 +487,7 @@ def _train(project_id):
                 print('[INFO] set deployed = False')
             except CustomVisionErrorException:
                 print('[ERROR] From Custom Vision: Nothing changed since last training', flush=True)
+                raise
 
         return JsonResponse({'status': 'ok'})
 
@@ -478,7 +497,7 @@ def _train(project_id):
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': f'Training Status : Failed {str(e)}', 'log': str(e), 'project':project_obj}
+            defaults={'status': f'Status : failed {str(e)}', 'log': str(e), 'project':project_obj}
         )
 
         return JsonResponse({'status': f'failed: {str(e)}'})
