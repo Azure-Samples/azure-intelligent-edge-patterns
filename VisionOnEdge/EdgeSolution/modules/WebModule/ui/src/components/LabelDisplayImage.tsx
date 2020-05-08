@@ -57,7 +57,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
           <FastLayer>
             <KonvaImage image={image} />
             {annotations.map((annotation, i) => (
-              <DisplayBox key={i} vertices={annotation.label} color="red" />
+              <DisplayBox key={i} scale={scale.current} vertices={annotation.label} color="red" />
             ))}
           </FastLayer>
         </Stage>

@@ -64,9 +64,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
         {!isRelabel && (
           <Button
             text
-            disabled={
-              index === filteredImages.length - 1 || isOnePointBox(annotations)
-            }
+            disabled={index === filteredImages.length - 1 || isOnePointBox(annotations)}
             icon={<ChevronEndIcon size="larger" />}
             onClick={(): void => {
               dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));

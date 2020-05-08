@@ -203,10 +203,17 @@ export const Box2d: FC<Box2dComponentProps> = ({
   );
 };
 
-export const DisplayBox: FC<{ vertices: BoxLabel; color: string }> = ({ vertices, color }) => {
+export const DisplayBox: FC<{ vertices: BoxLabel; color: string; scale: number }> = ({
+  scale,
+  vertices,
+  color,
+}) => {
   return (
     <>
       <Line
+        ref={(ref): void => {
+          if (ref) ref.cache();
+        }}
         points={[
           vertices.x1,
           vertices.y1,
@@ -220,12 +227,45 @@ export const DisplayBox: FC<{ vertices: BoxLabel; color: string }> = ({ vertices
           vertices.y1,
         ]}
         stroke={color}
-        strokeWidth={4}
+        strokeWidth={1 / scale}
+        closed={true}
       />
-      <Circle x={vertices.x1} y={vertices.y1} radius={10} fill={color} />
-      <Circle x={vertices.x2} y={vertices.y1} radius={10} fill={color} />
-      <Circle x={vertices.x2} y={vertices.y2} radius={10} fill={color} />
-      <Circle x={vertices.x1} y={vertices.y2} radius={10} fill={color} />
+      <Circle
+        ref={(ref): void => {
+          if (ref) ref.cache();
+        }}
+        x={vertices.x1}
+        y={vertices.y1}
+        radius={3 / scale}
+        fill={color}
+      />
+      <Circle
+        ref={(ref): void => {
+          if (ref) ref.cache();
+        }}
+        x={vertices.x2}
+        y={vertices.y1}
+        radius={3 / scale}
+        fill={color}
+      />
+      <Circle
+        ref={(ref): void => {
+          if (ref) ref.cache();
+        }}
+        x={vertices.x2}
+        y={vertices.y2}
+        radius={3 / scale}
+        fill={color}
+      />
+      <Circle
+        ref={(ref): void => {
+          if (ref) ref.cache();
+        }}
+        x={vertices.x1}
+        y={vertices.y2}
+        radius={3 / scale}
+        fill={color}
+      />
     </>
   );
 };

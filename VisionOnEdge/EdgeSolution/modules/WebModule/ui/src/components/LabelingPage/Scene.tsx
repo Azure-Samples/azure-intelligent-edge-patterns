@@ -102,8 +102,8 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     }
   }, [noMoreCreate, changeCursorState]);
   useEffect(() => {
-    if (workState === WorkState.None) setSelectedAnnotationIndex(null);
-  }, [workState]);
+    if (workState === WorkState.None && !noMoreCreate) setSelectedAnnotationIndex(null);
+  }, [workState, noMoreCreate]);
   useEffect(() => {
     const [outcomeSize, outcomeScale] = resizeImage(size);
     setImageSize(outcomeSize);
