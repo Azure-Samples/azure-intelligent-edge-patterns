@@ -121,7 +121,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     );
 
   return (
-    <div style={{ margin: 3 }}>
+    <div style={{ margin: '0.2em' }}>
       {annotations.length !== 0 &&
       showOuterRemoveButton &&
       !isDragging &&

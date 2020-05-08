@@ -17,7 +17,13 @@ interface LabelingPageProps {
   partId?: number;
   isRelabel: boolean;
 }
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDialog, partId, isRelabel }) => {
+const LabelingPage: FC<LabelingPageProps> = ({
+  labelingType,
+  imageIndex,
+  closeDialog,
+  partId,
+  isRelabel,
+}) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
   const { images, annotations } = useSelector<State, { images: LabelImage[]; annotations: Annotation[] }>(
@@ -43,25 +49,29 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
         DRAW A RECTANGLE AROUND THE PART
       </Text>
       <Flex vAlign="center">
-        <Button
-          text
-          disabled={index === 0}
-          icon={<ChevronStartIcon size="larger" />}
-          onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-            setIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
-          }}
-        />
+        {!isRelabel && (
+          <Button
+            text
+            disabled={index === 0}
+            icon={<ChevronStartIcon size="larger" />}
+            onClick={(): void => {
+              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
+              setIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
+            }}
+          />
+        )}
         <Scene url={imageUrl ?? '/icons/Play.png'} annotations={annotations} labelingType={labelingType} />
-        <Button
-          text
-          disabled={index === filteredImages.length - 1}
-          icon={<ChevronEndIcon size="larger" />}
-          onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-            setIndex((prev) => (prev + 1) % filteredImages.length);
-          }}
-        />
+        {!isRelabel && (
+          <Button
+            text
+            disabled={index === filteredImages.length - 1}
+            icon={<ChevronEndIcon size="larger" />}
+            onClick={(): void => {
+              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
+              setIndex((prev) => (prev + 1) % filteredImages.length);
+            }}
+          />
+        )}
       </Flex>
       <Flex gap="gap.medium">
         <Button

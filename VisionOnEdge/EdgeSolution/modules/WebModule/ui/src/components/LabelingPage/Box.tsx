@@ -130,7 +130,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            changeCursorState(LabelingCursorStates.nwseResize);
+            if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.nwseResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;
@@ -149,7 +149,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            changeCursorState(LabelingCursorStates.neswResize);
+            if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.neswResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;
@@ -168,7 +168,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            changeCursorState(LabelingCursorStates.nwseResize);
+            if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.nwseResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;
@@ -187,7 +187,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
             if (display) return;
-            changeCursorState(LabelingCursorStates.neswResize);
+            if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.neswResize);
           }}
           onMouseLeave={(): void => {
             if (display) return;

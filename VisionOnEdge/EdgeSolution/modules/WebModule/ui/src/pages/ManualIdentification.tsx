@@ -169,8 +169,8 @@ const ManualIdentification: FC = () => {
           disabled={judgedImages.correct.length === 0 && judgedImages.incorrect.length === 0}
           onClick={(): void => {
             axios({ method: 'POST', url: '/api/relabel/update', data: judgedImages })
-              .then((response) => {
-                console.info(response);
+              .then(() => {
+                dispatch(getLabelImages());
                 return void 0;
               })
               .catch((err) => {
