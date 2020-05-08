@@ -139,6 +139,12 @@ class Project(models.Model):
     #    #print(instance.parts)
     #    requests.get('http://localhost:8000/api/projects/'+str(project_id)+'/train')
 
+class Train(models.Model):
+    status = models.CharField(max_length=200)
+    log = models.CharField(max_length=1000)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+
 pre_save.connect(Project.pre_save, Project, dispatch_uid='Project_pre')
 post_save.connect(Project.post_save, Project, dispatch_uid='Project_post')
 #m2m_changed.connect(Project.m2m_changed, Project.parts.through, dispatch_uid='Project_m2m')

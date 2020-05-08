@@ -37,6 +37,7 @@ router.register('images', views.ImageViewSet)
 router.register('projects', views.ProjectViewSet)
 router.register('locations', views.LocationViewSet)
 router.register('annotations', views.AnnotationViewSet)
+router.register('train', views.TrainViewSet)
 router.register('settings', views.SettingViewSet)
 
 urlpatterns = \
