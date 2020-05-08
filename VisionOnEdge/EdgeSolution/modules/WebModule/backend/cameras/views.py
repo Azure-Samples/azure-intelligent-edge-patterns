@@ -364,10 +364,10 @@ def capture(request, stream_id):
 
 def _train(project_id):
 
-    try:
-        project_obj = Project.objects.get(pk=project_id)
-        customvision_project_id = project_obj.customvision_project_id
+    project_obj = Project.objects.get(pk=project_id)
+    customvision_project_id = project_obj.customvision_project_id
 
+    try:
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
@@ -461,64 +461,23 @@ def _train(project_id):
                 trainer.train_project(customvision_project_id)
                 project_obj.deployed = False
                 project_obj.save(update_fields=['deployed'])
+                update_train_status(project_id)
                 print('[INFO] set deployed = False')
             except CustomVisionErrorException:
                 print('[ERROR] From Custom Vision: Nothing changed since last training', flush=True)
 
-            for image_obj in images:
-                print('*** image', image_obj)
-
-                part = image_obj.part
-                part_name = part.name
-                if part_name not in tag_dict:
-                    print('part_name', part_name)
-                    tag = trainer.create_tag(customvision_project_id, part_name)
-                    tag_dict[tag.name] = tag.id
-
-                tag_id = tag_dict[part_name]
-
-                name = 'img-' + datetime.datetime.utcnow().isoformat()
-                regions = []
-                width = image_obj.image.width
-                height = image_obj.image.height
-                try:
-                    labels = json.loads(image_obj.labels)
-                    for label in labels:
-                        x = label['x1'] / width
-                        y = label['y1'] / height
-                        w = (label['x2'] - label['x1']) / width
-                        h = (label['y2'] - label['y1']) / height
-                        region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
-                        regions.append(region)
-
-                    image = image_obj.image
-                    image.open()
-                    img_entry = ImageFileCreateEntry(name=name, contents=image.read(), regions=regions)
-                    img_entries.append(img_entry)
-                except:
-                    pass
-            print('uploading...')
-            upload_result = trainer.create_images_from_files(customvision_project_id, images=img_entries)
-            print('batch success:', upload_result.is_batch_successful)
-            #print(upload_result)
-
-            print('training...')
-            trainer.train_project(customvision_project_id)
-
-            print('start working status')
-            update_train_status(project_id)
-
-            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'status': 'ok'})
 
     except Exception as e:
-        print(f'Exception: {e}')
-        return JsonResponse({'status': f'failed: {str(e)}'})
+        print(f'Exception: {str(e)}')
 
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': 'Training Status : Preparing', 'log': '', 'project':project_obj}
+            defaults={'status': f'Training Status : Failed {str(e)}', 'log': str(e), 'project':project_obj}
         )
+
+        return JsonResponse({'status': f'failed: {str(e)}'})
 
 @api_view()
 def train(request, project_id):
