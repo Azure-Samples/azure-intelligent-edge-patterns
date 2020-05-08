@@ -64,7 +64,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     setWorkState(WorkState.None);
     setShowOuterRemoveButton(false);
   }, [dispatch, selectedAnnotationIndex, setWorkState, setShowOuterRemoveButton]);
-  const onMouseDown = (e:KonvaEventObject<MouseEvent>): void => {
+  const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
 
@@ -73,9 +73,11 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     setWorkState(WorkState.Creating);
   };
 
-  const onMouseUp = (e:KonvaEventObject<MouseEvent>): void => {
+  const onMouseUp = (e: KonvaEventObject<MouseEvent>): void => {
     if (workState === WorkState.Creating) {
-      dispatch(updateCreatingAnnotation({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y }));
+      dispatch(
+        updateCreatingAnnotation({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y }),
+      );
       if (annotations.length - 1 === selectedAnnotationIndex) {
         setWorkState(WorkState.Selecting);
       } else {
@@ -103,10 +105,18 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   }, [workState]);
   useEffect(() => {
     if (size.width !== 0) {
-      const scaleX = defaultSize.width / size.width;
-      if (scaleX !== scale.current.x) {
-        scale.current = { x: scaleX, y: scaleX };
-        setImageSize((prev) => ({ ...prev, height: size.height * scaleX }));
+      if (size.width > size.height) {
+        const scaleX = defaultSize.width / size.width;
+        if (scaleX !== scale.current.x) {
+          scale.current = { x: scaleX, y: scaleX };
+          setImageSize({ width: defaultSize.width, height: size.height * scaleX });
+        }
+      } else {
+        const scaleY = defaultSize.height / size.height;
+        if (scaleY !== scale.current.y) {
+          scale.current = { x: scaleY, y: scaleY };
+          setImageSize({ height: defaultSize.height, width: size.width * scaleY });
+        }
       }
     }
   }, [size]);

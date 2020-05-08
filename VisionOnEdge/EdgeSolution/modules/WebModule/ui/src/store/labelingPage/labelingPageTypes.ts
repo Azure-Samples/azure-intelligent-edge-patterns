@@ -67,7 +67,6 @@ export enum LabelingCursorStates {
   nwseResize = 'nwse-resize',
 }
 export interface Box2dComponentProps {
-  display?: boolean;
   workState: WorkState;
   scale: number;
   onSelect: Function;

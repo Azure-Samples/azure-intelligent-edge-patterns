@@ -11,7 +11,6 @@ import {
 import { updateAnnotation } from '../../store/labelingPage/labelingPageActions';
 
 export const Box2d: FC<Box2dComponentProps> = ({
-  display = false,
   scale,
   workState,
   onSelect,
@@ -23,11 +22,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
   changeCursorState = null,
 }) => {
   const [vertices, setVertices] = useState<BoxLabel>(annotation.label);
-  const anchorRadius: number = (display ? 10 : 5) / scale;
-  const strokeWidth: number = (display ? 4 : 2) / scale;
-  const groupRef = useRef(null);
+  const anchorRadius: number = 5 / scale;
+  const strokeWidth: number = 2 / scale;
+  const boxRef = useRef(null);
+
   const dispatchLabel = (): void => {
-    if (display) return;
     changeCursorState();
 
     if (!dispatch) return;
@@ -47,7 +46,6 @@ export const Box2d: FC<Box2dComponentProps> = ({
 
   const onDragAnchor = useCallback(
     ({ xi = 'x1', yi = 'y1' }) => (e: KonvaEventObject<DragEvent>): void => {
-      if (display) return;
       const stage = e.target.getStage();
       const { width, height } = stage.getSize();
       let x = Math.round(e.target.position().x);
@@ -85,11 +83,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
 
       setVertices((prevVertices) => ({ ...prevVertices, [xi]: x, [yi]: y }));
     },
-    [display, changeCursorState, scale, vertices],
+    [changeCursorState, scale, vertices],
   );
 
   useEffect(() => {
-    const layer = groupRef.current.getLayer();
+    const layer = boxRef.current.getLayer();
     layer.on('mousemove', mouseMoveListener);
     return (): void => {
       layer.off('mousemove', mouseMoveListener);
@@ -101,7 +99,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
 
   return (
     <Group
-      ref={groupRef}
+      ref={(e): void => {
+        if (e) {
+          boxRef.current = e;
+        }
+      }}
       visible={visible}
       onMouseDown={(e): void => {
         if (workState === WorkState.None) {
@@ -139,11 +141,9 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragMove={onDragAnchor({ xi: 'x1', yi: 'y1' })}
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
-            if (display) return;
             if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.nwseResize);
           }}
           onMouseLeave={(): void => {
-            if (display) return;
             changeCursorState();
           }}
         />
@@ -158,11 +158,9 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragMove={onDragAnchor({ xi: 'x2', yi: 'y1' })}
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
-            if (display) return;
             if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.neswResize);
           }}
           onMouseLeave={(): void => {
-            if (display) return;
             changeCursorState();
           }}
         />
@@ -177,11 +175,9 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragMove={onDragAnchor({ xi: 'x2', yi: 'y2' })}
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
-            if (display) return;
             if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.nwseResize);
           }}
           onMouseLeave={(): void => {
-            if (display) return;
             changeCursorState();
           }}
         />
@@ -196,15 +192,40 @@ export const Box2d: FC<Box2dComponentProps> = ({
           onDragMove={onDragAnchor({ xi: 'x1', yi: 'y2' })}
           onDragEnd={dispatchLabel}
           onMouseEnter={(): void => {
-            if (display) return;
             if (workState !== WorkState.Creating) changeCursorState(LabelingCursorStates.neswResize);
           }}
           onMouseLeave={(): void => {
-            if (display) return;
             changeCursorState();
           }}
         />
       </Group>
     </Group>
+  );
+};
+
+export const DisplayBox: FC<{ vertices: BoxLabel; color: string }> = ({ vertices, color }) => {
+  return (
+    <>
+      <Line
+        points={[
+          vertices.x1,
+          vertices.y1,
+          vertices.x2,
+          vertices.y1,
+          vertices.x2,
+          vertices.y2,
+          vertices.x1,
+          vertices.y2,
+          vertices.x1,
+          vertices.y1,
+        ]}
+        stroke={color}
+        strokeWidth={4}
+      />
+      <Circle x={vertices.x1} y={vertices.y1} radius={10} fill={color} />
+      <Circle x={vertices.x2} y={vertices.y1} radius={10} fill={color} />
+      <Circle x={vertices.x2} y={vertices.y2} radius={10} fill={color} />
+      <Circle x={vertices.x1} y={vertices.y2} radius={10} fill={color} />
+    </>
   );
 };

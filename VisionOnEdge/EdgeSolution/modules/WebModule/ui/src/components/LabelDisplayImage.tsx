@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, FC, useMemo } from 'react';
-import { Stage, Layer, Image as KonvaImage } from 'react-konva';
+import { Stage, FastLayer, Image as KonvaImage } from 'react-konva';
 import { Flex, Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
-import { Position2D, Size2D, WorkState, AnnotationState } from '../store/labelingPage/labelingPageTypes';
+import { Position2D, Size2D, AnnotationState, Annotation } from '../store/labelingPage/labelingPageTypes';
+import { DisplayBox } from './LabelingPage/Box';
 import { LabelImage } from '../store/image/imageTypes';
-import { Box2d } from './LabelingPage/Box';
 
 interface LabelDisplayImageProps {
   labelImage: LabelImage;
@@ -27,7 +27,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   const [imageSize, setImageSize] = useState<Size2D>({ width, height });
   const scale = useRef<Position2D>({ x: 1, y: 1 });
 
-  const annotations = useMemo(() => {
+  const annotations = useMemo<Annotation[]>(() => {
     if (!labelImage?.labels) return [];
 
     return JSON.parse(labelImage.labels).map((parsedLabels) => ({
@@ -51,22 +51,12 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
     <div onClick={onClick} style={{ cursor: pointerCursor ? 'pointer' : 'default' }}>
       <Flex column>
         <Stage width={imageSize.width} height={imageSize.height} scale={scale.current}>
-          <Layer>
+          <FastLayer>
             <KonvaImage image={image} />
             {annotations.map((annotation, i) => (
-              <Box2d
-                key={i}
-                display={true}
-                workState={WorkState.None}
-                onSelect={(): void => void 0}
-                annotation={annotation}
-                scale={1}
-                annotationIndex={i}
-                selected={annotations.length === 1}
-                dispatch={null}
-              />
+              <DisplayBox key={i} vertices={annotation.label} color="red" />
             ))}
-          </Layer>
+          </FastLayer>
         </Stage>
         <Text align="center">{labelText}</Text>
       </Flex>
