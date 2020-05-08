@@ -58,7 +58,6 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
                 key={i}
                 display={true}
                 workState={WorkState.None}
-                cursorPosition={{ x: 0, y: 0 }}
                 onSelect={(): void => void 0}
                 annotation={annotation}
                 scale={1}

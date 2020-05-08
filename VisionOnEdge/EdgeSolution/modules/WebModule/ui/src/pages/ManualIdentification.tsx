@@ -68,7 +68,7 @@ const ManualIdentification: FC = () => {
 
   const showImages = useMemo(() => {
     const filteredImages = getFilteredImages(images, { partId: selectedPartId, isRelabel: true })
-      .map((e) => ({ ...e, confidenceLevel: e.confidence * 100 }))
+      .map((e) => ({ ...e, confidenceLevel: ((e.confidence * 1000) | 0) / 10 }))
       .filter(
         (e) => e.confidenceLevel >= confidenceLevelRange[0] && e.confidenceLevel <= confidenceLevelRange[1],
       );
@@ -169,8 +169,8 @@ const ManualIdentification: FC = () => {
           disabled={judgedImages.correct.length === 0 && judgedImages.incorrect.length === 0}
           onClick={(): void => {
             axios({ method: 'POST', url: '/api/relabel/update', data: judgedImages })
-              .then((response) => {
-                console.info(response);
+              .then(() => {
+                dispatch(getLabelImages());
                 return void 0;
               })
               .catch((err) => {

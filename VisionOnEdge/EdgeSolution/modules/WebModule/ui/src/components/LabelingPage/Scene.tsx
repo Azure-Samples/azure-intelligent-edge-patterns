@@ -42,7 +42,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
-  const [cursorPosition, setCursorPosition] = useState<Position2D>({ x: 0, y: 0 });
   const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<Position2D>({ x: 1, y: 1 });
@@ -65,19 +64,18 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     setWorkState(WorkState.None);
     setShowOuterRemoveButton(false);
   }, [dispatch, selectedAnnotationIndex, setWorkState, setShowOuterRemoveButton]);
-  // console.log(workState, cursorPosition, annotations);
-  const onMouseDown = (): void => {
+  const onMouseDown = (e:KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
 
-    dispatch(createAnnotation(cursorPosition));
+    dispatch(createAnnotation({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y }));
     setSelectedAnnotationIndex(annotations.length - 1);
     setWorkState(WorkState.Creating);
   };
 
-  const onMouseUp = (): void => {
+  const onMouseUp = (e:KonvaEventObject<MouseEvent>): void => {
     if (workState === WorkState.Creating) {
-      dispatch(updateCreatingAnnotation(cursorPosition));
+      dispatch(updateCreatingAnnotation({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y }));
       if (annotations.length - 1 === selectedAnnotationIndex) {
         setWorkState(WorkState.Selecting);
       } else {
@@ -121,7 +119,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     );
 
   return (
-    <div style={{ margin: 3 }}>
+    <div style={{ margin: '0.2em' }}>
       {annotations.length !== 0 &&
       showOuterRemoveButton &&
       !isDragging &&
@@ -145,9 +143,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
         <Layer
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
-          onMouseMove={(e: KonvaEventObject<MouseEvent>): void => {
-            setCursorPosition({ x: e.evt.offsetX / scale.current.x, y: e.evt.offsetY / scale.current.y });
-          }}
           onDragStart={(): void => {
             setIsDragging(true);
           }}
@@ -169,7 +164,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
               />
               <Box2d
                 workState={workState}
-                cursorPosition={cursorPosition}
                 onSelect={onSelect}
                 annotation={annotation}
                 scale={scale.current.x}

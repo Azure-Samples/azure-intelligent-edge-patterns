@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text, ChevronStartIcon, ChevronEndIcon } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
-import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
+import { LabelingType, Annotation, BoxLabel } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
@@ -17,7 +17,13 @@ interface LabelingPageProps {
   partId?: number;
   isRelabel: boolean;
 }
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDialog, partId, isRelabel }) => {
+const LabelingPage: FC<LabelingPageProps> = ({
+  labelingType,
+  imageIndex,
+  closeDialog,
+  partId,
+  isRelabel,
+}) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
   const { images, annotations } = useSelector<State, { images: LabelImage[]; annotations: Annotation[] }>(
@@ -43,30 +49,37 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
         DRAW A RECTANGLE AROUND THE PART
       </Text>
       <Flex vAlign="center">
-        <Button
-          text
-          disabled={index === 0}
-          icon={<ChevronStartIcon size="larger" />}
-          onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-            setIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
-          }}
-        />
+        {!isRelabel && (
+          <Button
+            text
+            disabled={index === 0 || isOnePointBox(annotations)}
+            icon={<ChevronStartIcon size="larger" />}
+            onClick={(): void => {
+              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
+              setIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
+            }}
+          />
+        )}
         <Scene url={imageUrl ?? '/icons/Play.png'} annotations={annotations} labelingType={labelingType} />
-        <Button
-          text
-          disabled={index === filteredImages.length - 1}
-          icon={<ChevronEndIcon size="larger" />}
-          onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-            setIndex((prev) => (prev + 1) % filteredImages.length);
-          }}
-        />
+        {!isRelabel && (
+          <Button
+            text
+            disabled={
+              index === filteredImages.length - 1 || isOnePointBox(annotations)
+            }
+            icon={<ChevronEndIcon size="larger" />}
+            onClick={(): void => {
+              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
+              setIndex((prev) => (prev + 1) % filteredImages.length);
+            }}
+          />
+        )}
       </Flex>
       <Flex gap="gap.medium">
         <Button
           primary
           content="Save"
+          disabled={isOnePointBox(annotations)}
           onClick={(): void => {
             dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
             closeDialog();
@@ -81,6 +94,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, imageIndex, closeDi
       </Flex>
     </Flex>
   );
+};
+
+const isOnePointBox = (annotations: Annotation[]): boolean => {
+  if (annotations.length === 0) return false;
+  const { label } = annotations[annotations.length - 1];
+  return label.x1 === label.x2 && label.y1 === label.y2;
 };
 
 export default LabelingPage;
