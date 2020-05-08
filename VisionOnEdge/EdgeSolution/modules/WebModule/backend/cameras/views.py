@@ -427,13 +427,20 @@ def _train(project_id):
         print('training...')
         trainer.train_project(customvision_project_id)
 
+        print('start working status')
+        update_train_status(project_id)
+
+        return JsonResponse({'status': 'ok'})
+
     except Exception as e:
         print(f'Exception: {e}')
+        return JsonResponse({'status': f'failed: {str(e)}'})
 
-    print('start working status')
-    update_train_status(project_id)
-
-    return JsonResponse({'status': 'ok'})
+        # @FIXME (Hugh): wrap it up
+        obj, created = Train.objects.update_or_create(
+            project=project_obj,
+            defaults={'status': 'Training Status : Preparing', 'log': '', 'project':project_obj}
+        )
 
 @api_view()
 def train(request, project_id):
