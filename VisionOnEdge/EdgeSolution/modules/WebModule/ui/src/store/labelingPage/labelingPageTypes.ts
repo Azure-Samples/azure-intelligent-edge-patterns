@@ -69,7 +69,6 @@ export enum LabelingCursorStates {
 export interface Box2dComponentProps {
   display?: boolean;
   workState: WorkState;
-  cursorPosition: Position2D;
   scale: number;
   onSelect: Function;
   annotation: Annotation;
@@ -87,8 +86,6 @@ export type BoxObject = {
   setVerticesToValidValue: (arg0: Annotation) => Annotation;
   setVerticesToInt: (arg0: Annotation) => Annotation;
   setVerticesPointsOrder: (arg0: Annotation) => Annotation;
-  // setStateCreated: (arg0: number, arg1: Annotation[]) => Annotation[];
-  // setFinished: (arg0: Annotation) => Annotation;
 };
 
 export enum WorkState {

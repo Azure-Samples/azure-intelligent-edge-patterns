@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text, ChevronStartIcon, ChevronEndIcon } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
-import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
+import { LabelingType, Annotation, BoxLabel } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
@@ -52,7 +52,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
         {!isRelabel && (
           <Button
             text
-            disabled={index === 0}
+            disabled={index === 0 || isOnePointBox(annotations)}
             icon={<ChevronStartIcon size="larger" />}
             onClick={(): void => {
               dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
@@ -64,7 +64,9 @@ const LabelingPage: FC<LabelingPageProps> = ({
         {!isRelabel && (
           <Button
             text
-            disabled={index === filteredImages.length - 1}
+            disabled={
+              index === filteredImages.length - 1 || isOnePointBox(annotations)
+            }
             icon={<ChevronEndIcon size="larger" />}
             onClick={(): void => {
               dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
@@ -77,6 +79,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
         <Button
           primary
           content="Save"
+          disabled={isOnePointBox(annotations)}
           onClick={(): void => {
             dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
             closeDialog();
@@ -91,6 +94,12 @@ const LabelingPage: FC<LabelingPageProps> = ({
       </Flex>
     </Flex>
   );
+};
+
+const isOnePointBox = (annotations: Annotation[]): boolean => {
+  if (annotations.length === 0) return false;
+  const { label } = annotations[annotations.length - 1];
+  return label.x1 === label.x2 && label.y1 === label.y2;
 };
 
 export default LabelingPage;
