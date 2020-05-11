@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/project/projectActions';
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
+import { formatDropdownValue } from '../util/formatDropdownValue';
 
 export const PartIdentification: React.FC = () => {
   const dispatch = useDispatch();
@@ -223,28 +224,13 @@ const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items, i
   return (
     <Flex vAlign="center" gap="gap.medium">
       <Text styles={{ width: '150px' }}>{`Select ${moduleName}`}</Text>
-      <Dropdown items={items} onChange={onDropdownChange} value={formatValue(value)} multiple={isMultiple} />
+      <Dropdown
+        items={items}
+        onChange={onDropdownChange}
+        value={formatDropdownValue(value)}
+        multiple={isMultiple}
+      />
       <Link to={to}>{`Add ${moduleName}`}</Link>
     </Flex>
   );
-};
-
-const formatValue = (value): DropdownItemProps | DropdownItemProps[] => {
-  if (Array.isArray(value)) {
-    return value.map((e) => ({
-      header: e.name,
-      content: {
-        key: e.id,
-      },
-    }));
-  }
-  if (value) {
-    return {
-      header: value.name,
-      content: {
-        key: value.id,
-      },
-    };
-  }
-  return null;
 };

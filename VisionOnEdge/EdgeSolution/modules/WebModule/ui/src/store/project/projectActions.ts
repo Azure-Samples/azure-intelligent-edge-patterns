@@ -72,7 +72,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
-        maxImages: data[0]?.maxImage ?? 50,
+        maxImages: data[0]?.maxImages ?? 50,
         successRate: data[0]?.successRate ?? 0,
         successfulInferences: data[0]?.successfulInferences ?? 0,
         unIdetifiedItems: data[0]?.unIdetifiedItems ?? 0,
