@@ -55,6 +55,10 @@ export type GetTrainingStatusSuccessAction = {
   type: typeof GET_TRAINING_STATUS_SUCCESS;
   payload: {
     trainingStatus: string;
+    modelUrl: string;
+    successRate: number;
+    successfulInferences: number;
+    unIdetifiedItems: number;
   };
 };
 

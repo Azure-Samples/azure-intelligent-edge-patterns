@@ -61,8 +61,20 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
         // if trainingStatus is ok originally, set it to 'not yet training' and get the exportin status from server again
         trainingStatus: state.trainingStatus === '' ? 'not yet training' : state.trainingStatus,
       };
-    case GET_TRAINING_STATUS_SUCCESS:
-      return { ...state, trainingStatus: action.payload.trainingStatus };
+    case GET_TRAINING_STATUS_SUCCESS: {
+      const { successRate, modelUrl, successfulInferences, unIdetifiedItems } = action.payload;
+      return {
+        ...state,
+        trainingStatus: action.payload.trainingStatus,
+        data: {
+          ...state.data,
+          ...(successRate && { successRate }),
+          ...(modelUrl && { modelUrl }),
+          ...(successfulInferences && { successfulInferences }),
+          ...(unIdetifiedItems && { unIdetifiedItems }),
+        },
+      };
+    }
     case GET_TRAINING_STATUS_FAILED:
       return { ...state, error: action.error };
     default:

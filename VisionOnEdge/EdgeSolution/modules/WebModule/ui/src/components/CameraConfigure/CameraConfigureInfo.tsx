@@ -4,7 +4,11 @@ import { Link, useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
-import { thunkDeleteProject, thunkGetTrainingStatus } from '../../store/project/projectActions';
+import {
+  thunkDeleteProject,
+  thunkGetTrainingStatus,
+  thunkGetProject,
+} from '../../store/project/projectActions';
 import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
@@ -42,12 +46,13 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   useEffect(() => {
     dispatch(thunkGetTrainingStatus(projectId));
   }, [dispatch, projectId]);
-  useInterval(
-    () => {
-      dispatch(thunkGetTrainingStatus(projectId));
-    },
-    !trainingStatus ? null : 5000,
-  );
+  useInterval(() => {
+    dispatch(thunkGetTrainingStatus(projectId));
+  }, 5000);
+
+  useEffect(() => {
+    dispatch(thunkGetProject());
+  }, [dispatch]);
 
   return (
     <Flex column gap="gap.large">
