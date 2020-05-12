@@ -1,0 +1,21 @@
+{
+  "DomainType": "ObjectDetection",
+  "Platform": "ONNX",
+  "Flavor": null,
+  "ExporterVersion": "2.0",
+  "ExportedDate": "2019-11-01T22:38:49.2810568Z",
+  "IterationId": "ba339713-9c60-4cab-b10b-f776628e9dda",
+  "ModelFileName": "model.onnx",
+  "LabelFileName": "labels.txt",
+  "ModelFileSHA1": "4fc28728414d5031f46bf149d14e79a13fcd3120",
+  "SchemaVersion": "1.0",
+  "InputStream":"video_file",
+  "Anchors": [[1.08, 1.19], [3.42, 4.41],  [6.63, 11.38],  [9.42, 5.11],  [16.62, 10.52]],
+  "ScaleWidth":416,
+  "ScaleHeight":416,
+  "InputFormat":"RGB",
+  "ConfThreshold":0.5,
+  "IouThreshold":0.45,
+  "Runtime":1,
+  "RenderFlag":0
+}
