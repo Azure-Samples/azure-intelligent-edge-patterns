@@ -74,8 +74,6 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
               .map((e) => e.name)
               .join(', ')}
           />
-          <span>Model Url: </span>
-          <a href={project.modelUrl}>{project.modelUrl}</a>
           <Flex column gap="gap.small">
             <Text styles={{ width: '150px' }} size="large">
               Live View:
