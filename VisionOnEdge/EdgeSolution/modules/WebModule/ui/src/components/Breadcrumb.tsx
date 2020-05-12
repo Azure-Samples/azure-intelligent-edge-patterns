@@ -17,7 +17,7 @@ const getTitle = (pathname: string): string => {
     case 'manual':
       return 'Identify Manually';
     case 'detail':
-      return 'Register Part';
+      return 'Details';
     case 'partIdentification':
       return 'Job Configuration';
     case 'capturePhotos':
@@ -25,7 +25,7 @@ const getTitle = (pathname: string): string => {
     case 'uploadPhotos':
       return null;
     default:
-      if (typeof pathname === 'string') return 'Details';      
+      if (typeof pathname === 'string') return 'Details';
       return null;
   }
 };

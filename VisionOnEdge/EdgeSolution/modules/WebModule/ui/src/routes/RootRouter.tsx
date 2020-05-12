@@ -18,7 +18,7 @@ export const RootRouter: FC = () => {
     <Switch>
       <Route path="/manual" component={ManualIdentification} />
       <Route path="/locations/register" component={LocationRegister} />
-      <Route path="/locations/:name" component={LocationDetails} />
+      <Route path="/locations/detail" component={LocationDetails} />
       <Route path="/locations" component={Locations} />
       <Route path="/label/:imageIndex" component={LabelingPage} />
       <Route path="/cameras/:name/:projectId" component={CameraDetails} />

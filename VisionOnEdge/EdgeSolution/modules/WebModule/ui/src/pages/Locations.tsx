@@ -21,7 +21,7 @@ const Locations: FC = () => {
         {locations.map((location, i) => (
           <ImageLink
             key={i}
-            to={`/locations/${location.name}`}
+            to={`/locations/detail?name=${location.name}`}
             defaultSrc="/icons/defaultLocation.png"
             width="100px"
             height="100px"
@@ -30,14 +30,14 @@ const Locations: FC = () => {
         ))}
       </Grid>
       <Flex hAlign="end">
-      <Link to="/locations/register">
-        <Button
-          primary
-          fluid
-          circular
-          content={<AddIcon size="largest" circular />}
-          style={{ width: '6em', height: '6em' }}
-        />
+        <Link to="/locations/register">
+          <Button
+            primary
+            fluid
+            circular
+            content={<AddIcon size="largest" circular />}
+            style={{ width: '6em', height: '6em' }}
+          />
         </Link>
       </Flex>
     </Flex>
