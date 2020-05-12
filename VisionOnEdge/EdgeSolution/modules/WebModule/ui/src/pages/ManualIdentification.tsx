@@ -171,6 +171,10 @@ const ManualIdentification: FC = () => {
             axios({ method: 'POST', url: '/api/relabel/update', data: judgedImages })
               .then(() => {
                 dispatch(getLabelImages());
+                setJudgedImages({
+                  correct: [],
+                  incorrect: [],
+                });
                 return void 0;
               })
               .catch((err) => {
