@@ -91,6 +91,8 @@ const ManualIdentification: FC = () => {
     dispatch(getLabelImages());
   }, [dispatch]);
 
+  const selectedPartValue = partItems.find((e) => (e.content as any).key === selectedPartId);
+
   return (
     <div>
       <Text size="larger" weight="semibold">
@@ -101,7 +103,11 @@ const ManualIdentification: FC = () => {
         <Grid columns="3" styles={{ columnGap: '1em', justifyItems: 'center' }}>
           <Flex vAlign="center" gap="gap.smaller">
             <Text truncated>Select Part:</Text>
-            <Dropdown items={partItems} onChange={onDropdownChange} />
+            <Dropdown
+              items={partItems}
+              onChange={onDropdownChange}
+              value={selectedPartValue ? { ...selectedPartValue } : null}
+            />
           </Flex>
           <Flex vAlign="center" gap="gap.smaller" styles={{ width: '80%' }}>
             <Text>Confidence Level:</Text>
