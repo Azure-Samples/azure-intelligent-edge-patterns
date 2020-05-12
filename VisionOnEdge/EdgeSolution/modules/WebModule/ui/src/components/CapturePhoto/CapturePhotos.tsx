@@ -14,15 +14,14 @@ import { LabelImage } from '../../store/image/imageTypes';
 import { getFilteredImages } from '../../util/getFilteredImages';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 
-export const CapturePhotos: React.FC = () => {
+export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const { partId } = useParams();
 
   return (
     <>
       <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
       <RTSPVideo selectedCamera={selectedCamera} partId={partId} canCapture={true} />
-      <CapturedImagesContainer partId={parseInt(partId, 10)} />
+      <CapturedImagesContainer partId={partId} />
     </>
   );
 };

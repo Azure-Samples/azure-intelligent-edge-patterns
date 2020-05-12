@@ -11,13 +11,20 @@ export const Parts: React.FC = () => {
   const imagesAPI = Axios.get('/api/images/');
 
   useEffect(() => {
-    Axios.all([partsAPI, imagesAPI]).then(
-      Axios.spread((...responses) => {
-        const {data: parts} = responses[0];
-        const {data: images} = responses[1];
-        setParts(parts.map(e => ({...e, images: images.find(img => getIdFromUrl(img.part) === e.id)?.image })))
-      }),
-    ).catch(err => console.error(err));
+    Axios.all([partsAPI, imagesAPI])
+      .then(
+        Axios.spread((...responses) => {
+          const { data: parts } = responses[0];
+          const { data: images } = responses[1];
+          setParts(
+            parts.map((e) => ({
+              ...e,
+              images: images.find((img) => getIdFromUrl(img.part) === e.id)?.image,
+            })),
+          );
+        }),
+      )
+      .catch((err) => console.error(err));
   }, []);
 
   return (
@@ -48,7 +55,7 @@ export const Parts: React.FC = () => {
 
 const Item = ({ src, id, name }): JSX.Element => {
   return (
-    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/${id}/capturePhotos`}>
+    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/capturePhotos?partId=${id}`}>
       <div style={{ width: '250px', height: '250px' }}>
         <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
