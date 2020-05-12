@@ -35,7 +35,23 @@ const Breadcrumb: FC = () => {
 
   if (pathname === '/') return <Text color="black">Home</Text>;
 
-  const pathTitles = pathname.split('/').slice(1);
+  const { pathTitles } = pathname
+    .split('/')
+    .slice(1)
+    .reduce(
+      (acc, cur) => {
+        const title = getTitle(cur);
+        if (!title) return acc;
+
+        const path = `${acc.path}/${cur}`;
+
+        return {
+          pathTitles: [...acc.pathTitles, { title, to: path }],
+          path,
+        };
+      },
+      { pathTitles: [], path: '' },
+    );
 
   return (
     <Flex gap="gap.smaller">
@@ -43,16 +59,16 @@ const Breadcrumb: FC = () => {
         <Text>Home</Text>
       </Link>
       {pathTitles.map((e, i, arr) => {
-        const title = getTitle(e);
+        // const title = getTitle(e);
 
         return (
           <Fragment key={i}>
             <Text color="black">{'>'}</Text>
             {i === arr.length - 1 ? (
-              <Text color="black">{title}</Text>
+              <Text color="black">{e.title}</Text>
             ) : (
-              <Link to={`/${e}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
-                <Text>{title}</Text>
+              <Link to={`${e.to}`} style={{ color: '#0094d8', textDecoration: 'none' }}>
+                <Text>{e.title}</Text>
               </Link>
             )}
           </Fragment>
