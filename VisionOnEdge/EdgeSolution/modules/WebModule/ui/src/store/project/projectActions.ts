@@ -141,13 +141,13 @@ export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promi
     });
 };
 
-export const thunkGetTrainingStatus = (projectId: number) => (dispatch, getState): Promise<any> => {
+export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise<any> => {
   dispatch(getTrainingStatusRequest());
 
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       if (data.status !== 'ok') dispatch(getTrainingStatusSuccess(data.status));
-      // else if (data.status === 'ok' && !data.download_uri) dispatch(getTrainingStatusSuccess(data.status));
+      else if (data.status === 'ok' && !data.download_uri) dispatch(getTrainingStatusSuccess(data.status));
       else {
         dispatch(
           getTrainingStatusSuccess(
