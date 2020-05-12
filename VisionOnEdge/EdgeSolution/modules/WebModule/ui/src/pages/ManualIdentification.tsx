@@ -81,15 +81,21 @@ const ManualIdentification: FC = () => {
     return filteredImages;
   }, [confidenceLevelRange, ascend, images, selectedPartId]);
 
-  const onDropdownChange = (_, data): void => {
-    const { key } = data.value.content;
-    setSelectedPartId(key);
+  const onDropdownChange = (_, { value }): void => {
+    if (value === null) {
+      setSelectedPartId((prev) => prev);
+    } else {
+      const { key } = value.content;
+      setSelectedPartId(key);
+    }
   };
 
   useEffect(() => {
     dispatch(thunkGetProject());
     dispatch(getLabelImages());
   }, [dispatch]);
+
+  const selectedPartValue = partItems.find((e) => (e.content as any).key === selectedPartId);
 
   return (
     <div>
@@ -101,7 +107,7 @@ const ManualIdentification: FC = () => {
         <Grid columns="3" styles={{ columnGap: '1em', justifyItems: 'center' }}>
           <Flex vAlign="center" gap="gap.smaller">
             <Text truncated>Select Part:</Text>
-            <Dropdown items={partItems} onChange={onDropdownChange} />
+            <Dropdown items={partItems} onChange={onDropdownChange} value={selectedPartValue} />
           </Flex>
           <Flex vAlign="center" gap="gap.smaller" styles={{ width: '80%' }}>
             <Text>Confidence Level:</Text>

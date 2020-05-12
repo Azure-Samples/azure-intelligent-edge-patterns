@@ -212,7 +212,8 @@ function useDropdownItems<T>(
 
 const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items, isMultiple }): JSX.Element => {
   const onDropdownChange = (_, data): void => {
-    if (Array.isArray(data.value)) {
+    if (data.value === null) setSelectedModuleItem((prev) => prev);
+    else if (Array.isArray(data.value)) {
       const ids = data.value.map((ele) => ele.content.key);
       setSelectedModuleItem(ids);
     } else {

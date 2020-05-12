@@ -38,9 +38,12 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
   }));
 
   const onDropdownChange = (_, data): void => {
-    const { key } = data.value.content;
-    const newSelectedCamera = availableCameras.find((ele) => ele.id === key);
-    if (newSelectedCamera) setSelectedCamera(newSelectedCamera);
+    if (data.value === null) setSelectedCamera((prev) => prev);
+    else {
+      const { key } = data.value.content;
+      const newSelectedCamera = availableCameras.find((ele) => ele.id === key);
+      if (newSelectedCamera) setSelectedCamera(newSelectedCamera);
+    }
   };
 
   return (

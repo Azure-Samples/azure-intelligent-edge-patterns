@@ -18,7 +18,7 @@ const CameraDetails: FC = (): JSX.Element => {
 
   useEffect(() => {
     dispatch(thunkGetProject());
-  }, []);
+  }, [dispatch]);
 
   if (!camera) return <Redirect to="/cameras" />;
 
