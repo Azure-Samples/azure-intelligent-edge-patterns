@@ -230,42 +230,10 @@ export const DisplayBox: FC<{ vertices: BoxLabel; color: string; scale: number }
         strokeWidth={1 / scale}
         closed={true}
       />
-      <Circle
-        ref={(ref): void => {
-          if (ref) ref.cache();
-        }}
-        x={vertices.x1}
-        y={vertices.y1}
-        radius={3 / scale}
-        fill={color}
-      />
-      <Circle
-        ref={(ref): void => {
-          if (ref) ref.cache();
-        }}
-        x={vertices.x2}
-        y={vertices.y1}
-        radius={3 / scale}
-        fill={color}
-      />
-      <Circle
-        ref={(ref): void => {
-          if (ref) ref.cache();
-        }}
-        x={vertices.x2}
-        y={vertices.y2}
-        radius={3 / scale}
-        fill={color}
-      />
-      <Circle
-        ref={(ref): void => {
-          if (ref) ref.cache();
-        }}
-        x={vertices.x1}
-        y={vertices.y2}
-        radius={3 / scale}
-        fill={color}
-      />
+      <Circle x={vertices.x1} y={vertices.y1} radius={3 / scale} fill={color} />
+      <Circle x={vertices.x2} y={vertices.y1} radius={3 / scale} fill={color} />
+      <Circle x={vertices.x2} y={vertices.y2} radius={3 / scale} fill={color} />
+      <Circle x={vertices.x1} y={vertices.y2} radius={3 / scale} fill={color} />
     </>
   );
 };
