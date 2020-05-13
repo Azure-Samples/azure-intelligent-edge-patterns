@@ -143,3 +143,16 @@ ENDPOINT = config.ENDPOINT
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
+
+import os
+if 'TRAINING_KEY' in os.environ:
+    TRAINING_KEY = os.environ['TRAINING_KEY']
+if 'ENDPOINT' in os.environ:
+    ENDPOINT = os.environ['ENDPOINT']
+
+print('************************************')
+print('CONFIGURATION:')
+print('  TRAINING_KEY:', TRAINING_KEY)
+print('  ENDPOINT:', ENDPOINT)
+print('************************************')
+
