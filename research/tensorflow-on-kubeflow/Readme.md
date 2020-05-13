@@ -1,11 +1,50 @@
 # Tensorflow on Kubeflow on Azure Stack
 
+This module demonstrates how to run TensorFlow jobs on Kubeflow cluster on Azure Stack.
 
-#
+[TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
+It was initially developed by the Google Brain team for internal Google use, and later released under
+the Apache License 2.0.
+
+# Prerequisites
+
+Previous familiarity with the following is recommended:
+
+- [Kubernetes](https://kubernetes.io/)
+- [Docker](https://www.docker.com/)
+- [TensorFlow](https://tensorflow.org/)
+- [Azure](http://azure.com)
+- [Kubeflow](https://github.com/kubeflow/kubeflow)
+
+For obvious reasons, distributed training of the models is easier to see if the cluster has more than one node in its pool, and, respectively, at least that amount of the replicas for the worker conterner instances.
+
+# Installation
+
+Please see the `Kubeflow on Azure Stack` module of this repository, or [https://www.kubeflow.org](https://www.kubeflow.org) for details of using Kubeflow and installing it on Azure or Azure Stack.
+
+`TFJob` is a custom workload, and you should see it among the registered custom resources:
+
+    azureuser@k8s-master-36519982-0:~$ kubectl get crd | grep tfjob
+    tfjobs.kubeflow.org          2020-05-06T01:30:30Z
+
+It is also recommended, but not necessary, to have Kubernetes Dashboard running on the cluster.
+
+
+# Building Docker image for distributed mnist model for e2e test
+
+We will run a popular scenario from Kubeflow's repository, 
+[K8s Custom Resource and Operator For TensorFlow jobs](https://github.com/kubeflow/tf-operator/)
 
 You do not have to re-build the image, you can use `kubeflow/tf-dist-mnist-test:1.0`. If you do decide to use your own image, here is how you could build it:
 
-    $ cd ~/src/tf-operator/examples/v1/dist-mnist
+    $ cd tensorflow-on-kubeflow/dist-mnist-e2e-test
+
+Login to your Docker account:
+
+    $ docker login
+    ... enter the credentials if needed ...
+
+Build the image:
 
     $ docker build -f Dockerfile -t rollingstones/tf-dist-mnist-test:1.0 ./
     Sending build context to Docker daemon  18.94kB
@@ -35,10 +74,48 @@ And to push to DockerHub or another container registry or artifactory:
     ...
     sha256:af441000275fe99aa463d36a814c1b3b38a7d5de45a131f38d97971119730a6a size: 3038
 
-#
+# Running a TFJob
 
+Create a tf_job_mnist-e2e-test.yaml file:
 
-    azureuser@k8s-master-36519982-0:~/src/tf-operator/examples/v1/dist-mnist$ k logs dist-mnist-for-e2e-test-my-worker-0
+    apiVersion: "kubeflow.org/v1"
+    kind: "TFJob"
+    metadata:
+      name: "dist-mnist-for-e2e-test-demo"
+    spec:
+      tfReplicaSpecs:
+        PS:
+          replicas: 1
+          restartPolicy: OnFailure
+          template:
+            spec:
+              containers:
+                - name: tensorflow
+                  image: rollingstones/tf-dist-mnist-test:1.0
+        Worker:
+          replicas: 3
+          restartPolicy: OnFailure
+          template:
+            spec:
+            containers:
+              - name: tensorflow
+                image: rollingstones/tf-dist-mnist-test:1.0
+
+To run a TFJob:
+
+    $ kubectl create -f tf_job_mnist-e2e-test.yaml
+
+You should see the pods being initialized, then running, and, finally, getting to status `Completed`:
+
+    $ kubeclt get pods
+    NAME                                    READY   STATUS             RESTARTS   AGE
+    dist-mnist-for-e2e-test-demo-worker-0     0/1     Completed          0          9m21s
+    dist-mnist-for-e2e-test-demo-worker-1     0/1     Completed          0          9m21s
+    dist-mnist-for-e2e-test-demo-worker-2     0/1     Completed          0          9m21s
+
+Here is an example of the log on a worker node:
+
+    $ kubectl logs dist-mnist-for-e2e-test-demo-worker-0
     /usr/local/lib/python2.7/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
     from ._conv import register_converters as _register_converters
     2020-05-13 19:30:28.384657: I tensorflow/core/platform/cpu_feature_guard.cc:137] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 AVX512F FMA
@@ -74,7 +151,15 @@ And to push to DockerHub or another container registry or artifactory:
     After 20000 training step(s), validation cross entropy = 2882.02
 
 
-#
+What is worth pointing out is that the nodes are being assigned individual indices:
+
+    2020-05-13 19:30:28.385503: I tensorflow/core/distributed_runtime/rpc/grpc_channel.cc:215] Initialize GrpcChannelCache for job ps -> {0 -> dist-mnist-for-e2e-test-my-ps-0.default.svc:2222}
+    2020-05-13 19:30:28.385534: I tensorflow/core/distributed_runtime/rpc/grpc_channel.cc:215] Initialize GrpcChannelCache for job worker -> {0 -> localhost:2222, 1 -> dist-mnist-for-e2e-test-my-worker-1.default.svc:2222, 2 -> dist-mnist-for-e2e-test-my-worker-2.default.svc:2222}
+    2020-05-13 19:30:28.386049: I tensorflow/core/distributed_runtime/rpc/grpc_server_lib.cc:324] Started server with target: grpc://localhost:2222
+
+# Links
+
+For further information:
 
 - https://www.kubeflow.org/docs/components/training/tftraining/
-
+- https://www.tensorflow.org/
