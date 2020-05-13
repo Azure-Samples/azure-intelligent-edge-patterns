@@ -143,10 +143,17 @@ def update_train_status(project_id):
                 continue
 
             print('Training Status : Completed')
+            train_performance = trainer.get_iteration_performance(customvision_project_id, iteration.id).as_dict()
+            print(train_performance)
+
             # @FIXME (Hugh): wrap it up
             obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'ok', 'log': '', 'project':project_obj}
+                    defaults={
+                        'status': 'ok',
+                        'log': '',
+                        'performance': json.dumps(train_performance),
+                        'project':project_obj}
             )
             break
             #return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
@@ -159,13 +166,14 @@ def export(request, project_id):
     """get the status of train job sent to custom vision
 
        @FIXME (Hugh): change the naming of this endpoint
+       @FIXME (Hugh): refactor how we store Train.performance
     """
     project_obj = Project.objects.get(pk=project_id)
     train_obj = Train.objects.get(project_id=project_id)
 
     return JsonResponse({
         'status': train_obj.status, 'download_uri': project_obj.download_uri,
-        'success_rate': 0.0,
+        'performance': json.loads(train_obj.performance),
         'inference_num': 0,
         'unidentified_num': 0
     })
