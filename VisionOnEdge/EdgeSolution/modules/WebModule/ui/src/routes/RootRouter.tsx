@@ -4,7 +4,6 @@ import Home from '../pages/Home';
 import Cameras from '../pages/Cameras';
 import CameraDetails from '../pages/CameraDetails';
 import { PartDetails } from '../pages/PartDetails';
-import LabelingPage from '../pages/LabelingPage';
 import Locations from '../pages/Locations';
 import LocationRegister from '../pages/LocationRegister';
 import LocationDetails from '../pages/LocationDetails';
@@ -18,14 +17,11 @@ export const RootRouter: FC = () => {
     <Switch>
       <Route path="/manual" component={ManualIdentification} />
       <Route path="/locations/register" component={LocationRegister} />
-      <Route path="/locations/:name" component={LocationDetails} />
+      <Route path="/locations/detail" component={LocationDetails} />
       <Route path="/locations" component={Locations} />
-      <Route path="/label/:imageIndex" component={LabelingPage} />
-      <Route path="/cameras/:name/:projectId" component={CameraDetails} />
-      <Route path="/cameras/:name/" component={CameraDetails} />
+      <Route path="/cameras/detail" component={CameraDetails} />
       <Route path="/cameras" component={Cameras} />
-      <Route path="/parts/detail/:partId" component={PartDetails} />
-      <Route path="/parts/detail/" component={PartDetails} />
+      <Route path="/parts/detail" component={PartDetails} />
       <Route path="/parts" component={Parts} />
       <Route path="/partIdentification" component={PartIdentification} />
       <Route path="/setting" component={Setting} />

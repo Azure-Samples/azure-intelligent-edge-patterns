@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Flex, Input, TextArea, Button, Menu, Grid, Alert } from '@fluentui/react-northstar';
-import { Link, useLocation, Switch, Route, useParams, useHistory } from 'react-router-dom';
+import { Link, useLocation, Switch, Route, useHistory } from 'react-router-dom';
 import axios from 'axios';
 
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
+import { useQuery } from '../hooks/useQuery';
 
 export const PartDetails = (): JSX.Element => {
+  const partId = useQuery().get('partId');
+
   return (
     <Grid columns={'repeat(12, 1fr)'} styles={{ gridColumnGap: '20px', height: '100%' }}>
-      <LeftPanel />
-      <RightPanel />
+      <LeftPanel partId={partId} />
+      <RightPanel partId={partId} />
     </Grid>
   );
 };
 
-const LeftPanel = (): JSX.Element => {
+const LeftPanel = ({ partId }): JSX.Element => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
-  const { partId } = useParams();
   const history = useHistory();
 
   useEffect(() => {
@@ -50,7 +52,7 @@ const LeftPanel = (): JSX.Element => {
       },
     })
       .then(({ data }) => {
-        history.push(`/parts/detail/${data.id}/capturePhotos`);
+        history.push(`/parts/detail/capturePhotos?partId=${data.id}`);
         return void 0;
       })
       .catch((err) => {
@@ -86,15 +88,15 @@ const LeftPanel = (): JSX.Element => {
   );
 };
 
-const RightPanel = (): JSX.Element => {
-  const { partId } = useParams();
-
+const RightPanel = ({ partId }): JSX.Element => {
   return (
     <Flex column gap="gap.small" styles={{ gridColumn: '5 / span 8' }}>
       {partId ? <Tab partId={partId} /> : null}
       <Switch>
-        <Route path="/parts/detail/:partId/capturePhotos" component={CapturePhotos} />
-        <Route path="/parts/detail/:partId/uploadPhotos">
+        <Route path={`/parts/detail/capturePhotos`}>
+          <CapturePhotos partId={parseInt(partId, 10)} />
+        </Route>
+        <Route path={`/parts/detail/uploadPhotos`}>
           <UploadPhotos partId={parseInt(partId, 10)} />
         </Route>
       </Switch>
@@ -107,19 +109,19 @@ const Tab = ({ partId }): JSX.Element => {
     {
       key: 'uploadPhotos',
       as: Link,
-      to: `/parts/detail/${partId}/uploadPhotos`,
+      to: `/parts/detail/uploadPhotos?partId=${partId}`,
       content: 'Upload Photos',
     },
     {
       key: 'capturePhotos',
       as: Link,
-      to: `/parts/detail/${partId}/capturePhotos`,
+      to: `/parts/detail/capturePhotos?partId=${partId}`,
       content: 'Capture Photo',
     },
   ];
 
   const { pathname } = useLocation();
-  const activeIndex = items.findIndex((ele) => ele.to === pathname);
+  const activeIndex = items.findIndex((ele) => ele.to.split('?')[0] === pathname);
 
   return <Menu items={items} activeIndex={activeIndex} pointing primary />;
 };
