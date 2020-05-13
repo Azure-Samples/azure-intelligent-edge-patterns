@@ -29,7 +29,7 @@ const Cameras: FC = (): JSX.Element => {
         {cameras.map((camera, i) => (
           <ImageLink
             key={i}
-            to={`/cameras/${camera.name}`}
+            to={`/cameras/detail?name=${camera.name}`}
             defaultSrc="/icons/Play.png"
             bgImgSrc="/icons/defaultCamera.png"
             width="100px"

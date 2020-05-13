@@ -36,9 +36,15 @@ const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
 const getProjectFailed = (error: Error): GetProjectFailedAction => ({ type: GET_PROJECT_FAILED, error });
 
 const getTrainingStatusRequest = (): GetTrainingStatusRequesAction => ({ type: GET_TRAINING_STATUS_REQUEST });
-const getTrainingStatusSuccess = (trainingStatus: string): GetTrainingStatusSuccessAction => ({
+const getTrainingStatusSuccess = (
+  trainingStatus: string,
+  modelUrl?: string,
+  successRate?: number,
+  successfulInferences?: number,
+  unIdetifiedItems?: number,
+): GetTrainingStatusSuccessAction => ({
   type: GET_TRAINING_STATUS_SUCCESS,
-  payload: { trainingStatus },
+  payload: { trainingStatus, modelUrl, successRate, successfulInferences, unIdetifiedItems },
 });
 const getTrainingStatusFailed = (error: Error): GetTrainingStatusFailedAction => ({
   type: GET_TRAINING_STATUS_FAILED,
@@ -72,7 +78,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
-        maxImages: data[0]?.maxImage ?? 50,
+        maxImages: data[0]?.maxImages ?? 50,
         successRate: data[0]?.successRate ?? 0,
         successfulInferences: data[0]?.successfulInferences ?? 0,
         unIdetifiedItems: data[0]?.unIdetifiedItems ?? 0,
@@ -116,6 +122,7 @@ export const thunkPostProject = (
   })
     .then(({ data }) => {
       dispatch(postProjectSuccess());
+      getTrain(data.id);
       return data.id;
     })
     .catch((err) => {
@@ -140,12 +147,23 @@ export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       if (data.status !== 'ok') dispatch(getTrainingStatusSuccess(data.status));
-      else if (data.status === 'ok' && !data.download_uri) dispatch(getTrainingStatusSuccess(data.status));
+      // else if (data.status === 'ok' && !data.download_uri) dispatch(getTrainingStatusSuccess(data.status));
       else {
-        dispatch(getTrainingStatusSuccess(''));
-        dispatch(thunkGetProject());
+        dispatch(
+          getTrainingStatusSuccess(
+            '',
+            data.download_uri,
+            data.success_rate,
+            data.inference_num,
+            data.unidentified_num,
+          ),
+        );
       }
       return void 0;
     })
     .catch((err) => dispatch(getTrainingStatusFailed(err)));
+};
+
+const getTrain = (projectId): void => {
+  Axios.get(`/api/projects/${projectId}/train`).catch((err) => console.error(err));
 };

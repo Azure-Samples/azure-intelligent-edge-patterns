@@ -162,7 +162,12 @@ def export(request, project_id):
     project_obj = Project.objects.get(pk=project_id)
     train_obj = Train.objects.get(project_id=project_id)
 
-    return JsonResponse({'status': train_obj.status, 'download_uri': project_obj.download_uri})
+    return JsonResponse({
+        'status': train_obj.status, 'download_uri': project_obj.download_uri,
+        'success_rate': 0.0,
+        'inference_num': 0,
+        'unidentified_num': 0
+    })
 
 # FIXME tmp workaround
 @api_view()

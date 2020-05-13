@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/project/projectActions';
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
+import { formatDropdownValue } from '../util/formatDropdownValue';
 
 export const PartIdentification: React.FC = () => {
   const dispatch = useDispatch();
@@ -59,7 +60,7 @@ export const PartIdentification: React.FC = () => {
       thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera),
     ) as unknown) as Promise<number>)
       .then((id) => {
-        if (typeof id !== 'undefined') history.push(`/cameras/${selectedCamera.name}/${id}`);
+        if (typeof id !== 'undefined') history.push(`/cameras/detail?name=${selectedCamera.name}`);
         return void 0;
       })
       .catch((e) => e);
@@ -211,7 +212,8 @@ function useDropdownItems<T>(
 
 const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items, isMultiple }): JSX.Element => {
   const onDropdownChange = (_, data): void => {
-    if (Array.isArray(data.value)) {
+    if (data.value === null) setSelectedModuleItem((prev) => prev);
+    else if (Array.isArray(data.value)) {
       const ids = data.value.map((ele) => ele.content.key);
       setSelectedModuleItem(ids);
     } else {
@@ -223,28 +225,13 @@ const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items, i
   return (
     <Flex vAlign="center" gap="gap.medium">
       <Text styles={{ width: '150px' }}>{`Select ${moduleName}`}</Text>
-      <Dropdown items={items} onChange={onDropdownChange} value={formatValue(value)} multiple={isMultiple} />
+      <Dropdown
+        items={items}
+        onChange={onDropdownChange}
+        value={formatDropdownValue(value)}
+        multiple={isMultiple}
+      />
       <Link to={to}>{`Add ${moduleName}`}</Link>
     </Flex>
   );
-};
-
-const formatValue = (value): DropdownItemProps | DropdownItemProps[] => {
-  if (Array.isArray(value)) {
-    return value.map((e) => ({
-      header: e.name,
-      content: {
-        key: e.id,
-      },
-    }));
-  }
-  if (value) {
-    return {
-      header: value.name,
-      content: {
-        key: value.id,
-      },
-    };
-  }
-  return null;
 };

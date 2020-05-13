@@ -1,4 +1,4 @@
-import React, { FC, memo, Dispatch, useState } from 'react';
+import React, { FC, memo, Dispatch, useState, useEffect } from 'react';
 import { Group, Line, Rect } from 'react-konva';
 
 import { Size2D, LabelingCursorStates, BoxLabel } from '../../store/labelingPage/labelingPageTypes';
@@ -46,6 +46,10 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
   }
   if (y === -60) setShowOuterRemoveButton(true);
   else setShowOuterRemoveButton(false);
+
+  useEffect(() => {
+    setStrokeWidth(1.5 / scale);
+  }, [scale]);
 
   return (
     <Group

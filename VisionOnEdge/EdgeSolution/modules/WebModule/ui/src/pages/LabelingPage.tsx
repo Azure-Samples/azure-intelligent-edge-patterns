@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text, ChevronStartIcon, ChevronEndIcon } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
-import { LabelingType, Annotation, BoxLabel } from '../store/labelingPage/labelingPageTypes';
+import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
@@ -64,9 +64,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
         {!isRelabel && (
           <Button
             text
-            disabled={
-              index === filteredImages.length - 1 || isOnePointBox(annotations)
-            }
+            disabled={index === filteredImages.length - 1 || isOnePointBox(annotations)}
             icon={<ChevronEndIcon size="larger" />}
             onClick={(): void => {
               dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));

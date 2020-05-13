@@ -1,13 +1,13 @@
 import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import { Flex, Text, Grid, Divider } from '@fluentui/react-northstar';
 import ImageLink from '../components/ImageLink';
 import { Location } from '../store/location/locationTypes';
 import { State } from '../store/State';
+import { useQuery } from '../hooks/useQuery';
 
 const LocationDetails: FC = () => {
-  const { name } = useParams();
+  const name = useQuery().get('name');
   const location = useSelector<State, Location>((state) => state.locations.find((e) => e.name === name));
 
   return (

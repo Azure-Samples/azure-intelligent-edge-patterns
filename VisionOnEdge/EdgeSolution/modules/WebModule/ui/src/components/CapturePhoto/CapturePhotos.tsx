@@ -12,21 +12,21 @@ import { RTSPVideo } from '../RTSPVideo';
 import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
 import { getFilteredImages } from '../../util/getFilteredImages';
+import { formatDropdownValue } from '../../util/formatDropdownValue';
 
-export const CapturePhotos: React.FC = () => {
+export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const { partId } = useParams();
 
   return (
     <>
-      <CameraSelector setSelectedCamera={setSelectedCamera} />
+      <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
       <RTSPVideo selectedCamera={selectedCamera} partId={partId} canCapture={true} />
-      <CapturedImagesContainer partId={parseInt(partId, 10)} />
+      <CapturedImagesContainer partId={partId} />
     </>
   );
 };
 
-const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
+const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
   const availableCameras = useCameras();
 
   const items: DropdownItemProps[] = availableCameras.map((ele) => ({
@@ -37,15 +37,18 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
   }));
 
   const onDropdownChange = (_, data): void => {
-    const { key } = data.value.content;
-    const selectedCamera = availableCameras.find((ele) => ele.id === key);
-    if (selectedCamera) setSelectedCamera(selectedCamera);
+    if (data.value === null) setSelectedCamera((prev) => prev);
+    else {
+      const { key } = data.value.content;
+      const newSelectedCamera = availableCameras.find((ele) => ele.id === key);
+      if (newSelectedCamera) setSelectedCamera(newSelectedCamera);
+    }
   };
 
   return (
     <Flex gap="gap.small" vAlign="center">
       <Text>Select Camera</Text>
-      <Dropdown items={items} onChange={onDropdownChange} />
+      <Dropdown items={items} onChange={onDropdownChange} value={formatDropdownValue(selectedCamera)} />
       <Link to="/addCamera">Add Camera</Link>
     </Flex>
   );
@@ -53,7 +56,9 @@ const CameraSelector = ({ setSelectedCamera }): JSX.Element => {
 
 const CapturedImagesContainer = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
-  const images = useSelector<State, LabelImage[]>((state) => state.images).filter((image) => !image.is_relabel);
+  const images = useSelector<State, LabelImage[]>((state) => state.images).filter(
+    (image) => !image.is_relabel,
+  );
   const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
   const isValid = filteredImages.filter((image) => image.labels).length >= 15;
 
