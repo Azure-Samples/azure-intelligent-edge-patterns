@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Flex, Text, Status, Button, Loader } from '@fluentui/react-northstar';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
@@ -14,6 +14,7 @@ import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
 import { useParts } from '../../hooks/useParts';
+import { useQuery } from '../../hooks/useQuery';
 
 export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }> = ({
   camera,
@@ -24,7 +25,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   );
   const parts = useParts();
   const dispatch = useDispatch();
-  const { name } = useParams();
+  const name = useQuery().get('name');
   const history = useHistory();
 
   const onDeleteConfigure = (): void => {
@@ -34,7 +35,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     const result = (dispatch(thunkDeleteProject(projectId)) as unknown) as Promise<any>;
     result
       .then((data) => {
-        if (data) return history.push(`/cameras/${name}`);
+        if (data) return history.push(`/cameras/detail?name=${name}`);
         return void 0;
       })
       .catch((err) => console.error(err));
