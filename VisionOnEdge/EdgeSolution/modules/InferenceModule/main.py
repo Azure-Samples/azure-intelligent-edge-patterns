@@ -48,12 +48,15 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.last_img = None
         self.last_prediction = []
 
-        self.confidence_min = 10 * 0.01
-        self.confidence_max = 90 * 0.01
+        self.confidence_min = 30 * 0.01
+        self.confidence_max = 80 * 0.01
         self.max_images = 10
         self.last_upload_time = 0
         self.is_upload_image = False
         self.current_uploaded_images = {}
+
+        self.inference_num = 0
+        self.unidentified_num = 0
 
 
     def restart_cam(self):
@@ -118,6 +121,9 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.is_upload_image = True
         self.lock.release()
 
+        self.inference_num = 0
+        self.unidentified_num = 0
+
 
     def predict(self, image):
 
@@ -126,6 +132,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.lock.release()
 
         return prediction
+
 
 
     def start_session(self):
@@ -141,38 +148,49 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                     height, width = img.shape[0], img.shape[1]
 
-
-                    if self.is_upload_image:
+                    detection = 'nothing'
+                    if True:
                         for prediction in self.last_prediction:
+                            #print(prediction)
                             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
-                                if self.confidence_min <= prediction['probability'] <= self.confidence_max:
+                                if prediction['probability'] > self.confidence_max:
+                                    detection = 'success'
+                                elif self.confidence_min <= prediction['probability'] <= self.confidence_max:
+
+                                    if detection != 'success': detection = 'unidentified'
+
                                     tag = prediction['tagName']
 
-                                    if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
-                                        pass
-                                    else:
-                                        x1 = int(prediction['boundingBox']['left'] * width)
-                                        y1 = int(prediction['boundingBox']['top'] * height)
-                                        x2 = x1 + int(prediction['boundingBox']['width'] * width)
-                                        y2 = y1 + int(prediction['boundingBox']['height'] * height)
-                                        labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
-                                        self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
-                                        #print(tag, onnx.current_uploaded_images[tag], j) 
-                                        self.last_upload_time = time.time()
-                                        print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images[tag], labels)
-                                        jpg = cv2.imencode('.jpg', img)[1].tobytes()
-                                        try:
-                                            requests.post('http://'+web_module_url()+'/api/relabel', data={
-                                                'confidence': prediction['probability'],
-                                                'labels': labels,
-                                                'part_name': tag,
-                                                'is_relabel': True,
-                                                'img': base64.b64encode(jpg)
-                                            })
-                                        except:
-                                            print('[ERROR] Failed to update image for relabeling')
+                                    if self.is_upload_image:
+                                        if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
+                                            pass
+                                        else:
+                                            x1 = int(prediction['boundingBox']['left'] * width)
+                                            y1 = int(prediction['boundingBox']['top'] * height)
+                                            x2 = x1 + int(prediction['boundingBox']['width'] * width)
+                                            y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                                            labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
+                                            self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
+                                            #print(tag, onnx.current_uploaded_images[tag], j) 
+                                            self.last_upload_time = time.time()
+                                            print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images[tag], labels)
+                                            jpg = cv2.imencode('.jpg', img)[1].tobytes()
+                                            try:
+                                                requests.post('http://'+web_module_url()+'/api/relabel', data={
+                                                    'confidence': prediction['probability'],
+                                                    'labels': labels,
+                                                    'part_name': tag,
+                                                    'is_relabel': True,
+                                                    'img': base64.b64encode(jpg)
+                                                })
+                                            except:
+                                                print('[ERROR] Failed to update image for relabeling')
 
-
+                    if detection == 'success':
+                        self.inference_num += 1
+                    elif detection == 'unidentified':
+                        self.unidentified_num += 1
+                    #print(detection)
                 else:
                     if self.cam_type == 'video_file':
                         self.restart_cam()
@@ -204,6 +222,10 @@ def predict():
     #print(onnx.last_prediction)
     #onnx.last_prediction
     return json.dumps(onnx.last_prediction)
+
+@app.route('/metrics', methods=['GET'])
+def metrics():
+    return json.dumps({'inference_num': onnx.inference_num, 'unidentified_num': onnx.unidentified_num})
 
 @app.route('/update_model')
 def update_model():
