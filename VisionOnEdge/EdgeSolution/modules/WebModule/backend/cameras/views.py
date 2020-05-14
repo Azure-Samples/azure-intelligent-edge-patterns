@@ -163,11 +163,26 @@ def export(request, project_id):
     project_obj = Project.objects.get(pk=project_id)
     train_obj = Train.objects.get(project_id=project_id)
 
+    success_rate = 0.0
+    inference_num = 0
+    unidentified_num = 0
+    try:
+        print('wew')
+        res = requests.get('http://'+inference_module_url()+'/metrics')
+        data = res.json()
+        success_rate = int(data['success_rate']*100)/100
+        inference_num = data['inference_num']
+        unidentified_num = data['unidentified_num']
+        print(data)
+    except:
+        
+        pass
+
     return JsonResponse({
         'status': train_obj.status, 'download_uri': project_obj.download_uri,
-        'success_rate': 0.0,
-        'inference_num': 0,
-        'unidentified_num': 0
+        'success_rate': success_rate,
+        'inference_num': inference_num,
+        'unidentified_num': unidentified_num,
     })
 
 # FIXME tmp workaround
