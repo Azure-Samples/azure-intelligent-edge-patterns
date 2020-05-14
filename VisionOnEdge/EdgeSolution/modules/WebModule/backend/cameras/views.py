@@ -167,13 +167,11 @@ def export(request, project_id):
     inference_num = 0
     unidentified_num = 0
     try:
-        print('wew')
         res = requests.get('http://'+inference_module_url()+'/metrics')
         data = res.json()
         success_rate = int(data['success_rate']*100)/100
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
-        print(data)
     except:
         
         pass
@@ -400,6 +398,44 @@ def capture(request, stream_id):
             return JsonResponse({'status': 'ok', 'image': img_serialized.data})
 
     return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
+
+
+@api_view()
+def train_performance(request, project_id):
+    project_obj = Project.objects.get(pk=project_id)
+    customvision_project_id = project_obj.customvision_project_id
+    
+    ret = {}
+
+    iterations = trainer.get_iterations(customvision_project_id)
+   
+    def _parse(iteration):
+        iteration = iteration.as_dict()
+        status = iteration['status']
+        if status == 'Completed':
+            performance = trainer.get_iteration_performance(customvision_project_id, iteration['id']).as_dict()
+            precision = performance['precision']
+            recall = performance['recall']
+            mAP = performance['average_precision']
+        else:
+            precision = 0.0
+            recall = 0.0
+            mAP = 0.0
+        return {
+            'status': status,
+            'precision': precision,
+            'recall': recall,
+            'map': mAP,
+        }
+
+    if len(iterations) >= 1:
+        ret['new'] = _parse(iterations[0])
+    if len(iterations) >= 2:
+        ret['previous'] = _parse(iterations[1])
+
+    
+    return JsonResponse(ret)
+        
 
 def _train(project_id):
 
