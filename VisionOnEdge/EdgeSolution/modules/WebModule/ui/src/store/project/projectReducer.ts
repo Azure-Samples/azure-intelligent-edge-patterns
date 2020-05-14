@@ -48,6 +48,9 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           successRate: null,
           successfulInferences: null,
           unIdetifiedItems: null,
+          precision: null,
+          recall: null,
+          mAP: null,
         },
         error: null,
       };

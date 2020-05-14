@@ -23,6 +23,9 @@ export type ProjectData = {
   successRate: number;
   successfulInferences: number;
   unIdetifiedItems: number;
+  precision: number;
+  recall: number;
+  mAP: number;
 };
 
 // Describing the different ACTION NAMES available

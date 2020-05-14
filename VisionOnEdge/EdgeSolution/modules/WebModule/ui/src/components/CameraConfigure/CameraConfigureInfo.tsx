@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Flex, Text, Status, Button, Loader } from '@fluentui/react-northstar';
+import React, { useEffect, FC } from 'react';
+import { Flex, Text, Status, Button, Loader, Grid } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -116,6 +116,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
               </>
             }
           />
+          <ConsequenseInfo precision={project.precision} recall={project.recall} mAP={project.mAP} />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
           </Button>
@@ -125,6 +126,42 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
         </>
       )}
     </Flex>
+  );
+};
+
+interface ConsequenseInfoProps {
+  precision: number;
+  recall: number;
+  mAP: number;
+}
+const ConsequenseInfo: FC<ConsequenseInfoProps> = ({ precision, recall, mAP }) => {
+  return (
+    <Grid columns={3} >
+      <div style={{height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between'}}>
+        <Text align="center" size="large" weight="semibold">
+          Precison
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
+          {precision}%
+        </Text>
+      </div>
+      <div style={{height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between'}}>
+        <Text align="center" size="large" weight="semibold">
+          Recall
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#0063b1' }}>
+          {recall}%
+        </Text>
+      </div>
+      <div style={{height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between'}}>
+        <Text align="center" size="large" weight="semibold">
+          mAP
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#69c138' }}>
+          {mAP}%
+        </Text>
+      </div>
+    </Grid>
   );
 };
 
