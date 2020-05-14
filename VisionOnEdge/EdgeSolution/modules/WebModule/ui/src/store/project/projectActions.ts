@@ -82,6 +82,9 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         successRate: data[0]?.successRate ?? 0,
         successfulInferences: data[0]?.successfulInferences ?? 0,
         unIdetifiedItems: data[0]?.unIdetifiedItems ?? 0,
+        precision: data[0]?.precision ?? null,
+        recall: data[0]?.recall ?? null,
+        mAP: data[0]?.mAP ?? null,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
