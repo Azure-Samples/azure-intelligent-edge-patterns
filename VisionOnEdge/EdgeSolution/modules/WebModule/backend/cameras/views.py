@@ -86,7 +86,7 @@ def update_train_status(project_id):
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Status : preparing custom vision environment', 'log': '', 'project':project_obj}
+                    defaults={'status': 'preparing', 'log': 'Status : preparing custom vision environment', 'project':project_obj}
                 )
                 continue
                 #return JsonResponse({'status': 'waiting training'})
@@ -97,7 +97,7 @@ def update_train_status(project_id):
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Status : training', 'log': '', 'project':project_obj}
+                    defaults={'status': 'training', 'log': 'Status : model training', 'project':project_obj}
                 )
                 continue
                 #return JsonResponse({'status': 'waiting training'})
@@ -108,7 +108,7 @@ def update_train_status(project_id):
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Status : exporting model', 'log': '', 'project':project_obj}
+                    defaults={'status': 'exporting', 'log': 'Status : exporting model', 'project':project_obj}
                 )
                 #trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
                 res = export_iterationv3_2(customvision_project_id, iteration.id)
@@ -138,7 +138,7 @@ def update_train_status(project_id):
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'Status : deploying model', 'log': '', 'project':project_obj}
+                    defaults={'status': 'deploying', 'log': 'Status : deploying model', 'project':project_obj}
                 )
                 continue
 
@@ -151,7 +151,7 @@ def update_train_status(project_id):
                     project=project_obj,
                     defaults={
                         'status': 'ok',
-                        'log': '',
+                        'log': 'Status : model training completed',
                         'performance': json.dumps(train_performance),
                         'project':project_obj}
             )
@@ -172,7 +172,7 @@ def export(request, project_id):
     train_obj = Train.objects.get(project_id=project_id)
 
     return JsonResponse({
-        'status': train_obj.status, 'download_uri': project_obj.download_uri,
+        'status': train_obj.status, 'log': train_obj.log, 'download_uri': project_obj.download_uri,
         'performance': json.loads(train_obj.performance),
         'inference_num': 0,
         'unidentified_num': 0
@@ -417,7 +417,7 @@ def _train(project_id):
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': 'Status: sending data (images and annotations)', 'log': '', 'project':project_obj}
+            defaults={'status': 'sending', 'log': 'Status: send data (images and annotations)', 'project':project_obj}
         )
 
         print(project_obj.id)
@@ -494,7 +494,7 @@ def _train(project_id):
             # @FIXME (Hugh): wrap it up
             obj, created = Train.objects.update_or_create(
                 project=project_obj,
-                defaults={'status': 'ok', 'log': '', 'project':project_obj}
+                defaults={'status': 'ok', 'log': 'Status: Nothing changed, no training', 'project':project_obj}
             )
 
         else:
@@ -530,10 +530,10 @@ def _train(project_id):
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': f'Status : failed {str(err_msg)}', 'log': str(err_msg), 'project': project_obj}
+            defaults={'status': 'failed', 'log': f'Status : failed {str(e)}', 'project':project_obj}
         )
 
-        return JsonResponse({'status': f'failed: {str(err_msg)}'})
+        return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(e)}'})
 
 @api_view()
 def train(request, project_id):
