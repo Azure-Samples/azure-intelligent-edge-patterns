@@ -5,6 +5,7 @@ import time
 import threading
 import datetime
 import threading
+import traceback
 import io
 import sys
 
@@ -390,6 +391,12 @@ def _train(project_id):
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
 
+    # @FIXME (Hugh): wrap it up
+    obj, created = Train.objects.update_or_create(
+        project=project_obj,
+        defaults={'status': 'Status: preparing data (images and annotations)', 'log': '', 'project':project_obj}
+    )
+
     try:
         count = 10
         while count > 0:
@@ -402,7 +409,7 @@ def _train(project_id):
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': 'Status: send data (images and annotations)', 'log': '', 'project':project_obj}
+            defaults={'status': 'Status: sending data (images and annotations)', 'log': '', 'project':project_obj}
         )
 
         print(project_obj.id)
@@ -497,15 +504,28 @@ def _train(project_id):
         return JsonResponse({'status': 'ok'})
 
     except Exception as e:
-        print(f'Exception: {str(e)}')
+        # @FIXME (Hugh): this is for debugging, plz wrap this up
+        def get_callstack_msg():
+            error_class = e.__class__.__name__
+            detail = e.args[0]
+            cl, exc, tb = sys.exc_info()
+            lastCallStack = traceback.extract_tb(tb)[-1]
+            fileName = lastCallStack[0]
+            lineNum = lastCallStack[1]
+            funcName = lastCallStack[2]
+            err_msg = "File \"{}\", line {}, in {}: [{}] {}".format(fileName, lineNum, funcName, error_class, detail)
+            return err_msg
+
+        err_msg = get_callstack_msg()
+        print(f'Exception: {err_msg}')
 
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': f'Status : failed {str(e)}', 'log': str(e), 'project':project_obj}
+            defaults={'status': f'Status : failed {str(err_msg)}', 'log': str(err_msg), 'project': project_obj}
         )
 
-        return JsonResponse({'status': f'failed: {str(e)}'})
+        return JsonResponse({'status': f'failed: {str(err_msg)}'})
 
 @api_view()
 def train(request, project_id):
