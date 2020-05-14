@@ -149,9 +149,8 @@ export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise
 
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
-      if (data.status !== 'ok') dispatch(getTrainingStatusSuccess(data.status));
-      // else if (data.status === 'ok' && !data.download_uri) dispatch(getTrainingStatusSuccess(data.status));
-      else {
+      if (data.status === 'failed') throw new Error(data.log);
+      else if (data.status === 'ok') {
         dispatch(
           getTrainingStatusSuccess(
             '',
@@ -161,7 +160,7 @@ export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise
             data.unidentified_num,
           ),
         );
-      }
+      } else dispatch(getTrainingStatusSuccess(data.log));
       return void 0;
     })
     .catch((err) => dispatch(getTrainingStatusFailed(err)));

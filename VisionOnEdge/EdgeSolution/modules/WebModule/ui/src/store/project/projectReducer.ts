@@ -77,7 +77,12 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       };
     }
     case GET_TRAINING_STATUS_FAILED:
-      return { ...state, data: { ...state.data, status: 'offline' }, error: action.error };
+      return {
+        ...state,
+        trainingStatus: '',
+        data: { ...state.data, status: 'offline' },
+        error: action.error,
+      };
     default:
       return { ...state };
   }
