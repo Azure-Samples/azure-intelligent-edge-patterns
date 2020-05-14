@@ -26,7 +26,15 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
   let x: number;
   let y: number;
 
-  if (label.x1 > 30 / scale || label.x2 < (imageSize.width - 25) / scale) {
+  if (
+    label.x1 < 0 ||
+    label.x2 > imageSize.width / scale ||
+    label.y1 < 0 ||
+    label.y2 > imageSize.height / scale
+  ) {
+    x = 0;
+    y = -60;
+  } else if (label.x1 > 30 / scale || label.x2 < (imageSize.width - 25) / scale) {
     if (label.x1 > 30 / scale) x = label.x1 - 20 / scale;
     else x = label.x2 + 25 / scale;
 

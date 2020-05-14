@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Flex, Text, Status, Button, Loader } from '@fluentui/react-northstar';
+import React, { useEffect, FC, useState } from 'react';
+import { Flex, Text, Status, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -20,9 +20,8 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   camera,
   projectId,
 }) => {
-  const { isLoading, error, data: project, trainingStatus } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+  const { error, data: project, trainingStatus } = useSelector<State, Project>((state) => state.project);
+  const [trainingInfo, setTrainingInfo] = useState(trainingStatus);
   const parts = useParts();
   const dispatch = useDispatch();
   const name = useQuery().get('name');
@@ -55,16 +54,19 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     dispatch(thunkGetProject());
   }, [dispatch]);
 
+  useEffect(() => {
+    setTrainingInfo((prev) => `${prev}\n${trainingStatus}`);
+  }, [trainingStatus]);
+
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
+      {error && <Alert danger header={error.name} content={`${error.message}`} />}
       {trainingStatus ? (
-        <Loader
-          size="largest"
-          label={trainingStatus}
-          labelPosition="below"
-          design={{ paddingTop: '300px' }}
-        />
+        <>
+          <Loader size="smallest" />
+          <pre>{trainingInfo}</pre>
+        </>
       ) : (
         <>
           <ListItem title="Status" content={<CameraStatus online={project.status === 'online'} />} />
@@ -116,6 +118,22 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
               </>
             }
           />
+          {project.prevConsequence && (
+            <>
+              <Text>Previous Model Metrics</Text>
+              <ConsequenseInfo
+                precision={project.prevConsequence?.precision}
+                recall={project.prevConsequence?.recall}
+                mAP={project.prevConsequence?.mAP}
+              />
+            </>
+          )}
+          <Text>Updated Model Metrics</Text>
+          <ConsequenseInfo
+            precision={project.curConsequence?.precision}
+            recall={project.curConsequence?.recall}
+            mAP={project.curConsequence?.mAP}
+          />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
           </Button>
@@ -125,6 +143,42 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
         </>
       )}
     </Flex>
+  );
+};
+
+interface ConsequenseInfoProps {
+  precision: number;
+  recall: number;
+  mAP: number;
+}
+const ConsequenseInfo: FC<ConsequenseInfoProps> = ({ precision, recall, mAP }) => {
+  return (
+    <Grid columns={3}>
+      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
+        <Text align="center" size="large" weight="semibold">
+          Precison
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
+          {precision}%
+        </Text>
+      </div>
+      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
+        <Text align="center" size="large" weight="semibold">
+          Recall
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#0063b1' }}>
+          {recall}%
+        </Text>
+      </div>
+      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
+        <Text align="center" size="large" weight="semibold">
+          mAP
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#69c138' }}>
+          {mAP}%
+        </Text>
+      </div>
+    </Grid>
   );
 };
 

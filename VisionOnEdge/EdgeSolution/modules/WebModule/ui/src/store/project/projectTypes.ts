@@ -9,6 +9,12 @@ export type Project = {
   error: Error;
 };
 
+export type Consequence = {
+  precision: number;
+  recall: number;
+  mAP: number;
+};
+
 export type ProjectData = {
   id: number;
   camera: any;
@@ -23,6 +29,8 @@ export type ProjectData = {
   successRate: number;
   successfulInferences: number;
   unIdetifiedItems: number;
+  curConsequence?: Consequence;
+  prevConsequence?: Consequence;
 };
 
 // Describing the different ACTION NAMES available
@@ -59,6 +67,7 @@ export type GetTrainingStatusSuccessAction = {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
+    consequences: Consequence[];
   };
 };
 

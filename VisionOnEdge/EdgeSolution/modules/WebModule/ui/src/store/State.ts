@@ -43,6 +43,8 @@ export const initialState: State = {
       successRate: null,
       successfulInferences: null,
       unIdetifiedItems: null,
+      prevConsequence: null,
+      curConsequence: null,
     },
     error: null,
     trainingStatus: '',
