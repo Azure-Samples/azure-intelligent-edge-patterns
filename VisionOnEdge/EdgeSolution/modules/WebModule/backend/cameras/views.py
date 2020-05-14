@@ -512,19 +512,7 @@ def _train(project_id):
         return JsonResponse({'status': 'ok'})
 
     except Exception as e:
-        # @FIXME (Hugh): this is for debugging, plz wrap this up
-        def get_callstack_msg():
-            error_class = e.__class__.__name__
-            detail = e.args[0]
-            cl, exc, tb = sys.exc_info()
-            lastCallStack = traceback.extract_tb(tb)[-1]
-            fileName = lastCallStack[0]
-            lineNum = lastCallStack[1]
-            funcName = lastCallStack[2]
-            err_msg = "File \"{}\", line {}, in {}: [{}] {}".format(fileName, lineNum, funcName, error_class, detail)
-            return err_msg
-
-        err_msg = get_callstack_msg()
+        err_msg = traceback.format_exc()
         print(f'Exception: {err_msg}')
 
         # @FIXME (Hugh): wrap it up
