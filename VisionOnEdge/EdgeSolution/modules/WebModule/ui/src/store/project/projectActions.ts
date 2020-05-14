@@ -26,6 +26,7 @@ import {
   GET_TRAINING_STATUS_SUCCESS,
   GetTrainingStatusFailedAction,
   GET_TRAINING_STATUS_FAILED,
+  Consequence,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -42,9 +43,10 @@ const getTrainingStatusSuccess = (
   successRate?: number,
   successfulInferences?: number,
   unIdetifiedItems?: number,
+  consequences?: Consequence[],
 ): GetTrainingStatusSuccessAction => ({
   type: GET_TRAINING_STATUS_SUCCESS,
-  payload: { trainingStatus, modelUrl, successRate, successfulInferences, unIdetifiedItems },
+  payload: { trainingStatus, modelUrl, successRate, successfulInferences, unIdetifiedItems, consequences },
 });
 const getTrainingStatusFailed = (error: Error): GetTrainingStatusFailedAction => ({
   type: GET_TRAINING_STATUS_FAILED,
@@ -82,9 +84,6 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         successRate: data[0]?.successRate ?? 0,
         successfulInferences: data[0]?.successfulInferences ?? 0,
         unIdetifiedItems: data[0]?.unIdetifiedItems ?? 0,
-        precision: data[0]?.precision ?? null,
-        recall: data[0]?.recall ?? null,
-        mAP: data[0]?.mAP ?? null,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -149,9 +148,14 @@ export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise
 
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
-      if (data.status !== 'ok') dispatch(getTrainingStatusSuccess(data.status));
-      // else if (data.status === 'ok' && !data.download_uri) dispatch(getTrainingStatusSuccess(data.status));
-      else {
+      if (data.status === 'failed') throw new Error(data.log);
+      else if (data.status === 'ok') {
+        const consequences: Consequence[] = data.performance.per_tag_performance.map((e) => ({
+          precision: e.precision,
+          recall: e.recall,
+          mAP: e.average_precision,
+        }));
+
         dispatch(
           getTrainingStatusSuccess(
             '',
@@ -159,9 +163,10 @@ export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise
             data.success_rate,
             data.inference_num,
             data.unidentified_num,
+            consequences,
           ),
         );
-      }
+      } else dispatch(getTrainingStatusSuccess(data.log));
       return void 0;
     })
     .catch((err) => dispatch(getTrainingStatusFailed(err)));
