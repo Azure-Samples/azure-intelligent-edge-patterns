@@ -118,7 +118,22 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
               </>
             }
           />
-          <ConsequenseInfo precision={project.precision} recall={project.recall} mAP={project.mAP} />
+          {project.prevConsequence && (
+            <>
+              <Text>Previous Model Metrics</Text>
+              <ConsequenseInfo
+                precision={project.prevConsequence?.precision}
+                recall={project.prevConsequence?.recall}
+                mAP={project.prevConsequence?.mAP}
+              />
+            </>
+          )}
+          <Text>Updated Model Metrics</Text>
+          <ConsequenseInfo
+            precision={project.curConsequence?.precision}
+            recall={project.curConsequence?.recall}
+            mAP={project.curConsequence?.mAP}
+          />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
           </Button>
