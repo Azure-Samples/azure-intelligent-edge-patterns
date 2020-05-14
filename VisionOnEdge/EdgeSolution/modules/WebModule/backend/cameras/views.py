@@ -97,7 +97,7 @@ def update_train_status(project_id):
                 # @FIXME (Hugh): wrap it up
                 obj, created = Train.objects.update_or_create(
                     project=project_obj,
-                    defaults={'status': 'training', 'log': 'Status : model training', 'project':project_obj}
+                    defaults={'status': 'training', 'log': 'Status : training model', 'project':project_obj}
                 )
                 continue
                 #return JsonResponse({'status': 'waiting training'})
@@ -143,7 +143,9 @@ def update_train_status(project_id):
                 continue
 
             print('Training Status : Completed')
-            train_performance = trainer.get_iteration_performance(customvision_project_id, iteration.id).as_dict()
+            train_performance = []
+            for iteration in iterations[:2]:
+                train_performance.append(trainer.get_iteration_performance(customvision_project_id, iteration.id).as_dict())
             print(train_performance)
 
             # @FIXME (Hugh): wrap it up
@@ -417,7 +419,7 @@ def _train(project_id):
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': 'sending', 'log': 'Status: send data (images and annotations)', 'project':project_obj}
+            defaults={'status': 'sending', 'log': 'Status : sending data (images and annotations)', 'project':project_obj}
         )
 
         print(project_obj.id)
