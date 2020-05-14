@@ -62,7 +62,14 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
         ...state,
       };
     case GET_TRAINING_STATUS_SUCCESS: {
-      const { successRate, modelUrl, successfulInferences, unIdetifiedItems, consequences } = action.payload;
+      const {
+        successRate,
+        modelUrl,
+        successfulInferences,
+        unIdetifiedItems,
+        curConsequence,
+        prevConsequence,
+      } = action.payload;
       return {
         ...state,
         trainingStatus: action.payload.trainingStatus,
@@ -72,8 +79,8 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           ...(modelUrl && { modelUrl }),
           ...(successfulInferences && { successfulInferences }),
           ...(unIdetifiedItems && { unIdetifiedItems }),
-          ...(consequences[0] && { curConsequence: consequences[0] }),
-          ...(consequences[1] && { curConsequence: consequences[1] }),
+          ...(curConsequence && { curConsequence }),
+          ...(prevConsequence && { prevConsequence }),
         },
       };
     }

@@ -43,10 +43,19 @@ const getTrainingStatusSuccess = (
   successRate?: number,
   successfulInferences?: number,
   unIdetifiedItems?: number,
-  consequences?: Consequence[],
+  curConsequence?: Consequence,
+  prevConsequence?: Consequence,
 ): GetTrainingStatusSuccessAction => ({
   type: GET_TRAINING_STATUS_SUCCESS,
-  payload: { trainingStatus, modelUrl, successRate, successfulInferences, unIdetifiedItems, consequences },
+  payload: {
+    trainingStatus,
+    modelUrl,
+    successRate,
+    successfulInferences,
+    unIdetifiedItems,
+    curConsequence,
+    prevConsequence,
+  },
 });
 const getTrainingStatusFailed = (error: Error): GetTrainingStatusFailedAction => ({
   type: GET_TRAINING_STATUS_FAILED,
@@ -146,29 +155,43 @@ export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promi
 export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise<any> => {
   dispatch(getTrainingStatusRequest());
 
-  return Axios.get(`/api/projects/${projectId}/export`)
-    .then(({ data }) => {
-      if (data.status === 'failed') throw new Error(data.log);
-      else if (data.status === 'ok') {
-        const consequences: Consequence[] = data.performance.per_tag_performance.map((e) => ({
-          precision: e.precision,
-          recall: e.recall,
-          mAP: e.average_precision,
-        }));
+  const exportAPI = Axios.get(`/api/projects/${projectId}/export`);
+  const performanceAPI = Axios.get(`/api/projects/${projectId}/train_performance`);
 
-        dispatch(
-          getTrainingStatusSuccess(
-            '',
-            data.download_uri,
-            data.success_rate,
-            data.inference_num,
-            data.unidentified_num,
-            consequences,
-          ),
-        );
-      } else dispatch(getTrainingStatusSuccess(data.log));
-      return void 0;
-    })
+  return Axios.all([exportAPI, performanceAPI])
+    .then(
+      Axios.spread((...responses) => {
+        const { data: exportData } = responses[0];
+        const { data: performanceData } = responses[1];
+        if (exportData.status === 'failed') throw new Error(exportData.log);
+        else if (exportData.status === 'ok') {
+          const prevConsequences: Consequence = {
+            precision: performanceData?.previous?.precision * 100,
+            recall: performanceData?.previous?.recall * 100,
+            mAP: performanceData?.previous?.map * 100,
+          };
+
+          const curConsequences: Consequence = {
+            precision: performanceData?.new?.precision * 100,
+            recall: performanceData?.new?.recall * 100,
+            mAP: performanceData?.new?.map * 100,
+          };
+
+          dispatch(
+            getTrainingStatusSuccess(
+              '',
+              exportData.download_uri,
+              exportData.success_rate,
+              exportData.inference_num,
+              exportData.unidentified_num,
+              prevConsequences,
+              curConsequences,
+            ),
+          );
+        } else dispatch(getTrainingStatusSuccess(exportData.log));
+        return void 0;
+      }),
+    )
     .catch((err) => dispatch(getTrainingStatusFailed(err)));
 };
 

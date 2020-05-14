@@ -67,7 +67,8 @@ export type GetTrainingStatusSuccessAction = {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
-    consequences: Consequence[];
+    curConsequence: Consequence;
+    prevConsequence: Consequence;
   };
 };
 
