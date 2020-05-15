@@ -130,11 +130,14 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.model = model
         self.current_uploaded_images = {}
         self.is_upload_image = True
-        self.lock.release()
 
         self.detection_success_num = 0
         self.detection_unidentified_num = 0
         self.detection_total = 0 # nothing isn't included
+        self.detections = []
+
+        self.lock.release()
+
 
     def predict(self, image):
 
@@ -197,6 +200,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                             except:
                                                 print('[ERROR] Failed to update image for relabeling')
 
+                    self.lock.acquire()
                     if detection == DETECTION_TYPE_NOTHING:
                         pass
                     else:
@@ -221,6 +225,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                 self.detection_success_num += 1
                             self.detection_total += 1
                         
+                    self.lock.release()
                     #print(detection)
                 else:
                     if self.cam_type == 'video_file':
