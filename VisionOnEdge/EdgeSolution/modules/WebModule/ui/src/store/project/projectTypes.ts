@@ -6,8 +6,26 @@ export type Project = {
   isLoading: boolean;
   trainingLog: string;
   data: ProjectData;
+  inferenceMetric: {
+    successRate: number;
+    successfulInferences: number;
+    unIdetifiedItems: number;
+  };
+  trainingMetric: {
+    prevConsequence: Consequence;
+    curConsequence: Consequence;
+  };
+  status: Status;
   error: Error;
 };
+
+export enum Status {
+  None = 'none',
+  WaitTraining = 'waitTraining',
+  FinishTraining = 'finishTraining',
+  TrainingFailed = 'trainingFailed',
+  StartInference = 'startInference',
+}
 
 export type Consequence = {
   precision: number;
@@ -25,12 +43,6 @@ export type ProjectData = {
   accuracyRangeMax: number;
   maxImages: number;
   modelUrl: string;
-  status: string;
-  successRate: number;
-  successfulInferences: number;
-  unIdetifiedItems: number;
-  curConsequence?: Consequence;
-  prevConsequence?: Consequence;
 };
 
 // Describing the different ACTION NAMES available
@@ -53,28 +65,23 @@ export type GetProjectFailedAction = {
   error: Error;
 };
 
-export const GET_TRAINING_STATUS_REQUEST = 'GET_TRAINING_STATUS_REQUEST';
-export type GetTrainingStatusRequesAction = {
-  type: typeof GET_TRAINING_STATUS_REQUEST;
+export const GET_TRAINING_LOG_REQUEST = 'GET_TRAINING_LOG_REQUEST';
+export type GetTrainingLogRequesAction = {
+  type: typeof GET_TRAINING_LOG_REQUEST;
 };
 
-export const GET_TRAINING_STATUS_SUCCESS = 'GET_TRAINING_STATUS_SUCCESS';
-export type GetTrainingStatusSuccessAction = {
-  type: typeof GET_TRAINING_STATUS_SUCCESS;
+export const GET_TRAINING_LOG_SUCCESS = 'GET_TRAINING_LOG_SUCCESS';
+export type GetTrainingLogSuccessAction = {
+  type: typeof GET_TRAINING_LOG_SUCCESS;
   payload: {
     trainingLog: string;
-    modelUrl: string;
-    successRate: number;
-    successfulInferences: number;
-    unIdetifiedItems: number;
-    curConsequence: Consequence;
-    prevConsequence: Consequence;
+    newStatus: Status;
   };
 };
 
-export const GET_TRAINING_STATUS_FAILED = 'GET_TRAINING_STATUS_FAILED';
-export type GetTrainingStatusFailedAction = {
-  type: typeof GET_TRAINING_STATUS_FAILED;
+export const GET_TRAINING_LOG_FAILED = 'GET_TRAINING_LOG_FAILED';
+export type GetTrainingLogFailedAction = {
+  type: typeof GET_TRAINING_LOG_FAILED;
   error: Error;
 };
 
@@ -114,9 +121,9 @@ export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
   | GetProjectFailedAction
-  | GetTrainingStatusRequesAction
-  | GetTrainingStatusSuccessAction
-  | GetTrainingStatusFailedAction
+  | GetTrainingLogRequesAction
+  | GetTrainingLogSuccessAction
+  | GetTrainingLogFailedAction
   | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction

@@ -20,13 +20,13 @@ import {
   GET_PROJECT_REQUEST,
   UpdateProjectDataAction,
   UPDATE_PROJECT_DATA,
-  GetTrainingStatusRequesAction,
-  GET_TRAINING_STATUS_REQUEST,
-  GetTrainingStatusSuccessAction,
-  GET_TRAINING_STATUS_SUCCESS,
-  GetTrainingStatusFailedAction,
-  GET_TRAINING_STATUS_FAILED,
-  Consequence,
+  GetTrainingLogRequesAction,
+  GET_TRAINING_LOG_REQUEST,
+  GetTrainingLogSuccessAction,
+  GET_TRAINING_LOG_SUCCESS,
+  GetTrainingLogFailedAction,
+  GET_TRAINING_LOG_FAILED,
+  Status,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -36,29 +36,16 @@ const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
 });
 const getProjectFailed = (error: Error): GetProjectFailedAction => ({ type: GET_PROJECT_FAILED, error });
 
-const getTrainingStatusRequest = (): GetTrainingStatusRequesAction => ({ type: GET_TRAINING_STATUS_REQUEST });
-const getTrainingStatusSuccess = (
-  trainingLog: string,
-  modelUrl?: string,
-  successRate?: number,
-  successfulInferences?: number,
-  unIdetifiedItems?: number,
-  curConsequence?: Consequence,
-  prevConsequence?: Consequence,
-): GetTrainingStatusSuccessAction => ({
-  type: GET_TRAINING_STATUS_SUCCESS,
+const getTrainingLogRequest = (): GetTrainingLogRequesAction => ({ type: GET_TRAINING_LOG_REQUEST });
+const getTrainingLogSuccess = (trainingLog: string, newStatus: Status): GetTrainingLogSuccessAction => ({
+  type: GET_TRAINING_LOG_SUCCESS,
   payload: {
     trainingLog,
-    modelUrl,
-    successRate,
-    successfulInferences,
-    unIdetifiedItems,
-    curConsequence,
-    prevConsequence,
+    newStatus,
   },
 });
-const getTrainingStatusFailed = (error: Error): GetTrainingStatusFailedAction => ({
-  type: GET_TRAINING_STATUS_FAILED,
+const getTrainingStatusFailed = (error: Error): GetTrainingLogFailedAction => ({
+  type: GET_TRAINING_LOG_FAILED,
   error,
 });
 
@@ -85,14 +72,10 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         location: parseInt(data[0]?.location.split('/')[5], 10) ?? null,
         parts: data[0]?.parts.map((ele) => parseInt(ele.split('/')[5], 10)) ?? [],
         modelUrl: data[0]?.download_uri ?? '',
-        status: data[0]?.status ?? 'online',
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
         maxImages: data[0]?.maxImages ?? 50,
-        successRate: data[0]?.successRate ?? 0,
-        successfulInferences: data[0]?.successfulInferences ?? 0,
-        unIdetifiedItems: data[0]?.unIdetifiedItems ?? 0,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -152,46 +135,16 @@ export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promi
     });
 };
 
-export const thunkGetTrainingStatus = (projectId: number) => (dispatch): Promise<any> => {
-  dispatch(getTrainingStatusRequest());
+export const thunkGetTrainingLog = (projectId: number) => (dispatch): Promise<any> => {
+  dispatch(getTrainingLogRequest());
 
-  const exportAPI = Axios.get(`/api/projects/${projectId}/export`);
-  const performanceAPI = Axios.get(`/api/projects/${projectId}/train_performance`);
-
-  return Axios.all([exportAPI, performanceAPI])
-    .then(
-      Axios.spread((...responses) => {
-        const { data: exportData } = responses[0];
-        const { data: performanceData } = responses[1];
-        if (exportData.status === 'failed') throw new Error(exportData.log);
-        else if (exportData.status === 'ok') {
-          const prevConsequences: Consequence = {
-            precision: performanceData?.previous?.precision * 100,
-            recall: performanceData?.previous?.recall * 100,
-            mAP: performanceData?.previous?.map * 100,
-          };
-
-          const curConsequences: Consequence = {
-            precision: performanceData?.new?.precision * 100,
-            recall: performanceData?.new?.recall * 100,
-            mAP: performanceData?.new?.map * 100,
-          };
-
-          dispatch(
-            getTrainingStatusSuccess(
-              '',
-              exportData.download_uri,
-              exportData.success_rate,
-              exportData.inference_num,
-              exportData.unidentified_num,
-              prevConsequences,
-              curConsequences,
-            ),
-          );
-        } else dispatch(getTrainingStatusSuccess(exportData.log));
-        return void 0;
-      }),
-    )
+  return Axios.get(`/api/projects/${projectId}/export`)
+    .then(({ data }) => {
+      if (data.status === 'failed') throw new Error(data.log);
+      else if (data.status === 'ok') dispatch(getTrainingLogSuccess('', Status.FinishTraining));
+      else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining));
+      return void 0;
+    })
     .catch((err) => dispatch(getTrainingStatusFailed(err)));
 };
 

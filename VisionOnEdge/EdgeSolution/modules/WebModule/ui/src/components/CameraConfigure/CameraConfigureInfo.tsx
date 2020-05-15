@@ -4,12 +4,8 @@ import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
-import {
-  thunkDeleteProject,
-  thunkGetTrainingStatus,
-  thunkGetProject,
-} from '../../store/project/projectActions';
-import { Project } from '../../store/project/projectTypes';
+import { thunkDeleteProject, thunkGetTrainingLog, thunkGetProject } from '../../store/project/projectActions';
+import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
@@ -20,7 +16,10 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   camera,
   projectId,
 }) => {
-  const { error, data: project, trainingLog } = useSelector<State, Project>((state) => state.project);
+  const { error, data: project, trainingLog, status, trainingMetric, inferenceMetric } = useSelector<
+    State,
+    Project
+  >((state) => state.project);
   const [trainingInfo, setTrainingInfo] = useState(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
@@ -44,10 +43,10 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
    * Call custom Vision to export
    */
   useEffect(() => {
-    dispatch(thunkGetTrainingStatus(projectId));
+    dispatch(thunkGetTrainingLog(projectId));
   }, [dispatch, projectId]);
   useInterval(() => {
-    dispatch(thunkGetTrainingStatus(projectId));
+    dispatch(thunkGetTrainingLog(projectId));
   }, 5000);
 
   useEffect(() => {
@@ -70,7 +69,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
       ) : (
         <>
           <ListItem title="Status">
-            <CameraStatus online={project.status === 'online'} />
+            <CameraStatus online={status === CameraConfigStatus.FinishTraining} />
           </ListItem>
           <ListItem title="Configured for">
             {parts
@@ -86,13 +85,13 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
           </Flex>
           <ListItem title="Success Rate">
             <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-              {`${project.successRate}%`}
+              {`${inferenceMetric.successRate}%`}
             </Text>
           </ListItem>
-          <ListItem title="Successful Inferences">{project.successfulInferences}</ListItem>
+          <ListItem title="Successful Inferences">{inferenceMetric.successfulInferences}</ListItem>
           <ListItem title="Unidentified Items">
             <Text styles={{ margin: '5px' }} size="large">
-              {project.unIdetifiedItems}
+              {inferenceMetric.unIdetifiedItems}
             </Text>
             <Button
               content="Identify Manually"
@@ -111,21 +110,21 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
               to="/manual"
             />
           </ListItem>
-          {project.prevConsequence && (
+          {trainingMetric.prevConsequence && (
             <>
               <Text>Previous Model Metrics</Text>
               <ConsequenceDashboard
-                precision={project.prevConsequence?.precision}
-                recall={project.prevConsequence?.recall}
-                mAP={project.prevConsequence?.mAP}
+                precision={trainingMetric.prevConsequence?.precision}
+                recall={trainingMetric.prevConsequence?.recall}
+                mAP={trainingMetric.prevConsequence?.mAP}
               />
             </>
           )}
           <Text>Updated Model Metrics</Text>
           <ConsequenceDashboard
-            precision={project.curConsequence?.precision}
-            recall={project.curConsequence?.recall}
-            mAP={project.curConsequence?.mAP}
+            precision={trainingMetric.curConsequence?.precision}
+            recall={trainingMetric.curConsequence?.recall}
+            mAP={trainingMetric.curConsequence?.mAP}
           />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration

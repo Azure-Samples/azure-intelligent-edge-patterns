@@ -2,7 +2,7 @@ import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
 import { Part } from './part/partTypes';
 import { Location } from './location/locationTypes';
-import { Project } from './project/projectTypes';
+import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 
 export interface State {
@@ -39,13 +39,17 @@ export const initialState: State = {
       accuracyRangeMax: 80,
       maxImages: 50,
       modelUrl: '',
-      status: '',
-      successRate: null,
-      successfulInferences: null,
-      unIdetifiedItems: null,
+    },
+    trainingMetric: {
       prevConsequence: null,
       curConsequence: null,
     },
+    inferenceMetric: {
+      successRate: null,
+      successfulInferences: null,
+      unIdetifiedItems: null,
+    },
+    status: Status.None,
     error: null,
     trainingLog: '',
   },

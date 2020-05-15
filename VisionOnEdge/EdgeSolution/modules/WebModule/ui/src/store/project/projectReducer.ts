@@ -11,9 +11,10 @@ import {
   GET_PROJECT_REQUEST,
   UPDATE_PROJECT_DATA,
   POST_PROJECT_REQUEST,
-  GET_TRAINING_STATUS_REQUEST,
-  GET_TRAINING_STATUS_SUCCESS,
-  GET_TRAINING_STATUS_FAILED,
+  GET_TRAINING_LOG_REQUEST,
+  GET_TRAINING_LOG_SUCCESS,
+  GET_TRAINING_LOG_FAILED,
+  Status,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -44,51 +45,40 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           accuracyRangeMax: 80,
           maxImages: 50,
           modelUrl: '',
-          status: '',
-          successRate: null,
-          successfulInferences: null,
-          unIdetifiedItems: null,
+        },
+        inferenceMetric: {
+          successRate: 0,
+          successfulInferences: 0,
+          unIdetifiedItems: 0,
+        },
+        trainingMetric: {
           curConsequence: null,
           prevConsequence: null,
         },
+        trainingLog: '',
+        status: Status.None,
         error: null,
       };
     case DELETE_PROJECT_FALIED:
       return { ...state };
     case UPDATE_PROJECT_DATA:
       return { ...state, data: action.payload };
-    case GET_TRAINING_STATUS_REQUEST:
+    case GET_TRAINING_LOG_REQUEST:
       return {
         ...state,
       };
-    case GET_TRAINING_STATUS_SUCCESS: {
-      const {
-        successRate,
-        modelUrl,
-        successfulInferences,
-        unIdetifiedItems,
-        curConsequence,
-        prevConsequence,
-      } = action.payload;
+    case GET_TRAINING_LOG_SUCCESS:
       return {
         ...state,
         trainingLog: action.payload.trainingLog,
-        data: {
-          ...state.data,
-          ...(successRate && { successRate }),
-          ...(modelUrl && { modelUrl }),
-          ...(successfulInferences && { successfulInferences }),
-          ...(unIdetifiedItems && { unIdetifiedItems }),
-          ...(curConsequence && { curConsequence }),
-          ...(prevConsequence && { prevConsequence }),
-        },
+        status: action.payload.newStatus,
       };
-    }
-    case GET_TRAINING_STATUS_FAILED:
+    case GET_TRAINING_LOG_FAILED:
       return {
         ...state,
         trainingLog: '',
-        data: { ...state.data, status: 'offline' },
+        data: { ...state.data },
+        status: Status.TrainingFailed,
         error: action.error,
       };
     default:
