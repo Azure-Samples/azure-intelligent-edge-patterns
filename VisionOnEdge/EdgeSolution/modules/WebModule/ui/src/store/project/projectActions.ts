@@ -27,6 +27,13 @@ import {
   GetTrainingLogFailedAction,
   GET_TRAINING_LOG_FAILED,
   Status,
+  GetTrainingMetricRequestAction,
+  GET_TRAINING_METRIC_REQUEST,
+  GetTrainingMetricSuccessAction,
+  GET_TRAINING_METRIC_SUCCESS,
+  GetTrainingMetricFailedAction,
+  GET_TRAINING_METRIC_FAILED,
+  Consequence,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -55,6 +62,21 @@ const postProjectFail = (error: Error): PostProjectFaliedAction => ({ type: POST
 
 const deleteProjectSuccess = (): DeleteProjectSuccessAction => ({ type: DELETE_PROJECT_SUCCESS });
 const deleteProjectFailed = (): DeleteProjectFaliedAction => ({ type: DELETE_PROJECT_FALIED });
+
+const getTrainingMetricRequest = (): GetTrainingMetricRequestAction => ({
+  type: GET_TRAINING_METRIC_REQUEST,
+});
+const getTrainingMetricSuccess = (
+  curConsequence: Consequence,
+  prevConsequence: Consequence,
+): GetTrainingMetricSuccessAction => ({
+  type: GET_TRAINING_METRIC_SUCCESS,
+  payload: { prevConsequence, curConsequence },
+});
+const getTrainingMetricFailed = (error: Error): GetTrainingMetricFailedAction => ({
+  type: GET_TRAINING_METRIC_FAILED,
+  error,
+});
 
 export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
@@ -123,6 +145,9 @@ export const thunkPostProject = (
       dispatch(postProjectFail(err));
     }) as Promise<number>;
 };
+const getTrain = (projectId): void => {
+  Axios.get(`/api/projects/${projectId}/train`).catch((err) => console.error(err));
+};
 
 export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {
   return Axios.delete(`/api/projects/${projectId}/`)
@@ -148,6 +173,28 @@ export const thunkGetTrainingLog = (projectId: number) => (dispatch): Promise<an
     .catch((err) => dispatch(getTrainingStatusFailed(err)));
 };
 
-const getTrain = (projectId): void => {
-  Axios.get(`/api/projects/${projectId}/train`).catch((err) => console.error(err));
+export const thunkGetTrainingMetric = (projectId: number) => (dispacth): Promise<any> => {
+  dispacth(getTrainingMetricRequest());
+
+  return Axios.get(`/api/projects/${projectId}/train_performance`)
+    .then(({ data }) => {
+      const curConsequence: Consequence = data.new
+        ? {
+            precision: data.new.precision * 100,
+            recall: data.new.recall * 100,
+            mAP: data.new.map * 100,
+          }
+        : null;
+
+      const prevConsequence: Consequence = data.previous
+        ? {
+            precision: data.previous.precision * 100,
+            recall: data.previous.recall * 100,
+            mAP: data.previous.map * 100,
+          }
+        : null;
+
+      return dispacth(getTrainingMetricSuccess(curConsequence, prevConsequence));
+    })
+    .catch((err) => dispacth(getTrainingMetricFailed(err)));
 };

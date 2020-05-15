@@ -85,6 +85,26 @@ export type GetTrainingLogFailedAction = {
   error: Error;
 };
 
+export const GET_TRAINING_METRIC_REQUEST = 'GET_TRAINING_METRIC_REQUEST';
+export type GetTrainingMetricRequestAction = {
+  type: typeof GET_TRAINING_METRIC_REQUEST;
+};
+
+export const GET_TRAINING_METRIC_SUCCESS = 'GET_TRAINING_METRIC_SUCCESS';
+export type GetTrainingMetricSuccessAction = {
+  type: typeof GET_TRAINING_METRIC_SUCCESS;
+  payload: {
+    prevConsequence: Consequence;
+    curConsequence: Consequence;
+  };
+};
+
+export const GET_TRAINING_METRIC_FAILED = 'GET_TRAINING_METRIC_FAILED';
+export type GetTrainingMetricFailedAction = {
+  type: typeof GET_TRAINING_METRIC_FAILED;
+  error: Error;
+};
+
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
 export type PostProjectRequestAction = {
   type: typeof POST_PROJECT_REQUEST;
@@ -129,7 +149,10 @@ export type ProjectActionTypes =
   | PostProjectFaliedAction
   | DeleteProjectSuccessAction
   | DeleteProjectFaliedAction
-  | UpdateProjectDataAction;
+  | UpdateProjectDataAction
+  | GetTrainingMetricRequestAction
+  | GetTrainingMetricSuccessAction
+  | GetTrainingMetricFailedAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

@@ -4,7 +4,11 @@ import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
-import { thunkDeleteProject, thunkGetTrainingLog, thunkGetProject } from '../../store/project/projectActions';
+import {
+  thunkDeleteProject,
+  thunkGetTrainingLog,
+  thunkGetTrainingMetric,
+} from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
@@ -45,13 +49,18 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   useEffect(() => {
     dispatch(thunkGetTrainingLog(projectId));
   }, [dispatch, projectId]);
-  useInterval(() => {
-    dispatch(thunkGetTrainingLog(projectId));
-  }, 5000);
+  useInterval(
+    () => {
+      dispatch(thunkGetTrainingLog(projectId));
+    },
+    status === CameraConfigStatus.WaitTraining ? 5000 : null,
+  );
 
   useEffect(() => {
-    dispatch(thunkGetProject());
-  }, [dispatch]);
+    if (status === CameraConfigStatus.FinishTraining || status === CameraConfigStatus.TrainingFailed) {
+      dispatch(thunkGetTrainingMetric(projectId));
+    }
+  }, [dispatch, status, projectId]);
 
   useEffect(() => {
     setTrainingInfo((prev) => `${prev}\n${trainingLog}`);
