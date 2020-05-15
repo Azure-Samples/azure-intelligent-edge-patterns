@@ -25,6 +25,7 @@ import requests
 
 
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
+from .train import Trainer
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 
@@ -183,7 +184,7 @@ def export(request, project_id):
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
     except:
-        
+
         pass
 
     return JsonResponse({
@@ -415,11 +416,11 @@ def capture(request, stream_id):
 def train_performance(request, project_id):
     project_obj = Project.objects.get(pk=project_id)
     customvision_project_id = project_obj.customvision_project_id
-    
+
     ret = {}
 
     iterations = trainer.get_iterations(customvision_project_id)
-   
+
     def _parse(iteration):
         iteration = iteration.as_dict()
         status = iteration['status']
@@ -444,9 +445,9 @@ def train_performance(request, project_id):
     if len(iterations) >= 2:
         ret['previous'] = _parse(iterations[1])
 
-    
+
     return JsonResponse(ret)
-        
+
 
 def _train(project_id):
 
@@ -458,6 +459,8 @@ def _train(project_id):
         project=project_obj,
         defaults={'status': 'Status: preparing data (images and annotations)', 'log': '', 'project':project_obj}
     )
+
+    Trainer.dequeue_iterations(trainer=trainer, custom_vision_project_id=customvision_project_id)
 
     try:
         count = 10
