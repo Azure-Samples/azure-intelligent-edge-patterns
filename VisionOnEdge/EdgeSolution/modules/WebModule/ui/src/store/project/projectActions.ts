@@ -214,17 +214,17 @@ export const thunkGetTrainingMetrics = (projectId: number) => (dispacth): Promis
     .then(({ data }) => {
       const curConsequence: Consequence = data.new
         ? {
-            precision: data.new.precision * 100,
-            recall: data.new.recall * 100,
-            mAP: data.new.map * 100,
+            precision: data.new.precision,
+            recall: data.new.recall,
+            mAP: data.new.map,
           }
         : null;
 
       const prevConsequence: Consequence = data.previous
         ? {
-            precision: data.previous.precision * 100,
-            recall: data.previous.recall * 100,
-            mAP: data.previous.map * 100,
+            precision: data.previous.precision,
+            recall: data.previous.recall,
+            mAP: data.previous.map,
           }
         : null;
 
