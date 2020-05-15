@@ -57,7 +57,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   );
 
   useEffect(() => {
-    if (status === CameraConfigStatus.FinishTraining || status === CameraConfigStatus.TrainingFailed) {
+    if (status === CameraConfigStatus.FinishTraining) {
       dispatch(thunkGetTrainingMetrics(projectId));
     }
   }, [dispatch, status, projectId]);
