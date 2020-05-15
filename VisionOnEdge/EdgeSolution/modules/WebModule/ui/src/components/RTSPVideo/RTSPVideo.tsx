@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Button,
@@ -9,8 +9,15 @@ import {
 } from '@fluentui/react-northstar';
 
 import { thunkAddCapturedImages } from '../../store/part/partActions';
+import { RTSPVideoProps } from './RTSPVideo.type';
 
-export const RTSPVideoComponent = ({ rtsp = null, partId, canCapture }): JSX.Element => {
+export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
+  rtsp = null,
+  partId,
+  canCapture,
+  onVideoStart,
+  onVideoPause,
+}) => {
   const [streamId, setStreamId] = useState<string>('');
   const dispatch = useDispatch();
 
@@ -28,13 +35,14 @@ export const RTSPVideoComponent = ({ rtsp = null, partId, canCapture }): JSX.Ele
       .catch((err) => {
         console.error(err);
       });
+    if (onVideoStart) onVideoStart();
   };
 
   const onCapturePhoto = (): void => {
     dispatch(thunkAddCapturedImages(streamId));
   };
 
-  const onDisconnect = useCallback((): void => {
+  const onDisconnect = (): void => {
     setStreamId('');
     fetch(`/api/streams/${streamId}/disconnect`)
       .then((response) => response.json())
@@ -45,14 +53,15 @@ export const RTSPVideoComponent = ({ rtsp = null, partId, canCapture }): JSX.Ele
       .catch((err) => {
         console.error(err);
       });
-  }, [streamId]);
+    if (onVideoPause) onVideoPause();
+  };
 
   useEffect(() => {
     window.addEventListener('beforeunload', onDisconnect);
     return (): void => {
       window.removeEventListener('beforeunload', onDisconnect);
     };
-  }, [onDisconnect]);
+  });
 
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 

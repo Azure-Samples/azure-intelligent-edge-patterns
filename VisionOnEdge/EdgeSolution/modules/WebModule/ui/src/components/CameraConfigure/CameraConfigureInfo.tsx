@@ -6,10 +6,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useInterval } from '../../hooks/useInterval';
 import {
   thunkDeleteProject,
-  thunkGetTrainingStatus,
-  thunkGetProject,
+  thunkGetTrainingLog,
+  thunkGetTrainingMetrics,
+  thunkGetInferenceMetrics,
+  startInference,
+  stopInference,
 } from '../../store/project/projectActions';
-import { Project } from '../../store/project/projectTypes';
+import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
@@ -20,11 +23,14 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   camera,
   projectId,
 }) => {
-  const { error, data: project, trainingStatus } = useSelector<State, Project>((state) => state.project);
-  const [trainingInfo, setTrainingInfo] = useState(trainingStatus);
+  const { error, data: project, trainingLog, status, trainingMetrics, inferenceMetrics } = useSelector<
+    State,
+    Project
+  >((state) => state.project);
+  const allTrainingLog = useAllTrainingLog(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
-  const name = useQuery().get('name');
+  const cameraName = useQuery().get('name');
   const history = useHistory();
 
   const onDeleteConfigure = useCallback((): void => {
@@ -34,43 +40,62 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     const result = (dispatch(thunkDeleteProject(projectId)) as unknown) as Promise<any>;
     result
       .then((data) => {
-        if (data) return history.push(`/cameras/detail?name=${name}`);
+        if (data) return history.push(`/cameras/detail?name=${cameraName}`);
         return void 0;
       })
       .catch((err) => console.error(err));
-  }, [dispatch, history, name, projectId]);
+  }, [dispatch, history, cameraName, projectId]);
 
-  /**
-   * Call custom Vision to export
-   */
   useEffect(() => {
-    dispatch(thunkGetTrainingStatus(projectId));
+    dispatch(thunkGetTrainingLog(projectId));
   }, [dispatch, projectId]);
-  useInterval(() => {
-    dispatch(thunkGetTrainingStatus(projectId));
-  }, 5000);
+  useInterval(
+    () => {
+      dispatch(thunkGetTrainingLog(projectId));
+    },
+    status === CameraConfigStatus.WaitTraining ? 5000 : null,
+  );
 
   useEffect(() => {
-    dispatch(thunkGetProject());
-  }, [dispatch]);
+    if (status === CameraConfigStatus.FinishTraining) {
+      dispatch(thunkGetTrainingMetrics(projectId));
+    }
+  }, [dispatch, status, projectId]);
 
-  useEffect(() => {
-    setTrainingInfo((prev) => `${prev}\n${trainingStatus}`);
-  }, [trainingStatus]);
+  useInterval(
+    () => {
+      dispatch(thunkGetInferenceMetrics(projectId));
+    },
+    status === CameraConfigStatus.StartInference ? 5000 : null,
+  );
+
+  const onVideoStart = (): void => {
+    dispatch(startInference());
+  };
+
+  const onVideoPause = (): void => {
+    dispatch(stopInference());
+  };
 
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      {trainingStatus ? (
+      {trainingLog ? (
         <>
           <Loader size="smallest" />
-          <pre>{trainingInfo}</pre>
+          <pre>{allTrainingLog}</pre>
         </>
       ) : (
         <>
           <ListItem title="Status">
-            <CameraStatus online={project.status === 'online'} />
+            <CameraStatus
+              online={[
+                CameraConfigStatus.FinishTraining,
+                CameraConfigStatus.PendInference,
+                CameraConfigStatus.StartInference,
+              ].includes(status)}
+            />
           </ListItem>
           <ListItem title="Configured for">
             {parts
@@ -82,17 +107,23 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <RTSPVideo rtsp={camera.rtsp} partId={project.parts[0]} canCapture={false} />
+            <RTSPVideo
+              rtsp={camera.rtsp}
+              partId={project.parts[0]}
+              canCapture={false}
+              onVideoStart={onVideoStart}
+              onVideoPause={onVideoPause}
+            />
           </Flex>
           <ListItem title="Success Rate">
             <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-              {`${project.successRate}%`}
+              {`${inferenceMetrics.successRate}%`}
             </Text>
           </ListItem>
-          <ListItem title="Successful Inferences">{project.successfulInferences}</ListItem>
+          <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
           <ListItem title="Unidentified Items">
             <Text styles={{ margin: '5px' }} size="large">
-              {project.unIdetifiedItems}
+              {inferenceMetrics.unIdetifiedItems}
             </Text>
             <Button
               content="Identify Manually"
@@ -111,21 +142,21 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
               to="/manual"
             />
           </ListItem>
-          {project.prevConsequence && (
+          {trainingMetrics.prevConsequence && (
             <>
               <Text>Previous Model Metrics</Text>
               <ConsequenceDashboard
-                precision={project.prevConsequence?.precision}
-                recall={project.prevConsequence?.recall}
-                mAP={project.prevConsequence?.mAP}
+                precision={trainingMetrics.prevConsequence?.precision}
+                recall={trainingMetrics.prevConsequence?.recall}
+                mAP={trainingMetrics.prevConsequence?.mAP}
               />
             </>
           )}
           <Text>Updated Model Metrics</Text>
           <ConsequenceDashboard
-            precision={project.curConsequence?.precision}
-            recall={project.curConsequence?.recall}
-            mAP={project.curConsequence?.mAP}
+            precision={trainingMetrics.curConsequence?.precision}
+            recall={trainingMetrics.curConsequence?.recall}
+            mAP={trainingMetrics.curConsequence?.mAP}
           />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
@@ -137,6 +168,18 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
       )}
     </Flex>
   );
+};
+
+/**
+ * Retrun a string which contains all logs get from server during training
+ * @param trainingLog The log get from the api export
+ */
+const useAllTrainingLog = (trainingLog: string): string => {
+  const [allLogs, setAllLogs] = useState(trainingLog);
+  useEffect(() => {
+    setAllLogs((prev) => `${prev}\n${trainingLog}`);
+  }, [trainingLog]);
+  return allLogs;
 };
 
 interface ConsequenceDashboardProps {

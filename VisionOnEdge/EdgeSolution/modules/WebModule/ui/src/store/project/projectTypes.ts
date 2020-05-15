@@ -4,10 +4,29 @@ import type { State } from '../State';
 
 export type Project = {
   isLoading: boolean;
-  trainingStatus: string;
+  trainingLog: string;
   data: ProjectData;
+  inferenceMetrics: {
+    successRate: number;
+    successfulInferences: number;
+    unIdetifiedItems: number;
+  };
+  trainingMetrics: {
+    prevConsequence: Consequence;
+    curConsequence: Consequence;
+  };
+  status: Status;
   error: Error;
 };
+
+export enum Status {
+  None = 'none',
+  WaitTraining = 'waitTraining',
+  FinishTraining = 'finishTraining',
+  TrainingFailed = 'trainingFailed',
+  StartInference = 'startInference',
+  PendInference = 'pendInference',
+}
 
 export type Consequence = {
   precision: number;
@@ -25,12 +44,6 @@ export type ProjectData = {
   accuracyRangeMax: number;
   maxImages: number;
   modelUrl: string;
-  status: string;
-  successRate: number;
-  successfulInferences: number;
-  unIdetifiedItems: number;
-  curConsequence?: Consequence;
-  prevConsequence?: Consequence;
 };
 
 // Describing the different ACTION NAMES available
@@ -53,28 +66,64 @@ export type GetProjectFailedAction = {
   error: Error;
 };
 
-export const GET_TRAINING_STATUS_REQUEST = 'GET_TRAINING_STATUS_REQUEST';
-export type GetTrainingStatusRequesAction = {
-  type: typeof GET_TRAINING_STATUS_REQUEST;
+export const GET_TRAINING_LOG_REQUEST = 'GET_TRAINING_LOG_REQUEST';
+export type GetTrainingLogRequesAction = {
+  type: typeof GET_TRAINING_LOG_REQUEST;
 };
 
-export const GET_TRAINING_STATUS_SUCCESS = 'GET_TRAINING_STATUS_SUCCESS';
-export type GetTrainingStatusSuccessAction = {
-  type: typeof GET_TRAINING_STATUS_SUCCESS;
+export const GET_TRAINING_LOG_SUCCESS = 'GET_TRAINING_LOG_SUCCESS';
+export type GetTrainingLogSuccessAction = {
+  type: typeof GET_TRAINING_LOG_SUCCESS;
   payload: {
-    trainingStatus: string;
-    modelUrl: string;
-    successRate: number;
-    successfulInferences: number;
-    unIdetifiedItems: number;
-    curConsequence: Consequence;
-    prevConsequence: Consequence;
+    trainingLog: string;
+    newStatus: Status;
   };
 };
 
-export const GET_TRAINING_STATUS_FAILED = 'GET_TRAINING_STATUS_FAILED';
-export type GetTrainingStatusFailedAction = {
-  type: typeof GET_TRAINING_STATUS_FAILED;
+export const GET_TRAINING_LOG_FAILED = 'GET_TRAINING_LOG_FAILED';
+export type GetTrainingLogFailedAction = {
+  type: typeof GET_TRAINING_LOG_FAILED;
+  error: Error;
+};
+
+export const GET_TRAINING_METRICS_REQUEST = 'GET_TRAINING_METRICS_REQUEST';
+export type GetTrainingMetricsRequestAction = {
+  type: typeof GET_TRAINING_METRICS_REQUEST;
+};
+
+export const GET_TRAINING_METRICS_SUCCESS = 'GET_TRAINING_METRICS_SUCCESS';
+export type GetTrainingMetricsSuccessAction = {
+  type: typeof GET_TRAINING_METRICS_SUCCESS;
+  payload: {
+    prevConsequence: Consequence;
+    curConsequence: Consequence;
+  };
+};
+
+export const GET_TRAINING_METRICS_FAILED = 'GET_TRAINING_METRICS_FAILED';
+export type GetTrainingMetricsFailedAction = {
+  type: typeof GET_TRAINING_METRICS_FAILED;
+  error: Error;
+};
+
+export const GET_INFERENCE_METRICS_REQUEST = 'GET_TRAINING_INFERENCE_REQUEST';
+export type GetInferenceMetricsRequestAction = {
+  type: typeof GET_INFERENCE_METRICS_REQUEST;
+};
+
+export const GET_INFERENCE_METRICS_SUCCESS = 'GET_INFERENCE_METRICS_SUCCESS';
+export type GetInferenceMetricsSuccessAction = {
+  type: typeof GET_INFERENCE_METRICS_SUCCESS;
+  payload: {
+    successRate: number;
+    successfulInferences: number;
+    unIdetifiedItems: number;
+  };
+};
+
+export const GET_INFERENCE_METRICS_FAILED = 'GET_INFERENCE_METRICS_FAILED';
+export type GetInferenceMetricsFailedAction = {
+  type: typeof GET_INFERENCE_METRICS_FAILED;
   error: Error;
 };
 
@@ -110,19 +159,37 @@ export type UpdateProjectDataAction = {
   payload: ProjectData;
 };
 
+export const START_INFERENCE = 'START_INFERENCE';
+export type StartInferenceAction = {
+  type: typeof START_INFERENCE;
+};
+
+export const STOP_INFERENCE = 'STOP_INFERENCE';
+export type StopInferenceAction = {
+  type: typeof STOP_INFERENCE;
+};
+
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
   | GetProjectFailedAction
-  | GetTrainingStatusRequesAction
-  | GetTrainingStatusSuccessAction
-  | GetTrainingStatusFailedAction
+  | GetTrainingLogRequesAction
+  | GetTrainingLogSuccessAction
+  | GetTrainingLogFailedAction
   | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction
   | DeleteProjectSuccessAction
   | DeleteProjectFaliedAction
-  | UpdateProjectDataAction;
+  | UpdateProjectDataAction
+  | GetTrainingMetricsRequestAction
+  | GetTrainingMetricsSuccessAction
+  | GetTrainingMetricsFailedAction
+  | GetInferenceMetricsRequestAction
+  | GetInferenceMetricsSuccessAction
+  | GetInferenceMetricsFailedAction
+  | StartInferenceAction
+  | StopInferenceAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;
