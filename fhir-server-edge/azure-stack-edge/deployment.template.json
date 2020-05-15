@@ -1,0 +1,188 @@
+{
+    "$schema-template": "2.0.0",
+    "modulesContent": {
+        "$edgeAgent": {
+            "properties.desired": {
+                "schemaVersion": "1.0",
+                "runtime": {
+                    "type": "docker",
+                    "settings": {
+                        "minDockerVersion": "v1.25",
+                        "loggingOptions": "",
+                        "registryCredentials": {}
+                    }
+                },
+                "systemModules": {
+                    "edgeAgent": {
+                        "type": "docker",
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+                            "createOptions": {}
+                        }
+                    },
+                    "edgeHub": {
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+                            "createOptions": {
+                                "HostConfig": {
+                                    "PortBindings": {
+                                        "5671/tcp": [
+                                            {
+                                                "HostPort": "5671"
+                                            }
+                                        ],
+                                        "8883/tcp": [
+                                            {
+                                                "HostPort": "8883"
+                                            }
+                                        ],
+                                        "443/tcp": [
+                                            {
+                                                "HostPort": "443"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "modules": {
+                    "fhir-api": {
+                        "type": "docker",
+                        "version": "1.0",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "Env": {
+                            "ASPNETCORE_URLS": {
+                                "value": "$ASPNETCORE_URLS"
+                            },                            
+                            "ASPNETCORE_Kestrel__Certificates__Default__Password": {
+                                "value": "$ASPNETCORE_Kestrel__Certificates__Default__Password"
+                            },
+                            "ASPNETCORE_Kestrel__Certificates__Default__Path": {
+                                "value": "$ASPNETCORE_Kestrel__Certificates__Default__Path"
+                            },
+                            "ApplicationInsights__InstrumentationKey": {
+                                "value": "$ApplicationInsights__InstrumentationKey"
+                            },
+                            "FHIRServer__Security__Enabled":{
+                                "value": "$FHIRServer__Security__Enabled"
+                            },
+                            "FHIRServer__Security__Authentication__Audience":{
+                                "value": "$FHIRServer__Security__Authentication__Audience"
+                            },
+                            "FHIRServer__Security__Authentication__Authority":{
+                                "value": "$FHIRServer__Security__Authentication__Authority"
+                            },
+                            "SqlServer__ConnectionString":{
+                                "value": "Server=tcp:sql,1433;Initial Catalog=FHIR;Persist Security Info=False;User ID=sa;Password=${SAPASSWORD};MultipleActiveResultSets=False;Connection Timeout=30;"
+                            },
+                            "SqlServer__AllowDatabaseCreation":{
+                                "value": "$SqlServer__AllowDatabaseCreation"
+                            },
+                            "SqlServer__Initialize":{
+                                "value": "$SqlServer__Initialize"
+                            },
+                            "DataStore":{
+                                "value": "$DataStore"
+                            }
+                        },
+                        "settings": {
+                            "image": "healthplatformregistry.azurecr.io/${FHIR_VERSION}_fhir-server:latest",
+                            "createOptions": {
+                                "ExposedPorts": {
+                                    "8080/tcp": {},
+                                    "8443/tcp": {}
+                                },
+                                "HostConfig": {
+                                    "Mounts": [
+                                        {
+                                            "Target": "/https/",
+                                            "Source": "/https",
+                                            "Type": "bind"
+                                        }
+                                    ],                                    
+                                    "PortBindings": {
+                                        "8080/tcp": [
+                                            {
+                                                "HostIp": "0.0.0.0",
+                                                "HostPort": "8080"
+                                            }
+                                        ],
+                                        "8443/tcp": [
+                                            {
+                                                "HostIp": "0.0.0.0",
+                                                "HostPort": "8443"
+                                            }
+                                        ]                                        
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "sql": {
+                        "type": "docker",
+                        "version": "1.0",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "env": {
+                            "ACCEPT_EULA": {
+                                "value": "${ACCEPT_EULA}"
+                            },
+                            "MSSQL_SA_PASSWORD": {
+                                "value": "${SAPASSWORD}"
+                            }
+                        },
+                        "settings": {
+                            "image": "mcr.microsoft.com/mssql/server",
+                            "createOptions": {
+                                "Healthcheck": {
+                                    "Test": [
+                                        "CMD",
+                                        "/opt/mssql-tools/bin/sqlcmd",
+                                        "-U sa -P ${SAPASSWORD} -Q 'SELECT * FROM INFORMATION_SCHEMA.TABLES'"
+                                    ],
+                                    "StartPeriod": 300000000000,
+                                    "Interval": 10000000000,
+                                    "Timeout": 10000000000,
+                                    "Retries": 6
+                                },
+                                "HostConfig": {
+                                    "Mounts": [
+                                        {
+                                            "Target": "/var/opt/mssql",
+                                            "Source": "sqlVolume",
+                                            "Type": "volume"
+                                        }
+                                    ],
+                                    "PortBindings": {
+                                        "1433/tcp": [
+                                            {
+                                                "HostPort": "1433"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "$edgeHub": {
+            "properties.desired": {
+                "schemaVersion": "1.0",
+                "routes": {
+                    "sendToHub": "FROM /* INTO $upstream"
+                },
+                "storeAndForwardConfiguration": {
+                    "timeToLiveSecs": 7200
+                }
+            }
+        }
+    }
+}
