@@ -575,10 +575,10 @@ def _train(project_id):
         # @FIXME (Hugh): wrap it up
         obj, created = Train.objects.update_or_create(
             project=project_obj,
-            defaults={'status': 'failed', 'log': f'Status : failed {str(e)}', 'project':project_obj}
+            defaults={'status': 'failed', 'log': f'Status : failed {str(err_msg)}', 'project':project_obj}
         )
 
-        return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(e)}'})
+        return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
 
 @api_view()
 def train(request, project_id):
