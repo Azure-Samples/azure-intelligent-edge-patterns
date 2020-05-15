@@ -526,7 +526,6 @@ def _train(project_id):
                 count += 1
             except:
                 print("[ERROR] Unexpected error:", sys.exc_info()[0], flush=True)
-                raise
 
             if len(img_entries) >= 5:
                 print('uploading...', flush=True)
