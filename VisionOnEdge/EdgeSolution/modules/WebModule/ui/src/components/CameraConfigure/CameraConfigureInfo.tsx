@@ -27,10 +27,10 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     State,
     Project
   >((state) => state.project);
-  const [trainingInfo, setTrainingInfo] = useState(trainingLog);
+  const allTrainingLog = useAllTrainingLog(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
-  const name = useQuery().get('name');
+  const cameraName = useQuery().get('name');
   const history = useHistory();
 
   const onDeleteConfigure = useCallback((): void => {
@@ -40,11 +40,11 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     const result = (dispatch(thunkDeleteProject(projectId)) as unknown) as Promise<any>;
     result
       .then((data) => {
-        if (data) return history.push(`/cameras/detail?name=${name}`);
+        if (data) return history.push(`/cameras/detail?name=${cameraName}`);
         return void 0;
       })
       .catch((err) => console.error(err));
-  }, [dispatch, history, name, projectId]);
+  }, [dispatch, history, cameraName, projectId]);
 
   useEffect(() => {
     dispatch(thunkGetTrainingLog(projectId));
@@ -55,9 +55,6 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     },
     status === CameraConfigStatus.WaitTraining ? 5000 : null,
   );
-  useEffect(() => {
-    setTrainingInfo((prev) => `${prev}\n${trainingLog}`);
-  }, [trainingLog]);
 
   useEffect(() => {
     if (status === CameraConfigStatus.FinishTraining || status === CameraConfigStatus.TrainingFailed) {
@@ -87,7 +84,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
       {trainingLog ? (
         <>
           <Loader size="smallest" />
-          <pre>{trainingInfo}</pre>
+          <pre>{allTrainingLog}</pre>
         </>
       ) : (
         <>
@@ -171,6 +168,18 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
       )}
     </Flex>
   );
+};
+
+/**
+ * Retrun a string which contains all logs get from server during training
+ * @param trainingLog The log get from the api export
+ */
+const useAllTrainingLog = (trainingLog: string): string => {
+  const [allLogs, setAllLogs] = useState(trainingLog);
+  useEffect(() => {
+    setAllLogs((prev) => `${prev}\n${trainingLog}`);
+  }, [trainingLog]);
+  return allLogs;
 };
 
 interface ConsequenceDashboardProps {
