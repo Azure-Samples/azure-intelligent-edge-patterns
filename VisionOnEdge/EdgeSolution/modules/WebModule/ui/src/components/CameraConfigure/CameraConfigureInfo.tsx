@@ -20,8 +20,8 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   camera,
   projectId,
 }) => {
-  const { error, data: project, trainingStatus } = useSelector<State, Project>((state) => state.project);
-  const [trainingInfo, setTrainingInfo] = useState(trainingStatus);
+  const { error, data: project, trainingLog } = useSelector<State, Project>((state) => state.project);
+  const [trainingInfo, setTrainingInfo] = useState(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
   const name = useQuery().get('name');
@@ -55,14 +55,14 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   }, [dispatch]);
 
   useEffect(() => {
-    setTrainingInfo((prev) => `${prev}\n${trainingStatus}`);
-  }, [trainingStatus]);
+    setTrainingInfo((prev) => `${prev}\n${trainingLog}`);
+  }, [trainingLog]);
 
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      {trainingStatus ? (
+      {trainingLog ? (
         <>
           <Loader size="smallest" />
           <pre>{trainingInfo}</pre>

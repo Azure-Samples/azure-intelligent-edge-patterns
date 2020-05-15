@@ -4,7 +4,7 @@ import type { State } from '../State';
 
 export type Project = {
   isLoading: boolean;
-  trainingStatus: string;
+  trainingLog: string;
   data: ProjectData;
   error: Error;
 };
@@ -62,7 +62,7 @@ export const GET_TRAINING_STATUS_SUCCESS = 'GET_TRAINING_STATUS_SUCCESS';
 export type GetTrainingStatusSuccessAction = {
   type: typeof GET_TRAINING_STATUS_SUCCESS;
   payload: {
-    trainingStatus: string;
+    trainingLog: string;
     modelUrl: string;
     successRate: number;
     successfulInferences: number;

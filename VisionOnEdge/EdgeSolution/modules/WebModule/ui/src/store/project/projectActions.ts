@@ -38,7 +38,7 @@ const getProjectFailed = (error: Error): GetProjectFailedAction => ({ type: GET_
 
 const getTrainingStatusRequest = (): GetTrainingStatusRequesAction => ({ type: GET_TRAINING_STATUS_REQUEST });
 const getTrainingStatusSuccess = (
-  trainingStatus: string,
+  trainingLog: string,
   modelUrl?: string,
   successRate?: number,
   successfulInferences?: number,
@@ -48,7 +48,7 @@ const getTrainingStatusSuccess = (
 ): GetTrainingStatusSuccessAction => ({
   type: GET_TRAINING_STATUS_SUCCESS,
   payload: {
-    trainingStatus,
+    trainingLog,
     modelUrl,
     successRate,
     successfulInferences,

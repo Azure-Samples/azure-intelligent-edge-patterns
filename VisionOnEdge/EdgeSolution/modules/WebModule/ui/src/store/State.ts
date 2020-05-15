@@ -47,6 +47,6 @@ export const initialState: State = {
       curConsequence: null,
     },
     error: null,
-    trainingStatus: '',
+    trainingLog: '',
   },
 };

@@ -72,7 +72,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       } = action.payload;
       return {
         ...state,
-        trainingStatus: action.payload.trainingStatus,
+        trainingLog: action.payload.trainingLog,
         data: {
           ...state.data,
           ...(successRate && { successRate }),
@@ -87,7 +87,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case GET_TRAINING_STATUS_FAILED:
       return {
         ...state,
-        trainingStatus: '',
+        trainingLog: '',
         data: { ...state.data, status: 'offline' },
         error: action.error,
       };
