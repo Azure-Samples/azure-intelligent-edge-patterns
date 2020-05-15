@@ -14,8 +14,8 @@
                 "username": "$CONTAINER_REGISTRY_USERNAME",
                 "password": "$CONTAINER_REGISTRY_PASSWORD",
                 "address": "$CONTAINER_REGISTRY_NAME"
-              }   
-            } 
+              }
+            }
           }
         },
         "systemModules": {
@@ -62,6 +62,10 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "env": {
+              "TRAINING_KEY": { "value": "CUSTOM-VISION-TRAINING-KEY" },
+              "ENDPOINT": { "value": "CUSTOM-VISION-ENDPOINT" }
+            },
             "settings": {
               "image": "${MODULES.WebModule}",
               "createOptions": {
@@ -74,7 +78,7 @@
                     ]
                   }
                 }
-              }        
+              }
             }
           },
           "InferenceModule": {
@@ -93,21 +97,17 @@
     "$edgeHub": {
       "properties.desired": {
         "schemaVersion": "1.0",
-        "routes": {
-        },
+        "routes": {},
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
       }
     },
     "WebModule": {
-      "properties.desired": {
-      }
+      "properties.desired": {}
     },
     "VisionSampleModule": {
-      "properties.desired": {
-        
-      }
+      "properties.desired": {}
     }
   }
 }
