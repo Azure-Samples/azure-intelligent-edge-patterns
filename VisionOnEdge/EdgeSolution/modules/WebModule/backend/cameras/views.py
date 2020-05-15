@@ -189,8 +189,8 @@ def export(request, project_id):
     return JsonResponse({
         'status': train_obj.status, 'log': train_obj.log, 'download_uri': project_obj.download_uri,
         'success_rate': success_rate,
-        'inference_num': 0,
-        'unidentified_num': 0
+        'inference_num': inference_num,
+        'unidentified_num': unidentified_num,
 
     })
 
