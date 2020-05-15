@@ -40,11 +40,11 @@ export const initialState: State = {
       maxImages: 50,
       modelUrl: '',
     },
-    trainingMetric: {
+    trainingMetrics: {
       prevConsequence: null,
       curConsequence: null,
     },
-    inferenceMetric: {
+    inferenceMetrics: {
       successRate: null,
       successfulInferences: null,
       unIdetifiedItems: null,

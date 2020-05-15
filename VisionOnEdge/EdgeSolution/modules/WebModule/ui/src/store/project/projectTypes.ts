@@ -6,12 +6,12 @@ export type Project = {
   isLoading: boolean;
   trainingLog: string;
   data: ProjectData;
-  inferenceMetric: {
+  inferenceMetrics: {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
   };
-  trainingMetric: {
+  trainingMetrics: {
     prevConsequence: Consequence;
     curConsequence: Consequence;
   };

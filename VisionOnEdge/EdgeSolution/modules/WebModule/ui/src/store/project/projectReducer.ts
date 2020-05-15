@@ -54,12 +54,12 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           maxImages: 50,
           modelUrl: '',
         },
-        inferenceMetric: {
+        inferenceMetrics: {
           successRate: 0,
           successfulInferences: 0,
           unIdetifiedItems: 0,
         },
-        trainingMetric: {
+        trainingMetrics: {
           curConsequence: null,
           prevConsequence: null,
         },
@@ -94,7 +94,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case GET_TRAINING_METRICS_SUCCESS:
       return {
         ...state,
-        trainingMetric: action.payload,
+        trainingMetrics: action.payload,
         status: Status.PendInference,
       };
     case GET_TRAINING_METRICS_FAILED:
@@ -105,7 +105,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case GET_INFERENCE_METRICS_REQUEST:
       return state;
     case GET_INFERENCE_METRICS_SUCCESS:
-      return { ...state, inferenceMetric: action.payload };
+      return { ...state, inferenceMetrics: action.payload };
     case GET_INFERENCE_METRICS_FAILED:
       return { ...state, error: action.error };
     case START_INFERENCE:

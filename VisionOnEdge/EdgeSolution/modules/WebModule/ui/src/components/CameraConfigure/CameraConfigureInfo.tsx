@@ -23,7 +23,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   camera,
   projectId,
 }) => {
-  const { error, data: project, trainingLog, status, trainingMetric, inferenceMetric } = useSelector<
+  const { error, data: project, trainingLog, status, trainingMetrics, inferenceMetrics } = useSelector<
     State,
     Project
   >((state) => state.project);
@@ -120,13 +120,13 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
           </Flex>
           <ListItem title="Success Rate">
             <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-              {`${inferenceMetric.successRate}%`}
+              {`${inferenceMetrics.successRate}%`}
             </Text>
           </ListItem>
-          <ListItem title="Successful Inferences">{inferenceMetric.successfulInferences}</ListItem>
+          <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
           <ListItem title="Unidentified Items">
             <Text styles={{ margin: '5px' }} size="large">
-              {inferenceMetric.unIdetifiedItems}
+              {inferenceMetrics.unIdetifiedItems}
             </Text>
             <Button
               content="Identify Manually"
@@ -145,21 +145,21 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
               to="/manual"
             />
           </ListItem>
-          {trainingMetric.prevConsequence && (
+          {trainingMetrics.prevConsequence && (
             <>
               <Text>Previous Model Metrics</Text>
               <ConsequenceDashboard
-                precision={trainingMetric.prevConsequence?.precision}
-                recall={trainingMetric.prevConsequence?.recall}
-                mAP={trainingMetric.prevConsequence?.mAP}
+                precision={trainingMetrics.prevConsequence?.precision}
+                recall={trainingMetrics.prevConsequence?.recall}
+                mAP={trainingMetrics.prevConsequence?.mAP}
               />
             </>
           )}
           <Text>Updated Model Metrics</Text>
           <ConsequenceDashboard
-            precision={trainingMetric.curConsequence?.precision}
-            recall={trainingMetric.curConsequence?.recall}
-            mAP={trainingMetric.curConsequence?.mAP}
+            precision={trainingMetrics.curConsequence?.precision}
+            recall={trainingMetrics.curConsequence?.recall}
+            mAP={trainingMetrics.curConsequence?.mAP}
           />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
