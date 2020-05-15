@@ -121,7 +121,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
           {project.prevConsequence && (
             <>
               <Text>Previous Model Metrics</Text>
-              <ConsequenseInfo
+              <ConsequenceDashboard
                 precision={project.prevConsequence?.precision}
                 recall={project.prevConsequence?.recall}
                 mAP={project.prevConsequence?.mAP}
@@ -129,7 +129,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
             </>
           )}
           <Text>Updated Model Metrics</Text>
-          <ConsequenseInfo
+          <ConsequenceDashboard
             precision={project.curConsequence?.precision}
             recall={project.curConsequence?.recall}
             mAP={project.curConsequence?.mAP}
@@ -146,12 +146,12 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   );
 };
 
-interface ConsequenseInfoProps {
+interface ConsequenceDashboardProps {
   precision: number;
   recall: number;
   mAP: number;
 }
-const ConsequenseInfo: FC<ConsequenseInfoProps> = ({ precision, recall, mAP }) => {
+const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall, mAP }) => {
   return (
     <Grid columns={3}>
       <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
@@ -159,7 +159,7 @@ const ConsequenseInfo: FC<ConsequenseInfoProps> = ({ precision, recall, mAP }) =
           Precison
         </Text>
         <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
-          {precision}%
+          {precision === null ? '' : `${((precision * 1000) | 0) / 10}%`}
         </Text>
       </div>
       <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
@@ -167,7 +167,7 @@ const ConsequenseInfo: FC<ConsequenseInfoProps> = ({ precision, recall, mAP }) =
           Recall
         </Text>
         <Text align="center" size="large" weight="semibold" styles={{ color: '#0063b1' }}>
-          {recall}%
+          {recall === null ? '' : `${((recall * 1000) | 0) / 10}%`}
         </Text>
       </div>
       <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
@@ -175,7 +175,7 @@ const ConsequenseInfo: FC<ConsequenseInfoProps> = ({ precision, recall, mAP }) =
           mAP
         </Text>
         <Text align="center" size="large" weight="semibold" styles={{ color: '#69c138' }}>
-          {mAP}%
+          {mAP === null ? '' : `${((mAP * 1000) | 0) / 10}%`}
         </Text>
       </div>
     </Grid>
