@@ -15,9 +15,9 @@ import {
   GET_TRAINING_LOG_SUCCESS,
   GET_TRAINING_LOG_FAILED,
   Status,
-  GET_TRAINING_METRIC_REQUEST,
-  GET_TRAINING_METRIC_SUCCESS,
-  GET_TRAINING_METRIC_FAILED,
+  GET_TRAINING_METRICS_REQUEST,
+  GET_TRAINING_METRICS_SUCCESS,
+  GET_TRAINING_METRICS_FAILED,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -84,14 +84,14 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
         status: Status.TrainingFailed,
         error: action.error,
       };
-    case GET_TRAINING_METRIC_REQUEST:
+    case GET_TRAINING_METRICS_REQUEST:
       return state;
-    case GET_TRAINING_METRIC_SUCCESS:
+    case GET_TRAINING_METRICS_SUCCESS:
       return {
         ...state,
         trainingMetric: action.payload,
       };
-    case GET_TRAINING_METRIC_FAILED:
+    case GET_TRAINING_METRICS_FAILED:
       return {
         ...state,
         error: action.error,

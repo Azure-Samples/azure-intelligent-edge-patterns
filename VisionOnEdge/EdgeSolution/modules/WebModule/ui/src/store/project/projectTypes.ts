@@ -85,23 +85,23 @@ export type GetTrainingLogFailedAction = {
   error: Error;
 };
 
-export const GET_TRAINING_METRIC_REQUEST = 'GET_TRAINING_METRIC_REQUEST';
-export type GetTrainingMetricRequestAction = {
-  type: typeof GET_TRAINING_METRIC_REQUEST;
+export const GET_TRAINING_METRICS_REQUEST = 'GET_TRAINING_METRICS_REQUEST';
+export type GetTrainingMetricsRequestAction = {
+  type: typeof GET_TRAINING_METRICS_REQUEST;
 };
 
-export const GET_TRAINING_METRIC_SUCCESS = 'GET_TRAINING_METRIC_SUCCESS';
-export type GetTrainingMetricSuccessAction = {
-  type: typeof GET_TRAINING_METRIC_SUCCESS;
+export const GET_TRAINING_METRICS_SUCCESS = 'GET_TRAINING_METRICS_SUCCESS';
+export type GetTrainingMetricsSuccessAction = {
+  type: typeof GET_TRAINING_METRICS_SUCCESS;
   payload: {
     prevConsequence: Consequence;
     curConsequence: Consequence;
   };
 };
 
-export const GET_TRAINING_METRIC_FAILED = 'GET_TRAINING_METRIC_FAILED';
-export type GetTrainingMetricFailedAction = {
-  type: typeof GET_TRAINING_METRIC_FAILED;
+export const GET_TRAINING_METRICS_FAILED = 'GET_TRAINING_METRICS_FAILED';
+export type GetTrainingMetricsFailedAction = {
+  type: typeof GET_TRAINING_METRICS_FAILED;
   error: Error;
 };
 
@@ -150,9 +150,9 @@ export type ProjectActionTypes =
   | DeleteProjectSuccessAction
   | DeleteProjectFaliedAction
   | UpdateProjectDataAction
-  | GetTrainingMetricRequestAction
-  | GetTrainingMetricSuccessAction
-  | GetTrainingMetricFailedAction;
+  | GetTrainingMetricsRequestAction
+  | GetTrainingMetricsSuccessAction
+  | GetTrainingMetricsFailedAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

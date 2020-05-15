@@ -7,7 +7,7 @@ import { useInterval } from '../../hooks/useInterval';
 import {
   thunkDeleteProject,
   thunkGetTrainingLog,
-  thunkGetTrainingMetric,
+  thunkGetTrainingMetrics,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -58,7 +58,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
 
   useEffect(() => {
     if (status === CameraConfigStatus.FinishTraining || status === CameraConfigStatus.TrainingFailed) {
-      dispatch(thunkGetTrainingMetric(projectId));
+      dispatch(thunkGetTrainingMetrics(projectId));
     }
   }, [dispatch, status, projectId]);
 
