@@ -8,6 +8,9 @@ import {
   thunkDeleteProject,
   thunkGetTrainingLog,
   thunkGetTrainingMetrics,
+  thunkGetInferenceMetrics,
+  startInference,
+  stopInference,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -43,9 +46,6 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
       .catch((err) => console.error(err));
   }, [dispatch, history, name, projectId]);
 
-  /**
-   * Call custom Vision to export
-   */
   useEffect(() => {
     dispatch(thunkGetTrainingLog(projectId));
   }, [dispatch, projectId]);
@@ -55,6 +55,9 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     },
     status === CameraConfigStatus.WaitTraining ? 5000 : null,
   );
+  useEffect(() => {
+    setTrainingInfo((prev) => `${prev}\n${trainingLog}`);
+  }, [trainingLog]);
 
   useEffect(() => {
     if (status === CameraConfigStatus.FinishTraining || status === CameraConfigStatus.TrainingFailed) {
@@ -62,9 +65,20 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     }
   }, [dispatch, status, projectId]);
 
-  useEffect(() => {
-    setTrainingInfo((prev) => `${prev}\n${trainingLog}`);
-  }, [trainingLog]);
+  useInterval(
+    () => {
+      dispatch(thunkGetInferenceMetrics(projectId));
+    },
+    status === CameraConfigStatus.StartInference ? 5000 : null,
+  );
+
+  const onVideoStart = (): void => {
+    dispatch(startInference());
+  };
+
+  const onVideoPause = (): void => {
+    dispatch(stopInference());
+  };
 
   return (
     <Flex column gap="gap.large">
@@ -78,7 +92,13 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
       ) : (
         <>
           <ListItem title="Status">
-            <CameraStatus online={status === CameraConfigStatus.FinishTraining} />
+            <CameraStatus
+              online={[
+                CameraConfigStatus.FinishTraining,
+                CameraConfigStatus.PendInference,
+                CameraConfigStatus.StartInference,
+              ].includes(status)}
+            />
           </ListItem>
           <ListItem title="Configured for">
             {parts
@@ -90,7 +110,13 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <RTSPVideo rtsp={camera.rtsp} partId={project.parts[0]} canCapture={false} />
+            <RTSPVideo
+              rtsp={camera.rtsp}
+              partId={project.parts[0]}
+              canCapture={false}
+              onVideoStart={onVideoStart}
+              onVideoPause={onVideoPause}
+            />
           </Flex>
           <ListItem title="Success Rate">
             <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">

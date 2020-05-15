@@ -25,6 +25,7 @@ export enum Status {
   FinishTraining = 'finishTraining',
   TrainingFailed = 'trainingFailed',
   StartInference = 'startInference',
+  PendInference = 'pendInference',
 }
 
 export type Consequence = {
@@ -105,6 +106,27 @@ export type GetTrainingMetricsFailedAction = {
   error: Error;
 };
 
+export const GET_INFERENCE_METRICS_REQUEST = 'GET_TRAINING_INFERENCE_REQUEST';
+export type GetInferenceMetricsRequestAction = {
+  type: typeof GET_INFERENCE_METRICS_REQUEST;
+};
+
+export const GET_INFERENCE_METRICS_SUCCESS = 'GET_INFERENCE_METRICS_SUCCESS';
+export type GetInferenceMetricsSuccessAction = {
+  type: typeof GET_INFERENCE_METRICS_SUCCESS;
+  payload: {
+    successRate: number;
+    successfulInferences: number;
+    unIdetifiedItems: number;
+  };
+};
+
+export const GET_INFERENCE_METRICS_FAILED = 'GET_INFERENCE_METRICS_FAILED';
+export type GetInferenceMetricsFailedAction = {
+  type: typeof GET_INFERENCE_METRICS_FAILED;
+  error: Error;
+};
+
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
 export type PostProjectRequestAction = {
   type: typeof POST_PROJECT_REQUEST;
@@ -137,6 +159,16 @@ export type UpdateProjectDataAction = {
   payload: ProjectData;
 };
 
+export const START_INFERENCE = 'START_INFERENCE';
+export type StartInferenceAction = {
+  type: typeof START_INFERENCE;
+};
+
+export const STOP_INFERENCE = 'STOP_INFERENCE';
+export type StopInferenceAction = {
+  type: typeof STOP_INFERENCE;
+};
+
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
@@ -152,7 +184,12 @@ export type ProjectActionTypes =
   | UpdateProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
-  | GetTrainingMetricsFailedAction;
+  | GetTrainingMetricsFailedAction
+  | GetInferenceMetricsRequestAction
+  | GetInferenceMetricsSuccessAction
+  | GetInferenceMetricsFailedAction
+  | StartInferenceAction
+  | StopInferenceAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

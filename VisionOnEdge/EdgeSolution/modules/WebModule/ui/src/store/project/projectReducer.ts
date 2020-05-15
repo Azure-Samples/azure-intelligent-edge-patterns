@@ -18,6 +18,11 @@ import {
   GET_TRAINING_METRICS_REQUEST,
   GET_TRAINING_METRICS_SUCCESS,
   GET_TRAINING_METRICS_FAILED,
+  GET_INFERENCE_METRICS_REQUEST,
+  GET_INFERENCE_METRICS_SUCCESS,
+  GET_INFERENCE_METRICS_FAILED,
+  START_INFERENCE,
+  STOP_INFERENCE,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -90,12 +95,23 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return {
         ...state,
         trainingMetric: action.payload,
+        status: Status.PendInference,
       };
     case GET_TRAINING_METRICS_FAILED:
       return {
         ...state,
         error: action.error,
       };
+    case GET_INFERENCE_METRICS_REQUEST:
+      return state;
+    case GET_INFERENCE_METRICS_SUCCESS:
+      return { ...state, inferenceMetric: action.payload };
+    case GET_INFERENCE_METRICS_FAILED:
+      return { ...state, error: action.error };
+    case START_INFERENCE:
+      return { ...state, status: Status.StartInference };
+    case STOP_INFERENCE:
+      return { ...state, status: Status.PendInference };
     default:
       return { ...state };
   }

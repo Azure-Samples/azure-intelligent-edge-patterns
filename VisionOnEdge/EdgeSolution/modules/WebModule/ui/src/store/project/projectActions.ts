@@ -34,6 +34,16 @@ import {
   GetTrainingMetricsFailedAction,
   GET_TRAINING_METRICS_FAILED,
   Consequence,
+  GetInferenceMetricsRequestAction,
+  GET_INFERENCE_METRICS_REQUEST,
+  GET_INFERENCE_METRICS_SUCCESS,
+  GetInferenceMetricsSuccessAction,
+  GetInferenceMetricsFailedAction,
+  GET_INFERENCE_METRICS_FAILED,
+  StartInferenceAction,
+  START_INFERENCE,
+  STOP_INFERENCE,
+  StopInferenceAction,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -76,6 +86,30 @@ const getTrainingMetricsSuccess = (
 const getTrainingMetricsFailed = (error: Error): GetTrainingMetricsFailedAction => ({
   type: GET_TRAINING_METRICS_FAILED,
   error,
+});
+
+const getInferenceMetricsRequest = (): GetInferenceMetricsRequestAction => ({
+  type: GET_INFERENCE_METRICS_REQUEST,
+});
+const getInferenceMetricsSuccess = (
+  successRate: number,
+  successfulInferences: number,
+  unIdetifiedItems: number,
+): GetInferenceMetricsSuccessAction => ({
+  type: GET_INFERENCE_METRICS_SUCCESS,
+  payload: { successRate, successfulInferences, unIdetifiedItems },
+});
+const getInferenceMetricsFailed = (error: Error): GetInferenceMetricsFailedAction => ({
+  type: GET_INFERENCE_METRICS_FAILED,
+  error,
+});
+
+export const startInference = (): StartInferenceAction => ({
+  type: START_INFERENCE,
+});
+
+export const stopInference = (): StopInferenceAction => ({
+  type: STOP_INFERENCE,
 });
 
 export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAction => ({
@@ -197,4 +231,16 @@ export const thunkGetTrainingMetrics = (projectId: number) => (dispacth): Promis
       return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence));
     })
     .catch((err) => dispacth(getTrainingMetricsFailed(err)));
+};
+
+export const thunkGetInferenceMetrics = (projectId: number) => (dispatch): Promise<any> => {
+  dispatch(getInferenceMetricsRequest());
+
+  return Axios.get(`/api/projects/${projectId}/export`)
+    .then(({ data }) => {
+      return dispatch(
+        getInferenceMetricsSuccess(data.success_rate, data.inference_num, data.unidentified_num),
+      );
+    })
+    .catch((err) => dispatch(getInferenceMetricsFailed(err)));
 };
