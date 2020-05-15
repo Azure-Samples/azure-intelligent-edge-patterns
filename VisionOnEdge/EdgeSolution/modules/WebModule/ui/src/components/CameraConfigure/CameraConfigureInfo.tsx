@@ -1,4 +1,4 @@
-import React, { useEffect, FC, useState } from 'react';
+import React, { useEffect, FC, useState, useCallback } from 'react';
 import { Flex, Text, Status, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,7 +27,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   const name = useQuery().get('name');
   const history = useHistory();
 
-  const onDeleteConfigure = (): void => {
+  const onDeleteConfigure = useCallback((): void => {
     // eslint-disable-next-line no-restricted-globals
     const sureDelete = confirm('Delete this configuration?');
     if (!sureDelete) return;
@@ -38,7 +38,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
         return void 0;
       })
       .catch((err) => console.error(err));
-  };
+  }, [dispatch, history, name, projectId]);
 
   /**
    * Call custom Vision to export
@@ -69,55 +69,48 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
         </>
       ) : (
         <>
-          <ListItem title="Status" content={<CameraStatus online={project.status === 'online'} />} />
-          <ListItem
-            title="Configured for"
-            content={parts
+          <ListItem title="Status">
+            <CameraStatus online={project.status === 'online'} />
+          </ListItem>
+          <ListItem title="Configured for">
+            {parts
               .filter((e) => project.parts.includes(e.id))
               .map((e) => e.name)
               .join(', ')}
-          />
+          </ListItem>
           <Flex column gap="gap.small">
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <RTSPVideo selectedCamera={camera} partId={project.parts[0]} canCapture={false} />
+            <RTSPVideo rtsp={camera.rtsp} partId={project.parts[0]} canCapture={false} />
           </Flex>
-          <ListItem
-            title="Success Rate"
-            content={
-              <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-                {`${project.successRate}%`}
-              </Text>
-            }
-          />
-          <ListItem title="Successful Inferences" content={project.successfulInferences} />
-          <ListItem
-            title="Unidentified Items"
-            content={
-              <>
-                <Text styles={{ margin: '5px' }} size="large">
-                  {project.unIdetifiedItems}
-                </Text>
-                <Button
-                  content="Identify Manually"
-                  primary
-                  styles={{
-                    backgroundColor: 'red',
-                    marginLeft: '100px',
-                    ':hover': {
-                      backgroundColor: '#A72037',
-                    },
-                    ':active': {
-                      backgroundColor: '#8E192E',
-                    },
-                  }}
-                  as={Link}
-                  to="/manual"
-                />
-              </>
-            }
-          />
+          <ListItem title="Success Rate">
+            <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
+              {`${project.successRate}%`}
+            </Text>
+          </ListItem>
+          <ListItem title="Successful Inferences">{project.successfulInferences}</ListItem>
+          <ListItem title="Unidentified Items">
+            <Text styles={{ margin: '5px' }} size="large">
+              {project.unIdetifiedItems}
+            </Text>
+            <Button
+              content="Identify Manually"
+              primary
+              styles={{
+                backgroundColor: 'red',
+                marginLeft: '100px',
+                ':hover': {
+                  backgroundColor: '#A72037',
+                },
+                ':active': {
+                  backgroundColor: '#8E192E',
+                },
+              }}
+              as={Link}
+              to="/manual"
+            />
+          </ListItem>
           {project.prevConsequence && (
             <>
               <Text>Previous Model Metrics</Text>
@@ -182,17 +175,15 @@ const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall
   );
 };
 
-const ListItem = ({ title, content }): JSX.Element => {
-  const getContent = (): JSX.Element => {
-    if (typeof content === 'string' || typeof content === 'number')
-      return <Text size="large">{content}</Text>;
-    return content;
-  };
-
+const ListItem = ({ title, children }): JSX.Element => {
   return (
     <Flex vAlign="center">
-      <Text styles={{ width: '200px' }} size="large">{`${title}: `}</Text>
-      {getContent()}
+      <Text style={{ width: '200px' }} size="large">{`${title}: `}</Text>
+      {typeof children === 'string' || typeof children === 'number' ? (
+        <Text size="large">{children}</Text>
+      ) : (
+        children
+      )}
     </Flex>
   );
 };

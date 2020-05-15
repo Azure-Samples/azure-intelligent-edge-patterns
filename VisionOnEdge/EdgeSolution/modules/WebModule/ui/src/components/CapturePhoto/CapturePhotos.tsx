@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
-import { Link, useParams, Prompt } from 'react-router-dom';
+import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
@@ -20,7 +20,7 @@ export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
   return (
     <>
       <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
-      <RTSPVideo selectedCamera={selectedCamera} partId={partId} canCapture={true} />
+      <RTSPVideo rtsp={selectedCamera?.rtsp} partId={partId} canCapture={true} />
       <CapturedImagesContainer partId={partId} />
     </>
   );
