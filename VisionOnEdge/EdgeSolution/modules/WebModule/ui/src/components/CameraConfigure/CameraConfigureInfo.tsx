@@ -78,7 +78,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      {trainingLog ? (
+      {status === CameraConfigStatus.WaitTraining ? (
         <>
           <Loader size="smallest" />
           <pre>{allTrainingLog}</pre>
