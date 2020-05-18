@@ -37,7 +37,8 @@ def web_module_url():
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
-    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
         # Default system params
         self.render = False
 
@@ -64,6 +65,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.detection_unidentified_num = 0
         self.detection_total = 0
         self.detections = []
+
+        self.threshold = 0.4
 
 
     def restart_cam(self):
@@ -159,6 +162,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                 if b:
                     self.last_img = img
                     self.last_prediction = self.predict(img)
+                    #print(self.last_prediction)
 
                     height, width = img.shape[0], img.shape[1]
 
@@ -330,6 +334,15 @@ def update_cam():
 
     return 'ok'
 
+@app.route('/update_threshold')
+def update_threshold():
+    threshold = float(request.args.get('threshold'))
+
+    print('[INFO] update theshold to', threshold)
+
+    onnx.threshold = threshold
+    return 'ok'
+
 @app.route('/video_feed')
 def video_feed():
     inference = not not request.args.get('inference')
@@ -338,8 +351,10 @@ def video_feed():
         while True:
             img = onnx.last_img.copy()
             if inference:
+                #print('n')
                 height, width = img.shape[0], img.shape[1]
                 predictions = onnx.last_prediction
+                #print(onnx.last_prediction)
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 font_scale = 1
                 thickness = 3
@@ -347,7 +362,7 @@ def video_feed():
                     #print(prediction['tagName'], prediction['probability'])
                     #print(onnx.last_upload_time, time.time())
 
-                    if prediction['probability'] > 0.5:
+                    if prediction['probability'] > onnx.threshold:
                         x1 = int(prediction['boundingBox']['left'] * width)
                         y1 = int(prediction['boundingBox']['top'] * height)
                         x2 = x1 + int(prediction['boundingBox']['width'] * width)
