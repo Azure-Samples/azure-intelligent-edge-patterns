@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: fhir-service
+spec:
+  selector:
+    app: fhir-server
+  ports:
+    - protocol: TCP
+      port: {{ .Values.fhir.httpPort }}
+      targetPort: {{ .Values.fhir.httpPort }}
+      name: fhir-http
+    - protocol: TCP
+      port: {{ .Values.fhir.httpsPort }}
+      targetPort: {{ .Values.fhir.httpsPort }}
+      name: fhir-https         
+  type: LoadBalancer
