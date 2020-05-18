@@ -30,7 +30,7 @@ const CameraDetails: FC = (): JSX.Element => {
   return (
     <Grid columns="2" design={{ height: '100%' }}>
       <CameraDetailInfo id={camera.id} name={name} rtsp={camera.rtsp} modelName={camera.model_name} />
-      {hasProject ? <CameraConfigureInfo camera={camera} projectId={projectId} /> : <CreateCameraConfig />}
+      {hasProject ? <CameraConfigureInfo projectId={projectId} /> : <CreateCameraConfig />}
     </Grid>
   );
 };

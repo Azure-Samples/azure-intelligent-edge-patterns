@@ -1,7 +1,8 @@
 import React, { useEffect, FC, useState, useCallback } from 'react';
-import { Flex, Text, Status, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
+import { Flex, Text, Status, Button, Loader, Grid, Alert, Image } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import Axios from 'axios';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
@@ -9,24 +10,18 @@ import {
   thunkGetTrainingLog,
   thunkGetTrainingMetrics,
   thunkGetInferenceMetrics,
-  startInference,
-  stopInference,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
-import { Camera } from '../../store/camera/cameraTypes';
-import { RTSPVideo } from '../RTSPVideo';
 import { useParts } from '../../hooks/useParts';
 import { useQuery } from '../../hooks/useQuery';
 
-export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }> = ({
-  camera,
-  projectId,
-}) => {
+export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => {
   const { error, data: project, trainingLog, status, trainingMetrics, inferenceMetrics } = useSelector<
     State,
     Project
   >((state) => state.project);
+  const [videoSrc, setVideoSrc] = useState('');
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
@@ -59,6 +54,12 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   useEffect(() => {
     if (status === CameraConfigStatus.FinishTraining) {
       dispatch(thunkGetTrainingMetrics(projectId));
+      Axios.get(`/api/projects/${projectId}/inference_video_feed`)
+        .then(({ data }) => {
+          setVideoSrc(data.url);
+          return void 0;
+        })
+        .catch((err) => console.error(err));
     }
   }, [dispatch, status, projectId]);
 
@@ -69,19 +70,15 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
     status === CameraConfigStatus.StartInference ? 5000 : null,
   );
 
-  const onVideoStart = (): void => {
-    dispatch(startInference());
-  };
-
-  const onVideoPause = (): void => {
-    dispatch(stopInference());
-  };
+  const isCameraOnline = [CameraConfigStatus.FinishTraining, CameraConfigStatus.StartInference].includes(
+    status,
+  );
 
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      {trainingLog ? (
+      {status === CameraConfigStatus.WaitTraining ? (
         <>
           <Loader size="smallest" />
           <pre>{allTrainingLog}</pre>
@@ -89,13 +86,7 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
       ) : (
         <>
           <ListItem title="Status">
-            <CameraStatus
-              online={[
-                CameraConfigStatus.FinishTraining,
-                CameraConfigStatus.PendInference,
-                CameraConfigStatus.StartInference,
-              ].includes(status)}
-            />
+            <CameraStatus online={isCameraOnline} />
           </ListItem>
           <ListItem title="Configured for">
             {parts
@@ -107,13 +98,11 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <RTSPVideo
-              rtsp={camera.rtsp}
-              partId={project.parts[0]}
-              canCapture={false}
-              onVideoStart={onVideoStart}
-              onVideoPause={onVideoPause}
-            />
+            <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
+              {isCameraOnline && videoSrc ? (
+                <Image src={videoSrc} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              ) : null}
+            </div>
           </Flex>
           <ListItem title="Success Rate">
             <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
