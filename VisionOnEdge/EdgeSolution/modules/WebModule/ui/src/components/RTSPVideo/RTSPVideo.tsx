@@ -1,16 +1,29 @@
-import { useState, useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { thunkAddCapturedImages } from "../../store/part/partActions";
-import React from "react";
-import { Button, PlayIcon, CallControlPresentNewIcon, PauseThickIcon, Image } from "@fluentui/react-northstar";
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import {
+  Button,
+  PlayIcon,
+  CallControlPresentNewIcon,
+  PauseThickIcon,
+  Image,
+} from '@fluentui/react-northstar';
 
-export const RTSPVideo = ({ selectedCamera, partId, canCapture }): JSX.Element => {
+import { thunkAddCapturedImages } from '../../store/part/partActions';
+import { RTSPVideoProps } from './RTSPVideo.type';
+
+export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
+  rtsp = null,
+  partId,
+  canCapture,
+  onVideoStart,
+  onVideoPause,
+}) => {
   const [streamId, setStreamId] = useState<string>('');
   const dispatch = useDispatch();
 
   const onCreateStream = (): void => {
-    let url = `/api/streams/connect/?part_id=${partId}&rtsp=${selectedCamera.rtsp}`;
-    if(!canCapture) url += '&inference=1';
+    let url = `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
+    if (!canCapture) url += '&inference=1';
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
@@ -22,13 +35,14 @@ export const RTSPVideo = ({ selectedCamera, partId, canCapture }): JSX.Element =
       .catch((err) => {
         console.error(err);
       });
+    if (onVideoStart) onVideoStart();
   };
 
   const onCapturePhoto = (): void => {
     dispatch(thunkAddCapturedImages(streamId));
   };
 
-  const onDisconnect = useCallback((): void => {
+  const onDisconnect = (): void => {
     setStreamId('');
     fetch(`/api/streams/${streamId}/disconnect`)
       .then((response) => response.json())
@@ -39,14 +53,15 @@ export const RTSPVideo = ({ selectedCamera, partId, canCapture }): JSX.Element =
       .catch((err) => {
         console.error(err);
       });
-  }, [streamId]);
+    if (onVideoPause) onVideoPause();
+  };
 
   useEffect(() => {
     window.addEventListener('beforeunload', onDisconnect);
     return (): void => {
       window.removeEventListener('beforeunload', onDisconnect);
     };
-  }, [onDisconnect]);
+  });
 
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
@@ -63,15 +78,15 @@ export const RTSPVideo = ({ selectedCamera, partId, canCapture }): JSX.Element =
             icon: <PlayIcon />,
             iconOnly: true,
             onClick: onCreateStream,
-            disabled: selectedCamera === null,
+            disabled: rtsp === null,
           },
-          (canCapture && {
+          canCapture && {
             key: 'capture',
             icon: <CallControlPresentNewIcon />,
             iconOnly: true,
             onClick: onCapturePhoto,
             disabled: !streamId,
-          }),
+          },
           {
             key: 'stop',
             icon: <PauseThickIcon />,
@@ -84,3 +99,5 @@ export const RTSPVideo = ({ selectedCamera, partId, canCapture }): JSX.Element =
     </>
   );
 };
+
+export const RTSPVideo = React.memo(RTSPVideoComponent);

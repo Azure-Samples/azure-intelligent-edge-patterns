@@ -17,6 +17,11 @@ from utility import get_file_zip
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1 # sec
 
+DETECTION_TYPE_NOTHING = 'nothing'
+DETECTION_TYPE_SUCCESS = 'success'
+DETECTION_TYPE_UNIDENTIFIED = 'unidentified'
+DETECTION_BUFFER_SIZE = 10000
+
 def is_edge():
     try:
         IoTHubModuleClient.create_from_edge_environment()
@@ -55,8 +60,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.is_upload_image = False
         self.current_uploaded_images = {}
 
-        self.inference_num = 0
-        self.unidentified_num = 0
+        self.detection_success_num = 0
+        self.detection_unidentified_num = 0
+        self.detection_total = 0
+        self.detections = []
 
 
     def restart_cam(self):
@@ -110,6 +117,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         return None
 
+    def update_retrain_parameters(self, confidence_min, confidence_max, max_images):
+        self.confidence_min = confidence_min * 0.01
+        self.confidence_max = confidence_max * 0.01
+        self.max_images = max_imagese
 
     def update_model(self, model_dir):
         model = self.load_model( model_dir)
@@ -119,10 +130,13 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.model = model
         self.current_uploaded_images = {}
         self.is_upload_image = True
-        self.lock.release()
 
-        self.inference_num = 0
-        self.unidentified_num = 0
+        self.detection_success_num = 0
+        self.detection_unidentified_num = 0
+        self.detection_total = 0 # nothing isn't included
+        self.detections = []
+
+        self.lock.release()
 
 
     def predict(self, image):
@@ -148,16 +162,16 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                     height, width = img.shape[0], img.shape[1]
 
-                    detection = 'nothing'
+                    detection = DETECTION_TYPE_NOTHING
                     if True:
                         for prediction in self.last_prediction:
                             #print(prediction)
                             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
                                 if prediction['probability'] > self.confidence_max:
-                                    detection = 'success'
+                                    detection = DETECTION_TYPE_SUCCESS
                                 elif self.confidence_min <= prediction['probability'] <= self.confidence_max:
 
-                                    if detection != 'success': detection = 'unidentified'
+                                    if detection != DETECTION_TYPE_SUCCESS: detection = DETECTION_TYPE_UNIDENTIFIED
 
                                     tag = prediction['tagName']
 
@@ -186,10 +200,32 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                             except:
                                                 print('[ERROR] Failed to update image for relabeling')
 
-                    if detection == 'success':
-                        self.inference_num += 1
-                    elif detection == 'unidentified':
-                        self.unidentified_num += 1
+                    self.lock.acquire()
+                    if detection == DETECTION_TYPE_NOTHING:
+                        pass
+                    else:
+                        if self.detection_total == DETECTION_BUFFER_SIZE:
+                            oldest_detection = self.detections.pop(0)
+                            if oldest_detection == DETECTION_TYPE_UNIDENTIFIED:
+                                self.detection_unidentified_num -= 1
+                            elif oldest_detection == DETECTION_TYPE_SUCCESS:
+                                self.detection_success_num -= 1
+
+                            self.detections.append(detection)
+                            if detection == DETECTION_TYPE_UNIDENTIFIED:
+                                self.detection_unidentified_num += 1
+                            elif detection == DETECTION_TYPE_SUCCESS:
+                                self.detection_success_num += 1
+                        
+                        else:
+                            self.detections.append(detection)
+                            if detection == DETECTION_TYPE_UNIDENTIFIED:
+                                self.detection_unidentified_num += 1
+                            elif detection == DETECTION_TYPE_SUCCESS:
+                                self.detection_success_num += 1
+                            self.detection_total += 1
+                        
+                    self.lock.release()
                     #print(detection)
                 else:
                     if self.cam_type == 'video_file':
@@ -225,13 +261,43 @@ def predict():
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
-    return json.dumps({'inference_num': onnx.inference_num, 'unidentified_num': onnx.unidentified_num})
+    inference_num = onnx.detection_success_num
+    unidentified_num = onnx.detection_unidentified_num
+    total = onnx.detection_total
+    if total == 0:
+        success_rate = 0
+    else:
+        success_rate = inference_num * 100 / total 
+    return json.dumps({
+        'success_rate': success_rate,
+        'inference_num': inference_num, 
+        'unidentified_num': unidentified_num})
+
+@app.route('/update_retrain_parameters')
+def update_retrain_parameters():
+    
+    confidence_min = request.args.get('confidence_min')
+    if not confidence_min: return 'missing confidence_min'
+
+    confidence_max = request.args.get('confidence_max')
+    if not confidence_max: return 'missing confidence_max'
+
+    max_images = request.args.get('max_images')
+    if not max_images: return 'missing max_images'
+
+    self.confidence_min = int(confidence_min) * 0.01
+    self.confidence_max = int(confidence_max) * 0.01
+    self.max_images = int(max_images)
+
+    return 'ok'
 
 @app.route('/update_model')
 def update_model():
 
     model_uri = request.args.get('model_uri')
     if not model_uri: return ('missing model_uri')
+
+
 
     print('[INFO] Update Model ...')
 

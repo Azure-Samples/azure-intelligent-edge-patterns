@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react';
-import { Flex, Text, Status, Button, Loader } from '@fluentui/react-northstar';
+import React, { useEffect, FC, useState, useCallback } from 'react';
+import { Flex, Text, Status, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
   thunkDeleteProject,
-  thunkGetTrainingStatus,
-  thunkGetProject,
+  thunkGetTrainingLog,
+  thunkGetTrainingMetrics,
+  thunkGetInferenceMetrics,
+  startInference,
+  stopInference,
 } from '../../store/project/projectActions';
-import { Project } from '../../store/project/projectTypes';
+import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
@@ -20,101 +23,140 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   camera,
   projectId,
 }) => {
-  const { isLoading, error, data: project, trainingStatus } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+  const { error, data: project, trainingLog, status, trainingMetrics, inferenceMetrics } = useSelector<
+    State,
+    Project
+  >((state) => state.project);
+  const allTrainingLog = useAllTrainingLog(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
-  const name = useQuery().get('name');
+  const cameraName = useQuery().get('name');
   const history = useHistory();
 
-  const onDeleteConfigure = (): void => {
+  const onDeleteConfigure = useCallback((): void => {
     // eslint-disable-next-line no-restricted-globals
     const sureDelete = confirm('Delete this configuration?');
     if (!sureDelete) return;
     const result = (dispatch(thunkDeleteProject(projectId)) as unknown) as Promise<any>;
     result
       .then((data) => {
-        if (data) return history.push(`/cameras/detail?name=${name}`);
+        if (data) return history.push(`/cameras/detail?name=${cameraName}`);
         return void 0;
       })
       .catch((err) => console.error(err));
+  }, [dispatch, history, cameraName, projectId]);
+
+  useEffect(() => {
+    dispatch(thunkGetTrainingLog(projectId));
+  }, [dispatch, projectId]);
+  useInterval(
+    () => {
+      dispatch(thunkGetTrainingLog(projectId));
+    },
+    status === CameraConfigStatus.WaitTraining ? 5000 : null,
+  );
+
+  useEffect(() => {
+    if (status === CameraConfigStatus.FinishTraining) {
+      dispatch(thunkGetTrainingMetrics(projectId));
+    }
+  }, [dispatch, status, projectId]);
+
+  useInterval(
+    () => {
+      dispatch(thunkGetInferenceMetrics(projectId));
+    },
+    status === CameraConfigStatus.StartInference ? 5000 : null,
+  );
+
+  const onVideoStart = (): void => {
+    dispatch(startInference());
   };
 
-  /**
-   * Call custom Vision to export
-   */
-  useEffect(() => {
-    dispatch(thunkGetTrainingStatus(projectId));
-  }, [dispatch, projectId]);
-  useInterval(() => {
-    dispatch(thunkGetTrainingStatus(projectId));
-  }, 5000);
-
-  useEffect(() => {
-    dispatch(thunkGetProject());
-  }, [dispatch]);
+  const onVideoPause = (): void => {
+    dispatch(stopInference());
+  };
 
   return (
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
-      {trainingStatus ? (
-        <Loader
-          size="largest"
-          label={trainingStatus}
-          labelPosition="below"
-          design={{ paddingTop: '300px' }}
-        />
+      {error && <Alert danger header={error.name} content={`${error.message}`} />}
+      {trainingLog ? (
+        <>
+          <Loader size="smallest" />
+          <pre>{allTrainingLog}</pre>
+        </>
       ) : (
         <>
-          <ListItem title="Status" content={<CameraStatus online={project.status === 'online'} />} />
-          <ListItem
-            title="Configured for"
-            content={parts
+          <ListItem title="Status">
+            <CameraStatus
+              online={[
+                CameraConfigStatus.FinishTraining,
+                CameraConfigStatus.PendInference,
+                CameraConfigStatus.StartInference,
+              ].includes(status)}
+            />
+          </ListItem>
+          <ListItem title="Configured for">
+            {parts
               .filter((e) => project.parts.includes(e.id))
               .map((e) => e.name)
               .join(', ')}
-          />
+          </ListItem>
           <Flex column gap="gap.small">
             <Text styles={{ width: '150px' }} size="large">
               Live View:
             </Text>
-            <RTSPVideo selectedCamera={camera} partId={project.parts[0]} canCapture={false} />
+            <RTSPVideo
+              rtsp={camera.rtsp}
+              partId={project.parts[0]}
+              canCapture={false}
+              onVideoStart={onVideoStart}
+              onVideoPause={onVideoPause}
+            />
           </Flex>
-          <ListItem
-            title="Success Rate"
-            content={
-              <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-                {`${project.successRate}%`}
-              </Text>
-            }
-          />
-          <ListItem title="Successful Inferences" content={project.successfulInferences} />
-          <ListItem
-            title="Unidentified Items"
-            content={
-              <>
-                <Text styles={{ margin: '5px' }} size="large">
-                  {project.unIdetifiedItems}
-                </Text>
-                <Button
-                  content="Identify Manually"
-                  primary
-                  styles={{
-                    backgroundColor: 'red',
-                    marginLeft: '100px',
-                    ':hover': {
-                      backgroundColor: '#A72037',
-                    },
-                    ':active': {
-                      backgroundColor: '#8E192E',
-                    },
-                  }}
-                  as={Link}
-                  to="/manual"
-                />
-              </>
-            }
+          <ListItem title="Success Rate">
+            <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
+              {`${inferenceMetrics.successRate}%`}
+            </Text>
+          </ListItem>
+          <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
+          <ListItem title="Unidentified Items">
+            <Text styles={{ margin: '5px' }} size="large">
+              {inferenceMetrics.unIdetifiedItems}
+            </Text>
+            <Button
+              content="Identify Manually"
+              primary
+              styles={{
+                backgroundColor: 'red',
+                marginLeft: '100px',
+                ':hover': {
+                  backgroundColor: '#A72037',
+                },
+                ':active': {
+                  backgroundColor: '#8E192E',
+                },
+              }}
+              as={Link}
+              to="/manual"
+            />
+          </ListItem>
+          {trainingMetrics.prevConsequence && (
+            <>
+              <Text>Previous Model Metrics</Text>
+              <ConsequenceDashboard
+                precision={trainingMetrics.prevConsequence?.precision}
+                recall={trainingMetrics.prevConsequence?.recall}
+                mAP={trainingMetrics.prevConsequence?.mAP}
+              />
+            </>
+          )}
+          <Text>Updated Model Metrics</Text>
+          <ConsequenceDashboard
+            precision={trainingMetrics.curConsequence?.precision}
+            recall={trainingMetrics.curConsequence?.recall}
+            mAP={trainingMetrics.curConsequence?.mAP}
           />
           <Button primary onClick={onDeleteConfigure}>
             Delete Configuration
@@ -128,17 +170,63 @@ export const CameraConfigureInfo: React.FC<{ camera: Camera; projectId: number }
   );
 };
 
-const ListItem = ({ title, content }): JSX.Element => {
-  const getContent = (): JSX.Element => {
-    if (typeof content === 'string' || typeof content === 'number')
-      return <Text size="large">{content}</Text>;
-    return content;
-  };
+/**
+ * Retrun a string which contains all logs get from server during training
+ * @param trainingLog The log get from the api export
+ */
+const useAllTrainingLog = (trainingLog: string): string => {
+  const [allLogs, setAllLogs] = useState(trainingLog);
+  useEffect(() => {
+    setAllLogs((prev) => `${prev}\n${trainingLog}`);
+  }, [trainingLog]);
+  return allLogs;
+};
 
+interface ConsequenceDashboardProps {
+  precision: number;
+  recall: number;
+  mAP: number;
+}
+const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall, mAP }) => {
+  return (
+    <Grid columns={3}>
+      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
+        <Text align="center" size="large" weight="semibold">
+          Precison
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
+          {precision === null ? '' : `${((precision * 1000) | 0) / 10}%`}
+        </Text>
+      </div>
+      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
+        <Text align="center" size="large" weight="semibold">
+          Recall
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#0063b1' }}>
+          {recall === null ? '' : `${((recall * 1000) | 0) / 10}%`}
+        </Text>
+      </div>
+      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
+        <Text align="center" size="large" weight="semibold">
+          mAP
+        </Text>
+        <Text align="center" size="large" weight="semibold" styles={{ color: '#69c138' }}>
+          {mAP === null ? '' : `${((mAP * 1000) | 0) / 10}%`}
+        </Text>
+      </div>
+    </Grid>
+  );
+};
+
+const ListItem = ({ title, children }): JSX.Element => {
   return (
     <Flex vAlign="center">
-      <Text styles={{ width: '200px' }} size="large">{`${title}: `}</Text>
-      {getContent()}
+      <Text style={{ width: '200px' }} size="large">{`${title}: `}</Text>
+      {typeof children === 'string' || typeof children === 'number' ? (
+        <Text size="large">{children}</Text>
+      ) : (
+        children
+      )}
     </Flex>
   );
 };

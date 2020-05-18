@@ -40,7 +40,7 @@ const LeftPanel = ({ partId }): JSX.Element => {
   }, [partId]);
 
   const onSave = (): void => {
-    const hasPartId = partId !== undefined;
+    const hasPartId = ![undefined, null].includes(partId);
     const url = hasPartId ? `/api/parts/${partId}/` : `/api/parts/`;
 
     axios({

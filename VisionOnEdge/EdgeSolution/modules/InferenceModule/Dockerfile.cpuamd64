@@ -20,7 +20,7 @@ ENV LC_ALL en_US.UTF-8
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt && \
-    pip install flask opencv-python
+    pip install flask opencv-python onnx
 
 ARG DEVICE
 
