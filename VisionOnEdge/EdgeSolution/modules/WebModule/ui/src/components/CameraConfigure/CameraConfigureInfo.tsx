@@ -2,7 +2,6 @@ import React, { useEffect, FC, useState, useCallback } from 'react';
 import { Flex, Text, Status, Button, Loader, Grid, Alert, Image } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import Axios from 'axios';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
@@ -21,7 +20,6 @@ export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId
     State,
     Project
   >((state) => state.project);
-  const [videoSrc, setVideoSrc] = useState('');
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
@@ -54,12 +52,6 @@ export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId
   useEffect(() => {
     if (status === CameraConfigStatus.FinishTraining) {
       dispatch(thunkGetTrainingMetrics(projectId));
-      Axios.get(`/api/projects/${projectId}/inference_video_feed`)
-        .then(({ data }) => {
-          setVideoSrc(data.url);
-          return void 0;
-        })
-        .catch((err) => console.error(err));
     }
   }, [dispatch, status, projectId]);
 
@@ -99,8 +91,11 @@ export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId
               Live View:
             </Text>
             <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
-              {isCameraOnline && videoSrc ? (
-                <Image src={videoSrc} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              {isCameraOnline ? (
+                <Image
+                  src={`http://${window.location.hostname}:5000/video_feed?inference=1`}
+                  styles={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
               ) : null}
             </div>
           </Flex>
