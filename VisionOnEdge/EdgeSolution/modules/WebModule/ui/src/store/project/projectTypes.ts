@@ -25,7 +25,6 @@ export enum Status {
   FinishTraining = 'finishTraining',
   TrainingFailed = 'trainingFailed',
   StartInference = 'startInference',
-  PendInference = 'pendInference',
 }
 
 export type Consequence = {
