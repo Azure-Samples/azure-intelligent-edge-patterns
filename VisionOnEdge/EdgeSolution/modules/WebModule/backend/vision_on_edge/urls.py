@@ -52,6 +52,7 @@ urlpatterns = \
         path('api/projects/<int:project_id>/train', views.train),
         path('api/projects/<int:project_id>/export', views.export),
         path('api/projects/<int:project_id>/train_performance', views.train_performance),
+        path('api/projects/<int:project_id>/inference_video_feed', views.inference_video_feed),
         path('api/projects/null/export', views.export_null),
         path('api/relabel', views.upload_relabel_image),
         path('api/relabel/update', views.relabel_update),

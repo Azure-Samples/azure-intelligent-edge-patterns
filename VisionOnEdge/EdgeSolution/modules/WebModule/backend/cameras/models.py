@@ -219,12 +219,13 @@ class Stream(object):
 
     def gen(self):
         self.status = 'running'
-        print('[INFO] start streaming with', self.rtsp)
+        print('[INFO] start streaming with', self.rtsp, flush=True)
         self.cap = cv2.VideoCapture(self.rtsp)
         while self.status == 'running':
             t, img = self.cap.read()
             # Need to add the video flag FIXME
             if t == False:
+                print('[INFO] restart cam ...', flush=True)
                 self.cap = cv2.VideoCapture(self.rtsp)
                 time.sleep(1)
                 continue

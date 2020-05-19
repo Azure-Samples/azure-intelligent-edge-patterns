@@ -661,3 +661,8 @@ def relabel_update(request):
         print('image', image_id, 'removed from relabeling pool')
 
     return JsonResponse({'status': 'ok'})
+
+@api_view()
+def inference_video_feed(request, project_id):
+    return JsonResponse({'status': 'ok', 'url': 'http://'+inference_module_url()+'/video_feed?inference=1'})
+
