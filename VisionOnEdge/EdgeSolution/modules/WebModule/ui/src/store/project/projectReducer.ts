@@ -106,10 +106,6 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state, inferenceMetrics: action.payload };
     case GET_INFERENCE_METRICS_FAILED:
       return { ...state, error: action.error };
-    case START_INFERENCE:
-      return { ...state, status: Status.StartInference };
-    case STOP_INFERENCE:
-      return { ...state, status: Status.PendInference };
     default:
       return { ...state };
   }
