@@ -2,7 +2,7 @@
   "$schema-version": "0.0.1",
   "description": "",
   "image": {
-    "repository": "mycapreg.azurecr.io/inferencemodule",
+    "repository": "intelligentedge/inferencemodule",
     "tag": {
       "version": "0.1.12",
       "platforms": {

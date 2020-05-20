@@ -2,7 +2,7 @@
   "$schema-version": "0.0.1",
   "description": "",
   "image": {
-    "repository": "$CONTAINER_REGISTRY_NAME/visionsamplemodule",
+    "repository": "intelligentedge/visionsamplemodule",
     "tag": {
       "version": "0.1.20",
       "platforms": {
