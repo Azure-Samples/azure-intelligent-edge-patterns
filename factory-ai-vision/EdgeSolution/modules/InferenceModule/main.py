@@ -37,8 +37,8 @@ def web_module_url():
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
-    #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
-    def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
+    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    #def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
         # Default system params
         self.render = False
 
