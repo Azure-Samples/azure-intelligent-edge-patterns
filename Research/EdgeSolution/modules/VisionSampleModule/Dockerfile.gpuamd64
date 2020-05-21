@@ -1,0 +1,52 @@
+FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
+
+#FROM nvidia/cuda:10.1-cudnn7-devel
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgtk2.0-dev \
+    libssl-dev \
+    libffi-dev \
+    libboost-python-dev \
+    libboost-filesystem1.58.0 \
+    libboost-thread1.58.0 \
+    python3-pip   
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
+    && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales \
+    && update-locale LANG=en_US.UTF-8
+ENV LANG en_US.UTF-8 
+ENV LC_ALL en_US.UTF-8
+
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt && \
+    pip install flask opencv-python onnx
+
+ARG DEVICE
+
+#Upgradin CUDA to 10.2
+RUn sudo apt-get install -y software-properties-common
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-ubuntu1604.pin
+RUN sudo mv cuda-ubuntu1604.pin /etc/apt/preferences.d/cuda-repository-pin-600
+RUN sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+RUN sudo add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/ /"
+RUN sudo apt-get update
+RUN sudo apt-get -y install cuda
+
+COPY main.py ./
+COPY object_detection.py ./
+COPY VideoStream.py ./
+COPY iot_hub_manager.py ./
+COPY image_classification.py ./
+COPY utility.py ./
+COPY default_model/cvexport.manifest default_model/
+COPY default_model default_model/
+COPY sample_video sample_video/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+CMD [ "python3", "-u", "./main.py" ]
+
