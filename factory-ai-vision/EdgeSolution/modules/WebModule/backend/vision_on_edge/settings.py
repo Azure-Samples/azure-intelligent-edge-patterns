@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+import config
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -47,7 +48,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -137,14 +138,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ICON_URL = '/icons/'
 ICON_ROOT = os.path.join(UI_DIR, 'icons')
 
-import config
 TRAINING_KEY = config.TRAINING_KEY
 ENDPOINT = config.ENDPOINT
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
 
-import os
 if 'TRAINING_KEY' in os.environ:
     TRAINING_KEY = os.environ['TRAINING_KEY']
 if 'ENDPOINT' in os.environ:
@@ -155,4 +154,3 @@ print('CONFIGURATION:')
 print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
-

@@ -1,0 +1,1 @@
+[{"model": "cameras.trainer", "pk": 1, "fields": {"trainer_name": "DEFAULT_TRAINER", "end_point": "", "training_key": ""}}]

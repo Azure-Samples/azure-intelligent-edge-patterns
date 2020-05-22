@@ -24,13 +24,16 @@ from rest_framework import routers
 from cameras import views
 from . import views as site_views
 
+
 class OptionalSlashRouter(routers.DefaultRouter):
     def __init__(self):
         super(routers.DefaultRouter, self).__init__()
         self.trailing_slash = '/?'
 
+
 #router = ters.DefaultRouter(trailing_slash=False)
 router = OptionalSlashRouter()
+router.register('trainer', views.TrainerViewSet)
 router.register('cameras', views.CameraViewSet)
 router.register('parts', views.PartViewSet)
 router.register('images', views.ImageViewSet)
