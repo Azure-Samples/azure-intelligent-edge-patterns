@@ -90,12 +90,21 @@ class Trainer(models.Model):
         return Trainer._get_trainer_obj_static(
             end_point=self.end_point, training_key=self.training_key)
 
-    def revalidate(self) -> None:
+    def revalidate(self):
         """
         Update self.is_trainer_valid.
         """
         trainer = self._get_trainer_obj()
-        self.is_trainer_valid = (trainer is not None)
+        print(trainer)
+        try:
+            obj_detection_domain = next(domain for domain in trainer.get_domains(
+            ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
+            self.is_trainer_valid = True
+            self.obj_detection_domain_id = obj_detection_domain.id
+        except:
+            self.is_trainer_valid = False
+            self.obj_detection_domain_id = ''
+
         return self.is_trainer_valid
 
     def _get_trainer_obj_and_revalidate(self):
@@ -329,9 +338,9 @@ class Stream(object):
                 self.predictions = res.json()
                 self.mutex.release()
                 time.sleep(0.02)
-                #print('received p', self.predictions)
+                # print('received p', self.predictions)
 
-                #inference = self.iot.receive_message_on_input('inference', timeout=1)
+                # inference = self.iot.receive_message_on_input('inference', timeout=1)
                 # if not inference:
                 #    self.mutex.acquire()
                 #    self.bboxes = []
@@ -372,9 +381,9 @@ class Stream(object):
             predictions = list(prediction.copy()
                                for prediction in self.predictions)
             self.mutex.release()
-            #print('bboxes', bboxes)
-            #cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
-            #cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'], (bbox['p1'][0], bbox['p1'][1]-15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 255), 1)
+            # print('bboxes', bboxes)
+            # cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
+            # cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'], (bbox['p1'][0], bbox['p1'][1]-15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 255), 1)
             height, width = img.shape[0], img.shape[1]
             font = cv2.FONT_HERSHEY_SIMPLEX
             font_scale = 1
@@ -395,7 +404,7 @@ class Stream(object):
 
     def get_frame(self):
         print('[INFO] get frame', self)
-        #b, img = self.cap.read()
+        # b, img = self.cap.read()
         time_begin = time.time()
         while True:
             if time.time() - time_begin > 5:
