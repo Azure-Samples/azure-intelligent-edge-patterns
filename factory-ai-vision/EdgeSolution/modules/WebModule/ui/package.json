@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@fluentui/react-northstar": "0.48.0",
+    "@microsoft/applicationinsights-react-js": "^2.5.4",
+    "@microsoft/applicationinsights-web": "^2.5.4",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
