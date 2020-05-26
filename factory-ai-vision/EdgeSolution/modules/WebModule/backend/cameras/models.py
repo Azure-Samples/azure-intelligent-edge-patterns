@@ -44,6 +44,9 @@ def is_edge():
         return False
 
 
+logger = logging.getLogger(__name__)
+
+
 def inference_module_url():
     if is_edge():
         return '172.18.0.1:5000'
@@ -116,14 +119,15 @@ class Trainer(models.Model):
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
-        if update_fields is not None:
-            return
-        logging.debug('update_fields:', update_fields)
-        if instance.id is not None:
-            return
-        logging.info('Creating Trainer on Custom Vision')
-        logging.debug('Instance pre:', instance)
         try:
+            if update_fields is not None:
+                return
+            logger.debug('update_fields:', update_fields)
+            if instance.id is not None:
+                return
+            logger.info('Creating Trainer on Custom Vision')
+            logger.debug('Instance pre:', instance)
+
             trainer = Trainer._get_trainer_obj_static(
                 training_key=instance.training_key,
                 end_point=instance.end_point)
@@ -132,6 +136,7 @@ class Trainer(models.Model):
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
         except:
+            logger.exception("pre_save excetion")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
 
