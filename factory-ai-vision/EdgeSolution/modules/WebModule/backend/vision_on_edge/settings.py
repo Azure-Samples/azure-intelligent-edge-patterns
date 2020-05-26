@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import config
+from configs.logging_config import LOGGING_CONFIG_PRODUCTION, LOGGING_CONFIG_DEV
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -48,11 +49,22 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'opencensus.ext.django.middleware.OpencensusMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# OPENCENSUS = {
+#     'TRACE': {
+#         'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
+#         'EXPORTER': '''opencensus.ext.azure.trace_exporter.AzureExporter(
+#             connection_string="InstrumentationKey={KEY}"
+#         )''',
+#     }
+# }
+
 
 ROOT_URLCONF = 'vision_on_edge.urls'
 
@@ -154,3 +166,5 @@ print('CONFIGURATION:')
 print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
+
+LOGGING = LOGGING_CONFIG_PRODUCTION
