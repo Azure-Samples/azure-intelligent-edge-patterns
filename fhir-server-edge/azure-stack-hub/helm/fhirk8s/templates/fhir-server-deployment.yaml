@@ -27,13 +27,14 @@ spec:
             path: /health/check
             port: 8080
           initialDelaySeconds: 300
-          periodSeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3    
         envFrom:
         - secretRef:
             name: fhir-env
         volumeMounts:
         - name: fhir-server-certificate
-          mountPath: /certs/certificate.pfx
+          mountPath: /https/certificate.pfx
           subPath: certificate.pfx
           readOnly: true
       volumes:
