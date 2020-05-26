@@ -5,7 +5,7 @@ import threading
 import queue
 import random
 import sys
-
+import logging
 
 from django.db import models
 from django.db.models.signals import post_save, post_delete, pre_save, post_save, m2m_changed
@@ -95,7 +95,6 @@ class Trainer(models.Model):
         Update self.is_trainer_valid.
         """
         trainer = self._get_trainer_obj()
-        print(trainer)
         try:
             obj_detection_domain = next(domain for domain in trainer.get_domains(
             ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
@@ -119,11 +118,11 @@ class Trainer(models.Model):
     def pre_save(sender, instance, update_fields, **kwargs):
         if update_fields is not None:
             return
-        print('update_fields:', update_fields)
+        logging.debug('update_fields:', update_fields)
         if instance.id is not None:
             return
-        print('[INFO] Creating Trainer on Custom Vision')
-        print('instance pre:', instance)
+        logging.info('Creating Trainer on Custom Vision')
+        logging.debug('Instance pre:', instance)
         try:
             trainer = Trainer._get_trainer_obj_static(
                 training_key=instance.training_key,
