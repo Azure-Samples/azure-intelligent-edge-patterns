@@ -47,7 +47,7 @@ export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo 
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
       <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
-        {showVideo ? <LiveViewScene AOIs={AOIs} setAOIs={setAOIs} /> : null}
+        {showVideo ? <LiveViewScene AOIs={AOIs} setAOIs={setAOIs} visible={showAOI} /> : null}
       </div>
     </Flex>
   );

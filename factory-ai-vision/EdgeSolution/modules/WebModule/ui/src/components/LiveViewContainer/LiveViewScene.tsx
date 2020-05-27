@@ -6,7 +6,7 @@ import { KonvaEventObject } from 'konva/types/Node';
 import useImage from '../LabelingPage/util/useImage';
 import { LiveViewProps, MaskProps, AOIBoxProps } from './LiveViewContainer.type';
 
-export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs }) => {
+export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
   const imgRef = useRef(null);
@@ -54,11 +54,12 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs }) => {
       <Stage ref={stageRef}>
         <Layer ref={layerRef}>
           <KonvaImage image={imgEle} ref={imgRef} />
-          <Mask width={imgWidth} height={imgHeight} holes={AOIs} />
+          <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
           {AOIs.map((e, i) => (
             <AOIBox
               key={i}
               box={e}
+              visible={visible}
               onBoxChange={(updateBox): void =>
                 setAOIs((prev) => {
                   const newBox = updateBox(prev[i]);
@@ -75,12 +76,13 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs }) => {
   );
 };
 
-const Mask: React.FC<MaskProps> = ({ width, height, holes }) => {
+const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   return (
     <Shape
       width={width}
       height={height}
       fill={'rgba(0,0,0,0.5)'}
+      visible={visible}
       sceneFunc={(ctx, shape): void => {
         ctx.beginPath();
         ctx.moveTo(0, 0);
@@ -105,7 +107,7 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes }) => {
   );
 };
 
-const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange }) => {
+const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible }) => {
   const { x1, y1, x2, y2 } = box;
   const COLOR = 'white';
   const RADIUS = 20;
@@ -131,7 +133,7 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange }) => {
   };
 
   return (
-    <Group>
+    <Group visible={visible}>
       <Line points={[x1, y1, x1, y2, x2, y2, x2, y1]} closed stroke={COLOR} strokeWidth={10} />
       <Circle draggable name="leftTop" x={x1} y={y1} radius={RADIUS} fill={COLOR} onDragMove={handleDrag} />
       <Circle draggable name="rightTop" x={x2} y={y1} radius={RADIUS} fill={COLOR} onDragMove={handleDrag} />
