@@ -1,4 +1,4 @@
-import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo } from 'react';
+import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo } from 'react';
 import { Dropdown, DropdownItemProps, Flex, Text, Button, RadioGroup } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
@@ -22,7 +22,10 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   partItems,
   isPartCorrect,
 }) => {
-  const filteredPartItems = partItems.filter((e) => (e.content as any).key !== partId);
+  const filteredPartItems = useMemo(() => partItems.filter((e) => (e.content as any).key !== partId), [
+    partId,
+    partItems,
+  ]);
   const [selectedPartItem, setSelectedPartItem] = useState<DropdownItemProps>(filteredPartItems[0]);
 
   const onDropdownChange = (_, { value }): void => {
@@ -40,22 +43,28 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
       <div style={{ margin: '0.2em' }}>
         <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={100} height={100} />
       </div>
-      <Flex column gap="gap.smaller" styles={{ width: '30%' }}>
-        <Text truncated>Confidence Level: {confidenceLevel}%</Text>
-        <Flex>
+      <Flex column gap="gap.smaller" styles={{ width: '40%' }}>
+        <Text align="center" truncated>
+          Confidence Level: <b>{confidenceLevel}%</b>
+        </Text>
+        <Flex vAlign="center" styles={{ width: '100%', height: '2em' }}>
           <RadioGroup
             checkedValue={isPartCorrect}
             onCheckedValueChange={(_, newProps): void => {
               setJudgedImageList((prev) => {
                 if (newProps.value === 1) {
-                  const idxInIncorrect = prev.incorrect.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
+                  const idxInIncorrect = prev.incorrect.findIndex(
+                    (e) => e.imageId === relabelImages[imageIndex].id,
+                  );
                   const idxInCorrect = prev.correct.indexOf(relabelImages[imageIndex].id);
                   if (idxInIncorrect >= 0) prev.incorrect.splice(idxInIncorrect, 1);
                   if (idxInCorrect === -1) prev.correct.push(relabelImages[imageIndex].id);
                 }
                 if (newProps.value === 0) {
                   const idxInCorrect = prev.correct.indexOf(relabelImages[imageIndex].id);
-                  const idxInIncorrect = prev.incorrect.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
+                  const idxInIncorrect = prev.incorrect.findIndex(
+                    (e) => e.imageId === relabelImages[imageIndex].id,
+                  );
                   if (idxInCorrect >= 0) prev.correct.splice(idxInCorrect, 1);
                   if (idxInIncorrect === -1)
                     prev.incorrect.push({
@@ -79,8 +88,15 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
               },
             ]}
           />
-          {!isPartCorrect && filteredPartItems.length > 0 && (
-            <Dropdown items={filteredPartItems} onChange={onDropdownChange} value={selectedPartItem} />
+          {isPartCorrect === 0 && filteredPartItems.length > 0 && (
+            <div style={{ width: '50%' }}>
+              <Dropdown
+                fluid
+                items={filteredPartItems}
+                onChange={onDropdownChange}
+                value={selectedPartItem}
+              />
+            </div>
           )}
         </Flex>
         <LabelingPageDialog
