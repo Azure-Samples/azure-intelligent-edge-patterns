@@ -204,6 +204,7 @@ class Camera(models.Model):
     name = models.CharField(max_length=200)
     rtsp = models.CharField(max_length=1000)
     model_name = models.CharField(max_length=200)
+    area = models.CharField(max_length=1000, blank=True)
 
     def __str__(self):
         return self.name
