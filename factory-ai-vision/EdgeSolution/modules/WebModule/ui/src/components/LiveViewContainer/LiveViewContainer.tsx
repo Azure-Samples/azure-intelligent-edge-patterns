@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { Text, Image, Checkbox, Flex, Button } from '@fluentui/react-northstar';
+import { LiveViewScene } from './LiveViewScene';
 
 export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo }) => {
   const [showAOI, setShowAOI] = useState(true);
@@ -45,12 +46,7 @@ export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo 
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
       <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
-        {showVideo ? (
-          <Image
-            src={`http://${window.location.hostname}:5000/video_feed?inference=1`}
-            styles={{ width: '100%', height: '100%', objectFit: 'contain' }}
-          />
-        ) : null}
+        {showVideo ? <LiveViewScene /> : null}
       </div>
     </Flex>
   );
