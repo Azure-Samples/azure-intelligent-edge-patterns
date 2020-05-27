@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import * as R from 'ramda';
 
 import { Text, Checkbox, Flex, Button } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
@@ -6,9 +7,9 @@ import { Box } from './LiveViewContainer.type';
 
 export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo }) => {
   const [showAOI, setShowAOI] = useState(true);
-  const [AOIs, setAOIs] = useState<Box[]>([{ x1: 100, y1: 100, x2: 2000, y2: 1000 }]);
+  const lasteUpdatedAOIs = useRef([{ x1: 100, y1: 100, x2: 2000, y2: 1000 }]);
+  const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
-  const [hasEdit, setHasEdit] = useState(true);
 
   const onCheckboxClick = () => {
     setShowAOI((prev) => !prev);
@@ -17,6 +18,7 @@ export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo 
   const onUpdate = () => {
     // TODO API
     setShowUpdateSuccessTxt(true);
+    lasteUpdatedAOIs.current = R.clone(AOIs);
   };
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo 
     }
   }, [showUpdateSuccessTxt]);
 
+  const hasEdit = !R.equals(lasteUpdatedAOIs.current, AOIs);
   const updateBtnDisabled = !showAOI || !hasEdit;
 
   return (
