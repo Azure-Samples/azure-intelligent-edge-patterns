@@ -309,7 +309,7 @@ class LocationViewSet(viewsets.ModelViewSet):
 class CameraSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Camera
-        fields = ['id', 'name', 'rtsp']
+        fields = ['id', 'name', 'rtsp', 'area']
 
 
 class CameraViewSet(viewsets.ModelViewSet):
