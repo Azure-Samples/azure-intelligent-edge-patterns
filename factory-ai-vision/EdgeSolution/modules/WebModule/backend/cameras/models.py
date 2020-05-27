@@ -180,7 +180,7 @@ class Trainer(models.Model):
             return None
 
     def __str__(self):
-        return f'Name: {self.trainer_name}, endpoint: {self.end_point}'
+        return self.trainer_name
 
 
 class Part(models.Model):

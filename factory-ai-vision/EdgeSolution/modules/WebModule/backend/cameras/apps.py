@@ -16,6 +16,17 @@ class CameraConfig(AppConfig):
 
             from cameras.models import Trainer
 
+            existing_trainers = Trainer.objects.filter(
+                trainer_name=DEFAULT_TRAINER_NAME,
+                training_key=TRAINING_KEY,
+                end_point=ENDPOINT)
+            if len(existing_trainers) == 1:
+                logger.info(
+                    f"Found existing {DEFAULT_TRAINER_NAME}. Revalidating...")
+                trainer = existing_trainers[0]
+                trainer.revalidate()
+                return
+
             trainers_with_dup_name = Trainer.objects.filter(
                 trainer_name=DEFAULT_TRAINER_NAME)
             if len(trainers_with_dup_name):
@@ -35,5 +46,5 @@ class CameraConfig(AppConfig):
                 end_point=ENDPOINT,
             )
             if created:
-                logger.info(f"Validating {DEFAULT_TRAINER_NAME}")
+                logger.info(f"{DEFAULT_TRAINER_NAME} Created")
                 default_trainer.revalidate()
