@@ -31,7 +31,7 @@ LOGGING_CONFIG_DEV = {
     'formatters': {
         'precise': {
             'format': '%(asctime)s %(levelname)s %(name)-20s : %(message)s',
-            'datefmt': '[%Y-%m-%d %H:%M:%S]'
+            'datefmt': '[%d-%b-%Y %H:%M:%S]'
         }
     },
     'root': {

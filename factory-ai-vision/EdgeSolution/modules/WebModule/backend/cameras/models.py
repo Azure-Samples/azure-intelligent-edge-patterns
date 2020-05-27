@@ -95,7 +95,7 @@ class Trainer(models.Model):
 
     def revalidate(self):
         """
-        Update self.is_trainer_valid.
+        Update self.is_trainer_valid
         """
         trainer = self._get_trainer_obj()
         try:
@@ -103,13 +103,18 @@ class Trainer(models.Model):
             ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
             self.is_trainer_valid = True
             self.obj_detection_domain_id = obj_detection_domain.id
+            logger.info(
+                "Successfully created trainer client and got obj detection domain")
         except:
+            logger.exception(
+                "Failed to create trainer client and get obj detection domain")
             self.is_trainer_valid = False
             self.obj_detection_domain_id = ''
-
+        logger.info(
+            f"{self.trainer_name} is_trainer_valid: {self.is_trainer_valid}")
         return self.is_trainer_valid
 
-    def _get_trainer_obj_and_revalidate(self):
+    def revalidate_and_get_trainer_obj(self):
         """
         Get trainer object and update self.is_trainer_valid.
         """
@@ -144,7 +149,7 @@ class Trainer(models.Model):
         """
         Dequeue training iterations
         """
-        trainer = self._get_trainer_obj_and_revalidate()
+        trainer = self.revalidate_and_get_trainer_obj()
         if not trainer:
             return
         iterations = trainer.get_iterations(custom_vision_project_id)
@@ -158,17 +163,20 @@ class Trainer(models.Model):
         A wrapper function.
         Return project if succeed. Return None otherwise.
         """
-        trainer = self._get_trainer_obj_and_revalidate()
-        print("Try to create project")
-        print(f"trainer: {trainer}")
+        trainer = self.revalidate_and_get_trainer_obj()
+        logger.info("Creating obj detection project")
+        logger.info(f"trainer: {trainer}")
         if not trainer:
-            print("Trainer is invalid thus cannot create project")
+            logger.info("Trainer is invalid thus cannot create project")
             return None
         try:
-            project = trainer.create_project(name=project_name)
+            project = trainer.create_project(
+                name=project_name,
+                domain_id=self.obj_detection_domain_id)
             return project
         except:
-            print("Trainer can create client but cannot create project")
+            logger.exception(
+                "Endpoint + Training_Key can create client but cannot create project")
             return None
 
     def __str__(self):
@@ -243,32 +251,33 @@ class Project(models.Model):
     def pre_save(sender, instance, update_fields, **kwargs):
         if update_fields is not None:
             return
-        print('update_fields:', update_fields)
+        logger.info(f'update_fields: {update_fields}')
         if instance.id is not None:
             return
-        print('[INFO] Creating Project on Custom Vision')
+
         name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
         instance.customvision_project_name = name
-        print('instance pre:', instance)
+        logger.info(f'instance pre: {instance}')
 
         trainer = instance.trainer
         instance.trainer.revalidate()
         instance.trainer.save()
         trainer = instance.trainer
         if trainer.is_trainer_valid:
+            logger.info('Creating Project on Custom Vision')
             project = trainer.create_project(name)
-            print('[INFO] Got Custom Vision Project ID', project.id)
+            logger.info(f'Got Custom Vision Project ID {project.id}')
             instance.customvision_project_id = project.id
         else:
-            print('[INFO] Has not set the key, Got DUMMY PRJ ID')
+            logger.info('Has not set the key, Got DUMMY PRJ ID')
             instance.customvision_project_id = 'DUMMY-PROJECT-ID'
 
     @staticmethod
     def post_save(sender, instance, update_fields, **kwargs):
-        print('saving instance', instance, update_fields)
+        logger.info(f'Saving instance: {instance} {update_fields}')
         if update_fields is not None:
             return
-        print('[INFO] POST_SAVE')
+        logger.info('post_save')
         project_id = instance.id
         # def _train_f(pid):
         #     requests.get('http://localhost:8000/api/projects/'+str(pid)+'/train')
