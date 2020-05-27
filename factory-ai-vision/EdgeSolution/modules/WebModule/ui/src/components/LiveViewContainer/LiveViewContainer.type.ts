@@ -26,5 +26,6 @@ export type MaskProps = {
 export type AOIBoxProps = {
   box: Box;
   onBoxChange: (updateBox: (prevBox: Box) => Box) => void;
+  boundary: Box;
   visible: boolean;
 };

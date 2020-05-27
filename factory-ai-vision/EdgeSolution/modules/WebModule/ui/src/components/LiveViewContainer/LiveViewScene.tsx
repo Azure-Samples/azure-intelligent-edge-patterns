@@ -81,6 +81,7 @@ const AOILayer: React.FC<AOILayerProps> = ({ imgWidth, imgHeight, AOIs, setAOIs,
           key={i}
           box={e}
           visible={visible}
+          boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
           onBoxChange={(updateBox): void =>
             setAOIs((prev) => {
               const newBox = updateBox(prev[i]);
@@ -126,13 +127,34 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   );
 };
 
-const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible }) => {
+const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary }) => {
   const { x1, y1, x2, y2 } = box;
   const COLOR = 'white';
   const RADIUS = 20;
 
   const handleDrag = (e: KonvaEventObject<DragEvent>): void => {
-    const { x, y } = e.target.position();
+    let { x, y } = e.target.position();
+
+    if (x < boundary.x1) {
+      x = boundary.x1;
+      e.target.x(x);
+    }
+
+    if (x > boundary.x2) {
+      x = boundary.x2;
+      e.target.x(x);
+    }
+
+    if (y < boundary.y1) {
+      y = boundary.y1;
+      e.target.y(y);
+    }
+
+    if (y > boundary.y2) {
+      y = boundary.y2;
+      e.target.y(y);
+    }
+
     switch (e.target.name()) {
       case 'leftTop':
         onBoxChange((prev) => ({ ...prev, x1: x, y1: y }));
