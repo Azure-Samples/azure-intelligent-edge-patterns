@@ -8,33 +8,28 @@ import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation } from '../store/image/imageActions';
-import { getFilteredImages } from '../util/getFilteredImages';
+import { RelabelImage } from '../components/ManualIdentification/types';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
+  images: LabelImage[] | RelabelImage[];
   imageIndex: number;
   closeDialog: () => void;
-  partId?: number;
   isRelabel: boolean;
 }
 const LabelingPage: FC<LabelingPageProps> = ({
   labelingType,
+  images,
   imageIndex,
   closeDialog,
-  partId,
   isRelabel,
 }) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
-  const { images, annotations } = useSelector<State, { images: LabelImage[]; annotations: Annotation[] }>(
-    (state) => ({
-      images: state.images,
-      annotations: state.labelingPageState.annotations,
-    }),
-  );
-  const filteredImages = getFilteredImages(images, { partId, isRelabel });
-  const imageUrl = filteredImages[index]?.image;
-  const imageId = filteredImages[index]?.id;
+  const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
+
+  const imageUrl = images[index]?.image;
+  const imageId = images[index]?.id;
 
   useEffect(() => {
     if (typeof imageId === 'number') dispatch(getAnnotations(imageId));
@@ -55,8 +50,8 @@ const LabelingPage: FC<LabelingPageProps> = ({
             disabled={index === 0 || isOnePointBox(annotations)}
             icon={<ChevronStartIcon size="larger" />}
             onClick={(): void => {
-              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-              setIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
+              dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+              setIndex((prev) => (prev - 1 + images.length) % images.length);
             }}
           />
         )}
@@ -64,11 +59,11 @@ const LabelingPage: FC<LabelingPageProps> = ({
         {!isRelabel && (
           <Button
             text
-            disabled={index === filteredImages.length - 1 || isOnePointBox(annotations)}
+            disabled={index === images.length - 1 || isOnePointBox(annotations)}
             icon={<ChevronEndIcon size="larger" />}
             onClick={(): void => {
-              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-              setIndex((prev) => (prev + 1) % filteredImages.length);
+              dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+              setIndex((prev) => (prev + 1) % images.length);
             }}
           />
         )}
@@ -79,7 +74,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
           content="Save"
           disabled={isOnePointBox(annotations)}
           onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
+            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
             closeDialog();
           }}
         />

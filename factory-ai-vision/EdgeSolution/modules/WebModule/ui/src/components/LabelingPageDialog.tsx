@@ -3,14 +3,21 @@ import { Dialog } from '@fluentui/react-northstar';
 
 import LabelingPage from '../pages/LabelingPage';
 import { LabelingType } from '../store/labelingPage/labelingPageTypes';
+import { LabelImage } from '../store/image/imageTypes';
+import { RelabelImage } from './ManualIdentification/types';
 
 interface LabelingPageDialogProps {
   trigger: JSX.Element;
   imageIndex: number;
-  partId?: number;
+  images: LabelImage[] | RelabelImage[];
   isRelabel: boolean;
 }
-const LabelingPageDialog: FC<LabelingPageDialogProps> = ({ trigger, imageIndex, partId, isRelabel }): JSX.Element => {
+const LabelingPageDialog: FC<LabelingPageDialogProps> = ({
+  trigger,
+  images,
+  imageIndex,
+  isRelabel,
+}): JSX.Element => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog
@@ -22,8 +29,8 @@ const LabelingPageDialog: FC<LabelingPageDialogProps> = ({ trigger, imageIndex, 
         <LabelingPage
           closeDialog={(): void => setOpen(false)}
           labelingType={LabelingType.SingleAnnotation}
+          images={images}
           imageIndex={imageIndex}
-          partId={partId}
           isRelabel={isRelabel}
         />
       }

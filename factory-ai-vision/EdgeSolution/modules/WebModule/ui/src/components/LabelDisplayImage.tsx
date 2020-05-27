@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, FC, useMemo, useCallback } from 'react';
 import { Stage, FastLayer, Image as KonvaImage } from 'react-konva';
-import { Flex, Text } from '@fluentui/react-northstar';
+import { Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
 import { Size2D, AnnotationState, Annotation } from '../store/labelingPage/labelingPageTypes';
@@ -47,8 +47,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   }, [size, resizeImage]);
 
   return (
-    <div onClick={onClick} style={{ cursor: pointerCursor ? 'pointer' : 'default' }}>
-      <Flex column>
+    <div onClick={onClick} style={{ cursor: pointerCursor ? 'pointer' : 'default', display: 'flex', flexFlow: 'column' }}>
         <Stage
           width={imageSize.width}
           height={imageSize.height}
@@ -62,7 +61,6 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
           </FastLayer>
         </Stage>
         <Text align="center">{labelText}</Text>
-      </Flex>
     </div>
   );
 };
