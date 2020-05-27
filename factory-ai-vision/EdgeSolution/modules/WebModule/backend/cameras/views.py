@@ -554,11 +554,6 @@ def _train(project_id):
 
         logger.info(f'Project id: {project_obj.id}')
         logger.info(f'Part ids: {part_ids}')
-
-        images = Image.objects.filter(
-            part_id__in=part_ids, is_relabel=False, uploaded=False).all()
-
-        logger.info(f'Image length: {len(images)}')
         tags = trainer.get_tags(customvision_project_id)
 
         tag_dict = {}
@@ -567,22 +562,24 @@ def _train(project_id):
         for tag in tags:
             tag_dict[tag.name] = tag.id
 
-        # Create tags on cv
-        logger.info("Creating tags before training...")
-        for index, image_obj in enumerate(images):
-
-            part = image_obj.part
-            part_name = part.name
+        # Create tags on CustomVisioin Project
+        # Maybe move to Project Model?
+        logger.info("Create tags before training...")
+        counter = 0
+        for part_id in part_ids:
+            part_name = Part.objects.get(id=part_id).name
+            project_partnames[part_name] = 'foo'
             if part_name not in tag_dict:
-                logger.info(f'new part name: {part_name}')
-                logger.info(f'creating new tag: {part_name}')
+                logger.info(f'Creating tags: {part_name}')
                 tag = trainer.create_tag(customvision_project_id, part_name)
                 tag_dict[tag.name] = tag.id
-            if part_name not in project_partnames:
-                project_partnames[part_name] = 'foo'
+                counter += 1
+        logger.info(f"Created {counter} tags")
+        logger.info("Create tags finish")
 
-        # Delete tags on cv
-        logger.info("Deleting tags before training...")
+        # Delete tags on CustomVisioin Project
+        # Maybe move to Project Model?
+        logger.info("Delete tags before training")
         counter = 0
         for tag_name in tag_dict.keys():
             if tag_name not in project_partnames:
@@ -592,16 +589,54 @@ def _train(project_id):
                 trainer.delete_tag(project_id=customvision_project_id,
                                    tag_id=tag_dict[tag_name])
         logger.info(f"Deleted {counter} tags")
+        logger.info("Delete tags finish.")
 
-        # Prune untagged image on cv project
-        pass
+        # Delete untagged images on CustomVisioin Project
+        # Maybe move to Project Model?
+        logger.info("Delete untagged images before training")
+        untagged_image_count = trainer.get_untagged_image_count(
+            project_id=customvision_project_id)
+        batch_size = 50
+        untagged_image_batch = trainer.get_untagged_images(
+            project_id=customvision_project_id, take=batch_size)
+        untagged_img_ids = []
+        counter = 0
+        expected_iteration = untagged_image_count//batch_size+1
+        # TODO: remove
+        logger.info(
+            f'expected_iteration: {expected_iteration} = {untagged_image_count}//{batch_size}+1')
 
-        # Upload images to cv
+        while(len(untagged_image_batch) > 0):
+            logger.info(f"deleting batch {counter}")
+            for img in untagged_image_batch:
+                logger.info(f"Putting img: {img.id} to deleting list")
+                untagged_img_ids.append(img.id)
+            trainer.delete_images(
+                project_id=customvision_project_id,
+                image_ids=untagged_img_ids)
+            untagged_image_batch = trainer.get_untagged_images(
+                project_id=customvision_project_id,
+                take=batch_size)
+            untagged_img_ids = []
+            counter += 1
+            if counter > expected_iteration*10:
+                logging.exception(
+                    "Deleting untagged images take way too many iteration. Something went wrong.")
+                break
+        logger.info("Delete untagged finish")
+
+        # Upload images to CustomVisioin Project
+        # TODO: Replace the line below if we are sure local images sync Custom Vision well
+        # images = Image.objects.filter(
+        #    part_id__in=part_ids,
+        #    is_relabel=False,
+        #    uploaded=False).all()
         logger.info('Preparing to submit images and train...')
-        logger.info(f'Image length: {len(images)}')
+        images = Image.objects.filter(part_id__in=part_ids).all()
         count = 0
         img_entries = []
         img_objs = []
+        logger.info(f'Image length: {len(images)}')
 
         for index, image_obj in enumerate(images):
             logger.info(f'*** image {index+1}, {image_obj}')
