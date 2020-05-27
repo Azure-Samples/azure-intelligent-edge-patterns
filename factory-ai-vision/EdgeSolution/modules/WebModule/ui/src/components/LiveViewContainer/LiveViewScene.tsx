@@ -85,6 +85,18 @@ const AOILayer: React.FC<AOILayerProps> = ({ imgWidth, imgHeight, AOIs, setAOIs,
           onBoxChange={(updateBox): void =>
             setAOIs((prev) => {
               const newBox = updateBox(prev[i]);
+              if (newBox.x1 > newBox.x2) {
+                const tmp = newBox.x1;
+                newBox.x1 = newBox.x2;
+                newBox.x2 = tmp;
+              }
+
+              if (newBox.y1 > newBox.y2) {
+                const tmp = newBox.y1;
+                newBox.y1 = newBox.y2;
+                newBox.y2 = tmp;
+              }
+
               const newAOIs = [...prev];
               newAOIs[i] = newBox;
               return newAOIs;
