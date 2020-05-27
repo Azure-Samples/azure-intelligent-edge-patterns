@@ -3,40 +3,48 @@ import sys
 from config import TRAINING_KEY, ENDPOINT
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 class CameraConfig(AppConfig):
     name = 'cameras'
 
     def ready(self):
-        print(sys.argv)
         if 'runserver' in sys.argv:
-            logging.info("Cleaning Default Trainer")
+            logger.info("CemeraAppConfig ready while running server")
             DEFAULT_TRAINER_NAME = 'DEFAULT_TRAINER'
+
             from cameras.models import Trainer
+
+            existing_trainers = Trainer.objects.filter(
+                trainer_name=DEFAULT_TRAINER_NAME,
+                training_key=TRAINING_KEY,
+                end_point=ENDPOINT)
+            if len(existing_trainers) == 1:
+                logger.info(
+                    f"Found existing {DEFAULT_TRAINER_NAME}. Revalidating...")
+                trainer = existing_trainers[0]
+                trainer.revalidate()
+                return
 
             trainers_with_dup_name = Trainer.objects.filter(
                 trainer_name=DEFAULT_TRAINER_NAME)
-
             if len(trainers_with_dup_name):
-                logging.info(f"Found existed {DEFAULT_TRAINER_NAME}")
-                logging.info(trainers_with_dup_name)
-                logging.info("Deleting")
+                logger.info(f"Deleting existing {DEFAULT_TRAINER_NAME}")
                 trainers_with_dup_name.delete()
+
             trainers_with_dup_ep_tk = Trainer.objects.filter(
                 end_point=ENDPOINT, training_key=TRAINING_KEY)
-
             if len(trainers_with_dup_ep_tk):
-                logging.info(f"Found existed TRAINING_KEY+{ENDPOINT}")
-                logging.info(trainers_with_dup_ep_tk)
-                logging.info("Deleting")
+                logger.info(f"Deleting existing TRAINING_KEY+{ENDPOINT}")
                 trainers_with_dup_ep_tk.delete()
-            logging.info("Creating Default Trainer")
+
+            logger.info(f"Creating new {DEFAULT_TRAINER_NAME}")
             default_trainer, created = Trainer.objects.update_or_create(
                 trainer_name=DEFAULT_TRAINER_NAME,
                 training_key=TRAINING_KEY,
                 end_point=ENDPOINT,
             )
             if created:
+                logger.info(f"{DEFAULT_TRAINER_NAME} Created")
                 default_trainer.revalidate()
-        else:
-            print("Escaping")
