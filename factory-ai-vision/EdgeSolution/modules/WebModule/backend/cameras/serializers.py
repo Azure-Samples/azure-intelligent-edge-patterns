@@ -5,8 +5,12 @@ from .models import Trainer
 class TrainerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trainer
-        fields = ['trainer_name', 'end_point',
-                  'training_key', 'is_trainer_valid', 'obj_detection_domain_id']
+        fields = ['id',
+                  'trainer_name',
+                  'end_point',
+                  'training_key',
+                  'is_trainer_valid',
+                  'obj_detection_domain_id']
 
     def create(self, validated_data):
         trainer, created = Trainer.objects.get_or_create(
