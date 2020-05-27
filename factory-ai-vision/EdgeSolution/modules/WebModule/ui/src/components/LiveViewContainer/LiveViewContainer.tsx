@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-import { Text, Image, Checkbox, Flex, Button } from '@fluentui/react-northstar';
+import { Text, Checkbox, Flex, Button } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
+import { Box } from './LiveViewContainer.type';
 
 export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo }) => {
   const [showAOI, setShowAOI] = useState(true);
-  const [AOIs, setAOIs] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
+  const [AOIs, setAOIs] = useState<Box[]>([{ x1: 100, y1: 100, x2: 2000, y2: 1000 }]);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [hasEdit, setHasEdit] = useState(true);
 
@@ -46,7 +47,7 @@ export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo 
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
       <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
-        {showVideo ? <LiveViewScene /> : null}
+        {showVideo ? <LiveViewScene AOIs={AOIs} setAOIs={setAOIs} /> : null}
       </div>
     </Flex>
   );

@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { Stage, FastLayer, Image as KonvaImage } from 'react-konva';
+import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle } from 'react-konva';
 import Konva from 'konva';
-import useImage from '../LabelingPage/util/useImage';
+import { KonvaEventObject } from 'konva/types/Node';
 
-export const LiveViewScene: React.FC = () => {
+import useImage from '../LabelingPage/util/useImage';
+import { LiveViewProps, MaskProps, AOIBoxProps } from './LiveViewContainer.type';
+
+export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
   const imgRef = useRef(null);
@@ -49,10 +52,107 @@ export const LiveViewScene: React.FC = () => {
   return (
     <div ref={divRef} style={{ width: '100%', height: '100%' }}>
       <Stage ref={stageRef}>
-        <FastLayer ref={layerRef}>
+        <Layer ref={layerRef}>
           <KonvaImage image={imgEle} ref={imgRef} />
-        </FastLayer>
+          <Mask width={imgWidth} height={imgHeight} holes={AOIs} />
+          {AOIs.map((e, i) => (
+            <AOIBox
+              key={i}
+              box={e}
+              onBoxChange={(updateBox): void =>
+                setAOIs((prev) => {
+                  const newBox = updateBox(prev[i]);
+                  const newAOIs = [...prev];
+                  newAOIs[i] = newBox;
+                  return newAOIs;
+                })
+              }
+            />
+          ))}
+        </Layer>
       </Stage>
     </div>
+  );
+};
+
+const Mask: React.FC<MaskProps> = ({ width, height, holes }) => {
+  return (
+    <Shape
+      width={width}
+      height={height}
+      fill={'rgba(0,0,0,0.5)'}
+      sceneFunc={(ctx, shape): void => {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(shape.width(), 0);
+        ctx.lineTo(shape.width(), shape.height());
+        ctx.lineTo(0, shape.height());
+        ctx.lineTo(0, 0);
+
+        // Nonozero-rule
+        holes.forEach(({ x1, y1, x2, y2 }) => {
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x1, y2);
+          ctx.lineTo(x2, y2);
+          ctx.lineTo(x2, y1);
+          ctx.lineTo(x1, y1);
+        });
+
+        ctx.fillStrokeShape(shape);
+      }}
+      listening={false}
+    />
+  );
+};
+
+const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange }) => {
+  const { x1, y1, x2, y2 } = box;
+  const COLOR = 'white';
+  const RADIUS = 20;
+
+  const handleDrag = (e: KonvaEventObject<DragEvent>): void => {
+    const { x, y } = e.target.position();
+    switch (e.target.name()) {
+      case 'leftTop':
+        onBoxChange((prev) => ({ ...prev, x1: x, y1: y }));
+        break;
+      case 'rightTop':
+        onBoxChange((prev) => ({ ...prev, x2: x, y1: y }));
+        break;
+      case 'rightBottom':
+        onBoxChange((prev) => ({ ...prev, x2: x, y2: y }));
+        break;
+      case 'leftBottom':
+        onBoxChange((prev) => ({ ...prev, x1: x, y2: y }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  return (
+    <Group>
+      <Line points={[x1, y1, x1, y2, x2, y2, x2, y1]} closed stroke={COLOR} strokeWidth={10} />
+      <Circle draggable name="leftTop" x={x1} y={y1} radius={RADIUS} fill={COLOR} onDragMove={handleDrag} />
+      <Circle draggable name="rightTop" x={x2} y={y1} radius={RADIUS} fill={COLOR} onDragMove={handleDrag} />
+      <Circle
+        draggable
+        name="rightBottom"
+        x={x2}
+        y={y2}
+        radius={RADIUS}
+        fill={COLOR}
+        onDragMove={handleDrag}
+      />
+      <Circle
+        draggable
+        name="leftBottom"
+        x={x1}
+        y={y2}
+        radius={RADIUS}
+        fill={COLOR}
+        onDragMove={handleDrag}
+      />
+    </Group>
   );
 };
