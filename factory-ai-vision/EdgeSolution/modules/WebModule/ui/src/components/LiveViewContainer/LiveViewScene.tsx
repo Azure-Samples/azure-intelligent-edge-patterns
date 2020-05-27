@@ -4,7 +4,7 @@ import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
 import useImage from '../LabelingPage/util/useImage';
-import { LiveViewProps, MaskProps, AOIBoxProps } from './LiveViewContainer.type';
+import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
 
 export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible }) => {
   const divRef = useRef<HTMLDivElement>(null);
@@ -12,7 +12,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible 
   const imgRef = useRef(null);
   const layerRef = useRef(null);
 
-  const [imgEle, _, { width: imgWidth, height: imgHeight }] = useImage(
+  const [imgEle, status, { width: imgWidth, height: imgHeight }] = useImage(
     `http://${window.location.hostname}:5000/video_feed?inference=1`,
     '',
   );
@@ -54,25 +54,44 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible 
       <Stage ref={stageRef}>
         <Layer ref={layerRef}>
           <KonvaImage image={imgEle} ref={imgRef} />
-          <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
-          {AOIs.map((e, i) => (
-            <AOIBox
-              key={i}
-              box={e}
-              visible={visible}
-              onBoxChange={(updateBox): void =>
-                setAOIs((prev) => {
-                  const newBox = updateBox(prev[i]);
-                  const newAOIs = [...prev];
-                  newAOIs[i] = newBox;
-                  return newAOIs;
-                })
-              }
-            />
-          ))}
+          {
+            /* Render when image is loaded to prevent AOI boxes show in unscale size */
+            status === 'loaded' && (
+              <AOILayer
+                imgWidth={imgWidth}
+                imgHeight={imgHeight}
+                AOIs={AOIs}
+                setAOIs={setAOIs}
+                visible={visible}
+              />
+            )
+          }
         </Layer>
       </Stage>
     </div>
+  );
+};
+
+const AOILayer: React.FC<AOILayerProps> = ({ imgWidth, imgHeight, AOIs, setAOIs, visible }): JSX.Element => {
+  return (
+    <>
+      <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
+      {AOIs.map((e, i) => (
+        <AOIBox
+          key={i}
+          box={e}
+          visible={visible}
+          onBoxChange={(updateBox): void =>
+            setAOIs((prev) => {
+              const newBox = updateBox(prev[i]);
+              const newAOIs = [...prev];
+              newAOIs[i] = newBox;
+              return newAOIs;
+            })
+          }
+        />
+      ))}
+    </>
   );
 };
 

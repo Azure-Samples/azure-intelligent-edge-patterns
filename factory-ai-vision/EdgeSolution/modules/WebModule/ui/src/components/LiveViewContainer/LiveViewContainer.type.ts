@@ -8,6 +8,14 @@ export type LiveViewProps = {
   visible: boolean;
 };
 
+export type AOILayerProps = {
+  imgWidth: number;
+  imgHeight: number;
+  AOIs: Box[];
+  setAOIs: Dispatch<SetStateAction<Box[]>>;
+  visible: boolean;
+};
+
 export type MaskProps = {
   width: number;
   height: number;
