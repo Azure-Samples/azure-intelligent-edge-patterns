@@ -29,22 +29,21 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
         borderWidth: '1px',
       }}
     >
-      {images.map((img, i) => {
+      {images.map((img, i, arr) => {
         if (img.display) {
           let isPartCorrect: number = null;
-
           if (judgedImageList.correct.indexOf(img.id) >= 0) {
             isPartCorrect = 1;
           } else if (judgedImageList.incorrect.findIndex((e) => e.imageId === img.id) >= 0) {
             isPartCorrect = 0;
           }
-          console.log(img, i);
+
           return (
             <ImageIdentificationItem
-              key={i}
+              key={img.id}
               confidenceLevel={img.confidenceLevel}
               imageIndex={i}
-              relabelImage={img}
+              relabelImages={arr}
               isPartCorrect={isPartCorrect}
               setJudgedImageList={setJudgedImageList}
               partId={selectedPartId}
@@ -52,7 +51,7 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
             />
           );
         }
-        return <div key={i} />;
+        return void 0;
       })}
     </Grid>
   );
