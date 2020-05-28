@@ -5,26 +5,32 @@ import Axios from 'axios';
 import { Text, Checkbox, Flex, Button, Alert } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
 import { Box } from './LiveViewContainer.type';
+import { AOIData } from '../../type';
 
-export const LiveViewContainer: React.FC<{ showVideo: boolean; initialAOIs: Box[] }> = ({
-  showVideo,
-  initialAOIs,
-}) => {
-  const [showAOI, setShowAOI] = useState(true);
-  const lasteUpdatedAOIs = useRef(
-    initialAOIs.length ? initialAOIs : [{ x1: 100, y1: 100, x2: 2000, y2: 1000 }],
-  );
+export const LiveViewContainer: React.FC<{
+  showVideo: boolean;
+  initialAOIData: AOIData;
+  cameraId: number;
+}> = ({ showVideo, initialAOIData, cameraId }) => {
+  const [showAOI, setShowAOI] = useState(initialAOIData.useAOI);
+  const lasteUpdatedAOIs = useRef(initialAOIData.AOIs);
   const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>(null);
 
   const onCheckboxClick = async (): Promise<void> => {
-    setShowAOI((prev) => !prev);
+    setShowAOI(!showAOI);
     setLoading(true);
     try {
-      await Axios.post('', {});
+      await Axios.patch(`/api/cameras/${cameraId}/`, {
+        area: JSON.stringify({
+          useAOI: !showAOI,
+          AOIs: lasteUpdatedAOIs.current,
+        }),
+      });
       setShowUpdateSuccessTxt(true);
+      if (!showAOI) setAOIs(lasteUpdatedAOIs.current);
     } catch (e) {
       // Set back to the state before updating for switch case
       setShowAOI(showAOI);
@@ -36,7 +42,12 @@ export const LiveViewContainer: React.FC<{ showVideo: boolean; initialAOIs: Box[
   const onUpdate = async (): Promise<void> => {
     setLoading(true);
     try {
-      await Axios.post('', {});
+      await Axios.patch(`/api/cameras/${cameraId}/`, {
+        area: JSON.stringify({
+          useAOI: showAOI,
+          AOIs,
+        }),
+      });
       setShowUpdateSuccessTxt(true);
       lasteUpdatedAOIs.current = R.clone(AOIs);
     } catch (e) {

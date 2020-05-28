@@ -10,6 +10,7 @@ import { Camera } from '../store/camera/cameraTypes';
 import { State } from '../store/State';
 import { thunkGetProject } from '../store/project/projectActions';
 import { useQuery } from '../hooks/useQuery';
+import { AOIData } from '../type';
 
 const CameraDetails: FC = (): JSX.Element => {
   const cameraIdInproject = useSelector<State, number>((state) => state.project.data.camera);
@@ -26,22 +27,25 @@ const CameraDetails: FC = (): JSX.Element => {
   if (!camera) return <Redirect to="/cameras" />;
 
   const hasProject = cameraIdInproject === camera.id;
-  const aois = getAOIs(camera.area);
+  const aoiData = getAOIData(camera.area);
 
   return (
     <Grid columns="2" design={{ height: '100%' }}>
       <CameraDetailInfo id={camera.id} name={name} rtsp={camera.rtsp} modelName={camera.model_name} />
-      {hasProject ? <CameraConfigureInfo projectId={projectId} AOIs={aois} /> : <CreateCameraConfig />}
+      {hasProject ? <CameraConfigureInfo projectId={projectId} AOIs={aoiData} /> : <CreateCameraConfig />}
     </Grid>
   );
 };
 
 export default CameraDetails;
 
-const getAOIs = (cameraArea: string): { x1: number; y1: number; x2: number; y2: number }[] => {
+const getAOIData = (cameraArea: string): AOIData => {
   try {
     return JSON.parse(cameraArea);
   } catch (e) {
-    return [];
+    return {
+      useAOI: true,
+      AOIs: [{ x1: 100, y1: 100, x2: 2000, y2: 1000 }],
+    };
   }
 };
