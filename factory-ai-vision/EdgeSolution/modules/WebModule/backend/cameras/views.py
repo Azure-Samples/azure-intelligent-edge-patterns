@@ -63,6 +63,7 @@ def inference_module_url():
 
 logger = logging.getLogger(__name__)
 
+# TODO: Remove after making sure the new Model Trainer can work with other component
 # trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
 #
 # is_trainer_valid = True
@@ -85,23 +86,21 @@ def export_iterationv3_2(project_id, iteration_id):
 
 def update_train_status(project_id):
     def _train_status_worker(project_id):
+        project_obj = Project.objects.get(pk=project_id)
+        trainer = project_obj.trainer.revalidate_and_get_trainer_obj()
+        camera_id = project_obj.camera_id
+        customvision_project_id = project_obj.customvision_project_id
+        camera = Camera.objects.get(pk=camera_id)
+
         while True:
             time.sleep(1)
-            project_obj = Project.objects.get(pk=project_id)
-            trainer = project_obj.trainer.revalidate_and_get_trainer_obj()
-
-            camera_id = project_obj.camera_id
-            customvision_project_id = project_obj.customvision_project_id
-            camera = Camera.objects.get(pk=camera_id)
 
             iterations = trainer.get_iterations(customvision_project_id)
             if len(iterations) == 0:
                 logger.info('Status: preparing custom vision environment')
-                # @FIXME (Hugh): wrap it up
-                obj, created = Train.objects.update_or_create(
-                    project=project_obj,
-                    defaults={
-                        'status': 'preparing', 'log': 'Status : preparing custom vision environment', 'project': project_obj}
+                obj, created = project_obj.upcreate_training_status(
+                    status='preparing',
+                    log='Status : preparing custom vision environment'
                 )
                 continue
                 # return JsonResponse({'status': 'waiting training'})
@@ -109,14 +108,11 @@ def update_train_status(project_id):
             iteration = iterations[0]
             if iteration.exportable == False or iteration.status != 'Completed':
                 logger.info('Status: training')
-                # @FIXME (Hugh): wrap it up
-                obj, created = Train.objects.update_or_create(
-                    project=project_obj,
-                    defaults={
-                        'status': 'training',
-                        'log': 'Status : training model',
-                        'project': project_obj}
+                obj, created = project_obj.upcreate_training_status(
+                    status='training',
+                    log='Status : training model'
                 )
+
                 continue
                 # return JsonResponse({'status': 'waiting training'})
 
@@ -124,13 +120,9 @@ def update_train_status(project_id):
                 customvision_project_id, iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
                 logger.info('Status: exporting model')
-                # @FIXME (Hugh): wrap it up
-                obj, created = Train.objects.update_or_create(
-                    project=project_obj,
-                    defaults={
-                        'status': 'exporting',
-                        'log': 'Status : exporting model',
-                        'project': project_obj}
+                obj, created = project_obj.upcreate_training_status(
+                    status='exporting',
+                    log='Status : exporting model'
                 )
                 # trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
                 res = export_iterationv3_2(
@@ -161,11 +153,9 @@ def update_train_status(project_id):
                     project_obj.save(
                         update_fields=['download_uri', 'deployed'])
 
-                # @FIXME (Hugh): wrap it up
-                obj, created = Train.objects.update_or_create(
-                    project=project_obj,
-                    defaults={
-                        'status': 'deploying', 'log': 'Status : deploying model', 'project': project_obj}
+                obj, created = project_obj.upcreate_training_status(
+                    status='deploying',
+                    log='Status : deploying model'
                 )
                 continue
 
@@ -174,16 +164,12 @@ def update_train_status(project_id):
             for iteration in iterations[:2]:
                 train_performance.append(trainer.get_iteration_performance(
                     customvision_project_id, iteration.id).as_dict())
-            logger.info(f'Training Performace: {train_performance}')
 
-            # @FIXME (Hugh): wrap it up
-            obj, created = Train.objects.update_or_create(
-                project=project_obj,
-                defaults={
-                    'status': 'ok',
-                    'log': 'Status : model training completed',
-                    'performance': json.dumps(train_performance),
-                    'project': project_obj}
+            logger.info(f'Training Performance: {train_performance}')
+            obj, created = project_obj.upcreate_training_status(
+                status='ok',
+                log='Status : model training completed',
+                performance=json.dumps(train_performance)
             )
             break
             # return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
@@ -212,15 +198,17 @@ def export(request, project_id):
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
     except:
-
+        # TODO: return other json response if we can determine if inference is alive
+        logger.error("Unexpected error")
         pass
 
     return JsonResponse({
-        'status': train_obj.status, 'log': train_obj.log, 'download_uri': project_obj.download_uri,
+        'status': train_obj.status,
+        'log': train_obj.log,
+        'download_uri': project_obj.download_uri,
         'success_rate': success_rate,
         'inference_num': inference_num,
         'unidentified_num': unidentified_num,
-
     })
 
 # FIXME tmp workaround
@@ -524,11 +512,9 @@ def _train(project_id):
     trainer = project_obj.trainer.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
-    # @FIXME (Hugh): wrap it up
-    obj, created = Train.objects.update_or_create(
-        project=project_obj,
-        defaults={
-            'status': 'Status: preparing data (images and annotations)', 'log': '', 'project': project_obj}
+    project_obj.upcreate_training_status(
+        status='Status: preparing data (images and annotations)',
+        log=''
     )
 
     Trainer.dequeue_iterations(
@@ -544,13 +530,9 @@ def _train(project_id):
             time.sleep(1)
             count -= 1
 
-        # @FIXME (Hugh): wrap it up
-        obj, created = Train.objects.update_or_create(
-            project=project_obj,
-            defaults={'status': 'sending',
-                      'log': 'Status : sending data (images and annotations)',
-                      'project': project_obj}
-        )
+        obj, created = project_obj.upcreate_training_status(
+            status='sending',
+            log='Status : sending data (images and annotations)')
 
         logger.info(f'Project id: {project_obj.id}')
         logger.info(f'Part ids: {part_ids}')
@@ -564,22 +546,22 @@ def _train(project_id):
 
         # Create tags on CustomVisioin Project
         # Maybe move to Project Model?
-        logger.info("Create tags before training...")
+        logger.info("Creating tags before training...")
         counter = 0
         for part_id in part_ids:
             part_name = Part.objects.get(id=part_id).name
             project_partnames[part_name] = 'foo'
             if part_name not in tag_dict:
-                logger.info(f'Creating tags: {part_name}')
+                logger.info(f'Creating tag: {part_name}')
                 tag = trainer.create_tag(customvision_project_id, part_name)
                 tag_dict[tag.name] = tag.id
                 counter += 1
         logger.info(f"Created {counter} tags")
-        logger.info("Create tags finish")
+        logger.info("Creating tags... Done")
 
         # Delete tags on CustomVisioin Project
         # Maybe move to Project Model?
-        logger.info("Delete tags before training")
+        logger.info("Deleting tags before training...")
         counter = 0
         for tag_name in tag_dict.keys():
             if tag_name not in project_partnames:
@@ -589,11 +571,11 @@ def _train(project_id):
                 trainer.delete_tag(project_id=customvision_project_id,
                                    tag_id=tag_dict[tag_name])
         logger.info(f"Deleted {counter} tags")
-        logger.info("Delete tags finish.")
+        logger.info("Deleting tags... Done")
 
         # Delete untagged images on CustomVisioin Project
         # Maybe move to Project Model?
-        logger.info("Delete untagged images before training")
+        logger.info("Deleting untagged images before training...")
         untagged_image_count = trainer.get_untagged_image_count(
             project_id=customvision_project_id)
         batch_size = 50
@@ -602,12 +584,9 @@ def _train(project_id):
         untagged_img_ids = []
         counter = 0
         expected_iteration = untagged_image_count//batch_size+1
-        # TODO: remove
-        logger.info(
-            f'expected_iteration: {expected_iteration} = {untagged_image_count}//{batch_size}+1')
 
         while(len(untagged_image_batch) > 0):
-            logger.info(f"deleting batch {counter}")
+            logger.info(f"Deleting untagged images... batch {counter}")
             for img in untagged_image_batch:
                 logger.info(f"Putting img: {img.id} to deleting list")
                 untagged_img_ids.append(img.id)
@@ -621,9 +600,9 @@ def _train(project_id):
             counter += 1
             if counter > expected_iteration*10:
                 logging.exception(
-                    "Deleting untagged images take way too many iteration. Something went wrong.")
+                    "Deleting untagged images... take way too many iteration. Something went wrong.")
                 break
-        logger.info("Delete untagged finish")
+        logger.info("Deleting untagged images... Done")
 
         # Upload images to CustomVisioin Project
         # TODO: Replace the line below if we are sure local images sync Custom Vision well
@@ -631,7 +610,7 @@ def _train(project_id):
         #    part_id__in=part_ids,
         #    is_relabel=False,
         #    uploaded=False).all()
-        logger.info('Preparing to submit images and train...')
+        logger.info('Uploading images before training...')
         images = Image.objects.filter(part_id__in=part_ids).all()
         count = 0
         img_entries = []
@@ -672,7 +651,7 @@ def _train(project_id):
                 logger.exception("unexpected error")
 
             if len(img_entries) >= 5:
-                logger.info(f'uploading {len(img_entries)} images')
+                logger.info(f'Uploading {len(img_entries)} images')
                 upload_result = trainer.create_images_from_files(
                     customvision_project_id, images=img_entries)
                 logger.info(
@@ -684,7 +663,7 @@ def _train(project_id):
                 img_objs = []
 
         if len(img_entries) >= 1:
-            logger.info('uploading images...')
+            logger.info(f'Uploading {len(img_entries)} images')
             upload_result = trainer.create_images_from_files(
                 customvision_project_id, images=img_entries)
             logger.info(
@@ -692,17 +671,13 @@ def _train(project_id):
             for img_obj in img_objs:
                 img_obj.uploaded = True
                 img_obj.save()
+        logger.info('Uploading images... Done')
 
         if count == 0:
             logger.info('Nothing changed, not training')
-            # @FIXME (Hugh): wrap it up
-            obj, created = Train.objects.update_or_create(
-                project=project_obj,
-                defaults={
-                    'status': 'ok',
-                    'log': 'Status: Nothing changed, no training',
-                    'project': project_obj}
-            )
+            obj, created = project_obj.upcreate_training_status(
+                status='ok',
+                log='Status: Nothing changed, no training')
 
         else:
             logger.info('training...')
@@ -722,14 +697,9 @@ def _train(project_id):
     except Exception as e:
         err_msg = traceback.format_exc()
         logger.exception(f'Exception: {err_msg}')
-
-        # @FIXME (Hugh): wrap it up
-        obj, created = Train.objects.update_or_create(
-            project=project_obj,
-            defaults={'status': 'failed',
-                      'log': f'Status : failed {str(err_msg)}',
-                      'project': project_obj}
-        )
+        obj, created = project_obj.upcreate_training_status(
+            status='failed',
+            log=f'Status : failed {str(err_msg)}')
 
         return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
 

@@ -293,6 +293,16 @@ class Project(models.Model):
         # t = threading.Thread(target=_train_f, args=(project_id,))
         # t.start()
 
+    def upcreate_training_status(self, status: str, log: str, performance: str = '{}'):
+        obj, created = Train.objects.update_or_create(
+            project=self,
+            defaults={
+                'status': status,
+                'log': log,
+                'performance': performance}
+        )
+        return obj, created
+
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
     #    print('[INFO] M2M_CHANGED')
