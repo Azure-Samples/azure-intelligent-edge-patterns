@@ -6,9 +6,14 @@ import { Text, Checkbox, Flex, Button, Alert } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
 import { Box } from './LiveViewContainer.type';
 
-export const LiveViewContainer: React.FC<{ showVideo: boolean }> = ({ showVideo }) => {
+export const LiveViewContainer: React.FC<{ showVideo: boolean; initialAOIs: Box[] }> = ({
+  showVideo,
+  initialAOIs,
+}) => {
   const [showAOI, setShowAOI] = useState(true);
-  const lasteUpdatedAOIs = useRef([{ x1: 100, y1: 100, x2: 2000, y2: 1000 }]);
+  const lasteUpdatedAOIs = useRef(
+    initialAOIs.length ? initialAOIs : [{ x1: 100, y1: 100, x2: 2000, y2: 1000 }],
+  );
   const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);

@@ -26,13 +26,22 @@ const CameraDetails: FC = (): JSX.Element => {
   if (!camera) return <Redirect to="/cameras" />;
 
   const hasProject = cameraIdInproject === camera.id;
+  const aois = getAOIs(camera.area);
 
   return (
     <Grid columns="2" design={{ height: '100%' }}>
       <CameraDetailInfo id={camera.id} name={name} rtsp={camera.rtsp} modelName={camera.model_name} />
-      {hasProject ? <CameraConfigureInfo projectId={projectId} /> : <CreateCameraConfig />}
+      {hasProject ? <CameraConfigureInfo projectId={projectId} AOIs={aois} /> : <CreateCameraConfig />}
     </Grid>
   );
 };
 
 export default CameraDetails;
+
+const getAOIs = (cameraArea: string): { x1: number; y1: number; x2: number; y2: number }[] => {
+  try {
+    return JSON.parse(cameraArea);
+  } catch (e) {
+    return [];
+  }
+};
