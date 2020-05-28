@@ -9,6 +9,8 @@ import {
   Checkbox,
   Input,
   Alert,
+  Dialog,
+  ExclamationCircleIcon,
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -79,6 +81,42 @@ export const PartIdentification: React.FC = () => {
       {error && (
         <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
       )}
+      <Dialog
+        styles={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        cancelButton="Cancel"
+        confirmButton="Confirm to use test model"
+        content={
+          <>
+            <Flex hAlign="center" column>
+              <ExclamationCircleIcon
+                size="largest"
+                styles={({ theme: { siteVariables } }): any => ({
+                  color: siteVariables.colorScheme.brand.foreground,
+                })}
+              />
+              <div>
+                <p>Test model is for seeing inference result, no retraining experience here.</p>
+                <p>For retraining experience, please create a new model</p>
+              </div>
+            </Flex>
+          </>
+        }
+        trigger={
+          <Button
+            styles={{
+              backgroundColor: '#ff9727',
+              ':hover': {
+                backgroundColor: '#cf7a1f',
+              },
+              ':active': {
+                backgroundColor: '#cf7a1f',
+              },
+            }}
+            content="Test Model"
+            primary
+          />
+        }
+      />
       <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
         <ModuleSelector
           moduleName="cameras"
