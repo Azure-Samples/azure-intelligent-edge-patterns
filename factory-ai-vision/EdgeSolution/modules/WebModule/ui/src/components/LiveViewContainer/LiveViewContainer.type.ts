@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-
-export type Box = { x1: number; y1: number; x2: number; y2: number };
+import { Box } from '../../type';
 
 export type LiveViewProps = {
   AOIs: Box[];
