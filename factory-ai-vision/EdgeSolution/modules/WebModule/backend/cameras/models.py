@@ -76,7 +76,8 @@ class Trainer(models.Model):
     @staticmethod
     def _get_trainer_obj_static(end_point: str, training_key: str):
         """
-        If success, return the CustomVisionTrainingClient object. Return None otherwise
+        Return CustomVisionTrainingClient. Does not do any check
+        : Success: return CustomVisionTrainingClient object
         """
         try:
             trainer = CustomVisionTrainingClient(
@@ -88,14 +89,18 @@ class Trainer(models.Model):
     def _get_trainer_obj(self):
         """
         Use self.end_point and self.training_key to create trainer
-        If success, return the CustomVisionTrainingClient object. Return None otherwise
+        : Success: return the CustomVisionTrainingClient object
         """
         return Trainer._get_trainer_obj_static(
             end_point=self.end_point, training_key=self.training_key)
 
     def revalidate(self):
         """
-        Update self.is_trainer_valid
+        Create client and try to get obj_detection_domain.
+        Update self.is_trainer_valid and return it's value
+        Update obj_detection_domain_id to '' if failed
+        : Success: True
+        : Failed:  False
         """
         trainer = self._get_trainer_obj()
         try:
@@ -106,8 +111,9 @@ class Trainer(models.Model):
             logger.info(
                 "Successfully created trainer client and got obj detection domain")
         except:
-            logger.exception(
-                "Failed to create trainer client and get obj detection domain")
+            # logger.exception('revalidate exception')
+            logger.error(
+                "Failed to create trainer client or get obj detection domain")
             self.is_trainer_valid = False
             self.obj_detection_domain_id = ''
         logger.info(
@@ -116,11 +122,15 @@ class Trainer(models.Model):
 
     def revalidate_and_get_trainer_obj(self):
         """
-        Get trainer object and update self.is_trainer_valid.
+        Update all the relevent fields and return the CustimVisionClient obj.
+        : Success: return CustimVisionClient object
+        : Failed:  return None
         """
-        self.revalidate()
-        trainer = self._get_trainer_obj()
-        return trainer
+        if self.revalidate():
+            trainer = self._get_trainer_obj()
+            return trainer
+        else:
+            return None
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -130,8 +140,9 @@ class Trainer(models.Model):
             logger.debug('update_fields:', update_fields)
             if instance.id is not None:
                 return
-            logger.info('Creating Trainer on Custom Vision')
-            logger.debug('Instance pre:', instance)
+            logger.info(
+                f'Creating Trainer {instance.trainer_name} (CustomVisionClient)')
+            logger.debug('Instance:', instance)
 
             trainer = Trainer._get_trainer_obj_static(
                 training_key=instance.training_key,
@@ -141,23 +152,11 @@ class Trainer(models.Model):
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
         except:
-            logger.exception(
+            # logger.exception()
+            logger.error(
                 "pre_save exception. Set is_trainer_valid to false and obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
-
-    def dequeue_iterations(self, custom_vision_project_id: str, max_iterations=2):
-        """
-        Dequeue training iterations
-        """
-        trainer = self.revalidate_and_get_trainer_obj()
-        if not trainer:
-            return
-        iterations = trainer.get_iterations(custom_vision_project_id)
-        if len(iterations) > max_iterations:
-            # TODO delete train in Train Model
-            trainer.delete_iteration(
-                custom_vision_project_id, iterations[-1].as_dict()['id'])
 
     def create_project(self, project_name: str):
         """
@@ -284,6 +283,23 @@ class Project(models.Model):
         #     requests.get('http://localhost:8000/api/projects/'+str(pid)+'/train')
         # t = threading.Thread(target=_train_f, args=(project_id,))
         # t.start()
+
+    def dequeue_iterations(self, max_iterations=2):
+        """
+        Dequeue training iterations
+        """
+        try:
+            trainer = self.trainer.revalidate_and_get_trainer_obj()
+            if not trainer:
+                return
+            iterations = trainer.get_iterations(self.custom_vision_project_id)
+            if len(iterations) > max_iterations:
+                # TODO delete train in Train Model
+                trainer.delete_iteration(
+                    self.custom_vision_project_id, iterations[-1].as_dict()['id'])
+        except:
+            logger.exception('dequeue_iteration error')
+            return
 
     def upcreate_training_status(self, status: str, log: str, performance: str = '{}'):
         obj, created = Train.objects.update_or_create(
