@@ -141,7 +141,8 @@ class Trainer(models.Model):
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
         except:
-            logger.exception("pre_save excetion")
+            logger.exception(
+                "pre_save exception. Set is_trainer_valid to false and obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
 
