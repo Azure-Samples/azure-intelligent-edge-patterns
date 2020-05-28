@@ -15,9 +15,9 @@ import { State } from '../../store/State';
 import { useParts } from '../../hooks/useParts';
 import { useQuery } from '../../hooks/useQuery';
 import { LiveViewContainer } from '../LiveViewContainer';
-import { Box } from '../LiveViewContainer/LiveViewContainer.type';
+import { AOIData } from '../../type';
 
-export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: Box[] }> = ({ projectId, AOIs }) => {
+export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }> = ({ projectId, AOIs }) => {
   const { error, data: project, trainingLog, status, trainingMetrics, inferenceMetrics } = useSelector<
     State,
     Project
@@ -89,7 +89,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: Box[] }> =
               .join(', ')}
           </ListItem>
           <Flex column gap="gap.small">
-            <LiveViewContainer showVideo={true} initialAOIs={AOIs} />
+            <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
           </Flex>
           <ListItem title="Success Rate">
             <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
