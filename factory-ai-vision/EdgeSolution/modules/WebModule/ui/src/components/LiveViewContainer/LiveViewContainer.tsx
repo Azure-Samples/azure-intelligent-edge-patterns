@@ -4,8 +4,7 @@ import Axios from 'axios';
 
 import { Text, Checkbox, Flex, Button, Alert } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
-import { Box } from './LiveViewContainer.type';
-import { AOIData } from '../../type';
+import { AOIData, Box } from '../../type';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
