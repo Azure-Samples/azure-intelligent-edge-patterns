@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, memo, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Flex, Text, Image } from '@fluentui/react-northstar';
 
@@ -18,7 +18,7 @@ interface ImageLinkProps {
   height?: string;
   bgImgStyle?: BgImgStyle;
   pointerCursor?: boolean;
-  onClick?: (event: any) => void;
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
 const ImageLink: FC<ImageLinkProps> = ({
   to = '',
@@ -26,9 +26,9 @@ const ImageLink: FC<ImageLinkProps> = ({
   defaultSrc,
   bgImgSrc,
   label = '',
-  imgPadding = '10px',
-  width = '100px',
-  height = '100px',
+  imgPadding = '0.625em',
+  width = '6.25em',
+  height = '6.25em',
   bgImgStyle,
   pointerCursor = false,
   onClick,
@@ -70,4 +70,4 @@ const ImageLink: FC<ImageLinkProps> = ({
   );
 };
 
-export default ImageLink;
+export default memo(ImageLink);
