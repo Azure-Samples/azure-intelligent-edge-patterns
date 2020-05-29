@@ -1,5 +1,5 @@
 import React, { FC, Dispatch, memo } from 'react';
-import { Grid } from '@fluentui/react-northstar';
+import { Grid, DropdownItemProps } from '@fluentui/react-northstar';
 import ImageIdentificationItem from './ImageItem';
 import { JudgedImageList, RelabelImage } from './types';
 
@@ -8,7 +8,7 @@ interface ImagesContainerProps {
   judgedImageList: JudgedImageList;
   setJudgedImageList: Dispatch<JudgedImageList>;
   selectedPartId: number;
-  partItems: any[];
+  partItems: DropdownItemProps[];
 }
 const ImagesContainer: FC<ImagesContainerProps> = ({
   images,
@@ -23,9 +23,9 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
       styles={{
         width: '100%',
         height: '80%',
-        borderStyle: 'solid',
         overflow: 'scroll',
         borderWidth: '0.0625em',
+        borderStyle: 'solid'
       }}
     >
       {images.map((img, i, arr) => {

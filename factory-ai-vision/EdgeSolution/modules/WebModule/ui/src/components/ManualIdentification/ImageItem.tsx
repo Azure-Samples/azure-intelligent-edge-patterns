@@ -1,4 +1,4 @@
-import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo } from 'react';
+import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo, useCallback } from 'react';
 import { Dropdown, DropdownItemProps, Text, Button, RadioGroup } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
@@ -22,31 +22,88 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   partItems,
   isPartCorrect,
 }) => {
-  const filteredPartItems = useMemo(() => partItems.filter((e) => (e.content as any).key !== partId), [
-    partId,
-    partItems,
-  ]);
+  const filteredPartItems = useMemo(
+    () => [
+      {
+        header: 'No Object',
+        content: {
+          key: null,
+        },
+      },
+      ...partItems.filter((e) => (e.content as any).key !== partId),
+    ],
+    [partId, partItems],
+  );
   const [selectedPartItem, setSelectedPartItem] = useState<DropdownItemProps>(filteredPartItems[0]);
 
   const onDropdownChange = (_, { value }): void => {
     if (value !== null) {
       setSelectedPartItem(value);
+
+      setJudgedImageList((prev) => {
+        const next = [...prev];
+        const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
+
+        if (idx >= 0) next[idx] = { ...next[idx], partId: value.content.key };
+        else {
+          next.push({
+            imageId: relabelImages[imageIndex].id,
+            partId: value.content.key,
+          });
+        }
+
+        return next;
+      });
     }
   };
 
+  const onRadioGroupChange = (_, newProps): void => {
+    setJudgedImageList((prev) => {
+      const next = [...prev];
+
+      if (newProps.value === 1) {
+        const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
+
+        if (idx >= 0) next[idx] = { ...next[idx], partId };
+        else next.push({ imageId: relabelImages[imageIndex].id, partId });
+      }
+      if (newProps.value === 0) {
+        const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
+
+        if (idx >= 0) next[idx] = { ...next[idx], partId: null };
+        else {
+          next.push({
+            imageId: relabelImages[imageIndex].id,
+            partId: null,
+          });
+        }
+      }
+      return next;
+    });
+  };
+
   useEffect(() => {
+    setJudgedImageList([]);
     setSelectedPartItem(filteredPartItems[0]);
-  }, [filteredPartItems]);
+  }, [filteredPartItems, setSelectedPartItem, setJudgedImageList]);
 
   return (
-    <div style={{ height: '100%', display: 'flex', justifyContent: 'center', padding: '1em' }}>
+    <div
+      style={{
+        display: 'flex',
+        minHeight: '9em',
+        maxHeight: '30%',
+        justifyContent: 'center',
+        padding: '1em',
+      }}
+    >
       <div style={{ margin: '0.1em' }}>
         <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={100} height={100} />
       </div>
       <div
         style={{
           height: '100%',
-          width: '30%',
+          width: '40%',
           display: 'flex',
           flexFlow: 'column',
           justifyContent: 'space-between',
@@ -65,31 +122,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         >
           <RadioGroup
             checkedValue={isPartCorrect}
-            onCheckedValueChange={(_, newProps): void => {
-              setJudgedImageList((prev) => {
-                const next = [...prev];
-
-                if (newProps.value === 1) {
-                  const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
-
-                  if (idx >= 0) next[idx] = { ...next[idx], partId };
-                  else next.push({ imageId: relabelImages[imageIndex].id, partId });
-                }
-                if (newProps.value === 0) {
-                  const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
-
-                  if (idx >= 0)
-                    next[idx] = { ...next[idx], partId: (selectedPartItem?.content as any)?.key ?? null };
-                  else {
-                    next.push({
-                      imageId: relabelImages[imageIndex].id,
-                      partId: (selectedPartItem?.content as any)?.key ?? null,
-                    });
-                  }
-                }
-                return next;
-              });
-            }}
+            onCheckedValueChange={onRadioGroupChange}
             items={[
               {
                 key: '1',
