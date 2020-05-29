@@ -803,23 +803,23 @@ def upload_relabel_image(request):
 def relabel_update(request):
 
     logger.info('update relabeling')
-    if 'correct' not in request.data:
-        logger.info('missing correct')
-    if 'incorrect' not in request.data:
-        logger.info('missing incorrect')
+    data = request.data
+    if type(data) is not type([]):
+        logger.info('data should be array of object {}')
+        return JsonResponse({'status': 'failed'})
 
-    correct = request.data['correct']
-    for image_id in correct:
+    for item in data:
+        image_id = item['imageId']
+        part_id = item['partId']
         img_obj = Image.objects.get(pk=image_id)
-        img_obj.is_relabel = False
-        img_obj.save()
-        logger.info(f'image {image_id} added from relabeling pool')
-
-    incorrect = request.data['incorrect']
-    for image_id in incorrect:
-        img_obj = Image.objects.get(pk=image_id)
-        img_obj.delete()
-        logger.info(f'image {image_id} removed from relabeling pool')
+        if part_id is not None:
+            img_obj.is_relabel = False
+            img_obj.part_id = part_id
+            img_obj.save()
+            logger.info(f'image {image_id} with part {part_id} added from relabeling pool')
+        else:
+            img_obj.delete()
+            logger.info(f'image {image_id} removed from relabeling pool')
 
     return JsonResponse({'status': 'ok'})
 

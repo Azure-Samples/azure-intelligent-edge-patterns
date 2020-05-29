@@ -209,6 +209,14 @@ class Camera(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def post_save(sender, instance, update_fields, **kwargs):
+        if len(instance.area) > 1:
+            print('[INFO] Sending new AOI to Inference Module...')
+            requests.get('http://'+inference_module_url()+'/update_cam', params={'cam_type':'rtsp', 'cam_source': instance.rtsp, 'aoi': instance.area})
+
+post_save.connect(Camera.post_save, Camera, dispatch_uid='Camera_post')
+
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/')
