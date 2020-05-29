@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, FC, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, memo, MouseEvent, FC } from 'react';
 import { Stage, FastLayer, Image as KonvaImage } from 'react-konva';
 import { Text } from '@fluentui/react-northstar';
 
@@ -14,7 +14,7 @@ interface LabelDisplayImageProps {
   width: number;
   height?: number;
   pointerCursor?: boolean;
-  onClick?: (event: any) => void;
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
 const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   labelImage,
@@ -47,22 +47,21 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   }, [size, resizeImage]);
 
   return (
-    <div onClick={onClick} style={{ cursor: pointerCursor ? 'pointer' : 'default', display: 'flex', flexFlow: 'column' }}>
-        <Stage
-          width={imageSize.width}
-          height={imageSize.height}
-          scale={{ x: scale.current, y: scale.current }}
-        >
-          <FastLayer>
-            <KonvaImage image={image} />
-            {annotations.map((annotation, i) => (
-              <DisplayBox key={i} scale={scale.current} vertices={annotation.label} color="red" />
-            ))}
-          </FastLayer>
-        </Stage>
-        <Text align="center">{labelText}</Text>
+    <div
+      onClick={onClick}
+      style={{ cursor: pointerCursor ? 'pointer' : 'default', display: 'flex', flexFlow: 'column' }}
+    >
+      <Stage width={imageSize.width} height={imageSize.height} scale={{ x: scale.current, y: scale.current }}>
+        <FastLayer>
+          <KonvaImage image={image} />
+          {annotations.map((annotation, i) => (
+            <DisplayBox key={i} scale={scale.current} vertices={annotation.label} color="red" />
+          ))}
+        </FastLayer>
+      </Stage>
+      <Text align="center">{labelText}</Text>
     </div>
   );
 };
 
-export default LabelDisplayImage;
+export default memo(LabelDisplayImage);

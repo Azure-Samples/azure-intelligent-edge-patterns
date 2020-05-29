@@ -17,7 +17,6 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
   selectedPartId,
   partItems,
 }) => {
-  
   return (
     <Grid
       columns="2"
@@ -32,10 +31,12 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
       {images.map((img, i, arr) => {
         if (img.display) {
           let isPartCorrect: number = null;
-          if (judgedImageList.correct.indexOf(img.id) >= 0) {
-            isPartCorrect = 1;
-          } else if (judgedImageList.incorrect.findIndex((e) => e.imageId === img.id) >= 0) {
-            isPartCorrect = 0;
+          const idx = judgedImageList.findIndex((e) => e.imageId === img.id);
+
+          if (idx >= 0) {
+            if (judgedImageList[idx].partId === selectedPartId) {
+              isPartCorrect = 1;
+            } else isPartCorrect = 0;
           }
 
           return (

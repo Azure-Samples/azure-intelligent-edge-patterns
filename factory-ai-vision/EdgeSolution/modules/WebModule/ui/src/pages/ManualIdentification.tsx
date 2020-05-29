@@ -60,10 +60,7 @@ const ManualIdentification: FC = () => {
   ]);
   const [ascend, setAscend] = useState<boolean>(false);
   const sortRef = useRef({ sorted: false, prevIsAscend: false });
-  const [judgedImageList, setJudgedImageList] = useState<JudgedImageList>({
-    correct: [],
-    incorrect: [],
-  });
+  const [judgedImageList, setJudgedImageList] = useState<JudgedImageList>([]);
 
   const [relabelImages, setRelabelImages] = useState<RelabelImage[]>([]);
 
@@ -178,15 +175,12 @@ const ManualIdentification: FC = () => {
           content="Update"
           styles={{ width: '15%' }}
           primary
-          disabled={judgedImageList.correct.length === 0 && judgedImageList.incorrect.length === 0}
+          disabled={judgedImageList.length === 0}
           onClick={(): void => {
             axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
               .then(() => {
                 dispatch(getLabelImages());
-                setJudgedImageList({
-                  correct: [],
-                  incorrect: [],
-                });
+                setJudgedImageList([]);
                 return void 0;
               })
               .catch((err) => {
