@@ -10,3 +10,13 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 To install the solution on a PC running Windows, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the vision-on-edge-install.cmd script.
 
 To install the solution on a Mac, or a PC running Linux, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the vision-on-edge-install.sh script.
+
+
+# Build the docker and deploy by Visual Studio Code
+
+Before installation, please make sure you have docker installed in your local environment, and at least one iot edge is connected to your iot hub
+
+1. To enable training process, enter your custom vision training key `TRAINING_KEY` and endpoint `ENDPOINT` in `factory-ai-vision/EdgeSolution/modules/WebModule/backend/config.py`
+2. To enable app insight, enter your instrumental key `APP_INSIGHT_INST_KEY` in `factory-ai-vision/EdgeSolution/modules/WebModule/backendconfigs/app_insight.py` and set `APP_INSIGHT_ON` as `True`
+3. Open Visual Studio Code, right click on `factory-ai-vision/EdgeSolution/deployment.gpu.template.json` and choose "Build and Push IoT Edge Solution" it will start to build the docker container. It takes more than 10 mins to finish if it's your first time to build
+4. In Visual Studio Code, right click on `factory-ai-vision/EdgeSolution/config/deployment.gpu.amd64.json` and choose "Create Single Deployment for Single Device" and then pick the edge from the list to deploy
