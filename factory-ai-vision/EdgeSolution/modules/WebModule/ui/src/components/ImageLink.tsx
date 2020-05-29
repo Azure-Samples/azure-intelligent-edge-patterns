@@ -1,4 +1,4 @@
-import React, { FC, MouseEvent } from 'react';
+import React, { FC, memo, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Flex, Text, Image } from '@fluentui/react-northstar';
 
@@ -70,4 +70,4 @@ const ImageLink: FC<ImageLinkProps> = ({
   );
 };
 
-export default ImageLink;
+export default memo(ImageLink);
