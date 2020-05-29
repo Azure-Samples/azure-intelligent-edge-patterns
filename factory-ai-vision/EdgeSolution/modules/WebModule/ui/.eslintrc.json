@@ -60,7 +60,7 @@
       }
     ],
     "no-void": "off",
-    "no-console": "warn",
+    "no-console": ["warn", { "allow": ["error"] }],
     "no-undef": "error",
     "import/no-duplicates": "warn",
     "import/prefer-default-export": "off",

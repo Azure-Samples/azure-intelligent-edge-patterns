@@ -22,6 +22,7 @@ $availabilitySetId = $resourceJSON.Properties.availabilitySet.id
 $bootDiagnostics_storageUri = $resourceJSON.Properties.diagnosticsProfile.bootDiagnostics.storageUri
 $nsgId = $nicObject.Properties.networkSecurityGroup.id
 $publicIpId = $nicObject.Properties.ipConfigurations.properties.publicIPAddress.id
+$WindowsOS = $resourceJSON.Properties.OSProfile.WindowsConfiguration
 
 #datadisks
 if($datadisk_names){
@@ -107,6 +108,31 @@ if($publicIpId){
 }else{
   $publicIpTemplating = ""
 }
+
+#Os Profile
+if($WindowsOS){
+  #Windows OS
+  $OsProfileTemplating = 
+@"
+            "osProfile": {
+              "computerName": "[parameters('virtualMachineName')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]",
+                "windowsConfiguration": {
+                  "provisionVmAgent": "true"
+                }
+"@
+} else {
+  #Linux OS
+  $OsProfileTemplating =
+@"
+            "osProfile": {
+              "computerName": "[parameters('virtualMachineName')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+"@  
+}
+
 
 $armTemplate = 
 @"
@@ -210,14 +236,8 @@ $armTemplate =
           "apiVersion": "[parameters('armAPIVersion')]",
           "location": "[parameters('location')]",
           "properties": {
-            "osProfile": {
-              "computerName": "[parameters('virtualMachineName')]",
-              "adminUsername": "[parameters('adminUsername')]",
-              "adminPassword": "[parameters('adminPassword')]",
-              "windowsConfiguration": {
-                "provisionVmAgent": "true"
-              }
-            },
+            $OsProfileTemplating
+          },
             "hardwareProfile": {
               "vmSize": "[parameters('virtualMachineSize')]"
             },

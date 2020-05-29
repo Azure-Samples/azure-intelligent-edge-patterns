@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+from configs.app_insight import APP_INSIGHT_ON
+import config
+from configs.logging_config import LOGGING_CONFIG_PRODUCTION, LOGGING_CONFIG_DEV
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -47,11 +50,25 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'opencensus.ext.django.middleware.OpencensusMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if APP_INSIGHT_ON:
+    from configs.app_insight import APP_INSIGHT_CONN_STR
+    MIDDLEWARE.append('opencensus.ext.django.middleware.OpencensusMiddleware')
+    OPENCENSUS = {
+        'TRACE': {
+            'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
+            'EXPORTER': f'''opencensus.ext.azure.trace_exporter.AzureExporter(
+                connection_string="{APP_INSIGHT_CONN_STR}"
+            )''',
+        }
+    }
+
 
 ROOT_URLCONF = 'vision_on_edge.urls'
 
@@ -137,14 +154,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ICON_URL = '/icons/'
 ICON_ROOT = os.path.join(UI_DIR, 'icons')
 
-import config
 TRAINING_KEY = config.TRAINING_KEY
 ENDPOINT = config.ENDPOINT
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
 
-import os
 if 'TRAINING_KEY' in os.environ:
     TRAINING_KEY = os.environ['TRAINING_KEY']
 if 'ENDPOINT' in os.environ:
@@ -156,3 +171,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
+LOGGING = LOGGING_CONFIG_PRODUCTION
