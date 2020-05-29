@@ -161,7 +161,8 @@ class Trainer(models.Model):
     def create_project(self, project_name: str):
         """
         A wrapper function.
-        Return project if succeed. Return None otherwise.
+        : Success: return project
+        : Failed:  return None
         """
         trainer = self.revalidate_and_get_trainer_obj()
         logger.info("Creating obj detection project")
@@ -178,6 +179,18 @@ class Trainer(models.Model):
             logger.exception(
                 "Endpoint + Training_Key can create client but cannot create project")
             return None
+
+    def delete_project(self, project_id: str):
+        """
+        A wrapper function for deleting project.
+        : Success: return project
+        : Failed:  return None
+        """
+        # trainer = self.revalidate_and_get_trainer_obj()
+        # logger.info("Deleting project")
+        # logger.info(
+        #    f"Deleting project on Custom Vision.Trainer: {self.trainer_name}, {trainer}")
+        pass
 
     def __str__(self):
         return self.trainer_name
@@ -246,6 +259,8 @@ class Project(models.Model):
     accuracyRangeMax = models.IntegerField(null=True)
     maxImages = models.IntegerField(null=True)
     deployed = models.BooleanField(default=False)
+    train_try_counter = models.IntegerField(default=0)
+    train_success_counter = models.IntegerField(default=0)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -284,6 +299,22 @@ class Project(models.Model):
         # t = threading.Thread(target=_train_f, args=(project_id,))
         # t.start()
 
+    @staticmethod
+    def pre_delete(sender, instance, using):
+        # logger.info(f'Deleting instance: {instance} {update_fields}')
+        # try:
+        #   if not instance.customvision_project_id:
+        #        logger.info(
+        #            "customvision project id is None. Cannot delete from Custom Vision")
+        #        return
+        #    trainer = instance.trainer.revalidate_and_get_trainer()
+        #    if trainer:
+        #        trainer.delete_project(instance.customvision_project_id)
+        #        logger.info("Project deleted on Custom Vision")
+        # except:
+        # logger.exception("Unexpected Error")
+        pass
+
     def dequeue_iterations(self, max_iterations=2):
         """
         Dequeue training iterations
@@ -310,6 +341,50 @@ class Project(models.Model):
                 'performance': performance}
         )
         return obj, created
+
+    def train_project(self):
+        """
+        Train project self. Return is training request success (boolean)
+        Will add counter
+        : Success: return True
+        : Failed : return False
+        """
+        is_task_success = False
+        update_fields = []
+
+        try:
+            self.train_try_counter += 1
+            update_fields.append('train_try_counter')
+            logger.info(
+                f"Project: {self.customvision_project_name} attempt to train for the {self.train_try_counter}'s time")
+            trainer = self.trainer.revalidate_and_get_trainer_obj()
+            if not trainer:
+                logger.error('Trainer is invalid. Not going to train...')
+                raise
+
+            # Submit training task
+            logger.info(
+                f"{self.customvision_project_name} submit training task to CustomVision")
+            trainer.train_project(self.customvision_project_id)
+
+            # Set trainer_counter
+            self.train_success_counter += 1
+            update_fields.append('train_success_counter')
+            logger.info(
+                f"{self.customvision_project_name} train_success_count: {self.train_success_counter}")
+
+            # Set deployed
+            self.deployed = False
+            update_fields.append('deployed')
+            logger.info('set deployed = False')
+
+            # If all above is success
+            is_task_success = True
+        except:
+            logger.exception('Something wrong while training project')
+        finally:
+            self.save(update_fields=update_fields)
+            return is_task_success
 
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
