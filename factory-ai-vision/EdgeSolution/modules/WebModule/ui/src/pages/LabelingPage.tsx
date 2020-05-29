@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
-import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
+import { LabelingType, Annotation, WorkState } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
@@ -27,8 +27,11 @@ const LabelingPage: FC<LabelingPageProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
+  const [workState, setWorkState] = useState<WorkState>(WorkState.None);
+
   const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
 
+  const isOnePointBox = checkOnePointBox(annotations);
   const imageUrl = images[index]?.image;
   const imageId = images[index]?.id;
 
@@ -46,8 +49,8 @@ const LabelingPage: FC<LabelingPageProps> = ({
       </Text>
       <PrevNextButton
         isRelabel={isRelabel}
-        prevDisabled={index === 0 || isOnePointBox(annotations)}
-        nextDisabled={index === images.length - 1 || isOnePointBox(annotations)}
+        prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
+        nextDisabled={index === images.length - 1 || workState === WorkState.Creating || isOnePointBox}
         onPrevClick={(): void => {
           dispatch(saveLabelImageAnnotation(images[index].id, annotations));
           setIndex((prev) => (prev - 1 + images.length) % images.length);
@@ -57,13 +60,19 @@ const LabelingPage: FC<LabelingPageProps> = ({
           setIndex((prev) => (prev + 1) % images.length);
         }}
       >
-        <Scene url={imageUrl ?? '/icons/Play.png'} annotations={annotations} labelingType={labelingType} />
+        <Scene
+          url={imageUrl ?? '/icons/Play.png'}
+          annotations={annotations}
+          workState={workState}
+          setWorkState={setWorkState}
+          labelingType={labelingType}
+        />
       </PrevNextButton>
       <Flex gap="gap.medium">
         <Button
           primary
           content="Save"
-          disabled={isOnePointBox(annotations)}
+          disabled={isOnePointBox || workState === WorkState.Creating}
           onClick={(): void => {
             dispatch(saveLabelImageAnnotation(images[index].id, annotations));
             closeDialog();
@@ -80,7 +89,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
   );
 };
 
-const isOnePointBox = (annotations: Annotation[]): boolean => {
+const checkOnePointBox = (annotations: Annotation[]): boolean => {
   if (annotations.length === 0) return false;
   const { label } = annotations[annotations.length - 1];
   return label.x1 === label.x2 && label.y1 === label.y2;
