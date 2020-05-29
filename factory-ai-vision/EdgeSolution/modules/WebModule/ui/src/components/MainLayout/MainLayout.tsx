@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { Grid, Segment, Image, Flex, Text, MenuIcon } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
 import Breadcrumb from '../Breadcrumb';
+import LeftNav from './LeftNav';
 
 export const MainLayout: React.FC = ({ children }) => {
   return (
@@ -57,31 +58,5 @@ const TopNav: FC = () => {
         <Text color="white">User</Text>
       </Flex>
     </Flex>
-  );
-};
-
-const LeftNav: FC<any> = ({ styles }): JSX.Element => {
-  return (
-    <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
-      <Flex column gap="gap.large" hAlign="center">
-        <NavItem src="/icons/location.png" to="/locations"></NavItem>
-        <NavItem src="/icons/camera.png" to="/cameras"></NavItem>
-        <NavItem src="/icons/part.png" to="/parts"></NavItem>
-        <NavItem src="/icons/manual.png" to="/manual"></NavItem>
-        <NavItem src="/icons/partIdentification.png" to="/partIdentification"></NavItem>
-      </Flex>
-    </Segment>
-  );
-};
-
-const NavItem = ({ src, to }): JSX.Element => {
-  return (
-    <NavLink
-      to={to}
-      style={{ display: 'flex', justifyContent: 'center', padding: '0.8em' }}
-      activeStyle={{ backgroundColor: 'rgba(250, 83, 5, 0.5)' }}
-    >
-      <Image src={src} design={{ width: '100%' }}></Image>
-    </NavLink>
   );
 };

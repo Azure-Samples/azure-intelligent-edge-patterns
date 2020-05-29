@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Flex, Button, Text, ChevronStartIcon, ChevronEndIcon } from '@fluentui/react-northstar';
+import { Flex, Button, Text } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
 import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
@@ -9,6 +9,7 @@ import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation } from '../store/image/imageActions';
 import { RelabelImage } from '../components/ManualIdentification/types';
+import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
@@ -43,31 +44,21 @@ const LabelingPage: FC<LabelingPageProps> = ({
       <Text size="larger" weight="semibold">
         DRAW A RECTANGLE AROUND THE PART
       </Text>
-      <Flex vAlign="center">
-        {!isRelabel && (
-          <Button
-            text
-            disabled={index === 0 || isOnePointBox(annotations)}
-            icon={<ChevronStartIcon size="larger" />}
-            onClick={(): void => {
-              dispatch(saveLabelImageAnnotation(images[index].id, annotations));
-              setIndex((prev) => (prev - 1 + images.length) % images.length);
-            }}
-          />
-        )}
+      <PrevNextButton
+        isRelabel={isRelabel}
+        prevDisabled={index === 0 || isOnePointBox(annotations)}
+        nextDisabled={index === images.length - 1 || isOnePointBox(annotations)}
+        onPrevClick={(): void => {
+          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          setIndex((prev) => (prev - 1 + images.length) % images.length);
+        }}
+        onNextClick={(): void => {
+          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          setIndex((prev) => (prev + 1) % images.length);
+        }}
+      >
         <Scene url={imageUrl ?? '/icons/Play.png'} annotations={annotations} labelingType={labelingType} />
-        {!isRelabel && (
-          <Button
-            text
-            disabled={index === images.length - 1 || isOnePointBox(annotations)}
-            icon={<ChevronEndIcon size="larger" />}
-            onClick={(): void => {
-              dispatch(saveLabelImageAnnotation(images[index].id, annotations));
-              setIndex((prev) => (prev + 1) % images.length);
-            }}
-          />
-        )}
-      </Flex>
+      </PrevNextButton>
       <Flex gap="gap.medium">
         <Button
           primary

@@ -26,7 +26,7 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
         height: '80%',
         borderStyle: 'solid',
         overflow: 'scroll',
-        borderWidth: '1px',
+        borderWidth: '0.0625em',
       }}
     >
       {images.map((img, i, arr) => {
