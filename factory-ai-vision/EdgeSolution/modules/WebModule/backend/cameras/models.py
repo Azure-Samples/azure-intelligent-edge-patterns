@@ -14,6 +14,7 @@ import requests
 
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
 
 
@@ -362,10 +363,23 @@ class Project(models.Model):
         update_fields = []
 
         try:
+
+            from opencensus.ext.azure.trace_exporter import AzureExporter
+            from opencensus.trace.samplers import ProbabilitySampler
+
+            from configs.app_insight import APP_INSIGHT_ON, APP_INSIGHT_INST_KEY, APP_INSIGHT_CONN_STR
+            from opencensus.ext.azure.log_exporter import AzureLogHandler
+
+            if APP_INSIGHT_ON:
+                logger = logging.getLogger("Backend-Training-App-Insight")
+                logger.addHandler(AzureLogHandler(
+                    connection_string=APP_INSIGHT_CONN_STR)
+                )
+
             self.train_try_counter += 1
             update_fields.append('train_try_counter')
             logger.info(
-                f"Project: {self.customvision_project_name} attempt to train for the {self.train_try_counter}'s time")
+                f"Project: {self.customvision_project_name} train attempt count: {self.train_try_counter}")
             trainer = self.trainer.revalidate_and_get_trainer_obj()
             if not trainer:
                 logger.error('Trainer is invalid. Not going to train...')
@@ -380,7 +394,7 @@ class Project(models.Model):
             self.train_success_counter += 1
             update_fields.append('train_success_counter')
             logger.info(
-                f"{self.customvision_project_name} train_success_count: {self.train_success_counter}")
+                f"Project: {self.customvision_project_name} train submit count: {self.train_success_counter}")
 
             # Set deployed
             self.deployed = False
@@ -389,8 +403,13 @@ class Project(models.Model):
 
             # If all above is success
             is_task_success = True
+        except CustomVisionErrorException as cvee:
+            logger.error(
+                'From Custom Vision: Nothing changed since last training')
+            raise cvee
         except:
             logger.exception('Something wrong while training project')
+            raise
         finally:
             self.save(update_fields=update_fields)
             return is_task_success

@@ -33,9 +33,7 @@ from .serializers import TrainerSerializer
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 
 # FIXME move these to views
-from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
-from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import CustomVisionErrorException
 
 from azure.iot.device import IoTHubModuleClient
 from azure.iot.hub import IoTHubRegistryManager
@@ -62,18 +60,6 @@ def inference_module_url():
 
 
 logger = logging.getLogger(__name__)
-
-# TODO: Remove after making sure the new Model Trainer can work with other component
-# trainer = CustomVisionTrainingClient(TRAINING_KEY, endpoint=ENDPOINT)
-#
-# is_trainer_valid = True
-#
-# # Classification, General (compact) for classiciation
-# try:
-#     obj_detection_domain = next(domain for domain in trainer.get_domains(
-#     ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
-# except:
-#     is_trainer_valid = False
 
 
 def export_iterationv3_2(project_id, iteration_id):
@@ -197,10 +183,13 @@ def export(request, project_id):
         success_rate = int(data['success_rate']*100)/100
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
+    except requests.exceptions.ConnectionError:
+        logger.error(
+            f"Export failed. Inference module url: {inference_module_url()} unreachable")
     except:
         # TODO: return other json response if we can determine if inference is alive
         logger.exception("Unexpected error")
-        pass
+        # pass
 
     return JsonResponse({
         'status': train_obj.status,
@@ -349,8 +338,6 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
                         'download_uri': {'required': False}}
 
     def create(self, validated_data):
-        logger.info("Project Serializer creating")
-        logger.info(f"Project Serializer validated_data: {validated_data}")
         parts = validated_data.pop("parts")
         if 'trainer' not in validated_data:
             validated_data['trainer'] = TrainerModel.objects.first()
@@ -372,6 +359,17 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Image
         fields = ['id', 'image', 'labels', 'part', 'is_relabel', 'confidence']
+
+#     def update(self, instance, validated_data):
+#         # for attr in ['image', 'labels', 'part', 'is_relabel', 'confidence']:
+#         #    print(attr)
+#         instance.image = validated_data.get('image', instance.image)
+#         instance.labels = validated_data.get('labels', instance.labels)
+#         instance.part = validated_data.get('part', instance.part)
+#         instance.is_relabel = validated_data.get(
+#             'is_relabel', instance.is_relabel)
+#         instance.uploaded = False
+#         return instance
 
 
 class ImageViewSet(viewsets.ModelViewSet):
@@ -541,6 +539,7 @@ def _train(project_id):
         tag_dict = {}
         tag_dict_local = {}
         project_partnames = {}
+        project_changed = False
         for tag in tags:
             tag_dict[tag.name] = tag.id
 
@@ -556,6 +555,7 @@ def _train(project_id):
                 tag = trainer.create_tag(customvision_project_id, part_name)
                 tag_dict[tag.name] = tag.id
                 counter += 1
+        project_changed = project_changed or (counter > 0)
         logger.info(f"Created {counter} tags")
         logger.info("Creating tags... Done")
 
@@ -570,6 +570,7 @@ def _train(project_id):
                     f"Deleting tag: {tag_name}, id: {tag_dict[tag_name]}")
                 trainer.delete_tag(project_id=customvision_project_id,
                                    tag_id=tag_dict[tag_name])
+        project_changed = project_changed or (counter > 0)
         logger.info(f"Deleted {counter} tags")
         logger.info("Deleting tags... Done")
 
@@ -583,7 +584,7 @@ def _train(project_id):
             project_id=customvision_project_id, take=batch_size)
         untagged_img_ids = []
         counter = 0
-        expected_iteration = untagged_image_count//batch_size+1
+        expected_iteration = (untagged_image_count//batch_size)+1
 
         while(len(untagged_image_batch) > 0):
             logger.info(f"Deleting untagged images... batch {counter}")
@@ -600,8 +601,9 @@ def _train(project_id):
             counter += 1
             if counter > expected_iteration*10:
                 logging.exception(
-                    "Deleting untagged images... take way too many iteration. Something went wrong.")
+                    "Deleting untagged images... Take way too many iterations. Something went wrong.")
                 break
+        project_changed = project_changed or (counter > 0)
         logger.info("Deleting untagged images... Done")
 
         # Upload images to CustomVisioin Project
@@ -646,6 +648,9 @@ def _train(project_id):
                     name=img_name, contents=image.read(), regions=regions)
                 img_objs.append(image_obj)
                 img_entries.append(img_entry)
+                project_changed = project_changed or (not image_obj.uploaded)
+                # TODO: Remove
+                logger.info(f'project_changed: {project_changed}')
                 count += 1
             except:
                 logger.exception("unexpected error")
@@ -655,7 +660,7 @@ def _train(project_id):
                 upload_result = trainer.create_images_from_files(
                     customvision_project_id, images=img_entries)
                 logger.info(
-                    f'batch upload results is successful: {upload_result.is_batch_successful}')
+                    f'Uploading images... Is batch success: {upload_result.is_batch_successful}')
                 img_entries = []
                 for img_obj in img_objs:
                     img_obj.uploaded = True
@@ -667,38 +672,38 @@ def _train(project_id):
             upload_result = trainer.create_images_from_files(
                 customvision_project_id, images=img_entries)
             logger.info(
-                f'batch upload results is successful: {upload_result.is_batch_successful}')
+                f'Uploading images... Is batch success: {upload_result.is_batch_successful}')
             for img_obj in img_objs:
                 img_obj.uploaded = True
                 img_obj.save()
         logger.info('Uploading images... Done')
 
-        if count == 0:
+        if not project_changed:
             logger.info('Nothing changed, not training')
             obj, created = project_obj.upcreate_training_status(
                 status='ok',
                 log='Status: Nothing changed, no training')
 
         else:
-            logger.info('training...')
             try:
-                # trainer.train_project(customvision_project_id)
+                logger.info('training...')
                 project_obj.train_project()
                 update_train_status(project_id)
-            except CustomVisionErrorException:
-                logger.error(
-                    'From Custom Vision: Nothing changed since last training')
+
+            except:
+                logger.exception(
+                    'Unexpected error while training project')
                 raise
 
         return JsonResponse({'status': 'ok'})
 
     except Exception as e:
+        # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception(f'Exception: {err_msg}')
         obj, created = project_obj.upcreate_training_status(
             status='failed',
             log=f'Status : failed {str(err_msg)}')
-
         return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
 
 
