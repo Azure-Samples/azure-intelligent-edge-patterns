@@ -199,7 +199,7 @@ def export(request, project_id):
         unidentified_num = data['unidentified_num']
     except:
         # TODO: return other json response if we can determine if inference is alive
-        logger.error("Unexpected error")
+        logger.exception("Unexpected error")
         pass
 
     return JsonResponse({
@@ -682,11 +682,9 @@ def _train(project_id):
         else:
             logger.info('training...')
             try:
-                trainer.train_project(customvision_project_id)
-                project_obj.deployed = False
-                project_obj.save(update_fields=['deployed'])
+                # trainer.train_project(customvision_project_id)
+                project_obj.train_project()
                 update_train_status(project_id)
-                logger.info('set deployed = False')
             except CustomVisionErrorException:
                 logger.error(
                     'From Custom Vision: Nothing changed since last training')
