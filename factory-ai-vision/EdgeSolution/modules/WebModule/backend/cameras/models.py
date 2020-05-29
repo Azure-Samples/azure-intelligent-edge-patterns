@@ -14,6 +14,7 @@ import requests
 
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
+from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
 
 
@@ -76,7 +77,8 @@ class Trainer(models.Model):
     @staticmethod
     def _get_trainer_obj_static(end_point: str, training_key: str):
         """
-        If success, return the CustomVisionTrainingClient object. Return None otherwise
+        Return CustomVisionTrainingClient. Does not do any check
+        : Success: return CustomVisionTrainingClient object
         """
         try:
             trainer = CustomVisionTrainingClient(
@@ -88,14 +90,18 @@ class Trainer(models.Model):
     def _get_trainer_obj(self):
         """
         Use self.end_point and self.training_key to create trainer
-        If success, return the CustomVisionTrainingClient object. Return None otherwise
+        : Success: return the CustomVisionTrainingClient object
         """
         return Trainer._get_trainer_obj_static(
             end_point=self.end_point, training_key=self.training_key)
 
     def revalidate(self):
         """
-        Update self.is_trainer_valid
+        Create client and try to get obj_detection_domain.
+        Update self.is_trainer_valid and return it's value
+        Update obj_detection_domain_id to '' if failed
+        : Success: True
+        : Failed:  False
         """
         trainer = self._get_trainer_obj()
         try:
@@ -106,8 +112,9 @@ class Trainer(models.Model):
             logger.info(
                 "Successfully created trainer client and got obj detection domain")
         except:
-            logger.exception(
-                "Failed to create trainer client and get obj detection domain")
+            # logger.exception('revalidate exception')
+            logger.error(
+                "Failed to create trainer client or get obj detection domain")
             self.is_trainer_valid = False
             self.obj_detection_domain_id = ''
         logger.info(
@@ -116,11 +123,15 @@ class Trainer(models.Model):
 
     def revalidate_and_get_trainer_obj(self):
         """
-        Get trainer object and update self.is_trainer_valid.
+        Update all the relevent fields and return the CustimVisionClient obj.
+        : Success: return CustimVisionClient object
+        : Failed:  return None
         """
-        self.revalidate()
-        trainer = self._get_trainer_obj()
-        return trainer
+        if self.revalidate():
+            trainer = self._get_trainer_obj()
+            return trainer
+        else:
+            return None
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -130,8 +141,9 @@ class Trainer(models.Model):
             logger.debug('update_fields:', update_fields)
             if instance.id is not None:
                 return
-            logger.info('Creating Trainer on Custom Vision')
-            logger.debug('Instance pre:', instance)
+            logger.info(
+                f'Creating Trainer {instance.trainer_name} (CustomVisionClient)')
+            logger.debug('Instance:', instance)
 
             trainer = Trainer._get_trainer_obj_static(
                 training_key=instance.training_key,
@@ -141,27 +153,17 @@ class Trainer(models.Model):
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
         except:
-            logger.exception("pre_save excetion")
+            # logger.exception()
+            logger.error(
+                "pre_save exception. Set is_trainer_valid to false and obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
-
-    def dequeue_iterations(self, custom_vision_project_id: str, max_iterations=2):
-        """
-        Dequeue training iterations
-        """
-        trainer = self.revalidate_and_get_trainer_obj()
-        if not trainer:
-            return
-        iterations = trainer.get_iterations(custom_vision_project_id)
-        if len(iterations) > max_iterations:
-            # TODO delete train in Train Model
-            trainer.delete_iteration(
-                custom_vision_project_id, iterations[-1].as_dict()['id'])
 
     def create_project(self, project_name: str):
         """
         A wrapper function.
-        Return project if succeed. Return None otherwise.
+        : Success: return project
+        : Failed:  return None
         """
         trainer = self.revalidate_and_get_trainer_obj()
         logger.info("Creating obj detection project")
@@ -178,6 +180,18 @@ class Trainer(models.Model):
             logger.exception(
                 "Endpoint + Training_Key can create client but cannot create project")
             return None
+
+    def delete_project(self, project_id: str):
+        """
+        A wrapper function for deleting project.
+        : Success: return project
+        : Failed:  return None
+        """
+        # trainer = self.revalidate_and_get_trainer_obj()
+        # logger.info("Deleting project")
+        # logger.info(
+        #    f"Deleting project on Custom Vision.Trainer: {self.trainer_name}, {trainer}")
+        pass
 
     def __str__(self):
         return self.trainer_name
@@ -255,6 +269,8 @@ class Project(models.Model):
     accuracyRangeMax = models.IntegerField(null=True)
     maxImages = models.IntegerField(null=True)
     deployed = models.BooleanField(default=False)
+    train_try_counter = models.IntegerField(default=0)
+    train_success_counter = models.IntegerField(default=0)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -292,6 +308,111 @@ class Project(models.Model):
         #     requests.get('http://localhost:8000/api/projects/'+str(pid)+'/train')
         # t = threading.Thread(target=_train_f, args=(project_id,))
         # t.start()
+
+    @staticmethod
+    def pre_delete(sender, instance, using):
+        # logger.info(f'Deleting instance: {instance} {update_fields}')
+        # try:
+        #   if not instance.customvision_project_id:
+        #        logger.info(
+        #            "customvision project id is None. Cannot delete from Custom Vision")
+        #        return
+        #    trainer = instance.trainer.revalidate_and_get_trainer()
+        #    if trainer:
+        #        trainer.delete_project(instance.customvision_project_id)
+        #        logger.info("Project deleted on Custom Vision")
+        # except:
+        # logger.exception("Unexpected Error")
+        pass
+
+    def dequeue_iterations(self, max_iterations=2):
+        """
+        Dequeue training iterations
+        """
+        try:
+            trainer = self.trainer.revalidate_and_get_trainer_obj()
+            if not trainer:
+                return
+            iterations = trainer.get_iterations(self.custom_vision_project_id)
+            if len(iterations) > max_iterations:
+                # TODO delete train in Train Model
+                trainer.delete_iteration(
+                    self.custom_vision_project_id, iterations[-1].as_dict()['id'])
+        except:
+            logger.exception('dequeue_iteration error')
+            return
+
+    def upcreate_training_status(self, status: str, log: str, performance: str = '{}'):
+        obj, created = Train.objects.update_or_create(
+            project=self,
+            defaults={
+                'status': status,
+                'log': log,
+                'performance': performance}
+        )
+        return obj, created
+
+    def train_project(self):
+        """
+        Train project self. Return is training request success (boolean)
+        Will add counter
+        : Success: return True
+        : Failed : return False
+        """
+        is_task_success = False
+        update_fields = []
+
+        try:
+
+            from opencensus.ext.azure.trace_exporter import AzureExporter
+            from opencensus.trace.samplers import ProbabilitySampler
+
+            from configs.app_insight import APP_INSIGHT_ON, APP_INSIGHT_INST_KEY, APP_INSIGHT_CONN_STR
+            from opencensus.ext.azure.log_exporter import AzureLogHandler
+
+            if APP_INSIGHT_ON:
+                logger = logging.getLogger("Backend-Training-App-Insight")
+                logger.addHandler(AzureLogHandler(
+                    connection_string=APP_INSIGHT_CONN_STR)
+                )
+
+            self.train_try_counter += 1
+            update_fields.append('train_try_counter')
+            logger.info(
+                f"Project: {self.customvision_project_name} train attempt count: {self.train_try_counter}")
+            trainer = self.trainer.revalidate_and_get_trainer_obj()
+            if not trainer:
+                logger.error('Trainer is invalid. Not going to train...')
+                raise
+
+            # Submit training task
+            logger.info(
+                f"{self.customvision_project_name} submit training task to CustomVision")
+            trainer.train_project(self.customvision_project_id)
+
+            # Set trainer_counter
+            self.train_success_counter += 1
+            update_fields.append('train_success_counter')
+            logger.info(
+                f"Project: {self.customvision_project_name} train submit count: {self.train_success_counter}")
+
+            # Set deployed
+            self.deployed = False
+            update_fields.append('deployed')
+            logger.info('set deployed = False')
+
+            # If all above is success
+            is_task_success = True
+        except CustomVisionErrorException as cvee:
+            logger.error(
+                'From Custom Vision: Nothing changed since last training')
+            raise cvee
+        except:
+            logger.exception('Something wrong while training project')
+            raise
+        finally:
+            self.save(update_fields=update_fields)
+            return is_task_success
 
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
