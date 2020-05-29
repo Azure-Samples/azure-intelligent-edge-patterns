@@ -31,6 +31,8 @@ from .models import Trainer as TrainerModel
 from .serializers import TrainerSerializer
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
+from configs.app_insight import APP_INSIGHT_INST_KEY
+
 
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
@@ -800,3 +802,7 @@ def relabel_update(request):
 @api_view()
 def inference_video_feed(request, project_id):
     return JsonResponse({'status': 'ok', 'url': 'http://'+inference_module_url()+'/video_feed?inference=1'})
+
+@api_view()
+def instrumentation_key(request):
+    return APP_INSIGHT_INST_KEY
