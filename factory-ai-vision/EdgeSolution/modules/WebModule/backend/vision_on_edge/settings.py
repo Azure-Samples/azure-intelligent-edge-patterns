@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+from configs.app_insight import APP_INSIGHT_ON
 import config
 from configs.logging_config import LOGGING_CONFIG_PRODUCTION, LOGGING_CONFIG_DEV
 import os
@@ -56,14 +57,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# OPENCENSUS = {
-#     'TRACE': {
-#         'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
-#         'EXPORTER': '''opencensus.ext.azure.trace_exporter.AzureExporter(
-#             connection_string="InstrumentationKey={KEY}"
-#         )''',
-#     }
-# }
+if APP_INSIGHT_ON:
+    from configs.app_insight import APP_INSIGHT_CONN_STR
+    MIDDLEWARE.append('opencensus.ext.django.middleware.OpencensusMiddleware')
+    OPENCENSUS = {
+        'TRACE': {
+            'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
+            'EXPORTER': f'''opencensus.ext.azure.trace_exporter.AzureExporter(
+                connection_string="{APP_INSIGHT_CONN_STR}"
+            )''',
+        }
+    }
 
 
 ROOT_URLCONF = 'vision_on_edge.urls'
