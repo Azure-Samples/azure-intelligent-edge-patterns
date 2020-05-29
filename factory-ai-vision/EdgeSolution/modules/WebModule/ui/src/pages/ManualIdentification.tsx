@@ -137,7 +137,7 @@ const ManualIdentification: FC = () => {
               <Range
                 value={confidenceLevelRange}
                 allowCross={false}
-                onChange={(e): void => setConfidenceLevelRange(e)}
+                onChange={setConfidenceLevelRange}
                 handle={({ value, dragging, index, ...restProps }): JSX.Element => {
                   return (
                     <Tooltip
