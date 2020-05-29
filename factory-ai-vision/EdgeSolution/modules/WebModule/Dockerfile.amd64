@@ -11,6 +11,7 @@ COPY backend/config.py .
 COPY backend/cameras cameras
 COPY backend/ui_production ui_production
 COPY backend/vision_on_edge vision_on_edge
+COPY backend/configs configs
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
