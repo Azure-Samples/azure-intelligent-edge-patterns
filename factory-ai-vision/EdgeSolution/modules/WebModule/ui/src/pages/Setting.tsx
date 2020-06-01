@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Flex, Text, Input, Button, Alert } from '@fluentui/react-northstar';
+import { Divider, Flex, Text, Input, Button, Alert, Dropdown } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 
@@ -61,75 +61,60 @@ export const Setting = (): JSX.Element => {
   };
 
   return (
-    <Flex column gap="gap.large">
+    <>
       <h1>Setting</h1>
-      <Divider color="grey" />
-      <Text size="large" weight="bold">
-        Azure Cognitive Services Settings:{' '}
-      </Text>
-      <Flex vAlign="center">
-        <Text size="large" design={{ width: '300px' }}>
-          Namespace:
-        </Text>
-        <Input
-          value={settingData.namespace}
-          onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, namespace: value }))}
-        />
+      <Divider color="grey" design={{ paddingBottom: '10px' }} />
+      <Flex gap="gap.large" design={{ height: '80%' }}>
+        <Flex column gap="gap.large" design={{ width: '50%' }}>
+          <Text size="large" weight="bold">
+            Azure Cognitive Services Settings:{' '}
+          </Text>
+          <Flex vAlign="center">
+            <Text size="large" design={{ width: '300px' }}>
+              Namespace:
+            </Text>
+            <Input
+              value={settingData.namespace}
+              onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, namespace: value }))}
+              fluid
+            />
+          </Flex>
+          <Flex vAlign="center">
+            <Text size="large" design={{ width: '300px' }}>
+              Key:
+            </Text>
+            <Input
+              value={settingData.key}
+              onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, key: value }))}
+              fluid
+            />
+          </Flex>
+          <Flex gap="gap.large">
+            <Button primary onClick={onSave} disabled={Object.values(settingData).some((e) => !e)}>
+              Save
+            </Button>
+            <Button primary as={Link} to="/">
+              Cancel
+            </Button>
+          </Flex>
+          {saveStatus.content ? (
+            <Alert
+              success={saveStatus.success}
+              danger={!saveStatus.success}
+              content={saveStatus.content}
+              dismissible
+            />
+          ) : null}
+        </Flex>
+        <Divider color="grey" vertical styles={{ height: '100%' }} />
+        <Flex column gap="gap.large">
+          <Text size="large" weight="bold">
+            Previous Projects:{' '}
+          </Text>
+          <Dropdown />
+          <Button primary content="Load" />
+        </Flex>
       </Flex>
-      <Flex vAlign="center">
-        <Text size="large" design={{ width: '300px' }}>
-          Key:
-        </Text>
-        <Input
-          value={settingData.key}
-          onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, key: value }))}
-        />
-      </Flex>
-      <Flex vAlign="center">
-        <Text size="large" design={{ width: '300px' }}>
-          Iot Hub Connection String:
-        </Text>
-        <Input
-          value={settingData.iotHubConnectionString}
-          onChange={(_, { value }): void =>
-            setSettingData((prev) => ({ ...prev, iotHubConnectionString: value }))
-          }
-        />
-      </Flex>
-      <Flex vAlign="center">
-        <Text size="large" design={{ width: '300px' }}>
-          Device ID:
-        </Text>
-        <Input
-          value={settingData.deviceId}
-          onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, deviceId: value }))}
-        />
-      </Flex>
-      <Flex vAlign="center">
-        <Text size="large" design={{ width: '300px' }}>
-          Module ID:
-        </Text>
-        <Input
-          value={settingData.moduleId}
-          onChange={(_, { value }): void => setSettingData((prev) => ({ ...prev, moduleId: value }))}
-        />
-      </Flex>
-      <Flex gap="gap.large">
-        <Button primary onClick={onSave} disabled={Object.values(settingData).some((e) => !e)}>
-          Save
-        </Button>
-        <Button primary as={Link} to="/">
-          Cancel
-        </Button>
-      </Flex>
-      {saveStatus.content ? (
-        <Alert
-          success={saveStatus.success}
-          danger={!saveStatus.success}
-          content={saveStatus.content}
-          dismissible
-        />
-      ) : null}
-    </Flex>
+    </>
   );
 };
