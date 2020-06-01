@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mssql-service
+spec:
+  selector:
+    app: mssql
+  ports:
+    - protocol: TCP
+      port: {{ .Values.mssql.servicePort }}
+      targetPort: {{ .Values.mssql.servicePort }}
+      nodePort: null
+      name: mssql
+  type: ClusterIP

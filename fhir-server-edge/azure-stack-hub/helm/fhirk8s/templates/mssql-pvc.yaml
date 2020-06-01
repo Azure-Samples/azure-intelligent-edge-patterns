@@ -1,0 +1,11 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:  
+  name: mssql-data
+spec:
+  storageClassName: managed-standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mssql.pvcClaim.size }}
