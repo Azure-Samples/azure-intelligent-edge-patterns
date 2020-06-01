@@ -26,9 +26,6 @@ import requests
 
 
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
-from .train import Trainer
-from .models import Trainer as TrainerModel
-from .serializers import TrainerSerializer
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 from configs.app_insight import APP_INSIGHT_INST_KEY
@@ -75,7 +72,7 @@ def export_iterationv3_2(project_id, iteration_id):
 def update_train_status(project_id):
     def _train_status_worker(project_id):
         project_obj = Project.objects.get(pk=project_id)
-        trainer = project_obj.trainer.revalidate_and_get_trainer_obj()
+        trainer = project_obj.setting.revalidate_and_get_trainer_obj()
         camera_id = project_obj.camera_id
         customvision_project_id = project_obj.customvision_project_id
         camera = Camera.objects.get(pk=camera_id)
@@ -206,7 +203,7 @@ def export(request, project_id):
 @api_view()
 def export_null(request):
     project_obj = Project.objects.all()[0]
-    trainer = project_obj.revalidate_and_get_trainer_obj()
+    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     camera_id = project_obj.camera_id
     camera = Camera.objects.get(pk=camera_id)
 
@@ -241,15 +238,6 @@ def export_null(request):
         update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
-
-
-#
-# Trainer Views
-#
-
-class TrainerViewSet(viewsets.ModelViewSet):
-    queryset = TrainerModel.objects.all()
-    serializer_class = TrainerSerializer
 
 #
 # Part Views
@@ -304,12 +292,26 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
         model = Setting
         fields = [
             'id',
+            'name',
             'training_key',
             'endpoint',
             'iot_hub_connection_string',
             'device_id',
-            'module_id'
-        ]
+            'module_id',
+            'is_trainer_valid',
+            'obj_detection_domain_id']
+
+    def create(self, validated_data):
+        obj, created = Setting.objects.get_or_create(
+            end_point=validated_data['end_point'],
+            training_key=validated_data['training_key'],
+            defaults={
+                'name': validated_data['name'],
+                'iot_hub_connection_string': validated_data['iot_hub_connection_string'],
+                'device_id': validated_data['device_id'],
+                'module_id': validated_data['module_id'],
+            })
+        return obj
 
 
 class SettingViewSet(viewsets.ModelViewSet):
@@ -325,7 +327,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
         fields = [
-            'trainer',
+            'setting',
             'id',
             'camera',
             'location',
@@ -336,13 +338,14 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             'accuracyRangeMax',
             'maxImages'
         ]
-        extra_kwargs = {'trainer': {'required': False},
+        extra_kwargs = {'setting': {'required': False},
                         'download_uri': {'required': False}}
 
     def create(self, validated_data):
+        logger.info("Project Serializer create")
         parts = validated_data.pop("parts")
-        if 'trainer' not in validated_data:
-            validated_data['trainer'] = TrainerModel.objects.first()
+        if 'setting' not in validated_data:
+            validated_data['setting'] = Setting.objects.first()
         project = Project.objects.create(**validated_data)
         project.parts.set(parts)
         return project
@@ -471,7 +474,7 @@ def capture(request, stream_id):
 @api_view()
 def train_performance(request, project_id):
     project_obj = Project.objects.get(pk=project_id)
-    trainer = project_obj.trainer.revalidate_and_get_trainer_obj()
+    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
     ret = {}
@@ -509,7 +512,7 @@ def train_performance(request, project_id):
 def _train(project_id):
 
     project_obj = Project.objects.get(pk=project_id)
-    trainer = project_obj.trainer.revalidate_and_get_trainer_obj()
+    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
     project_obj.upcreate_training_status(
@@ -517,8 +520,7 @@ def _train(project_id):
         log=''
     )
 
-    Trainer.dequeue_iterations(
-        trainer=trainer, custom_vision_project_id=customvision_project_id)
+    project_obj.dequeue_iterations()
 
     try:
         count = 10
@@ -791,7 +793,8 @@ def relabel_update(request):
             img_obj.is_relabel = False
             img_obj.part_id = part_id
             img_obj.save()
-            logger.info(f'image {image_id} with part {part_id} added from relabeling pool')
+            logger.info(
+                f'image {image_id} with part {part_id} added from relabeling pool')
         else:
             img_obj.delete()
             logger.info(f'image {image_id} removed from relabeling pool')
@@ -802,6 +805,7 @@ def relabel_update(request):
 @api_view()
 def inference_video_feed(request, project_id):
     return JsonResponse({'status': 'ok', 'url': 'http://'+inference_module_url()+'/video_feed?inference=1'})
+
 
 @api_view()
 def instrumentation_key(request):
