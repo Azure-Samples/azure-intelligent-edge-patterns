@@ -1,4 +1,4 @@
-import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo } from 'react';
 import { Dropdown, DropdownItemProps, Text, Button, RadioGroup } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
@@ -44,13 +44,8 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         const next = [...prev];
         const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
 
-        if (idx >= 0) next[idx] = { ...next[idx], partId: value.content.key };
-        else {
-          next.push({
-            imageId: relabelImages[imageIndex].id,
-            partId: value.content.key,
-          });
-        }
+        if (idx === -1) throw new Error("Image id doesn't match");
+        next[idx] = { ...next[idx], partId: value.content.key };
 
         return next;
       });
@@ -66,8 +61,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
 
         if (idx >= 0) next[idx] = { ...next[idx], partId };
         else next.push({ imageId: relabelImages[imageIndex].id, partId });
-      }
-      if (newProps.value === 0) {
+      } else if (newProps.value === 0) {
         const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
 
         if (idx >= 0) next[idx] = { ...next[idx], partId: null };
