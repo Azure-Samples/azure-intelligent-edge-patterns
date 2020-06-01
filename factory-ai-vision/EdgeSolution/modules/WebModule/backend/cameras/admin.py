@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Trainer, Project, Location, Camera, Image, Part
+from .models import Project, Location, Camera, Image, Part, Setting
 
 # Register your models here.
-admin.site.register(Trainer)
 admin.site.register(Project)
 admin.site.register(Location)
 admin.site.register(Camera)
 admin.site.register(Image)
 admin.site.register(Part)
+admin.site.register(Setting)
