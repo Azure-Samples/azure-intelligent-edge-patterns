@@ -14,7 +14,7 @@ const Home: FC = () => {
       </Text>
       <Text>
       </Text>
-      <Text color="white" styles={{ backgroundColor: '#373644', padding: '2px 2px 2px 10px' }}>
+      <Text color="white" styles={{ backgroundColor: '#373644', padding: '0.125em 0.125em 0.125em 0.625em' }}>
         GET STARTED:
       </Text>
       <Flex gap="gap.large">
@@ -22,14 +22,14 @@ const Home: FC = () => {
           imgSrc="/icons/location-filled.png"
           to="/locations/register"
           label="Register a new Location"
-          width="100px"
+          width="6.25em"
         />
         <ImageLink
           imgSrc="/icons/camera-filled.png"
           to="/cameras"
           label="Register a new Camera"
-          width="100px"
-          imgPadding="10px 3px 10px 3px"
+          width="6.25em"
+          imgPadding="0.625em 0.1875em 0.625em 0.1875em"
           onClick={(): void => {
             dispatch(openDialog());
           }}
@@ -38,10 +38,10 @@ const Home: FC = () => {
           imgSrc="/icons/part-filled.png"
           to="/parts/detail"
           label="Register a new Part"
-          width="100px"
+          width="6.25em"
         />
       </Flex>
-      <Text color="white" styles={{ backgroundColor: '#373644', padding: '2px 2px 2px 10px' }}>
+      <Text color="white" styles={{ backgroundColor: '#373644', padding: '0.125em 0.125em 0.125em 0.625em' }}>
         SELECT FROM THE FOLLOWING TASKS:
       </Text>
       <Flex gap="gap.large">
@@ -49,14 +49,14 @@ const Home: FC = () => {
           imgSrc="/icons/doubleCube.png"
           to="/partIdentification"
           label="Identify Parts"
-          width="100px"
+          width="6.25em"
         />
-        <ImageLink imgSrc="/icons/defects.png" to="/" label="Identify Defects" width="100px" />
+        <ImageLink imgSrc="/icons/defects.png" to="/" label="Identify Defects" width="6.25em" />
         <ImageLink
           imgSrc="/icons/manual-filled.png"
           to="/manual"
           label="Identify items manually"
-          width="100px"
+          width="6.25em"
         />
       </Flex>
     </Flex>

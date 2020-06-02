@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
 import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image, Group } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -30,8 +30,10 @@ interface SceneProps {
   url?: string;
   labelingType: LabelingType;
   annotations: Annotation[];
+  workState: WorkState;
+  setWorkState: Dispatch<WorkState>;
 }
-const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
+const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState, setWorkState }) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
@@ -42,7 +44,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
-  const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<number>(1);

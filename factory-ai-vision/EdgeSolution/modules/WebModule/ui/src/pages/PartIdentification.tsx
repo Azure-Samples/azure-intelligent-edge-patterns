@@ -9,13 +9,41 @@ import {
   Checkbox,
   Input,
   Alert,
+  Dialog,
+  ExclamationCircleIcon,
+  ShorthandCollection,
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/project/projectActions';
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
-import { formatDropdownValue } from '../util/formatDropdownValue';
+import { formatDropdownValue, Value } from '../util/formatDropdownValue';
+
+const testModelValue = {
+  camera: {
+    id: null,
+    name: 'Test Video',
+  },
+  parts: [
+    {
+      id: null,
+      name: 'Part 1',
+    },
+    {
+      id: null,
+      name: 'Part 2',
+    },
+    {
+      id: null,
+      name: 'Part 3',
+    },
+  ],
+  location: {
+    id: null,
+    name: 'Test Location',
+  },
+};
 
 export const PartIdentification: React.FC = () => {
   const dispatch = useDispatch();
@@ -42,6 +70,7 @@ export const PartIdentification: React.FC = () => {
   >('locations');
   const history = useHistory();
   const [maxImgCountError, setMaxImgCountError] = useState(false);
+  const [isTestModel, setIsTestModel] = useState(false);
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
@@ -70,6 +99,8 @@ export const PartIdentification: React.FC = () => {
     dispatch(updateProjectData({ ...data, [keyName]: value }));
   };
 
+  const accracyRangeDisabled = !needRetraining || isTestModel;
+
   return (
     <>
       <Text size="larger" weight="semibold">
@@ -79,64 +110,69 @@ export const PartIdentification: React.FC = () => {
       {error && (
         <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
       )}
+      <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
       <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
         <ModuleSelector
           moduleName="cameras"
           to="/cameras"
-          value={selectedCamera}
+          value={isTestModel ? testModelValue.camera : selectedCamera}
           setSelectedModuleItem={setSelectedCameraById}
           items={dropDownCameras}
           isMultiple={false}
+          isTestModel={isTestModel}
         />
         <ModuleSelector
           moduleName="parts"
           to="/parts"
-          value={selectedParts}
+          value={isTestModel ? testModelValue.parts : selectedParts}
           setSelectedModuleItem={setSelectedPartsById}
           items={dropDownParts}
           isMultiple={true}
+          isTestModel={isTestModel}
         />
         <ModuleSelector
           moduleName="locations"
           to="/locations"
-          value={selectedLocations}
+          value={isTestModel ? testModelValue.location : selectedLocations}
           setSelectedModuleItem={setSelectedLocationById}
           items={dropDownLocations}
           isMultiple={false}
+          isTestModel={isTestModel}
         />
         <Checkbox
           label="Set up retraining"
           checked={needRetraining}
           onChange={(_, { checked }): void => setData('needRetraining', checked)}
+          disabled={isTestModel}
         />
-        <Text disabled={!needRetraining}>Accuracy Range</Text>
-        <Text disabled={!needRetraining}>
+        <Text disabled={accracyRangeDisabled}>Accuracy Range</Text>
+        <Text disabled={accracyRangeDisabled}>
           Minimum:{' '}
           <Input
             type="number"
-            disabled={!needRetraining}
+            disabled={accracyRangeDisabled}
             inline
             value={accuracyRangeMin}
             onChange={(_, { value }): void => setData('accuracyRangeMin', value)}
           />
           %
         </Text>
-        <Text disabled={!needRetraining}>
+        <Text disabled={accracyRangeDisabled}>
           Maximum:{' '}
           <Input
             type="number"
-            disabled={!needRetraining}
+            disabled={accracyRangeDisabled}
             inline
             value={accuracyRangeMax}
             onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
           />
           %
         </Text>
-        <Text disabled={!needRetraining}>
+        <Text disabled={accracyRangeDisabled}>
           Maximum Images:{' '}
           <Input
             type="number"
-            disabled={!needRetraining}
+            disabled={accracyRangeDisabled}
             inline
             value={maxImage}
             onChange={(_, { value }): void => {
@@ -152,11 +188,72 @@ export const PartIdentification: React.FC = () => {
           content="Configure"
           primary
           onClick={handleSubmitConfigure}
-          disabled={!selectedCamera || !selectedLocations || !selectedParts || isLoading}
+          disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
           loading={isLoading}
         />
       </Flex>
     </>
+  );
+};
+
+const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
+  if (isTestModel) {
+    return (
+      <Button
+        styles={{
+          backgroundColor: '#ff9727',
+          ':hover': {
+            backgroundColor: '#cf7a1f',
+          },
+          ':active': {
+            backgroundColor: '#cf7a1f',
+          },
+        }}
+        content="Back"
+        onClick={(): void => setIsTestModel(false)}
+        primary
+      />
+    );
+  }
+
+  return (
+    <Dialog
+      styles={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+      cancelButton="Cancel"
+      confirmButton="Confirm to use test model"
+      onConfirm={(): void => setIsTestModel(true)}
+      content={
+        <>
+          <Flex hAlign="center" column>
+            <ExclamationCircleIcon
+              size="largest"
+              styles={({ theme: { siteVariables } }): any => ({
+                color: siteVariables.colorScheme.brand.foreground,
+              })}
+            />
+            <div>
+              <p>Test model is for seeing inference result, no retraining experience here.</p>
+              <p>For retraining experience, please create a new model</p>
+            </div>
+          </Flex>
+        </>
+      }
+      trigger={
+        <Button
+          styles={{
+            backgroundColor: '#ff9727',
+            ':hover': {
+              backgroundColor: '#cf7a1f',
+            },
+            ':active': {
+              backgroundColor: '#cf7a1f',
+            },
+          }}
+          content="Test Model"
+          primary
+        />
+      }
+    />
   );
 };
 
@@ -210,10 +307,30 @@ function useDropdownItems<T>(
   return [loading, dropDownItems, selectedItem, setSelectedItemById];
 }
 
-const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items, isMultiple }): JSX.Element => {
+/* Module Selector */
+
+type ModuleSelectorProps = {
+  moduleName: string;
+  to: string;
+  value: Value;
+  setSelectedModuleItem: (id: string | string[]) => void;
+  items: ShorthandCollection<DropdownItemProps>;
+  isMultiple: boolean;
+  isTestModel: boolean;
+};
+
+const ModuleSelector: React.FC<ModuleSelectorProps> = ({
+  moduleName,
+  to,
+  value,
+  setSelectedModuleItem,
+  items,
+  isMultiple,
+  isTestModel,
+}): JSX.Element => {
   const onDropdownChange = (_, data): void => {
-    if (data.value === null) setSelectedModuleItem((prev) => prev);
-    else if (Array.isArray(data.value)) {
+    if (data.value === null) return;
+    if (Array.isArray(data.value)) {
       const ids = data.value.map((ele) => ele.content.key);
       setSelectedModuleItem(ids);
     } else {
@@ -225,12 +342,16 @@ const ModuleSelector = ({ moduleName, to, value, setSelectedModuleItem, items, i
   return (
     <Flex vAlign="center" gap="gap.medium">
       <Text styles={{ width: '150px' }}>{`Select ${moduleName}`}</Text>
-      <Dropdown
-        items={items}
-        onChange={onDropdownChange}
-        value={formatDropdownValue(value)}
-        multiple={isMultiple}
-      />
+      {isTestModel ? (
+        <Dropdown items={items} value={formatDropdownValue(value)} multiple={isMultiple} open={false} />
+      ) : (
+        <Dropdown
+          items={items}
+          onChange={onDropdownChange}
+          value={formatDropdownValue(value)}
+          multiple={isMultiple}
+        />
+      )}
       <Link to={to}>{`Add ${moduleName}`}</Link>
     </Flex>
   );

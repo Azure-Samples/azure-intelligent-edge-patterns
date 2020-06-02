@@ -34,6 +34,10 @@ def web_module_url():
     else: return 'localhost:8000'
 
 
+def is_inside_aoi(x1, y1, x2, y2, aoi_info):
+    return ( (onnx.aoi_info['x1'] <= x1 <= onnx.aoi_info['x2']) or (onnx.aoi_info['x1'] <= x2 <= onnx.aoi_info['x2']) ) and \
+           ( (onnx.aoi_info['y1'] <= y1 <= onnx.aoi_info['y2']) or (onnx.aoi_info['y1'] <= y2 <= onnx.aoi_info['y2']) )
+
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
@@ -68,6 +72,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.threshold = 0.4
 
+        self.has_aoi = False
+        self.aoi_info = None
+        #json.loads("{\"useAOI\":true,\"AOIs\":[{\"x1\":100,\"y1\":216.36363636363637,\"x2\":614.909090909091,\"y2\":1762.181818181818}]}")['AOIs'][0]
+
 
     def restart_cam(self):
 
@@ -82,7 +90,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.lock.release()
 
 
-    def update_cam(self, cam_type, cam_source):
+    def update_cam(self, cam_type, cam_source, has_aoi, aoi_info):
         print('[INFO] Updating Cam ...')
         #print('  cam_type', cam_type)
         #print('  cam_source', cam_source)
@@ -96,6 +104,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         if self.cam_type == cam_type and self.cam_source == cam_source: return
 
         self.cam_source = cam_source
+        self.has_aoi    = has_aoi
+        self.aoi_info   = aoi_info
         cam = cv2.VideoCapture(cam_source)
 
         # Protected by Mutex
@@ -171,6 +181,15 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                         for prediction in self.last_prediction:
                             #print(prediction)
                             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
+                                x1 = int(prediction['boundingBox']['left'] * width)
+                                y1 = int(prediction['boundingBox']['top'] * height)
+                                x2 = x1 + int(prediction['boundingBox']['width'] * width)
+                                y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                                labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
+
+                                if self.has_aoi:
+                                    if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info): continue
+
                                 if prediction['probability'] > self.confidence_max:
                                     detection = DETECTION_TYPE_SUCCESS
                                 elif self.confidence_min <= prediction['probability'] <= self.confidence_max:
@@ -183,11 +202,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                         if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
                                             pass
                                         else:
-                                            x1 = int(prediction['boundingBox']['left'] * width)
-                                            y1 = int(prediction['boundingBox']['top'] * height)
-                                            x2 = x1 + int(prediction['boundingBox']['width'] * width)
-                                            y2 = y1 + int(prediction['boundingBox']['height'] * height)
-                                            labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
                                             self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
                                             #print(tag, onnx.current_uploaded_images[tag], j) 
                                             self.last_upload_time = time.time()
@@ -330,7 +344,20 @@ def update_cam():
     print('updating cam ...')
     print('  cam_type', cam_type)
     print('  cam_source', cam_source)
-    onnx.update_cam(cam_type, cam_source)
+
+    aoi = request.args.get('aoi')
+    try:
+        aoi = json.loads(aoi)
+        has_aoi = aoi['useAOI']
+        aoi_info = aoi['AOIs'][0]
+    except:
+        has_aoi = False
+        aoi_info = None
+
+    print('  has_aoi', has_aoi)
+    print('  aoi_info', aoi_info)
+
+    onnx.update_cam(cam_type, cam_source, has_aoi, aoi_info)
 
     return 'ok'
 
@@ -362,11 +389,17 @@ def video_feed():
                     #print(prediction['tagName'], prediction['probability'])
                     #print(onnx.last_upload_time, time.time())
 
+                    if onnx.has_aoi:
+                        img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)
+
                     if prediction['probability'] > onnx.threshold:
                         x1 = int(prediction['boundingBox']['left'] * width)
                         y1 = int(prediction['boundingBox']['top'] * height)
                         x2 = x1 + int(prediction['boundingBox']['width'] * width)
                         y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                        if onnx.has_aoi:
+                            if not is_inside_aoi(x1, y1, x2, y2, onnx.aoi_info): continue
+
                         img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                         img = cv2.putText(img, prediction['tagName'], (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
 
@@ -377,6 +410,11 @@ def video_feed():
 
     return Response(_gen(),
             mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# for debugging
+#onnx.update_cam(cam_type='rtsp', cam_source='sample_video/video.mp4', has_aoi=True, aoi_info={'x1': 100, 'x2': 1000, 'y1': 100, 'y2': 500})
+#requests.get('http://localhost:5000/update_cam', params={'cam_type':'rtsp', 'cam_source':'0', 'aoi':'{\"useAOI\":true,\"AOIs\":[{\"x1\":100,\"y1\":216.36363636363637,\"x2\":3314.909090909091,\"y2\":1762.181818181818}]}'})
+
 
 def main():
 

@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 import sys
-from config import TRAINING_KEY, ENDPOINT
+from config import *
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,25 +30,29 @@ class CameraConfig(AppConfig):
             settings_with_dup_name = Setting.objects.filter(
                 name=DEFAULT_SETTING_NAME)
             if len(settings_with_dup_name):
-                logger.info(f"Deleting existing {DEFAULT_SETTING_NAME}")
-                settings_with_dup_name.delete()
+                logger.info(
+                    f"Found existing {DEFAULT_SETTING_NAME} with different (Endpoint, key)")
+                logger.info(f"User may already changed the key ")
+                # settings_with_dup_name.delete()
+                return
 
             settings_with_dup_ep_tk = Setting.objects.filter(
                 endpoint=ENDPOINT, training_key=TRAINING_KEY)
             if len(settings_with_dup_ep_tk):
-                logger.info(f"Deleting existing TRAINING_KEY+{ENDPOINT}")
-                settings_with_dup_ep_tk.delete()
+                logger.info(
+                    f"Found existing (Endpoint, key) with different setting name")
+                logger.info(f"Pass...")
+                return
 
             logger.info(f"Creating new {DEFAULT_SETTING_NAME}")
             default_setting, created = Setting.objects.update_or_create(
                 name=DEFAULT_SETTING_NAME,
                 training_key=TRAINING_KEY,
                 endpoint=ENDPOINT,
+                iot_hub_connection_string=IOT_HUB_CONNECTION_STRING,
+                device_id=DEVICE_ID,
+                module_id=MODULE_ID
             )
-            if created:
-                logger.info(
-                    f"{DEFAULT_SETTING_NAME} Created. Revalidating in pre_save...")
-                default_setting.save()
-            else:
+            if not created:
                 logger.error(
                     f"{DEFAULT_SETTING_NAME} not created. Something went wrong")

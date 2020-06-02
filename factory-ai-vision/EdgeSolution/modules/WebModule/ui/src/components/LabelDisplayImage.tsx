@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, FC, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, memo, MouseEvent, FC } from 'react';
 import { Stage, FastLayer, Image as KonvaImage } from 'react-konva';
-import { Flex, Text } from '@fluentui/react-northstar';
+import { Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
 import { Size2D, AnnotationState, Annotation } from '../store/labelingPage/labelingPageTypes';
@@ -14,7 +14,7 @@ interface LabelDisplayImageProps {
   width: number;
   height?: number;
   pointerCursor?: boolean;
-  onClick?: (event: any) => void;
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
 const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   labelImage,
@@ -24,7 +24,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   pointerCursor = false,
   onClick,
 }) => {
-  const [image, _, size] = useImage(labelImage.image, 'anonymous');
+  const [image, , size] = useImage(labelImage.image, 'anonymous');
   const [imageSize, setImageSize] = useState<Size2D>({ width, height });
   const resizeImage = useCallback(getResizeImageFunction({ width, height }), [width, height]);
   const scale = useRef<number>(1);
@@ -47,24 +47,21 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   }, [size, resizeImage]);
 
   return (
-    <div onClick={onClick} style={{ cursor: pointerCursor ? 'pointer' : 'default' }}>
-      <Flex column>
-        <Stage
-          width={imageSize.width}
-          height={imageSize.height}
-          scale={{ x: scale.current, y: scale.current }}
-        >
-          <FastLayer>
-            <KonvaImage image={image} />
-            {annotations.map((annotation, i) => (
-              <DisplayBox key={i} scale={scale.current} vertices={annotation.label} color="red" />
-            ))}
-          </FastLayer>
-        </Stage>
-        <Text align="center">{labelText}</Text>
-      </Flex>
+    <div
+      onClick={onClick}
+      style={{ cursor: pointerCursor ? 'pointer' : 'default', display: 'flex', flexFlow: 'column' }}
+    >
+      <Stage width={imageSize.width} height={imageSize.height} scale={{ x: scale.current, y: scale.current }}>
+        <FastLayer>
+          <KonvaImage image={image} />
+          {annotations.map((annotation, i) => (
+            <DisplayBox key={i} scale={scale.current} vertices={annotation.label} color="red" />
+          ))}
+        </FastLayer>
+      </Stage>
+      <Text align="center">{labelText}</Text>
     </div>
   );
 };
 
-export default LabelDisplayImage;
+export default memo(LabelDisplayImage);

@@ -1,5 +1,5 @@
 import React, { useEffect, FC, useState, useCallback } from 'react';
-import { Flex, Text, Status, Button, Loader, Grid, Alert, Image } from '@fluentui/react-northstar';
+import { Flex, Text, Status, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -14,8 +14,10 @@ import { Project, Status as CameraConfigStatus } from '../../store/project/proje
 import { State } from '../../store/State';
 import { useParts } from '../../hooks/useParts';
 import { useQuery } from '../../hooks/useQuery';
+import { LiveViewContainer } from '../LiveViewContainer';
+import { AOIData } from '../../type';
 
-export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => {
+export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }> = ({ projectId, AOIs }) => {
   const { error, data: project, trainingLog, status, trainingMetrics, inferenceMetrics } = useSelector<
     State,
     Project
@@ -87,17 +89,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId
               .join(', ')}
           </ListItem>
           <Flex column gap="gap.small">
-            <Text styles={{ width: '150px' }} size="large">
-              Live View:
-            </Text>
-            <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
-              {isCameraOnline ? (
-                <Image
-                  src={`http://${window.location.hostname}:5000/video_feed?inference=1`}
-                  styles={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                />
-              ) : null}
-            </div>
+            <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
           </Flex>
           <ListItem title="Success Rate">
             <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">

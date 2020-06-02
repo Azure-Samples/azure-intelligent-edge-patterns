@@ -28,6 +28,8 @@ import requests
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
+from configs.app_insight import APP_INSIGHT_INST_KEY
+
 
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
@@ -274,7 +276,7 @@ class LocationViewSet(viewsets.ModelViewSet):
 class CameraSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Camera
-        fields = ['id', 'name', 'rtsp']
+        fields = ['id', 'name', 'rtsp', 'area']
 
 
 class CameraViewSet(viewsets.ModelViewSet):
@@ -340,6 +342,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
                         'download_uri': {'required': False}}
 
     def create(self, validated_data):
+        logger.info("Project Serializer create")
         parts = validated_data.pop("parts")
         if 'setting' not in validated_data:
             validated_data['setting'] = Setting.objects.first()
@@ -777,23 +780,24 @@ def upload_relabel_image(request):
 def relabel_update(request):
 
     logger.info('update relabeling')
-    if 'correct' not in request.data:
-        logger.info('missing correct')
-    if 'incorrect' not in request.data:
-        logger.info('missing incorrect')
+    data = request.data
+    if type(data) is not type([]):
+        logger.info('data should be array of object {}')
+        return JsonResponse({'status': 'failed'})
 
-    correct = request.data['correct']
-    for image_id in correct:
+    for item in data:
+        image_id = item['imageId']
+        part_id = item['partId']
         img_obj = Image.objects.get(pk=image_id)
-        img_obj.is_relabel = False
-        img_obj.save()
-        logger.info(f'image {image_id} added from relabeling pool')
-
-    incorrect = request.data['incorrect']
-    for image_id in incorrect:
-        img_obj = Image.objects.get(pk=image_id)
-        img_obj.delete()
-        logger.info(f'image {image_id} removed from relabeling pool')
+        if part_id is not None:
+            img_obj.is_relabel = False
+            img_obj.part_id = part_id
+            img_obj.save()
+            logger.info(
+                f'image {image_id} with part {part_id} added from relabeling pool')
+        else:
+            img_obj.delete()
+            logger.info(f'image {image_id} removed from relabeling pool')
 
     return JsonResponse({'status': 'ok'})
 
@@ -801,3 +805,8 @@ def relabel_update(request):
 @api_view()
 def inference_video_feed(request, project_id):
     return JsonResponse({'status': 'ok', 'url': 'http://'+inference_module_url()+'/video_feed?inference=1'})
+
+
+@api_view()
+def instrumentation_key(request):
+    return APP_INSIGHT_INST_KEY

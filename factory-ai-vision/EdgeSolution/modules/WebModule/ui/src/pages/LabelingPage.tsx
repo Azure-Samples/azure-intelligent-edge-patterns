@@ -1,40 +1,39 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Flex, Button, Text, ChevronStartIcon, ChevronEndIcon } from '@fluentui/react-northstar';
+import { Flex, Button, Text } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
-import { LabelingType, Annotation } from '../store/labelingPage/labelingPageTypes';
+import { LabelingType, Annotation, WorkState } from '../store/labelingPage/labelingPageTypes';
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation } from '../store/image/imageActions';
-import { getFilteredImages } from '../util/getFilteredImages';
+import { RelabelImage } from '../components/ManualIdentification/types';
+import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
+  images: LabelImage[] | RelabelImage[];
   imageIndex: number;
   closeDialog: () => void;
-  partId?: number;
   isRelabel: boolean;
 }
 const LabelingPage: FC<LabelingPageProps> = ({
   labelingType,
+  images,
   imageIndex,
   closeDialog,
-  partId,
   isRelabel,
 }) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
-  const { images, annotations } = useSelector<State, { images: LabelImage[]; annotations: Annotation[] }>(
-    (state) => ({
-      images: state.images,
-      annotations: state.labelingPageState.annotations,
-    }),
-  );
-  const filteredImages = getFilteredImages(images, { partId, isRelabel });
-  const imageUrl = filteredImages[index]?.image;
-  const imageId = filteredImages[index]?.id;
+  const [workState, setWorkState] = useState<WorkState>(WorkState.None);
+
+  const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
+
+  const isOnePointBox = checkOnePointBox(annotations);
+  const imageUrl = images[index]?.image;
+  const imageId = images[index]?.id;
 
   useEffect(() => {
     if (typeof imageId === 'number') dispatch(getAnnotations(imageId));
@@ -48,38 +47,34 @@ const LabelingPage: FC<LabelingPageProps> = ({
       <Text size="larger" weight="semibold">
         DRAW A RECTANGLE AROUND THE PART
       </Text>
-      <Flex vAlign="center">
-        {!isRelabel && (
-          <Button
-            text
-            disabled={index === 0 || isOnePointBox(annotations)}
-            icon={<ChevronStartIcon size="larger" />}
-            onClick={(): void => {
-              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-              setIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
-            }}
-          />
-        )}
-        <Scene url={imageUrl ?? '/icons/Play.png'} annotations={annotations} labelingType={labelingType} />
-        {!isRelabel && (
-          <Button
-            text
-            disabled={index === filteredImages.length - 1 || isOnePointBox(annotations)}
-            icon={<ChevronEndIcon size="larger" />}
-            onClick={(): void => {
-              dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
-              setIndex((prev) => (prev + 1) % filteredImages.length);
-            }}
-          />
-        )}
-      </Flex>
+      <PrevNextButton
+        isRelabel={isRelabel}
+        prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
+        nextDisabled={index === images.length - 1 || workState === WorkState.Creating || isOnePointBox}
+        onPrevClick={(): void => {
+          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          setIndex((prev) => (prev - 1 + images.length) % images.length);
+        }}
+        onNextClick={(): void => {
+          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          setIndex((prev) => (prev + 1) % images.length);
+        }}
+      >
+        <Scene
+          url={imageUrl ?? '/icons/Play.png'}
+          annotations={annotations}
+          workState={workState}
+          setWorkState={setWorkState}
+          labelingType={labelingType}
+        />
+      </PrevNextButton>
       <Flex gap="gap.medium">
         <Button
           primary
           content="Save"
-          disabled={isOnePointBox(annotations)}
+          disabled={isOnePointBox || workState === WorkState.Creating}
           onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(filteredImages[index].id, annotations));
+            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
             closeDialog();
           }}
         />
@@ -94,7 +89,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
   );
 };
 
-const isOnePointBox = (annotations: Annotation[]): boolean => {
+const checkOnePointBox = (annotations: Annotation[]): boolean => {
   if (annotations.length === 0) return false;
   const { label } = annotations[annotations.length - 1];
   return label.x1 === label.x2 && label.y1 === label.y2;

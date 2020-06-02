@@ -48,7 +48,7 @@ def inference_module_url():
 # Create your models here.
 
 class Part(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     description = models.CharField(max_length=1000)
 
     def __str__(self):
@@ -59,15 +59,6 @@ class Location(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
     coordinates = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-
-class Camera(models.Model):
-    name = models.CharField(max_length=200)
-    rtsp = models.CharField(max_length=1000)
-    model_name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
@@ -230,9 +221,29 @@ class Setting(models.Model):
         return self.name
 
 
+class Camera(models.Model):
+    name = models.CharField(max_length=200)
+    rtsp = models.CharField(max_length=1000)
+    model_name = models.CharField(max_length=200)
+    area = models.CharField(max_length=1000, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def post_save(sender, instance, update_fields, **kwargs):
+        if len(instance.area) > 1:
+            logger.info('Sending new AOI to Inference Module...')
+            requests.get('http://'+inference_module_url()+'/update_cam', params={
+                         'cam_type': 'rtsp', 'cam_source': instance.rtsp, 'aoi': instance.area})
+
+
+post_save.connect(Camera.post_save, Camera, dispatch_uid='Camera_post')
+
+
 class Project(models.Model):
     setting = models.ForeignKey(
-        Setting, on_delete=models.CASCADE)
+        Setting, on_delete=models.CASCADE, default=1)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     parts = models.ManyToManyField(
@@ -253,8 +264,8 @@ class Project(models.Model):
         if update_fields is not None:
             return
         logger.info(f'update_fields: {update_fields}')
-        if instance.id is not None:
-            return
+        # if instance.id is not None:
+        #    return
 
         name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
         instance.customvision_project_name = name
@@ -339,6 +350,8 @@ class Project(models.Model):
                 logger.addHandler(AzureLogHandler(
                     connection_string=APP_INSIGHT_CONN_STR)
                 )
+            else:
+                logger = logging.getLogger(__name__)
 
             self.train_try_counter += 1
             update_fields.append('train_try_counter')
@@ -374,9 +387,9 @@ class Project(models.Model):
         except:
             logger.exception('Something wrong while training project')
             raise
-        finally:
-            self.save(update_fields=update_fields)
-            return is_task_success
+        # finally:
+        #    self.save(update_fields=update_fields)
+        #    return is_task_success
 
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
