@@ -302,7 +302,7 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         obj, created = Setting.objects.get_or_create(
-            end_point=validated_data['end_point'],
+            endpoint=validated_data['endpoint'],
             training_key=validated_data['training_key'],
             defaults={
                 'name': validated_data['name'],
