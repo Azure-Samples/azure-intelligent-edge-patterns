@@ -261,36 +261,43 @@ class Project(models.Model):
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
+        logger.info("Project pre_save")
+        logger.info(f'Saving instance: {instance} {update_fields}')
+
         if update_fields is not None:
             return
-        logger.info(f'update_fields: {update_fields}')
         # if instance.id is not None:
         #    return
 
         name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
         instance.customvision_project_name = name
-        logger.info(f'instance pre: {instance}')
 
         setting = instance.setting
         instance.setting.revalidate()
         instance.setting.save()
         setting = instance.setting
+
         if setting.is_trainer_valid:
             logger.info('Creating Project on Custom Vision')
             project = setting.create_project(name)
-            logger.info(f'Got Custom Vision Project ID {project.id}')
+            logger.info(f'Got Custom Vision Project Id: {project.id}')
             instance.customvision_project_id = project.id
         else:
             logger.info('Has not set the key, Got DUMMY PRJ ID')
             instance.customvision_project_id = 'DUMMY-PROJECT-ID'
+        logger.info("Project pre_save... End")
 
     @staticmethod
-    def post_save(sender, instance, update_fields, **kwargs):
+    def post_save(sender, instance, created, update_fields, **kwargs):
+        logger.info("Project post_save")
         logger.info(f'Saving instance: {instance} {update_fields}')
         if update_fields is not None:
             return
-        logger.info('post_save')
+        if not created:
+            logger.info("Project modified")
+
         project_id = instance.id
+        logger.info("Project post_save... End")
         # def _train_f(pid):
         #     requests.get('http://localhost:8000/api/projects/'+str(pid)+'/train')
         # t = threading.Thread(target=_train_f, args=(project_id,))

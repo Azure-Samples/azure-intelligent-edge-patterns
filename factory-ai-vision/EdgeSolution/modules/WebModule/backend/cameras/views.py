@@ -32,8 +32,7 @@ from configs.app_insight import APP_INSIGHT_INST_KEY
 
 
 # FIXME move these to views
-from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
-
+from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region, CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
@@ -338,8 +337,10 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             'accuracyRangeMax',
             'maxImages'
         ]
-        extra_kwargs = {'setting': {'required': False},
-                        'download_uri': {'required': False}}
+        extra_kwargs = {
+            'setting': {'required': False},
+            'download_uri': {'required': False},
+        }
 
     def create(self, validated_data):
         logger.info("Project Serializer create")
@@ -810,3 +811,103 @@ def inference_video_feed(request, project_id):
 @api_view()
 def instrumentation_key(request):
     return APP_INSIGHT_INST_KEY
+
+
+@api_view()
+def list_projects(request, setting_id):
+    """
+    Get the list of project at Custom Vision.
+    """
+    setting_obj = Setting.objects.get(pk=setting_id)
+    trainer = setting_obj.revalidate_and_get_trainer_obj()
+
+    rs = {}
+    project_list = trainer.get_projects()
+    for project in project_list:
+        rs[project.id] = project.name
+
+    return JsonResponse(rs)
+
+
+@api_view()
+def pull_cv_project(request, project_id):
+    """
+    Delete the local project, parts and images. Pull the remote project from Custom Vision.
+    """
+    logger.info("Pulling CustomVision Project")
+    rs = {}
+    project_obj = Project.objects.get(pk=project_id)
+    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
+
+    customvision_project_id = request.query_params.get(
+        'customvision_project_id')
+    logger.info(f"customvision_project_id: {customvision_project_id}")
+
+    if not trainer:
+        return JsonResponse({
+            'status': 'failed',
+            'logs': '(Endpoint, Training_key) invalid'
+        })
+
+    try:
+        project = trainer.get_project(project_id=customvision_project_id)
+#         logger.info("Deleting all parts...")
+#         Part.object.all().delete()
+#         logger.info("Deleting all images...")
+#         Image.object.all().delete()
+#
+#         logger.info("Creating Parts...")
+#         counter = 0
+#         tags = trainer.get_tags(customvision_project_id)
+#         for tag in tags:
+#             logger.info(f"Creating Part {counter}")
+#             part_obj, created = Part.update_or_create(
+#                 name=tag.name,
+#                 description="From remote"
+#             )
+#             counter += 1
+#
+#         logger.info("Pulling Tagged Images...")
+#         counter = 0
+#         tags = trainer.get_tags(customvision_project_id)
+#         for tag in tags:
+#             logger.info(f"Creating Part {counter}")
+#             part_obj, created = Part.update_or_create(
+#                 name=tag.name,
+#                 description="From remote"
+#             )
+#             counter += 1
+#         logger.info(f"Pulled {counter} images")
+#         logger.info("Pulling Tagged Images... End")
+#
+#         logger.info("Pulling Untagged Images...")
+#         counter = 0
+#         tags = trainer.get_tags(customvision_project_id)
+#         for tag in tags:
+#             logger.info(f"Creating Part {counter}")
+#             part_obj, created = Part.update_or_create(
+#                 name=tag.name,
+#                 description="From remote"
+#             )
+#             counter += 1
+#         logger.info(f"Created {counter} images")
+#         logger.info("Pulling Untagged Images... End")
+        logger.info("Sync End")
+    except CustomVisionErrorException as e:
+        logger.error(f"CustomVisionErrorException: {e.message}")
+        logger.error("Probably cause by invalid customvision project id")
+        logger.error("Do nothing...")
+        return JsonResponse({
+            'status': 'failed',
+            'log': f'Status : failed because invalid customvision project id'})
+    except Exception as e:
+        # TODO: Remove in production
+        err_msg = traceback.format_exc()
+        logger.exception(f'Exception: {err_msg}')
+        return JsonResponse({
+            'status': 'failed',
+            'log': f'Status : failed {str(err_msg)}'})
+
+    logger.info("Pulling CustomVision Project... End")
+    rs['status'] = 'success'
+    return JsonResponse(rs)
