@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React, { useState, useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Flex, Button, Dialog, Input, Grid, AddIcon } from '@fluentui/react-northstar';
+import { Text, Dialog, Input, Grid, Button } from '@fluentui/react-northstar';
 
 import { postCamera, getCameras } from '../store/camera/cameraActions';
 import ImageLink from '../components/ImageLink';
 import { State } from '../store/State';
 import { closeDialog, openDialog } from '../store/dialog/dialogIsOpenActions';
 import { Camera } from '../store/camera/cameraTypes';
+import AddButton from '../components/AddButton';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
@@ -24,7 +25,15 @@ const Cameras: FC = (): JSX.Element => {
   }, [dispatch]);
 
   return (
-    <Flex column gap="gap.large" padding="padding.medium" styles={{ height: '100%' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexFlow: 'column',
+        justifyContent: 'space-between',
+        padding: '3em',
+        height: '100%',
+      }}
+    >
       <Grid columns="8" styles={{ height: '75%' }}>
         {cameras.map((camera, i) => (
           <ImageLink
@@ -32,8 +41,8 @@ const Cameras: FC = (): JSX.Element => {
             to={`/cameras/detail?name=${camera.name}`}
             defaultSrc="/icons/Play.png"
             bgImgSrc="/icons/defaultCamera.png"
-            width="100px"
-            height="100px"
+            width="6.25em"
+            height="6.25em"
             bgImgStyle={{
               backgroundSize: '60%',
               backgroundPosition: 'center',
@@ -44,55 +53,79 @@ const Cameras: FC = (): JSX.Element => {
         ))}
       </Grid>
       <Dialog
-        trigger={
-          <Flex hAlign="end">
-            <Button
-              primary
-              fluid
-              circular
-              content={<AddIcon size="largest" circular />}
-              style={{ width: '6em', height: '6em' }}
-            />
-          </Flex>
-        }
-        confirmButton="Submit"
-        onConfirm={(): void => {
-          dispatch(postCamera({ name, rtsp, model_name }));
-          setName('');
-          setRtsp('');
-          setModel_name('');
-          dispatch(closeDialog());
-        }}
-        cancelButton="Cancel"
-        header="Add Camera"
+        styles={{ width: '20%', height: '40%', padding: 0, display: 'flex' }}
         open={dialogIsOpen}
-        onOpen={(): void => {
-          dispatch(openDialog());
-        }}
-        onCancel={(): void => {
-          dispatch(closeDialog());
-        }}
+        trigger={
+          <div style={{ alignSelf: 'flex-end' }}>
+            <AddButton
+              onClick={(): void => {
+                dispatch(openDialog());
+              }}
+            />
+          </div>
+        }
         content={
-          <Flex column gap="gap.small">
-            <Input
-              placeholder="Name"
-              value={name}
-              onChange={(_, newProps): void => setName(newProps.value)}
-            />
-            <Input
-              placeholder="RTSP URL"
-              value={rtsp}
-              onChange={(_, newProps): void => setRtsp(newProps.value)}
-            />
-            <Input
-              placeholder="Model Name"
-              value={model_name}
-              onChange={(_, newProps): void => setModel_name(newProps.value)}
-            />
-          </Flex>
+          <div
+            style={{
+              height: '100%',
+              display: 'flex',
+              flexFlow: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Text size="larger" weight="semibold">
+              Add Camera
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                flexFlow: 'column',
+                height: '50%',
+                justifyContent: 'space-around',
+              }}
+            >
+              <Input
+                placeholder="Name"
+                value={name}
+                onChange={(_, newProps): void => setName(newProps.value)}
+              />
+
+              <Input
+                placeholder="RTSP URL"
+                value={rtsp}
+                onChange={(_, newProps): void => setRtsp(newProps.value)}
+              />
+              <Input
+                placeholder="Model Name"
+                value={model_name}
+                onChange={(_, newProps): void => setModel_name(newProps.value)}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%' }}>
+              <Button
+                primary
+                content="Submit"
+                disabled={name === '' || rtsp === '' || model_name === ''}
+                onClick={(): void => {
+                  dispatch(postCamera({ name, rtsp, model_name }));
+                  setName('');
+                  setRtsp('');
+                  setModel_name('');
+                  dispatch(closeDialog());
+                }}
+              />
+              <Button
+                content="Cancel"
+                onClick={(): void => {
+                  dispatch(closeDialog());
+                }}
+              />
+            </div>
+          </div>
         }
       />
-    </Flex>
+    </div>
   );
 };
 

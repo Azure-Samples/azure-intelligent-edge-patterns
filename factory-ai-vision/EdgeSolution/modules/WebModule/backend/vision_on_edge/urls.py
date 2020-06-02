@@ -24,10 +24,12 @@ from rest_framework import routers
 from cameras import views
 from . import views as site_views
 
+
 class OptionalSlashRouter(routers.DefaultRouter):
     def __init__(self):
         super(routers.DefaultRouter, self).__init__()
         self.trailing_slash = '/?'
+
 
 #router = ters.DefaultRouter(trailing_slash=False)
 router = OptionalSlashRouter()
@@ -51,8 +53,13 @@ urlpatterns = \
         path('api/streams/<int:stream_id>/capture', views.capture),
         path('api/projects/<int:project_id>/train', views.train),
         path('api/projects/<int:project_id>/export', views.export),
-        path('api/projects/<int:project_id>/train_performance', views.train_performance),
-        path('api/projects/<int:project_id>/inference_video_feed', views.inference_video_feed),
+        path('api/projects/<int:project_id>/train_performance',
+             views.train_performance),
+        path('api/projects/<int:project_id>/inference_video_feed',
+             views.inference_video_feed),
+        path('api/projects/<int:project_id>/pull_cv_project',
+             views.pull_cv_project),
+        path('api/settings/<int:setting_id>/list_projects', views.list_projects),
         path('api/projects/null/export', views.export_null),
         path('api/relabel', views.upload_relabel_image),
         path('api/relabel/update', views.relabel_update),
