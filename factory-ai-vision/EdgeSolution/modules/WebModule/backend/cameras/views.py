@@ -369,10 +369,13 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         return project
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
+class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
 #
 # Image Views
 #

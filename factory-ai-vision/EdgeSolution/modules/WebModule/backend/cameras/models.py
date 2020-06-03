@@ -316,6 +316,7 @@ class Project(models.Model):
     deployed = models.BooleanField(default=False)
     train_try_counter = models.IntegerField(default=0)
     train_success_counter = models.IntegerField(default=0)
+    is_demo = models.BooleanField(default=False)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
