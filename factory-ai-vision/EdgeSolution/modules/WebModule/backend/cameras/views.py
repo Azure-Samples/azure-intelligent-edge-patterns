@@ -21,6 +21,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import serializers, viewsets
 from rest_framework import status
+from rest_framework import filters
+from filters.mixins import FiltersMixin
 
 import requests
 
@@ -245,12 +247,17 @@ def export_null(request):
 class PartSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Part
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description', 'is_demo']
 
 
-class PartViewSet(viewsets.ModelViewSet):
+class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Part.objects.all()
     serializer_class = PartSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
+
 
 #
 # Location Views
@@ -549,6 +556,10 @@ def _train(project_id):
         for tag in tags:
             tag_dict[tag.name] = tag.id
 
+        # Update existing tags
+        # TODO: update tags
+        # trainer.update_tags(project_id, tag_id, new_tag)
+
         # Create tags on CustomVisioin Project
         # Maybe move to Project Model?
         logger.info("Creating tags before training...")
@@ -558,7 +569,8 @@ def _train(project_id):
             part_description = Part.objects.get(id=part_id).description
             project_partnames[part_name] = 'foo'
             if part_name not in tag_dict:
-                logger.info(f'Creating tag: {part_name}')
+                logger.info(
+                    f'Creating tag: {part_name}. Description: {part_description}')
                 tag = trainer.create_tag(
                     project_id=customvision_project_id,
                     name=part_name,
@@ -716,16 +728,6 @@ def _train(project_id):
             log=f'Status : failed {str(err_msg)}')
         return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
 
-@api_view()
-def test_model(request):
-    return JsonResponse({'parts':[
-        {'id': -1, 'name': 'Barrel'     , 'description': '1'},
-        {'id': -1, 'name': 'Bottle'     , 'description': '1'},
-        {'id': -1, 'name': 'Box'        , 'description': '1'},
-        {'id': -1, 'name': 'Hammer'     , 'description': '1'},
-        {'id': -1, 'name': 'Plastic bag', 'description': '1'},
-        {'id': -1, 'name': 'Screwdriver', 'description': '1'}
-    ]})
 
 @api_view()
 def train(request, project_id):
@@ -894,10 +896,11 @@ def pull_cv_project(request, project_id):
         tags = trainer.get_tags(customvision_project_id)
         part_objs = []
         for tag in tags:
-            logger.info(f"Creating Part {counter}")
+            logger.info(
+                f"Creating Part {counter}: {tag.name} {tag.description}")
             part_obj, created = Part.objects.update_or_create(
                 name=tag.name,
-                description=tag.description if tag.description else "Null Desb"
+                description=tag.description if tag.description else f"{tag.name}'s description"
             )
             counter += 1
             if not created:

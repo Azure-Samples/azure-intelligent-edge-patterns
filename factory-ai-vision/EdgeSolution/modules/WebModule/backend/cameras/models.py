@@ -50,8 +50,12 @@ def inference_module_url():
 # Create your models here.
 
 class Part(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
+    is_demo = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('name', 'is_demo')
 
     def __str__(self):
         return self.name
