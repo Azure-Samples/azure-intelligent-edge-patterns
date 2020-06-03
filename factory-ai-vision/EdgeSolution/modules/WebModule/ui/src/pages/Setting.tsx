@@ -213,6 +213,8 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
   const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
   const [customVisionProjectId, setCustomVisionProjectId] = useState('');
   const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject();
+  const [otherLoading, setOtherLoading] = useState(false);
+  const [otherError, setOtherError] = useState<Error>(null);
 
   const onDropdownChange = (_, data): void => {
     if (data.value === null) setCustomVisionProjectId(customVisionProjectId);
@@ -220,15 +222,17 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
   };
 
   const onLoad = (): void => {
+    setOtherLoading(true);
     Axios.get(
       `api/projects/${projectData.id}/pull_cv_project?customvision_project_id=${customVisionProjectId}`,
     )
-      .then(({ data }) => console.log(data))
-      .catch((err) => console.error(err));
+      .catch((err) => setOtherError(err))
+      .finally(() => setOtherLoading(false));
   };
 
   useEffect(() => {
     if (settingDataId !== -1) {
+      setOtherLoading(true);
       Axios.get(`/api/settings/${settingDataId}/list_projects`)
         .then(({ data }) => {
           const items: DropdownItemProps[] = Object.entries(data).map(([key, value]) => ({
@@ -240,11 +244,13 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           setDropdownItems(items);
           return void 0;
         })
-        .catch((e) => {
-          console.error(e);
-        });
+        .catch((e) => setOtherError(e))
+        .finally(() => setOtherLoading(false));
     }
   }, [settingDataId]);
+
+  const loading = otherLoading || isProjectLoading;
+  const error = [otherError, projectError].filter((e) => !!e);
 
   return (
     <>
@@ -254,7 +260,14 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           Previous Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} />
-        <Button primary content="Load" disabled={!customVisionProjectId} onClick={onLoad} />
+        <Button
+          primary
+          content="Load"
+          disabled={!customVisionProjectId || loading}
+          onClick={onLoad}
+          loading={loading}
+        />
+        {error.length ? <Alert danger content={`Failed to load ${error.join(', ')}`} dismissible /> : null}
       </Flex>
     </>
   );
