@@ -24,7 +24,6 @@ from rest_framework import status
 
 import requests
 
-
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
 
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
@@ -332,6 +331,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             'location',
             'parts',
             'download_uri',
+            'customvision_project_id',
             'needRetraining',
             'accuracyRangeMin',
             'accuracyRangeMax',
@@ -340,6 +340,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'setting': {'required': False},
             'download_uri': {'required': False},
+            'customvision_project_id': {'required': False}
         }
 
     def create(self, validated_data):
@@ -554,10 +555,14 @@ def _train(project_id):
         counter = 0
         for part_id in part_ids:
             part_name = Part.objects.get(id=part_id).name
+            part_description = Part.objects.get(id=part_id).description
             project_partnames[part_name] = 'foo'
             if part_name not in tag_dict:
                 logger.info(f'Creating tag: {part_name}')
-                tag = trainer.create_tag(customvision_project_id, part_name)
+                tag = trainer.create_tag(
+                    project_id=customvision_project_id,
+                    name=part_name,
+                    description=part_description)
                 tag_dict[tag.name] = tag.id
                 counter += 1
         project_changed = project_changed or (counter > 0)
@@ -833,6 +838,7 @@ def list_projects(request, setting_id):
 def pull_cv_project(request, project_id):
     """
     Delete the local project, parts and images. Pull the remote project from Custom Vision.
+    TODO: open a thread
     """
     logger.info("Pulling CustomVision Project")
     rs = {}
@@ -851,52 +857,64 @@ def pull_cv_project(request, project_id):
 
     try:
         project = trainer.get_project(project_id=customvision_project_id)
-#         logger.info("Deleting all parts...")
-#         Part.object.all().delete()
-#         logger.info("Deleting all images...")
-#         Image.object.all().delete()
-#
-#         logger.info("Creating Parts...")
-#         counter = 0
-#         tags = trainer.get_tags(customvision_project_id)
-#         for tag in tags:
-#             logger.info(f"Creating Part {counter}")
-#             part_obj, created = Part.update_or_create(
-#                 name=tag.name,
-#                 description="From remote"
-#             )
-#             counter += 1
-#
-#         logger.info("Pulling Tagged Images...")
-#         counter = 0
-#         tags = trainer.get_tags(customvision_project_id)
-#         for tag in tags:
-#             logger.info(f"Creating Part {counter}")
-#             part_obj, created = Part.update_or_create(
-#                 name=tag.name,
-#                 description="From remote"
-#             )
-#             counter += 1
-#         logger.info(f"Pulled {counter} images")
-#         logger.info("Pulling Tagged Images... End")
-#
-#         logger.info("Pulling Untagged Images...")
-#         counter = 0
-#         tags = trainer.get_tags(customvision_project_id)
-#         for tag in tags:
-#             logger.info(f"Creating Part {counter}")
-#             part_obj, created = Part.update_or_create(
-#                 name=tag.name,
-#                 description="From remote"
-#             )
-#             counter += 1
-#         logger.info(f"Created {counter} images")
-#         logger.info("Pulling Untagged Images... End")
-        logger.info("Sync End")
+        logger.info(f"Setting Project...")
+        project_obj.customvision_project_id = customvision_project_id
+        project_obj.save()
+        logger.info(f"Setting Project... End")
+
+        logger.info("Deleting all parts...")
+        Part.objects.all().delete()
+        logger.info("Deleting all images...")
+        Image.objects.all().delete()
+
+        logger.info("Pulling Parts...")
+        counter = 0
+        tags = trainer.get_tags(customvision_project_id)
+        part_objs = []
+        for tag in tags:
+            logger.info(f"Creating Part {counter}")
+            part_obj, created = Part.objects.update_or_create(
+                name=tag.name,
+                description=tag.description if tag.description else "Null Desb"
+            )
+            counter += 1
+            if not created:
+                raise
+            project_obj.parts.add(part_obj)
+        logger.info(f"Pulled {counter} Parts")
+        logger.info("Pulling Parts... End")
+
+        logger.info("Pulling Tagged Images...")
+        counter = 0
+        imgs = trainer.get_tagged_images(customvision_project_id)
+        for img in imgs:
+            for region in img.regions:
+                logger.info(f"*** img {counter}")
+                logger.info(f"Downloading img {img.id}")
+                part_obj = Part.objects.get(name=region.tag_name)
+                # TODO: This will not work if single image has multiple
+                # regions with same tags
+                # In another words, only 1 picture and 1 part will be created.
+                img_obj, created = Image.objects.update_or_create(
+                    part=part_obj,
+                    remote_url=img.original_image_uri
+                )
+                if not created:
+                    raise
+                img_obj.get_remote_image()
+                img_obj.set_labels(
+                    left=region.left,
+                    top=region.top,
+                    width=region.width,
+                    height=region.height)
+                counter += 1
+
+        logger.info(f"Pulled {counter} images")
+        logger.info("Pulling Tagged Images... End")
     except CustomVisionErrorException as e:
         logger.error(f"CustomVisionErrorException: {e.message}")
-        logger.error("Probably cause by invalid customvision project id")
-        logger.error("Do nothing...")
+        logger.error(
+            "Probably cause by invalid customvision project id. Do nothing...")
         return JsonResponse({
             'status': 'failed',
             'log': f'Status : failed because invalid customvision project id'})
@@ -909,5 +927,4 @@ def pull_cv_project(request, project_id):
             'log': f'Status : failed {str(err_msg)}'})
 
     logger.info("Pulling CustomVision Project... End")
-    rs['status'] = 'success'
-    return JsonResponse(rs)
+    return JsonResponse({'status': 'ok'})

@@ -57,6 +57,8 @@ urlpatterns = \
              views.train_performance),
         path('api/projects/<int:project_id>/inference_video_feed',
              views.inference_video_feed),
+        # path('api/settings/<int:setting_id>/clone_cv_project',
+        #     views.clone_cv_project),
         path('api/projects/<int:project_id>/pull_cv_project',
              views.pull_cv_project),
         path('api/settings/<int:setting_id>/list_projects', views.list_projects),
