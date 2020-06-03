@@ -56,13 +56,32 @@ class CameraConfig(AppConfig):
 
             create_demo = True
             if create_demo:
-                from cameras.models import Part
+                from cameras.models import Part, Camera, Location
                 logger.info("Creating Demo")
                 for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
-                    part, created = Part.objects.update_or_create(
+                    demo_part, created = Part.objects.update_or_create(
                         name=partname,
                         is_demo=True,
                         defaults={
                             'description': "Demo"
                         }
                     )
+
+                demo_camera, created = Camera.objects.update_or_create(
+                    name="Demo Video",
+                    is_demo=True,
+                    defaults={
+                        'model_name': "Demo Model",
+                        'rtsp': "sample_video/video.mp4",
+                        'area': ""
+                    }
+                )
+
+                demo_location, created = Location.objects.update_or_create(
+                    name="Demo Location",
+                    is_demo=True,
+                    defaults={
+                        'description': "Demo Model",
+                        'coordinates': "0,0",
+                    }
+                )

@@ -267,12 +267,16 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
 class LocationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Location
-        fields = ['id', 'name', 'description', 'coordinates']
+        fields = ['id', 'name', 'description', 'coordinates', 'is_demo']
 
 
-class LocationViewSet(viewsets.ModelViewSet):
+class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
 #
 # Camera Views
 #
@@ -281,17 +285,22 @@ class LocationViewSet(viewsets.ModelViewSet):
 class CameraSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Camera
-        fields = ['id', 'name', 'rtsp', 'area']
+        fields = ['id', 'name', 'rtsp', 'area', 'is_demo']
 
 
-class CameraViewSet(viewsets.ModelViewSet):
+class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
-
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
 
 #
 # Settings Views
 #
+
+
 class SettingSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Setting
