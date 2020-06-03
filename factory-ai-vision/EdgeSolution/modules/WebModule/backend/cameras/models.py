@@ -92,6 +92,7 @@ class Image(models.Model):
             from django.core import files
 
             self.image.save(file_name, files.File(fp))
+            fp.close()
             self.save()
         else:
             raise
