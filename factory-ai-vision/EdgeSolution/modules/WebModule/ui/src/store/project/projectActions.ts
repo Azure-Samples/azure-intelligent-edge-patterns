@@ -146,6 +146,7 @@ export const thunkPostProject = (
   selectedLocations,
   selectedParts,
   selectedCamera,
+  isTestModel,
 ): ProjectThunk => (dispatch, getState): Promise<number> => {
   const isProjectEmpty = projectId === null;
   const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
@@ -172,15 +173,16 @@ export const thunkPostProject = (
   })
     .then(({ data }) => {
       dispatch(postProjectSuccess());
-      getTrain(data.id);
+      getTrain(data.id, isTestModel);
       return data.id;
     })
     .catch((err) => {
       dispatch(postProjectFail(err));
     }) as Promise<number>;
 };
-const getTrain = (projectId): void => {
-  Axios.get(`/api/projects/${projectId}/train`).catch((err) => console.error(err));
+const getTrain = (projectId, isTestModel: boolean): void => {
+  const url = isTestModel ? `/api/projects/${projectId}/train?demo=True` : `/api/projects/${projectId}/train`;
+  Axios.get(url).catch((err) => console.error(err));
 };
 
 export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {

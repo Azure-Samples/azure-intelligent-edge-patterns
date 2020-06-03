@@ -86,7 +86,7 @@ export const PartIdentification: React.FC = () => {
 
   const handleSubmitConfigure = (): void => {
     ((dispatch(
-      thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera),
+      thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
     ) as unknown) as Promise<number>)
       .then((id) => {
         if (typeof id !== 'undefined') history.push(`/cameras/detail?name=${selectedCamera.name}`);
