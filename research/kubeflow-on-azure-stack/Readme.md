@@ -24,8 +24,8 @@ tenant ID, Service Principal ID and secret.
 
 ## Login to the desired cloud
 
-We recommend you run the following commands from an Ubuntu vm iside of your Azure Stack.
-If you do not already have a vm, create it using web Portal.
+We recommend you run the following commands from an Ubuntu vm inside of your Azure Stack.
+If you do not already have a vm, create it using web Portal(ask your Azure Stack administrator for the link).
 
 ![](kubeflow-on-azure-stack/creating_vm.png)
 
