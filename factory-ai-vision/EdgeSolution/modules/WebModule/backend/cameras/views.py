@@ -716,9 +716,31 @@ def _train(project_id):
             log=f'Status : failed {str(err_msg)}')
         return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
 
+@api_view()
+def test_model(request):
+    return JsonResponse({'parts':[
+        {'id': -1, 'name': 'Barrel'     , 'description': '1'},
+        {'id': -1, 'name': 'Bottle'     , 'description': '1'},
+        {'id': -1, 'name': 'Box'        , 'description': '1'},
+        {'id': -1, 'name': 'Hammer'     , 'description': '1'},
+        {'id': -1, 'name': 'Plastic bag', 'description': '1'},
+        {'id': -1, 'name': 'Screwdriver', 'description': '1'}
+    ]})
 
 @api_view()
 def train(request, project_id):
+
+    is_demo = request.query_params.get('demo')
+    if is_demo and (is_demo.lower() == 'true'):
+        logger.info('demo... bypass training process')
+        project_obj = Project.objects.get(pk=project_id)
+        obj, created = project_obj.upcreate_training_status(
+            status='ok',
+            log='Status : demo ok'
+        )
+        # FIXME pass the new model info to inference server (willy implement)
+        return JsonResponse({'status': 'ok'})
+
     logger.info('sleeping')
     return _train(project_id)
 
