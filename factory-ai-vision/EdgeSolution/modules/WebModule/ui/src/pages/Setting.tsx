@@ -67,9 +67,6 @@ export const Setting = (): JSX.Element => {
     reducer,
     initialState,
   );
-  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
-  const [customVisionProjectId, setCustomVisionProjectId] = useState('');
-  const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject();
 
   const notEmpty = settingData.id !== -1;
 
@@ -101,25 +98,6 @@ export const Setting = (): JSX.Element => {
         console.error(err);
       });
   }, []);
-
-  useEffect(() => {
-    if (settingData.id !== -1) {
-      Axios.get(`/api/settings/${settingData.id}/list_projects`)
-        .then(({ data }) => {
-          const items: DropdownItemProps[] = Object.entries(data).map(([key, value]) => ({
-            header: value,
-            content: {
-              key,
-            },
-          }));
-          setDropdownItems(items);
-          return void 0;
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    }
-  }, [settingData.id]);
 
   const onSave = (): void => {
     const isSettingEmpty = settingData.id === -1;
@@ -169,19 +147,6 @@ export const Setting = (): JSX.Element => {
       });
   };
 
-  const onDropdownChange = (_, data): void => {
-    if (data.value === null) setCustomVisionProjectId(customVisionProjectId);
-    else setCustomVisionProjectId(data.value.content.key);
-  };
-
-  const onLoad = (): void => {
-    Axios.get(
-      `api/projects/${projectData.id}/pull_cv_project?customvision_project_id=${customVisionProjectId}`,
-    )
-      .then(({ data }) => console.log(data))
-      .catch((err) => console.error(err));
-  };
-
   return (
     <>
       <h1>Setting</h1>
@@ -228,18 +193,58 @@ export const Setting = (): JSX.Element => {
             />
           ) : null}
         </Flex>
-        {notEmpty && (
-          <>
-            <Divider color="grey" vertical styles={{ height: '100%' }} />
-            <Flex column gap="gap.large">
-              <Text size="large" weight="bold">
-                Previous Projects:{' '}
-              </Text>
-              <Dropdown items={dropdownItems} onChange={onDropdownChange} />
-              <Button primary content="Load" disabled={!customVisionProjectId} onClick={onLoad} />
-            </Flex>
-          </>
-        )}
+        {notEmpty && <PreviousProjectPanel settingDataId={settingData.id} />}
+      </Flex>
+    </>
+  );
+};
+
+const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingDataId }) => {
+  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
+  const [customVisionProjectId, setCustomVisionProjectId] = useState('');
+  const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject();
+
+  const onDropdownChange = (_, data): void => {
+    if (data.value === null) setCustomVisionProjectId(customVisionProjectId);
+    else setCustomVisionProjectId(data.value.content.key);
+  };
+
+  const onLoad = (): void => {
+    Axios.get(
+      `api/projects/${projectData.id}/pull_cv_project?customvision_project_id=${customVisionProjectId}`,
+    )
+      .then(({ data }) => console.log(data))
+      .catch((err) => console.error(err));
+  };
+
+  useEffect(() => {
+    if (settingDataId !== -1) {
+      Axios.get(`/api/settings/${settingDataId}/list_projects`)
+        .then(({ data }) => {
+          const items: DropdownItemProps[] = Object.entries(data).map(([key, value]) => ({
+            header: value,
+            content: {
+              key,
+            },
+          }));
+          setDropdownItems(items);
+          return void 0;
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
+  }, [settingDataId]);
+
+  return (
+    <>
+      <Divider color="grey" vertical styles={{ height: '100%' }} />
+      <Flex column gap="gap.large">
+        <Text size="large" weight="bold">
+          Previous Projects:{' '}
+        </Text>
+        <Dropdown items={dropdownItems} onChange={onDropdownChange} />
+        <Button primary content="Load" disabled={!customVisionProjectId} onClick={onLoad} />
       </Flex>
     </>
   );
