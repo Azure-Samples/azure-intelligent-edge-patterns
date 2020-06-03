@@ -15,6 +15,8 @@ import Axios, { AxiosRequestConfig } from 'axios';
 import { useProject } from '../hooks/useProject';
 
 const initialState = {
+  loading: false,
+  error: null,
   current: {
     id: -1,
     key: '',
@@ -39,8 +41,15 @@ type Action =
       payload: string;
     }
   | {
-      type: 'UPDATE_ALL';
+      type: 'REQUEST_START';
+    }
+  | {
+      type: 'REQUEST_SUCCESS';
       payload: SettingDataState;
+    }
+  | {
+      type: 'REQUEST_FAIL';
+      error: Error;
     };
 
 type SettingReducer = Reducer<SettingDataState, Action>;
@@ -51,34 +60,37 @@ const reducer: SettingReducer = (state, action) => {
       return { ...state, current: { ...state.current, key: action.payload } };
     case 'UPDATE_NAMESPACE':
       return { ...state, current: { ...state.current, namespace: action.payload } };
-    case 'UPDATE_ALL':
+    case 'REQUEST_START':
+      return { ...state, loading: true };
+    case 'REQUEST_SUCCESS':
       return action.payload;
+    case 'REQUEST_FAIL':
+      return { ...state, error: action.error };
     default:
       return state;
   }
 };
 
 export const Setting = (): JSX.Element => {
-  const [saveStatus, setSaveStatus] = useState({
-    success: false,
-    content: '',
-  });
-  const [{ current: settingData, origin: originSettingData }, dispatch] = useReducer<SettingReducer>(
-    reducer,
-    initialState,
-  );
+  const [{ loading, error, current: settingData, origin: originSettingData }, dispatch] = useReducer<
+    SettingReducer
+  >(reducer, initialState);
 
   const notEmpty = settingData.id !== -1;
 
   const cannotUpdateOrSave = R.equals(settingData, originSettingData);
 
   useEffect(() => {
+    dispatch({ type: 'REQUEST_START' });
+
     Axios.get('/api/settings/')
       .then(({ data }) => {
         if (data.length > 0) {
           dispatch({
-            type: 'UPDATE_ALL',
+            type: 'REQUEST_SUCCESS',
             payload: {
+              loading: false,
+              error: null,
               current: {
                 id: data[0].id,
                 key: data[0].training_key,
@@ -95,7 +107,7 @@ export const Setting = (): JSX.Element => {
         return void 0;
       })
       .catch((err) => {
-        console.error(err);
+        dispatch({ type: 'REQUEST_FAIL', error: err });
       });
   }, []);
 
@@ -122,12 +134,15 @@ export const Setting = (): JSX.Element => {
           method: 'PUT',
         };
 
+    dispatch({ type: 'REQUEST_START' });
+
     Axios(url, requestConfig)
       .then(({ data }) => {
-        setSaveStatus({ success: true, content: 'Save Setting Successfully' });
         dispatch({
-          type: 'UPDATE_ALL',
+          type: 'REQUEST_SUCCESS',
           payload: {
+            loading: false,
+            error: null,
             current: {
               id: data.id,
               key: data.training_key,
@@ -140,10 +155,12 @@ export const Setting = (): JSX.Element => {
             },
           },
         });
+        // Reload page so PreviousProjectPanel can query again
+        window.location.reload();
         return void 0;
       })
       .catch((err) => {
-        setSaveStatus({ success: false, content: `Fail to save settings: /n ${err.toString()}` });
+        dispatch({ type: 'REQUEST_FAIL', error: err });
       });
   };
 
@@ -177,21 +194,14 @@ export const Setting = (): JSX.Element => {
             />
           </Flex>
           <Flex gap="gap.large">
-            <Button primary onClick={onSave} disabled={cannotUpdateOrSave}>
+            <Button primary onClick={onSave} disabled={cannotUpdateOrSave || loading} loading={loading}>
               {notEmpty ? 'Update' : 'Save'}
             </Button>
             <Button primary as={Link} to="/">
               Cancel
             </Button>
           </Flex>
-          {saveStatus.content ? (
-            <Alert
-              success={saveStatus.success}
-              danger={!saveStatus.success}
-              content={saveStatus.content}
-              dismissible
-            />
-          ) : null}
+          {error ? <Alert danger content={`Failed to save ${error}`} dismissible /> : null}
         </Flex>
         {notEmpty && <PreviousProjectPanel settingDataId={settingData.id} />}
       </Flex>
