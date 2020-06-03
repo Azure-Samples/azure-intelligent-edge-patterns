@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useReducer, Reducer } from 'react';
 import * as R from 'ramda';
-import { Divider, Flex, Text, Input, Button, Alert, Dropdown } from '@fluentui/react-northstar';
+import {
+  Divider,
+  Flex,
+  Text,
+  Input,
+  Button,
+  Alert,
+  Dropdown,
+  DropdownItemProps,
+} from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
-import Axios from 'axios';
+import Axios, { AxiosRequestConfig } from 'axios';
+import { useProject } from '../hooks/useProject';
 
 const initialState = {
   current: {
@@ -57,6 +67,13 @@ export const Setting = (): JSX.Element => {
     reducer,
     initialState,
   );
+  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
+  const [customVisionProjectId, setCustomVisionProjectId] = useState('');
+  const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject();
+
+  const notEmpty = settingData.id !== -1;
+
+  const cannotUpdateOrSave = R.equals(settingData, originSettingData);
 
   useEffect(() => {
     Axios.get('/api/settings/')
@@ -85,17 +102,49 @@ export const Setting = (): JSX.Element => {
       });
   }, []);
 
+  useEffect(() => {
+    if (settingData.id !== -1) {
+      Axios.get(`/api/settings/${settingData.id}/list_projects`)
+        .then(({ data }) => {
+          const items: DropdownItemProps[] = Object.entries(data).map(([key, value]) => ({
+            header: value,
+            content: {
+              key,
+            },
+          }));
+          setDropdownItems(items);
+          return void 0;
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
+  }, [settingData.id]);
+
   const onSave = (): void => {
     const isSettingEmpty = settingData.id === -1;
     const url = isSettingEmpty ? `/api/settings/` : `/api/settings/${settingData.id}/`;
+    const requestConfig: AxiosRequestConfig = isSettingEmpty
+      ? {
+          data: {
+            training_key: settingData.key,
+            endpoint: settingData.namespace,
+            name: '',
+            iot_hub_connection_string: '',
+            device_id: '',
+            module_id: '',
+          },
+          method: 'POST',
+        }
+      : {
+          data: {
+            training_key: settingData.key,
+            endpoint: settingData.namespace,
+          },
+          method: 'PUT',
+        };
 
-    Axios(url, {
-      data: {
-        training_key: settingData.key,
-        endpoint: settingData.namespace,
-      },
-      method: isSettingEmpty ? 'POST' : 'PUT',
-    })
+    Axios(url, requestConfig)
       .then(({ data }) => {
         setSaveStatus({ success: true, content: 'Save Setting Successfully' });
         dispatch({
@@ -120,9 +169,18 @@ export const Setting = (): JSX.Element => {
       });
   };
 
-  const notEmpty = settingData.id !== -1;
+  const onDropdownChange = (_, data): void => {
+    if (data.value === null) setCustomVisionProjectId(customVisionProjectId);
+    else setCustomVisionProjectId(data.value.content.key);
+  };
 
-  const cannotUpdateOrSave = R.equals(settingData, originSettingData);
+  const onLoad = (): void => {
+    Axios.get(
+      `api/projects/${projectData.id}/pull_cv_project?customvision_project_id=${customVisionProjectId}`,
+    )
+      .then(({ data }) => console.log(data))
+      .catch((err) => console.error(err));
+  };
 
   return (
     <>
@@ -177,8 +235,8 @@ export const Setting = (): JSX.Element => {
               <Text size="large" weight="bold">
                 Previous Projects:{' '}
               </Text>
-              <Dropdown />
-              <Button primary content="Load" />
+              <Dropdown items={dropdownItems} onChange={onDropdownChange} />
+              <Button primary content="Load" disabled={!customVisionProjectId} onClick={onLoad} />
             </Flex>
           </>
         )}
