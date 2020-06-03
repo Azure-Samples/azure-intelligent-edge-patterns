@@ -56,7 +56,7 @@ class CameraConfig(AppConfig):
 
             create_demo = True
             if create_demo:
-                from cameras.models import Part, Camera, Location
+                from cameras.models import Part, Camera, Location, Project
                 logger.info("Creating Demo")
                 for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
                     demo_part, created = Part.objects.update_or_create(
@@ -83,5 +83,19 @@ class CameraConfig(AppConfig):
                     defaults={
                         'description': "Demo Model",
                         'coordinates': "0,0",
+                    }
+                )
+
+                default_setting, created = Setting.objects.update_or_create(
+                    name=DEFAULT_SETTING_NAME)
+                demo_project, created = Project.objects.update_or_create(
+                    is_demo=True,
+                    defaults={
+                        'setting': default_setting,
+                        'camera': demo_camera,
+                        'location': demo_location,
+                        'customvision_project_id': 'Blank',
+                        'customvision_project_name': 'Blank',
+
                     }
                 )
