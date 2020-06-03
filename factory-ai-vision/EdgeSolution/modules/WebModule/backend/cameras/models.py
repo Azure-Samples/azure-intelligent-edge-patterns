@@ -11,6 +11,8 @@ from django.db import models
 from django.db.models.signals import post_save, post_delete, pre_save, post_save, m2m_changed
 import cv2
 import requests
+from io import BytesIO
+from PIL import Image as PILImage
 
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
@@ -48,8 +50,12 @@ def inference_module_url():
 # Create your models here.
 
 class Part(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
+    is_demo = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('name', 'is_demo')
 
     def __str__(self):
         return self.name
@@ -59,6 +65,7 @@ class Location(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
     coordinates = models.CharField(max_length=200)
+    is_demo = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -71,6 +78,56 @@ class Image(models.Model):
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)
     uploaded = models.BooleanField(default=False)
+    remote_url = models.CharField(max_length=1000, null=True)
+
+    def get_remote_image(self):
+        if self.remote_url:
+            resp = requests.get(self.remote_url)
+            if resp.status_code != requests.codes.ok:
+                raise
+            fp = BytesIO()
+            fp.write(resp.content)
+            file_name = f"{self.part.name}-{self.remote_url.split('/')[-1]}"
+            logger.info(f"Saving as name {file_name}")
+            from django.core import files
+
+            self.image.save(file_name, files.File(fp))
+            fp.close()
+            self.save()
+        else:
+            raise
+
+    def set_labels(self, left: float, top: float, width: float, height: float):
+        try:
+            if left > 1 or top > 1 or width > 1 or height > 1:
+                raise ValueError(
+                    f"{left}, {top}, {width}, {height} must be less than 1")
+            elif left < 0 or top < 0 or width < 0 or height < 0:
+                raise ValueError(
+                    f"{left}, {top}, {width}, {height} must be greater than 0")
+            elif (left + width) > 1 or (top + height) > 1:
+                raise ValueError(
+                    f"left + width:{left + width}, top + height:{top + height} must be less than 1")
+            from PIL import Image
+            with Image.open(self.image) as img:
+                logger.info(f"Successfully open img {self.image}")
+                size_width, size_height = img.size
+                label_x1 = int(size_width*left)
+                label_y1 = int(size_height*top)
+                label_x2 = int(size_width*(left+width))
+                label_y2 = int(size_height*(top+height))
+                self.labels = json.dumps([{
+                    'x1': label_x1,
+                    'y1': label_y1,
+                    'x2': label_x2,
+                    'y2': label_y2}
+                ])
+                self.save()
+                logger.info(f"Successfully save labels to {self.labels}")
+        except ValueError:
+            logger.exception("Set Annotation: Region Error")
+        except:
+            logger.exception("Unexpected Error")
 
 
 class Annotation(models.Model):
@@ -226,6 +283,7 @@ class Camera(models.Model):
     rtsp = models.CharField(max_length=1000)
     model_name = models.CharField(max_length=200)
     area = models.CharField(max_length=1000, blank=True)
+    is_demo = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -258,6 +316,7 @@ class Project(models.Model):
     deployed = models.BooleanField(default=False)
     train_try_counter = models.IntegerField(default=0)
     train_success_counter = models.IntegerField(default=0)
+    is_demo = models.BooleanField(default=False)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -277,7 +336,16 @@ class Project(models.Model):
         instance.setting.save()
         setting = instance.setting
 
-        if setting.is_trainer_valid:
+        if setting.is_trainer_valid and instance.customvision_project_id:
+            logger.info(
+                f'Updating CustomVision id: {instance.customvision_project_id}')
+            logger.info('Assume Syncing')
+            try:
+                trainer = setting.revalidate_and_get_trainer_obj()
+                trainer.get_project(instance.customvision_project_id)
+            except:
+                logger.exception("Unexpected error")
+        elif setting.is_trainer_valid:
             logger.info('Creating Project on Custom Vision')
             project = setting.create_project(name)
             logger.info(f'Got Custom Vision Project Id: {project.id}')
@@ -291,6 +359,7 @@ class Project(models.Model):
     def post_save(sender, instance, created, update_fields, **kwargs):
         logger.info("Project post_save")
         logger.info(f'Saving instance: {instance} {update_fields}')
+
         if update_fields is not None:
             return
         if not created:
