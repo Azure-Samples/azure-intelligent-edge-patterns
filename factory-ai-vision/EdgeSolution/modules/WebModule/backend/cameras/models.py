@@ -420,7 +420,7 @@ class Project(models.Model):
             update_fields.append('train_try_counter')
             if app_insight_on:
                 app_insight_logger.info(
-                    f"Project: {self.customvision_project_name} train attempt count: {self.train_try_counter}")
+                    f"Project: {self.customvision_project_name}. Train attempt count: {self.train_try_counter}")
 
             # Get CustomVisionClient
             trainer = self.setting.revalidate_and_get_trainer_obj()
