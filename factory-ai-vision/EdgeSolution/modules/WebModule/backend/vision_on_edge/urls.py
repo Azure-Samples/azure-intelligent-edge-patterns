@@ -65,6 +65,7 @@ urlpatterns = \
         path('api/projects/null/export', views.export_null),
         path('api/relabel', views.upload_relabel_image),
         path('api/relabel/update', views.relabel_update),
+        path('api/appinsight/key', views.instrumentation_key),
         path('admin/', admin.site.urls),
         url('^', site_views.UIAppView.as_view())
     ]
