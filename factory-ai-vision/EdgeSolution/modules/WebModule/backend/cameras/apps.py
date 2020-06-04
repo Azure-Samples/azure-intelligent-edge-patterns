@@ -1,7 +1,8 @@
 from django.apps import AppConfig
-import sys
 from config import *
+
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
 
