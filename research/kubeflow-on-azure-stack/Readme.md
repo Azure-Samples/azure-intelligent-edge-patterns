@@ -19,7 +19,9 @@ The reader is expected to be familiar with the following:
 - [Jupyter](https://jupyter.org/).
 - [Bash in Azure Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
 
-IMPORTANT: Ask your cloud administrator which settings you need to use for the cloud you want to deploy the Kuberflow cluster:
+IMPORTANT: Ask your cloud administrator which settings you need to use for the cloud you want
+to deploy the Kuberflow cluster(you might also be able to retrieve them yourslef if you have
+the access rights to do so, see the screen shots below):
 
   - your Azure Subscription
   - tenant ID
@@ -29,6 +31,25 @@ IMPORTANT: Ask your cloud administrator which settings you need to use for the c
   - endpoint resource manager
   - storage endpoint
   - keyvault dns or some other security mechanisms your team is using
+
+Here is how you could find out your subscription, tenant Id, Service Principal ID, and create a secret.
+Make sure you are on Azure Hub's portal(1), make sure you are on the correct AD (2), this is how to browse to `Subscriptions`
+if it is not already pinned on your dashboard.
+![](kubeflow-on-azure-stack/subscriptions01.png)
+
+Select the subscription name you would like to use(or create a new one)
+![](kubeflow-on-azure-stack/subscriptions02.png)
+
+This is how you access Access Control, Click on `Access Control(IAM)`:
+![](kubeflow-on-azure-stack/subscriptions03.png)
+
+Add(2) or select a Service Principal Name(3) if you already have it:
+![](kubeflow-on-azure-stack/subscriptions04.png)
+
+On this screen you can find your `Tenant ID` and `App ID`:
+![](kubeflow-on-azure-stack/subscriptions05.png)
+
+Contact you cloud administrator for all this information before proceeding further.
 
 ## Login to the desired cloud
 
