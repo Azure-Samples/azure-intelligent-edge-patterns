@@ -19,12 +19,58 @@ The reader is expected to be familiar with the following:
 - [Jupyter](https://jupyter.org/).
 - [Bash in Azure Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
 
-You need to have an Azure Subscription, or create one. With the subscription you will have the
-tenant ID, Service Principal ID and secret.
+IMPORTANT: Ask your cloud administrator which settings you need to use for the cloud you want
+to deploy the Kuberflow cluster(you might also be able to retrieve them yourslef if you have
+the access rights to do so, see the screen shots below):
+
+  - your Azure Subscription
+  - tenant ID
+  - Service Principal ID
+  - and secret(associated with that Service Principal ID)
+  - cloud name (`DEMOE2` in this tutorial, your team might be working with multiple public or on-prem clouds)
+  - endpoint resource manager
+  - storage endpoint
+  - keyvault dns or some other security mechanisms your team is using
+
+Here is how you could find out your subscription, tenant Id, Service Principal ID, and create a secret.
+Make sure you are on Azure Hub's portal(1), make sure you are on the correct AD (2), this is how to browse to `Subscriptions`
+if it is not already pinned on your dashboard.
+![](kubeflow-on-azure-stack/subscriptions01.png)
+
+Select the subscription name you would like to use(or create a new one)
+![](kubeflow-on-azure-stack/subscriptions02.png)
+
+This is how you access Access Control, Click on `Access Control(IAM)`:
+![](kubeflow-on-azure-stack/subscriptions03.png)
+
+Add(2) or select a Service Principal Name(3) if you already have it:
+![](kubeflow-on-azure-stack/subscriptions04.png)
+
+On this screen you can find your `Tenant ID` and `App ID`:
+![](kubeflow-on-azure-stack/subscriptions05.png)
+
+Contact you cloud administrator for all this information before proceeding further.
 
 ## Login to the desired cloud
 
-If you do not already have Azure CLI, install it. See [Install Azure CLI with apt](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest) if you are using Ubuntu, or similar for other OSes.
+We recommend you run the following commands from an Ubuntu vm inside of your Azure Stack.
+If you do not already have a vm, create it using web Portal(ask your Azure Stack administrator for the link).
+
+![](kubeflow-on-azure-stack/creating_vm.png)
+
+Once the vm is created, you can ssh or rdp to it and open a terminal. Click button `Connect` in the details
+of the vm in Portal to see which user name and public ip address you can use, or download the rdp configuration.
+If your vm's public ip is `12.34.56.78` and you created your vm specifying userid `azureuser`, it would look like so on MacOS, Linux:
+
+    $ ssh azureuser@12.34.56.78
+
+Or, on Windows, in command prompt, PowerShell, or a terminal of your choice:
+
+    c:\Work> ssh ssh azureuser@12.34.56.78
+
+You can also use [Ubuntu sub-system](https://docs.microsoft.com/en-us/windows/wsl/install-win10) that it part of Windows 10.
+
+Some images already have Azure CLI, in case your vm does not, see [Install Azure CLI with apt](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest).
 
     $ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
     ...
@@ -33,7 +79,14 @@ If you do not already have Azure CLI, install it. See [Install Azure CLI with ap
     0 upgraded, 1 newly installed, 0 to remove and 34 not upgraded.
     ...
 
-Register with the correct cloud(if you work with multiple):
+Ask your cloud administrator which settings you need to use for the cloud you want to deploy the Kuberflow cluster(your team might be working with multiple public or on-prem clouds):
+
+  - your cloud name (`DEMOE2` in this tutorial)
+  - endpoint resource manager
+  - storage endpoint
+  - keyvault dns or some other security mechanisms your team is using
+
+Then register with the correct cloud.
 
     $ az cloud register -n DEMOE2 --endpoint-resource-manager "https://management.demoe2.example.com" --suffix-storage-endpoint "portal.demoe2.example.com" --suffix-keyvault-dns ".vault.portal.demoe2.example.com"
     The cloud 'DEMOE2' is registered.
@@ -42,11 +95,12 @@ Set it as active:
 
     $ az cloud set -n DEMOE2
 
-It may be helpful to update it to the desired API version:
+It may be helpful to update it to the desired API version(`2019-03-01-hybrid` in the command below):
 
     $ az cloud update --profile 2019-03-01-hybrid
 
-Login to the desired cloud:
+Login to the desired cloud(you could look up the information in the Portal, or create a new service principal
+if your cloud administrator gave you this entitlement):
 
     $ az login --tenant stackdemo.example.com --service-principal -u 1234567-1234-123-123 -p SUPERSECRET
     [
@@ -69,7 +123,7 @@ Login to the desired cloud:
 A cluster for Kubeflow will be created using 'aks-endine', although, you could create
 a resource group using Portal, or CLI:
 
-    $ az group create --name sandboxRG3kf --location ppe2
+    $ az group create --name sandboxRG3kf --location demoe2
     {
         "id": "/subscriptions/123456789-1234-9876-123456789123456/resourceGroups/sandboxRG3kf",
         "location": "demoe2",
