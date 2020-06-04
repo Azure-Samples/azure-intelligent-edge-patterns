@@ -1,6 +1,7 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from '@fluentui/react-northstar';
+import Axios from 'axios';
 import { RootRouter } from './routes/RootRouter';
 import { MainLayout } from './components/MainLayout';
 import { myTheme } from './theme';
@@ -9,6 +10,13 @@ import { getAppInsights } from './TelemetryService';
 
 const App: FC = (): JSX.Element => {
   let appInsights = null;
+  const [key, setKey] = useState('');
+
+  useEffect(() => {
+    Axios.get('http://localhost:8000/api/appinsight/key')
+      .then(({ data }) => setKey(data.key))
+      .catch((e) => console.error(e));
+  }, []);
 
   return (
     <Provider theme={myTheme}>
@@ -17,7 +25,7 @@ const App: FC = (): JSX.Element => {
           after={(): void => {
             appInsights = getAppInsights();
           }}
-          instrumentationKey="97824aa6-ebbc-4d2a-b9a1-2fdde7d77fcc"
+          instrumentationKey={key}
         >
           <div className="App">
             <MainLayout>
