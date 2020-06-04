@@ -19,8 +19,16 @@ The reader is expected to be familiar with the following:
 - [Jupyter](https://jupyter.org/).
 - [Bash in Azure Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
 
-You need to have an Azure Subscription, or create one. With the subscription you will have the
-tenant ID, Service Principal ID and secret.
+IMPORTANT: Ask your cloud administrator which settings you need to use for the cloud you want to deploy the Kuberflow cluster:
+
+  - your Azure Subscription
+  - tenant ID
+  - Service Principal ID
+  - and secret(associated with that Service Principal ID)
+  - cloud name (`DEMOE2` in this tutorial, your team might be working with multiple public or on-prem clouds)
+  - endpoint resource manager
+  - storage endpoint
+  - keyvault dns or some other security mechanisms your team is using
 
 ## Login to the desired cloud
 
@@ -50,7 +58,7 @@ Some images already have Azure CLI, in case your vm does not, see [Install Azure
     0 upgraded, 1 newly installed, 0 to remove and 34 not upgraded.
     ...
 
-Ask your cloud administrator which settings you need to use for the cloud you want to deploy the Kuberflow cluster(your ream might be working with multiple public or on-prem clouds):
+Ask your cloud administrator which settings you need to use for the cloud you want to deploy the Kuberflow cluster(your team might be working with multiple public or on-prem clouds):
 
   - your cloud name (`DEMOE2` in this tutorial)
   - endpoint resource manager
