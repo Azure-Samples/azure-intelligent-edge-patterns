@@ -43,7 +43,10 @@ Select the subscription name you would like to use(or create a new one)
 This is how you access Access Control, Click on `Access Control(IAM)`:
 ![kubeflow-on-azure-stack/subscriptions03.png](kubeflow-on-azure-stack/subscriptions03.png)
 
-Add(2) or select a Service Principal Name(3) if you already have it:
+You may need to use Azure's Active Directory to create a Service Principal account. Make sure you are in the correct portal, Azure(1), and using correct Active Directory account (2), click on it and click `switch AD account` if needed. Then you will be able to create a new Service Principlal by selecting `New registration`(3). You will see it in the list (4):
+![kubeflow-on-azure-stack/app-registration01.png](kubeflow-on-azure-stack/app-registration01.png)
+
+Again, button `Add`(2) on this page is not what you need, but once you did the previous step and created the new registration, you see you Service Principal Name in the list(3):
 ![kubeflow-on-azure-stack/subscriptions04.png](kubeflow-on-azure-stack/subscriptions04.png)
 
 On this screen you can find your `Tenant ID` and `App ID`:
