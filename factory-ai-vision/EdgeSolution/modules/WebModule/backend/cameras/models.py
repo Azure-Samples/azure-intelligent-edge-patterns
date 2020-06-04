@@ -22,6 +22,7 @@ from azure.iot.device import IoTHubModuleClient
 
 from azure.iot.device import IoTHubModuleClient
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
+from cameras.utils.app_insight import get_app_insight_logger
 
 try:
     iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
@@ -414,25 +415,14 @@ class Project(models.Model):
         update_fields = []
 
         try:
-
-            from opencensus.ext.azure.trace_exporter import AzureExporter
-            from opencensus.trace.samplers import ProbabilitySampler
-
-            from configs.app_insight import APP_INSIGHT_ON, APP_INSIGHT_INST_KEY, APP_INSIGHT_CONN_STR
-            from opencensus.ext.azure.log_exporter import AzureLogHandler
-
-            if APP_INSIGHT_ON:
-                logger = logging.getLogger("Backend-Training-App-Insight")
-                logger.addHandler(AzureLogHandler(
-                    connection_string=APP_INSIGHT_CONN_STR)
-                )
-            else:
-                logger = logging.getLogger(__name__)
-
+            app_insight_on, app_insight_logger = get_app_insight_logger()
             self.train_try_counter += 1
             update_fields.append('train_try_counter')
-            logger.info(
-                f"Project: {self.customvision_project_name} train attempt count: {self.train_try_counter}")
+            if app_insight_on:
+                app_insight_logger.info(
+                    f"Project: {self.customvision_project_name} train attempt count: {self.train_try_counter}")
+
+            # Get CustomVisionClient
             trainer = self.setting.revalidate_and_get_trainer_obj()
             if not trainer:
                 logger.error('Trainer is invalid. Not going to train...')
@@ -446,8 +436,26 @@ class Project(models.Model):
             # Set trainer_counter
             self.train_success_counter += 1
             update_fields.append('train_success_counter')
-            logger.info(
-                f"Project: {self.customvision_project_name} train submit count: {self.train_success_counter}")
+
+            # App Insight
+            if app_insight_on:
+                app_insight_logger.info(
+                    f"Project: {self.customvision_project_name}. Train submit count: {self.train_success_counter}")
+                tags = trainer.get_tags(self.customvision_project_id)
+                len_tags = len(tags)
+
+                app_insight_logger.info(
+                    f"Project: {self.customvision_project_name}. Tag count: {len_tags}")
+                for tag in tags:
+                    tag_images_count = trainer.get_tagged_image_count(
+                        project_id=self.customvision_project_id,
+                        tag_ids=[tag.id])
+                    app_insight_logger.info(
+                        f"Project: {self.customvision_project_name}. Tag: {tag.name}. Image count: {tag_images_count}")
+                total_images_count = trainer.get_tagged_image_count(
+                    project_id=self.customvision_project_id)
+                app_insight_logger.info(
+                    f"Project: {self.customvision_project_name}. Total image count: {total_images_count}")
 
             # Set deployed
             self.deployed = False
@@ -457,15 +465,19 @@ class Project(models.Model):
             # If all above is success
             is_task_success = True
         except CustomVisionErrorException as cvee:
-            logger.error(
-                'From Custom Vision: Nothing changed since last training')
+            if app_insight_on:
+                app_insight_logger.exception(
+                    'From Custom Vision: Nothing changed since last training')
+            else:
+                logger.error(
+                    'From Custom Vision: Nothing changed since last training')
             raise cvee
         except:
             logger.exception('Something wrong while training project')
             raise
-        # finally:
-        #    self.save(update_fields=update_fields)
-        #    return is_task_success
+        finally:
+            self.save(update_fields=update_fields)
+            return is_task_success
 
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):

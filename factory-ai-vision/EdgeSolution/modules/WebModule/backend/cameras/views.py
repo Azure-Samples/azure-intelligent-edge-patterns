@@ -683,8 +683,8 @@ def _train(project_id):
                 img_objs.append(image_obj)
                 img_entries.append(img_entry)
                 project_changed = project_changed or (not image_obj.uploaded)
-                # TODO: Remove
-                logger.info(f'project_changed: {project_changed}')
+                if project_changed:
+                    logger.info(f'project_changed: {project_changed}')
                 count += 1
             except:
                 logger.exception("unexpected error")
