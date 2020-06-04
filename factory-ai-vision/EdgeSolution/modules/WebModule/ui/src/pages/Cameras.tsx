@@ -13,7 +13,7 @@ import AddButton from '../components/AddButton';
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
   const { dialogIsOpen, cameras } = useSelector<State, { dialogIsOpen: boolean; cameras: Camera[] }>(
-    (state) => ({ dialogIsOpen: state.dialogIsOpen, cameras: state.cameras }),
+    (state) => ({ dialogIsOpen: state.dialogIsOpen, cameras: state.cameras.filter((e) => !e.is_demo) }),
   );
 
   const [name, setName] = useState<string>('');
@@ -108,7 +108,7 @@ const Cameras: FC = (): JSX.Element => {
                 content="Submit"
                 disabled={name === '' || rtsp === '' || model_name === ''}
                 onClick={(): void => {
-                  dispatch(postCamera({ name, rtsp, model_name }));
+                  dispatch(postCamera({ name, rtsp, model_name, is_demo: false }));
                   setName('');
                   setRtsp('');
                   setModel_name('');

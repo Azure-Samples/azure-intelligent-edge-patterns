@@ -30,9 +30,11 @@ export const Parts: React.FC = () => {
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <Flex gap="gap.large" wrap>
-        {parts.map((ele) => (
-          <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
-        ))}
+        {parts
+          .filter((e) => !e.is_demo)
+          .map((ele) => (
+            <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
+          ))}
       </Flex>
       <Button
         primary
