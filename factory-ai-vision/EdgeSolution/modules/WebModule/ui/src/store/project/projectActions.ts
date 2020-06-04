@@ -117,10 +117,12 @@ export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAc
   payload: projectData,
 });
 
-export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
+export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest());
 
-  return Axios.get('/api/projects/')
+  const url = isTestModel === undefined ? '/api/projects/' : `/api/projects/?is_demo=${Number(isTestModel)}`;
+
+  return Axios.get(url)
     .then(({ data }) => {
       const project: ProjectData = {
         id: data[0]?.id ?? null,
