@@ -35,19 +35,19 @@ the access rights to do so, see the screen shots below):
 Here is how you could find out your subscription, tenant Id, Service Principal ID, and create a secret.
 Make sure you are on Azure Hub's portal(1), make sure you are on the correct AD (2), this is how to browse to `Subscriptions`
 if it is not already pinned on your dashboard.
-![](kubeflow-on-azure-stack/subscriptions01.png)
+![kubeflow-on-azure-stack/subscriptions01.png](kubeflow-on-azure-stack/subscriptions01.png)
 
 Select the subscription name you would like to use(or create a new one)
-![](kubeflow-on-azure-stack/subscriptions02.png)
+![kubeflow-on-azure-stack/subscriptions02.png](kubeflow-on-azure-stack/subscriptions02.png)
 
 This is how you access Access Control, Click on `Access Control(IAM)`:
-![](kubeflow-on-azure-stack/subscriptions03.png)
+![kubeflow-on-azure-stack/subscriptions03.png](kubeflow-on-azure-stack/subscriptions03.png)
 
 Add(2) or select a Service Principal Name(3) if you already have it:
-![](kubeflow-on-azure-stack/subscriptions04.png)
+![kubeflow-on-azure-stack/subscriptions04.png](kubeflow-on-azure-stack/subscriptions04.png)
 
 On this screen you can find your `Tenant ID` and `App ID`:
-![](kubeflow-on-azure-stack/subscriptions05.png)
+![kubeflow-on-azure-stack/subscriptions05.png](kubeflow-on-azure-stack/subscriptions05.png)
 
 Contact you cloud administrator for all this information before proceeding further.
 
@@ -56,7 +56,7 @@ Contact you cloud administrator for all this information before proceeding furth
 We recommend you run the following commands from an Ubuntu vm inside of your Azure Stack.
 If you do not already have a vm, create it using web Portal(ask your Azure Stack administrator for the link).
 
-![](kubeflow-on-azure-stack/creating_vm.png)
+![kubeflow-on-azure-stack/creating_vm.png](kubeflow-on-azure-stack/creating_vm.png)
 
 Once the vm is created, you can ssh or rdp to it and open a terminal. Click button `Connect` in the details
 of the vm in Portal to see which user name and public ip address you can use, or download the rdp configuration.
@@ -348,19 +348,19 @@ Then the EXTERNAL-IP will become available from:
 
 Open it in your browser, and make sure your firewall rules allow HTTP port 80.
 
-![](kubeflow-on-azure-stack/kubeflow_dashboard1.png)
+![(kubeflow-on-azure-stack/kubeflow_dashboard1.png](kubeflow-on-azure-stack/kubeflow_dashboard1.png)
 
-For more information see [Installing Kubeflow on Azure](- https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/)
+For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/)
 
 ## Using Kubeflow
 
 You need to create a namespace to be able to create Jupyter servers. 
 
-![](kubeflow-on-azure-stack/kubeflow_dashboard2_notebook_servers.png)
+![kubeflow-on-azure-stack/kubeflow_dashboard2_notebook_servers.png](kubeflow-on-azure-stack/kubeflow_dashboard2_notebook_servers.png)
 
 Once you create a server, you can connect to it and upload Python files.
 
-![](kubeflow-on-azure-stack/kubeflow_dashboard3_notebook.png)
+![kubeflow-on-azure-stack/kubeflow_dashboard3_notebook.png](kubeflow-on-azure-stack/kubeflow_dashboard3_notebook.png)
 
 ## Next Steps
 
