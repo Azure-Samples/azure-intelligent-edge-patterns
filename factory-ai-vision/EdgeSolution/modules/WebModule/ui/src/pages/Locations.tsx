@@ -11,7 +11,7 @@ import AddButton from '../components/AddButton';
 
 const Locations: FC = () => {
   const dispatch = useDispatch();
-  const locations = useSelector<State, Location[]>((state) => state.locations);
+  const locations = useSelector<State, Location[]>((state) => state.locations.filter((e) => !e.is_demo));
 
   useEffect(() => {
     dispatch(getLocations());
