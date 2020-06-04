@@ -216,11 +216,16 @@ Edit the deployment definition file to adjust for your own configuration and des
         }
     }
 
-If you do not have `aks-engine` already, install it using (Install the AKS engine on Linux in Azure Stack)[https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux]. For Linux, if you have the connection:
+Download `aks-engone` installation script if you do not have it already:
 
     $ curl -o get-akse.sh https://raw.githubusercontent.com/Azure/aks-engine/master/scripts/get-akse.sh
     $ chmod 700 get-akse.sh
+
+Run the installer, specifying its version:
+
     $ ./get-akse.sh --version v0.43.0
+
+If you have problems, please refer to the official page: [Install the AKS engine on Linux in Azure Stack](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux).
 
 In the completely disconnected environment, you need to acquire the archive via a machine that does have the connection, and uncompress it on the machine where you plan using it:
 
@@ -238,7 +243,8 @@ If Azure Resource Manager endpoint is using a self-signed certificate, you need 
     $ sudo cp /var/lib/waagent/Certificates.pem /usr/local/share/ca-certificates/azurestackca.crt 
     $ sudo update-ca-certificates
 
-Run `aks-engine deploy` command:
+Run `aks-engine deploy` command filling in the information pieces you gathered in the check list
+in `Prerequisites`:
 
     $ aks-engine deploy -m kube-rgKF_ppe2.json --auth-method client_secret --auto-suffix \
         --azure-env AzureStackCloud --client-id 123456-1234 --client-secret 123supersecret \
