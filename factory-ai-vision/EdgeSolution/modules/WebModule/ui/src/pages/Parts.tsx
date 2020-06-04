@@ -8,7 +8,7 @@ export const Parts: React.FC = () => {
   const [parts, setParts] = useState([]);
 
   useEffect(() => {
-    const partsAPI = Axios.get('/api/parts/');
+    const partsAPI = Axios.get('/api/parts/?is_demo=0');
     const imagesAPI = Axios.get('/api/images/');
 
     Axios.all([partsAPI, imagesAPI])
