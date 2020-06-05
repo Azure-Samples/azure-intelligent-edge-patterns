@@ -68,8 +68,6 @@ class CameraConfig(AppConfig):
 
             default_setting, created = Setting.objects.update_or_create(
                 name=DEFAULT_SETTING_NAME)
-            default_project, created = Project.objects.update_or_create(
-                is_demo=False)
 
             create_demo = True
             if create_demo:
@@ -126,6 +124,11 @@ class CameraConfig(AppConfig):
                     }
                 )
                 logger.info("Creating Demo... End")
+
+            default_project, created = Project.objects.update_or_create(
+                is_demo=False,
+                camera=demo_camera,
+                location=demo_location)
 
             stats = stats_module.stats
             view_manager = stats.view_manager
