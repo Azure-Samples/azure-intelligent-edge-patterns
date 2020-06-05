@@ -313,24 +313,31 @@ def update_retrain_parameters():
 def update_model():
 
     model_uri = request.args.get('model_uri')
-    if not model_uri: return ('missing model_uri')
-
+    model_dir = request.args.get('model_dir')
+    if not model_uri and not model_dir: return ('missing model_uri or model_dir')
 
 
     print('[INFO] Update Model ...')
+    if model_uri:
 
-    if model_uri == onnx.model_uri:
-        print('[INFO] Model Uri unchanged')
+        print('[INFO] Got Model URI', model_uri)
+
+        if model_uri == onnx.model_uri:
+            print('[INFO] Model Uri unchanged')
+        else:
+            get_file_zip(model_uri, MODEL_DIR)
+            onnx.model_uri = model_uri
+
+        onnx.update_model('model')
+        print('[INFO] Update Finished ...')
+
         return 'ok'
 
-    get_file_zip(model_uri, MODEL_DIR)
-    onnx.model_uri = model_uri
-
-    onnx.update_model('model')
-    print('[INFO] Update Finished ...')
-
-    return 'ok'
-
+    elif model_dir:
+        print('[INFO] Got Model DIR', model_dir)
+        onnx.update_model(model_dir)
+        print('[INFO] Update Finished ...')
+        return 'ok'
 
 @app.route('/update_cam')
 def update_cam():
