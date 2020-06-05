@@ -6,8 +6,6 @@ import { ai } from '../TelemetryService';
 
 /**
  * This Component provides telemetry with Azure App Insights
- *
- * NOTE: the package '@microsoft/applicationinsights-react-js' has a HOC withAITracking that requires this to be a Class Component rather than a Functional Component
  */
 const TelemetryProvider: React.FC<any> = ({ instrumentationKey, history, after, children }) => {
   const initialized = useRef(false);
