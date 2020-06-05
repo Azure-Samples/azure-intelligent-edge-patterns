@@ -965,7 +965,8 @@ def pull_cv_project(request, project_id):
             for img in imgs:
                 logger.info(f"*** img {img_counter}")
                 for region in img.regions:
-                    part_obj = Part.objects.get(name=region.tag_name)
+                    part_obj = Part.objects.filter(
+                        name=region.tag_name, is_demo=False)[0]
                     img_obj, created = Image.objects.update_or_create(
                         part=part_obj,
                         remote_url=img.original_image_uri
