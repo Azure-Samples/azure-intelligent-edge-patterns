@@ -35,12 +35,12 @@ from configs.app_insight import APP_INSIGHT_INST_KEY
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region, CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
-from azure.iot.hub import IoTHubRegistryManager
-from azure.iot.hub.models import Twin, TwinProperties
-try:
-    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-except:
-    iot = None
+#from azure.iot.hub import IoTHubRegistryManager
+#from azure.iot.hub.models import Twin, TwinProperties
+#try:
+#    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
+#except:
+#    iot = None
 
 
 def is_edge():
@@ -234,8 +234,8 @@ def export_null(request):
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
 
-    if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+    #if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
+        #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
@@ -748,6 +748,12 @@ def train(request, project_id):
     is_demo = request.query_params.get('demo')
     if is_demo and (is_demo.lower() == 'true'):
         logger.info('demo... bypass training process')
+
+        requests.get('http://'+inference_module_url()+'/update_cam',
+                     params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+        requests.get('http://'+inference_module_url() +
+                     '/update_model', params={'model_dir': 'default_model_6parts'})
+
         project_obj = Project.objects.get(pk=project_id)
         obj, created = project_obj.upcreate_training_status(
             status='ok',
