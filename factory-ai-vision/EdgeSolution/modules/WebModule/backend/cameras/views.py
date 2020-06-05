@@ -851,7 +851,7 @@ def inference_video_feed(request, project_id):
 
 @api_view()
 def instrumentation_key(request):
-    return APP_INSIGHT_INST_KEY
+    return JsonResponse({'status': 'ok', 'key': APP_INSIGHT_INST_KEY})
 
 
 @api_view()
