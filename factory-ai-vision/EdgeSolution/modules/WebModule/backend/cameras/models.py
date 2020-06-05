@@ -33,7 +33,8 @@ except:
 def is_edge():
     try:
         IoTHubModuleClient.create_from_edge_environment()
-        return True
+        if len(Project.objects.filter(is_demo=False)) > 0:
+            return True
     except:
         return False
 
@@ -342,13 +343,16 @@ post_save.connect(Camera.post_save, Camera, dispatch_uid='Camera_post')
 class Project(models.Model):
     setting = models.ForeignKey(
         Setting, on_delete=models.CASCADE, default=1)
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
     parts = models.ManyToManyField(
         Part, related_name='part')
-    customvision_project_id = models.CharField(max_length=200)
-    customvision_project_name = models.CharField(max_length=200)
-    download_uri = models.CharField(max_length=1000, null=True, blank=True)
+    customvision_project_id = models.CharField(
+        max_length=200, null=True, blank=True, default='')
+    customvision_project_name = models.CharField(
+        max_length=200, null=True, blank=True, default='')
+    download_uri = models.CharField(
+        max_length=1000, null=True, blank=True, default='')
     needRetraining = models.BooleanField(default=False)
     accuracyRangeMin = models.IntegerField(null=True)
     accuracyRangeMax = models.IntegerField(null=True)
