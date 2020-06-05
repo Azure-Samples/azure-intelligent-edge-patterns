@@ -151,6 +151,8 @@ class Setting(models.Model):
     device_id = models.CharField(max_length=1000, blank=True)
     module_id = models.CharField(max_length=1000, blank=True)
 
+    is_collect_data = models.BooleanField(default=False)
+
     is_trainer_valid = models.BooleanField(default=False)
     obj_detection_domain_id = models.CharField(
         max_length=1000, blank=True, default='')
