@@ -21,6 +21,8 @@ import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/p
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
 import { formatDropdownValue, Value } from '../util/formatDropdownValue';
+import { getIdFromUrl } from '../util/GetIDFromUrl';
+import { getAppInsights } from '../TelemetryService';
 
 export const PartIdentification: React.FC = () => {
   const dispatch = useDispatch();
@@ -63,16 +65,35 @@ export const PartIdentification: React.FC = () => {
     if (camera) setSelectedCameraById(camera);
   }, [camera, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
 
-  const handleSubmitConfigure = (): void => {
-    ((dispatch(
-      thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
-    ) as unknown) as Promise<number>)
-      .then((id) => {
-        if (typeof id !== 'undefined')
-          history.push(`/cameras/detail?name=${selectedCamera.name}&isDemo=${isTestModel}`);
-        return void 0;
-      })
-      .catch((e) => e);
+  const handleSubmitConfigure = async (): Promise<void> => {
+    try {
+      if (!isTestModel) {
+        const { data: images } = await Axios.get('/api/images/');
+
+        const selectedPartIds = selectedParts.map((e) => e.id);
+        const interestedImagesLength = images.filter((e) => selectedPartIds.includes(getIdFromUrl(e.part)))
+          .length;
+        const appInsight = getAppInsights();
+        if (appInsight)
+          appInsight.trackEvent({
+            name: 'train',
+            properties: {
+              images: interestedImagesLength,
+              parts: selectedParts.length,
+              source: window.location.hostname,
+            },
+          });
+      }
+
+      const id = await dispatch(
+        thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
+      );
+
+      if (typeof id !== 'undefined')
+        history.push(`/cameras/detail?name=${selectedCamera.name}&isDemo=${isTestModel}`);
+    } catch (e) {
+      alert(e);
+    }
   };
 
   const setData = (keyName: keyof ProjectData, value: ProjectData[keyof ProjectData]): void => {
