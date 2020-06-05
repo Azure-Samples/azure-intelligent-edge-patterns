@@ -6,6 +6,15 @@ import sys
 import threading
 import time
 
+from datetime import datetime
+from opencensus.ext.azure import metrics_exporter
+from opencensus.stats import aggregation as aggregation_module
+from opencensus.stats import measure as measure_module
+from opencensus.stats import stats as stats_module
+from opencensus.stats import view as view_module
+from opencensus.tags import tag_map as tag_map_module
+from configs.app_insight import APP_INSIGHT_CONN_STR
+
 logger = logging.getLogger(__name__)
 
 
@@ -59,7 +68,7 @@ class CameraConfig(AppConfig):
 
             create_demo = True
             if create_demo:
-                from cameras.models import Part, Camera, Location, Project, Train
+                from cameras.models import Part, Camera, Location, Project, Train, Image
                 logger.info("Creating Demo")
                 for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
                     demo_part, created = Part.objects.update_or_create(
@@ -113,39 +122,95 @@ class CameraConfig(AppConfig):
                 )
                 logger.info("Creating Demo... End")
 
-#         def _part_monitor():
-#             from opencensus.ext.azure import metrics_exporter
-#             from opencensus.stats import aggregation as aggregation_module
-#             from opencensus.stats import measure as measure_module
-#             from opencensus.stats import stats as stats_module
-#             from opencensus.stats import view as view_module
-#             from opencensus.tags import tag_map as tag_map_module
-#             from configs.app_insight import APP_INSIGHT_CONN_STR
-#             stats = stats_module.stats
-#             view_manager = stats.view_manager
-#             stats_recorder = stats.stats_recorder
-#
-#             PARTS_MEASURE = measure_module.MeasureInt("part",
-#                                                       "number of parts",
-#                                                       "parts")
-#             PARTS_VIEW = view_module.View("part_view",
-#                                           "number of parts",
-#                                           [],
-#                                           PARTS_MEASURE,
-#                                           aggregation_module.CountAggregation())
-#             # time.sleep(15)
-#
-#             exporter = metrics_exporter.new_metrics_exporter(
-#                 connection_string=APP_INSIGHT_CONN_STR)
-#             view_manager.register_exporter(exporter)
-#
-#             view_manager.register_view(PARTS_VIEW)
-#             mmap = stats_recorder.new_measurement_map()
-#             tmap = tag_map_module.TagMap()
-#
-#             mmap.measure_int_put(PARTS_MEASURE, len(
-#                 Part.objects.filter(is_demo=False)))
-#             mmap.record(tmap)
-#             logger.info(len(Part.objects.filter(is_demo=False)))
-#
-#         threading.Thread(target=_part_monitor).start()
+        stats = stats_module.stats
+        view_manager = stats.view_manager
+        stats_recorder = stats.stats_recorder
+        exporter = metrics_exporter.new_metrics_exporter(
+            connection_string=APP_INSIGHT_CONN_STR)
+        view_manager.register_exporter(exporter)
+
+        def _part_monitor():
+            PARTS_MEASURE = measure_module.MeasureInt("part",
+                                                      "number of parts",
+                                                      "parts")
+
+            PARTS_VIEW = view_module.View("part_view",
+                                          "number of parts",
+                                          [],
+                                          PARTS_MEASURE,
+                                          aggregation_module.LastValueAggregation())
+
+            view_manager.register_view(PARTS_VIEW)
+            while True:
+                time.sleep(15)
+                mmap_1 = stats_recorder.new_measurement_map()
+                mmap_1.measure_int_put(PARTS_MEASURE, len(
+                    Part.objects.filter(is_demo=False)))
+                mmap_1.record()
+                metrics = list(
+                    mmap_1.measure_to_view_map.get_metrics(datetime.utcnow()))
+
+        def _img_monitor():
+            IMAGES_MEASURE = measure_module.MeasureInt("images",
+                                                       "number of images",
+                                                       "images")
+            IMAGES_VIEW = view_module.View("image_view",
+                                           "number of images",
+                                           [],
+                                           IMAGES_MEASURE,
+                                           aggregation_module.LastValueAggregation())
+
+            view_manager.register_view(IMAGES_VIEW)
+            while True:
+                time.sleep(15)
+                mmap_2 = stats_recorder.new_measurement_map()
+                mmap_2.measure_int_put(IMAGES_MEASURE, len(
+                    Image.objects.all()))
+                mmap_2.record()
+                metrics = list(
+                    mmap_2.measure_to_view_map.get_metrics(datetime.utcnow()))
+
+        def _training_job_triggered_monitor():
+            TRAINING_JOB_TRIGGERED_MEASURE = measure_module.MeasureInt("training_job_triggered",
+                                                                       "number of training job triggered",
+                                                                       "training_job_triggered")
+            TRAINING_JOB_TRIGGERED_VIEW = view_module.View("training_job_triggered_view",
+                                                           "number of training job triggered",
+                                                           [],
+                                                           TRAINING_JOB_TRIGGERED_MEASURE,
+                                                           aggregation_module.LastValueAggregation())
+
+            view_manager.register_view(TRAINING_JOB_TRIGGERED_VIEW)
+            while True:
+                time.sleep(15)
+                mmap_3 = stats_recorder.new_measurement_map()
+                mmap_3.measure_int_put(TRAINING_JOB_TRIGGERED_MEASURE, Project.objects.filter(
+                    is_demo=False)[0].train_success_counter)
+                mmap_3.record()
+                metrics = list(
+                    mmap_3.measure_to_view_map.get_metrics(datetime.utcnow()))
+
+        def _retraining_jobs_monitor():
+            RETRAINING_JOB_MEASURE = measure_module.MeasureInt("retraining_jobs",
+                                                               "number of retraining jobs",
+                                                               "retraining_jobs")
+            RETRAINING_JOB_VIEW = view_module.View("retraining_job_view",
+                                                   "number of retraining jobs",
+                                                   [],
+                                                   RETRAINING_JOB_MEASURE,
+                                                   aggregation_module.LastValueAggregation())
+
+            view_manager.register_view(RETRAINING_JOB_VIEW)
+            while True:
+                time.sleep(15)
+                mmap_4 = stats_recorder.new_measurement_map()
+                mmap_4.measure_int_put(RETRAINING_JOB_MEASURE, Project.objects.filter(
+                    is_demo=False)[0].train_try_counter)
+                mmap_4.record()
+                metrics = list(
+                    mmap_4.measure_to_view_map.get_metrics(datetime.utcnow()))
+
+        threading.Thread(target=_part_monitor).start()
+        threading.Thread(target=_img_monitor).start()
+        threading.Thread(target=_training_job_triggered_monitor).start()
+        threading.Thread(target=_retraining_jobs_monitor).start()
