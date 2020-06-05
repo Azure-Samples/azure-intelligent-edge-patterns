@@ -35,7 +35,7 @@ const ManualIdentification: FC = () => {
       images: state.images,
     }),
   );
-  const parts = useParts();
+  const parts = useParts(false);
   const partItems = useMemo<DropdownItemProps[]>(() => {
     if (parts.length === 0 || projectData.parts.length === 0) return [];
 
@@ -65,7 +65,7 @@ const ManualIdentification: FC = () => {
   const [relabelImages, setRelabelImages] = useState<RelabelImage[]>([]);
 
   useEffect(() => {
-    dispatch(thunkGetProject());
+    dispatch(thunkGetProject(false));
     dispatch(getLabelImages());
   }, [dispatch]);
 
@@ -107,7 +107,6 @@ const ManualIdentification: FC = () => {
       });
       sortRef.current = { sorted: true, prevIsAscend: true };
     }
-
   }, [ascend]);
 
   const onDropdownChange = (_, { value }): void => {
