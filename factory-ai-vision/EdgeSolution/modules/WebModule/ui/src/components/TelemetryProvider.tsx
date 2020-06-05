@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
 import { withRouter } from 'react-router-dom';
 
@@ -9,27 +9,20 @@ import { ai } from '../TelemetryService';
  *
  * NOTE: the package '@microsoft/applicationinsights-react-js' has a HOC withAITracking that requires this to be a Class Component rather than a Functional Component
  */
-class TelemetryProvider extends Component<any, { initialized: boolean }> {
-  state = {
-    initialized: false,
-  };
+const TelemetryProvider: React.FC<any> = ({ instrumentationKey, history, after, children }) => {
+  const initialized = useRef(false);
 
-  componentDidMount(): void {
-    const { history } = this.props;
-    const { initialized } = this.state;
-    const AppInsightsInstrumentationKey = this.props.instrumentationKey; // PUT YOUR KEY HERE
-    if (!initialized && Boolean(AppInsightsInstrumentationKey) && Boolean(history)) {
+  useEffect(() => {
+    const AppInsightsInstrumentationKey = instrumentationKey;
+    if (!initialized.current && Boolean(AppInsightsInstrumentationKey) && Boolean(history)) {
       ai.initialize(AppInsightsInstrumentationKey, history);
-      this.setState({ initialized: true });
+      initialized.current = true;
     }
 
-    this.props.after();
-  }
+    after();
+  }, [history, instrumentationKey, after]);
 
-  render(): ReactNode {
-    const { children } = this.props;
-    return <>{children}</>;
-  }
-}
+  return <>{children}</>;
+};
 
-export default withRouter(withAITracking(ai.reactPlugin, TelemetryProvider));
+export default withRouter(withAITracking(ai.reactPlugin, TelemetryProvider, 'TelemetryProvider'));
