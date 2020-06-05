@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:latest-tensorrt
+FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
 
 #FROM nvidia/cuda:10.1-cudnn7-devel
 WORKDIR /app
