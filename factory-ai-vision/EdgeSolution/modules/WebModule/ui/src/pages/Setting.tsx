@@ -239,7 +239,7 @@ export const Setting = (): JSX.Element => {
 const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingDataId }) => {
   const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
   const [customVisionProjectId, setCustomVisionProjectId] = useState('');
-  const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject();
+  const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
 
