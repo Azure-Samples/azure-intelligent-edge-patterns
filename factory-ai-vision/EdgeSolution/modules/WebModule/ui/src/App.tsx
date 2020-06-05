@@ -6,10 +6,8 @@ import { RootRouter } from './routes/RootRouter';
 import { MainLayout } from './components/MainLayout';
 import { myTheme } from './theme';
 import TelemetryProvider from './components/TelemetryProvider';
-import { getAppInsights } from './TelemetryService';
 
 const App: FC = (): JSX.Element => {
-  let appInsights = null;
   const [key, setKey] = useState('');
 
   useEffect(() => {
@@ -24,12 +22,7 @@ const App: FC = (): JSX.Element => {
   return (
     <Provider theme={myTheme}>
       <BrowserRouter>
-        <TelemetryProvider
-          after={(): void => {
-            appInsights = getAppInsights();
-          }}
-          instrumentationKey={key}
-        >
+        <TelemetryProvider instrumentationKey={key}>
           <div className="App">
             <MainLayout>
               <RootRouter />

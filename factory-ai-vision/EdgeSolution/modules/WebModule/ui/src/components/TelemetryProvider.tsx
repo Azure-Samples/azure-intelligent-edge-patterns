@@ -1,13 +1,17 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, createContext, useContext } from 'react';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
 import { withRouter } from 'react-router-dom';
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 
-import { ai } from '../TelemetryService';
+import { ai, getAppInsights } from '../TelemetryService';
+
+export const AppInsightContext = createContext<ApplicationInsights>(null);
+export const useAppInsight = (): ApplicationInsights => useContext(AppInsightContext);
 
 /**
  * This Component provides telemetry with Azure App Insights
  */
-const TelemetryProvider: React.FC<any> = ({ instrumentationKey, history, after, children }) => {
+const TelemetryProvider: React.FC<any> = ({ instrumentationKey, history, children }) => {
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -16,11 +20,9 @@ const TelemetryProvider: React.FC<any> = ({ instrumentationKey, history, after, 
       ai.initialize(AppInsightsInstrumentationKey, history);
       initialized.current = true;
     }
+  }, [history, instrumentationKey]);
 
-    after();
-  }, [history, instrumentationKey, after]);
-
-  return <>{children}</>;
+  return <AppInsightContext.Provider value={getAppInsights()}>{children}</AppInsightContext.Provider>;
 };
 
 export default withRouter(withAITracking(ai.reactPlugin, TelemetryProvider, 'TelemetryProvider'));

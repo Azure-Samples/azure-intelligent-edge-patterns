@@ -46,4 +46,4 @@ const createTelemetryService = (): { reactPlugin; appInsights; initialize } => {
 };
 
 export const ai = createTelemetryService();
-export const getAppInsights = (): any => appInsights;
+export const getAppInsights = (): ApplicationInsights => appInsights;

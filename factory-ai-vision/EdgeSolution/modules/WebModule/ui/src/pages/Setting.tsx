@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, Reducer } from 'react';
+import React, { useState, useEffect, useReducer, Reducer, useContext } from 'react';
 import * as R from 'ramda';
 import {
   Divider,
@@ -9,10 +9,12 @@ import {
   Alert,
   Dropdown,
   DropdownItemProps,
+  Checkbox,
 } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { useProject } from '../hooks/useProject';
+import { useAppInsight } from '../components/TelemetryProvider';
 
 const initialState = {
   loading: false,
@@ -75,6 +77,7 @@ export const Setting = (): JSX.Element => {
   const [{ loading, error, current: settingData, origin: originSettingData }, dispatch] = useReducer<
     SettingReducer
   >(reducer, initialState);
+  const [checkboxChecked, setCheckboxChecked] = useState(false);
 
   const notEmpty = settingData.id !== -1;
 
@@ -103,6 +106,7 @@ export const Setting = (): JSX.Element => {
               },
             },
           });
+          setCheckboxChecked(data[0].is_collect_data);
         }
         return void 0;
       })
@@ -110,6 +114,11 @@ export const Setting = (): JSX.Element => {
         dispatch({ type: 'REQUEST_FAIL', error: err });
       });
   }, []);
+
+  const appInsight = useAppInsight();
+  useEffect(() => {
+    if (appInsight) appInsight.config.disableTelemetry = !checkboxChecked;
+  }, [appInsight, checkboxChecked]);
 
   const onSave = (): void => {
     const isSettingEmpty = settingData.id === -1;
@@ -164,6 +173,15 @@ export const Setting = (): JSX.Element => {
       });
   };
 
+  const onCheckBoxClick = (): void => {
+    const newCheckboxChecked = !checkboxChecked;
+    setCheckboxChecked(newCheckboxChecked);
+    Axios.patch(`/api/settings/${settingData.id}`, { is_collect_data: newCheckboxChecked }).catch((err) => {
+      setCheckboxChecked(checkboxChecked);
+      console.error(err);
+    });
+  };
+
   return (
     <>
       <h1>Setting</h1>
@@ -205,6 +223,13 @@ export const Setting = (): JSX.Element => {
         </Flex>
         {notEmpty && <PreviousProjectPanel settingDataId={settingData.id} />}
       </Flex>
+      <Divider color="grey" />
+      <Checkbox
+        label="Allow to Send Usage Data"
+        toggle
+        checked={checkboxChecked}
+        onChange={onCheckBoxClick}
+      />
     </>
   );
 };
