@@ -109,8 +109,8 @@ class Image(models.Model):
             elif (left + width) > 1 or (top + height) > 1:
                 raise ValueError(
                     f"left + width:{left + width}, top + height:{top + height} must be less than 1")
-            from PIL import Image
-            with Image.open(self.image) as img:
+
+            with PILImage.open(self.image) as img:
                 logger.info(f"Successfully open img {self.image}")
                 size_width, size_height = img.size
                 label_x1 = int(size_width*left)
@@ -127,6 +127,23 @@ class Image(models.Model):
                 logger.info(f"Successfully save labels to {self.labels}")
         except ValueError:
             logger.exception("Set Annotation: Region Error")
+        except:
+            logger.exception("Unexpected Error")
+
+    def add_labels(self, left: float, top: float, width: float, height: float):
+        try:
+            if left > 1 or top > 1 or width > 1 or height > 1:
+                raise ValueError(
+                    f"{left}, {top}, {width}, {height} must be less than 1")
+            elif left < 0 or top < 0 or width < 0 or height < 0:
+                raise ValueError(
+                    f"{left}, {top}, {width}, {height} must be greater than 0")
+            elif (left + width) > 1 or (top + height) > 1:
+                raise ValueError(
+                    f"left + width:{left + width}, top + height:{top + height} must be less than 1")
+            pass
+        except ValueError:
+            logger.exception("Add Annotation: Region Error")
         except:
             logger.exception("Unexpected Error")
 
@@ -180,6 +197,25 @@ class Setting(models.Model):
         return Setting._get_trainer_obj_static(
             endpoint=self.endpoint, training_key=self.training_key)
 
+    def _validate_static(endpoint: str, training_key: str):
+        """
+        return tuple (is_trainer_valid, trainer)
+        """
+        logger.info(f'validatiing {endpoint}, {training_key}')
+        trainer = Setting._get_trainer_obj_static(
+            endpoint=endpoint,
+            training_key=training_key)
+        is_trainer_valid = False
+        try:
+            trainer.get_domains()
+            is_trainer_valid = True
+        except:
+            trainer = None
+        finally:
+            logger.info(
+                f'is_trainer_valid: {is_trainer_valid}. trainer: {trainer}')
+            return is_trainer_valid, trainer
+
     def revalidate(self):
         """
         Create a client, try to get obj_detection_domain, return is task success
@@ -188,23 +224,23 @@ class Setting(models.Model):
         : Success: True
         : Failed:  False
         """
-        trainer = self._get_trainer_obj()
+        is_trainer_valid, trainer = Setting._validate_static(
+            endpoint=self.endpoint,
+            training_key=self.training_key)
         try:
-            obj_detection_domain = next(domain for domain in trainer.get_domains(
-            ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
-            self.is_trainer_valid = True
-            self.obj_detection_domain_id = obj_detection_domain.id
-            logger.info(
-                "Successfully created trainer client and got obj detection domain")
+            if is_trainer_valid:
+                obj_detection_domain = next(domain for domain in trainer.get_domains(
+                ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
+                self.is_trainer_valid = True
+                self.obj_detection_domain_id = obj_detection_domain.id
+            else:
+                self.is_trainer_valid = False
+                self.obj_detection_domain_id = ''
         except:
-            # logger.exception('revalidate exception')
-            logger.error(
-                "Failed to create trainer client or get obj detection domain")
-            self.is_trainer_valid = False
-            self.obj_detection_domain_id = ''
-        logger.info(
-            f"{self.name} is_trainer_valid: {self.is_trainer_valid}")
-        return self.is_trainer_valid
+            logger.exception('Setting.revalidate: Unexpected error')
+        finally:
+            self.save()
+            return self.is_trainer_valid
 
     def revalidate_and_get_trainer_obj(self):
         """
@@ -240,12 +276,13 @@ class Setting(models.Model):
                 f'Validating Trainer {instance.name} (CustomVisionClient)... Pass')
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
-            logger.info("Setting Presave... End")
         except:
             logger.exception(
                 "pre_save exception. Set is_trainer_valid to false and obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
+        finally:
+            logger.info("Setting Presave... End")
 
     def create_project(self, project_name: str):
         """
@@ -329,26 +366,28 @@ class Project(models.Model):
         # if instance.id is not None:
         #    return
 
-        name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
-        instance.customvision_project_name = name
-
-        setting = instance.setting
-        instance.setting.revalidate()
-        instance.setting.save()
-        setting = instance.setting
-
-        if setting.is_trainer_valid and instance.customvision_project_id:
+        trainer = instance.setting.revalidate_and_get_trainer_obj()
+        if instance.is_demo:
+            logger.info(f"Project instance.is_demo: {instance.is_demo}")
+            pass
+        elif trainer and instance.customvision_project_id:
+            # Endpoint and Training_key is valid, and trying to save with cv_project_id
+            # Probably Syncing
             logger.info(
-                f'Updating CustomVision id: {instance.customvision_project_id}')
+                f'Project CustomVision Project Id: {instance.customvision_project_id}')
             logger.info('Assume Syncing')
             try:
-                trainer = setting.revalidate_and_get_trainer_obj()
-                trainer.get_project(instance.customvision_project_id)
+                cv_project_obj = trainer.get_project(
+                    instance.customvision_project_id)
             except:
                 logger.exception("Unexpected error")
-        elif setting.is_trainer_valid:
+        elif trainer:
+            # Endpoint and Training_key is valid, and trying to save with no cv_project_id
+            name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
+            instance.customvision_project_name = name
+
             logger.info('Creating Project on Custom Vision')
-            project = setting.create_project(name)
+            project = instance.setting.create_project(name)
             logger.info(f'Got Custom Vision Project Id: {project.id}')
             instance.customvision_project_id = project.id
         else:
@@ -407,7 +446,7 @@ class Project(models.Model):
     def train_project(self):
         """
         Train project self. Return is training request success (boolean)
-        counter +=1 
+        counter +=1
         : Success: return True
         : Failed : return False
         """
@@ -464,20 +503,22 @@ class Project(models.Model):
 
             # If all above is success
             is_task_success = True
-        except CustomVisionErrorException as cvee:
+            return is_task_success
+        except CustomVisionErrorException as e:
             if app_insight_on:
                 app_insight_logger.exception(
-                    'From Custom Vision: Nothing changed since last training')
+                    f'From Custom Vision: {e.message}')
             else:
                 logger.error(
-                    'From Custom Vision: Nothing changed since last training')
-            raise cvee
-        except:
-            logger.exception('Something wrong while training project')
-            raise
-        finally:
+                    f'From Custom Vision: {e.message}')
             self.save(update_fields=update_fields)
-            return is_task_success
+            raise e
+        except:
+            self.save(update_fields=update_fields)
+            logger.exception('Something wrong while training project')
+        # finally:
+        #    self.save(update_fields=update_fields)
+        #    return is_task_success
 
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
@@ -491,6 +532,13 @@ class Train(models.Model):
     status = models.CharField(max_length=200)
     log = models.CharField(max_length=1000)
     performance = models.CharField(max_length=1000, default='{}')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+
+class Task(models.Model):
+    task_type = models.CharField(max_length=100)
+    status = models.CharField(max_length=200)
+    log = models.CharField(max_length=1000)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
@@ -588,6 +636,7 @@ class Stream(object):
             predictions = list(prediction.copy()
                                for prediction in self.predictions)
             self.mutex.release()
+
             # print('bboxes', bboxes)
             # cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
             # cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'], (bbox['p1'][0], bbox['p1'][1]-15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 255), 1)

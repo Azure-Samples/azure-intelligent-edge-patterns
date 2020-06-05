@@ -57,11 +57,19 @@ class TrainerTestCase(TestCase):
 
     def test_create_project(self):
         from azure.cognitiveservices.vision.customvision.training.models import Project
+        from azure.cognitiveservices.vision.customvision.training.models import CustomVisionErrorException
+
         default_setting = Setting.objects.get(name="DEFAULT_SETTING")
+        default_trainer = default_setting._get_trainer_obj()
         invalid_setting = Setting.objects.get(name="INVALID_SETTING")
 
         project = default_setting.create_project('django_unittest')
         project_na = invalid_setting.create_project('django_unittest')
 
-        self.assertIsNone(project_na)
+        # Valid Project
         self.assertIsInstance(project, Project)
+        self.assertIsInstance(default_trainer.get_project(project.id), Project)
+        default_setting._get_trainer_obj().delete_project(project_id=project.id)
+
+        # NA
+        self.assertIsNone(project_na)
