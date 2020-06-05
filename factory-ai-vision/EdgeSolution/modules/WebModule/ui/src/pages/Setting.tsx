@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, Reducer, useContext } from 'react';
+import React, { useState, useEffect, useReducer, Reducer } from 'react';
 import * as R from 'ramda';
 import {
   Divider,
@@ -14,7 +14,7 @@ import {
 import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { useProject } from '../hooks/useProject';
-import { useAppInsight } from '../components/TelemetryProvider';
+import { getAppInsights } from '../TelemetryService';
 
 const initialState = {
   loading: false,
@@ -115,11 +115,6 @@ export const Setting = (): JSX.Element => {
       });
   }, []);
 
-  const appInsight = useAppInsight();
-  useEffect(() => {
-    if (appInsight) appInsight.config.disableTelemetry = !checkboxChecked;
-  }, [appInsight, checkboxChecked]);
-
   const onSave = (): void => {
     const isSettingEmpty = settingData.id === -1;
     const url = isSettingEmpty ? `/api/settings/` : `/api/settings/${settingData.id}/`;
@@ -176,10 +171,17 @@ export const Setting = (): JSX.Element => {
   const onCheckBoxClick = (): void => {
     const newCheckboxChecked = !checkboxChecked;
     setCheckboxChecked(newCheckboxChecked);
-    Axios.patch(`/api/settings/${settingData.id}`, { is_collect_data: newCheckboxChecked }).catch((err) => {
-      setCheckboxChecked(checkboxChecked);
-      console.error(err);
-    });
+    Axios.patch(`/api/settings/${settingData.id}`, { is_collect_data: newCheckboxChecked })
+      .then(() => {
+        const appInsight = getAppInsights();
+        if (!appInsight) throw Error('App Insight hasnot been initialize');
+        appInsight.config.disableTelemetry = !newCheckboxChecked;
+        return void 0;
+      })
+      .catch((err) => {
+        setCheckboxChecked(checkboxChecked);
+        alert(err);
+      });
   };
 
   return (

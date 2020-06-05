@@ -8,21 +8,39 @@ import { myTheme } from './theme';
 import TelemetryProvider from './components/TelemetryProvider';
 
 const App: FC = (): JSX.Element => {
-  const [key, setKey] = useState('');
+  const [appInsightInfo, setAppInsightInfo] = useState({
+    key: '',
+    isAppInsightOn: false,
+  });
 
   useEffect(() => {
-    Axios.get('/api/appinsight/key')
-      .then(({ data }) => {
-        if (data.key) return setKey(data.key);
-        throw new Error('No API Key');
-      })
+    const appInsightKey = Axios.get('/api/appinsight/key');
+    const settings = Axios.get('/api/settings/');
+
+    Axios.all([appInsightKey, settings])
+      .then(
+        Axios.spread((...responses) => {
+          const { data: appInsightKeyData } = responses[0];
+          const { data: settingsData } = responses[1];
+
+          if (appInsightKeyData.key)
+            return setAppInsightInfo({
+              key: appInsightKeyData.key,
+              isAppInsightOn: settingsData[0].is_collect_data,
+            });
+          throw new Error('No API Key');
+        }),
+      )
       .catch((e) => console.error(e));
-  }, [key]);
+  }, []);
 
   return (
     <Provider theme={myTheme}>
       <BrowserRouter>
-        <TelemetryProvider instrumentationKey={key}>
+        <TelemetryProvider
+          instrumentationKey={appInsightInfo.key}
+          isAppInsightOn={appInsightInfo.isAppInsightOn}
+        >
           <div className="App">
             <MainLayout>
               <RootRouter />
