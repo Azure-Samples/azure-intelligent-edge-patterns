@@ -37,9 +37,9 @@ from azure.cognitiveservices.vision.customvision.training.models import ImageFil
 from azure.iot.device import IoTHubModuleClient
 #from azure.iot.hub import IoTHubRegistryManager
 #from azure.iot.hub.models import Twin, TwinProperties
-#try:
+# try:
 #    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-#except:
+# except:
 #    iot = None
 
 
@@ -234,8 +234,8 @@ def export_null(request):
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
 
-    #if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+    # if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
+    #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
@@ -897,7 +897,9 @@ def pull_cv_project(request, project_id):
     """
     logger.info("Pulling CustomVision Project")
     rs = {}
-    project_obj = Project.objects.get(pk=project_id)
+    # FIXME: Should send correct id
+    # project_obj = Project.objects.get(pk=project_id)
+    project_obj = Project.objects.get(is_demo=False)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
 
     customvision_project_id = request.query_params.get(
