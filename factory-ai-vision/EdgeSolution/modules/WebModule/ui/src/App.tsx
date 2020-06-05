@@ -13,10 +13,15 @@ const App: FC = (): JSX.Element => {
   const [key, setKey] = useState('');
 
   useEffect(() => {
-    Axios.get('http://localhost:8000/api/appinsight/key')
-      .then(({ data }) => setKey(data.key))
+    Axios.get('/api/appinsight/key')
+      .then(({ data }) => {
+        if (key) return setKey(data.key);
+        throw new Error('No API Key');
+      })
       .catch((e) => console.error(e));
-  }, []);
+  }, [key]);
+
+  if (!key) return <h1>Loading</h1>;
 
   return (
     <Provider theme={myTheme}>
