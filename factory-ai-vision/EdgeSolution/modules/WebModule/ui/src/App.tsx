@@ -6,15 +6,31 @@ import { RootRouter } from './routes/RootRouter';
 import { MainLayout } from './components/MainLayout';
 import { myTheme } from './theme';
 import TelemetryProvider from './components/TelemetryProvider';
-import { getAppInsights } from './TelemetryService';
 
 const App: FC = (): JSX.Element => {
-  let appInsights = null;
-  const [key, setKey] = useState('');
+  const [appInsightInfo, setAppInsightInfo] = useState({
+    key: '',
+    isAppInsightOn: false,
+  });
 
   useEffect(() => {
-    Axios.get('http://localhost:8000/api/appinsight/key')
-      .then(({ data }) => setKey(data.key))
+    const appInsightKey = Axios.get('/api/appinsight/key');
+    const settings = Axios.get('/api/settings/');
+
+    Axios.all([appInsightKey, settings])
+      .then(
+        Axios.spread((...responses) => {
+          const { data: appInsightKeyData } = responses[0];
+          const { data: settingsData } = responses[1];
+
+          if (appInsightKeyData.key)
+            return setAppInsightInfo({
+              key: appInsightKeyData.key,
+              isAppInsightOn: settingsData[0].is_collect_data,
+            });
+          throw new Error('No API Key');
+        }),
+      )
       .catch((e) => console.error(e));
   }, []);
 
@@ -22,10 +38,8 @@ const App: FC = (): JSX.Element => {
     <Provider theme={myTheme}>
       <BrowserRouter>
         <TelemetryProvider
-          after={(): void => {
-            appInsights = getAppInsights();
-          }}
-          instrumentationKey={key}
+          instrumentationKey={appInsightInfo.key}
+          isAppInsightOn={appInsightInfo.isAppInsightOn}
         >
           <div className="App">
             <MainLayout>
