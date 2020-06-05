@@ -9,10 +9,12 @@ import {
   Alert,
   Dropdown,
   DropdownItemProps,
+  Checkbox,
 } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { useProject } from '../hooks/useProject';
+import { getAppInsights } from '../TelemetryService';
 
 const initialState = {
   loading: false,
@@ -75,6 +77,7 @@ export const Setting = (): JSX.Element => {
   const [{ loading, error, current: settingData, origin: originSettingData }, dispatch] = useReducer<
     SettingReducer
   >(reducer, initialState);
+  const [checkboxChecked, setCheckboxChecked] = useState(false);
 
   const notEmpty = settingData.id !== -1;
 
@@ -103,6 +106,7 @@ export const Setting = (): JSX.Element => {
               },
             },
           });
+          setCheckboxChecked(data[0].is_collect_data);
         }
         return void 0;
       })
@@ -164,6 +168,22 @@ export const Setting = (): JSX.Element => {
       });
   };
 
+  const onCheckBoxClick = (): void => {
+    const newCheckboxChecked = !checkboxChecked;
+    setCheckboxChecked(newCheckboxChecked);
+    Axios.patch(`/api/settings/${settingData.id}`, { is_collect_data: newCheckboxChecked })
+      .then(() => {
+        const appInsight = getAppInsights();
+        if (!appInsight) throw Error('App Insight hasnot been initialize');
+        appInsight.config.disableTelemetry = !newCheckboxChecked;
+        return void 0;
+      })
+      .catch((err) => {
+        setCheckboxChecked(checkboxChecked);
+        alert(err);
+      });
+  };
+
   return (
     <>
       <h1>Setting</h1>
@@ -205,6 +225,13 @@ export const Setting = (): JSX.Element => {
         </Flex>
         {notEmpty && <PreviousProjectPanel settingDataId={settingData.id} />}
       </Flex>
+      <Divider color="grey" />
+      <Checkbox
+        label="Allow to Send Usage Data"
+        toggle
+        checked={checkboxChecked}
+        onChange={onCheckBoxClick}
+      />
     </>
   );
 };

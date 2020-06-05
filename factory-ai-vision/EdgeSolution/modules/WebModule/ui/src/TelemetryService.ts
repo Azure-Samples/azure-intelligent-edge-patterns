@@ -15,7 +15,7 @@ const createTelemetryService = (): { reactPlugin; appInsights; initialize } => {
    * @param {Object} browserHistory - client's browser history, supplied by the withRouter HOC
    * @return {void}
    */
-  const initialize = (instrumentationKey: string, browserHistory): any => {
+  const initialize = (instrumentationKey: string, isAppInsightOn: boolean, browserHistory): any => {
     if (!browserHistory) {
       throw new Error('Could not initialize Telemetry Service');
     }
@@ -30,6 +30,7 @@ const createTelemetryService = (): { reactPlugin; appInsights; initialize } => {
         instrumentationKey,
         maxBatchInterval: 0,
         disableFetchTracking: false,
+        disableTelemetry: !isAppInsightOn,
         extensions: [reactPlugin],
         extensionConfig: {
           [reactPlugin.identifier]: {
@@ -46,4 +47,4 @@ const createTelemetryService = (): { reactPlugin; appInsights; initialize } => {
 };
 
 export const ai = createTelemetryService();
-export const getAppInsights = (): any => appInsights;
+export const getAppInsights = (): ApplicationInsights => appInsights;
