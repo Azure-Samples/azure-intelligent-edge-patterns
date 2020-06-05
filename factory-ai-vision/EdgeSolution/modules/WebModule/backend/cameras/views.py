@@ -499,8 +499,14 @@ def train_performance(request, project_id):
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
-    ret = {}
+    if project_obj.is_demo:
+        return JsonResponse({
+            'status': 'ok',
+            'precision': 1,
+            'recall': 'demo_recall',
+            'map': 'demo_map', })
 
+    ret = {}
     iterations = trainer.get_iterations(customvision_project_id)
 
     def _parse(iteration):
@@ -725,10 +731,16 @@ def _train(project_id):
                 project_obj.train_project()
                 update_train_status(project_id)
 
+            except CustomVisionErrorException as e:
+                obj, created = project_obj.upcreate_training_status(
+                    status='failed',
+                    log=e.message)
+                return JsonResponse({'status': 'failed',
+                                     'log': e.message},
+                                    status=e.response.status_code)
             except:
                 logger.exception(
                     'Unexpected error while training project')
-                raise
 
         return JsonResponse({'status': 'ok'})
 
@@ -897,6 +909,12 @@ def pull_cv_project(request, project_id):
             'status': 'failed',
             'logs': '(Endpoint, Training_key) invalid'
         })
+    if project_obj.is_demo:
+        logger.info("Bad request. Demo project should not change")
+        return JsonResponse({
+            'status': 'failed',
+            'logs': 'Demo project should not change'
+        })
 
     try:
         project = trainer.get_project(project_id=customvision_project_id)
@@ -906,14 +924,13 @@ def pull_cv_project(request, project_id):
         logger.info(f"Setting Project... End")
 
         logger.info("Deleting all parts...")
-        Part.objects.all().delete()
+        Part.objects.filter(is_demo=False).delete()
         logger.info("Deleting all images...")
         Image.objects.all().delete()
 
         logger.info("Pulling Parts...")
         counter = 0
         tags = trainer.get_tags(customvision_project_id)
-        part_objs = []
         for tag in tags:
             logger.info(
                 f"Creating Part {counter}: {tag.name} {tag.description}")
@@ -922,36 +939,55 @@ def pull_cv_project(request, project_id):
                 description=tag.description if tag.description else f"{tag.name}'s description"
             )
             counter += 1
-            if not created:
-                raise
-            project_obj.parts.add(part_obj)
+            if created:
+                project_obj.parts.add(part_obj)
+            else:
+                logging.error(f"{tag.name} not added")
         logger.info(f"Pulled {counter} Parts")
         logger.info("Pulling Parts... End")
 
         logger.info("Pulling Tagged Images...")
-        counter = 0
-        imgs = trainer.get_tagged_images(customvision_project_id)
-        for img in imgs:
-            for region in img.regions:
-                logger.info(f"*** img {counter}")
-                logger.info(f"Downloading img {img.id}")
-                part_obj = Part.objects.get(name=region.tag_name)
-                # TODO: This will not work if single image has multiple
-                # regions with same tags
-                # In another words, only 1 picture and 1 part will be created.
-                img_obj, created = Image.objects.update_or_create(
-                    part=part_obj,
-                    remote_url=img.original_image_uri
-                )
-                if not created:
-                    raise
-                img_obj.get_remote_image()
-                img_obj.set_labels(
-                    left=region.left,
-                    top=region.top,
-                    width=region.width,
-                    height=region.height)
-                counter += 1
+        img_counter = 0
+        imgs_count = trainer.get_tagged_image_count(
+            project_id=customvision_project_id)
+        img_batch_size = 50
+        img_index = 0
+
+        while (img_index <= imgs_count):
+
+            logger.info(f'Img Index: {img_index}. Img Count: {imgs_count}')
+            imgs = trainer.get_tagged_images(
+                project_id=customvision_project_id,
+                take=img_batch_size,
+                skip=img_index)
+            for img in imgs:
+                logger.info(f"*** img {img_counter}")
+                for region in img.regions:
+                    part_obj = Part.objects.get(name=region.tag_name)
+                    img_obj, created = Image.objects.update_or_create(
+                        part=part_obj,
+                        remote_url=img.original_image_uri
+                    )
+                    if created:
+                        logger.info(f"Downloading img {img.id}")
+                        img_obj.get_remote_image()
+                        logger.info(f"Setting label of {img.id}")
+                        img_obj.set_labels(
+                            left=region.left,
+                            top=region.top,
+                            width=region.width,
+                            height=region.height)
+                        img_counter += 1
+                    else:
+                        # TODO:  Multiple region with same tag
+                        logger.info(f"Adding label to {img.id}")
+                        img_obj.add_labels(
+                            left=region.left,
+                            top=region.top,
+                            width=region.width,
+                            height=region.height)
+
+            img_index += img_batch_size
 
         logger.info(f"Pulled {counter} images")
         logger.info("Pulling Tagged Images... End")

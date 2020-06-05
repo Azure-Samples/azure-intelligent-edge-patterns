@@ -1,7 +1,10 @@
 from django.apps import AppConfig
-import sys
 from config import *
+
 import logging
+import sys
+import threading
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +59,7 @@ class CameraConfig(AppConfig):
 
             create_demo = True
             if create_demo:
-                from cameras.models import Part, Camera, Location, Project
+                from cameras.models import Part, Camera, Location, Project, Train
                 logger.info("Creating Demo")
                 for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
                     demo_part, created = Part.objects.update_or_create(
@@ -99,3 +102,50 @@ class CameraConfig(AppConfig):
 
                     }
                 )
+
+                demo_train, created = Train.objects.update_or_create(
+                    project=demo_project,
+                    defaults={
+                        'status': 'demo ok',
+                        'log': 'demo log',
+                        'performance': 1,
+                    }
+                )
+                logger.info("Creating Demo... End")
+
+#         def _part_monitor():
+#             from opencensus.ext.azure import metrics_exporter
+#             from opencensus.stats import aggregation as aggregation_module
+#             from opencensus.stats import measure as measure_module
+#             from opencensus.stats import stats as stats_module
+#             from opencensus.stats import view as view_module
+#             from opencensus.tags import tag_map as tag_map_module
+#             from configs.app_insight import APP_INSIGHT_CONN_STR
+#             stats = stats_module.stats
+#             view_manager = stats.view_manager
+#             stats_recorder = stats.stats_recorder
+#
+#             PARTS_MEASURE = measure_module.MeasureInt("part",
+#                                                       "number of parts",
+#                                                       "parts")
+#             PARTS_VIEW = view_module.View("part_view",
+#                                           "number of parts",
+#                                           [],
+#                                           PARTS_MEASURE,
+#                                           aggregation_module.CountAggregation())
+#             # time.sleep(15)
+#
+#             exporter = metrics_exporter.new_metrics_exporter(
+#                 connection_string=APP_INSIGHT_CONN_STR)
+#             view_manager.register_exporter(exporter)
+#
+#             view_manager.register_view(PARTS_VIEW)
+#             mmap = stats_recorder.new_measurement_map()
+#             tmap = tag_map_module.TagMap()
+#
+#             mmap.measure_int_put(PARTS_MEASURE, len(
+#                 Part.objects.filter(is_demo=False)))
+#             mmap.record(tmap)
+#             logger.info(len(Part.objects.filter(is_demo=False)))
+#
+#         threading.Thread(target=_part_monitor).start()
