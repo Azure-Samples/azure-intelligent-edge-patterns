@@ -313,6 +313,7 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
             'device_id',
             'module_id',
             'is_trainer_valid',
+            'is_collect_data',
             'obj_detection_domain_id']
 
     def create(self, validated_data):
