@@ -68,7 +68,8 @@ export const PartIdentification: React.FC = () => {
       thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
     ) as unknown) as Promise<number>)
       .then((id) => {
-        if (typeof id !== 'undefined') history.push(`/cameras/detail?name=${selectedCamera.name}`);
+        if (typeof id !== 'undefined')
+          history.push(`/cameras/detail?name=${selectedCamera.name}&isDemo=${isTestModel}`);
         return void 0;
       })
       .catch((e) => e);
