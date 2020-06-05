@@ -9,57 +9,40 @@ Main differences of the detached mode include limitations on:
 - How to access software packages(especially third-party).
 - How storage is allocated and utilized.
 
-## Prerequieistes
+## Prerequisites
 
 The reader is expected to be familiar with the following:
 
 - [Azure](http://azure.com) CLI, and Microsoft Azure subscription covering AKS.
+- [Azure Stack Hub](https://azure.microsoft.com/en-us/products/azure-stack/hub/)
 - [Kubernetes](https://kubernetes.io/)
 - [Kubeflow](https://github.com/kubeflow/kubeflow)
 - [Jupyter](https://jupyter.org/).
-- [Bash in Azure Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
+- [Bash](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
 
-IMPORTANT: Ask your cloud administrator which settings you need to use for the cloud you want
-to deploy the Kuberflow cluster(you might also be able to retrieve them yourslef if you have
-the access rights to do so, see the screen shots below):
+IMPORTANT: While you might have the premissions to retrieve some information on your
+own(see [User Information on Azure](acquiring_settings.md) for details), most likely
+you will need to ask your cloud administrator for the the following:
 
+  - link to your Azure Hub Portal
   - your Azure Subscription
-  - tenant ID
+  - Tenant ID
   - Service Principal ID
-  - and secret(associated with that Service Principal ID)
+  - the secret associated with that Service Principal ID
   - cloud name (`DEMOE2` in this tutorial, your team might be working with multiple public or on-prem clouds)
   - endpoint resource manager
   - storage endpoint
   - keyvault dns or some other security mechanisms your team is using
 
-Here is how you could find out your subscription, tenant Id, Service Principal ID, and create a secret.
-Make sure you are on Azure Hub's portal(1), make sure you are on the correct AD (2), this is how to browse to `Subscriptions`
-if it is not already pinned on your dashboard.
-![kubeflow-on-azure-stack/subscriptions01.png](kubeflow-on-azure-stack/subscriptions01.png)
-
-Select the subscription name you would like to use(or create a new one)
-![kubeflow-on-azure-stack/subscriptions02.png](kubeflow-on-azure-stack/subscriptions02.png)
-
-This is how you access Access Control, Click on `Access Control(IAM)`:
-![kubeflow-on-azure-stack/subscriptions03.png](kubeflow-on-azure-stack/subscriptions03.png)
-
-You may need to use Azure's Active Directory to create a Service Principal account. Make sure you are in the correct portal, Azure(1), and using correct Active Directory account (2), click on it and click `switch AD account` if needed. Then you will be able to create a new Service Principlal by selecting `New registration`(3). You will see it in the list (4):
-![kubeflow-on-azure-stack/app-registration01.png](kubeflow-on-azure-stack/app-registration01.png)
-
-Again, button `Add`(2) on this page is not what you need, but once you did the previous step and created the new registration, you see you Service Principal Name in the list(3):
-![kubeflow-on-azure-stack/subscriptions04.png](kubeflow-on-azure-stack/subscriptions04.png)
-
-On this screen you can find your `Tenant ID` and `App ID`:
-![kubeflow-on-azure-stack/subscriptions05.png](kubeflow-on-azure-stack/subscriptions05.png)
-
-Contact you cloud administrator for all this information before proceeding further.
+Make sure you have all this information before proceeding further.
 
 ## Login to the desired cloud
 
 We recommend you run the following commands from an Ubuntu vm inside of your Azure Stack.
-If you do not already have a vm, create it using web Portal(ask your Azure Stack administrator for the link).
+If you do not already have a vm, create it using web Portal(ask your Azure Stack
+administrator for the link, www.azure.com will not work - it is for the public cloud).
 
-![kubeflow-on-azure-stack/creating_vm.png](kubeflow-on-azure-stack/creating_vm.png)
+![pics/creating_vm.png](pics/creating_vm.png)
 
 Once the vm is created, you can ssh or rdp to it and open a terminal. Click button `Connect` in the details
 of the vm in Portal to see which user name and public ip address you can use, or download the rdp configuration.
@@ -351,7 +334,7 @@ Then the EXTERNAL-IP will become available from:
 
 Open it in your browser, and make sure your firewall rules allow HTTP port 80.
 
-![(kubeflow-on-azure-stack/kubeflow_dashboard1.png](kubeflow-on-azure-stack/kubeflow_dashboard1.png)
+![(pics/kubeflow_dashboard1.png](pics/kubeflow_dashboard1.png)
 
 For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/)
 
@@ -359,11 +342,11 @@ For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org
 
 You need to create a namespace to be able to create Jupyter servers. 
 
-![kubeflow-on-azure-stack/kubeflow_dashboard2_notebook_servers.png](kubeflow-on-azure-stack/kubeflow_dashboard2_notebook_servers.png)
+![pics/kubeflow_dashboard2_notebook_servers.png](pics/kubeflow_dashboard2_notebook_servers.png)
 
 Once you create a server, you can connect to it and upload Python files.
 
-![kubeflow-on-azure-stack/kubeflow_dashboard3_notebook.png](kubeflow-on-azure-stack/kubeflow_dashboard3_notebook.png)
+![pics/kubeflow_dashboard3_notebook.png](pics/kubeflow_dashboard3_notebook.png)
 
 ## Next Steps
 
