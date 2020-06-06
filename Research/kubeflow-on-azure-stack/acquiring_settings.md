@@ -22,3 +22,5 @@ On this screen you can find your `Tenant ID` and `App ID`:
 ![pics/subscriptions05.png](pics/subscriptions05.png)
 
 Contact you cloud administrator for more details.
+
+[Back](Readme.md)

@@ -21,26 +21,36 @@ The reader is expected to be familiar with the following:
 - [Bash](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
 
 IMPORTANT: While you might have the premissions to retrieve some information on your
-own(see [User Information on Azure](acquiring_settings.md) for details), most likely
-you will need to ask your cloud administrator for the the following:
+own(see [User Information on Azure](acquiring_settings.md)) or create, but most likely
+you will need to ask your cloud administrator. You need the following:
 
-  - link to your Azure Hub Portal
-  - your Azure Subscription
-  - Tenant ID
-  - Service Principal ID
-  - the secret associated with that Service Principal ID
-  - cloud name (`DEMOE2` in this tutorial, your team might be working with multiple public or on-prem clouds)
-  - endpoint resource manager
-  - storage endpoint
-  - keyvault dns or some other security mechanisms your team is using
+  - The link to your Azure Stack Hub Portal (`https://portal.demo2.stackpoc.com/signin/index/@demo.ondemo.com` in this tutorial)
+  - your portal URL (`https://portal.demo2.stackpoc.com` in this tutorial)
+  - your Azure Subscription (`KFDemo2Subscription`, with ID `123-SUBSCRIPTION-456` in this tutorial).
+  See if you can [create a subscription](creating_a_subscription.md) yourself.
+  - Service Principal ID (`azure-stack-spn-demo` in this tutorial).
+  See if you can [create a service principal](creating_service_principal.md) yourself. If you can create it, you will create the following too
+  (otherwise you might be able to [retrieve them](acquiring_settings.md)): 
+    - Tenant ID (Directory ID for this spn) (`12345-TENANT-67890` in this tutorial)
+    - Application (client) ID (`12345-APPLICATION-67890` in this tutorial)
+    - the secret associated with that Service Principal ID(`XYZSUPERSECRET1234567890` in this tutorial, but it is better to not use the secret value directly)
+  - cloud name (`DEMOE2` in this tutorial)
+  - cloud location (`demoe2` in this tutorial)
+  - Azure Environment (`AzureStackCloud` in this tutorial)
+  - These are for cloud registration `"az register ..."`
+    - endpoint resource manager(`https://management.demoe2.example.com` in this tutorial)
+    - storage endpoint(`portal.demoe2.example.com` in this tutorial)
+    - keyvault dns or some other security mechanisms your team is using(`.vault.portal.demoe2.example.com` in this tutorial)
+  
 
 Make sure you have all this information before proceeding further.
 
 ## Login to the desired cloud
 
-We recommend you run the following commands from an Ubuntu vm inside of your Azure Stack.
+We recommend you run the following commands(up to the creation of the Kubernetes cluster) from an Ubuntu vm inside of your Azure Stack.
+
 If you do not already have a vm, create it using web Portal(ask your Azure Stack
-administrator for the link, www.azure.com will not work - it is for the public cloud).
+administrator for the link("The link to your Azure Stack Hub Portal" in the Prerequisites checklist above). Be aware that www.azure.com will not work - it is for the public cloud).
 
 ![pics/creating_vm.png](pics/creating_vm.png)
 
@@ -52,9 +62,11 @@ If your vm's public ip is `12.34.56.78` and you created your vm specifying useri
 
 Or, on Windows, in command prompt, PowerShell, or a terminal of your choice:
 
-    c:\Work> ssh ssh azureuser@12.34.56.78
+    c:\Work> ssh azureuser@12.34.56.78
 
 You can also use [Ubuntu sub-system](https://docs.microsoft.com/en-us/windows/wsl/install-win10) that it part of Windows 10.
+
+## Installing Azure CLI
 
 Some images already have Azure CLI, in case your vm does not, see [Install Azure CLI with apt](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest).
 
@@ -65,14 +77,9 @@ Some images already have Azure CLI, in case your vm does not, see [Install Azure
     0 upgraded, 1 newly installed, 0 to remove and 34 not upgraded.
     ...
 
-Ask your cloud administrator which settings you need to use for the cloud you want to deploy the Kuberflow cluster(your team might be working with multiple public or on-prem clouds):
+## Registering with the correct cloud
 
-  - your cloud name (`DEMOE2` in this tutorial)
-  - endpoint resource manager
-  - storage endpoint
-  - keyvault dns or some other security mechanisms your team is using
-
-Then register with the correct cloud.
+Then register with the correct cloud like so:
 
     $ az cloud register -n DEMOE2 --endpoint-resource-manager "https://management.demoe2.example.com" --suffix-storage-endpoint "portal.demoe2.example.com" --suffix-keyvault-dns ".vault.portal.demoe2.example.com"
     The cloud 'DEMOE2' is registered.
@@ -85,24 +92,26 @@ It may be helpful to update it to the desired API version(`2019-03-01-hybrid` in
 
     $ az cloud update --profile 2019-03-01-hybrid
 
-Login to the desired cloud(you could look up the information in the Portal, or create a new service principal
-if your cloud administrator gave you this entitlement):
+Login to the desired cloud(with the data from Prerequisites checklist above):
 
-    $ az login --tenant stackdemo.example.com --service-principal -u 1234567-1234-123-123 -p SUPERSECRET
+    $ az login --tenant demo.ondemo.com --service-principal -u 12345-APPLICATION-67890 -p XYZSUPERSECRET1234567890
     [
       {
         "cloudName": "DEMOE2",
         "id": "12345-1234-1234-1234-12344321",
         "isDefault": true,
-        "name": "DemoKubeflowSubscription",
+        "name": "KFDemo2Subscription",
         "state": "Enabled",
-        "tenantId": "12345-1234-5678-9abcd-0987654321",
+        "tenantId": "12345-TENANT-67890",
         "user": {
-          "name": "1234567890-1234-987654321",
+          "name": "12345-APPLICATION-67890",
           "type": "servicePrincipal"
         }
       }
     ]
+
+You can run `az cloud list` to confirm your registration and login are correct. Look for
+the active cloud in your .json or the format you chose.
 
 ## Create Kubeflow Kubernetes cluster
 
@@ -122,16 +131,34 @@ a resource group using Portal, or CLI:
         "type": null
     }
 
-If you do not have a suitable key pair already, you can generate one using `ssh-gen`:
+If you do not have a suitable key pair already, you can generate one using `ssh-gen`,
+you can name it, for example, `id_rsa_for_demo`:
 
     $ ssh-keygen -t rsa -b 4096
 
-Then follow the instructions and use the public key in the "ssh" in .json below. If you have any problems, see [Create SSH Key Pair](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/mac-create-ssh-keys)
+You will need the public portion of your key pair in the "ssh" in .json below. If you have any problems, see [Create SSH Key Pair](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/mac-create-ssh-keys)
 or 
 [App Identity in Azure Stack Hub](https://docs.microsoft.com/en-us/azure-stack/operator/azure-stack-create-service-principals)
 
+Create a folder for the .json with the Kubernetes definition:
 
-Edit the deployment definition file to adjust for your own configuration and desired scale. Here is kube-rgKF_ppe2.json:
+    $ mkdir -p ~/DEMO_KF
+    $ cd ~/DEMO_KF
+
+Download the aks-engine template like so:
+
+    $ curl -o kube-KFDEMO_demoe2.json https://raw.githubusercontent.com/Azure/aks-engine/master/examples/azure-stack/kubernetes-azurestack.json
+
+Edit the deployment definition file. Plug in the settings from the Requirements
+checklist above, and adjust for your own configuration and desired scale.
+
+In our case we updated these fields:
+
+- "portalURL": "https://portal.demo2.stackpoc.com"
+- "dnsPrefix": "kube-rgDEMO2"
+- "keyData": "\<whatever is in id_rsa_for_demo.pub\>"
+
+Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDEMO2_demoe2.json`:
 
     {
         "apiVersion": "vlabs",
@@ -170,7 +197,7 @@ Edit the deployment definition file to adjust for your own configuration and des
                 "enableTelemetry": true
             },
             "masterProfile": {
-                "dnsPrefix": "kube-rgKF",
+                "dnsPrefix": "kube-rgDEMO2",
                 "distro": "aks-ubuntu-16.04",
                 "count": 1,
                 "vmSize": "Standard_D2_v2"
@@ -190,7 +217,7 @@ Edit the deployment definition file to adjust for your own configuration and des
                 "ssh": {
                     "publicKeys": [
                         {
-                            "keyData": "ssh-rsa SOMESUPERSECRETKEYNOBODYKNOWS"
+                            "keyData": "ssh-rsa SOMESUPERSECRETKEYNOBODYKNOWSSOMESUPERSECRETKEYNOBODYKNOWSSOMESUPERSECRETKEYNOBODYKNOWSSOMESUPERSECRETKEYNOBODYKNOWSSOMESUPERSECRETKEYNOBODYKNOWSSOMESUPERSECRETKEYNOBODYKNOWSSOMESUPERSECRETKEYNOBODYKNOWS"
                         }
                     ]
                 }
@@ -202,7 +229,12 @@ Edit the deployment definition file to adjust for your own configuration and des
         }
     }
 
-Download `aks-engone` installation script if you do not have it already:
+### Downloading aks-engine
+
+If you already have a suitable `aks-engine`, you may skip this chapter, or if you have any problems,
+see details in a separate page, [Installing aks-engine](installing_aks-engine.md). These are the steps:
+
+Download `aks-engine` installation script:
 
     $ curl -o get-akse.sh https://raw.githubusercontent.com/Azure/aks-engine/master/scripts/get-akse.sh
     $ chmod 700 get-akse.sh
@@ -224,6 +256,8 @@ Verify `aks-engine` version:
     GitCommit: 8928a4094
     GitTreeState: clean
 
+## Running deploying Kubernetes using aks-engine
+
 If Azure Resource Manager endpoint is using a self-signed certificate, you need to explicitly add the root certificate to trusted certificate store of the machine:
 
     $ sudo cp /var/lib/waagent/Certificates.pem /usr/local/share/ca-certificates/azurestackca.crt 
@@ -232,12 +266,12 @@ If Azure Resource Manager endpoint is using a self-signed certificate, you need 
 Run `aks-engine deploy` command filling in the information pieces you gathered in the check list
 in `Prerequisites`:
 
-    $ aks-engine deploy -m kube-rgKF_ppe2.json --auth-method client_secret --auto-suffix \
-        --azure-env AzureStackCloud --client-id 123456-1234 --client-secret 123supersecret \
-        --force-overwrite --location demoe2 --resource-group kube-rgKF \
-        --subscription-id 12345-4321-1234567890 --debug
+    $ aks-engine deploy -m kube-rgDEMO2_demoe2.json --auth-method client_secret --auto-suffix \
+        --azure-env AzureStackCloud --client-id 12345-APPLICATION-67890 --client-secret XYZSUPERSECRET1234567890 \
+        --force-overwrite --location demoe2 --resource-group kube-rgDEMO \
+        --subscription-id 123-SUBSCRIPTION-456 --debug
     INFO[0000] Writing cloud profile to: /tmp/azurestackcloud.json045678
-    DEBU[0000] Resolving tenantID for subscriptionID: 12345-4321-1234567890
+    DEBU[0000] Resolving tenantID for subscriptionID: 123-SUBSCRIPTION-456
     DEBU[0000] Already registered for "Microsoft.Compute"
     DEBU[0000] Already registered for "Microsoft.Storage"
     DEBU[0000] Already registered for "Microsoft.Network"
@@ -263,10 +297,17 @@ in `Prerequisites`:
     INFO[0006] Starting ARM Deployment (kube-rgKF-987654321). This will take some time...
     INFO[0497] Finished ARM Deployment (kube-rgKF-987654321). Succeeded
 
-If you did everything correctly, at this point you could ssh to the master node and check
-the cluster. You can find master node's public IP address at the Portal.
 
-    $ ssh -i id_rsa_demokey -l azureuser 12.345.123.45
+If you did everything correctly, at this point you could ssh to the master node and check
+the cluster. You can find master node's public IP address at the Portal(select
+subscription `KFDemo2Subscription` and click on the master node):
+
+![pics/kubernetes_cluster.png](pics/kubernetes_cluster.png)
+
+It would be helpful to record the master ip, and a connecting script containing
+something like the following: 
+
+    $ ssh -i ~/.ssh/id_rsa_demokey azureuser@12.345.123.45
     Authorized uses only. All activity may be monitored and reported.
     Welcome to Ubuntu 16.04.6 LTS (GNU/Linux 4.15.0-1061-azure x86_64)
     ...
@@ -287,21 +328,24 @@ the cluster. You can find master node's public IP address at the Portal.
 
 ## Install Kubeflow
 
-The following is done at the master node. Download the `kfctl` from [Kubeflow releases](https://github.com/kubeflow/kfctl/releases) page.
+The following is done at the master node. If you plan to install Kubeflow clusters often, consider
+creating a script with all the commands.
+
+Download the `kfctl` from [Kubeflow releases](https://github.com/kubeflow/kfctl/releases) page.
 
     $ mkdir kubeflow
     $ cd kubeflow/
-    $ wget https://github.com/kubeflow/kfctl/releases/download/v1.0.1/kfctl_v1.0.1-0-gf3edb9b_linux.tar.gz
+    $ wget https://github.com/kubeflow/kfctl/releases/download/v1.0.2/kfctl_v1.0.2-0-ga476281_linux.tar.gz
     ...
     ‘kfctl_v1.0.1-0-gf3edb9b_linux.tar.gz’ saved [31630869/31630869]
 
-    $ tar -xvf kfctl_v1.0.1_<platform>.tar.gz
+    $ tar -xvf kfctl_v1.0.1-0-gf3edb9b_linux.tar.gz
 
     $ export PATH=$PATH:~/kubeflow/
     $ export KF_NAME=sandboxASkf
     $ export BASE_DIR=/opt/
     $ export KF_DIR=${BASE_DIR}/${KF_NAME}
-    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.0-branch/kfdef/kfctl_k8s_istio.v1.0.1.yaml"
+    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.0-branch/kfdef/kfctl_k8s_istio.v1.0.2.yaml"
     
 Generate and deploy Kubeflow:
 
@@ -335,6 +379,8 @@ Then the EXTERNAL-IP will become available from:
 Open it in your browser, and make sure your firewall rules allow HTTP port 80.
 
 ![(pics/kubeflow_dashboard1.png](pics/kubeflow_dashboard1.png)
+
+You can monitor Kubeflow cluster by looking at the Kubernetes status, you might need to wait to let the pods create containers and start.
 
 For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/)
 
