@@ -5,6 +5,7 @@ import Axios from 'axios';
 import { Text, Checkbox, Flex, Button, Alert } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
 import { AOIData, Box } from '../../type';
+import useImage from '../LabelingPage/util/useImage';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -17,6 +18,7 @@ export const LiveViewContainer: React.FC<{
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>(null);
+  const imageInfo = useImage(`http://${window.location.hostname}:5000/video_feed?inference=1`, '');
 
   const onCheckboxClick = async (): Promise<void> => {
     setShowAOI(!showAOI);
@@ -64,6 +66,10 @@ export const LiveViewContainer: React.FC<{
     }
   }, [showUpdateSuccessTxt]);
 
+  useEffect(() => {
+    if (!AOIs.length) setAOIs([{ x1: 0, y1: 0, x2: imageInfo[2].width, y2: imageInfo[2].height }]);
+  }, [AOIs.length, imageInfo[2].width, imageInfo[2].height]);
+
   const hasEdit = !R.equals(lasteUpdatedAOIs.current, AOIs);
   const updateBtnDisabled = !showAOI || !hasEdit;
 
@@ -85,7 +91,9 @@ export const LiveViewContainer: React.FC<{
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
       <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
-        {showVideo ? <LiveViewScene AOIs={AOIs} setAOIs={setAOIs} visible={showAOI} /> : null}
+        {showVideo ? (
+          <LiveViewScene AOIs={AOIs} setAOIs={setAOIs} visible={showAOI} imageInfo={imageInfo} />
+        ) : null}
       </div>
     </Flex>
   );

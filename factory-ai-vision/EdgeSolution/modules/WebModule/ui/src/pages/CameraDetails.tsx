@@ -45,8 +45,8 @@ const getAOIData = (cameraArea: string): AOIData => {
     return JSON.parse(cameraArea);
   } catch (e) {
     return {
-      useAOI: true,
-      AOIs: [{ x1: 50, y1: 50, x2: 200, y2: 100 }],
+      useAOI: false,
+      AOIs: [],
     };
   }
 };

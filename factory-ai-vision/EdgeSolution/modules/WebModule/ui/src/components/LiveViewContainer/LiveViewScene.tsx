@@ -3,19 +3,15 @@ import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle } from 'r
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import useImage from '../LabelingPage/util/useImage';
 import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
 
-export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible }) => {
+export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible, imageInfo }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
   const imgRef = useRef(null);
   const layerRef = useRef(null);
 
-  const [imgEle, status, { width: imgWidth, height: imgHeight }] = useImage(
-    `http://${window.location.hostname}:5000/video_feed?inference=1`,
-    '',
-  );
+  const [imgEle, status, { width: imgWidth, height: imgHeight }] = imageInfo;
 
   /* The component need to support image with Content-type "multipart/x-mixed-replace",
      which will keep updating the image data.
