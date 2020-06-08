@@ -104,11 +104,17 @@ class Image(models.Model):
                 raise ValueError(
                     f"{left}, {top}, {width}, {height} must be less than 1")
             elif left < 0 or top < 0 or width < 0 or height < 0:
-                raise ValueError(
+                # raise ValueError(
+                #    f"{left}, {top}, {width}, {height} must be greater than 0")
+                logger.error(
                     f"{left}, {top}, {width}, {height} must be greater than 0")
+                return
             elif (left + width) > 1 or (top + height) > 1:
-                raise ValueError(
+                # raise ValueError(
+                #    f"left + width:{left + width}, top + height:{top + height} must be less than 1")
+                logger.error(
                     f"left + width:{left + width}, top + height:{top + height} must be less than 1")
+                return
 
             with PILImage.open(self.image) as img:
                 logger.info(f"Successfully open img {self.image}")
@@ -420,11 +426,10 @@ class Project(models.Model):
 
         def _r(confidence_min, confidence_max, max_images):
             requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
-                    'confidence_min': confidence_min, 'confidence_max': confidence_max, 'max_imags': max_images}) 
+                'confidence_min': confidence_min, 'confidence_max': confidence_max, 'max_imags': max_images})
 
         threading.Thread(target=_r, args=(
-                          confidence_min, confidence_max, max_images)).start()
-
+            confidence_min, confidence_max, max_images)).start()
 
         if update_fields is not None:
             return

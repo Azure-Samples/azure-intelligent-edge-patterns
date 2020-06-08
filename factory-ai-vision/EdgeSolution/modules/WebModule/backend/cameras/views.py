@@ -900,7 +900,8 @@ def pull_cv_project(request, project_id):
     rs = {}
     # FIXME: Should send correct id
     # project_obj = Project.objects.get(pk=project_id)
-    project_obj = Project.objects.get(is_demo=False)
+    if len(Project.objects.filter(is_demo=False)):
+        project_obj = Project.objects.filter(is_demo=False)[0]
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
 
     customvision_project_id = request.query_params.get(
