@@ -354,9 +354,9 @@ class Project(models.Model):
     download_uri = models.CharField(
         max_length=1000, null=True, blank=True, default='')
     needRetraining = models.BooleanField(default=False)
-    accuracyRangeMin = models.IntegerField(null=True)
-    accuracyRangeMax = models.IntegerField(null=True)
-    maxImages = models.IntegerField(null=True)
+    accuracyRangeMin = models.IntegerField(default=30)
+    accuracyRangeMax = models.IntegerField(default=80)
+    maxImages = models.IntegerField(default=10)
     deployed = models.BooleanField(default=False)
     train_try_counter = models.IntegerField(default=0)
     train_success_counter = models.IntegerField(default=0)
@@ -405,6 +405,27 @@ class Project(models.Model):
     def post_save(sender, instance, created, update_fields, **kwargs):
         logger.info("Project post_save")
         logger.info(f'Saving instance: {instance} {update_fields}')
+
+        confidence_min = 30
+        confidence_max = 80
+        max_images = 10
+
+        if instance.accuracyRangeMin is not None:
+            confidence_min = instance.accuracyRangeMin
+
+        if instance.accuracyRangeMax is not None:
+            confidence_max = instance.accuracyRangeMax
+
+        if instance.maxImages is not None:
+            max_images = instance.maxImages
+
+        def _r(confidence_min, confidence_max, max_images):
+            requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
+                    'confidence_min': confidence_min, 'confidence_max': confidence_max, 'max_imags': max_images}) 
+
+        threading.Thread(target=_r, args=(
+                          confidence_min, confidence_max, max_images)).start()
+
 
         if update_fields is not None:
             return

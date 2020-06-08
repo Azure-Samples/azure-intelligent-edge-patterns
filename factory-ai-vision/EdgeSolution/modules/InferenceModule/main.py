@@ -307,6 +307,11 @@ def update_retrain_parameters():
     self.confidence_max = int(confidence_max) * 0.01
     self.max_images = int(max_images)
 
+    print('[INFO] updaing retrain parameters to')
+    print('  conficen_min:', confidence_min)
+    print('  conficen_max:', confidence_max)
+    print('  max_images  :', max_images)
+
     return 'ok'
 
 @app.route('/update_model')
