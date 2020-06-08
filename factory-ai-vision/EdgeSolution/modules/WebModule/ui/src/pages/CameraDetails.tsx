@@ -46,7 +46,7 @@ const getAOIData = (cameraArea: string): AOIData => {
   } catch (e) {
     return {
       useAOI: false,
-      AOIs: [{ x1: 50, y1: 50, x2: 200, y2: 100 }],
+      AOIs: [],
     };
   }
 };
