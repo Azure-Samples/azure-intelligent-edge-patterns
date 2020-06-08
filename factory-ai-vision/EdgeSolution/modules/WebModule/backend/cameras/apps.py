@@ -87,7 +87,7 @@ class CameraConfig(AppConfig):
                     is_demo=True,
                     defaults={
                         'model_name': "Demo Model",
-                        'rtsp': "sample_video/video.mp4",
+                        'rtsp': 'sample_video/video_1min.mp4',
                         'area': ""
                     }
                 )
