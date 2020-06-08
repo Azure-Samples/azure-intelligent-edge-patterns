@@ -776,6 +776,13 @@ def train(request, project_id):
         log=''
     )
     logger.info('sleeping')
+
+    rtsp = project_obj.camera.rtsp
+    def _send(rtsp):
+        logger.info(f'**** updaing cam to {rtsp}')
+        requests.get('http://'+inference_module_url()+'/update_cam',
+                     params={'cam_type': 'rtsp', 'cam_source': rtsp})
+    threading.Thread(target=_send, args=(rtsp,)).start()
     return _train(project_id)
 
 
