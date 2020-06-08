@@ -430,6 +430,8 @@ class Project(models.Model):
             trainer = self.setting.revalidate_and_get_trainer_obj()
             if not trainer:
                 return
+            if not self.customvision_project_id:
+                return
             iterations = trainer.get_iterations(self.customvision_project_id)
             if len(iterations) > max_iterations:
                 # TODO delete train in Train Model
