@@ -22,8 +22,7 @@ from azure.iot.device import IoTHubModuleClient
 
 from azure.iot.device import IoTHubModuleClient
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
-from cameras.utils.app_insight import get_app_insight_logger
-
+from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor, get_app_insight_logger
 try:
     iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
 except:
@@ -505,26 +504,6 @@ class Project(models.Model):
             self.train_success_counter += 1
             update_fields.append('train_success_counter')
 
-            # App Insight
-            if app_insight_on:
-                app_insight_logger.info(
-                    f"Project: {self.customvision_project_name}. Train submit count: {self.train_success_counter}")
-                tags = trainer.get_tags(self.customvision_project_id)
-                len_tags = len(tags)
-
-                app_insight_logger.info(
-                    f"Project: {self.customvision_project_name}. Tag count: {len_tags}")
-                for tag in tags:
-                    tag_images_count = trainer.get_tagged_image_count(
-                        project_id=self.customvision_project_id,
-                        tag_ids=[tag.id])
-                    app_insight_logger.info(
-                        f"Project: {self.customvision_project_name}. Tag: {tag.name}. Image count: {tag_images_count}")
-                total_images_count = trainer.get_tagged_image_count(
-                    project_id=self.customvision_project_id)
-                app_insight_logger.info(
-                    f"Project: {self.customvision_project_name}. Total image count: {total_images_count}")
-
             # Set deployed
             self.deployed = False
             update_fields.append('deployed')
@@ -545,9 +524,15 @@ class Project(models.Model):
         except:
             self.save(update_fields=update_fields)
             logger.exception('Something wrong while training project')
-        # finally:
-        #    self.save(update_fields=update_fields)
-        #    return is_task_success
+        finally:
+            # App Insight
+            if self.setting.is_collect_data:
+                logger.info("Sending Logs to App Insight")
+                part_monitor(len(Part.objects.filter(is_demo=False)))
+                img_monitor(len(Image.objects.all()))
+                training_job_triggered_monitor(self.train_try_counter)
+                retraining_jobs_monitor(self.train_success_counter)
+            self.save(update_fields=update_fields)
 
     def export_iterationv3_2(self, iteration_id):
         setting_obj = self.setting

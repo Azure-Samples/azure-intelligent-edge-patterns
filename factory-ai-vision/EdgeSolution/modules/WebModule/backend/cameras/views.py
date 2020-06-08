@@ -318,6 +318,7 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
                 'iot_hub_connection_string': validated_data['iot_hub_connection_string'],
                 'device_id': validated_data['device_id'],
                 'module_id': validated_data['module_id'],
+                'is_collect_data': validated_data['is_collect_data']
             })
         return obj
 
