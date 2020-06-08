@@ -451,6 +451,8 @@ class Project(models.Model):
             trainer = self.setting.revalidate_and_get_trainer_obj()
             if not trainer:
                 return
+            if not self.customvision_project_id:
+                return
             iterations = trainer.get_iterations(self.customvision_project_id)
             if len(iterations) > max_iterations:
                 # TODO delete train in Train Model
@@ -547,6 +549,15 @@ class Project(models.Model):
         #    self.save(update_fields=update_fields)
         #    return is_task_success
 
+    def export_iterationv3_2(self, iteration_id):
+        setting_obj = self.setting
+
+        url = setting_obj.endpoint+'customvision/v3.2/training/projects/' + \
+            self.customvision_project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
+        res = requests.post(url, '{body}', headers={
+                            'Training-key': setting_obj.training_key})
+
+        return res
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
     #    print('[INFO] M2M_CHANGED')

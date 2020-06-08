@@ -61,14 +61,6 @@ def inference_module_url():
 logger = logging.getLogger(__name__)
 
 
-def export_iterationv3_2(project_id, iteration_id):
-    url = ENDPOINT+'customvision/v3.2/training/projects/' + \
-        project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
-    res = requests.post(url, '{body}', headers={'Training-key': TRAINING_KEY})
-
-    return res
-
-
 def update_train_status(project_id):
     def _train_status_worker(project_id):
         project_obj = Project.objects.get(pk=project_id)
@@ -110,8 +102,7 @@ def update_train_status(project_id):
                     log='Status : exporting model'
                 )
                 # trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
-                res = export_iterationv3_2(
-                    customvision_project_id, iteration.id)
+                res = project_obj.export_iterationv3_2(iteration.id)
                 logger.info(res.json())
                 continue
                 # return JsonResponse({'status': 'exporting'})
@@ -200,6 +191,8 @@ def export(request, project_id):
     })
 
 # FIXME tmp workaround
+
+
 @api_view()
 def export_null(request):
     project_obj = Project.objects.all()[0]
@@ -227,7 +220,7 @@ def export_null(request):
     if len(exports) == 0:
         logger.info('exporting ...')
         # trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
-        res = export_iterationv3_2(customvision_project_id, iteration.id)
+        res = project_obj.export_iterationv3_2(iteration.id)
         logger.info(res.json())
         return JsonResponse({'status': 'exporting'})
 
@@ -436,6 +429,8 @@ class TrainViewSet(viewsets.ModelViewSet):
 # Stream Views
 #
 streams = []
+
+
 @api_view()
 def connect_stream(request):
     part_id = request.query_params.get('part_id')
@@ -774,6 +769,11 @@ def train(request, project_id):
         # FIXME pass the new model info to inference server (willy implement)
         return JsonResponse({'status': 'ok'})
 
+    project_obj = Project.objects.get(pk=project_id)
+    project_obj.upcreate_training_status(
+        status='Status: preparing data (images and annotations)',
+        log=''
+    )
     logger.info('sleeping')
     return _train(project_id)
 
