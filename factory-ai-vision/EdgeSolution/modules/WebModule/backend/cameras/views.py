@@ -769,6 +769,11 @@ def train(request, project_id):
         # FIXME pass the new model info to inference server (willy implement)
         return JsonResponse({'status': 'ok'})
 
+    project_obj = Project.objects.get(pk=project_id)
+    project_obj.upcreate_training_status(
+        status='Status: preparing data (images and annotations)',
+        log=''
+    )
     logger.info('sleeping')
     return _train(project_id)
 
