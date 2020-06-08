@@ -79,7 +79,7 @@ export const Setting = (): JSX.Element => {
   >(reducer, initialState);
   const [checkboxChecked, setCheckboxChecked] = useState(false);
 
-  const notEmpty = settingData.id !== -1;
+  const notEmpty = originSettingData.namespace && originSettingData.key;
 
   const cannotUpdateOrSave = R.equals(settingData, originSettingData);
 
