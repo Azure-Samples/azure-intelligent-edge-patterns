@@ -8,7 +8,7 @@ import logging
 class PartTests(APITestCase):
     def test_create_part(self):
         """
-        Ensure we can create a new account object.
+        Ensure we can create a new Part object.
         """
         url = reverse('part-list')
         data = {'name': 'Box',
@@ -20,7 +20,7 @@ class PartTests(APITestCase):
 
     def test_create_dup_parts(self):
         """
-        Ensure we can create a new account object.
+        Ensure create duplicate Part objects will failed.
         """
         url = reverse('part-list')
         data = {'name': 'Box',
@@ -34,7 +34,7 @@ class PartTests(APITestCase):
 
     def test_create_same_lowercase_parts(self):
         """
-        Ensure we can create a new account object.
+        Ensure Part (name, is_demo) is unique together.
         """
         url = reverse('part-list')
         data = {'name': 'Box',
@@ -60,7 +60,7 @@ class PartTests(APITestCase):
 
     def test_create_no_desb_parts(self):
         """
-        Ensure we can create a new account object.
+        Ensure no desb will failed.
         """
         url = reverse('part-list')
         data = {'name': 'Box'}
