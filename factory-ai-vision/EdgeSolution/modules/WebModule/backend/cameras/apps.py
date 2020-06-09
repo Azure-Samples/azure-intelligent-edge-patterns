@@ -6,16 +6,6 @@ import sys
 import threading
 import time
 
-
-from opencensus.ext.azure import metrics_exporter
-from opencensus.stats import aggregation as aggregation_module
-from opencensus.stats import measure as measure_module
-from opencensus.stats import stats as stats_module
-from opencensus.stats import view as view_module
-from opencensus.tags import tag_map as tag_map_module
-from configs.app_insight import APP_INSIGHT_CONN_STR
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,8 +25,8 @@ class CameraConfig(AppConfig):
             if len(existing_settings) == 1:
                 logger.info(
                     f"Found existing {DEFAULT_SETTING_NAME}. Revalidating in pre_save...")
-                setting = existing_settings[0]
-                setting.save()
+                default_setting = existing_settings[0]
+                default_setting.save()
 
             elif len(Setting.objects.filter(
                     name=DEFAULT_SETTING_NAME)) > 0:
@@ -44,6 +34,9 @@ class CameraConfig(AppConfig):
                     f"Found existing {DEFAULT_SETTING_NAME} with different (Endpoint, key)")
                 logger.info(f"User may already changed the key ")
                 # settings_with_dup_name.delete()
+                default_setting = Setting.objects.filter(
+                    name=DEFAULT_SETTING_NAME)[0]
+                default_setting.save()
 
             elif len(Setting.objects.filter(
                     endpoint=ENDPOINT,
@@ -52,6 +45,10 @@ class CameraConfig(AppConfig):
                     f"Found existing (Endpoint, key) with different setting name")
                 logger.info(f"Pass...")
 
+                default_setting = Setting.objects.filter(
+                    endpoint=ENDPOINT,
+                    training_key=TRAINING_KEY)[0]
+                default_setting.save()
             else:
                 logger.info(f"Creating new {DEFAULT_SETTING_NAME}")
                 default_setting, created = Setting.objects.update_or_create(
@@ -66,13 +63,9 @@ class CameraConfig(AppConfig):
                     logger.error(
                         f"{DEFAULT_SETTING_NAME} not created. Something went wrong")
 
-            default_setting, created = Setting.objects.update_or_create(
-                name=DEFAULT_SETTING_NAME)
-
             create_demo = True
             if create_demo:
-
-                logger.info("Creating Demo")
+                logger.info("Creating Demo Parts")
                 for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
                     demo_part, created = Part.objects.update_or_create(
                         name=partname,
@@ -82,6 +75,7 @@ class CameraConfig(AppConfig):
                         }
                     )
 
+                logger.info("Creating Demo Camera")
                 demo_camera, created = Camera.objects.update_or_create(
                     name="Demo Video",
                     is_demo=True,
@@ -92,6 +86,7 @@ class CameraConfig(AppConfig):
                     }
                 )
 
+                logger.info("Creating Demo Location")
                 demo_location, created = Location.objects.update_or_create(
                     name="Demo Location",
                     is_demo=True,
@@ -101,17 +96,13 @@ class CameraConfig(AppConfig):
                     }
                 )
 
-                default_setting, created = Setting.objects.update_or_create(
-                    name=DEFAULT_SETTING_NAME)
+                logger.info("Creating Demo Project")
                 demo_project, created = Project.objects.update_or_create(
                     is_demo=True,
                     defaults={
                         'setting': default_setting,
                         'camera': demo_camera,
                         'location': demo_location,
-                        'customvision_project_id': 'Blank',
-                        'customvision_project_name': 'Blank',
-
                     }
                 )
 
@@ -127,5 +118,9 @@ class CameraConfig(AppConfig):
 
             default_project, created = Project.objects.update_or_create(
                 is_demo=False,
-                camera=demo_camera,
-                location=demo_location)
+                defaults={
+                    'camera': demo_camera,
+                    'location': demo_location})
+            logger.info(
+                f"None demo project found: {not created}. Default project created: {created}")
+            logger.info("CameraAppConfig End while running server")
