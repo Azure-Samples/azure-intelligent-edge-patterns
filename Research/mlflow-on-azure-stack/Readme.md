@@ -15,7 +15,7 @@ Run the below commands to build the Dockerfile in this directory and push it to 
 ```sh
 docker login <your-registry-server> -u <registry-username> -p <registry-password>
 docker build . -t mlflow-server:latest
-docker tag mlflowserver:latest <your-registry-server>/mlflow-server:latest
+docker tag mlflow-server:latest <your-registry-server>/mlflow-server:latest
 docker push <your-registry-server>/mlflow-server:latest
 ```
 
