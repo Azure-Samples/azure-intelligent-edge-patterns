@@ -169,6 +169,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                 b, img = self.cam.read()
                 self.lock.release()
 
+                # if b is false, restart the video if the type is video
                 if b:
                     self.last_img = img
                     self.last_prediction = self.predict(img)
@@ -375,11 +376,12 @@ def update_cam():
 
 @app.route('/update_threshold')
 def update_threshold():
-    threshold = float(request.args.get('threshold'))
+    #threshold = float(request.args.get('threshold'))
 
-    print('[INFO] update theshold to', threshold)
+    #print('[INFO] update theshold to', threshold)
 
-    onnx.threshold = threshold
+    #onnx.threshold = threshold
+    print('[WARNING] is depreciated')
     return 'ok'
 
 @app.route('/video_feed')
@@ -404,7 +406,8 @@ def video_feed():
                     if onnx.has_aoi:
                         img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)
 
-                    if prediction['probability'] > onnx.threshold:
+                    #if prediction['probability'] > onnx.threshold:
+                    if prediction['probability'] > onnx.confidence_max:
                         x1 = int(prediction['boundingBox']['left'] * width)
                         y1 = int(prediction['boundingBox']['top'] * height)
                         x2 = x1 + int(prediction['boundingBox']['width'] * width)
