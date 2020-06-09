@@ -547,6 +547,8 @@ def _train(project_id):
     project_obj.dequeue_iterations()
 
     try:
+        if not trainer:
+            raise ValueError('Please input valid training_key and namespace')
         count = 10
         while count > 0:
             part_ids = [part.id for part in project_obj.parts.all()]
@@ -778,6 +780,7 @@ def train(request, project_id):
     logger.info('sleeping')
 
     rtsp = project_obj.camera.rtsp
+
     def _send(rtsp):
         logger.info(f'**** updaing cam to {rtsp}')
         requests.get('http://'+inference_module_url()+'/update_cam',
