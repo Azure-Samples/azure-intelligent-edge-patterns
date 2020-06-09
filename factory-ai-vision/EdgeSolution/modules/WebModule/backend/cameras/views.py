@@ -242,6 +242,14 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
         model = Part
         fields = ['id', 'name', 'description', 'is_demo']
 
+    def validate(self, attrs):
+        if 'is_demo' not in attrs:
+            attrs['is_demo'] = False
+        if Part.objects.filter(name_lower=attrs['name'].lower(), is_demo=attrs['is_demo']).exists():
+            raise serializers.ValidationError(
+                "(name, is_demo) should be unique together. Name is case insensitive")
+        return attrs
+
 
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Part.objects.all()
@@ -547,6 +555,8 @@ def _train(project_id):
     project_obj.dequeue_iterations()
 
     try:
+        if not trainer:
+            raise ValueError('Please input valid training_key and namespace')
         count = 10
         while count > 0:
             part_ids = [part.id for part in project_obj.parts.all()]
@@ -778,6 +788,7 @@ def train(request, project_id):
     logger.info('sleeping')
 
     rtsp = project_obj.camera.rtsp
+
     def _send(rtsp):
         logger.info(f'**** updaing cam to {rtsp}')
         requests.get('http://'+inference_module_url()+'/update_cam',

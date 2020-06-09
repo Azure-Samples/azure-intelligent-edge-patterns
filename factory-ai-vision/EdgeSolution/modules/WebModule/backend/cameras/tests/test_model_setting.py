@@ -1,10 +1,8 @@
 from django.test import TestCase
-
-# Create your tests here.
-
-from django.test import TestCase
 from cameras.models import Setting
 from config import ENDPOINT, TRAINING_KEY
+
+# You should have valid training key and endpoint in order to test this module
 
 
 class TrainerTestCase(TestCase):
