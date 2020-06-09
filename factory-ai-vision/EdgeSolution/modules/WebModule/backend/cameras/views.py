@@ -243,6 +243,8 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'name', 'description', 'is_demo']
 
     def validate(self, attrs):
+        if 'is_demo' not in attrs:
+            attrs['is_demo'] = False
         if Part.objects.filter(name_lower=attrs['name'].lower(), is_demo=attrs['is_demo']).exists():
             raise serializers.ValidationError(
                 "(name, is_demo) should be unique together. Name is case insensitive")
