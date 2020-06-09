@@ -2,7 +2,7 @@
 1. For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working 
 2. For runnign on GPU : Azure Stack Edge 
                         OR
-                        Azure or Azure Stack Hub VM with Nvidia Docker+ Nvidia driver + Azure Iot Edge 
+                        Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge 
 
 
 
