@@ -54,12 +54,24 @@ class Part(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
     is_demo = models.BooleanField(default=False)
+    name_lower = models.CharField(max_length=200, default=str(name).lower())
 
     class Meta:
-        unique_together = ('name', 'is_demo')
+        unique_together = ('name_lower', 'is_demo')
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def pre_save(sender, instance, update_fields, **kwargs):
+        try:
+            if update_fields is not None:
+                return
+            update_fields = []
+            instance.name_lower = str(instance.name).lower()
+            update_fields.append('name_lower')
+        except:
+            logger.exception("Unexpected Error in Part Presave")
 
 
 class Location(models.Model):
@@ -570,6 +582,7 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
+pre_save.connect(Part.pre_save, Part, dispatch_uid='Part_pre')
 pre_save.connect(Project.pre_save, Project, dispatch_uid='Project_pre')
 post_save.connect(Project.post_save, Project, dispatch_uid='Project_post')
 # m2m_changed.connect(Project.m2m_changed, Project.parts.through, dispatch_uid='Project_m2m')
