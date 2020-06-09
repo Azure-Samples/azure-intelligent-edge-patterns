@@ -242,6 +242,12 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
         model = Part
         fields = ['id', 'name', 'description', 'is_demo']
 
+    def validate(self, attrs):
+        if Part.objects.filter(name_lower=attrs['name'].lower(), is_demo=attrs['is_demo']).exists():
+            raise serializers.ValidationError(
+                "(name, is_demo) should be unique together. Name is case insensitive")
+        return attrs
+
 
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Part.objects.all()
