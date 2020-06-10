@@ -270,10 +270,17 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
   const onLoad = (): void => {
     setOtherLoading(true);
     Axios.get(
-      `api/projects/${
+      `/api/projects/${
         projectData.id
       }/pull_cv_project?customvision_project_id=${customVisionProjectId}&partial=${Number(loadPartial)}`,
     )
+      .catch((err) => setOtherError(err))
+      .finally(() => setOtherLoading(false));
+  };
+
+  const onCreateNewProject = (): void => {
+    setOtherLoading(true);
+    Axios.get(`/api/projects/${projectData.id}/reset`)
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
   };
@@ -324,7 +331,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           contentText={<p>Create New Project will remove all the parts, sure you want to do that?</p>}
           open={createProjectModel}
           onConfirm={() => {
-            // TODO
+            onCreateNewProject();
             setCreateProjectModel(false);
           }}
           onCancel={() => {
