@@ -243,16 +243,27 @@ export const Setting = (): JSX.Element => {
   );
 };
 
+const initialDropdownItem = [
+  {
+    header: '+ Create New Project',
+    content: {
+      key: 'NEW',
+    },
+  },
+];
+
 const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingDataId }) => {
-  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
+  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>(initialDropdownItem);
   const [customVisionProjectId, setCustomVisionProjectId] = useState('');
   const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
   const [loadPartial, setLoadPartial] = useState(false);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
+  const [createProjectModel, setCreateProjectModel] = useState(false);
 
   const onDropdownChange = (_, data): void => {
     if (data.value === null) setCustomVisionProjectId(customVisionProjectId);
+    else if (data.value.content.key === initialDropdownItem[0].content.key) setCreateProjectModel(true);
     else setCustomVisionProjectId(data.value.content.key);
   };
 
@@ -276,7 +287,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
               key,
             },
           }));
-          setDropdownItems(items);
+          setDropdownItems([...initialDropdownItem, ...items]);
           return void 0;
         })
         .catch((e) => setOtherError(e))
@@ -306,6 +317,18 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           trigger={
             <Button primary content="Load" disabled={!customVisionProjectId || loading} loading={loading} />
           }
+        />
+        <WarningDialog
+          contentText={<p>Create New Project will remove all the parts, sure you want to do that?</p>}
+          open={createProjectModel}
+          onConfirm={() => {
+            // TODO
+            setCreateProjectModel(false);
+          }}
+          onCancel={() => {
+            setCreateProjectModel(false);
+            setCustomVisionProjectId(null);
+          }}
         />
         {error.length ? <Alert danger content={`Failed to load ${error.join(', ')}`} dismissible /> : null}
       </Flex>

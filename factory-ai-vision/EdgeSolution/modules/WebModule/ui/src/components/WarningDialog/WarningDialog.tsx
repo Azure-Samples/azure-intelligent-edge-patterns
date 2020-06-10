@@ -9,6 +9,7 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({
   contentText,
   cancelButton = 'Cancel',
   confirmButton = 'Confirm',
+  open = null,
 }): JSX.Element => {
   return (
     <Dialog
@@ -17,6 +18,7 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({
       confirmButton={confirmButton}
       onConfirm={onConfirm}
       onCancel={onCancel}
+      open={open}
       content={
         <>
           <Flex hAlign="center" column>
