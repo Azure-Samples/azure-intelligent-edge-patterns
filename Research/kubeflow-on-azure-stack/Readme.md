@@ -128,7 +128,7 @@ IP when it is ready:
 
 So, when it is no longer `<pending>`, it(from the above output, `88.258.18.69`) should be accessible from your browser.
 
-Congratulations, you can now skip to the chapter "Using Kubeflow".
+Congratulations, you can now skip to the chapter "Using Dashboard".
 
 ### If you chose to do the installation manually. 
 
@@ -199,7 +199,7 @@ Once you create a server, you can connect to it and upload Python files.
 ![pics/kubeflow_dashboard3_notebook.png](pics/kubeflow_dashboard3_notebook.png)
 
 
-## Using Kubeflow
+## Uninstalling Kubeflow
 
 If you installed Kubeflow using `kubeflow_install.sh`, you can remove it using `kubeflow_uninstall.sh`:
 
