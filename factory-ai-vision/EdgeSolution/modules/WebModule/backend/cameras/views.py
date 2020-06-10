@@ -14,6 +14,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.core.files.images import ImageFile
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
 
 # from rest_framework.views import APIView
 from rest_framework.request import Request
@@ -24,11 +25,11 @@ from rest_framework import status
 from rest_framework import filters
 from filters.mixins import FiltersMixin
 
-from django.db.utils import IntegrityError
+
 import requests
 
-from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
-
+from distutils.util import strtobool
+from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train, Task
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 from configs.app_insight import APP_INSIGHT_INST_KEY
 
@@ -317,7 +318,25 @@ class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         'is_demo': 'is_demo',
     }
+#
+# Task
+#
 
+
+class TaskSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['task_type', 'status', 'log', 'project']
+
+
+class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'project': 'project',
+    }
+#
 #
 # Settings Views
 #
@@ -936,39 +955,46 @@ def pull_cv_project(request, project_id):
     TODO: open a thread
     """
     logger.info("Pulling CustomVision Project")
-    rs = {}
+    update_fields = []
     # FIXME: Should send correct id
     # project_obj = Project.objects.get(pk=project_id)
     if len(Project.objects.filter(is_demo=False)):
         project_obj = Project.objects.filter(is_demo=False)[0]
+    # Check Project
+    if project_obj.is_demo:
+        return JsonResponse({
+            'status': 'failed',
+            'logs': 'Demo project should not change'
+        })
+    # Check Training_Key, Endpoint
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-
-    customvision_project_id = request.query_params.get(
-        'customvision_project_id')
-    logger.info(f"customvision_project_id: {customvision_project_id}")
-
     if not trainer:
         return JsonResponse({
             'status': 'failed',
             'logs': '(Endpoint, Training_key) invalid'
         })
-    if project_obj.is_demo:
-        logger.info("Bad request. Demo project should not change")
-        return JsonResponse({
-            'status': 'failed',
-            'logs': 'Demo project should not change'
-        })
+
+    # Check Customvision Project id
+    customvision_project_id = request.query_params.get(
+        'customvision_project_id')
+    logger.info(f"customvision_project_id: {customvision_project_id}")
+
+    # Check Partial
+    try:
+        is_partial = bool(strtobool(request.query_params.get('partial')))
+    except:
+        is_partial = True
+    logger.info(f"Loading Project in Partial Mode: {is_partial}")
 
     try:
+        # Invalid CustomVision Project ID handled by exception
         project = trainer.get_project(project_id=customvision_project_id)
-        logger.info(f"Setting Project...")
         project_obj.customvision_project_id = customvision_project_id
-        project_obj.save()
-        logger.info(f"Setting Project... End")
+        project_obj.deployed = False
+        update_fields.extend(['customvision_project_id', 'deployed'])
 
-        logger.info("Deleting all parts...")
+        logger.info("Deleting all parts and images...")
         Part.objects.filter(is_demo=False).delete()
-        logger.info("Deleting all images...")
         Image.objects.all().delete()
 
         logger.info("Pulling Parts...")
@@ -989,6 +1015,14 @@ def pull_cv_project(request, project_id):
         logger.info(f"Pulled {counter} Parts")
         logger.info("Pulling Parts... End")
 
+        # Partial
+        if is_partial:
+            exporting_task_obj = Task.objects.create(
+                task_type='export_iteration', status='init', log='Just Started', project=project_obj)
+            exporting_task_obj.start_exporting()
+            return JsonResponse({'status': 'ok', 'task.id': exporting_task_obj.id})
+
+        # Full Download
         logger.info("Pulling Tagged Images...")
         img_counter = 0
         imgs_count = trainer.get_tagged_image_count(
@@ -997,7 +1031,6 @@ def pull_cv_project(request, project_id):
         img_index = 0
 
         while (img_index <= imgs_count):
-
             logger.info(f'Img Index: {img_index}. Img Count: {imgs_count}')
             imgs = trainer.get_tagged_images(
                 project_id=customvision_project_id,
@@ -1035,13 +1068,12 @@ def pull_cv_project(request, project_id):
 
         logger.info(f"Pulled {counter} images")
         logger.info("Pulling Tagged Images... End")
+        logger.info("Pulling CustomVision Project... End")
+        return JsonResponse({'status': 'ok'})
     except CustomVisionErrorException as e:
         logger.error(f"CustomVisionErrorException: {e.message}")
-        logger.error(
-            "Probably cause by invalid customvision project id. Do nothing...")
-        return JsonResponse({
-            'status': 'failed',
-            'log': f'Status : failed because invalid customvision project id'})
+        return JsonResponse({'status': 'failed',
+                             'log': e.message})
     except Exception as e:
         # TODO: Remove in production
         err_msg = traceback.format_exc()
@@ -1049,6 +1081,28 @@ def pull_cv_project(request, project_id):
         return JsonResponse({
             'status': 'failed',
             'log': f'Status : failed {str(err_msg)}'})
+    finally:
+        project_obj.save(update_fields=update_fields)
 
-    logger.info("Pulling CustomVision Project... End")
+
+@api_view()
+def reset_project(request, project_id):
+    try:
+        project_obj = Project.objects.get(pk=project_id)
+    except:
+        if len(Project.objects.filter(is_demo=False)):
+            project_obj = Project.objects.filter(is_demo=False)[0]
+    Part.objects.filter(is_demo=False).delete()
+    Image.objects.all().delete()
+    project_obj.customvision_project_id = ''
+    project_obj.customvision_project_name = ''
+    project_obj.download_uri = ''
+    project_obj.needRetraining = False
+    project_obj.accuracyRangeMin = 30
+    project_obj.accuracyRangeMax = 80
+    project_obj.maxImages = 10
+    project_obj.deployed = False
+    project_obj.train_try_counter = 0
+    project_obj.train_success_counter = 0
+    project_obj.save()
     return JsonResponse({'status': 'ok'})

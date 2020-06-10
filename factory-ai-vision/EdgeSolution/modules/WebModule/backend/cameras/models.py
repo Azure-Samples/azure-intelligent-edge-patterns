@@ -588,6 +588,51 @@ class Task(models.Model):
     log = models.CharField(max_length=1000)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
+    def start_exporting(self):
+        def _export_worker(self):
+            project_obj = self.project
+            trainer = project_obj.setting.revalidate_and_get_trainer_obj()
+            camera_id = project_obj.camera_id
+            customvision_project_id = project_obj.customvision_project_id
+            camera = Camera.objects.get(pk=camera_id)
+            while True:
+                time.sleep(1)
+                iterations = trainer.get_iterations(customvision_project_id)
+                if len(iterations) == 0:
+                    logger.error('failed: not yet trained')
+                    self.status = 'running'
+                    self.log = 'failed: not yet trained'
+                    self.save()
+                    return
+
+                iteration = iterations[0]
+                if iteration.exportable == False or iteration.status != 'Completed':
+                    self.status = 'running'
+                    self.log = 'Status : training model'
+                    self.save()
+                    continue
+
+                exports = trainer.get_exports(
+                    customvision_project_id, iteration.id)
+                if len(exports) == 0 or not exports[0].download_uri:
+                    logger.info('Status: exporting model')
+                    self.status = 'running'
+                    self.log = 'Status : exporting model'
+                    res = project_obj.export_iterationv3_2(iteration.id)
+                    self.save()
+                    logger.info(res.json())
+                    continue
+
+                self.status = 'ok'
+                self.log = 'Status : work done'
+                self.save()
+                project_obj.download_uri = exports[0].download_uri
+                project_obj.save()
+                break
+            return
+
+        threading.Thread(target=_export_worker, args=(self,)).start()
+
 
 pre_save.connect(Part.pre_save, Part, dispatch_uid='Part_pre')
 pre_save.connect(Project.pre_save, Project, dispatch_uid='Project_pre')
