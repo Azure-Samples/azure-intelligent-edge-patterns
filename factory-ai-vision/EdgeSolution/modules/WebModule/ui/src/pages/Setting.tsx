@@ -247,6 +247,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
   const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
   const [customVisionProjectId, setCustomVisionProjectId] = useState('');
   const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
+  const [loadPartial, setLoadPartial] = useState(false);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
 
@@ -294,6 +295,11 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           Previous Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} />
+        <Checkbox
+          checked={loadPartial}
+          label="Load Partial Data"
+          onClick={(): void => setLoadPartial((prev) => !prev)}
+        />
         <WarningDialog
           contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
           onConfirm={onLoad}
