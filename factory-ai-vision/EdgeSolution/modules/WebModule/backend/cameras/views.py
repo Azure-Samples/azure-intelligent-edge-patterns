@@ -24,6 +24,7 @@ from rest_framework import status
 from rest_framework import filters
 from filters.mixins import FiltersMixin
 
+from django.db.utils import IntegrityError
 import requests
 
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
@@ -242,13 +243,33 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
         model = Part
         fields = ['id', 'name', 'description', 'is_demo']
 
-    def validate(self, attrs):
-        if 'is_demo' not in attrs:
-            attrs['is_demo'] = False
-        if Part.objects.filter(name_lower=attrs['name'].lower(), is_demo=attrs['is_demo']).exists():
-            raise serializers.ValidationError(
-                "(name, is_demo) should be unique together. Name is case insensitive")
-        return attrs
+    def create(self, validated_data):
+        try:
+            return Part.objects.create(**validated_data)
+        except IntegrityError as ie:
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': ie})
+        except:
+            logger.exception("Unexpected Error")
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': "Unexpected Error"})
+
+    def update(self, instance, validated_data):
+        try:
+            foo = super().update(instance, validated_data)
+            return foo
+        except IntegrityError as ie:
+            logger.error("Exception")
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': ie})
+        except:
+            logger.exception("Unexpected Error")
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': "Unexpected Error"})
 
 
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):

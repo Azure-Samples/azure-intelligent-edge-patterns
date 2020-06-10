@@ -9,6 +9,8 @@ import logging
 
 from django.db import models
 from django.db.models.signals import post_save, post_delete, pre_save, post_save, m2m_changed
+from django.db.utils import IntegrityError
+
 import cv2
 import requests
 from io import BytesIO
@@ -22,7 +24,8 @@ from azure.iot.device import IoTHubModuleClient
 
 from azure.iot.device import IoTHubModuleClient
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
-from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor, get_app_insight_logger
+
+
 try:
     iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
 except:
@@ -70,6 +73,9 @@ class Part(models.Model):
             update_fields = []
             instance.name_lower = str(instance.name).lower()
             update_fields.append('name_lower')
+        except IntegrityError as ie:
+            logger.error(ie)
+            raise ie
         except:
             logger.exception("Unexpected Error in Part Presave")
 
@@ -544,6 +550,7 @@ class Project(models.Model):
         finally:
             # App Insight
             if self.setting.is_collect_data:
+                from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor, get_app_insight_logger
                 logger.info("Sending Logs to App Insight")
                 part_monitor(len(Part.objects.filter(is_demo=False)))
                 img_monitor(len(Image.objects.all()))
