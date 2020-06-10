@@ -270,7 +270,9 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
   const onLoad = (): void => {
     setOtherLoading(true);
     Axios.get(
-      `api/projects/${projectData.id}/pull_cv_project?customvision_project_id=${customVisionProjectId}`,
+      `api/projects/${
+        projectData.id
+      }/pull_cv_project?customvision_project_id=${customVisionProjectId}&partial=${Number(loadPartial)}`,
     )
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));

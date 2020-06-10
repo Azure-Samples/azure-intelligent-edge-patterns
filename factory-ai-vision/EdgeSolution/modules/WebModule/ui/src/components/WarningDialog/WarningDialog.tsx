@@ -9,7 +9,7 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({
   contentText,
   cancelButton = 'Cancel',
   confirmButton = 'Confirm',
-  open = null,
+  open = undefined,
 }): JSX.Element => {
   return (
     <Dialog
