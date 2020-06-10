@@ -64,6 +64,74 @@ something like the following:
 
 ## Install Kubeflow
 
+The easiest way to install Kubeflow on Azure Stack is to run script `kubeflow_install.sh` from
+`sbin` directory. There are other useful scripts, all of which you should be running at
+the master node of your Kubernetes cluster:
+
+- kubeflow_install.sh - installs Kubeflow.
+- kubeflow_uninstall.sh - uninstalls Kubeflow.
+- get_kf_board_ip.sh - helps find out the IP address of the Kubeflow dashboard.
+- get_kubernetes_info.sh - your Kubernetes infrastructure information.
+- get_token.sh - simplifies obtaining a token.
+- clean_evicted.sh - kills evicted pods, hopefully you will not need to run this one.
+
+At your Kubernetes master node:
+
+    $ git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
+    $ cd azure-intelligent-edge-patterns/Research/kubeflow-on-azure-stack/sbin
+    $ ./kubeflow_install.sh
+    Installing Kubeflow
+    Writing logs to "~/kubeflow/install.log"
+    ...
+    ...
+    INFO[0134] Successfully applied application seldon-core-operator  filename="kustomize/kustomize.go:209"
+    INFO[0134] Applied the configuration Successfully!       filename="cmd/apply.go:72"
+    The installation will take a while, and there will be some time needed to create the pods.
+    In a few minutes, check the resources deployed correctly in namespace 'kubeflow'
+    kubectl get all -n kubeflow
+
+
+If you have done everything correctly, the log will be long and, because of the nature
+of Kubernetes, some time is needed for the system to become functional. Even when 
+the script ends, you will see something like this, indicating the pods are being created:
+
+![pics/progress_container_creating.png](pics/progress_container_creating.png)
+
+For your particular environment, you can modify the definitions in the script, or
+pass the parameters in the command line(they overwrite the defaults): 
+
+    --kf_ctl_dir        - where to download and install kfctl
+    --kf_name           - name of the Kubeflow cluster
+    --kf_username       - user name under which to install Kubeflow
+    --kfctl_release_uri - kfctl URI
+    --kf_dir_base       - the base dir where you can install multiple instances of Kubeflow
+    --kf_config_uri     - config URI of Kubeflow config
+    --help              - show help
+
+To start using Kubeflow, you may want to make Kubeflow Dashboard be visible, so you will need
+to change the type of the ingress behavior - from `NodePort` to `LoadBalancer`, using this:
+
+    $ kubectl edit -n istio-system svc/istio-ingressgateway
+
+It will look something like this: 
+
+![pics/ingress_loadbalancer.png](pics/ingress_loadbalancer.png)
+
+You can run another script from the sbin directory, `get_kf_board_ip.sh` to get the external
+IP when it is ready:
+
+    $ get_kf_board_ip.sh
+    kubectl get -w -n istio-system svc/istio-ingressgateway
+    NAME                   TYPE           CLUSTER-IP   EXTERNAL-IP   PORT          
+    istio-ingressgateway   LoadBalancer   10.0.7.257   <pending>     15020:32053/TCP,80:31380/TCP...
+    istio-ingressgateway   LoadBalancer   10.0.7.257   88.258.18.69  15020:32053/TCP,80:31380...
+
+So, when it is no longer `<pending>`, it(from the above output, `88.258.18.69`) should be accessible from your browser.
+
+Congratulations, you can now skip to the chapter "Using Kubeflow".
+
+### If you chose to do the installation manually. 
+
 The following is done at the master node. If you plan to install Kubeflow clusters often, consider
 creating a script with all the commands.
 

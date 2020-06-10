@@ -76,14 +76,15 @@ export KF_DIR=${KF_DIR_BASE}/${KF_NAME}
 
 
 echo "Installing Kubeflow" | tee $KF_INSTALL_LOG
-echo "---------" | tee $KF_INSTALL_LOG
-echo "KF_CTL_DIR: $KF_CTL_DIR" | tee $KF_INSTALL_LOG
-echo "KF_NAME: $KF_NAME" | tee $KF_INSTALL_LOG
-echo "KF_USERNAME: $KF_USERNAME" | tee $KF_INSTALL_LOG
-echo "KFCTL_RELEASE_URI: $KFCTL_RELEASE_URI" | tee $KF_INSTALL_LOG
-echo "KF_DIR: $KF_DIR" | tee $KF_INSTALL_LOG
-echo "KF_CONFIG_URI=: $KF_CONFIG_URI" | tee $KF_INSTALL_LOG
-echo "---------" | tee $KF_INSTALL_LOG
+echo "Writing logs to \"$KF_INSTALL_LOG\""
+echo "---------" | tee -a $KF_INSTALL_LOG
+echo "KF_CTL_DIR: $KF_CTL_DIR" | tee -a $KF_INSTALL_LOG
+echo "KF_NAME: $KF_NAME" | tee -a $KF_INSTALL_LOG
+echo "KF_USERNAME: $KF_USERNAME" | tee -a $KF_INSTALL_LOG
+echo "KFCTL_RELEASE_URI: $KFCTL_RELEASE_URI" | tee -a $KF_INSTALL_LOG
+echo "KF_DIR: $KF_DIR" | tee -a $KF_INSTALL_LOG
+echo "KF_CONFIG_URI=: $KF_CONFIG_URI" | tee -a $KF_INSTALL_LOG
+echo "---------" | tee -a $KF_INSTALL_LOG
 
 
 echo "#--- Kubeflow config" >> ~/.bashrc
@@ -92,33 +93,33 @@ echo "export KF_DIR=${KF_DIR}" >> ~/.bashrc
 echo "export KF_CONFIG_FILENAME=${KF_CONFIG_FILENAME}" >> ~/.bashrc
 echo "#--- Kubeflow config end" >> ~/.bashrc
 
-echo "Creating the dir for kfctl, $KF_CTL_DIR"
+echo "Creating the dir for kfctl, $KF_CTL_DIR" | tee -a $KF_INSTALL_LOG
 mkdir -p $KF_CTL_DIR || exit 2
 cd $KF_CTL_DIR  || exit 2
 wget $KFCTL_RELEASE_URI 
 if test $? -eq 0
 then
-	echo "Downloaded ${KFCTL_RELEASE_URI}." | tee $KF_INSTALL_LOG
+	echo "Downloaded ${KFCTL_RELEASE_URI}." | tee -a $KF_INSTALL_LOG
 else
-	echo "ERROR: Failed to download ${KFCTL_RELEASE_URI}!" | tee $KF_INSTALL_LOG
+	echo "ERROR: Failed to download ${KFCTL_RELEASE_URI}!" | tee -a $KF_INSTALL_LOG
     exit 2
 fi
 
 tar -xvf ${KFCTL_RELEASE_FILENAME}
 if test $? -eq 0
 then
-	echo "Unpacked ${KFCTL_RELEASE_FILENAME}."  | tee $KF_INSTALL_LOG
+	echo "Unpacked ${KFCTL_RELEASE_FILENAME}."  | tee -a $KF_INSTALL_LOG
 else
-	echo "ERROR: Failed to unpack ${KFCTL_RELEASE_FILENAME}!"  | tee $KF_INSTALL_LOG
+	echo "ERROR: Failed to unpack ${KFCTL_RELEASE_FILENAME}!"  | tee -a $KF_INSTALL_LOG
     exit 2
 fi
     
 sudo mkdir -p ${KF_DIR}
 if test $? -eq 0
 then
-	echo "Created ${KF_DIR}."  | tee $KF_INSTALL_LOG
+	echo "Created ${KF_DIR}."  | tee -a $KF_INSTALL_LOG
 else
-	echo "ERROR: Failed to create ${KF_DIR}!"  | tee $KF_INSTALL_LOG
+	echo "ERROR: Failed to create ${KF_DIR}!"  | tee -a $KF_INSTALL_LOG
     exit 2
 fi
 
