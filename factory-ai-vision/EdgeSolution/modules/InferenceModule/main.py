@@ -74,6 +74,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.has_aoi = False
         self.aoi_info = None
+        self.parts = []
         #json.loads("{\"useAOI\":true,\"AOIs\":[{\"x1\":100,\"y1\":216.36363636363637,\"x2\":614.909090909091,\"y2\":1762.181818181818}]}")['AOIs'][0]
 
 
@@ -89,6 +90,9 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.cam = cam
         self.lock.release()
 
+    def update_parts(self, parts):
+        print('[INFO] Updating Parts ...', parts)
+        self.parts = parts
 
     def update_cam(self, cam_type, cam_source, has_aoi, aoi_info):
         print('[INFO] Updating Cam ...')
@@ -180,7 +184,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                     detection = DETECTION_TYPE_NOTHING
                     if True:
                         for prediction in self.last_prediction:
-                            #print(prediction)
+
+                            tag = prediction['tagName']
+                            if tag not in self.parts: continue
+
                             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
                                 x1 = int(prediction['boundingBox']['left'] * width)
                                 y1 = int(prediction['boundingBox']['top'] * height)
@@ -197,7 +204,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                                     if detection != DETECTION_TYPE_SUCCESS: detection = DETECTION_TYPE_UNIDENTIFIED
 
-                                    tag = prediction['tagName']
 
                                     if self.is_upload_image:
                                         if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
@@ -374,6 +380,19 @@ def update_cam():
 
     return 'ok'
 
+@app.route('/update_parts')
+def update_parts():
+    try:
+        parts = request.args.getlist('parts')
+        print('[INFO] Updateing parts', parts)
+        self.parts = parts
+    except:
+        print('[ERROR] Unknown format', parts)
+
+    onnx.update_parts(parts)
+
+    return 'ok'
+
 @app.route('/update_threshold')
 def update_threshold():
     #threshold = float(request.args.get('threshold'))
@@ -402,6 +421,8 @@ def video_feed():
                 for prediction in predictions:
                     #print(prediction['tagName'], prediction['probability'])
                     #print(onnx.last_upload_time, time.time())
+                    tag = prediction['tagName']
+                    if tag not in onnx.parts: continue
 
                     if onnx.has_aoi:
                         img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)

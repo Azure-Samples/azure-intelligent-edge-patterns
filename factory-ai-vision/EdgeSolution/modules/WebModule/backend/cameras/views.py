@@ -813,6 +813,11 @@ def train(request, project_id):
                      '/update_model', params={'model_dir': 'default_model_6parts'})
 
         project_obj = Project.objects.get(pk=project_id)
+        parts = [p.name for p in project_obj.parts.all()]
+        logger.info('Update parts f{parts}')
+        requests.get('http://'+inference_module_url() +
+                     '/update_parts', params={'parts': parts})
+
         obj, created = project_obj.upcreate_training_status(
             status='ok',
             log='Status : demo ok'
