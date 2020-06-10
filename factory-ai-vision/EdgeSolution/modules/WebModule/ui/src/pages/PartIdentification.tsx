@@ -24,6 +24,23 @@ import { formatDropdownValue, Value } from '../util/formatDropdownValue';
 import { getIdFromUrl } from '../util/GetIDFromUrl';
 import { getAppInsights } from '../TelemetryService';
 
+const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
+  const { data: images } = await Axios.get('/api/images/');
+
+  const selectedPartIds = selectedParts.map((e) => e.id);
+  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(getIdFromUrl(e.part))).length;
+  const appInsight = getAppInsights();
+  if (appInsight)
+    appInsight.trackEvent({
+      name: 'train',
+      properties: {
+        images: interestedImagesLength,
+        parts: selectedParts.length,
+        source: window.location.hostname,
+      },
+    });
+};
+
 export const PartIdentification: React.FC = () => {
   const dispatch = useDispatch();
   const { isLoading, error, data } = useSelector<State, Project>((state) => state.project);
@@ -60,30 +77,24 @@ export const PartIdentification: React.FC = () => {
   }, [dispatch, cameraLoading, locationLoading, partLoading, isTestModel]);
 
   useEffect(() => {
-    if (location) setSelectedLocationById(location);
-    if (parts.length) setSelectedPartsById(parts);
-    if (camera) setSelectedCameraById(camera);
-  }, [camera, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
+    if (!isTestModel) {
+      if (location) setSelectedLocationById(location);
+      if (parts.length) setSelectedPartsById(parts);
+      if (camera) setSelectedCameraById(camera);
+    }
+  }, [
+    camera,
+    isTestModel,
+    location,
+    parts,
+    setSelectedCameraById,
+    setSelectedLocationById,
+    setSelectedPartsById,
+  ]);
 
   const handleSubmitConfigure = async (): Promise<void> => {
     try {
-      if (!isTestModel) {
-        const { data: images } = await Axios.get('/api/images/');
-
-        const selectedPartIds = selectedParts.map((e) => e.id);
-        const interestedImagesLength = images.filter((e) => selectedPartIds.includes(getIdFromUrl(e.part)))
-          .length;
-        const appInsight = getAppInsights();
-        if (appInsight)
-          appInsight.trackEvent({
-            name: 'train',
-            properties: {
-              images: interestedImagesLength,
-              parts: selectedParts.length,
-              source: window.location.hostname,
-            },
-          });
-      }
+      if (!isTestModel) sendTrainInfoToAppInsight(selectedParts);
 
       const id = await dispatch(
         thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
@@ -129,7 +140,6 @@ export const PartIdentification: React.FC = () => {
           setSelectedModuleItem={setSelectedPartsById}
           items={dropDownParts}
           isMultiple={true}
-          isTestModel={isTestModel}
         />
         <ModuleSelector
           moduleName="locations"
@@ -320,7 +330,7 @@ type ModuleSelectorProps = {
   setSelectedModuleItem: (id: string | string[]) => void;
   items: ShorthandCollection<DropdownItemProps>;
   isMultiple: boolean;
-  isTestModel: boolean;
+  isTestModel?: boolean;
 };
 
 const ModuleSelector: React.FC<ModuleSelectorProps> = ({
