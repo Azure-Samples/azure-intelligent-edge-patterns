@@ -58,13 +58,13 @@ do
       echo "Usage: kubeflow_install.sh [options]"
       echo " "
       echo "Options:"
-      echo "   --kf_ctl_dir        - where to download and install kfctl"
-      echo "   --kf_name           - name of the Kubeflow cluster"
-      echo "   --kf_username       - user name under which to install Kubeflow"
-      echo "   --kfctl_release_uri - kfctl URI"
-      echo "   --kf_dir_base       - the base dir where you can install multiple instances of Kubeflow"
-      echo "   --kf_config_uri     - config URI of Kubeflow config"
-      echo "   --help"
+      echo "    --kf_ctl_dir <dir_name>      - where to download and install kfctl"
+      echo "    --kf_name <name>             - name of the Kubeflow cluster"
+      echo "    --kf_username <username>     - user name under which to install Kubeflow"
+      echo "    --kfctl_release_uri <uri>    - kfctl URI"
+      echo "    --kf_dir_base <dir_name>     - the base dir for instances of Kubeflow"
+      echo "    --kf_config_uri <uri>        - config URI of Kubeflow config"
+      echo "    --help"
       exit 1
       ;;        
   esac

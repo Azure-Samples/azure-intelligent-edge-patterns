@@ -13,8 +13,15 @@ cd ${KF_DIR}
 if test $? -ne 0
 then
 	echo "ERROR: Failed to change dir to ${KF_DIR}!"
+    echo "You might need to run '. ~/bashrc' - the KF_CONFIG_FILENAME(which you need to do uninstallation) is defined there"
     exit 2
 fi
 
 # Remove Kubeflow
 kfctl delete -f ${KF_CONFIG_FILENAME}
+if test $? -ne 0
+then
+	echo "ERROR: Failed to change dir to ${KF_DIR}!"
+    echo "You might need to run '. ~/bashrc' - the PATH to kfctl(which you need to do uninstallation) is defined there"
+    exit 2
+fi
