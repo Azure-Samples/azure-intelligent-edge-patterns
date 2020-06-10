@@ -9,8 +9,6 @@ import {
   Checkbox,
   Input,
   Alert,
-  Dialog,
-  ExclamationCircleIcon,
   ShorthandCollection,
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
@@ -23,6 +21,7 @@ import { State } from '../store/State';
 import { formatDropdownValue, Value } from '../util/formatDropdownValue';
 import { getIdFromUrl } from '../util/GetIDFromUrl';
 import { getAppInsights } from '../TelemetryService';
+import { WarningDialog } from '../components/WarningDialog';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -228,25 +227,13 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
   }
 
   return (
-    <Dialog
-      styles={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-      cancelButton="Cancel"
+    <WarningDialog
       confirmButton="Confirm to use test model"
       onConfirm={(): void => setIsTestModel(true)}
-      content={
+      contentText={
         <>
-          <Flex hAlign="center" column>
-            <ExclamationCircleIcon
-              size="largest"
-              styles={({ theme: { siteVariables } }): any => ({
-                color: siteVariables.colorScheme.brand.foreground,
-              })}
-            />
-            <div>
-              <p>Test model is for seeing inference result, no retraining experience here.</p>
-              <p>For retraining experience, please create a new model</p>
-            </div>
-          </Flex>
+          <p>Test model is for seeing inference result, no retraining experience here.</p>
+          <p>For retraining experience, please create a new model</p>
         </>
       }
       trigger={

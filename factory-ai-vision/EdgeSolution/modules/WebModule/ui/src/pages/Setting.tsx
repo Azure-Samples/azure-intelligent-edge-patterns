@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { useProject } from '../hooks/useProject';
 import { getAppInsights } from '../TelemetryService';
+import { WarningDialog } from '../components/WarningDialog';
 
 const initialState = {
   loading: false,
@@ -214,9 +215,15 @@ export const Setting = (): JSX.Element => {
             />
           </Flex>
           <Flex gap="gap.large">
-            <Button primary onClick={onSave} disabled={cannotUpdateOrSave || loading} loading={loading}>
-              {notEmpty ? 'Update' : 'Save'}
-            </Button>
+            <WarningDialog
+              onConfirm={onSave}
+              trigger={
+                <Button primary disabled={cannotUpdateOrSave || loading} loading={loading}>
+                  {notEmpty ? 'Update' : 'Save'}
+                </Button>
+              }
+              contentText={<p>Update Key / Namespace will remove all the parts, sure you want to update?</p>}
+            />
             <Button primary as={Link} to="/">
               Cancel
             </Button>
@@ -236,23 +243,44 @@ export const Setting = (): JSX.Element => {
   );
 };
 
+const initialDropdownItem = [
+  {
+    header: '+ Create New Project',
+    content: {
+      key: 'NEW',
+    },
+  },
+];
+
 const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingDataId }) => {
-  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>([]);
+  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>(initialDropdownItem);
   const [customVisionProjectId, setCustomVisionProjectId] = useState('');
   const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
+  const [loadPartial, setLoadPartial] = useState(false);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
+  const [createProjectModel, setCreateProjectModel] = useState(false);
 
   const onDropdownChange = (_, data): void => {
     if (data.value === null) setCustomVisionProjectId(customVisionProjectId);
+    else if (data.value.content.key === initialDropdownItem[0].content.key) setCreateProjectModel(true);
     else setCustomVisionProjectId(data.value.content.key);
   };
 
   const onLoad = (): void => {
     setOtherLoading(true);
     Axios.get(
-      `api/projects/${projectData.id}/pull_cv_project?customvision_project_id=${customVisionProjectId}`,
+      `/api/projects/${
+        projectData.id
+      }/pull_cv_project?customvision_project_id=${customVisionProjectId}&partial=${Number(loadPartial)}`,
     )
+      .catch((err) => setOtherError(err))
+      .finally(() => setOtherLoading(false));
+  };
+
+  const onCreateNewProject = (): void => {
+    setOtherLoading(true);
+    Axios.get(`/api/projects/${projectData.id}/reset`)
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
   };
@@ -268,7 +296,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
               key,
             },
           }));
-          setDropdownItems(items);
+          setDropdownItems([...initialDropdownItem, ...items]);
           return void 0;
         })
         .catch((e) => setOtherError(e))
@@ -287,12 +315,29 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           Previous Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} />
-        <Button
-          primary
-          content="Load"
-          disabled={!customVisionProjectId || loading}
-          onClick={onLoad}
-          loading={loading}
+        <Checkbox
+          checked={loadPartial}
+          label="Load Partial Data"
+          onClick={(): void => setLoadPartial((prev) => !prev)}
+        />
+        <WarningDialog
+          contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
+          onConfirm={onLoad}
+          trigger={
+            <Button primary content="Load" disabled={!customVisionProjectId || loading} loading={loading} />
+          }
+        />
+        <WarningDialog
+          contentText={<p>Create New Project will remove all the parts, sure you want to do that?</p>}
+          open={createProjectModel}
+          onConfirm={() => {
+            onCreateNewProject();
+            setCreateProjectModel(false);
+          }}
+          onCancel={() => {
+            setCreateProjectModel(false);
+            setCustomVisionProjectId(null);
+          }}
         />
         {error.length ? <Alert danger content={`Failed to load ${error.join(', ')}`} dismissible /> : null}
       </Flex>
