@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { useProject } from '../hooks/useProject';
 import { getAppInsights } from '../TelemetryService';
+import { WarningDialog } from '../components/WarningDialog';
 
 const initialState = {
   loading: false,
@@ -214,9 +215,15 @@ export const Setting = (): JSX.Element => {
             />
           </Flex>
           <Flex gap="gap.large">
-            <Button primary onClick={onSave} disabled={cannotUpdateOrSave || loading} loading={loading}>
-              {notEmpty ? 'Update' : 'Save'}
-            </Button>
+            <WarningDialog
+              onConfirm={onSave}
+              trigger={
+                <Button primary disabled={cannotUpdateOrSave || loading} loading={loading}>
+                  {notEmpty ? 'Update' : 'Save'}
+                </Button>
+              }
+              contentText={<p>Update Key / Namespace will remove all the parts, sure you want to update?</p>}
+            />
             <Button primary as={Link} to="/">
               Cancel
             </Button>
