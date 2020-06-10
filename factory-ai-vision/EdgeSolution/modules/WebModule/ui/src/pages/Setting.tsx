@@ -280,7 +280,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
 
   const onCreateNewProject = (): void => {
     setOtherLoading(true);
-    Axios.get(`/api/projects/${projectData.id}/reset`)
+    Axios.get(`/api/projects/${projectData.id}/reset_project`)
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
   };
