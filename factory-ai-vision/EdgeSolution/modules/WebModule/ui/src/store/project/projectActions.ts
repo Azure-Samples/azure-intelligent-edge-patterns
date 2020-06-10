@@ -117,10 +117,12 @@ export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAc
   payload: projectData,
 });
 
-export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
+export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest());
 
-  return Axios.get('/api/projects/')
+  const url = isTestModel === undefined ? '/api/projects/' : `/api/projects/?is_demo=${Number(isTestModel)}`;
+
+  return Axios.get(url)
     .then(({ data }) => {
       const project: ProjectData = {
         id: data[0]?.id ?? null,
@@ -146,6 +148,7 @@ export const thunkPostProject = (
   selectedLocations,
   selectedParts,
   selectedCamera,
+  isTestModel,
 ): ProjectThunk => (dispatch, getState): Promise<number> => {
   const isProjectEmpty = projectId === null;
   const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
@@ -172,15 +175,16 @@ export const thunkPostProject = (
   })
     .then(({ data }) => {
       dispatch(postProjectSuccess());
-      getTrain(data.id);
+      getTrain(data.id, isTestModel);
       return data.id;
     })
     .catch((err) => {
       dispatch(postProjectFail(err));
     }) as Promise<number>;
 };
-const getTrain = (projectId): void => {
-  Axios.get(`/api/projects/${projectId}/train`).catch((err) => console.error(err));
+const getTrain = (projectId, isTestModel: boolean): void => {
+  const url = isTestModel ? `/api/projects/${projectId}/train?demo=True` : `/api/projects/${projectId}/train`;
+  Axios.get(url).catch((err) => console.error(err));
 };
 
 export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {

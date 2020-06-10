@@ -169,6 +169,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                 b, img = self.cam.read()
                 self.lock.release()
 
+                # if b is false, restart the video if the type is video
                 if b:
                     self.last_img = img
                     self.last_prediction = self.predict(img)
@@ -307,30 +308,42 @@ def update_retrain_parameters():
     self.confidence_max = int(confidence_max) * 0.01
     self.max_images = int(max_images)
 
+    print('[INFO] updaing retrain parameters to')
+    print('  conficen_min:', confidence_min)
+    print('  conficen_max:', confidence_max)
+    print('  max_images  :', max_images)
+
     return 'ok'
 
 @app.route('/update_model')
 def update_model():
 
     model_uri = request.args.get('model_uri')
-    if not model_uri: return ('missing model_uri')
-
+    model_dir = request.args.get('model_dir')
+    if not model_uri and not model_dir: return ('missing model_uri or model_dir')
 
 
     print('[INFO] Update Model ...')
+    if model_uri:
 
-    if model_uri == onnx.model_uri:
-        print('[INFO] Model Uri unchanged')
+        print('[INFO] Got Model URI', model_uri)
+
+        if model_uri == onnx.model_uri:
+            print('[INFO] Model Uri unchanged')
+        else:
+            get_file_zip(model_uri, MODEL_DIR)
+            onnx.model_uri = model_uri
+
+        onnx.update_model('model')
+        print('[INFO] Update Finished ...')
+
         return 'ok'
 
-    get_file_zip(model_uri, MODEL_DIR)
-    onnx.model_uri = model_uri
-
-    onnx.update_model('model')
-    print('[INFO] Update Finished ...')
-
-    return 'ok'
-
+    elif model_dir:
+        print('[INFO] Got Model DIR', model_dir)
+        onnx.update_model(model_dir)
+        print('[INFO] Update Finished ...')
+        return 'ok'
 
 @app.route('/update_cam')
 def update_cam():
@@ -363,11 +376,12 @@ def update_cam():
 
 @app.route('/update_threshold')
 def update_threshold():
-    threshold = float(request.args.get('threshold'))
+    #threshold = float(request.args.get('threshold'))
 
-    print('[INFO] update theshold to', threshold)
+    #print('[INFO] update theshold to', threshold)
 
-    onnx.threshold = threshold
+    #onnx.threshold = threshold
+    print('[WARNING] is depreciated')
     return 'ok'
 
 @app.route('/video_feed')
@@ -392,7 +406,8 @@ def video_feed():
                     if onnx.has_aoi:
                         img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)
 
-                    if prediction['probability'] > onnx.threshold:
+                    #if prediction['probability'] > onnx.threshold:
+                    if prediction['probability'] > onnx.confidence_max:
                         x1 = int(prediction['boundingBox']['left'] * width)
                         y1 = int(prediction['boundingBox']['top'] * height)
                         x2 = x1 + int(prediction['boundingBox']['width'] * width)

@@ -9,40 +9,35 @@ import {
   Checkbox,
   Input,
   Alert,
-  Dialog,
-  ExclamationCircleIcon,
   ShorthandCollection,
 } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import Axios from 'axios';
+
 import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/project/projectActions';
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
 import { formatDropdownValue, Value } from '../util/formatDropdownValue';
+import { getIdFromUrl } from '../util/GetIDFromUrl';
+import { getAppInsights } from '../TelemetryService';
+import { WarningDialog } from '../components/WarningDialog';
 
-const testModelValue = {
-  camera: {
-    id: null,
-    name: 'Test Video',
-  },
-  parts: [
-    {
-      id: null,
-      name: 'Part 1',
-    },
-    {
-      id: null,
-      name: 'Part 2',
-    },
-    {
-      id: null,
-      name: 'Part 3',
-    },
-  ],
-  location: {
-    id: null,
-    name: 'Test Location',
-  },
+const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
+  const { data: images } = await Axios.get('/api/images/');
+
+  const selectedPartIds = selectedParts.map((e) => e.id);
+  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(getIdFromUrl(e.part))).length;
+  const appInsight = getAppInsights();
+  if (appInsight)
+    appInsight.trackEvent({
+      name: 'train',
+      properties: {
+        images: interestedImagesLength,
+        parts: selectedParts.length,
+        source: window.location.hostname,
+      },
+    });
 };
 
 export const PartIdentification: React.FC = () => {
@@ -58,41 +53,57 @@ export const PartIdentification: React.FC = () => {
     accuracyRangeMax,
     maxImages: maxImage,
   } = data;
+  const [isTestModel, setIsTestModel] = useState(false);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
+    isTestModel,
   );
   const [partLoading, dropDownParts, selectedParts, setSelectedPartsById] = useDropdownItems<any>(
     'parts',
+    isTestModel,
     true,
   );
   const [locationLoading, dropDownLocations, selectedLocations, setSelectedLocationById] = useDropdownItems<
     any
-  >('locations');
+  >('locations', isTestModel);
   const history = useHistory();
   const [maxImgCountError, setMaxImgCountError] = useState(false);
-  const [isTestModel, setIsTestModel] = useState(false);
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
-      dispatch(thunkGetProject());
+      dispatch(thunkGetProject(isTestModel));
     }
-  }, [dispatch, cameraLoading, locationLoading, partLoading]);
+  }, [dispatch, cameraLoading, locationLoading, partLoading, isTestModel]);
 
   useEffect(() => {
-    if (location) setSelectedLocationById(location);
-    if (parts.length) setSelectedPartsById(parts);
-    if (camera) setSelectedCameraById(camera);
-  }, [camera, location, parts, setSelectedCameraById, setSelectedLocationById, setSelectedPartsById]);
+    if (!isTestModel) {
+      if (location) setSelectedLocationById(location);
+      if (parts.length) setSelectedPartsById(parts);
+      if (camera) setSelectedCameraById(camera);
+    }
+  }, [
+    camera,
+    isTestModel,
+    location,
+    parts,
+    setSelectedCameraById,
+    setSelectedLocationById,
+    setSelectedPartsById,
+  ]);
 
-  const handleSubmitConfigure = (): void => {
-    ((dispatch(
-      thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera),
-    ) as unknown) as Promise<number>)
-      .then((id) => {
-        if (typeof id !== 'undefined') history.push(`/cameras/detail?name=${selectedCamera.name}`);
-        return void 0;
-      })
-      .catch((e) => e);
+  const handleSubmitConfigure = async (): Promise<void> => {
+    try {
+      if (!isTestModel) sendTrainInfoToAppInsight(selectedParts);
+
+      const id = await dispatch(
+        thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
+      );
+
+      if (typeof id !== 'undefined')
+        history.push(`/cameras/detail?name=${selectedCamera.name}&isDemo=${isTestModel}`);
+    } catch (e) {
+      alert(e);
+    }
   };
 
   const setData = (keyName: keyof ProjectData, value: ProjectData[keyof ProjectData]): void => {
@@ -115,7 +126,7 @@ export const PartIdentification: React.FC = () => {
         <ModuleSelector
           moduleName="cameras"
           to="/cameras"
-          value={isTestModel ? testModelValue.camera : selectedCamera}
+          value={selectedCamera}
           setSelectedModuleItem={setSelectedCameraById}
           items={dropDownCameras}
           isMultiple={false}
@@ -124,16 +135,15 @@ export const PartIdentification: React.FC = () => {
         <ModuleSelector
           moduleName="parts"
           to="/parts"
-          value={isTestModel ? testModelValue.parts : selectedParts}
+          value={selectedParts}
           setSelectedModuleItem={setSelectedPartsById}
           items={dropDownParts}
           isMultiple={true}
-          isTestModel={isTestModel}
         />
         <ModuleSelector
           moduleName="locations"
           to="/locations"
-          value={isTestModel ? testModelValue.location : selectedLocations}
+          value={selectedLocations}
           setSelectedModuleItem={setSelectedLocationById}
           items={dropDownLocations}
           isMultiple={false}
@@ -217,25 +227,13 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
   }
 
   return (
-    <Dialog
-      styles={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-      cancelButton="Cancel"
+    <WarningDialog
       confirmButton="Confirm to use test model"
       onConfirm={(): void => setIsTestModel(true)}
-      content={
+      contentText={
         <>
-          <Flex hAlign="center" column>
-            <ExclamationCircleIcon
-              size="largest"
-              styles={({ theme: { siteVariables } }): any => ({
-                color: siteVariables.colorScheme.brand.foreground,
-              })}
-            />
-            <div>
-              <p>Test model is for seeing inference result, no retraining experience here.</p>
-              <p>For retraining experience, please create a new model</p>
-            </div>
-          </Flex>
+          <p>Test model is for seeing inference result, no retraining experience here.</p>
+          <p>For retraining experience, please create a new model</p>
         </>
       }
       trigger={
@@ -260,6 +258,7 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
 // TODO Make this integrate with Redux
 function useDropdownItems<T>(
   moduleName: string,
+  isTestModel: boolean,
   isMultiple?: boolean,
 ): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => void] {
   const originItems = useRef<(T & { id: number })[]>([]);
@@ -269,9 +268,8 @@ function useDropdownItems<T>(
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/${moduleName}/`)
-      .then((res) => res.json())
-      .then((data) => {
+    Axios(`/api/${moduleName}/?is_demo=${Number(isTestModel)}`)
+      .then(({ data }) => {
         setDropDownItems(
           data.map((e) => ({
             header: e.name,
@@ -281,14 +279,17 @@ function useDropdownItems<T>(
           })),
         );
         originItems.current = data;
+        if (isMultiple) {
+          setSelectedItem(data);
+        } else {
+          setSelectedItem(data[0]);
+        }
         setLoading(false);
         return void 0;
       })
-      .catch((err) => {
-        setLoading(false);
-        console.error(err);
-      });
-  }, [moduleName]);
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, [isMultiple, moduleName, isTestModel]);
 
   const setSelectedItemById = useCallback((id: string | string[]): void => {
     if (Array.isArray(id)) {
@@ -316,7 +317,7 @@ type ModuleSelectorProps = {
   setSelectedModuleItem: (id: string | string[]) => void;
   items: ShorthandCollection<DropdownItemProps>;
   isMultiple: boolean;
-  isTestModel: boolean;
+  isTestModel?: boolean;
 };
 
 const ModuleSelector: React.FC<ModuleSelectorProps> = ({

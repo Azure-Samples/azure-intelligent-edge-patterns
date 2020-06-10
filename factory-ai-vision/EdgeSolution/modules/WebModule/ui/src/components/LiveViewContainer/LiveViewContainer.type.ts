@@ -5,6 +5,7 @@ export type LiveViewProps = {
   AOIs: Box[];
   setAOIs: Dispatch<SetStateAction<Box[]>>;
   visible: boolean;
+  imageInfo: [HTMLImageElement, string, { width: number; height: number }];
 };
 
 export type AOILayerProps = {

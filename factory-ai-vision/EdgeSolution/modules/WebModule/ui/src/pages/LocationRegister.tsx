@@ -44,7 +44,7 @@ const LocationRegister: FC = () => {
           primary
           disabled={[name, coordinates, description].includes('')}
           onClick={(): void => {
-            dispatch(postLocation({ name, coordinates, description }));
+            dispatch(postLocation({ name, coordinates, description, is_demo: false }));
             history.push('/locations');
           }}
           content="Save"

@@ -7,17 +7,17 @@ import { getIdFromUrl } from '../util/GetIDFromUrl';
 export const Parts: React.FC = () => {
   const [parts, setParts] = useState([]);
 
-  const partsAPI = Axios.get('/api/parts/');
-  const imagesAPI = Axios.get('/api/images/');
-
   useEffect(() => {
+    const partsAPI = Axios.get('/api/parts/');
+    const imagesAPI = Axios.get('/api/images/');
+
     Axios.all([partsAPI, imagesAPI])
       .then(
         Axios.spread((...responses) => {
-          const { data: parts } = responses[0];
+          const { data: partsRes } = responses[0];
           const { data: images } = responses[1];
           setParts(
-            parts.map((e) => ({
+            partsRes.map((e) => ({
               ...e,
               images: images.find((img) => getIdFromUrl(img.part) === e.id)?.image,
             })),
@@ -30,9 +30,11 @@ export const Parts: React.FC = () => {
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <Flex gap="gap.large" wrap>
-        {parts.map((ele) => (
-          <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
-        ))}
+        {parts
+          .filter((e) => !e.is_demo)
+          .map((ele) => (
+            <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
+          ))}
       </Flex>
       <Button
         primary

@@ -17,12 +17,13 @@ const CameraDetails: FC = (): JSX.Element => {
   const projectId = useSelector<State, number>((state) => state.project.data.id);
   const dispatch = useDispatch();
   const name = useQuery().get('name');
+  const isDemo = useQuery().get('isDemo');
   const camera = useSelector<State, Camera>((state) => state.cameras.find((ele) => ele.name === name));
 
   useEffect(() => {
-    dispatch(thunkGetProject());
+    dispatch(thunkGetProject(isDemo === 'true'));
     dispatch(getCameras());
-  }, [dispatch]);
+  }, [dispatch, isDemo]);
 
   if (!camera) return <Redirect to="/cameras" />;
 
@@ -44,8 +45,8 @@ const getAOIData = (cameraArea: string): AOIData => {
     return JSON.parse(cameraArea);
   } catch (e) {
     return {
-      useAOI: true,
-      AOIs: [{ x1: 50, y1: 50, x2: 200, y2: 100 }],
+      useAOI: false,
+      AOIs: [],
     };
   }
 };

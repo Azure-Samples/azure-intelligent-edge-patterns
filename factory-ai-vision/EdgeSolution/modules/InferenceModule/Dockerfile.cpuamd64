@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:latest-openvino-cpu
+FROM mcr.microsoft.com/azureml/onnxruntime:latest
 
 WORKDIR /app
 
@@ -29,6 +29,7 @@ COPY object_detection.py ./
 COPY utility.py ./
 COPY default_model/cvexport.manifest default_model/
 COPY default_model default_model/
+COPY default_model_6parts default_model_6parts/
 COPY sample_video sample_video/
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model

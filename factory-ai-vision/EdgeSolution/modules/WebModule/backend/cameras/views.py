@@ -14,6 +14,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.core.files.images import ImageFile
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
 
 # from rest_framework.views import APIView
 from rest_framework.request import Request
@@ -21,12 +22,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import serializers, viewsets
 from rest_framework import status
+from rest_framework import filters
+from filters.mixins import FiltersMixin
+
 
 import requests
 
-
-from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train
-
+from distutils.util import strtobool
+from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train, Task
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT, IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
 from configs.app_insight import APP_INSIGHT_INST_KEY
 
@@ -34,12 +37,12 @@ from configs.app_insight import APP_INSIGHT_INST_KEY
 # FIXME move these to views
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region, CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
-from azure.iot.hub import IoTHubRegistryManager
-from azure.iot.hub.models import Twin, TwinProperties
-try:
-    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-except:
-    iot = None
+#from azure.iot.hub import IoTHubRegistryManager
+#from azure.iot.hub.models import Twin, TwinProperties
+# try:
+#    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
+# except:
+#    iot = None
 
 
 def is_edge():
@@ -58,14 +61,6 @@ def inference_module_url():
 
 
 logger = logging.getLogger(__name__)
-
-
-def export_iterationv3_2(project_id, iteration_id):
-    url = ENDPOINT+'customvision/v3.2/training/projects/' + \
-        project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
-    res = requests.post(url, '{body}', headers={'Training-key': TRAINING_KEY})
-
-    return res
 
 
 def update_train_status(project_id):
@@ -109,8 +104,7 @@ def update_train_status(project_id):
                     log='Status : exporting model'
                 )
                 # trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
-                res = export_iterationv3_2(
-                    customvision_project_id, iteration.id)
+                res = project_obj.export_iterationv3_2(iteration.id)
                 logger.info(res.json())
                 continue
                 # return JsonResponse({'status': 'exporting'})
@@ -199,6 +193,8 @@ def export(request, project_id):
     })
 
 # FIXME tmp workaround
+
+
 @api_view()
 def export_null(request):
     project_obj = Project.objects.all()[0]
@@ -226,15 +222,15 @@ def export_null(request):
     if len(exports) == 0:
         logger.info('exporting ...')
         # trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
-        res = export_iterationv3_2(customvision_project_id, iteration.id)
+        res = project_obj.export_iterationv3_2(iteration.id)
         logger.info(res.json())
         return JsonResponse({'status': 'exporting'})
 
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
 
-    if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-        update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+    # if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
+    #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
@@ -246,12 +242,45 @@ def export_null(request):
 class PartSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Part
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description', 'is_demo']
+
+    def create(self, validated_data):
+        try:
+            return Part.objects.create(**validated_data)
+        except IntegrityError as ie:
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': ie})
+        except:
+            logger.exception("Unexpected Error")
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': "Unexpected Error"})
+
+    def update(self, instance, validated_data):
+        try:
+            foo = super().update(instance, validated_data)
+            return foo
+        except IntegrityError as ie:
+            logger.error("Exception")
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': ie})
+        except:
+            logger.exception("Unexpected Error")
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': "Unexpected Error"})
 
 
-class PartViewSet(viewsets.ModelViewSet):
+class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Part.objects.all()
     serializer_class = PartSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
+
 
 #
 # Location Views
@@ -261,12 +290,16 @@ class PartViewSet(viewsets.ModelViewSet):
 class LocationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Location
-        fields = ['id', 'name', 'description', 'coordinates']
+        fields = ['id', 'name', 'description', 'coordinates', 'is_demo']
 
 
-class LocationViewSet(viewsets.ModelViewSet):
+class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
 #
 # Camera Views
 #
@@ -275,17 +308,40 @@ class LocationViewSet(viewsets.ModelViewSet):
 class CameraSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Camera
-        fields = ['id', 'name', 'rtsp', 'area']
+        fields = ['id', 'name', 'rtsp', 'area', 'is_demo']
 
 
-class CameraViewSet(viewsets.ModelViewSet):
+class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
+#
+# Task
+#
 
 
+class TaskSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['task_type', 'status', 'log', 'project']
+
+
+class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'project': 'project',
+    }
+#
 #
 # Settings Views
 #
+
+
 class SettingSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Setting
@@ -298,6 +354,7 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
             'device_id',
             'module_id',
             'is_trainer_valid',
+            'is_collect_data',
             'obj_detection_domain_id']
 
     def create(self, validated_data):
@@ -309,6 +366,7 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
                 'iot_hub_connection_string': validated_data['iot_hub_connection_string'],
                 'device_id': validated_data['device_id'],
                 'module_id': validated_data['module_id'],
+                'is_collect_data': validated_data['is_collect_data']
             })
         return obj
 
@@ -332,6 +390,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             'location',
             'parts',
             'download_uri',
+            'customvision_project_id',
             'needRetraining',
             'accuracyRangeMin',
             'accuracyRangeMax',
@@ -340,6 +399,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'setting': {'required': False},
             'download_uri': {'required': False},
+            'customvision_project_id': {'required': False}
         }
 
     def create(self, validated_data):
@@ -352,10 +412,13 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         return project
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
+class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        'is_demo': 'is_demo',
+    }
 #
 # Image Views
 #
@@ -415,6 +478,8 @@ class TrainViewSet(viewsets.ModelViewSet):
 # Stream Views
 #
 streams = []
+
+
 @api_view()
 def connect_stream(request):
     part_id = request.query_params.get('part_id')
@@ -478,8 +543,14 @@ def train_performance(request, project_id):
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
-    ret = {}
+    if project_obj.is_demo:
+        return JsonResponse({
+            'status': 'ok',
+            'precision': 1,
+            'recall': 'demo_recall',
+            'map': 'demo_map', })
 
+    ret = {}
     iterations = trainer.get_iterations(customvision_project_id)
 
     def _parse(iteration):
@@ -524,6 +595,8 @@ def _train(project_id):
     project_obj.dequeue_iterations()
 
     try:
+        if not trainer:
+            raise ValueError('Please input valid training_key and namespace')
         count = 10
         while count > 0:
             part_ids = [part.id for part in project_obj.parts.all()]
@@ -548,16 +621,25 @@ def _train(project_id):
         for tag in tags:
             tag_dict[tag.name] = tag.id
 
+        # Update existing tags
+        # TODO: update tags
+        # trainer.update_tags(project_id, tag_id, new_tag)
+
         # Create tags on CustomVisioin Project
         # Maybe move to Project Model?
         logger.info("Creating tags before training...")
         counter = 0
         for part_id in part_ids:
             part_name = Part.objects.get(id=part_id).name
+            part_description = Part.objects.get(id=part_id).description
             project_partnames[part_name] = 'foo'
             if part_name not in tag_dict:
-                logger.info(f'Creating tag: {part_name}')
-                tag = trainer.create_tag(customvision_project_id, part_name)
+                logger.info(
+                    f'Creating tag: {part_name}. Description: {part_description}')
+                tag = trainer.create_tag(
+                    project_id=customvision_project_id,
+                    name=part_name,
+                    description=part_description)
                 tag_dict[tag.name] = tag.id
                 counter += 1
         project_changed = project_changed or (counter > 0)
@@ -654,8 +736,8 @@ def _train(project_id):
                 img_objs.append(image_obj)
                 img_entries.append(img_entry)
                 project_changed = project_changed or (not image_obj.uploaded)
-                # TODO: Remove
-                logger.info(f'project_changed: {project_changed}')
+                if project_changed:
+                    logger.info(f'project_changed: {project_changed}')
                 count += 1
             except:
                 logger.exception("unexpected error")
@@ -695,10 +777,16 @@ def _train(project_id):
                 project_obj.train_project()
                 update_train_status(project_id)
 
+            except CustomVisionErrorException as e:
+                obj, created = project_obj.upcreate_training_status(
+                    status='failed',
+                    log=e.message)
+                return JsonResponse({'status': 'failed',
+                                     'log': e.message},
+                                    status=e.response.status_code)
             except:
                 logger.exception(
                     'Unexpected error while training project')
-                raise
 
         return JsonResponse({'status': 'ok'})
 
@@ -714,7 +802,38 @@ def _train(project_id):
 
 @api_view()
 def train(request, project_id):
+
+    is_demo = request.query_params.get('demo')
+    if is_demo and (is_demo.lower() == 'true'):
+        logger.info('demo... bypass training process')
+
+        requests.get('http://'+inference_module_url()+'/update_cam',
+                     params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+        requests.get('http://'+inference_module_url() +
+                     '/update_model', params={'model_dir': 'default_model_6parts'})
+
+        project_obj = Project.objects.get(pk=project_id)
+        obj, created = project_obj.upcreate_training_status(
+            status='ok',
+            log='Status : demo ok'
+        )
+        # FIXME pass the new model info to inference server (willy implement)
+        return JsonResponse({'status': 'ok'})
+
+    project_obj = Project.objects.get(pk=project_id)
+    project_obj.upcreate_training_status(
+        status='Status: preparing data (images and annotations)',
+        log=''
+    )
     logger.info('sleeping')
+
+    rtsp = project_obj.camera.rtsp
+
+    def _send(rtsp):
+        logger.info(f'**** updaing cam to {rtsp}')
+        requests.get('http://'+inference_module_url()+'/update_cam',
+                     params={'cam_type': 'rtsp', 'cam_source': rtsp})
+    threading.Thread(target=_send, args=(rtsp,)).start()
     return _train(project_id)
 
 
@@ -810,7 +929,7 @@ def inference_video_feed(request, project_id):
 
 @api_view()
 def instrumentation_key(request):
-    return APP_INSIGHT_INST_KEY
+    return JsonResponse({'status': 'ok', 'key': APP_INSIGHT_INST_KEY})
 
 
 @api_view()
@@ -833,73 +952,128 @@ def list_projects(request, setting_id):
 def pull_cv_project(request, project_id):
     """
     Delete the local project, parts and images. Pull the remote project from Custom Vision.
+    TODO: open a thread
     """
     logger.info("Pulling CustomVision Project")
-    rs = {}
-    project_obj = Project.objects.get(pk=project_id)
+    update_fields = []
+    # FIXME: Should send correct id
+    # project_obj = Project.objects.get(pk=project_id)
+    if len(Project.objects.filter(is_demo=False)):
+        project_obj = Project.objects.filter(is_demo=False)[0]
+    # Check Project
+    if project_obj.is_demo:
+        return JsonResponse({
+            'status': 'failed',
+            'logs': 'Demo project should not change'
+        })
+    # Check Training_Key, Endpoint
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-
-    customvision_project_id = request.query_params.get(
-        'customvision_project_id')
-    logger.info(f"customvision_project_id: {customvision_project_id}")
-
     if not trainer:
         return JsonResponse({
             'status': 'failed',
             'logs': '(Endpoint, Training_key) invalid'
         })
 
+    # Check Customvision Project id
+    customvision_project_id = request.query_params.get(
+        'customvision_project_id')
+    logger.info(f"customvision_project_id: {customvision_project_id}")
+
+    # Check Partial
     try:
+        is_partial = bool(strtobool(request.query_params.get('partial')))
+    except:
+        is_partial = True
+    logger.info(f"Loading Project in Partial Mode: {is_partial}")
+
+    try:
+        # Invalid CustomVision Project ID handled by exception
         project = trainer.get_project(project_id=customvision_project_id)
-#         logger.info("Deleting all parts...")
-#         Part.object.all().delete()
-#         logger.info("Deleting all images...")
-#         Image.object.all().delete()
-#
-#         logger.info("Creating Parts...")
-#         counter = 0
-#         tags = trainer.get_tags(customvision_project_id)
-#         for tag in tags:
-#             logger.info(f"Creating Part {counter}")
-#             part_obj, created = Part.update_or_create(
-#                 name=tag.name,
-#                 description="From remote"
-#             )
-#             counter += 1
-#
-#         logger.info("Pulling Tagged Images...")
-#         counter = 0
-#         tags = trainer.get_tags(customvision_project_id)
-#         for tag in tags:
-#             logger.info(f"Creating Part {counter}")
-#             part_obj, created = Part.update_or_create(
-#                 name=tag.name,
-#                 description="From remote"
-#             )
-#             counter += 1
-#         logger.info(f"Pulled {counter} images")
-#         logger.info("Pulling Tagged Images... End")
-#
-#         logger.info("Pulling Untagged Images...")
-#         counter = 0
-#         tags = trainer.get_tags(customvision_project_id)
-#         for tag in tags:
-#             logger.info(f"Creating Part {counter}")
-#             part_obj, created = Part.update_or_create(
-#                 name=tag.name,
-#                 description="From remote"
-#             )
-#             counter += 1
-#         logger.info(f"Created {counter} images")
-#         logger.info("Pulling Untagged Images... End")
-        logger.info("Sync End")
+        project_obj.customvision_project_id = customvision_project_id
+        project_obj.deployed = False
+        update_fields.extend(['customvision_project_id', 'deployed'])
+
+        logger.info("Deleting all parts and images...")
+        Part.objects.filter(is_demo=False).delete()
+        Image.objects.all().delete()
+
+        logger.info("Pulling Parts...")
+        counter = 0
+        tags = trainer.get_tags(customvision_project_id)
+        for tag in tags:
+            logger.info(
+                f"Creating Part {counter}: {tag.name} {tag.description}")
+            part_obj, created = Part.objects.update_or_create(
+                name=tag.name,
+                description=tag.description if tag.description else f"{tag.name}'s description"
+            )
+            counter += 1
+            if created:
+                project_obj.parts.add(part_obj)
+            else:
+                logging.error(f"{tag.name} not added")
+        logger.info(f"Pulled {counter} Parts")
+        logger.info("Pulling Parts... End")
+
+        # Partial
+        if is_partial:
+            exporting_task_obj = Task.objects.create(
+                task_type='export_iteration', status='init', log='Just Started', project=project_obj)
+            exporting_task_obj.start_exporting()
+            return JsonResponse({'status': 'ok', 'task.id': exporting_task_obj.id})
+
+        # Full Download
+        logger.info("Pulling Tagged Images...")
+        img_counter = 0
+        imgs_count = trainer.get_tagged_image_count(
+            project_id=customvision_project_id)
+        img_batch_size = 50
+        img_index = 0
+
+        while (img_index <= imgs_count):
+            logger.info(f'Img Index: {img_index}. Img Count: {imgs_count}')
+            imgs = trainer.get_tagged_images(
+                project_id=customvision_project_id,
+                take=img_batch_size,
+                skip=img_index)
+            for img in imgs:
+                logger.info(f"*** img {img_counter}")
+                for region in img.regions:
+                    part_obj = Part.objects.filter(
+                        name=region.tag_name, is_demo=False)[0]
+                    img_obj, created = Image.objects.update_or_create(
+                        part=part_obj,
+                        remote_url=img.original_image_uri
+                    )
+                    if created:
+                        logger.info(f"Downloading img {img.id}")
+                        img_obj.get_remote_image()
+                        logger.info(f"Setting label of {img.id}")
+                        img_obj.set_labels(
+                            left=region.left,
+                            top=region.top,
+                            width=region.width,
+                            height=region.height)
+                        img_counter += 1
+                    else:
+                        # TODO:  Multiple region with same tag
+                        logger.info(f"Adding label to {img.id}")
+                        img_obj.add_labels(
+                            left=region.left,
+                            top=region.top,
+                            width=region.width,
+                            height=region.height)
+
+            img_index += img_batch_size
+
+        logger.info(f"Pulled {counter} images")
+        logger.info("Pulling Tagged Images... End")
+        logger.info("Pulling CustomVision Project... End")
+        return JsonResponse({'status': 'ok'})
     except CustomVisionErrorException as e:
         logger.error(f"CustomVisionErrorException: {e.message}")
-        logger.error("Probably cause by invalid customvision project id")
-        logger.error("Do nothing...")
-        return JsonResponse({
-            'status': 'failed',
-            'log': f'Status : failed because invalid customvision project id'})
+        return JsonResponse({'status': 'failed',
+                             'log': e.message})
     except Exception as e:
         # TODO: Remove in production
         err_msg = traceback.format_exc()
@@ -907,7 +1081,28 @@ def pull_cv_project(request, project_id):
         return JsonResponse({
             'status': 'failed',
             'log': f'Status : failed {str(err_msg)}'})
+    finally:
+        project_obj.save(update_fields=update_fields)
 
-    logger.info("Pulling CustomVision Project... End")
-    rs['status'] = 'success'
-    return JsonResponse(rs)
+
+@api_view()
+def reset_project(request, project_id):
+    try:
+        project_obj = Project.objects.get(pk=project_id)
+    except:
+        if len(Project.objects.filter(is_demo=False)):
+            project_obj = Project.objects.filter(is_demo=False)[0]
+    Part.objects.filter(is_demo=False).delete()
+    Image.objects.all().delete()
+    project_obj.customvision_project_id = ''
+    project_obj.customvision_project_name = ''
+    project_obj.download_uri = ''
+    project_obj.needRetraining = False
+    project_obj.accuracyRangeMin = 30
+    project_obj.accuracyRangeMax = 80
+    project_obj.maxImages = 10
+    project_obj.deployed = False
+    project_obj.train_try_counter = 0
+    project_obj.train_success_counter = 0
+    project_obj.save()
+    return JsonResponse({'status': 'ok'})

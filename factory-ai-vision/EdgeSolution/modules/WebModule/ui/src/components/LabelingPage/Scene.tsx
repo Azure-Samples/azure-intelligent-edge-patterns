@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
-import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
-import { Stage, Layer, Image, Group } from 'react-konva';
+import { Button, CloseIcon } from '@fluentui/react-northstar';
+import { Stage, Layer, Image, Group, Text as KonvaText } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
@@ -111,12 +111,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState,
     scale.current = outcomeScale;
   }, [size, resizeImage]);
 
-  if (status === 'loading' || (imageSize.height === 0 && imageSize.width === 0))
-    return (
-      <Text align="center" color="red">
-        Loading...
-      </Text>
-    );
+  const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
   return (
     <div style={{ margin: '0.2em' }}>
@@ -151,29 +146,39 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState,
           }}
         >
           <Image image={image} />
-          {annotations.map((annotation, i) => (
-            <Group key={i}>
-              <RemoveBoxButton
-                imageSize={imageSize}
-                visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
-                label={annotation.label}
-                scale={scale.current}
-                changeCursorState={changeCursorState}
-                setShowOuterRemoveButton={setShowOuterRemoveButton}
-                removeBox={removeBox}
-              />
-              <Box2d
-                workState={workState}
-                onSelect={onSelect}
-                annotation={annotation}
-                scale={scale.current}
-                annotationIndex={i}
-                selected={i === selectedAnnotationIndex}
-                dispatch={dispatch}
-                changeCursorState={changeCursorState}
-              />
-            </Group>
-          ))}
+          {!isLoading &&
+            annotations.map((annotation, i) => (
+              <Group key={i}>
+                <RemoveBoxButton
+                  imageSize={imageSize}
+                  visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
+                  label={annotation.label}
+                  scale={scale.current}
+                  changeCursorState={changeCursorState}
+                  setShowOuterRemoveButton={setShowOuterRemoveButton}
+                  removeBox={removeBox}
+                />
+                <Box2d
+                  workState={workState}
+                  onSelect={onSelect}
+                  annotation={annotation}
+                  scale={scale.current}
+                  annotationIndex={i}
+                  selected={i === selectedAnnotationIndex}
+                  dispatch={dispatch}
+                  changeCursorState={changeCursorState}
+                />
+              </Group>
+            ))}
+          {isLoading && (
+            <KonvaText
+              x={imageSize.width / 2 - 50}
+              y={imageSize.height / 2 - 25}
+              fontSize={50}
+              text="Loading..."
+              fill="rgb(255, 0, 0)"
+            />
+          )}
         </Layer>
       </Stage>
     </div>
