@@ -1,3 +1,11 @@
+# Prerequiste 
+1. For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working 
+2. For runnign on GPU : Azure Stack Edge 
+                        OR
+                        Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge 
+
+
+
 # Vision on Edge Installer
 
 To install the Vision on Edge Solution Accelerator, the following prerequisites are required...
