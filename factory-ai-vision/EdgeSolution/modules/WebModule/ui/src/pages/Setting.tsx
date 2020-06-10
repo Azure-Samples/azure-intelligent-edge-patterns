@@ -294,12 +294,12 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           Previous Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} />
-        <Button
-          primary
-          content="Load"
-          disabled={!customVisionProjectId || loading}
-          onClick={onLoad}
-          loading={loading}
+        <WarningDialog
+          contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
+          onConfirm={onLoad}
+          trigger={
+            <Button primary content="Load" disabled={!customVisionProjectId || loading} loading={loading} />
+          }
         />
         {error.length ? <Alert danger content={`Failed to load ${error.join(', ')}`} dismissible /> : null}
       </Flex>
