@@ -41,6 +41,7 @@ router.register('locations', views.LocationViewSet)
 router.register('annotations', views.AnnotationViewSet)
 router.register('train', views.TrainViewSet)
 router.register('settings', views.SettingViewSet)
+router.register('tasks', views.TaskViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
@@ -61,6 +62,7 @@ urlpatterns = \
         #     views.clone_cv_project),
         path('api/projects/<int:project_id>/pull_cv_project',
              views.pull_cv_project),
+        path('api/projects/<int:project_id>/reset_project', views.reset_project),
         path('api/settings/<int:setting_id>/list_projects', views.list_projects),
         path('api/projects/null/export', views.export_null),
         path('api/relabel', views.upload_relabel_image),
