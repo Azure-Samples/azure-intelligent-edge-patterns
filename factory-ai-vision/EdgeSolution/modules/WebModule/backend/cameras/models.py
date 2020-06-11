@@ -444,7 +444,7 @@ class Project(models.Model):
 
         def _r(confidence_min, confidence_max, max_images):
             requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
-                'confidence_min': confidence_min, 'confidence_max': confidence_max, 'max_imags': max_images})
+                'confidence_min': confidence_min, 'confidence_max': confidence_max, 'max_images': max_images})
 
         threading.Thread(target=_r, args=(
             confidence_min, confidence_max, max_images)).start()
