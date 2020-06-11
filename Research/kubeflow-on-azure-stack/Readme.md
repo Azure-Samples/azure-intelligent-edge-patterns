@@ -70,6 +70,7 @@ the master node of your Kubernetes cluster:
 
 - kubeflow_install.sh - installs Kubeflow.
 - kubeflow_uninstall.sh - uninstalls Kubeflow.
+- edit_external_access.sh - runs command to open Kubernetes editor.
 - get_kf_board_ip.sh - helps find out the IP address of the Kubeflow dashboard.
 - get_kubernetes_info.sh - your Kubernetes infrastructure information.
 - get_token.sh - simplifies obtaining a token.
@@ -155,7 +156,7 @@ It will look something like this:
 You can run another script from the sbin directory, `get_kf_board_ip.sh` to get the external
 IP when it is ready:
 
-    $ get_kf_board_ip.sh
+    $ ./get_kf_board_ip.sh
     kubectl get -w -n istio-system svc/istio-ingressgateway
     NAME                   TYPE           CLUSTER-IP   EXTERNAL-IP   PORT          
     istio-ingressgateway   LoadBalancer   10.0.7.257   <pending>     15020:32053/TCP,80:31380/TCP...
