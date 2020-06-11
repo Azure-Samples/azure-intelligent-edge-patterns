@@ -64,6 +64,9 @@ logger = logging.getLogger(__name__)
 
 
 def update_train_status(project_id):
+    """
+    This function not only update status, but also send request to inference model
+    """
     def _train_status_worker(project_id):
         project_obj = Project.objects.get(pk=project_id)
         trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -113,14 +116,17 @@ def update_train_status(project_id):
             project_obj.save(update_fields=['download_uri'])
             parts = [p.name for p in project_obj.parts.all()]
 
+            logger.info(
+                f'Successfulling export model: {project_obj.download_uri}')
+            logger.info(f'Preparing to deploy to inference')
             logger.info(f'Project is deployed before: {project_obj.deployed}')
             if not project_obj.deployed:
                 if exports[0].download_uri:
                     # update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
                     def _send(download_uri, rtsp, parts):
                         # FIXME
-                        # print('update rtsp',  rtsp, flush=True)
-                        # print('update model', download_uri, flush=True)
+                        # logger.info(f'update rtsp {rtsp}')
+                        # logger.info(f'update model {download_uri}')
                         requests.get('http://'+inference_module_url()+'/update_cam',
                                      params={'cam_type': 'rtsp', 'cam_source': rtsp})
                         requests.get('http://'+inference_module_url() +
@@ -178,6 +184,8 @@ def export(request, project_id):
         success_rate = int(data['success_rate']*100)/100
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
+        logger.info(
+            f"success_rate: {success_rate}. inference_num: {inference_num}")
     except requests.exceptions.ConnectionError:
         logger.error(
             f"Export failed. Inference module url: {inference_module_url()} unreachable")
@@ -698,12 +706,12 @@ def _train(project_id):
 
         # Upload images to CustomVisioin Project
         # TODO: Replace the line below if we are sure local images sync Custom Vision well
-        # images = Image.objects.filter(
-        #    part_id__in=part_ids,
-        #    is_relabel=False,
-        #    uploaded=False).all()
+        images = Image.objects.filter(
+            part_id__in=part_ids,
+            is_relabel=False,
+            uploaded=False).all()
         logger.info('Uploading images before training...')
-        images = Image.objects.filter(part_id__in=part_ids).all()
+        #images = Image.objects.filter(part_id__in=part_ids).all()
         count = 0
         img_entries = []
         img_objs = []
@@ -768,29 +776,25 @@ def _train(project_id):
                 img_obj.save()
         logger.info('Uploading images... Done')
 
-        if not project_changed:
-            logger.info('Nothing changed, not training')
-            obj, created = project_obj.upcreate_training_status(
-                status='ok',
-                log='Status: Nothing changed, no training')
-
-        else:
-            try:
-                logger.info('training...')
-                project_obj.train_project()
-                update_train_status(project_id)
-
-            except CustomVisionErrorException as e:
+        try:
+            if not project_changed:
+                logger.info('Nothing changed. Not training')
                 obj, created = project_obj.upcreate_training_status(
-                    status='failed',
-                    log=e.message)
-                return JsonResponse({'status': 'failed',
-                                     'log': e.message},
-                                    status=e.response.status_code)
-            except:
-                logger.exception(
-                    'Unexpected error while training project')
+                    status='ok',
+                    log='Status: Nothing changed. Not training')
+            else:
+                logger.info('Project changed. Training...')
+                project_obj.train_project()
 
+        except CustomVisionErrorException as e:
+            logger.info(f'CustomVision Error: {e}')
+            obj, created = project_obj.upcreate_training_status(
+                status='failed',
+                log=e.message)
+            return JsonResponse({'status': 'failed',
+                                 'log': e.message},
+                                status=e.response.status_code)
+        update_train_status(project_id)
         return JsonResponse({'status': 'ok'})
 
     except Exception as e:

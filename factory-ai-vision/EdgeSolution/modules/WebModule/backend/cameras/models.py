@@ -505,12 +505,13 @@ class Project(models.Model):
         update_fields = []
 
         try:
-            app_insight_on, app_insight_logger = get_app_insight_logger()
+
             self.train_try_counter += 1
             update_fields.append('train_try_counter')
-            if app_insight_on:
-                app_insight_logger.info(
-                    f"Project: {self.customvision_project_name}. Train attempt count: {self.train_try_counter}")
+            # app_insight_on, app_insight_logger = get_app_insight_logger()
+            # if app_insight_on:
+            #    app_insight_logger.info(
+            #        f"Project: {self.customvision_project_name}. Train attempt count: {self.train_try_counter}")
 
             # Get CustomVisionClient
             trainer = self.setting.revalidate_and_get_trainer_obj()
@@ -630,7 +631,6 @@ class Task(models.Model):
                 project_obj.save()
                 break
             return
-
         threading.Thread(target=_export_worker, args=(self,)).start()
 
 
