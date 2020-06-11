@@ -111,12 +111,13 @@ def update_train_status(project_id):
 
             project_obj.download_uri = exports[0].download_uri
             project_obj.save(update_fields=['download_uri'])
+            parts = [p.name for p in project_obj.parts.all()]
 
             logger.info(f'Project is deployed before: {project_obj.deployed}')
             if not project_obj.deployed:
                 if exports[0].download_uri:
                     # update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
-                    def _send(download_uri, rtsp):
+                    def _send(download_uri, rtsp, parts):
                         # FIXME
                         # print('update rtsp',  rtsp, flush=True)
                         # print('update model', download_uri, flush=True)
@@ -124,8 +125,10 @@ def update_train_status(project_id):
                                      params={'cam_type': 'rtsp', 'cam_source': rtsp})
                         requests.get('http://'+inference_module_url() +
                                      '/update_model', params={'model_uri': download_uri})
+                        requests.get('http://'+inference_module_url() +
+                                     '/update_parts', params={'parts': parts})
                     threading.Thread(target=_send, args=(
-                        exports[0].download_uri, camera.rtsp)).start()
+                        exports[0].download_uri, camera.rtsp, parts)).start()
 
                     project_obj.deployed = True
                     project_obj.save(
