@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow  
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mlflow
+        image: <your-registry-server>/mlflow-server:latest
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+        - name: regcred
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mlflow-service
+spec:
+  selector:
+    app: mlflow
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      name: mlflow
+  type: LoadBalancer    
+
