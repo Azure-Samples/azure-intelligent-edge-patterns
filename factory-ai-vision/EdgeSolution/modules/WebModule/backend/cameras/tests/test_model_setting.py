@@ -5,7 +5,7 @@ from config import ENDPOINT, TRAINING_KEY
 # You should have valid training key and endpoint in order to test this module
 
 
-class TrainerTestCase(TestCase):
+class SettingTestCase(TestCase):
     def setUp(self):
         """
         Create serveral trainer
@@ -22,7 +22,7 @@ class TrainerTestCase(TestCase):
                                training_key='5566cannotdie',
                                is_trainer_valid=True)
 
-    def test_presave_trainer_is_valid(self):
+    def test_setup_is_valid(self):
         """
         Setting pre_save should validate the (ENDPOINT, TRAINING_KEY) and save in 'is_trainer_valid'
         """
@@ -31,14 +31,21 @@ class TrainerTestCase(TestCase):
         self.assertTrue(default_setting.is_trainer_valid)
         self.assertFalse(invalid_setting.is_trainer_valid)
 
-    def test_revalidate(self):
+    def test_presave_validate(self):
         """
-        revalidate should update 
+        Setting pre_save should validate the (ENDPOINT, TRAINING_KEY) and save in 'is_trainer_valid'
         """
         default_setting = Setting.objects.get(name="DEFAULT_SETTING")
+        self.assertTrue(default_setting.is_trainer_valid)
+        default_setting.training_key = "INVALID_TRAINING_KEY"
+        default_setting.save()
+        self.assertFalse(default_setting.is_trainer_valid)
+
         invalid_setting = Setting.objects.get(name="INVALID_SETTING")
-        self.assertTrue(default_setting.revalidate())
-        self.assertFalse(invalid_setting.revalidate())
+        self.assertFalse(invalid_setting.is_trainer_valid)
+        invalid_setting.training_key = TRAINING_KEY
+        invalid_setting.save()
+        self.assertTrue(invalid_setting.is_trainer_valid)
 
     def test_revalidate_and_get_setting_obj(self):
         """
