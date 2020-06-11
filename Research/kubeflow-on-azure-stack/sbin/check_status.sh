@@ -10,6 +10,6 @@ do
     # This filters out the "ContainerCreating" and other cases,
     # and leaves the title row
     kubectl get pods -n kubeflow | grep -v Running | grep -v Completed
-    sleep 10
+    sleep 30
     echo "Press Ctrl-C to stop..."
 done
