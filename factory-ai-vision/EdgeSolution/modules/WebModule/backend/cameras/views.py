@@ -64,6 +64,9 @@ logger = logging.getLogger(__name__)
 
 
 def update_train_status(project_id):
+    """
+    This function not only update status, but also send request to inference model
+    """
     def _train_status_worker(project_id):
         project_obj = Project.objects.get(pk=project_id)
         trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -113,6 +116,9 @@ def update_train_status(project_id):
             project_obj.save(update_fields=['download_uri'])
             parts = [p.name for p in project_obj.parts.all()]
 
+            logger.info(
+                f'Successfulling export model: {project_obj.download_uri}')
+            logger.info(f'Preparing to deploy to inference')
             logger.info(f'Project is deployed before: {project_obj.deployed}')
             if not project_obj.deployed:
                 if exports[0].download_uri:
