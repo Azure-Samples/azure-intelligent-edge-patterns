@@ -10,7 +10,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
-import axios from 'axios';
+import Axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
@@ -52,7 +52,7 @@ const ManualIdentification: FC = () => {
   }, [parts, projectData]);
 
   const [selectedPartItem, setSelectedPartItem] = useState<DropdownItemProps>(null);
-  const selectedPartId: number = (selectedPartItem?.content as any)?.key ?? null;
+  const selectedPartId: number = (selectedPartItem?.content as { key: number })?.key ?? null;
 
   const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([
     projectData.accuracyRangeMin,
@@ -163,6 +163,26 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
+        <div style={{ display: 'flex', minWidth: '15em', maxWidth: '15%', justifyContent: 'space-around' }}>
+          <Button
+            primary
+            content="Yes to all"
+            onClick={(): void => {
+              setJudgedImageList(relabelImages.map((e) => ({ imageId: e.id, partId: selectedPartId })));
+            }}
+          />
+          <Button
+            styles={{
+              backgroundColor: '#E97548',
+              color: 'white',
+              ':hover': { backgroundColor: '#CC4A31', color: 'white' },
+            }}
+            content="No to all"
+            onClick={(): void => {
+              setJudgedImageList(relabelImages.map((e) => ({ imageId: e.id, partId: null })));
+            }}
+          />
+        </div>
         <ImagesContainer
           images={relabelImages}
           judgedImageList={judgedImageList}
@@ -176,7 +196,7 @@ const ManualIdentification: FC = () => {
           primary
           disabled={judgedImageList.length === 0}
           onClick={(): void => {
-            axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
+            Axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
               .then(() => {
                 dispatch(getLabelImages());
                 setJudgedImageList([]);

@@ -1,6 +1,6 @@
 // Describe the shape of the labelImage's slice of state
 export type LabelImage = {
-  id?: number;
+  id: number;
   image: string;
   labels: string;
   part: string;
