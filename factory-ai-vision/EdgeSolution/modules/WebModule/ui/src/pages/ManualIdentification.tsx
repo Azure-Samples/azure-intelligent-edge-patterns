@@ -10,7 +10,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
-import axios from 'axios';
+import Axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
@@ -176,7 +176,7 @@ const ManualIdentification: FC = () => {
           primary
           disabled={judgedImageList.length === 0}
           onClick={(): void => {
-            axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
+            Axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
               .then(() => {
                 dispatch(getLabelImages());
                 setJudgedImageList([]);

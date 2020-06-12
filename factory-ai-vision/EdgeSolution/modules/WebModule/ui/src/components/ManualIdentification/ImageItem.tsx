@@ -85,14 +85,21 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
     <div
       style={{
         display: 'flex',
-        minHeight: '9em',
-        maxHeight: '30%',
+        minHeight: '13em',
+        maxHeight: '60%',
         justifyContent: 'center',
         padding: '1em',
       }}
     >
-      <div style={{ margin: '0.1em' }}>
-        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={100} height={100} />
+      <div
+        style={{
+          margin: '0.2em',
+          display: 'flex',
+          flexFlow: 'column',
+          justifyContent: 'space-around',
+        }}
+      >
+        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={150} height={150} />
       </div>
       <div
         style={{
@@ -100,7 +107,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           width: '40%',
           display: 'flex',
           flexFlow: 'column',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
         }}
       >
         <Text truncated>
