@@ -221,7 +221,7 @@ class Setting(models.Model):
         """
         return tuple (is_trainer_valid, trainer)
         """
-        logger.info(f'validatiing {endpoint}, {training_key}')
+        logger.info(f'Validatiing {endpoint}, {training_key}')
         trainer = Setting._get_trainer_obj_static(
             endpoint=endpoint,
             training_key=training_key)
@@ -285,7 +285,7 @@ class Setting(models.Model):
         """
         trainer = self.revalidate_and_get_trainer_obj()
         logger.info("Creating obj detection project")
-        logger.info(f"trainer: {trainer}")
+        logger.info(f"Trainer: {trainer}")
         if not trainer:
             logger.info("Trainer is invalid thus cannot create project")
             return None
