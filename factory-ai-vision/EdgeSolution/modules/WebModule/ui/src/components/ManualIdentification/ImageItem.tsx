@@ -30,7 +30,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           key: null,
         },
       },
-      ...partItems.filter((e) => (e.content as any).key !== partId),
+      ...partItems.filter((e) => (e.content as { key: number }).key !== partId),
     ],
     [partId, partItems],
   );
@@ -86,7 +86,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
       style={{
         display: 'flex',
         minHeight: '13em',
-        maxHeight: '60%',
+        maxHeight: '40%',
         justifyContent: 'center',
         padding: '1em',
       }}
