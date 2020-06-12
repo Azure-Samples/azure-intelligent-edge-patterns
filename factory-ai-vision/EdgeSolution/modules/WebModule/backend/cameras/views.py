@@ -825,7 +825,7 @@ def train(request, project_id):
         requests.get('http://'+inference_module_url() +
                      '/update_parts', params={'parts': parts})
         requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
-                'confidence_min': 30, 'confidence_max': 30, 'max_images': 10})
+            'confidence_min': 30, 'confidence_max': 30, 'max_images': 10})
 
         obj, created = project_obj.upcreate_training_status(
             status='ok',
@@ -900,7 +900,7 @@ def upload_relabel_image(request):
     confidence = request.data['confidence']
     is_relabel = request.data['is_relabel']
 
-    parts = Part.objects.filter(name=part_name)
+    parts = Part.objects.filter(name=part_name, is_demo=False)
     if len(parts) == 0:
         logger.error(f'Unknown Part Name: {part_name}')
         return JsonResponse({'status': 'failed'})
