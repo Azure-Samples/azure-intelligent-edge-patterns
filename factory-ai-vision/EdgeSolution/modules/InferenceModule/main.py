@@ -29,6 +29,11 @@ def is_edge():
     except:
         return False
 
+try:
+    iot = IoTHubModuleClient.create_from_edge_environment()
+except:
+    iot = None
+
 def web_module_url():
     if is_edge(): return '172.18.0.1:8080'
     else: return 'localhost:8000'
@@ -41,8 +46,9 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
-    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
-    #def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
+    #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
+        #def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
         # Default system params
         self.render = False
 
@@ -59,7 +65,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.last_prediction = []
 
         self.confidence_min = 30 * 0.01
-        self.confidence_max = 80 * 0.01
+        self.confidence_max = 30 * 0.01
         self.max_images = 10
         self.last_upload_time = 0
         self.is_upload_image = False
@@ -185,6 +191,9 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                     if True:
                         for prediction in self.last_prediction:
 
+                            if iot:
+                                iot.send_message(json.dumps(prediction))
+
                             tag = prediction['tagName']
                             if tag not in self.parts: continue
 
@@ -273,7 +282,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-model_dir = './default_model'
+#model_dir = './default_model'
+model_dir = './default_model_6parts'
 onnx = ONNXRuntimeModelDeploy(model_dir)
 onnx.start_session()
 
@@ -310,9 +320,9 @@ def update_retrain_parameters():
     max_images = request.args.get('max_images')
     if not max_images: return 'missing max_images'
 
-    self.confidence_min = int(confidence_min) * 0.01
-    self.confidence_max = int(confidence_max) * 0.01
-    self.max_images = int(max_images)
+    onnx.confidence_min = int(confidence_min) * 0.01
+    onnx.confidence_max = int(confidence_max) * 0.01
+    onnx.max_images = int(max_images)
 
     print('[INFO] updaing retrain parameters to')
     print('  conficen_min:', confidence_min)
@@ -418,17 +428,20 @@ def video_feed():
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 font_scale = 1
                 thickness = 3
+                #print(predictions)
                 for prediction in predictions:
                     #print(prediction['tagName'], prediction['probability'])
                     #print(onnx.last_upload_time, time.time())
                     tag = prediction['tagName']
-                    if tag not in onnx.parts: continue
+                    #if tag not in onnx.parts: continue
 
                     if onnx.has_aoi:
                         img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)
 
                     #if prediction['probability'] > onnx.threshold:
+                    #print('if??', prediction['probability'], onnx.confidence_max)
                     if prediction['probability'] > onnx.confidence_max:
+                        #print('to draw')
                         x1 = int(prediction['boundingBox']['left'] * width)
                         y1 = int(prediction['boundingBox']['top'] * height)
                         x2 = x1 + int(prediction['boundingBox']['width'] * width)
