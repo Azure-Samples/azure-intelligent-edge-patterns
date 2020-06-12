@@ -256,7 +256,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
   const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>(initialDropdownItem);
   const [customVisionProjectId, setCustomVisionProjectId] = useState('');
   const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
-  const [loadPartial, setLoadPartial] = useState(false);
+  const [loadFullImages, setLoadFullImages] = useState(false);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
   const [createProjectModel, setCreateProjectModel] = useState(false);
@@ -272,7 +272,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
     Axios.get(
       `/api/projects/${
         projectData.id
-      }/pull_cv_project?customvision_project_id=${customVisionProjectId}&partial=${Number(loadPartial)}`,
+      }/pull_cv_project?customvision_project_id=${customVisionProjectId}&partial=${Number(!loadFullImages)}`,
     )
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
@@ -315,11 +315,19 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           Previous Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} />
-        <Checkbox
-          checked={loadPartial}
-          label="Load Partial Data"
-          onClick={(): void => setLoadPartial((prev) => !prev)}
-        />
+        {loadFullImages ? (
+          <Checkbox
+            checked={loadFullImages}
+            label="Load Full Images"
+            onClick={(): void => setLoadFullImages((prev) => !prev)}
+          />
+        ) : (
+          <WarningDialog
+            contentText={<p>Load full images will take a long time, sure you want to do that?</p>}
+            onConfirm={(): void => setLoadFullImages((prev) => !prev)}
+            trigger={<Checkbox checked={loadFullImages} label="Load Full Images" />}
+          />
+        )}
         <WarningDialog
           contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
           onConfirm={onLoad}
