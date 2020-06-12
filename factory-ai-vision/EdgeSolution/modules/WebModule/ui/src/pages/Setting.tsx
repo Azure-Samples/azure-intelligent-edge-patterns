@@ -323,7 +323,7 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           />
         ) : (
           <WarningDialog
-            contentText={<p>Load full images will take a long time, sure you want to do that?</p>}
+            contentText={<p>Depends on the number of images, loading full images takes time</p>}
             onConfirm={(): void => setLoadFullImages((prev) => !prev)}
             trigger={<Checkbox checked={loadFullImages} label="Load Full Images" />}
           />
