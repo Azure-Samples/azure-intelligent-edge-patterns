@@ -360,7 +360,6 @@ class Project(models.Model):
     def pre_save(sender, instance, update_fields, **kwargs):
         logger.info("Project pre_save")
         logger.info(f'Saving instance: {instance} {update_fields}')
-
         if update_fields is not None:
             return
         # if instance.id is not None:
@@ -372,27 +371,38 @@ class Project(models.Model):
             pass
         elif trainer and instance.customvision_project_id:
             # Endpoint and Training_key is valid, and trying to save with cv_project_id
-            # Probably Syncing
             logger.info(
                 f'Project CustomVision Project Id: {instance.customvision_project_id}')
-            logger.info('Assume Syncing')
             try:
                 cv_project_obj = trainer.get_project(
                     instance.customvision_project_id)
-            except:
+            except CustomVisionErrorException as e:
+                logger.error(e)
+                instance.customvision_project_id = ''
+            except Exception as e:
                 logger.exception("Unexpected error")
         elif trainer:
-            # Endpoint and Training_key is valid, and trying to save with no cv_project_id
-            name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
-            instance.customvision_project_name = name
+            # Endpoint and Training_key is valid, and trying to save without cv_project_id
+            logger.info("Setting project name")
+            try:
+                if not instance.customvision_project_name:
+                    raise ValueError("Use Default")
+                name = instance.customvision_project_name
+            except:
+                name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
+                instance.customvision_project_name = name
+            logger.info(
+                f"Setting project name: {instance.customvision_project_name}")
 
             logger.info('Creating Project on Custom Vision')
             project = instance.setting.create_project(name)
-            logger.info(f'Got Custom Vision Project Id: {project.id}')
+            logger.info(
+                f'Got Custom Vision Project Id: {project.id}. Saving...')
             instance.customvision_project_id = project.id
         else:
-            logger.info('Has not set the key, Got DUMMY PRJ ID')
-            instance.customvision_project_id = 'DUMMY-PROJECT-ID'
+            # logger.info('Has not set the key, Got DUMMY PRJ ID')
+            # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
+            instance.customvision_project_id = ''
         logger.info("Project pre_save... End")
 
     @staticmethod
@@ -517,7 +527,7 @@ class Project(models.Model):
         finally:
             # App Insight
             if self.setting.is_collect_data:
-                from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor, get_app_insight_logger
+                from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor
                 logger.info("Sending Logs to App Insight")
                 part_monitor(len(Part.objects.filter(is_demo=False)))
                 img_monitor(len(Image.objects.all()))
@@ -526,8 +536,6 @@ class Project(models.Model):
             self.save(update_fields=update_fields)
 
     def export_iterationv3_2(self, iteration_id):
-        """A Wrapper function for 
-        """
         setting_obj = self.setting
         url = setting_obj.endpoint+'customvision/v3.2/training/projects/' + \
             self.customvision_project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
