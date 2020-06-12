@@ -29,7 +29,8 @@ export const getAnnotations = (imageId: number) => (dispatch, getState): void =>
   if (labels === null) {
     dispatch(requestAnnotationsSuccess([]));
   } else {
-    const annotations = JSON.parse(labels).map((parsedLabels) => ({
+    const annotations: Annotation[] = JSON.parse(labels).map((parsedLabels, i) => ({
+      id: i,
       label: parsedLabels,
       attribute: '',
       annotationState: AnnotationState.Finish,
@@ -73,6 +74,7 @@ export const resetAnnotation = (): ResetAnnotationAction => ({
 export const BoxObj: BoxObject = {
   init(): Annotation {
     return {
+      id: null,
       label: { x1: 0, y1: 0, x2: 0, y2: 0 },
       attribute: '',
       annotationState: AnnotationState.Empty,
