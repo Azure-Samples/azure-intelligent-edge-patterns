@@ -152,7 +152,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           imageIndex={imageIndex}
           images={relabelImages}
           isRelabel={true}
-          trigger={<Button primary content="Identify" disabled={!isPartCorrect} />}
+          trigger={<Button primary content="Identify" />}
         />
       </div>
     </div>
