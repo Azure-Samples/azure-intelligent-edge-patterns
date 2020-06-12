@@ -315,11 +315,19 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
           Previous Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} />
-        <Checkbox
-          checked={loadFullImages}
-          label="Load Full Images (This takes a long time)"
-          onClick={(): void => setLoadFullImages((prev) => !prev)}
-        />
+        {loadFullImages ? (
+          <Checkbox
+            checked={loadFullImages}
+            label="Load Full Images"
+            onClick={(): void => setLoadFullImages((prev) => !prev)}
+          />
+        ) : (
+          <WarningDialog
+            contentText={<p>Load full images will take a long time, sure you want to do that?</p>}
+            onConfirm={(): void => setLoadFullImages((prev) => !prev)}
+            trigger={<Checkbox checked={loadFullImages} label="Load Full Images" />}
+          />
+        )}
         <WarningDialog
           contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
           onConfirm={onLoad}
