@@ -263,7 +263,6 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
                 'status': 'failed',
                 'log': 'dataset with same name exists, please change another name'})
         except:
-            logger.error(dir(ie))
             logger.exception("Unexpected Error")
             raise serializers.ValidationError(detail={
                 'status': 'failed',
