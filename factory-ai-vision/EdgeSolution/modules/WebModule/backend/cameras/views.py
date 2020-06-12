@@ -261,8 +261,9 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
         except IntegrityError as ie:
             raise serializers.ValidationError(detail={
                 'status': 'failed',
-                'log': ie})
+                'log': 'dataset with same name exists, please change another name'})
         except:
+            logger.error(dir(ie))
             logger.exception("Unexpected Error")
             raise serializers.ValidationError(detail={
                 'status': 'failed',
@@ -273,10 +274,9 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
             foo = super().update(instance, validated_data)
             return foo
         except IntegrityError as ie:
-            logger.error("Exception")
             raise serializers.ValidationError(detail={
                 'status': 'failed',
-                'log': ie})
+                'log': 'dataset with same name exists, please change another name'})
         except:
             logger.exception("Unexpected Error")
             raise serializers.ValidationError(detail={
