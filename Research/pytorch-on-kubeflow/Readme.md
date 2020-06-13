@@ -239,7 +239,13 @@ You can also monitor CPU usage on nodes while your PyTorchJob is running:
 
 Here is a sample of the output:
 
-    $ kubectl logs pytorch-dist-mnist-gloo-demo-master-0
+    $ k logs pytorch-dist-mnist-gloo-demo-worker-2
+    WORLD_SIZE is 5
+    RANK is 3
+    MASTER_ADDR is pytorch-dist-mnist-gloo-demo-master-0
+    MASTER_PORT is 23456
+    dist.is_available() is True
+    device is cpu
     Using distributed PyTorch with gloo backend
     Downloading http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
     Downloading http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
@@ -247,6 +253,8 @@ Here is a sample of the output:
     Downloading http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz
     Processing...
     Done!
+    creating a Distributor
+    Total epochs: 10
     Train Epoch: 1 [0/60000 (0%)]   loss=2.3000
     Train Epoch: 1 [640/60000 (1%)] loss=2.2135
     Train Epoch: 1 [1280/60000 (2%)]        loss=2.1704
@@ -257,7 +265,6 @@ Here is a sample of the output:
     Train Epoch: 1 [58880/60000 (98%)]      loss=0.2036
     Train Epoch: 1 [59520/60000 (99%)]      loss=0.0645
     accuracy=0.9666
-
 
 
 # Links

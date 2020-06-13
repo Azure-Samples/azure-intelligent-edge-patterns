@@ -15,6 +15,16 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 WORLD_SIZE = int(os.environ.get('WORLD_SIZE', 1))
+print(f"WORLD_SIZE is {WORLD_SIZE}")
+
+myrank = os.environ.get('RANK')
+print(f"RANK is {myrank}")
+
+mymaster_addr = os.environ.get('MASTER_ADDR')
+print(f"MASTER_ADDR is {mymaster_addr}")
+
+mymaster_port = os.environ.get('MASTER_PORT')
+print(f"MASTER_PORT is {mymaster_port}")
 
 
 class Net(nn.Module):
@@ -83,27 +93,33 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=1, metavar='N',
+    parser.add_argument('--epochs', type=int, default=10, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
     parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                         help='SGD momentum (default: 0.5)')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
+    parser.add_argument('--no-cuda', action='store_true', default=True,
                         help='disables CUDA training')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--save-model', action='store_true', default=False,
+    parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
     parser.add_argument('--dir', default='logs', metavar='L',
                         help='directory where summary logs are stored')
+    
     if dist.is_available():
+        print("dist.is_available() is True")
         parser.add_argument('--backend', type=str, help='Distributed backend',
                             choices=[dist.Backend.GLOO, dist.Backend.NCCL, dist.Backend.MPI],
                             default=dist.Backend.GLOO)
+    else:
+        print("dist.is_available() is False")
+
     args = parser.parse_args()
+    
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     if use_cuda:
         print('Using CUDA')
@@ -113,10 +129,13 @@ def main():
     torch.manual_seed(args.seed)
 
     device = torch.device("cuda" if use_cuda else "cpu")
+    print(f"device is {device}")
 
     if should_distribute():
         print('Using distributed PyTorch with {} backend'.format(args.backend))
         dist.init_process_group(backend=args.backend)
+    else:
+        print('Not using distributed PyTorch, not doing a process group')
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     train_loader = torch.utils.data.DataLoader(
@@ -136,18 +155,31 @@ def main():
     model = Net().to(device)
 
     if is_distributed():
+        print("creating a Distributor")
         Distributor = nn.parallel.DistributedDataParallel if use_cuda \
             else nn.parallel.DistributedDataParallelCPU
         model = Distributor(model)
+    else:
+        print("NOT creating a Distributor")
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
+    print(f"Total epochs: {args.epochs}")
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch, writer)
+        if epoch %5 == 1: 
+            if (args.save_model and myrank == 0):
+                print(f"saving model to 'mnist_cnn_epoch{epoch}.pt'...")
+                torch.save(model.state_dict(),f"mnist_cnn_epoch{epoch}.pt")
+        
+          
         test(args, model, device, test_loader, writer, epoch)
 
     if (args.save_model):
+        print(f"saving model to 'mnist_cnn.pt'...")
         torch.save(model.state_dict(),"mnist_cnn.pt")
         
 if __name__ == '__main__':
     main()
+
+
