@@ -2,6 +2,7 @@ from django.test import TestCase
 from cameras.models import Part
 from django.core.exceptions import MultipleObjectsReturned
 from rest_framework.test import APITransactionTestCase
+from .test_special_strings import special_strings
 
 
 class PartTestCase(APITransactionTestCase):
@@ -21,7 +22,12 @@ class PartTestCase(APITransactionTestCase):
         Part.objects.create(name="Part2",
                             description="python apps.py",
                             is_demo=False)
-        self.exist_num = 4
+        for s in special_strings:
+            Part.objects.create(name=s,
+                                description=s,
+                                is_demo=False)
+
+        self.exist_num = 4 + len(special_strings)
 
     def test_setup_is_valid(self):
         self.assertEqual(Part.objects.count(), self.exist_num)

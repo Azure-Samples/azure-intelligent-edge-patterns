@@ -29,7 +29,13 @@ class CameraTestCase(APITransactionTestCase):
                                   model_name="model3",
                                   area="QQ",
                                   is_demo=True)
-        self.exist_num = 4
+            for s in special_strings:
+                Camera.objects.create(name=s,
+                                      rtsp=s,
+                                      model_name=s,
+                                      area=s,
+                                      is_demo=False)
+        self.exist_num = 4 + len(special_strings)
 
     def test_setup_is_valid(self):
         self.assertEqual(Camera.objects.count(), self.exist_num)

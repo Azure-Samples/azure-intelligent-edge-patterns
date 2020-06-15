@@ -10,8 +10,7 @@ project_prefix = "UnitTest"
 
 class ModelProjectTestCase(APITransactionTestCase):
     def setUp(self):
-        """
-        Create serveral Location
+        """Create serveral Location
         :DEFAULT_TRAINER: trainer create from configs
         :INVALID_TRAINER: an invalid trainer
         """
