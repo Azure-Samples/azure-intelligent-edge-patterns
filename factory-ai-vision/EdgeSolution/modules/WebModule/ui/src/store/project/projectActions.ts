@@ -95,9 +95,11 @@ const getInferenceMetricsSuccess = (
   successRate: number,
   successfulInferences: number,
   unIdetifiedItems: number,
+  isGpu: boolean,
+  averageTime: number,
 ): GetInferenceMetricsSuccessAction => ({
   type: GET_INFERENCE_METRICS_SUCCESS,
-  payload: { successRate, successfulInferences, unIdetifiedItems },
+  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime },
 });
 const getInferenceMetricsFailed = (error: Error): GetInferenceMetricsFailedAction => ({
   type: GET_INFERENCE_METRICS_FAILED,
@@ -243,7 +245,13 @@ export const thunkGetInferenceMetrics = (projectId: number) => (dispatch): Promi
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       return dispatch(
-        getInferenceMetricsSuccess(data.success_rate, data.inference_num, data.unidentified_num),
+        getInferenceMetricsSuccess(
+          data.success_rate,
+          data.inference_num,
+          data.unidentified_num,
+          data.gpu,
+          data.average_time,
+        ),
       );
     })
     .catch((err) => dispatch(getInferenceMetricsFailed(err)));
