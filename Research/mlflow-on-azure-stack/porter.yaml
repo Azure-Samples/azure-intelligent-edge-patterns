@@ -1,0 +1,36 @@
+# This is the configuration for Porter
+
+name: MLflowInstaller
+version: 1.0
+description: "MLflow Installer"
+# TODO: update the registry to your own, e.g. myregistry/porter-mlflow:v1.0
+#tag: naedwebs/porter-mlflow:v1.0
+
+# Uncomment the line below to use a template Dockerfile for your invocation image
+dockerfile: Dockerfile.tmpl
+ 
+
+install:
+  - kubernetes:
+      description: "Install Hello World App"
+      manifests:
+        - ./manifests/hello
+      wait: true
+  
+  - exec:
+      description: "Install mlflow"
+      command: 
+		wget https://raw.githubusercontent.com/NealAnalyticsLLC/azure-intelligent-edge-patterns/mlflow-on-azure-stack/Research/mlflow-on-azure-stack/tracking_server.yaml
+        kubectl create namespace mlflow
+		kubectl apply -f ./tracking_server.yaml --namespace mlflow
+    
+mixins:
+  - exec
+  - az 
+  
+
+uninstall:
+  - exec:
+      description: "Uninstall MLflow"
+      command: kubectl delete namespace mlflow
+
