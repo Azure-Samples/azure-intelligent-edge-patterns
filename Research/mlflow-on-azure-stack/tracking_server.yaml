@@ -1,3 +1,15 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:  
+  name: mlruns-pvc
+spec:
+  storageClassName: managed-standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,11 +27,19 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: mlflow
-        image: <your-registry-server>/mlflow-server:latest
+        image: naedwebs/mlflow-server:latest
         ports:
         - containerPort: 5000
+        volumeMounts:
+        - name: mlruns
+          mountPath: /app/mlruns
+      volumes:
+      - name: mlruns
+        persistentVolumeClaim:
+          claimName: mlruns-pvc        
       imagePullSecrets:
         - name: regcred
+     
 ---
 kind: Service
 apiVersion: v1
