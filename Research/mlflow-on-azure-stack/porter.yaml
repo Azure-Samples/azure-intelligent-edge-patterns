@@ -11,16 +11,12 @@ dockerfile: Dockerfile.tmpl
  
 
 install:
-  - kubernetes:
-      description: "Install Hello World App"
-      manifests:
-        - ./manifests/hello
-      wait: true
-  
   - exec:
       description: "Install mlflow"
-      command: wget https://raw.githubusercontent.com/NealAnalyticsLLC/azure-intelligent-edge-patterns/mlflow-on-azure-stack/Research/mlflow-on-azure-stack/tracking_server.yaml \ kubectl create namespace mlflow \ kubectl apply -f ./tracking_server.yaml --namespace mlflow
-    
+      command: ./helpers.sh
+      arguments:
+        - "install"
+      
 mixins:
   - exec
   - az 
