@@ -823,10 +823,11 @@ def train(request, project_id):
         logger.info('demo... bypass training process')
 
         cam_is_demo = project_obj.camera.is_demo
-        # Camera
+        # Camera FIXME peter, check here
         if cam_is_demo:
+            rtsp = project_obj.camera.rtsp
             requests.get('http://'+inference_module_url()+'/update_cam',
-                         params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+                         params={'cam_type': 'rtsp', 'cam_source': rtsp})
         else:
             rtsp = project_obj.camera.rtsp
             requests.get('http://'+inference_module_url()+'/update_cam',
