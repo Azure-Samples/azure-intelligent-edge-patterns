@@ -514,12 +514,8 @@ class Project(models.Model):
             is_task_success = True
             return is_task_success
         except CustomVisionErrorException as e:
-            if app_insight_on:
-                app_insight_logger.exception(
-                    f'From Custom Vision: {e.message}')
-            else:
-                logger.error(
-                    f'From Custom Vision: {e.message}')
+            logger.error(
+                f'From Custom Vision: {e.message}')
             raise e
         except:
             logger.exception('Unexpected error while Project.train_project')
