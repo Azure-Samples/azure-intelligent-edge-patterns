@@ -56,6 +56,8 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           successRate: 0,
           successfulInferences: 0,
           unIdetifiedItems: 0,
+          isGpu: false,
+          averageTime: 0,
         },
         trainingMetrics: {
           curConsequence: null,
