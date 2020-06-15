@@ -80,8 +80,11 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.has_aoi = False
         self.aoi_info = None
+        # Part that we want to detect
         self.parts = []
-        #json.loads("{\"useAOI\":true,\"AOIs\":[{\"x1\":100,\"y1\":216.36363636363637,\"x2\":614.909090909091,\"y2\":1762.181818181818}]}")['AOIs'][0]
+
+        self.is_gpu = (onnxruntime.get_device() == 'GPU')
+        self.average_inference_time = 0
 
 
     def restart_cam(self):
@@ -167,6 +170,9 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.lock.acquire()
         prediction, inf_time = self.model.predict_image(image)
         self.lock.release()
+
+        inf_time_ms = inf_time * 1000
+        self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
 
         return prediction
 
@@ -299,14 +305,19 @@ def metrics():
     inference_num = onnx.detection_success_num
     unidentified_num = onnx.detection_unidentified_num
     total = onnx.detection_total
+    is_gpu = onnx.is_gpu
+    average_inference_time = onnx.average_inference_time
     if total == 0:
         success_rate = 0
     else:
-        success_rate = inference_num * 100 / total 
+        success_rate = inference_num * 100 / total
     return json.dumps({
         'success_rate': success_rate,
-        'inference_num': inference_num, 
-        'unidentified_num': unidentified_num})
+        'inference_num': inference_num,
+        'unidentified_num': unidentified_num,
+        'is_gpu': is_gpu,
+        'average_inference_time': average_inference_time,
+        })
 
 @app.route('/update_retrain_parameters')
 def update_retrain_parameters():
