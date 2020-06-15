@@ -198,6 +198,12 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                     if True:
                         for prediction in self.last_prediction:
 
+<<<<<<< HEAD
+=======
+                            if iot:
+                                iot.send_message(json.dumps(prediction))
+
+>>>>>>> aa3a2f03d4845ce75509563f6f525fc34b6ad293
                             tag = prediction['tagName']
                             if tag not in self.parts: continue
 

@@ -4,7 +4,11 @@
   "image": {
     "repository": "intelligentedge/inferencemodule",
     "tag": {
+<<<<<<< HEAD
       "version": "0.1.34",
+=======
+      "version": "0.1.27",
+>>>>>>> aa3a2f03d4845ce75509563f6f525fc34b6ad293
       "platforms": {
         "cpuamd64": "./Dockerfile.cpuamd64",
         "gpuamd64": "./Dockerfile.gpuamd64",
