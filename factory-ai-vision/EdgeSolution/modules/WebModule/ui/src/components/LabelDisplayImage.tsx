@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback, memo, MouseEvent, FC, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo, MouseEvent, FC, useRef } from 'react';
 import Konva from 'konva';
 import { Text } from '@fluentui/react-northstar';
 
@@ -43,46 +43,45 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   }, [labelImage]);
 
   useEffect(() => {
-    const [outcomeSize, outcomeScale] = resizeImage(size);
-    imgScale.current = outcomeScale;
-    stage.current = new Konva.Stage({
-      height: outcomeSize.height,
-      width: outcomeSize.width,
-      scale: { x: outcomeScale, y: outcomeScale },
-      container: `display-${labelImage.id}`,
-    });
+    if (size.width > 0) {
+      if (layer.current === null) {
+        const [outcomeSize, outcomeScale] = resizeImage(size);
+        imgScale.current = outcomeScale;
 
-    layer.current = new Konva.FastLayer();
+        stage.current = new Konva.Stage({
+          height: outcomeSize.height,
+          width: outcomeSize.width,
+          scale: { x: outcomeScale, y: outcomeScale },
+          container: `display-${labelImage.id}`,
+        });
 
-    img.current = new Konva.Image({ image });
-    layer.current.add(img.current);
-    stage.current.add(layer.current);
+        layer.current = new Konva.FastLayer();
 
-    return (): void => {
-      stage.current.destroy();
-      layer.current.destroy();
-    };
-  }, [size, image, resizeImage, labelImage.id]);
+        img.current = new Konva.Image({ image });
 
-  useEffect(() => {
-    const newShapes = annotations.map((e) => annotationToShape(e, imgScale.current));
-
-    for (let i = 0; i < shapes.current.length; i++) {
-      shapes.current[i].edge.destroy();
-
-      shapes.current[i].points.forEach((e) => e.destroy());
-    }
-    shapes.current = newShapes;
-    for (let i = 0; i < newShapes.length; i++) {
-      const { points, edge } = newShapes[i];
-      layer.current.add(edge);
-
-      for (let j = 0; j < points.length; j++) {
-        layer.current.add(points[j]);
+        layer.current.add(img.current);
+        stage.current.add(layer.current);
       }
+      const newShapes = annotations.map((e) => annotationToShape(e, imgScale.current));
+
+      for (let i = 0; i < shapes.current.length; i++) {
+        shapes.current[i].edge.destroy();
+        shapes.current[i].points.forEach((e) => e.destroy());
+      }
+      
+      shapes.current = newShapes;
+      for (let i = 0; i < newShapes.length; i++) {
+        const { points, edge } = newShapes[i];
+        layer.current.add(edge);
+
+        for (let j = 0; j < points.length; j++) {
+          layer.current.add(points[j]);
+        }
+      }
+
+      layer.current.draw();
     }
-    stage.current.draw();
-  }, [annotations]);
+  }, [size, image, resizeImage, labelImage.id, annotations]);
 
   return (
     <div
