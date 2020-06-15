@@ -201,6 +201,8 @@ def export(request, project_id):
         'success_rate': success_rate,
         'inference_num': inference_num,
         'unidentified_num': unidentified_num,
+        'gpu': False,
+        'average_time': 33,
     })
 
 # FIXME tmp workaround
