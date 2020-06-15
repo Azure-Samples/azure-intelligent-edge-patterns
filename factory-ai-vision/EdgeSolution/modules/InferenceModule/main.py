@@ -196,6 +196,20 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                     detection = DETECTION_TYPE_NOTHING
                     if True:
+                        if iot:
+                            send_counter += 1
+                            # Modify here to change the threshold
+                            if send_counter == 200:
+                                iot.send_message_to_output(json.dumps(self.last_predictions), 'metrics')
+                                send_counter = 0
+                        else:
+                            send_counter += 1
+                            # Modify here to change the threshold
+                            if send_counter == 200:
+                                print(json.dumps(self.last_prediction), 'metrics')
+                                send_counter = 0
+                            pass
+
                         for prediction in self.last_prediction:
 
                             tag = prediction['tagName']
@@ -213,12 +227,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                                 if prediction['probability'] > self.confidence_max:
                                     detection = DETECTION_TYPE_SUCCESS
-                                    if iot:
-                                        send_counter += 1
-                                        # Modify here to change the threshold
-                                        if send_counter == 3:
-                                            iot.send_message_to_output(json.dumps(prediction), 'metrics')
-                                            send_counter = 0
 
                                 elif self.confidence_min <= prediction['probability'] <= self.confidence_max:
 
