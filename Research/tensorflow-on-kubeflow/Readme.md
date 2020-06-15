@@ -157,10 +157,94 @@ What is worth pointing out is that the nodes are being assigned individual indic
     2020-05-13 19:30:28.385534: I tensorflow/core/distributed_runtime/rpc/grpc_channel.cc:215] Initialize GrpcChannelCache for job worker -> {0 -> localhost:2222, 1 -> dist-mnist-for-e2e-test-my-worker-1.default.svc:2222, 2 -> dist-mnist-for-e2e-test-my-worker-2.default.svc:2222}
     2020-05-13 19:30:28.386049: I tensorflow/core/distributed_runtime/rpc/grpc_server_lib.cc:324] Started server with target: grpc://localhost:2222
 
-# Building Docker image for mnist TFJob with summaries
+# Persistence for models and data
 
-We can run another sample, and use a mounted volume to save the summaries.
+If you would like to save the results of model training, you can do so from you scripts
+using the Kubernetes volumes you mount. However, on Azure Stack you do not have `azurefile`
+available yet, so you can use a network storage instead.
 
+You can follow the [Installing Network Storage Server](installing_network_storage.md). But
+usually it is better to ask your Azure Stack administrator to create a Samba server for you.
+
+## Creating smb clients
+
+On the client side, if you have to do it yourself, install a Samba client:
+
+    $ sudo apt install -y smbclient cifs-utils
+
+Create a folder for mounting:
+
+    $ sudo mkdir /mnt/shares
+
+Put your share drive information to `/etc/samba`:
+
+    $ sudo vi /etc/samba/.sambacreds
+    $ cat /etc/samba/.sambacreds
+    username=sambauser1
+    password=<the password>
+    domain=WORKGROUP
+
+Define the mount in your `fstab` file, pointing to your .sbmabcreds file and the mounting point we created:
+
+    $ sudo vi /etc/fstab
+    $ cat /etc/fstab
+    ...
+    //12.34.259.89/sambauser1        /mnt/shares     cifs    rw,uid=azureuser,guest,noperm,credentials=/etc/samba/.sambacreds        0 0
+    ...
+
+Verify the mounting, you should see your server's ip and Samba user:
+
+    $ sudo mount
+    ...
+    //12.34.259.89/sambauser1 on /mnt/shares type cifs (rw,relatime,vers=default,cache=strict,username=sambauser1,domain=WORKGROUP,uid=1000,forceuid,gid=0,noforcegid,addr=12.34.259.89,file_mode=0755,dir_mode=0755,soft,nounix,serverino,mapposix,noperm,rsize=1048576,wsize=1048576,echo_interval=60,actimeo=1)
+    ...
+
+Try the following from two different nodes of your cluster. On one:
+
+    $ echo "from machine a" >  /mnt/shares/from_machine_a.txt
+    
+On the other:    
+
+    $ ls /mnt/shares/
+    from_machine_a.txt
+    $ cat /mnt/shares/from_machine_a.txt
+    from machine a
+
+You would need to repeat the same installation process on all Kubernetes nodes, because
+the pods could be instantiated anywhere and will try to access the local storage there.
+
+## Creating pvc and pv
+
+Create a .yaml with pv and pvc definitions pointing to the created shared folder:
+
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: tfevent-volume
+      labels:
+        type: local-storage
+        app: tfjob
+    spec:
+      capacity:
+        storage: 10Gi
+      #storageClassName: standard
+      storageClassName: local-storage
+      accessModes:
+        - ReadWriteMany
+      hostPath:
+        path: /mnt/shares/kfbuffer
+
+You can now see the pv being `Bound`:
+    
+    $ kubectl -n kubeflow get pv
+    NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                                      STORAGECLASS    REASON   AGE
+    ...
+    tfevent-volume                             10Gi       RWX            Retain           Bound       default/local-storage                      local-storage            3m54s
+    ...
+
+Now, from your script in the container you can write to that folder your serialized models during the intermediate
+steps. It is better to let the master node (with rank 0) to do the logging and serialization. And the master node
+should do the deserialization if needed.
 
 # Links
 
