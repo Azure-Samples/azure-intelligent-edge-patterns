@@ -1,7 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
-from cameras.models import Part
 from config import ENDPOINT, TRAINING_KEY
 import logging
 

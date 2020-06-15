@@ -1,9 +1,10 @@
-from django.test import TestCase
+from rest_framework.test import APITransactionTestCase
 from cameras.models import Camera
 from unittest.mock import patch
+from .test_special_strings import special_strings
 
 
-class CameraTestCase(TestCase):
+class CameraTestCase(APITransactionTestCase):
     def setUp(self):
         with patch('requests.get') as mock_request:
             mock_request.return_value.status_code = 200
@@ -18,13 +19,13 @@ class CameraTestCase(TestCase):
                                   model_name="model1",
                                   area="55,66",
                                   is_demo=False)
-            Camera.objects.create(name="DemoCamera1",
+            Camera.objects.create(name="Camera1",
                                   rtsp="0",
                                   model_name="model1",
                                   area="QQ",
                                   is_demo=True)
-            Camera.objects.create(name="DemoCamera2",
-                                  rtsp="0",
+            Camera.objects.create(name="Camera2",
+                                  rtsp="12",
                                   model_name="model3",
                                   area="QQ",
                                   is_demo=True)

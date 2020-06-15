@@ -1,6 +1,7 @@
-from rest_framework.test import APITransactionTestCase
+from django.test import TestCase
 from cameras.models import Part
 from django.core.exceptions import MultipleObjectsReturned
+from rest_framework.test import APITransactionTestCase
 
 
 class PartTestCase(APITransactionTestCase):

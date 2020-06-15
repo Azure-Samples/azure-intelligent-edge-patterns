@@ -1,8 +1,8 @@
-from django.test import TestCase
+from rest_framework.test import APITransactionTestCase
 from cameras.models import Location
 
 
-class LocationTestCase(TestCase):
+class LocationTestCase(APITransactionTestCase):
     def setUp(self):
         Location.objects.create(name="Location1",
                                 description="description1",

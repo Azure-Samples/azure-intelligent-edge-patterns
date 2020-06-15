@@ -1,4 +1,4 @@
-from django.test import TestCase
+from rest_framework.test import APITransactionTestCase
 from cameras.models import Project, Setting, Camera, Location, Part
 from config import ENDPOINT, TRAINING_KEY
 from unittest.mock import patch
@@ -8,7 +8,7 @@ from azure.cognitiveservices.vision.customvision.training import CustomVisionTra
 project_prefix = "UnitTest"
 
 
-class ModelProjectTestCase(TestCase):
+class ModelProjectTestCase(APITransactionTestCase):
     def setUp(self):
         """
         Create serveral Location

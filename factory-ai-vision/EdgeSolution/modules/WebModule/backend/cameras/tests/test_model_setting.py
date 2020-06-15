@@ -1,11 +1,11 @@
-from django.test import TestCase
+from rest_framework.test import APITransactionTestCase
 from cameras.models import Setting
 from config import ENDPOINT, TRAINING_KEY
 
 # You should have valid training key and endpoint in order to test this module
 
 
-class SettingTestCase(TestCase):
+class SettingTestCase(APITransactionTestCase):
     def setUp(self):
         """
         Create serveral trainer
