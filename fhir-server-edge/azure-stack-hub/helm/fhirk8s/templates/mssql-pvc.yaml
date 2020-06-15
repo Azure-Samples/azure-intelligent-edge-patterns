@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:  
   name: mssql-data
 spec:
-  storageClassName: managed-standard
+  storageClassName: {{ .Values.mssql.storageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
