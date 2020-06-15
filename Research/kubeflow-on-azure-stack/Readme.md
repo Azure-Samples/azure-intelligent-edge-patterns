@@ -70,18 +70,34 @@ the master node of your Kubernetes cluster:
 
 - kubeflow_install.sh - installs Kubeflow.
 - kubeflow_uninstall.sh - uninstalls Kubeflow.
+- edit_external_access.sh - runs command to open Kubernetes editor.
 - get_kf_board_ip.sh - helps find out the IP address of the Kubeflow dashboard.
 - get_kubernetes_info.sh - your Kubernetes infrastructure information.
 - get_token.sh - simplifies obtaining a token.
 - clean_evicted.sh - kills evicted pods, hopefully you will not need to run this one.
+- check_status.sh - to see useful information during installation/uninstallation.
 
 At your Kubernetes master node:
 
     $ git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
     $ cd azure-intelligent-edge-patterns/Research/kubeflow-on-azure-stack/sbin
+
+**IMPORTANT:**
+
+**Do NOT stop the script until it finishes. Some Kubernetes errors and warnings are expected
+until the system fully functional. After the installer finishes, it takes several minutes
+for the containers to create. Kubeflow cluster name, config, and path to kfctl will be
+apended to `~/.bashrc` for the `kubeflow_uninstall.sh` to work. You will need to re-login
+or run `". ~/.bashrc"` to set the environment variables.**
+
+Run the script:
+
     $ ./kubeflow_install.sh
     Installing Kubeflow
     Writing logs to "~/kubeflow/install.log"
+    ...
+    ...
+    <a very long process(several minutes), with Kubernetes warnings and errors about the not-yet-created pods>
     ...
     ...
     INFO[0134] Successfully applied application seldon-core-operator  filename="kustomize/kustomize.go:209"
@@ -91,8 +107,8 @@ At your Kubernetes master node:
     kubectl get all -n kubeflow
 
 
-If you have done everything correctly, the log will be long and, because of the nature
-of Kubernetes, some time is needed for the system to become functional. Even when 
+As we mentioned, if you have done everything correctly, the log will be long and, because
+of the nature of Kubernetes, some time is needed for the system to become functional. Even when 
 the script ends, you will see something like this, indicating the pods are being created:
 
 ![pics/progress_container_creating.png](pics/progress_container_creating.png)
@@ -108,10 +124,30 @@ pass the parameters in the command line(they overwrite the defaults):
     --kf_config_uri <uri>        - config URI of Kubeflow config
     --help              - show help
 
-To start using Kubeflow, you may want to make Kubeflow Dashboard be visible, so you will need
-to change the type of the ingress behavior - from `NodePort` to `LoadBalancer`, using this:
+Feel free to use script `check_status.sh` to monitor the Kubeflow cluster coming up, it
+should show you the pods that are being created or terminated. As cluster being created, all pods will
+become `Running` and the list will be empty:
 
-    $ kubectl edit -n istio-system svc/istio-ingressgateway
+    $ ./check_status.sh
+    NAMESPACE         NAME                                                           READY   STATUS              RESTARTS   AGE
+    istio-system      istio-pilot-677df6b6d4-266mg                                   0/2     ContainerCreating   0          2s
+    istio-system      istio-pilot-677df6b6d4-prpzq                                   0/2     Pending             0          2s
+    kubeflow          katib-db-manager-54b66f9f9d-7wqms                              0/1     Error               0          71s
+    kubeflow          katib-mysql-dcf7dcbd5-tnb7g                                    0/1     ContainerCreating   0          70s
+    kubeflow          metadata-db-65fb5b695d-vncwd                                   0/1     ContainerCreating   0          80s
+    kubeflow          metadata-grpc-deployment-5c6db9749-jx2tl                       0/1     CrashLoopBackOff    3          80s
+    kubeflow          minio-6b67f98977-kltck                                         0/1     ContainerCreating   0          69s
+    kubeflow          mysql-85bc64f5c4-9jpfh                                         0/1     ContainerCreating   0          69s
+    Press Ctrl-C to stop...
+    ^C
+
+When the pods have been created, you can proceed.
+
+To start using Kubeflow, you may want to make Kubeflow Dashboard be visible, so you will need
+to change the type of the ingress behavior - from `NodePort` to `LoadBalancer`, using this
+command (default editor is vi, to edit you need to press `i`, and to save and exit, `<esc>:wq`):
+
+    $ ./edit_external_access.sh
 
 It will look something like this: 
 
@@ -120,7 +156,7 @@ It will look something like this:
 You can run another script from the sbin directory, `get_kf_board_ip.sh` to get the external
 IP when it is ready:
 
-    $ get_kf_board_ip.sh
+    $ ./get_kf_board_ip.sh
     kubectl get -w -n istio-system svc/istio-ingressgateway
     NAME                   TYPE           CLUSTER-IP   EXTERNAL-IP   PORT          
     istio-ingressgateway   LoadBalancer   10.0.7.257   <pending>     15020:32053/TCP,80:31380/TCP...
@@ -130,7 +166,7 @@ So, when it is no longer `<pending>`, it(from the above output, `88.258.18.69`) 
 
 Congratulations, you can now skip to the chapter "Using Dashboard".
 
-### If you chose to do the installation manually. 
+### If you choose to do the installation manually. 
 
 The following is done at the master node. If you plan to install Kubeflow clusters often, consider
 creating a script with all the commands.
@@ -156,20 +192,36 @@ Generate and deploy Kubeflow:
     $ sudo mkdir -p ${KF_DIR}
     $ sudo chown azureuser ${KF_DIR}
     $ cd ${KF_DIR}
+
+**IMPORTANT:**
+
+**Do NOT stop this command until it finishes. Some Kubernetes errors and warnings are expected
+until the system fully functional. It takes several minutes for the containers to create.**
+
     $ kfctl apply -V -f ${CONFIG_URI}
+    ...
+    ...
+    <a very long process(several minutes), with Kubernetes warnings and errors about the not-yet-created pods>
+    ...
     ...
     INFO[0184] Successfully applied application seldon-core-operator  filename="kustomize/kustomize.go:209"
     INFO[0184] Applied the configuration Successfully!       filename="cmd/apply.go:72"
 
-Check the resources deployed correctly in namespace `kubeflow`
+Check the resources deployed correctly in namespace `kubeflow`. It will take several minutes
+for the pods to come up:
   
     $ kubectl get all -n kubeflow
 
-It will show the list of the services and posd for the cluster we just created.
+It will show the list of the services and pods for the cluster we just created.
 
-## Using dashboard
+## Preparing dashboard
 
-To access the dashboard using external connection, replace `"type: NodePort"` with `"type: LoadBalancer"` using the editor:
+Make sure all the pods are up and running(Using `kubectl get all -n kubeflow`, wait until
+they are).
+
+To access the dashboard using external connection, replace `"type: NodePort"` with
+`"type: LoadBalancer"` using the editor (default editor is vi, to edit you need
+to press `i`, and to save and exit, `<esc>:wq`):
 
     $ kubectl edit -n istio-system svc/istio-ingressgateway
     service/istio-ingressgateway edited
@@ -180,11 +232,15 @@ Then the EXTERNAL-IP will become available from:
     NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
     istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
 
-Open it in your browser, and make sure your firewall rules allow HTTP port 80.
+## Using dashboard
+
+When you have your istio-ingressgateway's external ip(you can retrieve it using `get_kf_board_ip.sh`),
+open it in your browser, and make sure your firewall rules allow HTTP port 80.
 
 ![(pics/kubeflow_dashboard1.png](pics/kubeflow_dashboard1.png)
 
-You can monitor Kubeflow cluster by looking at the Kubernetes status, you might need to wait to let the pods create containers and start.
+You can monitor Kubeflow cluster by looking at the Kubernetes status, you might need to wait to
+let the pods create containers and start.
 
 For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/)
 
@@ -204,26 +260,36 @@ Once you create a server, you can connect to it and upload Python files.
 If you installed Kubeflow using `kubeflow_install.sh`, you can remove it using `kubeflow_uninstall.sh`:
 
     $ ./kubeflow_uninstall.sh
-    Removing Kubeflow from /opt/sandboxASkf2, according to kfctl_k8s_istio.v1.0.2.yaml
+    Removing Kubeflow from /opt/sandboxASkf, according to kfctl_k8s_istio.v1.0.2.yaml
 
-It runs `kfctl delete` on the same .yaml that was used to create the cluster. That is what you would need
-to do if you want to do it manually.
+It runs `kfctl delete` on the same .yaml that was used to create the cluster. If you are not
+using `kubeflow_unistall.sh` script, you would need to do it manually(`kfctl delete -f <the sript's name>`).
 
-Now see how pods are disappearing:
+To see Kubeflow's pods disappear, run `check_status.sh` script:
 
-    azureuser@k8s-master-38926943-0:/opt/sandboxASkf$ k get pods -n kubeflow
-    NAME                                                           READY   STATUS        RESTARTS   AGE
-    argo-ui-7ffb9b6577-lcdmz                                       1/1     Terminating   0          88m
-    jupyter-web-app-deployment-679d5f5dc4-g7g24                    1/1     Terminating   0          88m
-    metadata-grpc-deployment-5c6db9749-cxq9q                       1/1     Terminating   6          88m
-    metadata-ui-7c85545947-xpfmj                                   1/1     Terminating   0          88m
-    ml-pipeline-ml-pipeline-visualizationserver-6d744dd449-f8kk2   1/1     Terminating   0          88m
-    ml-pipeline-ui-549b5b6744-5psmb                                1/1     Terminating   0          88m
-    pytorch-operator-cf8c5c497-p87rg                               1/1     Terminating   0          88m
-    tensorboard-5f685f9d79-4wzmk                                   1/1     Terminating   0          88m
-    tf-job-operator-5fb85c5fb7-qf9h6                               1/1     Terminating   0          88m
+    $ ./check_status.sh
+    NAMESPACE         NAME                                            READY   STATUS        RESTARTS   AGE
+    kubeflow          argo-ui-7ffb9b6577-n295r                        0/1     Terminating   0          31m
+    kubeflow          jupyter-web-app-deployment-679d5f5dc4-2cvwt     0/1     Terminating   0          31m
+    kubeflow          metadata-grpc-deployment-5c6db9749-jx2tl        0/1     Terminating   5          31m
+    kubeflow          metadata-ui-7c85545947-55smm                    0/1     Terminating   0          31m
+    Press Ctrl-C to stop...
+    NAMESPACE         NAME                                            READY   STATUS        RESTARTS   AGE
+    kubeflow          metadata-grpc-deployment-5c6db9749-jx2tl        0/1     Terminating   5          31m
+    kubeflow          metadata-ui-7c85545947-55smm                    0/1     Terminating   0          31m
+    Press Ctrl-C to stop...
+    NAMESPACE         NAME                                            READY   STATUS      RESTARTS   AGE
+    Press Ctrl-C to stop...
+    NAMESPACE         NAME                                            READY   STATUS      RESTARTS   AGE
+    ^C
 
-Kubeflow is sorry to see you go.
+One last thing is left - to remove the Kubeflow folder. The `kubeflow_uninistall.sh` script gives you
+the exact command you need to run according to your configuration, if you left default settings,
+it will look like so:
+
+    $ sudo rm -rf /opt/sandboxASkf
+
+You can now re-install it if you would like.
 
 ## Next Steps
 
