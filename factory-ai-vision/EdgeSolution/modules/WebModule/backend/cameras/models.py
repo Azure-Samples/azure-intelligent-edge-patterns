@@ -68,8 +68,6 @@ class Part(models.Model):
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
         try:
-            if update_fields is not None:
-                return
             update_fields = []
             instance.name_lower = str(instance.name).lower()
             update_fields.append('name_lower')
@@ -149,10 +147,8 @@ class Image(models.Model):
                 ])
                 self.save()
                 logger.info(f"Successfully save labels to {self.labels}")
-        except ValueError:
-            logger.exception("Set Annotation: Region Error")
-        except:
-            logger.exception("Unexpected Error")
+        except ValueError as e:
+            raise e
 
     def add_labels(self, left: float, top: float, width: float, height: float):
         try:
@@ -166,10 +162,8 @@ class Image(models.Model):
                 raise ValueError(
                     f"left + width:{left + width}, top + height:{top + height} must be less than 1")
             pass
-        except ValueError:
-            logger.exception("Add Annotation: Region Error")
-        except:
-            logger.exception("Unexpected Error")
+        except ValueError as e:
+            raise e
 
 
 class Annotation(models.Model):
@@ -227,7 +221,7 @@ class Setting(models.Model):
         """
         return tuple (is_trainer_valid, trainer)
         """
-        logger.info(f'validatiing {endpoint}, {training_key}')
+        logger.info(f'Validatiing {endpoint}, {training_key}')
         trainer = Setting._get_trainer_obj_static(
             endpoint=endpoint,
             training_key=training_key)
@@ -235,38 +229,12 @@ class Setting(models.Model):
         try:
             trainer.get_domains()
             is_trainer_valid = True
-        except:
+        except CustomVisionErrorException as e:
             trainer = None
+        except Exception:
+            raise
         finally:
-            logger.info(
-                f'is_trainer_valid: {is_trainer_valid}. trainer: {trainer}')
             return is_trainer_valid, trainer
-
-    def revalidate(self):
-        """
-        Create a client, try to get obj_detection_domain, return is task success
-        Update self.is_trainer_valid and return it's value
-        Update obj_detection_domain_id to '' if failed
-        : Success: True
-        : Failed:  False
-        """
-        is_trainer_valid, trainer = Setting._validate_static(
-            endpoint=self.endpoint,
-            training_key=self.training_key)
-        try:
-            if is_trainer_valid:
-                obj_detection_domain = next(domain for domain in trainer.get_domains(
-                ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
-                self.is_trainer_valid = True
-                self.obj_detection_domain_id = obj_detection_domain.id
-            else:
-                self.is_trainer_valid = False
-                self.obj_detection_domain_id = ''
-        except:
-            logger.exception('Setting.revalidate: Unexpected error')
-        finally:
-            self.save()
-            return self.is_trainer_valid
 
     def revalidate_and_get_trainer_obj(self):
         """
@@ -274,8 +242,9 @@ class Setting(models.Model):
         : Success: return CustimVisionClient object
         : Failed:  return None
         """
-        if self.revalidate():
-            trainer = self._get_trainer_obj()
+        is_trainer_valid, trainer = Setting._validate_static(
+            self.endpoint, self.training_key)
+        if is_trainer_valid:
             return trainer
         else:
             return None
@@ -284,14 +253,8 @@ class Setting(models.Model):
     def pre_save(sender, instance, update_fields, **kwargs):
         logger.info("Setting Presave")
         try:
-            logger.info(f"instance.id: {instance.id}")
-            logger.info(f"update fields: {update_fields}")
-
-            if update_fields is not None:
-                return
             logger.info(
                 f'Validating Trainer {instance.name} (CustomVisionClient)')
-
             trainer = Setting._get_trainer_obj_static(
                 training_key=instance.training_key,
                 endpoint=instance.endpoint)
@@ -302,11 +265,16 @@ class Setting(models.Model):
                 f'Validating Trainer {instance.name} (CustomVisionClient)... Pass')
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
-        except:
-            logger.exception(
-                "pre_save exception. Set is_trainer_valid to false and obj_detection_domain_id to ''")
+        except CustomVisionErrorException as e:
+            logger.error(
+                f"Setting Presave occur CustomVisionError:{e}")
+            logger.error(
+                "Set is_trainer_valid to false and obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
+        except Exception:
+            logger.exception("Setting Presave: Unexpected Error")
+            raise
         finally:
             logger.info("Setting Presave... End")
 
@@ -317,7 +285,7 @@ class Setting(models.Model):
         """
         trainer = self.revalidate_and_get_trainer_obj()
         logger.info("Creating obj detection project")
-        logger.info(f"trainer: {trainer}")
+        logger.info(f"Trainer: {trainer}")
         if not trainer:
             logger.info("Trainer is invalid thus cannot create project")
             return None
@@ -326,10 +294,13 @@ class Setting(models.Model):
                 name=project_name,
                 domain_id=self.obj_detection_domain_id)
             return project
-        except:
-            logger.exception(
-                "Endpoint + Training_Key can create client but cannot create project")
+        except CustomVisionErrorException as e:
+            logger.error(
+                f"Setting creating project occur CustomVisionError:{e}")
             return None
+        except Exception:
+            logger.exception("Setting Presave: Unexpected Error")
+            raise
 
     def delete_project(self, project_id: str):
         """
@@ -389,7 +360,6 @@ class Project(models.Model):
     def pre_save(sender, instance, update_fields, **kwargs):
         logger.info("Project pre_save")
         logger.info(f'Saving instance: {instance} {update_fields}')
-
         if update_fields is not None:
             return
         # if instance.id is not None:
@@ -401,27 +371,38 @@ class Project(models.Model):
             pass
         elif trainer and instance.customvision_project_id:
             # Endpoint and Training_key is valid, and trying to save with cv_project_id
-            # Probably Syncing
             logger.info(
                 f'Project CustomVision Project Id: {instance.customvision_project_id}')
-            logger.info('Assume Syncing')
             try:
                 cv_project_obj = trainer.get_project(
                     instance.customvision_project_id)
-            except:
+            except CustomVisionErrorException as e:
+                logger.error(e)
+                instance.customvision_project_id = ''
+            except Exception as e:
                 logger.exception("Unexpected error")
         elif trainer:
-            # Endpoint and Training_key is valid, and trying to save with no cv_project_id
-            name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
-            instance.customvision_project_name = name
+            # Endpoint and Training_key is valid, and trying to save without cv_project_id
+            logger.info("Setting project name")
+            try:
+                if not instance.customvision_project_name:
+                    raise ValueError("Use Default")
+                name = instance.customvision_project_name
+            except:
+                name = 'VisionOnEdge-' + datetime.datetime.utcnow().isoformat()
+                instance.customvision_project_name = name
+            logger.info(
+                f"Setting project name: {instance.customvision_project_name}")
 
             logger.info('Creating Project on Custom Vision')
             project = instance.setting.create_project(name)
-            logger.info(f'Got Custom Vision Project Id: {project.id}')
+            logger.info(
+                f'Got Custom Vision Project Id: {project.id}. Saving...')
             instance.customvision_project_id = project.id
         else:
-            logger.info('Has not set the key, Got DUMMY PRJ ID')
-            instance.customvision_project_id = 'DUMMY-PROJECT-ID'
+            # logger.info('Has not set the key, Got DUMMY PRJ ID')
+            # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
+            instance.customvision_project_id = ''
         logger.info("Project pre_save... End")
 
     @staticmethod
@@ -508,10 +489,6 @@ class Project(models.Model):
 
             self.train_try_counter += 1
             update_fields.append('train_try_counter')
-            # app_insight_on, app_insight_logger = get_app_insight_logger()
-            # if app_insight_on:
-            #    app_insight_logger.info(
-            #        f"Project: {self.customvision_project_name}. Train attempt count: {self.train_try_counter}")
 
             # Get CustomVisionClient
             trainer = self.setting.revalidate_and_get_trainer_obj()
@@ -537,21 +514,16 @@ class Project(models.Model):
             is_task_success = True
             return is_task_success
         except CustomVisionErrorException as e:
-            if app_insight_on:
-                app_insight_logger.exception(
-                    f'From Custom Vision: {e.message}')
-            else:
-                logger.error(
-                    f'From Custom Vision: {e.message}')
-            self.save(update_fields=update_fields)
+            logger.error(
+                f'From Custom Vision: {e.message}')
             raise e
         except:
-            self.save(update_fields=update_fields)
-            logger.exception('Something wrong while training project')
+            logger.exception('Unexpected error while Project.train_project')
+            raise
         finally:
             # App Insight
             if self.setting.is_collect_data:
-                from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor, get_app_insight_logger
+                from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor
                 logger.info("Sending Logs to App Insight")
                 part_monitor(len(Part.objects.filter(is_demo=False)))
                 img_monitor(len(Image.objects.all()))
@@ -561,12 +533,10 @@ class Project(models.Model):
 
     def export_iterationv3_2(self, iteration_id):
         setting_obj = self.setting
-
         url = setting_obj.endpoint+'customvision/v3.2/training/projects/' + \
             self.customvision_project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
         res = requests.post(url, '{body}', headers={
                             'Training-key': setting_obj.training_key})
-
         return res
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):

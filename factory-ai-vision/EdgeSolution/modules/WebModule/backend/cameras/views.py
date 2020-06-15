@@ -265,7 +265,7 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
         except IntegrityError as ie:
             raise serializers.ValidationError(detail={
                 'status': 'failed',
-                'log': ie})
+                'log': 'dataset with same name exists, please change another name'})
         except:
             logger.exception("Unexpected Error")
             raise serializers.ValidationError(detail={
@@ -277,10 +277,9 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
             foo = super().update(instance, validated_data)
             return foo
         except IntegrityError as ie:
-            logger.error("Exception")
             raise serializers.ValidationError(detail={
                 'status': 'failed',
-                'log': ie})
+                'log': 'dataset with same name exists, please change another name'})
         except:
             logger.exception("Unexpected Error")
             raise serializers.ValidationError(detail={
@@ -815,17 +814,28 @@ def _train(project_id):
 def train(request, project_id):
 
     is_demo = request.query_params.get('demo')
-    if is_demo and (is_demo.lower() == 'true'):
+    project_obj = Project.objects.get(pk=project_id)
+    parts = [p.name for p in project_obj.parts.all()]
+    rtsp = project_obj.camera.rtsp
+    download_uri = project_obj.download_uri
+
+    if is_demo and (is_demo.lower() == 'true') or project_obj.is_demo:
         logger.info('demo... bypass training process')
 
-        requests.get('http://'+inference_module_url()+'/update_cam',
-                     params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+        cam_is_demo = project_obj.camera.is_demo
+        # Camera
+        if cam_is_demo:
+            requests.get('http://'+inference_module_url()+'/update_cam',
+                         params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+        else:
+            rtsp = project_obj.camera.rtsp
+            requests.get('http://'+inference_module_url()+'/update_cam',
+                         params={'cam_type': 'rtsp', 'cam_source': rtsp})
+
         requests.get('http://'+inference_module_url() +
                      '/update_model', params={'model_dir': 'default_model_6parts'})
 
-        project_obj = Project.objects.get(pk=project_id)
-        parts = [p.name for p in project_obj.parts.all()]
-        logger.info('Update parts f{parts}')
+        logger.info(f'Update parts {parts}')
         requests.get('http://'+inference_module_url() +
                      '/update_parts', params={'parts': parts})
         requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
@@ -838,16 +848,11 @@ def train(request, project_id):
         # FIXME pass the new model info to inference server (willy implement)
         return JsonResponse({'status': 'ok'})
 
-    project_obj = Project.objects.get(pk=project_id)
     project_obj.upcreate_training_status(
         status='Status: preparing data (images and annotations)',
         log=''
     )
     logger.info('sleeping')
-
-    rtsp = project_obj.camera.rtsp
-    parts = [p.name for p in project_obj.parts.all()]
-    download_uri = project_obj.download_uri
 
     def _send(rtsp, parts, download_uri):
         logger.info(f'**** updaing cam to {rtsp}')
@@ -962,14 +967,22 @@ def list_projects(request, setting_id):
     Get the list of project at Custom Vision.
     """
     setting_obj = Setting.objects.get(pk=setting_id)
-    trainer = setting_obj.revalidate_and_get_trainer_obj()
+    trainer = setting_obj._get_trainer_obj()
 
-    rs = {}
-    project_list = trainer.get_projects()
-    for project in project_list:
-        rs[project.id] = project.name
-
-    return JsonResponse(rs)
+    try:
+        rs = {}
+        project_list = trainer.get_projects()
+        for project in project_list:
+            rs[project.id] = project.name
+        return JsonResponse(rs)
+    except CustomVisionErrorException as e:
+        return JsonResponse({'status': 'failed',
+                             'log': e.message},
+                            status=e.response.status_code)
+    except Exception as e:
+        return JsonResponse({'status': 'failed',
+                             'log': str(e)},
+                            status=401)
 
 
 @api_view()

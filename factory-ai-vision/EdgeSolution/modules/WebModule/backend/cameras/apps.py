@@ -102,18 +102,14 @@ class CameraConfig(AppConfig):
                     defaults={
                         'setting': default_setting,
                         'camera': demo_camera,
-                        'location': demo_location,
-                    }
-                )
+                        'location': demo_location, })
 
                 demo_train, created = Train.objects.update_or_create(
                     project=demo_project,
                     defaults={
                         'status': 'demo ok',
                         'log': 'demo log',
-                        'performance': 1,
-                    }
-                )
+                        'performance': 1, })
                 logger.info("Creating Demo... End")
 
             default_project, created = Project.objects.update_or_create(
