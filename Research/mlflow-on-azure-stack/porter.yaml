@@ -19,7 +19,7 @@ install:
   
   - exec:
       description: "Install mlflow"
-      command: 
+      command: |
 	wget https://raw.githubusercontent.com/NealAnalyticsLLC/azure-intelligent-edge-patterns/mlflow-on-azure-stack/Research/mlflow-on-azure-stack/tracking_server.yaml
         kubectl create namespace mlflow
 	kubectl apply -f ./tracking_server.yaml --namespace mlflow
