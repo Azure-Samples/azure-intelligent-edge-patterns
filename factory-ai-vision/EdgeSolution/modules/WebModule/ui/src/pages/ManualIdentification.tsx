@@ -39,16 +39,19 @@ const ManualIdentification: FC = () => {
   const partItems = useMemo<DropdownItemProps[]>(() => {
     if (parts.length === 0 || projectData.parts.length === 0) return [];
 
-    return projectData.parts.map((partId) => {
+    return projectData.parts.reduce((acc, partId) => {
       const part = parts.find((e) => e.id === partId);
 
-      return {
+      if (!part) return acc;
+
+      acc.push({
         header: part.name,
         content: {
           key: part.id,
         },
-      };
-    });
+      });
+      return acc;
+    }, []);
   }, [parts, projectData]);
 
   const [selectedPartItem, setSelectedPartItem] = useState<DropdownItemProps>(null);
