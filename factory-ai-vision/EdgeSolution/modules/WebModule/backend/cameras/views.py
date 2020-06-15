@@ -810,17 +810,28 @@ def _train(project_id):
 def train(request, project_id):
 
     is_demo = request.query_params.get('demo')
-    if is_demo and (is_demo.lower() == 'true'):
+    project_obj = Project.objects.get(pk=project_id)
+    parts = [p.name for p in project_obj.parts.all()]
+    rtsp = project_obj.camera.rtsp
+    download_uri = project_obj.download_uri
+
+    if is_demo and (is_demo.lower() == 'true') or project_obj.is_demo:
         logger.info('demo... bypass training process')
 
-        requests.get('http://'+inference_module_url()+'/update_cam',
-                     params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+        cam_is_demo = project_obj.camera.is_demo
+        # Camera
+        if cam_is_demo:
+            requests.get('http://'+inference_module_url()+'/update_cam',
+                         params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+        else:
+            rtsp = project_obj.camera.rtsp
+            requests.get('http://'+inference_module_url()+'/update_cam',
+                         params={'cam_type': 'rtsp', 'cam_source': rtsp})
+
         requests.get('http://'+inference_module_url() +
                      '/update_model', params={'model_dir': 'default_model_6parts'})
 
-        project_obj = Project.objects.get(pk=project_id)
-        parts = [p.name for p in project_obj.parts.all()]
-        logger.info('Update parts f{parts}')
+        logger.info(f'Update parts {parts}')
         requests.get('http://'+inference_module_url() +
                      '/update_parts', params={'parts': parts})
         requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
@@ -833,16 +844,11 @@ def train(request, project_id):
         # FIXME pass the new model info to inference server (willy implement)
         return JsonResponse({'status': 'ok'})
 
-    project_obj = Project.objects.get(pk=project_id)
     project_obj.upcreate_training_status(
         status='Status: preparing data (images and annotations)',
         log=''
     )
     logger.info('sleeping')
-
-    rtsp = project_obj.camera.rtsp
-    parts = [p.name for p in project_obj.parts.all()]
-    download_uri = project_obj.download_uri
 
     def _send(rtsp, parts, download_uri):
         logger.info(f'**** updaing cam to {rtsp}')
