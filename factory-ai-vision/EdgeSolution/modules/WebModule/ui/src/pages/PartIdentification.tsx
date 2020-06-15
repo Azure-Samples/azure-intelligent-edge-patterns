@@ -130,7 +130,6 @@ export const PartIdentification: React.FC = () => {
           setSelectedModuleItem={setSelectedCameraById}
           items={dropDownCameras}
           isMultiple={false}
-          isTestModel={isTestModel}
         />
         <ModuleSelector
           moduleName="parts"
@@ -267,8 +266,12 @@ function useDropdownItems<T>(
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const url =
+      moduleName === 'cameras' && isTestModel
+        ? `/api/${moduleName}/`
+        : `/api/${moduleName}/?is_demo=${Number(isTestModel)}`;
     setLoading(true);
-    Axios(`/api/${moduleName}/?is_demo=${Number(isTestModel)}`)
+    Axios(url)
       .then(({ data }) => {
         setDropDownItems(
           data.map((e) => ({
