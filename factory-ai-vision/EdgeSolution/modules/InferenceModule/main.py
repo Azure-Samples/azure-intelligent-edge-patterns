@@ -180,6 +180,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def start_session(self):
         def run(self):
+            send_counter = 0
             while True:
                 self.lock.acquire()
                 b, img = self.cam.read()
@@ -197,9 +198,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                     if True:
                         for prediction in self.last_prediction:
 
-                            if iot:
-                                iot.send_message(json.dumps(prediction))
-
                             tag = prediction['tagName']
                             if tag not in self.parts: continue
 
@@ -215,6 +213,13 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                                 if prediction['probability'] > self.confidence_max:
                                     detection = DETECTION_TYPE_SUCCESS
+                                    if iot:
+                                        send_counter += 1
+                                        # Modify here to change the threshold
+                                        if send_counter == 3:
+                                            iot.send_message_to_output(json.dumps(prediction), 'metrics')
+                                            send_counter = 0
+
                                 elif self.confidence_min <= prediction['probability'] <= self.confidence_max:
 
                                     if detection != DETECTION_TYPE_SUCCESS: detection = DETECTION_TYPE_UNIDENTIFIED
