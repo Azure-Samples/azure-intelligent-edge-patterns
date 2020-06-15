@@ -184,6 +184,8 @@ def export(request, project_id):
         success_rate = int(data['success_rate']*100)/100
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
+        is_gpu = data['is_gpu']
+        average_inference_time = data['average_inference_time']
         logger.info(
             f"success_rate: {success_rate}. inference_num: {inference_num}")
     except requests.exceptions.ConnectionError:
@@ -201,8 +203,8 @@ def export(request, project_id):
         'success_rate': success_rate,
         'inference_num': inference_num,
         'unidentified_num': unidentified_num,
-        'gpu': False,
-        'average_time': 33,
+        'gpu': is_gpu,
+        'average_time': average_inference_time,
     })
 
 # FIXME tmp workaround
