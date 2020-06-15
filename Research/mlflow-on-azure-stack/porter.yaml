@@ -1,0 +1,29 @@
+# This is the configuration for Porter
+
+name: MLflowInstaller
+version: 1.0
+description: "MLflow Installer"
+# TODO: update the registry to your own, e.g. myregistry/porter-mlflow:v1.0
+#tag: naedwebs/porter-mlflow:v1.0
+
+# Uncomment the line below to use a template Dockerfile for your invocation image
+dockerfile: Dockerfile.tmpl
+ 
+
+install:
+  - exec:
+      description: "Install mlflow"
+      command: ./helpers.sh
+      arguments:
+        - "install"
+      
+mixins:
+  - exec
+  - az 
+  
+
+uninstall:
+  - exec:
+      description: "Uninstall MLflow"
+      command: kubectl delete namespace mlflow
+
