@@ -963,14 +963,22 @@ def list_projects(request, setting_id):
     Get the list of project at Custom Vision.
     """
     setting_obj = Setting.objects.get(pk=setting_id)
-    trainer = setting_obj.revalidate_and_get_trainer_obj()
+    trainer = setting_obj._get_trainer_obj()
 
-    rs = {}
-    project_list = trainer.get_projects()
-    for project in project_list:
-        rs[project.id] = project.name
-
-    return JsonResponse(rs)
+    try:
+        rs = {}
+        project_list = trainer.get_projects()
+        for project in project_list:
+            rs[project.id] = project.name
+        return JsonResponse(rs)
+    except CustomVisionErrorException as e:
+        return JsonResponse({'status': 'failed',
+                             'log': e.message},
+                            status=e.response.status_code)
+    except Exception as e:
+        return JsonResponse({'status': 'failed',
+                             'log': str(e)},
+                            status=401)
 
 
 @api_view()
