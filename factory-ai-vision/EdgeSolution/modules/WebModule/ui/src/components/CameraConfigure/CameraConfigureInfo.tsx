@@ -91,12 +91,17 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
           <Flex column gap="gap.small">
             <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
           </Flex>
-          <ListItem title="Success Rate">
-            <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-              {`${inferenceMetrics.successRate}%`}
-            </Text>
-          </ListItem>
-          <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
+          <Grid columns={2} styles={{ rowGap: '20px' }}>
+            <ListItem title="Success Rate">
+              <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
+                {`${inferenceMetrics.successRate}%`}
+              </Text>
+            </ListItem>
+            <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>{`${
+              Math.round(inferenceMetrics.averageTime * 100) / 100
+            }/ms`}</ListItem>
+            <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
+          </Grid>
           <ListItem title="Unidentified Items">
             <Text styles={{ margin: '5px' }} size="large">
               {inferenceMetrics.unIdetifiedItems}

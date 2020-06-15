@@ -30,7 +30,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           key: null,
         },
       },
-      ...partItems.filter((e) => (e.content as any).key !== partId),
+      ...partItems.filter((e) => (e.content as { key: number }).key !== partId),
     ],
     [partId, partItems],
   );
@@ -85,14 +85,22 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
     <div
       style={{
         display: 'flex',
-        minHeight: '9em',
-        maxHeight: '30%',
+        minHeight: '13em',
+        maxHeight: '40%',
         justifyContent: 'center',
         padding: '1em',
       }}
     >
-      <div style={{ margin: '0.1em' }}>
-        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={100} height={100} />
+      <div
+        style={{
+          margin: '0.2em',
+          display: 'flex',
+          flexFlow: 'column',
+          minWidth: '14em',
+          justifyContent: 'space-around',
+        }}
+      >
+        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={200} height={150} />
       </div>
       <div
         style={{
@@ -100,7 +108,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           width: '40%',
           display: 'flex',
           flexFlow: 'column',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
         }}
       >
         <Text truncated>
@@ -145,7 +153,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           imageIndex={imageIndex}
           images={relabelImages}
           isRelabel={true}
-          trigger={<Button primary content="Identify" disabled={!isPartCorrect} />}
+          trigger={<Button primary content="Identify" />}
         />
       </div>
     </div>

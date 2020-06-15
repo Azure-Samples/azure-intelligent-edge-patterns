@@ -10,6 +10,8 @@ export type Project = {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
+    isGpu: boolean;
+    averageTime: number;
   };
   trainingMetrics: {
     prevConsequence: Consequence;
@@ -117,6 +119,8 @@ export type GetInferenceMetricsSuccessAction = {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
+    isGpu: boolean;
+    averageTime: number;
   };
 };
 

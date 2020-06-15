@@ -184,6 +184,8 @@ def export(request, project_id):
         success_rate = int(data['success_rate']*100)/100
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
+        is_gpu = data['is_gpu']
+        average_inference_time = data['average_inference_time']
         logger.info(
             f"success_rate: {success_rate}. inference_num: {inference_num}")
     except requests.exceptions.ConnectionError:
@@ -201,6 +203,8 @@ def export(request, project_id):
         'success_rate': success_rate,
         'inference_num': inference_num,
         'unidentified_num': unidentified_num,
+        'gpu': is_gpu,
+        'average_time': average_inference_time,
     })
 
 # FIXME tmp workaround
@@ -824,6 +828,8 @@ def train(request, project_id):
         logger.info('Update parts f{parts}')
         requests.get('http://'+inference_module_url() +
                      '/update_parts', params={'parts': parts})
+        requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
+            'confidence_min': 30, 'confidence_max': 30, 'max_images': 10})
 
         obj, created = project_obj.upcreate_training_status(
             status='ok',
@@ -840,12 +846,18 @@ def train(request, project_id):
     logger.info('sleeping')
 
     rtsp = project_obj.camera.rtsp
+    parts = [p.name for p in project_obj.parts.all()]
+    download_uri = project_obj.download_uri
 
-    def _send(rtsp):
+    def _send(rtsp, parts, download_uri):
         logger.info(f'**** updaing cam to {rtsp}')
         requests.get('http://'+inference_module_url()+'/update_cam',
                      params={'cam_type': 'rtsp', 'cam_source': rtsp})
-    threading.Thread(target=_send, args=(rtsp,)).start()
+        requests.get('http://'+inference_module_url() +
+                     '/update_model', params={'model_uri': download_uri})
+        requests.get('http://'+inference_module_url() +
+                     '/update_parts', params={'parts': parts})
+    threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
     return _train(project_id)
 
 
@@ -892,7 +904,7 @@ def upload_relabel_image(request):
     confidence = request.data['confidence']
     is_relabel = request.data['is_relabel']
 
-    parts = Part.objects.filter(name=part_name)
+    parts = Part.objects.filter(name=part_name, is_demo=False)
     if len(parts) == 0:
         logger.error(f'Unknown Part Name: {part_name}')
         return JsonResponse({'status': 'failed'})
