@@ -449,7 +449,7 @@ def video_feed():
                     #print(prediction['tagName'], prediction['probability'])
                     #print(onnx.last_upload_time, time.time())
                     tag = prediction['tagName']
-                    #if tag not in onnx.parts: continue
+                    if tag not in onnx.parts: continue
 
                     if onnx.has_aoi:
                         img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)
