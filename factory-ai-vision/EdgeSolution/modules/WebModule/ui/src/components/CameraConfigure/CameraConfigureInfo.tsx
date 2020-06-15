@@ -97,9 +97,9 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
                 {`${inferenceMetrics.successRate}%`}
               </Text>
             </ListItem>
-            <ListItem
-              title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}
-            >{`${inferenceMetrics.averageTime}/ms`}</ListItem>
+            <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>{`${
+              Math.round(inferenceMetrics.averageTime * 100) / 100
+            }/ms`}</ListItem>
             <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
           </Grid>
           <ListItem title="Unidentified Items">
