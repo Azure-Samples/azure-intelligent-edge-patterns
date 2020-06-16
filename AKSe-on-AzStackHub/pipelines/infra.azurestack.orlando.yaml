@@ -1,0 +1,33 @@
+name: $(BuildDefinitionName).$(DayOfYear)$(Rev:.r)
+
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: 'infra-azurestack-orlando-vg' # for stage Orlando
+
+stages:
+
+# Deploy AKS Engine
+- stage: aksengine_orlando
+  displayName: 'Deploy AKS Engine (Orlando)'
+  dependsOn: []
+  
+  pool:
+    name: $(agentPool)
+    vmImage: ubuntu-latest
+
+  variables: 
+  - group: 'infra-azurestack-orlando-vg' # environment specific variable group
+
+  jobs:
+  - template: templates/infra.azurestack.template.yaml
+    parameters: 
+      azureServiceConnection: '$(azureServiceConnection)' # azure subscription 
+      azureLocation: '$(location)' # Azure (Stack) Location
+      workingDirectory: 'src/tf/aksengine' # working dir
+      tfKey: 'orlando.tfstate' # state filename
+      tfAzureServiceConnection: '$(azureServiceConnection)'
+      tfVersion: '$(tfVersion)' # TF version

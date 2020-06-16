@@ -1,0 +1,87 @@
+name: $(BuildDefinitionName).$(DayOfYear)$(Rev:.r)
+
+trigger: none
+
+pool:
+  name: 'azurestack-orlando'
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: 'infra-azurestack-seattle-vg'
+- group: 'infra-azure-vg'
+
+jobs:
+- job: k8sconfig
+  displayName: 'Kubernetes Configuration'
+  steps:
+
+  - task: HelmInstaller@1
+    inputs:
+      helmVersionToInstall: 'latest' 
+
+  - task: KubectlInstaller@0
+    inputs:
+      kubectlVersion: 'latest'
+
+  - task: Bash@3
+    displayName: 'Bash - pre-config for helm'
+    inputs:
+      targetType: inline
+      script: |
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com
+        helm repo update
+
+        # -> has to go into a dedicated kubectl task
+        #kubectl create namespace cert-manager
+        #kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.0/cert-manager.crds.yaml
+
+  - task: HelmDeploy@0
+    displayName: 'Helm deploy - NGINX Ingress Controller'
+    inputs:
+      connectionType: 'Kubernetes Service Connection'
+      kubernetesServiceEndpoint: 'kubernetes-seattle-config'
+      command: upgrade
+      chartName: ingress-nginx/ingress-nginx
+      releaseName: ingress-nginx
+      overrideValues: ''
+      install: true
+      waitForExecution: false
+
+  - task: HelmDeploy@0
+    displayName: 'Helm deploy - cert-manager'
+    inputs:
+      connectionType: 'Kubernetes Service Connection'
+      kubernetesServiceEndpoint: 'kubernetes-seattle-config'
+      command: upgrade
+      chartName: jetstack/cert-manager
+      namespace: cert-manager
+      releaseName: cert-manager
+      arguments: '--version v0.15.0'
+      install: true
+      waitForExecution: false
+
+  - task: HelmDeploy@0
+    displayName: 'Helm deploy - Azure Monitoring Agent'
+    inputs:
+      connectionType: 'Kubernetes Service Connection'
+      kubernetesServiceEndpoint: 'kubernetes-seattle-config'
+      command: upgrade
+      chartName: incubator/azuremonitor-containers
+      releaseName: azuremonitor-containers
+      overrideValues: 'omsagent.secret.wsid=$(logAnalyticsWorkspaceId),omsagent.secret.key=$(logAnalyticsWorkspaceKey),omsagent.env.clusterName=$(kubernetesClusterName)'
+      install: true
+      waitForExecution: false
+
+  - task: HelmDeploy@0
+    displayName: 'Helm deploy - Application'
+    inputs:
+      connectionType: 'Kubernetes Service Connection'
+      kubernetesServiceEndpoint: 'kubernetes-seattle-config'
+      command: upgrade
+      chartName: incubator/azuremonitor-containers
+      releaseName: ratings-app
+      overrideValues: ''
+      install: true
+      waitForExecution: false
