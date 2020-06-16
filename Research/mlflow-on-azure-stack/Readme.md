@@ -2,6 +2,9 @@
 
 This module demonstrates how to create an MLflow environment in Kubernetes on Azure Stack
 
+## In Progress
+- packaging the steps in this Readme into a CNAB package that can be installed using Porter
+
 ## Prerequisites 
 - Access to an existing Kubernetes cluster
 - A kubeconfig file to connect to cluster
