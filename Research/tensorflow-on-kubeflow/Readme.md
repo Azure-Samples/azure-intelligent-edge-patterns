@@ -276,7 +276,6 @@ Apply it:
     persistentvolume/samba-share-volume created
     persistentvolumeclaim/samba-share-claim created
 
-
     $ kubectl get pvc
     NAME                STATUS   VOLUME               CAPACITY   ACCESS MODES   STORAGECLASS    AGE
     samba-share-claim   Bound    samba-share-volume   20Gi       RWX            local-storage   2m24s
@@ -288,6 +287,45 @@ Apply it:
     ...
 
 You should see the pv being `Bound`, and it is available for your applications.
+
+    $ kubectl describe pvc samba-share-claim
+    Name:          samba-share-claim
+    Namespace:     default
+    StorageClass:  local-storage
+    Status:        Bound
+    Volume:        samba-share-volume
+    Labels:        <none>
+    Annotations:   pv.kubernetes.io/bind-completed: yes
+                   pv.kubernetes.io/bound-by-controller: yes
+    Finalizers:    [kubernetes.io/pvc-protection]
+    Capacity:      20Gi
+    Access Modes:  RWX
+    VolumeMode:    Filesystem
+    Mounted By:    <none>
+    Events:        <none>
+
+And the volume itself marked as `HostPath`:
+
+    $ kubectl describe pv samba-share-volume
+    Name:            samba-share-volume
+    Labels:          type=local
+    Annotations:     pv.kubernetes.io/bound-by-controller: yes
+    Finalizers:      [kubernetes.io/pv-protection]
+    StorageClass:    local-storage
+    Status:          Bound
+    Claim:           default/samba-share-claim
+    Reclaim Policy:  Retain
+    Access Modes:    RWX
+    VolumeMode:      Filesystem
+    Capacity:        20Gi
+    Node Affinity:   <none>
+    Message:
+    Source:
+        Type:          HostPath (bare host directory volume)
+        Path:          /mnt/shares/kfbuffer
+        HostPathType:
+    Events:            <none>
+
 
 Now, from your script in the container you can write to that folder your serialized models during the intermediate
 steps. It is better to let the master node (with rank 0) to do the logging and serialization. And the master node
