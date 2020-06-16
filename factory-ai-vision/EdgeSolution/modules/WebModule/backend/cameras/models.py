@@ -479,7 +479,7 @@ class Project(models.Model):
             return
 
     def upcreate_training_status(self, status: str, log: str, performance: str = '{}'):
-        logger.info(f'Updating Training Status. Status: {status}. Log: {log}')
+        logger.info(f'Updating Training Status: ({status}. {log})')
         obj, created = Train.objects.update_or_create(
             project=self,
             defaults={
@@ -719,13 +719,15 @@ class Stream(object):
 
     def gen(self):
         self.status = 'running'
-        print('[INFO] start streaming with', self.rtsp, flush=True)
+        logger.info(f'start streaming with {self.rtsp}')
         self.cap = cv2.VideoCapture(self.rtsp)
         while self.status == 'running':
+            if not self.cap.isOpened():
+                raise ValueError("Cannot connect to rtsp")
+                break
             t, img = self.cap.read()
             # Need to add the video flag FIXME
             if t == False:
-                print('[INFO] restart cam ...', flush=True)
                 self.cap = cv2.VideoCapture(self.rtsp)
                 time.sleep(1)
                 continue
@@ -750,8 +752,10 @@ class Stream(object):
                 if prediction['probability'] > 0.25:
                     x1 = int(prediction['boundingBox']['left'] * width)
                     y1 = int(prediction['boundingBox']['top'] * height)
-                    x2 = x1 + int(prediction['boundingBox']['width'] * width)
-                    y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                    x2 = x1 + \
+                        int(prediction['boundingBox']['width'] * width)
+                    y2 = y1 + \
+                        int(prediction['boundingBox']['height'] * height)
                     img = cv2.rectangle(
                         img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                     img = cv2.putText(
