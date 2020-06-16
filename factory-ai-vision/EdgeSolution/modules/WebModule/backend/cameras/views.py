@@ -80,7 +80,6 @@ def update_train_status(project_id):
 
             iterations = trainer.get_iterations(customvision_project_id)
             if len(iterations) == 0:
-                logger.info('Status: preparing custom vision environment')
                 obj, created = project_obj.upcreate_training_status(
                     status='preparing',
                     log='Status : preparing custom vision environment'
@@ -93,7 +92,6 @@ def update_train_status(project_id):
 
             iteration = iterations[0]
             if iteration.exportable == False or iteration.status != 'Completed':
-                logger.info('Status: training')
                 obj, created = project_obj.upcreate_training_status(
                     status='training',
                     log='Status : training model'
@@ -105,7 +103,6 @@ def update_train_status(project_id):
             exports = trainer.get_exports(
                 customvision_project_id, iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
-                logger.info('Status: exporting model')
                 obj, created = project_obj.upcreate_training_status(
                     status='exporting',
                     log='Status : exporting model'
@@ -806,12 +803,10 @@ def _train(project_id):
         logger.info('Uploading images... Done')
 
         if not project_changed:
-            logger.info('Nothing changed. Not training')
             obj, created = project_obj.upcreate_training_status(
                 status='ok',
                 log='Status: Nothing changed. Not training')
         else:
-            logger.info('Project changed. Training...')
             obj, created = project_obj.upcreate_training_status(
                 status='ok',
                 log='Status: Project changed. Training...')
