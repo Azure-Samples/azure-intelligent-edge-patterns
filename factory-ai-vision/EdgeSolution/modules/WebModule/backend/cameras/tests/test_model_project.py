@@ -3,9 +3,11 @@ from cameras.models import Project, Setting, Camera, Location, Part
 from config import ENDPOINT, TRAINING_KEY
 from unittest.mock import patch
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
-
+import logging
 
 project_prefix = "UnitTest"
+
+logger = logging.getLogger(__name__)
 
 
 class ModelProjectTestCase(APITransactionTestCase):
@@ -23,18 +25,16 @@ class ModelProjectTestCase(APITransactionTestCase):
                                                      training_key='',
                                                      is_trainer_valid=False)
         for i in range(3):
-            with patch('requests.get') as mock_request:
-                mock_request.return_value.status_code = 200
-                demo_camera_obj = Camera.objects.create(name="demo_camera_{i}",
-                                                        rtsp="0",
-                                                        model_name="model{i}",
-                                                        area="{i*2},{i*3}",
-                                                        is_demo=True)
-                camera_obj = Camera.objects.create(name="camera_{i}",
-                                                   rtsp="0",
-                                                   model_name="model{i}",
-                                                   area="{i*2},{i*3}",
-                                                   is_demo=False)
+            demo_camera_obj = Camera.objects.create(name="demo_camera_{i}",
+                                                    rtsp="0",
+                                                    model_name="model{i}",
+                                                    area="{i*2},{i*3}",
+                                                    is_demo=True)
+            camera_obj = Camera.objects.create(name="camera_{i}",
+                                               rtsp="0",
+                                               model_name="model{i}",
+                                               area="{i*2},{i*3}",
+                                               is_demo=False)
 
             demo_location_obj = Location.objects.create(name=f"location_{i}",
                                                         description=f"description_{i}",
@@ -71,7 +71,7 @@ class ModelProjectTestCase(APITransactionTestCase):
             is_demo=True).count(), self.exist_num)
 
     def test_create_1(self):
-        """invalid setting should lead to DUMMY-PROJECT-ID
+        """invalid setting -> customvision_id = ''
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='invalid_setting').first(),
@@ -86,8 +86,12 @@ class ModelProjectTestCase(APITransactionTestCase):
         self.assertEqual(project_obj.customvision_project_id, '')
 
     def test_create_2(self):
-        """valid setting will create a project on customvision
+        """valid setting will not create project on customvision
+        will wait until train for the first time
         """
+        trainer = CustomVisionTrainingClient(
+            api_key=TRAINING_KEY, endpoint=ENDPOINT)
+        project_count = len(trainer.get_projects())
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
             camera=Camera.objects.filter(name='demo_camera_1').first(),
@@ -96,11 +100,13 @@ class ModelProjectTestCase(APITransactionTestCase):
             is_demo=False
         )
 
-        self.assertFalse(project_obj.customvision_project_id == '')
+        project_count_after = len(trainer.get_projects())
+        self.assertEqual(project_obj.customvision_project_id, '')
+        self.assertEqual(project_count, project_count_after)
 
     def test_create_3(self):
         """valid setting with wrong customvision_project_id
-        This state will not occur.
+        This state should not occur often...
         Set the customvision_project_id = ''
         Will not create project on customvision
         """
@@ -116,6 +122,24 @@ class ModelProjectTestCase(APITransactionTestCase):
             is_demo=False)
 
         self.assertTrue(project_obj.customvision_project_id == '')
+
+    def test_create_project(self):
+        """create project with a valid setting.
+        name should start with prefix so tear down will delete the project from custom vision
+        """
+        project_obj = Project.objects.create(
+            setting=Setting.objects.filter(name='valid_setting').first(),
+            camera=Camera.objects.filter(name='demo_camera_1').first(),
+            location=Location.objects.filter(name='demo_location_1').first(),
+            is_demo=False,
+            customvision_project_id='56cannotdie',
+            customvision_project_name=f'{project_prefix}-test_update_1'
+        )
+        # Project already created
+        project_obj.save()
+        self.assertTrue(project_obj.customvision_project_id == '')
+        project_obj.create_project()
+        self.assertFalse(project_obj.customvision_project_id == '')
 
     def test_update_1(self):
         """
@@ -136,6 +160,7 @@ class ModelProjectTestCase(APITransactionTestCase):
 
     @classmethod
     def tearDownClass(self):
+        logger.info("Deleting Projects on CustomVision")
         trainer = CustomVisionTrainingClient(
             api_key=TRAINING_KEY, endpoint=ENDPOINT)
         projects = trainer.get_projects()
