@@ -73,23 +73,26 @@ def update_train_status(project_id):
         camera_id = project_obj.camera_id
         customvision_project_id = project_obj.customvision_project_id
         camera = Camera.objects.get(pk=camera_id)
-
+        wait_prepare = 0
+        # If exceed, this project probably not going to be trained
+        max_wait_prepare = 60
         while True:
             time.sleep(1)
 
             iterations = trainer.get_iterations(customvision_project_id)
             if len(iterations) == 0:
-                logger.info('Status: preparing custom vision environment')
                 obj, created = project_obj.upcreate_training_status(
                     status='preparing',
                     log='Status : preparing custom vision environment'
                 )
+                wait_prepare += 1
+                if wait_prepare > max_wait_prepare:
+                    break
                 continue
                 # return JsonResponse({'status': 'waiting training'})
 
             iteration = iterations[0]
             if iteration.exportable == False or iteration.status != 'Completed':
-                logger.info('Status: training')
                 obj, created = project_obj.upcreate_training_status(
                     status='training',
                     log='Status : training model'
@@ -101,7 +104,6 @@ def update_train_status(project_id):
             exports = trainer.get_exports(
                 customvision_project_id, iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
-                logger.info('Status: exporting model')
                 obj, created = project_obj.upcreate_training_status(
                     status='exporting',
                     log='Status : exporting model'
@@ -188,13 +190,28 @@ def export(request, project_id):
         average_inference_time = data['average_inference_time']
         logger.info(
             f"success_rate: {success_rate}. inference_num: {inference_num}")
+#         return JsonResponse({
+#             'status': train_obj.status,
+#             'log': train_obj.log,
+#             'download_uri': project_obj.download_uri,
+#             'success_rate': success_rate,
+#             'inference_num': inference_num,
+#             'unidentified_num': unidentified_num,
+#         })
     except requests.exceptions.ConnectionError:
         logger.error(
             f"Export failed. Inference module url: {inference_module_url()} unreachable")
+        return JsonResponse({
+            'status': 'failed',
+            'log': f'Export failed. Inference module url: {inference_module_url()} unreachable',
+        }, status=503)
     except:
         # TODO: return other json response if we can determine if inference is alive
         logger.exception("Unexpected error")
-        # pass
+        return JsonResponse({
+            'status': 'failed',
+            'log': 'Unexpected error',
+        }, status=500)
 
     return JsonResponse({
         'status': train_obj.status,
@@ -601,6 +618,15 @@ def _train(project_id):
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
+    # Invalid Endpoint + Training Key
+    if not trainer:
+        obj, created = project_obj.upcreate_training_status(
+            status='failed',
+            log='Status: Training key or Endpoint is invalid. Please change the settings')
+        return JsonResponse({'status': 'failed',
+                             'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                            status=503)
+
     project_obj.upcreate_training_status(
         status='Status: preparing data (images and annotations)',
         log=''
@@ -609,8 +635,6 @@ def _train(project_id):
     project_obj.dequeue_iterations()
 
     try:
-        if not trainer:
-            raise ValueError('Please input valid training_key and namespace')
         count = 10
         while count > 0:
             part_ids = [part.id for part in project_obj.parts.all()]
@@ -620,14 +644,26 @@ def _train(project_id):
             time.sleep(1)
             count -= 1
 
-        obj, created = project_obj.upcreate_training_status(
-            status='sending',
-            log='Status : sending data (images and annotations)')
-
         logger.info(f'Project id: {project_obj.id}')
         logger.info(f'Part ids: {part_ids}')
-        tags = trainer.get_tags(customvision_project_id)
+        try:
+            trainer.get_project(customvision_project_id)
+            obj, created = project_obj.upcreate_training_status(
+                status='preparing',
+                log=f'status : Project found on CustomVision. Name: {project_obj.customvision_project_name}')
+        except:
+            project_obj.create_project()
+            obj, created = project_obj.upcreate_training_status(
+                status='preparing',
+                log=f'status : Project created on CustomVision. Name: {project_obj.customvision_project_name}')
+            logger.info(
+                f"Project created on CustomVision. Id {project_obj.customvision_project_id}. Name: {project_obj.customvision_project_name}")
+            customvision_project_id = project_obj.customvision_project_id
 
+        obj, created = project_obj.upcreate_training_status(
+            status='sending',
+            log='status : sending data (images and annotations)')
+        tags = trainer.get_tags(customvision_project_id)
         tag_dict = {}
         tag_dict_local = {}
         project_partnames = {}
@@ -779,26 +815,34 @@ def _train(project_id):
                 img_obj.save()
         logger.info('Uploading images... Done')
 
-        try:
-            if not project_changed:
-                logger.info('Nothing changed. Not training')
-                obj, created = project_obj.upcreate_training_status(
-                    status='ok',
-                    log='Status: Nothing changed. Not training')
-            else:
-                logger.info('Project changed. Training...')
-                project_obj.train_project()
+        if not project_changed:
+            obj, created = project_obj.upcreate_training_status(
+                status='ok',
+                log='Status: Nothing changed. Not training')
+        else:
+            obj, created = project_obj.upcreate_training_status(
+                status='ok',
+                log='Status: Project changed. Training...')
+            project_obj.train_project()
+        update_train_status(project_id)
+        return JsonResponse({'status': 'ok'})
 
-        except CustomVisionErrorException as e:
-            logger.info(f'CustomVision Error: {e}')
+    except CustomVisionErrorException as e:
+        logger.error(f'CustomVisionErrorException: {e}')
+        if e.message == "Operation returned an invalid status code 'Access Denied'":
+            obj, created = project_obj.upcreate_training_status(
+                status='failed',
+                log='Training key or Endpoint is invalid. Please change the settings')
+            return JsonResponse({'status': 'failed',
+                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                                status=503)
+        else:
             obj, created = project_obj.upcreate_training_status(
                 status='failed',
                 log=e.message)
             return JsonResponse({'status': 'failed',
                                  'log': e.message},
                                 status=e.response.status_code)
-        update_train_status(project_id)
-        return JsonResponse({'status': 'ok'})
 
     except Exception as e:
         # TODO: Remove in production
@@ -856,7 +900,7 @@ def train(request, project_id):
     logger.info('sleeping')
 
     def _send(rtsp, parts, download_uri):
-        logger.info(f'**** updaing cam to {rtsp}')
+        logger.info(f'**** updating cam to {rtsp}')
         requests.get('http://'+inference_module_url()+'/update_cam',
                      params={'cam_type': 'rtsp', 'cam_source': rtsp})
         requests.get('http://'+inference_module_url() +
@@ -977,13 +1021,18 @@ def list_projects(request, setting_id):
             rs[project.id] = project.name
         return JsonResponse(rs)
     except CustomVisionErrorException as e:
-        return JsonResponse({'status': 'failed',
-                             'log': e.message},
-                            status=e.response.status_code)
+        if e.message == "Operation returned an invalid status code 'Access Denied'":
+            return JsonResponse({'status': 'failed',
+                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                                status=503)
+        else:
+            return JsonResponse({'status': 'failed',
+                                 'log': e.message},
+                                status=e.response.status_code)
     except Exception as e:
         return JsonResponse({'status': 'failed',
                              'log': str(e)},
-                            status=401)
+                            status=500)
 
 
 @api_view()
@@ -1053,7 +1102,7 @@ def pull_cv_project(request, project_id):
         logger.info(f"Pulled {counter} Parts")
         logger.info("Pulling Parts... End")
 
-        # Partial
+        # Partial Download
         if is_partial:
             exporting_task_obj = Task.objects.create(
                 task_type='export_iteration', status='init', log='Just Started', project=project_obj)

@@ -25,7 +25,6 @@ from azure.iot.device import IoTHubModuleClient
 from azure.iot.device import IoTHubModuleClient
 from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
 
-
 try:
     iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
 except:
@@ -267,7 +266,14 @@ class Setting(models.Model):
             instance.obj_detection_domain_id = obj_detection_domain.id
         except CustomVisionErrorException as e:
             logger.error(
-                f"Setting Presave occur CustomVisionError:{e}")
+                f"Setting Presave occur CustomVisionError: {e}")
+            logger.error(
+                "Set is_trainer_valid to false and obj_detection_domain_id to ''")
+            instance.is_trainer_valid = False
+            instance.obj_detection_domain_id = ''
+        except KeyError as e:
+            logger.error(
+                f"Setting Presave occur KeyError: {e}")
             logger.error(
                 "Set is_trainer_valid to false and obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
@@ -327,8 +333,11 @@ class Camera(models.Model):
     def post_save(sender, instance, update_fields, **kwargs):
         if len(instance.area) > 1:
             logger.info('Sending new AOI to Inference Module...')
-            requests.get('http://'+inference_module_url()+'/update_cam', params={
-                         'cam_type': 'rtsp', 'cam_source': instance.rtsp, 'aoi': instance.area})
+            try:
+                requests.get('http://'+inference_module_url()+'/update_cam', params={
+                    'cam_type': 'rtsp', 'cam_source': instance.rtsp, 'aoi': instance.area})
+            except:
+                logger.error("Request failed")
 
 
 post_save.connect(Camera.post_save, Camera, dispatch_uid='Camera_post')
@@ -372,12 +381,14 @@ class Project(models.Model):
         elif trainer and instance.customvision_project_id:
             # Endpoint and Training_key is valid, and trying to save with cv_project_id
             logger.info(
-                f'Project CustomVision Project Id: {instance.customvision_project_id}')
+                f'Project CustomVision Id: {instance.customvision_project_id}')
             try:
                 cv_project_obj = trainer.get_project(
                     instance.customvision_project_id)
             except CustomVisionErrorException as e:
                 logger.error(e)
+                logger.error(
+                    f"Project {instance.customvision_project_id} does not belong to Training Key + Endpoint pair. Set to ''")
                 instance.customvision_project_id = ''
             except Exception as e:
                 logger.exception("Unexpected error")
@@ -394,11 +405,11 @@ class Project(models.Model):
             logger.info(
                 f"Setting project name: {instance.customvision_project_name}")
 
-            logger.info('Creating Project on Custom Vision')
-            project = instance.setting.create_project(name)
-            logger.info(
-                f'Got Custom Vision Project Id: {project.id}. Saving...')
-            instance.customvision_project_id = project.id
+            #logger.info('Creating Project on Custom Vision')
+            #project = instance.setting.create_project(name)
+            # logger.info(
+            #    f'Got Custom Vision Project Id: {project.id}. Saving...')
+            #instance.customvision_project_id = project.id
         else:
             # logger.info('Has not set the key, Got DUMMY PRJ ID')
             # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
@@ -461,11 +472,14 @@ class Project(models.Model):
                 # TODO delete train in Train Model
                 trainer.delete_iteration(
                     self.customvision_project_id, iterations[-1].as_dict()['id'])
+        except CustomVisionErrorException as e:
+            logger.error(e)
         except:
             logger.exception('dequeue_iteration error')
             return
 
     def upcreate_training_status(self, status: str, log: str, performance: str = '{}'):
+        logger.info(f'Updating Training Status: ({status}. {log})')
         obj, created = Train.objects.update_or_create(
             project=self,
             defaults={
@@ -474,6 +488,32 @@ class Project(models.Model):
                 'performance': performance}
         )
         return obj, created
+
+    def create_project(self):
+        trainer = self.setting.revalidate_and_get_trainer_obj()
+        logger.info("Creating obj detection project")
+        if not trainer:
+            logger.info(
+                "Training key + Endpoint is invalid thus cannot create project")
+            return None
+        try:
+            if not self.customvision_project_name:
+                self.customvision_project_name = 'VisionOnEdge-' + \
+                    datetime.datetime.utcnow().isoformat()
+            project = trainer.create_project(
+                name=self.customvision_project_name,
+                domain_id=self.setting.obj_detection_domain_id)
+            self.customvision_project_id = project.id
+            update_fields = ['customvision_project_id',
+                             'customvision_project_name']
+            self.save(update_fields=update_fields)
+        except CustomVisionErrorException as e:
+            logger.error(
+                f"Project create_project occur CustomVisionErrorException:{e}")
+            raise e
+        except Exception as e:
+            logger.exception("Project create_project: Unexpected Error")
+            raise e
 
     def train_project(self):
         """
@@ -517,9 +557,9 @@ class Project(models.Model):
             logger.error(
                 f'From Custom Vision: {e.message}')
             raise e
-        except:
+        except Exception as e:
             logger.exception('Unexpected error while Project.train_project')
-            raise
+            raise e
         finally:
             # App Insight
             if self.setting.is_collect_data:
@@ -563,9 +603,8 @@ class Task(models.Model):
         def _export_worker(self):
             project_obj = self.project
             trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-            camera_id = project_obj.camera_id
             customvision_project_id = project_obj.customvision_project_id
-            camera = Camera.objects.get(pk=camera_id)
+            camera = project_obj.camera
             while True:
                 time.sleep(1)
                 iterations = trainer.get_iterations(customvision_project_id)
@@ -680,13 +719,15 @@ class Stream(object):
 
     def gen(self):
         self.status = 'running'
-        print('[INFO] start streaming with', self.rtsp, flush=True)
+        logger.info(f'start streaming with {self.rtsp}')
         self.cap = cv2.VideoCapture(self.rtsp)
         while self.status == 'running':
+            if not self.cap.isOpened():
+                raise ValueError("Cannot connect to rtsp")
+                break
             t, img = self.cap.read()
             # Need to add the video flag FIXME
             if t == False:
-                print('[INFO] restart cam ...', flush=True)
                 self.cap = cv2.VideoCapture(self.rtsp)
                 time.sleep(1)
                 continue
@@ -711,8 +752,10 @@ class Stream(object):
                 if prediction['probability'] > 0.25:
                     x1 = int(prediction['boundingBox']['left'] * width)
                     y1 = int(prediction['boundingBox']['top'] * height)
-                    x2 = x1 + int(prediction['boundingBox']['width'] * width)
-                    y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                    x2 = x1 + \
+                        int(prediction['boundingBox']['width'] * width)
+                    y2 = y1 + \
+                        int(prediction['boundingBox']['height'] * height)
                     img = cv2.rectangle(
                         img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                     img = cv2.putText(
