@@ -267,7 +267,14 @@ class Setting(models.Model):
             instance.obj_detection_domain_id = obj_detection_domain.id
         except CustomVisionErrorException as e:
             logger.error(
-                f"Setting Presave occur CustomVisionError:{e}")
+                f"Setting Presave occur CustomVisionError: {e}")
+            logger.error(
+                "Set is_trainer_valid to false and obj_detection_domain_id to ''")
+            instance.is_trainer_valid = False
+            instance.obj_detection_domain_id = ''
+        except KeyError as e:
+            logger.error(
+                f"Setting Presave occur KeyError: {e}")
             logger.error(
                 "Set is_trainer_valid to false and obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
