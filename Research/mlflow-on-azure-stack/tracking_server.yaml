@@ -36,10 +36,7 @@ spec:
       volumes:
       - name: mlruns
         persistentVolumeClaim:
-          claimName: mlruns-pvc        
-      imagePullSecrets:
-        - name: regcred
-     
+          claimName: mlruns-pvc     
 ---
 kind: Service
 apiVersion: v1
