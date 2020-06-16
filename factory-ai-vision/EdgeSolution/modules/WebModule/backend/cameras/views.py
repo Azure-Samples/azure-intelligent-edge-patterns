@@ -74,6 +74,7 @@ def update_train_status(project_id):
         customvision_project_id = project_obj.customvision_project_id
         camera = Camera.objects.get(pk=camera_id)
         wait_prepare = 0
+        # If exceed, this project probably not going to be trained
         max_wait_prepare = 60
         while True:
             time.sleep(1)
@@ -1088,7 +1089,7 @@ def pull_cv_project(request, project_id):
         logger.info(f"Pulled {counter} Parts")
         logger.info("Pulling Parts... End")
 
-        # Partial
+        # Partial Download
         if is_partial:
             exporting_task_obj = Task.objects.create(
                 task_type='export_iteration', status='init', log='Just Started', project=project_obj)
