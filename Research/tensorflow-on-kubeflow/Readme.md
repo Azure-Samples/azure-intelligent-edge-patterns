@@ -301,7 +301,10 @@ You should see the pv being `Bound`, and it is available for your applications.
     Capacity:      20Gi
     Access Modes:  RWX
     VolumeMode:    Filesystem
-    Mounted By:    <none>
+    Mounted By:    dist-mnist-for-e2e-test-demo-ps-0
+                   dist-mnist-for-e2e-test-demo-worker-0
+                   dist-mnist-for-e2e-test-demo-worker-1
+                   dist-mnist-for-e2e-test-demo-worker-2
     Events:        <none>
 
 And the volume itself marked as `HostPath`:
