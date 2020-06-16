@@ -32,7 +32,7 @@ spec:
         - containerPort: 5000
         volumeMounts:
         - name: mlruns
-          mountPath: /app/mlruns
+          mountPath: /app/storage
       volumes:
       - name: mlruns
         persistentVolumeClaim:
