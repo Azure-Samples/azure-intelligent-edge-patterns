@@ -12,6 +12,13 @@ spec:
           containers:
             - name: tensorflow
               image: kubeflow/tf-dist-mnist-test:1.0
+          volumeMounts:
+            - mountPath: "/tmp/mnist-data"
+              name: samba-share-volume2
+          volumes:
+            - name: samba-share-volume2
+              persistentVolumeClaim:
+                claimName: samba-share-claim
     Worker:
       replicas: 3
       restartPolicy: OnFailure
@@ -20,3 +27,11 @@ spec:
           containers:
             - name: tensorflow
               image: kubeflow/tf-dist-mnist-test:1.0
+          volumeMounts:
+            - mountPath: "/tmp/mnist-data"
+              name: samba-share-volume2
+          volumes:
+            - name: samba-share-volume2
+              persistentVolumeClaim:
+                claimName: samba-share-claim
+                

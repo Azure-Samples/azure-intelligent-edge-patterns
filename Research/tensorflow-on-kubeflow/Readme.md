@@ -105,10 +105,21 @@ To run a TFJob:
 
     $ kubectl create -f tf_job_mnist-e2e-test.yaml
 
-You should see the pods being initialized, then running, and, finally, getting to status `Completed`:
+You should see the pods being initialized:
+
+    $ kubectl get pods
+    NAME                                     READY   STATUS              RESTARTS   AGE
+    ...
+    dist-mnist-for-e2e-test-demo-ps-0        0/1     ContainerCreating   0          23s
+    dist-mnist-for-e2e-test-demo-worker-0    0/1     ContainerCreating   0          23s
+    dist-mnist-for-e2e-test-demo-worker-1    0/1     ContainerCreating   0          23s
+    dist-mnist-for-e2e-test-demo-worker-2    0/1     ContainerCreating   0          23s
+
+Then pods will be running, and, finally, getting to status `Completed`:
 
     $ kubeclt get pods
     NAME                                    READY   STATUS             RESTARTS   AGE
+    ...
     dist-mnist-for-e2e-test-demo-worker-0     0/1     Completed          0          9m21s
     dist-mnist-for-e2e-test-demo-worker-1     0/1     Completed          0          9m21s
     dist-mnist-for-e2e-test-demo-worker-2     0/1     Completed          0          9m21s
@@ -161,7 +172,7 @@ What is worth pointing out is that the nodes are being assigned individual indic
 
 If you would like to save the results of model training, you can do so from you scripts
 using the Kubernetes volumes you mount. However, on Azure Stack you do not have `azurefile`
-available yet, so you can use a network storage instead.
+available yet, but there are many other options, e.g. you can use a network storage.
 
 You can follow the [Installing Network Storage Server](installing_network_storage.md). But
 usually it is better to ask your Azure Stack administrator to create a Samba server for you.
@@ -175,6 +186,7 @@ On the client side, if you have to do it yourself, install a Samba client:
 Create a folder for mounting:
 
     $ sudo mkdir /mnt/shares
+    $ sudo chown azureuser:azureuser /mnt/shares
 
 Put your share drive information to `/etc/samba`:
 
@@ -191,6 +203,8 @@ Define the mount in your `fstab` file, pointing to your .sbmabcreds file and the
     ...
     //12.34.259.89/sambauser1        /mnt/shares     cifs    rw,uid=azureuser,guest,noperm,credentials=/etc/samba/.sambacreds        0 0
     ...
+
+    $ sudo mount /mnt/shares
 
 Verify the mounting, you should see your server's ip and Samba user:
 
@@ -213,38 +227,72 @@ On the other:
 You would need to repeat the same installation process on all Kubernetes nodes, because
 the pods could be instantiated anywhere and will try to access the local storage there.
 
-## Creating pvc and pv
+## Creating storage class, pv, and pvc
 
-Create a .yaml with pv and pvc definitions pointing to the created shared folder:
+Create a .yaml with sc/pv/pvc definitions pointing to the created shared folder:
 
-    apiVersion: v1
-    kind: PersistentVolume
-    metadata:
-      name: tfevent-volume
-      labels:
-        type: local-storage
-        app: tfjob
-    spec:
-      capacity:
-        storage: 10Gi
-      #storageClassName: standard
-      storageClassName: local-storage
-      accessModes:
-        - ReadWriteMany
-      hostPath:
-        path: /mnt/shares/kfbuffer
+```
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+#reclaimPolicy: Retain
+#volumeBindingMode: WaitForFirstConsumer
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: samba-share-volume
+  labels:
+    type: local
+    app: tfjob
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/shares/kfbuffer"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: samba-share-claim
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+```
 
-You can now see the pv being `Bound`:
-    
-    $ kubectl -n kubeflow get pv
-    NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                                      STORAGECLASS    REASON   AGE
+Apply it:
+
+    $ kubectl create -f persistence.yaml
+    storageclass.storage.k8s.io/local-storage created
+    persistentvolume/samba-share-volume created
+    persistentvolumeclaim/samba-share-claim created
+
+
+    $ kubectl get pvc
+    NAME                STATUS   VOLUME               CAPACITY   ACCESS MODES   STORAGECLASS    AGE
+    samba-share-claim   Bound    samba-share-volume   20Gi       RWX            local-storage   2m24s
+
+    $ kubectl get pv
+    NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                   STORAGECLASS    REASON   AGE
     ...
-    tfevent-volume                             10Gi       RWX            Retain           Bound       default/local-storage                      local-storage            3m54s
+    samba-share-volume                         20Gi       RWX            Retain           Bound    default/samba-share-claim               local-storage            2m41s
     ...
+
+You should see the pv being `Bound`, and it is available for your applications.
 
 Now, from your script in the container you can write to that folder your serialized models during the intermediate
 steps. It is better to let the master node (with rank 0) to do the logging and serialization. And the master node
 should do the deserialization if needed.
+See [save_and_load.ipynb](https://github.com/tensorflow/docs/blob/master/site/en/tutorials/distribute/save_and_load.ipynb) example notebook.
 
 # Links
 
