@@ -48,6 +48,8 @@ export const initialState: State = {
       successRate: null,
       successfulInferences: null,
       unIdetifiedItems: null,
+      isGpu: false,
+      averageTime: null,
     },
     status: Status.None,
     error: null,

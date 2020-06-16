@@ -96,10 +96,11 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           margin: '0.2em',
           display: 'flex',
           flexFlow: 'column',
+          minWidth: '14em',
           justifyContent: 'space-around',
         }}
       >
-        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={150} height={150} />
+        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={200} height={150} />
       </div>
       <div
         style={{

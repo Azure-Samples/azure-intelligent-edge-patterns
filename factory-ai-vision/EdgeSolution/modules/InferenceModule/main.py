@@ -80,8 +80,11 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.has_aoi = False
         self.aoi_info = None
+        # Part that we want to detect
         self.parts = []
-        #json.loads("{\"useAOI\":true,\"AOIs\":[{\"x1\":100,\"y1\":216.36363636363637,\"x2\":614.909090909091,\"y2\":1762.181818181818}]}")['AOIs'][0]
+
+        self.is_gpu = (onnxruntime.get_device() == 'GPU')
+        self.average_inference_time = 0
 
 
     def restart_cam(self):
@@ -168,12 +171,16 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         prediction, inf_time = self.model.predict_image(image)
         self.lock.release()
 
+        inf_time_ms = inf_time * 1000
+        self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
+
         return prediction
 
 
 
     def start_session(self):
         def run(self):
+            send_counter = 0
             while True:
                 self.lock.acquire()
                 b, img = self.cam.read()
@@ -189,10 +196,21 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                     detection = DETECTION_TYPE_NOTHING
                     if True:
-                        for prediction in self.last_prediction:
+                        if iot:
+                            send_counter += 1
+                            # Modify here to change the threshold
+                            if send_counter == 200:
+                                iot.send_message_to_output(json.dumps(self.last_predictions), 'metrics')
+                                send_counter = 0
+                        else:
+                            send_counter += 1
+                            # Modify here to change the threshold
+                            if send_counter == 200:
+                                print(json.dumps(self.last_prediction), 'metrics')
+                                send_counter = 0
+                            pass
 
-                            if iot:
-                                iot.send_message(json.dumps(prediction))
+                        for prediction in self.last_prediction:
 
                             tag = prediction['tagName']
                             if tag not in self.parts: continue
@@ -209,6 +227,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                                 if prediction['probability'] > self.confidence_max:
                                     detection = DETECTION_TYPE_SUCCESS
+
                                 elif self.confidence_min <= prediction['probability'] <= self.confidence_max:
 
                                     if detection != DETECTION_TYPE_SUCCESS: detection = DETECTION_TYPE_UNIDENTIFIED
@@ -299,14 +318,19 @@ def metrics():
     inference_num = onnx.detection_success_num
     unidentified_num = onnx.detection_unidentified_num
     total = onnx.detection_total
+    is_gpu = onnx.is_gpu
+    average_inference_time = onnx.average_inference_time
     if total == 0:
         success_rate = 0
     else:
-        success_rate = inference_num * 100 / total 
+        success_rate = inference_num * 100 / total
     return json.dumps({
         'success_rate': success_rate,
-        'inference_num': inference_num, 
-        'unidentified_num': unidentified_num})
+        'inference_num': inference_num,
+        'unidentified_num': unidentified_num,
+        'is_gpu': is_gpu,
+        'average_inference_time': average_inference_time,
+        })
 
 @app.route('/update_retrain_parameters')
 def update_retrain_parameters():
@@ -433,7 +457,7 @@ def video_feed():
                     #print(prediction['tagName'], prediction['probability'])
                     #print(onnx.last_upload_time, time.time())
                     tag = prediction['tagName']
-                    #if tag not in onnx.parts: continue
+                    if tag not in onnx.parts: continue
 
                     if onnx.has_aoi:
                         img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)

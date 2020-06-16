@@ -186,16 +186,18 @@ def export(request, project_id):
         success_rate = int(data['success_rate']*100)/100
         inference_num = data['inference_num']
         unidentified_num = data['unidentified_num']
+        is_gpu = data['is_gpu']
+        average_inference_time = data['average_inference_time']
         logger.info(
             f"success_rate: {success_rate}. inference_num: {inference_num}")
-        return JsonResponse({
-            'status': train_obj.status,
-            'log': train_obj.log,
-            'download_uri': project_obj.download_uri,
-            'success_rate': success_rate,
-            'inference_num': inference_num,
-            'unidentified_num': unidentified_num,
-        })
+#         return JsonResponse({
+#             'status': train_obj.status,
+#             'log': train_obj.log,
+#             'download_uri': project_obj.download_uri,
+#             'success_rate': success_rate,
+#             'inference_num': inference_num,
+#             'unidentified_num': unidentified_num,
+#         })
     except requests.exceptions.ConnectionError:
         logger.error(
             f"Export failed. Inference module url: {inference_module_url()} unreachable")
@@ -211,6 +213,16 @@ def export(request, project_id):
             'log': 'Unexpected error',
         }, status=500)
 
+    return JsonResponse({
+        'status': train_obj.status,
+        'log': train_obj.log,
+        'download_uri': project_obj.download_uri,
+        'success_rate': success_rate,
+        'inference_num': inference_num,
+        'unidentified_num': unidentified_num,
+        'gpu': is_gpu,
+        'average_time': average_inference_time,
+    })
 
 # FIXME tmp workaround
 
@@ -855,10 +867,11 @@ def train(request, project_id):
         logger.info('demo... bypass training process')
 
         cam_is_demo = project_obj.camera.is_demo
-        # Camera
+        # Camera FIXME peter, check here
         if cam_is_demo:
+            rtsp = project_obj.camera.rtsp
             requests.get('http://'+inference_module_url()+'/update_cam',
-                         params={'cam_type': 'video', 'cam_source': 'sample_video/video_1min.mp4'})
+                         params={'cam_type': 'rtsp', 'cam_source': rtsp})
         else:
             rtsp = project_obj.camera.rtsp
             requests.get('http://'+inference_module_url()+'/update_cam',
