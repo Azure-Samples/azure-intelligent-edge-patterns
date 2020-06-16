@@ -260,11 +260,11 @@ While the infrastructure of Azure Stack Hub is already resilient to failures and
 
 Therefore it is a good practice to deploy your production Kubernetes cluster as well as the workload to two (or more) clusters hosted in different locations or datacenters and use technologies like Azure Traffic Manager (or comparable solutions) to route users based on cluster response time or based on geography.
 
-![Using Traffic Manager to control traffic flows](/img/aks-azure-traffic-manager.png)
+![Using Traffic Manager to control traffic flows](img/aks-azure-traffic-manager.png)
 
 Customers who have a single Kubernetes cluster typically connect to the service IP or DNS name of a given application. In a multi-cluster deployment, customers should connect to a Traffic Manager DNS name that points to the services/ingress on each Kubernetes cluster.
 
-![Using Traffic Manager to route to on-premises Cluster](/img/aks-azure-traffic-manager-on-premises.png)
+![Using Traffic Manager to route to on-premises Cluster](img/aks-azure-traffic-manager-on-premises.png)
 
 > This pattern is also a [best practice for (managed) AKS clusters in Azure](https://docs.microsoft.com/azure/aks/operator-best-practices-multi-region#plan-for-multiregion-deployment).
 
