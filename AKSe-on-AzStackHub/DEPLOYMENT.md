@@ -161,6 +161,7 @@ Helm is a Kubernetes package manager, available as a binary that is runs on MacO
 
 ```bash
 helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+helm repo update
 
 helm install incubator/azuremonitor-containers \
 --set omsagent.secret.wsid=<your_workspace_id> \
@@ -274,9 +275,19 @@ There are some post-deployment operational considerations that are worth describ
 
 ## Upgrade Kubernetes
 
-Upgrade is a complex Day 2 operation that can be either done manually or using AKS Engine. AKS Engine allows you to upgrade the cluster that was originally deployed using the tool. You should be aware of the availability of new updates and use the AKS Engine to apply them.
+Upgrading a Kubernetes Cluster is a complex Day 2 operation that can be done using AKS Engine. 
 
-* [Upgrade a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade)
+- [Upgrade a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade)
+
+AKS Engine allows you to upgrade clusters to newer Kubernetes and base OS image versions:
+
+- [Steps to upgrade to a newer Kubernetes version](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-upgrade-to-a-newer-kubernetes-version)
+
+As well as upgrading only the underlaying nodes to newer base OS image versions:
+
+- [Steps to only upgrade the OS image](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-only-upgrade-the-os-image)
+
+Newer base OS images contain security and kernel updates. It's the cluster operator's responsibility to monitor the the availability of newer Kubernetes Versions and OS Images and to plan and execute these upgrades using AKS Engine. The base OS images have to be downloaded from the Azure Stack Hub Marketplace by the Azure Stack Operator.
 
 ## Scale Kubernetes
 
@@ -284,4 +295,4 @@ Scale is another Day 2 operation that can be orchestrated using AKS Engine.
 
 The scale command reuses your cluster configuration file (apimodel.json) inside the output directory as input for a new Azure Resource Manager deployment. AKS Engine executes the scale operation against a specific agent pool. When the scale operation is complete, AKS Engine updates the cluster definition in that same apimodel.json file to reflect the new node count in order to reflect the updated, current cluster configuration.
 
-* [Scale a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-scale)
+- [Scale a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-scale)
