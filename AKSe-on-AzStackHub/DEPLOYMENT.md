@@ -49,7 +49,7 @@ First you must connect to the previously created AKS Engine helper VM.
 
 The VM should have a Public IP Address and should be accessible via SSH (Port 22/TCP).
 
-![AKS Engine VM Overview page](/img/aksengine-vm-overview.png)
+![AKS Engine VM Overview page](img/aksengine-vm-overview.png)
 
 > You can use a tool of your choice like MobaXterm, puTTY or PowerShell in Windows 10 to connect to a Linux VM using SSH.
 
@@ -59,7 +59,7 @@ ssh <username>@<ipaddress>
 
 After connecting, run the command `aks-engine`. Go to [Supported AKS Engine Versions](https://github.com/Azure/aks-engine/blob/master/docs/topics/azure-stack.md#supported-aks-engine-versions) to learn more about the AKS Engine and Kubernetes versions.
 
-![aks-engine command line example](/img/aksengine-cmdline-example.png)
+![aks-engine command line example](img/aksengine-cmdline-example.png)
 
 ## Deploy a Kubernetes Cluster
 
@@ -71,7 +71,7 @@ The step-by-step process is documented here:
 
 The end result of the `aks-engine deploy` command and the preparations in the previous steps is a fully featured Kubernetes cluster deployed into the tenant space of the first Azure Stack Hub instance. The cluster itself consists of Azure IaaS components like VMs, Load Balancers, VNets, Disks and so on.
 
-![Cluster IaaS Components Azure Stack Portal](/img/aks-azure-stack-iaas-components.png)
+![Cluster IaaS Components Azure Stack Portal](img/aks-azure-stack-iaas-components.png)
 
 1) Azure Load Balancer (K8s API Endpoint)
 2) Worker Nodes (Agent Pool)
@@ -87,7 +87,7 @@ You can now connect to the previously created Kubernetes cluster, either via SSH
 ssh azureuser@<k8s-master-lb-ip>
 ```
 
-![Execute kubectl on master node](/img/k8s-kubectl-on-masternode.png)
+![Execute kubectl on master node](img/k8s-kubectl-on-masternode.png)
 
 It is not recommended to use the master node as a jumpbox for administrative tasks. The `kubectl` configuration is stored in `.kube/config` on the master node(s) as well as on the AKS Engine VM. You can copy the configuration to an admin machine with connectivity to the Kubernetes cluster and use the `kubectl` command there. The `.kube/config` file is also used later to configure a service connection in Azure DevOps.
 
