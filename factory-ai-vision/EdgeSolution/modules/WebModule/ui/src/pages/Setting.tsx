@@ -196,7 +196,7 @@ export const Setting = (): JSX.Element => {
           </Text>
           <Flex vAlign="center">
             <Text size="large" design={{ width: '300px' }}>
-              Namespace:
+              Endpoint:
             </Text>
             <Input
               value={settingData.namespace}
