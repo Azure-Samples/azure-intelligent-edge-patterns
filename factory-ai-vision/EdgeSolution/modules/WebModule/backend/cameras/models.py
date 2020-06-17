@@ -527,6 +527,8 @@ class Project(models.Model):
                 self.save(update_fields=['retraining_counter'])
             else:
                 logger.info("Project not changed")
+            logger.info(
+                f"Sending Data to App Insight {self.setting.is_collect_data}")
             if self.setting.is_collect_data:
                 from cameras.utils.app_insight import part_monitor, img_monitor, training_job_monitor, retraining_job_monitor
                 logger.info("Sending Logs to App Insight")
