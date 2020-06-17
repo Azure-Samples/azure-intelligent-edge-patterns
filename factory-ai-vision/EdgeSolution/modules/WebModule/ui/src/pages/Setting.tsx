@@ -10,6 +10,8 @@ import {
   Dropdown,
   DropdownItemProps,
   Checkbox,
+  Dialog,
+  QuestionCircleIcon,
 } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
@@ -202,6 +204,28 @@ export const Setting = (): JSX.Element => {
               value={settingData.namespace}
               onChange={(_, { value }): void => dispatch({ type: 'UPDATE_NAMESPACE', payload: value })}
               fluid
+            />
+            <Dialog
+              header="Get Endpoint and Key"
+              content={
+                <Flex column styles={{ maxHeight: '800px', overflow: 'scroll' }}>
+                  <p>
+                    Step 1: Login Custom vision,{' '}
+                    <a href="https://www.customvision.ai/" target="_blank" rel="noopener noreferrer">
+                      https://www.customvision.ai/
+                    </a>
+                  </p>
+                  <p>Step 2: Click on the setting icon on the top</p>
+                  <img src="guide_step_2.png" style={{ width: '100%' }} />
+                  <p>
+                    Step 3: Choose the resources under the account, you will see information of
+                    &quot;Key&quot; and &quot;Endpoint&quot;
+                  </p>
+                  <img src="guide_step_3.png" style={{ width: '100%' }} />
+                </Flex>
+              }
+              confirmButton="Close"
+              trigger={<Button text icon={<QuestionCircleIcon />} iconOnly />}
             />
           </Flex>
           <Flex vAlign="center">
