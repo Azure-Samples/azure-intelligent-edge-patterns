@@ -405,11 +405,11 @@ class Project(models.Model):
             logger.info(
                 f"Setting project name: {instance.customvision_project_name}")
 
-            #logger.info('Creating Project on Custom Vision')
-            #project = instance.setting.create_project(name)
+            # logger.info('Creating Project on Custom Vision')
+            # project = instance.setting.create_project(name)
             # logger.info(
             #    f'Got Custom Vision Project Id: {project.id}. Saving...')
-            #instance.customvision_project_id = project.id
+            # instance.customvision_project_id = project.id
         else:
             # logger.info('Has not set the key, Got DUMMY PRJ ID')
             # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
@@ -515,7 +515,7 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise e
 
-    def update_app_insight_counter(self, has_new_parts: bool, has_new_images: bool, source):
+    def update_app_insight_counter(self, has_new_parts: bool, has_new_images: bool, source, parts_last_train: int, images_last_train: int):
         try:
             retrain = train = 0
             if has_new_parts:
@@ -539,12 +539,16 @@ class Project(models.Model):
                 img_monitor(len(Image.objects.all()))
                 training_job_monitor(self.training_counter)
                 retraining_job_monitor(self.retraining_counter)
+                trainer = self.setting._get_trainer_obj()
+                images_now = trainer.get_tagged_image_count(
+                    self.customvision_project_id)
+                parts_now = len(trainer.get_tags(self.customvision_project_id))
                 from cameras.utils.app_insight import get_app_insight_logger
                 az_logger = get_app_insight_logger()
                 az_logger.info('training', extra={'custom_dimensions': {
                     'train': train,
-                    'images': len(Image.objects.all()),
-                    'parts': len(Part.objects.filter(is_demo=False)),
+                    'images': images_now-images_last_train,
+                    'parts': parts_now-parts_last_train,
                     'retrain': retrain,
                     'source': source}})
         except Exception as e:
@@ -594,7 +598,7 @@ class Project(models.Model):
         url = setting_obj.endpoint+'customvision/v3.2/training/projects/' + \
             self.customvision_project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
         res = requests.post(url, '{body}', headers={
-                            'Training-key': setting_obj.training_key})
+            'Training-key': setting_obj.training_key})
         return res
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):

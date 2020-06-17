@@ -672,7 +672,9 @@ def _train(project_id, request):
         has_new_images = False
         for tag in tags:
             tag_dict[tag.name] = tag.id
-
+        parts_last_train = len(tags)
+        images_last_train = trainer.get_tagged_image_count(
+            project_obj.customvision_project_id)
         # Update existing tags
         # TODO: update tags
         # trainer.update_tags(project_id, tag_id, new_tag)
@@ -831,7 +833,11 @@ def _train(project_id, request):
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
                 project_obj.update_app_insight_counter(
-                    has_new_parts=has_new_parts, has_new_images=has_new_images, source=request.get_host())
+                    has_new_parts=has_new_parts,
+                    has_new_images=has_new_images,
+                    source=request.get_host(),
+                    parts_last_train=parts_last_train,
+                    images_last_train=images_last_train)
         # A Thread/Task to keep updating the status
         update_train_status(project_id)
         return JsonResponse({'status': 'ok'})
