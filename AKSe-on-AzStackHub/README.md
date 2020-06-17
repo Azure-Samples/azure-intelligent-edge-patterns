@@ -314,14 +314,14 @@ Secrets/credentials should never be stored in plaintext in your application code
 
 The **Patch and Update (PNU)** process in Azure Kubernetes Service (in Azure) is partially automated, security updates are automatically applied to Linux nodes. These updates include OS security fixes or kernel updates. AKS doesn't automatically reboot these Linux nodes to complete the update process.
 
-On a Kubernetes Cluster deployed by AKS Engine on Azure Stack Hub is the PNU process unmanaged and in the cluster operator's responsibility.
-
-AKS Engine helps with the two most important tasks:
+On a Kubernetes Cluster deployed by AKS Engine on Azure Stack Hub is the PNU process unmanaged and the responsibility of the cluster operator. AKS Engine helps with the two most important tasks:
 
 - [Upgrade to a newer Kubernetes and base OS image version](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-upgrade-to-a-newer-kubernetes-version)
 - [Upgrade the base OS image only](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-only-upgrade-the-os-image)
 
-Newer base OS images contain the latest OS security fixes and kernel updates. These images have to be downloaded by the Azure Stack Hub Operator.
+Newer base OS images contain the latest OS security fixes and kernel updates. Updates that were released between two OS image versions or before a newer base OS image version is available in the Azure Stack Hub Marketplace are automatically installed using Debian's (the foundation Ubuntu, which is the Linux distro that is used for the Kubernetes cluster nodes, is build on top of) [Unattended Upgrade](https://wiki.debian.org/UnattendedUpgrades) mechanism to automatically apply the latest security (and other) updates automatically.
+
+The _Unattended Upgrade_ mechanism does not automatically reboot cluster nodes. This can be done automatically using the open-source [kured (KUbernetes REboot Daemon)](https://docs.microsoft.com/en-us/azure/aks/node-updates-kured) that watches for Linux nodes that require a reboot, then automatically handle the rescheduling of running pods and node reboot process.
 
 ## Deployment (CI/CD) considerations
 
