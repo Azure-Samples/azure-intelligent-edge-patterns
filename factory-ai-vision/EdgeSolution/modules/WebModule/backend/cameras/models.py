@@ -515,16 +515,19 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise e
 
-    def update_app_insight_counter(self, has_new_parts: bool, has_new_images: bool):
+    def update_app_insight_counter(self, has_new_parts: bool, has_new_images: bool, source):
         try:
+            retrain = train = 0
             if has_new_parts:
                 logger.info("This is a training job")
                 self.training_counter += 1
                 self.save(update_fields=['training_counter'])
+                train = 1
             elif has_new_images:
                 logger.info("This is a re-training job")
                 self.retraining_counter += 1
                 self.save(update_fields=['retraining_counter'])
+                retrain = 1
             else:
                 logger.info("Project not changed")
             logger.info(
@@ -536,6 +539,14 @@ class Project(models.Model):
                 img_monitor(len(Image.objects.all()))
                 training_job_monitor(self.training_counter)
                 retraining_job_monitor(self.retraining_counter)
+                from cameras.utils.app_insight import get_app_insight_logger
+                az_logger = get_app_insight_logger()
+                az_logger.info('training', extra={'custom_dimensions': {
+                    'train': train,
+                    'images': len(Image.objects.all()),
+                    'parts': len(Part.objects.filter(is_demo=False)),
+                    'retrain': retrain,
+                    'source': source}})
         except Exception as e:
             logger.exception(
                 "update_app_insight_counter occur unexcepted error")

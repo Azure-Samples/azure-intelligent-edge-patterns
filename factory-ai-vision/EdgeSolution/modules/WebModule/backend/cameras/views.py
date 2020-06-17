@@ -612,7 +612,7 @@ def train_performance(request, project_id):
     return JsonResponse(ret)
 
 
-def _train(project_id):
+def _train(project_id, request):
 
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -831,7 +831,7 @@ def _train(project_id):
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
                 project_obj.update_app_insight_counter(
-                    has_new_parts=has_new_parts, has_new_images=has_new_images)
+                    has_new_parts=has_new_parts, has_new_images=has_new_images, source=request.get_host())
         # A Thread/Task to keep updating the status
         update_train_status(project_id)
         return JsonResponse({'status': 'ok'})
@@ -917,7 +917,7 @@ def train(request, project_id):
         requests.get('http://'+inference_module_url() +
                      '/update_parts', params={'parts': parts})
     threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
-    return _train(project_id)
+    return _train(project_id, request)
 
 
 # FIXME will need to find a better way to deal with this
@@ -1179,6 +1179,18 @@ def pull_cv_project(request, project_id):
             'log': f'Status : failed {str(err_msg)}'})
     finally:
         project_obj.save(update_fields=update_fields)
+
+
+@api_view()
+def project_reset_camera(request, project_id):
+    try:
+        project_obj = Project.objects.get(pk=project_id)
+    except:
+        if len(Project.objects.filter(is_demo=False)):
+            project_obj = Project.objects.filter(is_demo=False)[0]
+    project_obj.camera = Camera.objects.filter(is_demo=True).first()
+    project_obj.save(update_fields=['camera'])
+    return JsonResponse({'status': 'ok'})
 
 
 @api_view()

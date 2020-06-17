@@ -78,15 +78,12 @@ mmap_4 = stats_recorder.new_measurement_map()
 
 
 def get_app_insight_logger():
-    if APP_INSIGHT_ON:
-        app_insight_logger = logging.getLogger(
-            "Backend-Training-App-Insight")
-        app_insight_logger.addHandler(AzureLogHandler(
-            connection_string=APP_INSIGHT_CONN_STR)
-        )
-        return APP_INSIGHT_ON, app_insight_logger
-    else:
-        return APP_INSIGHT_ON, None
+    app_insight_logger = logging.getLogger(
+        "Backend-Training-App-Insight")
+    app_insight_logger.addHandler(AzureLogHandler(
+        connection_string=APP_INSIGHT_CONN_STR)
+    )
+    return app_insight_logger
 
 
 def part_monitor(count: int):
