@@ -7,6 +7,7 @@ This module demonstrates how to create and use a Kubeflow cluster on Azure Stack
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
   - [Installing Kubernetes manually](installing_kubernetes.md)
+  - [Persistence on AzureStack](#persistence-on-azure-stack)
 - [Install Kubeflow](#install-kubeflow)
 - [Kubeflow dashboard](#preparing-kubeflow-dashboard) (preparing and using)
 - [Using Kubeflow](#using-kubeflow)
@@ -83,6 +84,36 @@ something like the following:
     k8s-linuxpool-27515788-1   Ready    agent    22m   v1.15.5
     k8s-linuxpool-27515788-2   Ready    agent    22m   v1.15.5
     k8s-master-27515788-0      Ready    master   22m   v1.15.5
+
+## Persistence on Azure Stack
+
+Most real-life applications need data storage. Azure Stack team actively works on making
+available the options available on the public cloud, however, there are nuances in a detauched
+environment.
+
+For this demo we will substitute `azurefile` with our own locally-mounted network storage.
+
+Follow the steps in [Installing Storage](installing_storage.md) to create a Persistent Volume Claim
+that you could use in your Kubernetes deployments.
+
+If you done everything right, you should be able to see this `pvc` in your environment:
+
+    $ kubectl get pvc
+    NAME                STATUS   VOLUME               CAPACITY   ACCESS MODES   STORAGECLASS    AGE
+    ...
+    samba-share-claim   Bound    samba-share-volume   20Gi       RWX            local-storage   23h
+    ...
+
+And you should see the Persisted Volume itself:
+
+    $ kubeclt get pv
+    NAME               CAPACITY ACCESS MODES   RECLAIM POLICY STATUS CLAIM                       STORAGECLASS    REASON   AGE
+    ...
+    samba-share-volume 20Gi     RWX            Retain         Bound  default/samba-share-claim   local-storage            23h
+    ...
+
+Consult your cloud system administrator if you have any problems, there could be many other
+options sutable to particular scenarios and development lifecycle.
 
 ## Install Kubeflow
 
