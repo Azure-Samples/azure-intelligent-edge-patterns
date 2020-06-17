@@ -1,6 +1,20 @@
 # Kubeflow on Azure Stack
 
-This module demonstrates how to create a Kubeflow cluster on Azure Stack.
+This module demonstrates how to create and use a Kubeflow cluster on Azure Stack.
+
+**Table of contents**
+
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+  - [Installing Kubernetes manually](installing_kubernetes.md)
+- [Install Kubeflow](#install-kubeflow)
+- [Preparing Kubeflow dashboard](#preparing-kubeflow-dashboard)
+- [Using Kubeflow](#using-kubeflow)
+  - [Kubeflow dashboard](#kubeflow-dashboard)
+- [Uninstalling Kubeflow](#uninstalling-kubeflow)
+- [Next Steps](#next-steps)
+
+## Overview
 
 Main differences of the detached mode include limitations on:
 
@@ -8,6 +22,7 @@ Main differences of the detached mode include limitations on:
 - Handling of the artifacts(e.g. Docker images).
 - How to access software packages(especially third-party).
 - How storage is allocated and utilized.
+- See [Known Issues and Limitations](https://github.com/Azure/aks-engine/blob/master/docs/topics/azure-stack.md#known-issues-and-limitations) for other nuances.
 
 ## Prerequisites
 
@@ -17,8 +32,12 @@ The reader is expected to be familiar with the following:
 - [Azure Stack Hub](https://azure.microsoft.com/en-us/products/azure-stack/hub/)
 - [Kubernetes](https://kubernetes.io/)
 - [Kubeflow](https://github.com/kubeflow/kubeflow)
-- [Jupyter](https://jupyter.org/).
 - [Bash](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
+- (optional) [Jupyter](https://jupyter.org/).
+- (optional) [TensorFlow](https://www.tensorflow.org/)
+  - [Tensorboard](https://www.tensorflow.org/tensorboard/)
+- (optional) [PyTorch](https://pytorch.org/)
+
 
 IMPORTANT: While you might have the premissions to retrieve some information on your
 own(see [User Information on Azure](acquiring_settings.md)) or create, but most likely
@@ -214,7 +233,7 @@ for the pods to come up:
 
 It will show the list of the services and pods for the cluster we just created.
 
-## Preparing dashboard
+## Preparing Kubeflow dashboard
 
 Make sure all the pods are up and running(Using `kubectl get all -n kubeflow`, wait until
 they are).
@@ -232,7 +251,7 @@ Then the EXTERNAL-IP will become available from:
     NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
     istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
 
-## Using dashboard
+## Kubeflow dashboard
 
 When you have your istio-ingressgateway's external ip(you can retrieve it using `get_kf_board_ip.sh`),
 open it in your browser, and make sure your firewall rules allow HTTP port 80.
@@ -301,3 +320,4 @@ The following resources might help during troubleshooting or modifications:
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux
 - https://docs.microsoft.com/en-us/azure-stack
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-cluster
+- https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/AKSe-on-AzStackHub
