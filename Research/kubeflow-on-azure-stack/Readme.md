@@ -8,9 +8,12 @@ This module demonstrates how to create and use a Kubeflow cluster on Azure Stack
 - [Prerequisites](#prerequisites)
   - [Installing Kubernetes manually](installing_kubernetes.md)
 - [Install Kubeflow](#install-kubeflow)
-- [Preparing Kubeflow dashboard](#preparing-kubeflow-dashboard)
+- [Kubeflow dashboard](#preparing-kubeflow-dashboard) (preparing and using)
 - [Using Kubeflow](#using-kubeflow)
   - [Kubeflow dashboard](#kubeflow-dashboard)
+  - [Jupyter Server](#jupyter-server)
+  - [TFjob](#TFjob) (distributed training)
+  - [PyTorchJob](#PyTorchJob) (distributed training)
 - [Uninstalling Kubeflow](#uninstalling-kubeflow)
 - [Next Steps](#next-steps)
 
@@ -269,10 +272,26 @@ You need to create a namespace to be able to create Jupyter servers.
 
 ![pics/kubeflow_dashboard2_notebook_servers.png](pics/kubeflow_dashboard2_notebook_servers.png)
 
+## Jupyter Server
+
 Once you create a server, you can connect to it and upload Python files.
 
 ![pics/kubeflow_dashboard3_notebook.png](pics/kubeflow_dashboard3_notebook.png)
 
+## TFjob
+
+[TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
+It was initially developed by the Google Brain team for internal Google use, and later released under
+the Apache License 2.0.
+
+See [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack) for the demo of a `TFJob` execution in the environment that we create in this tutorial.
+
+## PyTorchJob
+
+[PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework, it has Python and C++ interfaces, primarily developed by Facebook's AI Research Lab. PyTorch is rooted in [Torch library](https://github.com/torch/torch7)
+
+See [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) for the demo
+of a `PyTorchJob` execution in the environment that we create in this tutorial.
 
 ## Uninstalling Kubeflow
 
