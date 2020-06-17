@@ -1,10 +1,12 @@
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITransactionTestCase, APITestCase
+from rest_framework.test import APITransactionTestCase
 from cameras.models import Part
 import logging
-
+#
 logger = logging.getLogger(__name__)
+#
+#
 
 
 class PartTests(APITransactionTestCase):
@@ -13,6 +15,7 @@ class PartTests(APITransactionTestCase):
         data = {'name': 'Part1',
                 'description': 'Desb1'}
         self.client.post(url, data, format='json')
+
         data = {'name': 'Part2',
                 'description': 'Desb2'}
         response = self.client.post(url, data, format='json')
@@ -24,10 +27,12 @@ class PartTests(APITransactionTestCase):
                 'description': 'Desb1',
                 'is_demo': True}
         self.client.post(url, data, format='json')
+
         data = {'name': 'DemoPart2',
                 'description': 'Desb1',
                 'is_demo': True}
         self.client.post(url, data, format='json')
+
         data = {'name': 'DemoPart3',
                 'description': 'Desb1',
                 'is_demo': True}
@@ -42,6 +47,7 @@ class PartTests(APITransactionTestCase):
         data = {'name': 'Box',
                 'description': 'Desb1'}
         response = self.client.post(url, data, format='json')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Part.objects.count(), self.exist_num+1)
         self.assertEqual(Part.objects.get(name='Box').name, 'Box')
@@ -163,7 +169,6 @@ class PartTests(APITransactionTestCase):
         Ensure Update Parts
         """
         # New description
-
         url = reverse('part-list')
         response = self.client.get(
             url)
@@ -172,7 +177,6 @@ class PartTests(APITransactionTestCase):
                 part2_id = part['id']
             if part['name'] == 'Part1':
                 part1_id = part['id']
-
         data = {'name': 'New Part Name',
                 'description': 'New Description'}
         response = self.client.put(
@@ -180,7 +184,6 @@ class PartTests(APITransactionTestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
         self.assertEqual(Part.objects.count(), self.exist_num)
-
         data = {'name': 'DemoPart1',
                 'description': 'New Description'}
         response = self.client.put(

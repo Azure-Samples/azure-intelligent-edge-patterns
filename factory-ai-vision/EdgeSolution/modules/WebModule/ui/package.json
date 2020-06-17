@@ -30,7 +30,8 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.3.0",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.3",
+    "uniqid": "^5.2.0"
   },
   "resolutions": {
     "rc-align": "2.3.5"

@@ -10,6 +10,10 @@ import {
   Dropdown,
   DropdownItemProps,
   Checkbox,
+  Dialog,
+  QuestionCircleIcon,
+  Tooltip,
+  Grid,
 } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
@@ -79,6 +83,7 @@ export const Setting = (): JSX.Element => {
     SettingReducer
   >(reducer, initialState);
   const [checkboxChecked, setCheckboxChecked] = useState(false);
+  const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
 
   const notEmpty = originSettingData.namespace && originSettingData.key;
 
@@ -194,26 +199,61 @@ export const Setting = (): JSX.Element => {
           <Text size="large" weight="bold">
             Azure Cognitive Services Settings:{' '}
           </Text>
-          <Flex vAlign="center">
-            <Text size="large" design={{ width: '300px' }}>
-              Namespace:
-            </Text>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '100px auto 50px',
+              gridTemplateRows: 'auto auto',
+              rowGap: '30px',
+            }}
+          >
+            <Text size="large">Endpoint:</Text>
             <Input
               value={settingData.namespace}
               onChange={(_, { value }): void => dispatch({ type: 'UPDATE_NAMESPACE', payload: value })}
               fluid
             />
-          </Flex>
-          <Flex vAlign="center">
-            <Text size="large" design={{ width: '300px' }}>
-              Key:
-            </Text>
+            <Tooltip
+              trigger={
+                <Button
+                  text
+                  icon={<QuestionCircleIcon />}
+                  iconOnly
+                  onClick={(): void => setIsUserGuideOpen(true)}
+                />
+              }
+              content="Where to get Endpoint and Key?"
+            />
+            <Dialog
+              open={isUserGuideOpen}
+              header="Get Endpoint and Key"
+              content={
+                <Flex column styles={{ maxHeight: '800px', overflow: 'scroll' }}>
+                  <p>
+                    Step 1: Login Custom vision,{' '}
+                    <a href="https://www.customvision.ai/" target="_blank" rel="noopener noreferrer">
+                      https://www.customvision.ai/
+                    </a>
+                  </p>
+                  <p>Step 2: Click on the setting icon on the top</p>
+                  <img src="guide_step_2.png" style={{ width: '100%' }} />
+                  <p>
+                    Step 3: Choose the resources under the account, you will see information of
+                    &quot;Key&quot; and &quot;Endpoint&quot;
+                  </p>
+                  <img src="guide_step_3.png" style={{ width: '100%' }} />
+                </Flex>
+              }
+              confirmButton="Close"
+              onConfirm={(): void => setIsUserGuideOpen(false)}
+            />
+            <Text size="large">Key:</Text>
             <Input
               value={settingData.key}
               onChange={(_, { value }): void => dispatch({ type: 'UPDATE_KEY', payload: value })}
               fluid
             />
-          </Flex>
+          </div>
           <Flex gap="gap.large">
             <WarningDialog
               onConfirm={onSave}
