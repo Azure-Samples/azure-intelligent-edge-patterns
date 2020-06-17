@@ -19,6 +19,7 @@ export const LiveViewContainer: React.FC<{
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>(null);
   const imageInfo = useImage(`http://${window.location.hostname}:5000/video_feed?inference=1`, '');
+  const [creatingAOI, setCreatingAOI] = useState(false);
 
   const onCheckboxClick = async (): Promise<void> => {
     setShowAOI(!showAOI);
@@ -88,6 +89,14 @@ export const LiveViewContainer: React.FC<{
           onClick={onCheckboxClick}
         />
         <Button content="Update" primary disabled={updateBtnDisabled} onClick={onUpdate} loading={loading} />
+        <Button
+          content="Create Area of Interest"
+          primary={!creatingAOI}
+          disabled={!showAOI}
+          onClick={(): void => setCreatingAOI((prev) => !prev)}
+          circular
+          styles={{ padding: '0 5px' }}
+        />
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
       <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
