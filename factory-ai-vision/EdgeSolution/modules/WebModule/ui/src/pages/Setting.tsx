@@ -12,6 +12,7 @@ import {
   Checkbox,
   Dialog,
   QuestionCircleIcon,
+  Tooltip,
 } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
@@ -81,6 +82,7 @@ export const Setting = (): JSX.Element => {
     SettingReducer
   >(reducer, initialState);
   const [checkboxChecked, setCheckboxChecked] = useState(false);
+  const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
 
   const notEmpty = originSettingData.namespace && originSettingData.key;
 
@@ -205,7 +207,19 @@ export const Setting = (): JSX.Element => {
               onChange={(_, { value }): void => dispatch({ type: 'UPDATE_NAMESPACE', payload: value })}
               fluid
             />
+            <Tooltip
+              trigger={
+                <Button
+                  text
+                  icon={<QuestionCircleIcon />}
+                  iconOnly
+                  onClick={(): void => setIsUserGuideOpen(true)}
+                />
+              }
+              content="Where to get Endpoint and Key?"
+            />
             <Dialog
+              open={isUserGuideOpen}
               header="Get Endpoint and Key"
               content={
                 <Flex column styles={{ maxHeight: '800px', overflow: 'scroll' }}>
@@ -225,7 +239,7 @@ export const Setting = (): JSX.Element => {
                 </Flex>
               }
               confirmButton="Close"
-              trigger={<Button text icon={<QuestionCircleIcon />} iconOnly />}
+              onConfirm={(): void => setIsUserGuideOpen(false)}
             />
           </Flex>
           <Flex vAlign="center">
