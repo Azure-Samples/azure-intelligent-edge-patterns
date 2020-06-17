@@ -49,7 +49,7 @@ First you must connect to the previously created AKS Engine helper VM.
 
 The VM should have a Public IP Address and should be accessible via SSH (Port 22/TCP).
 
-![AKS Engine VM Overview page](/img/aksengine-vm-overview.png)
+![AKS Engine VM Overview page](img/aksengine-vm-overview.png)
 
 > You can use a tool of your choice like MobaXterm, puTTY or PowerShell in Windows 10 to connect to a Linux VM using SSH.
 
@@ -59,7 +59,7 @@ ssh <username>@<ipaddress>
 
 After connecting, run the command `aks-engine`. Go to [Supported AKS Engine Versions](https://github.com/Azure/aks-engine/blob/master/docs/topics/azure-stack.md#supported-aks-engine-versions) to learn more about the AKS Engine and Kubernetes versions.
 
-![aks-engine command line example](/img/aksengine-cmdline-example.png)
+![aks-engine command line example](img/aksengine-cmdline-example.png)
 
 ## Deploy a Kubernetes Cluster
 
@@ -71,7 +71,7 @@ The step-by-step process is documented here:
 
 The end result of the `aks-engine deploy` command and the preparations in the previous steps is a fully featured Kubernetes cluster deployed into the tenant space of the first Azure Stack Hub instance. The cluster itself consists of Azure IaaS components like VMs, Load Balancers, VNets, Disks and so on.
 
-![Cluster IaaS Components Azure Stack Portal](/img/aks-azure-stack-iaas-components.png)
+![Cluster IaaS Components Azure Stack Portal](img/aks-azure-stack-iaas-components.png)
 
 1) Azure Load Balancer (K8s API Endpoint)
 2) Worker Nodes (Agent Pool)
@@ -87,7 +87,7 @@ You can now connect to the previously created Kubernetes cluster, either via SSH
 ssh azureuser@<k8s-master-lb-ip>
 ```
 
-![Execute kubectl on master node](/img/k8s-kubectl-on-masternode.png)
+![Execute kubectl on master node](img/k8s-kubectl-on-masternode.png)
 
 It is not recommended to use the master node as a jumpbox for administrative tasks. The `kubectl` configuration is stored in `.kube/config` on the master node(s) as well as on the AKS Engine VM. You can copy the configuration to an admin machine with connectivity to the Kubernetes cluster and use the `kubectl` command there. The `.kube/config` file is also used later to configure a service connection in Azure DevOps.
 
@@ -161,6 +161,7 @@ Helm is a Kubernetes package manager, available as a binary that is runs on MacO
 
 ```bash
 helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+helm repo update
 
 helm install incubator/azuremonitor-containers \
 --set omsagent.secret.wsid=<your_workspace_id> \
@@ -274,9 +275,19 @@ There are some post-deployment operational considerations that are worth describ
 
 ## Upgrade Kubernetes
 
-Upgrade is a complex Day 2 operation that can be either done manually or using AKS Engine. AKS Engine allows you to upgrade the cluster that was originally deployed using the tool. You should be aware of the availability of new updates and use the AKS Engine to apply them.
+Upgrading a Kubernetes Cluster is a complex Day 2 operation that can be done using AKS Engine. 
 
-* [Upgrade a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade)
+- [Upgrade a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade)
+
+AKS Engine allows you to upgrade clusters to newer Kubernetes and base OS image versions:
+
+- [Steps to upgrade to a newer Kubernetes version](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-upgrade-to-a-newer-kubernetes-version)
+
+As well as upgrading only the underlaying nodes to newer base OS image versions:
+
+- [Steps to only upgrade the OS image](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-only-upgrade-the-os-image)
+
+Newer base OS images contain security and kernel updates. It's the cluster operator's responsibility to monitor the the availability of newer Kubernetes Versions and OS Images and to plan and execute these upgrades using AKS Engine. The base OS images have to be downloaded from the Azure Stack Hub Marketplace by the Azure Stack Operator.
 
 ## Scale Kubernetes
 
@@ -284,4 +295,4 @@ Scale is another Day 2 operation that can be orchestrated using AKS Engine.
 
 The scale command reuses your cluster configuration file (apimodel.json) inside the output directory as input for a new Azure Resource Manager deployment. AKS Engine executes the scale operation against a specific agent pool. When the scale operation is complete, AKS Engine updates the cluster definition in that same apimodel.json file to reflect the new node count in order to reflect the updated, current cluster configuration.
 
-* [Scale a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-scale)
+- [Scale a Kubernetes cluster on Azure Stack Hub](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-scale)

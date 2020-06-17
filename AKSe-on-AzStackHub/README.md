@@ -115,14 +115,14 @@ The Kubernetes cluster itself consists of, and is built on top of Azure (Stack) 
 
 When selecting VM sizes for the initial deployment there are several considerations:  
 
-* __Cost__
-  * When planning your worker nodes keep in mind the overall cost per VM you will incur. For example, if your application workloads require limited resources, you should plan to deploy smaller sized VMs. Azure Stack, like Azure, is normally billed on a consumption basis, so appropriately sizing the VMs for Kubernetes roles is crucial to optimizing consumption costs.
-  * If your application needs more (or fewer) resources, you can scale out (or in) your current nodes horizontally (between 1 and 50 nodes). If you need more than 50 nodes you can create an additional cluster in a separate subscription.
-  * At this time you can not scale up the actual VMs vertically to another VM size without redeploying the cluster.
-* __Quotas__
-  * Consider the [quotas](https://docs.microsoft.com/azure-stack/operator/azure-stack-quota-types) you have configured when planning out an AKS deployment on your Azure Stack Hub. Make sure each [subscription](https://docs.microsoft.com/en-us/azure-stack/operator/service-plan-offer-subscription-overview) has the proper plans and the proper quotas configured to handle the amount of compute, storage, etc. that will be needed for your clusters as they scale out.
-* __Application Workloads__
-  * Please refer to the [Clusters and workloads concepts](https://docs.microsoft.com/azure/aks/concepts-clusters-workloads#nodes-and-node-pools) in the Kubernetes core concepts for Azure Kubernetes Service document to scope the proper VM size based on the compute and memory needs of your application.  
+- __Cost__
+  - When planning your worker nodes keep in mind the overall cost per VM you will incur. For example, if your application workloads require limited resources, you should plan to deploy smaller sized VMs. Azure Stack, like Azure, is normally billed on a consumption basis, so appropriately sizing the VMs for Kubernetes roles is crucial to optimizing consumption costs.
+  - If your application needs more (or fewer) resources, you can scale out (or in) your current nodes horizontally (between 1 and 50 nodes). If you need more than 50 nodes you can create an additional cluster in a separate subscription.
+  - At this time you can not scale up the actual VMs vertically to another VM size without redeploying the cluster.
+- __Quotas__
+  - Consider the [quotas](https://docs.microsoft.com/azure-stack/operator/azure-stack-quota-types) you have configured when planning out an AKS deployment on your Azure Stack Hub. Make sure each [subscription](https://docs.microsoft.com/en-us/azure-stack/operator/service-plan-offer-subscription-overview) has the proper plans and the proper quotas configured to handle the amount of compute, storage, etc. that will be needed for your clusters as they scale out.
+- __Application Workloads__
+  - Please refer to the [Clusters and workloads concepts](https://docs.microsoft.com/azure/aks/concepts-clusters-workloads#nodes-and-node-pools) in the Kubernetes core concepts for Azure Kubernetes Service document to scope the proper VM size based on the compute and memory needs of your application.  
 
 Scalability of the cluster itself will be achieved by scaling in and out the number of master and worker nodes or by adding additional node pools (which is not available on Azure Stack Hub today). Scaling the cluster can be done based on performance data, e.g. collected using Container Insights (Azure Monitor + Log Analytics) and is done manually using the AKS Engine helper VM that was used to deploy the Kubernetes cluster in the first place.
 
@@ -260,11 +260,11 @@ While the infrastructure of Azure Stack Hub is already resilient to failures and
 
 Therefore it is a good practice to deploy your production Kubernetes cluster as well as the workload to two (or more) clusters hosted in different locations or datacenters and use technologies like Azure Traffic Manager (or comparable solutions) to route users based on cluster response time or based on geography.
 
-![Using Traffic Manager to control traffic flows](/img/aks-azure-traffic-manager.png)
+![Using Traffic Manager to control traffic flows](img/aks-azure-traffic-manager.png)
 
 Customers who have a single Kubernetes cluster typically connect to the service IP or DNS name of a given application. In a multi-cluster deployment, customers should connect to a Traffic Manager DNS name that points to the services/ingress on each Kubernetes cluster.
 
-![Using Traffic Manager to route to on-premises Cluster](/img/aks-azure-traffic-manager-on-premises.png)
+![Using Traffic Manager to route to on-premises Cluster](img/aks-azure-traffic-manager-on-premises.png)
 
 > This pattern is also a [best practice for (managed) AKS clusters in Azure](https://docs.microsoft.com/azure/aks/operator-best-practices-multi-region#plan-for-multiregion-deployment).
 
@@ -309,6 +309,19 @@ To store secrets like connection strings or database credentials there are sever
 - 3rd-Party solutions like HashiCorp Vault (running on Kubernetes)
 
 Secrets/credentials should never be stored in plaintext in your application code or within scripts. And shouldn't be stored in a version control system. Instead, the deployment automation should retrieve the secrets as needed.
+
+**Patch and Update**
+
+The **Patch and Update (PNU)** process in Azure Kubernetes Service (in Azure) is partially automated, security updates are automatically applied to Linux nodes. These updates include OS security fixes or kernel updates. AKS doesn't automatically reboot these Linux nodes to complete the update process.
+
+On a Kubernetes Cluster deployed by AKS Engine on Azure Stack Hub is the PNU process unmanaged and in the cluster operator's responsibility.
+
+AKS Engine helps with the two most important tasks:
+
+- [Upgrade to a newer Kubernetes and base OS image version](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-upgrade-to-a-newer-kubernetes-version)
+- [Upgrade the base OS image only](https://docs.microsoft.com/azure-stack/user/azure-stack-kubernetes-aks-engine-upgrade#steps-to-only-upgrade-the-os-image)
+
+Newer base OS images contain the latest OS security fixes and kernel updates. These images have to be downloaded by the Azure Stack Hub Operator.
 
 ## Deployment (CI/CD) considerations
 

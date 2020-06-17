@@ -2,10 +2,14 @@
 
 This module demonstrates how to create an MLflow environment in Kubernetes on Azure Stack
 
+## In Progress
+- packaging the steps in this Readme into a CNAB package that can be installed using Porter
+
 ## Prerequisites 
 - Access to an existing Kubernetes cluster
 - A kubeconfig file to connect to cluster
 - A private ACR repository in Azure
+- Anaconda
 - Docker desktop
 - Kubectl 
 
@@ -69,3 +73,8 @@ kubectl get service mlflow-service --namespace <your-namespace> --output jsonpat
 1. Enter the the IP from the previous step in the below format
 1. http://<ip from above>:5000
 1. You should see something like the image below
+
+## Step 9: Starting the Jupyter Notebook Tutorial
+Open Jupyter Notebook, it should have been installed along side Anaconda. Navigate to the "notebooks" directory and select the MLflow_Tutorial notebook.
+
+Follow along in the tutorial. Any cell can be run by pushing shift + enter.
