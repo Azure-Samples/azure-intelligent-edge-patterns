@@ -11,7 +11,6 @@ dockerfile: Dockerfile.tmpl
 
 mixins:
   - exec
-  #- az 
   - kubernetes
 
 parameters:
@@ -21,7 +20,6 @@ parameters:
 
   - name: kf_username
     type: string
-    #default: azureuser
     default: root
 
   - name: kf_name
@@ -53,16 +51,16 @@ credentials:
     path: /root/.kube/config
 
 install:
-  # - exec:
-  #     description: "Install mlflow"
-  #     command: ./mlflow.sh
-  #     arguments:
-  #       - "install"
   - exec:
-      description: "Install Kubeflow"
-      command: ./kubeflow.sh
+      description: "Install mlflow"
+      command: ./mlflow.sh
       arguments:
         - "install"
+  # - exec:
+  #     description: "Install Kubeflow"
+  #     command: ./kubeflow.sh
+  #     arguments:
+  #       - "install"
 
 upgrade:
   - exec:
@@ -70,20 +68,20 @@ upgrade:
       command: ./mlflow.sh
       arguments:
         - "upgrade"
-  - exec:
-      description: "Upgrade Kubeflow"
-      command: ./kubeflow.sh
-      arguments:
-        - "upgrade"        
+  # - exec:
+  #     description: "Upgrade Kubeflow"
+  #     command: ./kubeflow.sh
+  #     arguments:
+  #       - "upgrade"        
 
 uninstall:
-  # - exec:
-  #     description: "Uninstall MLflow"
-  #     command: ./mlflow.sh
-  #     arguments:
-  #       - "uninstall"
   - exec:
-      description: "Uninstall Kubeflow"
-      command: ./kubeflow.sh
+      description: "Uninstall MLflow"
+      command: ./mlflow.sh
       arguments:
-        - "uninstall"           
+        - "uninstall"
+  # - exec:
+  #     description: "Uninstall Kubeflow"
+  #     command: ./kubeflow.sh
+  #     arguments:
+  #       - "uninstall"           
