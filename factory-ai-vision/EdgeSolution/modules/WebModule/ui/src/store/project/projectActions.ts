@@ -136,6 +136,10 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
         maxImages: data[0]?.maxImages ?? 50,
+        // TODO
+        sendMessageToCloud: false,
+        framesPerMin: 6,
+        accuracyThreshold: 50,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -169,6 +173,7 @@ export const thunkPostProject = (
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
       maxImages: projectData.maxImages,
+      // TODO Send to BE
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

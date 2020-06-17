@@ -41,6 +41,9 @@ export const initialState: State = {
       accuracyRangeMax: 80,
       maxImages: 50,
       modelUrl: '',
+      sendMessageToCloud: false,
+      framesPerMin: 6,
+      accuracyThreshold: 50,
     },
     trainingMetrics: {
       prevConsequence: null,
