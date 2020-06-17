@@ -34,11 +34,13 @@ Before installation, please make sure you have docker installed in your local en
 1. Go to App Insight, click Usage -> Users, click Pin to ping it to dashboard
 2. Go to Logs, type this query and run:
 
-    customEvents
-    | where name == 'train'
+    traces
+    | where message == 'training'
     | extend images = tolong(customDimensions.images)
     | extend parts = tolong(customDimensions.parts)
     | extend source = tostring(customDimensions.source)
-    | summarize train = count(), retrain = count() - 1, parts = sum(images), images = sum(parts) by source
+    | extend train = tolong(customDimensions.train)
+    | extend retrain = tolong(customDimensions.retrain)
+    | summarize train = sum(train), retrain = sum(retrain), parts = sum(parts), images = sum(images) by source
 
 3. Click Pin to ping it to dashboard as well
