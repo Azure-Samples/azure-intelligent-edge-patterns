@@ -361,8 +361,8 @@ class Project(models.Model):
     accuracyRangeMax = models.IntegerField(default=80)
     maxImages = models.IntegerField(default=10)
     deployed = models.BooleanField(default=False)
-    train_try_counter = models.IntegerField(default=0)
-    train_success_counter = models.IntegerField(default=0)
+    training_counter = models.IntegerField(default=0)
+    retraining_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
 
     @staticmethod
@@ -405,11 +405,11 @@ class Project(models.Model):
             logger.info(
                 f"Setting project name: {instance.customvision_project_name}")
 
-            #logger.info('Creating Project on Custom Vision')
-            #project = instance.setting.create_project(name)
+            # logger.info('Creating Project on Custom Vision')
+            # project = instance.setting.create_project(name)
             # logger.info(
             #    f'Got Custom Vision Project Id: {project.id}. Saving...')
-            #instance.customvision_project_id = project.id
+            # instance.customvision_project_id = project.id
         else:
             # logger.info('Has not set the key, Got DUMMY PRJ ID')
             # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
@@ -515,10 +515,49 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise e
 
+    def update_app_insight_counter(self, has_new_parts: bool, has_new_images: bool, source, parts_last_train: int, images_last_train: int):
+        try:
+            retrain = train = 0
+            if has_new_parts:
+                logger.info("This is a training job")
+                self.training_counter += 1
+                self.save(update_fields=['training_counter'])
+                train = 1
+            elif has_new_images:
+                logger.info("This is a re-training job")
+                self.retraining_counter += 1
+                self.save(update_fields=['retraining_counter'])
+                retrain = 1
+            else:
+                logger.info("Project not changed")
+            logger.info(
+                f"Sending Data to App Insight {self.setting.is_collect_data}")
+            if self.setting.is_collect_data:
+                from cameras.utils.app_insight import part_monitor, img_monitor, training_job_monitor, retraining_job_monitor
+                logger.info("Sending Logs to App Insight")
+                part_monitor(len(Part.objects.filter(is_demo=False)))
+                img_monitor(len(Image.objects.all()))
+                training_job_monitor(self.training_counter)
+                retraining_job_monitor(self.retraining_counter)
+                trainer = self.setting._get_trainer_obj()
+                images_now = trainer.get_tagged_image_count(
+                    self.customvision_project_id)
+                parts_now = len(trainer.get_tags(self.customvision_project_id))
+                from cameras.utils.app_insight import get_app_insight_logger
+                az_logger = get_app_insight_logger()
+                az_logger.info('training', extra={'custom_dimensions': {
+                    'train': train,
+                    'images': images_now-images_last_train,
+                    'parts': parts_now-parts_last_train,
+                    'retrain': retrain,
+                    'source': source}})
+        except Exception as e:
+            logger.exception(
+                "update_app_insight_counter occur unexcepted error")
+
     def train_project(self):
         """
-        Train project self. Return is training request success (boolean)
-        counter +=1
+        Submit training task to CustomVision. Return is training request success (boolean)
         : Success: return True
         : Failed : return False
         """
@@ -526,10 +565,6 @@ class Project(models.Model):
         update_fields = []
 
         try:
-
-            self.train_try_counter += 1
-            update_fields.append('train_try_counter')
-
             # Get CustomVisionClient
             trainer = self.setting.revalidate_and_get_trainer_obj()
             if not trainer:
@@ -540,11 +575,6 @@ class Project(models.Model):
             logger.info(
                 f"{self.customvision_project_name} submit training task to CustomVision")
             trainer.train_project(self.customvision_project_id)
-
-            # Set trainer_counter
-            self.train_success_counter += 1
-            update_fields.append('train_success_counter')
-
             # Set deployed
             self.deployed = False
             update_fields.append('deployed')
@@ -561,14 +591,6 @@ class Project(models.Model):
             logger.exception('Unexpected error while Project.train_project')
             raise e
         finally:
-            # App Insight
-            if self.setting.is_collect_data:
-                from cameras.utils.app_insight import part_monitor, img_monitor, training_job_triggered_monitor, retraining_jobs_monitor
-                logger.info("Sending Logs to App Insight")
-                part_monitor(len(Part.objects.filter(is_demo=False)))
-                img_monitor(len(Image.objects.all()))
-                training_job_triggered_monitor(self.train_try_counter)
-                retraining_jobs_monitor(self.train_success_counter)
             self.save(update_fields=update_fields)
 
     def export_iterationv3_2(self, iteration_id):
@@ -576,7 +598,7 @@ class Project(models.Model):
         url = setting_obj.endpoint+'customvision/v3.2/training/projects/' + \
             self.customvision_project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
         res = requests.post(url, '{body}', headers={
-                            'Training-key': setting_obj.training_key})
+            'Training-key': setting_obj.training_key})
         return res
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):

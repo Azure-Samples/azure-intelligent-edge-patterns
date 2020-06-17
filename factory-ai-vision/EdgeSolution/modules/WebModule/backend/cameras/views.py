@@ -612,7 +612,7 @@ def train_performance(request, project_id):
     return JsonResponse(ret)
 
 
-def _train(project_id):
+def _train(project_id, request):
 
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -668,9 +668,13 @@ def _train(project_id):
         tag_dict_local = {}
         project_partnames = {}
         project_changed = False
+        has_new_parts = False
+        has_new_images = False
         for tag in tags:
             tag_dict[tag.name] = tag.id
-
+        parts_last_train = len(tags)
+        images_last_train = trainer.get_tagged_image_count(
+            project_obj.customvision_project_id)
         # Update existing tags
         # TODO: update tags
         # trainer.update_tags(project_id, tag_id, new_tag)
@@ -690,58 +694,59 @@ def _train(project_id):
                     project_id=customvision_project_id,
                     name=part_name,
                     description=part_description)
+                has_new_parts = True
                 tag_dict[tag.name] = tag.id
                 counter += 1
         project_changed = project_changed or (counter > 0)
         logger.info(f"Created {counter} tags")
         logger.info("Creating tags... Done")
 
-        # Delete tags on CustomVisioin Project
-        # Maybe move to Project Model?
-        logger.info("Deleting tags before training...")
-        counter = 0
-        for tag_name in tag_dict.keys():
-            if tag_name not in project_partnames:
-                counter += 1
-                logger.info(
-                    f"Deleting tag: {tag_name}, id: {tag_dict[tag_name]}")
-                trainer.delete_tag(project_id=customvision_project_id,
-                                   tag_id=tag_dict[tag_name])
-        project_changed = project_changed or (counter > 0)
-        logger.info(f"Deleted {counter} tags")
-        logger.info("Deleting tags... Done")
+#         # Delete tags on CustomVisioin Project
+#         # Maybe move to Project Model?
+#         logger.info("Deleting tags before training...")
+#         counter = 0
+#         for tag_name in tag_dict.keys():
+#             if tag_name not in project_partnames:
+#                 counter += 1
+#                 logger.info(
+#                     f"Deleting tag: {tag_name}, id: {tag_dict[tag_name]}")
+#                 trainer.delete_tag(project_id=customvision_project_id,
+#                                    tag_id=tag_dict[tag_name])
+#         project_changed = project_changed or (counter > 0)
+#         logger.info(f"Deleted {counter} tags")
+#         logger.info("Deleting tags... Done")
+#
+#         # Delete untagged images on CustomVisioin Project
+#         # Maybe move to Project Model?
+#         logger.info("Deleting untagged images before training...")
+#         untagged_image_count = trainer.get_untagged_image_count(
+#             project_id=customvision_project_id)
+#         batch_size = 50
+#         untagged_image_batch = trainer.get_untagged_images(
+#             project_id=customvision_project_id, take=batch_size)
+#         untagged_img_ids = []
+#         counter = 0
+#         expected_iteration = (untagged_image_count//batch_size)+1
 
-        # Delete untagged images on CustomVisioin Project
-        # Maybe move to Project Model?
-        logger.info("Deleting untagged images before training...")
-        untagged_image_count = trainer.get_untagged_image_count(
-            project_id=customvision_project_id)
-        batch_size = 50
-        untagged_image_batch = trainer.get_untagged_images(
-            project_id=customvision_project_id, take=batch_size)
-        untagged_img_ids = []
-        counter = 0
-        expected_iteration = (untagged_image_count//batch_size)+1
-
-        while(len(untagged_image_batch) > 0):
-            logger.info(f"Deleting untagged images... batch {counter}")
-            for img in untagged_image_batch:
-                logger.info(f"Putting img: {img.id} to deleting list")
-                untagged_img_ids.append(img.id)
-            trainer.delete_images(
-                project_id=customvision_project_id,
-                image_ids=untagged_img_ids)
-            untagged_image_batch = trainer.get_untagged_images(
-                project_id=customvision_project_id,
-                take=batch_size)
-            untagged_img_ids = []
-            counter += 1
-            if counter > expected_iteration*10:
-                logging.exception(
-                    "Deleting untagged images... Take way too many iterations. Something went wrong.")
-                break
-        project_changed = project_changed or (counter > 0)
-        logger.info("Deleting untagged images... Done")
+#         while(len(untagged_image_batch) > 0):
+#             logger.info(f"Deleting untagged images... batch {counter}")
+#             for img in untagged_image_batch:
+#                 logger.info(f"Putting img: {img.id} to deleting list")
+#                 untagged_img_ids.append(img.id)
+#             trainer.delete_images(
+#                 project_id=customvision_project_id,
+#                 image_ids=untagged_img_ids)
+#             untagged_image_batch = trainer.get_untagged_images(
+#                 project_id=customvision_project_id,
+#                 take=batch_size)
+#             untagged_img_ids = []
+#             counter += 1
+#             if counter > expected_iteration*10:
+#                 logging.exception(
+#                     "Deleting untagged images... Take way too many iterations. Something went wrong.")
+#                 break
+#         project_changed = project_changed or (counter > 0)
+#         logger.info("Deleting untagged images... Done")
 
         # Upload images to CustomVisioin Project
         # TODO: Replace the line below if we are sure local images sync Custom Vision well
@@ -758,6 +763,7 @@ def _train(project_id):
 
         for index, image_obj in enumerate(images):
             logger.info(f'*** image {index+1}, {image_obj}')
+            has_new_images = True
             part = image_obj.part
             part_name = part.name
             tag_id = tag_dict[part_name]
@@ -815,6 +821,7 @@ def _train(project_id):
                 img_obj.save()
         logger.info('Uploading images... Done')
 
+        # Submit training task to Custom Vision
         if not project_changed:
             obj, created = project_obj.upcreate_training_status(
                 status='ok',
@@ -823,7 +830,15 @@ def _train(project_id):
             obj, created = project_obj.upcreate_training_status(
                 status='ok',
                 log='Status: Project changed. Training...')
-            project_obj.train_project()
+            training_task_submit_success = project_obj.train_project()
+            if training_task_submit_success:
+                project_obj.update_app_insight_counter(
+                    has_new_parts=has_new_parts,
+                    has_new_images=has_new_images,
+                    source=request.get_host(),
+                    parts_last_train=parts_last_train,
+                    images_last_train=images_last_train)
+        # A Thread/Task to keep updating the status
         update_train_status(project_id)
         return JsonResponse({'status': 'ok'})
 
@@ -908,7 +923,7 @@ def train(request, project_id):
         requests.get('http://'+inference_module_url() +
                      '/update_parts', params={'parts': parts})
     threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
-    return _train(project_id)
+    return _train(project_id, request)
 
 
 # FIXME will need to find a better way to deal with this
@@ -1170,6 +1185,18 @@ def pull_cv_project(request, project_id):
             'log': f'Status : failed {str(err_msg)}'})
     finally:
         project_obj.save(update_fields=update_fields)
+
+
+@api_view()
+def project_reset_camera(request, project_id):
+    try:
+        project_obj = Project.objects.get(pk=project_id)
+    except:
+        if len(Project.objects.filter(is_demo=False)):
+            project_obj = Project.objects.filter(is_demo=False)[0]
+    project_obj.camera = Camera.objects.filter(is_demo=True).first()
+    project_obj.save(update_fields=['camera'])
+    return JsonResponse({'status': 'ok'})
 
 
 @api_view()
