@@ -13,6 +13,7 @@ import {
   Dialog,
   QuestionCircleIcon,
   Tooltip,
+  Grid,
 } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios, { AxiosRequestConfig } from 'axios';
@@ -198,10 +199,15 @@ export const Setting = (): JSX.Element => {
           <Text size="large" weight="bold">
             Azure Cognitive Services Settings:{' '}
           </Text>
-          <Flex vAlign="center">
-            <Text size="large" design={{ width: '300px' }}>
-              Endpoint:
-            </Text>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '100px auto 50px',
+              gridTemplateRows: 'auto auto',
+              rowGap: '30px',
+            }}
+          >
+            <Text size="large">Endpoint:</Text>
             <Input
               value={settingData.namespace}
               onChange={(_, { value }): void => dispatch({ type: 'UPDATE_NAMESPACE', payload: value })}
@@ -241,17 +247,13 @@ export const Setting = (): JSX.Element => {
               confirmButton="Close"
               onConfirm={(): void => setIsUserGuideOpen(false)}
             />
-          </Flex>
-          <Flex vAlign="center">
-            <Text size="large" design={{ width: '300px' }}>
-              Key:
-            </Text>
+            <Text size="large">Key:</Text>
             <Input
               value={settingData.key}
               onChange={(_, { value }): void => dispatch({ type: 'UPDATE_KEY', payload: value })}
               fluid
             />
-          </Flex>
+          </div>
           <Flex gap="gap.large">
             <WarningDialog
               onConfirm={onSave}
