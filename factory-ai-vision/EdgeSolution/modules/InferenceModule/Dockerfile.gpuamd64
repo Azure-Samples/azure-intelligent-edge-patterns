@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
+FROM mcr.microsoft.com/azureml/onnxruntime:latest-tensorrt
 
 #FROM nvidia/cuda:10.1-cudnn7-devel
 WORKDIR /app
@@ -9,8 +9,8 @@ RUN apt-get update && \
     libssl-dev \
     libffi-dev \
     libboost-python-dev \
-    libboost-filesystem1.58.0 \
-    libboost-thread1.58.0 \
+    libboost-filesystem1.65.1 \
+    libboost-thread1.65.1 \
     python3-pip   
 
 RUN apt-get update \
