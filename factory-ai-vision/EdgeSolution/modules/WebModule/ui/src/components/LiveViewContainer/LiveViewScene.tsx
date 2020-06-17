@@ -2,14 +2,35 @@ import React, { useEffect, useRef } from 'react';
 import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle } from 'react-konva';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
+import * as R from 'ramda';
 
-import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
+import {
+  LiveViewProps,
+  MaskProps,
+  AOIBoxProps,
+  AOILayerProps,
+  CreatingState,
+} from './LiveViewContainer.type';
 
-export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible, imageInfo }) => {
+const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
+  const transform = layer.getAbsoluteTransform().copy();
+  transform.invert();
+  const pos = layer.getStage().getPointerPosition();
+  return transform.point(pos);
+};
+
+export const LiveViewScene: React.FC<LiveViewProps> = ({
+  AOIs,
+  setAOIs,
+  visible,
+  imageInfo,
+  creatingState,
+  setCreatingState,
+}) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
   const imgRef = useRef(null);
-  const layerRef = useRef(null);
+  const layerRef = useRef<Konva.Layer>(null);
 
   const [imgEle, status, { width: imgWidth, height: imgHeight }] = imageInfo;
 
@@ -45,10 +66,32 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({ AOIs, setAOIs, visible,
     }
   }, [imgHeight, imgWidth]);
 
+  const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
+    if (creatingState === CreatingState.Disabled) return;
+
+    const { x, y } = getRelativePosition(e.target.getLayer());
+    setAOIs((prev) => [...prev, { x1: x, y1: y, x2: x, y2: y }]);
+    setCreatingState(CreatingState.Creating);
+  };
+
+  const onMouseMove = (e: KonvaEventObject<MouseEvent>): void => {
+    if (creatingState !== CreatingState.Creating) return;
+
+    const { x, y } = getRelativePosition(e.target.getLayer());
+    setAOIs(R.adjust(-1, (rear) => ({ ...rear, x2: x, y2: y })));
+  };
+
   return (
     <div ref={divRef} style={{ width: '100%', height: '100%' }}>
-      <Stage ref={stageRef}>
-        <Layer ref={layerRef}>
+      <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
+        <Layer
+          ref={layerRef}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={(): void => {
+            if (creatingState === CreatingState.Creating) setCreatingState(CreatingState.Waiting);
+          }}
+        >
           <KonvaImage image={imgEle} ref={imgRef} />
           {
             /* Render when image is loaded to prevent AOI boxes show in unscale size */

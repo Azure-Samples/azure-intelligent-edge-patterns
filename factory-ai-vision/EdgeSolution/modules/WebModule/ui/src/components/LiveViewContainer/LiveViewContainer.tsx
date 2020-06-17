@@ -6,6 +6,7 @@ import { Text, Checkbox, Flex, Button, Alert } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
 import { AOIData, Box } from '../../type';
 import useImage from '../LabelingPage/util/useImage';
+import { CreatingState } from './LiveViewContainer.type';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -19,7 +20,7 @@ export const LiveViewContainer: React.FC<{
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>(null);
   const imageInfo = useImage(`http://${window.location.hostname}:5000/video_feed?inference=1`, '');
-  const [creatingAOI, setCreatingAOI] = useState(false);
+  const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
 
   const onCheckboxClick = async (): Promise<void> => {
     setShowAOI(!showAOI);
@@ -91,9 +92,12 @@ export const LiveViewContainer: React.FC<{
         <Button content="Update" primary disabled={updateBtnDisabled} onClick={onUpdate} loading={loading} />
         <Button
           content="Create Area of Interest"
-          primary={!creatingAOI}
+          primary={creatingAOI !== CreatingState.Disabled}
           disabled={!showAOI}
-          onClick={(): void => setCreatingAOI((prev) => !prev)}
+          onClick={(): void => {
+            if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
+            else setCreatingAOI(CreatingState.Disabled);
+          }}
           circular
           styles={{ padding: '0 5px' }}
         />
@@ -101,7 +105,14 @@ export const LiveViewContainer: React.FC<{
       </Flex>
       <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
         {showVideo ? (
-          <LiveViewScene AOIs={AOIs} setAOIs={setAOIs} visible={showAOI} imageInfo={imageInfo} />
+          <LiveViewScene
+            AOIs={AOIs}
+            setAOIs={setAOIs}
+            visible={showAOI}
+            imageInfo={imageInfo}
+            creatingState={creatingAOI}
+            setCreatingState={setCreatingAOI}
+          />
         ) : null}
       </div>
     </Flex>
