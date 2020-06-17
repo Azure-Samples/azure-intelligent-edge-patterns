@@ -22,6 +22,7 @@ export type AOILayerProps = {
   AOIs: Box[];
   setAOIs: Dispatch<SetStateAction<Box[]>>;
   visible: boolean;
+  creatingState: CreatingState;
 };
 
 export type MaskProps = {
@@ -34,6 +35,10 @@ export type MaskProps = {
 export type AOIBoxProps = {
   box: Box;
   onBoxChange: (updateBox: (prevBox: Box) => Box) => void;
-  boundary: Box;
+  boundary: { x1: number; y1: number; x2: number; y2: number };
   visible: boolean;
+  radius: number;
+  strokeWidth: number;
+  removeBox: (id: string) => void;
+  creatingState: CreatingState;
 };

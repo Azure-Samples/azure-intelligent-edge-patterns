@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle } from 'react-konva';
+import React, { useEffect, useRef, useState } from 'react';
+import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle, Path, Rect } from 'react-konva';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import * as R from 'ramda';
+import uniqid from 'uniqid';
 
 import {
   LiveViewProps,
@@ -70,7 +71,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     if (creatingState === CreatingState.Disabled) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    setAOIs((prev) => [...prev, { x1: x, y1: y, x2: x, y2: y }]);
+    setAOIs((prev) => [...prev, { id: uniqid(), x1: x, y1: y, x2: x, y2: y }]);
     setCreatingState(CreatingState.Creating);
   };
 
@@ -102,6 +103,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
                 AOIs={AOIs}
                 setAOIs={setAOIs}
                 visible={visible}
+                creatingState={creatingState}
               />
             )
           }
@@ -111,16 +113,25 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   );
 };
 
-const AOILayer: React.FC<AOILayerProps> = ({ imgWidth, imgHeight, AOIs, setAOIs, visible }): JSX.Element => {
+const AOILayer: React.FC<AOILayerProps> = ({
+  imgWidth,
+  imgHeight,
+  AOIs,
+  setAOIs,
+  visible,
+  creatingState,
+}): JSX.Element => {
   return (
     <>
       <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
       {AOIs.map((e, i) => (
         <AOIBox
-          key={i}
+          key={e.id}
           box={e}
           visible={visible}
           boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+          radius={10}
+          strokeWidth={5}
           onBoxChange={(updateBox): void =>
             setAOIs((prev) => {
               const newBox = updateBox(prev[i]);
@@ -141,6 +152,10 @@ const AOILayer: React.FC<AOILayerProps> = ({ imgWidth, imgHeight, AOIs, setAOIs,
               return newAOIs;
             })
           }
+          removeBox={(id): void => {
+            setAOIs((prev) => prev.filter((ele) => ele.id !== id));
+          }}
+          creatingState={creatingState}
         />
       ))}
     </>
@@ -178,10 +193,19 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   );
 };
 
-const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary }) => {
+const AOIBox: React.FC<AOIBoxProps> = ({
+  box,
+  onBoxChange,
+  visible,
+  boundary,
+  radius,
+  strokeWidth,
+  removeBox,
+  creatingState,
+}) => {
   const { x1, y1, x2, y2 } = box;
   const COLOR = 'white';
-  const RADIUS = 20;
+  const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
 
   const handleDrag = (e: KonvaEventObject<DragEvent>): void => {
     let { x, y } = e.target.position();
@@ -225,16 +249,30 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary }) 
   };
 
   return (
-    <Group visible={visible}>
-      <Line points={[x1, y1, x1, y2, x2, y2, x2, y1]} closed stroke={COLOR} strokeWidth={10} />
-      <Circle draggable name="leftTop" x={x1} y={y1} radius={RADIUS} fill={COLOR} onDragMove={handleDrag} />
-      <Circle draggable name="rightTop" x={x2} y={y1} radius={RADIUS} fill={COLOR} onDragMove={handleDrag} />
+    <Group
+      visible={visible}
+      onMouseEnter={(): void => setCanceBtnVisible(true)}
+      onMouseLeave={(): void => setCanceBtnVisible(false)}
+      cache={[{ drawBorder: true }]}
+    >
+      {/** A bigger region for mouseEnter event */}
+      <Line x={x1} y={y1 - 40} points={[0, -40, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, -40]} closed />
+      <Line
+        x={x1}
+        y={y1}
+        points={[0, 0, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, 0]}
+        closed
+        stroke={COLOR}
+        strokeWidth={strokeWidth}
+      />
+      <Circle draggable name="leftTop" x={x1} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
+      <Circle draggable name="rightTop" x={x2} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
       <Circle
         draggable
         name="rightBottom"
         x={x2}
         y={y2}
-        radius={RADIUS}
+        radius={radius}
         fill={COLOR}
         onDragMove={handleDrag}
       />
@@ -243,9 +281,24 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary }) 
         name="leftBottom"
         x={x1}
         y={y2}
-        radius={RADIUS}
+        radius={radius}
         fill={COLOR}
         onDragMove={handleDrag}
+      />
+      <Path
+        x={x1}
+        y={y1 - 40}
+        data="M 0 0 L 25 25 M 25 0 L 0 25"
+        stroke="red"
+        strokeWidth={5}
+        visible={cancelBtnVisible && creatingState === CreatingState.Disabled}
+        onMouseEnter={(e): void => {
+          e.target.getStage().container().style.cursor = 'pointer';
+        }}
+        onMouseLeave={(e): void => {
+          e.target.getStage().container().style.cursor = 'default';
+        }}
+        onClick={(): void => removeBox(box.id)}
       />
     </Group>
   );

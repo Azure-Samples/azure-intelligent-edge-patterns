@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as R from 'ramda';
 import Axios from 'axios';
+import uniqid from 'uniqid';
 
 import { Text, Checkbox, Flex, Button, Alert } from '@fluentui/react-northstar';
 import { LiveViewScene } from './LiveViewScene';
@@ -69,7 +70,8 @@ export const LiveViewContainer: React.FC<{
   }, [showUpdateSuccessTxt]);
 
   useEffect(() => {
-    if (!AOIs.length) setAOIs([{ x1: 0, y1: 0, x2: imageInfo[2].width, y2: imageInfo[2].height }]);
+    if (!AOIs.length)
+      setAOIs([{ id: uniqid(), x1: 0, y1: 0, x2: imageInfo[2].width, y2: imageInfo[2].height }]);
   }, [AOIs.length, imageInfo[2].width, imageInfo[2].height]);
 
   const hasEdit = !R.equals(lasteUpdatedAOIs.current, AOIs);
