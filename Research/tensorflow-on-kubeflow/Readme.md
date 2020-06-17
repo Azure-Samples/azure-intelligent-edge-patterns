@@ -333,6 +333,16 @@ And the volume itself marked as `HostPath`:
 Now, from your script in the container you can write to that folder your serialized models during the intermediate
 steps. It is better to let the master node (with rank 0) to do the logging and serialization. And the master node
 should do the deserialization if needed.
+
+For our example, we save the `checkpoint`, model metadata and other information at our shared volume:
+
+    $ ls /mnt/shares/kfbuffer/
+    checkpoint                                                             model.ckpt-0.meta
+    events.out.tfevents.1592351909.dist-mnist-for-e2e-test-demo2-worker-0  t10k-images-idx3-ubyte.gz
+    graph.pbtxt                                                            t10k-labels-idx1-ubyte.gz
+    model.ckpt-0.data-00000-of-00001                                       train-images-idx3-ubyte.gz
+    model.ckpt-0.index                                                     train-labels-idx1-ubyte.gz
+
 See [save_and_load.ipynb](https://github.com/tensorflow/docs/blob/master/site/en/tutorials/distribute/save_and_load.ipynb) example notebook.
 
 # Links

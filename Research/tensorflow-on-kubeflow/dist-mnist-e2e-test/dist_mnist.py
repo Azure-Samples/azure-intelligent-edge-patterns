@@ -217,7 +217,8 @@ def main(unused_argv):
       sync_init_op = opt.get_init_tokens_op()
 
     init_op = tf.global_variables_initializer()
-    train_dir = tempfile.mkdtemp()
+    #train_dir = tempfile.mkdtemp()
+    train_dir = "/tmp/mnist-data"
 
     if FLAGS.sync_replicas:
       sv = tf.train.Supervisor(

@@ -13,6 +13,6 @@
 # limitations under the License.
 
 FROM tensorflow/tensorflow:1.5.0
-
+RUN mkdir /tmp/mnist-data
 ADD . /var/tf_dist_mnist
 ENTRYPOINT ["python", "/var/tf_dist_mnist/dist_mnist.py"]
