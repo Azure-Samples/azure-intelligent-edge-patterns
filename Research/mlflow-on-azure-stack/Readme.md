@@ -13,7 +13,12 @@ Make sure you have Porter installed. You can find the installation instructions 
 
 
 ## Step 2: Build Porter CNAB
-First you will need to navigate to this directory in the repository
+First you will need to navigate to this directory in the repository. For example 
+
+```sh
+cd ./research/mlflow-on-azure-stack
+```
+
 Next, you will build the porter CNAB
 
 ```sh
@@ -28,11 +33,19 @@ porter credentials generate
 ```
 Enter path to your kubeconfig file when prompted
 
+Validate that your credential is present by running the below command. You should see something like the below output.
+```sh
+porter credentials list
+```
+
+![List Porter Credentials](./docs/img/porter-credentials-validate.png)
+
+
 ## Step 4: Use Porter CNAB
 Run one of the below commands to interact with the CNAB
 
 ```sh
-porter install --cred <name of your credential>
-porter upgrade --cred <name of your credential>
-porter uninstall --cred <name of your credential>
+porter install --cred MLServicesInstaller
+porter upgrade --cred MLServicesInstaller
+porter uninstall --cred MLServicesInstaller
 ```
