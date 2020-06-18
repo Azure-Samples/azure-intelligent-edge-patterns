@@ -375,6 +375,7 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
             'name',
             'training_key',
             'endpoint',
+            'is_trainer_valid',
             'iot_hub_connection_string',
             'device_id',
             'module_id',
@@ -850,7 +851,7 @@ def _train(project_id, request):
                 log=e.message)
             return JsonResponse({'status': 'failed',
                                  'log': e.message},
-                                status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                                status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         # TODO: Remove in production
