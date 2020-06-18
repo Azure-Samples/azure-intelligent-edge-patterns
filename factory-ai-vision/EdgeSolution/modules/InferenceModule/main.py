@@ -200,7 +200,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                             send_counter += 1
                             # Modify here to change the threshold
                             if send_counter == 200:
-                                iot.send_message_to_output(json.dumps(self.last_predictions), 'metrics')
+                                iot.send_message_to_output(json.dumps(self.last_prediction), 'metrics')
                                 send_counter = 0
                         else:
                             send_counter += 1
