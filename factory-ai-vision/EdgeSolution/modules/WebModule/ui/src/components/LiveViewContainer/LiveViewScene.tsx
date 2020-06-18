@@ -282,7 +282,7 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, re
       />
       <Path
         x={x1}
-        y={y1 - 70}
+        y={y1 - 30 / scale}
         data="M 0 0 L 20 20 M 20 0 L 0 20"
         stroke="red"
         strokeWidth={5}

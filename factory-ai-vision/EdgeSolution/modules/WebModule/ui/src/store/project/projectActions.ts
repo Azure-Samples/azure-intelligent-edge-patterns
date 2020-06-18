@@ -206,7 +206,8 @@ export const thunkGetTrainingLog = (projectId: number) => (dispatch): Promise<an
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
-      else if (data.status === 'ok') dispatch(getTrainingLogSuccess('', Status.FinishTraining));
+      else if (data.status === 'ok' || data.status === 'demo ok')
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining));
       else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining));
       return void 0;
     })
