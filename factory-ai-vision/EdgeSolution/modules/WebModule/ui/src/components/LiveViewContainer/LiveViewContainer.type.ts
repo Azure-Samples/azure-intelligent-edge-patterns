@@ -37,8 +37,6 @@ export type AOIBoxProps = {
   onBoxChange: (updateBox: (prevBox: Box) => Box) => void;
   boundary: { x1: number; y1: number; x2: number; y2: number };
   visible: boolean;
-  radius: number;
-  strokeWidth: number;
   removeBox: (id: string) => void;
   creatingState: CreatingState;
 };
