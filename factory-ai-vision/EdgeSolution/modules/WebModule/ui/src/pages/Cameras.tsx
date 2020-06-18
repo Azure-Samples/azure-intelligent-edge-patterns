@@ -49,18 +49,22 @@ const Cameras: FC = (): JSX.Element => {
         ))}
       </Grid>
       <AddModuleDialog
+        header="Add Location"
         fields={[
           {
             placeholder: 'Name',
             key: 'name',
+            type: 'input',
           },
           {
             placeholder: 'RTSP URL',
             key: 'rtsp',
+            type: 'input',
           },
           {
             placeholder: 'Model Name',
             key: 'model_name',
+            type: 'input',
           },
         ]}
         onConfirm={({ name, rtsp, model_name }): void => {
