@@ -11,6 +11,8 @@ Make sure you have Porter installed. You can find the installation instructions 
 
 [Porter Installation Instructions](https://porter.sh/install/)
 
+**NOTE:** be sure to add porter to your PATH so it can find the binaries
+
 
 ## Step 2: Build Porter CNAB
 First you will need to navigate to this directory in the repository. For example 
