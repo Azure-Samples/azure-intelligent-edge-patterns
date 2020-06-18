@@ -12,11 +12,7 @@ export const PrivateRoute: React.FC<RouteProps> = ({ component, ...rest }) => {
     dispatch(thunkGetSetting());
   }, [dispatch]);
 
-  return (
-    <Route
-      {...rest}
-      component={null}
-      render={() => (isTrainerValid ? component : <Redirect to="/setting" />)}
-    />
-  );
+  if (isTrainerValid) return <Route {...rest} component={component} />;
+
+  return <Route {...rest} render={() => <Redirect to="/setting" />} />;
 };
