@@ -136,10 +136,9 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
         maxImages: data[0]?.maxImages ?? 50,
-        // TODO
-        sendMessageToCloud: false,
-        framesPerMin: 6,
-        accuracyThreshold: 50,
+        sendMessageToCloud: data[0]?.metrics_is_send_iothub,
+        framesPerMin: data[0]?.metrics_frame_per_minutes,
+        accuracyThreshold: data[0]?.metrics_accuracy_threshold,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -173,7 +172,9 @@ export const thunkPostProject = (
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
       maxImages: projectData.maxImages,
-      // TODO Send to BE
+      metrics_is_send_iothub: projectData.sendMessageToCloud,
+      metrics_frame_per_minutes: projectData.framesPerMin,
+      metrics_accuracy_threshold: projectData.accuracyThreshold,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
