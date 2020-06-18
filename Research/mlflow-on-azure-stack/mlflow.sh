@@ -6,6 +6,7 @@ install() {
   kubectl create namespace mlflow
   kubectl apply -f ./tracking_server.yaml --namespace mlflow
   kubectl get service mlflow-service --namespace mlflow --output jsonpath={.status.loadBalancer.ingress[0].ip}
+  echo test
 }
 
 upgrade() {
