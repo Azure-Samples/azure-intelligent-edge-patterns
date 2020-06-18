@@ -66,7 +66,29 @@ class CameraConfig(AppConfig):
             create_demo = True
             if create_demo:
                 logger.info("Creating Demo Parts")
-                for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
+                #for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
+                for partname in [
+                        'aeroplane',
+                        'bicycle',
+                        'bird',
+                        'boat',
+                        'bottle',
+                        'bus',
+                        'car',
+                        'cat',
+                        'chair',
+                        'cow',
+                        'diningtable',
+                        'dog',
+                        'horse',
+                        'motorbike',
+                        'person',
+                        'pottedplant',
+                        'sheep',
+                        'sofa',
+                        'train',
+                        'tvmonitor',
+                    ]:
                     demo_part, created = Part.objects.update_or_create(
                         name=partname,
                         is_demo=True,
@@ -81,7 +103,7 @@ class CameraConfig(AppConfig):
                     is_demo=True,
                     defaults={
                         'model_name': "Demo Model",
-                        'rtsp': 'sample_video/video_1min.mp4',
+                        'rtsp': 'sample_video/video.mp4',
                         'area': ""
                     }
                 )

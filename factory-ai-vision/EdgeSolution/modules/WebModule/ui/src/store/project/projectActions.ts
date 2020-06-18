@@ -136,6 +136,9 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
         maxImages: data[0]?.maxImages ?? 50,
+        sendMessageToCloud: data[0]?.metrics_is_send_iothub,
+        framesPerMin: data[0]?.metrics_frame_per_minutes,
+        accuracyThreshold: data[0]?.metrics_accuracy_threshold,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -169,6 +172,9 @@ export const thunkPostProject = (
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
       maxImages: projectData.maxImages,
+      metrics_is_send_iothub: projectData.sendMessageToCloud,
+      metrics_frame_per_minutes: projectData.framesPerMin,
+      metrics_accuracy_threshold: projectData.accuracyThreshold,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
@@ -206,7 +212,8 @@ export const thunkGetTrainingLog = (projectId: number) => (dispatch): Promise<an
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
-      else if (data.status === 'ok') dispatch(getTrainingLogSuccess('', Status.FinishTraining));
+      else if (data.status === 'ok' || data.status === 'demo ok')
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining));
       else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining));
       return void 0;
     })

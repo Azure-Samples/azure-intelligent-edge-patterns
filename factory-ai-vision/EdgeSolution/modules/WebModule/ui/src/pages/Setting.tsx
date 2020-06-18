@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, Reducer } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as R from 'ramda';
 import {
   Divider,
@@ -13,75 +13,28 @@ import {
   Dialog,
   QuestionCircleIcon,
   Tooltip,
-  Grid,
 } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
-import Axios, { AxiosRequestConfig } from 'axios';
+import Axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { useProject } from '../hooks/useProject';
 import { getAppInsights } from '../TelemetryService';
 import { WarningDialog } from '../components/WarningDialog';
-
-const initialState = {
-  loading: false,
-  error: null,
-  current: {
-    id: -1,
-    key: '',
-    namespace: '',
-  },
-  origin: {
-    id: -1,
-    key: '',
-    namespace: '',
-  },
-};
-
-type SettingDataState = typeof initialState;
-
-type Action =
-  | {
-      type: 'UPDATE_KEY';
-      payload: string;
-    }
-  | {
-      type: 'UPDATE_NAMESPACE';
-      payload: string;
-    }
-  | {
-      type: 'REQUEST_START';
-    }
-  | {
-      type: 'REQUEST_SUCCESS';
-      payload: SettingDataState;
-    }
-  | {
-      type: 'REQUEST_FAIL';
-      error: Error;
-    };
-
-type SettingReducer = Reducer<SettingDataState, Action>;
-
-const reducer: SettingReducer = (state, action) => {
-  switch (action.type) {
-    case 'UPDATE_KEY':
-      return { ...state, current: { ...state.current, key: action.payload } };
-    case 'UPDATE_NAMESPACE':
-      return { ...state, current: { ...state.current, namespace: action.payload } };
-    case 'REQUEST_START':
-      return { ...state, loading: true };
-    case 'REQUEST_SUCCESS':
-      return action.payload;
-    case 'REQUEST_FAIL':
-      return { ...state, error: action.error };
-    default:
-      return state;
-  }
-};
+import { State } from '../store/State';
+import { Setting as SettingType } from '../store/setting/settingType';
+import {
+  updateNamespace,
+  updateKey,
+  thunkGetSetting,
+  thunkPostSetting,
+} from '../store/setting/settingAction';
 
 export const Setting = (): JSX.Element => {
-  const [{ loading, error, current: settingData, origin: originSettingData }, dispatch] = useReducer<
-    SettingReducer
-  >(reducer, initialState);
+  const { loading, error, current: settingData, origin: originSettingData } = useSelector<State, SettingType>(
+    (state) => state.setting,
+  );
+  const dispatch = useDispatch();
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
 
@@ -90,88 +43,19 @@ export const Setting = (): JSX.Element => {
   const cannotUpdateOrSave = R.equals(settingData, originSettingData);
 
   useEffect(() => {
-    dispatch({ type: 'REQUEST_START' });
-
-    Axios.get('/api/settings/')
-      .then(({ data }) => {
-        if (data.length > 0) {
-          dispatch({
-            type: 'REQUEST_SUCCESS',
-            payload: {
-              loading: false,
-              error: null,
-              current: {
-                id: data[0].id,
-                key: data[0].training_key,
-                namespace: data[0].endpoint,
-              },
-              origin: {
-                id: data[0].id,
-                key: data[0].training_key,
-                namespace: data[0].endpoint,
-              },
-            },
-          });
-          setCheckboxChecked(data[0].is_collect_data);
-        }
-        return void 0;
-      })
-      .catch((err) => {
-        dispatch({ type: 'REQUEST_FAIL', error: err });
-      });
-  }, []);
+    (dispatch(thunkGetSetting()) as any)
+      .then((isCollectData: boolean) => setCheckboxChecked(isCollectData))
+      .catch((e) => console.error(e));
+  }, [dispatch]);
 
   const onSave = (): void => {
-    const isSettingEmpty = settingData.id === -1;
-    const url = isSettingEmpty ? `/api/settings/` : `/api/settings/${settingData.id}/`;
-    const requestConfig: AxiosRequestConfig = isSettingEmpty
-      ? {
-          data: {
-            training_key: settingData.key,
-            endpoint: settingData.namespace,
-            name: '',
-            iot_hub_connection_string: '',
-            device_id: '',
-            module_id: '',
-          },
-          method: 'POST',
-        }
-      : {
-          data: {
-            training_key: settingData.key,
-            endpoint: settingData.namespace,
-          },
-          method: 'PUT',
-        };
-
-    dispatch({ type: 'REQUEST_START' });
-
-    Axios(url, requestConfig)
-      .then(({ data }) => {
-        dispatch({
-          type: 'REQUEST_SUCCESS',
-          payload: {
-            loading: false,
-            error: null,
-            current: {
-              id: data.id,
-              key: data.training_key,
-              namespace: data.endpoint,
-            },
-            origin: {
-              id: data.id,
-              key: data.training_key,
-              namespace: data.endpoint,
-            },
-          },
-        });
+    (dispatch(thunkPostSetting()) as any)
+      .then(() => {
         // Reload page so PreviousProjectPanel can query again
         window.location.reload();
         return void 0;
       })
-      .catch((err) => {
-        dispatch({ type: 'REQUEST_FAIL', error: err });
-      });
+      .catch((e) => console.error(e));
   };
 
   const onCheckBoxClick = (): void => {
@@ -210,7 +94,9 @@ export const Setting = (): JSX.Element => {
             <Text size="large">Endpoint:</Text>
             <Input
               value={settingData.namespace}
-              onChange={(_, { value }): void => dispatch({ type: 'UPDATE_NAMESPACE', payload: value })}
+              onChange={(_, { value }): void => {
+                dispatch(updateNamespace(value));
+              }}
               fluid
             />
             <Tooltip
@@ -250,7 +136,9 @@ export const Setting = (): JSX.Element => {
             <Text size="large">Key:</Text>
             <Input
               value={settingData.key}
-              onChange={(_, { value }): void => dispatch({ type: 'UPDATE_KEY', payload: value })}
+              onChange={(_, { value }): void => {
+                dispatch(updateKey(value));
+              }}
               fluid
             />
           </div>

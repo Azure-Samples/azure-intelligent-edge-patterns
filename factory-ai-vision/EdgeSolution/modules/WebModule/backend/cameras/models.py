@@ -365,6 +365,10 @@ class Project(models.Model):
     retraining_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
 
+    metrics_is_send_iothub = models.BooleanField(default=False)
+    metrics_accuracy_threshold = models.IntegerField(default=50)
+    metrics_frame_per_minutes = models.IntegerField(default=6)
+
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
         logger.info("Project pre_save")
