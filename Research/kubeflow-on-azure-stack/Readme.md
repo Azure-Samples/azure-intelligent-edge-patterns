@@ -309,6 +309,12 @@ Once you create a server, you can connect to it and upload Python files.
 
 ![pics/kubeflow_dashboard3_notebook.png](pics/kubeflow_dashboard3_notebook.png)
 
+You can click the button `Upload`, and upload the provided `demo_notebook.ipynb`, than click
+button `Run` to execute, you should see something like this:
+
+![(pics/demo_notebook.png](pics/demo_notebook.png)
+
+
 ## TFjob
 
 [TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
