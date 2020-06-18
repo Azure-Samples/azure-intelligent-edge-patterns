@@ -425,7 +425,10 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             'needRetraining',
             'accuracyRangeMin',
             'accuracyRangeMax',
-            'maxImages'
+            'maxImages',
+            'metrics_is_send_iothub',
+            'metrics_accuracy_threshold',
+            'metrics_frame_per_minutes',
         ]
         extra_kwargs = {
             'setting': {'required': False},
