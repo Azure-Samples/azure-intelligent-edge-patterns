@@ -698,18 +698,18 @@ def _train(project_id, request):
 
         # Delete tags on CustomVisioin Project
         # Maybe move to Project Model?
-        logger.info("Deleting tags before training...")
-        counter = 0
-        for tag_name in tag_dict.keys():
-            if tag_name not in project_partnames:
-                counter += 1
-                logger.info(
-                    f"Deleting tag: {tag_name}, id: {tag_dict[tag_name]}")
-                trainer.delete_tag(project_id=customvision_project_id,
-                                   tag_id=tag_dict[tag_name])
-        project_changed = project_changed or (counter > 0)
-        logger.info(f"Deleted {counter} tags")
-        logger.info("Deleting tags... Done")
+        # logger.info("Deleting tags before training...")
+        # counter = 0
+        # for tag_name in tag_dict.keys():
+        # if tag_name not in project_partnames:
+        # counter += 1
+        # logger.info(
+        # f"Deleting tag: {tag_name}, id: {tag_dict[tag_name]}")
+        # trainer.delete_tag(project_id=customvision_project_id,
+        # tag_id=tag_dict[tag_name])
+        # project_changed = project_changed or (counter > 0)
+        # logger.info(f"Deleted {counter} tags")
+        # logger.info("Deleting tags... Done")
 
         # # Delete untagged images on CustomVisioin Project
         # # Maybe move to Project Model?
