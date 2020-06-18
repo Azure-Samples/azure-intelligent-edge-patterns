@@ -11,21 +11,22 @@ import ManualIdentification from '../pages/ManualIdentification';
 import { Parts } from '../pages/Parts';
 import { PartIdentification } from '../pages/PartIdentification';
 import { Setting } from '../pages/Setting';
+import { PrivateRoute } from './PrivateRoute';
 
 export const RootRouter: FC = () => {
   return (
     <Switch>
-      <Route path="/manual" component={ManualIdentification} />
-      <Route path="/locations/register" component={LocationRegister} />
-      <Route path="/locations/detail" component={LocationDetails} />
-      <Route path="/locations" component={Locations} />
-      <Route path="/cameras/detail" component={CameraDetails} />
-      <Route path="/cameras" component={Cameras} />
-      <Route path="/parts/detail" component={PartDetails} />
-      <Route path="/parts" component={Parts} />
-      <Route path="/partIdentification" component={PartIdentification} />
+      <PrivateRoute path="/manual" component={ManualIdentification} />
+      <PrivateRoute path="/locations/register" component={LocationRegister} />
+      <PrivateRoute path="/locations/detail" component={LocationDetails} />
+      <PrivateRoute path="/locations" component={Locations} />
+      <PrivateRoute path="/cameras/detail" component={CameraDetails} />
+      <PrivateRoute path="/cameras" component={Cameras} />
+      <PrivateRoute path="/parts/detail" component={PartDetails} />
+      <PrivateRoute path="/parts" component={Parts} />
+      <PrivateRoute path="/partIdentification" component={PartIdentification} />
       <Route path="/setting" component={Setting} />
-      <Route path="/" component={Home} />
+      <PrivateRoute path="/" component={Home} />
     </Switch>
   );
 };
