@@ -4,6 +4,7 @@ import { Part } from './part/partTypes';
 import { Location } from './location/locationTypes';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
+import { Setting } from './setting/settingType';
 
 export interface State {
   dialogIsOpen: boolean;
@@ -13,6 +14,7 @@ export interface State {
   part: Part;
   project: Project;
   images: LabelImage[];
+  setting: Setting;
 }
 
 export type LabelingPageState = { annotations: Annotation[] };
@@ -54,5 +56,19 @@ export const initialState: State = {
     status: Status.None,
     error: null,
     trainingLog: '',
+  },
+  setting: {
+    loading: false,
+    error: null,
+    current: {
+      id: -1,
+      key: '',
+      namespace: '',
+    },
+    origin: {
+      id: -1,
+      key: '',
+      namespace: '',
+    },
   },
 };
