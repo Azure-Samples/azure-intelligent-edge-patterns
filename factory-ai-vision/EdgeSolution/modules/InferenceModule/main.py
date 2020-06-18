@@ -301,8 +301,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-#model_dir = './default_model'
-model_dir = './default_model_6parts'
+model_dir = './default_model'
+#model_dir = './default_model_6parts'
 onnx = ONNXRuntimeModelDeploy(model_dir)
 onnx.start_session()
 

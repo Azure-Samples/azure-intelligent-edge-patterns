@@ -893,7 +893,8 @@ def train(request, project_id):
                          params={'cam_type': 'rtsp', 'cam_source': rtsp})
 
         requests.get('http://'+inference_module_url() +
-                     '/update_model', params={'model_dir': 'default_model_6parts'})
+                     '/update_model', params={'model_dir': 'default_model'})
+                     #'/update_model', params={'model_dir': 'default_model_6parts'})
 
         logger.info(f'Update parts {parts}')
         requests.get('http://'+inference_module_url() +
