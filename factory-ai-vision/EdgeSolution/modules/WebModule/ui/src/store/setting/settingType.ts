@@ -13,6 +13,7 @@ export type Setting = {
   error: Error;
   current: SettingData;
   origin: SettingData;
+  isTrainerValid: boolean;
 };
 
 export type UpdateKeyAction = {

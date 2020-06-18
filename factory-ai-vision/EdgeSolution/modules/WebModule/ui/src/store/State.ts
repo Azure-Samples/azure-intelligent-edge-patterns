@@ -70,5 +70,6 @@ export const initialState: State = {
       key: '',
       namespace: '',
     },
+    isTrainerValid: false,
   },
 };

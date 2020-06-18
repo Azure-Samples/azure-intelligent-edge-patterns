@@ -51,6 +51,7 @@ export const thunkGetSetting = () => (dispatch): Promise<any> => {
               key: data[0].training_key,
               namespace: data[0].endpoint,
             },
+            isTrainerValid: data[0].is_trainer_valid,
           }),
         );
       }
@@ -103,6 +104,7 @@ export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promis
             key: data.training_key,
             namespace: data.endpoint,
           },
+          isTrainerValid: data.is_trainer_valid,
         }),
       );
       return void 0;
