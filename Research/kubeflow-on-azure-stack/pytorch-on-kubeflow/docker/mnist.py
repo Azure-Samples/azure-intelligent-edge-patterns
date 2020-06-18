@@ -93,8 +93,8 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                        help='number of epochs to train (default: 10)')
+    parser.add_argument('--epochs', type=int, default=5, metavar='N',
+                        help='number of epochs to train (default: 5)')
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
     parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
@@ -107,7 +107,7 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
-    parser.add_argument('--dir', default='logs', metavar='L',
+    parser.add_argument('--dir', default='/tmp/mnist-data', metavar='L',
                         help='directory where summary logs are stored')
     
     if dist.is_available():
@@ -139,14 +139,14 @@ def main():
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=True, download=True,
+        datasets.MNIST(f"{args.dir}/data", train=True, download=True,
                        transform=transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
         batch_size=args.batch_size, shuffle=True, **kwargs)
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=False, transform=transforms.Compose([
+        datasets.MNIST(f"{args.dir}/data", train=False, transform=transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
@@ -165,19 +165,21 @@ def main():
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
     print(f"Total epochs: {args.epochs}")
+    print(f"args.save_model: {args.save_model}")
+    print(f"args.dir: \"{args.dir}\"")    
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch, writer)
         if epoch %5 == 1: 
-            if (args.save_model and myrank == 0):
-                print(f"saving model to 'mnist_cnn_epoch{epoch}.pt'...")
-                torch.save(model.state_dict(),f"mnist_cnn_epoch{epoch}.pt")
+            if (args.save_model and int(myrank) == 0):
+                print(f"saving model to \"{args.dir}/mnist_cnn_epoch{epoch}.pt\"...")
+                torch.save(model.state_dict(),f"{args.dir}/mnist_cnn_epoch{epoch}.pt")
         
           
         test(args, model, device, test_loader, writer, epoch)
 
     if (args.save_model):
         print(f"saving model to 'mnist_cnn.pt'...")
-        torch.save(model.state_dict(),"mnist_cnn.pt")
+        torch.save(model.state_dict(),f"{args.dir}/mnist_cnn.pt")
         
 if __name__ == '__main__':
     main()

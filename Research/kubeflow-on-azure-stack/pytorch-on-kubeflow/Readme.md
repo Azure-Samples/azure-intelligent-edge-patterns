@@ -266,6 +266,58 @@ Here is a sample of the output:
     Train Epoch: 1 [59520/60000 (99%)]      loss=0.0645
     accuracy=0.9666
 
+If you mounted the persistent storage to your cluster as described in [Installing Storage](../installing_storage.md), you can attach it to your `PyTorchJob`(i.e. using provided .yaml):
+
+    $ kubectl create -f pytorch_job_mnist_gloo_demo-with-persistence.yaml
+    pytorchjob.kubeflow.org/pytorch-dist-mnist-gloo-demo created
+
+And not you can see the snapshots of your model:
+
+    $ ls /mnt/shares/kfjbuffer/
+    data
+    mnist_cnn_epoch1.pt
+    mnist_cnn_epoch2.pt
+    mnist_cnn_epoch3.pt
+    mnist_cnn_epoch4.pt
+    mnist_cnn_epoch5.pt
+    mnist_cnn.pt
+    events.out.tfevents.1592502623.pytorch-dist-mnist-gloo-demo2-master-0
+    events.out.tfevents.1592502630.pytorch-dist-mnist-gloo-demo2-worker-1
+    events.out.tfevents.1592502631.pytorch-dist-mnist-gloo-demo2-worker-0
+    events.out.tfevents.1592502632.pytorch-dist-mnist-gloo-demo2-worker-3
+    events.out.tfevents.1592502635.pytorch-dist-mnist-gloo-demo2-worker-2
+    events.out.tfevents.1592502640.pytorch-dist-mnist-gloo-demo2-master-0
+    events.out.tfevents.1592502640.pytorch-dist-mnist-gloo-demo2-worker-0
+    events.out.tfevents.1592502640.pytorch-dist-mnist-gloo-demo2-worker-1
+    events.out.tfevents.1592502640.pytorch-dist-mnist-gloo-demo2-worker-3
+    events.out.tfevents.1592502641.pytorch-dist-mnist-gloo-demo2-worker-2
+
+Look at the logs to see the progress:
+
+    $ kubectl logs pytorch-dist-mnist-gloo-demo2-master-0
+    WORLD_SIZE is 5
+    RANK is 0
+    MASTER_ADDR is localhost
+    MASTER_PORT is 23456
+    dist.is_available() is True
+    device is cpu
+    Using distributed PyTorch with gloo backend
+    creating a Distributor
+    Total epochs: 5
+    args.save_model: True
+    args.dir: "/tmp/mnist-data"
+    Train Epoch: 1 [0/60000 (0%)]   loss=2.3000
+    Train Epoch: 1 [640/60000 (1%)] loss=2.2135
+    Train Epoch: 1 [1280/60000 (2%)]        loss=2.1704
+    ...
+    Train Epoch: 5 [58240/60000 (97%)]      loss=0.0068
+    Train Epoch: 5 [58880/60000 (98%)]      loss=0.0423
+    Train Epoch: 5 [59520/60000 (99%)]      loss=0.0119
+    saving model to "/tmp/mnist-data/mnist_cnn_epoch5.pt"...
+    accuracy=0.9872
+    saving model to 'mnist_cnn.pt'...
+
+See more on PyTorch at [https://github.com/pytorch/pytorch](https://github.com/pytorch/pytorch)
 
 # Links
 

@@ -18,6 +18,9 @@ Previous familiarity with the following is recommended:
 
 For obvious reasons, distributed training of the models is easier to see if the cluster has more than one node in its pool, and, respectively, at least that amount of the replicas for the worker conterner instances.
 
+**IMPORTANT: for the demo, you will need to have a DockerHub account, replace `rollingstone` with your
+own account name in the commands and .yamls below.**
+
 # Installation
 
 Please see the `Kubeflow on Azure Stack` module of this repository, or [https://www.kubeflow.org](https://www.kubeflow.org) for details of using Kubeflow and installing it on Azure or Azure Stack.
@@ -39,14 +42,15 @@ You do not have to re-build the image, you can use `kubeflow/tf-dist-mnist-test:
 
     $ cd tensorflow-on-kubeflow/dist-mnist-e2e-test
 
-Login to your Docker account:
+Login to your Docker account(we use account `"rollingstone"`, but you will need to substitute it for your own
+in all commands and .yamls):
 
     $ docker login
     ... enter the credentials if needed ...
 
 Build the image:
 
-    $ docker build -f Dockerfile -t rollingstones/tf-dist-mnist-test:1.0 ./
+    $ docker build -f Dockerfile -t rollingstone/tf-dist-mnist-test:1.0 ./
     Sending build context to Docker daemon  18.94kB
     Step 1/3 : FROM tensorflow/tensorflow:1.5.0
     1.5.0: Pulling from tensorflow/tensorflow
@@ -63,12 +67,12 @@ Build the image:
     Removing intermediate container 7defb9c160d7
     ---> b9fc305fb63a
     Successfully built b9fc305fb63a
-    Successfully tagged rollingstones/tf-dist-mnist-test:1.0
+    Successfully tagged rollingstone/tf-dist-mnist-test:1.0
 
 And to push to DockerHub or another container registry or artifactory:
 
-    $ docker push rollingstones/tf-dist-mnist-test:1.0
-    The push refers to repository [docker.io/rollingstones/tf-dist-mnist-test]
+    $ docker push rollingstone/tf-dist-mnist-test:1.0
+    The push refers to repository [docker.io/rollingstone/tf-dist-mnist-test]
     ce40b6a5f992: Pushed 
     c04a36d9e118: Mounted from tensorflow/tensorflow
     ...
@@ -76,8 +80,10 @@ And to push to DockerHub or another container registry or artifactory:
 
 # Running a TFJob
 
-Create a tf_job_mnist-e2e-test.yaml file:
+Create a tf_job_mnist-e2e-test.yaml file, it should look like the one we provided:
 
+
+    $ cat tf_job_mnist-e2e-test.yaml
     apiVersion: "kubeflow.org/v1"
     kind: "TFJob"
     metadata:
@@ -91,7 +97,7 @@ Create a tf_job_mnist-e2e-test.yaml file:
             spec:
               containers:
                 - name: tensorflow
-                  image: rollingstones/tf-dist-mnist-test:1.0
+                  image: rollingstone/tf-dist-mnist-test:1.0
         Worker:
           replicas: 3
           restartPolicy: OnFailure
@@ -99,7 +105,7 @@ Create a tf_job_mnist-e2e-test.yaml file:
             spec:
             containers:
               - name: tensorflow
-                image: rollingstones/tf-dist-mnist-test:1.0
+                image: rollingstone/tf-dist-mnist-test:1.0
 
 To run a TFJob:
 
@@ -195,7 +201,52 @@ Now, from your script in the container you can write to that folder your seriali
 steps. It is better to let the master node (with rank 0) to do the logging and serialization. And the master node
 should do the deserialization if needed.
 
-For our example, we save the `checkpoint`, model metadata and other information at our shared volume:
+Your updated .yaml should look something like:
+
+    $ cat tf_job_mnist-e2e-test-with_persistence.yaml
+    apiVersion: "kubeflow.org/v1"
+    kind: "TFJob"
+    metadata:
+      name: "dist-mnist-for-e2e-test-demo"
+    spec:
+      tfReplicaSpecs:
+        PS:
+          replicas: 1
+          restartPolicy: OnFailure
+          template:
+            spec:
+              containers:
+              - name: tensorflow
+                image: kubeflow/tf-dist-mnist-test:1.0
+                volumeMounts:
+                - mountPath: "/tmp/mnist-data"
+                  name: samba-share-volume2
+              volumes:
+              - name: samba-share-volume2
+                persistentVolumeClaim:
+                  claimName: samba-share-claim
+        Worker:
+          replicas: 3
+          restartPolicy: OnFailure
+          template:
+            spec:
+              containers:
+              - name: tensorflow
+                image: kubeflow/tf-dist-mnist-test:1.0
+                volumeMounts:
+                - mountPath: "/tmp/mnist-data"
+                  name: samba-share-volume2
+              volumes:
+              - name: samba-share-volume2
+                persistentVolumeClaim:
+                  claimName: samba-share-claim
+
+For our example, we save the `checkpoint`, model metadata and other information at our shared volume,
+a typical run would be:
+
+    $ kubectl create -f tf_job_mnist-e2e-test-with_persistence.yaml
+
+And soon after, you should see the serialized model in your folder:
 
     $ ls /mnt/shares/kfbuffer/
     checkpoint                                                             model.ckpt-0.meta
@@ -204,7 +255,7 @@ For our example, we save the `checkpoint`, model metadata and other information 
     model.ckpt-0.data-00000-of-00001                                       train-images-idx3-ubyte.gz
     model.ckpt-0.index                                                     train-labels-idx1-ubyte.gz
 
-See [save_and_load.ipynb](https://github.com/tensorflow/docs/blob/master/site/en/tutorials/distribute/save_and_load.ipynb) example notebook.
+For more tutorials and How-Tos, see TensorFlow's [save_and_load.ipynb](https://github.com/tensorflow/docs/blob/master/site/en/tutorials/distribute/save_and_load.ipynb) example notebook.
 
 # Links
 
