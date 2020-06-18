@@ -80,6 +80,7 @@ mmap_4 = stats_recorder.new_measurement_map()
 def get_app_insight_logger():
     app_insight_logger = logging.getLogger(
         "Backend-Training-App-Insight")
+    app_insight_logger.handlers = []
     app_insight_logger.addHandler(AzureLogHandler(
         connection_string=APP_INSIGHT_CONN_STR)
     )
