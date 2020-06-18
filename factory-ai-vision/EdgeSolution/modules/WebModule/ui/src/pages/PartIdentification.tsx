@@ -52,6 +52,9 @@ export const PartIdentification: React.FC = () => {
     accuracyRangeMin,
     accuracyRangeMax,
     maxImages: maxImage,
+    sendMessageToCloud,
+    framesPerMin,
+    accuracyThreshold,
   } = data;
   const [isTestModel, setIsTestModel] = useState(false);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
@@ -111,6 +114,7 @@ export const PartIdentification: React.FC = () => {
   };
 
   const accracyRangeDisabled = !needRetraining || isTestModel;
+  const messageToCloudDisabled = !sendMessageToCloud || isTestModel;
 
   return (
     <>
@@ -148,50 +152,82 @@ export const PartIdentification: React.FC = () => {
           isMultiple={false}
           isTestModel={isTestModel}
         />
-        <Checkbox
-          label="Set up retraining"
-          checked={needRetraining}
-          onChange={(_, { checked }): void => setData('needRetraining', checked)}
-          disabled={isTestModel}
-        />
-        <Text disabled={accracyRangeDisabled}>Accuracy Range</Text>
-        <Text disabled={accracyRangeDisabled}>
-          Minimum:{' '}
-          <Input
-            type="number"
-            disabled={accracyRangeDisabled}
-            inline
-            value={accuracyRangeMin}
-            onChange={(_, { value }): void => setData('accuracyRangeMin', value)}
-          />
-          %
-        </Text>
-        <Text disabled={accracyRangeDisabled}>
-          Maximum:{' '}
-          <Input
-            type="number"
-            disabled={accracyRangeDisabled}
-            inline
-            value={accuracyRangeMax}
-            onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
-          />
-          %
-        </Text>
-        <Text disabled={accracyRangeDisabled}>
-          Maximum Images:{' '}
-          <Input
-            type="number"
-            disabled={accracyRangeDisabled}
-            inline
-            value={maxImage}
-            onChange={(_, { value }): void => {
-              if ((value as any) < 15) setMaxImgCountError(true);
-              else setMaxImgCountError(false);
-              setData('maxImages', value);
-            }}
-          />
-          {maxImgCountError && <Text error>Cannot be less than 15</Text>}
-        </Text>
+        <Flex gap="gap.large">
+          <Flex column gap="gap.medium">
+            <Checkbox
+              label="Set up retraining"
+              checked={needRetraining}
+              onChange={(_, { checked }): void => setData('needRetraining', checked)}
+              disabled={isTestModel}
+            />
+            <Text disabled={accracyRangeDisabled}>Accuracy Range</Text>
+            <Text disabled={accracyRangeDisabled}>
+              Minimum:{' '}
+              <Input
+                type="number"
+                disabled={accracyRangeDisabled}
+                inline
+                value={accuracyRangeMin}
+                onChange={(_, { value }): void => setData('accuracyRangeMin', value)}
+              />
+              %
+            </Text>
+            <Text disabled={accracyRangeDisabled}>
+              Maximum:{' '}
+              <Input
+                type="number"
+                disabled={accracyRangeDisabled}
+                inline
+                value={accuracyRangeMax}
+                onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
+              />
+              %
+            </Text>
+            <Text disabled={accracyRangeDisabled}>
+              Maximum Images:{' '}
+              <Input
+                type="number"
+                disabled={accracyRangeDisabled}
+                inline
+                value={maxImage}
+                onChange={(_, { value }): void => {
+                  if ((value as any) < 15) setMaxImgCountError(true);
+                  else setMaxImgCountError(false);
+                  setData('maxImages', value);
+                }}
+              />
+              {maxImgCountError && <Text error>Cannot be less than 15</Text>}
+            </Text>
+          </Flex>
+          <Flex column gap="gap.medium">
+            <Checkbox
+              label="Send message to cloud"
+              checked={sendMessageToCloud}
+              onChange={(_, { checked }): void => setData('sendMessageToCloud', checked)}
+              disabled={isTestModel}
+            />
+            <Text disabled={messageToCloudDisabled}>
+              Frames per minute:{' '}
+              <Input
+                type="number"
+                disabled={messageToCloudDisabled}
+                inline
+                value={framesPerMin}
+                onChange={(_, { value }): void => setData('framesPerMin', value)}
+              />
+            </Text>
+            <Text disabled={messageToCloudDisabled}>
+              Accuracy threshold:{' '}
+              <Input
+                type="number"
+                disabled={messageToCloudDisabled}
+                inline
+                value={accuracyThreshold}
+                onChange={(_, { value }): void => setData('accuracyThreshold', value)}
+              />
+            </Text>
+          </Flex>
+        </Flex>
         <Link to="">Advanced Configuration</Link>
         <Button
           content="Configure"
