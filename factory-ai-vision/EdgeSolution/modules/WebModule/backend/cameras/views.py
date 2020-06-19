@@ -417,7 +417,10 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             'needRetraining',
             'accuracyRangeMin',
             'accuracyRangeMax',
-            'maxImages'
+            'maxImages',
+            'metrics_is_send_iothub',
+            'metrics_accuracy_threshold',
+            'metrics_frame_per_minutes',
         ]
         extra_kwargs = {
             'setting': {'required': False},
@@ -886,7 +889,8 @@ def train(request, project_id):
                          params={'cam_type': 'rtsp', 'cam_source': rtsp})
 
         requests.get('http://'+inference_module_url() +
-                     '/update_model', params={'model_dir': 'default_model_6parts'})
+                     '/update_model', params={'model_dir': 'default_model'})
+        # '/update_model', params={'model_dir': 'default_model_6parts'})
 
         logger.info(f'Update parts {parts}')
         requests.get('http://'+inference_module_url() +
@@ -1209,7 +1213,7 @@ def reset_project(request, project_id):
     project_obj.needRetraining = False
     project_obj.accuracyRangeMin = 30
     project_obj.accuracyRangeMax = 80
-    project_obj.maxImages = 10
+    project_obj.maxImages = 20
     project_obj.deployed = False
     project_obj.train_try_counter = 0
     project_obj.train_success_counter = 0
