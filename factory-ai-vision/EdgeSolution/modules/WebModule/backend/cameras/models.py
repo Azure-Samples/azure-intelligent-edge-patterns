@@ -578,9 +578,10 @@ class Project(models.Model):
                     'parts': parts_now-parts_last_train,
                     'retrain': retrain,
                     'source': source}})
-        except Exception as e:
+        except Exception:
             logger.exception(
                 "update_app_insight_counter occur unexcepted error")
+            raise
 
     def train_project(self):
         """
@@ -610,13 +611,13 @@ class Project(models.Model):
             # If all above is success
             is_task_success = True
             return is_task_success
-        except CustomVisionErrorException as e:
+        except CustomVisionErrorException as customvision_err:
             logger.error(
-                f'From Custom Vision: {e.message}')
-            raise e
-        except Exception as unexpected_error:
+                f'From Custom Vision: {customvision_err.message}')
+            raise
+        except Exception:
             logger.exception('Unexpected error while Project.train_project')
-            raise e
+            raise
         finally:
             self.save(update_fields=update_fields)
 
@@ -661,7 +662,6 @@ class Task(models.Model):
             project_obj = self.project
             trainer = project_obj.setting.revalidate_and_get_trainer_obj()
             customvision_project_id = project_obj.customvision_project_id
-            camera = project_obj.camera
             while True:
                 time.sleep(1)
                 iterations = trainer.get_iterations(customvision_project_id)
@@ -788,7 +788,6 @@ class Stream(object):
         while self.status == 'running':
             if not self.cap.isOpened():
                 raise ValueError("Cannot connect to rtsp")
-                break
             t, img = self.cap.read()
             # Need to add the video flag FIXME
             if t == False:
