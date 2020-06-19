@@ -125,10 +125,9 @@ export const PartIdentification: React.FC = () => {
       {error && (
         <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
       )}
-      <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
       <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
         <ModuleSelector
-          moduleName="cameras"
+          moduleName="camera"
           to="/cameras"
           value={selectedCamera}
           setSelectedModuleItem={setSelectedCameraById}
@@ -144,7 +143,7 @@ export const PartIdentification: React.FC = () => {
           isMultiple={true}
         />
         <ModuleSelector
-          moduleName="locations"
+          moduleName="location"
           to="/locations"
           value={selectedLocations}
           setSelectedModuleItem={setSelectedLocationById}
@@ -160,7 +159,7 @@ export const PartIdentification: React.FC = () => {
               onChange={(_, { checked }): void => setData('needRetraining', checked)}
               disabled={isTestModel}
             />
-            <Text disabled={accracyRangeDisabled}>Accuracy Range</Text>
+            <Text disabled={accracyRangeDisabled}>Capture Image</Text>
             <Text disabled={accracyRangeDisabled}>
               Minimum:{' '}
               <Input
@@ -184,7 +183,7 @@ export const PartIdentification: React.FC = () => {
               %
             </Text>
             <Text disabled={accracyRangeDisabled}>
-              Maximum Images:{' '}
+              Maximum Images to Store:{' '}
               <Input
                 type="number"
                 disabled={accracyRangeDisabled}
@@ -228,14 +227,16 @@ export const PartIdentification: React.FC = () => {
             </Text>
           </Flex>
         </Flex>
-        <Link to="">Advanced Configuration</Link>
-        <Button
-          content="Configure"
-          primary
-          onClick={handleSubmitConfigure}
-          disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
-          loading={isLoading}
-        />
+        <Flex gap="gap.large">
+          <Button
+            content="Configure"
+            primary
+            onClick={handleSubmitConfigure}
+            disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
+            loading={isLoading}
+          />
+          <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
+        </Flex>
       </Flex>
     </>
   );
@@ -243,49 +244,23 @@ export const PartIdentification: React.FC = () => {
 
 const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
   if (isTestModel) {
-    return (
-      <Button
-        styles={{
-          backgroundColor: '#ff9727',
-          ':hover': {
-            backgroundColor: '#cf7a1f',
-          },
-          ':active': {
-            backgroundColor: '#cf7a1f',
-          },
-        }}
-        content="Back"
-        onClick={(): void => setIsTestModel(false)}
-        primary
-      />
-    );
+    return <Button content="Back" onClick={(): void => setIsTestModel(false)} primary />;
   }
 
   return (
     <WarningDialog
-      confirmButton="Confirm to use test model"
+      confirmButton="Confirm"
       onConfirm={(): void => setIsTestModel(true)}
       contentText={
         <>
-          <p>Test model is for seeing inference result, no retraining experience here.</p>
+          <p>
+            &quot;Demo Pretrained Detection&quot; is for seeing inference result, no retraining experience
+            here.
+          </p>
           <p>For retraining experience, please create a new model</p>
         </>
       }
-      trigger={
-        <Button
-          styles={{
-            backgroundColor: '#ff9727',
-            ':hover': {
-              backgroundColor: '#cf7a1f',
-            },
-            ':active': {
-              backgroundColor: '#cf7a1f',
-            },
-          }}
-          content="Test Model"
-          primary
-        />
-      }
+      trigger={<Button content="Demo Pretrained Detection" primary />}
     />
   );
 };

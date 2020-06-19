@@ -135,7 +135,7 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
-        maxImages: data[0]?.maxImages ?? 50,
+        maxImages: data[0]?.maxImages ?? 20,
         sendMessageToCloud: data[0]?.metrics_is_send_iothub,
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
