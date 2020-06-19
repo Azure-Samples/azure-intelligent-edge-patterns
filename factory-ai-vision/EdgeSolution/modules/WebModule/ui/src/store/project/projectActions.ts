@@ -44,6 +44,8 @@ import {
   START_INFERENCE,
   STOP_INFERENCE,
   StopInferenceAction,
+  UPDATE_ORIGIN_PROJECT_DATA,
+  UpdateOriginProjectDataAction,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -117,6 +119,10 @@ export const stopInference = (): StopInferenceAction => ({
 export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
   payload: projectData,
+});
+
+export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({
+  type: UPDATE_ORIGIN_PROJECT_DATA,
 });
 
 export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {

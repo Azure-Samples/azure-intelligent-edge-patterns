@@ -29,7 +29,7 @@ import {
   thunkGetSetting,
   thunkPostSetting,
 } from '../store/setting/settingAction';
-import { updateProjectData } from '../store/project/projectActions';
+import { updateProjectData, updateOriginProjectData } from '../store/project/projectActions';
 
 export const Setting = (): JSX.Element => {
   const { loading, error, current: settingData, origin: originSettingData, isTrainerValid } = useSelector<
@@ -205,7 +205,9 @@ const initialDropdownItem = [
 ];
 
 const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = ({ cvProjects }) => {
-  const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
+  const { isLoading: isProjectLoading, error: projectError, data: projectData, originData } = useProject(
+    false,
+  );
   const [loadFullImages, setLoadFullImages] = useState(false);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
@@ -226,6 +228,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
         projectData.cvProjectId
       }&partial=${Number(!loadFullImages)}`,
     )
+      .then(() => dispatch(updateOriginProjectData()))
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
   };
@@ -277,7 +280,12 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
           contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
           onConfirm={onLoad}
           trigger={
-            <Button primary content="Load" disabled={!projectData.cvProjectId || loading} loading={loading} />
+            <Button
+              primary
+              content="Load"
+              disabled={(!loadFullImages && projectData.cvProjectId === originData.cvProjectId) || loading}
+              loading={loading}
+            />
           }
         />
         <WarningDialog
