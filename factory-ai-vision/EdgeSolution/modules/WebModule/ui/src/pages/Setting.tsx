@@ -212,6 +212,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
   const [createProjectModel, setCreateProjectModel] = useState(false);
+  const [projectName, setProjectName] = useState('');
   const dispatch = useDispatch();
 
   const onDropdownChange = (_, data): void => {
@@ -235,7 +236,8 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
 
   const onCreateNewProject = (): void => {
     setOtherLoading(true);
-    Axios.get(`/api/projects/${projectData.id}/reset_project`)
+    Axios.get(`/api/projects/${projectData.id}/reset_project?project_name=${projectName}`)
+      .then(() => window.location.reload())
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
   };
@@ -263,37 +265,57 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
           Previous Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} value={selectedDropdownItems} />
-        {loadFullImages ? (
+        {loadFullImages && projectData.cvProjectId !== 'NEW' && (
           <Checkbox
             checked={loadFullImages}
             label="Load Full Images"
             onClick={(): void => setLoadFullImages((prev) => !prev)}
           />
-        ) : (
+        )}
+        {!loadFullImages && projectData.cvProjectId !== 'NEW' && (
           <WarningDialog
             contentText={<p>Depends on the number of images, loading full images takes time</p>}
             onConfirm={(): void => setLoadFullImages((prev) => !prev)}
             trigger={<Checkbox checked={loadFullImages} label="Load Full Images" />}
           />
         )}
-        <WarningDialog
-          contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
-          onConfirm={onLoad}
-          trigger={
-            <Button
-              primary
-              content="Load"
-              disabled={(!loadFullImages && projectData.cvProjectId === originData.cvProjectId) || loading}
-              loading={loading}
-            />
-          }
-        />
+        {projectData.cvProjectId === 'NEW' && (
+          <Input
+            placeholder="Input a project name"
+            fluid
+            onChange={(_, { value }) => {
+              setProjectName(value);
+            }}
+          />
+        )}
+        {projectData.cvProjectId === 'NEW' ? (
+          <Button
+            primary
+            content={'Create'}
+            disabled={loading}
+            loading={loading}
+            onClick={onCreateNewProject}
+          />
+        ) : (
+          <WarningDialog
+            contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
+            onConfirm={onLoad}
+            trigger={
+              <Button
+                primary
+                content={'Load'}
+                disabled={(!loadFullImages && projectData.cvProjectId === originData.cvProjectId) || loading}
+                loading={loading}
+              />
+            }
+          />
+        )}
         <WarningDialog
           contentText={<p>Create New Project will remove all the parts, sure you want to do that?</p>}
           open={createProjectModel}
           onConfirm={(): void => {
-            onCreateNewProject();
             setCreateProjectModel(false);
+            dispatch(updateProjectData({ ...projectData, cvProjectId: 'NEW' }));
           }}
           onCancel={(): void => setCreateProjectModel(false)}
         />
