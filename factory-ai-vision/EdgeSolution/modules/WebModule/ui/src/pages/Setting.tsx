@@ -31,12 +31,15 @@ import {
 } from '../store/setting/settingAction';
 
 export const Setting = (): JSX.Element => {
-  const { loading, error, current: settingData, origin: originSettingData } = useSelector<State, SettingType>(
-    (state) => state.setting,
-  );
+  const { loading, error, current: settingData, origin: originSettingData, isTrainerValid } = useSelector<
+    State,
+    SettingType
+  >((state) => state.setting);
   const dispatch = useDispatch();
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
+  const [cvProjects, setCvProjects] = useState<Record<string, string>>({});
+  const [otherError, setOtherError] = useState<Error>(null);
 
   const notEmpty = originSettingData.namespace && originSettingData.key;
 
@@ -70,9 +73,28 @@ export const Setting = (): JSX.Element => {
       })
       .catch((err) => {
         setCheckboxChecked(checkboxChecked);
-        alert(err);
+        setOtherError(err);
       });
   };
+
+  useEffect(() => {
+    if (settingData.id !== -1) {
+      Axios.get(`/api/settings/${settingData.id}/list_projects`)
+        .then(({ data }) => {
+          setCvProjects(data);
+          return void 0;
+        })
+        .catch((e) => {
+          if (e.response) {
+            setOtherError(new Error(e.response.data.log));
+          } else if (e.request) {
+            setOtherError(new Error(e.request));
+          } else {
+            setOtherError(e);
+          }
+        });
+    }
+  }, [settingData.id]);
 
   return (
     <>
@@ -157,8 +179,9 @@ export const Setting = (): JSX.Element => {
             </Button>
           </Flex>
           {error ? <Alert danger content={`Failed to save ${error}`} dismissible /> : null}
+          {otherError ? <Alert danger content={`Error ${otherError}`} dismissible /> : null}
         </Flex>
-        {notEmpty && <PreviousProjectPanel settingDataId={settingData.id} />}
+        {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
       </Flex>
       <Divider color="grey" />
       <Checkbox
@@ -180,8 +203,7 @@ const initialDropdownItem = [
   },
 ];
 
-const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingDataId }) => {
-  const [dropdownItems, setDropdownItems] = useState<DropdownItemProps[]>(initialDropdownItem);
+const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = ({ cvProjects }) => {
   const [customVisionProjectId, setCustomVisionProjectId] = useState('');
   const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
   const [loadFullImages, setLoadFullImages] = useState(false);
@@ -213,24 +235,15 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
       .finally(() => setOtherLoading(false));
   };
 
-  useEffect(() => {
-    if (settingDataId !== -1) {
-      setOtherLoading(true);
-      Axios.get(`/api/settings/${settingDataId}/list_projects`)
-        .then(({ data }) => {
-          const items: DropdownItemProps[] = Object.entries(data).map(([key, value]) => ({
-            header: value,
-            content: {
-              key,
-            },
-          }));
-          setDropdownItems([...initialDropdownItem, ...items]);
-          return void 0;
-        })
-        .catch((e) => setOtherError(e))
-        .finally(() => setOtherLoading(false));
-    }
-  }, [settingDataId]);
+  const dropdownItems: DropdownItemProps[] = [
+    ...initialDropdownItem,
+    ...Object.entries(cvProjects).map(([key, value]) => ({
+      header: value,
+      content: {
+        key,
+      },
+    })),
+  ];
 
   const loading = otherLoading || isProjectLoading;
   const error = [otherError, projectError].filter((e) => !!e);
@@ -266,11 +279,11 @@ const PreviousProjectPanel: React.FC<{ settingDataId: number }> = ({ settingData
         <WarningDialog
           contentText={<p>Create New Project will remove all the parts, sure you want to do that?</p>}
           open={createProjectModel}
-          onConfirm={() => {
+          onConfirm={(): void => {
             onCreateNewProject();
             setCreateProjectModel(false);
           }}
-          onCancel={() => {
+          onCancel={(): void => {
             setCreateProjectModel(false);
             setCustomVisionProjectId(null);
           }}
