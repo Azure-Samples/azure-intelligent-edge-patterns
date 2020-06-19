@@ -227,7 +227,6 @@ export const PartIdentification: React.FC = () => {
             </Text>
           </Flex>
         </Flex>
-        <Link to="">Advanced Configuration</Link>
         <Flex gap="gap.large">
           <Button
             content="Configure"
