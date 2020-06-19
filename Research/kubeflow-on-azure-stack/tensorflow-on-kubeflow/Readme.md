@@ -259,8 +259,7 @@ For more tutorials and How-Tos, see TensorFlow's [save_and_load.ipynb](https://g
 
 ## Next Steps
 
-Proceed to [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) tutorial to learn running
-`PyTorchJob`s.
+Proceed to [PyTorch on Kubeflow Tutorial](../pytorch-on-kubeflow/Readme.md) tutorial to learn how to run `PyTorchJob`s.
 
 # Links
 
