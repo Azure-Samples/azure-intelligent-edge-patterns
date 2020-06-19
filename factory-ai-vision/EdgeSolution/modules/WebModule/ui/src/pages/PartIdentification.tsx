@@ -125,7 +125,6 @@ export const PartIdentification: React.FC = () => {
       {error && (
         <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
       )}
-      <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
       <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
         <ModuleSelector
           moduleName="camera"
@@ -160,7 +159,7 @@ export const PartIdentification: React.FC = () => {
               onChange={(_, { checked }): void => setData('needRetraining', checked)}
               disabled={isTestModel}
             />
-            <Text disabled={accracyRangeDisabled}>Accuracy Range</Text>
+            <Text disabled={accracyRangeDisabled}>Capture Image</Text>
             <Text disabled={accracyRangeDisabled}>
               Minimum:{' '}
               <Input
@@ -184,7 +183,7 @@ export const PartIdentification: React.FC = () => {
               %
             </Text>
             <Text disabled={accracyRangeDisabled}>
-              Maximum Images:{' '}
+              Maximum Images to Store:{' '}
               <Input
                 type="number"
                 disabled={accracyRangeDisabled}
@@ -229,13 +228,16 @@ export const PartIdentification: React.FC = () => {
           </Flex>
         </Flex>
         <Link to="">Advanced Configuration</Link>
-        <Button
-          content="Configure"
-          primary
-          onClick={handleSubmitConfigure}
-          disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
-          loading={isLoading}
-        />
+        <Flex gap="gap.large">
+          <Button
+            content="Configure"
+            primary
+            onClick={handleSubmitConfigure}
+            disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
+            loading={isLoading}
+          />
+          <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
+        </Flex>
       </Flex>
     </>
   );
@@ -243,22 +245,7 @@ export const PartIdentification: React.FC = () => {
 
 const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
   if (isTestModel) {
-    return (
-      <Button
-        styles={{
-          backgroundColor: '#ff9727',
-          ':hover': {
-            backgroundColor: '#cf7a1f',
-          },
-          ':active': {
-            backgroundColor: '#cf7a1f',
-          },
-        }}
-        content="Back"
-        onClick={(): void => setIsTestModel(false)}
-        primary
-      />
-    );
+    return <Button content="Back" onClick={(): void => setIsTestModel(false)} primary />;
   }
 
   return (
@@ -268,27 +255,13 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
       contentText={
         <>
           <p>
-            &quot;Demo pretrained detection&quot; is for seeing inference result, no retraining experience
+            &quot;Demo Pretrained Detection&quot; is for seeing inference result, no retraining experience
             here.
           </p>
           <p>For retraining experience, please create a new model</p>
         </>
       }
-      trigger={
-        <Button
-          styles={{
-            backgroundColor: '#ff9727',
-            ':hover': {
-              backgroundColor: '#cf7a1f',
-            },
-            ':active': {
-              backgroundColor: '#cf7a1f',
-            },
-          }}
-          content="Demo pretrained detection"
-          primary
-        />
-      }
+      trigger={<Button content="Demo Pretrained Detection" primary />}
     />
   );
 };
