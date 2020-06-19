@@ -323,11 +323,6 @@ Look at the logs to see the progress:
 
 See more on PyTorch at [https://github.com/pytorch/pytorch](https://github.com/pytorch/pytorch)
 
-## Next Steps
-
-Proceed to [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) tutorial to learn running
-`PyTorchJob`s.
-
 # Links
 
 For more information:
