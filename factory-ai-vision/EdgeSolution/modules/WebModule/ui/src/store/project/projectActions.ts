@@ -139,6 +139,7 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         sendMessageToCloud: data[0]?.metrics_is_send_iothub,
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
+        cvProjectId: data[0]?.customvision_project_id,
       };
       dispatch(getProjectSuccess(project));
       return void 0;

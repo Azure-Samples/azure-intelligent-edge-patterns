@@ -48,6 +48,7 @@ export type ProjectData = {
   framesPerMin: number;
   accuracyThreshold: number;
   modelUrl: string;
+  cvProjectId?: string;
 };
 
 // Describing the different ACTION NAMES available

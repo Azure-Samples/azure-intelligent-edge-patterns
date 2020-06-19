@@ -29,6 +29,7 @@ import {
   thunkGetSetting,
   thunkPostSetting,
 } from '../store/setting/settingAction';
+import { updateProjectData } from '../store/project/projectActions';
 
 export const Setting = (): JSX.Element => {
   const { loading, error, current: settingData, origin: originSettingData, isTrainerValid } = useSelector<
@@ -204,25 +205,26 @@ const initialDropdownItem = [
 ];
 
 const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = ({ cvProjects }) => {
-  const [customVisionProjectId, setCustomVisionProjectId] = useState('');
   const { isLoading: isProjectLoading, error: projectError, data: projectData } = useProject(false);
   const [loadFullImages, setLoadFullImages] = useState(false);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState<Error>(null);
   const [createProjectModel, setCreateProjectModel] = useState(false);
+  const dispatch = useDispatch();
 
   const onDropdownChange = (_, data): void => {
-    if (data.value === null) setCustomVisionProjectId(customVisionProjectId);
+    if (data.value === null)
+      dispatch(updateProjectData({ ...projectData, cvProjectId: projectData.cvProjectId }));
     else if (data.value.content.key === initialDropdownItem[0].content.key) setCreateProjectModel(true);
-    else setCustomVisionProjectId(data.value.content.key);
+    else dispatch(updateProjectData({ ...projectData, cvProjectId: data.value.content.key }));
   };
 
   const onLoad = (): void => {
     setOtherLoading(true);
     Axios.get(
-      `/api/projects/${
-        projectData.id
-      }/pull_cv_project?customvision_project_id=${customVisionProjectId}&partial=${Number(!loadFullImages)}`,
+      `/api/projects/${projectData.id}/pull_cv_project?customvision_project_id=${
+        projectData.cvProjectId
+      }&partial=${Number(!loadFullImages)}`,
     )
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
@@ -248,6 +250,8 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
   const loading = otherLoading || isProjectLoading;
   const error = [otherError, projectError].filter((e) => !!e);
 
+  const selectedDropdownItems = dropdownItems.find((e) => (e.content as any).key === projectData.cvProjectId);
+
   return (
     <>
       <Divider color="grey" vertical styles={{ height: '100%' }} />
@@ -255,7 +259,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
         <Text size="large" weight="bold">
           Previous Projects:{' '}
         </Text>
-        <Dropdown items={dropdownItems} onChange={onDropdownChange} />
+        <Dropdown items={dropdownItems} onChange={onDropdownChange} value={selectedDropdownItems} />
         {loadFullImages ? (
           <Checkbox
             checked={loadFullImages}
@@ -273,7 +277,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
           contentText={<p>Load Project will remove all the parts, sure you want to do that?</p>}
           onConfirm={onLoad}
           trigger={
-            <Button primary content="Load" disabled={!customVisionProjectId || loading} loading={loading} />
+            <Button primary content="Load" disabled={!projectData.cvProjectId || loading} loading={loading} />
           }
         />
         <WarningDialog
@@ -283,10 +287,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
             onCreateNewProject();
             setCreateProjectModel(false);
           }}
-          onCancel={(): void => {
-            setCreateProjectModel(false);
-            setCustomVisionProjectId(null);
-          }}
+          onCancel={(): void => setCreateProjectModel(false)}
         />
         {error.length ? <Alert danger content={`Failed to load ${error.join(', ')}`} dismissible /> : null}
       </Flex>
