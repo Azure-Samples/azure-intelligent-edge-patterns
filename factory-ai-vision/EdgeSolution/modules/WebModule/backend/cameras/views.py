@@ -321,7 +321,7 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
 class LocationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Location
-        fields = ['id', 'name', 'description', 'coordinates', 'is_demo']
+        fields = ['id', 'name', 'description',  'is_demo']
 
 
 class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):

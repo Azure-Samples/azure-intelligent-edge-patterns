@@ -48,20 +48,14 @@ const Locations: FC = () => {
               required: true,
             },
             {
-              placeholder: 'Coordinates',
-              key: 'coordinates',
-              type: 'input',
-              required: false,
-            },
-            {
               placeholder: 'Description',
               key: 'description',
               type: 'textArea',
               required: false,
             },
           ]}
-          onConfirm={({ name, description, coordinates }): void => {
-            dispatch(postLocation({ name, coordinates, description, is_demo: false }));
+          onConfirm={({ name, description }): void => {
+            dispatch(postLocation({ name, description, is_demo: false }));
           }}
         />
       </div>
