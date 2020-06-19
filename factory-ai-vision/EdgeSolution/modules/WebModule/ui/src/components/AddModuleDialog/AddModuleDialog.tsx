@@ -6,12 +6,18 @@ import AddButton from '../AddButton';
 
 type AddModuleDialogProps = {
   header: string;
-  fields: { placeholder: string; key: string; type: 'input' | 'textArea' }[];
+  fields: { placeholder: string; key: string; type: 'input' | 'textArea'; required: boolean }[];
   onConfirm: (formData: Record<string, string>) => void;
 };
 
 export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ header, fields, onConfirm }) => {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(
+    fields.reduce((acc, cur) => {
+      return { ...acc, [cur.key]: '' };
+    }, {}),
+  );
+
+  const isSubmitDisabled = fields.some((e) => e.required && !formData[e.key]);
 
   return (
     <Dialog
@@ -21,7 +27,7 @@ export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ header, fields
         alignItems: 'center',
         width: '500px',
       }}
-      confirmButton="Submit"
+      confirmButton={{ content: 'Submit', disabled: isSubmitDisabled }}
       cancelButton="Cancel"
       onConfirm={(): void => onConfirm(formData)}
       header={header}
@@ -40,6 +46,7 @@ export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ header, fields
                 value={formData[e.key]}
                 onChange={(_, { value }): void => setFormData(R.assoc(e.key, value, formData))}
                 fluid
+                required={e.required}
               />
             ) : (
               <TextArea
@@ -49,6 +56,7 @@ export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ header, fields
                 onChange={(_, { value }): void => setFormData(R.assoc(e.key, value, formData))}
                 styles={{ height: '100px' }}
                 fluid
+                required={e.required}
               />
             ),
           )}

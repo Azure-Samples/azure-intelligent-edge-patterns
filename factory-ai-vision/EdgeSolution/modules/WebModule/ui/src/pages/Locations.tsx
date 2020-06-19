@@ -45,16 +45,19 @@ const Locations: FC = () => {
               placeholder: 'Location Name',
               key: 'name',
               type: 'input',
+              required: true,
             },
             {
               placeholder: 'Coordinates',
               key: 'coordinates',
               type: 'input',
+              required: false,
             },
             {
               placeholder: 'Description',
               key: 'description',
               type: 'textArea',
+              required: false,
             },
           ]}
           onConfirm={({ name, description, coordinates }): void => {

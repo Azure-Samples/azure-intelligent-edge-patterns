@@ -55,16 +55,19 @@ const Cameras: FC = (): JSX.Element => {
             placeholder: 'Name',
             key: 'name',
             type: 'input',
+            required: true,
           },
           {
             placeholder: 'RTSP URL',
             key: 'rtsp',
             type: 'input',
+            required: true,
           },
           {
             placeholder: 'Model Name',
             key: 'model_name',
             type: 'input',
+            required: false,
           },
         ]}
         onConfirm={({ name, rtsp, model_name }): void => {

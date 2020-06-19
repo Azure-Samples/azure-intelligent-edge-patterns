@@ -45,11 +45,13 @@ export const Parts: React.FC = () => {
               placeholder: 'Part Name',
               key: 'name',
               type: 'input',
+              required: true,
             },
             {
               placeholder: 'Description',
               key: 'description',
               type: 'textArea',
+              required: false,
             },
           ]}
           onConfirm={({ name, description }): void => {
