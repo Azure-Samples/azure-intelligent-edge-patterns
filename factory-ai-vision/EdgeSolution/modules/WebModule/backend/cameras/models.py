@@ -359,7 +359,7 @@ class Project(models.Model):
     needRetraining = models.BooleanField(default=False)
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
-    maxImages = models.IntegerField(default=10)
+    maxImages = models.IntegerField(default=20)
     deployed = models.BooleanField(default=False)
     training_counter = models.IntegerField(default=0)
     retraining_counter = models.IntegerField(default=0)

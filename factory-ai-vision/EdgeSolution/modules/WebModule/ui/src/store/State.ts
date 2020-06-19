@@ -39,7 +39,7 @@ export const initialState: State = {
       needRetraining: true,
       accuracyRangeMin: 60,
       accuracyRangeMax: 80,
-      maxImages: 50,
+      maxImages: 20,
       modelUrl: '',
       sendMessageToCloud: false,
       framesPerMin: 6,
