@@ -128,7 +128,7 @@ export const PartIdentification: React.FC = () => {
       <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
       <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
         <ModuleSelector
-          moduleName="cameras"
+          moduleName="camera"
           to="/cameras"
           value={selectedCamera}
           setSelectedModuleItem={setSelectedCameraById}
@@ -144,7 +144,7 @@ export const PartIdentification: React.FC = () => {
           isMultiple={true}
         />
         <ModuleSelector
-          moduleName="locations"
+          moduleName="location"
           to="/locations"
           value={selectedLocations}
           setSelectedModuleItem={setSelectedLocationById}
