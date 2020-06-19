@@ -63,15 +63,9 @@ const Cameras: FC = (): JSX.Element => {
             type: 'input',
             required: true,
           },
-          {
-            placeholder: 'Model Name',
-            key: 'model_name',
-            type: 'input',
-            required: false,
-          },
         ]}
-        onConfirm={({ name, rtsp, model_name }): void => {
-          dispatch(postCamera({ name, rtsp, model_name, is_demo: false }));
+        onConfirm={({ name, rtsp }): void => {
+          dispatch(postCamera({ name, rtsp, is_demo: false }));
         }}
       />
     </div>
