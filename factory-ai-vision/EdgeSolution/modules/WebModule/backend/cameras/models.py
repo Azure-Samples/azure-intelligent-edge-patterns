@@ -359,11 +359,15 @@ class Project(models.Model):
     needRetraining = models.BooleanField(default=False)
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
-    maxImages = models.IntegerField(default=10)
+    maxImages = models.IntegerField(default=20)
     deployed = models.BooleanField(default=False)
     training_counter = models.IntegerField(default=0)
     retraining_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
+
+    metrics_is_send_iothub = models.BooleanField(default=False)
+    metrics_accuracy_threshold = models.IntegerField(default=50)
+    metrics_frame_per_minutes = models.IntegerField(default=6)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):

@@ -40,14 +40,20 @@ def web_module_url():
 
 
 def is_inside_aoi(x1, y1, x2, y2, aoi_info):
-    return ( (onnx.aoi_info['x1'] <= x1 <= onnx.aoi_info['x2']) or (onnx.aoi_info['x1'] <= x2 <= onnx.aoi_info['x2']) ) and \
-           ( (onnx.aoi_info['y1'] <= y1 <= onnx.aoi_info['y2']) or (onnx.aoi_info['y1'] <= y2 <= onnx.aoi_info['y2']) )
+    for aoi_area in aoi_info:
+        #print(x1, y1, x2, y2, aoi_area)
+        if ( (aoi_area['x1'] <= x1 <= aoi_area['x2']) or (aoi_area['x1'] <= x2 <= aoi_area['x2']) ) and \
+            ( (aoi_area['y1'] <= y1 <= aoi_area['y2']) or (aoi_area['y1'] <= y2 <= aoi_area['y2']) ):
+            #print('in')
+            return True
+    return False
+
 
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
-    #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
-    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
+    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
         #def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
         # Default system params
         self.render = False
@@ -301,8 +307,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-#model_dir = './default_model'
-model_dir = './default_model_6parts'
+model_dir = './default_model'
+#model_dir = './default_model_6parts'
 onnx = ONNXRuntimeModelDeploy(model_dir)
 onnx.start_session()
 
@@ -402,7 +408,7 @@ def update_cam():
     try:
         aoi = json.loads(aoi)
         has_aoi = aoi['useAOI']
-        aoi_info = aoi['AOIs'][0]
+        aoi_info = aoi['AOIs']
     except:
         has_aoi = False
         aoi_info = None
@@ -460,7 +466,8 @@ def video_feed():
                     if tag not in onnx.parts: continue
 
                     if onnx.has_aoi:
-                        img = cv2.rectangle(img, (int(onnx.aoi_info['x1']), int(onnx.aoi_info['y1'])), (int(onnx.aoi_info['x2']), int(onnx.aoi_info['y2'])), (0, 255, 255), 2)
+                        for aoi_area in onnx.aoi_info:
+                            img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
 
                     #if prediction['probability'] > onnx.threshold:
                     #print('if??', prediction['probability'], onnx.confidence_max)

@@ -52,6 +52,9 @@ export const PartIdentification: React.FC = () => {
     accuracyRangeMin,
     accuracyRangeMax,
     maxImages: maxImage,
+    sendMessageToCloud,
+    framesPerMin,
+    accuracyThreshold,
   } = data;
   const [isTestModel, setIsTestModel] = useState(false);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
@@ -111,6 +114,7 @@ export const PartIdentification: React.FC = () => {
   };
 
   const accracyRangeDisabled = !needRetraining || isTestModel;
+  const messageToCloudDisabled = !sendMessageToCloud || isTestModel;
 
   return (
     <>
@@ -121,10 +125,9 @@ export const PartIdentification: React.FC = () => {
       {error && (
         <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
       )}
-      <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
       <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
         <ModuleSelector
-          moduleName="cameras"
+          moduleName="camera"
           to="/cameras"
           value={selectedCamera}
           setSelectedModuleItem={setSelectedCameraById}
@@ -140,7 +143,7 @@ export const PartIdentification: React.FC = () => {
           isMultiple={true}
         />
         <ModuleSelector
-          moduleName="locations"
+          moduleName="location"
           to="/locations"
           value={selectedLocations}
           setSelectedModuleItem={setSelectedLocationById}
@@ -148,58 +151,92 @@ export const PartIdentification: React.FC = () => {
           isMultiple={false}
           isTestModel={isTestModel}
         />
-        <Checkbox
-          label="Set up retraining"
-          checked={needRetraining}
-          onChange={(_, { checked }): void => setData('needRetraining', checked)}
-          disabled={isTestModel}
-        />
-        <Text disabled={accracyRangeDisabled}>Accuracy Range</Text>
-        <Text disabled={accracyRangeDisabled}>
-          Minimum:{' '}
-          <Input
-            type="number"
-            disabled={accracyRangeDisabled}
-            inline
-            value={accuracyRangeMin}
-            onChange={(_, { value }): void => setData('accuracyRangeMin', value)}
+        <Flex gap="gap.large">
+          <Flex column gap="gap.medium">
+            <Checkbox
+              label="Set up retraining"
+              checked={needRetraining}
+              onChange={(_, { checked }): void => setData('needRetraining', checked)}
+              disabled={isTestModel}
+            />
+            <Text disabled={accracyRangeDisabled}>Capture Image</Text>
+            <Text disabled={accracyRangeDisabled}>
+              Minimum:{' '}
+              <Input
+                type="number"
+                disabled={accracyRangeDisabled}
+                inline
+                value={accuracyRangeMin}
+                onChange={(_, { value }): void => setData('accuracyRangeMin', value)}
+              />
+              %
+            </Text>
+            <Text disabled={accracyRangeDisabled}>
+              Maximum:{' '}
+              <Input
+                type="number"
+                disabled={accracyRangeDisabled}
+                inline
+                value={accuracyRangeMax}
+                onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
+              />
+              %
+            </Text>
+            <Text disabled={accracyRangeDisabled}>
+              Maximum Images to Store:{' '}
+              <Input
+                type="number"
+                disabled={accracyRangeDisabled}
+                inline
+                value={maxImage}
+                onChange={(_, { value }): void => {
+                  if ((value as any) < 15) setMaxImgCountError(true);
+                  else setMaxImgCountError(false);
+                  setData('maxImages', value);
+                }}
+              />
+              {maxImgCountError && <Text error>Cannot be less than 15</Text>}
+            </Text>
+          </Flex>
+          <Flex column gap="gap.medium">
+            <Checkbox
+              label="Send message to cloud"
+              checked={sendMessageToCloud}
+              onChange={(_, { checked }): void => setData('sendMessageToCloud', checked)}
+              disabled={isTestModel}
+            />
+            <Text disabled={messageToCloudDisabled}>
+              Frames per minute:{' '}
+              <Input
+                type="number"
+                disabled={messageToCloudDisabled}
+                inline
+                value={framesPerMin}
+                onChange={(_, { value }): void => setData('framesPerMin', value)}
+              />
+            </Text>
+            <Text disabled={messageToCloudDisabled}>
+              Accuracy threshold:{' '}
+              <Input
+                type="number"
+                disabled={messageToCloudDisabled}
+                inline
+                value={accuracyThreshold}
+                onChange={(_, { value }): void => setData('accuracyThreshold', value)}
+              />
+            </Text>
+          </Flex>
+        </Flex>
+        <Flex gap="gap.large">
+          <Button
+            content="Configure"
+            primary
+            onClick={handleSubmitConfigure}
+            disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
+            loading={isLoading}
           />
-          %
-        </Text>
-        <Text disabled={accracyRangeDisabled}>
-          Maximum:{' '}
-          <Input
-            type="number"
-            disabled={accracyRangeDisabled}
-            inline
-            value={accuracyRangeMax}
-            onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
-          />
-          %
-        </Text>
-        <Text disabled={accracyRangeDisabled}>
-          Maximum Images:{' '}
-          <Input
-            type="number"
-            disabled={accracyRangeDisabled}
-            inline
-            value={maxImage}
-            onChange={(_, { value }): void => {
-              if ((value as any) < 15) setMaxImgCountError(true);
-              else setMaxImgCountError(false);
-              setData('maxImages', value);
-            }}
-          />
-          {maxImgCountError && <Text error>Cannot be less than 15</Text>}
-        </Text>
-        <Link to="">Advanced Configuration</Link>
-        <Button
-          content="Configure"
-          primary
-          onClick={handleSubmitConfigure}
-          disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
-          loading={isLoading}
-        />
+          <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
+        </Flex>
       </Flex>
     </>
   );
@@ -207,49 +244,23 @@ export const PartIdentification: React.FC = () => {
 
 const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
   if (isTestModel) {
-    return (
-      <Button
-        styles={{
-          backgroundColor: '#ff9727',
-          ':hover': {
-            backgroundColor: '#cf7a1f',
-          },
-          ':active': {
-            backgroundColor: '#cf7a1f',
-          },
-        }}
-        content="Back"
-        onClick={(): void => setIsTestModel(false)}
-        primary
-      />
-    );
+    return <Button content="Back" onClick={(): void => setIsTestModel(false)} primary />;
   }
 
   return (
     <WarningDialog
-      confirmButton="Confirm to use test model"
+      confirmButton="Confirm"
       onConfirm={(): void => setIsTestModel(true)}
       contentText={
         <>
-          <p>Test model is for seeing inference result, no retraining experience here.</p>
+          <p>
+            &quot;Demo Pretrained Detection&quot; is for seeing inference result, no retraining experience
+            here.
+          </p>
           <p>For retraining experience, please create a new model</p>
         </>
       }
-      trigger={
-        <Button
-          styles={{
-            backgroundColor: '#ff9727',
-            ':hover': {
-              backgroundColor: '#cf7a1f',
-            },
-            ':active': {
-              backgroundColor: '#cf7a1f',
-            },
-          }}
-          content="Test Model"
-          primary
-        />
-      }
+      trigger={<Button content="Demo Pretrained Detection" primary />}
     />
   );
 };

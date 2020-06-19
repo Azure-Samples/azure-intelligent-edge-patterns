@@ -44,6 +44,9 @@ export type ProjectData = {
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
+  sendMessageToCloud: boolean;
+  framesPerMin: number;
+  accuracyThreshold: number;
   modelUrl: string;
 };
 

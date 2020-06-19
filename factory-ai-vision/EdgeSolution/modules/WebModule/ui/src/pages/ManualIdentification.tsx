@@ -180,9 +180,14 @@ const ManualIdentification: FC = () => {
               color: 'white',
               ':hover': { backgroundColor: '#CC4A31', color: 'white' },
             }}
-            content="No to all"
+            content="No to remaining"
             onClick={(): void => {
-              setJudgedImageList(relabelImages.map((e) => ({ imageId: e.id, partId: null })));
+              setJudgedImageList((prev) =>
+                relabelImages.map((relabelImage) => {
+                  const judgedImage = prev.find((imgInList) => imgInList.imageId === relabelImage.id);
+                  return judgedImage === undefined ? { imageId: relabelImage.id, partId: null } : judgedImage;
+                }),
+              );
             }}
           />
         </div>

@@ -51,6 +51,9 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           accuracyRangeMax: 80,
           maxImages: 50,
           modelUrl: '',
+          sendMessageToCloud: false,
+          framesPerMin: 6,
+          accuracyThreshold: 50,
         },
         inferenceMetrics: {
           successRate: 0,
