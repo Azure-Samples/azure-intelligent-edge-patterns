@@ -263,11 +263,14 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
 
   return (
     <WarningDialog
-      confirmButton="Confirm to use test model"
+      confirmButton="Confirm"
       onConfirm={(): void => setIsTestModel(true)}
       contentText={
         <>
-          <p>Test model is for seeing inference result, no retraining experience here.</p>
+          <p>
+            &quot;Demo pretrained detection&quot; is for seeing inference result, no retraining experience
+            here.
+          </p>
           <p>For retraining experience, please create a new model</p>
         </>
       }
@@ -282,7 +285,7 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
               backgroundColor: '#cf7a1f',
             },
           }}
-          content="Test Model"
+          content="Demo pretrained detection"
           primary
         />
       }
