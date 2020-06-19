@@ -262,7 +262,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
       <Divider color="grey" vertical styles={{ height: '100%' }} />
       <Flex column gap="gap.large">
         <Text size="large" weight="bold">
-          Previous Projects:{' '}
+          Projects:{' '}
         </Text>
         <Dropdown items={dropdownItems} onChange={onDropdownChange} value={selectedDropdownItems} />
         {loadFullImages && projectData.cvProjectId !== 'NEW' && (
