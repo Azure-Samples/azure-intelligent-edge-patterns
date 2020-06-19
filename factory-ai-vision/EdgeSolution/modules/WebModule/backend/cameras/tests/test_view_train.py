@@ -27,13 +27,11 @@ class ViewTrainTestCase(APITransactionTestCase):
                                                      is_trainer_valid=False)
         camera_obj = Camera.objects.create(name="camera_1",
                                            rtsp="valid_rtsp",
-                                           model_name="model_1",
                                            area="55,66",
                                            is_demo=False)
 
         location_obj = Location.objects.create(name="location_1",
                                                description=f"description_1",
-                                               coordinates="55,66",
                                                is_demo=False)
         part_obj = Part.objects.create(name="part_1",
                                        description=f"description_1",

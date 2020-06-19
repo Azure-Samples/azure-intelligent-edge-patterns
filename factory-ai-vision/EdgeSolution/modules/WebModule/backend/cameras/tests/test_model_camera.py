@@ -10,29 +10,24 @@ class CameraTestCase(APITransactionTestCase):
             mock_request.return_value.status_code = 200
             Camera.objects.create(name="Camera1",
                                   rtsp="0",
-                                  model_name="model1",
                                   area="QQ",
                                   is_demo=False)
 
             Camera.objects.create(name="Camera2",
                                   rtsp="0",
-                                  model_name="model1",
                                   area="55,66",
                                   is_demo=False)
             Camera.objects.create(name="Camera1",
                                   rtsp="0",
-                                  model_name="model1",
                                   area="QQ",
                                   is_demo=True)
             Camera.objects.create(name="Camera2",
                                   rtsp="12",
-                                  model_name="model3",
                                   area="QQ",
                                   is_demo=True)
             for s in special_strings:
                 Camera.objects.create(name=s,
                                       rtsp=s,
-                                      model_name=s,
                                       area=s,
                                       is_demo=False)
         self.exist_num = 4 + len(special_strings)

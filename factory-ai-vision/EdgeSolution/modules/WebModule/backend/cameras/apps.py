@@ -80,7 +80,6 @@ class CameraConfig(AppConfig):
                     name="Demo Video",
                     is_demo=True,
                     defaults={
-                        'model_name': "Demo Model",
                         'rtsp': 'sample_video/video_1min.mp4',
                         'area': ""
                     }
@@ -91,8 +90,7 @@ class CameraConfig(AppConfig):
                     name="Demo Location",
                     is_demo=True,
                     defaults={
-                        'description': "Demo Model",
-                        'coordinates': "0,0",
+                        'description': "Demo Location",
                     }
                 )
 

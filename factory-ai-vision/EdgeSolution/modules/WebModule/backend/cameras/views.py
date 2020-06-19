@@ -319,7 +319,7 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
     """LocationSerializer"""
     class Meta:
         model = Location
-        fields = ['id', 'name', 'description', 'coordinates', 'is_demo']
+        fields = ['id', 'name', 'description', 'is_demo']
 
 
 class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):

@@ -27,22 +27,18 @@ class ModelProjectTestCase(APITransactionTestCase):
         for i in range(3):
             demo_camera_obj = Camera.objects.create(name="demo_camera_{i}",
                                                     rtsp="0",
-                                                    model_name="model{i}",
                                                     area="{i*2},{i*3}",
                                                     is_demo=True)
             camera_obj = Camera.objects.create(name="camera_{i}",
                                                rtsp="0",
-                                               model_name="model{i}",
                                                area="{i*2},{i*3}",
                                                is_demo=False)
 
             demo_location_obj = Location.objects.create(name=f"location_{i}",
                                                         description=f"description_{i}",
-                                                        coordinates="{i*20},{i*30}",
                                                         is_demo=True)
             location_obj = Location.objects.create(name=f"demo_location_{i}",
                                                    description=f"description_{i}",
-                                                   coordinates="{i*20},{i*30}",
                                                    is_demo=False)
             demo_part_obj = Part.objects.create(name=f"part_{i}",
                                                 description=f"description_{i}",
