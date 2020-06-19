@@ -379,7 +379,6 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
             'iot_hub_connection_string',
             'device_id',
             'module_id',
-            'is_trainer_valid',
             'is_collect_data',
             'obj_detection_domain_id']
 
