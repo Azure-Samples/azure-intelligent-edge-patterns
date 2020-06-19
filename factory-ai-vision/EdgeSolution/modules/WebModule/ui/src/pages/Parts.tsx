@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Image, Text, Button, AddIcon } from '@fluentui/react-northstar';
+import { Flex, Image, Text } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import { getIdFromUrl } from '../util/GetIDFromUrl';
+import { AddModuleDialog } from '../components/AddModuleDialog';
 
 export const Parts: React.FC = () => {
   const [parts, setParts] = useState([]);
@@ -36,21 +37,41 @@ export const Parts: React.FC = () => {
             <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
           ))}
       </Flex>
-      <Button
-        primary
-        fluid
-        circular
-        content={<AddIcon size="largest" circular />}
-        style={{
-          width: 100,
-          height: 100,
-          position: 'fixed',
-          right: '100px',
-          bottom: '100px',
-        }}
-        as={Link}
-        to="/parts/detail"
-      />
+      <div style={{ position: 'absolute', right: '100px', bottom: '100px' }}>
+        <AddModuleDialog
+          header="Add Part"
+          fields={[
+            {
+              placeholder: 'Part Name',
+              key: 'name',
+              type: 'input',
+            },
+            {
+              placeholder: 'Description',
+              key: 'description',
+              type: 'textArea',
+            },
+          ]}
+          onConfirm={({ name, description }): void => {
+            // TODO Migrate this to part action
+            Axios({
+              method: 'POST',
+              url: `/api/parts/`,
+              data: {
+                name,
+                description,
+              },
+            })
+              .then(({ data }) => {
+                setParts((prev) => prev.concat(data));
+                return void 0;
+              })
+              .catch((err) => {
+                alert(err);
+              });
+          }}
+        />
+      </div>
     </div>
   );
 };
