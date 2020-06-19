@@ -83,13 +83,13 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
         vAlign="center"
       >
         {filteredImages.map((image, i, arr) => (
-          <div key={image.id}>
+          <div key={image.id} style={{ height: '100%', width: '100%' }}>
             <span>{i + 1}</span>
             <LabelingPageDialog
               key={i}
               imageIndex={i}
               images={arr}
-              trigger={<LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />}
+              trigger={<LabelDisplayImage labelImage={image} pointerCursor />}
               isRelabel={false}
             />
           </div>
