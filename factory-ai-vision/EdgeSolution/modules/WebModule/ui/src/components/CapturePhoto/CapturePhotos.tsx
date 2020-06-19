@@ -45,6 +45,11 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
     }
   };
 
+  // FIXME Find a better way to replace the setState in the effect
+  useEffect(() => {
+    if (availableCameras.length === 1) setSelectedCamera(availableCameras[0]);
+  }, [availableCameras, setSelectedCamera]);
+
   return (
     <Flex gap="gap.small" vAlign="center">
       <Text>Select Camera</Text>
