@@ -9,10 +9,9 @@ import { deleteCamera } from '../../store/camera/cameraActions';
 interface CameraDetailInfoProps {
   name: string;
   rtsp: string;
-  modelName: string;
   id: number;
 }
-const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, modelName }) => {
+const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp }) => {
   const dispatch = useDispatch();
 
   return (
@@ -25,12 +24,10 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, modelName
         <Flex column gap="gap.small">
           <Text size="large" content={'Name:'} />
           <Text size="large" content={'RTSP Url:'} />
-          <Text size="large" content={'Model:'} />
         </Flex>
         <Flex column gap="gap.medium">
           <Text size="large" content={name} />
           <Text size="large" content={rtsp} />
-          <Text size="large" content={modelName} />
         </Flex>
       </Grid>
       <ConfirmDialog

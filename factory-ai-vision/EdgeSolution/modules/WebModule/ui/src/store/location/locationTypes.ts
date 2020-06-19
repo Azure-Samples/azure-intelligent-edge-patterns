@@ -2,7 +2,6 @@
 export type Location = {
   id?: number;
   name: string;
-  coordinates: string;
   description: string;
   projectId?: number;
   is_demo: boolean;
