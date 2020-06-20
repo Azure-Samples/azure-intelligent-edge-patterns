@@ -25,7 +25,7 @@ install() {
   
   echo "       ... Installing Kubeflow for deployment: ${KF_NAME}"
   echo "[DEBUG] $KF_CTL_DIR/kfctl apply -V -f ${KF_CONFIG_URI}"
-   $KF_CTL_DIR/kfctl apply -V -f ${KF_CONFIG_URI}
+  $KF_CTL_DIR/kfctl apply -V -f ${KF_CONFIG_URI}
 
 }
 
