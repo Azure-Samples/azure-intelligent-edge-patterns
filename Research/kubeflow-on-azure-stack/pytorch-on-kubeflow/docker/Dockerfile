@@ -12,4 +12,6 @@ ADD mnist.py /opt/mnist/src/mnist.py
 RUN  chgrp -R 0 /opt/mnist \
   && chmod -R g+rwX /opt/mnist
 
+RUN mkdir -p /tmp/mnist-data
+
 ENTRYPOINT ["python", "/opt/mnist/src/mnist.py"]

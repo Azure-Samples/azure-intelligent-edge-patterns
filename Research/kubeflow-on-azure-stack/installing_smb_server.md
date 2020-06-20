@@ -1,4 +1,4 @@
-# Installing Network Storage
+# Installing Samba Server
 
 It is one of many ways to create a network-accessible storage, we will create a Samba server.
 
@@ -115,5 +115,7 @@ And verify that the ports are listening:
     udp        0      0 0.0.0.0:138             0.0.0.0:*                           19126/nmbd
 
 You are ready to get the samba clients connect to your server.
+
+Follow the instructions for creating Samba Persistent Volume Claim in [Installing Storage](installing_storage.md)
 
 [Back](Readme.md)

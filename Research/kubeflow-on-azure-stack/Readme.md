@@ -1,6 +1,27 @@
 # Kubeflow on Azure Stack
 
-This module demonstrates how to create a Kubeflow cluster on Azure Stack.
+This module demonstrates how to create and use a Kubeflow cluster on Azure Stack.
+
+**Table of contents**
+
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+  - [Installing Kubernetes manually](installing_kubernetes.md)
+  - [Kubernetes Dashboard](#kubernetes-dashboard)
+  - [Tensorboard](#tensorboard)
+  - [Persistence on AzureStack](#persistence-on-azure-stack)
+- [Install Kubeflow](#install-kubeflow)
+- [Kubeflow dashboard](#preparing-kubeflow-dashboard) (preparing and using)
+- [Using Kubeflow](#using-kubeflow)
+  - [Kubeflow dashboard](#kubeflow-dashboard)
+  - [Jupyter Server](#jupyter-server)
+  - [TFjob](#TFjob) (distributed training)
+  - [PyTorchJob](#PyTorchJob) (distributed training)
+- [Uninstalling Kubeflow](#uninstalling-kubeflow)
+- [Next Steps](#next-steps)
+- [Links](#links)
+
+## Overview
 
 Main differences of the detached mode include limitations on:
 
@@ -8,6 +29,7 @@ Main differences of the detached mode include limitations on:
 - Handling of the artifacts(e.g. Docker images).
 - How to access software packages(especially third-party).
 - How storage is allocated and utilized.
+- See [Known Issues and Limitations](https://github.com/Azure/aks-engine/blob/master/docs/topics/azure-stack.md#known-issues-and-limitations) for other nuances.
 
 ## Prerequisites
 
@@ -17,8 +39,12 @@ The reader is expected to be familiar with the following:
 - [Azure Stack Hub](https://azure.microsoft.com/en-us/products/azure-stack/hub/)
 - [Kubernetes](https://kubernetes.io/)
 - [Kubeflow](https://github.com/kubeflow/kubeflow)
-- [Jupyter](https://jupyter.org/).
 - [Bash](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
+- (optional) [Jupyter](https://jupyter.org/).
+- (optional) [TensorFlow](https://www.tensorflow.org/)
+  - [Tensorboard](https://www.tensorflow.org/tensorboard/)
+- (optional) [PyTorch](https://pytorch.org/)
+
 
 IMPORTANT: While you might have the premissions to retrieve some information on your
 own(see [User Information on Azure](acquiring_settings.md)) or create, but most likely
@@ -61,6 +87,117 @@ something like the following:
     k8s-linuxpool-27515788-1   Ready    agent    22m   v1.15.5
     k8s-linuxpool-27515788-2   Ready    agent    22m   v1.15.5
     k8s-master-27515788-0      Ready    master   22m   v1.15.5
+
+## Kubernetes Dashboard
+
+You are welcome to check if you can see the Kubernetes board from your
+machine. You can get your Kubernetes Dashboard's address from `cluster-info`:
+
+    $ kubectl cluster-info
+    ...
+    kubernetes-dashboard is running at https://kube-rgkf-5.demoe2.cloudapp.stackpoc.com/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
+    ...
+
+We provided a script to retrieve a login token:
+
+    $ sbin/get_token.sh
+    Name:         namespace-controller-token-masdg
+    Type:  kubernetes.io/service-account-token
+    token:      12345678904DETcwwkZAyHfzD1Wp8_58eVbzthMmsh1P4ca9mXCB12wEhwS_J0VCsN4ektqjYmoTiXOuc2TGz7XlFys2BBhZLINMH3WYexaHPXovGGtRRg_D8rd_WA-T03SKZwpuPGljb-dYi_NyxqTtwufz7duBRX_1f3Ga4_3f8zEx5wqUCHL4vD2xyaG_EMxhmOpqPBPvlhk3s_dj0_ZGdsLvJZE4cWI1LHGFEuwghc5vPhnJb9QZvsdfgRzbPwUZT4IOsS_tS65Wk
+
+Cut/paste that token into the Sign In screen:
+
+![pics/kubernetes_dashboard_login.png](pics/kubernetes_dashboard_login.png)
+
+You might need to contact your cloud administrator to retrieve the certificates from your cluster, and once
+you imported them, you should be able to see the Kubernetes Dashboard in a browser:
+
+![pics/kubernetes_dashboard_intro.png](pics/kubernetes_dashboard_intro.png)
+
+## Tensorboard
+
+You can skip this chapter for now. There is another useful tool to monitor some ML applications if
+they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
+You might contact your cloud administrator to help you establish network access, or you can
+use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
+
+It will look something like this(for a different app, outside the scope of this demo):
+
+![pics/tensorboard_graph.png](pics/tensorboard_graph.png)
+
+Here is how you would connect your Tensorboard with the persistence we discuss next:
+
+    $ cat tb.yaml
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      labels:
+        app: tensorboard
+      name: tensorboard
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: tensorboard
+      template:
+        metadata:
+          labels:
+            app: tensorboard
+        spec:
+          volumes:
+          - name: samba-share-volume2
+            persistentVolumeClaim:
+              # claimName: azurefile
+              claimName: samba-share-claim
+          containers:
+          - name: tensorboard
+            image: tensorflow/tensorflow:1.10.0
+            imagePullPolicy: Always
+            command:
+             - /usr/local/bin/tensorboard
+            args:
+            - --logdir
+            - /tmp/tensorflow/logs
+            volumeMounts:
+            - mountPath: /tmp/tensorflow
+              #subPath: somedemo55
+              name: samba-share-volume2
+            ports:
+            - containerPort: 6006
+              protocol: TCP
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+
+
+## Persistence on Azure Stack
+
+Most real-life applications need data storage. Azure Stack team actively works on making
+available the options available on the public cloud, however, there are nuances in a detauched
+environment.
+
+For this demo we will substitute `azurefile` with our own locally-mounted network storage.
+
+Follow the steps in [Installing Storage](installing_storage.md) to create a Persistent Volume Claim
+that you could use in your Kubernetes deployments.
+
+If you done everything right, you should be able to see this `pvc` in your environment:
+
+    $ kubectl get pvc
+    NAME                STATUS   VOLUME               CAPACITY   ACCESS MODES   STORAGECLASS    AGE
+    ...
+    samba-share-claim   Bound    samba-share-volume   20Gi       RWX            local-storage   23h
+    ...
+
+And you should see the Persisted Volume itself:
+
+    $ kubeclt get pv
+    NAME               CAPACITY ACCESS MODES   RECLAIM POLICY STATUS CLAIM                       STORAGECLASS    REASON   AGE
+    ...
+    samba-share-volume 20Gi     RWX            Retain         Bound  default/samba-share-claim   local-storage            23h
+    ...
+
+Consult your cloud system administrator if you have any problems, there could be many other
+options sutable to particular scenarios and development lifecycle.
 
 ## Install Kubeflow
 
@@ -214,7 +351,7 @@ for the pods to come up:
 
 It will show the list of the services and pods for the cluster we just created.
 
-## Preparing dashboard
+## Preparing Kubeflow dashboard
 
 Make sure all the pods are up and running(Using `kubectl get all -n kubeflow`, wait until
 they are).
@@ -232,7 +369,7 @@ Then the EXTERNAL-IP will become available from:
     NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
     istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
 
-## Using dashboard
+## Kubeflow dashboard
 
 When you have your istio-ingressgateway's external ip(you can retrieve it using `get_kf_board_ip.sh`),
 open it in your browser, and make sure your firewall rules allow HTTP port 80.
@@ -250,10 +387,32 @@ You need to create a namespace to be able to create Jupyter servers.
 
 ![pics/kubeflow_dashboard2_notebook_servers.png](pics/kubeflow_dashboard2_notebook_servers.png)
 
+## Jupyter Server
+
 Once you create a server, you can connect to it and upload Python files.
 
 ![pics/kubeflow_dashboard3_notebook.png](pics/kubeflow_dashboard3_notebook.png)
 
+You can click the button `Upload`, and upload the provided `demo_notebook.ipynb`, than click
+button `Run` to execute, you should see something like this:
+
+![(pics/demo_notebook.png](pics/demo_notebook.png)
+
+
+## TFjob
+
+[TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
+It was initially developed by the Google Brain team for internal Google use, and later released under
+the Apache License 2.0.
+
+See [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack) for the demo of a `TFJob` execution in the environment that we create in this tutorial.
+
+## PyTorchJob
+
+[PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework, it has Python and C++ interfaces, primarily developed by Facebook's AI Research Lab. PyTorch is rooted in [Torch library](https://github.com/torch/torch7)
+
+See [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) for the demo
+of a `PyTorchJob` execution in the environment that we create in this tutorial.
 
 ## Uninstalling Kubeflow
 
@@ -293,6 +452,14 @@ You can now re-install it if you would like.
 
 ## Next Steps
 
+Proceed to [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack)
+to learn how to execute `TFJob`s on Kubeflow, in the environment that we just created.
+
+And then run [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) tutorial to learn running
+`PyTorchJob`s.
+
+# Links
+
 The following resources might help during troubleshooting or modifications:
 
 - https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart
@@ -301,3 +468,4 @@ The following resources might help during troubleshooting or modifications:
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux
 - https://docs.microsoft.com/en-us/azure-stack
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-cluster
+- https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/AKSe-on-AzStackHub
