@@ -21,10 +21,11 @@ from django.db.utils import IntegrityError
 # from rest_framework.views import APIView
 # from rest_framework.request import Request
 # from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework import serializers, viewsets
 from rest_framework import status
 from rest_framework import filters
+from rest_framework.response import Response
 from filters.mixins import FiltersMixin
 
 
@@ -44,8 +45,8 @@ from configs.app_insight import APP_INSIGHT_INST_KEY
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train, Task
 
 
-#from azure.iot.hub import IoTHubRegistryManager
-#from azure.iot.hub.models import Twin, TwinProperties
+# from azure.iot.hub import IoTHubRegistryManager
+# from azure.iot.hub.models import Twin, TwinProperties
 # try:
 #    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
 # except:
@@ -267,7 +268,7 @@ def export_null(request):
     project_obj.save(update_fields=['download_uri'])
 
     # if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-    #update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
+    # update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
@@ -276,7 +277,13 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
     """PartSerializer"""
     class Meta:
         model = Part
-        fields = ['id', 'name', 'description', 'is_demo']
+        fields = ['id',
+                  'name',
+                  'description',
+                  'is_demo']
+        extra_kwargs = {
+            'description': {'required': False},
+        }
 
     def create(self, validated_data):
         try:
@@ -325,15 +332,20 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
     """LocationSerializer"""
     class Meta:
         model = Location
-        fields = ['id', 'name', 'description', 'is_demo']
+        fields = ['id',
+                  'name',
+                  'description', 'is_demo']
+        extra_kwargs = {
+            'description': {'required': False},
+        }
 
 
 class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Location ModelViewSet
 
-    Available filters:
-    @is_demo
+    @Available filters
+    is_demo
     """
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
@@ -423,6 +435,32 @@ class SettingViewSet(viewsets.ModelViewSet):
     """
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
+
+    @action(detail=True, methods=['get'])
+    def list_projects(self, request, pk=None):
+        """
+        List Project under Training Key + Endpoint
+        """
+        try:
+            setting_obj = Setting.objects.get(pk=pk)
+            trainer = setting_obj._get_trainer_obj()
+            rs = {}
+            project_list = trainer.get_projects()
+            for project in project_list:
+                rs[project.id] = project.name
+            return Response(rs)
+        except CustomVisionErrorException as e:
+            if e.message == "Operation returned an invalid status code 'Access Denied'":
+                return Response({'status': 'failed',
+                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                                status=503)
+            return Response({'status': 'failed',
+                             'log': e.message},
+                            status=e.response.status_code)
+        except Exception as e:
+            return Response({'status': 'failed',
+                             'log': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
@@ -1254,31 +1292,46 @@ def reset_project(request, project_id):
         project_obj.customvision_project_id = ''
         project_obj.customvision_project_name = project_name
         project_obj.download_uri = ''
-        project_obj.needRetraining = False
-        project_obj.accuracyRangeMin = 30
-        project_obj.accuracyRangeMax = 80
-        project_obj.maxImages = 20
+        project_obj.needRetraining = Project._meta.get_field(
+            'needRetraining').get_default()
+        project_obj.accuracyRangeMin = Project._meta.get_field(
+            'accuracyRangeMin').get_default()
+        project_obj.accuracyRangeMax = Project._meta.get_field(
+            'accuracyRangeMax').get_default()
+        project_obj.maxImages = Project._meta.get_field(
+            'maxImages').get_default()
         project_obj.deployed = False
-        project_obj.train_try_counter = 0
-        project_obj.train_success_counter = 0
+        project_obj.training_counter = 0
+        project_obj.retraining_counter = 0
         project_obj.save()
         project_obj.create_project()
-        return JsonResponse({'status': 'ok'})
+        return Response({'status': 'ok'})
+    except KeyError as key_err:
+        if str(key_err) in ['Endpoint', "'Endpoint'"]:
+            # Probably reseting without training key and endpoint
+            # When user click configure, project will check customvision_id. if empty than create
+            # Thus we can pass for now. Wait for configure/training to create project...
+            return Response({'status': 'ok'})
+        logger.exception("Reset project unexpected key error")
+        return Response({
+            'status': 'failed',
+            'log': str(key_err)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except ValueError as value_err:
         logger.exception("Reset Project Value Error")
-        return JsonResponse({
+        return Response({
             'status': 'failed',
             'log': str(value_err)},
             status=status.HTTP_400_BAD_REQUEST)
     except CustomVisionErrorException as customvision_err:
         logger.exception("Error from Custom Vision")
         if customvision_err.message == "Operation returned an invalid status code 'Access Denied'":
-            return JsonResponse({
+            return Response({
                 'status': 'failed',
                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE)
         else:
-            return JsonResponse({
+            return Response({
                 'status': 'failed',
                 'log': customvision_err.message},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE)

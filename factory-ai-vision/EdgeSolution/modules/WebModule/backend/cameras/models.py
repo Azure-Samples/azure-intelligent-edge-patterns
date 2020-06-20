@@ -376,7 +376,7 @@ class Project(models.Model):
         max_length=200, null=True, blank=True, default='')
     download_uri = models.CharField(
         max_length=1000, null=True, blank=True, default='')
-    needRetraining = models.BooleanField(default=False)
+    needRetraining = models.BooleanField(default=True)
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
     maxImages = models.IntegerField(default=20)

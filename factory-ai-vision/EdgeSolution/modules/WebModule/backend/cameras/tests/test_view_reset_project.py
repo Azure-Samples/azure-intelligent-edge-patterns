@@ -62,9 +62,15 @@ class ViewListProjectTestCase(APITransactionTestCase):
         self.assertEqual(len(Project.objects.all()), 2)
 
     def test_valid_setting_reset_project(self):
-        """Reset a project with valid setting.
-        Response Code: status.HTTP_200_OK.
-        Response Body: {'status': 'OK'}
+        """
+        @Type
+        Positive
+
+        @Description
+        Reset a project with valid setting
+
+        @Expected Results:
+        200 {'status': 'ok'}
         """
         url = reverse('project-list')
         valid_setting = Setting.objects.filter(
@@ -73,17 +79,51 @@ class ViewListProjectTestCase(APITransactionTestCase):
         response = self.client.get(
             path=f'{url}/{valid_project.id}/reset_project',
             data={'project_name': f'{project_prefix}-test-reset-1'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        try:
-            json.loads(response.content)
-        except:
-            self.fail("Response Content is not json loadable")
-        self.assertEqual('ok', json.loads(response.content)['status'])
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'ok')
+
+    def test_valid_setting_reset_project(self):
+        """
+        @Type
+        Positive
+
+        @Description
+        Default needRetraining is True
+
+        @Expected Results
+        200 {... : ...
+             'needRetraining': true
+             ... : ...}
+        """
+        url = reverse('project-list')
+        valid_setting = Setting.objects.filter(
+            name='valid_setting').first()
+        valid_project = Project.objects.filter(setting=valid_setting).first()
+        response = self.client.get(
+            path=f'{url}/{valid_project.id}/reset_project',
+            data={'project_name': f'{project_prefix}-test-reset-1'})
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'ok')
+
+        response = self.client.get(path=f'{url}/{valid_project.id}')
+        self.assertTrue(json.loads(response.content)['needRetraining'])
 
     def test_invalid_setting_reset_project(self):
-        """Reset a project with invalid setting.
-        Response Code: status.HTTP_4XX status.HTTP_5XX
-        Response Body: {'status': 'failed', 'log': 'some reason'}
+        """
+        @Type
+        Negative
+
+        @Description
+        Reset a project with invalid setting
+
+        @Expected Results:
+        400 {'status': 'failed', 'log': 'some reason'}
         """
         url = reverse('project-list')
         invalid_setting = Setting.objects.filter(
@@ -99,10 +139,15 @@ class ViewListProjectTestCase(APITransactionTestCase):
         self.assertTrue(len(json.loads(response.content)['log']) > 0)
 
     def test_valid_setting_reset_project_without_project_name(self):
-        """Reset a project with valid setting.
-        However, project_name not provided
-        Response Code: status.HTTP_400_BAD_REQUEST
-        Response Body: {'status': 'failed', 'log': 'some reason'}
+        """
+        @Type
+        Negative
+
+        @Description
+        Reset a project with valid setting. However, project_name not provided
+
+        @Expected Results
+        400 {'status': 'failed', 'log': 'some reason'}
         """
         url = reverse('project-list')
         invalid_setting = Setting.objects.filter(

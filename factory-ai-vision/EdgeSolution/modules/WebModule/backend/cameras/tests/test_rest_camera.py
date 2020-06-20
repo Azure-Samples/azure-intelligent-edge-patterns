@@ -1,12 +1,21 @@
-from django.test import TestCase
-from django.core.exceptions import MultipleObjectsReturned
-from cameras.models import Camera
-from rest_framework.test import APITransactionTestCase
-from .test_special_strings import special_strings
+"""
+Camera REST API Test
+"""
 from unittest.mock import patch
 
+from django.test import TestCase
+from django.core.exceptions import MultipleObjectsReturned
+from rest_framework.test import APITransactionTestCase
 
-class CameraTestCase(APITransactionTestCase):
+from cameras.models import Camera
+from .test_special_strings import special_strings
+
+
+class CameraTestCases(APITransactionTestCase):
+    """
+    Camera REST API TestCases
+    """
+
     def setUp(self):
         with patch('requests.get') as mock_request:
             mock_request.return_value.status_code = 200
@@ -28,10 +37,10 @@ class CameraTestCase(APITransactionTestCase):
                                   rtsp="0",
                                   area="0",
                                   is_demo=False)
-            for s in special_strings:
-                Camera.objects.create(name=s,
-                                      rtsp=s,
-                                      area=s,
+            for special_string in special_strings:
+                Camera.objects.create(name=special_string,
+                                      rtsp=special_string,
+                                      area=special_string,
                                       is_demo=False)
         self.exist_num = 4 + len(special_strings)
 
