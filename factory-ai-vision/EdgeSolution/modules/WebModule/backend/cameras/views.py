@@ -1,3 +1,6 @@
+"""
+Camera views
+"""
 from __future__ import absolute_import, unicode_literals
 import base64
 import json
@@ -28,11 +31,14 @@ from filters.mixins import FiltersMixin
 import requests
 
 # Third Party Import
-from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region, CustomVisionErrorException
+from azure.cognitiveservices.vision.customvision.training.models import (ImageFileCreateEntry,
+                                                                         Region,
+                                                                         CustomVisionErrorException)
 from azure.iot.device import IoTHubModuleClient
 
 # First Party Import
-from vision_on_edge.settings import IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID
+# from vision_on_edge.settings import IOT_HUB_CONNECTION_STRING
+from vision_on_edge.settings import DEVICE_ID, MODULE_ID
 from configs.app_insight import APP_INSIGHT_INST_KEY
 
 from .models import Camera, Stream, Image, Location, Project, Part, Annotation, Setting, Train, Task
@@ -82,7 +88,7 @@ def update_train_status(project_id):
 
             iterations = trainer.get_iterations(customvision_project_id)
             if len(iterations) == 0:
-                obj, created = project_obj.upcreate_training_status(
+                project_obj.upcreate_training_status(
                     status='preparing',
                     log='Status : preparing custom vision environment'
                 )
@@ -94,7 +100,7 @@ def update_train_status(project_id):
 
             iteration = iterations[0]
             if iteration.exportable == False or iteration.status != 'Completed':
-                obj, created = project_obj.upcreate_training_status(
+                project_obj.upcreate_training_status(
                     status='training',
                     log='Status : training model'
                 )
@@ -121,7 +127,7 @@ def update_train_status(project_id):
 
             logger.info(
                 f'Successfulling export model: {project_obj.download_uri}')
-            logger.info(f'Preparing to deploy to inference')
+            logger.info('Preparing to deploy to inference')
             logger.info(f'Project is deployed before: {project_obj.deployed}')
             if not project_obj.deployed:
                 if exports[0].download_uri:
@@ -301,7 +307,12 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """PartViewSet with 'is_demo' filter"""
+    """
+    Part ModelViewSet.Partname should be unique.
+
+    Available filters:
+    @is_demo
+    """
     queryset = Part.objects.all()
     serializer_class = PartSerializer
     filter_backends = (filters.OrderingFilter,)
@@ -310,20 +321,20 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     }
 
 
-#
-# Location Views
-#
-
-
 class LocationSerializer(serializers.HyperlinkedModelSerializer):
     """LocationSerializer"""
     class Meta:
         model = Location
-        fields = ['id', 'name', 'description',  'is_demo']
+        fields = ['id', 'name', 'description', 'is_demo']
 
 
 class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """LocationViewSet with 'is_demo' filter"""
+    """
+    Location ModelViewSet
+
+    Available filters:
+    @is_demo
+    """
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
     filter_backends = (filters.OrderingFilter,)
@@ -340,7 +351,12 @@ class CameraSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """CameraViewSet with 'is_demo' filter"""
+    """
+    Camera ModelViewSet
+
+    Available filters:
+    @is_demo
+    """
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
     filter_backends = (filters.OrderingFilter,)
@@ -357,7 +373,12 @@ class TaskSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """TaskViewSet"""
+    """
+    Task ModelViewSet
+
+    Available filters:
+    @project
+    """
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filter_backends = (filters.OrderingFilter,)
@@ -379,7 +400,6 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
             'iot_hub_connection_string',
             'device_id',
             'module_id',
-            'is_trainer_valid',
             'is_collect_data',
             'obj_detection_domain_id']
 
@@ -398,7 +418,9 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SettingViewSet(viewsets.ModelViewSet):
-    """SettingViewSet"""
+    """
+    Setting ModelViewSet
+    """
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
 
@@ -440,7 +462,12 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """ProjectViewSet with 'is_demo' filters"""
+    """
+    Project ModelViewSet
+
+    Available filters
+    @is_demo
+    """
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filter_backends = (filters.OrderingFilter,)
@@ -468,7 +495,9 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ImageViewSet(viewsets.ModelViewSet):
-    """ImageViewSet"""
+    """
+    Image ModelViewSet
+    """
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
 
@@ -481,7 +510,9 @@ class AnnotationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AnnotationViewSet(viewsets.ModelViewSet):
-    """AnnotationViewSet"""
+    """
+    Annotation ModelViewSet
+    """
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
 
@@ -494,7 +525,9 @@ class TrainSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TrainViewSet(viewsets.ModelViewSet):
-    """TrainViewSet"""
+    """
+    Train ModelViewSet
+    """
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
 
@@ -616,7 +649,7 @@ def _train(project_id, request):
 
     # Invalid Endpoint + Training Key
     if not trainer:
-        obj, created = project_obj.upcreate_training_status(
+        project_obj.upcreate_training_status(
             status='failed',
             log='Status: Training key or Endpoint is invalid. Please change the settings')
         return JsonResponse({'status': 'failed',
@@ -899,7 +932,7 @@ def train(request, project_id):
         requests.get('http://'+inference_module_url()+'/update_retrain_parameters', params={
             'confidence_min': 30, 'confidence_max': 30, 'max_images': 10})
 
-        obj, created = project_obj.upcreate_training_status(
+        project_obj.upcreate_training_status(
             status='ok',
             log='Status : demo ok'
         )
@@ -985,7 +1018,9 @@ def upload_relabel_image(request):
 
 @api_view(['POST'])
 def relabel_update(request):
-
+    """
+    Update relabel image
+    """
     logger.info('update relabeling')
     data = request.data
     if type(data) is not type([]):
@@ -1087,7 +1122,8 @@ def pull_cv_project(request, project_id):
 
     try:
         # Invalid CustomVision Project ID handled by exception
-        project = trainer.get_project(project_id=customvision_project_id)
+        trainer.get_project(project_id=customvision_project_id)
+
         project_obj.customvision_project_id = customvision_project_id
         project_obj.deployed = False
         update_fields.extend(['customvision_project_id', 'deployed'])
@@ -1117,7 +1153,10 @@ def pull_cv_project(request, project_id):
         # Partial Download
         if is_partial:
             exporting_task_obj = Task.objects.create(
-                task_type='export_iteration', status='init', log='Just Started', project=project_obj)
+                task_type='export_iteration',
+                status='init',
+                log='Just Started',
+                project=project_obj)
             exporting_task_obj.start_exporting()
             return JsonResponse({'status': 'ok', 'task.id': exporting_task_obj.id})
 
@@ -1206,17 +1245,43 @@ def reset_project(request, project_id):
     except:
         if len(Project.objects.filter(is_demo=False)):
             project_obj = Project.objects.filter(is_demo=False)[0]
-    Part.objects.filter(is_demo=False).delete()
-    Image.objects.all().delete()
-    project_obj.customvision_project_id = ''
-    project_obj.customvision_project_name = ''
-    project_obj.download_uri = ''
-    project_obj.needRetraining = False
-    project_obj.accuracyRangeMin = 30
-    project_obj.accuracyRangeMax = 80
-    project_obj.maxImages = 20
-    project_obj.deployed = False
-    project_obj.train_try_counter = 0
-    project_obj.train_success_counter = 0
-    project_obj.save()
-    return JsonResponse({'status': 'ok'})
+    try:
+        Part.objects.filter(is_demo=False).delete()
+        project_name = request.query_params.get('project_name')
+        if not project_name:
+            raise ValueError('project_name required')
+        Image.objects.all().delete()
+        project_obj.customvision_project_id = ''
+        project_obj.customvision_project_name = project_name
+        project_obj.download_uri = ''
+        project_obj.needRetraining = False
+        project_obj.accuracyRangeMin = 30
+        project_obj.accuracyRangeMax = 80
+        project_obj.maxImages = 20
+        project_obj.deployed = False
+        project_obj.train_try_counter = 0
+        project_obj.train_success_counter = 0
+        project_obj.save()
+        project_obj.create_project()
+        return JsonResponse({'status': 'ok'})
+    except ValueError as value_err:
+        logger.exception("Reset Project Value Error")
+        return JsonResponse({
+            'status': 'failed',
+            'log': str(value_err)},
+            status=status.HTTP_400_BAD_REQUEST)
+    except CustomVisionErrorException as customvision_err:
+        logger.exception("Error from Custom Vision")
+        if customvision_err.message == "Operation returned an invalid status code 'Access Denied'":
+            return JsonResponse({
+                'status': 'failed',
+                'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        else:
+            return JsonResponse({
+                'status': 'failed',
+                'log': customvision_err.message},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    except Exception:
+        logger.exception("Uncaught Error")
+        raise

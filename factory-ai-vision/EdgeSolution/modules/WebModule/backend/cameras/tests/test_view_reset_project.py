@@ -1,19 +1,19 @@
 import logging
 import json
+from pprint import pformat
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
-from cameras.models import Project, Setting, Camera, Location, Part
+from cameras.models import Setting, Part, Image, Camera, Project, Location
 from config import ENDPOINT, TRAINING_KEY
-from unittest.mock import patch
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 project_prefix = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
 
-class ViewTrainTestCase(APITransactionTestCase):
+class ViewListProjectTestCase(APITransactionTestCase):
     def setUp(self):
         """Create setting, camera, location anr parts.
         """
@@ -25,6 +25,7 @@ class ViewTrainTestCase(APITransactionTestCase):
                                                      endpoint=ENDPOINT,
                                                      training_key='',
                                                      is_trainer_valid=False)
+
         camera_obj = Camera.objects.create(name="camera_1",
                                            rtsp="valid_rtsp",
                                            area="55,66",
@@ -36,11 +37,12 @@ class ViewTrainTestCase(APITransactionTestCase):
         part_obj = Part.objects.create(name="part_1",
                                        description=f"description_1",
                                        is_demo=False)
+
         invalid_project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='invalid_setting').first(),
             camera=Camera.objects.filter(name='camera_1').first(),
             location=Location.objects.filter(name='location_1').first(),
-            customvision_project_id='super_valid_project_id',
+            customvision_project_id='foo',
             customvision_project_name=f'{project_prefix}-test_create_1',
             is_demo=False
         )
@@ -50,45 +52,72 @@ class ViewTrainTestCase(APITransactionTestCase):
             setting=Setting.objects.filter(name='valid_setting').first(),
             camera=Camera.objects.filter(name='camera_1').first(),
             location=Location.objects.filter(name='location_1').first(),
-            customvision_project_id='super_valid_project_id',
+            customvision_project_id='bar',
             customvision_project_name=f'{project_prefix}-test_create_2',
             is_demo=False
         )
         valid_project_obj.parts.add(part_obj)
 
     def test_setup_is_valid(self):
-        self.assertEqual(len(Camera.objects.all()), 1)
-        valid_setting = Setting.objects.filter(name='valid_setting').first()
-        project_obj = Project.objects.filter(setting=valid_setting).first()
+        self.assertEqual(len(Project.objects.all()), 2)
 
-    def test_train_valid_project(self):
-        """valid setting should lead to create new project and train.
-        However, we have no image to train
+    def test_valid_setting_reset_project(self):
+        """Reset a project with valid setting.
+        Response Code: status.HTTP_200_OK.
+        Response Body: {'status': 'OK'}
         """
         url = reverse('project-list')
-        valid_setting = Setting.objects.filter(name='valid_setting').first()
-        project_obj = Project.objects.filter(setting=valid_setting).first()
-        response = self.client.get(f'{url}/{project_obj.id}/train')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        response_status = json.loads(response.content)['status']
-        self.assertEqual(response_status, 'failed')
-        response_log = json.loads(response.content)['log']
-        self.assertEqual(response_log, 'Not enough images for training')
+        valid_setting = Setting.objects.filter(
+            name='valid_setting').first()
+        valid_project = Project.objects.filter(setting=valid_setting).first()
+        response = self.client.get(
+            path=f'{url}/{valid_project.id}/reset_project',
+            data={'project_name': f'{project_prefix}-test-reset-1'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        try:
+            json.loads(response.content)
+        except:
+            self.fail("Response Content is not json loadable")
+        self.assertEqual('ok', json.loads(response.content)['status'])
 
-    def test_train_invalid_project(self):
-        """invalid setting should lead to failed and replace customvision id to ''
+    def test_invalid_setting_reset_project(self):
+        """Reset a project with invalid setting.
+        Response Code: status.HTTP_4XX status.HTTP_5XX
+        Response Body: {'status': 'failed', 'log': 'some reason'}
         """
         url = reverse('project-list')
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
-        project_obj = Project.objects.filter(setting=invalid_setting).first()
-        response = self.client.get(f'{url}/{project_obj.id}/train')
-        self.assertEqual(response.status_code,
-                         status.HTTP_503_SERVICE_UNAVAILABLE)
-        response_status = json.loads(response.content)['status']
-        self.assertEqual(response_status, 'failed')
+        invalid_project = Project.objects.filter(
+            setting=invalid_setting).first()
+        response = self.client.get(
+            path=f'{url}/{invalid_project.id}/reset_project',
+            data={'project_name': f'{project_prefix}-test-reset-2'})
 
-    @classmethod
+        self.assertNotEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual('failed', json.loads(response.content)['status'])
+        self.assertTrue(len(json.loads(response.content)['log']) > 0)
+
+    def test_valid_setting_reset_project_without_project_name(self):
+        """Reset a project with valid setting.
+        However, project_name not provided
+        Response Code: status.HTTP_400_BAD_REQUEST
+        Response Body: {'status': 'failed', 'log': 'some reason'}
+        """
+        url = reverse('project-list')
+        invalid_setting = Setting.objects.filter(
+            name='invalid_setting').first()
+        invalid_project = Project.objects.filter(
+            setting=invalid_setting).first()
+        response = self.client.get(
+            path=f'{url}/{invalid_project.id}/reset_project')
+
+        self.assertNotEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual('failed', json.loads(response.content)['status'])
+        self.assertTrue(json.loads(response.content)[
+                        'log'].find('project_name') >= 0)
+
+    @ classmethod
     def tearDownClass(self):
         trainer = CustomVisionTrainingClient(
             api_key=TRAINING_KEY, endpoint=ENDPOINT)
