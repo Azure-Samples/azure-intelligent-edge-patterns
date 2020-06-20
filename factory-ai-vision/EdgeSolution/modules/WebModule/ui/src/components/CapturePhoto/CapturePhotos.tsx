@@ -54,7 +54,7 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
     <Flex gap="gap.small" vAlign="center">
       <Text>Select Camera</Text>
       <Dropdown items={items} onChange={onDropdownChange} value={formatDropdownValue(selectedCamera)} />
-      <Link to="/addCamera">Add Camera</Link>
+      <Link to="/cameras">Add Camera</Link>
     </Flex>
   );
 };
