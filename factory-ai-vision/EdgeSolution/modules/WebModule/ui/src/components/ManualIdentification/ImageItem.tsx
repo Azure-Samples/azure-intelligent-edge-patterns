@@ -84,28 +84,26 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   return (
     <div
       style={{
+        minHeight: '16em',
+        height: '100%',
         display: 'flex',
-        minHeight: '13em',
-        maxHeight: '40%',
         justifyContent: 'center',
-        padding: '1em',
+        alignItems: 'center',
       }}
     >
       <div
         style={{
-          margin: '0.2em',
-          display: 'flex',
-          flexFlow: 'column',
-          minWidth: '14em',
-          justifyContent: 'space-around',
+          padding: '0.5em',
+          height: '100%',
+          flex: '1 0 0',
         }}
       >
-        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={200} height={150} />
+        <LabelDisplayImage labelImage={relabelImages[imageIndex]} />
       </div>
       <div
         style={{
-          height: '100%',
-          width: '40%',
+          height: '80%',
+          flex: '1 0 0',
           display: 'flex',
           flexFlow: 'column',
           justifyContent: 'center',
@@ -120,6 +118,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
             alignItems: 'center',
             width: '100%',
             height: '50%',
+            padding: '0.2em',
           }}
         >
           <RadioGroup

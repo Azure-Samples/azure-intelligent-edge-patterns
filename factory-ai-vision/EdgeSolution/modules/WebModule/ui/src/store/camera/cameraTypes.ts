@@ -3,7 +3,6 @@ export type Camera = {
   id?: number;
   name: string;
   rtsp: string;
-  model_name: string;
   area?: string;
   is_demo: boolean;
 };

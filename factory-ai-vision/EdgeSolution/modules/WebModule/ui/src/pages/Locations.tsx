@@ -1,13 +1,12 @@
 import React, { useEffect, FC } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
 
 import { State } from '../store/State';
 import { Location } from '../store/location/locationTypes';
 import ImageLink from '../components/ImageLink';
-import { getLocations } from '../store/location/locationActions';
-import AddButton from '../components/AddButton';
+import { getLocations, postLocation } from '../store/location/locationActions';
+import { AddModuleDialog } from '../components/AddModuleDialog';
 
 const Locations: FC = () => {
   const dispatch = useDispatch();
@@ -39,9 +38,26 @@ const Locations: FC = () => {
         ))}
       </Grid>
       <div style={{ alignSelf: 'flex-end' }}>
-        <Link to="/locations/register">
-          <AddButton />
-        </Link>
+        <AddModuleDialog
+          header="Add Location"
+          fields={[
+            {
+              placeholder: 'Location Name',
+              key: 'name',
+              type: 'input',
+              required: true,
+            },
+            {
+              placeholder: 'Description',
+              key: 'description',
+              type: 'textArea',
+              required: false,
+            },
+          ]}
+          onConfirm={({ name, description }): void => {
+            dispatch(postLocation({ name, description, is_demo: false }));
+          }}
+        />
       </div>
     </div>
   );

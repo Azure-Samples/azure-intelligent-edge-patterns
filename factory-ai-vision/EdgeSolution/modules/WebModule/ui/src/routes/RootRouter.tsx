@@ -5,7 +5,6 @@ import Cameras from '../pages/Cameras';
 import CameraDetails from '../pages/CameraDetails';
 import { PartDetails } from '../pages/PartDetails';
 import Locations from '../pages/Locations';
-import LocationRegister from '../pages/LocationRegister';
 import LocationDetails from '../pages/LocationDetails';
 import ManualIdentification from '../pages/ManualIdentification';
 import { Parts } from '../pages/Parts';
@@ -17,7 +16,6 @@ export const RootRouter: FC = () => {
   return (
     <Switch>
       <PrivateRoute path="/manual" component={ManualIdentification} />
-      <PrivateRoute path="/locations/register" component={LocationRegister} />
       <PrivateRoute path="/locations/detail" component={LocationDetails} />
       <PrivateRoute path="/locations" component={Locations} />
       <PrivateRoute path="/cameras/detail" component={CameraDetails} />
