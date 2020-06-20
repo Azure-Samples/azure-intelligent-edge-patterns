@@ -28,18 +28,22 @@ import {
   updateKey,
   thunkGetSetting,
   thunkPostSetting,
+  thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
-import { updateProjectData, updateOriginProjectData } from '../store/project/projectActions';
+import { updateProjectData, updateOriginProjectData, thunkGetProject } from '../store/project/projectActions';
 
 export const Setting = (): JSX.Element => {
-  const { loading, error, current: settingData, origin: originSettingData, isTrainerValid } = useSelector<
-    State,
-    SettingType
-  >((state) => state.setting);
+  const {
+    loading,
+    error,
+    current: settingData,
+    origin: originSettingData,
+    isTrainerValid,
+    cvProjects,
+  } = useSelector<State, SettingType>((state) => state.setting);
   const dispatch = useDispatch();
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
-  const [cvProjects, setCvProjects] = useState<Record<string, string>>({});
   const [otherError, setOtherError] = useState<Error>(null);
 
   const notEmpty = originSettingData.namespace && originSettingData.key;
@@ -80,22 +84,9 @@ export const Setting = (): JSX.Element => {
 
   useEffect(() => {
     if (settingData.id !== -1) {
-      Axios.get(`/api/settings/${settingData.id}/list_projects`)
-        .then(({ data }) => {
-          setCvProjects(data);
-          return void 0;
-        })
-        .catch((e) => {
-          if (e.response) {
-            setOtherError(new Error(e.response.data.log));
-          } else if (e.request) {
-            setOtherError(new Error(e.request));
-          } else {
-            setOtherError(e);
-          }
-        });
+      dispatch(thunkGetAllCvProjects());
     }
-  }, [settingData.id]);
+  }, [dispatch, settingData.id]);
 
   return (
     <>
@@ -204,7 +195,7 @@ const initialDropdownItem = [
   },
 ];
 
-const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = ({ cvProjects }) => {
+const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = ({ cvProjects = {} }) => {
   const { isLoading: isProjectLoading, error: projectError, data: projectData, originData } = useProject(
     false,
   );
@@ -213,6 +204,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
   const [otherError, setOtherError] = useState<Error>(null);
   const [createProjectModel, setCreateProjectModel] = useState(false);
   const [projectName, setProjectName] = useState('');
+  const [successDialog, setSuccessDialog] = useState(false);
   const dispatch = useDispatch();
 
   const onDropdownChange = (_, data): void => {
@@ -234,13 +226,32 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
       .finally(() => setOtherLoading(false));
   };
 
-  const onCreateNewProject = (): void => {
+  const onCreateNewProject = async (): Promise<void> => {
     setOtherLoading(true);
-    Axios.get(`/api/projects/${projectData.id}/reset_project?project_name=${projectName}`)
-      .then(() => window.location.reload())
-      .catch((err) => setOtherError(err))
-      .finally(() => setOtherLoading(false));
+    try {
+      await Axios.get(`/api/projects/${projectData.id}/reset_project?project_name=${projectName}`);
+      // Update cvProject when create success
+      dispatch(thunkGetProject(false));
+      dispatch(thunkGetAllCvProjects());
+      setSuccessDialog(true);
+    } catch (err) {
+      setOtherError(err);
+    }
+    setOtherLoading(false);
   };
+
+  useEffect(() => {
+    let didCancel = false;
+    if (successDialog) {
+      setTimeout(() => {
+        if (!didCancel) setSuccessDialog(false);
+      }, 3000);
+    }
+
+    return (): void => {
+      didCancel = true;
+    };
+  });
 
   const dropdownItems: DropdownItemProps[] = [
     ...initialDropdownItem,
@@ -320,6 +331,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
           onCancel={(): void => setCreateProjectModel(false)}
         />
         {error.length ? <Alert danger content={`Failed to load ${error.join(', ')}`} dismissible /> : null}
+        {successDialog && <Alert dismissible header="Create Project Success" success visible />}
       </Flex>
     </>
   );
