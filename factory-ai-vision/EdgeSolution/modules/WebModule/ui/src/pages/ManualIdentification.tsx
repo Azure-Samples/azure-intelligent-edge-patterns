@@ -166,7 +166,7 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
-        <div style={{ display: 'flex', minWidth: '15em', maxWidth: '15%', justifyContent: 'space-around' }}>
+        <div style={{ display: 'flex', minWidth: '20em', maxWidth: '20%', justifyContent: 'space-around' }}>
           <Button
             primary
             content="Yes to all"

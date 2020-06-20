@@ -19,12 +19,10 @@ const LocationDetails: FC = () => {
       <Grid columns="15% 3fr 2fr" styles={{ height: '60%' }}>
         <Flex column gap="gap.large">
           <ImageLink defaultSrc="/icons/defaultLocation.png" width="6.25em" height="6.25em" />
-          <Text>Coordinates:</Text>
           <Text>Description:</Text>
         </Flex>
         <Flex column gap="gap.large">
           <Text styles={{ paddingTop: '0.625em', minHeight: '6.25em' }}>{location.name}</Text>
-          <Text>{location.coordinates}</Text>
           <Text styles={{ height: '60%' }}>{location.description}</Text>
         </Flex>
       </Grid>

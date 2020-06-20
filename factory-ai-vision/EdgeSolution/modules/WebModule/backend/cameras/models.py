@@ -14,7 +14,7 @@ from io import BytesIO
 from django.core import files
 from django.db import models
 from django.db.models.signals import post_save, pre_save
-#from django.db.models.signals import post_delete, m2m_changed
+# from django.db.models.signals import post_delete, m2m_changed
 from django.db.utils import IntegrityError
 from rest_framework import status
 
@@ -344,7 +344,7 @@ class Camera(models.Model):
     area = models.CharField(max_length=1000, blank=True)
     is_demo = models.BooleanField(default=False)
 
-    def __str__(self):
+   def __str__(self):
         return self.name
 
     @staticmethod
