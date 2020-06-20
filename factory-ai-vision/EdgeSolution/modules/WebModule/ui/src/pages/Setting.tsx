@@ -204,7 +204,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
   const [otherError, setOtherError] = useState<Error>(null);
   const [createProjectModel, setCreateProjectModel] = useState(false);
   const [projectName, setProjectName] = useState('');
-  const [successDialog, setSuccessDialog] = useState(false);
+  const [successDialog, setSuccessDialog] = useState('');
   const dispatch = useDispatch();
 
   const onDropdownChange = (_, data): void => {
@@ -221,7 +221,11 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
         projectData.cvProjectId
       }&partial=${Number(!loadFullImages)}`,
     )
-      .then(() => dispatch(updateOriginProjectData()))
+      .then(() => {
+        dispatch(updateOriginProjectData());
+        setSuccessDialog('Load Project Success');
+        return void 0;
+      })
       .catch((err) => setOtherError(err))
       .finally(() => setOtherLoading(false));
   };
@@ -233,7 +237,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
       // Update cvProject when create success
       dispatch(thunkGetProject(false));
       dispatch(thunkGetAllCvProjects());
-      setSuccessDialog(true);
+      setSuccessDialog('Create Project Success');
     } catch (err) {
       setOtherError(err);
     }
@@ -244,7 +248,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
     let didCancel = false;
     if (successDialog) {
       setTimeout(() => {
-        if (!didCancel) setSuccessDialog(false);
+        if (!didCancel) setSuccessDialog('');
       }, 3000);
     }
 
@@ -331,7 +335,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
           onCancel={(): void => setCreateProjectModel(false)}
         />
         {error.length ? <Alert danger content={`Failed to load ${error.join(', ')}`} dismissible /> : null}
-        {successDialog && <Alert dismissible header="Create Project Success" success visible />}
+        {successDialog && <Alert dismissible header={successDialog} success visible />}
       </Flex>
     </>
   );
