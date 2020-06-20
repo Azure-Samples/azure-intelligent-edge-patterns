@@ -21,10 +21,11 @@ from django.db.utils import IntegrityError
 # from rest_framework.views import APIView
 # from rest_framework.request import Request
 # from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework import serializers, viewsets
 from rest_framework import status
 from rest_framework import filters
+from rest_framework.response import Response
 from filters.mixins import FiltersMixin
 
 
@@ -276,7 +277,13 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
     """PartSerializer"""
     class Meta:
         model = Part
-        fields = ['id', 'name', 'description', 'is_demo']
+        fields = ['id',
+                  'name',
+                  'description',
+                  'is_demo']
+        extra_kwargs = {
+            'description': {'required': False},
+        }
 
     def create(self, validated_data):
         try:
@@ -423,6 +430,32 @@ class SettingViewSet(viewsets.ModelViewSet):
     """
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
+
+    @action(detail=True, methods=['get'])
+    def list_projects(self, request, pk=None):
+        """
+        List Project under Training Key + Endpoint
+        """
+        try:
+            setting_obj = Setting.objects.get(pk=pk)
+            trainer = setting_obj._get_trainer_obj()
+            rs = {}
+            project_list = trainer.get_projects()
+            for project in project_list:
+                rs[project.id] = project.name
+            return Response(rs)
+        except CustomVisionErrorException as e:
+            if e.message == "Operation returned an invalid status code 'Access Denied'":
+                return Response({'status': 'failed',
+                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                                status=503)
+            return Response({'status': 'failed',
+                             'log': e.message},
+                            status=e.response.status_code)
+        except Exception as e:
+            return Response({'status': 'failed',
+                             'log': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):

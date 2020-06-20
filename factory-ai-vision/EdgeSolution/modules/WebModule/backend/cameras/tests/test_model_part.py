@@ -1,10 +1,18 @@
+"""
+Part Model and method unittest
+"""
 from rest_framework.test import APITransactionTestCase
-from cameras.models import Part
 from django.core.exceptions import MultipleObjectsReturned
+
+from cameras.models import Part
 from .test_special_strings import special_strings
 
 
 class PartTestCase(APITransactionTestCase):
+    """
+    Part Model and method unittest
+    """
+
     def setUp(self):
         Part.objects.create(name="Part1",
                             description="Description1",
@@ -21,18 +29,24 @@ class PartTestCase(APITransactionTestCase):
         Part.objects.create(name="Part2",
                             description="python apps.py",
                             is_demo=False)
-        for s in special_strings:
-            Part.objects.create(name=s,
-                                description=s,
+        for special_string in special_strings:
+            Part.objects.create(name=special_string,
+                                description=special_string,
                                 is_demo=False)
         self.exist_num = 4 + len(special_strings)
 
     def test_setup_is_valid(self):
+        """
+        Make sure setup is valid
+        """
         self.assertEqual(Part.objects.count(), self.exist_num)
         self.assertRaises(MultipleObjectsReturned,
                           Part.objects.get, name='Part1')
 
     def test_get(self):
+        """
+        Basic Test
+        """
         part1 = Part.objects.filter(name='Part1').last()
         self.assertFalse(part1.is_demo)
         part1 = Part.objects.filter(name='Part2').last()
@@ -41,3 +55,22 @@ class PartTestCase(APITransactionTestCase):
         self.assertTrue(part1.is_demo)
         part1 = Part.objects.filter(name='Part2').first()
         self.assertTrue(part1.is_demo)
+
+    def test_create_without_description(self):
+        """
+        @Type
+        Positive
+
+        @Description
+        Create a part without description assigned
+        Description column is now not mandatory
+
+        @Expected Results
+        Object created. Description is ''
+        """
+        part_name = "Part without Desb"
+        Part.objects.create(name=part_name,
+                            is_demo=False)
+        part_obj = Part.objects.get(name=part_name)
+        self.assertEqual(part_obj.description,
+                         '')

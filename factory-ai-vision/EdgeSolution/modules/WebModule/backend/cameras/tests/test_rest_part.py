@@ -1,15 +1,22 @@
+"""
+Part REST API unittest
+"""
+import logging
+import json
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 from cameras.models import Part
-import logging
-#
+
 logger = logging.getLogger(__name__)
-#
-#
 
 
 class PartTests(APITransactionTestCase):
+    """
+    Test Cases for Part API
+    """
+
     def setUp(self):
         url = reverse('part-list')
         data = {'name': 'Part1',
@@ -18,7 +25,7 @@ class PartTests(APITransactionTestCase):
 
         data = {'name': 'Part2',
                 'description': 'Desb2'}
-        response = self.client.post(url, data, format='json')
+        self.client.post(url, data, format='json')
         data = {'name': 'Part3',
                 'description': 'Desb3'}
         self.client.post(url, data, format='json')
@@ -41,65 +48,174 @@ class PartTests(APITransactionTestCase):
 
     def test_create_part(self):
         """
-        Ensure we can create a new Part object.
+        @Type
+        Positive
+
+        @Description
+        Ensure we can created a part by rest api.
+
+        @Expected Results
+        200 {'name': 'part_name',
+             'description': 'part_description'}
         """
         url = reverse('part-list')
-        data = {'name': 'Box',
-                'description': 'Desb1'}
+        part_name = 'Unittest Box'
+        part_desb = 'Unittest Box Description'
+
+        data = {'name': part_name,
+                'description': part_desb}
         response = self.client.post(url, data, format='json')
-        print(response.data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Part.objects.count(), self.exist_num+1)
-        self.assertEqual(Part.objects.get(name='Box').name, 'Box')
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_201_CREATED)
+        self.assertEqual(json.loads(response.content)['name'],
+                         part_name)
+        self.assertEqual(json.loads(response.content)['description'],
+                         part_desb)
+        self.assertEqual(Part.objects.count(),
+                         self.exist_num+1)
+        self.assertEqual(Part.objects.get(name=part_name).name,
+                         part_name)
 
     def test_create_dup_parts(self):
         """
+        @Type
+        Negative
+
+        @Description
         Ensure create duplicate Part objects will failed.
+
+        @Expected Results
+        400 {'status':'failed',
+             'log': 'xxx'}
         """
+        # Var
         url = reverse('part-list')
-        data = {'name': 'Part1',
-                'description': 'New Description'}
+        part_name = 'Part1'
+        part_desb = 'Unittest Part1 Description'
+
+        # Request
+        data = {'name': part_name,
+                'description': part_desb}
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(Part.objects.count(), self.exist_num)
+
+        # Check
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'failed')
+        self.assertNotEqual(json.loads(response.content)['log'],
+                            '')
+        self.assertEqual(Part.objects.count(),
+                         self.exist_num)
 
     def test_create_same_lowercase_parts(self):
         """
+        @Type
+        Negative
+
+        @Description
         Ensure Part (name, is_demo) is unique together.
+
+        @Expected Results
+        400 {'status':'failed',
+             'log': 'xxx'}
         """
+        # Random Case
         url = reverse('part-list')
+
+        # Request
         data = {'name': 'pArT1',
                 'description': 'New Description'}
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Check
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'failed')
+        self.assertNotEqual(json.loads(response.content)['log'],
+                            '')
         self.assertEqual(Part.objects.count(), self.exist_num)
 
+        # All upper case
+        # Request
         data = {'name': 'PART2',
                 'description': 'New Description'}
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(Part.objects.count(), self.exist_num)
 
+        # Check
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'failed')
+        self.assertNotEqual(json.loads(response.content)['log'],
+                            '')
+        self.assertEqual(Part.objects.count(),
+                         self.exist_num)
+
+        # All lowercase
+        # Request
         data = {'name': 'part3',
                 'description': 'New Description'}
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Check
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'failed')
+        self.assertNotEqual(json.loads(response.content)['log'],
+                            '')
         self.assertEqual(Part.objects.count(), self.exist_num)
 
     def test_create_no_desb_parts(self):
         """
-        Ensure no desb will failed.
-        """
-        url = reverse('part-list')
-        data = {'name': 'nEw_pArT1'}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(Part.objects.count(), self.exist_num)
+        @Type
+        Positive
 
-        data = {'name': 'NEW_PART2'}
+        @Description
+        Create a part without description assigned.
+        Description column is now not mandatory.
+        Thus, request is valid
+
+        @Expected Results
+        201 {'name': 'part_name',
+             'description': 'xxx'}
+        """
+        # Var
+        url = reverse('part-list')
+        default_desb = ''
+
+        # Request
+        part_name = 'nEw_pArT1'
+        data = {'name': part_name}
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(Part.objects.count(), self.exist_num)
+
+        # Check
+        self.assertEqual(response.status_code,
+                         status.HTTP_201_CREATED)
+        self.assertEqual(json.loads(response.content)['name'],
+                         part_name)
+        self.assertEqual(json.loads(response.content)['description'],
+                         default_desb)
+        self.assertEqual(Part.objects.count(),
+                         self.exist_num + 1)
+
+        # Request
+        part_name = 'NEW_PART2'
+        data = {'name': part_name}
+        response = self.client.post(url, data, format='json')
+
+        # Check
+        self.assertEqual(response.status_code,
+                         status.HTTP_201_CREATED)
+        self.assertEqual(json.loads(response.content)['name'],
+                         part_name)
+        self.assertEqual(json.loads(response.content)['description'],
+                         default_desb)
+        self.assertEqual(Part.objects.count(),
+                         self.exist_num + 2)
 
     def test_create_demo_parts_with_same_name(self):
         """
@@ -132,7 +248,7 @@ class PartTests(APITransactionTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Part.objects.count(), self.exist_num+4)
 
-    def test_create_demo_parts_with_same_name(self):
+    def test_create_demo_parts_with_same_name_2(self):
         """
         Ensure Create Parts with Same name will conflict
         """
