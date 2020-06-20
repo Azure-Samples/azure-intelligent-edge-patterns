@@ -80,7 +80,7 @@ class Part(models.Model):
 class Location(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
-    coordinates = models.CharField(max_length=200)
+    # coordinates = models.CharField(max_length=200)
     is_demo = models.BooleanField(default=False)
 
     def __str__(self):
@@ -322,7 +322,7 @@ class Setting(models.Model):
 class Camera(models.Model):
     name = models.CharField(max_length=200)
     rtsp = models.CharField(max_length=1000)
-    model_name = models.CharField(max_length=200)
+    # model_name = models.CharField(max_length=200)
     area = models.CharField(max_length=1000, blank=True)
     is_demo = models.BooleanField(default=False)
 
@@ -359,7 +359,7 @@ class Project(models.Model):
     needRetraining = models.BooleanField(default=False)
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
-    maxImages = models.IntegerField(default=10)
+    maxImages = models.IntegerField(default=20)
     deployed = models.BooleanField(default=False)
     training_counter = models.IntegerField(default=0)
     retraining_counter = models.IntegerField(default=0)

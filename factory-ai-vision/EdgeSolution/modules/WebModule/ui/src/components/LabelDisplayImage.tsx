@@ -1,35 +1,33 @@
-import React, { useState, useEffect, useMemo, useCallback, memo, MouseEvent, FC, useRef } from 'react';
+import React, { useEffect, useMemo, useCallback, useLayoutEffect, memo, MouseEvent, FC, useRef } from 'react';
 import Konva from 'konva';
 import { Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
-import { AnnotationState, Annotation } from '../store/labelingPage/labelingPageTypes';
+import { AnnotationState, Annotation, Size2D } from '../store/labelingPage/labelingPageTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import getResizeImageFunction from './LabelingPage/util/resizeImage';
 
 interface LabelDisplayImageProps {
   labelImage: LabelImage;
   labelText?: string;
-  width: number;
-  height?: number;
   pointerCursor?: boolean;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
 const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   labelImage,
   labelText = '',
-  width = 300,
-  height = 150,
   pointerCursor = false,
   onClick,
 }) => {
   const stage = useRef<Konva.Stage>(null);
   const layer = useRef<Konva.FastLayer>(null);
   const img = useRef<Konva.Image>(null);
+
+  const imgSize = useRef<Size2D>({ width: 400, height: 300 });
   const imgScale = useRef<number>(1);
   const shapes = useRef<BoxShape[]>([]);
   const [image, , size] = useImage(labelImage.image, 'anonymous');
-  const resizeImage = useCallback(getResizeImageFunction({ width, height }), [width, height]);
+  const resizeImage = useCallback(getResizeImageFunction(imgSize.current), [imgSize.current]);
 
   const annotations = useMemo<Annotation[]>(() => {
     if (!labelImage?.labels) return [];
@@ -41,7 +39,12 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
       annotationState: AnnotationState.Finish,
     }));
   }, [labelImage]);
-
+  useLayoutEffect(() => {
+    const container: HTMLDivElement = document.querySelector('#container');
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    imgSize.current = { width, height };
+  }, []);
   useEffect(() => {
     if (size.width > 0) {
       if (layer.current === null) {
@@ -68,7 +71,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
         shapes.current[i].edge.destroy();
         shapes.current[i].points.forEach((e) => e.destroy());
       }
-      
+
       shapes.current = newShapes;
       for (let i = 0; i < newShapes.length; i++) {
         const { points, edge } = newShapes[i];
@@ -86,10 +89,15 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   return (
     <div
       onClick={onClick}
+      id="container"
       style={{
         cursor: pointerCursor ? 'pointer' : 'default',
         display: 'flex',
         flexFlow: 'column',
+        height: '100%',
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
       <div id={`display-${labelImage.id}`} />
