@@ -1,5 +1,5 @@
 """
-Part REST API unittest
+Part REST API Test
 """
 import logging
 import json
@@ -7,12 +7,14 @@ import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
+
 from cameras.models import Part
+from .test_special_strings import special_strings
 
 logger = logging.getLogger(__name__)
 
 
-class PartTests(APITransactionTestCase):
+class PartRestTestCases(APITransactionTestCase):
     """
     Test Cases for Part API
     """
@@ -44,7 +46,27 @@ class PartTests(APITransactionTestCase):
                 'description': 'Desb1',
                 'is_demo': True}
         self.client.post(url, data, format='json')
-        self.exist_num = 6
+
+        for special_string in special_strings:
+            data = {'name': special_string,
+                    'description': special_string,
+                    'is_demo': True}
+            self.client.post(url, data, format='json')
+            data = {'name': special_string,
+                    'description': special_string,
+                    'is_demo': False}
+            self.client.post(url, data, format='json')
+
+        self.exist_num = 6 + 2*(len(special_strings))
+
+    def test_setup_is_valid(self):
+        """
+        Make sure setup is valid
+        """
+        url = reverse('part-list')
+        response = self.client.get(url, format='json')
+        self.assertEqual(len(json.loads(response.content)),
+                         self.exist_num)
 
     def test_create_part(self):
         """

@@ -42,19 +42,14 @@ class PartTestCase(APITransactionTestCase):
         self.assertEqual(Part.objects.count(), self.exist_num)
         self.assertRaises(MultipleObjectsReturned,
                           Part.objects.get, name='Part1')
-
-    def test_get(self):
-        """
-        Basic Test
-        """
-        part1 = Part.objects.filter(name='Part1').last()
-        self.assertFalse(part1.is_demo)
-        part1 = Part.objects.filter(name='Part2').last()
-        self.assertFalse(part1.is_demo)
-        part1 = Part.objects.filter(name='Part1').first()
-        self.assertTrue(part1.is_demo)
-        part1 = Part.objects.filter(name='Part2').first()
-        self.assertTrue(part1.is_demo)
+        part_1 = Part.objects.filter(name='Part1').last()
+        self.assertFalse(part_1.is_demo)
+        part_2 = Part.objects.filter(name='Part2').last()
+        self.assertFalse(part_2.is_demo)
+        demo_part_1 = Part.objects.filter(name='Part1').first()
+        self.assertTrue(demo_part_1.is_demo)
+        demo_part_2 = Part.objects.filter(name='Part2').first()
+        self.assertTrue(demo_part_2.is_demo)
 
     def test_create_without_description(self):
         """
@@ -62,7 +57,7 @@ class PartTestCase(APITransactionTestCase):
         Positive
 
         @Description
-        Create a part without description assigned
+        Create parts without description assigned
         Description column is now not mandatory
 
         @Expected Results

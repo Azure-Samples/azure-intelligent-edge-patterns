@@ -332,15 +332,20 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
     """LocationSerializer"""
     class Meta:
         model = Location
-        fields = ['id', 'name', 'description', 'is_demo']
+        fields = ['id',
+                  'name',
+                  'description', 'is_demo']
+        extra_kwargs = {
+            'description': {'required': False},
+        }
 
 
 class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Location ModelViewSet
 
-    Available filters:
-    @is_demo
+    @Available filters
+    is_demo
     """
     queryset = Location.objects.all()
     serializer_class = LocationSerializer

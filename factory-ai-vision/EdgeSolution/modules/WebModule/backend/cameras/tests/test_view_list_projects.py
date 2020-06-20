@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 class ViewListProjectTestCase(APITransactionTestCase):
     def setUp(self):
-        """Create setting, camera, location anr parts.
+        """
+        Create setting, camera, location and parts.
         """
         valid_setting_obj = Setting.objects.create(name="valid_setting",
                                                    endpoint=ENDPOINT,
@@ -27,30 +28,52 @@ class ViewListProjectTestCase(APITransactionTestCase):
                                                      is_trainer_valid=False)
 
     def test_setup_is_valid(self):
+        """
+        Make sure setup is valid
+        """
         self.assertEqual(len(Setting.objects.all()), 2)
 
     def test_valid_setting_list_project(self):
-        """invalid setting should show projects with json
+        """
+        @Type
+        Positive
+
+        @Description
+        List project with valid setting.
+
+        @Expected Results
+        200 {'project_id', 'project_name'}
         """
         url = reverse('setting-list')
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         response = self.client.get(f'{url}/{valid_setting.id}/list_projects')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        try:
-            json.loads(response.content)
-        except:
-            self.fail("Response Content is not json loadable")
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertTrue(len(json.loads(response.content)) > 0)
 
     def test_invalid_setting_list_project(self):
-        """invalid setting should return status = failed.
+        """
+        @Type
+        Negative
+
+        @Description
+        List project with invalid setting
+
+        @Expected Results
+        503 {'status':'failed',
+             'log': 'xxx'}
         """
         url = reverse('setting-list')
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
         response = self.client.get(f'{url}/{invalid_setting.id}/list_projects')
-        self.assertNotEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertEqual('failed', json.loads(response.content)['status'])
+        self.assertEqual(response.status_code,
+                         status.HTTP_503_SERVICE_UNAVAILABLE)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'failed')
+        self.assertTrue(json.loads(response.content)['log'].find('valid') > 0)
 
     @classmethod
     def tearDownClass(self):

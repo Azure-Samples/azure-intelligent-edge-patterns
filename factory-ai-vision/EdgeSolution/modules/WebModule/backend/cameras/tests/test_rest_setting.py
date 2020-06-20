@@ -1,14 +1,26 @@
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITransactionTestCase
-from config import ENDPOINT, TRAINING_KEY
+"""
+Camera REST API Test
+"""
 import logging
+from django.urls import reverse
+#from rest_framework import status
+
+from rest_framework.test import APITransactionTestCase
+#from config import ENDPOINT, TRAINING_KEY
+
 
 logger = logging.getLogger(__name__)
 
 
-class PartTests(APITransactionTestCase):
+class CameraRestTests(APITransactionTestCase):
+    """
+    Camera REST API Test
+    """
+
     def setUp(self):
+        """
+        Setup
+        """
         url = reverse('setting-list')
         data = {'name': 'Part1',
                 'description': 'Desb1'}
