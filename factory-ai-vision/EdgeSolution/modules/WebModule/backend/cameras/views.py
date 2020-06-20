@@ -449,6 +449,13 @@ class SettingViewSet(viewsets.ModelViewSet):
             for project in project_list:
                 rs[project.id] = project.name
             return Response(rs)
+        except KeyError as key_err:
+            if str(key_err) in ['Endpoint', "'Endpoint'"]:
+                return Response({'status': 'failed',
+                                 'log': f'{str(key_err)} must not be empty'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'failed',
+                             'log': f'{str(key_err)}'})
         except CustomVisionErrorException as e:
             if e.message == "Operation returned an invalid status code 'Access Denied'":
                 return Response({'status': 'failed',
@@ -458,6 +465,7 @@ class SettingViewSet(viewsets.ModelViewSet):
                              'log': e.message},
                             status=e.response.status_code)
         except Exception as e:
+            logger.exception("Unexpected Error while listing projects")
             return Response({'status': 'failed',
                              'log': str(e)},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -1092,32 +1100,6 @@ def inference_video_feed(request, project_id):
 def instrumentation_key(request):
     return JsonResponse({'status': 'ok',
                          'key': APP_INSIGHT_INST_KEY})
-
-
-@api_view()
-def list_projects(request, setting_id):
-    """Get the list of project at Custom Vision"""
-    setting_obj = Setting.objects.get(pk=setting_id)
-    trainer = setting_obj._get_trainer_obj()
-
-    try:
-        rs = {}
-        project_list = trainer.get_projects()
-        for project in project_list:
-            rs[project.id] = project.name
-        return JsonResponse(rs)
-    except CustomVisionErrorException as e:
-        if e.message == "Operation returned an invalid status code 'Access Denied'":
-            return JsonResponse({'status': 'failed',
-                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
-                                status=503)
-        return JsonResponse({'status': 'failed',
-                             'log': e.message},
-                            status=e.response.status_code)
-    except Exception as e:
-        return JsonResponse({'status': 'failed',
-                             'log': str(e)},
-                            status=500)
 
 
 @api_view()
