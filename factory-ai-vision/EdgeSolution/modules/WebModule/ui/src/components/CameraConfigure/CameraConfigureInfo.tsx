@@ -26,6 +26,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
   const parts = useParts();
   const dispatch = useDispatch();
   const cameraName = useQuery().get('name');
+  const isDemo = useQuery().get('isDemo') === 'true';
   const history = useHistory();
 
   const onDeleteConfigure = useCallback((): void => {
@@ -139,7 +140,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
             recall={trainingMetrics.curConsequence?.recall}
             mAP={trainingMetrics.curConsequence?.mAP}
           />
-          <Button primary onClick={onDeleteConfigure}>
+          <Button primary disabled={isDemo} onClick={onDeleteConfigure}>
             Delete Configuration
           </Button>
           <Button primary as={Link} to="/partIdentification">

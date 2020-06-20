@@ -14,6 +14,7 @@ export type Setting = {
   current: SettingData;
   origin: SettingData;
   isTrainerValid: boolean;
+  cvProjects?: Record<string, string>;
 };
 
 export type UpdateKeyAction = {
@@ -40,11 +41,28 @@ export type GetSettingFailedAction = {
   error: Error;
 };
 
+export type GetAllCvProjectsRequestAction = {
+  type: 'GET_ALL_CV_PROJECTS_REQUEST';
+};
+
+export type GetAllCvProjectsSuccessAction = {
+  type: 'GET_ALL_CV_PROJECTS_SUCCESS';
+  pyload: Record<string, string>;
+};
+
+export type GetAllCvProjectsErrorAction = {
+  type: 'GET_ALL_CV_PROJECTS_ERROR';
+  error: Error;
+};
+
 export type SettingActionType =
   | UpdateKeyAction
   | UpdateNamespaceAction
   | GetSettingRequestAction
   | GetSettingSuccessAction
-  | GetSettingFailedAction;
+  | GetSettingFailedAction
+  | GetAllCvProjectsRequestAction
+  | GetAllCvProjectsSuccessAction
+  | GetAllCvProjectsErrorAction;
 
 export type SettingThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

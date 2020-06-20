@@ -16,6 +16,7 @@ const getLocationsSuccess = (data: Location[]): GetLocationsSuccess => ({
 
 const requestLocationsFailure = (error: any): RequestLocationsFailure => {
   console.error(error);
+  alert(error);
   return { type: REQUEST_LOCATION_FAILURE };
 };
 

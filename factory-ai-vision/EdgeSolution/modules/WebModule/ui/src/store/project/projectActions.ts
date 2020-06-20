@@ -44,6 +44,8 @@ import {
   START_INFERENCE,
   STOP_INFERENCE,
   StopInferenceAction,
+  UPDATE_ORIGIN_PROJECT_DATA,
+  UpdateOriginProjectDataAction,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -119,6 +121,10 @@ export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAc
   payload: projectData,
 });
 
+export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({
+  type: UPDATE_ORIGIN_PROJECT_DATA,
+});
+
 export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest());
 
@@ -139,6 +145,7 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         sendMessageToCloud: data[0]?.metrics_is_send_iothub,
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
+        cvProjectId: data[0]?.customvision_project_id,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -196,7 +203,7 @@ const getTrain = (projectId, isTestModel: boolean): void => {
 };
 
 export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {
-  return Axios.delete(`/api/projects/${projectId}/`)
+  return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
       return dispatch(deleteProjectSuccess());
     })

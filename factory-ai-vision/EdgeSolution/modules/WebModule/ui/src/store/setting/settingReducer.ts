@@ -13,6 +13,12 @@ const settingReducer = (state = initialState.setting, action: SettingActionType)
       return action.payload;
     case 'REQUEST_FAIL':
       return { ...state, error: action.error };
+    case 'GET_ALL_CV_PROJECTS_REQUEST':
+      return { ...state, loading: true };
+    case 'GET_ALL_CV_PROJECTS_SUCCESS':
+      return { ...state, loading: false, cvProjects: action.pyload };
+    case 'GET_ALL_CV_PROJECTS_ERROR':
+      return { ...state, loading: false, error: action.error };
     default:
       return state;
   }

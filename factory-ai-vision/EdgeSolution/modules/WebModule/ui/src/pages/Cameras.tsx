@@ -49,7 +49,7 @@ const Cameras: FC = (): JSX.Element => {
         ))}
       </Grid>
       <AddModuleDialog
-        header="Add Location"
+        header="Add Camera"
         fields={[
           {
             placeholder: 'Name',
