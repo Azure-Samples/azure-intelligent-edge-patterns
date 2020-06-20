@@ -94,7 +94,11 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
               key={i}
               imageIndex={i}
               images={arr}
-              trigger={<LabelDisplayImage labelImage={image} pointerCursor />}
+              trigger={
+                <div style={{ height: 150, width: 200 }}>
+                  <LabelDisplayImage labelImage={image} pointerCursor />
+                </div>
+              }
               isRelabel={false}
             />
           </div>
