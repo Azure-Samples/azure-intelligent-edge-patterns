@@ -62,7 +62,7 @@ def inference_module_url():
 class Part(models.Model):
     """Part Model"""
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=1000)
+    description = models.CharField(max_length=1000, blank=True, default='')
     is_demo = models.BooleanField(default=False)
     name_lower = models.CharField(max_length=200, default=str(name).lower())
 
@@ -89,7 +89,7 @@ class Part(models.Model):
 class Location(models.Model):
     """Location Model"""
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=1000)
+    description = models.CharField(max_length=1000, blank=True, default='')
     is_demo = models.BooleanField(default=False)
 
     def __str__(self):
