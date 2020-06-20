@@ -344,7 +344,7 @@ class Camera(models.Model):
     area = models.CharField(max_length=1000, blank=True)
     is_demo = models.BooleanField(default=False)
 
-   def __str__(self):
+    def __str__(self):
         return self.name
 
     @staticmethod
