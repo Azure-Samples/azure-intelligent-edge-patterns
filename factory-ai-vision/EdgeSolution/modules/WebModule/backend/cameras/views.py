@@ -452,15 +452,16 @@ class SettingViewSet(viewsets.ModelViewSet):
         except KeyError as key_err:
             if str(key_err) in ['Endpoint', "'Endpoint'"]:
                 return Response({'status': 'failed',
-                                 'log': f'{str(key_err)} must not be empty'},
+                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
                                 status=status.HTTP_400_BAD_REQUEST)
             return Response({'status': 'failed',
-                             'log': f'{str(key_err)}'})
+                             'log': f'KeyError {str(key_err)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except CustomVisionErrorException as e:
             if e.message == "Operation returned an invalid status code 'Access Denied'":
                 return Response({'status': 'failed',
                                  'log': 'Training key or Endpoint is invalid. Please change the settings'},
-                                status=503)
+                                status=status.HTTP_503_SERVICE_UNAVAILABLE)
             return Response({'status': 'failed',
                              'log': e.message},
                             status=e.response.status_code)
