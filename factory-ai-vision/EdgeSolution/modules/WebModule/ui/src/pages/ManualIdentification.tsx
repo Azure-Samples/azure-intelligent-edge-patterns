@@ -10,6 +10,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
+import { useHistory } from 'react-router-dom';
 import Axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
@@ -28,6 +29,7 @@ import { JudgedImageList, RelabelImage } from '../components/ManualIdentificatio
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
 
 const ManualIdentification: FC = () => {
+  const history = useHistory();
   const dispatch = useDispatch();
   const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
     (state) => ({
@@ -76,7 +78,7 @@ const ManualIdentification: FC = () => {
     setRelabelImages(
       getFilteredImages(images, {
         partId: selectedPartId,
-        isRelabel: true,
+        isRelabel: false, // ! true
       }).map((e) => {
         const confidenceLevel = ((e.confidence * 1000) | 0) / 10;
         return {
@@ -206,6 +208,13 @@ const ManualIdentification: FC = () => {
           onClick={(): void => {
             Axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
               .then(() => {
+                // * Check if all relabelImages are updated
+                // TODO: Use response to update
+                const judgedIds = judgedImageList.map((e) => e.imageId);
+                if (relabelImages.every((e) => judgedIds.includes(e.id))) {
+                  history.push('/partIdentification');
+                }
+
                 dispatch(getLabelImages());
                 setJudgedImageList([]);
                 return void 0;

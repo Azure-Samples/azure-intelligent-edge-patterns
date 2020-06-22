@@ -107,10 +107,10 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           </div>
         }
       />
-
       <div
         style={{
-          height: '80%',
+          height: '96%',
+          maxHeight: '10em',
           flex: '1 0 0',
           display: 'flex',
           flexFlow: 'column',
