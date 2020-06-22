@@ -185,7 +185,7 @@ const ManualIdentification: FC = () => {
               setJudgedImageList((prev) =>
                 relabelImages.map((relabelImage) => {
                   const judgedImage = prev.find((imgInList) => imgInList.imageId === relabelImage.id);
-                  return judgedImage === undefined ? { imageId: relabelImage.id, partId: null } : judgedImage;
+                  return judgedImage ?? { imageId: relabelImage.id, partId: null };
                 }),
               );
             }}
