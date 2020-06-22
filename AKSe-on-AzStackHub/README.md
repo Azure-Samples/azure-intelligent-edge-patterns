@@ -14,6 +14,7 @@ This document describes how to architect and operate a highly available Kubernet
 - [Backup and Disaster Recovery](#backup-and-disaster-recovery)
 - [Availability Considerations](#availability-considerations)
 - [Identity and Security Considerations](#identity-and-security-considerations)
+- [Patch and Update](#patch-and-update)
 - [Deployment (CI/CD) Considerations](#deployment-cicd-considerations)
 - [Deploying the Solution](#deploy-the-solution)
 - [Next Steps](#next-steps)
@@ -310,7 +311,7 @@ To store secrets like connection strings or database credentials there are sever
 
 Secrets/credentials should never be stored in plaintext in your application code or within scripts. And shouldn't be stored in a version control system. Instead, the deployment automation should retrieve the secrets as needed.
 
-**Patch and Update**
+## Patch and Update
 
 The **Patch and Update (PNU)** process in Azure Kubernetes Service (in Azure) is partially automated, Kubernetes version upgrades are triggered manually while security updates are applied automatically. These updates can include OS security fixes or kernel updates. AKS does not automatically reboot these Linux nodes to complete the update process. 
 
