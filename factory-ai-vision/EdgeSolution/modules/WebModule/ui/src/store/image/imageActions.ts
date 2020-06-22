@@ -28,7 +28,7 @@ const requestLabelImagesFailure = (error: any): any => {
   return { type: REQUEST_LABEL_IMAGE_FAILURE };
 };
 
-const postLabelImageSuccess = (image: LabelImage): PostLabelImageSuccess => ({
+export const postLabelImageSuccess = (image: LabelImage): PostLabelImageSuccess => ({
   type: POST_LABEL_IMAGE_SUCCESS,
   payload: image,
 });

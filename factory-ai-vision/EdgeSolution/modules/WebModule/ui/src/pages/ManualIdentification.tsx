@@ -78,7 +78,7 @@ const ManualIdentification: FC = () => {
     setRelabelImages(
       getFilteredImages(images, {
         partId: selectedPartId,
-        isRelabel: false, // ! true
+        isRelabel: true,
       }).map((e) => {
         const confidenceLevel = ((e.confidence * 1000) | 0) / 10;
         return {

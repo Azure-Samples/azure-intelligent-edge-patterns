@@ -6,7 +6,7 @@ import {
   UPDATE_CAPTURED_IMAGES,
 } from './partTypes';
 import { LabelImage } from '../image/imageTypes';
-import { getLabelImages } from '../image/imageActions';
+import { postLabelImageSuccess } from '../image/imageActions';
 
 export const addCapturedImages = (newCapturedImage: LabelImage): AddCapturedImageAction => ({
   type: ADD_CAPTURED_IMAGE,
@@ -24,7 +24,7 @@ export const thunkAddCapturedImages = (streamId: string): PartThunk => async (di
     .then((data) => {
       if (data.status === 'ok') {
         dispatch(addCapturedImages(data.image));
-        dispatch(getLabelImages());
+        dispatch(postLabelImageSuccess(data.image));
       }
       return null;
     })
