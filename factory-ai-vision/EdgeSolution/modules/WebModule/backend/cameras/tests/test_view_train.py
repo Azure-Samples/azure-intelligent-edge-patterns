@@ -1,47 +1,59 @@
+"""
+Project's custom action 'train' test
+"""
 import logging
 import json
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
+
+from azure.cognitiveservices.vision.customvision.training import (
+    CustomVisionTrainingClient)
+
 from cameras.models import Project, Setting, Camera, Location, Part
 from config import ENDPOINT, TRAINING_KEY
-from unittest.mock import patch
-from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
-project_prefix = "UnitTest"
+
+
+PROJECT_PREFIX = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
 
 class ViewTrainTestCase(APITransactionTestCase):
-    def setUp(self):
-        """Create setting, camera, location anr parts.
-        """
-        valid_setting_obj = Setting.objects.create(name="valid_setting",
-                                                   endpoint=ENDPOINT,
-                                                   training_key=TRAINING_KEY,
-                                                   is_trainer_valid=False)
-        invalid_setting_obj = Setting.objects.create(name="invalid_setting",
-                                                     endpoint=ENDPOINT,
-                                                     training_key='',
-                                                     is_trainer_valid=False)
-        camera_obj = Camera.objects.create(name="camera_1",
-                                           rtsp="valid_rtsp",
-                                           area="55,66",
-                                           is_demo=False)
+    """
+    Project's custom action 'train' test
+    """
 
-        location_obj = Location.objects.create(name="location_1",
-                                               description=f"description_1",
-                                               is_demo=False)
+    def setUp(self):
+        """
+        Setup and create projects.
+        """
+        Setting.objects.create(name="valid_setting",
+                               endpoint=ENDPOINT,
+                               training_key=TRAINING_KEY,
+                               is_trainer_valid=False)
+        Setting.objects.create(name="invalid_setting",
+                               endpoint=ENDPOINT,
+                               training_key='',
+                               is_trainer_valid=False)
+        Camera.objects.create(name="camera_1",
+                              rtsp="valid_rtsp",
+                              area="55,66",
+                              is_demo=False)
+
+        Location.objects.create(name="location_1",
+                                description="description_1",
+                                is_demo=False)
         part_obj = Part.objects.create(name="part_1",
-                                       description=f"description_1",
+                                       description="description_1",
                                        is_demo=False)
         invalid_project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='invalid_setting').first(),
             camera=Camera.objects.filter(name='camera_1').first(),
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='super_valid_project_id',
-            customvision_project_name=f'{project_prefix}-test_create_1',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
             is_demo=False
         )
         invalid_project_obj.parts.add(part_obj)
@@ -51,16 +63,18 @@ class ViewTrainTestCase(APITransactionTestCase):
             camera=Camera.objects.filter(name='camera_1').first(),
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='super_valid_project_id',
-            customvision_project_name=f'{project_prefix}-test_create_2',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
             is_demo=False
         )
         valid_project_obj.parts.add(part_obj)
 
     def test_setup_is_valid(self):
-        """Make sure setup is valid"""
+        """
+        Make sure setup is valid
+        """
         self.assertEqual(len(Camera.objects.all()), 1)
         valid_setting = Setting.objects.filter(name='valid_setting').first()
-        project_obj = Project.objects.filter(setting=valid_setting).first()
+        Project.objects.get(setting=valid_setting)
 
     def test_train_valid_project(self):
         """
@@ -99,7 +113,7 @@ class ViewTrainTestCase(APITransactionTestCase):
         customvision project id set to ''
 
         @Expected Results
-        Project not trained. customvision project id = '' 
+        Project not trained. customvision_project_id set to ''
 
         @Expected HTTP Response
         503 {'status': 'failed', 'log': 'training key + endpoint invalid'}
@@ -116,10 +130,10 @@ class ViewTrainTestCase(APITransactionTestCase):
                          'failed')
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         trainer = CustomVisionTrainingClient(
             api_key=TRAINING_KEY, endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
-            if project.name.find(project_prefix) == 0:
+            if project.name.find(PROJECT_PREFIX) == 0:
                 trainer.delete_project(project_id=project.id)

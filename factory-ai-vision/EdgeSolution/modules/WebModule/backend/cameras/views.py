@@ -103,7 +103,7 @@ def update_train_status(project_id):
             if iteration.exportable == False or iteration.status != 'Completed':
                 project_obj.upcreate_training_status(
                     status='training',
-                    log='Status : training model'
+                    log='Status : training (Training job might take up to 10-15 minutes)'
                 )
 
                 continue
@@ -112,7 +112,7 @@ def update_train_status(project_id):
             exports = trainer.get_exports(
                 customvision_project_id, iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
-                obj, created = project_obj.upcreate_training_status(
+                project_obj.upcreate_training_status(
                     status='exporting',
                     log='Status : exporting model'
                 )
@@ -149,7 +149,7 @@ def update_train_status(project_id):
                     project_obj.save(
                         update_fields=['download_uri', 'deployed'])
 
-                obj, created = project_obj.upcreate_training_status(
+                project_obj.upcreate_training_status(
                     status='deploying',
                     log='Status : deploying model'
                 )
@@ -162,7 +162,7 @@ def update_train_status(project_id):
                     customvision_project_id, iteration.id).as_dict())
 
             logger.info(f'Training Performance: {train_performance}')
-            obj, created = project_obj.upcreate_training_status(
+            project_obj.upcreate_training_status(
                 status='ok',
                 log='Status : model training completed',
                 performance=json.dumps(train_performance)
@@ -724,12 +724,12 @@ def _train(project_id, request):
         logger.info(f'Part ids: {part_ids}')
         try:
             project = trainer.get_project(customvision_project_id)
-            obj, created = project_obj.upcreate_training_status(
+            project_obj.upcreate_training_status(
                 status='preparing',
                 log=f'status : Project {project_obj.customvision_project_name} found on Custom Vision')
         except:
             project_obj.create_project()
-            obj, created = project_obj.upcreate_training_status(
+            project_obj.upcreate_training_status(
                 status='preparing',
                 log=f'status : Project created on CustomVision. Name: {project_obj.customvision_project_name}')
             logger.info("Project created on CustomVision.")
@@ -738,9 +738,9 @@ def _train(project_id, request):
                 f"Project Name: {project_obj.customvision_project_name}")
             customvision_project_id = project_obj.customvision_project_id
 
-        obj, created = project_obj.upcreate_training_status(
+        project_obj.upcreate_training_status(
             status='sending',
-            log='status : sending data (images and annotations)')
+            log='Status : sending data (images and annotations)')
         tags = trainer.get_tags(customvision_project_id)
         tag_dict = {}
         tag_dict_local = {}
@@ -899,13 +899,13 @@ def _train(project_id, request):
 
         # Submit training task to Custom Vision
         if not project_changed:
-            obj, created = project_obj.upcreate_training_status(
+            project_obj.upcreate_training_status(
                 status='ok',
                 log='Status: Nothing changed. Not training')
         else:
-            obj, created = project_obj.upcreate_training_status(
+            project_obj.upcreate_training_status(
                 status='ok',
-                log='Status: Project changed. Training...')
+                log='Status: Project changed. Submitting training task...')
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
                 project_obj.update_app_insight_counter(
@@ -921,7 +921,7 @@ def _train(project_id, request):
     except CustomVisionErrorException as e:
         logger.error(f'CustomVisionErrorException: {e}')
         if e.message == "Operation returned an invalid status code 'Access Denied'":
-            obj, created = project_obj.upcreate_training_status(
+            project_obj.upcreate_training_status(
                 status='failed',
                 log='Training key or Endpoint is invalid. Please change the settings')
             return JsonResponse({
@@ -929,7 +929,7 @@ def _train(project_id, request):
                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE)
         else:
-            obj, created = project_obj.upcreate_training_status(
+            project_obj.upcreate_training_status(
                 status='failed',
                 log=e.message)
             return JsonResponse({'status': 'failed',
@@ -940,7 +940,7 @@ def _train(project_id, request):
         # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception(f'Exception: {err_msg}')
-        obj, created = project_obj.upcreate_training_status(
+        project_obj.upcreate_training_status(
             status='failed',
             log=f'Status : failed {str(err_msg)}')
         return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
