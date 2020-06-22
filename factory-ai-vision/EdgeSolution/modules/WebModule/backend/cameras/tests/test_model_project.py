@@ -7,13 +7,17 @@ Requirements:
 2. Custom Vision is able to create projects
 
 Notes:
-1. All test projects created on Azure Custom Vision will start will PROJECT_PREFIX
-2. All projects on Azure Custom Vision started with PROJECT_PREFIX will be deleted after testing.
+1. All test projects created on Azure Custom Vision will have/should have name
+   starting with PROJECT_PREFIX.
+2. All projects on Azure Custom Vision started with PROJECT_PREFIX will
+   be deleted after testing.
 """
 import logging
 
 from rest_framework.test import APITransactionTestCase
-from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
+
+from azure.cognitiveservices.vision.customvision.training import (
+    CustomVisionTrainingClient)
 
 from cameras.models import Project, Setting, Camera, Location, Part
 from config import ENDPOINT, TRAINING_KEY
@@ -139,8 +143,18 @@ class ModelProjectTestCases(APITransactionTestCase):
         self.assertTrue(project_obj.customvision_project_id == '')
 
     def test_create_project(self):
-        """create project with a valid setting.
-        name should start with prefix so tear down will delete the project from custom vision
+        """
+        @type
+        Positvie
+
+        @Description
+        Create project with a valid setting.
+        Project name should start with PROJECT_PREFIX so it get deleted while
+        teardown.
+
+        @Expected result
+        Project created on custom vision.
+        Project.customvision_project_id been set.
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
@@ -150,16 +164,27 @@ class ModelProjectTestCases(APITransactionTestCase):
             customvision_project_id='56cannotdie',
             customvision_project_name=f'{PROJECT_PREFIX}-test_update_1'
         )
-        # Project already created
+
+        # Check
         project_obj.save()
-        self.assertTrue(project_obj.customvision_project_id == '')
+        self.assertEqual(project_obj.customvision_project_id,
+                         '')
+
+        # Create project and check
         project_obj.create_project()
-        self.assertFalse(project_obj.customvision_project_id == '')
+        self.assertNotEqual(project_obj.customvision_project_id,
+                            '')
 
     def test_update_1(self):
         """
-        update with a invalid customvision_project_id.
-        set customvision_project_id to ''
+        @Type
+        Negative
+
+        @Description
+        Update customvision_project_id with an invalid string.
+
+        @Expected result
+        After save called, customvision_project_id should be set to ''
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
