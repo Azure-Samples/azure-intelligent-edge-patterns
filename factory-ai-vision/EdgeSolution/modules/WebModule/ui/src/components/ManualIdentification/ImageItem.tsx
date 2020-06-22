@@ -1,5 +1,5 @@
 import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo } from 'react';
-import { Dropdown, DropdownItemProps, Text, Button, RadioGroup } from '@fluentui/react-northstar';
+import { Dropdown, DropdownItemProps, Text, RadioGroup } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
 import { JudgedImageList, RelabelImage } from './types';
@@ -91,18 +91,26 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         alignItems: 'center',
       }}
     >
+      <LabelingPageDialog
+        imageIndex={imageIndex}
+        images={relabelImages}
+        isRelabel={true}
+        trigger={
+          <div
+            style={{
+              padding: '0.5em',
+              height: '96%',
+              flex: '1 0 0',
+            }}
+          >
+            <LabelDisplayImage pointerCursor labelImage={relabelImages[imageIndex]} />
+          </div>
+        }
+      />
       <div
         style={{
-          padding: '0.5em',
-          height: '100%',
-          flex: '1 0 0',
-        }}
-      >
-        <LabelDisplayImage labelImage={relabelImages[imageIndex]} />
-      </div>
-      <div
-        style={{
-          height: '80%',
+          height: '96%',
+          maxHeight: '10em',
           flex: '1 0 0',
           display: 'flex',
           flexFlow: 'column',
@@ -148,12 +156,6 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
             </div>
           )}
         </div>
-        <LabelingPageDialog
-          imageIndex={imageIndex}
-          images={relabelImages}
-          isRelabel={true}
-          trigger={<Button primary content="Identify" />}
-        />
       </div>
     </div>
   );

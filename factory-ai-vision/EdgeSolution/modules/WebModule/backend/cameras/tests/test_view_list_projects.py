@@ -1,31 +1,41 @@
+"""
+Testing List Project API View (Under settings)
+"""
 import logging
 import json
-from pprint import pformat
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
+
+from azure.cognitiveservices.vision.customvision.training import (
+    CustomVisionTrainingClient)
+
 from cameras.models import Setting
 from config import ENDPOINT, TRAINING_KEY
-from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
-project_prefix = "UnitTest"
+
+PROJECT_PREFIX = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
 
 class ViewListProjectTestCase(APITransactionTestCase):
+    """
+    Testing setting-instance's custom action 'list_projects'
+    """
+
     def setUp(self):
         """
         Create setting, camera, location and parts.
         """
-        valid_setting_obj = Setting.objects.create(name="valid_setting",
-                                                   endpoint=ENDPOINT,
-                                                   training_key=TRAINING_KEY,
-                                                   is_trainer_valid=False)
-        invalid_setting_obj = Setting.objects.create(name="invalid_setting",
-                                                     endpoint=ENDPOINT,
-                                                     training_key='',
-                                                     is_trainer_valid=False)
+        Setting.objects.create(name="valid_setting",
+                               endpoint=ENDPOINT,
+                               training_key=TRAINING_KEY,
+                               is_trainer_valid=False)
+        Setting.objects.create(name="invalid_setting",
+                               endpoint=ENDPOINT,
+                               training_key='',
+                               is_trainer_valid=False)
 
     def test_setup_is_valid(self):
         """
@@ -76,10 +86,10 @@ class ViewListProjectTestCase(APITransactionTestCase):
         self.assertTrue(json.loads(response.content)['log'].find('valid') > 0)
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         trainer = CustomVisionTrainingClient(
             api_key=TRAINING_KEY, endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
-            if project.name.find(project_prefix) == 0:
+            if project.name.find(PROJECT_PREFIX) == 0:
                 trainer.delete_project(project_id=project.id)

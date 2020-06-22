@@ -48,7 +48,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
         DRAW A RECTANGLE AROUND THE PART
       </Text>
       <Text size="larger" styles={{ alignSelf: 'flex-start' }}>
-        {index}
+        {index + 1}
       </Text>
       <PrevNextButton
         isRelabel={isRelabel}

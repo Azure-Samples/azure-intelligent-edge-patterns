@@ -1,10 +1,15 @@
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { Grid, Segment, Image, Flex, Text, MenuIcon } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+
 import Breadcrumb from '../Breadcrumb';
 import LeftNav from './LeftNav';
+import { State } from '../../store/State';
 
-export const MainLayout: React.FC = ({ children }) => {
+export const MainLayout: FC = ({ children }) => {
+  const isTrainerValid = useSelector<State, boolean>((state) => state.setting.isTrainerValid);
+
   return (
     <Grid
       columns="60px auto"
@@ -12,7 +17,7 @@ export const MainLayout: React.FC = ({ children }) => {
       design={{ height: '100vh' }}
       styles={{ justifyContent: 'stretch' }}
     >
-      <TopNav />
+      <TopNav disabled={!isTrainerValid} />
       <LeftNav
         styles={{
           gridColumn: '1 / span 1',
@@ -20,17 +25,18 @@ export const MainLayout: React.FC = ({ children }) => {
           boxShadow: '1px 0px 10px 0px rgba(0,0,0,0.75)',
           zIndex: 1,
         }}
+        disabled={!isTrainerValid}
       />
 
       <Segment styles={{ gridColumn: 'span 1', padding: '30px' }}>
-        <Breadcrumb />
+        <Breadcrumb disabled={!isTrainerValid} />
         {children}
       </Segment>
     </Grid>
   );
 };
 
-const TopNav: FC = () => {
+const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
   return (
     <Flex
       space="between"
@@ -47,12 +53,26 @@ const TopNav: FC = () => {
     >
       <Flex gap="gap.large" vAlign="center">
         <MenuIcon size="large" styles={{ color: 'white' }} />
-        <NavLink to={'/'} style={{ textDecoration: 'none' }}>
+        <NavLink
+          to={'/'}
+          style={{ textDecoration: 'none', cursor: disabled && 'default' }}
+          onClick={(e: MouseEvent): void => {
+            if (disabled) e.preventDefault();
+          }}
+        >
           <Text color="white">Vision on Edge</Text>
         </NavLink>
       </Flex>
-      <Flex vAlign="center" hAlign="end" gap="gap.medium" styles={{ height: '100%' }}>
-        <Link to="/setting" style={{ height: '100%' }}>
+      <Flex
+        vAlign="center"
+        hAlign="end"
+        gap="gap.medium"
+        styles={{ height: '100%' }}
+        onClick={(e: MouseEvent): void => {
+          if (disabled) e.preventDefault();
+        }}
+      >
+        <Link to="/setting" style={{ height: '100%', cursor: disabled && 'default' }}>
           <Image styles={{ height: '100%' }} src="/icons/setting.png" />
         </Link>
         <Text color="white">User</Text>
