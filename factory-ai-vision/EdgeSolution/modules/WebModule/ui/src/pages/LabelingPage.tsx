@@ -47,6 +47,9 @@ const LabelingPage: FC<LabelingPageProps> = ({
       <Text size="larger" weight="semibold">
         DRAW A RECTANGLE AROUND THE PART
       </Text>
+      <Text size="larger" styles={{ alignSelf: 'flex-start' }}>
+        {index}
+      </Text>
       <PrevNextButton
         isRelabel={isRelabel}
         prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
@@ -71,11 +74,12 @@ const LabelingPage: FC<LabelingPageProps> = ({
       <Flex gap="gap.medium">
         <Button
           primary
-          content="Save"
+          content={index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
           disabled={isOnePointBox || workState === WorkState.Creating}
           onClick={(): void => {
             dispatch(saveLabelImageAnnotation(images[index].id, annotations));
-            closeDialog();
+            if (index === images.length - 1) closeDialog();
+            setIndex((prev) => (prev + 1) % images.length);
           }}
         />
         <Button

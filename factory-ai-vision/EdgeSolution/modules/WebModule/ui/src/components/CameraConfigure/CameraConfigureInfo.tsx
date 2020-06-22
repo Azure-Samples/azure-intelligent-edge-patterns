@@ -26,6 +26,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
   const parts = useParts();
   const dispatch = useDispatch();
   const cameraName = useQuery().get('name');
+  const isDemo = useQuery().get('isDemo') === 'true';
   const history = useHistory();
 
   const onDeleteConfigure = useCallback((): void => {
@@ -139,7 +140,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
             recall={trainingMetrics.curConsequence?.recall}
             mAP={trainingMetrics.curConsequence?.mAP}
           />
-          <Button primary onClick={onDeleteConfigure}>
+          <Button primary disabled={isDemo} onClick={onDeleteConfigure}>
             Delete Configuration
           </Button>
           <Button primary as={Link} to="/partIdentification">
@@ -173,7 +174,7 @@ const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall
     <Grid columns={3}>
       <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
         <Text align="center" size="large" weight="semibold">
-          Precison
+          Precision
         </Text>
         <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
           {precision === null ? '' : `${((precision * 1000) | 0) / 10}%`}

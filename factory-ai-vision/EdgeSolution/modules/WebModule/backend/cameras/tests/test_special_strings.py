@@ -1,3 +1,6 @@
+"""
+Some special string/char that may cause error
+"""
 special_strings = [
     "%", "_", "()", "[", "]", "[]", "$", "^", "[^]", "[^a-f]",
     "`", "&", "?", ".", ",", "'", '"', "#", "--", ";",

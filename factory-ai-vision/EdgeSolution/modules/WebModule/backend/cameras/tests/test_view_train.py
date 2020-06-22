@@ -27,13 +27,11 @@ class ViewTrainTestCase(APITransactionTestCase):
                                                      is_trainer_valid=False)
         camera_obj = Camera.objects.create(name="camera_1",
                                            rtsp="valid_rtsp",
-                                           model_name="model_1",
                                            area="55,66",
                                            is_demo=False)
 
         location_obj = Location.objects.create(name="location_1",
                                                description=f"description_1",
-                                               coordinates="55,66",
                                                is_demo=False)
         part_obj = Part.objects.create(name="part_1",
                                        description=f"description_1",
@@ -59,36 +57,63 @@ class ViewTrainTestCase(APITransactionTestCase):
         valid_project_obj.parts.add(part_obj)
 
     def test_setup_is_valid(self):
+        """Make sure setup is valid"""
         self.assertEqual(len(Camera.objects.all()), 1)
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         project_obj = Project.objects.filter(setting=valid_setting).first()
 
     def test_train_valid_project(self):
-        """valid setting should lead to create new project and train.
-        However, we have no image to train
+        """
+        @Type
+        Positive
+
+        @Description
+        Train a project with valid setting.
+        In this case, we have no image...
+
+        @Expected Results
+        Project get trained
+
+        @Expected HTTP Response
+        400 {'status': 'failed', 'log': 'Not enough images for training'}
         """
         url = reverse('project-list')
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         project_obj = Project.objects.filter(setting=valid_setting).first()
         response = self.client.get(f'{url}/{project_obj.id}/train')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        response_status = json.loads(response.content)['status']
-        self.assertEqual(response_status, 'failed')
-        response_log = json.loads(response.content)['log']
-        self.assertEqual(response_log, 'Not enough images for training')
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'],
+                         'failed')
+        self.assertEqual(json.loads(response.content)['log'],
+                         'Not enough images for training')
 
     def test_train_invalid_project(self):
-        """invalid setting should lead to failed and replace customvision id to ''
+        """
+        @Type
+        Negative
+
+        @Description
+        Train a project with invalid setting.
+        customvision project id set to ''
+
+        @Expected Results
+        Project not trained. customvision project id = '' 
+
+        @Expected HTTP Response
+        503 {'status': 'failed', 'log': 'training key + endpoint invalid'}
         """
         url = reverse('project-list')
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
         project_obj = Project.objects.filter(setting=invalid_setting).first()
         response = self.client.get(f'{url}/{project_obj.id}/train')
+
         self.assertEqual(response.status_code,
                          status.HTTP_503_SERVICE_UNAVAILABLE)
-        response_status = json.loads(response.content)['status']
-        self.assertEqual(response_status, 'failed')
+        self.assertEqual(json.loads(response.content)['status'],
+                         'failed')
 
     @classmethod
     def tearDownClass(self):

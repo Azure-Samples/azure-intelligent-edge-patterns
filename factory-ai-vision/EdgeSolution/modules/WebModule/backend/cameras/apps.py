@@ -66,29 +66,29 @@ class CameraConfig(AppConfig):
             create_demo = True
             if create_demo:
                 logger.info("Creating Demo Parts")
-                #for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
+                # for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
                 for partname in [
-                        'aeroplane',
-                        'bicycle',
-                        'bird',
-                        'boat',
-                        'bottle',
-                        'bus',
-                        'car',
-                        'cat',
-                        'chair',
-                        'cow',
-                        'diningtable',
-                        'dog',
-                        'horse',
-                        'motorbike',
-                        'person',
-                        'pottedplant',
-                        'sheep',
-                        'sofa',
-                        'train',
-                        'tvmonitor',
-                    ]:
+                    'aeroplane',
+                    'bicycle',
+                    'bird',
+                    'boat',
+                    'bottle',
+                    'bus',
+                    'car',
+                    'cat',
+                    'chair',
+                    'cow',
+                    'diningtable',
+                    'dog',
+                    'horse',
+                    'motorbike',
+                    'person',
+                    'pottedplant',
+                    'sheep',
+                    'sofa',
+                    'train',
+                    'tvmonitor',
+                ]:
                     demo_part, created = Part.objects.update_or_create(
                         name=partname,
                         is_demo=True,
@@ -112,7 +112,7 @@ class CameraConfig(AppConfig):
                     name="Demo Location",
                     is_demo=True,
                     defaults={
-                        'description': "Demo Model",
+                        'description': "Demo Location",
                     }
                 )
 

@@ -6,6 +6,7 @@ export type Project = {
   isLoading: boolean;
   trainingLog: string;
   data: ProjectData;
+  originData: ProjectData;
   inferenceMetrics: {
     successRate: number;
     successfulInferences: number;
@@ -48,6 +49,7 @@ export type ProjectData = {
   framesPerMin: number;
   accuracyThreshold: number;
   modelUrl: string;
+  cvProjectId?: string;
 };
 
 // Describing the different ACTION NAMES available
@@ -165,6 +167,11 @@ export type UpdateProjectDataAction = {
   payload: ProjectData;
 };
 
+export const UPDATE_ORIGIN_PROJECT_DATA = 'UPDATE_ORIGIN_PROJECT_DATA';
+export type UpdateOriginProjectDataAction = {
+  type: typeof UPDATE_ORIGIN_PROJECT_DATA;
+};
+
 export const START_INFERENCE = 'START_INFERENCE';
 export type StartInferenceAction = {
   type: typeof START_INFERENCE;
@@ -188,6 +195,7 @@ export type ProjectActionTypes =
   | DeleteProjectSuccessAction
   | DeleteProjectFaliedAction
   | UpdateProjectDataAction
+  | UpdateOriginProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
   | GetTrainingMetricsFailedAction

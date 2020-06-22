@@ -54,7 +54,7 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
     <Flex gap="gap.small" vAlign="center">
       <Text>Select Camera</Text>
       <Dropdown items={items} onChange={onDropdownChange} value={formatDropdownValue(selectedCamera)} />
-      <Link to="/addCamera">Add Camera</Link>
+      <Link to="/cameras">Add Camera</Link>
     </Flex>
   );
 };
@@ -94,7 +94,11 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
               key={i}
               imageIndex={i}
               images={arr}
-              trigger={<LabelDisplayImage labelImage={image} pointerCursor />}
+              trigger={
+                <div style={{ height: 150, width: 200 }}>
+                  <LabelDisplayImage labelImage={image} pointerCursor />
+                </div>
+              }
               isRelabel={false}
             />
           </div>

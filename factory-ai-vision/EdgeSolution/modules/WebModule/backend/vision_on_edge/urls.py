@@ -65,7 +65,6 @@ urlpatterns = \
         path('api/projects/<int:project_id>/reset_project', views.reset_project),
         path('api/projects/<int:project_id>/reset_camera',
              views.project_reset_camera),
-        path('api/settings/<int:setting_id>/list_projects', views.list_projects),
         path('api/projects/null/export', views.export_null),
         path('api/relabel', views.upload_relabel_image),
         path('api/relabel/update', views.relabel_update),

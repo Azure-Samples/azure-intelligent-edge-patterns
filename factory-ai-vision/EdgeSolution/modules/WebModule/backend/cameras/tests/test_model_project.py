@@ -1,58 +1,73 @@
-from rest_framework.test import APITransactionTestCase
-from cameras.models import Project, Setting, Camera, Location, Part
-from config import ENDPOINT, TRAINING_KEY
-from unittest.mock import patch
-from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
+"""
+Project Model Test.
+In this test, projects will be created on Azure Custom Vision.
+
+Requirements:
+1. ENDPOINT, TRAINING_KEY in config.py is valid.
+2. Custom Vision is able to create projects
+
+Notes:
+1. All test projects created on Azure Custom Vision will start will PROJECT_PREFIX
+2. All projects on Azure Custom Vision started with PROJECT_PREFIX will be deleted after testing.
+"""
 import logging
 
-project_prefix = "UnitTest"
+from rest_framework.test import APITransactionTestCase
+from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
+
+from cameras.models import Project, Setting, Camera, Location, Part
+from config import ENDPOINT, TRAINING_KEY
+
+PROJECT_PREFIX = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
 
-class ModelProjectTestCase(APITransactionTestCase):
-    def setUp(self):
-        """Create serveral Location
-        :DEFAULT_TRAINER: trainer create from configs
-        :INVALID_TRAINER: an invalid trainer
-        """
-        valid_setting_obj = Setting.objects.create(name="valid_setting",
-                                                   endpoint=ENDPOINT,
-                                                   training_key=TRAINING_KEY,
-                                                   is_trainer_valid=False)
-        invalid_setting_obj = Setting.objects.create(name="invalid_setting",
-                                                     endpoint=ENDPOINT,
-                                                     training_key='',
-                                                     is_trainer_valid=False)
-        for i in range(3):
-            demo_camera_obj = Camera.objects.create(name="demo_camera_{i}",
-                                                    rtsp="0",
-                                                    model_name="model{i}",
-                                                    area="{i*2},{i*3}",
-                                                    is_demo=True)
-            camera_obj = Camera.objects.create(name="camera_{i}",
-                                               rtsp="0",
-                                               model_name="model{i}",
-                                               area="{i*2},{i*3}",
-                                               is_demo=False)
+class ModelProjectTestCases(APITransactionTestCase):
+    """
+    Project Model Test Cases
+    """
 
-            demo_location_obj = Location.objects.create(name=f"location_{i}",
-                                                        description=f"description_{i}",
-                                                        coordinates="{i*20},{i*30}",
-                                                        is_demo=True)
-            location_obj = Location.objects.create(name=f"demo_location_{i}",
-                                                   description=f"description_{i}",
-                                                   coordinates="{i*20},{i*30}",
-                                                   is_demo=False)
-            demo_part_obj = Part.objects.create(name=f"part_{i}",
-                                                description=f"description_{i}",
-                                                is_demo=True)
-            part_obj = Part.objects.create(name=f"part_{i}",
-                                           description=f"description_{i}",
-                                           is_demo=False)
+    def setUp(self):
+        """
+        Setup. Create Objects
+        """
+        Setting.objects.create(name="valid_setting",
+                               endpoint=ENDPOINT,
+                               training_key=TRAINING_KEY,
+                               is_trainer_valid=False)
+        Setting.objects.create(name="invalid_setting",
+                               endpoint=ENDPOINT,
+                               training_key='',
+                               is_trainer_valid=False)
+        for i in range(3):
+            Camera.objects.create(name="demo_camera_{i}",
+                                  rtsp="0",
+                                  area="{i*2},{i*3}",
+                                  is_demo=True)
+            Camera.objects.create(name="camera_{i}",
+                                  rtsp="0",
+                                  area="{i*2},{i*3}",
+                                  is_demo=False)
+
+            Location.objects.create(name=f"location_{i}",
+                                    description=f"description_{i}",
+                                    is_demo=True)
+            Location.objects.create(name=f"demo_location_{i}",
+                                    description=f"description_{i}",
+                                    is_demo=False)
+            Part.objects.create(name=f"part_{i}",
+                                description=f"description_{i}",
+                                is_demo=True)
+            Part.objects.create(name=f"part_{i}",
+                                description=f"description_{i}",
+                                is_demo=False)
         self.exist_num = 3
 
     def test_setup_is_valid(self):
+        """
+        Making sure setup is valid
+        """
         self.assertEqual(Setting.objects.filter(
             training_key='').count(), 1)
         self.assertEqual(Setting.objects.filter(
@@ -78,7 +93,7 @@ class ModelProjectTestCase(APITransactionTestCase):
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
             customvision_project_id='super_valid_project_id',
-            customvision_project_name=f'{project_prefix}-test_create_1',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
             is_demo=False
         )
         self.assertFalse(project_obj.customvision_project_id ==
@@ -96,7 +111,7 @@ class ModelProjectTestCase(APITransactionTestCase):
             setting=Setting.objects.filter(name='valid_setting').first(),
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
-            customvision_project_name=f'{project_prefix}-test_create_2',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
             is_demo=False
         )
 
@@ -118,7 +133,7 @@ class ModelProjectTestCase(APITransactionTestCase):
             location=Location.objects.filter(
                 name='demo_location_1').first(),
             customvision_project_id='5566thebest',
-            customvision_project_name=f'{project_prefix}-test_create_3',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_3',
             is_demo=False)
 
         self.assertTrue(project_obj.customvision_project_id == '')
@@ -133,7 +148,7 @@ class ModelProjectTestCase(APITransactionTestCase):
             location=Location.objects.filter(name='demo_location_1').first(),
             is_demo=False,
             customvision_project_id='56cannotdie',
-            customvision_project_name=f'{project_prefix}-test_update_1'
+            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1'
         )
         # Project already created
         project_obj.save()
@@ -151,7 +166,7 @@ class ModelProjectTestCase(APITransactionTestCase):
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
             is_demo=False,
-            customvision_project_name=f'{project_prefix}-test_update_1'
+            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1'
         )
         # Project already created
         project_obj.customvision_project_id = '56cannotdie'
@@ -159,11 +174,11 @@ class ModelProjectTestCase(APITransactionTestCase):
         self.assertTrue(project_obj.customvision_project_id == '')
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         logger.info("Deleting Projects on CustomVision")
         trainer = CustomVisionTrainingClient(
             api_key=TRAINING_KEY, endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
-            if project.name.find(project_prefix) == 0:
+            if project.name.find(PROJECT_PREFIX) == 0:
                 trainer.delete_project(project_id=project.id)
