@@ -166,7 +166,7 @@ export const Setting = (): JSX.Element => {
               }
               contentText={<p>Update Key / Namespace will remove all the parts, sure you want to update?</p>}
             />
-            <Button primary as={Link} to="/">
+            <Button primary as={Link} to={isTrainerValid ? "/": "setting"}>
               Cancel
             </Button>
           </Flex>
@@ -298,7 +298,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
           <Input
             placeholder="Input a project name"
             fluid
-            onChange={(_, { value }) => {
+            onChange={(_, { value }): void => {
               setProjectName(value);
             }}
           />
