@@ -16,11 +16,17 @@ Make sure you have Porter installed. You can find the installation instructions 
 
 ## Step 2: Build Porter CNAB
 First you will need to navigate to porter directory in the repository. For example 
+try to clone/copy files at /home/user/
 
 ```sh
 cd ./research/mlflow-on-azure-stack/porter
 ```
+Change the file permissions
 
+```sh
+chmod 777 mlflow.sh
+chmod 777 kubeflow.sh
+```
 Next, you will build the porter CNAB
 
 ```sh
@@ -50,4 +56,11 @@ Run one of the below commands to interact with the CNAB
 porter install --cred MLServicesInstaller
 porter upgrade --cred MLServicesInstaller
 porter uninstall --cred MLServicesInstaller
+```
+### Step 5: Check for pods and services
+After the installation each of the services gets installed into its own namespace, try below commands to look for pods and services:
+
+```sh
+kubectl get pods -n mlflow
+kubectl get pods -n kubeflow
 ```
