@@ -13,14 +13,13 @@ import logging
 from distutils.util import strtobool
 
 # from django.shortcuts import render
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.core.files.images import ImageFile
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 
 # from rest_framework.views import APIView
 # from rest_framework.request import Request
-# from rest_framework.response import Response
 from rest_framework.decorators import api_view, action
 from rest_framework import serializers, viewsets
 from rest_framework import status
@@ -98,7 +97,7 @@ def update_train_status(project_id):
                 if wait_prepare > max_wait_prepare:
                     break
                 continue
-                # return Response({'status': 'waiting training'})
+                # return JsonResponse({'status': 'waiting training'})
 
             iteration = iterations[0]
             if not iteration.exportable or iteration.status != 'Completed':
@@ -108,7 +107,7 @@ def update_train_status(project_id):
                 )
 
                 continue
-                # return Response({'status': 'waiting training'})
+                # return JsonResponse({'status': 'waiting training'})
 
             exports = trainer.get_exports(
                 customvision_project_id, iteration.id)
@@ -121,7 +120,7 @@ def update_train_status(project_id):
                 res = project_obj.export_iterationv3_2(iteration.id)
                 logger.info(res.json())
                 continue
-                # return Response({'status': 'exporting'})
+                # return JsonResponse({'status': 'exporting'})
 
             project_obj.download_uri = exports[0].download_uri
             project_obj.save(update_fields=['download_uri'])
@@ -167,7 +166,7 @@ def update_train_status(project_id):
                 performance=json.dumps(train_performance)
             )
             break
-            # return Response({'status': 'ok', 'download_uri': exports[-1].download_uri})
+            # return JsonResponse({'status': 'ok', 'download_uri': exports[-1].download_uri})
 
     threading.Thread(target=_train_status_worker, args=(project_id,)).start()
 
@@ -196,7 +195,7 @@ def export(request, project_id):
         average_inference_time = data['average_inference_time']
         logger.info("success_rate: %s. inference_num: %s",
                     success_rate, inference_num)
-#         return Response({
+#         return JsonResponse({
 #             'status': train_obj.status,
 #             'log': train_obj.log,
 #             'download_uri': project_obj.download_uri,
@@ -207,19 +206,19 @@ def export(request, project_id):
     except requests.exceptions.ConnectionError:
         logger.error(
             "Export failed. Inference module url: %s unreachable", inference_module_url())
-        return Response({
+        return JsonResponse({
             'status': 'failed',
             'log': f'Export failed. Inference module url: {inference_module_url()} unreachable',
         }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except:
         # TODO: return other json response if we can determine if inference is alive
         logger.exception("unexpected error while exporting project")
-        return Response({
+        return JsonResponse({
             'status': 'failed',
             'log': 'unexpected error',
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    return Response({
+    return JsonResponse({
         'status': train_obj.status,
         'log': train_obj.log,
         'download_uri': project_obj.download_uri,
@@ -241,17 +240,17 @@ def export_null(request):
 
     if trainer is None:
         logger.error('trainer obj is invalid')
-        return Response({'status': 'trainer invalid'})
+        return JsonResponse({'status': 'trainer invalid'})
     iterations = trainer.get_iterations(customvision_project_id)
     if len(iterations) == 0:
         logger.info('not yet training ...')
-        return Response({'status': 'waiting training'})
+        return JsonResponse({'status': 'waiting training'})
 
     iteration = iterations[0]
 
     if not iteration.exportable or iteration.status != 'Completed':
         logger.info('waiting training ...')
-        return Response({'status': 'waiting training'})
+        return JsonResponse({'status': 'waiting training'})
 
     exports = trainer.get_exports(customvision_project_id, iteration.id)
     if len(exports) == 0:
@@ -259,7 +258,7 @@ def export_null(request):
         # trainer.export_iteration(customvision_project_id, iteration.id, 'ONNX')
         res = project_obj.export_iterationv3_2(iteration.id)
         logger.info(res.json())
-        return Response({'status': 'exporting'})
+        return JsonResponse({'status': 'exporting'})
 
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=['download_uri'])
@@ -267,8 +266,8 @@ def export_null(request):
     # if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
     # update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
-    return Response({'status': 'ok',
-                     'download_uri': exports[-1].download_uri})
+    return JsonResponse({'status': 'ok',
+                         'download_uri': exports[-1].download_uri})
 
 
 class PartSerializer(serializers.HyperlinkedModelSerializer):
@@ -446,29 +445,29 @@ class SettingViewSet(viewsets.ModelViewSet):
             project_list = trainer.get_projects()
             for project in project_list:
                 result[project.id] = project.name
-            return Response(result)
+            return JsonResponse(result)
         except KeyError as key_err:
             if str(key_err) in ['Endpoint', "'Endpoint'"]:
                 return Response({'status': 'failed',
                                  'log': 'Training key or Endpoint is invalid. Please change the settings'},
                                 status=status.HTTP_400_BAD_REQUEST)
-            return Response({'status': 'failed',
-                             'log': f'KeyError {str(key_err)}'},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({'status': 'failed',
+                                 'log': f'KeyError {str(key_err)}'},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except CustomVisionErrorException as customvision_error:
             if customvision_error.message == \
                     "Operation returned an invalid status code 'Access Denied'":
-                return Response({'status': 'failed',
-                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
-                                status=status.HTTP_503_SERVICE_UNAVAILABLE)
-            return Response({'status': 'failed',
-                             'log': e.message},
-                            status=e.response.status_code)
+                return JsonResponse({'status': 'failed',
+                                     'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                                    status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            return JsonResponse({'status': 'failed',
+                                 'log': e.message},
+                                status=e.response.status_code)
         except Exception as e:
             logger.exception("Unexpected Error while listing projects")
-            return Response({'status': 'failed',
-                             'log': str(e)},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'status': 'failed',
+                                 'log': str(e)},
+                                status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
@@ -591,15 +590,15 @@ def connect_stream(request):
     rtsp = request.query_params.get('rtsp') or '0'
     inference = (not not request.query_params.get('inference')) or False
     if part_id is None:
-        return Response({'status': 'failed', 'reason': 'part_id is missing'})
+        return JsonResponse({'status': 'failed', 'reason': 'part_id is missing'})
 
     try:
         Part.objects.get(pk=int(part_id))
         s = Stream(rtsp, part_id=part_id, inference=inference)
         streams.append(s)
-        return Response({'status': 'ok', 'stream_id': s.id})
+        return JsonResponse({'status': 'ok', 'stream_id': s.id})
     except ObjectDoesNotExist:
-        return Response({'status': 'failed', 'reason': 'part_id doesnt exist'})
+        return JsonResponse({'status': 'failed', 'reason': 'part_id doesnt exist'})
 
 
 @api_view()
@@ -609,8 +608,8 @@ def disconnect_stream(request, stream_id):
         stream = streams[i]
         if stream.id == stream_id:
             stream.close()
-            return Response({'status': 'ok'})
-    return Response({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
+            return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
 
 
 def video_feed(request, stream_id):
@@ -642,9 +641,9 @@ def capture(request, stream_id):
                 img_obj, context={'request': request})
             logger.info(img_serialized.data)
 
-            return Response({'status': 'ok', 'image': img_serialized.data})
+            return JsonResponse({'status': 'ok', 'image': img_serialized.data})
 
-    return Response({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
+    return JsonResponse({'status': 'failed', 'reason': 'cannot find stream_id '+str(stream_id)})
 
 
 @api_view()
@@ -655,7 +654,7 @@ def train_performance(request, project_id):
     customvision_project_id = project_obj.customvision_project_id
 
     if project_obj.is_demo:
-        return Response({
+        return JsonResponse({
             'status': 'ok',
             'precision': 1,
             'recall': 'demo_recall',
@@ -689,7 +688,7 @@ def train_performance(request, project_id):
     if len(iterations) >= 2:
         ret['previous'] = _parse(iterations[1])
 
-    return Response(ret)
+    return JsonResponse(ret)
 
 
 def _train(project_id, request):
@@ -703,9 +702,9 @@ def _train(project_id, request):
         project_obj.upcreate_training_status(
             status='failed',
             log='Status: Training key or Endpoint is invalid. Please change the settings')
-        return Response({'status': 'failed',
-                         'log': 'Training key or Endpoint is invalid. Please change the settings'},
-                        status=503)
+        return JsonResponse({'status': 'failed',
+                             'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                            status=503)
 
     project_obj.upcreate_training_status(
         status='Status: preparing data (images and annotations)',
@@ -873,7 +872,7 @@ def _train(project_id, request):
                     images_last_train=images_last_train)
         # A Thread/Task to keep updating the status
         update_train_status(project_id)
-        return Response({'status': 'ok'})
+        return JsonResponse({'status': 'ok'})
 
     except CustomVisionErrorException as e:
         logger.error('CustomVisionErrorException: %s', e)
@@ -881,16 +880,16 @@ def _train(project_id, request):
             project_obj.upcreate_training_status(
                 status='failed',
                 log='Training key or Endpoint is invalid. Please change the settings')
-            return Response({'status': 'failed',
-                             'log': 'Training key or Endpoint is invalid. Please change the settings'},
-                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            return JsonResponse({'status': 'failed',
+                                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                                status=status.HTTP_503_SERVICE_UNAVAILABLE)
         else:
             project_obj.upcreate_training_status(
                 status='failed',
                 log=e.message)
-            return Response({'status': 'failed',
-                             'log': e.message},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'status': 'failed',
+                                 'log': e.message},
+                                status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         # TODO: Remove in production
@@ -899,7 +898,7 @@ def _train(project_id, request):
         project_obj.upcreate_training_status(
             status='failed',
             log=f'Status : failed {str(err_msg)}')
-        return Response({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
+        return JsonResponse({'status': 'failed', 'log': f'Status : failed {str(err_msg)}'})
 
 
 @api_view()
@@ -942,7 +941,7 @@ def train(request, project_id):
             log='Status : demo ok'
         )
         # FIXME pass the new model info to inference server (willy implement)
-        return Response({'status': 'ok'})
+        return JsonResponse({'status': 'ok'})
 
     project_obj.upcreate_training_status(
         status='Status: preparing data (images and annotations)',
@@ -1010,7 +1009,7 @@ def upload_relabel_image(request):
     parts = Part.objects.filter(name=part_name, is_demo=False)
     if len(parts) == 0:
         logger.error('Unknown Part Name: %s', part_name)
-        return Response({'status': 'failed'})
+        return JsonResponse({'status': 'failed'})
 
     img_io = io.BytesIO(img_data)
 
@@ -1020,7 +1019,7 @@ def upload_relabel_image(request):
         image=img, part_id=parts[0].id, labels=labels, confidence=confidence, is_relabel=True)
     img_obj.save()
 
-    return Response({'status': 'ok'})
+    return JsonResponse({'status': 'ok'})
 
 
 @api_view(['POST'])
@@ -1032,7 +1031,7 @@ def relabel_update(request):
     data = request.data
     if type(data) is not type([]):
         logger.info('data should be array of object {}')
-        return Response({'status': 'failed'})
+        return JsonResponse({'status': 'failed'})
 
     for item in data:
         image_id = item['imageId']
@@ -1048,21 +1047,21 @@ def relabel_update(request):
             img_obj.delete()
             logger.info('image %s removed from relabeling pool', image_id)
 
-    return Response({'status': 'ok'})
+    return JsonResponse({'status': 'ok'})
 
 
 @api_view()
 def inference_video_feed(request, project_id):
     """Return inferenced video feed"""
-    return Response({'status': 'ok',
-                     'url': 'http://'+inference_module_url()+'/video_feed?inference=1'})
+    return JsonResponse({'status': 'ok',
+                         'url': 'http://'+inference_module_url()+'/video_feed?inference=1'})
 
 
 @api_view()
 def instrumentation_key(request):
     """App Insight Instrument Key"""
-    return Response({'status': 'ok',
-                     'key': APP_INSIGHT_INST_KEY})
+    return JsonResponse({'status': 'ok',
+                         'key': APP_INSIGHT_INST_KEY})
 
 
 @api_view()
@@ -1080,14 +1079,14 @@ def pull_cv_project(request, project_id):
         project_obj = Project.objects.filter(is_demo=False)[0]
     # Check Project
     if project_obj.is_demo:
-        return Response({
+        return JsonResponse({
             'status': 'failed',
             'logs': 'Demo project should not change'
         })
     # Check Training_Key, Endpoint
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     if not trainer:
-        return Response({
+        return JsonResponse({
             'status': 'failed',
             'logs': '(Endpoint, Training_key) invalid'
         })
@@ -1159,7 +1158,7 @@ def pull_cv_project(request, project_id):
                 log='Just Started',
                 project=project_obj)
             exporting_task_obj.start_exporting()
-            return Response({'status': 'ok', 'task.id': exporting_task_obj.id})
+            return JsonResponse({'status': 'ok', 'task.id': exporting_task_obj.id})
 
         # Full Download
         logger.info("Pulling Tagged Images...")
@@ -1208,17 +1207,17 @@ def pull_cv_project(request, project_id):
         logger.info("Pulled %s images", counter)
         logger.info("Pulling Tagged Images... End")
         logger.info("Pulling CustomVision Project... End")
-        return Response({'status': 'ok'})
+        return JsonResponse({'status': 'ok'})
     except CustomVisionErrorException as customvision_error:
         logger.error("CustomVisionErrorException: %s",
                      customvision_error.message)
-        return Response({'status': 'failed',
-                         'log': customvision_error.message})
+        return JsonResponse({'status': 'failed',
+                             'log': customvision_error.message})
     except Exception:
         # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception('Exception: %s', err_msg)
-        return Response({
+        return JsonResponse({
             'status': 'failed',
             'log': f'Status : failed {str(err_msg)}'})
     finally:
@@ -1235,7 +1234,7 @@ def project_reset_camera(request, project_id):
             project_obj = Project.objects.filter(is_demo=False)[0]
     project_obj.camera = Camera.objects.filter(is_demo=True).first()
     project_obj.save(update_fields=['camera'])
-    return Response({'status': 'ok'})
+    return JsonResponse({'status': 'ok'})
 
 
 @ api_view()
@@ -1268,33 +1267,33 @@ def reset_project(request, project_id):
         project_obj.retraining_counter = 0
         project_obj.save()
         project_obj.create_project()
-        return Response({'status': 'ok'})
+        return JsonResponse({'status': 'ok'})
     except KeyError as key_err:
         if str(key_err) in ['Endpoint', "'Endpoint'"]:
             # Probably reseting without training key and endpoint. When user
             # click configure, project will check customvision_id. If empty
             # than create project, Thus we can pass for now. Wait for
             # configure/training to create project...
-            return Response({'status': 'ok'})
+            return JsonResponse({'status': 'ok'})
         logger.exception("Reset project unexpected key error")
-        return Response({'status': 'failed',
-                         'log': str(key_err)},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return JsonResponse({'status': 'failed',
+                             'log': str(key_err)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except ValueError as value_err:
         logger.exception("Reset Project Value Error")
-        return Response({'status': 'failed',
-                         'log': str(value_err)},
-                        status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({'status': 'failed',
+                             'log': str(value_err)},
+                            status=status.HTTP_400_BAD_REQUEST)
     except CustomVisionErrorException as customvision_err:
         logger.exception("Error from Custom Vision")
         if customvision_err.message == "Operation returned an invalid status code 'Access Denied'":
-            return Response({
+            return JsonResponse({
                 'status': 'failed',
                 'log': 'Training key or Endpoint is invalid. Please change the settings'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        return Response({'status': 'failed',
-                         'log': customvision_err.message},
-                        status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return JsonResponse({'status': 'failed',
+                             'log': customvision_err.message},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except Exception:
         logger.exception("Uncaught Error")
         raise
