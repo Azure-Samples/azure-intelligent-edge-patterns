@@ -174,7 +174,7 @@ const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall
     <Grid columns={3}>
       <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
         <Text align="center" size="large" weight="semibold">
-          Precison
+          Precision
         </Text>
         <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
           {precision === null ? '' : `${((precision * 1000) | 0) / 10}%`}

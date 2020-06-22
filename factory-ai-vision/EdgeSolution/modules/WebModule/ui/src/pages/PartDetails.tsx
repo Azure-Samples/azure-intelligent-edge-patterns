@@ -78,7 +78,6 @@ const LeftPanel = ({ partId }): JSX.Element => {
       />
       <Flex space="around">
         <Button content="Save" primary onClick={onSave} disabled={!name || !description} />
-        <Button content="Cancel" onClick={(): void => history.push(`/parts/`)} />
       </Flex>
       {!!error && <Alert danger content={error} dismissible />}
     </Flex>

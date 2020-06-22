@@ -61,7 +61,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
 
   return (
     <>
-      <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
+      <div style={{ width: '100%', height: '30rem', backgroundColor: 'black' }}>
         {src ? <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
       </div>
       <Flex styles={{ height: '50px' }} hAlign="center" gap="gap.large">
