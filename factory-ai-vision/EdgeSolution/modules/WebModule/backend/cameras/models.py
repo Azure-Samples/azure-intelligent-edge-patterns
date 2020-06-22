@@ -124,7 +124,7 @@ class Image(models.Model):
                 fp = BytesIO()
                 fp.write(resp.content)
                 file_name = f"{self.part.name}-{self.remote_url.split('/')[-1]}"
-                logger.info(f"Saving as name {file_name}")
+                logger.info("Saving as name %s", file_name)
 
                 self.image.save(file_name, files.File(fp))
                 fp.close()
@@ -144,21 +144,21 @@ class Image(models.Model):
                     f"{left}, {top}, {width}, {height} must be less than 1")
             elif left < 0 or top < 0 or width < 0 or height < 0:
                 # raise ValueError(
-                #    f"{left}, {top}, {width}, {height} must be greater than 0")
-                logger.error(
-                    f"{left}, {top}, {width}, {height} must be greater than 0")
+                # f"{left}, {top}, {width}, {height} must be greater than 0")
+                logger.error("%s, %s, %s, %s must be greater than 0",
+                             left, top, width, height)
                 return
             elif left + width > 1:
-                logger.error(
-                    f"left + width:{left + width} must be less than 1")
+                logger.error("left + width: %s + %s must be less than 1",
+                             left, width)
                 return
             elif top + height > 1:
-                logger.error(
-                    f"top + height:{top + height} must be less than 1")
+                logger.error("top + height: %s + %s must be less than 1",
+                             top, height)
                 return
 
             with PILImage.open(self.image) as img:
-                logger.info(f"Successfully open img {self.image}")
+                logger.info("Successfully open img %s", self.image)
                 size_width, size_height = img.size
                 label_x1 = int(size_width*left)
                 label_y1 = int(size_height*top)
@@ -182,17 +182,17 @@ class Image(models.Model):
         "Add Labels to Image"
         try:
             if left > 1 or top > 1 or width > 1 or height > 1:
-                raise ValueError(
-                    f"{left}, {top}, {width}, {height} must be less than 1")
+                raise ValueError("%s, %s, %s, %s must be less than 1",
+                                 left, top, width, height)
             elif left < 0 or top < 0 or width < 0 or height < 0:
-                raise ValueError(
-                    f"{left}, {top}, {width}, {height} must be greater than 0")
+                raise ValueError("%s, %s, %s, %s must be greater than 0",
+                                 left, top, width, height)
             elif left + width > 1:
-                raise ValueError(
-                    f"left + width:{left + width} must be less than 1")
+                raise ValueError("left + width: %s + %s must be less than 1",
+                                 left, width)
             elif top + height > 1:
-                raise ValueError(
-                    f"top + height:{top + height} must be less than 1")
+                raise ValueError("top + height: %s + %s  must be less than 1",
+                                 top, height)
             pass
         except ValueError as e:
             raise e
@@ -647,6 +647,9 @@ class Project(models.Model):
         CustomVisionTrainingClient SDK may have some issues exporting
         Use the REST API
         """
+        # trainer.export_iteration(customvision_project_id,
+        # iteration.id,
+        # 'ONNX')
         setting_obj = self.setting
         url = setting_obj.endpoint+'customvision/v3.2/training/projects/' + \
             self.customvision_project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
