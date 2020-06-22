@@ -1,76 +1,71 @@
-from django.test import TransactionTestCase
+"""
+Part Model and method unittest
+"""
+from rest_framework.test import APITransactionTestCase
+from django.core.exceptions import MultipleObjectsReturned
+
 from cameras.models import Part
-from django.db.utils import IntegrityError
-from sqlite3 import IntegrityError as dbIntegrityError
+from .test_special_strings import special_strings
 
 
-class ModelPartTestCase(TransactionTestCase):
+class PartTestCase(APITransactionTestCase):
+    """
+    Part Model and method unittest
+    """
+
     def setUp(self):
-        """
-        Create serveral Part
-        :DEFAULT_TRAINER: trainer create from configs
-        :INVALID_TRAINER: an invalid trainer
-        """
-        for partname in ['Box', 'barrel', 'hAMMER', 'ScReWdRiVeR', 'BOTTLE', 'PLASTIC BAG']:
-            demo_part, created = Part.objects.update_or_create(
-                name=partname,
-                is_demo=True,
-                defaults={
-                    'description': "Demo Test case"
-                }
-            )
+        Part.objects.create(name="Part1",
+                            description="Description1",
+                            is_demo=True)
 
-        for partname in ['Box', 'Barrel', 'Hammer', 'Screwdriver', 'Bottle', 'Plastic bag']:
-            demo_part, created = Part.objects.update_or_create(
-                name=partname,
-                is_demo=False,
-                defaults={
-                    'description': "None Demo Test case"
-                }
-            )
+        Part.objects.create(name="Part2",
+                            description="Description2",
+                            is_demo=True)
 
-    def test_create_ok_if_unique(self):
-        """
-        part should be unique with (is_demo, name_lower)
-        name_lower is auto generated in pre_save
-        should pass
-        """
-        new_part, created = Part.objects.update_or_create(
-            name="NewPart", is_demo=True)
-        self.assertTrue(created)
-        # Same name in demo set
-        # Should pass, so any downloading task with part with name already in demo set will not failed
-        new_part, created = Part.objects.update_or_create(
-            name="NewPart", is_demo=False)
-        self.assertTrue(created)
+        Part.objects.create(name="Part1",
+                            description="SELECT * FROM 'LOCATION'",
+                            is_demo=False)
 
-    def test_create_failed_if_not_unique(self):
+        Part.objects.create(name="Part2",
+                            description="python apps.py",
+                            is_demo=False)
+        for special_string in special_strings:
+            Part.objects.create(name=special_string,
+                                description=special_string,
+                                is_demo=False)
+        self.exist_num = 4 + len(special_strings)
+
+    def test_setup_is_valid(self):
         """
-        revalidate should update 
+        Make sure setup is valid
         """
-        # Same name in demo set
-        for partname in ['Box', 'barrel', 'hAMMER', 'ScReWdRiVeR', 'BOTTLE', 'PLASTIC BAG']:
-            try:
-                test_part = Part.objects.create(
-                    name=partname,
-                    is_demo=True,
-                    description='Test Description'
-                )
-                self.fail("Should not created")
-            except IntegrityError:
-                pass
-            except:
-                self.fail("Unexpected Error")
-        # Same name in pratical set
-        for partname in ['Box', 'barrel', 'hAMMER', 'ScReWdRiVeR', 'BOTTLE', 'PLASTIC BAG']:
-            try:
-                test_part = Part.objects.create(
-                    name=partname,
-                    is_demo=False,
-                    description='Test Description'
-                )
-                self.fail("Should not created")
-            except IntegrityError:
-                pass
-            except:
-                self.fail("Unexpected Error")
+        self.assertEqual(Part.objects.count(), self.exist_num)
+        self.assertRaises(MultipleObjectsReturned,
+                          Part.objects.get, name='Part1')
+        part_1 = Part.objects.filter(name='Part1').last()
+        self.assertFalse(part_1.is_demo)
+        part_2 = Part.objects.filter(name='Part2').last()
+        self.assertFalse(part_2.is_demo)
+        demo_part_1 = Part.objects.filter(name='Part1').first()
+        self.assertTrue(demo_part_1.is_demo)
+        demo_part_2 = Part.objects.filter(name='Part2').first()
+        self.assertTrue(demo_part_2.is_demo)
+
+    def test_create_without_description(self):
+        """
+        @Type
+        Positive
+
+        @Description
+        Create parts without description assigned
+        Description column is now not mandatory
+
+        @Expected Results
+        Object created. Description is ''
+        """
+        part_name = "Part without Desb"
+        Part.objects.create(name=part_name,
+                            is_demo=False)
+        part_obj = Part.objects.get(name=part_name)
+        self.assertEqual(part_obj.description,
+                         '')

@@ -46,17 +46,17 @@ IMAGES_VIEW = view_module.View("image_view",
 view_manager.register_view(IMAGES_VIEW)
 
 #
-# TRAINING_JOB_TRIGGERED
+# TRAINING_JOB
 #
-TRAINING_JOB_TRIGGERED_MEASURE = measure_module.MeasureInt("training_job_triggered",
-                                                           "number of training job triggered",
-                                                           "training_job_triggered")
-TRAINING_JOB_TRIGGERED_VIEW = view_module.View("training_job_triggered_view",
-                                               "number of training job triggered",
-                                               [],
-                                               TRAINING_JOB_TRIGGERED_MEASURE,
-                                               aggregation_module.LastValueAggregation())
-view_manager.register_view(TRAINING_JOB_TRIGGERED_VIEW)
+TRAINING_JOB_MEASURE = measure_module.MeasureInt("training_jobs",
+                                                 "number of training jobs",
+                                                 "training_jobs")
+TRAINING_JOB_VIEW = view_module.View("training_job_view",
+                                     "number of training jobs",
+                                     [],
+                                     TRAINING_JOB_MEASURE,
+                                     aggregation_module.LastValueAggregation())
+view_manager.register_view(TRAINING_JOB_VIEW)
 
 #
 # RETRAINING_JOB
@@ -78,15 +78,13 @@ mmap_4 = stats_recorder.new_measurement_map()
 
 
 def get_app_insight_logger():
-    if APP_INSIGHT_ON:
-        app_insight_logger = logging.getLogger(
-            "Backend-Training-App-Insight")
-        app_insight_logger.addHandler(AzureLogHandler(
-            connection_string=APP_INSIGHT_CONN_STR)
-        )
-        return APP_INSIGHT_ON, app_insight_logger
-    else:
-        return APP_INSIGHT_ON, None
+    app_insight_logger = logging.getLogger(
+        "Backend-Training-App-Insight")
+    app_insight_logger.handlers = []
+    app_insight_logger.addHandler(AzureLogHandler(
+        connection_string=APP_INSIGHT_CONN_STR)
+    )
+    return app_insight_logger
 
 
 def part_monitor(count: int):
@@ -103,14 +101,14 @@ def img_monitor(count: int):
         mmap_2.measure_to_view_map.get_metrics(datetime.utcnow()))
 
 
-def training_job_triggered_monitor(count: int):
-    mmap_3.measure_int_put(TRAINING_JOB_TRIGGERED_MEASURE, count)
+def training_job_monitor(count: int):
+    mmap_3.measure_int_put(TRAINING_JOB_MEASURE, count)
     mmap_3.record()
     metrics = list(
         mmap_3.measure_to_view_map.get_metrics(datetime.utcnow()))
 
 
-def retraining_jobs_monitor(count: int):
+def retraining_job_monitor(count: int):
     mmap_4.measure_int_put(RETRAINING_JOB_MEASURE, count)
     mmap_4.record()
     metrics = list(

@@ -44,12 +44,13 @@ const CapturedImagesContainer = ({ capturedImages, isValid, partId }): JSX.Eleme
         columns="2"
         styles={{
           border: '1px solid grey',
-          height: '100%',
+          height: '45rem',
           gridGap: '10px',
           padding: '10px',
           borderColor: isValid ? '' : 'red',
           justifyItems: 'center',
           alignItems: 'center',
+          overflow: 'scroll',
         }}
       >
         {capturedImages.map((image, i, arr) => (
@@ -57,7 +58,7 @@ const CapturedImagesContainer = ({ capturedImages, isValid, partId }): JSX.Eleme
             key={i}
             imageIndex={i}
             images={arr}
-            trigger={<LabelDisplayImage labelImage={image} pointerCursor width={300} height={225} />}
+            trigger={<LabelDisplayImage labelImage={image} pointerCursor />}
             isRelabel={false}
           />
         ))}

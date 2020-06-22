@@ -26,6 +26,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
   const parts = useParts();
   const dispatch = useDispatch();
   const cameraName = useQuery().get('name');
+  const isDemo = useQuery().get('isDemo') === 'true';
   const history = useHistory();
 
   const onDeleteConfigure = useCallback((): void => {
@@ -91,12 +92,17 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
           <Flex column gap="gap.small">
             <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
           </Flex>
-          <ListItem title="Success Rate">
-            <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
-              {`${inferenceMetrics.successRate}%`}
-            </Text>
-          </ListItem>
-          <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
+          <Grid columns={2} styles={{ rowGap: '20px' }}>
+            <ListItem title="Success Rate">
+              <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
+                {`${inferenceMetrics.successRate}%`}
+              </Text>
+            </ListItem>
+            <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>{`${
+              Math.round(inferenceMetrics.averageTime * 100) / 100
+            }/ms`}</ListItem>
+            <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
+          </Grid>
           <ListItem title="Unidentified Items">
             <Text styles={{ margin: '5px' }} size="large">
               {inferenceMetrics.unIdetifiedItems}
@@ -134,7 +140,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
             recall={trainingMetrics.curConsequence?.recall}
             mAP={trainingMetrics.curConsequence?.mAP}
           />
-          <Button primary onClick={onDeleteConfigure}>
+          <Button primary disabled={isDemo} onClick={onDeleteConfigure}>
             Delete Configuration
           </Button>
           <Button primary as={Link} to="/partIdentification">
@@ -168,7 +174,7 @@ const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall
     <Grid columns={3}>
       <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
         <Text align="center" size="large" weight="semibold">
-          Precison
+          Precision
         </Text>
         <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
           {precision === null ? '' : `${((precision * 1000) | 0) / 10}%`}

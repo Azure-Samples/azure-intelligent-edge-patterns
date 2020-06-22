@@ -1,5 +1,5 @@
 import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo } from 'react';
-import { Dropdown, DropdownItemProps, Text, Button, RadioGroup } from '@fluentui/react-northstar';
+import { Dropdown, DropdownItemProps, Text, RadioGroup } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
 import { JudgedImageList, RelabelImage } from './types';
@@ -30,7 +30,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           key: null,
         },
       },
-      ...partItems.filter((e) => (e.content as any).key !== partId),
+      ...partItems.filter((e) => (e.content as { key: number }).key !== partId),
     ],
     [partId, partItems],
   );
@@ -84,23 +84,37 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   return (
     <div
       style={{
+        minHeight: '16em',
+        height: '100%',
         display: 'flex',
-        minHeight: '9em',
-        maxHeight: '30%',
         justifyContent: 'center',
-        padding: '1em',
+        alignItems: 'center',
       }}
     >
-      <div style={{ margin: '0.1em' }}>
-        <LabelDisplayImage labelImage={relabelImages[imageIndex]} width={100} height={100} />
-      </div>
+      <LabelingPageDialog
+        imageIndex={imageIndex}
+        images={relabelImages}
+        isRelabel={true}
+        trigger={
+          <div
+            style={{
+              padding: '0.5em',
+              height: '96%',
+              flex: '1 0 0',
+            }}
+          >
+            <LabelDisplayImage pointerCursor labelImage={relabelImages[imageIndex]} />
+          </div>
+        }
+      />
       <div
         style={{
-          height: '100%',
-          width: '40%',
+          height: '96%',
+          maxHeight: '10em',
+          flex: '1 0 0',
           display: 'flex',
           flexFlow: 'column',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
         }}
       >
         <Text truncated>
@@ -112,6 +126,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
             alignItems: 'center',
             width: '100%',
             height: '50%',
+            padding: '0.2em',
           }}
         >
           <RadioGroup
@@ -141,12 +156,6 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
             </div>
           )}
         </div>
-        <LabelingPageDialog
-          imageIndex={imageIndex}
-          images={relabelImages}
-          isRelabel={true}
-          trigger={<Button primary content="Identify" disabled={!isPartCorrect} />}
-        />
       </div>
     </div>
   );

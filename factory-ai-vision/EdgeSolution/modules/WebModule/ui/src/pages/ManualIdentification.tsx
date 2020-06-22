@@ -10,7 +10,8 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
-import axios from 'axios';
+import { useHistory } from 'react-router-dom';
+import Axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
@@ -28,6 +29,7 @@ import { JudgedImageList, RelabelImage } from '../components/ManualIdentificatio
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
 
 const ManualIdentification: FC = () => {
+  const history = useHistory();
   const dispatch = useDispatch();
   const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
     (state) => ({
@@ -39,20 +41,23 @@ const ManualIdentification: FC = () => {
   const partItems = useMemo<DropdownItemProps[]>(() => {
     if (parts.length === 0 || projectData.parts.length === 0) return [];
 
-    return projectData.parts.map((partId) => {
+    return projectData.parts.reduce((acc, partId) => {
       const part = parts.find((e) => e.id === partId);
 
-      return {
+      if (!part) return acc;
+
+      acc.push({
         header: part.name,
         content: {
           key: part.id,
         },
-      };
-    });
+      });
+      return acc;
+    }, []);
   }, [parts, projectData]);
 
   const [selectedPartItem, setSelectedPartItem] = useState<DropdownItemProps>(null);
-  const selectedPartId: number = (selectedPartItem?.content as any)?.key ?? null;
+  const selectedPartId: number = (selectedPartItem?.content as { key: number })?.key ?? null;
 
   const [confidenceLevelRange, setConfidenceLevelRange] = useState<[number, number]>([
     projectData.accuracyRangeMin,
@@ -163,6 +168,31 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
+        <div style={{ display: 'flex', minWidth: '20em', maxWidth: '20%', justifyContent: 'space-around' }}>
+          <Button
+            primary
+            content="Yes to all"
+            onClick={(): void => {
+              setJudgedImageList(relabelImages.map((e) => ({ imageId: e.id, partId: selectedPartId })));
+            }}
+          />
+          <Button
+            styles={{
+              backgroundColor: '#E97548',
+              color: 'white',
+              ':hover': { backgroundColor: '#CC4A31', color: 'white' },
+            }}
+            content="No to remaining"
+            onClick={(): void => {
+              setJudgedImageList((prev) =>
+                relabelImages.map((relabelImage) => {
+                  const judgedImage = prev.find((imgInList) => imgInList.imageId === relabelImage.id);
+                  return judgedImage ?? { imageId: relabelImage.id, partId: null };
+                }),
+              );
+            }}
+          />
+        </div>
         <ImagesContainer
           images={relabelImages}
           judgedImageList={judgedImageList}
@@ -176,8 +206,15 @@ const ManualIdentification: FC = () => {
           primary
           disabled={judgedImageList.length === 0}
           onClick={(): void => {
-            axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
+            Axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
               .then(() => {
+                // * Check if all relabelImages are updated
+                // TODO: Use response to update
+                const judgedIds = judgedImageList.map((e) => e.imageId);
+                if (relabelImages.every((e) => judgedIds.includes(e.id))) {
+                  history.push('/partIdentification');
+                }
+
                 dispatch(getLabelImages());
                 setJudgedImageList([]);
                 return void 0;

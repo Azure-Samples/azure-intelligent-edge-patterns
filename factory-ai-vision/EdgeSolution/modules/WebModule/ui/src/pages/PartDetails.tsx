@@ -40,19 +40,16 @@ const LeftPanel = ({ partId }): JSX.Element => {
   }, [partId]);
 
   const onSave = (): void => {
-    const hasPartId = ![undefined, null].includes(partId);
-    const url = hasPartId ? `/api/parts/${partId}/` : `/api/parts/`;
-
     axios({
-      method: hasPartId ? 'PUT' : 'POST',
-      url,
+      method: 'PUT',
+      url: `/api/parts/${partId}/`,
       data: {
         name,
         description,
       },
     })
-      .then(({ data }) => {
-        history.push(`/parts/detail/capturePhotos?partId=${data.id}`);
+      .then(() => {
+        history.push(`/parts/`);
         return void 0;
       })
       .catch((err) => {
@@ -81,7 +78,6 @@ const LeftPanel = ({ partId }): JSX.Element => {
       />
       <Flex space="around">
         <Button content="Save" primary onClick={onSave} disabled={!name || !description} />
-        <Button content="Cancel" />
       </Flex>
       {!!error && <Alert danger content={error} dismissible />}
     </Flex>

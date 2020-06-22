@@ -2,9 +2,9 @@
   "$schema-version": "0.0.1",
   "description": "",
   "image": {
-    "repository": "intelligentedge/inferencemodule",
+    "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/inferencemodule",
     "tag": {
-      "version": "0.1.19",
+      "version": "0.1.40",
       "platforms": {
         "cpuamd64": "./Dockerfile.cpuamd64",
         "gpuamd64": "./Dockerfile.gpuamd64",

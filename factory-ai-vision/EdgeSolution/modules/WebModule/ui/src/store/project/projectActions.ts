@@ -44,6 +44,8 @@ import {
   START_INFERENCE,
   STOP_INFERENCE,
   StopInferenceAction,
+  UPDATE_ORIGIN_PROJECT_DATA,
+  UpdateOriginProjectDataAction,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -95,9 +97,11 @@ const getInferenceMetricsSuccess = (
   successRate: number,
   successfulInferences: number,
   unIdetifiedItems: number,
+  isGpu: boolean,
+  averageTime: number,
 ): GetInferenceMetricsSuccessAction => ({
   type: GET_INFERENCE_METRICS_SUCCESS,
-  payload: { successRate, successfulInferences, unIdetifiedItems },
+  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime },
 });
 const getInferenceMetricsFailed = (error: Error): GetInferenceMetricsFailedAction => ({
   type: GET_INFERENCE_METRICS_FAILED,
@@ -117,6 +121,10 @@ export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAc
   payload: projectData,
 });
 
+export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({
+  type: UPDATE_ORIGIN_PROJECT_DATA,
+});
+
 export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest());
 
@@ -133,7 +141,11 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
         accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
-        maxImages: data[0]?.maxImages ?? 50,
+        maxImages: data[0]?.maxImages ?? 20,
+        sendMessageToCloud: data[0]?.metrics_is_send_iothub,
+        framesPerMin: data[0]?.metrics_frame_per_minutes,
+        accuracyThreshold: data[0]?.metrics_accuracy_threshold,
+        cvProjectId: data[0]?.customvision_project_id,
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -167,6 +179,9 @@ export const thunkPostProject = (
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
       maxImages: projectData.maxImages,
+      metrics_is_send_iothub: projectData.sendMessageToCloud,
+      metrics_frame_per_minutes: projectData.framesPerMin,
+      metrics_accuracy_threshold: projectData.accuracyThreshold,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
@@ -188,7 +203,7 @@ const getTrain = (projectId, isTestModel: boolean): void => {
 };
 
 export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {
-  return Axios.delete(`/api/projects/${projectId}/`)
+  return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
       return dispatch(deleteProjectSuccess());
     })
@@ -204,7 +219,8 @@ export const thunkGetTrainingLog = (projectId: number) => (dispatch): Promise<an
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
-      else if (data.status === 'ok') dispatch(getTrainingLogSuccess('', Status.FinishTraining));
+      else if (data.status === 'ok' || data.status === 'demo ok')
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining));
       else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining));
       return void 0;
     })
@@ -243,7 +259,13 @@ export const thunkGetInferenceMetrics = (projectId: number) => (dispatch): Promi
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       return dispatch(
-        getInferenceMetricsSuccess(data.success_rate, data.inference_num, data.unidentified_num),
+        getInferenceMetricsSuccess(
+          data.success_rate,
+          data.inference_num,
+          data.unidentified_num,
+          data.gpu,
+          data.average_time,
+        ),
       );
     })
     .catch((err) => dispatch(getInferenceMetricsFailed(err)));

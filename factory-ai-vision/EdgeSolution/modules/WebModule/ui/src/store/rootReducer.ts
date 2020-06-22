@@ -9,6 +9,7 @@ import locationsReducer from './location/locationReducer';
 import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
 import projectReducer from './project/projectReducer';
 import labelImagesReducer from './image/imageReducer';
+import settingReducer from './setting/settingReducer';
 
 const rootReducer = combineReducers({
   cameras: camerasReducer,
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   dialogIsOpen: dialogIsOpenReducer,
   project: projectReducer,
   images: labelImagesReducer,
+  setting: settingReducer,
 });
 
 const persistConfig = {

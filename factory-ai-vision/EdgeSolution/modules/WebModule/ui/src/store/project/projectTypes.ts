@@ -6,10 +6,13 @@ export type Project = {
   isLoading: boolean;
   trainingLog: string;
   data: ProjectData;
+  originData: ProjectData;
   inferenceMetrics: {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
+    isGpu: boolean;
+    averageTime: number;
   };
   trainingMetrics: {
     prevConsequence: Consequence;
@@ -42,7 +45,11 @@ export type ProjectData = {
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
+  sendMessageToCloud: boolean;
+  framesPerMin: number;
+  accuracyThreshold: number;
   modelUrl: string;
+  cvProjectId?: string;
 };
 
 // Describing the different ACTION NAMES available
@@ -117,6 +124,8 @@ export type GetInferenceMetricsSuccessAction = {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
+    isGpu: boolean;
+    averageTime: number;
   };
 };
 
@@ -158,6 +167,11 @@ export type UpdateProjectDataAction = {
   payload: ProjectData;
 };
 
+export const UPDATE_ORIGIN_PROJECT_DATA = 'UPDATE_ORIGIN_PROJECT_DATA';
+export type UpdateOriginProjectDataAction = {
+  type: typeof UPDATE_ORIGIN_PROJECT_DATA;
+};
+
 export const START_INFERENCE = 'START_INFERENCE';
 export type StartInferenceAction = {
   type: typeof START_INFERENCE;
@@ -181,6 +195,7 @@ export type ProjectActionTypes =
   | DeleteProjectSuccessAction
   | DeleteProjectFaliedAction
   | UpdateProjectDataAction
+  | UpdateOriginProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
   | GetTrainingMetricsFailedAction

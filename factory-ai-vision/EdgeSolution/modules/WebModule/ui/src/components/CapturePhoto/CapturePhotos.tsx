@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
 import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -15,13 +15,35 @@ import { getFilteredImages } from '../../util/getFilteredImages';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 
 export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
+  const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
+  const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
+  const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
+  const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
+  const prevImageLength = useRef<number>(filteredImages.length);
+
+  useEffect(() => {
+    dispatch(getLabelImages());
+  }, [dispatch]);
+  useEffect(() => {
+    if (openLabelingPage && prevImageLength.current !== filteredImages.length) {
+      setGoLabelImageIdx(filteredImages.length - 1);
+      setOpenLabelingPage(false);
+      prevImageLength.current = filteredImages.length;
+    }
+  }, [openLabelingPage, filteredImages]);
 
   return (
     <>
       <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
-      <RTSPVideo rtsp={selectedCamera?.rtsp} partId={partId} canCapture={true} />
-      <CapturedImagesContainer partId={partId} />
+      <RTSPVideo
+        rtsp={selectedCamera?.rtsp}
+        partId={partId}
+        canCapture={true}
+        setOpenLabelingPage={setOpenLabelingPage}
+      />
+      <CapturedImagesContainer images={filteredImages} goLabelImageIdx={goLabelImageIdx} />
     </>
   );
 };
@@ -45,28 +67,23 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
     }
   };
 
+  // FIXME Find a better way to replace the setState in the effect
+  useEffect(() => {
+    if (availableCameras.length === 1) setSelectedCamera(availableCameras[0]);
+  }, [availableCameras, setSelectedCamera]);
+
   return (
     <Flex gap="gap.small" vAlign="center">
       <Text>Select Camera</Text>
       <Dropdown items={items} onChange={onDropdownChange} value={formatDropdownValue(selectedCamera)} />
-      <Link to="/addCamera">Add Camera</Link>
+      <Link to="/cameras">Add Camera</Link>
     </Flex>
   );
 };
 
-const CapturedImagesContainer = ({ partId }): JSX.Element => {
-  const dispatch = useDispatch();
-  const images = useSelector<State, LabelImage[]>((state) => state.images).filter(
-    (image) => !image.is_relabel,
-  );
-  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
-  const isValid = filteredImages.filter((image) => image.labels).length >= 15;
-
-  useEffect(() => {
-    dispatch(getLabelImages());
-  }, [dispatch]);
-
-  const imageCount = filteredImages.length;
+const CapturedImagesContainer = ({ images, goLabelImageIdx }): JSX.Element => {
+  const isValid = images.filter((image) => image.labels).length >= 15;
+  const imageCount = images.length;
 
   return (
     <>
@@ -82,14 +99,19 @@ const CapturedImagesContainer = ({ partId }): JSX.Element => {
         gap="gap.small"
         vAlign="center"
       >
-        {filteredImages.map((image, i, arr) => (
-          <div key={image.id}>
+        {images.map((image, i, arr) => (
+          <div key={image.id} style={{ height: '100%', width: '100%' }}>
             <span>{i + 1}</span>
             <LabelingPageDialog
               key={i}
               imageIndex={i}
               images={arr}
-              trigger={<LabelDisplayImage labelImage={image} pointerCursor width={200} height={150} />}
+              forceOpen={goLabelImageIdx === i}
+              trigger={
+                <div style={{ height: 150, width: 200 }}>
+                  <LabelDisplayImage labelImage={image} pointerCursor />
+                </div>
+              }
               isRelabel={false}
             />
           </div>

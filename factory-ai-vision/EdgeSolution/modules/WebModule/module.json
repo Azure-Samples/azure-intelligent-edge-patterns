@@ -2,9 +2,9 @@
   "$schema-version": "0.0.1",
   "description": "",
   "image": {
-    "repository": "intelligentedge/visionwebmodule",
+    "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule",
     "tag": {
-      "version": "0.3.31",
+      "version": "0.3.72",
       "platforms": {
         "amd64": "./Dockerfile.amd64",
         "amd64.debug": "./Dockerfile.amd64.debug",
