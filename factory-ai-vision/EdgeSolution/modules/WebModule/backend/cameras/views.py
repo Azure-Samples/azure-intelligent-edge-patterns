@@ -22,14 +22,13 @@ from azure.cognitiveservices.vision.customvision.training.models import (
 from azure.iot.device import IoTHubModuleClient
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.images import ImageFile
-from django.db.utils import IntegrityError
 
 # from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 
 # from rest_framework.response import Response
 from filters.mixins import FiltersMixin
-from rest_framework import filters, serializers, status, viewsets
+from rest_framework import filters, status, viewsets
 
 # from rest_framework.views import APIView
 # from rest_framework.request import Request
@@ -53,6 +52,17 @@ from .models import (
     Stream,
     Task,
     Train,
+)
+from .serializers import (
+    AnnotationSerializer,
+    CameraSerializer,
+    ImageSerializer,
+    LocationSerializer,
+    PartSerializer,
+    ProjectSerializer,
+    SettingSerializer,
+    TaskSerializer,
+    TrainSerializer,
 )
 
 # from azure.iot.hub import IoTHubRegistryManager
@@ -232,8 +242,6 @@ def export(request, project_id):
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
     except:
-        # TODO: return other json response if we can determine if inference is
-        # alive
         logger.exception("unexpected error while exporting project")
         return JsonResponse(
             {"status": "failed", "log": "unexpected error",},
@@ -292,54 +300,6 @@ def export_null(request):
     return JsonResponse({"status": "ok", "download_uri": exports[-1].download_uri})
 
 
-class PartSerializer(serializers.HyperlinkedModelSerializer):
-    """PartSerializer"""
-
-    class Meta:
-        model = Part
-        fields = ["id", "name", "description", "is_demo"]
-        extra_kwargs = {
-            "description": {"required": False},
-        }
-
-    def create(self, validated_data):
-        try:
-            return Part.objects.create(**validated_data)
-        except IntegrityError:
-            raise serializers.ValidationError(
-                detail={
-                    "status": "failed",
-                    "log": (
-                        "dataset with same name exists," + "please change another name"
-                    ),
-                }
-            )
-        except:
-            logger.exception("Part update occur uncaught error")
-            raise serializers.ValidationError(
-                detail={"status": "failed", "log": "Unexpected Error"}
-            )
-
-    def update(self, instance, validated_data):
-        try:
-            result = super().update(instance, validated_data)
-            return result
-        except IntegrityError:
-            raise serializers.ValidationError(
-                detail={
-                    "status": "failed",
-                    "log": (
-                        "dataset with same name exists, " + "please change another name"
-                    ),
-                }
-            )
-        except:
-            logger.exception("Part update occur uncaught error")
-            raise serializers.ValidationError(
-                detail={"status": "failed", "log": "Unexpected Error"}
-            )
-
-
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Part ModelViewSet.Partname should be unique.
@@ -354,17 +314,6 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "is_demo": "is_demo",
     }
-
-
-class LocationSerializer(serializers.HyperlinkedModelSerializer):
-    """LocationSerializer"""
-
-    class Meta:
-        model = Location
-        fields = ["id", "name", "description", "is_demo"]
-        extra_kwargs = {
-            "description": {"required": False},
-        }
 
 
 class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
@@ -383,14 +332,6 @@ class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
     }
 
 
-class CameraSerializer(serializers.HyperlinkedModelSerializer):
-    """CameraSerializer"""
-
-    class Meta:
-        model = Camera
-        fields = ["id", "name", "rtsp", "area", "is_demo"]
-
-
 class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Camera ModelViewSet
@@ -407,14 +348,6 @@ class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     }
 
 
-class TaskSerializer(serializers.HyperlinkedModelSerializer):
-    """TaskSerializer"""
-
-    class Meta:
-        model = Task
-        fields = ["task_type", "status", "log", "project"]
-
-
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Task ModelViewSet
@@ -429,41 +362,6 @@ class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "project": "project",
     }
-
-
-class SettingSerializer(serializers.HyperlinkedModelSerializer):
-    """SettingSerializer"""
-
-    class Meta:
-        model = Setting
-        fields = [
-            "id",
-            "name",
-            "training_key",
-            "endpoint",
-            "is_trainer_valid",
-            "iot_hub_connection_string",
-            "device_id",
-            "module_id",
-            "is_collect_data",
-            "obj_detection_domain_id",
-        ]
-
-    def create(self, validated_data):
-        obj, _ = Setting.objects.get_or_create(
-            endpoint=validated_data["endpoint"],
-            training_key=validated_data["training_key"],
-            defaults={
-                "name": validated_data["name"],
-                "iot_hub_connection_string": validated_data[
-                    "iot_hub_connection_string"
-                ],
-                "device_id": validated_data["device_id"],
-                "module_id": validated_data["module_id"],
-                "is_collect_data": validated_data["is_collect_data"],
-            },
-        )
-        return obj
 
 
 class SettingViewSet(viewsets.ModelViewSet):
@@ -485,7 +383,7 @@ class SettingViewSet(viewsets.ModelViewSet):
                 raise ValueError("Training Key")
             if not setting_obj.endpoint:
                 raise ValueError("Endpoint")
-            trainer = setting_obj._get_trainer_obj()
+            trainer = setting_obj.get_trainer_obj()
             result = {}
             project_list = trainer.get_projects()
             for project in project_list:
@@ -533,43 +431,6 @@ class SettingViewSet(viewsets.ModelViewSet):
             )
 
 
-class ProjectSerializer(serializers.HyperlinkedModelSerializer):
-    """ProjectSerializer"""
-
-    class Meta:
-        model = Project
-        fields = [
-            "setting",
-            "id",
-            "camera",
-            "location",
-            "parts",
-            "download_uri",
-            "customvision_project_id",
-            "needRetraining",
-            "accuracyRangeMin",
-            "accuracyRangeMax",
-            "maxImages",
-            "metrics_is_send_iothub",
-            "metrics_accuracy_threshold",
-            "metrics_frame_per_minutes",
-        ]
-        extra_kwargs = {
-            "setting": {"required": False},
-            "download_uri": {"required": False},
-            "customvision_project_id": {"required": False},
-        }
-
-    def create(self, validated_data):
-        logger.info("Project Serializer create")
-        parts = validated_data.pop("parts")
-        if "setting" not in validated_data:
-            validated_data["setting"] = Setting.objects.first()
-        project = Project.objects.create(**validated_data)
-        project.parts.set(parts)
-        return project
-
-
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Project ModelViewSet
@@ -586,14 +447,6 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     }
 
 
-class ImageSerializer(serializers.HyperlinkedModelSerializer):
-    """ImageSerializer"""
-
-    class Meta:
-        model = Image
-        fields = ["id", "image", "labels", "part", "is_relabel", "confidence"]
-
-
 class ImageViewSet(viewsets.ModelViewSet):
     """
     Image ModelViewSet
@@ -603,14 +456,6 @@ class ImageViewSet(viewsets.ModelViewSet):
     serializer_class = ImageSerializer
 
 
-class AnnotationSerializer(serializers.HyperlinkedModelSerializer):
-    """AnnotationSerializer"""
-
-    class Meta:
-        model = Annotation
-        fields = ["id", "image", "labels"]
-
-
 class AnnotationViewSet(viewsets.ModelViewSet):
     """
     Annotation ModelViewSet
@@ -618,14 +463,6 @@ class AnnotationViewSet(viewsets.ModelViewSet):
 
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
-
-
-class TrainSerializer(serializers.HyperlinkedModelSerializer):
-    """TrainSerializer"""
-
-    class Meta:
-        model = Train
-        fields = ["id", "status", "log", "project"]
 
 
 class TrainViewSet(viewsets.ModelViewSet):
