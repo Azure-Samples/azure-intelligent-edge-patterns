@@ -704,9 +704,9 @@ def _train(project_id, request):
     if not trainer:
         project_obj.upcreate_training_status(
             status='failed',
-            log='Status: Training key or Endpoint is invalid. Please change the settings')
+            log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
         return JsonResponse({'status': 'failed',
-                             'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                             'log': error_messages.CUSTOM_VISION_ACCESS_ERROR},
                             status=503)
 
     project_obj.upcreate_training_status(
@@ -1144,10 +1144,11 @@ def pull_cv_project(request, project_id):
             if is_partial:
                 logger.info("loading one image as icon")
                 try:
-                    image_uri = trainer.get_tagged_images(
+                    img = trainer.get_tagged_images(
                         project_id=customvision_project_id,
                         tag_ids=[tag.id],
-                        take=1)[0].original_image_uri
+                        take=1)[0]
+                    image_uri = img.original_image_uri
                     img_obj, created = Image.objects.update_or_create(
                         part=part_obj,
                         remote_url=image_uri,
@@ -1156,6 +1157,19 @@ def pull_cv_project(request, project_id):
                     logger.info("loading from remote url: %s",
                                 img_obj.remote_url)
                     img_obj.get_remote_image()
+                    logger.info("Finding tag.id %s", tag.id)
+                    logger.info("Finding tag.name %s", tag.name)
+                    for region in img.regions:
+                        if region.tag_id == tag.id:
+                            logger.info("Region Found")
+                            img_obj.set_labels(
+                                left=region.left,
+                                top=region.top,
+                                width=region.width,
+                                height=region.height
+                            )
+                            break
+
                 except CustomVisionErrorException:
                     logger.info("This tag does not have an image")
         logger.info("Pulled %s Parts", counter)
