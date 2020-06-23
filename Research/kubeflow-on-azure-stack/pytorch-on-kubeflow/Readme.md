@@ -139,7 +139,7 @@ Shortly after, you should see the pods up-and-running:
 
 At standard Kubernetes Dashboard you could see the pods:
 
-![](images/pytorch_cluster_pods.png)
+![images/pytorch_cluster_pods.png](images/pytorch_cluster_pods.png)
 
 
 To get the information about the running PyTorch workload:
@@ -320,6 +320,12 @@ Look at the logs to see the progress:
     saving model to "/tmp/mnist-data/mnist_cnn_epoch5.pt"...
     accuracy=0.9872
     saving model to 'mnist_cnn.pt'...
+
+
+And, since in our example we used tensorboardX to write summaries, if you connected the `Tensorboard` logs properly,
+you will see your data in the Tensorboard:
+
+![images/tensorboard_scalars.png](images/tensorboard_scalars.png)
 
 See more on PyTorch at [https://github.com/pytorch/pytorch](https://github.com/pytorch/pytorch)
 

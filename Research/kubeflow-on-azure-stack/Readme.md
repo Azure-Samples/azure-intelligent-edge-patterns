@@ -8,7 +8,6 @@ This module demonstrates how to create and use a Kubeflow cluster on Azure Stack
 - [Prerequisites](#prerequisites)
   - [Installing Kubernetes manually](installing_kubernetes.md)
   - [Kubernetes Dashboard](#kubernetes-dashboard)
-  - [Tensorboard](#tensorboard)
   - [Persistence on AzureStack](#persistence-on-azure-stack)
 - [Install Kubeflow](#install-kubeflow)
 - [Kubeflow dashboard](#preparing-kubeflow-dashboard) (preparing and using)
@@ -113,61 +112,6 @@ You might need to contact your cloud administrator to retrieve the certificates 
 you imported them, you should be able to see the Kubernetes Dashboard in a browser:
 
 ![pics/kubernetes_dashboard_intro.png](pics/kubernetes_dashboard_intro.png)
-
-## Tensorboard
-
-You can skip this chapter for now. There is another useful tool to monitor some ML applications if
-they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
-You might contact your cloud administrator to help you establish network access, or you can
-use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
-
-It will look something like this(for a different app, outside the scope of this demo):
-
-![pics/tensorboard_graph.png](pics/tensorboard_graph.png)
-
-Here is how you would connect your Tensorboard with the persistence we discuss next:
-
-    $ cat tb.yaml
-    apiVersion: extensions/v1beta1
-    kind: Deployment
-    metadata:
-      labels:
-        app: tensorboard
-      name: tensorboard
-    spec:
-      replicas: 1
-      selector:
-        matchLabels:
-          app: tensorboard
-      template:
-        metadata:
-          labels:
-            app: tensorboard
-        spec:
-          volumes:
-          - name: samba-share-volume2
-            persistentVolumeClaim:
-              # claimName: azurefile
-              claimName: samba-share-claim
-          containers:
-          - name: tensorboard
-            image: tensorflow/tensorflow:1.10.0
-            imagePullPolicy: Always
-            command:
-             - /usr/local/bin/tensorboard
-            args:
-            - --logdir
-            - /tmp/tensorflow/logs
-            volumeMounts:
-            - mountPath: /tmp/tensorflow
-              #subPath: somedemo55
-              name: samba-share-volume2
-            ports:
-            - containerPort: 6006
-              protocol: TCP
-          dnsPolicy: ClusterFirst
-          restartPolicy: Always
-
 
 ## Persistence on Azure Stack
 
@@ -450,6 +394,56 @@ it will look like so:
 
 You can now re-install it if you would like.
 
+## Tensorboard
+
+You can skip this chapter for now. There is another useful tool to monitor some ML applications if
+they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
+You might contact your cloud administrator to help you establish network access, or you can
+use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
+
+Here is how you would connect your Tensorboard with the persistence we discuss next:
+
+    $ cat tb.yaml
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      labels:
+        app: tensorboard
+      name: tensorboard
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: tensorboard
+      template:
+        metadata:
+          labels:
+            app: tensorboard
+        spec:
+          volumes:
+          - name: samba-share-volume2
+            persistentVolumeClaim:
+              # claimName: azurefile
+              claimName: samba-share-claim
+          containers:
+          - name: tensorboard
+            image: tensorflow/tensorflow:1.10.0
+            imagePullPolicy: Always
+            command:
+             - /usr/local/bin/tensorboard
+            args:
+            - --logdir
+            - /tmp/tensorflow/logs
+            volumeMounts:
+            - mountPath: /tmp/tensorflow
+              #subPath: somedemo55
+              name: samba-share-volume2
+            ports:
+            - containerPort: 6006
+              protocol: TCP
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+
 ## Next Steps
 
 Proceed to [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack)
@@ -457,6 +451,11 @@ to learn how to execute `TFJob`s on Kubeflow, in the environment that we just cr
 
 And then run [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) tutorial to learn running
 `PyTorchJob`s.
+
+The PyTorch example we run will log data for TensorBoard, you will see something like this:
+
+![pytorch-on-kubeflow/images/tensorboard_scalars.png](pytorch-on-kubeflow/images/tensorboard_scalars.png)
+
 
 # Links
 
