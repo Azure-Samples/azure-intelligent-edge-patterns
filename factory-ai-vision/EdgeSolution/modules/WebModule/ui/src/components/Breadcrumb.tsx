@@ -1,4 +1,4 @@
-import React, { FC, Fragment } from 'react';
+import React, { FC, MouseEvent, Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Text, Flex } from '@fluentui/react-northstar';
 
@@ -30,7 +30,7 @@ const getTitle = (pathname: string): string => {
   }
 };
 
-const Breadcrumb: FC = () => {
+const Breadcrumb: FC<{ disabled: boolean }> = ({ disabled }) => {
   const { pathname } = useLocation();
 
   if (pathname === '/') return <Text color="black">Home</Text>;
@@ -55,12 +55,16 @@ const Breadcrumb: FC = () => {
 
   return (
     <Flex gap="gap.smaller">
-      <Link to={'/'} style={{ color: '#0094d8', textDecoration: 'none' }}>
+      <Link
+        to={'/'}
+        style={{ color: '#0094d8', textDecoration: 'none', cursor: disabled && 'default' }}
+        onClick={(e: MouseEvent): void => {
+          if (disabled) e.preventDefault();
+        }}
+      >
         <Text>Home</Text>
       </Link>
       {pathTitles.map((e, i, arr) => {
-        // const title = getTitle(e);
-
         return (
           <Fragment key={i}>
             <Text color="black">{'>'}</Text>

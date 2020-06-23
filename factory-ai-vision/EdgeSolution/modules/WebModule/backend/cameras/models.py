@@ -23,14 +23,22 @@ import requests
 
 from PIL import Image as PILImage
 
-from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
-# from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateEntry, Region
-from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import CustomVisionErrorException
+from azure.cognitiveservices.vision.customvision.training import (
+    CustomVisionTrainingClient)
+# from azure.cognitiveservices.vision.customvision.training.models import (
+# ImageFileCreateEntry, Region)
+from azure.cognitiveservices.vision.customvision.training.models.\
+    custom_vision_error_py3 import CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
 
 
 # from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
-from cameras.utils.app_insight import part_monitor, img_monitor, training_job_monitor, retraining_job_monitor, get_app_insight_logger
+from cameras.utils.app_insight import (
+    part_monitor,
+    img_monitor,
+    training_job_monitor,
+    retraining_job_monitor,
+    get_app_insight_logger)
 from config import IOT_HUB_CONNECTION_STRING
 
 logger = logging.getLogger(__name__)
@@ -116,7 +124,7 @@ class Image(models.Model):
                 fp = BytesIO()
                 fp.write(resp.content)
                 file_name = f"{self.part.name}-{self.remote_url.split('/')[-1]}"
-                logger.info(f"Saving as name {file_name}")
+                logger.info("Saving as name %s", file_name)
 
                 self.image.save(file_name, files.File(fp))
                 fp.close()
@@ -136,19 +144,21 @@ class Image(models.Model):
                     f"{left}, {top}, {width}, {height} must be less than 1")
             elif left < 0 or top < 0 or width < 0 or height < 0:
                 # raise ValueError(
-                #    f"{left}, {top}, {width}, {height} must be greater than 0")
-                logger.error(
-                    f"{left}, {top}, {width}, {height} must be greater than 0")
+                # f"{left}, {top}, {width}, {height} must be greater than 0")
+                logger.error("%s, %s, %s, %s must be greater than 0",
+                             left, top, width, height)
                 return
-            elif (left + width) > 1 or (top + height) > 1:
-                # raise ValueError(
-                #    f"left + width:{left + width}, top + height:{top + height} must be less than 1")
-                logger.error(
-                    f"left + width:{left + width}, top + height:{top + height} must be less than 1")
+            elif left + width > 1:
+                logger.error("left + width: %s + %s must be less than 1",
+                             left, width)
+                return
+            elif top + height > 1:
+                logger.error("top + height: %s + %s must be less than 1",
+                             top, height)
                 return
 
             with PILImage.open(self.image) as img:
-                logger.info(f"Successfully open img {self.image}")
+                logger.info("Successfully open img %s", self.image)
                 size_width, size_height = img.size
                 label_x1 = int(size_width*left)
                 label_y1 = int(size_height*top)
@@ -172,14 +182,17 @@ class Image(models.Model):
         "Add Labels to Image"
         try:
             if left > 1 or top > 1 or width > 1 or height > 1:
-                raise ValueError(
-                    f"{left}, {top}, {width}, {height} must be less than 1")
+                raise ValueError("%s, %s, %s, %s must be less than 1",
+                                 left, top, width, height)
             elif left < 0 or top < 0 or width < 0 or height < 0:
-                raise ValueError(
-                    f"{left}, {top}, {width}, {height} must be greater than 0")
-            elif (left + width) > 1 or (top + height) > 1:
-                raise ValueError(
-                    f"left + width:{left + width}, top + height:{top + height} must be less than 1")
+                raise ValueError("%s, %s, %s, %s must be greater than 0",
+                                 left, top, width, height)
+            elif left + width > 1:
+                raise ValueError("left + width: %s + %s must be less than 1",
+                                 left, width)
+            elif top + height > 1:
+                raise ValueError("top + height: %s + %s  must be less than 1",
+                                 top, height)
             pass
         except ValueError as e:
             raise e
@@ -194,9 +207,11 @@ class Annotation(models.Model):
 class Setting(models.Model):
     """
     A wrapper model of CustomVisionTraingClient.
-    Try not to pass CustomVisionTraingClient object if new model is expected to be created.
-    e.g. create project, create train/iteration
-    Instead, create a wrapper methods and let call, in order to sync the db with remote.
+
+    Try not to pass CustomVisionTraingClient object if new model is expected to
+    be created. e.g. create project, create train/iteration, etc.
+    Instead, create a wrapper methods and let call, in order to sync the db
+    with remote.
     """
     name = models.CharField(
         max_length=100, blank=True, default='', unique=True)
@@ -275,25 +290,28 @@ class Setting(models.Model):
             trainer = Setting._get_trainer_obj_static(
                 training_key=instance.training_key,
                 endpoint=instance.endpoint)
-            obj_detection_domain = next(domain for domain in trainer.get_domains(
-            ) if domain.type == "ObjectDetection" and domain.name == "General (compact)")
+            obj_detection_domain = next(
+                domain for domain in trainer.get_domains()
+                if domain.type == "ObjectDetection" and
+                domain.name == "General (compact)"
+            )
 
             logger.info(
-                f'Validating Trainer {instance.name} (CustomVisionClient)... Pass')
+                f'Validating Trainer {instance.name} Key + Endpoint... Pass')
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
         except CustomVisionErrorException as e:
             logger.error(
                 f"Setting Presave occur CustomVisionError: {e}")
             logger.error(
-                "Set is_trainer_valid to false and obj_detection_domain_id to ''")
+                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
         except KeyError as e:
             logger.error(
                 f"Setting Presave occur KeyError: {e}")
             logger.error(
-                "Set is_trainer_valid to false and obj_detection_domain_id to ''")
+                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ''
         except Exception as unexpected_error:
@@ -353,8 +371,10 @@ class Camera(models.Model):
         if len(instance.area) > 1:
             logger.info('Sending new AOI to Inference Module...')
             try:
-                requests.get('http://'+inference_module_url()+'/update_cam', params={
-                    'cam_type': 'rtsp', 'cam_source': instance.rtsp, 'aoi': instance.area})
+                requests.get(url='http://'+inference_module_url()+'/update_cam',
+                             params={'cam_type': 'rtsp',
+                                     'cam_source': instance.rtsp,
+                                     'aoi': instance.area})
             except:
                 logger.error("Request failed")
 
@@ -404,7 +424,8 @@ class Project(models.Model):
             logger.info(f"Project instance.is_demo: {instance.is_demo}")
             pass
         elif trainer and instance.customvision_project_id:
-            # Endpoint and Training_key is valid, and trying to save with cv_project_id
+            # Endpoint and Training_key is valid, and trying to save with
+            # customvision_project_id...
             logger.info(
                 f'Project CustomVision Id: {instance.customvision_project_id}')
             try:
@@ -626,6 +647,9 @@ class Project(models.Model):
         CustomVisionTrainingClient SDK may have some issues exporting
         Use the REST API
         """
+        # trainer.export_iteration(customvision_project_id,
+        # iteration.id,
+        # 'ONNX')
         setting_obj = self.setting
         url = setting_obj.endpoint+'customvision/v3.2/training/projects/' + \
             self.customvision_project_id+'/iterations/'+iteration_id+'/export?platform=ONNX'
@@ -659,6 +683,7 @@ class Task(models.Model):
         """Start Exporting"""
 
         def _export_worker(self):
+            """Export Model Worker"""
             project_obj = self.project
             trainer = project_obj.setting.revalidate_and_get_trainer_obj()
             customvision_project_id = project_obj.customvision_project_id
@@ -690,6 +715,8 @@ class Task(models.Model):
                     logger.info(res.json())
                     continue
 
+                logger.info("Successfully export model. download_uri: %s",
+                            exports[0].download_uri)
                 self.status = 'ok'
                 self.log = 'Status : work done'
                 self.save()

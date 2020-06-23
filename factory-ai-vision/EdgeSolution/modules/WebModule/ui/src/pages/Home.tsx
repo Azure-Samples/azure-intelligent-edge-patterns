@@ -1,12 +1,9 @@
 import React, { FC } from 'react';
 import { Text, Flex } from '@fluentui/react-northstar';
-import { useDispatch } from 'react-redux';
 
 import ImageLink from '../components/ImageLink';
-import { openDialog } from '../store/dialog/dialogIsOpenActions';
 
 const Home: FC = () => {
-  const dispatch = useDispatch();
   return (
     <Flex column gap="gap.medium">
       <Text size="larger" weight="semibold">
@@ -30,9 +27,6 @@ const Home: FC = () => {
           label="Register a new Camera"
           width="6.25em"
           imgPadding="0.625em 0.1875em 0.625em 0.1875em"
-          onClick={(): void => {
-            dispatch(openDialog());
-          }}
         />
         <ImageLink
           imgSrc="/icons/part-filled.png"
