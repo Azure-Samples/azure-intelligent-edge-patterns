@@ -58,7 +58,7 @@ const LeftPanel = ({ partId }): JSX.Element => {
   };
 
   return (
-    <Flex column space="around" styles={{ gridColumn: '1 / span 4' }}>
+    <div style={{ height: '60%', display: 'flex', flexFlow: 'column', justifyContent: 'space-between', gridColumn: '1 / span 4' }}>
       <Input
         placeholder="Enter Part Name..."
         fluid
@@ -70,17 +70,17 @@ const LeftPanel = ({ partId }): JSX.Element => {
       />
       <TextArea
         placeholder="Enter Description..."
-        design={{ height: '80%' }}
+        design={{ height: '60%' }}
         value={description}
         onChange={(_, newProps): void => {
           setDescription(newProps.value);
         }}
       />
       <Flex space="around">
-        <Button content="Save" primary onClick={onSave} disabled={!name || !description} />
+        <Button content="Save" primary onClick={onSave} disabled={!name} />
       </Flex>
       {!!error && <Alert danger content={error} dismissible />}
-    </Flex>
+    </div>
   );
 };
 

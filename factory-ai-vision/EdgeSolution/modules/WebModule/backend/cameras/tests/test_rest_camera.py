@@ -3,7 +3,6 @@ Camera REST API Test
 """
 from unittest.mock import patch
 
-from django.test import TestCase
 from django.core.exceptions import MultipleObjectsReturned
 from rest_framework.test import APITransactionTestCase
 
@@ -45,6 +44,9 @@ class CameraTestCases(APITransactionTestCase):
         self.exist_num = 4 + len(special_strings)
 
     def test_setup_is_valid(self):
+        """
+        Make sure setup is valid
+        """
         self.assertEqual(Camera.objects.count(), self.exist_num)
         self.assertRaises(MultipleObjectsReturned,
                           Camera.objects.get, name='Camera1')

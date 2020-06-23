@@ -1,10 +1,22 @@
+"""
+Location ModelViewSet test
+"""
+
 from rest_framework.test import APITransactionTestCase
+
 from cameras.models import Location
 from .test_special_strings import special_strings
 
 
 class LocationTestCase(APITransactionTestCase):
+    """
+    Location ModelViewSet test cases
+    """
+
     def setUp(self):
+        """
+        Setup, create objects.
+        """
         Location.objects.create(name="Location1",
                                 description="description1",
                                 is_demo=False)
@@ -20,9 +32,9 @@ class LocationTestCase(APITransactionTestCase):
         Location.objects.create(name="DemoLocation2",
                                 description="python apps.py",
                                 is_demo=True)
-        for s in special_strings:
-            Location.objects.create(name=s,
-                                    description=s,
+        for special_string in special_strings:
+            Location.objects.create(name=special_string,
+                                    description=special_string,
                                     is_demo=False)
         self.exist_num = 4 + len(special_strings)
 

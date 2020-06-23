@@ -1,41 +1,52 @@
+"""
+Testing Model Setting's custom action 'reset project'
+"""
 import logging
 import json
-from pprint import pformat
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
-from cameras.models import Setting, Part, Image, Camera, Project, Location
+
+from azure.cognitiveservices.vision.customvision.training import (
+    CustomVisionTrainingClient)
+
+from cameras.models import Setting, Part, Camera, Project, Location
 from config import ENDPOINT, TRAINING_KEY
-from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
-project_prefix = "UnitTest"
+
+PROJECT_PREFIX = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
 
-class ViewListProjectTestCase(APITransactionTestCase):
+class ResetProjectTestCase(APITransactionTestCase):
+    """
+    Reset Project test cases
+    """
+
     def setUp(self):
-        """Create setting, camera, location anr parts.
         """
-        valid_setting_obj = Setting.objects.create(name="valid_setting",
-                                                   endpoint=ENDPOINT,
-                                                   training_key=TRAINING_KEY,
-                                                   is_trainer_valid=False)
-        invalid_setting_obj = Setting.objects.create(name="invalid_setting",
-                                                     endpoint=ENDPOINT,
-                                                     training_key='',
-                                                     is_trainer_valid=False)
+        Setup, created objects.
+        """
+        Setting.objects.create(name="valid_setting",
+                               endpoint=ENDPOINT,
+                               training_key=TRAINING_KEY,
+                               is_trainer_valid=False)
+        Setting.objects.create(name="invalid_setting",
+                               endpoint=ENDPOINT,
+                               training_key='',
+                               is_trainer_valid=False)
 
-        camera_obj = Camera.objects.create(name="camera_1",
-                                           rtsp="valid_rtsp",
-                                           area="55,66",
-                                           is_demo=False)
+        Camera.objects.create(name="camera_1",
+                              rtsp="valid_rtsp",
+                              area="55,66",
+                              is_demo=False)
 
-        location_obj = Location.objects.create(name="location_1",
-                                               description=f"description_1",
-                                               is_demo=False)
+        Location.objects.create(name="location_1",
+                                description="description_1",
+                                is_demo=False)
         part_obj = Part.objects.create(name="part_1",
-                                       description=f"description_1",
+                                       description="description_1",
                                        is_demo=False)
 
         invalid_project_obj = Project.objects.create(
@@ -43,7 +54,7 @@ class ViewListProjectTestCase(APITransactionTestCase):
             camera=Camera.objects.filter(name='camera_1').first(),
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='foo',
-            customvision_project_name=f'{project_prefix}-test_create_1',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
             is_demo=False
         )
         invalid_project_obj.parts.add(part_obj)
@@ -53,15 +64,18 @@ class ViewListProjectTestCase(APITransactionTestCase):
             camera=Camera.objects.filter(name='camera_1').first(),
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='bar',
-            customvision_project_name=f'{project_prefix}-test_create_2',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
             is_demo=False
         )
         valid_project_obj.parts.add(part_obj)
 
     def test_setup_is_valid(self):
+        """
+        Make sure setup is valid
+        """
         self.assertEqual(len(Project.objects.all()), 2)
 
-    def test_valid_setting_reset_project(self):
+    def test_valid_setting_reset_project_1(self):
         """
         @Type
         Positive
@@ -78,20 +92,20 @@ class ViewListProjectTestCase(APITransactionTestCase):
         valid_project = Project.objects.filter(setting=valid_setting).first()
         response = self.client.get(
             path=f'{url}/{valid_project.id}/reset_project',
-            data={'project_name': f'{project_prefix}-test-reset-1'})
+            data={'project_name': f'{PROJECT_PREFIX}-test-reset-1'})
 
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content)['status'],
                          'ok')
 
-    def test_valid_setting_reset_project(self):
+    def test_valid_setting_reset_project_2(self):
         """
         @Type
         Positive
 
         @Description
-        Default needRetraining is True
+        Make sure default needRetraining is True after reset.
 
         @Expected Results
         200 {... : ...
@@ -104,7 +118,7 @@ class ViewListProjectTestCase(APITransactionTestCase):
         valid_project = Project.objects.filter(setting=valid_setting).first()
         response = self.client.get(
             path=f'{url}/{valid_project.id}/reset_project',
-            data={'project_name': f'{project_prefix}-test-reset-1'})
+            data={'project_name': f'{PROJECT_PREFIX}-test-reset-1'})
 
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
@@ -132,7 +146,7 @@ class ViewListProjectTestCase(APITransactionTestCase):
             setting=invalid_setting).first()
         response = self.client.get(
             path=f'{url}/{invalid_project.id}/reset_project',
-            data={'project_name': f'{project_prefix}-test-reset-2'})
+            data={'project_name': f'{PROJECT_PREFIX}-test-reset-2'})
 
         self.assertNotEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('failed', json.loads(response.content)['status'])
@@ -163,10 +177,10 @@ class ViewListProjectTestCase(APITransactionTestCase):
                         'log'].find('project_name') >= 0)
 
     @ classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         trainer = CustomVisionTrainingClient(
             api_key=TRAINING_KEY, endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
-            if project.name.find(project_prefix) == 0:
+            if project.name.find(PROJECT_PREFIX) == 0:
                 trainer.delete_project(project_id=project.id)
