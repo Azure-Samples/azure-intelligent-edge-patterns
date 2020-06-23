@@ -5,6 +5,10 @@ This guide demonstrates how to install a remote MLflow Tracking Server on Kubern
 **Reference Material:**
 - [Manual Installation Instructions](./docs/manual_installation.md)
 
+**Prerequisite:**
+- Will need the k8 cluster ".kubeconfig" file on your local machine to execute commands on the k8 cluster 
+- Below instructions are not intended to be run from the master node, but from another Linux dev environment
+- Clone the github repo at "/home/user/" path
 
 ## Step 1: Install Porter
 Make sure you have Porter installed. You can find the installation instructions for your OS at the link provided below.
@@ -16,7 +20,6 @@ Make sure you have Porter installed. You can find the installation instructions 
 
 ## Step 2: Build Porter CNAB
 First you will need to navigate to porter directory in the repository. For example 
-try to clone/copy files at /home/user/
 
 ```sh
 cd ./research/mlflow-on-azure-stack/porter
