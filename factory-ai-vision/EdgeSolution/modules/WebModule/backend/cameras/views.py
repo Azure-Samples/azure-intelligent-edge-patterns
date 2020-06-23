@@ -42,7 +42,7 @@ from configs.app_insight import APP_INSIGHT_INST_KEY
 
 from .models import Camera, Stream, Image, Location, Project, Part
 from .models import Annotation, Setting, Train, Task
-# from .utils.error_messages import CUSTOM_VISION_ACCESS_ERROR
+from general import error_messages
 
 # from azure.iot.hub import IoTHubRegistryManager
 # from azure.iot.hub.models import Twin, TwinProperties
@@ -50,7 +50,7 @@ from .models import Annotation, Setting, Train, Task
 #    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
 # except:
 #    iot = None
-CUSTOM_VISION_ACCESS_ERROR = 'Training key or Endpoint is invalid. Please change the settings'
+
 logger = logging.getLogger(__name__)
 
 
@@ -203,8 +203,8 @@ def export(request, project_id):
                      inference_module_url())
         return JsonResponse({
             'status': 'failed',
-            'log': f'Export failed. Inference module url: {inference_module_url()} unreachable',
-        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            'log': f'Export failed. Inference module url: {inference_module_url()} unreachable'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except:
         # TODO: return other json response if we can determine if inference is
         # alive
@@ -439,27 +439,39 @@ class SettingViewSet(viewsets.ModelViewSet):
         """
         try:
             setting_obj = Setting.objects.get(pk=pk)
+            if not setting_obj.training_key:
+                raise ValueError("Training Key")
+            elif not setting_obj.endpoint:
+                raise ValueError("Endpoint")
             trainer = setting_obj._get_trainer_obj()
             result = {}
             project_list = trainer.get_projects()
             for project in project_list:
                 result[project.id] = project.name
             return JsonResponse(result)
+        except ValueError as value_err:
+            return JsonResponse({
+                'status': 'failed',
+                'log': error_messages.CUSTOM_VISION_MISSING_FIELD},
+                status=status.HTTP_400_BAD_REQUEST)
         except KeyError as key_err:
             if str(key_err) in ['Endpoint', "'Endpoint'"]:
-                return JsonResponse({'status': 'failed',
-                                     'log': CUSTOM_VISION_ACCESS_ERROR},
-                                    status=status.HTTP_400_BAD_REQUEST)
-            return JsonResponse({'status': 'failed',
-                                 'log': f'KeyError {str(key_err)}'},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return JsonResponse({
+                    'status': 'failed',
+                    'log': error_messages.CUSTOM_VISION_ACCESS_ERROR},
+                    status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({
+                'status': 'failed',
+                'log': f'KeyError {str(key_err)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except CustomVisionErrorException as customvision_error:
             if customvision_error.message == \
                     "Operation returned an invalid status code 'Access Denied'":
 
-                return JsonResponse({'status': 'failed',
-                                     'log': 'Training key or Endpoint is invalid. Please change the settings'},
-                                    status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                return JsonResponse({
+                    'status': 'failed',
+                    'log': error_messages.CUSTOM_VISION_ACCESS_ERROR},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE)
             return JsonResponse({'status': 'failed',
                                  'log': e.message},
                                 status=e.response.status_code)
@@ -692,9 +704,9 @@ def _train(project_id, request):
     if not trainer:
         project_obj.upcreate_training_status(
             status='failed',
-            log='Status: Training key or Endpoint is invalid. Please change the settings')
+            log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
         return JsonResponse({'status': 'failed',
-                             'log': 'Training key or Endpoint is invalid. Please change the settings'},
+                             'log': error_messages.CUSTOM_VISION_ACCESS_ERROR},
                             status=503)
 
     project_obj.upcreate_training_status(
@@ -1087,7 +1099,7 @@ def pull_cv_project(request, project_id):
     if not trainer:
         return JsonResponse({
             'status': 'failed',
-            'logs': CUSTOM_VISION_ACCESS_ERROR
+            'logs': error_messages.CUSTOM_VISION_ACCESS_ERROR
         })
 
     # Check Customvision Project id
@@ -1132,10 +1144,11 @@ def pull_cv_project(request, project_id):
             if is_partial:
                 logger.info("loading one image as icon")
                 try:
-                    image_uri = trainer.get_tagged_images(
+                    img = trainer.get_tagged_images(
                         project_id=customvision_project_id,
                         tag_ids=[tag.id],
-                        take=1)[0].original_image_uri
+                        take=1)[0]
+                    image_uri = img.original_image_uri
                     img_obj, created = Image.objects.update_or_create(
                         part=part_obj,
                         remote_url=image_uri,
@@ -1144,6 +1157,19 @@ def pull_cv_project(request, project_id):
                     logger.info("loading from remote url: %s",
                                 img_obj.remote_url)
                     img_obj.get_remote_image()
+                    logger.info("Finding tag.id %s", tag.id)
+                    logger.info("Finding tag.name %s", tag.name)
+                    for region in img.regions:
+                        if region.tag_id == tag.id:
+                            logger.info("Region Found")
+                            img_obj.set_labels(
+                                left=region.left,
+                                top=region.top,
+                                width=region.width,
+                                height=region.height
+                            )
+                            break
+
                 except CustomVisionErrorException:
                     logger.info("This tag does not have an image")
         logger.info("Pulled %s Parts", counter)
@@ -1288,7 +1314,7 @@ def reset_project(request, project_id):
         if customvision_err.message == "Operation returned an invalid status code 'Access Denied'":
             return JsonResponse({
                 'status': 'failed',
-                'log': CUSTOM_VISION_ACCESS_ERROR},
+                'log': error_messages.CUSTOM_VISION_ACCESS_ERROR},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return JsonResponse({'status': 'failed',
                              'log': customvision_err.message},
