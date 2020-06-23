@@ -257,6 +257,46 @@ And soon after, you should see the serialized model in your folder:
 
 For more tutorials and How-Tos, see TensorFlow's [save_and_load.ipynb](https://github.com/tensorflow/docs/blob/master/site/en/tutorials/distribute/save_and_load.ipynb) example notebook.
 
+## Tensorboard
+
+There is another useful tool to monitor some ML applications if they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
+
+A concrete example of a tensorboard-using script is in folder `mnist-w-tb`. You will need your
+github account to build the image(substitute `rollingstone` for yours) and run:
+
+    $ cd mnist-w-tb
+    $ docker build -t rollingstone/tf-mnist-w-tb:latest .
+    $ docker push rollingstone/tf-mnist-w-tb:latest
+    $ kubectl create -f tb.yaml
+    $ kubectl create -f tfjob.yaml
+
+You might contact your cloud administrator to help you establish network access, or you can
+use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
+
+    $ export PODNAME=$(kubectl get pod -l app=tensorboard -o jsonpath='{.items[0].metadata.name}')
+    $ kubectl port-forward ${PODNAME} 6006:6006
+
+It will look something like this:
+
+![../pics/tensorboard_graph.png](../pics/tensorboard_graph.png)
+
+Another tab shows the input images (train/test):
+
+![../pics/tensorboard_images.png](../pics/tensorboard_images.png)
+
+There are scalars the model logged:
+
+![../pics/tensorboard_scalars.png](../pics/tensorboard_scalars.png)
+
+And histograms for different parameters:
+
+![../pics/tensorboard_histograms.png](../pics/tensorboard_histograms.png)
+
+There is a projector that animates the points in the NN layer dimensions:
+
+![../pics/tensorboard_projector.png](../pics/tensorboard_projector.png)
+
+
 ## Next Steps
 
 Proceed to [PyTorch on Kubeflow Tutorial](../pytorch-on-kubeflow/Readme.md) tutorial to learn how to run `PyTorchJob`s.
@@ -267,3 +307,4 @@ For further information:
 
 - https://www.kubeflow.org/docs/components/training/tftraining/
 - https://www.tensorflow.org/
+- https://github.com/Azure/kubeflow-labs
