@@ -280,6 +280,23 @@ It will look something like this:
 
 ![../pics/tensorboard_graph.png](../pics/tensorboard_graph.png)
 
+Another tab shows the input images (train/test):
+
+![../pics/tensorboard_images.png](../pics/tensorboard_images.png)
+
+There are scalars the model logged:
+
+![../pics/tensorboard_scalars.png](../pics/tensorboard_scalars.png)
+
+And histograms for different parameters:
+
+![../pics/tensorboard_histograms.png](../pics/tensorboard_histograms.png)
+
+There is a projector that animates the points in the NN layer dimensions:
+
+![../pics/tensorboard_projector.png](../pics/tensorboard_projector.png)
+
+
 ## Next Steps
 
 Proceed to [PyTorch on Kubeflow Tutorial](../pytorch-on-kubeflow/Readme.md) tutorial to learn how to run `PyTorchJob`s.
