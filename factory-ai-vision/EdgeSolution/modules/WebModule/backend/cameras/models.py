@@ -572,7 +572,7 @@ class Project(models.Model):
                 parts_now = len(trainer.get_tags(self.customvision_project_id))
                 # Traces
                 az_logger = get_app_insight_logger()
-                az_logger.info('training', extra={'custom_dimensions': {
+                az_logger.warning('training', extra={'custom_dimensions': {
                     'train': train,
                     'images': images_now-images_last_train,
                     'parts': parts_now-parts_last_train,
