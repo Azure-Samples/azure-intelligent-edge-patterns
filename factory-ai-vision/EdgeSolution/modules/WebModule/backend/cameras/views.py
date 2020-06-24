@@ -789,7 +789,7 @@ def _train(project_id, request):
             )
         else:
             project_obj.upcreate_training_status(
-                status="ok", log="Status: Project changed. Submitting training task..."
+                status="training", log="Status: Project changed. Submitting training task..."
             )
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
