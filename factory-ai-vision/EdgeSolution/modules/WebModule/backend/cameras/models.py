@@ -493,6 +493,9 @@ class Project(models.Model):
         confidence_min = 30
         confidence_max = 80
         max_images = 10
+        metrics_is_send_iothub = False
+        metrics_accuracy_threshold = 50
+        metrics_frame_per_minutes = 6
 
         if instance.accuracyRangeMin is not None:
             confidence_min = instance.accuracyRangeMin
@@ -502,6 +505,13 @@ class Project(models.Model):
 
         if instance.maxImages is not None:
             max_images = instance.maxImages
+
+        if instance.metrics_is_send_iothub is not None:
+            metrics_is_send_iothub = instance.metrics_is_send_iothub
+        if instance.metrics_accuracy_threshold is not None:
+            metrics_accuracy_threshold = instance.metrics_accuracy_threshold
+        if instance.metrics_frame_per_minutes is not None:
+            metrics_frame_per_minutes = instance.metrics_frame_per_minutes
 
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
@@ -513,9 +523,14 @@ class Project(models.Model):
                 },
             )
 
-        threading.Thread(
-            target=_r, args=(confidence_min, confidence_max, max_images)
-        ).start()
+            requests.get('http://'+inference_module_url()+'/update_iothub_parameters', params={
+                'is_send': metrics_is_send_iothub,
+                'threshold': metrics_accuracy_threshold,
+                'fpm': metrics_frame_per_minutes,
+            })
+
+        threading.Thread(target=_r, args=(
+            confidence_min, confidence_max, max_images)).start()
 
         if update_fields is not None:
             return
