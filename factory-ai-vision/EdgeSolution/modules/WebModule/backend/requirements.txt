@@ -1,5 +1,6 @@
 django
 djangorestframework
+drf-yasg
 drf-url-filters
 opencv-python
 pillow
