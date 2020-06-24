@@ -129,7 +129,8 @@ def update_train_status(project_id):
 
                 continue
 
-            exports = trainer.get_exports(customvision_project_id, iteration.id)
+            exports = trainer.get_exports(
+                customvision_project_id, iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
                 project_obj.upcreate_training_status(
                     status="exporting", log="Status : exporting model"
@@ -142,7 +143,8 @@ def update_train_status(project_id):
             project_obj.save(update_fields=["download_uri"])
             parts = [p.name for p in project_obj.parts.all()]
 
-            logger.info("Successfulling export model: %s", project_obj.download_uri)
+            logger.info("Successfulling export model: %s",
+                        project_obj.download_uri)
             logger.info("Preparing to deploy to inference")
             logger.info("Project is deployed before: %s", project_obj.deployed)
             if not project_obj.deployed:
@@ -166,11 +168,13 @@ def update_train_status(project_id):
                         )
 
                     threading.Thread(
-                        target=_send, args=(exports[0].download_uri, camera.rtsp, parts)
+                        target=_send, args=(
+                            exports[0].download_uri, camera.rtsp, parts)
                     ).start()
 
                     project_obj.deployed = True
-                    project_obj.save(update_fields=["download_uri", "deployed"])
+                    project_obj.save(
+                        update_fields=["download_uri", "deployed"])
 
                 project_obj.upcreate_training_status(
                     status="deploying", log="Status : deploying model"
@@ -219,7 +223,8 @@ def export(request, project_id):
         unidentified_num = data["unidentified_num"]
         is_gpu = data["is_gpu"]
         average_inference_time = data["average_inference_time"]
-        logger.info("success_rate: %s. inference_num: %s", success_rate, inference_num)
+        logger.info("success_rate: %s. inference_num: %s",
+                    success_rate, inference_num)
     #         return JsonResponse({
     #             'status': train_obj.status,
     #             'log': train_obj.log,
@@ -244,7 +249,7 @@ def export(request, project_id):
     except:
         logger.exception("unexpected error while exporting project")
         return JsonResponse(
-            {"status": "failed", "log": "unexpected error",},
+            {"status": "failed", "log": "unexpected error", },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -507,7 +512,8 @@ def disconnect_stream(request, stream_id):
             stream.close()
             return JsonResponse({"status": "ok"})
     return JsonResponse(
-        {"status": "failed", "reason": "cannot find stream_id " + str(stream_id)}
+        {"status": "failed",
+            "reason": "cannot find stream_id " + str(stream_id)}
     )
 
 
@@ -536,13 +542,15 @@ def capture(request, stream_id):
             logger.info(stream.part_id)
             img_obj = Image(image=img, part_id=stream.part_id)
             img_obj.save()
-            img_serialized = ImageSerializer(img_obj, context={"request": request})
+            img_serialized = ImageSerializer(
+                img_obj, context={"request": request})
             logger.info(img_serialized.data)
 
             return JsonResponse({"status": "ok", "image": img_serialized.data})
 
     return JsonResponse(
-        {"status": "failed", "reason": "cannot find stream_id " + str(stream_id)}
+        {"status": "failed",
+            "reason": "cannot find stream_id " + str(stream_id)}
     )
 
 
@@ -650,7 +658,8 @@ def _train(project_id, request):
 
             logger.info("Project created on CustomVision.")
             logger.info("Project Id: %s", project_obj.customvision_project_id)
-            logger.info("Project Name: %s", project_obj.customvision_project_name)
+            logger.info("Project Name: %s",
+                        project_obj.customvision_project_name)
             customvision_project_id = project_obj.customvision_project_id
 
         project_obj.upcreate_training_status(
@@ -726,7 +735,8 @@ def _train(project_id, request):
                     y = label["y1"] / height
                     w = (label["x2"] - label["x1"]) / width
                     h = (label["y2"] - label["y1"]) / height
-                    region = Region(tag_id=tag_id, left=x, top=y, width=w, height=h)
+                    region = Region(tag_id=tag_id, left=x,
+                                    top=y, width=w, height=h)
                     regions.append(region)
 
                 image = image_obj.image
@@ -810,7 +820,8 @@ def _train(project_id, request):
             )
 
         else:
-            project_obj.upcreate_training_status(status="failed", log=e.message)
+            project_obj.upcreate_training_status(
+                status="failed", log=e.message)
             return JsonResponse(
                 {"status": "failed", "log": e.message},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -870,10 +881,12 @@ def train(request, project_id):
         )
         requests.get(
             "http://" + inference_module_url() + "/update_retrain_parameters",
-            params={"confidence_min": 30, "confidence_max": 30, "max_images": 10},
+            params={"confidence_min": 30,
+                    "confidence_max": 30, "max_images": 10},
         )
 
-        project_obj.upcreate_training_status(status="ok", log="Status : demo ok")
+        project_obj.upcreate_training_status(
+            status="ok", log="Status : demo ok")
         # FIXME pass the new model info to inference server (willy implement)
         return JsonResponse({"status": "ok"})
 
@@ -1044,7 +1057,8 @@ def pull_cv_project(request, project_id):
         )
 
     # Check Customvision Project id
-    customvision_project_id = request.query_params.get("customvision_project_id")
+    customvision_project_id = request.query_params.get(
+        "customvision_project_id")
     logger.info("customvision_project_id: %s", {customvision_project_id})
 
     # Check Partial
@@ -1070,7 +1084,8 @@ def pull_cv_project(request, project_id):
         counter = 0
         tags = trainer.get_tags(customvision_project_id)
         for tag in tags:
-            logger.info("Creating Part %s: %s %s", counter, tag.name, tag.description)
+            logger.info("Creating Part %s: %s %s",
+                        counter, tag.name, tag.description)
             part_obj, created = Part.objects.update_or_create(
                 name=tag.name, description=tag.description if tag.description else ""
             )
@@ -1083,13 +1098,15 @@ def pull_cv_project(request, project_id):
                 logger.info("loading one image as icon")
                 try:
                     img = trainer.get_tagged_images(
-                        project_id=customvision_project_id, tag_ids=[tag.id], take=1
+                        project_id=customvision_project_id, tag_ids=[
+                            tag.id], take=1
                     )[0]
                     image_uri = img.original_image_uri
                     img_obj, created = Image.objects.update_or_create(
                         part=part_obj, remote_url=image_uri, uploaded=True
                     )
-                    logger.info("loading from remote url: %s", img_obj.remote_url)
+                    logger.info("loading from remote url: %s",
+                                img_obj.remote_url)
                     img_obj.get_remote_image()
                     logger.info("Finding tag.id %s", tag.id)
                     logger.info("Finding tag.name %s", tag.name)
@@ -1123,7 +1140,8 @@ def pull_cv_project(request, project_id):
         # Full Download
         logger.info("Pulling Tagged Images...")
         img_counter = 0
-        imgs_count = trainer.get_tagged_image_count(project_id=customvision_project_id)
+        imgs_count = trainer.get_tagged_image_count(
+            project_id=customvision_project_id)
         img_batch_size = 50
         img_index = 0
 
@@ -1169,7 +1187,8 @@ def pull_cv_project(request, project_id):
         logger.info("Pulling CustomVision Project... End")
         return JsonResponse({"status": "ok"})
     except CustomVisionErrorException as customvision_error:
-        logger.error("CustomVisionErrorException: %s", customvision_error.message)
+        logger.error("CustomVisionErrorException: %s",
+                     customvision_error.message)
         return JsonResponse({"status": "failed", "log": customvision_error.message})
     except Exception:
         # TODO: Remove in production
@@ -1221,7 +1240,8 @@ def reset_project(request, project_id):
         project_obj.accuracyRangeMax = Project._meta.get_field(
             "accuracyRangeMax"
         ).get_default()
-        project_obj.maxImages = Project._meta.get_field("maxImages").get_default()
+        project_obj.maxImages = Project._meta.get_field(
+            "maxImages").get_default()
         project_obj.deployed = False
         project_obj.training_counter = 0
         project_obj.retraining_counter = 0
