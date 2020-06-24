@@ -1,3 +1,6 @@
+"""
+Azure CustomVision Settings
+"""
 TRAINING_KEY = ''
 ENDPOINT = ''
 
