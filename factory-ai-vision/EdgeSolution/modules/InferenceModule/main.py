@@ -245,6 +245,13 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                     _p = prediction['probability']
                                     if _tag not in self.parts: continue
                                     if _p < self.iothub_threshold: continue
+                                    x1 = int(prediction['boundingBox']['left'] * width)
+                                    y1 = int(prediction['boundingBox']['top'] * height)
+                                    x2 = x1 + int(prediction['boundingBox']['width'] * width)
+                                    y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                                    if self.has_aoi:
+                                        if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info): continue
+
                                     predictions_to_send.append(prediction)
                                 if len(predictions_to_send) > 0:
                                     if iot:
