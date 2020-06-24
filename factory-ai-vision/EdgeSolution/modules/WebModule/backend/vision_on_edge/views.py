@@ -1,3 +1,6 @@
+"""
+Project Views
+"""
 import os
 import logging
 
@@ -5,9 +8,16 @@ from django.views.generic import View
 from django.http import HttpResponse
 from django.conf import settings
 
+
 class UIAppView(View):
+    """
+    Project UI View
+    """
 
     def get(self, request):
+        """
+        get index
+        """
         try:
             with open(os.path.join(settings.UI_DIR, 'index.html')) as f:
                 return HttpResponse(f.read())
@@ -21,4 +31,3 @@ class UIAppView(View):
                 ''',
                 status=501,
             )
-

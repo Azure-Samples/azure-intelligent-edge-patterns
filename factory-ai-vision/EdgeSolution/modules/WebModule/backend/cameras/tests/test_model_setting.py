@@ -130,7 +130,7 @@ class SettingTestCase(APITransactionTestCase):
 
         self.assertIsInstance(project,
                               Project)
-        valid_setting._get_trainer_obj().get_project(project.id)
+        valid_setting.get_trainer_obj().get_project(project.id)
 
     def test_create_project_negative(self):
         """
