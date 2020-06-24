@@ -95,7 +95,7 @@ export const Setting = (): JSX.Element => {
       <Flex gap="gap.large" design={{ height: '80%' }}>
         <Flex column gap="gap.large" design={{ width: '50%' }}>
           <Text size="large" weight="bold">
-            Azure Cognitive Services Settings:{' '}
+            Azure Cognitive Services Settings:
           </Text>
           <div
             style={{
@@ -166,11 +166,11 @@ export const Setting = (): JSX.Element => {
               }
               contentText={<p>Update Key / Namespace will remove all the parts, sure you want to update?</p>}
             />
-            <Button primary as={Link} to={isTrainerValid ? "/": "setting"}>
+            <Button primary as={Link} to={isTrainerValid ? '/' : 'setting'}>
               Cancel
             </Button>
           </Flex>
-          {error ? <Alert danger content={`Failed to save ${error}`} dismissible /> : null}
+          {error ? <Alert danger content={`${error}`} dismissible /> : null}
           {otherError ? <Alert danger content={`Error ${otherError}`} dismissible /> : null}
         </Flex>
         {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
