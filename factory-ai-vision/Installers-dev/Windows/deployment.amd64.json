@@ -56,17 +56,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "intelligentedge/inferencemodule:0.1.2-<cpu or gpu>amd64",
-              "createOptions": {
-                "HostConfig": {
-                  "NetworkMode": "host",
-                  "runtime": "<Docker Runtime>"
-                },
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                }
-              }
+              "createOptions": "{\"HostConfig\":{\"NetworkMode\":\"host\",\"runtime\":\"<Docker Runtime>\"},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}"
             }
           }
         }
