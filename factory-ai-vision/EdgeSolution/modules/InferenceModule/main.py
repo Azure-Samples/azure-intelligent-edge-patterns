@@ -554,7 +554,7 @@ def video_feed():
                         img = cv2.putText(img, prediction['tagName'], (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
 
 
-            #time.sleep(0.03)
+            time.sleep(0.03)
             yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
 
