@@ -68,62 +68,62 @@ IF !count! leq 1 (
 
 REM ############################## Install Custom Vision ###########################
 
-REM ECHO You can use your existing Custom Vision service, or create a new one
-REM CHOICE /c yn /m "Would you like to use an existing Custom Vision Service?" /n
+ECHO You can use your existing Custom Vision service, or create a new one
+CHOICE /c yn /m "Would you like to use an existing Custom Vision Service?" /n
 
-REM REM Using goto here due to issues with delayed expansion
-REM IF %errorlevel%==1 ( GOTO :EXISTINGCV )
-REM ECHO Installing the Custom Vision Service
-REM ECHO.
-REM SET loc1=eastus
-REM SET loc2=westus2
-REM SET loc3=southcentralus
-REM SET loc4=northcentralus
+REM Using goto here due to issues with delayed expansion
+IF %errorlevel%==1 ( GOTO :EXISTINGCV )
+ECHO Installing the Custom Vision Service
+ECHO.
+SET loc1=eastus
+SET loc2=westus2
+SET loc3=southcentralus
+SET loc4=northcentralus
 
-REM ECHO a      %loc1%
-REM ECHO b      %loc2%
-REM ECHO c      %loc3%
-REM ECHO d      %loc4%
-REM ECHO.
-REM CHOICE /c abcd /m "choose the location" /n
+ECHO a      %loc1%
+ECHO b      %loc2%
+ECHO c      %loc3%
+ECHO d      %loc4%
+ECHO.
+CHOICE /c abcd /m "choose the location" /n
 
-REM SET location=!loc%errorlevel%!
+SET location=!loc%errorlevel%!
 
-REM ECHO you chose: %location%
+ECHO you chose: %location%
 
-REM ECHO Creating resource group - %rg-name%
-REM call az group create -l %location% -n %rg-name%
+ECHO Creating resource group - %rg-name%
+call az group create -l %location% -n %rg-name%
 
-REM ECHO Creating Custom Vision Service
-REM SET count=0
-REM REM Need to note in the documentation that only one free service per subscription can be created.  An existing one results in an error.
-REM FOR /F "tokens=* USEBACKQ" %%F IN (`az deployment group create --resource-group %rg-name% --template-file %custom-vision-arm%
-REM     --query properties.outputs.*.value -o table --parameters "{ \"location\": { \"value\": \"%location%\" } }"`) DO ( 
-REM   REM to do: figure out the format for retrieving the training and predition keys here
-REM   SET out!count!=%%F
-REM   SET /a count=!count!+1
-REM )
-REM IF !count! == 0 (
-REM     ECHO.
-REM     ECHO Deployment failed.  Please check if you already have a free version of Custom Vision installed.
-REM     ECHO Press any key to exit...
-REM     PAUSE > noOutput
-REM     GOTO :eof
-REM )
+ECHO Creating Custom Vision Service
+SET count=0
+REM Need to note in the documentation that only one free service per subscription can be created.  An existing one results in an error.
+FOR /F "tokens=* USEBACKQ" %%F IN (`az deployment group create --resource-group %rg-name% --template-file %custom-vision-arm%
+    --query properties.outputs.*.value -o table --parameters "{ \"location\": { \"value\": \"%location%\" } }"`) DO ( 
+  REM to do: figure out the format for retrieving the training and predition keys here
+  SET out!count!=%%F
+  SET /a count=!count!+1
+)
+IF !count! == 0 (
+    ECHO.
+    ECHO Deployment failed.  Please check if you already have a free version of Custom Vision installed.
+    ECHO Press any key to exit...
+    PAUSE > noOutput
+    GOTO :eof
+)
 
-REM REM Set the Custom Vision variables
-REM SET cv-training-api-key=!out2!
-REM SET cv-training-endpoint=!out3!
+REM Set the Custom Vision variables
+SET cv-training-api-key=!out2!
+SET cv-training-endpoint=!out3!
 
-REM ECHO API Key: %cv-training-api-key%
-REM ECHO Endpoint: %cv-training-endpoint%
+ECHO API Key: %cv-training-api-key%
+ECHO Endpoint: %cv-training-endpoint%
 
-REM GOTO :NOEXISTINGCV
-REM :EXISTINGCV
-REM SET /P cv-training-endpoint="Please enter your Custom Vision endpoint: "
-REM SET /P cv-training-api-key="Please enter your Custom Vision Key: "
+GOTO :NOEXISTINGCV
+:EXISTINGCV
+SET /P cv-training-endpoint="Please enter your Custom Vision endpoint: "
+SET /P cv-training-api-key="Please enter your Custom Vision Key: "
 
-REM :NOEXISTINGCV
+:NOEXISTINGCV
 
 REM ############################## Get IoT Hub #####################################
 
