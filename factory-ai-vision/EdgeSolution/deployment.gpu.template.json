@@ -97,8 +97,7 @@
                   "EndpointsConfig": {
                     "host": {}
                   }
-                },
-                "Env": ["DISPLAY=:0"]
+                }
               }
             }
           }
