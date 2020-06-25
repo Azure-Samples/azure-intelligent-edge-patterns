@@ -10,14 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
-from configs.app_insight import APP_INSIGHT_ON
-import config
-from configs.logging_config import LOGGING_CONFIG_PRODUCTION, LOGGING_CONFIG_DEV
 import os
+
+import config
+from configs.app_insight import APP_INSIGHT_ON
+from configs.logging_config import (LOGGING_CONFIG_DEV,
+                                    LOGGING_CONFIG_PRODUCTION)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -29,7 +30,6 @@ SECRET_KEY = 'gjfeo_pt@1$23c$*g8to4bewom59sml0%8fgbdgot=ypr84b$@'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'cameras',
     'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -62,13 +63,14 @@ if APP_INSIGHT_ON:
     MIDDLEWARE.append('opencensus.ext.django.middleware.OpencensusMiddleware')
     OPENCENSUS = {
         'TRACE': {
-            'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
-            'EXPORTER': f'''opencensus.ext.azure.trace_exporter.AzureExporter(
+            'SAMPLER':
+                'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
+            'EXPORTER':
+                f'''opencensus.ext.azure.trace_exporter.AzureExporter(
                 connection_string="{APP_INSIGHT_CONN_STR}"
             )''',
         }
     }
-
 
 ROOT_URLCONF = 'vision_on_edge.urls'
 
@@ -90,9 +92,8 @@ TEMPLATES = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-#WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
+# WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
 ASGI_APPLICATION = 'vision_on_edge.asgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -104,25 +105,27 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -136,7 +139,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

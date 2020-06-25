@@ -92,6 +92,18 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.is_gpu = (onnxruntime.get_device() == 'GPU')
         self.average_inference_time = 0
 
+        # IoT Hub
+        self.iothub_is_send = False
+        self.iothub_threshold = 0.5
+        self.iothub_fpm = 0
+        self.iothub_last_send_time = time.time()
+        self.iothub_interval = 99999999
+        #self.iothub_is_send = True
+        #self.iothub_threshold = 0.8
+        #self.iothub_fpm = 1
+        #self.iothub_last_send_time = time.time()
+        #self.iothub_interval = 5
+
 
     def restart_cam(self):
 
@@ -170,6 +182,16 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.lock.release()
 
+    def update_iothub_parameters(self, is_send, threshold, fpm):
+        self.iothub_is_send = is_send
+        self.iothub_threshold = threshold
+        self.iothub_fpm = fpm
+        self.iothub_last_send_time = time.time()
+        if fpm == 0:
+            self.iothub_is_send = 0
+            self.iothub_interval = 99999999
+        else:
+            self.iothub_interval = 60 / fpm # seconds
 
     def predict(self, image):
 
@@ -202,19 +224,46 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
                     detection = DETECTION_TYPE_NOTHING
                     if True:
-                        if iot:
-                            send_counter += 1
-                            # Modify here to change the threshold
-                            if send_counter == 200:
-                                iot.send_message_to_output(json.dumps(self.last_prediction), 'metrics')
-                                send_counter = 0
-                        else:
-                            send_counter += 1
-                            # Modify here to change the threshold
-                            if send_counter == 200:
-                                print(json.dumps(self.last_prediction), 'metrics')
-                                send_counter = 0
-                            pass
+                        send_counter += 1
+                        # Modify here to change the threshold (deprecated)
+                        #if send_counter == 200:
+                        #    if iot:
+                        #        iot.send_message_to_output(json.dumps(self.last_prediction), 'metrics')
+                        #    else:
+                        #        print('[METRICS]', json.dumps(self.last_prediction))
+                        #    send_counter = 0
+                        if self.iothub_is_send:
+                            if self.iothub_last_send_time + self.iothub_interval < time.time():
+                                #print('1', self.iothub_last_send_time)
+                                #print('2', self.iothub_interval)
+                                #print('3', self.iothub_last_send_time + self.iothub_interval)
+                                #print('4', time.time())
+                                #print('wew')
+                                predictions_to_send = []
+                                for prediction in self.last_prediction:
+                                    _tag = prediction['tagName']
+                                    _p = prediction['probability']
+                                    if _tag not in self.parts: continue
+                                    if _p < self.iothub_threshold: continue
+                                    x1 = int(prediction['boundingBox']['left'] * width)
+                                    y1 = int(prediction['boundingBox']['top'] * height)
+                                    x2 = x1 + int(prediction['boundingBox']['width'] * width)
+                                    y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                                    if self.has_aoi:
+                                        if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info): continue
+
+                                    predictions_to_send.append(prediction)
+                                if len(predictions_to_send) > 0:
+                                    if iot:
+                                        iot.send_message_to_output(json.dumps(predictions_to_send), 'metrics')
+                                        print('[INFO] sending metrics to iothub')
+                                    else:
+                                        #print('[METRICS]', json.dumps(predictions_to_send))
+                                        pass
+                                    self.iothub_last_send_time = time.time()
+
+
+
 
                         for prediction in self.last_prediction:
 
@@ -423,11 +472,14 @@ def update_cam():
 @app.route('/update_parts')
 def update_parts():
     try:
+        print('----Upadate parts----')
         parts = request.args.getlist('parts')
-        print('[INFO] Updateing parts', parts)
+        print('[INFO] Updating parts', parts)
         self.parts = parts
+        print('[INFO] Updated parts', parts)
     except:
         print('[ERROR] Unknown format', parts)
+        #return 'unknown format'
 
     onnx.update_parts(parts)
 
@@ -443,6 +495,29 @@ def update_threshold():
     print('[WARNING] is depreciated')
     return 'ok'
 
+@app.route('/update_iothub_parameters')
+def update_iothub_parameters():
+    is_send = request.args.get('is_send')
+    threshold = request.args.get('threshold')
+    fpm = request.args.get('fpm')
+
+    if not is_send: return 'missing is_send'
+    if not threshold: return 'missing threshold'
+    if not fpm: return 'missing fpm'
+
+    is_send = (is_send == 'True')
+    threshold = int(threshold) * 0.01
+    fpm = int(fpm)
+
+
+    print('updating iothub parameters ...')
+    print('  is_send', is_send)
+    print('  threshold', threshold)
+    print('  fpm', fpm)
+
+    onnx.update_iothub_parameters(is_send, threshold, fpm)
+    return 'ok'
+
 @app.route('/video_feed')
 def video_feed():
     inference = not not request.args.get('inference')
@@ -451,17 +526,12 @@ def video_feed():
         while True:
             img = onnx.last_img.copy()
             if inference:
-                #print('n')
                 height, width = img.shape[0], img.shape[1]
                 predictions = onnx.last_prediction
-                #print(onnx.last_prediction)
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 font_scale = 1
                 thickness = 3
-                #print(predictions)
                 for prediction in predictions:
-                    #print(prediction['tagName'], prediction['probability'])
-                    #print(onnx.last_upload_time, time.time())
                     tag = prediction['tagName']
                     if tag not in onnx.parts: continue
 

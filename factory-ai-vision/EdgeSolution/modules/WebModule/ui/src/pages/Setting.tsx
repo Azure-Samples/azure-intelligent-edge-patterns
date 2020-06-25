@@ -171,7 +171,7 @@ export const Setting = (): JSX.Element => {
             </Button>
           </Flex>
           {error ? <Alert danger content={`${error}`} dismissible /> : null}
-          {otherError ? <Alert danger content={`Error ${otherError}`} dismissible /> : null}
+          {otherError ? <Alert danger content={`${otherError}`} dismissible /> : null}
         </Flex>
         {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
       </Flex>
