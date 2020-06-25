@@ -8,6 +8,10 @@ import time
 
 logger = logging.getLogger(__name__)
 
+# PETER PLEASE FIX THIS FIXME
+# setting.py will check whether there's any environment variable, and use it to replace the origin config.py's
+from vision_on_edge.settings import TRAINING_KEY as TRAINING_KEY2
+from vision_on_edge.settings import ENDPOINT as ENDPOINT2
 
 class CameraConfig(AppConfig):
     name = 'cameras'
@@ -20,8 +24,8 @@ class CameraConfig(AppConfig):
 
             existing_settings = Setting.objects.filter(
                 name=DEFAULT_SETTING_NAME,
-                training_key=TRAINING_KEY,
-                endpoint=ENDPOINT)
+                training_key=TRAINING_KEY2,
+                endpoint=ENDPOINT2)
             if len(existing_settings) == 1:
                 logger.info(
                     f"Found existing {DEFAULT_SETTING_NAME}. Revalidating in pre_save...")
@@ -39,22 +43,22 @@ class CameraConfig(AppConfig):
                 default_setting.save()
 
             elif len(Setting.objects.filter(
-                    endpoint=ENDPOINT,
-                    training_key=TRAINING_KEY)) > 0:
+                    endpoint=ENDPOINT2,
+                    training_key=TRAINING_KEY2)) > 0:
                 logger.info(
                     f"Found existing (Endpoint, key) with different setting name")
                 logger.info(f"Pass...")
 
                 default_setting = Setting.objects.filter(
-                    endpoint=ENDPOINT,
-                    training_key=TRAINING_KEY)[0]
+                    endpoint=ENDPOINT2,
+                    training_key=TRAINING_KEY2)[0]
                 default_setting.save()
             else:
                 logger.info(f"Creating new {DEFAULT_SETTING_NAME}")
                 default_setting, created = Setting.objects.update_or_create(
                     name=DEFAULT_SETTING_NAME,
-                    training_key=TRAINING_KEY,
-                    endpoint=ENDPOINT,
+                    training_key=TRAINING_KEY2,
+                    endpoint=ENDPOINT2,
                     iot_hub_connection_string=IOT_HUB_CONNECTION_STRING,
                     device_id=DEVICE_ID,
                     module_id=MODULE_ID
