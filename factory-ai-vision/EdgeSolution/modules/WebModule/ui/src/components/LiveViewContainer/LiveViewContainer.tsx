@@ -71,7 +71,15 @@ export const LiveViewContainer: React.FC<{
 
   useEffect(() => {
     if (!AOIs.length)
-      setAOIs([{ id: uniqid(), x1: 0, y1: 0, x2: imageInfo[2].width, y2: imageInfo[2].height }]);
+      setAOIs([
+        {
+          id: uniqid(),
+          x1: imageInfo[2].width * 0.1,
+          y1: imageInfo[2].height * 0.1,
+          x2: imageInfo[2].width * 0.9,
+          y2: imageInfo[2].height * 0.9,
+        },
+      ]);
   }, [AOIs.length, imageInfo[2].width, imageInfo[2].height]);
 
   const hasEdit = !R.equals(lasteUpdatedAOIs.current, AOIs);
@@ -92,17 +100,19 @@ export const LiveViewContainer: React.FC<{
           onClick={onCheckboxClick}
         />
         <Button content="Update" primary disabled={updateBtnDisabled} onClick={onUpdate} loading={loading} />
-        <Button
-          content="Create Area of Interest"
-          primary={creatingAOI !== CreatingState.Disabled}
-          disabled={!showAOI}
-          onClick={(): void => {
-            if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
-            else setCreatingAOI(CreatingState.Disabled);
-          }}
-          circular
-          styles={{ padding: '0 5px' }}
-        />
+        {false && (
+          <Button
+            content="Create Area of Interest"
+            primary={creatingAOI !== CreatingState.Disabled}
+            disabled={!showAOI}
+            onClick={(): void => {
+              if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
+              else setCreatingAOI(CreatingState.Disabled);
+            }}
+            circular
+            styles={{ padding: '0 5px' }}
+          />
+        )}
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
       <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>

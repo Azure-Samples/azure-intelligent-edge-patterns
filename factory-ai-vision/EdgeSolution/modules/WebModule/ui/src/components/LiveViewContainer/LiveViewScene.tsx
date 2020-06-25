@@ -251,7 +251,7 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, re
       ref={groupRef}
     >
       {/** A bigger region for mouseEnter event */}
-      <Line x={x1} y={y1 - 40} points={[0, -40, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, -40]} closed />
+      <Line x={x1} y={y1 - 80} points={[0, -80, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, -80]} closed />
       <Line
         x={x1}
         y={y1}
@@ -280,22 +280,24 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, re
         fill={COLOR}
         onDragMove={handleDrag}
       />
-      <Path
-        x={x1}
-        y={y1 - 30 / scale}
-        data="M 0 0 L 20 20 M 20 0 L 0 20"
-        stroke="red"
-        strokeWidth={5}
-        visible={cancelBtnVisible && creatingState === CreatingState.Disabled}
-        onMouseEnter={(e): void => {
-          e.target.getStage().container().style.cursor = 'pointer';
-        }}
-        onMouseLeave={(e): void => {
-          e.target.getStage().container().style.cursor = 'default';
-        }}
-        onClick={(): void => removeBox(box.id)}
-        scale={{ x: 1 / scale, y: 1 / scale }}
-      />
+      {false && (
+        <Path
+          x={x1}
+          y={y1 - 30 / scale}
+          data="M 0 0 L 20 20 M 20 0 L 0 20"
+          stroke="red"
+          strokeWidth={5}
+          visible={cancelBtnVisible && creatingState === CreatingState.Disabled}
+          onMouseEnter={(e): void => {
+            e.target.getStage().container().style.cursor = 'pointer';
+          }}
+          onMouseLeave={(e): void => {
+            e.target.getStage().container().style.cursor = 'default';
+          }}
+          onClick={(): void => removeBox(box.id)}
+          scale={{ x: 1 / scale, y: 1 / scale }}
+        />
+      )}
     </Group>
   );
 };
