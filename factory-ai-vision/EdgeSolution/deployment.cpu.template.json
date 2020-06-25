@@ -88,7 +88,18 @@
             "restartPolicy": "always",
             "settings": {
               "image": "${MODULES.InferenceModule.cpuamd64}",
-              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/tmp/.X11-unix:/tmp/.X11-unix\",\"/dev:/dev\"],\"NetworkMode\":\"host\",\"IpcMode\":\"host\",\"Privileged\":true},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}},\"Env\":[\"DISPLAY=:0\"]}"
+              "createOptions": {
+                "HostConfig": {
+                  "NetworkMode": "host",
+                  "runtime": "runc"
+                },
+                "NetworkingConfig": {
+                  "EndpointsConfig": {
+                    "host": {}
+                  }
+                },
+                "Env": ["DISPLAY=:0"]
+              }
             }
           }
         }
