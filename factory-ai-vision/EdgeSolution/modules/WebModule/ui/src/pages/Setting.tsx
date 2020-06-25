@@ -175,6 +175,7 @@ export const Setting = (): JSX.Element => {
         </Flex>
         {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
       </Flex>
+      {false && <>
       <Divider color="grey" />
       <Checkbox
         label="Allow to Send Usage Data"
@@ -182,6 +183,7 @@ export const Setting = (): JSX.Element => {
         checked={checkboxChecked}
         onChange={onCheckBoxClick}
       />
+      </>}
     </>
   );
 };
