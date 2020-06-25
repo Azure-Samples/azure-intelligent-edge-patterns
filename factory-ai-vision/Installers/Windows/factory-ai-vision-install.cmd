@@ -213,6 +213,7 @@ CHOICE /c yn /m "Does your Azure Stack Edge device have a GPU?" /n
 
 REM Using goto here due to issues with delayed expansion
 IF %errorlevel%==1 ( SET cpuGpu=gpu) ELSE ( SET cpuGpu=cpu)
+IF %cpuGpu%==gpu ( SET runtime=nvidia) ELSE ( SET runtime=runc)
 
 REM ############################## Write Config ############################################
 
@@ -224,6 +225,7 @@ FOR /f "delims=" %%i IN (%edge-deployment-json%) DO (
     SET "line=!line:<Training API Key>=%cv-training-api-key%!"
     SET "line=!line:<Training Endpoint>=%cv-training-endpoint%!"
     SET "line=!line:<cpu or gpu>=%cpuGpu%!"
+    SET "line=!line:<Docker Runtime>=%runtime%!"
     ECHO !line! >> %edge-deploy-json%
 )
 
