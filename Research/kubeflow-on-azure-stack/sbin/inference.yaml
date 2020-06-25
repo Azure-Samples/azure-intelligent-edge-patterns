@@ -1,5 +1,6 @@
 #
-# the pipeline that 
+# the pipeline to pass parameters to a model and
+# eventually expose the deployment port to the outside. 
 #
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
@@ -23,15 +24,16 @@ spec:
 
   - name: whalesay
     container:
-      image: docker/whalesay:latest
+      #image: docker/whalesay:latest
+      image: alpine:latest
       command: [sh, -c]
-      args: ["echo {\"x\":3.0} | tee /tmp/input_request.json"]
+      args: ["echo -e \"{\\\"x\\\":3.0}\" | tee /tmp/message"]
     outputs:
       artifacts:
-      # generate hello-art artifact from /tmp/input_request.json
+      # generate hello-art artifact from /tmp/message
       # artifacts can be directories as well as files
       - name: input-art
-        path: /tmp/input_request.json
+        path: /tmp/message
 
   - name: run-model
     inputs:

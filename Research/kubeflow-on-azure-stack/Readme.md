@@ -512,7 +512,7 @@ it into a json if needed, and pass to the model in a container:
         container:
           image: docker/whalesay:latest
           command: [sh, -c]
-          args: ["echo {\"x\":3.0} | tee /tmp/input_request.json"]
+          args: ["echo \"{\\\"x\\\":3.0}\" | tee /tmp/input_request.json"]
         outputs:
           artifacts:
           # generate hello-art artifact from /tmp/input_request.json
@@ -534,6 +534,90 @@ it into a json if needed, and pass to the model in a container:
 
 Depending on the application, you may want to communicate with the pipeline via requests to the first
 step. Or you can compress it all and have your logic inside of the single container.
+
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: inferencing-demo-curl-
+    spec:
+      entrypoint: inferencing-example
+      templates:
+      - name: inferencing-example
+        steps:
+        - - name: run-inference-server
+            template: run-model
+    
+      - name: run-model
+        container:
+          image: nginx:alpine
+          ports:
+          - containerPort: 80
+
+Now you can see the pod with this service(a place-holder for your model) running if you want:
+
+![pics/pipeline_server.png](pics/pipeline_server.png)
+
+It is, in the case above, `inferencing-demo-curl-kj6z5-2763558554`.
+
+Another option is to deploy your model as Kubernetes deployment, here is an nginx server you could try:
+
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: my-nginx
+      labels:
+        app: my-nginx
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: my-nginx
+      template:
+        metadata:
+          labels:
+            app: my-nginx
+        spec:
+          containers:
+          - name: my-nginx
+            image: nginx:alpine
+            ports:
+            - containerPort: 80
+            resources:
+              limits:
+                memory: "128Mi" #128 MB
+                cpu: "200m" #200 millicpu (.2 cpu or 20% of the cpu)
+
+Now you can increment number of replicas and your service will be automatically scaled.
+
+This is how you can forward the port for this deployment:
+
+    $ kubectl port-forward deployment/my-nginx 7000:80
+    Forwarding from 127.0.0.1:7000 -> 80
+    Forwarding from [::1]:7000 -> 80
+    Handling connection for 7000
+
+And access your server(model containers) using, for example, `curl`:
+
+    $ curl localhost:7000
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Welcome to nginx!</title>    
+    ...
+    </body>
+    </html>
+
+Here is an example of how you can connect to the model you trained:
+
+    $ curl --header "Content-Type: application/json" \
+                    --request POST \
+                    --data '{"X":123,"Y":568}' \
+             http://localhost:5050/api/infere
+    Elasticnet model (alpha=0.050000, l1_ratio=0.050000):
+
+    RMSE: 82.16359959591213
+    MAE: 69.52472687854122
+    R2: -0.02072575078015859
 
 ## Next Steps
 
