@@ -17,7 +17,7 @@ To install the Vision on Edge Solution Accelerator using the installation script
  \- or -
 
 * For a Mac, or a PC running Linux, navigate to the directory containing the installation files in a terminal and run the vision-on-edge-install.sh script.
-* Now you can access the product GUI, as open browser yourip:8080   eg.http://52.1.1.1:8080/
+* Now you can access the product GUI, open browser youripedgedeviceip:8080   eg. http://52.1.1.1:8080/
 
 
 # Build the docker and deploy by Visual Studio Code
@@ -30,18 +30,3 @@ Before installation, please make sure you have docker installed in your local en
 4. In Visual Studio Code, right click on `factory-ai-vision/EdgeSolution/config/deployment.gpu.amd64.json` and choose "Create Single Deployment for Single Device" and then pick the edge from the list to deploy
 
 
-# Query on App Insight to see the user usage statistics
-
-1. Go to App Insight, click Usage -> Users, click Pin to ping it to dashboard
-2. Go to Logs, type this query and run:
-
-    traces
-    | where message == 'training'
-    | extend images = tolong(customDimensions.images)
-    | extend parts = tolong(customDimensions.parts)
-    | extend source = tostring(customDimensions.source)
-    | extend train = tolong(customDimensions.train)
-    | extend retrain = tolong(customDimensions.retrain)
-    | summarize train = sum(train), retrain = sum(retrain), parts = sum(parts), images = sum(images) by source
-
-3. Click Pin to ping it to dashboard as well
