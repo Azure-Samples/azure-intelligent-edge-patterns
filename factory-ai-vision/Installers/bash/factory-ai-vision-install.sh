@@ -33,7 +33,7 @@ if [ ! $? -eq 0 ]; then
   # Azure CLI is not installed.  It has an MSI installer on Windows, or is available over REST.
   echo
   echo It looks like Azure CLI is not installed.  Please install it from: 
-  echo https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows
+  echo https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
   echo and try again
   read -p "Press any key to exit..."
   exit 1
@@ -227,8 +227,8 @@ fi
 while true; do
   read -p "Does your device have a GPU? (y or n): " -n 1 -r; echo
   case $REPLY in
-      [Yy]* ) cpuGpu="gpu"; break;;
-      [Nn]* ) cpuGpu="cpu"; break;;
+      [Yy]* ) cpuGpu="gpu"; runtime="nvidia"; break;;
+      [Nn]* ) cpuGpu="cpu"; runtime="runc"  ; break;;
       * ) echo "Please answer yes or no.";;
   esac
 done
@@ -242,6 +242,7 @@ do
     prtline=${line//'<Training Endpoint>'/$cvTrainingEndpoint}
     prtline=${prtline//'<Training API Key>'/$cvTrainingApiKey}
     prtline=${prtline//'<cpu or gpu>'/$cpuGpu}
+    prtline=${prtline//'<Docker Runtime>'/$runtime}
     echo $prtline
 done < "$input" > ./$edgeDeployJson
 

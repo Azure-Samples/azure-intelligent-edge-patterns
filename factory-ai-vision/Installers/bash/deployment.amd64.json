@@ -45,7 +45,7 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/visionwebmodule:0.1.0-amd64",
+              "image": "intelligentedge/visionwebmodule:0.1.5-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8080\"}]}}}"
             }
           },
@@ -55,8 +55,8 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/inferencemodule:0.1.0-<cpu or gpu>amd64",
-              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/tmp/.X11-unix:/tmp/.X11-unix\",\"/dev:/dev\"],\"NetworkMode\":\"host\",\"IpcMode\":\"host\",\"Privileged\":true},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}},\"Env\":[\"DISPLAY=:0\"]}"
+              "image": "intelligentedge/inferencemodule:0.1.5-<cpu or gpu>amd64",
+              "createOptions": "{\"HostConfig\":{\"NetworkMode\":\"host\",\"runtime\":\"<Docker Runtime>\"},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}"
             }
           }
         }
@@ -65,7 +65,9 @@
     "$edgeHub": {
       "properties.desired": {
         "schemaVersion": "1.0",
-        "routes": {},
+        "routes": {
+          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream"
+        },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
