@@ -67,3 +67,22 @@ After the installation each of the services gets installed into its own namespac
 kubectl get pods -n mlflow
 kubectl get pods -n kubeflow
 ```
+### Step 6: Opening Kubeflow dashboard
+To access the dashboard using external connection, replace "type: NodePort" with "type: LoadBalancer" using the editor:
+
+```sh
+$ kubectl edit -n istio-system svc/istio-ingressgateway
+service/istio-ingressgateway edited
+```
+Then the EXTERNAL-IP will become available from:
+
+```sh
+$ kubectl get -w -n istio-system svc/istio-ingressgateway
+NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
+istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
+```
+Open it in your browser, and make sure your firewall rules allow HTTP port 80.
+
+You can monitor Kubeflow cluster by looking at the Kubernetes status, you might need to wait to let the pods create containers and start.
+
+For more information see Installing Kubeflow on Azure
