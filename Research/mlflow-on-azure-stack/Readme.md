@@ -81,7 +81,7 @@ $ kubectl get -w -n istio-system svc/istio-ingressgateway
 NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
 istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
 ```
-Open it in your browser, and make sure your firewall rules allow HTTP port 80.
+Use external-ip to open it in your browser, and make sure your firewall rules allow HTTP port 80.
 
 You can monitor Kubeflow cluster by looking at the Kubernetes status, you might need to wait to let the pods create containers and start.
 
