@@ -68,11 +68,11 @@ kubectl get pods -n mlflow
 kubectl get pods -n kubeflow
 ```
 ### Step 6: Opening Kubeflow dashboard
-To access the dashboard using external connection, replace "type: NodePort" with "type: LoadBalancer" using the editor:
+To access the dashboard using external connection, replace "type: NodePort" with "type: LoadBalancer" using the patch command:
 
 ```sh
-$ kubectl edit -n istio-system svc/istio-ingressgateway
-service/istio-ingressgateway edited
+$ kubectl patch svc/istio-ingressgateway -p '{"spec":{"type": "LoadBalancer"}}' -n istio-system
+service/istio-ingressgateway patched
 ```
 Then the EXTERNAL-IP will become available from:
 
