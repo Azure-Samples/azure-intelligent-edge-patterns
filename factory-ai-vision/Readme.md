@@ -17,7 +17,7 @@ To install the Vision on Edge Solution Accelerator using the installation script
  \- or -
 
 * For a Mac, or a PC running Linux, navigate to the directory containing the installation files in a terminal and run the vision-on-edge-install.sh script.
-* Now you can access the product GUI, open browser youripedgedeviceip:8080   eg. http://52.1.1.1:8080/
+* Now you can access the product GUI, open browser youredgedeviceip:8080   eg. http://52.1.1.1:8080/
 
 
 # Build the docker and deploy by Visual Studio Code
