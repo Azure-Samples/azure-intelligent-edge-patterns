@@ -85,4 +85,4 @@ Use external-ip to open it in your browser, and make sure your firewall rules al
 
 You can monitor Kubeflow cluster by looking at the Kubernetes status, you might need to wait to let the pods create containers and start.
 
-For more information see Installing Kubeflow on Azure
+For more information see Installing Kubeflow on Azure -  https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/
