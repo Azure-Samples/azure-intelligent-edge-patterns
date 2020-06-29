@@ -15,7 +15,7 @@ class LocationsConfig(AppConfig):
     """
     locations App Config
     """
-    name = 'cameras'
+    name = 'locations'
 
     def ready(self):
         """
