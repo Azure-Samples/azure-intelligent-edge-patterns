@@ -22,6 +22,7 @@ from django.conf import settings
 from rest_framework import routers
 
 from cameras import views
+from locations.api import views as location_views
 from . import views as site_views
 
 
@@ -37,7 +38,7 @@ router.register('cameras', views.CameraViewSet)
 router.register('parts', views.PartViewSet)
 router.register('images', views.ImageViewSet)
 router.register('projects', views.ProjectViewSet)
-router.register('locations', views.LocationViewSet)
+router.register('locations', location_views.LocationViewSet)
 router.register('annotations', views.AnnotationViewSet)
 router.register('train', views.TrainViewSet)
 router.register('settings', views.SettingViewSet)
