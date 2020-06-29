@@ -6,7 +6,6 @@ import sys
 
 from django.apps import AppConfig
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -24,7 +23,7 @@ class LocationsConfig(AppConfig):
         """
         # FIXME test may use this as well
         if 'runserver' in sys.argv:
-            from locations.models import Location
+            from locations.models import Location # pylint: disable=C0415
             logger.info("LocationsAppConfig ready while running server")
 
             create_demo = True
