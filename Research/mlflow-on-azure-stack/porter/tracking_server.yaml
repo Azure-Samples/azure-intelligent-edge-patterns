@@ -51,4 +51,58 @@ spec:
       targetPort: 5000
       name: mlflow
   type: LoadBalancer    
-
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:  
+  name: sftp-pvc
+spec:
+  storageClassName: default
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sftp-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftp  
+  template:
+    metadata:
+      labels:
+        app: sftp
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: sftp
+        image: atmoz/sftp:alpine
+        args: ["demo:demo:::archive"]
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: archive
+          mountPath: /home/demo/
+      volumes:
+      - name: archive
+        persistentVolumeClaim:
+          claimName: sftp-pvc     
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: sftp
+spec:
+  selector:
+    app: sftp
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 22
+      name: mlflow
+  type: LoadBalancer    
