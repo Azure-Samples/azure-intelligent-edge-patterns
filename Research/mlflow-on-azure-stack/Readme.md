@@ -1,4 +1,4 @@
-# MLflow Installation On Kubernetes
+# MLflow and Kubeflow Installation On Kubernetes
 
 This guide demonstrates how to install a remote MLflow Tracking Server on Kubernetes. The instructions below demonstrate how to install using a Cloud Native Application Bundle (CNAB). Please see the document referenced below for manual installation instructions.
 
