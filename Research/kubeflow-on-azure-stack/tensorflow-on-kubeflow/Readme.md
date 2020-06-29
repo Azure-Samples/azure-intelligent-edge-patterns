@@ -3,8 +3,6 @@
 This module demonstrates how to run TensorFlow jobs on Kubeflow cluster on Azure Stack.
 
 [TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
-It was initially developed by the Google Brain team for internal Google use, and later released under
-the Apache License 2.0.
 
 # Prerequisites
 
