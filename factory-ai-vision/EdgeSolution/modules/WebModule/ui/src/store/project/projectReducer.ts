@@ -22,6 +22,7 @@ import {
   GET_INFERENCE_METRICS_SUCCESS,
   GET_INFERENCE_METRICS_FAILED,
   UPDATE_ORIGIN_PROJECT_DATA,
+  RESET_STATUS,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -134,6 +135,8 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state, inferenceMetrics: action.payload };
     case GET_INFERENCE_METRICS_FAILED:
       return { ...state, error: action.error };
+    case RESET_STATUS:
+      return { ...state, status: Status.None };
     default:
       return { ...state };
   }

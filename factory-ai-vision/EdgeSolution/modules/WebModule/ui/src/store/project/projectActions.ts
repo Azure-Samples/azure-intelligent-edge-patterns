@@ -46,6 +46,8 @@ import {
   StopInferenceAction,
   UPDATE_ORIGIN_PROJECT_DATA,
   UpdateOriginProjectDataAction,
+  ResetStatusAction,
+  RESET_STATUS,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -123,6 +125,10 @@ export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAc
 
 export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({
   type: UPDATE_ORIGIN_PROJECT_DATA,
+});
+
+export const resetStatus = (): ResetStatusAction => ({
+  type: RESET_STATUS,
 });
 
 export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {

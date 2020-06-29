@@ -182,6 +182,11 @@ export type StopInferenceAction = {
   type: typeof STOP_INFERENCE;
 };
 
+export const RESET_STATUS = 'RESET_STATUS';
+export type ResetStatusAction = {
+  type: typeof RESET_STATUS;
+};
+
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
@@ -203,7 +208,8 @@ export type ProjectActionTypes =
   | GetInferenceMetricsSuccessAction
   | GetInferenceMetricsFailedAction
   | StartInferenceAction
-  | StopInferenceAction;
+  | StopInferenceAction
+  | ResetStatusAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;
