@@ -15,7 +15,9 @@ COPY backend/ui_production ui_production
 COPY backend/vision_on_edge vision_on_edge
 COPY backend/configs configs
 RUN rm -rf cameras/migrations/*.py
+RUN rm -rf locations/migrations/*.py
 RUN touch cameras/migrations/__init__.py
+RUN touch locations/migrations/__init__.py
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
