@@ -106,7 +106,7 @@ class Image(models.Model):
             if self.remote_url:
                 resp = requests.get(self.remote_url)
                 if resp.status_code != status.HTTP_200_OK:
-                    raise Request
+                    raise requests.exceptions.RequestException
                 fp = BytesIO()
                 fp.write(resp.content)
                 file_name = f"{self.part.name}-{self.remote_url.split('/')[-1]}"
