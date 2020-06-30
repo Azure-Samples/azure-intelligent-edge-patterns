@@ -73,7 +73,9 @@ Some images already have Azure CLI, in case your vm does not, see [Install Azure
 
 ## Registering with the correct cloud
 
-Then register with the correct cloud like so:
+Run `az cloud list` to see which cloud is currently active.
+
+If it is not where you want to create your Kubernetes cluster, register with the correct cloud like so:
 
     $ az cloud register -n DEMOE2 --endpoint-resource-manager "https://management.demoe2.example.com" --suffix-storage-endpoint "portal.demoe2.example.com" --suffix-keyvault-dns ".vault.portal.demoe2.example.com"
     The cloud 'DEMOE2' is registered.
@@ -110,7 +112,7 @@ the active cloud in your .json or the format you chose.
 ## Create Kubeflow Kubernetes cluster
 
 A cluster for Kubeflow will be created using 'aks-endine', although, you could create
-a resource group using Portal, or CLI:
+a resource group using Portal, or CLI (it is an OPTIONAL step, you can skip it):
 
     $ az group create --name sandboxRG3kf --location demoe2
     {
@@ -151,6 +153,7 @@ In our case we updated these fields:
 - "portalURL": "https://portal.demo2.stackpoc.com"
 - "dnsPrefix": "kube-rgDEMO2"
 - "keyData": "\<whatever is in id_rsa_for_demo.pub\>"
+- updated the `"orchestratorReleaseVersion"` from 1.15 to 1.15.5(which is among the listed supported versions)
 
 Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDEMO2_demoe2.json`:
 
@@ -239,7 +242,8 @@ Run the installer, specifying its version:
 
 If you have problems, please refer to the official page: [Install the AKS engine on Linux in Azure Stack](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux).
 
-In the completely disconnected environment, you need to acquire the archive via a machine that does have the connection, and uncompress it on the machine where you plan using it:
+In the completely disconnected environment, you need to acquire the archive via a machine that
+does have the connection, and uncompress it on the machine where you plan using it:
 
     $ tar xvzf aks-engine-v0.xx.x-linux-amd64.tar.gz -C /usr/local/bin
 
@@ -258,7 +262,8 @@ If Azure Resource Manager endpoint is using a self-signed certificate, you need 
     $ sudo update-ca-certificates
 
 Run `aks-engine deploy` command filling in the information pieces you gathered in the check list
-in `Prerequisites`:
+in [Prerequisites](#prerequisites). It is a lengthy process, taking several minutes, depending on your
+chosen configuration(number of nodes, etc.):
 
     $ aks-engine deploy -m kube-rgDEMO2_demoe2.json --auth-method client_secret --auto-suffix \
         --azure-env AzureStackCloud --client-id 12345-APPLICATION-67890 --client-secret XYZSUPERSECRET1234567890 \

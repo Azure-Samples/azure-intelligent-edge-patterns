@@ -35,6 +35,7 @@ Main differences of the detached mode include limitations on:
 
 The reader is expected to be familiar with the following:
 
+- [Docker](http://docker.com), see our [Introduction to Docker](introduction_to_docker.md) as a refresher.
 - [Azure](http://azure.com) CLI, and Microsoft Azure subscription covering AKS.
 - [Azure Stack Hub](https://azure.microsoft.com/en-us/products/azure-stack/hub/)
 - [Kubernetes](https://kubernetes.io/)
@@ -54,9 +55,33 @@ you will need to ask your cloud administrator. You need the following:
 
 See additional prerequisites if you are [Installing Kubernetes](installing_kubernetes.md) yourself.
 
+Clone this repository to use the provided scripts and configuration files. You can do it, for example, using comannd line:
+
+    $ git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
+
+Then go to the `sbin` directory in Kubeflow section (we will give the description of each of the files
+later in this section):
+
+    $ cd Research/kubeflow-on-azure-stack/sbin
+    $ ls
+    check_status.sh
+    clean_evicted.sh
+    edit_external_access.sh
+    get_kf_board_ip.sh
+    get_kubernetes_info.sh
+    get_token.sh
+    inference.yaml
+    kubeflow_install.sh
+    kubeflow_uninstall.sh
+    persistence.yaml
+    start_tb.sh
+    tensorboard.yaml
+
+
 ## Check the integrity of your Kubernetes cluster
 
-If you already have a Kubernetes cluster you may skip this chapter.
+If you already have a Kubernetes cluster you may skip this chapter. However,
+**make sure you have the values from [Prerequisites](installing_kubernetes.md#prerequisites) section**.
 
 If you do not have a Kubernetes cluster already, follow [Installing Kubernetes](installing_kubernetes.md).
 
@@ -98,7 +123,11 @@ machine. You can get your Kubernetes Dashboard's address from `cluster-info`:
     kubernetes-dashboard is running at https://kube-rgkf-5.demoe2.cloudapp.stackpoc.com/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
     ...
 
-We provided a script to retrieve a login token:
+You might need to contact your cloud administrator to retrieve the certificates from your cluster, here
+is the link with instructions how to do it: [Access the Kubernetes Dashboard in Azure Stack Hub](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-solution-template-kubernetes-dashboard?view=azs-2002#import-the-certificate).
+
+We provided a script to retrieve a login token(which is a time-sensitive operation, talk to your
+cloud administrator to use the imported `kubeconfig` instead):
 
     $ sbin/get_token.sh
     Name:         namespace-controller-token-masdg
@@ -109,8 +138,8 @@ Cut/paste that token into the Sign In screen:
 
 ![pics/kubernetes_dashboard_login.png](pics/kubernetes_dashboard_login.png)
 
-You might need to contact your cloud administrator to retrieve the certificates from your cluster, and once
-you imported them, you should be able to see the Kubernetes Dashboard in a browser:
+Again, you might need to contact your cloud administrator to retrieve the certificates from your cluster
+to access these links, you should be able to see the Kubernetes Dashboard in a browser:
 
 ![pics/kubernetes_dashboard_intro.png](pics/kubernetes_dashboard_intro.png)
 
@@ -124,6 +153,10 @@ For this demo we will substitute `azurefile` with our own locally-mounted networ
 
 Follow the steps in [Installing Storage](installing_storage.md) to create a Persistent Volume Claim
 that you could use in your Kubernetes deployments.
+
+For simplicity, we create a Samba server, but you are welcome to use nfs
+version of your choice. You will only update the firewall rules for your
+solution, Samba server requires inbound port range `"137-139,445"`
 
 If you done everything right, you should be able to see this `pvc` in your environment:
 
@@ -347,14 +380,12 @@ button `Run` to execute, you should see something like this:
 ## TFjob
 
 [TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
-It was initially developed by the Google Brain team for internal Google use, and later released under
-the Apache License 2.0.
 
 See [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack) for the demo of a `TFJob` execution in the environment that we create in this tutorial.
 
 ## PyTorchJob
 
-[PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework, it has Python and C++ interfaces, primarily developed by Facebook's AI Research Lab. PyTorch is rooted in [Torch library](https://github.com/torch/torch7)
+[PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework, it has Python and C++ interfaces. PyTorch is rooted in [Torch library](https://github.com/torch/torch7)
 
 See [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) for the demo
 of a `PyTorchJob` execution in the environment that we create in this tutorial.
@@ -631,15 +662,15 @@ The PyTorch example we run will log data for TensorBoard, you will see something
 
 ![pytorch-on-kubeflow/images/tensorboard_scalars.png](pytorch-on-kubeflow/images/tensorboard_scalars.png)
 
-
 # Links
 
 The following resources might help during troubleshooting or modifications:
 
+- https://docs.microsoft.com/en-us/azure-stack
+- https://github.com/Azure/kubeflow-labs
 - https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart
 - https://docs.microsoft.com/en-us/azure/aks/gpu-cluster
 - https://docs.microsoft.com/en-us/azure-stack/asdk/asdk-install
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux
-- https://docs.microsoft.com/en-us/azure-stack
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-cluster
 - https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/AKSe-on-AzStackHub

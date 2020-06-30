@@ -4,6 +4,12 @@ If you would like to save the results of model training, you can do so from your
 defining Kubernetes volumes for your containers. However, on Azure Stack you do not have `azurefile`
 available yet. Luckily, there are many other options, e.g. you can use a network storage.
 
+For this tutorial we create a Samba server and use Samba clients on our nodes, but you are
+free to use alternatives if they are available and work in your environment. Switch to 
+an NFS server will be simple, you will need to use your nfs server's ip and credentials in
+the volume mounts only, leaving the project .yamls refering to the same Persisted Volume Claims, 
+see [Creating storage class, pv, and pvc](#creating-storage-class-pv-and-pvc) for details.
+
 ## Creating smb server
 
 Follow the [Installing Samba Server](installing_smb_server.md) to create your network storage server.
@@ -13,7 +19,9 @@ to other available options on the cluster you are using.
 
 ## Creating smb clients
 
-On the client side, if you have to do it yourself, install a Samba client:
+Each node of our Kubernetes cluster has to have Samba client to access our Samba server.
+You need to repeat the following on every vm in your Kubernetes cluster(you can get their
+local ip from the portal and ssh from the master node):
 
     $ sudo apt install -y smbclient cifs-utils
 
