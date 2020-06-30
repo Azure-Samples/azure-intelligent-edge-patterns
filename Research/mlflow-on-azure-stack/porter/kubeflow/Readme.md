@@ -48,7 +48,7 @@ Validate that your credential is present by running the below command. You shoul
 porter credentials list
 ```
 
-![List Porter Credentials](./docs/img/porter-credentials-validate.png)
+![List Porter Credentials](/Research/mlflow-on-azure-stack/docs/img/porter-credentials-validate.png)
 
 
 ## Step 4: Use Porter CNAB
@@ -87,7 +87,7 @@ $ kubectl get -w -n istio-system svc/istio-ingressgateway
 NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
 istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
 ```
-![Kubeflow dashboard](./docs/img/kubeflow_dashboard1.png) 
+![Kubeflow dashboard](/Research/mlflow-on-azure-stack/docs/img/kubeflow_dashboard1.png) 
 
 Use external-ip to open it in your browser, and make sure your firewall rules allow HTTP port 80.
 
