@@ -3,7 +3,7 @@
 This guide demonstrates how to install a remote MLflow Tracking Server on Kubernetes. The instructions below demonstrate how to install using a Cloud Native Application Bundle (CNAB). Please see the document referenced below for manual installation instructions.
 
 **Reference Material:**
-- [Manual Installation Instructions](./docs/manual_installation.md)
+- [Manual Installation Instructions](/Research/mlflow-on-azure-stack/docs/manual_installation.md)
 
 **Prerequisite:**
 - Will need the k8 cluster ".kubeconfig" file on your local machine to execute commands on the k8 cluster 
