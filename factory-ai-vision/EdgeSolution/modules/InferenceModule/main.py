@@ -82,7 +82,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.detection_total = 0
         self.detections = []
 
-        self.threshold = 0.4
+        self.threshold = 0.3
 
         self.has_aoi = False
         self.aoi_info = None
@@ -165,6 +165,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.confidence_min = confidence_min * 0.01
         self.confidence_max = confidence_max * 0.01
         self.max_images = max_imagese
+        self.threshold = self.confidence_max
 
     def update_model(self, model_dir):
         model = self.load_model( model_dir)
@@ -522,7 +523,7 @@ def update_prob_threshold():
     prob_threshold = request.args.get('prob_threshold')
     if not prob_threshold: return 'missing prob_threshold'
 
-    onnx.prob_threshold = int(prob_threshold) * 0.01
+    onnx.threshold = int(prob_threshold) * 0.01
     print('[INFO] updaing prob_threshold to')
     print('  prob_threshold:', prob_threshold)
 
@@ -549,10 +550,9 @@ def video_feed():
                         for aoi_area in onnx.aoi_info:
                             img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
 
-                    #if prediction['probability'] > onnx.threshold:
-                    #print('if??', prediction['probability'], onnx.confidence_max)
-                    if prediction['probability'] > onnx.confidence_max:
-                        #print('to draw')
+                    #if prediction['probability'] > onnx.confidence_max:
+                    #print(prediction)
+                    if prediction['probability'] > onnx.threshold:
                         x1 = int(prediction['boundingBox']['left'] * width)
                         y1 = int(prediction['boundingBox']['top'] * height)
                         x2 = x1 + int(prediction['boundingBox']['width'] * width)
