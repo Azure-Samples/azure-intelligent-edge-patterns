@@ -3,6 +3,7 @@ Location models
 """
 from django.db import models
 
+
 class Location(models.Model):
     """Location Model"""
 
