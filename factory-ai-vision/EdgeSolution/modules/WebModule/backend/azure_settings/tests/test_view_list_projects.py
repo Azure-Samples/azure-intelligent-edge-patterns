@@ -12,7 +12,7 @@ from azure.cognitiveservices.vision.customvision.training import (
     CustomVisionTrainingClient)
 
 from cameras.models import Setting
-from config import ENDPOINT, TRAINING_KEY
+from configs.customvision_config import ENDPOINT, TRAINING_KEY
 from general import error_messages
 
 PROJECT_PREFIX = "UnitTest"

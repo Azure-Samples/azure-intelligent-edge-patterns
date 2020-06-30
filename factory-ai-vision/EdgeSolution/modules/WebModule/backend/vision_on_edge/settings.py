@@ -14,8 +14,8 @@ import os
 
 import config
 from configs.app_insight import APP_INSIGHT_ON
-from configs.logging_config import (LOGGING_CONFIG_DEV,
-                                    LOGGING_CONFIG_PRODUCTION)
+from configs import logging_config
+from configs.customvision_config import TRAINING_KEY, ENDPOINT
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'azure_settings',
+    'locations',
     'cameras',
     'rest_framework',
     'drf_yasg',
@@ -156,16 +158,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ICON_URL = '/icons/'
 ICON_ROOT = os.path.join(UI_DIR, 'icons')
 
-TRAINING_KEY = config.TRAINING_KEY
-ENDPOINT = config.ENDPOINT
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
-
-if 'TRAINING_KEY' in os.environ:
-    TRAINING_KEY = os.environ['TRAINING_KEY']
-if 'ENDPOINT' in os.environ:
-    ENDPOINT = os.environ['ENDPOINT']
 
 print('************************************')
 print('CONFIGURATION:')
@@ -173,4 +168,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = LOGGING_CONFIG_PRODUCTION
+LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION

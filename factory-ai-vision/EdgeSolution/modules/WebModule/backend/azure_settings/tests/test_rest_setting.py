@@ -6,7 +6,6 @@ from django.urls import reverse
 #from rest_framework import status
 
 from rest_framework.test import APITransactionTestCase
-#from config import ENDPOINT, TRAINING_KEY
 
 
 logger = logging.getLogger(__name__)
