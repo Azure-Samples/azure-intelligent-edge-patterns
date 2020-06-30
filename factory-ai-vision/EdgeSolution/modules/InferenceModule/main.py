@@ -561,7 +561,9 @@ def video_feed():
                             if not is_inside_aoi(x1, y1, x2, y2, onnx.aoi_info): continue
 
                         img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                        img = cv2.putText(img, prediction['tagName'], (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
+                        prob_str = str(int(prediction['probability']*1000)/10)
+                        prob_str = ' (' + prob_str + '%)'
+                        img = cv2.putText(img, prediction['tagName']+prob_str, (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
 
 
             time.sleep(0.03)
