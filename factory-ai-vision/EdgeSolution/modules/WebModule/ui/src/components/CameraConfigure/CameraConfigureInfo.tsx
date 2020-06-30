@@ -9,6 +9,7 @@ import {
   thunkGetTrainingLog,
   thunkGetTrainingMetrics,
   thunkGetInferenceMetrics,
+  resetStatus,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -65,6 +66,10 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
     status === CameraConfigStatus.StartInference ? 5000 : null,
   );
 
+  useEffect(() => {
+    return () => dispatch(resetStatus());
+  }, []);
+
   const isCameraOnline = [CameraConfigStatus.FinishTraining, CameraConfigStatus.StartInference].includes(
     status,
   );
@@ -73,7 +78,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      {status === CameraConfigStatus.WaitTraining ? (
+      {status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None ? (
         <>
           <Loader size="smallest" />
           <pre>{allTrainingLog}</pre>
