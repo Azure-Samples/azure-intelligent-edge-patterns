@@ -35,6 +35,7 @@ IF NOT !errorlevel! == 0 (
   PAUSE > noOutput
   GOTO :eof
 )
+Call az extension update --name azure-iot
 
 REM ############################## Get Tenant ###################################
 
@@ -51,17 +52,15 @@ REM Only one option so no need to prompt for choice
 IF !count! leq 1 (
     CALL az account set --subscription "!var1!"
 ) ELSE (
-    REM This assumes an upper limit of 26 on any list to be chosen from
     REM Underscore is necessary as all other constructs are 1 based so lines up with 1 based for loop next
-    SET alpha=_abcdefghijklmnopqrstuvwxyz
     FOR /L %%G IN (1,1,!count!) DO (
         SET char=!alpha:~%%G,1!
-        ECHO !char!     !var%%G!
+        ECHO %%G     !var%%G!
     )
     ECHO.
-    SET choose=!alpha:~1,%count%!
-    CHOICE /c !choose! /m "Choose the letter corisponding to your tenant" /n
-    CALL SET az-subscripton-name=%%var!errorlevel!%%
+    set /p userinp=Choose the number corisponding to your tenant: 
+    set userinp=!userinp:~0,2!
+    CALL SET az-subscripton-name=%%var!userinp!%%
     CALL ECHO "you chose:" "!az-subscripton-name!"
     CALL az account set --subscription "!az-subscripton-name!" --only-show-errors
 )
@@ -152,17 +151,15 @@ IF !count! == 1 (
     )
     SET iot-hub-name=%var1%
 ) ELSE (
-    REM This assumes an upper limit of 26 on any list to be chosen from
     REM Underscore is necessary as all other constructs are 1 based so lines up with 1 based for loop next
-    SET alpha=_abcdefghijklmnopqrstuvwxyz
     FOR /L %%G IN (1,1,!count!) DO (
         SET char=!alpha:~%%G,1!
-        ECHO !char!     !var%%G!
+        ECHO %%G     !var%%G!
     )
     ECHO.
-    SET choose=!alpha:~1,%count%!
-    CHOICE /c !choose! /m "Choose the letter corisponding to your iothub" /n
-    CALL SET iot-hub-name=%%var!errorlevel!%%
+    SET /p userinp=Choose the number corisponding to your iothub: 
+    SET userinp=!userinp:~0,2!
+    CALL SET iot-hub-name=%%var!userinp!%%
     CALL ECHO you chose: !iot-hub-name!
 )
 
@@ -199,12 +196,12 @@ IF !count! == 1 (
     SET alpha=_abcdefghijklmnopqrstuvwxyz
     FOR /L %%G IN (1,1,!count!) DO (
         SET char=!alpha:~%%G,1!
-        ECHO !char!     !var%%G!
+        ECHO %%G     !var%%G!
     )
     ECHO.
-    SET choose=!alpha:~1,%count%!
-    CHOICE /c !choose! /m "Choose the letter corisponding to your iot device" /n
-    CALL SET edge-device-id=%%var!errorlevel!%%
+    SET /p userinp=Choose the number corisponding to your iot device: 
+    SET userinp=!userinp:~0,2!
+    CALL SET edge-device-id=%%var!userinp!%%
     CALL ECHO you chose: !edge-device-id!
 )
 
@@ -241,5 +238,5 @@ FOR /F "tokens=* USEBACKQ" %%F IN (`az iot edge set-modules --device-id %edge-de
 ECHO installation complete
 
 ECHO solution scheduled to deploy on the %edge-device-id% device, from the %iot-hub-name% hub
-
+ECHO status of deployment can be checked using the command 'sudo iotedge list' on the Azure Stack Edge device
 ENDLOCAL
