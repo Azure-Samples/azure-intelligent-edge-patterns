@@ -11,8 +11,10 @@ from rest_framework.test import APITransactionTestCase
 from azure.cognitiveservices.vision.customvision.training import (
     CustomVisionTrainingClient)
 
-from cameras.models import Project, Setting, Camera, Location, Part
-from config import ENDPOINT, TRAINING_KEY
+from azure_settings.models import Setting
+from locations.models import Location
+from cameras.models import Project, Camera, Part
+from configs.customvision_config import ENDPOINT, TRAINING_KEY
 
 
 PROJECT_PREFIX = "UnitTest"

@@ -14,8 +14,7 @@ import os
 
 import config
 from configs.app_insight import APP_INSIGHT_ON
-from configs.logging_config import (LOGGING_CONFIG_DEV,
-                                    LOGGING_CONFIG_PRODUCTION)
+from configs import logging_config
 from configs.customvision_config import TRAINING_KEY, ENDPOINT
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -42,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'azure_settings',
     'locations',
     'cameras',
     'rest_framework',
@@ -168,4 +168,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = LOGGING_CONFIG_PRODUCTION
+LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION
