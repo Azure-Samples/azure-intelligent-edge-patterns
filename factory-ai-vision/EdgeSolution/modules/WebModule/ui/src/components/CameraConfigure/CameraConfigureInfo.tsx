@@ -1,5 +1,5 @@
 import React, { useEffect, FC, useState, useCallback } from 'react';
-import { Flex, Text, Status, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
+import { Flex, Text, Status, Button, Loader, Grid, Alert, Input } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -9,6 +9,9 @@ import {
   thunkGetTrainingLog,
   thunkGetTrainingMetrics,
   thunkGetInferenceMetrics,
+  resetStatus,
+  updateProjectData,
+  thunkUpdateProbThreshold,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -18,10 +21,15 @@ import { LiveViewContainer } from '../LiveViewContainer';
 import { AOIData } from '../../type';
 
 export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }> = ({ projectId, AOIs }) => {
-  const { error, data: project, trainingLog, status, trainingMetrics, inferenceMetrics } = useSelector<
-    State,
-    Project
-  >((state) => state.project);
+  const {
+    error,
+    data: project,
+    trainingLog,
+    status,
+    trainingMetrics,
+    inferenceMetrics,
+    isLoading,
+  } = useSelector<State, Project>((state) => state.project);
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const parts = useParts();
   const dispatch = useDispatch();
@@ -65,6 +73,10 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
     status === CameraConfigStatus.StartInference ? 5000 : null,
   );
 
+  useEffect(() => {
+    return () => dispatch(resetStatus());
+  }, []);
+
   const isCameraOnline = [CameraConfigStatus.FinishTraining, CameraConfigStatus.StartInference].includes(
     status,
   );
@@ -73,7 +85,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
     <Flex column gap="gap.large">
       <h1>Configuration</h1>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      {status === CameraConfigStatus.WaitTraining ? (
+      {status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None ? (
         <>
           <Loader size="smallest" />
           <pre>{allTrainingLog}</pre>
@@ -92,6 +104,24 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
           <Flex column gap="gap.small">
             <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
           </Flex>
+          <ListItem title="Maximum">
+            <Input
+              value={project.probThreshold}
+              onChange={(_, { value }): void => {
+                dispatch(updateProjectData({ probThreshold: value }));
+              }}
+            />
+            <span>%</span>
+            <Button
+              primary
+              content="Update Confidence Level"
+              onClick={(): void => {
+                dispatch(thunkUpdateProbThreshold());
+              }}
+              disabled={!project.probThreshold || isLoading}
+              loading={isLoading}
+            />
+          </ListItem>
           <Grid columns={2} styles={{ rowGap: '20px' }}>
             <ListItem title="Success Rate">
               <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
@@ -202,7 +232,7 @@ const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall
 
 const ListItem = ({ title, children }): JSX.Element => {
   return (
-    <Flex vAlign="center">
+    <Flex vAlign="center" gap="gap.medium">
       <Text style={{ width: '200px' }} size="large">{`${title}: `}</Text>
       {typeof children === 'string' || typeof children === 'number' ? (
         <Text size="large">{children}</Text>

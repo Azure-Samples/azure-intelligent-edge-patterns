@@ -255,6 +255,8 @@ class Project(models.Model):
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
 
+    prob_threshold = models.IntegerField(default=10)
+
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
         """Project pre_save"""
@@ -339,6 +341,7 @@ class Project(models.Model):
             metrics_accuracy_threshold = instance.metrics_accuracy_threshold
         if instance.metrics_frame_per_minutes is not None:
             metrics_frame_per_minutes = instance.metrics_frame_per_minutes
+
 
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
@@ -551,6 +554,22 @@ class Project(models.Model):
                             "{body}",
                             headers={"Training-key": setting_obj.training_key})
         return res
+
+    def update_prob_threshold(self, prob_threshold):
+        """update confidenece threshold of boundingBox
+        """
+        self.prob_threshold = prob_threshold
+
+        if prob_threshold > 100 or prob_threshold < 0:
+            raise ValueError('prob_threshold out of range')
+
+        requests.get(
+            "http://" + inference_module_url() + "/update_prob_threshold",
+            params={
+                "prob_threshold": prob_threshold,
+            },
+        )
+        self.save(update_fields=['prob_threshold'])
 
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):

@@ -62,6 +62,8 @@ urlpatterns = \
              views.inference_video_feed),
         path('api/projects/<int:project_id>/pull_cv_project',
              views.pull_cv_project),
+        path('api/projects/<int:project_id>/update_prob_threshold',
+             views.update_prob_threshold),
         path('api/projects/<int:project_id>/reset_project', views.reset_project),
         path('api/projects/<int:project_id>/reset_camera',
              views.project_reset_camera),

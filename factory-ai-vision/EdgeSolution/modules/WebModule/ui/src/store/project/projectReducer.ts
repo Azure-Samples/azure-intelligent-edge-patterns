@@ -22,6 +22,7 @@ import {
   GET_INFERENCE_METRICS_SUCCESS,
   GET_INFERENCE_METRICS_FAILED,
   UPDATE_ORIGIN_PROJECT_DATA,
+  RESET_STATUS,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -61,6 +62,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           sendMessageToCloud: false,
           framesPerMin: 6,
           accuracyThreshold: 50,
+          probThreshold: '10',
         },
         originData: {
           id: null,
@@ -75,6 +77,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           sendMessageToCloud: false,
           framesPerMin: 6,
           accuracyThreshold: 50,
+          probThreshold: '10',
         },
         inferenceMetrics: {
           successRate: 0,
@@ -94,7 +97,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case DELETE_PROJECT_FALIED:
       return { ...state };
     case UPDATE_PROJECT_DATA:
-      return { ...state, data: action.payload };
+      return { ...state, data: { ...state.data, ...action.payload } };
     case UPDATE_ORIGIN_PROJECT_DATA:
       return { ...state, originData: state.data };
     case GET_TRAINING_LOG_REQUEST:
@@ -134,6 +137,14 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state, inferenceMetrics: action.payload };
     case GET_INFERENCE_METRICS_FAILED:
       return { ...state, error: action.error };
+    case RESET_STATUS:
+      return { ...state, status: Status.None };
+    case 'UPDATE_PROB_THRESHOLD_REQUEST':
+      return { ...state, isLoading: true, error: null };
+    case 'UPDATE_PROB_THRESHOLD_SUCCESS':
+      return { ...state, isLoading: false };
+    case 'UPDATE_PROB_THRESHOLD_FAILED':
+      return { ...state, isLoading: false, error: action.error };
     default:
       return { ...state };
   }

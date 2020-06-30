@@ -175,15 +175,16 @@ export const Setting = (): JSX.Element => {
         </Flex>
         {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
       </Flex>
-      {false && <>
-      <Divider color="grey" />
-      <Checkbox
-        label="Allow to Send Usage Data"
-        toggle
-        checked={checkboxChecked}
-        onChange={onCheckBoxClick}
-      />
-      </>}
+      {/* 
+          <Divider color="grey" />
+          <Checkbox
+            label="Allow to Send Usage Data"
+            toggle
+            checked={checkboxChecked}
+            onChange={onCheckBoxClick}
+          />
+        </>
+      */}
     </>
   );
 };
@@ -210,10 +211,9 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
   const dispatch = useDispatch();
 
   const onDropdownChange = (_, data): void => {
-    if (data.value === null)
-      dispatch(updateProjectData({ ...projectData, cvProjectId: projectData.cvProjectId }));
+    if (data.value === null) dispatch(updateProjectData({ cvProjectId: projectData.cvProjectId }));
     else if (data.value.content.key === initialDropdownItem[0].content.key) setCreateProjectModel(true);
-    else dispatch(updateProjectData({ ...projectData, cvProjectId: data.value.content.key }));
+    else dispatch(updateProjectData({ cvProjectId: data.value.content.key }));
   };
 
   const onLoad = (): void => {
