@@ -1,5 +1,5 @@
 import React, { useEffect, FC, useState, useCallback } from 'react';
-import { Flex, Text, Status, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
+import { Flex, Text, Status, Button, Loader, Grid, Alert, Input } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -97,6 +97,11 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
           <Flex column gap="gap.small">
             <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
           </Flex>
+          <ListItem title="Maximum">
+            <Input />
+            <span>%</span>
+            <Button primary content="Update Confidence Level" />
+          </ListItem>
           <Grid columns={2} styles={{ rowGap: '20px' }}>
             <ListItem title="Success Rate">
               <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
@@ -207,7 +212,7 @@ const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall
 
 const ListItem = ({ title, children }): JSX.Element => {
   return (
-    <Flex vAlign="center">
+    <Flex vAlign="center" gap="gap.medium">
       <Text style={{ width: '200px' }} size="large">{`${title}: `}</Text>
       {typeof children === 'string' || typeof children === 'number' ? (
         <Text size="large">{children}</Text>
