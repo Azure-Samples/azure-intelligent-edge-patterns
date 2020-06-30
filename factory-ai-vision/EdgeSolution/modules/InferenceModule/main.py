@@ -205,7 +205,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         return prediction
 
 
-
     def start_session(self):
         def run(self):
             send_counter = 0
@@ -516,6 +515,17 @@ def update_iothub_parameters():
     print('  fpm', fpm)
 
     onnx.update_iothub_parameters(is_send, threshold, fpm)
+    return 'ok'
+
+@app.route('/update_prob_threshold')
+def update_prob_threshold():
+    prob_threshold = request.args.get('prob_threshold')
+    if not prob_threshold: return 'missing prob_threshold'
+
+    onnx.prob_threshold = int(prob_threshold) * 0.01
+    print('[INFO] updaing prob_threshold to')
+    print('  prob_threshold:', prob_threshold)
+
     return 'ok'
 
 @app.route('/video_feed')

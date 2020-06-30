@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'locations',
     'cameras',
     'rest_framework',
     'drf_yasg',

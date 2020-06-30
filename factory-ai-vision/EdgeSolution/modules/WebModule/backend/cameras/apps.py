@@ -27,8 +27,8 @@ class CameraConfig(AppConfig):
         """
         # FIXME test may use this as well
         if 'runserver' in sys.argv:
-            from cameras.models import (Part, Camera, Location, Project, Train,
-                                        Setting)
+            from cameras.models import (Part, Camera, Project, Train, Setting)
+            from locations.models import Location
             logger.info("CameraAppConfig ready while running server")
 
             existing_settings = Setting.objects.filter(
@@ -116,12 +116,11 @@ class CameraConfig(AppConfig):
                     })
 
                 logger.info("Creating Demo Location")
-                demo_location, created = Location.objects.update_or_create(
-                    name="Demo Location",
-                    is_demo=True,
-                    defaults={
-                        'description': "Demo Location",
-                    })
+                # Demo Location should be created already
+                # FIXME : split location from project, and remove location here
+                demo_locations = Location.objects.filter(is_demo=True)
+                if len(demo_locations) <= 0:
+                    return
 
                 logger.info("Creating Demo Project")
                 demo_project, created = Project.objects.update_or_create(
@@ -129,7 +128,7 @@ class CameraConfig(AppConfig):
                     defaults={
                         'setting': default_setting,
                         'camera': demo_camera,
-                        'location': demo_location,
+                        'location': demo_locations.first(),
                     })
 
                 demo_train, created = Train.objects.update_or_create(
@@ -140,12 +139,16 @@ class CameraConfig(AppConfig):
                         'performance': 1,
                     })
                 logger.info("Creating Demo... End")
+            demo_locations = Location.objects.filter(is_demo=True)
+            if len(demo_locations) <= 0:
+                return
 
+            # FIXME: is DEMO = False, will not have camera, location to assign
             default_project, created = Project.objects.update_or_create(
                 is_demo=False,
                 defaults={
                     'camera': demo_camera,
-                    'location': demo_location
+                    'location': demo_locations.first()
                 })
             logger.info(
                 "None demo project found: %s. Default project created: %s",
