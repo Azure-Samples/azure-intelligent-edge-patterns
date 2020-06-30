@@ -22,6 +22,7 @@ from django.conf import settings
 from rest_framework import routers
 
 from cameras import views
+from azure_settings.api import views as setting_views
 from locations.api import views as location_views
 from . import views as site_views
 
@@ -34,6 +35,7 @@ class OptionalSlashRouter(routers.DefaultRouter):
 
 #router = ters.DefaultRouter(trailing_slash=False)
 router = OptionalSlashRouter()
+router.register('settings', setting_views.SettingViewSet)
 router.register('cameras', views.CameraViewSet)
 router.register('parts', views.PartViewSet)
 router.register('images', views.ImageViewSet)
@@ -41,7 +43,6 @@ router.register('projects', views.ProjectViewSet)
 router.register('locations', location_views.LocationViewSet)
 router.register('annotations', views.AnnotationViewSet)
 router.register('train', views.TrainViewSet)
-router.register('settings', views.SettingViewSet)
 router.register('tasks', views.TaskViewSet)
 
 urlpatterns = \
@@ -59,8 +60,6 @@ urlpatterns = \
              views.train_performance),
         path('api/projects/<int:project_id>/inference_video_feed',
              views.inference_video_feed),
-        # path('api/settings/<int:setting_id>/clone_cv_project',
-        #     views.clone_cv_project),
         path('api/projects/<int:project_id>/pull_cv_project',
              views.pull_cv_project),
         path('api/projects/<int:project_id>/reset_project', views.reset_project),

@@ -1,16 +1,15 @@
 """
 Project Model Test.
-In this test, projects will be created on Azure Custom Vision.
+In this test, projects will be created on Azure CustomVision.
 
 Requirements:
-1. ENDPOINT, TRAINING_KEY in config.py is valid.
-2. Custom Vision is able to create projects
+1. ENDPOINT, TRAINING_KEY is valid.
+2. ENDPOINT, TRAINING_KEY is able to create projects on CustomVision.
 
 Notes:
-1. All test projects created on Azure Custom Vision will have/should have name
-   starting with PROJECT_PREFIX.
-2. All projects on Azure Custom Vision started with PROJECT_PREFIX will
-   be deleted after testing.
+1. Projects will be created on Azure CustomVision with name starting with
+   PROJECT_PREFIX.
+2. Projects with name starting with PROJECT_PREFIX will be deleted.
 """
 import logging
 
@@ -19,8 +18,10 @@ from rest_framework.test import APITransactionTestCase
 from azure.cognitiveservices.vision.customvision.training import (
     CustomVisionTrainingClient)
 
-from cameras.models import Project, Setting, Camera, Location, Part
-from config import ENDPOINT, TRAINING_KEY
+from azure_settings.models import Setting
+from locations.models import Location
+from cameras.models import Project, Camera, Part
+from configs.customvision_config import ENDPOINT, TRAINING_KEY
 
 PROJECT_PREFIX = "UnitTest"
 
