@@ -121,9 +121,9 @@ export const stopInference = (): StopInferenceAction => ({
   type: STOP_INFERENCE,
 });
 
-export const updateProjectData = (projectData: ProjectData): UpdateProjectDataAction => ({
+export const updateProjectData = (partialProjectData: Partial<ProjectData>): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
-  payload: projectData,
+  payload: partialProjectData,
 });
 
 export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({

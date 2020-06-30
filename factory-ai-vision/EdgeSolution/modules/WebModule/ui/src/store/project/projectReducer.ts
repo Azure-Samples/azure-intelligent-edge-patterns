@@ -96,9 +96,8 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       };
     case DELETE_PROJECT_FALIED:
       return { ...state };
-    // TODO let payload be subset of projectData
     case UPDATE_PROJECT_DATA:
-      return { ...state, data: action.payload };
+      return { ...state, data: { ...state.data, ...action.payload } };
     case UPDATE_ORIGIN_PROJECT_DATA:
       return { ...state, originData: state.data };
     case GET_TRAINING_LOG_REQUEST:

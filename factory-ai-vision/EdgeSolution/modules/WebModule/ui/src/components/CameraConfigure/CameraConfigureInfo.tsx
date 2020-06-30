@@ -108,7 +108,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number; AOIs: AOIData }>
             <Input
               value={project.probThreshold}
               onChange={(_, { value }): void => {
-                dispatch(updateProjectData({ ...project, probThreshold: value }));
+                dispatch(updateProjectData({ probThreshold: value }));
               }}
             />
             <span>%</span>

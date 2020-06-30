@@ -167,7 +167,7 @@ export type DeleteProjectFaliedAction = {
 export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
 export type UpdateProjectDataAction = {
   type: typeof UPDATE_PROJECT_DATA;
-  payload: ProjectData;
+  payload: Partial<ProjectData>;
 };
 
 export const UPDATE_ORIGIN_PROJECT_DATA = 'UPDATE_ORIGIN_PROJECT_DATA';
