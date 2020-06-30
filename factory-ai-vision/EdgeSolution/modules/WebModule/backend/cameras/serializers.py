@@ -132,6 +132,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             "metrics_is_send_iothub",
             "metrics_accuracy_threshold",
             "metrics_frame_per_minutes",
+            "prob_threshold",
         ]
         extra_kwargs = {
             "setting": {
@@ -143,6 +144,9 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             "customvision_project_id": {
                 "required": False
             },
+            "prob_threshold": {
+                "required": False
+            }
         }
 
     def create(self, validated_data):
