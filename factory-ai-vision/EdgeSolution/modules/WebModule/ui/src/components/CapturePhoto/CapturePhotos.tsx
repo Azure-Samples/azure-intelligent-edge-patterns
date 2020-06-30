@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef, Dispatch } from 'react';
 import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
 import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -14,10 +14,13 @@ import { LabelImage } from '../../store/image/imageTypes';
 import { getFilteredImages } from '../../util/getFilteredImages';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 
-export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
+export const CapturePhotos: React.FC<{
+  partId: number;
+  goLabelImageIdx: number;
+  setGoLabelImageIdx: Dispatch<number>;
+}> = ({ partId, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
   const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
   const images = useSelector<State, LabelImage[]>((state) => state.images);
   const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
@@ -32,7 +35,7 @@ export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
       setOpenLabelingPage(false);
       prevImageLength.current = filteredImages.length;
     }
-  }, [openLabelingPage, filteredImages]);
+  }, [openLabelingPage, filteredImages, setGoLabelImageIdx]);
 
   return (
     <>
@@ -43,7 +46,6 @@ export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
         canCapture={true}
         setOpenLabelingPage={setOpenLabelingPage}
       />
-      <CapturedImagesContainer images={filteredImages} goLabelImageIdx={goLabelImageIdx} />
     </>
   );
 };
@@ -81,9 +83,11 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
   );
 };
 
-const CapturedImagesContainer = ({ images, goLabelImageIdx }): JSX.Element => {
-  const isValid = images.filter((image) => image.labels).length >= 15;
-  const imageCount = images.length;
+export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Element => {
+  const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
+  const isValid = filteredImages.filter((image) => image.labels).length >= 15;
+  const imageCount = filteredImages.length;
 
   return (
     <>
@@ -99,7 +103,7 @@ const CapturedImagesContainer = ({ images, goLabelImageIdx }): JSX.Element => {
         gap="gap.small"
         vAlign="center"
       >
-        {images.map((image, i, arr) => (
+        {filteredImages.map((image, i, arr) => (
           <div key={image.id} style={{ height: '100%', width: '100%' }}>
             <span>{i + 1}</span>
             <LabelingPageDialog
