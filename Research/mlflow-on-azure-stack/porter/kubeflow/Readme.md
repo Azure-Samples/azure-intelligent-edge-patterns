@@ -3,7 +3,7 @@
 This guide demonstrates how to install a Kubeflow on Kubernetes. The instructions below demonstrate how to install using a Cloud Native Application Bundle (CNAB). Please see the document referenced below for manual installation instructions.
 
 **Reference Material:**
-- [Manual Installation Instructions](/Research/mlflow-on-azure-stack/docs/manual_installation.md)
+- [Manual Installation Instructions](/Research/kubeflow-on-azure-stack/Readme.md)
 
 **Prerequisite:**
 - Will need the k8 cluster ".kubeconfig" file on your local machine to execute commands on the k8 cluster 
@@ -96,6 +96,7 @@ You can monitor Kubeflow cluster by looking at the Kubernetes status, you might 
 For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/) 
 
 ### Step 7: Creating a Notebook Server
+Note: you should have MLFlow installed for this step, which can be found here [Installing MLFlow](/Research/mlflow-on-azure-stack/porter/mlflow/Readme.md)
 
 From the Kubeflow dashboard select "Notebook Servers". Pick the namespace you want to create the server under and select "+ New Server".
 
