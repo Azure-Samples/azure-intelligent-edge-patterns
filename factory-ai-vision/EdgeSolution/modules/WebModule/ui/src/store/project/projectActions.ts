@@ -168,7 +168,7 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         cvProjectId: data[0]?.customvision_project_id,
-        probThreshold: data[0]?.prob_threshold.toString() ?? '30',
+        probThreshold: data[0]?.prob_threshold.toString() ?? '10',
       };
       dispatch(getProjectSuccess(project));
       return void 0;

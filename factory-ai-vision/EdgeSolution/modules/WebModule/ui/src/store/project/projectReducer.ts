@@ -62,7 +62,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           sendMessageToCloud: false,
           framesPerMin: 6,
           accuracyThreshold: 50,
-          probThreshold: '30',
+          probThreshold: '10',
         },
         originData: {
           id: null,
@@ -77,7 +77,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           sendMessageToCloud: false,
           framesPerMin: 6,
           accuracyThreshold: 50,
-          probThreshold: '30',
+          probThreshold: '10',
         },
         inferenceMetrics: {
           successRate: 0,

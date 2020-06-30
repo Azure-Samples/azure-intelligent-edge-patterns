@@ -44,7 +44,7 @@ export const initialState: State = {
       sendMessageToCloud: false,
       framesPerMin: 6,
       accuracyThreshold: 50,
-      probThreshold: '30',
+      probThreshold: '10',
     },
     originData: {
       id: null,
@@ -59,7 +59,7 @@ export const initialState: State = {
       sendMessageToCloud: false,
       framesPerMin: 6,
       accuracyThreshold: 50,
-      probThreshold: '30',
+      probThreshold: '10',
     },
     trainingMetrics: {
       prevConsequence: null,
