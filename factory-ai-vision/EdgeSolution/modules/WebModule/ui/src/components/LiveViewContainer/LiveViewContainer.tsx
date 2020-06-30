@@ -87,35 +87,43 @@ export const LiveViewContainer: React.FC<{
 
   return (
     <Flex column gap="gap.medium">
-      <Text styles={{ width: '150px' }} size="large">
-        Live View:
-      </Text>
-      {error && <Alert danger header="Failed to Update!" content={`${error.name}: ${error.message}`} />}
-      <Flex hAlign="end" gap="gap.small" vAlign="center">
-        <Checkbox
-          labelPosition="start"
-          label="Show area of interest"
-          toggle
-          checked={showAOI}
-          onClick={onCheckboxClick}
-        />
-        <Button content="Update" primary disabled={updateBtnDisabled} onClick={onUpdate} loading={loading} />
-        {false && (
-          <Button
-            content="Create Area of Interest"
-            primary={creatingAOI !== CreatingState.Disabled}
-            disabled={!showAOI}
-            onClick={(): void => {
-              if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
-              else setCreatingAOI(CreatingState.Disabled);
-            }}
-            circular
-            styles={{ padding: '0 5px' }}
+      <Flex space="between">
+        <Text styles={{ width: '150px' }} size="medium">
+          Live View:
+        </Text>
+        {error && <Alert danger header="Failed to Update!" content={`${error.name}: ${error.message}`} />}
+        <Flex hAlign="end" gap="gap.small">
+          <Checkbox
+            labelPosition="start"
+            label="Show area of interest"
+            toggle
+            checked={showAOI}
+            onClick={onCheckboxClick}
           />
-        )}
-        <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
+          <Button
+            content="Update"
+            primary
+            disabled={updateBtnDisabled}
+            onClick={onUpdate}
+            loading={loading}
+          />
+          {false && (
+            <Button
+              content="Create Area of Interest"
+              primary={creatingAOI !== CreatingState.Disabled}
+              disabled={!showAOI}
+              onClick={(): void => {
+                if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
+                else setCreatingAOI(CreatingState.Disabled);
+              }}
+              circular
+              styles={{ padding: '0 5px' }}
+            />
+          )}
+          <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
+        </Flex>
       </Flex>
-      <div style={{ width: '100%', height: '600px', backgroundColor: 'black' }}>
+      <div style={{ width: '100%', height: '40vh', backgroundColor: 'black' }}>
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
