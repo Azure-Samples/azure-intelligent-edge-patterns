@@ -401,7 +401,7 @@ class Project(models.Model):
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
 
-    prob_threshold = models.IntegerField(default=30)
+    prob_threshold = models.IntegerField(default=10)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
