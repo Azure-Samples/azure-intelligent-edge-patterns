@@ -48,7 +48,7 @@ Validate that your credential is present by running the below command. You shoul
 porter credentials list
 ```
 
-![List Porter Credentials](./docs/img/porter-credentials-validate.png)
+![List Porter Credentials](/Research/mlflow-on-azure-stack/docs/img/porter-credentials-validate.png)
 
 
 ## Step 4: Use Porter CNAB
@@ -85,5 +85,5 @@ mlflow-service   LoadBalancer   10.0.176.78   52.250.47.209   5000:31148/TCP   1
 ```
 Use external-ip to open it in your browser, and make sure your firewall rules allow HTTP port 5000.
 
-![MLflow dashboard](./docs/img/mlflow_dashboard.png)
+![MLflow dashboard](/Research/mlflow-on-azure-stack/docs/img/mlflow_dashboard.png)
 
