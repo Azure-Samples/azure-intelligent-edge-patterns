@@ -62,6 +62,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           sendMessageToCloud: false,
           framesPerMin: 6,
           accuracyThreshold: 50,
+          probThreshold: '30',
         },
         originData: {
           id: null,
@@ -76,6 +77,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           sendMessageToCloud: false,
           framesPerMin: 6,
           accuracyThreshold: 50,
+          probThreshold: '30',
         },
         inferenceMetrics: {
           successRate: 0,
@@ -94,6 +96,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       };
     case DELETE_PROJECT_FALIED:
       return { ...state };
+    // TODO let payload be subset of projectData
     case UPDATE_PROJECT_DATA:
       return { ...state, data: action.payload };
     case UPDATE_ORIGIN_PROJECT_DATA:
@@ -137,6 +140,12 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state, error: action.error };
     case RESET_STATUS:
       return { ...state, status: Status.None };
+    case 'UPDATE_PROB_THRESHOLD_REQUEST':
+      return { ...state, isLoading: true, error: null };
+    case 'UPDATE_PROB_THRESHOLD_SUCCESS':
+      return { ...state, isLoading: false };
+    case 'UPDATE_PROB_THRESHOLD_FAILED':
+      return { ...state, isLoading: false, error: action.error };
     default:
       return { ...state };
   }

@@ -48,6 +48,9 @@ import {
   UpdateOriginProjectDataAction,
   ResetStatusAction,
   RESET_STATUS,
+  UpdateProbThresholdRequestAction,
+  UpdateProbThresholdSuccessAction,
+  UpdateProbThresholdFailedAction,
 } from './projectTypes';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
@@ -131,6 +134,19 @@ export const resetStatus = (): ResetStatusAction => ({
   type: RESET_STATUS,
 });
 
+const updateProbThresholdRequest = (): UpdateProbThresholdRequestAction => ({
+  type: 'UPDATE_PROB_THRESHOLD_REQUEST',
+});
+
+const updateProbThresholdSuccess = (): UpdateProbThresholdSuccessAction => ({
+  type: 'UPDATE_PROB_THRESHOLD_SUCCESS',
+});
+
+const updateProbThresholdFailed = (error: Error): UpdateProbThresholdFailedAction => ({
+  type: 'UPDATE_PROB_THRESHOLD_FAILED',
+  error,
+});
+
 export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest());
 
@@ -152,6 +168,7 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         cvProjectId: data[0]?.customvision_project_id,
+        probThreshold: data[0]?.prob_threshold.toString() ?? '30',
       };
       dispatch(getProjectSuccess(project));
       return void 0;
@@ -275,4 +292,26 @@ export const thunkGetInferenceMetrics = (projectId: number) => (dispatch): Promi
       );
     })
     .catch((err) => dispatch(getInferenceMetricsFailed(err)));
+};
+
+export const thunkUpdateProbThreshold = (): ProjectThunk => (dispatch, getState): Promise<any> => {
+  dispatch(updateProbThresholdRequest());
+
+  const projectId = getState().project.data.id;
+  const { probThreshold } = getState().project.data;
+
+  return Axios.get(`/api/projects/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
+    .then(() => dispatch(updateProbThresholdSuccess()))
+    .catch((e) => {
+      if (e.response) {
+        throw new Error(e.response.data.log);
+      } else if (e.request) {
+        throw new Error(e.request);
+      } else {
+        throw e;
+      }
+    })
+    .catch((e) => {
+      dispatch(updateProbThresholdFailed(e));
+    });
 };
