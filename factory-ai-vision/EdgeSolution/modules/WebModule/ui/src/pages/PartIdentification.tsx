@@ -110,7 +110,7 @@ export const PartIdentification: React.FC = () => {
   };
 
   const setData = (keyName: keyof ProjectData, value: ProjectData[keyof ProjectData]): void => {
-    dispatch(updateProjectData({ ...data, [keyName]: value }));
+    dispatch(updateProjectData({ [keyName]: value }));
   };
 
   const accracyRangeDisabled = !needRetraining || isTestModel;

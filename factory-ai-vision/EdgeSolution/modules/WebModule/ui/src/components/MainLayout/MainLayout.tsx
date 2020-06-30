@@ -1,5 +1,5 @@
 import React, { FC, MouseEvent } from 'react';
-import { Grid, Segment, Image, Flex, Text, MenuIcon } from '@fluentui/react-northstar';
+import { Grid, Segment, Image, Flex, Text, MenuIcon, Button } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -60,7 +60,9 @@ const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
             if (disabled) e.preventDefault();
           }}
         >
-          <Text color="white">Vision on Edge</Text>
+          <Button primary styles={{ backgroundColor: 'rgb(9, 34, 27)' }}>
+            Home
+          </Button>
         </NavLink>
       </Flex>
       <Flex

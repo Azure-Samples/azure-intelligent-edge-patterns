@@ -1,51 +1,39 @@
 """
 Camera models
 """
-import json
 import datetime
-import time
-import threading
-
+import json
+import logging
 # import queue
 # import random
 import sys
-import logging
+import threading
+import time
 from io import BytesIO
-
-from django.core import files
-from django.db import models
-from django.db.models.signals import post_save, pre_save
-
-# from django.db.models.signals import post_delete, m2m_changed
-from django.db.utils import IntegrityError
-from rest_framework import status
 
 import cv2
 import requests
-
-from PIL import Image as PILImage
-
-from azure.cognitiveservices.vision.customvision.training import (
-    CustomVisionTrainingClient,
-)
-
+from azure.cognitiveservices.vision.customvision.training import \
+    CustomVisionTrainingClient
 # from azure.cognitiveservices.vision.customvision.training.models import (
 # ImageFileCreateEntry, Region)
-from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import (
-    CustomVisionErrorException,
-)
+from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
+    CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
+from django.core import files
+from django.db import models
+from django.db.models.signals import post_save, pre_save
+# from django.db.models.signals import post_delete, m2m_changed
+from django.db.utils import IntegrityError
+from PIL import Image as PILImage
+from rest_framework import status
 
-
-# from vision_on_edge.settings import TRAINING_KEY, ENDPOINT
-from cameras.utils.app_insight import (
-    part_monitor,
-    img_monitor,
-    training_job_monitor,
-    retraining_job_monitor,
-    get_app_insight_logger,
-)
-from config import IOT_HUB_CONNECTION_STRING
+from cameras.utils.app_insight import (get_app_insight_logger, img_monitor,
+                                       part_monitor, retraining_job_monitor,
+                                       training_job_monitor)
+from configs.iot_config import IOT_HUB_CONNECTION_STRING
+from azure_settings.models import Setting
+from locations.models import Location
 
 logger = logging.getLogger(__name__)
 
@@ -102,17 +90,6 @@ class Part(models.Model):
             logger.exception("Unexpected Error in Part Presave")
 
 
-class Location(models.Model):
-    """Location Model"""
-
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=1000, blank=True, default="")
-    is_demo = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
-
-
 class Image(models.Model):
     """Image Model"""
 
@@ -130,7 +107,7 @@ class Image(models.Model):
             if self.remote_url:
                 resp = requests.get(self.remote_url)
                 if resp.status_code != status.HTTP_200_OK:
-                    raise Request
+                    raise requests.exceptions.RequestException
                 fp = BytesIO()
                 fp.write(resp.content)
                 file_name = f"{self.part.name}-{self.remote_url.split('/')[-1]}"
@@ -151,22 +128,20 @@ class Image(models.Model):
         try:
             if left > 1 or top > 1 or width > 1 or height > 1:
                 raise ValueError(
-                    f"{left}, {top}, {width}, {height} must be less than 1"
-                )
+                    f"{left}, {top}, {width}, {height} must be less than 1")
             elif left < 0 or top < 0 or width < 0 or height < 0:
                 # raise ValueError(
                 # f"{left}, {top}, {width}, {height} must be greater than 0")
-                logger.error(
-                    "%s, %s, %s, %s must be greater than 0", left, top, width, height
-                )
+                logger.error("%s, %s, %s, %s must be greater than 0", left,
+                             top, width, height)
                 return
             elif left + width > 1:
-                logger.error(
-                    "left + width: %s + %s must be less than 1", left, width)
+                logger.error("left + width: %s + %s must be less than 1", left,
+                             width)
                 return
             elif top + height > 1:
-                logger.error(
-                    "top + height: %s + %s must be less than 1", top, height)
+                logger.error("top + height: %s + %s must be less than 1", top,
+                             height)
                 return
 
             with PILImage.open(self.image) as img:
@@ -176,9 +151,12 @@ class Image(models.Model):
                 label_y1 = int(size_height * top)
                 label_x2 = int(size_width * (left + width))
                 label_y2 = int(size_height * (top + height))
-                self.labels = json.dumps(
-                    [{"x1": label_x1, "y1": label_y1, "x2": label_x2, "y2": label_y2}]
-                )
+                self.labels = json.dumps([{
+                    "x1": label_x1,
+                    "y1": label_y1,
+                    "x2": label_x2,
+                    "y2": label_y2
+                }])
                 self.save()
                 logger.info("Successfully save labels to %s", self.labels)
         except ValueError as e:
@@ -191,21 +169,17 @@ class Image(models.Model):
         "Add Labels to Image"
         try:
             if left > 1 or top > 1 or width > 1 or height > 1:
-                raise ValueError(
-                    "%s, %s, %s, %s must be less than 1", left, top, width, height
-                )
+                raise ValueError("%s, %s, %s, %s must be less than 1", left,
+                                 top, width, height)
             elif left < 0 or top < 0 or width < 0 or height < 0:
-                raise ValueError(
-                    "%s, %s, %s, %s must be greater than 0", left, top, width, height
-                )
+                raise ValueError("%s, %s, %s, %s must be greater than 0", left,
+                                 top, width, height)
             elif left + width > 1:
-                raise ValueError(
-                    "left + width: %s + %s must be less than 1", left, width
-                )
+                raise ValueError("left + width: %s + %s must be less than 1",
+                                 left, width)
             elif top + height > 1:
-                raise ValueError(
-                    "top + height: %s + %s  must be less than 1", top, height
-                )
+                raise ValueError("top + height: %s + %s  must be less than 1",
+                                 top, height)
         except ValueError as e:
             raise e
 
@@ -215,157 +189,6 @@ class Annotation(models.Model):
 
     image = models.OneToOneField(Image, on_delete=models.CASCADE)
     labels = models.CharField(max_length=1000, null=True)
-
-
-class Setting(models.Model):
-    """
-    A wrapper model of CustomVisionTraingClient.
-
-    Try not to pass CustomVisionTraingClient object if new model is expected to
-    be created. e.g. create project, create train/iteration, etc.
-    Instead, create a wrapper methods and let call, in order to sync the db
-    with remote.
-    """
-
-    name = models.CharField(max_length=100, blank=True,
-                            default="", unique=True)
-    endpoint = models.CharField(max_length=1000, blank=True)
-    training_key = models.CharField(max_length=1000, blank=True)
-    iot_hub_connection_string = models.CharField(max_length=1000, blank=True)
-    device_id = models.CharField(max_length=1000, blank=True)
-    module_id = models.CharField(max_length=1000, blank=True)
-
-    is_collect_data = models.BooleanField(default=False)
-
-    is_trainer_valid = models.BooleanField(default=False)
-    obj_detection_domain_id = models.CharField(
-        max_length=1000, blank=True, default="")
-
-    class Meta:
-        unique_together = ("endpoint", "training_key")
-
-    @staticmethod
-    def _get_trainer_obj_static(endpoint: str, training_key: str):
-        """
-        return <CustomVisionTrainingClient>.
-        : Success: return CustomVisionTrainingClient object
-        """
-        trainer = CustomVisionTrainingClient(
-            api_key=training_key, endpoint=endpoint)
-        return trainer
-
-    def get_trainer_obj(self):
-        """
-        return CustomVisionTrainingClient(self.training_key, self.endpoint)
-        : Success: return the CustomVisionTrainingClient object
-        """
-        return Setting._get_trainer_obj_static(
-            endpoint=self.endpoint, training_key=self.training_key
-        )
-
-    @staticmethod
-    def _validate_static(endpoint: str, training_key: str):
-        """
-        return tuple (is_trainer_valid, trainer)
-        """
-        logger.info("Validatiing %s %s", endpoint, training_key)
-        trainer = Setting._get_trainer_obj_static(
-            endpoint=endpoint, training_key=training_key
-        )
-        is_trainer_valid = False
-        try:
-            trainer.get_domains()
-            is_trainer_valid = True
-        except CustomVisionErrorException:
-            trainer = None
-        except Exception:
-            trainer = None
-        return is_trainer_valid, trainer
-
-    def revalidate_and_get_trainer_obj(self):
-        """
-        Update all the relevent fields and return the CustimVisionClient obj.
-        : Success: return CustimVisionClient object
-        : Failed:  return None
-        """
-        is_trainer_valid, trainer = Setting._validate_static(
-            self.endpoint, self.training_key
-        )
-        if is_trainer_valid:
-            return trainer
-        else:
-            return None
-
-    @staticmethod
-    def pre_save(instance, **kwargs):
-        """Setting pre_save"""
-        logger.info("Setting Presave")
-        try:
-            logger.info("Validating CustomVisionClient %s", instance.name)
-            trainer = Setting._get_trainer_obj_static(
-                training_key=instance.training_key, endpoint=instance.endpoint
-            )
-            obj_detection_domain = next(
-                domain
-                for domain in trainer.get_domains()
-                if domain.type == "ObjectDetection"
-                and domain.name == "General (compact)"
-            )
-
-            logger.info(
-                "Validating Trainer %s Key + Endpoint... Pass", instance.name)
-            instance.is_trainer_valid = True
-            instance.obj_detection_domain_id = obj_detection_domain.id
-        except CustomVisionErrorException as e:
-            logger.error("Setting Presave occur CustomVisionError: %s", e)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except KeyError as e:
-            logger.error("Setting Presave occur KeyError: %s", e)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except Exception as unexpected_error:
-            logger.exception("Setting Presave: Unexpected Error")
-            raise unexpected_error
-        finally:
-            logger.info("Setting Presave... End")
-
-    def create_project(self, project_name: str):
-        """
-        : Success: return project
-        : Failed:  return None
-        """
-        trainer = self.revalidate_and_get_trainer_obj()
-        logger.info("Creating obj detection project")
-        logger.info("Trainer: %s", trainer)
-        if not trainer:
-            logger.info("Trainer is invalid thus cannot create project")
-            return None
-        try:
-            project = trainer.create_project(
-                name=project_name, domain_id=self.obj_detection_domain_id
-            )
-            return project
-        except CustomVisionErrorException as e:
-            logger.error("Setting creating_project errors %s", e)
-            return None
-        except Exception:
-            logger.exception("Setting Presave: Unexpected Error")
-            raise
-
-    def delete_project(self, project_id: str):
-        """
-        : Success: return project
-        : Failed:  return None
-        """
-        pass
-
-    def __str__(self):
-        return self.name
 
 
 class Camera(models.Model):
@@ -407,14 +230,18 @@ class Project(models.Model):
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
     parts = models.ManyToManyField(Part, related_name="part")
-    customvision_project_id = models.CharField(
-        max_length=200, null=True, blank=True, default=""
-    )
-    customvision_project_name = models.CharField(
-        max_length=200, null=True, blank=True, default=""
-    )
-    download_uri = models.CharField(
-        max_length=1000, null=True, blank=True, default="")
+    customvision_project_id = models.CharField(max_length=200,
+                                               null=True,
+                                               blank=True,
+                                               default="")
+    customvision_project_name = models.CharField(max_length=200,
+                                                 null=True,
+                                                 blank=True,
+                                                 default="")
+    download_uri = models.CharField(max_length=1000,
+                                    null=True,
+                                    blank=True,
+                                    default="")
     needRetraining = models.BooleanField(default=True)
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
@@ -427,6 +254,8 @@ class Project(models.Model):
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
+
+    prob_threshold = models.IntegerField(default=10)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -453,8 +282,8 @@ class Project(models.Model):
             except CustomVisionErrorException as e:
                 logger.error(e)
                 logger.error(
-                    "Project %s not belong to Training Key + Endpoint pair."
-                    + "Set Project Id to ''",
+                    "Project %s not belong to Training Key + Endpoint pair." +
+                    "Set Project Id to ''",
                     instance.customvision_project_id,
                 )
                 instance.customvision_project_id = ""
@@ -513,9 +342,11 @@ class Project(models.Model):
         if instance.metrics_frame_per_minutes is not None:
             metrics_frame_per_minutes = instance.metrics_frame_per_minutes
 
+
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
-                "http://" + inference_module_url() + "/update_retrain_parameters",
+                "http://" + inference_module_url() +
+                "/update_retrain_parameters",
                 params={
                     "confidence_min": confidence_min,
                     "confidence_max": confidence_max,
@@ -523,14 +354,17 @@ class Project(models.Model):
                 },
             )
 
-            requests.get('http://'+inference_module_url()+'/update_iothub_parameters', params={
-                'is_send': metrics_is_send_iothub,
-                'threshold': metrics_accuracy_threshold,
-                'fpm': metrics_frame_per_minutes,
-            })
+            requests.get('http://' + inference_module_url() +
+                         '/update_iothub_parameters',
+                         params={
+                             'is_send': metrics_is_send_iothub,
+                             'threshold': metrics_accuracy_threshold,
+                             'fpm': metrics_frame_per_minutes,
+                         })
 
-        threading.Thread(target=_r, args=(
-            confidence_min, confidence_max, max_images)).start()
+        threading.Thread(target=_r,
+                         args=(confidence_min, confidence_max,
+                               max_images)).start()
 
         if update_fields is not None:
             return
@@ -560,16 +394,17 @@ class Project(models.Model):
             iterations = trainer.get_iterations(self.customvision_project_id)
             if len(iterations) > max_iterations:
                 # TODO delete train in Train Model
-                trainer.delete_iteration(
-                    self.customvision_project_id, iterations[-1].as_dict()[
-                        "id"]
-                )
+                trainer.delete_iteration(self.customvision_project_id,
+                                         iterations[-1].as_dict()["id"])
         except CustomVisionErrorException as e:
             logger.error(e)
         except:
             logger.exception("dequeue_iteration error")
 
-    def upcreate_training_status(self, status: str, log: str, performance: str = "{}"):
+    def upcreate_training_status(self,
+                                 status: str,
+                                 log: str,
+                                 performance: str = "{}"):
         """
         A wrapper function to create or update the training status of a
         project
@@ -577,8 +412,11 @@ class Project(models.Model):
         logger.info("Updating Training Status: %s %s", status, log)
         obj, created = Train.objects.update_or_create(
             project=self,
-            defaults={"status": status, "log": log,
-                      "performance": performance},
+            defaults={
+                "status": status,
+                "log": log,
+                "performance": performance
+            },
         )
         return obj, created
 
@@ -589,30 +427,30 @@ class Project(models.Model):
         try:
             if not self.customvision_project_name:
                 self.customvision_project_name = (
-                    "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
-                )
+                    "VisionOnEdge-" + datetime.datetime.utcnow().isoformat())
             project = trainer.create_project(
                 name=self.customvision_project_name,
                 domain_id=self.setting.obj_detection_domain_id,
             )
             self.customvision_project_id = project.id
-            update_fields = ["customvision_project_id",
-                             "customvision_project_name"]
+            update_fields = [
+                "customvision_project_id", "customvision_project_name"
+            ]
             self.save(update_fields=update_fields)
         except CustomVisionErrorException as customvision_err:
             logger.error("Project create_project error %s", customvision_err)
-            raise e
+            raise customvision_err
         except Exception as e:
             logger.exception("Project create_project: Unexpected Error")
             raise e
 
     def update_app_insight_counter(
-        self,
-        has_new_parts: bool,
-        has_new_images: bool,
-        source,
-        parts_last_train: int,
-        images_last_train: int,
+            self,
+            has_new_parts: bool,
+            has_new_images: bool,
+            source,
+            parts_last_train: int,
+            images_last_train: int,
     ):
         """Send message to app insight"""
         try:
@@ -641,8 +479,7 @@ class Project(models.Model):
                 retraining_job_monitor(self.retraining_counter)
                 trainer = self.setting.get_trainer_obj()
                 images_now = trainer.get_tagged_image_count(
-                    self.customvision_project_id
-                )
+                    self.customvision_project_id)
                 parts_now = len(trainer.get_tags(self.customvision_project_id))
                 # Traces
                 az_logger = get_app_insight_logger()
@@ -710,18 +547,29 @@ class Project(models.Model):
         # iteration.id,
         # 'ONNX')
         setting_obj = self.setting
-        url = (
-            setting_obj.endpoint
-            + "customvision/v3.2/training/projects/"
-            + self.customvision_project_id
-            + "/iterations/"
-            + iteration_id
-            + "/export?platform=ONNX"
-        )
-        res = requests.post(
-            url, "{body}", headers={"Training-key": setting_obj.training_key}
-        )
+        url = (setting_obj.endpoint + "customvision/v3.2/training/projects/" +
+               self.customvision_project_id + "/iterations/" + iteration_id +
+               "/export?platform=ONNX")
+        res = requests.post(url,
+                            "{body}",
+                            headers={"Training-key": setting_obj.training_key})
         return res
+
+    def update_prob_threshold(self, prob_threshold):
+        """update confidenece threshold of boundingBox
+        """
+        self.prob_threshold = prob_threshold
+
+        if prob_threshold > 100 or prob_threshold < 0:
+            raise ValueError('prob_threshold out of range')
+
+        requests.get(
+            "http://" + inference_module_url() + "/update_prob_threshold",
+            params={
+                "prob_threshold": prob_threshold,
+            },
+        )
+        self.save(update_fields=['prob_threshold'])
 
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
@@ -750,7 +598,6 @@ class Task(models.Model):
 
     def start_exporting(self):
         """Start Exporting"""
-
         def _export_worker(self):
             """Export Model Worker"""
             project_obj = self.project
@@ -773,8 +620,8 @@ class Task(models.Model):
                     self.save()
                     continue
 
-                exports = trainer.get_exports(
-                    customvision_project_id, iteration.id)
+                exports = trainer.get_exports(customvision_project_id,
+                                              iteration.id)
                 if len(exports) == 0 or not exports[0].download_uri:
                     logger.info("Status: exporting model")
                     self.status = "running"
@@ -796,20 +643,18 @@ class Task(models.Model):
                 break
             return
 
-        threading.Thread(target=_export_worker, args=(self,)).start()
+        threading.Thread(target=_export_worker, args=(self, )).start()
 
 
 pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")
 pre_save.connect(Project.pre_save, Project, dispatch_uid="Project_pre")
 post_save.connect(Project.post_save, Project, dispatch_uid="Project_post")
 # m2m_changed.connect(Project.m2m_changed, Project.parts.through, dispatch_uid='Project_m2m')
-pre_save.connect(Setting.pre_save, Setting, dispatch_uid="Setting_pre")
 
 
 # FIXME consider move this out of models.py
 class Stream(object):
     """Stream Class"""
-
     def __init__(self, rtsp, part_id=None, inference=False):
         if rtsp == "0":
             self.rtsp = 0
@@ -850,8 +695,8 @@ class Stream(object):
                     print("[INFO] stream finished")
                     break
                 sys.stdout.flush()
-                res = requests.get(
-                    "http://" + inference_module_url() + "/prediction")
+                res = requests.get("http://" + inference_module_url() +
+                                   "/prediction")
 
                 self.mutex.acquire()
                 self.predictions = res.json()
@@ -877,7 +722,7 @@ class Stream(object):
                 #    self.mutex.release()
 
         # if self.iot:
-        threading.Thread(target=_listener, args=(self,)).start()
+        threading.Thread(target=_listener, args=(self, )).start()
 
     def gen(self):
         """generator for stream"""
@@ -921,8 +766,8 @@ class Stream(object):
                     y1 = int(prediction["boundingBox"]["top"] * height)
                     x2 = x1 + int(prediction["boundingBox"]["width"] * width)
                     y2 = y1 + int(prediction["boundingBox"]["height"] * height)
-                    img = cv2.rectangle(
-                        img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255),
+                                        2)
                     img = cv2.putText(
                         img,
                         prediction["tagName"],
@@ -932,12 +777,9 @@ class Stream(object):
                         (0, 0, 255),
                         thickness,
                     )
-            yield (
-                b"--frame\r\n"
-                b"Content-Type: image/jpeg\r\n\r\n"
-                + cv2.imencode(".jpg", img)[1].tobytes()
-                + b"\r\n"
-            )
+            yield (b"--frame\r\n"
+                   b"Content-Type: image/jpeg\r\n\r\n" +
+                   cv2.imencode(".jpg", img)[1].tobytes() + b"\r\n")
         self.cap.release()
 
     def get_frame(self):
