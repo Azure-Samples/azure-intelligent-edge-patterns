@@ -321,9 +321,31 @@ Look at the logs to see the progress:
     accuracy=0.9872
     saving model to 'mnist_cnn.pt'...
 
+# Tracking your model via Tensorboard
 
-And, since in our example we used tensorboardX to write summaries, if you connected the `Tensorboard` logs properly,
-you will see your data in the Tensorboard:
+One of optional features of our example is logging of the data in Tensorboard's format,
+we used `tensorboardX` to write summaries.
+
+You will need instantiate Tensorboard like so:
+
+    $ kubectl create -f tb_pytorch.yaml
+
+You might contact your cloud administrator to help you establish network access, or you can
+use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
+This is how it looks like(run it on the machine where your web browser is):
+
+     $ ssh -NfL 6006:localhost:6006 -i id_rsa_for_kubernetes azureuser@<public_ip_address_or_dns_name>
+
+An alternative would be to create an RDP and XWindows server at the master node and RDP to it.
+If you did the ssh port fowarding, you do not need it.
+
+Now you can access the port you forward from your Kubernetes environment:
+
+    $ export PODNAME=$(kubectl get pod -l app=tensorboard -o jsonpath='{.items[0].metadata.name}')
+    $ kubectl port-forward ${PODNAME} 6006:6006
+
+If you have done everything correctly, you will see your data in the subfolder of your
+shared drive, and in the Tensorboard, and if not, please re-visit [Working with Tensorboard](../working_with_tensorboard.md):
 
 ![images/tensorboard_scalars.png](images/tensorboard_scalars.png)
 

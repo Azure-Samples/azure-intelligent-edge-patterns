@@ -658,7 +658,8 @@ to learn how to execute `TFJob`s on Kubeflow, in the environment that we just cr
 And then run [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) tutorial to learn running
 `PyTorchJob`s.
 
-The PyTorch example we run will log data for TensorBoard, you will see something like this:
+Some of our examples provide data to Tensorboard, see [Working with Tensorflow](working_with_tensorflow.md) for more information.
+The simplier PyTorch example we run will log data that looks something like this:
 
 ![pytorch-on-kubeflow/images/tensorboard_scalars.png](pytorch-on-kubeflow/images/tensorboard_scalars.png)
 
