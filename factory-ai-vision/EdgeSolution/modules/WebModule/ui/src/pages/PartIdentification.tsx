@@ -141,7 +141,7 @@ export const PartIdentification: React.FC = () => {
   }, [dispatch, images, selectedParts]);
 
   const accracyRangeDisabled = !needRetraining || isTestModel;
-  const messageToCloudDisabled = !sendMessageToCloud || isTestModel;
+  const messageToCloudDisabled = !sendMessageToCloud;
 
   return (
     <>
@@ -230,7 +230,6 @@ export const PartIdentification: React.FC = () => {
               label="Send message to cloud"
               checked={sendMessageToCloud}
               onChange={(_, { checked }): void => setData('sendMessageToCloud', checked)}
-              disabled={isTestModel}
             />
             <Text disabled={messageToCloudDisabled}>
               Frames per minute:{' '}
