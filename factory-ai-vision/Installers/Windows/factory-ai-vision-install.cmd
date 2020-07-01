@@ -120,7 +120,8 @@ ECHO Endpoint: %cv-training-endpoint%
 
 GOTO :NOEXISTINGCV
 :EXISTINGCV
-ECHO Endpoint and key information can be found at www.customvision.ai -> settings(top right corner)
+
+ECHO Endpoint and key information can be found at www.customvision.ai - settings(top right corner)
 SET /P cv-training-endpoint="Please enter your Custom Vision endpoint: "
 SET /P cv-training-api-key="Please enter your Custom Vision Key: "
 
