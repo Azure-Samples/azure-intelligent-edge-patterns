@@ -38,7 +38,6 @@ const Home: FC = () => {
           label="Identify Parts"
           width="6.25em"
         />
-        <ImageLink imgSrc="/icons/defects.png" to="/" label="Identify Defects" width="6.25em" />
         <ImageLink
           imgSrc="/icons/manual-filled.png"
           to="/manual"
