@@ -11,11 +11,20 @@ import {
   thunkGetInferenceMetrics,
   resetStatus,
 } from '../../store/project/projectActions';
-import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
+import { Project, Status as CameraConfigStatus, TrainingMetrics } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { useQuery } from '../../hooks/useQuery';
 
-export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => {
+export const CameraConfigureInfoContainer: React.FC<{ projectId: number }> = ({ projectId }) => {
+  return (
+    <Flex column gap="gap.large" space="between">
+      <h1>Configuration</h1>
+      <CameraConfigureInfo projectId={projectId} />
+    </Flex>
+  );
+};
+
+const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => {
   const { error, trainingLog, status, trainingMetrics } = useSelector<State, Project>(
     (state) => state.project,
   );
@@ -24,6 +33,7 @@ export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId
   const cameraName = useQuery().get('name');
   const isDemo = useQuery().get('isDemo') === 'true';
   const history = useHistory();
+  const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(true);
 
   const onDeleteConfigure = useCallback((): void => {
     // eslint-disable-next-line no-restricted-globals
@@ -65,44 +75,55 @@ export const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId
     return () => dispatch(resetStatus());
   }, []);
 
+  if (status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None)
+    return (
+      <>
+        <Loader size="smallest" />
+        <pre>{allTrainingLog}</pre>
+      </>
+    );
+
   return (
-    <Flex column gap="gap.large">
-      <h1>Configuration</h1>
+    <>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      {status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None ? (
+      <Button
+        content={showConsequenceDashboard ? 'Hide detail for training metric' : 'Show detail training metric'}
+        primary
+        onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
+      />
+      {showConsequenceDashboard && <ConsequenceBoardGroup trainingMetrics={trainingMetrics} />}
+      <Flex gap="gap.medium" styles={{ marginTop: 'auto' }}>
+        <Button primary as={Link} to="/partIdentification">
+          Edit Configuration
+        </Button>
+        <Button primary disabled={isDemo} onClick={onDeleteConfigure}>
+          Delete Configuration
+        </Button>
+      </Flex>
+    </>
+  );
+};
+
+const ConsequenceBoardGroup = ({ trainingMetrics }: { trainingMetrics: TrainingMetrics }): JSX.Element => {
+  return (
+    <>
+      {trainingMetrics.prevConsequence && (
         <>
-          <Loader size="smallest" />
-          <pre>{allTrainingLog}</pre>
-        </>
-      ) : (
-        <>
-          {trainingMetrics.prevConsequence && (
-            <>
-              <Text>Previous Model Metrics</Text>
-              <ConsequenceDashboard
-                precision={trainingMetrics.prevConsequence?.precision}
-                recall={trainingMetrics.prevConsequence?.recall}
-                mAP={trainingMetrics.prevConsequence?.mAP}
-              />
-            </>
-          )}
-          <Text>Updated Model Metrics</Text>
+          <Text>Previous Model Metrics</Text>
           <ConsequenceDashboard
-            precision={trainingMetrics.curConsequence?.precision}
-            recall={trainingMetrics.curConsequence?.recall}
-            mAP={trainingMetrics.curConsequence?.mAP}
+            precision={trainingMetrics.prevConsequence?.precision}
+            recall={trainingMetrics.prevConsequence?.recall}
+            mAP={trainingMetrics.prevConsequence?.mAP}
           />
-          <Flex gap="gap.medium">
-            <Button primary as={Link} to="/partIdentification">
-              Edit Configuration
-            </Button>
-            <Button primary disabled={isDemo} onClick={onDeleteConfigure}>
-              Delete Configuration
-            </Button>
-          </Flex>
         </>
       )}
-    </Flex>
+      <Text>Updated Model Metrics</Text>
+      <ConsequenceDashboard
+        precision={trainingMetrics.curConsequence?.precision}
+        recall={trainingMetrics.curConsequence?.recall}
+        mAP={trainingMetrics.curConsequence?.mAP}
+      />
+    </>
   );
 };
 
