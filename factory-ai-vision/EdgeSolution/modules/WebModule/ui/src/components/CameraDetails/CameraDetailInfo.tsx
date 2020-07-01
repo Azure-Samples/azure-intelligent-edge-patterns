@@ -95,7 +95,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
           </ListItem>
           <Grid columns={2} styles={{ rowGap: '20px' }}>
             <ListItem title="Success Rate">
-              <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="large">
+              <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="medium">
                 {`${inferenceMetrics.successRate}%`}
               </Text>
             </ListItem>
@@ -105,7 +105,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
             <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
           </Grid>
           <ListItem title="Unidentified Items">
-            <Text styles={{ margin: '5px' }} size="large">
+            <Text styles={{ margin: '5px' }} size="medium">
               {inferenceMetrics.unIdetifiedItems}
             </Text>
             <Button
