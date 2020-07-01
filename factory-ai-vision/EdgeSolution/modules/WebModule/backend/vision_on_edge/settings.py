@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'azure_settings',
     'locations',
     'cameras',
+    'azure_training',
     'rest_framework',
     'drf_yasg',
 ]
