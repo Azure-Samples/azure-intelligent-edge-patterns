@@ -41,7 +41,7 @@ const CapturedImagesContainer = ({ capturedImages, isValid, partId }): JSX.Eleme
     <>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
       <Grid
-        columns="2"
+        columns="6"
         styles={{
           border: '1px solid grey',
           height: '45rem',
