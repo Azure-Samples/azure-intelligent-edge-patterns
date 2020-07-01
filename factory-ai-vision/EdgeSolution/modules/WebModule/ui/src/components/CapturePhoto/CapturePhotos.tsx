@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Dispatch } from 'react';
-import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
+import { Flex, Dropdown, Text, DropdownItemProps, Grid } from '@fluentui/react-northstar';
 import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -93,15 +93,18 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
     <>
       <Text>Total: {imageCount}</Text>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
-      <Flex
+      <Grid
+        columns="4"
         styles={{
-          overflow: 'scroll',
           border: '1px solid grey',
-          height: '150px',
+          height: '45rem',
+          gridGap: '10px',
+          padding: '10px',
           borderColor: isValid ? '' : 'red',
+          justifyItems: 'center',
+          alignItems: 'center',
+          overflow: 'scroll',
         }}
-        gap="gap.small"
-        vAlign="center"
       >
         {filteredImages.map((image, i, arr) => (
           <div key={image.id} style={{ height: '100%', width: '100%' }}>
@@ -120,7 +123,7 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
             />
           </div>
         ))}
-      </Flex>
+      </Grid>
       <Prompt
         when={imageCount < 15}
         message="The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?"
