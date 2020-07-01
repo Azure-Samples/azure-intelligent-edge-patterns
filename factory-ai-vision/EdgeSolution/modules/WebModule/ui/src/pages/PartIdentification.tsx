@@ -22,6 +22,9 @@ import { formatDropdownValue, Value } from '../util/formatDropdownValue';
 import { getIdFromUrl } from '../util/GetIDFromUrl';
 import { getAppInsights } from '../TelemetryService';
 import { WarningDialog } from '../components/WarningDialog';
+import { AddCameraLink } from '../components/AddModuleDialog/AddCameraLink';
+import { AddLocationLink } from '../components/AddModuleDialog/AddLocationLink';
+import { AddPartLink } from '../components/AddModuleDialog/AddPartLink';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -365,6 +368,19 @@ const ModuleSelector: React.FC<ModuleSelectorProps> = ({
     }
   };
 
+  const getAddModuleLink = (): JSX.Element => {
+    switch (moduleName) {
+      case 'camera':
+        return <AddCameraLink />;
+      case 'location':
+        return <AddLocationLink />;
+      case 'parts':
+        return <AddPartLink />;
+      default:
+        return <p>Un supported module</p>;
+    }
+  };
+
   return (
     <Flex vAlign="center" gap="gap.medium">
       <Text styles={{ width: '150px' }}>{`Select ${moduleName}`}</Text>
@@ -378,7 +394,7 @@ const ModuleSelector: React.FC<ModuleSelectorProps> = ({
           multiple={isMultiple}
         />
       )}
-      <Link to={to}>{`Add ${moduleName}`}</Link>
+      {getAddModuleLink()}
     </Flex>
   );
 };
