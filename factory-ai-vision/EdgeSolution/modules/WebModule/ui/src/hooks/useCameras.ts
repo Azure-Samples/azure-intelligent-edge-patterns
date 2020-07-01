@@ -10,7 +10,7 @@ import { getCameras } from '../store/camera/cameraActions';
  */
 export const useCameras = (): Camera[] => {
   const dispatch = useDispatch();
-  const cameras: Camera[] = useSelector<State, Camera[]>((state) => state.cameras);
+  const cameras: Camera[] = useSelector<State, Camera[]>((state) => state.cameras.filter((e) => !e.is_demo));
 
   useEffect(() => {
     dispatch(getCameras());

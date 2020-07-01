@@ -6,17 +6,22 @@ export type Project = {
   isLoading: boolean;
   trainingLog: string;
   data: ProjectData;
+  originData: ProjectData;
   inferenceMetrics: {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
+    isGpu: boolean;
+    averageTime: number;
   };
-  trainingMetrics: {
-    prevConsequence: Consequence;
-    curConsequence: Consequence;
-  };
+  trainingMetrics: TrainingMetrics;
   status: Status;
   error: Error;
+};
+
+export type TrainingMetrics = {
+  prevConsequence: Consequence;
+  curConsequence: Consequence;
 };
 
 export enum Status {
@@ -42,10 +47,17 @@ export type ProjectData = {
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
+  sendMessageToCloud: boolean;
+  framesPerMin: number;
+  accuracyThreshold: number;
   modelUrl: string;
+  cvProjectId?: string;
+  // use text input brings a better UX, so we set it to string here
+  probThreshold: string;
 };
 
 // Describing the different ACTION NAMES available
+// FIXME Replace constant with string
 export const GET_PROJECT_REQUEST = 'GET_PROJECT_REQUEST';
 export type GetProjectRequestAction = {
   type: typeof GET_PROJECT_REQUEST;
@@ -117,6 +129,8 @@ export type GetInferenceMetricsSuccessAction = {
     successRate: number;
     successfulInferences: number;
     unIdetifiedItems: number;
+    isGpu: boolean;
+    averageTime: number;
   };
 };
 
@@ -155,7 +169,12 @@ export type DeleteProjectFaliedAction = {
 export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
 export type UpdateProjectDataAction = {
   type: typeof UPDATE_PROJECT_DATA;
-  payload: ProjectData;
+  payload: Partial<ProjectData>;
+};
+
+export const UPDATE_ORIGIN_PROJECT_DATA = 'UPDATE_ORIGIN_PROJECT_DATA';
+export type UpdateOriginProjectDataAction = {
+  type: typeof UPDATE_ORIGIN_PROJECT_DATA;
 };
 
 export const START_INFERENCE = 'START_INFERENCE';
@@ -166,6 +185,24 @@ export type StartInferenceAction = {
 export const STOP_INFERENCE = 'STOP_INFERENCE';
 export type StopInferenceAction = {
   type: typeof STOP_INFERENCE;
+};
+
+export const RESET_STATUS = 'RESET_STATUS';
+export type ResetStatusAction = {
+  type: typeof RESET_STATUS;
+};
+
+export type UpdateProbThresholdRequestAction = {
+  type: 'UPDATE_PROB_THRESHOLD_REQUEST';
+};
+
+export type UpdateProbThresholdSuccessAction = {
+  type: 'UPDATE_PROB_THRESHOLD_SUCCESS';
+};
+
+export type UpdateProbThresholdFailedAction = {
+  type: 'UPDATE_PROB_THRESHOLD_FAILED';
+  error: Error;
 };
 
 export type ProjectActionTypes =
@@ -181,6 +218,7 @@ export type ProjectActionTypes =
   | DeleteProjectSuccessAction
   | DeleteProjectFaliedAction
   | UpdateProjectDataAction
+  | UpdateOriginProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
   | GetTrainingMetricsFailedAction
@@ -188,7 +226,11 @@ export type ProjectActionTypes =
   | GetInferenceMetricsSuccessAction
   | GetInferenceMetricsFailedAction
   | StartInferenceAction
-  | StopInferenceAction;
+  | StopInferenceAction
+  | ResetStatusAction
+  | UpdateProbThresholdRequestAction
+  | UpdateProbThresholdSuccessAction
+  | UpdateProbThresholdFailedAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

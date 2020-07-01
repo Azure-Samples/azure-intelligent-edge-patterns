@@ -1,5 +1,11 @@
 // Describing the shape of the camera's slice of state
-export type Camera = { id?: number; name: string; rtsp: string; model_name: string };
+export type Camera = {
+  id?: number;
+  name: string;
+  rtsp: string;
+  area?: string;
+  is_demo: boolean;
+};
 
 // Describing the different ACTION NAMES available
 export const GET_CAMERA_SUCCESS = 'GET_CAMERA_SUCCESS';

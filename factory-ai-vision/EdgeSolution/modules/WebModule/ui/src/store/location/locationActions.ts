@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   GET_LOCATION_SUCCESS,
   POST_LOCATION_SUCCESS,
@@ -15,6 +16,7 @@ const getLocationsSuccess = (data: Location[]): GetLocationsSuccess => ({
 
 const requestLocationsFailure = (error: any): RequestLocationsFailure => {
   console.error(error);
+  alert(error);
   return { type: REQUEST_LOCATION_FAILURE };
 };
 
@@ -24,11 +26,8 @@ const postLocationSuccess = (data: Location): PostLocationSuccess => ({
 });
 
 export const getLocations = () => (dispatch): Promise<void> => {
-  return fetch('/api/locations/')
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
+  return axios('/api/locations/')
+    .then(({ data }) => {
       dispatch(getLocationsSuccess(data));
       return void 0;
     })
@@ -38,17 +37,11 @@ export const getLocations = () => (dispatch): Promise<void> => {
 };
 
 export const postLocation = (newLocation: Location) => (dispatch): Promise<void> => {
-  return fetch('/api/locations/', {
+  return axios('/api/locations/', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(newLocation),
+    data: newLocation,
   })
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
+    .then(({ data }) => {
       dispatch(postLocationSuccess(data));
       return void 0;
     })

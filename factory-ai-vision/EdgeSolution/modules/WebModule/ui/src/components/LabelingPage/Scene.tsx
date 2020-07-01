@@ -1,6 +1,6 @@
-import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Text, Button, CloseIcon } from '@fluentui/react-northstar';
-import { Stage, Layer, Image, Group } from 'react-konva';
+import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
+import { Button, CloseIcon } from '@fluentui/react-northstar';
+import { Stage, Layer, Image, Group, Text as KonvaText } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
@@ -30,8 +30,10 @@ interface SceneProps {
   url?: string;
   labelingType: LabelingType;
   annotations: Annotation[];
+  workState: WorkState;
+  setWorkState: Dispatch<WorkState>;
 }
-const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
+const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState, setWorkState }) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
@@ -42,7 +44,6 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
-  const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<number>(1);
@@ -110,12 +111,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
     scale.current = outcomeScale;
   }, [size, resizeImage]);
 
-  if (status === 'loading' || (imageSize.height === 0 && imageSize.width === 0))
-    return (
-      <Text align="center" color="red">
-        Loading...
-      </Text>
-    );
+  const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
   return (
     <div style={{ margin: '0.2em' }}>
@@ -150,29 +146,39 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations }) => {
           }}
         >
           <Image image={image} />
-          {annotations.map((annotation, i) => (
-            <Group key={i}>
-              <RemoveBoxButton
-                imageSize={imageSize}
-                visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
-                label={annotation.label}
-                scale={scale.current}
-                changeCursorState={changeCursorState}
-                setShowOuterRemoveButton={setShowOuterRemoveButton}
-                removeBox={removeBox}
-              />
-              <Box2d
-                workState={workState}
-                onSelect={onSelect}
-                annotation={annotation}
-                scale={scale.current}
-                annotationIndex={i}
-                selected={i === selectedAnnotationIndex}
-                dispatch={dispatch}
-                changeCursorState={changeCursorState}
-              />
-            </Group>
-          ))}
+          {!isLoading &&
+            annotations.map((annotation, i) => (
+              <Group key={i}>
+                <RemoveBoxButton
+                  imageSize={imageSize}
+                  visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
+                  label={annotation.label}
+                  scale={scale.current}
+                  changeCursorState={changeCursorState}
+                  setShowOuterRemoveButton={setShowOuterRemoveButton}
+                  removeBox={removeBox}
+                />
+                <Box2d
+                  workState={workState}
+                  onSelect={onSelect}
+                  annotation={annotation}
+                  scale={scale.current}
+                  annotationIndex={i}
+                  selected={i === selectedAnnotationIndex}
+                  dispatch={dispatch}
+                  changeCursorState={changeCursorState}
+                />
+              </Group>
+            ))}
+          {isLoading && (
+            <KonvaText
+              x={imageSize.width / 2 - 50}
+              y={imageSize.height / 2 - 25}
+              fontSize={50}
+              text="Loading..."
+              fill="rgb(255, 0, 0)"
+            />
+          )}
         </Layer>
       </Stage>
     </div>
