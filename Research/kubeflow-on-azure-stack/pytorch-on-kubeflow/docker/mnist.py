@@ -124,7 +124,7 @@ def main():
     if use_cuda:
         print('Using CUDA')
 
-    writer = SummaryWriter(args.dir)
+    writer = SummaryWriter(f"{args.dir}/logs")
 
     torch.manual_seed(args.seed)
 
