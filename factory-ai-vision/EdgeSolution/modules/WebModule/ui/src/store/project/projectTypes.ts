@@ -14,12 +14,14 @@ export type Project = {
     isGpu: boolean;
     averageTime: number;
   };
-  trainingMetrics: {
-    prevConsequence: Consequence;
-    curConsequence: Consequence;
-  };
+  trainingMetrics: TrainingMetrics;
   status: Status;
   error: Error;
+};
+
+export type TrainingMetrics = {
+  prevConsequence: Consequence;
+  curConsequence: Consequence;
 };
 
 export enum Status {
