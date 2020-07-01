@@ -264,6 +264,11 @@ command (default editor is vi, to edit you need to press `i`, and to save and ex
 
     $ ./edit_external_access.sh
 
+Or you can patch it like so:
+
+    $ kubectl patch svc/istio-ingressgateway -p '{"spec":{"type": "LoadBalancer"}}' -n istio-system
+    service/istio-ingressgateway patched
+
 It will look something like this: 
 
 ![pics/ingress_loadbalancer.png](pics/ingress_loadbalancer.png)
