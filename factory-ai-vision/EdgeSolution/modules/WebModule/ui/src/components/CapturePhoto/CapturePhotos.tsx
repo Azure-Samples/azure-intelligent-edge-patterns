@@ -94,7 +94,7 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
       <Text>Total: {imageCount}</Text>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
       <Grid
-        columns="4"
+        columns="3"
         styles={{
           border: '1px solid grey',
           height: '45rem',
