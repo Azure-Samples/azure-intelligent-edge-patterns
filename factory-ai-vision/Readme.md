@@ -1,4 +1,4 @@
-# Vision on Edge Installer
+# Automated installation with Vision on Edge Installer
 
 To install the Vision on Edge Solution Accelerator using the installation script, the following prerequisites are required...
 
@@ -20,7 +20,7 @@ To install the Vision on Edge Solution Accelerator using the installation script
 * Now you can access the product startup page by opening the browser at http://youredgedeviceip:8080   eg. http://52.1.1.1:8080/
 
 
-# Build the docker and deploy by Visual Studio Code
+# Manual installation building  a docker container and deploy by Visual Studio Code
 
 ### Prerequisites
 
