@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
+import React, { useState, useEffect, useRef, Dispatch } from 'react';
+import { Flex, Dropdown, Text, DropdownItemProps, Grid } from '@fluentui/react-northstar';
 import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -14,10 +14,13 @@ import { LabelImage } from '../../store/image/imageTypes';
 import { getFilteredImages } from '../../util/getFilteredImages';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 
-export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
+export const CapturePhotos: React.FC<{
+  partId: number;
+  goLabelImageIdx: number;
+  setGoLabelImageIdx: Dispatch<number>;
+}> = ({ partId, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
   const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
   const images = useSelector<State, LabelImage[]>((state) => state.images);
   const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
@@ -32,7 +35,7 @@ export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
       setOpenLabelingPage(false);
       prevImageLength.current = filteredImages.length;
     }
-  }, [openLabelingPage, filteredImages]);
+  }, [openLabelingPage, filteredImages, setGoLabelImageIdx]);
 
   return (
     <>
@@ -43,7 +46,6 @@ export const CapturePhotos: React.FC<{ partId: number }> = ({ partId }) => {
         canCapture={true}
         setOpenLabelingPage={setOpenLabelingPage}
       />
-      <CapturedImagesContainer images={filteredImages} goLabelImageIdx={goLabelImageIdx} />
     </>
   );
 };
@@ -81,25 +83,30 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
   );
 };
 
-const CapturedImagesContainer = ({ images, goLabelImageIdx }): JSX.Element => {
-  const isValid = images.filter((image) => image.labels).length >= 15;
-  const imageCount = images.length;
+export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Element => {
+  const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
+  const isValid = filteredImages.filter((image) => image.labels).length >= 15;
+  const imageCount = filteredImages.length;
 
   return (
     <>
       <Text>Total: {imageCount}</Text>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
-      <Flex
+      <Grid
+        columns="4"
         styles={{
-          overflow: 'scroll',
           border: '1px solid grey',
-          height: '150px',
+          height: '45rem',
+          gridGap: '10px',
+          padding: '10px',
           borderColor: isValid ? '' : 'red',
+          justifyItems: 'center',
+          alignItems: 'center',
+          overflow: 'scroll',
         }}
-        gap="gap.small"
-        vAlign="center"
       >
-        {images.map((image, i, arr) => (
+        {filteredImages.map((image, i, arr) => (
           <div key={image.id} style={{ height: '100%', width: '100%' }}>
             <span>{i + 1}</span>
             <LabelingPageDialog
@@ -116,7 +123,7 @@ const CapturedImagesContainer = ({ images, goLabelImageIdx }): JSX.Element => {
             />
           </div>
         ))}
-      </Flex>
+      </Grid>
       <Prompt
         when={imageCount < 15}
         message="The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?"
