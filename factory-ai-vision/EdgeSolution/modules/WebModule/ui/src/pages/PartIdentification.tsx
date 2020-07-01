@@ -284,14 +284,25 @@ function useDropdownItems<T>(
     setLoading(true);
     Axios(url)
       .then(({ data }) => {
-        setDropDownItems(
-          data.map((e) => ({
-            header: e.name,
-            content: {
-              key: e.id,
+        if (data.length === 0) {
+          setDropDownItems([
+            {
+              header: `No ${moduleName.replace('s', '')} found, please add ${moduleName.replace('s', '')}`,
+              content: {
+                key: 'Dummy',
+              },
             },
-          })),
-        );
+          ]);
+        } else {
+          setDropDownItems(
+            data.map((e) => ({
+              header: e.name,
+              content: {
+                key: e.id,
+              },
+            })),
+          );
+        }
         originItems.current = data;
         if (isMultiple) {
           setSelectedItem(data);
