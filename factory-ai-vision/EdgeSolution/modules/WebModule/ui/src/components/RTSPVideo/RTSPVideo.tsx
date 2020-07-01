@@ -69,7 +69,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
       <div style={{ width: '100%', height: '30rem', backgroundColor: 'black' }}>
         {src ? <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
       </div>
-      <div style={{ display: 'flex', flexFlow: 'column', alignItems: 'center' }}>
+      <Flex column hAlign="center" gap="gap.small">
         <Flex styles={{ height: '50px' }} hAlign="center" gap="gap.large">
           <ImageBtn
             name="Play"
@@ -92,7 +92,6 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
           onCheckedValueChange={(_, newProps): void => {
             setCaptureLabelMode(newProps.value as number);
           }}
-          styles={{ margin: '1.5em', width: '60%', display: 'flex', justifyContent: 'space-evenly' }}
           items={[
             {
               key: '0',
@@ -106,7 +105,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
             },
           ]}
         />
-      </div>
+      </Flex>
     </>
   );
 };

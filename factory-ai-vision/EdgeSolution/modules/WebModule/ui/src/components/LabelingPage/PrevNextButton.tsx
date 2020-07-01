@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Flex, Button, ChevronStartIcon, ChevronEndIcon } from '@fluentui/react-northstar';
+import { Flex, Button, ChevronStartIcon, ChevronEndIcon, Tooltip } from '@fluentui/react-northstar';
 
 interface PrevNextButtonProps {
   isRelabel: boolean;
@@ -28,7 +28,17 @@ const PrevNextButton: FC<PrevNextButtonProps> = ({
       )}
       {children}
       {!isRelabel && (
-        <Button text disabled={nextDisabled} icon={<ChevronEndIcon size="larger" />} onClick={onNextClick} />
+        <Tooltip
+          content="Save and Next"
+          trigger={
+            <Button
+              text
+              disabled={nextDisabled}
+              icon={<ChevronEndIcon size="larger" />}
+              onClick={onNextClick}
+            />
+          }
+        />
       )}
     </Flex>
   );

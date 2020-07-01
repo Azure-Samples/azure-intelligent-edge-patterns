@@ -1,13 +1,23 @@
 import React, { memo, MouseEvent, FC } from 'react';
 import { Segment, Image, Flex } from '@fluentui/react-northstar';
 import { NavLink } from 'react-router-dom';
+import { useProject } from '../../hooks/useProject';
+import { useCameras } from '../../hooks/useCameras';
 
 const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
+  const project = useProject(false);
+  const cameras = useCameras();
+  const cameraInUsed = cameras.find((e) => e.id === project.data.camera);
+
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
       <Flex column gap="gap.large" hAlign="center">
         <NavItem disabled={disabled} src="/icons/location.png" to="/locations"></NavItem>
-        <NavItem disabled={disabled} src="/icons/camera.png" to="/cameras"></NavItem>
+        <NavItem
+          disabled={disabled}
+          src="/icons/camera.png"
+          to={cameraInUsed ? `/cameras/detail?name=${cameraInUsed.name}` : '/cameras'}
+        />
         <NavItem disabled={disabled} src="/icons/part.png" to="/parts"></NavItem>
         <NavItem disabled={disabled} src="/icons/partIdentification.png" to="/partIdentification"></NavItem>
         <NavItem disabled={disabled} src="/icons/manual.png" to="/manual"></NavItem>

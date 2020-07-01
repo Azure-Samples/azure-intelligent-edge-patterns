@@ -52,7 +52,6 @@ const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
       }}
     >
       <Flex gap="gap.large" vAlign="center">
-        <MenuIcon size="large" styles={{ color: 'white' }} />
         <NavLink
           to={'/'}
           style={{ textDecoration: 'none', cursor: disabled && 'default' }}
@@ -60,9 +59,10 @@ const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
             if (disabled) e.preventDefault();
           }}
         >
-          <Button primary styles={{ backgroundColor: 'rgb(9, 34, 27)' }}>
-            Home
-          </Button>
+          <Flex gap="gap.medium">
+            <Image src="/icons/Home_white.png" design={{ width: '30px' }} />
+            <Text color="white">Vision on Edge</Text>
+          </Flex>
         </NavLink>
       </Flex>
       <Flex
