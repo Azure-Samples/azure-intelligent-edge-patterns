@@ -24,6 +24,7 @@ from rest_framework import routers
 from cameras import views
 from azure_settings.api import views as setting_views
 from locations.api import views as location_views
+from image_predictions.api import views as image_prediction_views
 from . import views as site_views
 
 
@@ -44,6 +45,8 @@ router.register('locations', location_views.LocationViewSet)
 router.register('annotations', views.AnnotationViewSet)
 router.register('train', views.TrainViewSet)
 router.register('tasks', views.TaskViewSet)
+router.register('image_predictions',
+                image_prediction_views.ImagePredictionViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
