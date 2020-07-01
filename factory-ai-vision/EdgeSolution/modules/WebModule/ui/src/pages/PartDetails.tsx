@@ -108,7 +108,7 @@ const LeftPanel = ({ partId, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element
             setGoLabelImageIdx={setGoLabelImageIdx}
           />
         </Flex>
-        <Flex column gap="gap.small" styles={{ width: '800px' }}>
+        <Flex column gap="gap.small" styles={{ width: '100%' }}>
           <CapturedImagesContainer partId={parseInt(partId, 10)} goLabelImageIdx={goLabelImageIdx} />
         </Flex>
       </Route>
