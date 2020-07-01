@@ -25,9 +25,12 @@ To install the Vision on Edge Solution Accelerator using the installation script
 ### Prerequisites
 
 Before installation, please make sure you have 
-1. Docker installed in your local environment <https://docs.docker.com/get-docker/>
-2. At least one IoT Edge with Port 8080 and 5000 opended is connected to your Iot Hub, please follow this documentation https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux to deploy if you don't have it.
+1. Docker installed in your local environment. If you don't have it, please following this documentation <https://docs.docker.com/get-docker/>
+
+2. At least one IoT Edge with Port 8080 and 5000 opended is connected to your Iot Hub. please follow this documentation https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux to deploy if you don't have it.
+
 3. An Azure Custom Vision account, you can find your training key here <https://www.customvision.ai/projects#/settings>
+
 4. An Azure Container Registry, please follow this to create your own if you don't have it <https://docs.microsoft.com/en-us/azure/container-registry/>
 
 ### Build and Deploy
