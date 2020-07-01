@@ -74,10 +74,11 @@ const LabelingPage: FC<LabelingPageProps> = ({
       <Flex gap="gap.medium">
         <Button
           primary
-          content={index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
+          content={isRelabel ? 'Save' : index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
           disabled={isOnePointBox || workState === WorkState.Creating}
           onClick={(): void => {
             dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+            if (isRelabel) return closeDialog();
             if (index === images.length - 1) closeDialog();
             setIndex((prev) => (prev + 1) % images.length);
           }}
