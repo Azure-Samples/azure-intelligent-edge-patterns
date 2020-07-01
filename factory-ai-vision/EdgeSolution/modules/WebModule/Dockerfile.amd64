@@ -14,6 +14,7 @@ COPY backend/general general
 COPY backend/ui_production ui_production
 COPY backend/vision_on_edge vision_on_edge
 COPY backend/configs configs
+COPY backend/azure_settings azure_settings
 RUN rm -rf cameras/migrations/*.py
 RUN rm -rf locations/migrations/*.py
 RUN touch cameras/migrations/__init__.py

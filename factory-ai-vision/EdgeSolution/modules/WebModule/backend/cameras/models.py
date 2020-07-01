@@ -32,6 +32,7 @@ from cameras.utils.app_insight import (get_app_insight_logger, img_monitor,
                                        part_monitor, retraining_job_monitor,
                                        training_job_monitor)
 from configs.iot_config import IOT_HUB_CONNECTION_STRING
+from azure_settings.models import Setting
 from locations.models import Location
 
 logger = logging.getLogger(__name__)
@@ -190,153 +191,6 @@ class Annotation(models.Model):
     labels = models.CharField(max_length=1000, null=True)
 
 
-class Setting(models.Model):
-    """
-    A wrapper model of CustomVisionTraingClient.
-
-    Try not to pass CustomVisionTraingClient object if new model is expected to
-    be created. e.g. create project, create train/iteration, etc.
-    Instead, create a wrapper methods and let call, in order to sync the db
-    with remote.
-    """
-
-    name = models.CharField(max_length=100,
-                            blank=True,
-                            default="",
-                            unique=True)
-    endpoint = models.CharField(max_length=1000, blank=True)
-    training_key = models.CharField(max_length=1000, blank=True)
-    iot_hub_connection_string = models.CharField(max_length=1000, blank=True)
-    device_id = models.CharField(max_length=1000, blank=True)
-    module_id = models.CharField(max_length=1000, blank=True)
-
-    is_collect_data = models.BooleanField(default=False)
-
-    is_trainer_valid = models.BooleanField(default=False)
-    obj_detection_domain_id = models.CharField(max_length=1000,
-                                               blank=True,
-                                               default="")
-
-    class Meta:
-        unique_together = ("endpoint", "training_key")
-
-    @staticmethod
-    def _get_trainer_obj_static(endpoint: str, training_key: str):
-        """
-        return <CustomVisionTrainingClient>.
-        : Success: return CustomVisionTrainingClient object
-        """
-        trainer = CustomVisionTrainingClient(api_key=training_key,
-                                             endpoint=endpoint)
-        return trainer
-
-    def get_trainer_obj(self):
-        """
-        return CustomVisionTrainingClient(self.training_key, self.endpoint)
-        : Success: return the CustomVisionTrainingClient object
-        """
-        return Setting._get_trainer_obj_static(endpoint=self.endpoint,
-                                               training_key=self.training_key)
-
-    @staticmethod
-    def _validate_static(endpoint: str, training_key: str):
-        """
-        return tuple (is_trainer_valid, trainer)
-        """
-        logger.info("Validatiing %s %s", endpoint, training_key)
-        trainer = Setting._get_trainer_obj_static(endpoint=endpoint,
-                                                  training_key=training_key)
-        is_trainer_valid = False
-        try:
-            trainer.get_domains()
-            is_trainer_valid = True
-        except CustomVisionErrorException:
-            trainer = None
-        except Exception:
-            trainer = None
-        return is_trainer_valid, trainer
-
-    def revalidate_and_get_trainer_obj(self):
-        """
-        Update all the relevent fields and return the CustimVisionClient obj.
-        : Success: return CustimVisionClient object
-        : Failed:  return None
-        """
-        is_trainer_valid, trainer = Setting._validate_static(
-            self.endpoint, self.training_key)
-        if is_trainer_valid:
-            return trainer
-        else:
-            return None
-
-    @staticmethod
-    def pre_save(instance, **kwargs):
-        """Setting pre_save"""
-        logger.info("Setting Presave")
-        try:
-            logger.info("Validating CustomVisionClient %s", instance.name)
-            trainer = Setting._get_trainer_obj_static(
-                training_key=instance.training_key, endpoint=instance.endpoint)
-            obj_detection_domain = next(domain
-                                        for domain in trainer.get_domains()
-                                        if domain.type == "ObjectDetection"
-                                        and domain.name == "General (compact)")
-
-            logger.info("Validating Trainer %s Key + Endpoint... Pass",
-                        instance.name)
-            instance.is_trainer_valid = True
-            instance.obj_detection_domain_id = obj_detection_domain.id
-        except CustomVisionErrorException as e:
-            logger.error("Setting Presave occur CustomVisionError: %s", e)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except KeyError as e:
-            logger.error("Setting Presave occur KeyError: %s", e)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except Exception as unexpected_error:
-            logger.exception("Setting Presave: Unexpected Error")
-            raise unexpected_error
-        finally:
-            logger.info("Setting Presave... End")
-
-    def create_project(self, project_name: str):
-        """
-        : Success: return project
-        : Failed:  return None
-        """
-        trainer = self.revalidate_and_get_trainer_obj()
-        logger.info("Creating obj detection project")
-        logger.info("Trainer: %s", trainer)
-        if not trainer:
-            logger.info("Trainer is invalid thus cannot create project")
-            return None
-        try:
-            project = trainer.create_project(
-                name=project_name, domain_id=self.obj_detection_domain_id)
-            return project
-        except CustomVisionErrorException as e:
-            logger.error("Setting creating_project errors %s", e)
-            return None
-        except Exception:
-            logger.exception("Setting Presave: Unexpected Error")
-            raise
-
-    def delete_project(self, project_id: str):
-        """
-        : Success: return project
-        : Failed:  return None
-        """
-        pass
-
-    def __str__(self):
-        return self.name
-
-
 class Camera(models.Model):
     """Camera Model"""
 
@@ -400,6 +254,8 @@ class Project(models.Model):
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
+
+    prob_threshold = models.IntegerField(default=10)
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
@@ -485,6 +341,7 @@ class Project(models.Model):
             metrics_accuracy_threshold = instance.metrics_accuracy_threshold
         if instance.metrics_frame_per_minutes is not None:
             metrics_frame_per_minutes = instance.metrics_frame_per_minutes
+
 
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
@@ -582,7 +439,7 @@ class Project(models.Model):
             self.save(update_fields=update_fields)
         except CustomVisionErrorException as customvision_err:
             logger.error("Project create_project error %s", customvision_err)
-            raise e
+            raise customvision_err
         except Exception as e:
             logger.exception("Project create_project: Unexpected Error")
             raise e
@@ -698,6 +555,22 @@ class Project(models.Model):
                             headers={"Training-key": setting_obj.training_key})
         return res
 
+    def update_prob_threshold(self, prob_threshold):
+        """update confidenece threshold of boundingBox
+        """
+        self.prob_threshold = prob_threshold
+
+        if prob_threshold > 100 or prob_threshold < 0:
+            raise ValueError('prob_threshold out of range')
+
+        requests.get(
+            "http://" + inference_module_url() + "/update_prob_threshold",
+            params={
+                "prob_threshold": prob_threshold,
+            },
+        )
+        self.save(update_fields=['prob_threshold'])
+
     # @staticmethod
     # def m2m_changed(sender, instance, action, **kwargs):
     #    print('[INFO] M2M_CHANGED')
@@ -777,7 +650,6 @@ pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")
 pre_save.connect(Project.pre_save, Project, dispatch_uid="Project_pre")
 post_save.connect(Project.post_save, Project, dispatch_uid="Project_post")
 # m2m_changed.connect(Project.m2m_changed, Project.parts.through, dispatch_uid='Project_m2m')
-pre_save.connect(Setting.pre_save, Setting, dispatch_uid="Setting_pre")
 
 
 # FIXME consider move this out of models.py
