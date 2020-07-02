@@ -18,7 +18,7 @@ export const CapturePhotos: React.FC<{
   partId: number;
   goLabelImageIdx: number;
   setGoLabelImageIdx: Dispatch<number>;
-}> = ({ partId, setGoLabelImageIdx }) => {
+}> = ({ partId, goLabelImageIdx, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
@@ -38,15 +38,20 @@ export const CapturePhotos: React.FC<{
   }, [openLabelingPage, filteredImages, setGoLabelImageIdx]);
 
   return (
-    <>
-      <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
-      <RTSPVideo
-        rtsp={selectedCamera?.rtsp}
-        partId={partId}
-        canCapture={true}
-        setOpenLabelingPage={setOpenLabelingPage}
-      />
-    </>
+    <Flex gap="gap.small" styles={{ height: '90%', maxHeight: '650px' }}>
+      <Flex column gap="gap.small" styles={{ width: '70%' }}>
+        <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
+        <RTSPVideo
+          rtsp={selectedCamera?.rtsp}
+          partId={partId}
+          canCapture={true}
+          setOpenLabelingPage={setOpenLabelingPage}
+        />
+      </Flex>
+      <Flex column gap="gap.small" styles={{ width: '30%' }}>
+        <CapturedImagesContainer partId={partId} goLabelImageIdx={goLabelImageIdx} />
+      </Flex>
+    </Flex>
   );
 };
 
@@ -94,10 +99,10 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
       <Text>Total: {imageCount}</Text>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
       <Grid
-        columns="3"
+        columns="2"
         styles={{
           border: '1px solid grey',
-          height: '45rem',
+          height: '40rem',
           gridGap: '10px',
           padding: '10px',
           borderColor: isValid ? '' : 'red',

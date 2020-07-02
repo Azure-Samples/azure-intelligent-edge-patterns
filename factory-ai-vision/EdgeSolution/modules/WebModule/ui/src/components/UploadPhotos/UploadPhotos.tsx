@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, Grid } from '@fluentui/react-northstar';
+import { Text, Grid, Flex } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { State } from '../../store/State';
@@ -29,10 +29,10 @@ export const UploadPhotos = ({ partId }): JSX.Element => {
   }
 
   return (
-    <>
+    <Flex gap="gap.smaller" column>
       <input type="file" onChange={handleUpload} accept="image/*" multiple />
       <CapturedImagesContainer capturedImages={filteredImages} isValid={isValid} partId={partId} />
-    </>
+    </Flex>
   );
 };
 
@@ -44,7 +44,6 @@ const CapturedImagesContainer = ({ capturedImages, isValid, partId }): JSX.Eleme
         columns="6"
         styles={{
           border: '1px solid grey',
-          height: '45rem',
           gridGap: '10px',
           padding: '10px',
           borderColor: isValid ? '' : 'red',

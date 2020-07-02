@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Flex, AddIcon } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 
-export const CreateCameraConfig: React.FC = () => {
+export const CreateCameraConfigButton: React.FC = () => {
   return (
     <div style={{ height: '100%' }}>
       <h1>Configuration</h1>
