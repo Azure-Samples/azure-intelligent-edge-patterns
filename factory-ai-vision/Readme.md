@@ -45,18 +45,18 @@ For Windows:
      3)	factory-ai-vision-install.cmd
    2.	Open the factory-ai-vision-install.cmd file and start running the installation. 
       It will open the terminal windows and ask for your Azure subscription. 
-   3.	Choose your subscription type 
+   3.	Choose your subscription
    4.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
-   5.	Choose where is your targeted edge device and confirm ywhether your device (GPU or CPU) 
+   5.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
 
 For Mac:
    1.	Open terminal 
    2.	Location the file, unzip bash.zip
-   3.	Bash factory-ai-vision-install.sh file 
-   4.	It will direct you too azure subscription login page
-   5.	Choose your subscription type 
+   3.	excute ```bash factory-ai-vision-install.sh```
+   4.	It will direct you to azure subscription login page
+   5.	Choose your subscription 
    6.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
-   7.	 Choose where is your targeted edge device  and confirm ywhether your device (Nvidia GPU or CPU) 
+   7.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
 
 ## Option 2: Install with vs code
 
