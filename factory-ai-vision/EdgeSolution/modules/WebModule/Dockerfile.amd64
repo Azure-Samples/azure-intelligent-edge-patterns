@@ -36,7 +36,7 @@ RUN touch azure_training/migrations/__init__.py
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-RUN rm -rf backend/ui_production/
+RUN rm -rf ui_production
 COPY --from=builder /app/build ui_production
 EXPOSE 8000
 
