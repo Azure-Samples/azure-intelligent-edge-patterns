@@ -11,7 +11,7 @@ import {
   Alert,
   ShorthandCollection,
 } from '@fluentui/react-northstar';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
@@ -25,6 +25,8 @@ import { WarningDialog } from '../components/WarningDialog';
 import { AddCameraLink } from '../components/AddModuleDialog/AddCameraLink';
 import { AddLocationLink } from '../components/AddModuleDialog/AddLocationLink';
 import { AddPartLink } from '../components/AddModuleDialog/AddPartLink';
+import { LabelImage } from '../store/image/imageTypes';
+import { getLabelImages } from '../store/image/imageActions';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -59,6 +61,7 @@ export const PartIdentification: React.FC = () => {
     framesPerMin,
     accuracyThreshold,
   } = data;
+  const images = useSelector<State, LabelImage[]>((state) => state.images);
   const [isTestModel, setIsTestModel] = useState(false);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
@@ -80,6 +83,10 @@ export const PartIdentification: React.FC = () => {
       dispatch(thunkGetProject(isTestModel));
     }
   }, [dispatch, cameraLoading, locationLoading, partLoading, isTestModel]);
+
+  useEffect(() => {
+    dispatch(getLabelImages());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isTestModel) {
@@ -116,8 +123,25 @@ export const PartIdentification: React.FC = () => {
     dispatch(updateProjectData({ [keyName]: value }));
   };
 
+  useEffect(() => {
+    const partImagesLengthPair: Record<string, number> = images.reduce((acc, cur) => {
+      const id = getIdFromUrl(cur.part);
+      if (selectedParts.map((e) => e.id).includes(id as any)) acc[id] = acc[id] + 1 || 1;
+      return acc;
+    }, {});
+    const minPartImageCount = Math.min(...Object.values(partImagesLengthPair));
+    if (minPartImageCount === Infinity) return;
+    if (minPartImageCount < 30) dispatch(updateProjectData({ accuracyRangeMin: 10, accuracyRangeMax: 40 }));
+    else if (minPartImageCount >= 30 && minPartImageCount < 80)
+      dispatch(updateProjectData({ accuracyRangeMin: 30, accuracyRangeMax: 60 }));
+    else if (minPartImageCount >= 80 && minPartImageCount < 130)
+      dispatch(updateProjectData({ accuracyRangeMin: 50, accuracyRangeMax: 80 }));
+    else if (minPartImageCount >= 130)
+      dispatch(updateProjectData({ accuracyRangeMin: 60, accuracyRangeMax: 90 }));
+  }, [dispatch, images, selectedParts]);
+
   const accracyRangeDisabled = !needRetraining || isTestModel;
-  const messageToCloudDisabled = !sendMessageToCloud || isTestModel;
+  const messageToCloudDisabled = !sendMessageToCloud;
 
   return (
     <>
@@ -206,7 +230,6 @@ export const PartIdentification: React.FC = () => {
               label="Send message to cloud"
               checked={sendMessageToCloud}
               onChange={(_, { checked }): void => setData('sendMessageToCloud', checked)}
-              disabled={isTestModel}
             />
             <Text disabled={messageToCloudDisabled}>
               Frames per minute:{' '}

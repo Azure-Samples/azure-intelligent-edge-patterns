@@ -17,7 +17,7 @@ import { useQuery } from '../../hooks/useQuery';
 
 export const CameraConfigureInfoContainer: React.FC<{ projectId: number }> = ({ projectId }) => {
   return (
-    <Flex column gap="gap.large" space="between">
+    <Flex column gap="gap.large">
       <h1>Configuration</h1>
       <CameraConfigureInfo projectId={projectId} />
     </Flex>
