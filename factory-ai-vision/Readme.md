@@ -72,22 +72,22 @@ Before installation, You must have the following services set up to use Vision o
 To learn more about this development environment, check out this tutorial 
 
 ### Get Started:
-   1.	create a .env file under directory factory-ai-vision/EdgeSolution and put following Azure Container Registry credential in. 
+1. create a .env file under directory factory-ai-vision/EdgeSolution and put following Azure Container Registry credential in. 
 Your  Visual Studio Code will need these credential to push the container later.
 - CONTAINER_REGISTRY_NAME="<YOUR_CONTAINER_REGISTRY_NAME>"
 - CONTAINER_REGISTRY_USERNAME="<YOUR_CONTAINER_REGSITRY_USERNAME>"
 - CONTAINER_REGISTRY_PASSWORD="<YOUR_CONTAINER_REGISTRY_PASSWORD>"
          
-   2.	(optional) Enter your custom vision training key TRAINING_KEY and endpoint ENDPOINT in factory-ai-vision/EdgeSolution/modules/WebModule/backend/config.py. Copy the information from your custom vision setting page. If you skip this step here, you are require to input the information later once the deployment are completed. 
+2. (optional) Enter your custom vision training key TRAINING_KEY and endpoint ENDPOINT in factory-ai-vision/EdgeSolution/modules/WebModule/backend/config.py. Copy the information from your custom vision setting page. If you skip this step here, you are require to input the information later once the deployment are completed. 
    
-   3.	Open Visual Studio Code, 
-For GPU version, right click on factory-ai-vision/EdgeSolution/deployment.gpu.template.json and choose "Build and Push IoT Edge Solution" it will start building the docker container. For the first time deployment, It takes more than 10 mins to complete. 
+3. Open Visual Studio Code, 
+- For GPU version, right click on factory-ai-vision/EdgeSolution/deployment.gpu.template.json and choose "Build and Push IoT Edge Solution" it will start building the docker container. For the first time deployment, It takes more than 10 mins to complete. 
 
-For CPU version, use the template file factory-ai-vision/EdgeSolution/deployment.gpu.template.json instead.
+- For CPU version, use the template file factory-ai-vision/EdgeSolution/deployment.gpu.template.json instead.
       
-   4.	In Visual Studio Code, right click on factory-ai-vision/EdgeSolution/config/deployment.gpu.amd64.json (or factory-ai-vision/EdgeSolution/config/deployment.cpu.amd64.json if you built CPU version in the last step) and choose "Create Single Deployment for Single Device" and select the edge device from the list to deploy.
+4. In Visual Studio Code, right click on factory-ai-vision/EdgeSolution/config/deployment.gpu.amd64.json (or factory-ai-vision/EdgeSolution/config/deployment.cpu.amd64.json if you built CPU version in the last step) and choose "Create Single Deployment for Single Device" and select the edge device from the list to deploy.
    
-   5.	Open your browser and connect to http://<your-edge-ip:8080>. In this step you will be asked to input your Custom Vision Training Key & Endpoint If you skiped step2 above.
+5. Open your browser and connect to http://<your-edge-ip:8080>. In this step you will be asked to input your Custom Vision Training Key & Endpoint If you skiped step2 above.
 
 
 # Video Tutorial 
