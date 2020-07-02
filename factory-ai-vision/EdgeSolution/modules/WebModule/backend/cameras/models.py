@@ -20,6 +20,7 @@ from django.core import files
 from django.db import models
 from django.db.models.signals import post_save
 from django.db.utils import IntegrityError
+from django.db.models.signals import pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
@@ -366,3 +367,5 @@ class Stream(object):
         """close stream"""
         self.status = "stopped"
         logger.info(f"release {self}")
+
+pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")
