@@ -3,10 +3,12 @@ This is a sample showing how to deploy a Custom Vision model to Azure IoT edge d
 Custom Vision equipped with image classification and object detection that are trained in the cloud with your own images. You can define your location, camera and set up objects to detect any manufacturing parts, defeat area, etc. while keeping your vide footage private, lowering your badnwidth costs and even running offline. 
 Check out this video to see brief introduction in action and understand how the value is delievered: 
 
+
+
 # Prerequiste
 ## Hardware
--	Azure Stack Edge 
--	Simulated Azure IoT Edge device (such as a PC): Set up Azure IoT Edge (instructions on Windows, instructions on Linux) and use the amd64 tags. A test x64 deployment manifest is already available. 
+-	**Azure Stack Edge**
+-	**Simulated Azure IoT Edge device**(such as a PC): Set up Azure IoT Edge (instructions on Windows, instructions on Linux) and use the amd64 tags. A test x64 deployment manifest is already available. 
   *For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
   *For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
 ## Services
@@ -60,16 +62,14 @@ For Mac:
 ### Prerequisites
 
 Before installation, You must have the following services set up to use Vision on Edge:
-   1.	Docker: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
-   2.	IoT Edge Port: At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information  https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux 
-   3.	Azure Custom Vision account, see the below link to find your training key here https://www.customvision.ai/projects#/settings
-   4.	Azure Container Registry, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
-   5.	Visual Studio Code: IoT Edge development environment. Download it from here
-   6.	Visual Studio Code: Azure IoT Edge Extension: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT       Edge Devices right from VS Code. A must-have for IoT Edge development.
+   1.	**Docker**: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
+   2.	**IoT Edge Port**: At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information  https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux 
+   3.	**Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
+   4.	**Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
+   5.	**Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
+   6. **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
  
- Download it from here. Once installed, connect it to your IoT Hub.
-
-To learn more about this development environment, check out this tutorial 
+To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) and [this video](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52):
 
 ### Get Started:
 1. create a .env file under directory factory-ai-vision/EdgeSolution and put following Azure Container Registry credential in. 
