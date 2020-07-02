@@ -4,7 +4,7 @@ import { Grid } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
 import CameraDetailInfo from '../components/CameraDetails/CameraDetailInfo';
-import { CameraConfigureInfoContainer, CreateCameraConfig } from '../components/CameraConfigure';
+import { CameraConfigureInfoContainer, CreateCameraConfigButton } from '../components/CameraConfigure';
 import { getCameras } from '../store/camera/cameraActions';
 import { Camera } from '../store/camera/cameraTypes';
 import { State } from '../store/State';
@@ -28,12 +28,13 @@ const CameraDetails: FC = (): JSX.Element => {
   if (!camera) return <Redirect to="/cameras" />;
 
   const hasProject = cameraIdInproject === camera.id;
+  // TODO Get this inside live view container
   const aoiData = getAOIData(camera.area);
 
   return (
     <Grid columns="2" design={{ height: '100%' }}>
       <CameraDetailInfo id={camera.id} name={name} rtsp={camera.rtsp} AOIs={aoiData} />
-      {hasProject ? <CameraConfigureInfoContainer projectId={projectId} /> : <CreateCameraConfig />}
+      {hasProject ? <CameraConfigureInfoContainer projectId={projectId} /> : <CreateCameraConfigButton />}
     </Grid>
   );
 };
