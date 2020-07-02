@@ -97,7 +97,7 @@ TEMPLATES = [
 CORS_ORIGIN_ALLOW_ALL = True
 
 # WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
-ASGI_APPLICATION = 'vision_on_edge.asgi.application'
+ASGI_APPLICATION = 'vision_on_edge.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -170,4 +170,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION
+LOGGING = logging_config.LOGGING_CONFIG_DEV
