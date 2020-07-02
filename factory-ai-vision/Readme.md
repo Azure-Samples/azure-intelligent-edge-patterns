@@ -12,11 +12,11 @@ To install the Vision on Edge Solution Accelerator using the installation script
 
 * The installer and supporting files must be copied to your local machine. Either clone the repository locally, or download the appropriate zip file for your platform from the Installers directory and extract the files.
 
-* For a PC running Windows, navigate to the directory containing the installation files in a terminal and run the vision-on-edge-install.cmd script.
+* For a PC running Windows, navigate to the directory containing the installation files in a terminal and run the "factory-ai-vision-install.cmd" script.
 
  \- or -
 
-* For a Mac, or a PC running Linux, navigate to the directory containing the installation files in a terminal and run the vision-on-edge-install.sh script.
+* For a Mac, or a PC running Linux, navigate to the directory containing the installation files in a terminal and run the "factory-ai-vision-install.sh" script.
 * Now you can access the product startup page by opening the browser at http://youredgedeviceip:8080   eg. http://52.1.1.1:8080/
 
 
