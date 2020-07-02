@@ -1,5 +1,5 @@
 import React, { useEffect, FC, useState, useCallback } from 'react';
-import { Flex, Text, Button, Loader, Grid, Alert } from '@fluentui/react-northstar';
+import { Flex, Text, Button, Loader, Grid, Alert, Input } from '@fluentui/react-northstar';
 import { Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -10,10 +10,13 @@ import {
   thunkGetTrainingMetrics,
   thunkGetInferenceMetrics,
   resetStatus,
+  updateProjectData,
+  thunkUpdateProbThreshold,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus, TrainingMetrics } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { useQuery } from '../../hooks/useQuery';
+import { ListItem } from '../CameraDetails/CameraDetailInfo';
 
 export const CameraConfigureInfoContainer: React.FC<{ projectId: number }> = ({ projectId }) => {
   return (
@@ -25,9 +28,15 @@ export const CameraConfigureInfoContainer: React.FC<{ projectId: number }> = ({ 
 };
 
 const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => {
-  const { error, trainingLog, status, trainingMetrics } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+  const {
+    error,
+    trainingLog,
+    status,
+    trainingMetrics,
+    isLoading,
+    inferenceMetrics,
+    data: project,
+  } = useSelector<State, Project>((state) => state.project);
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const cameraName = useQuery().get('name');
@@ -86,6 +95,56 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
   return (
     <>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
+      <ListItem title="Maximum">
+        <Input
+          value={project.probThreshold}
+          onChange={(_, { value }): void => {
+            dispatch(updateProjectData({ probThreshold: value }));
+          }}
+        />
+        <span>%</span>
+        <Button
+          primary
+          content="Update Confidence Level"
+          onClick={(): void => {
+            dispatch(thunkUpdateProbThreshold());
+          }}
+          disabled={!project.probThreshold || isLoading}
+          loading={isLoading}
+        />
+      </ListItem>
+      <Grid columns={2} styles={{ rowGap: '20px' }}>
+        <ListItem title="Success Rate">
+          <Text styles={{ color: 'rgb(244, 152, 40)', fontWeight: 'bold' }} size="medium">
+            {`${inferenceMetrics.successRate}%`}
+          </Text>
+        </ListItem>
+        <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>
+          {`${Math.round(inferenceMetrics.averageTime * 100) / 100}/ms`}
+        </ListItem>
+        <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
+      </Grid>
+      <ListItem title="Unidentified Items">
+        <Text styles={{ margin: '5px' }} size="medium">
+          {inferenceMetrics.unIdetifiedItems}
+        </Text>
+        <Button
+          content="Identify Manually"
+          primary
+          styles={{
+            backgroundColor: 'red',
+            marginLeft: '100px',
+            ':hover': {
+              backgroundColor: '#A72037',
+            },
+            ':active': {
+              backgroundColor: '#8E192E',
+            },
+          }}
+          as={Link}
+          to="/manual"
+        />
+      </ListItem>
       <Button
         content={showConsequenceDashboard ? 'Hide detail for training metric' : 'Show detail training metric'}
         primary
