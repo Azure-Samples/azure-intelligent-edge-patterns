@@ -1,5 +1,5 @@
 """
-Camera App start
+Camera App
 """
 import logging
 import sys
@@ -19,14 +19,17 @@ class CameraConfig(AppConfig):
 
     def ready(self):
         """
-        Only load to data when runserver
-        if ready run in migration will failed
+        Camera App ready
         """
         # FIXME test may use this as well
         if 'runserver' in sys.argv:
-            from cameras.models import (Part, Camera, Project, Train)  # pylint: disable=C0415
-            from locations.models import Location  # pylint: disable=C0415
-            from azure_settings.models import Setting  # pylint: disable=C0415
+            # Import models in migrate/makemigration will occurs error.
+            # pylint: disable=C0415
+            from cameras.models import Part, Camera
+            from azure_training.models import Project, Train
+            from locations.models import Location
+            from azure_settings.models import Setting
+            # pylint: enable=C0415
 
             logger.info("CameraAppConfig ready while running server")
 
@@ -74,10 +77,10 @@ class CameraConfig(AppConfig):
                 logger.info("Creating Demo Location")
 
                 # Demo Location should be created already
-                # FIXME split location from project, and remove location here
                 demo_locations = Location.objects.filter(is_demo=True)
                 if len(demo_locations) <= 0:
                     return
+                # Default Azure Settings should be created already
                 default_settings = Setting.objects.filter(
                     name=DEFAULT_SETTING_NAME)
                 if len(default_settings) <= 0:

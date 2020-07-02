@@ -1,5 +1,5 @@
 """
-Azure Settings (App)
+Azure Settings App
 """
 import logging
 import sys
@@ -22,13 +22,15 @@ class AzureSettingsConfig(AppConfig):
 
     def ready(self):
         """
-        Only load to data when runserver
-        if ready run in migration will failed
+        Azure Settings App ready
         """
         # FIXME test may use this as well
         if 'runserver' in sys.argv:
-            from .models import Setting # pylint: disable=C0415
-            logger.info("AzureSettingsAppConfig ready while running server")
+            # pylint: disable=C0415
+            from .models import Setting
+            # pylint: enable=C0415
+
+            logger.info("Azure Settings AppConfig ready while running server")
             logger.info(ENDPOINT)
             logger.info(TRAINING_KEY)
             existing_settings = Setting.objects.filter(
