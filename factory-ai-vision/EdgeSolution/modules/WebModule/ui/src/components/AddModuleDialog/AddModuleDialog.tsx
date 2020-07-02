@@ -4,13 +4,14 @@ import * as R from 'ramda';
 
 import AddButton from '../AddButton';
 
-type AddModuleDialogProps = {
+export type AddModuleDialogProps = {
   header: string;
   fields: { placeholder: string; key: string; type: 'input' | 'textArea'; required: boolean }[];
   onConfirm: (formData: Record<string, string>) => void;
+  trigger?: JSX.Element;
 };
 
-export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ header, fields, onConfirm }) => {
+export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ trigger, header, fields, onConfirm }) => {
   const [formData, setFormData] = useState(
     fields.reduce((acc, cur) => {
       return { ...acc, [cur.key]: '' };
@@ -32,9 +33,11 @@ export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ header, fields
       onConfirm={(): void => onConfirm(formData)}
       header={header}
       trigger={
-        <div style={{ alignSelf: 'flex-end' }}>
-          <AddButton />
-        </div>
+        trigger || (
+          <div style={{ alignSelf: 'flex-end' }}>
+            <AddButton />
+          </div>
+        )
       }
       content={
         <Flex column gap="gap.large" hAlign="center">

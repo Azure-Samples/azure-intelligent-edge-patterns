@@ -20,7 +20,7 @@ export const LiveViewContainer: React.FC<{
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>(null);
-  const imageInfo = useImage(`http://${window.location.hostname}:5000/video_feed?inference=1`, '');
+  const imageInfo = useImage(`http://${window.location.hostname}:5000/video_feed?inference=1`, '', true);
   const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
 
   const onCheckboxClick = async (): Promise<void> => {
