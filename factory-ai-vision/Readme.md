@@ -9,8 +9,8 @@ Check out this video to see brief introduction in action and understand how the 
 ## Hardware
 -	**Azure Stack Edge**
 -	**Simulated Azure IoT Edge device**(such as a PC): Set up Azure IoT Edge (instructions on Windows, instructions on Linux) and use the amd64 tags. A test x64 deployment manifest is already available. 
-  *For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
-  *For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
+     * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
+     * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:
 
@@ -103,9 +103,10 @@ If you are running into issues, please check following for assistnat:
 - On CPU make sure this work: 
 https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
 - On GPU make sure this work:
--  *Quick test : run below command this will try to access Nvidia gpu inside docker 
+
+     * Quick test : run below command this will try to access Nvidia gpu inside docker 
              1.	sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
--  *Long test :: deploy below from marketplace on your iot edge device and make sure it works 
+     * Long test :: deploy below from marketplace on your iot edge device and make sure it works 
               https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
    
 2. If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running: 
