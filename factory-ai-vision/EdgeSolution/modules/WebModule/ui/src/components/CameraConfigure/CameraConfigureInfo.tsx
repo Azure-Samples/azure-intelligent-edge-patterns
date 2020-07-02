@@ -43,7 +43,7 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
   const cameraName = useQuery().get('name');
   const isDemo = useQuery().get('isDemo') === 'true';
   const history = useHistory();
-  const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(true);
+  const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
 
   const onDeleteConfigure = useCallback((): void => {
     // eslint-disable-next-line no-restricted-globals
@@ -176,13 +176,17 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
           }}
         />
       </Flex>
-      <Button
-        content={showConsequenceDashboard ? 'Hide detail for training metric' : 'Show detail training metric'}
-        primary
-        onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
-      />
-      {showConsequenceDashboard && <ConsequenceBoardGroup trainingMetrics={trainingMetrics} />}
-      <Flex gap="gap.medium" styles={{ marginTop: 'auto' }}>
+      <Flex hAlign="center" column gap="gap.large" styles={{ paddingTop: '70px' }}>
+        <Button
+          content={
+            showConsequenceDashboard ? 'Hide detail for training metric' : 'Show detail training metric'
+          }
+          primary
+          onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
+        />
+        {showConsequenceDashboard && <ConsequenceDashboard trainingMetrics={trainingMetrics} />}
+      </Flex>
+      <Flex gap="gap.medium" styles={{ marginTop: 'auto' }} hAlign="center">
         <Button primary as={Link} to="/partIdentification">
           Edit Configuration
         </Button>
@@ -190,29 +194,6 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
           Delete Configuration
         </Button>
       </Flex>
-    </>
-  );
-};
-
-const ConsequenceBoardGroup = ({ trainingMetrics }: { trainingMetrics: TrainingMetrics }): JSX.Element => {
-  return (
-    <>
-      {trainingMetrics.prevConsequence && (
-        <>
-          <Text>Previous Model Metrics</Text>
-          <ConsequenceDashboard
-            precision={trainingMetrics.prevConsequence?.precision}
-            recall={trainingMetrics.prevConsequence?.recall}
-            mAP={trainingMetrics.prevConsequence?.mAP}
-          />
-        </>
-      )}
-      <Text>Updated Model Metrics</Text>
-      <ConsequenceDashboard
-        precision={trainingMetrics.curConsequence?.precision}
-        recall={trainingMetrics.curConsequence?.recall}
-        mAP={trainingMetrics.curConsequence?.mAP}
-      />
     </>
   );
 };
@@ -230,37 +211,45 @@ const useAllTrainingLog = (trainingLog: string): string => {
 };
 
 interface ConsequenceDashboardProps {
-  precision: number;
-  recall: number;
-  mAP: number;
+  trainingMetrics: TrainingMetrics;
 }
-const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({ precision, recall, mAP }) => {
+const ConsequenceDashboard: FC<ConsequenceDashboardProps> = ({
+  trainingMetrics: { curConsequence, prevConsequence },
+}) => {
   return (
-    <Grid columns={3}>
-      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
-        <Text align="center" size="large" weight="semibold">
-          Precision
-        </Text>
-        <Text align="center" size="large" weight="semibold" styles={{ color: '#9a0089' }}>
-          {precision === null ? '' : `${((precision * 1000) | 0) / 10}%`}
-        </Text>
-      </div>
-      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
-        <Text align="center" size="large" weight="semibold">
-          Recall
-        </Text>
-        <Text align="center" size="large" weight="semibold" styles={{ color: '#0063b1' }}>
-          {recall === null ? '' : `${((recall * 1000) | 0) / 10}%`}
-        </Text>
-      </div>
-      <div style={{ height: '5em', display: 'flex', flexFlow: 'column', justifyContent: 'space-between' }}>
-        <Text align="center" size="large" weight="semibold">
-          mAP
-        </Text>
-        <Text align="center" size="large" weight="semibold" styles={{ color: '#69c138' }}>
-          {mAP === null ? '' : `${((mAP * 1000) | 0) / 10}%`}
-        </Text>
-      </div>
-    </Grid>
+    <table style={{ textAlign: 'center', width: '60%' }}>
+      <tr>
+        <td style={{ width: '200px' }}></td>
+        <td>Precision</td>
+        <td>Recall</td>
+        <td>mAP</td>
+      </tr>
+      <tr>
+        <td>Updated Model Metrics</td>
+        <td style={{ color: '#9a0089' }}>
+          {curConsequence?.precision === null ? '' : `${((curConsequence?.precision * 1000) | 0) / 10}%`}
+        </td>
+        <td style={{ color: '#0063b1' }}>
+          {curConsequence?.recall === null ? '' : `${((curConsequence?.recall * 1000) | 0) / 10}%`}
+        </td>
+        <td style={{ color: '#69c138' }}>
+          {curConsequence?.mAP === null ? '' : `${((curConsequence?.mAP * 1000) | 0) / 10}%`}
+        </td>
+      </tr>
+      {prevConsequence && (
+        <tr>
+          <td>Previous Model Metrics</td>
+          <td style={{ color: '#9a0089' }}>
+            {prevConsequence?.precision === null ? '' : `${((prevConsequence?.precision * 1000) | 0) / 10}%`}
+          </td>
+          <td style={{ color: '#0063b1' }}>
+            {prevConsequence?.recall === null ? '' : `${((prevConsequence?.recall * 1000) | 0) / 10}%`}
+          </td>
+          <td style={{ color: '#69c138' }}>
+            {prevConsequence?.mAP === null ? '' : `${((prevConsequence?.mAP * 1000) | 0) / 10}%`}
+          </td>
+        </tr>
+      )}
+    </table>
   );
 };
