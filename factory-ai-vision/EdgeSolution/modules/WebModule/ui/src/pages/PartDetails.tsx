@@ -6,7 +6,6 @@ import axios from 'axios';
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
 import { useQuery } from '../hooks/useQuery';
-import { CapturedImagesContainer } from '../components/CapturePhoto/CapturePhotos';
 
 export const PartDetails = (): JSX.Element => {
   const partId = useQuery().get('partId');
@@ -35,16 +34,22 @@ export const PartDetails = (): JSX.Element => {
   };
 
   return (
-    <Grid columns={'1fr 1fr'} rows={'80px auto 50px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
+    <Grid columns={'68% 30%'} rows={'80px auto 30px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       {partId ? <Tab partId={partId} /> : null}
-      <RightPanel
+      <PartInfoForm
         partId={partId}
         name={name}
         setName={setName}
         description={description}
         setDescription={setDescription}
       />
-      <LeftPanel partId={partId} goLabelImageIdx={goLabelImageIdx} setGoLabelImageIdx={setGoLabelImageIdx} />
+      <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2' }}>
+        <CaptureImagePanel
+          partId={partId}
+          goLabelImageIdx={goLabelImageIdx}
+          setGoLabelImageIdx={setGoLabelImageIdx}
+        />
+      </Flex>
       <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" column>
         <Button content="Save" primary onClick={onSave} disabled={!name} />
         {!!error && <Alert danger content={error} dismissible />}
@@ -53,7 +58,7 @@ export const PartDetails = (): JSX.Element => {
   );
 };
 
-const RightPanel = ({ partId, name, setName, description, setDescription }): JSX.Element => {
+const PartInfoForm = ({ partId, name, setName, description, setDescription }): JSX.Element => {
   useEffect(() => {
     if (partId) {
       axios
@@ -97,25 +102,18 @@ const RightPanel = ({ partId, name, setName, description, setDescription }): JSX
   );
 };
 
-const LeftPanel = ({ partId, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
+const CaptureImagePanel = ({ partId, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
   return (
     <Switch>
       <Route path={`/parts/detail/capturePhotos`}>
-        <Flex column gap="gap.small">
-          <CapturePhotos
-            partId={parseInt(partId, 10)}
-            goLabelImageIdx={goLabelImageIdx}
-            setGoLabelImageIdx={setGoLabelImageIdx}
-          />
-        </Flex>
-        <Flex column gap="gap.small" styles={{ width: '100%' }}>
-          <CapturedImagesContainer partId={parseInt(partId, 10)} goLabelImageIdx={goLabelImageIdx} />
-        </Flex>
+        <CapturePhotos
+          partId={parseInt(partId, 10)}
+          goLabelImageIdx={goLabelImageIdx}
+          setGoLabelImageIdx={setGoLabelImageIdx}
+        />
       </Route>
       <Route path={`/parts/detail/uploadPhotos`}>
-        <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2' }}>
-          <UploadPhotos partId={parseInt(partId, 10)} />
-        </Flex>
+        <UploadPhotos partId={parseInt(partId, 10)} />
       </Route>
     </Switch>
   );
