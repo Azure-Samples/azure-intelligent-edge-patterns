@@ -77,6 +77,7 @@ export const PartIdentification: React.FC = () => {
   >('locations', isTestModel);
   const history = useHistory();
   const [maxImgCountError, setMaxImgCountError] = useState(false);
+  const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', imageLength: 0 });
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
@@ -124,21 +125,51 @@ export const PartIdentification: React.FC = () => {
   };
 
   useEffect(() => {
-    const partImagesLengthPair: Record<string, number> = images.reduce((acc, cur) => {
+    const partsWithImageLength = images.reduce((acc, cur) => {
       const id = getIdFromUrl(cur.part);
-      if (selectedParts.map((e) => e.id).includes(id as any)) acc[id] = acc[id] + 1 || 1;
+      const relatedPartIdx = acc.findIndex((e) => e.id === id);
+      if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
       return acc;
-    }, {});
-    const minPartImageCount = Math.min(...Object.values(partImagesLengthPair));
-    if (minPartImageCount === Infinity) return;
-    if (minPartImageCount < 30) dispatch(updateProjectData({ accuracyRangeMin: 10, accuracyRangeMax: 40 }));
-    else if (minPartImageCount >= 30 && minPartImageCount < 80)
-      dispatch(updateProjectData({ accuracyRangeMin: 30, accuracyRangeMax: 60 }));
-    else if (minPartImageCount >= 80 && minPartImageCount < 130)
-      dispatch(updateProjectData({ accuracyRangeMin: 50, accuracyRangeMax: 80 }));
-    else if (minPartImageCount >= 130)
-      dispatch(updateProjectData({ accuracyRangeMin: 60, accuracyRangeMax: 90 }));
-  }, [dispatch, images, selectedParts]);
+    }, selectedParts);
+
+    const minimumLengthPart = partsWithImageLength.reduce(
+      (acc, cur) => {
+        if (cur.length < acc.length) return { name: cur.name, length: cur.length };
+        return acc;
+      },
+      { name: '', length: Infinity },
+    );
+
+    if (minimumLengthPart.length === Infinity) return;
+    if (minimumLengthPart.length < 30)
+      setSuggestMessage({
+        min: 10,
+        max: 40,
+        partName: minimumLengthPart.name,
+        imageLength: minimumLengthPart.length,
+      });
+    else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80)
+      setSuggestMessage({
+        min: 30,
+        max: 60,
+        partName: minimumLengthPart.name,
+        imageLength: minimumLengthPart.length,
+      });
+    else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130)
+      setSuggestMessage({
+        min: 50,
+        max: 80,
+        partName: minimumLengthPart.name,
+        imageLength: minimumLengthPart.length,
+      });
+    else if (minimumLengthPart.length >= 130)
+      setSuggestMessage({
+        min: 60,
+        max: 90,
+        partName: minimumLengthPart.name,
+        imageLength: minimumLengthPart.length,
+      });
+  }, [accuracyRangeMin, dispatch, images, selectedParts]);
 
   const accracyRangeDisabled = !needRetraining || isTestModel;
   const messageToCloudDisabled = !sendMessageToCloud;
@@ -208,6 +239,9 @@ export const PartIdentification: React.FC = () => {
                 onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
               />
               %
+            </Text>
+            <Text styles={{ fontSize: '12px' }} success>
+              {`Suggestion: Set the Min to ${suggestMessage.min} and Max to ${suggestMessage.max} because the part ${suggestMessage.partName} has ${suggestMessage.imageLength} images`}
             </Text>
             <Text disabled={accracyRangeDisabled}>
               Maximum Images to Store:{' '}
