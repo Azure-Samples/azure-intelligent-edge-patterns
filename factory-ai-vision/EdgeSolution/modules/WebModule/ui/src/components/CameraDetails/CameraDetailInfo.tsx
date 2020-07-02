@@ -1,4 +1,4 @@
-import React, { FC, memo } from 'react';
+import React, { FC, memo, useState } from 'react';
 import { Flex, Text, Grid, Button, Status, Input } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -19,6 +19,7 @@ interface CameraDetailInfoProps {
   id: number;
 }
 const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) => {
+  const [showTestResult, setShowTestResult] = useState(false);
   const dispatch = useDispatch();
 
   const { data: project, inferenceMetrics, isLoading, status } = useSelector<State, Project>(
@@ -91,6 +92,11 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
               }}
               disabled={!project.probThreshold || isLoading}
               loading={isLoading}
+            />
+            <Button
+              content={showTestResult ? 'Back to Video' : 'Test Result'}
+              primary
+              onClick={(): void => setShowTestResult((prev) => !prev)}
             />
           </ListItem>
           <Grid columns={2} styles={{ rowGap: '20px' }}>
