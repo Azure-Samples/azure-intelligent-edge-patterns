@@ -72,10 +72,8 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
               .map((e) => e.name)
               .join(', ')}
           </ListItem>
-          <Flex column gap="gap.small">
-            <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
-          </Flex>
-          <ListItem title="Maximum">
+          <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
+          <ListItem title="Maximum Confidence Level">
             <Input
               value={project.probThreshold}
               onChange={(_, { value }): void => {
@@ -99,9 +97,9 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
                 {`${inferenceMetrics.successRate}%`}
               </Text>
             </ListItem>
-            <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>{`${
-              Math.round(inferenceMetrics.averageTime * 100) / 100
-            }/ms`}</ListItem>
+            <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>
+              {`${Math.round(inferenceMetrics.averageTime * 100) / 100}/ms`}
+            </ListItem>
             <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
           </Grid>
           <ListItem title="Unidentified Items">
