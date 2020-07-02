@@ -1,3 +1,4 @@
+
 # Custom vision + Azure IoT Edge for Factory AI
 This is a sample showing how to deploy a Custom Vision model to Azure IoT edge device and get AI model up running in a single day. 
 Custom Vision equipped with image classification and object detection that are trained in the cloud with your own images. You can define your location, camera and set up objects to detect any manufacturing parts, defeat area, etc. while keeping your vide footage private, lowering your badnwidth costs and even running offline. 
@@ -118,5 +119,7 @@ If you don’t see above, the conatiners aren't downloaded successfully yet
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
    
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
+
+
 
 
