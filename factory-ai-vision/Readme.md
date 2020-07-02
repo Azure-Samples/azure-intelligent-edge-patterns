@@ -73,38 +73,48 @@ To learn more about this development environment, check out this tutorial
 
 ### Get Started:
    1.	create a .env file under directory factory-ai-vision/EdgeSolution and put following Azure Container Registry credential in. 
-      Your  Visual Studio Code will need these credential to push the container later.
-         CONTAINER_REGISTRY_NAME="<YOUR_CONTAINER_REGISTRY_NAME>"
-         CONTAINER_REGISTRY_USERNAME="<YOUR_CONTAINER_REGSITRY_USERNAME>"
-         CONTAINER_REGISTRY_PASSWORD="<YOUR_CONTAINER_REGISTRY_PASSWORD>"
+Your  Visual Studio Code will need these credential to push the container later.
+- CONTAINER_REGISTRY_NAME="<YOUR_CONTAINER_REGISTRY_NAME>"
+- CONTAINER_REGISTRY_USERNAME="<YOUR_CONTAINER_REGSITRY_USERNAME>"
+- CONTAINER_REGISTRY_PASSWORD="<YOUR_CONTAINER_REGISTRY_PASSWORD>"
+         
    2.	(optional) Enter your custom vision training key TRAINING_KEY and endpoint ENDPOINT in factory-ai-vision/EdgeSolution/modules/WebModule/backend/config.py. Copy the information from your custom vision setting page. If you skip this step here, you are require to input the information later once the deployment are completed. 
-   3.	Open Visual Studio Code, to build the GPU version, right click on factory-ai-vision/EdgeSolution/deployment.gpu.template.json and choose "Build and Push IoT Edge Solution" it will start building the docker container. For the first time deployment, It takes more than 10 mins to complete. 
+   
+   3.	Open Visual Studio Code, 
+For GPU version, right click on factory-ai-vision/EdgeSolution/deployment.gpu.template.json and choose "Build and Push IoT Edge Solution" it will start building the docker container. For the first time deployment, It takes more than 10 mins to complete. 
 
-      For CPU version, use the template file factory-ai-vision/EdgeSolution/deployment.gpu.template.json instead.
+For CPU version, use the template file factory-ai-vision/EdgeSolution/deployment.gpu.template.json instead.
+      
    4.	In Visual Studio Code, right click on factory-ai-vision/EdgeSolution/config/deployment.gpu.amd64.json (or factory-ai-vision/EdgeSolution/config/deployment.cpu.amd64.json if you built CPU version in the last step) and choose "Create Single Deployment for Single Device" and select the edge device from the list to deploy.
+   
    5.	Open your browser and connect to http://<your-edge-ip:8080>. In this step you will be asked to input your Custom Vision Training Key & Endpoint If you skiped step2 above.
 
 
 # Video Tutorial 
 
-Vision on Edge installer: https://youtu.be/NWKLk8ENo-g
-Test with pretrained mode: https://youtu.be/7PWGNC7rkCE
-Load project from Custom Vision: https://youtu.be/gTEWlu2V8yk
+- Vision on Edge installer: https://youtu.be/NWKLk8ENo-g
+- Test with pretrained mode: https://youtu.be/7PWGNC7rkCE
+- Load project from Custom Vision: https://youtu.be/gTEWlu2V8yk
 
 # Troubleshooting 
 If you are running into issues, please check following for assistnat:
 
    1.	Ensure your setup is good
-      a.	On CPU make sure this work: https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
-
-      b.	On GPU make sure this work:
-           i.	Quick test : run below command this will try to access Nvidia gpu inside docker 
-                 1.	sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
-          ii.	Long test :: deploy below from marketplace on your iot edge device and make sure it works 
+   a.	On CPU make sure this work: 
+https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
+   b.	On GPU make sure this work:
+       i.	Quick test : run below command this will try to access Nvidia gpu inside docker 
+             1.	sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+      ii.	Long test :: deploy below from marketplace on your iot edge device and make sure it works 
               https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
-   2.	If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running: YOUR_CONTAINER_REGISTRY_NAME/inferencemodule:x.x.xx-cpuamd64 (or gpu) YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
+   
+   2.	If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running: 
+   - YOUR_CONTAINER_REGISTRY_NAME/inferencemodule:x.x.xx-cpuamd64 (or gpu) 
+   - YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 If you don’t see above, the conatiners aren't downloaded successfully yet 
+   
    3.	If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
+   
    4.	If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
 
 
