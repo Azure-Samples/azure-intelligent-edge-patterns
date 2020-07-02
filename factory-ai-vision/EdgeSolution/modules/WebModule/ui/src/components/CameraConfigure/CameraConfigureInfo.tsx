@@ -12,6 +12,7 @@ import {
   resetStatus,
   updateProjectData,
   thunkUpdateProbThreshold,
+  thunkUpdateAccuracyRange,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus, TrainingMetrics } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -145,6 +146,36 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
           to="/manual"
         />
       </ListItem>
+      <Text>Accuracy Range: </Text>
+      <Flex gap="gap.medium" vAlign="center">
+        <Text>Minimum:</Text>
+        <Input
+          value={project.accuracyRangeMin}
+          type="number"
+          onChange={(_, { value }): void => {
+            dispatch(updateProjectData({ accuracyRangeMin: parseInt(value, 10) }));
+          }}
+        />
+        <Text>%</Text>
+        <Text>Maximum:</Text>
+        <Input
+          value={project.accuracyRangeMax}
+          type="number"
+          onChange={(_, { value }): void => {
+            dispatch(updateProjectData({ accuracyRangeMax: parseInt(value, 10) }));
+          }}
+        />
+        <Text>%</Text>
+        <Button
+          content="Update Accuracy Range"
+          primary
+          loading={isLoading}
+          disabled={isLoading}
+          onClick={(): void => {
+            dispatch(thunkUpdateAccuracyRange());
+          }}
+        />
+      </Flex>
       <Button
         content={showConsequenceDashboard ? 'Hide detail for training metric' : 'Show detail training metric'}
         primary
