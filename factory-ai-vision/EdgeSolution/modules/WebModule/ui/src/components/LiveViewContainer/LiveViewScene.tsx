@@ -90,7 +90,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={(): void => {
-            if (creatingState === CreatingState.Creating) setCreatingState(CreatingState.Waiting);
+            if (creatingState === CreatingState.Creating) setCreatingState(CreatingState.Disabled);
           }}
         >
           <KonvaImage image={imgEle} ref={imgRef} />
@@ -280,24 +280,22 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, re
         fill={COLOR}
         onDragMove={handleDrag}
       />
-      {false && (
-        <Path
-          x={x1}
-          y={y1 - 30 / scale}
-          data="M 0 0 L 20 20 M 20 0 L 0 20"
-          stroke="red"
-          strokeWidth={5}
-          visible={cancelBtnVisible && creatingState === CreatingState.Disabled}
-          onMouseEnter={(e): void => {
-            e.target.getStage().container().style.cursor = 'pointer';
-          }}
-          onMouseLeave={(e): void => {
-            e.target.getStage().container().style.cursor = 'default';
-          }}
-          onClick={(): void => removeBox(box.id)}
-          scale={{ x: 1 / scale, y: 1 / scale }}
-        />
-      )}
+      <Path
+        x={x1}
+        y={y1 - 30 / scale}
+        data="M 0 0 L 20 20 M 20 0 L 0 20"
+        stroke="red"
+        strokeWidth={5}
+        visible={cancelBtnVisible && creatingState === CreatingState.Disabled}
+        onMouseEnter={(e): void => {
+          e.target.getStage().container().style.cursor = 'pointer';
+        }}
+        onMouseLeave={(e): void => {
+          e.target.getStage().container().style.cursor = 'default';
+        }}
+        onClick={(): void => removeBox(box.id)}
+        scale={{ x: 1 / scale, y: 1 / scale }}
+      />
     </Group>
   );
 };
