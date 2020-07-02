@@ -22,23 +22,28 @@ from django.conf import settings
 from rest_framework import routers
 
 from cameras import views
+from azure_settings.api import views as setting_views
+from locations.api import views as location_views
 from . import views as site_views
+
 
 class OptionalSlashRouter(routers.DefaultRouter):
     def __init__(self):
         super(routers.DefaultRouter, self).__init__()
         self.trailing_slash = '/?'
 
+
 #router = ters.DefaultRouter(trailing_slash=False)
 router = OptionalSlashRouter()
+router.register('settings', setting_views.SettingViewSet)
 router.register('cameras', views.CameraViewSet)
 router.register('parts', views.PartViewSet)
 router.register('images', views.ImageViewSet)
 router.register('projects', views.ProjectViewSet)
-router.register('locations', views.LocationViewSet)
+router.register('locations', location_views.LocationViewSet)
 router.register('annotations', views.AnnotationViewSet)
 router.register('train', views.TrainViewSet)
-router.register('settings', views.SettingViewSet)
+router.register('tasks', views.TaskViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
@@ -51,11 +56,21 @@ urlpatterns = \
         path('api/streams/<int:stream_id>/capture', views.capture),
         path('api/projects/<int:project_id>/train', views.train),
         path('api/projects/<int:project_id>/export', views.export),
-        path('api/projects/<int:project_id>/train_performance', views.train_performance),
-        path('api/projects/<int:project_id>/inference_video_feed', views.inference_video_feed),
+        path('api/projects/<int:project_id>/train_performance',
+             views.train_performance),
+        path('api/projects/<int:project_id>/inference_video_feed',
+             views.inference_video_feed),
+        path('api/projects/<int:project_id>/pull_cv_project',
+             views.pull_cv_project),
+        path('api/projects/<int:project_id>/update_prob_threshold',
+             views.update_prob_threshold),
+        path('api/projects/<int:project_id>/reset_project', views.reset_project),
+        path('api/projects/<int:project_id>/reset_camera',
+             views.project_reset_camera),
         path('api/projects/null/export', views.export_null),
         path('api/relabel', views.upload_relabel_image),
         path('api/relabel/update', views.relabel_update),
+        path('api/appinsight/key', views.instrumentation_key),
         path('admin/', admin.site.urls),
         url('^', site_views.UIAppView.as_view())
     ]

@@ -1,9 +1,15 @@
-import React, { FC } from 'react';
-import { Grid, Segment, Image, Flex, Text, MenuIcon } from '@fluentui/react-northstar';
+import React, { FC, MouseEvent } from 'react';
+import { Grid, Segment, Image, Flex, Text, MenuIcon, Button } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
-import Breadcrumb from '../Breadcrumb';
+import { useSelector } from 'react-redux';
 
-export const MainLayout: React.FC = ({ children }) => {
+import Breadcrumb from '../Breadcrumb';
+import LeftNav from './LeftNav';
+import { State } from '../../store/State';
+
+export const MainLayout: FC = ({ children }) => {
+  const isTrainerValid = useSelector<State, boolean>((state) => state.setting.isTrainerValid);
+
   return (
     <Grid
       columns="60px auto"
@@ -11,7 +17,7 @@ export const MainLayout: React.FC = ({ children }) => {
       design={{ height: '100vh' }}
       styles={{ justifyContent: 'stretch' }}
     >
-      <TopNav />
+      <TopNav disabled={!isTrainerValid} />
       <LeftNav
         styles={{
           gridColumn: '1 / span 1',
@@ -19,17 +25,18 @@ export const MainLayout: React.FC = ({ children }) => {
           boxShadow: '1px 0px 10px 0px rgba(0,0,0,0.75)',
           zIndex: 1,
         }}
+        disabled={!isTrainerValid}
       />
 
       <Segment styles={{ gridColumn: 'span 1', padding: '30px' }}>
-        <Breadcrumb />
+        <Breadcrumb disabled={!isTrainerValid} />
         {children}
       </Segment>
     </Grid>
   );
 };
 
-const TopNav: FC = () => {
+const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
   return (
     <Flex
       space="between"
@@ -45,43 +52,33 @@ const TopNav: FC = () => {
       }}
     >
       <Flex gap="gap.large" vAlign="center">
-        <MenuIcon size="large" styles={{ color: 'white' }} />
-        <NavLink to={'/'} style={{ textDecoration: 'none' }}>
-          <Text color="white">Vision on Edge</Text>
+        <NavLink
+          to={'/'}
+          style={{ textDecoration: 'none', cursor: disabled && 'default' }}
+          onClick={(e: MouseEvent): void => {
+            if (disabled) e.preventDefault();
+          }}
+        >
+          <Flex gap="gap.medium">
+            <Image src="/icons/Home_white.png" design={{ width: '30px' }} />
+            <Text color="white">Vision on Edge</Text>
+          </Flex>
         </NavLink>
       </Flex>
-      <Flex vAlign="center" hAlign="end" gap="gap.medium" styles={{ height: '100%' }}>
-        <Link to="/setting" style={{ height: '100%' }}>
+      <Flex
+        vAlign="center"
+        hAlign="end"
+        gap="gap.medium"
+        styles={{ height: '100%' }}
+        onClick={(e: MouseEvent): void => {
+          if (disabled) e.preventDefault();
+        }}
+      >
+        <Link to="/setting" style={{ height: '100%', cursor: disabled && 'default' }}>
           <Image styles={{ height: '100%' }} src="/icons/setting.png" />
         </Link>
         <Text color="white">User</Text>
       </Flex>
     </Flex>
-  );
-};
-
-const LeftNav: FC<any> = ({ styles }): JSX.Element => {
-  return (
-    <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
-      <Flex column gap="gap.large" hAlign="center">
-        <NavItem src="/icons/location.png" to="/locations"></NavItem>
-        <NavItem src="/icons/camera.png" to="/cameras"></NavItem>
-        <NavItem src="/icons/part.png" to="/parts"></NavItem>
-        <NavItem src="/icons/manual.png" to="/manual"></NavItem>
-        <NavItem src="/icons/partIdentification.png" to="/partIdentification"></NavItem>
-      </Flex>
-    </Segment>
-  );
-};
-
-const NavItem = ({ src, to }): JSX.Element => {
-  return (
-    <NavLink
-      to={to}
-      style={{ display: 'flex', justifyContent: 'center', padding: '0.8em' }}
-      activeStyle={{ backgroundColor: 'rgba(250, 83, 5, 0.5)' }}
-    >
-      <Image src={src} design={{ width: '100%' }}></Image>
-    </NavLink>
   );
 };

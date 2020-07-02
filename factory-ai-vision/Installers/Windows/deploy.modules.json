@@ -1,0 +1,84 @@
+ 
+{ 
+  "$schema-template": "2.0.0", 
+  "modulesContent": { 
+    "$edgeAgent": { 
+      "properties.desired": { 
+        "schemaVersion": "1.0", 
+        "runtime": { 
+          "type": "docker", 
+          "settings": { 
+            "minDockerVersion": "v1.25", 
+            "loggingOptions": "", 
+            "registryCredentials": {} 
+          } 
+        }, 
+        "systemModules": { 
+          "edgeAgent": { 
+            "type": "docker", 
+            "settings": { 
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0", 
+              "createOptions": "{}" 
+            } 
+          }, 
+          "edgeHub": { 
+            "type": "docker", 
+            "status": "running", 
+            "restartPolicy": "always", 
+            "settings": { 
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0", 
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}" 
+            } 
+          } 
+        }, 
+        "modules": { 
+          "WebModule": { 
+            "version": "1.0", 
+            "type": "docker", 
+            "status": "running", 
+            "restartPolicy": "always", 
+			      "env": { 
+              "ENDPOINT": { 
+                "value": "https://westus2.api.cognitive.microsoft.com/" 
+              }, 
+              "TRAINING_KEY": { 
+                "value": "a9ce558a81d04b5a8dcd87747961aeb1" 
+              } 
+            }, 
+            "settings": { 
+              "image": "intelligentedge/visionwebmodule:0.1.6-amd64", 
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8080\"}]}}}" 
+            } 
+          }, 
+          "InferenceModule": { 
+            "version": "1.0", 
+            "type": "docker", 
+            "status": "running", 
+            "restartPolicy": "always", 
+            "settings": { 
+              "image": "intelligentedge/inferencemodule:0.1.6-gpuamd64", 
+              "createOptions": "{\"HostConfig\":{\"NetworkMode\":\"host\",\"runtime\":\"nvidia\"},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}" 
+            } 
+          } 
+        } 
+      } 
+    }, 
+    "$edgeHub": { 
+      "properties.desired": { 
+        "schemaVersion": "1.0", 
+        "routes": { 
+          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream" 
+        }, 
+        "storeAndForwardConfiguration": { 
+          "timeToLiveSecs": 7200 
+        } 
+      } 
+    }, 
+    "WebModule": { 
+      "properties.desired": {} 
+    }, 
+    "VisionSampleModule": { 
+      "properties.desired": {} 
+    } 
+  } 
+} 

@@ -21,6 +21,8 @@ import {
   GET_INFERENCE_METRICS_REQUEST,
   GET_INFERENCE_METRICS_SUCCESS,
   GET_INFERENCE_METRICS_FAILED,
+  UPDATE_ORIGIN_PROJECT_DATA,
+  RESET_STATUS,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -28,7 +30,13 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case GET_PROJECT_REQUEST:
       return { ...state, isLoading: true, error: null };
     case GET_PROJECT_SUCCESS:
-      return { ...state, isLoading: false, data: { ...action.payload.project }, error: null };
+      return {
+        ...state,
+        isLoading: false,
+        data: { ...action.payload.project },
+        originData: { ...action.payload.project },
+        error: null,
+      };
     case GET_PROJECT_FAILED:
       return { ...state, isLoading: false, error: action.error };
     case POST_PROJECT_REQUEST:
@@ -51,11 +59,32 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
           accuracyRangeMax: 80,
           maxImages: 50,
           modelUrl: '',
+          sendMessageToCloud: false,
+          framesPerMin: 6,
+          accuracyThreshold: 50,
+          probThreshold: '10',
+        },
+        originData: {
+          id: null,
+          camera: null,
+          location: null,
+          parts: [],
+          needRetraining: true,
+          accuracyRangeMin: 60,
+          accuracyRangeMax: 80,
+          maxImages: 50,
+          modelUrl: '',
+          sendMessageToCloud: false,
+          framesPerMin: 6,
+          accuracyThreshold: 50,
+          probThreshold: '10',
         },
         inferenceMetrics: {
           successRate: 0,
           successfulInferences: 0,
           unIdetifiedItems: 0,
+          isGpu: false,
+          averageTime: 0,
         },
         trainingMetrics: {
           curConsequence: null,
@@ -68,7 +97,9 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case DELETE_PROJECT_FALIED:
       return { ...state };
     case UPDATE_PROJECT_DATA:
-      return { ...state, data: action.payload };
+      return { ...state, data: { ...state.data, ...action.payload } };
+    case UPDATE_ORIGIN_PROJECT_DATA:
+      return { ...state, originData: state.data };
     case GET_TRAINING_LOG_REQUEST:
       return {
         ...state,
@@ -106,6 +137,14 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state, inferenceMetrics: action.payload };
     case GET_INFERENCE_METRICS_FAILED:
       return { ...state, error: action.error };
+    case RESET_STATUS:
+      return { ...state, status: Status.None };
+    case 'UPDATE_PROB_THRESHOLD_REQUEST':
+      return { ...state, isLoading: true, error: null };
+    case 'UPDATE_PROB_THRESHOLD_SUCCESS':
+      return { ...state, isLoading: false };
+    case 'UPDATE_PROB_THRESHOLD_FAILED':
+      return { ...state, isLoading: false, error: action.error };
     default:
       return { ...state };
   }

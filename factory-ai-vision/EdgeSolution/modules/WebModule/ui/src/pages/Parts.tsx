@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Image, Text, Button, AddIcon } from '@fluentui/react-northstar';
+import { Flex, Image, Text } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import { getIdFromUrl } from '../util/GetIDFromUrl';
+import { AddModuleDialog } from '../components/AddModuleDialog';
 
 export const Parts: React.FC = () => {
   const [parts, setParts] = useState([]);
 
-  const partsAPI = Axios.get('/api/parts/');
-  const imagesAPI = Axios.get('/api/images/');
-
   useEffect(() => {
+    const partsAPI = Axios.get('/api/parts/');
+    const imagesAPI = Axios.get('/api/images/');
+
     Axios.all([partsAPI, imagesAPI])
       .then(
         Axios.spread((...responses) => {
-          const { data: parts } = responses[0];
+          const { data: partsRes } = responses[0];
           const { data: images } = responses[1];
           setParts(
-            parts.map((e) => ({
+            partsRes.map((e) => ({
               ...e,
               images: images.find((img) => getIdFromUrl(img.part) === e.id)?.image,
             })),
@@ -30,25 +31,49 @@ export const Parts: React.FC = () => {
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <Flex gap="gap.large" wrap>
-        {parts.map((ele) => (
-          <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
-        ))}
+        {parts
+          .filter((e) => !e.is_demo)
+          .map((ele) => (
+            <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
+          ))}
       </Flex>
-      <Button
-        primary
-        fluid
-        circular
-        content={<AddIcon size="largest" circular />}
-        style={{
-          width: 100,
-          height: 100,
-          position: 'fixed',
-          right: '100px',
-          bottom: '100px',
-        }}
-        as={Link}
-        to="/parts/detail"
-      />
+      <div style={{ position: 'absolute', right: '100px', bottom: '100px' }}>
+        <AddModuleDialog
+          header="Add Part"
+          fields={[
+            {
+              placeholder: 'Part Name',
+              key: 'name',
+              type: 'input',
+              required: true,
+            },
+            {
+              placeholder: 'Description',
+              key: 'description',
+              type: 'textArea',
+              required: false,
+            },
+          ]}
+          onConfirm={({ name, description }): void => {
+            // TODO Migrate this to part action
+            Axios({
+              method: 'POST',
+              url: `/api/parts/`,
+              data: {
+                name,
+                description,
+              },
+            })
+              .then(({ data }) => {
+                setParts((prev) => prev.concat(data));
+                return void 0;
+              })
+              .catch((err) => {
+                alert(err);
+              });
+          }}
+        />
+      </div>
     </div>
   );
 };

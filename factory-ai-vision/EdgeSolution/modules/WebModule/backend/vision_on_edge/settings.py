@@ -12,9 +12,13 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+import config
+from configs.app_insight import APP_INSIGHT_ON
+from configs import logging_config
+from configs.customvision_config import TRAINING_KEY, ENDPOINT
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -27,7 +31,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,8 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'azure_settings',
+    'locations',
     'cameras',
     'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -47,11 +53,26 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'opencensus.ext.django.middleware.OpencensusMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if APP_INSIGHT_ON:
+    from configs.app_insight import APP_INSIGHT_CONN_STR
+    MIDDLEWARE.append('opencensus.ext.django.middleware.OpencensusMiddleware')
+    OPENCENSUS = {
+        'TRACE': {
+            'SAMPLER':
+                'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
+            'EXPORTER':
+                f'''opencensus.ext.azure.trace_exporter.AzureExporter(
+                connection_string="{APP_INSIGHT_CONN_STR}"
+            )''',
+        }
+    }
 
 ROOT_URLCONF = 'vision_on_edge.urls'
 
@@ -73,9 +94,8 @@ TEMPLATES = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-#WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
+# WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
 ASGI_APPLICATION = 'vision_on_edge.asgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -87,25 +107,27 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -119,7 +141,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -137,18 +158,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ICON_URL = '/icons/'
 ICON_ROOT = os.path.join(UI_DIR, 'icons')
 
-import config
-TRAINING_KEY = config.TRAINING_KEY
-ENDPOINT = config.ENDPOINT
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
-
-import os
-if 'TRAINING_KEY' in os.environ:
-    TRAINING_KEY = os.environ['TRAINING_KEY']
-if 'ENDPOINT' in os.environ:
-    ENDPOINT = os.environ['ENDPOINT']
 
 print('************************************')
 print('CONFIGURATION:')
@@ -156,3 +168,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
+LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION
