@@ -9,6 +9,7 @@ import { useQuery } from '../hooks/useQuery';
 import { WarningDialog } from '../components/WarningDialog';
 import { errorTheme } from '../themes/errorTheme';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
+import { useProject } from '../hooks/useProject';
 
 export const PartDetails = (): JSX.Element => {
   const partId = useQuery().get('partId');
@@ -18,6 +19,7 @@ export const PartDetails = (): JSX.Element => {
   const [error, setError] = useState('');
   const history = useHistory();
   const [status, setStatus] = useState<Status>(Status.None);
+  const project = useProject(false);
 
   const onSave = (): void => {
     axios({
@@ -41,8 +43,8 @@ export const PartDetails = (): JSX.Element => {
     setStatus(Status.Loading);
 
     try {
+      await axios.get(`/api/projects/${project.data.id}/delete_tag?part_name=${name}`);
       await axios.delete(`/api/parts/${partId}/`);
-      // TODO: Another API
       setStatus(Status.Success);
     } catch (e) {
       setError(e);
