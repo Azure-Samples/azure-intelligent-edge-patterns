@@ -23,7 +23,7 @@ from azure.iot.device import IoTHubModuleClient
 from django.core import files
 from django.db import models
 from django.db.models.signals import post_save, pre_save
-# from django.db.models.signals import post_delete, m2m_changed
+from django.db.models.signals import pre_delete
 from django.db.utils import IntegrityError
 from PIL import Image as PILImage
 from rest_framework import status
@@ -88,6 +88,7 @@ class Part(models.Model):
             raise integrity_error
         except:
             logger.exception("Unexpected Error in Part Presave")
+
 
 
 class Image(models.Model):
@@ -342,7 +343,6 @@ class Project(models.Model):
         if instance.metrics_frame_per_minutes is not None:
             metrics_frame_per_minutes = instance.metrics_frame_per_minutes
 
-
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
                 "http://" + inference_module_url() +
@@ -443,6 +443,35 @@ class Project(models.Model):
         except Exception as e:
             logger.exception("Project create_project: Unexpected Error")
             raise e
+
+    def delete_tag_by_name(self, tag_name):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_name)   
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        tags = trainer.get_tags(project_id=self.customvision_project_id)
+        for tag in tags:
+            if tag.name.lower() == tag_name.lower():
+                trainer.delete_tag(project_id=self.customvision_project_id,
+                                   tag_id=tag.id)
+                logger.info("tag deleted: %s", tag_name)
+                return
+
+    def delete_tag_by_id(self, tag_id):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_id)
+
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        trainer.delete_tag(project_id=self.customvision_project_id,
+                           tag_id=tag_id)
+        return
 
     def update_app_insight_counter(
             self,
