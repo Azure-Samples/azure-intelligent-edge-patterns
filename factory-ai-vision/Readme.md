@@ -9,7 +9,7 @@ Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to se
 # Prerequiste
 ## Hardware
 -	**Azure Stack Edge**
--	**Simulated Azure IoT Edge device**(such as a PC): Set up Azure IoT Edge (instructions on Windows, instructions on Linux) and use the amd64 tags. A test x64 deployment manifest is already available. 
+- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge ([instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux)) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
      * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
 ## Services
@@ -39,9 +39,9 @@ Go to factory-ai-vision repo and click on Installers folder, there are two zip f
 
 For Windows: 
    1.	Click and download the Windows.zip, and unzip the zipped files. It contains three files:
-     1)	deploy-custom-vision-arm.json
-     2)	deployment.amd64.json 
-     3)	factory-ai-vision-install.cmd
+   a. deploy-custom-vision-arm.json
+   b. deployment.amd64.json 
+   c. factory-ai-vision-install.cmd
    2.	Open the factory-ai-vision-install.cmd file and start running the installation. 
       It will open the terminal windows and ask for your Azure subscription. 
    3.	Choose your subscription
@@ -69,14 +69,14 @@ Before installation, You must have the following services set up to use Vision o
    5.	**Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
    6. **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
  
-To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) and [this video](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52):
+To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) 
 
 ### Get Started:
 
 1. create a `.env` file under directory ```factory-ai-vision/EdgeSolution``` and put following Azure Container Registry credential in. Your Visual Studio Code will need these credential to push the container later.
-- CONTAINER_REGISTRY_NAME="<YOUR_CONTAINER_REGISTRY_NAME>"
-- CONTAINER_REGISTRY_USERNAME="<YOUR_CONTAINER_REGSITRY_USERNAME>"
-- CONTAINER_REGISTRY_PASSWORD="<YOUR_CONTAINER_REGISTRY_PASSWORD>"
+ CONTAINER_REGISTRY_NAME="<YOUR_CONTAINER_REGISTRY_NAME>"
+ CONTAINER_REGISTRY_USERNAME="<YOUR_CONTAINER_REGSITRY_USERNAME>"
+ CONTAINER_REGISTRY_PASSWORD="<YOUR_CONTAINER_REGISTRY_PASSWORD>"
 2. (optional) Enter your custom vision training key TRAINING_KEY and endpoint ENDPOINT in `factory-ai-vision/EdgeSolution/modules/WebModule/backend/config.py.` Copy the information from your custom vision setting page. If you skip this step here, you are require to input the information later once the deployment are completed.
 3. Open Visual Studio Code, to build the GPU version, right click on ```factory-ai-vision/EdgeSolution/deployment.gpu.template.json``` and choose "Build and Push IoT Edge Solution" it will start building the docker container. For the first time deployment, It takes more than 10 mins to complete. 
     For CPU version, use the template file ```factory-ai-vision/EdgeSolution/deployment.gpu.template.json``` instead.
