@@ -107,9 +107,9 @@ If you are running into issues, please check following for assistnat:
      https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
   b. On GPU make sure this work:
     1. Quick test : run below command this will try to access Nvidia gpu inside docker 
-- ```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
-    2. Long test :: deploy below from marketplace on your iot edge device and make sure it works 
-              https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
+    ```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
+    2. Long test :: deploy below from marketplace on your iot edge device and make sure it works
+    https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
    
 2. If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running: 
    - YOUR_CONTAINER_REGISTRY_NAME/inferencemodule:x.x.xx-cpuamd64 (or gpu) 
