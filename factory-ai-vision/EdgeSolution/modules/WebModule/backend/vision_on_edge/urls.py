@@ -29,8 +29,9 @@ from . import views as site_views
 
 
 class OptionalSlashRouter(routers.DefaultRouter):
+    """Make slash ('/') in url to be optional"""
     def __init__(self):
-        super(routers.DefaultRouter, self).__init__()
+        super().__init__()
         self.trailing_slash = '/?'
 
 
