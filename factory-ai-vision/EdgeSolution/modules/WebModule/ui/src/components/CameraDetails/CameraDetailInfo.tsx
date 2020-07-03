@@ -9,6 +9,7 @@ import { Project, Status as CameraConfigStatus } from '../../store/project/proje
 import { useParts } from '../../hooks/useParts';
 import { LiveViewContainer } from '../LiveViewContainer';
 import { AOIData } from '../../type';
+import { ListItem } from '../ListItem';
 
 interface CameraDetailInfoProps {
   AOIs: AOIData;
@@ -72,24 +73,6 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
         </>
       )}
     </Flex>
-  );
-};
-
-export const ListItem = ({ title, footerText = '', children }): JSX.Element => {
-  return (
-    <div>
-      <Flex vAlign="center" gap="gap.medium">
-        <Text style={{ width: '200px' }} size="medium">{`${title}: `}</Text>
-        {typeof children === 'string' || typeof children === 'number' ? (
-          <Text size="medium">{children}</Text>
-        ) : (
-          children
-        )}
-      </Flex>
-      <Text size="smallest" error>
-        {footerText}
-      </Text>
-    </div>
   );
 };
 
