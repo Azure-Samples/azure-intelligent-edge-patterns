@@ -356,7 +356,6 @@ class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
     }
 
 
-
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Project ModelViewSet
@@ -371,6 +370,28 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "is_demo": "is_demo",
     }
+
+    @action(detail=True, methods=["get"])
+    def delete_tag(self, request, pk=None):
+        """
+        List Project under Training Key + Endpoint
+        """
+        try:
+            project_obj = self.get_object()
+            part_id = request.query_params.get("part_id") or None
+            part_name = request.query_params.get("part_name") or None
+            if part_id is not None:
+                project_obj.delete_tag_by_id(tag_id=part_id)
+                return Response({'status': 'ok'})
+            elif part_name is not None:
+                project_obj.delete_tag_by_name(tag_name=part_name)
+                return Response({'status': 'ok'})
+            else:
+                raise AttributeError('part_name or part_id not found')
+        except AttributeError as attr_err:
+            return Response({'status': 'failed', 'log': str(attr_err)})
+        except CustomVisionErrorException as customvision_err:
+            return Response({'status': 'failed', 'log': str(customvision_err)})
 
 
 class ImageViewSet(viewsets.ModelViewSet):

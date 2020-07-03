@@ -89,12 +89,6 @@ class Part(models.Model):
         except:
             logger.exception("Unexpected Error in Part Presave")
 
-    @staticmethod
-    def pre_delete(instance, using, **kwargs):
-        """Part pre_delete"""
-        projects = Project.objects.filter(is_demo=False)
-        for project in projects:
-            project.delete_tag(tag_name=instance.name)
 
 
 class Image(models.Model):
@@ -450,8 +444,9 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise e
 
-    def delete_tag(self, tag_name):
+    def delete_tag_by_name(self, tag_name):
         """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_name)   
         if not self.setting.is_trainer_valid:
             return
         if not self.customvision_project_id:
@@ -459,10 +454,24 @@ class Project(models.Model):
         trainer = self.setting.get_trainer_obj()
         tags = trainer.get_tags(project_id=self.customvision_project_id)
         for tag in tags:
-            if tag.name == tag_name:
+            if tag.name.lower() == tag_name.lower():
                 trainer.delete_tag(project_id=self.customvision_project_id,
                                    tag_id=tag.id)
+                logger.info("tag deleted: %s", tag_name)
                 return
+
+    def delete_tag_by_id(self, tag_id):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_id)
+
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        trainer.delete_tag(project_id=self.customvision_project_id,
+                           tag_id=tag_id)
+        return
 
     def update_app_insight_counter(
             self,
@@ -669,8 +678,6 @@ class Task(models.Model):
 pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")
 pre_save.connect(Project.pre_save, Project, dispatch_uid="Project_pre")
 post_save.connect(Project.post_save, Project, dispatch_uid="Project_post")
-
-pre_delete.connect(Part.pre_delete, Part, dispatch_uid="Part_pre_delete")
 # m2m_changed.connect(Project.m2m_changed, Project.parts.through, dispatch_uid='Project_m2m')
 
 
