@@ -9,7 +9,7 @@ Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to se
 # Prerequiste
 ## Hardware
 -	**Azure Stack Edge**
-- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge ([instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux)) and use the amd64 tags. A test x64 deployment manifest is already available.
+- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge ([instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), ([instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
      * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
 ## Services
@@ -33,7 +33,7 @@ To install the solution on a Mac, or a PC running Linux, unpack the installation
 
 Before installation, please make sure you have the following: 
    1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information  https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux 
-   2.	Azure Custom Vision account, see the below link to find your training key ([here]https://www.customvision.ai/projects#/settings)
+   2.	Azure Custom Vision account, see the below link to find your training key ([here](https://www.customvision.ai/projects#/settings)
 ### Get Started:
 Go to factory-ai-vision repo and click on Installers folder, there are two zip files, Windows.zip and bash.zip 
 
