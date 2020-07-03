@@ -34,7 +34,6 @@ To install the solution on a Mac, or a PC running Linux, unpack the installation
 Before installation, please make sure you have the following: 
    1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information  https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux 
    2.	Azure Custom Vision account, see the below link to find your training key here https://www.customvision.ai/projects#/settings
-
 ### Get Started:
 Go to factory-ai-vision repo and click on Installers folder, there are two zip files, Windows.zip and bash.zip 
 
@@ -106,7 +105,7 @@ https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulate
 - On GPU make sure this work:
 
      * Quick test : run below command this will try to access Nvidia gpu inside docker 
-             1.	sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+             1.	```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
      * Long test :: deploy below from marketplace on your iot edge device and make sure it works 
               https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
    
