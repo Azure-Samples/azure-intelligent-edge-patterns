@@ -77,7 +77,7 @@ export const PartIdentification: React.FC = () => {
   >('locations', isTestModel);
   const history = useHistory();
   const [maxImgCountError, setMaxImgCountError] = useState(false);
-  const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', imageLength: 0 });
+  const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', rangeMessage: '' });
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
@@ -146,28 +146,28 @@ export const PartIdentification: React.FC = () => {
         min: 10,
         max: 40,
         partName: minimumLengthPart.name,
-        imageLength: minimumLengthPart.length,
+        rangeMessage: 'lower than 30',
       });
     else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80)
       setSuggestMessage({
         min: 30,
         max: 60,
         partName: minimumLengthPart.name,
-        imageLength: minimumLengthPart.length,
+        rangeMessage: 'between 30 to 80',
       });
     else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130)
       setSuggestMessage({
         min: 50,
         max: 80,
         partName: minimumLengthPart.name,
-        imageLength: minimumLengthPart.length,
+        rangeMessage: 'between 80 to 130',
       });
     else if (minimumLengthPart.length >= 130)
       setSuggestMessage({
         min: 60,
         max: 90,
         partName: minimumLengthPart.name,
-        imageLength: minimumLengthPart.length,
+        rangeMessage: 'more than 130',
       });
   }, [accuracyRangeMin, dispatch, images, selectedParts]);
 
@@ -241,7 +241,7 @@ export const PartIdentification: React.FC = () => {
               %
             </Text>
             <Text styles={{ fontSize: '12px' }} success>
-              {`Suggestion: Set the Min to ${suggestMessage.min} and Max to ${suggestMessage.max} because the part ${suggestMessage.partName} has ${suggestMessage.imageLength} images`}
+              {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
             </Text>
             <Text disabled={accracyRangeDisabled}>
               Maximum Images to Store:{' '}

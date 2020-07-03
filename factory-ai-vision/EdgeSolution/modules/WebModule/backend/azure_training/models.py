@@ -264,6 +264,34 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise
 
+    def delete_tag_by_name(self, tag_name):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_name)   
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        tags = trainer.get_tags(project_id=self.customvision_project_id)
+        for tag in tags:
+            if tag.name.lower() == tag_name.lower():
+                trainer.delete_tag(project_id=self.customvision_project_id,
+                                   tag_id=tag.id)
+                logger.info("tag deleted: %s", tag_name)
+                return
+
+    def delete_tag_by_id(self, tag_id):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_id)
+
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        trainer.delete_tag(project_id=self.customvision_project_id,
+                           tag_id=tag_id)
+        return
     def update_app_insight_counter(
             self,
             has_new_parts: bool,

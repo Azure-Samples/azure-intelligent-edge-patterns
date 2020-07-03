@@ -74,7 +74,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
               .join(', ')}
           </ListItem>
           <LiveViewContainer showVideo={true} initialAOIData={AOIs} cameraId={project.camera} />
-          <ListItem title="Maximum">
+          <ListItem title="Maximum Confidence Level">
             <Input
               value={project.probThreshold}
               onChange={(_, { value }): void => {

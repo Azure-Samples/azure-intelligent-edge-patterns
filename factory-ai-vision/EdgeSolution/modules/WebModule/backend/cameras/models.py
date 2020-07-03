@@ -19,6 +19,8 @@ from azure.iot.device import IoTHubModuleClient
 from django.core import files
 from django.db import models
 from django.db.models.signals import post_save
+# from django.db.models.signals import pre_save
+# from django.db.models.signals import pre_delete
 from django.db.utils import IntegrityError
 from django.db.models.signals import pre_save
 from PIL import Image as PILImage
@@ -80,6 +82,7 @@ class Part(models.Model):
             raise integrity_error
         except:
             logger.exception("Unexpected Error in Part Presave")
+
 
 
 class Image(models.Model):
@@ -214,6 +217,7 @@ class Camera(models.Model):
 
 post_save.connect(Camera.post_save, Camera, dispatch_uid="Camera_post")
 
+pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")
 
 # FIXME consider move this out of models.py
 class Stream(object):

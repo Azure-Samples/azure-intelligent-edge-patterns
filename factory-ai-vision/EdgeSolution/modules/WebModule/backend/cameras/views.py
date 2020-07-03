@@ -99,7 +99,6 @@ class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
         "is_demo": "is_demo",
     }
 
-
 class ImageViewSet(viewsets.ModelViewSet):
     """
     Image ModelViewSet
