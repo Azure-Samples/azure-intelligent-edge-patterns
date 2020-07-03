@@ -68,6 +68,15 @@ export const Parts: React.FC = () => {
                 setParts((prev) => prev.concat(data));
                 return void 0;
               })
+              .catch((e) => {
+                if (e.response) {
+                  throw new Error(e.response.data.log);
+                } else if (e.request) {
+                  throw new Error(e.request);
+                } else {
+                  throw e;
+                }
+              })
               .catch((err) => {
                 alert(err);
               });
