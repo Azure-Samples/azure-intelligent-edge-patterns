@@ -17,7 +17,7 @@ import {
 import { Project, Status as CameraConfigStatus, TrainingMetrics } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { useQuery } from '../../hooks/useQuery';
-import { ListItem } from '../CameraDetails/CameraDetailInfo';
+import { ListItem } from '../ListItem';
 
 export const CameraConfigureInfoContainer: React.FC<{ projectId: number }> = ({ projectId }) => {
   return (
@@ -127,16 +127,18 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
         <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>
           {`${Math.round(inferenceMetrics.averageTime * 100) / 100}/ms`}
         </ListItem>
-        <ListItem
-          title="Successful Inferences"
-          footerText={
-            successInferenceFooter
-              ? 'If you are not seeing inference result, we recommend to change the confidence level to 10%.'
-              : ''
-          }
-        >
-          {inferenceMetrics.successfulInferences}
-        </ListItem>
+        <div style={{ gridColumn: '1 / span 2' }}>
+          <ListItem
+            title="Successful Inferences"
+            footerText={
+              successInferenceFooter
+                ? 'If you are not seeing inference result, we recommend to change the confidence level to 10%.'
+                : ''
+            }
+          >
+            {inferenceMetrics.successfulInferences}
+          </ListItem>
+        </div>
       </Grid>
       <ListItem
         title="Unidentified Items"
