@@ -202,6 +202,36 @@ class Camera(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @staticmethod
+    def verify_rtsp(rtsp):
+        """ Return True if the rtsp is ok, otherwise return False """
+        logger.info("Camera static method: verify_rtsp")
+        logger.info(rtsp)
+        if rtsp == '0':
+            rtsp = 0
+        cap = cv2.VideoCapture(rtsp)
+        if not cap.isOpened():
+            cap.release()
+            return False
+        is_ok, _ = cap.read()
+        if not is_ok:
+            cap.release()
+            return False
+        cap.release()
+        return True
+
+    @staticmethod
+    def pre_save(instance, update_fields, **kwargs):
+        """Camera pre_save"""
+        if instance.is_demo:
+            return
+        if instance.rtsp is None:
+            raise ValueError('rtsp is none')
+        else:
+            rtsp_ok = Camera.verify_rtsp(rtsp=instance.rtsp)
+            if not rtsp_ok:
+                raise ValueError('rtsp is not valid')
 
     @staticmethod
     def post_save(instance, update_fields, **kwargs):
@@ -221,6 +251,7 @@ class Camera(models.Model):
                 logger.error("Request failed")
 
 
+pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")
 post_save.connect(Camera.post_save, Camera, dispatch_uid="Camera_post")
 
 
