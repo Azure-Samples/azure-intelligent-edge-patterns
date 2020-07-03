@@ -32,8 +32,8 @@ To install the solution on a PC running Windows, unpack the installation zip, na
 To install the solution on a Mac, or a PC running Linux, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.sh script.
 
 Before installation, please make sure you have the following: 
-   1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information  https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux 
-   2.	Azure Custom Vision account, see the below link to find your training key ([here](https://www.customvision.ai/projects#/settings)
+   1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
+   2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
 ### Get Started:
 Go to factory-ai-vision repo and click on Installers folder, there are two zip files, Windows.zip and bash.zip 
 
