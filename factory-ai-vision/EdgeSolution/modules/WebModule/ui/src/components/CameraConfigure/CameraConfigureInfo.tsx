@@ -44,6 +44,8 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
   const isDemo = useQuery().get('isDemo') === 'true';
   const history = useHistory();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
+  const successInferenceFooter = useNotification(inferenceMetrics.successfulInferences, 60000);
+  const unIdentifiedItemFooter = useNotification(inferenceMetrics.successfulInferences, 120000);
 
   const onDeleteConfigure = useCallback((): void => {
     // eslint-disable-next-line no-restricted-globals
@@ -82,8 +84,10 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
   );
 
   useEffect(() => {
-    return () => dispatch(resetStatus());
-  }, []);
+    return (): void => {
+      dispatch(resetStatus());
+    };
+  }, [dispatch]);
 
   if (status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None)
     return (
@@ -96,7 +100,7 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
   return (
     <>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      <ListItem title="Maximum">
+      <ListItem title="Maximum Confidence Level">
         <Input
           value={project.probThreshold}
           onChange={(_, { value }): void => {
@@ -123,28 +127,29 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
         <ListItem title={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`}>
           {`${Math.round(inferenceMetrics.averageTime * 100) / 100}/ms`}
         </ListItem>
-        <ListItem title="Successful Inferences">{inferenceMetrics.successfulInferences}</ListItem>
+        <ListItem
+          title="Successful Inferences"
+          footerText={
+            successInferenceFooter
+              ? 'If you are not seeing inference result, we recommend to change the confidence level to 10%.'
+              : ''
+          }
+        >
+          {inferenceMetrics.successfulInferences}
+        </ListItem>
       </Grid>
-      <ListItem title="Unidentified Items">
+      <ListItem
+        title="Unidentified Items"
+        footerText={
+          unIdentifiedItemFooter
+            ? 'If you are not receiving any images, we recommend to change the accuracy range to minimum 10%.'
+            : ''
+        }
+      >
         <Text styles={{ margin: '5px' }} size="medium">
           {inferenceMetrics.unIdetifiedItems}
         </Text>
-        <Button
-          content="Identify Manually"
-          primary
-          styles={{
-            backgroundColor: 'red',
-            marginLeft: '100px',
-            ':hover': {
-              backgroundColor: '#A72037',
-            },
-            ':active': {
-              backgroundColor: '#8E192E',
-            },
-          }}
-          as={Link}
-          to="/manual"
-        />
+        <Button content="Identify Manually" primary styles={{ marginLeft: '100px' }} as={Link} to="/manual" />
       </ListItem>
       <Text>Accuracy Range: </Text>
       <Flex gap="gap.medium" vAlign="center">
@@ -197,6 +202,38 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
     </>
   );
 };
+
+/**
+ * Check the condition for certain time, and show the notification for the given period.
+ * @param targetState Check this state if it equals to zero
+ * @param checkPeriod How long it last when it is zero
+ */
+function useNotification(targetState: number, checkPeriod: number): boolean {
+  const [showNotification, setShowNotification] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (showNotification) {
+      timer = setTimeout(() => setShowNotification(false), 10000);
+    }
+    return (): void => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [showNotification]);
+
+  useEffect(() => {
+    // The effect only need to be trigger when inferenceMetrics.successfulInferences keep 0 for the check period
+    if (targetState === 0) {
+      const timer = setTimeout(() => {
+        if (targetState === 0) setShowNotification(true);
+      }, checkPeriod);
+
+      return (): void => clearTimeout(timer);
+    }
+  }, [checkPeriod, targetState]);
+
+  return showNotification;
+}
 
 /**
  * Retrun a string which contains all logs get from server during training

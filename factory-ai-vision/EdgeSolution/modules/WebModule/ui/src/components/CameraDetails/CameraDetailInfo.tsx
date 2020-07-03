@@ -75,16 +75,21 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
   );
 };
 
-export const ListItem = ({ title, children }): JSX.Element => {
+export const ListItem = ({ title, footerText = '', children }): JSX.Element => {
   return (
-    <Flex vAlign="center" gap="gap.medium">
-      <Text style={{ width: '200px' }} size="medium">{`${title}: `}</Text>
-      {typeof children === 'string' || typeof children === 'number' ? (
-        <Text size="medium">{children}</Text>
-      ) : (
-        children
-      )}
-    </Flex>
+    <div>
+      <Flex vAlign="center" gap="gap.medium">
+        <Text style={{ width: '200px' }} size="medium">{`${title}: `}</Text>
+        {typeof children === 'string' || typeof children === 'number' ? (
+          <Text size="medium">{children}</Text>
+        ) : (
+          children
+        )}
+      </Flex>
+      <Text size="smallest" error>
+        {footerText}
+      </Text>
+    </div>
   );
 };
 
