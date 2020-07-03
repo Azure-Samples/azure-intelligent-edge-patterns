@@ -477,7 +477,6 @@ class Project(models.Model):
             self,
             has_new_parts: bool,
             has_new_images: bool,
-            source,
             parts_last_train: int,
             images_last_train: int,
     ):
@@ -520,7 +519,6 @@ class Project(models.Model):
                             "images": images_now - images_last_train,
                             "parts": parts_now - parts_last_train,
                             "retrain": retrain,
-                            "source": source,
                         }
                     },
                 )

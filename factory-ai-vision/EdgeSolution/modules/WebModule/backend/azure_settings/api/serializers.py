@@ -26,6 +26,7 @@ class SettingSerializer(serializers.HyperlinkedModelSerializer):
             "module_id",
             "is_collect_data",
             "obj_detection_domain_id",
+            "app_insight_has_init",
         ]
 
     def create(self, validated_data):
