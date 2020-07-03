@@ -175,16 +175,13 @@ export const Setting = (): JSX.Element => {
         </Flex>
         {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
       </Flex>
-      {/* 
-          <Divider color="grey" />
-          <Checkbox
-            label="Allow to Send Usage Data"
-            toggle
-            checked={checkboxChecked}
-            onChange={onCheckBoxClick}
-          />
-        </>
-      */}
+      <Divider color="grey" />
+      <Checkbox
+        label="Allow to Send Usage Data"
+        toggle
+        checked={checkboxChecked}
+        onChange={onCheckBoxClick}
+      />
     </>
   );
 };
