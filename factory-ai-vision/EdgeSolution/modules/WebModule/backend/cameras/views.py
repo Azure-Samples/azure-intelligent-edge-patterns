@@ -383,15 +383,26 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             if part_id is not None:
                 project_obj.delete_tag_by_id(tag_id=part_id)
                 return Response({'status': 'ok'})
-            elif part_name is not None:
+            if part_name is not None:
                 project_obj.delete_tag_by_name(tag_name=part_name)
                 return Response({'status': 'ok'})
-            else:
-                raise AttributeError('part_name or part_id not found')
+            raise AttributeError('part_name or part_id not found')
         except AttributeError as attr_err:
-            return Response({'status': 'failed', 'log': str(attr_err)})
+            return Response(
+                {
+                    'status': 'failed',
+                    'log': str(attr_err)
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except CustomVisionErrorException as customvision_err:
-            return Response({'status': 'failed', 'log': str(customvision_err)})
+            return Response(
+                {
+                    'status': 'failed',
+                    'log': str(customvision_err)
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
 
 class ImageViewSet(viewsets.ModelViewSet):
