@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Input, Button, Menu, Grid, Alert } from '@fluentui/react-northstar';
+import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/react-northstar';
 import { Link, useLocation, Switch, Route, useHistory } from 'react-router-dom';
 import axios from 'axios';
 
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
 import { useQuery } from '../hooks/useQuery';
+import { WarningDialog } from '../components/WarningDialog';
+import { errorTheme } from '../themes/errorTheme';
+import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 
 export const PartDetails = (): JSX.Element => {
   const partId = useQuery().get('partId');
@@ -14,6 +17,7 @@ export const PartDetails = (): JSX.Element => {
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const history = useHistory();
+  const [status, setStatus] = useState<Status>(Status.None);
 
   const onSave = (): void => {
     axios({
@@ -33,6 +37,18 @@ export const PartDetails = (): JSX.Element => {
       });
   };
 
+  const onDelete = async (): Promise<void> => {
+    setStatus(Status.Loading);
+
+    try {
+      await axios.delete(`/api/parts/${partId}/`);
+      // TODO: Another API
+      setStatus(Status.Success);
+    } catch (e) {
+      setError(e);
+    }
+  };
+
   return (
     <Grid columns={'68% 30%'} rows={'80px auto 30px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       {partId ? <Tab partId={partId} /> : null}
@@ -50,8 +66,25 @@ export const PartDetails = (): JSX.Element => {
           setGoLabelImageIdx={setGoLabelImageIdx}
         />
       </Flex>
-      <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" column>
+      <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" gap="gap.small">
         <Button content="Save" primary onClick={onSave} disabled={!name} />
+        <Provider theme={errorTheme}>
+          <WarningDialog
+            contentText={
+              <p>
+                Sure you want to delete the part <b>{name}</b>?
+              </p>
+            }
+            trigger={<Button content="Delete" primary />}
+            onConfirm={onDelete}
+          />
+        </Provider>
+        <LoadingDialog
+          status={status}
+          onConfirm={() => {
+            if (status === Status.Success) history.push(`/parts/`);
+          }}
+        />
         {!!error && <Alert danger content={error} dismissible />}
       </Flex>
     </Grid>
