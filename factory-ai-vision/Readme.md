@@ -9,7 +9,7 @@ Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to se
 # Prerequiste
 ## Hardware
 -	**Azure Stack Edge**
-- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge ([instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), ([instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
+- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
      * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
 ## Services
@@ -18,7 +18,7 @@ Check out the architecture below to see how Vision on Edge works. You can also g
  
 ## Get Started 
 To install the Vision on Edge Solution Accelerator, the following prerequisites are required...
-  1.	You must have the Azure CLI installed on your system. See ([this document](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for information on how to install the CLI
+  1.	You must have the Azure CLI installed on your system. See [this document](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for information on how to install the CLI
   2.	You must have an Azure subscription
   3.	That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device), port 5000 and 8080 need to be opened in the IoT Edge device/vm
   4.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
