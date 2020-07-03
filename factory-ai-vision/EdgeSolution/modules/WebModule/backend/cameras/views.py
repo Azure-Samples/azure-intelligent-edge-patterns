@@ -748,7 +748,6 @@ def _train(project_id, request):
                 project_obj.update_app_insight_counter(
                     has_new_parts=has_new_parts,
                     has_new_images=has_new_images,
-                    source=request.get_host(),
                     parts_last_train=parts_last_train,
                     images_last_train=images_last_train,
                 )
