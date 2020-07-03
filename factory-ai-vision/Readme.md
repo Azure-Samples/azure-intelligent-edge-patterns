@@ -103,10 +103,10 @@ Your  Visual Studio Code will need these credential to push the container later.
 If you are running into issues, please check following for assistnat:
 
 1. Ensure your setup is good
-  a. On CPU make sure this work: 
-     https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
-  b. On GPU make sure this work:
-    1. Quick test : run below command this will try to access Nvidia gpu inside docker
+a. On CPU make sure this work: 
+https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
+b. On GPU make sure this work:
+1. Quick test : run below command this will try to access Nvidia gpu inside docker
     ```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
     2. Long test :: deploy below from marketplace on your iot edge device and make sure it works
     https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
