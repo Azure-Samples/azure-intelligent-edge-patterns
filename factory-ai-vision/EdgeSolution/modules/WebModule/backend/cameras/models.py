@@ -23,7 +23,7 @@ from azure.iot.device import IoTHubModuleClient
 from django.core import files
 from django.db import models
 from django.db.models.signals import post_save, pre_save
-# from django.db.models.signals import post_delete, m2m_changed
+from django.db.models.signals import pre_delete
 from django.db.utils import IntegrityError
 from PIL import Image as PILImage
 from rest_framework import status
@@ -88,6 +88,13 @@ class Part(models.Model):
             raise integrity_error
         except:
             logger.exception("Unexpected Error in Part Presave")
+
+    @staticmethod
+    def pre_delete(instance, using, **kwargs):
+        """Part pre_delete"""
+        projects = Project.objects.filter(is_demo=False)
+        for project in projects:
+            project.delete_tag(tag_name=instance.name)
 
 
 class Image(models.Model):
@@ -342,7 +349,6 @@ class Project(models.Model):
         if instance.metrics_frame_per_minutes is not None:
             metrics_frame_per_minutes = instance.metrics_frame_per_minutes
 
-
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
                 "http://" + inference_module_url() +
@@ -443,6 +449,20 @@ class Project(models.Model):
         except Exception as e:
             logger.exception("Project create_project: Unexpected Error")
             raise e
+
+    def delete_tag(self, tag_name):
+        """delete tag on custom vision"""
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        tags = trainer.get_tags(project_id=self.customvision_project_id)
+        for tag in tags:
+            if tag.name == tag_name:
+                trainer.delete_tag(project_id=self.customvision_project_id,
+                                   tag_id=tag.id)
+                return
 
     def update_app_insight_counter(
             self,
@@ -649,6 +669,8 @@ class Task(models.Model):
 pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")
 pre_save.connect(Project.pre_save, Project, dispatch_uid="Project_pre")
 post_save.connect(Project.post_save, Project, dispatch_uid="Project_post")
+
+pre_delete.connect(Part.pre_delete, Part, dispatch_uid="Part_pre_delete")
 # m2m_changed.connect(Project.m2m_changed, Project.parts.through, dispatch_uid='Project_m2m')
 
 
