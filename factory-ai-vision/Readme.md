@@ -94,19 +94,21 @@ Your  Visual Studio Code will need these credential to push the container later.
 
 - Vision on Edge installer: https://youtu.be/NWKLk8ENo-g
 - Test with pretrained mode: https://youtu.be/7PWGNC7rkCE
+- Start from scratch- setup camera, add parts, label and train: https://youtu.be/jLY-VkxU99U
+- Retrain the model: https://youtu.be/dXh9isASvcY
 - Load project from Custom Vision: https://youtu.be/gTEWlu2V8yk
+
 
 # Troubleshooting 
 If you are running into issues, please check following for assistnat:
 
 1. Ensure your setup is good
-- On CPU make sure this work: 
-https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
-- On GPU make sure this work:
-
-     * Quick test : run below command this will try to access Nvidia gpu inside docker 
-            ```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
-     * Long test :: deploy below from marketplace on your iot edge device and make sure it works 
+  a. On CPU make sure this work: 
+     https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview
+  b. On GPU make sure this work:
+    1. Quick test : run below command this will try to access Nvidia gpu inside docker 
+- ```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
+    2. Long test :: deploy below from marketplace on your iot edge device and make sure it works 
               https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
    
 2. If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running: 
