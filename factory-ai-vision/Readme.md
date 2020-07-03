@@ -105,7 +105,7 @@ https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulate
 - On GPU make sure this work:
 
      * Quick test : run below command this will try to access Nvidia gpu inside docker 
-             1.	```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
+            ```sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi```
      * Long test :: deploy below from marketplace on your iot edge device and make sure it works 
               https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview
    
