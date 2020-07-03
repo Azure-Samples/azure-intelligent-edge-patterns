@@ -40,6 +40,7 @@ export const Setting = (): JSX.Element => {
     origin: originSettingData,
     isTrainerValid,
     cvProjects,
+    appInsightHasInit,
   } = useSelector<State, SettingType>((state) => state.setting);
   const dispatch = useDispatch();
   const [checkboxChecked, setCheckboxChecked] = useState(false);
@@ -66,20 +67,29 @@ export const Setting = (): JSX.Element => {
       .catch((e) => console.error(e));
   };
 
-  const onCheckBoxClick = (): void => {
-    const newCheckboxChecked = !checkboxChecked;
-    setCheckboxChecked(newCheckboxChecked);
-    Axios.patch(`/api/settings/${settingData.id}`, { is_collect_data: newCheckboxChecked })
+  const updateIsCollectData = (isCollectData, hasInit?): void => {
+    Axios.patch(`/api/settings/${settingData.id}`, {
+      is_collect_data: isCollectData,
+      ...(hasInit && { app_insight_has_init: hasInit }),
+    })
       .then(() => {
         const appInsight = getAppInsights();
         if (!appInsight) throw Error('App Insight hasnot been initialize');
-        appInsight.config.disableTelemetry = !newCheckboxChecked;
+        appInsight.config.disableTelemetry = !isCollectData;
+        // FIXME
+        window.location.reload();
         return void 0;
       })
       .catch((err) => {
         setCheckboxChecked(checkboxChecked);
         setOtherError(err);
       });
+  };
+
+  const onCheckBoxClick = (): void => {
+    const newCheckboxChecked = !checkboxChecked;
+    setCheckboxChecked(newCheckboxChecked);
+    updateIsCollectData(newCheckboxChecked);
   };
 
   useEffect(() => {
@@ -175,16 +185,21 @@ export const Setting = (): JSX.Element => {
         </Flex>
         {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
       </Flex>
-      {/* 
-          <Divider color="grey" />
-          <Checkbox
-            label="Allow to Send Usage Data"
-            toggle
-            checked={checkboxChecked}
-            onChange={onCheckBoxClick}
-          />
-        </>
-      */}
+      <Divider color="grey" />
+      <Checkbox
+        label="Allow to Send Usage Data"
+        toggle
+        checked={checkboxChecked}
+        onChange={onCheckBoxClick}
+      />
+      <WarningDialog
+        contentText={<p>Allow to Send Usage Data?</p>}
+        open={!appInsightHasInit}
+        confirmButton="Yes"
+        cancelButton="No"
+        onConfirm={(): void => updateIsCollectData(true, true)}
+        onCancel={(): void => updateIsCollectData(false, true)}
+      />
     </>
   );
 };

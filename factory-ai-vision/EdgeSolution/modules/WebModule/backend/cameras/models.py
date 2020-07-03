@@ -23,7 +23,7 @@ from azure.iot.device import IoTHubModuleClient
 from django.core import files
 from django.db import models
 from django.db.models.signals import post_save, pre_save
-# from django.db.models.signals import post_delete, m2m_changed
+from django.db.models.signals import pre_delete
 from django.db.utils import IntegrityError
 from PIL import Image as PILImage
 from rest_framework import status
@@ -88,6 +88,7 @@ class Part(models.Model):
             raise integrity_error
         except:
             logger.exception("Unexpected Error in Part Presave")
+
 
 
 class Image(models.Model):
@@ -201,6 +202,36 @@ class Camera(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @staticmethod
+    def verify_rtsp(rtsp):
+        """ Return True if the rtsp is ok, otherwise return False """
+        logger.info("Camera static method: verify_rtsp")
+        logger.info(rtsp)
+        if rtsp == '0':
+            rtsp = 0
+        cap = cv2.VideoCapture(rtsp)
+        if not cap.isOpened():
+            cap.release()
+            return False
+        is_ok, _ = cap.read()
+        if not is_ok:
+            cap.release()
+            return False
+        cap.release()
+        return True
+
+    @staticmethod
+    def pre_save(instance, update_fields, **kwargs):
+        """Camera pre_save"""
+        if instance.is_demo:
+            return
+        if instance.rtsp is None:
+            raise ValueError('rtsp is none')
+        else:
+            rtsp_ok = Camera.verify_rtsp(rtsp=instance.rtsp)
+            if not rtsp_ok:
+                raise ValueError('rtsp is not valid')
 
     @staticmethod
     def post_save(instance, update_fields, **kwargs):
@@ -220,6 +251,7 @@ class Camera(models.Model):
                 logger.error("Request failed")
 
 
+pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")
 post_save.connect(Camera.post_save, Camera, dispatch_uid="Camera_post")
 
 
@@ -342,7 +374,6 @@ class Project(models.Model):
         if instance.metrics_frame_per_minutes is not None:
             metrics_frame_per_minutes = instance.metrics_frame_per_minutes
 
-
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
                 "http://" + inference_module_url() +
@@ -444,11 +475,39 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise e
 
+    def delete_tag_by_name(self, tag_name):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_name)   
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        tags = trainer.get_tags(project_id=self.customvision_project_id)
+        for tag in tags:
+            if tag.name.lower() == tag_name.lower():
+                trainer.delete_tag(project_id=self.customvision_project_id,
+                                   tag_id=tag.id)
+                logger.info("tag deleted: %s", tag_name)
+                return
+
+    def delete_tag_by_id(self, tag_id):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_id)
+
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        trainer.delete_tag(project_id=self.customvision_project_id,
+                           tag_id=tag_id)
+        return
+
     def update_app_insight_counter(
             self,
             has_new_parts: bool,
             has_new_images: bool,
-            source,
             parts_last_train: int,
             images_last_train: int,
     ):
@@ -491,7 +550,6 @@ class Project(models.Model):
                             "images": images_now - images_last_train,
                             "parts": parts_now - parts_last_train,
                             "retrain": retrain,
-                            "source": source,
                         }
                     },
                 )
