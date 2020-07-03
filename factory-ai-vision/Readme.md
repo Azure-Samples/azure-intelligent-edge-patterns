@@ -18,7 +18,7 @@ Check out the architecture below to see how Vision on Edge works. You can also g
  
 ## Get Started 
 To install the Vision on Edge Solution Accelerator, the following prerequisites are required...
-  1.	You must have the Azure CLI installed on your system. See this document for information on how to install the CLI
+  1.	You must have the Azure CLI installed on your system. See ([this document](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for information on how to install the CLI
   2.	You must have an Azure subscription
   3.	That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device), port 5000 and 8080 need to be opened in the IoT Edge device/vm
   4.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
@@ -33,7 +33,7 @@ To install the solution on a Mac, or a PC running Linux, unpack the installation
 
 Before installation, please make sure you have the following: 
    1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information  https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux 
-   2.	Azure Custom Vision account, see the below link to find your training key here https://www.customvision.ai/projects#/settings
+   2.	Azure Custom Vision account, see the below link to find your training key ([here]https://www.customvision.ai/projects#/settings)
 ### Get Started:
 Go to factory-ai-vision repo and click on Installers folder, there are two zip files, Windows.zip and bash.zip 
 
