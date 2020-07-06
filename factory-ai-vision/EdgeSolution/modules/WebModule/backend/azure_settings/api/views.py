@@ -86,11 +86,11 @@ class SettingViewSet(viewsets.ModelViewSet):
                 },
                 status=customvision_error.response.status_code,
             )
-        except Exception as e:
+        except Exception as exception:
             logger.exception("Unexpected Error while listing projects")
             return Response(
                 {
                     "status": "failed",
-                    "log": str(e)  # Force yapf to change line...
+                    "log": str(exception)  # Force yapf to change line...
                 },
                 status=status.HTTP_400_BAD_REQUEST)

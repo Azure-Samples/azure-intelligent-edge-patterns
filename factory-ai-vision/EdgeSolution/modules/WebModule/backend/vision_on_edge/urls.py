@@ -22,14 +22,18 @@ from django.conf import settings
 from rest_framework import routers
 
 from cameras import views
+from cameras import util_views as camera_util_views
 from azure_settings.api import views as setting_views
 from locations.api import views as location_views
+from image_predictions.api import views as image_prediction_views
+from azure_training.api import views as azure_training_views
 from . import views as site_views
 
 
 class OptionalSlashRouter(routers.DefaultRouter):
+    """Make slash ('/') in url to be optional"""
     def __init__(self):
-        super(routers.DefaultRouter, self).__init__()
+        super().__init__()
         self.trailing_slash = '/?'
 
 
@@ -39,11 +43,13 @@ router.register('settings', setting_views.SettingViewSet)
 router.register('cameras', views.CameraViewSet)
 router.register('parts', views.PartViewSet)
 router.register('images', views.ImageViewSet)
-router.register('projects', views.ProjectViewSet)
 router.register('locations', location_views.LocationViewSet)
 router.register('annotations', views.AnnotationViewSet)
-router.register('train', views.TrainViewSet)
-router.register('tasks', views.TaskViewSet)
+router.register('image_predictions',
+                image_prediction_views.ImagePredictionViewSet)
+router.register('projects', azure_training_views.ProjectViewSet)
+router.register('train', azure_training_views.TrainViewSet)
+router.register('tasks', azure_training_views.TaskViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
@@ -54,23 +60,27 @@ urlpatterns = \
         path('api/streams/<int:stream_id>/disconnect', views.disconnect_stream),
         path('api/streams/<int:stream_id>/video_feed', views.video_feed),
         path('api/streams/<int:stream_id>/capture', views.capture),
-        path('api/projects/<int:project_id>/train', views.train),
-        path('api/projects/<int:project_id>/export', views.export),
+        path('api/projects/<int:project_id>/train', azure_training_views.train),
+        path('api/projects/<int:project_id>/export',
+             azure_training_views.export),
         path('api/projects/<int:project_id>/train_performance',
-             views.train_performance),
+             azure_training_views.train_performance),
         path('api/projects/<int:project_id>/inference_video_feed',
              views.inference_video_feed),
         path('api/projects/<int:project_id>/pull_cv_project',
-             views.pull_cv_project),
+             azure_training_views.pull_cv_project),
         path('api/projects/<int:project_id>/update_prob_threshold',
-             views.update_prob_threshold),
-        path('api/projects/<int:project_id>/reset_project', views.reset_project),
+             azure_training_views.update_prob_threshold),
+        path('api/projects/<int:project_id>/reset_project',
+             azure_training_views.reset_project),
         path('api/projects/<int:project_id>/reset_camera',
-             views.project_reset_camera),
-        path('api/projects/null/export', views.export_null),
+             azure_training_views.project_reset_camera),
+        path('api/projects/null/export', azure_training_views.export_null),
         path('api/relabel', views.upload_relabel_image),
         path('api/relabel/update', views.relabel_update),
         path('api/appinsight/key', views.instrumentation_key),
+        path('api/camera_utils/verify_rtsp',
+             camera_util_views.verify_rtsp),
         path('admin/', admin.site.urls),
         url('^', site_views.UIAppView.as_view())
     ]

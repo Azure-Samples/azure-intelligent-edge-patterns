@@ -52,6 +52,7 @@ import {
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
 } from './projectTypes';
+import { getIdFromUrl } from '../../util/GetIDFromUrl';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
 const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
@@ -156,9 +157,9 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
     .then(({ data }) => {
       const project: ProjectData = {
         id: data[0]?.id ?? null,
-        camera: parseInt(data[0]?.camera.split('/')[5], 10) ?? null,
-        location: parseInt(data[0]?.location.split('/')[5], 10) ?? null,
-        parts: data[0]?.parts.map((ele) => parseInt(ele.split('/')[5], 10)) ?? [],
+        camera: getIdFromUrl(data[0]?.camera) ?? null,
+        location: getIdFromUrl(data[0]?.location) ?? null,
+        parts: data[0]?.parts.map((ele) => getIdFromUrl(ele)) ?? [],
         modelUrl: data[0]?.download_uri ?? '',
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
@@ -313,5 +314,33 @@ export const thunkUpdateProbThreshold = (): ProjectThunk => (dispatch, getState)
     })
     .catch((e) => {
       dispatch(updateProbThresholdFailed(e));
+    });
+};
+
+export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState): Promise<any> => {
+  dispatch(postProjectRequest());
+
+  const projectId = getState().project.data.id;
+  const { accuracyRangeMin, accuracyRangeMax } = getState().project.data;
+
+  return Axios.patch(`/api/projects/${projectId}/`, {
+    accuracyRangeMin,
+    accuracyRangeMax,
+  })
+    .then(() => {
+      dispatch(postProjectSuccess());
+      return void 0;
+    })
+    .catch((e) => {
+      if (e.response) {
+        throw new Error(e.response.data.log);
+      } else if (e.request) {
+        throw new Error(e.request);
+      } else {
+        throw e;
+      }
+    })
+    .catch((e) => {
+      dispatch(postProjectFail(e));
     });
 };
