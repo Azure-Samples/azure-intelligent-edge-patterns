@@ -48,7 +48,7 @@ export const CapturePhotos: React.FC<{
           setOpenLabelingPage={setOpenLabelingPage}
         />
       </Flex>
-      <Flex column gap="gap.small" styles={{ width: '30%' }}>
+      <Flex column gap="gap.small" styles={{ width: '30%', minWidth: '450px' }}>
         <CapturedImagesContainer partId={partId} goLabelImageIdx={goLabelImageIdx} />
       </Flex>
     </Flex>
