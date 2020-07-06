@@ -2,16 +2,19 @@
 Camera utils views
 """
 
-from .models import Camera
+import logging
+
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
-import logging
+
+from .models import Camera
 
 logger = logging.getLogger(__name__)
 
 @api_view()
 def verify_rtsp(request):
+    """test if a rtsp is valid"""
     logger.info("Verifying rtsp")
     rtsp = request.query_params.get('rtsp')
     logger.info("rtsp %s", rtsp)

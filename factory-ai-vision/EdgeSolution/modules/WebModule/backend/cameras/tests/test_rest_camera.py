@@ -38,7 +38,7 @@ class CameraTestCases(APITransactionTestCase):
                                   is_demo=False)
             for special_string in special_strings:
                 Camera.objects.create(name=special_string,
-                                      rtsp=special_string,
+                                      rtsp=0,
                                       area=special_string,
                                       is_demo=False)
         self.exist_num = 4 + len(special_strings)

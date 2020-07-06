@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
-from cameras.models import Location
+from ..models import Location
 from .test_special_strings import special_strings
 
 logger = logging.getLogger(__name__)

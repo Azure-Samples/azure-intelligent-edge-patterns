@@ -1,5 +1,5 @@
 """
-App start
+Locations App
 """
 import logging
 import sys
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class LocationsConfig(AppConfig):
     """
-    locations App Config
+    Locations App Config
     """
     name = 'locations'
 
@@ -23,12 +23,14 @@ class LocationsConfig(AppConfig):
         """
         # FIXME test may use this as well
         if 'runserver' in sys.argv:
-            from locations.models import Location # pylint: disable=C0415
-            logger.info("LocationsAppConfig ready while running server")
+            # pylint: disable=C0415
+            from locations.models import Location
+            # pylint: enable=C0415
+
+            logger.info("Locations App Config ready while running server")
 
             create_demo = True
             if create_demo:
-
                 logger.info("Creating Demo Location")
                 Location.objects.update_or_create(
                     name="Demo Location",
@@ -37,4 +39,4 @@ class LocationsConfig(AppConfig):
                         'description': "Demo Location",
                     })
 
-            logger.info("CameraAppConfig End while running server")
+            logger.info("Locations App Config End while running server")
