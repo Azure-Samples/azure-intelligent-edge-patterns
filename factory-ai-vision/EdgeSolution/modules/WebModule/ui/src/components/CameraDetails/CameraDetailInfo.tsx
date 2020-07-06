@@ -28,7 +28,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
   );
 
   return (
-    <Flex styles={{ padding: '1em 2em' }} column gap="gap.medium">
+    <Flex styles={{ padding: '0 2em' }} column gap="gap.medium">
       <h1>Details</h1>
       <Grid columns="2" styles={{ gap: '3em' }}>
         <Flex column gap="gap.medium">
