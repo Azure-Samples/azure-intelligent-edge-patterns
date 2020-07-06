@@ -27,6 +27,7 @@ from azure_settings.api import views as setting_views
 from locations.api import views as location_views
 from image_predictions.api import views as image_prediction_views
 from azure_training.api import views as azure_training_views
+from notifications.api import views as notifications_views
 from . import views as site_views
 
 
@@ -50,6 +51,7 @@ router.register('image_predictions',
 router.register('projects', azure_training_views.ProjectViewSet)
 router.register('train', azure_training_views.TrainViewSet)
 router.register('tasks', azure_training_views.TaskViewSet)
+router.register('notifications', notifications_views.NotificationViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
