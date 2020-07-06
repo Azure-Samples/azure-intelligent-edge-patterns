@@ -12,7 +12,7 @@ from .models import (Annotation, Camera, Image, Part)
 logger = logging.getLogger(__name__)
 
 
-class PartSerializer(serializers.ModelSerializer):
+class PartSerializer(serializers.HyperlinkedModelSerializer):
     """PartSerializer"""
     class Meta:
         model = Part
@@ -61,7 +61,7 @@ class PartSerializer(serializers.ModelSerializer):
             })
 
 
-class CameraSerializer(serializers.ModelSerializer):
+class CameraSerializer(serializers.HyperlinkedModelSerializer):
     """CameraSerializer"""
     class Meta:
         model = Camera
@@ -87,14 +87,14 @@ class CameraSerializer(serializers.ModelSerializer):
             })
 
 
-class ImageSerializer(serializers.ModelSerializer):
+class ImageSerializer(serializers.HyperlinkedModelSerializer):
     """ImageSerializer"""
     class Meta:
         model = Image
         fields = ["id", "image", "labels", "part", "is_relabel", "confidence"]
 
 
-class AnnotationSerializer(serializers.ModelSerializer):
+class AnnotationSerializer(serializers.HyperlinkedModelSerializer):
     """AnnotationSerializer"""
     class Meta:
         model = Annotation

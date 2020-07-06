@@ -11,7 +11,7 @@ from ..models import ImagePrediction
 logger = logging.getLogger(__name__)
 
 
-class ImagePredictionSerializer(serializers.ModelSerializer):
+class ImagePredictionSerializer(serializers.HyperlinkedModelSerializer):
     """Image Prediction Serializer"""
     class Meta:
         model = ImagePrediction

@@ -11,7 +11,7 @@ from ..models import Setting
 logger = logging.getLogger(__name__)
 
 
-class SettingSerializer(serializers.ModelSerializer):
+class SettingSerializer(serializers.HyperlinkedModelSerializer):
     """SettingSerializer"""
     class Meta:
         model = Setting
