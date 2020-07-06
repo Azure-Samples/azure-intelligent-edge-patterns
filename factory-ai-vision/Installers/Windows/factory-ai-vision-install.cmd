@@ -231,7 +231,7 @@ FOR /f "delims=" %%i IN (%edge-deployment-json%) DO (
 
 REM ############################## Deploy Edge Modules #####################################
 
-ECHO Deploying conatiners to Azure Stack Edge
+ECHO Deploying containers to Azure Stack Edge
 ECHO This will take > 10 min at normal connection speeds.  Status can be checked on the Azure Stack Edge device
 SET count=-1
 FOR /F "tokens=* USEBACKQ" %%F IN (`az iot edge set-modules --device-id %edge-device-id% --hub-name %iot-hub-name% --content %edge-deploy-json%`) DO (
