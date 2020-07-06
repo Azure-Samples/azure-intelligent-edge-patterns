@@ -158,7 +158,6 @@ class Setting(models.Model):
         : Success: return project
         : Failed:  return None
         """
-        pass
 
     def __str__(self):
         return self.name

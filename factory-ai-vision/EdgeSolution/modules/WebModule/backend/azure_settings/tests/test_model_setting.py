@@ -14,15 +14,14 @@ Notes:
 """
 import logging
 
+from azure.cognitiveservices.vision.customvision.training import \
+    CustomVisionTrainingClient
+from azure.cognitiveservices.vision.customvision.training.models import Project
 from rest_framework.test import APITransactionTestCase
 
-from azure.cognitiveservices.vision.customvision.training import (
-    CustomVisionTrainingClient)
-from azure.cognitiveservices.vision.customvision.training.models import (
-    Project)
+from configs.customvision_config import ENDPOINT, TRAINING_KEY
 
 from ..models import Setting
-from configs.customvision_config import TRAINING_KEY, ENDPOINT
 
 PROJECT_PREFIX = "UnitTest"
 
