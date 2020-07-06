@@ -1,11 +1,12 @@
 import React, { FC, MouseEvent } from 'react';
-import { Grid, Segment, Image, Flex, Text, MenuIcon, Button } from '@fluentui/react-northstar';
+import { Grid, Segment, Image, Flex, Text, BellIcon } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import Breadcrumb from '../Breadcrumb';
 import LeftNav from './LeftNav';
 import { State } from '../../store/State';
+import { Badge } from '../Badge';
 
 export const MainLayout: FC = ({ children }) => {
   const isTrainerValid = useSelector<State, boolean>((state) => state.setting.isTrainerValid);
@@ -74,6 +75,9 @@ const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
           if (disabled) e.preventDefault();
         }}
       >
+        <Badge count={0}>
+          <BellIcon size="larger" />
+        </Badge>
         <Link to="/setting" style={{ height: '100%', cursor: disabled && 'default' }}>
           <Image styles={{ height: '100%' }} src="/icons/setting.png" />
         </Link>
