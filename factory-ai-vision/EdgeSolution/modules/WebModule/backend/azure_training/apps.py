@@ -44,10 +44,12 @@ class AzureTrainingConfig(AppConfig):
                 demo_locations = Location.objects.filter(is_demo=True)
                 if len(demo_locations) <= 0:
                     return
+
                 # Demo Camera should be created already
                 demo_cameras = Camera.objects.filter(is_demo=True)
                 if len(demo_cameras) <= 0:
                     return
+
                 # Default Settings should be created already
                 default_settings = Setting.objects.filter(
                     name=DEFAULT_SETTING_NAME)
