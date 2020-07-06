@@ -1,4 +1,4 @@
-import React, { FC, MouseEvent } from 'react';
+import React, { FC, MouseEvent, useState, Dispatch, SetStateAction } from 'react';
 import { Grid, Segment, Image, Flex, Text, BellIcon } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -7,9 +7,11 @@ import Breadcrumb from '../Breadcrumb';
 import LeftNav from './LeftNav';
 import { State } from '../../store/State';
 import { Badge } from '../Badge';
+import { NotificationPanel } from '../NotificationPanel';
 
 export const MainLayout: FC = ({ children }) => {
   const isTrainerValid = useSelector<State, boolean>((state) => state.setting.isTrainerValid);
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
   return (
     <Grid
@@ -18,7 +20,7 @@ export const MainLayout: FC = ({ children }) => {
       design={{ height: '100vh' }}
       styles={{ justifyContent: 'stretch' }}
     >
-      <TopNav disabled={!isTrainerValid} />
+      <TopNav disabled={!isTrainerValid} setNotificationOpen={setNotificationOpen} />
       <LeftNav
         styles={{
           gridColumn: '1 / span 1',
@@ -29,15 +31,30 @@ export const MainLayout: FC = ({ children }) => {
         disabled={!isTrainerValid}
       />
 
-      <Segment styles={{ gridColumn: 'span 1', padding: '30px' }}>
+      <Segment styles={{ gridColumn: 'span 1', padding: '30px', position: 'relative' }}>
         <Breadcrumb disabled={!isTrainerValid} />
         {children}
+        <div
+          style={{
+            height: '100%',
+            width: '320px',
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            zIndex: 3,
+          }}
+        >
+          <NotificationPanel isOpen={notificationOpen} onDismiss={(): void => setNotificationOpen(false)} />
+        </div>
       </Segment>
     </Grid>
   );
 };
 
-const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
+const TopNav: FC<{ disabled: boolean; setNotificationOpen: Dispatch<SetStateAction<boolean>> }> = ({
+  disabled,
+  setNotificationOpen,
+}) => {
   return (
     <Flex
       space="between"
@@ -76,7 +93,11 @@ const TopNav: FC<{ disabled: boolean }> = ({ disabled }) => {
         }}
       >
         <Badge count={0}>
-          <BellIcon size="larger" />
+          <BellIcon
+            size="larger"
+            styles={{ cursor: 'pointer' }}
+            onClick={(): void => setNotificationOpen((prev) => !prev)}
+          />
         </Badge>
         <Link to="/setting" style={{ height: '100%', cursor: disabled && 'default' }}>
           <Image styles={{ height: '100%' }} src="/icons/setting.png" />
