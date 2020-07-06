@@ -12,29 +12,15 @@ from io import BytesIO
 
 import cv2
 import requests
-# from azure.cognitiveservices.vision.customvision.training.models import (
-# ImageFileCreateEntry, Region)
-from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.device import IoTHubModuleClient
 from django.core import files
 from django.db import models
-from django.db.models.signals import post_save
-# from django.db.models.signals import pre_save
-# from django.db.models.signals import pre_delete
+from django.db.models.signals import post_save, pre_save
 from django.db.utils import IntegrityError
-from django.db.models.signals import pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
-from configs.iot_config import IOT_HUB_CONNECTION_STRING
-
-
 logger = logging.getLogger(__name__)
-
-try:
-    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-except:
-    iot = None
 
 
 def is_edge():
