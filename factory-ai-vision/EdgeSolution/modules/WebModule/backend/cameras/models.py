@@ -70,7 +70,6 @@ class Part(models.Model):
             logger.exception("Unexpected Error in Part Presave")
 
 
-
 class Image(models.Model):
     """Image Model"""
 
@@ -97,9 +96,9 @@ class Image(models.Model):
                 self.image.save(file_name, files.File(fp))
                 fp.close()
                 self.save()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException as request_err:
             # Probably wrong url
-            raise e
+            raise request_err
         except Exception as unexpected_error:
             logger.exception("unexpected error")
             raise unexpected_error
@@ -110,7 +109,7 @@ class Image(models.Model):
             if left > 1 or top > 1 or width > 1 or height > 1:
                 raise ValueError(
                     f"{left}, {top}, {width}, {height} must be less than 1")
-            elif left < 0 or top < 0 or width < 0 or height < 0:
+            if left < 0 or top < 0 or width < 0 or height < 0:
                 # raise ValueError(
                 # f"{left}, {top}, {width}, {height} must be greater than 0")
                 logger.error("%s, %s, %s, %s must be greater than 0", left,
@@ -140,11 +139,11 @@ class Image(models.Model):
                 }])
                 self.save()
                 logger.info("Successfully save labels to %s", self.labels)
-        except ValueError as e:
-            raise e
-        except Exception:
+        except ValueError as value_err:
+            raise value_err
+        except Exception as uncaught_err:
             logger.exception("Set label raise unexpected error")
-            raise e
+            raise uncaught_err
 
     def add_labels(self, left: float, top: float, width: float, height: float):
         "Add Labels to Image"
@@ -152,17 +151,17 @@ class Image(models.Model):
             if left > 1 or top > 1 or width > 1 or height > 1:
                 raise ValueError("%s, %s, %s, %s must be less than 1", left,
                                  top, width, height)
-            elif left < 0 or top < 0 or width < 0 or height < 0:
+            if left < 0 or top < 0 or width < 0 or height < 0:
                 raise ValueError("%s, %s, %s, %s must be greater than 0", left,
                                  top, width, height)
-            elif left + width > 1:
+            if left + width > 1:
                 raise ValueError("left + width: %s + %s must be less than 1",
                                  left, width)
-            elif top + height > 1:
+            if top + height > 1:
                 raise ValueError("top + height: %s + %s  must be less than 1",
                                  top, height)
-        except ValueError as e:
-            raise e
+        except ValueError as value_err:
+            raise value_err
 
 
 class Annotation(models.Model):
@@ -182,7 +181,7 @@ class Camera(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     @staticmethod
     def verify_rtsp(rtsp):
         """ Return True if the rtsp is ok, otherwise return False """
@@ -208,10 +207,9 @@ class Camera(models.Model):
             return
         if instance.rtsp is None:
             raise ValueError('rtsp is none')
-        else:
-            rtsp_ok = Camera.verify_rtsp(rtsp=instance.rtsp)
-            if not rtsp_ok:
-                raise ValueError('rtsp is not valid')
+        rtsp_ok = Camera.verify_rtsp(rtsp=instance.rtsp)
+        if not rtsp_ok:
+            raise ValueError('rtsp is not valid')
 
     @staticmethod
     def post_save(instance, update_fields, **kwargs):
@@ -229,7 +227,6 @@ class Camera(models.Model):
                 )
             except:
                 logger.error("Request failed")
-
 
 
 # FIXME consider move this out of models.py
@@ -284,7 +281,8 @@ class Stream(object):
                 time.sleep(0.02)
                 # print('received p', self.predictions)
 
-                # inference = self.iot.receive_message_on_input('inference', timeout=1)
+                # inference = self.iot.receive_message_on_input('inference',
+                #                                               timeout=1)
                 # if not inference:
                 #    self.mutex.acquire()
                 #    self.bboxes = []
@@ -383,7 +381,8 @@ class Stream(object):
     def close(self):
         """close stream"""
         self.status = "stopped"
-        logger.info(f"release {self}")
+        logger.info("release %s", self)
+
 
 pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")
 post_save.connect(Camera.post_save, Camera, dispatch_uid="Camera_post")
