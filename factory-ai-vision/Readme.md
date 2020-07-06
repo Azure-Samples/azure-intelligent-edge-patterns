@@ -1,3 +1,28 @@
+
+# Automated installation with Vision on Edge Installer
+
+To install the Vision on Edge Solution Accelerator using the installation script, the following prerequisites are required...
+
+1. You should have the latest version of the Azure CLI installed on your system.  See [this document](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for information on how to install or update the CLI
+2. You must have an Azure subscription
+3. Your subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device). Port 5000 and 8080 need to be available in the IoT Edge device
+
+ _**Important**_: If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version.  If you have an existing free version, installation will fail
+
+ To install the solution:
+
+* The installer and supporting files must be copied to your local machine. Either clone the repository locally, or download the appropriate zip file for your platform from the Installers directory and extract the files.
+
+* For a PC running Windows, navigate to the directory containing the installation files in a terminal and run the vision-on-edge-install.cmd script.
+
+ \- or -
+
+* For a Mac, or a PC running Linux, navigate to the directory containing the installation files in a terminal and run the vision-on-edge-install.sh script.
+* Now you can access the product startup page by opening the browser at http://youredgedeviceip:8080   eg. http://52.1.1.1:8080/
+
+
+# Manual installation building  a docker container and deploy by Visual Studio Code
+=======
 # Custom vision + Azure IoT Edge for Factory AI
 This is a sample showing how to deploy a Custom Vision model to Azure IoT edge device and get AI model up running in a single day. 
 Custom Vision equipped with image classification and object detection that are trained in the cloud with your own images. You can define your location, camera and set up objects to detect any manufacturing parts, defeat area, etc. while keeping your vide footage private, lowering your badnwidth costs and even running offline. 
