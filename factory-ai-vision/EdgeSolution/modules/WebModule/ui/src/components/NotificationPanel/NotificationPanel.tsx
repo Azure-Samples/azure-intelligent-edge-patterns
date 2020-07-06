@@ -1,7 +1,11 @@
 import React from 'react';
 import { Flex, CloseIcon, Button, Card, CardHeader, CardBody, Text } from '@fluentui/react-northstar';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import { mainTheme } from '../../themes/mainTheme';
+import { State } from '../../store/State';
+import { Notification } from '../../store/notification/notificationType';
 
 type NotificationPanelProps = {
   isOpen: boolean;
@@ -9,7 +13,9 @@ type NotificationPanelProps = {
 };
 
 export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onDismiss }) => {
-  const notifications = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5];
+  const notifications = useSelector<State, Notification[]>((state) => state.notifications);
+  const history = useHistory();
+
   return (
     <div
       style={{
@@ -26,24 +32,25 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
         <Button icon={<CloseIcon />} text iconOnly size="large" onClick={(): void => onDismiss()} />
       </Flex>
       <Flex column hAlign="center" gap="gap.medium" styles={{ padding: '10px' }}>
-        {notifications.map((_, i) => (
+        {notifications.map((e) => (
           <Card
-            key={i}
+            key={e.id}
             styles={{
               height: '',
               border: mainTheme.siteVariables.colorScheme.brand.border,
               cursor: 'pointer',
               width: '280px',
             }}
+            onClick={(): void => history.push(e.linkTo)}
           >
             <CardHeader>
               <Flex gap="gap.small">
                 <Flex column>
-                  <Text content="Training Job" weight="bold" />
+                  <Text content={e.title} weight="bold" />
                 </Flex>
               </Flex>
             </CardHeader>
-            <CardBody>Project is completed</CardBody>
+            <CardBody>{e.content}</CardBody>
           </Card>
         ))}
       </Flex>
