@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 @api_view()
 def verify_rtsp(request):
+    """test if a rtsp is valid"""
     logger.info("Verifying rtsp")
     rtsp = request.query_params.get('rtsp')
     logger.info("rtsp %s", rtsp)
