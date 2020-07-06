@@ -13,7 +13,7 @@ from ..models import Project, Task, Train
 logger = logging.getLogger(__name__)
 
 
-class ProjectSerializer(serializers.HyperlinkedModelSerializer):
+class ProjectSerializer(serializers.ModelSerializer):
     """Project Serializer"""
     class Meta:
         model = Project
@@ -59,14 +59,14 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         return project
 
 
-class TrainSerializer(serializers.HyperlinkedModelSerializer):
+class TrainSerializer(serializers.ModelSerializer):
     """TrainSerializer"""
     class Meta:
         model = Train
         fields = ["id", "status", "log", "project"]
 
 
-class TaskSerializer(serializers.HyperlinkedModelSerializer):
+class TaskSerializer(serializers.ModelSerializer):
     """TaskSerializer"""
     class Meta:
         model = Task
