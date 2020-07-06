@@ -1,0 +1,39 @@
+apiVersion: extensions/v1
+kind: Deployment
+metadata:
+  labels:
+    app: tensorboard
+  name: tensorboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tensorboard
+  template:
+    metadata:
+      labels:
+        app: tensorboard
+    spec:
+      volumes:
+        - name: samba-share-volume2
+          persistentVolumeClaim:
+            claimName: samba-share-claim
+      containers:
+      - name: tensorboard
+        image: tensorflow/tensorflow:1.10.0
+        imagePullPolicy: Always
+        command:
+         - /usr/local/bin/tensorboard
+        args:
+        - --logdir
+        - /tmp/tensorflow/logs
+        volumeMounts:
+          - mountPath: /tmp/tensorflow
+            subPath: tf-mnist-w-tb
+            name: samba-share-volume2
+        ports:
+        - containerPort: 6006
+          protocol: TCP
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      

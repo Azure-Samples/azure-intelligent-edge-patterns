@@ -1,0 +1,101 @@
+parameters:
+  workingDirectory: ''
+  tfKey: '' # TF State Filename
+  tfVersion: '' # TF version
+  tfAzureServiceConnection: '' # TF backend srvice connection
+  azureServiceConnection: '' # Azure Service Connection
+  azureLocation: '' # Azure (Stack) Location
+
+jobs:
+- job: deployinfra
+  displayName: 'Deploy Infrastructure'
+  workspace:
+    clean: all
+
+  steps:
+  - checkout: self
+    persistCredentials: true
+
+  # Print out some pipeline details for troubleshooting and debugging
+  - task: Bash@3
+    displayName: 'Pipeline Details'
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo "Infrastructure Pipeline Deployment Details"
+        echo "* Terraform Service Connection: ${{ parameters.tfAzureServiceConnection }}"
+        echo "* Terraform Version: ${{ parameters.tfVersion }}"
+
+        echo "* Target Azure Service Connection: ${{ parameters.azureServiceConnection}}"
+        echo "* Target Azure Location: ${{ parameters.azureLocation }}"
+        echo "* Azure ARM Endpoint: $(ARM_ENDPOINT)"
+        echo "* Azure ARM Environment: $(ARM_ENVIRONMENT)"
+
+  # Build Agent - Install Terraform tooling
+  - task: TerraformInstaller@0
+    displayName: 'Install Terraform Tooling ${{ parameters.tfVersion }} (Build Agent)'
+    inputs:
+      terraformVersion: '${{ parameters.tfVersion }}' # Terraform Version (specified in DevOps VG)
+    enabled: true
+
+  # Initialize Terraform
+  - task: TerraformTaskV1@0
+    displayName: 'Terraform Init'
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      backendServiceArm: '${{ parameters.tfAzureServiceConnection }}'
+      backendAzureRmResourceGroupName: '$(tfResourceGroup)'
+      backendAzureRmStorageAccountName: '$(tfStorageAccount)'
+      backendAzureRmContainerName: '$(tfContainerName)'
+      backendAzureRmKey: '${{ parameters.tfKey }}'
+      workingDirectory: '${{ parameters.workingDirectory }}'
+    env:
+      ARM_ACCESS_KEY: '$(tfStorageAccountKey)'
+      ARM_ENDPOINT: '$(ARM_ENDPOINT)'
+      ARM_ENVIRONMENT: '$(ARM_ENVIRONMENT)'
+      TF_LOG: "TRACE"
+
+  # Validate Terraform Code
+  - task: TerraformTaskV1@0
+    displayName: 'Terraform Validate'
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: '${{ parameters.workingDirectory }}'
+    env:
+      TF_VAR_location: '${{ parameters.azureLocation }}'
+      TF_VAR_client_secret: '$(spClientSecret)'
+      TF_VAR_client_id: '$(spClientId)'
+      TF_VAR_resource_group: '$(resourceGroup)'
+
+  # Execute Terraform Plan Task
+  - task: TerraformTaskV1@0
+    displayName: 'Terraform Plan'
+    inputs:
+      command: 'plan'
+      provider: 'azurerm'
+      environmentServiceNameAzureRM: '${{ parameters.azureServiceConnection}}'
+      workingDirectory: '${{ parameters.workingDirectory }}'
+    env:
+      TF_VAR_location: '${{ parameters.azureLocation }}'
+      TF_VAR_client_secret: '$(spClientSecret)'
+      TF_VAR_client_id: '$(spClientId)'
+      TF_VAR_resource_group: '$(resourceGroup)'
+    enabled: true
+
+  # Apply Terraform Configuration
+  - task: TerraformTaskV1@0
+    displayName: 'Terraform Apply'
+    condition: eq(variables['build.sourceBranch'], 'refs/heads/master') # will only run in master
+    inputs:
+      command: apply
+      provider: 'azurerm'
+      environmentServiceNameAzureRM: '${{ parameters.azureServiceConnection}}'
+      workingDirectory: '${{ parameters.workingDirectory }}'
+    env:
+      TF_VAR_location: '${{ parameters.azureLocation }}'
+      TF_VAR_client_secret: '$(spClientSecret)'
+      TF_VAR_client_id: '$(spClientId)'
+      TF_VAR_resource_group: '$(resourceGroup)'
+    enabled: true

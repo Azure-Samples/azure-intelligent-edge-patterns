@@ -40,7 +40,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
       properties: {
         images: interestedImagesLength,
         parts: selectedParts.length,
-        source: window.location.hostname,
+        source: '',
       },
     });
 };

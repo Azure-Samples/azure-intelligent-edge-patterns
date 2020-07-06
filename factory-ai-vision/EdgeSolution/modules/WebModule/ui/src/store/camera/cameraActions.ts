@@ -22,7 +22,7 @@ const deleteCameraSuccess = (id: number): DeleteCameraSuccess => ({
 });
 
 const requestCamerasFailure = (error: any): RequestCamerasFailure => {
-  console.error(error);
+  alert(error);
   return { type: REQUEST_CAMERA_FAILURE };
 };
 
@@ -50,6 +50,15 @@ export const postCamera = (newCamera: Camera) => (dispatch): Promise<void> => {
     .then(({ data }) => {
       dispatch(postCameraSuccess(data));
       return void 0;
+    })
+    .catch((e) => {
+      if (e.response) {
+        throw new Error(e.response.data.log);
+      } else if (e.request) {
+        throw new Error(e.request);
+      } else {
+        throw e;
+      }
     })
     .catch((err) => {
       dispatch(requestCamerasFailure(err));

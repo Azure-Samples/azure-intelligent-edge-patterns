@@ -1,7 +1,6 @@
 import React, { FC, memo, useState } from 'react';
 import { Flex, Text, Grid, Button, Status, Input } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 
 import ConfirmDialog from '../ConfirmDialog';
 import { deleteCamera } from '../../store/camera/cameraActions';
@@ -9,8 +8,8 @@ import { State } from '../../store/State';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { useParts } from '../../hooks/useParts';
 import { LiveViewContainer } from '../LiveViewContainer';
-import { updateProjectData, thunkUpdateProbThreshold } from '../../store/project/projectActions';
 import { AOIData } from '../../type';
+import { ListItem } from '../ListItem';
 
 interface CameraDetailInfoProps {
   AOIs: AOIData;
@@ -22,9 +21,7 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
   const [showTestResult, setShowTestResult] = useState(false);
   const dispatch = useDispatch();
 
-  const { data: project, inferenceMetrics, isLoading, status } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+  const { data: project, status } = useSelector<State, Project>((state) => state.project);
   const parts = useParts();
 
   const isCameraOnline = [CameraConfigStatus.FinishTraining, CameraConfigStatus.StartInference].includes(
@@ -130,19 +127,6 @@ const CameraDetailInfo: FC<CameraDetailInfoProps> = ({ id, name, rtsp, AOIs }) =
             />
           </ListItem>
         </>
-      )}
-    </Flex>
-  );
-};
-
-const ListItem = ({ title, children }): JSX.Element => {
-  return (
-    <Flex vAlign="center" gap="gap.medium">
-      <Text style={{ width: '200px' }} size="medium">{`${title}: `}</Text>
-      {typeof children === 'string' || typeof children === 'number' ? (
-        <Text size="medium">{children}</Text>
-      ) : (
-        children
       )}
     </Flex>
   );

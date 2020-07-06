@@ -121,6 +121,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CounterListener.cs" />
+    <Compile Include="EyeTracker.cs" />
     <Compile Include="GapConfig.cs" />
     <Compile Include="GapListener.cs" />
     <Compile Include="GapListenerHub.cs" />
