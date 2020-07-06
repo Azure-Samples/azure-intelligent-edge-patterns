@@ -25,7 +25,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
         <h2>Notification</h2>
         <Button icon={<CloseIcon />} text iconOnly size="large" onClick={(): void => onDismiss()} />
       </Flex>
-      <Flex column hAlign="center">
+      <Flex column hAlign="center" gap="gap.medium" styles={{ padding: '10px' }}>
         {notifications.map((_, i) => (
           <Card
             key={i}
@@ -33,6 +33,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
               height: '',
               border: mainTheme.siteVariables.colorScheme.brand.border,
               cursor: 'pointer',
+              width: '280px',
             }}
           >
             <CardHeader>
