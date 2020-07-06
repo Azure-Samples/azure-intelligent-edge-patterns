@@ -17,15 +17,14 @@ const LabelingPageDialog: FC<LabelingPageDialogProps> = ({
   trigger,
   images,
   imageIndex,
-  isRelabel,
   forceOpen = false,
 }): JSX.Element => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setOpen(forceOpen);
-  }, [forceOpen])
-  
+  }, [forceOpen]);
+
   return (
     <Dialog
       trigger={trigger}
@@ -38,7 +37,6 @@ const LabelingPageDialog: FC<LabelingPageDialogProps> = ({
           labelingType={LabelingType.SingleAnnotation}
           images={images}
           imageIndex={imageIndex}
-          isRelabel={isRelabel}
         />
       }
     />

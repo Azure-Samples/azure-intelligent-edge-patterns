@@ -4,7 +4,7 @@ Location ModelViewSet test
 
 from rest_framework.test import APITransactionTestCase
 
-from cameras.models import Location
+from ..models import Location
 from .test_special_strings import special_strings
 
 

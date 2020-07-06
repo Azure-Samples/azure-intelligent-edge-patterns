@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Input, Button, Menu, Grid, Alert } from '@fluentui/react-northstar';
+import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/react-northstar';
 import { Link, useLocation, Switch, Route, useHistory } from 'react-router-dom';
 import axios from 'axios';
 
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
 import { useQuery } from '../hooks/useQuery';
-import { CapturedImagesContainer } from '../components/CapturePhoto/CapturePhotos';
+import { WarningDialog } from '../components/WarningDialog';
+import { errorTheme } from '../themes/errorTheme';
+import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
+import { useProject } from '../hooks/useProject';
 
 export const PartDetails = (): JSX.Element => {
   const partId = useQuery().get('partId');
@@ -15,6 +18,8 @@ export const PartDetails = (): JSX.Element => {
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const history = useHistory();
+  const [status, setStatus] = useState<Status>(Status.None);
+  const project = useProject(false);
 
   const onSave = (): void => {
     axios({
@@ -34,26 +39,61 @@ export const PartDetails = (): JSX.Element => {
       });
   };
 
+  const onDelete = async (): Promise<void> => {
+    setStatus(Status.Loading);
+
+    try {
+      await axios.get(`/api/projects/${project.data.id}/delete_tag?part_name=${name}`);
+      await axios.delete(`/api/parts/${partId}/`);
+      setStatus(Status.Success);
+    } catch (e) {
+      setError(e);
+    }
+  };
+
   return (
-    <Grid columns={'1fr 1fr'} rows={'80px auto 50px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
+    <Grid columns={'68% 30%'} rows={'80px auto 30px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       {partId ? <Tab partId={partId} /> : null}
-      <RightPanel
+      <PartInfoForm
         partId={partId}
         name={name}
         setName={setName}
         description={description}
         setDescription={setDescription}
       />
-      <LeftPanel partId={partId} goLabelImageIdx={goLabelImageIdx} setGoLabelImageIdx={setGoLabelImageIdx} />
-      <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" column>
+      <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2' }}>
+        <CaptureImagePanel
+          partId={partId}
+          goLabelImageIdx={goLabelImageIdx}
+          setGoLabelImageIdx={setGoLabelImageIdx}
+        />
+      </Flex>
+      <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" gap="gap.small">
         <Button content="Save" primary onClick={onSave} disabled={!name} />
+        <Provider theme={errorTheme}>
+          <WarningDialog
+            contentText={
+              <p>
+                Sure you want to delete the part <b>{name}</b>?
+              </p>
+            }
+            trigger={<Button content="Delete" primary />}
+            onConfirm={onDelete}
+          />
+        </Provider>
+        <LoadingDialog
+          status={status}
+          onConfirm={() => {
+            if (status === Status.Success) history.push(`/parts/`);
+          }}
+        />
         {!!error && <Alert danger content={error} dismissible />}
       </Flex>
     </Grid>
   );
 };
 
-const RightPanel = ({ partId, name, setName, description, setDescription }): JSX.Element => {
+const PartInfoForm = ({ partId, name, setName, description, setDescription }): JSX.Element => {
   useEffect(() => {
     if (partId) {
       axios
@@ -97,25 +137,18 @@ const RightPanel = ({ partId, name, setName, description, setDescription }): JSX
   );
 };
 
-const LeftPanel = ({ partId, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
+const CaptureImagePanel = ({ partId, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
   return (
     <Switch>
       <Route path={`/parts/detail/capturePhotos`}>
-        <Flex column gap="gap.small">
-          <CapturePhotos
-            partId={parseInt(partId, 10)}
-            goLabelImageIdx={goLabelImageIdx}
-            setGoLabelImageIdx={setGoLabelImageIdx}
-          />
-        </Flex>
-        <Flex column gap="gap.small" styles={{ width: '100%' }}>
-          <CapturedImagesContainer partId={parseInt(partId, 10)} goLabelImageIdx={goLabelImageIdx} />
-        </Flex>
+        <CapturePhotos
+          partId={parseInt(partId, 10)}
+          goLabelImageIdx={goLabelImageIdx}
+          setGoLabelImageIdx={setGoLabelImageIdx}
+        />
       </Route>
       <Route path={`/parts/detail/uploadPhotos`}>
-        <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2' }}>
-          <UploadPhotos partId={parseInt(partId, 10)} />
-        </Flex>
+        <UploadPhotos partId={parseInt(partId, 10)} />
       </Route>
     </Switch>
   );

@@ -1,0 +1,19 @@
+container:
+    registry: "heoelri"
+
+frontend:
+    image:    "demo-rating-web"
+    tag:      "latest"
+    port:     8080
+
+midtier:
+    image:    "demo-rating-api"
+    tag:      "latest"
+    port:     80
+
+database:
+    image:    "mongo" #"demo-rating-mongodb"
+    tag:      "4.0.8" # "latest"
+    port:     27017
+    user:     "admin"
+    pass:     "password"

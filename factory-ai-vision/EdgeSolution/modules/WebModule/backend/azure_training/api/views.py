@@ -20,7 +20,7 @@ from azure.iot.hub.models import Twin, TwinProperties
 from django.http import JsonResponse
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 
 from cameras.models import Camera, Image, Part
@@ -86,6 +86,39 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "is_demo": "is_demo",
     }
+
+    @action(detail=True, methods=["get"])
+    def delete_tag(self, request, pk=None):
+        """
+        List Project under Training Key + Endpoint
+        """
+        try:
+            project_obj = self.get_object()
+            part_id = request.query_params.get("part_id") or None
+            part_name = request.query_params.get("part_name") or None
+            if part_id is not None:
+                project_obj.delete_tag_by_id(tag_id=part_id)
+                return Response({'status': 'ok'})
+            if part_name is not None:
+                project_obj.delete_tag_by_name(tag_name=part_name)
+                return Response({'status': 'ok'})
+            raise AttributeError('part_name or part_id not found')
+        except AttributeError as attr_err:
+            return Response(
+                {
+                    'status': 'failed',
+                    'log': str(attr_err)
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except CustomVisionErrorException as customvision_err:
+            return Response(
+                {
+                    'status': 'failed',
+                    'log': str(customvision_err)
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
 
 class TrainViewSet(viewsets.ModelViewSet):
@@ -363,7 +396,7 @@ def train_performance(request, project_id):
     return JsonResponse(ret)
 
 
-def _train(project_id, request):
+def _train(project_id):
     """Actually do uplaod, train and deploy"""
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -552,7 +585,6 @@ def _train(project_id, request):
                 project_obj.update_app_insight_counter(
                     has_new_parts=has_new_parts,
                     has_new_images=has_new_images,
-                    source=request.get_host(),
                     parts_last_train=parts_last_train,
                     images_last_train=images_last_train,
                 )
@@ -584,7 +616,7 @@ def _train(project_id, request):
         return JsonResponse(
             {
                 "status": "failed",
-                "log": e.message
+                "log": customvision_err.message
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
@@ -684,7 +716,7 @@ def train(request, project_id):
         )
 
     threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
-    return _train(project_id, request)
+    return _train(project_id)
 
 
 # FIXME will need to find a better way to deal with this

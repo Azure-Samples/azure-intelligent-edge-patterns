@@ -107,23 +107,21 @@ export const LiveViewContainer: React.FC<{
             onClick={onUpdate}
             loading={loading}
           />
-          {false && (
-            <Button
-              content="Create Area of Interest"
-              primary={creatingAOI !== CreatingState.Disabled}
-              disabled={!showAOI}
-              onClick={(): void => {
-                if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
-                else setCreatingAOI(CreatingState.Disabled);
-              }}
-              circular
-              styles={{ padding: '0 5px' }}
-            />
-          )}
+          <Button
+            content="Create Area of Interest"
+            primary={creatingAOI !== CreatingState.Disabled}
+            disabled={!showAOI}
+            onClick={(): void => {
+              if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
+              else setCreatingAOI(CreatingState.Disabled);
+            }}
+            circular
+            styles={{ padding: '0 5px' }}
+          />
           <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
         </Flex>
       </Flex>
-      <div style={{ width: '100%', height: '40vh', backgroundColor: 'black' }}>
+      <div style={{ width: '100%', height: '50vh', backgroundColor: 'black' }}>
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}

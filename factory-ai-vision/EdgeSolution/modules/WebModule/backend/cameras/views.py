@@ -11,36 +11,17 @@ import logging
 from azure.iot.device import IoTHubModuleClient
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.images import ImageFile
-
-# from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
-
-from rest_framework.response import Response
 from filters.mixins import FiltersMixin
-from rest_framework import filters, status, viewsets
-
-# from rest_framework.views import APIView
-# from rest_framework.request import Request
+from rest_framework import filters, viewsets
 from rest_framework.decorators import api_view
+# from rest_framework import status
+# from rest_framework.response import Response
 
-# First Party Import
 from configs.app_insight import APP_INSIGHT_INST_KEY
-
-
-from .models import (
-    Annotation,
-    Camera,
-    Image,
-    Part,
-    Stream,
-)
-
-from .serializers import (
-    AnnotationSerializer,
-    CameraSerializer,
-    ImageSerializer,
-    PartSerializer,
-)
+from .models import Annotation, Camera, Image, Part, Stream
+from .serializers import (AnnotationSerializer, CameraSerializer,
+                          ImageSerializer, PartSerializer)
 
 # from azure.iot.hub import IoTHubRegistryManager
 # from azure.iot.hub.models import Twin, TwinProperties
@@ -98,7 +79,6 @@ class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "is_demo": "is_demo",
     }
-
 
 class ImageViewSet(viewsets.ModelViewSet):
     """

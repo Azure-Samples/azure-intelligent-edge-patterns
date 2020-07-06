@@ -1,21 +1,21 @@
 """
 Project's custom action 'train' test
 """
-import logging
 import json
+import logging
 
+from azure.cognitiveservices.vision.customvision.training import \
+    CustomVisionTrainingClient
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
-from azure.cognitiveservices.vision.customvision.training import (
-    CustomVisionTrainingClient)
-
 from azure_settings.models import Setting
-from locations.models import Location
-from cameras.models import Project, Camera, Part
+from cameras.models import Camera, Part
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
+from locations.models import Location
 
+from ..models import Project
 
 PROJECT_PREFIX = "UnitTest"
 
@@ -40,7 +40,7 @@ class ViewTrainTestCase(APITransactionTestCase):
                                training_key='',
                                is_trainer_valid=False)
         Camera.objects.create(name="camera_1",
-                              rtsp="valid_rtsp",
+                              rtsp="0",
                               area="55,66",
                               is_demo=False)
 

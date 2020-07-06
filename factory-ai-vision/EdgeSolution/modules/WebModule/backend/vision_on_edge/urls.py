@@ -22,6 +22,7 @@ from django.conf import settings
 from rest_framework import routers
 
 from cameras import views
+from cameras import util_views as camera_util_views
 from azure_settings.api import views as setting_views
 from locations.api import views as location_views
 from image_predictions.api import views as image_prediction_views
@@ -30,8 +31,9 @@ from . import views as site_views
 
 
 class OptionalSlashRouter(routers.DefaultRouter):
+    """Make slash ('/') in url to be optional"""
     def __init__(self):
-        super(routers.DefaultRouter, self).__init__()
+        super().__init__()
         self.trailing_slash = '/?'
 
 
@@ -77,6 +79,8 @@ urlpatterns = \
         path('api/relabel', views.upload_relabel_image),
         path('api/relabel/update', views.relabel_update),
         path('api/appinsight/key', views.instrumentation_key),
+        path('api/camera_utils/verify_rtsp',
+             camera_util_views.verify_rtsp),
         path('admin/', admin.site.urls),
         url('^', site_views.UIAppView.as_view())
     ]

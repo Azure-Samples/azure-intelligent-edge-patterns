@@ -41,6 +41,7 @@ class Setting(models.Model):
     obj_detection_domain_id = models.CharField(max_length=1000,
                                                blank=True,
                                                default="")
+    app_insight_has_init = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("endpoint", "training_key")
@@ -157,7 +158,6 @@ class Setting(models.Model):
         : Success: return project
         : Failed:  return None
         """
-        pass
 
     def __str__(self):
         return self.name

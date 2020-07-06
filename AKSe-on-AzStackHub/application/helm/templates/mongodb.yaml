@@ -1,0 +1,48 @@
+## Generate a key
+# openssl rand -base64 741 > mongodb-keyfile
+## Create k8s secrets
+# kubectl create secret generic mongo-key --from-file=mongodb-keyfile
+# https://gist.github.com/thilinapiy/0c5abc2c0c28efe1bbe2165b0d8dc115
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratings-mongodb
+  labels:
+    name: ratings-mongo
+    app: ratings-mongo
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  ports:
+  - port: 27017
+    targetPort: {{ .Values.database.port }}
+  clusterIP: None
+  selector:
+    role: ratings-mongo
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ratings-mongodb
+spec:
+  serviceName: ratings-mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ratings-mongodb
+  template:
+    metadata:
+      labels:
+        app: ratings-mongodb
+        selector: mongodb-standalone
+    spec:
+      containers:
+      - name: mongodb-standalone
+        image: {{ .Values.database.image }}:{{ .Values.database.tag }}
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: {{ .Values.database.user }}
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: {{ .Values.database.pass }}

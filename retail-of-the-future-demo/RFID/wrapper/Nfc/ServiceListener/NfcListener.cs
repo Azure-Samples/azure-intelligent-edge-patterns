@@ -12,7 +12,7 @@ using NfcSupport;
 
 namespace ServiceListener
 {
-    public class NfcListener : ServicePointBase
+    public class NfcListener
     {
         public delegate void OnCardData(string cardUID);
         public event OnCardData CardDataEvent;

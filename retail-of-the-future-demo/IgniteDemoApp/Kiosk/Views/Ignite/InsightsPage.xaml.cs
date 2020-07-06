@@ -71,7 +71,8 @@ namespace IntelligentKioskSample.Views.Ignite
 
             if (hasGapDetection)
             {
-                this.gapListener.StartListening(OnGapDetection);
+                this.gapListener.GapDetectionEvent += OnGapDetection;
+                this.gapListener.StartListening();
             }
 
             base.OnNavigatedTo(e);
@@ -224,11 +225,11 @@ namespace IntelligentKioskSample.Views.Ignite
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
             this.isUpdating = false;
-            //this.counterVis.StopListening();
             this.customerCounterControl.StopListening();
             if (hasGapDetection)
             {
                 this.gapListener.StopListening();
+                this.gapListener.GapDetectionEvent -= OnGapDetection;
             }
             base.OnNavigatingFrom(e);
         }

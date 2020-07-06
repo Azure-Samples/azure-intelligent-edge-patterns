@@ -2,6 +2,8 @@
 
 - [Ignite Containers Deployment Guide](#ignite-containers-deployment-guide)
   - [Prerequisites](#prerequisites)
+    - [Click to Deploy](#click-to-deploy)
+  - [Prerequisites](#prerequisites)
     - [Visual Studio Code](#visual-studio-code)
     - [Create Anaconda Environment](#create-anaconda-environment)
     - [Configure IoT Hub connection in VS Code](#configure-iot-hub-connection-in-vs-code)
@@ -12,9 +14,43 @@
 
 # Ignite Containers Deployment Guide
 
-## Prerequisites
+## Step 1: Deploy Docker Images
+1. Click the "Deploy_Modules-Shortcut" icon located in this folder.
 
-### Visual Studio Code
+1. Provide your Azure subscription information when prompted.
+
+## Step 2: Deploy Edge Solution
+
+There are two methods that can be used for deployment. Click to deploy is the easiest and quickest. It is recommended to try this first.
+
+### Method 1: Click to Deploy (Recommended)
+
+#### Prerequisites
+
+1. [Az](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps?view=azps-3.3.0) for PowerShell.
+1. Python 3.6.8
+1. Az [azure-cli-iot-extention](https://github.com/Azure/azure-iot-cli-extension). Can be installed through this PowerShell command.
+>> ```az extension add --name azure-cli-iot-ext```
+1. [iotedgedev](https://github.com/Azure/iotedgedev). Can be installed through this command.
+>> ```pip install iotedgedev==2.1.2```
+
+#### Instructions
+
+1. Click the "Edit_Env-Shortcut" icon located in this folder.
+
+1. Enter the resource group and unique ID when prompted. The unique ID is a set of 5 unique characters generated for your deployment. It can be found attatched to many of the resources in your resource group as shown below.  
+
+    ![UniqueID](./docs/images/uniqueID.png)
+
+1. Enter the name of the IoT hub created in [Deploy Azure Assets](Ignite/ARMtemps/README.md) instructions.
+
+Modules should now be deploying.
+
+### Method 2: Via Visual Studio Code
+
+#### Prerequisites
+
+##### Visual Studio Code
 
 1. Install [Visual Studio Code](https://code.visualstudio.com/)
 1. Install [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools) extension
@@ -23,51 +59,35 @@
 
 ![extensions](docs/images/ext.png)
 
-### Create Anaconda Environment
-
-1. Install [Anaconda distribution](https://www.anaconda.com/distribution/)
-1. Install [CMake](https://cmake.org/download/)
-
-1. Create Anaconda environment from `environment_prod.yml` in this folder. This will install `opencv`, build `dlib` (takes a while, requires CMake), and other prerequisites.
-
-    ```sh
-    conda create -f environment_prod.yml
-    conda activate ignite
-    ```
-Running: 
-```sh
-pythyon people-counting\people_counter.py <args>
-```
-
-### Configure IoT Hub connection in VS Code
+#### Configure IoT Hub connection in VS Code
 
 1. Clone this repo.
 1. Load `IgniteSolution` (the folder containing this README) into VS Code
 1. Expand Azure IOT Hub view at the very bottom of the **Files** tab in VS Code
 
-![](docs/images/iothub.png)
+    ![](docs/images/iothub.png)
 
-2. Pick "Select IoT Hub" from the "..." menu, go through the prompts and select `iothub-235un`
+2. Pick "Select IoT Hub" from the "..." menu, go through the prompts and select your IoT Hub name (Ex. `iothub-123ab`)
 
 You are now ready to deploy the demo backend on our edge devices
 
 
-### Deploying to IoT Edge
+#### Deploying to IoT Edge
 
-1. Obtain the [.env](https://nacollab.sharepoint.com/sites/MicrosoftIgniteRetailDemo/Shared%20Documents/General/Dev%20Docs/.env) file and place it at the root of this solution. This file contains expansions to the variables mentioned in the deployment template.
+1. Obtain the [.env.template](IgniteSolution/.env.template) file, update it with your information, and save as `.env` at the root of this solution. This file contains expansions to the variables mentioned in the deployment template.
 
 1. Generate Deployment manifest. This will generate a `deployment.remote.amd64.json` in the `config` directory:
 
-![](docs/images/generate.png)
+    ![](docs/images/generate.png)
 
-2. Deploy to the right device by selecting the file generated in the previous step. **NOTE**: Do not right-click on the "template" file:
+1. Deploy to the right device by selecting the file generated in the previous step. **NOTE**: Do not right-click on the "template" file:
 
-![](docs/images/deploy.png)
+    ![](docs/images/deploy.png)
 
-![](docs/images/select_device.png)
+    ![](docs/images/select_device.png)
 
 You are done!
 
-### Further Information and Troubleshooting
+## Further Information and Troubleshooting
 
 Follow the [Counters and Gap Detection](docs/counters_and_gap_detection.md) guide for detailed information on calibrating counters and enabling gap detection.

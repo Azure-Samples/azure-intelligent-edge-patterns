@@ -315,3 +315,31 @@ export const thunkUpdateProbThreshold = (): ProjectThunk => (dispatch, getState)
       dispatch(updateProbThresholdFailed(e));
     });
 };
+
+export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState): Promise<any> => {
+  dispatch(postProjectRequest());
+
+  const projectId = getState().project.data.id;
+  const { accuracyRangeMin, accuracyRangeMax } = getState().project.data;
+
+  return Axios.patch(`/api/projects/${projectId}/`, {
+    accuracyRangeMin,
+    accuracyRangeMax,
+  })
+    .then(() => {
+      dispatch(postProjectSuccess());
+      return void 0;
+    })
+    .catch((e) => {
+      if (e.response) {
+        throw new Error(e.response.data.log);
+      } else if (e.request) {
+        throw new Error(e.request);
+      } else {
+        throw e;
+      }
+    })
+    .catch((e) => {
+      dispatch(postProjectFail(e));
+    });
+};

@@ -104,3 +104,9 @@ venv.bak/
 .mypy_cache/
 /.vs
 /staged-data-analytics
+
+# VS Code
+.vscode
+
+# vi
+*~

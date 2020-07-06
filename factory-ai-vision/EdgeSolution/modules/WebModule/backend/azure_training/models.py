@@ -10,28 +10,18 @@ import requests
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
-from azure.iot.hub import IoTHubRegistryManager
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
-from locations.models import Location
-from cameras.models import Part, Camera, Image
 from azure_settings.models import Setting
-
-from configs.iot_config import IOT_HUB_CONNECTION_STRING
-
+from cameras.models import Camera, Image, Part
+from locations.models import Location
 
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
 
 logger = logging.getLogger(__name__)
-
-try:
-    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-except:
-    iot = None
-
 
 def is_edge():
     """Determine is edge or not. Return bool"""
@@ -264,11 +254,38 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise
 
+    def delete_tag_by_name(self, tag_name):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_name)
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        tags = trainer.get_tags(project_id=self.customvision_project_id)
+        for tag in tags:
+            if tag.name.lower() == tag_name.lower():
+                trainer.delete_tag(project_id=self.customvision_project_id,
+                                   tag_id=tag.id)
+                logger.info("tag deleted: %s", tag_name)
+                return
+
+    def delete_tag_by_id(self, tag_id):
+        """delete tag on custom vision"""
+        logger.info("deleting tag: %s", tag_id)
+
+        if not self.setting.is_trainer_valid:
+            return
+        if not self.customvision_project_id:
+            return
+        trainer = self.setting.get_trainer_obj()
+        trainer.delete_tag(project_id=self.customvision_project_id,
+                           tag_id=tag_id)
+        return
     def update_app_insight_counter(
             self,
             has_new_parts: bool,
             has_new_images: bool,
-            source,
             parts_last_train: int,
             images_last_train: int,
     ):
@@ -311,7 +328,6 @@ class Project(models.Model):
                             "images": images_now - images_last_train,
                             "parts": parts_now - parts_last_train,
                             "retrain": retrain,
-                            "source": source,
                         }
                     },
                 )

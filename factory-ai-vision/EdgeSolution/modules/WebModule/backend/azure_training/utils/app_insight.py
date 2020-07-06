@@ -1,16 +1,16 @@
 import logging
+from datetime import datetime
 
-from configs.app_insight import APP_INSIGHT_ON, APP_INSIGHT_INST_KEY, APP_INSIGHT_CONN_STR
-from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure import metrics_exporter
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.stats import aggregation as aggregation_module
 from opencensus.stats import measure as measure_module
 from opencensus.stats import stats as stats_module
 from opencensus.stats import view as view_module
 from opencensus.tags import tag_map as tag_map_module
-from configs.app_insight import APP_INSIGHT_CONN_STR
 
-from datetime import datetime
+from configs.app_insight import (APP_INSIGHT_CONN_STR, APP_INSIGHT_INST_KEY,
+                                 APP_INSIGHT_ON)
 
 stats = stats_module.stats
 view_manager = stats.view_manager

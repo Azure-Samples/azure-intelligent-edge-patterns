@@ -1,0 +1,38 @@
+name: $(BuildDefinitionName).$(DayOfYear)$(Rev:.r)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - 'src/tf/global/*'
+      - '*.tf'
+    exclude: 
+      - '*.md'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: 'infra-azure-vg' # for stage globalservices
+
+stages:
+
+# Deploy Global Services (ACR, LogAnalytics, Traffic Manager)
+- stage: globalservices
+  displayName: 'Deploy Global Services (Public Azure)'
+  dependsOn: []
+  variables: 
+  - group: 'infra-azure-vg' # environment specific variable group
+
+  jobs:
+  - template: templates/infra.azure.template.yaml
+    parameters: 
+      azureServiceConnection: '$(azureServiceConnection)' # azure subscription 
+      azureLocation: '$(location)'
+      workingDirectory: 'src/tf/global' # working dir
+      tfKey: 'global.tfstate' # TF state filename
+      tfAzureServiceConnection: '$(azureServiceConnection)' # TF backend service connection
+      tfVersion: '$(tfVersion)' # TF version
