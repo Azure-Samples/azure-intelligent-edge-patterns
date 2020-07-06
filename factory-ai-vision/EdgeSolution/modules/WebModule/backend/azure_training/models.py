@@ -10,28 +10,18 @@ import requests
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
-from azure.iot.hub import IoTHubRegistryManager
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
-from locations.models import Location
-from cameras.models import Part, Camera, Image
 from azure_settings.models import Setting
-
-from configs.iot_config import IOT_HUB_CONNECTION_STRING
-
+from cameras.models import Camera, Image, Part
+from locations.models import Location
 
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
 
 logger = logging.getLogger(__name__)
-
-try:
-    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-except:
-    iot = None
-
 
 def is_edge():
     """Determine is edge or not. Return bool"""
@@ -266,7 +256,7 @@ class Project(models.Model):
 
     def delete_tag_by_name(self, tag_name):
         """delete tag on custom vision"""
-        logger.info("deleting tag: %s", tag_name)   
+        logger.info("deleting tag: %s", tag_name)
         if not self.setting.is_trainer_valid:
             return
         if not self.customvision_project_id:
@@ -296,7 +286,6 @@ class Project(models.Model):
             self,
             has_new_parts: bool,
             has_new_images: bool,
-            source,
             parts_last_train: int,
             images_last_train: int,
     ):
@@ -339,7 +328,6 @@ class Project(models.Model):
                             "images": images_now - images_last_train,
                             "parts": parts_now - parts_last_train,
                             "retrain": retrain,
-                            "source": source,
                         }
                     },
                 )

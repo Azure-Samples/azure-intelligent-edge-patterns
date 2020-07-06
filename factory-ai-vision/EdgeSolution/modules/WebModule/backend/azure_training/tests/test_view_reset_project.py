@@ -1,18 +1,20 @@
 """
 Testing Model Setting's custom action 'reset project'
 """
-import logging
 import json
+import logging
 
+from azure.cognitiveservices.vision.customvision.training import \
+    CustomVisionTrainingClient
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
-from azure.cognitiveservices.vision.customvision.training import (
-    CustomVisionTrainingClient)
-
-from cameras.models import Setting, Part, Camera, Project, Location
+from azure_settings.models import Setting
+from azure_training.models import Project
+from cameras.models import Camera, Part
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
+from locations.models import Location
 
 PROJECT_PREFIX = "UnitTest"
 
@@ -38,7 +40,7 @@ class ResetProjectTestCase(APITransactionTestCase):
                                is_trainer_valid=False)
 
         Camera.objects.create(name="camera_1",
-                              rtsp="valid_rtsp",
+                              rtsp="0",
                               area="55,66",
                               is_demo=False)
 

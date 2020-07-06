@@ -396,7 +396,7 @@ def train_performance(request, project_id):
     return JsonResponse(ret)
 
 
-def _train(project_id, request):
+def _train(project_id):
     """Actually do uplaod, train and deploy"""
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -585,7 +585,6 @@ def _train(project_id, request):
                 project_obj.update_app_insight_counter(
                     has_new_parts=has_new_parts,
                     has_new_images=has_new_images,
-                    source=request.get_host(),
                     parts_last_train=parts_last_train,
                     images_last_train=images_last_train,
                 )
@@ -617,7 +616,7 @@ def _train(project_id, request):
         return JsonResponse(
             {
                 "status": "failed",
-                "log": e.message
+                "log": customvision_err.message
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
@@ -717,7 +716,7 @@ def train(request, project_id):
         )
 
     threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
-    return _train(project_id, request)
+    return _train(project_id)
 
 
 # FIXME will need to find a better way to deal with this
