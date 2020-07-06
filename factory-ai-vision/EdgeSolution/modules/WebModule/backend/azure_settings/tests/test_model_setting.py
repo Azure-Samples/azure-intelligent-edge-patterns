@@ -21,7 +21,7 @@ from azure.cognitiveservices.vision.customvision.training import (
 from azure.cognitiveservices.vision.customvision.training.models import (
     Project)
 
-from cameras.models import Setting
+from ..models import Setting
 from configs.customvision_config import TRAINING_KEY, ENDPOINT
 
 PROJECT_PREFIX = "UnitTest"
