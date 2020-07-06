@@ -193,10 +193,25 @@ export const Setting = (): JSX.Element => {
         onChange={onCheckBoxClick}
       />
       <WarningDialog
-        contentText={<p>Allow to Send Usage Data?</p>}
+        contentText={
+          <>
+            <h1 style={{ textAlign: 'center' }}>Data Collection Policy</h1>
+            <p>
+              The software may collect information about your use of the software and send it to Microsoft.
+              Microsoft may use this information to provide services and improve our products and services.
+              You may turn off the telemetry as described in the repository or clicking settings on top right
+              corner. Our privacy statement is located at{' '}
+              <a href="https://go.microsoft.com/fwlink/?LinkID=824704">
+                https://go.microsoft.com/fwlink/?LinkID=824704
+              </a>
+              . You can learn more about data collection and use in the help documentation and our privacy
+              statement. Your use of the software operates as your consent to these practices.
+            </p>
+          </>
+        }
         open={!appInsightHasInit}
-        confirmButton="Yes"
-        cancelButton="No"
+        confirmButton="I agree"
+        cancelButton="I don't agree"
         onConfirm={(): void => updateIsCollectData(true, true)}
         onCancel={(): void => updateIsCollectData(false, true)}
       />
