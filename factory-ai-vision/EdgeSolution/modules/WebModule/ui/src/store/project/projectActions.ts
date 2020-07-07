@@ -52,7 +52,6 @@ import {
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
 } from './projectTypes';
-import { getIdFromUrl } from '../../util/GetIDFromUrl';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
 const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
