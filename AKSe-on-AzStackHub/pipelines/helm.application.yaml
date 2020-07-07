@@ -1,0 +1,48 @@
+name: $(BuildDefinitionName).$(DayOfYear)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+    - 'application/helm/*'
+
+variables:
+- group: 'infra-azure-vg'
+- name:  'buildContext' 
+  value: 'application/helm/'
+
+stages:
+ - stage: helm
+   displayName: 'Build Helm Chart'
+
+   jobs: 
+   - job: package
+     displayName: 'Build Helm Chart'
+     steps:
+
+      # Package Helm Chart
+      - task: HelmDeploy@0
+        displayName: 'Helm package'
+        inputs:
+          command: package
+          chartPath: 'application/helm/'
+          destination: $(Build.ArtifactStagingDirectory)
+          arguments: '--version $(Build.BuildId)'
+          save: false
+
+      # Push Helm Chart to Azure Container Registry
+      - task: AzureCLI@1
+        displayName: 'Azure CLI - Push Helm Chart to ACR'
+        condition: eq(variables['build.sourceBranch'], 'refs/heads/master') # will only run in master
+        inputs:
+          azureSubscription: '$(azureServiceConnection)'
+          scriptLocation: inlineScript
+          inlineScript: |
+            az acr helm repo add --name $CONTAINERREGISTRY
+            az acr helm push --name $CONTAINERREGISTRY $BUILD_DIR/ratings-$BUILD_ID.tgz
+        env:
+          CONTAINERREGISTRY: $(azureContainerRegistry)
+          BUILD_DIR: $(Build.ArtifactStagingDirectory)
+          BUILD_ID: $(Build.BuildId)

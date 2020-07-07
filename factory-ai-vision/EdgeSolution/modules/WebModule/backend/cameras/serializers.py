@@ -7,12 +7,12 @@ import logging
 from django.db.utils import IntegrityError
 from rest_framework import serializers
 
-from .models import (Annotation, Camera, Image, Part, Project, Task, Train)
+from .models import (Annotation, Camera, Image, Part)
 
 logger = logging.getLogger(__name__)
 
 
-class PartSerializer(serializers.HyperlinkedModelSerializer):
+class PartSerializer(serializers.ModelSerializer):
     """PartSerializer"""
     class Meta:
         model = Part
@@ -61,82 +61,41 @@ class PartSerializer(serializers.HyperlinkedModelSerializer):
             })
 
 
-class CameraSerializer(serializers.HyperlinkedModelSerializer):
+class CameraSerializer(serializers.ModelSerializer):
     """CameraSerializer"""
     class Meta:
         model = Camera
         fields = ["id", "name", "rtsp", "area", "is_demo"]
 
-
-class TaskSerializer(serializers.HyperlinkedModelSerializer):
-    """TaskSerializer"""
-    class Meta:
-        model = Task
-        fields = ["task_type", "status", "log", "project"]
-
-
-class ProjectSerializer(serializers.HyperlinkedModelSerializer):
-    """ProjectSerializer"""
-    class Meta:
-        model = Project
-        fields = [
-            "setting",
-            "id",
-            "camera",
-            "location",
-            "parts",
-            "download_uri",
-            "customvision_project_id",
-            "needRetraining",
-            "accuracyRangeMin",
-            "accuracyRangeMax",
-            "maxImages",
-            "metrics_is_send_iothub",
-            "metrics_accuracy_threshold",
-            "metrics_frame_per_minutes",
-            "prob_threshold",
-        ]
-        extra_kwargs = {
-            "setting": {
-                "required": False
-            },
-            "download_uri": {
-                "required": False
-            },
-            "customvision_project_id": {
-                "required": False
-            },
-            "prob_threshold": {
-                "required": False
-            }
-        }
-
     def create(self, validated_data):
-        logger.info("Project Serializer create")
-        parts = validated_data.pop("parts")
-        if "setting" not in validated_data:
-            validated_data["setting"] = Setting.objects.first()
-        project = Project.objects.create(**validated_data)
-        project.parts.set(parts)
-        return project
+        try:
+            return Camera.objects.create(**validated_data)
+        except ValueError as value_err:
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': str(value_err),
+            })
+
+    def update(self, instance, validated_data):
+        try:
+            result = super().update(instance, validated_data)
+            return result
+        except ValueError as value_err:
+            raise serializers.ValidationError(detail={
+                'status': 'failed',
+                'log': str(value_err),
+            })
 
 
-class ImageSerializer(serializers.HyperlinkedModelSerializer):
+class ImageSerializer(serializers.ModelSerializer):
     """ImageSerializer"""
     class Meta:
         model = Image
         fields = ["id", "image", "labels", "part", "is_relabel", "confidence"]
 
 
-class AnnotationSerializer(serializers.HyperlinkedModelSerializer):
+class AnnotationSerializer(serializers.ModelSerializer):
     """AnnotationSerializer"""
     class Meta:
         model = Annotation
         fields = ["id", "image", "labels"]
-
-
-class TrainSerializer(serializers.HyperlinkedModelSerializer):
-    """TrainSerializer"""
-    class Meta:
-        model = Train
-        fields = ["id", "status", "log", "project"]

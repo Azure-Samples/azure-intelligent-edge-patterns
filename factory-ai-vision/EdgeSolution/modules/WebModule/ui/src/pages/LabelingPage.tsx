@@ -16,15 +16,8 @@ interface LabelingPageProps {
   images: LabelImage[] | RelabelImage[];
   imageIndex: number;
   closeDialog: () => void;
-  isRelabel: boolean;
 }
-const LabelingPage: FC<LabelingPageProps> = ({
-  labelingType,
-  images,
-  imageIndex,
-  closeDialog,
-  isRelabel,
-}) => {
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex, closeDialog }) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -51,7 +44,6 @@ const LabelingPage: FC<LabelingPageProps> = ({
         {index + 1}
       </Text>
       <PrevNextButton
-        isRelabel={isRelabel}
         prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
         nextDisabled={index === images.length - 1 || workState === WorkState.Creating || isOnePointBox}
         onPrevClick={(): void => {

@@ -1,4 +1,4 @@
 import { CameraConfigureInfoContainer } from './CameraConfigureInfo';
-import { CreateCameraConfig } from './CreateCameraConfig';
+import { CreateCameraConfigButton } from './CreateCameraConfig';
 
-export { CameraConfigureInfoContainer, CreateCameraConfig };
+export { CameraConfigureInfoContainer, CreateCameraConfigButton };

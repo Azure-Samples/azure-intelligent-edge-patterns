@@ -11,7 +11,7 @@ import {
   Alert,
   ShorthandCollection,
 } from '@fluentui/react-northstar';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
@@ -19,18 +19,19 @@ import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/p
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
 import { formatDropdownValue, Value } from '../util/formatDropdownValue';
-import { getIdFromUrl } from '../util/GetIDFromUrl';
 import { getAppInsights } from '../TelemetryService';
 import { WarningDialog } from '../components/WarningDialog';
 import { AddCameraLink } from '../components/AddModuleDialog/AddCameraLink';
 import { AddLocationLink } from '../components/AddModuleDialog/AddLocationLink';
 import { AddPartLink } from '../components/AddModuleDialog/AddPartLink';
+import { LabelImage } from '../store/image/imageTypes';
+import { getLabelImages } from '../store/image/imageActions';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
 
   const selectedPartIds = selectedParts.map((e) => e.id);
-  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(getIdFromUrl(e.part))).length;
+  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(e.part)).length;
   const appInsight = getAppInsights();
   if (appInsight)
     appInsight.trackEvent({
@@ -38,7 +39,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
       properties: {
         images: interestedImagesLength,
         parts: selectedParts.length,
-        source: window.location.hostname,
+        source: '',
       },
     });
 };
@@ -59,6 +60,7 @@ export const PartIdentification: React.FC = () => {
     framesPerMin,
     accuracyThreshold,
   } = data;
+  const images = useSelector<State, LabelImage[]>((state) => state.images);
   const [isTestModel, setIsTestModel] = useState(false);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
@@ -74,12 +76,17 @@ export const PartIdentification: React.FC = () => {
   >('locations', isTestModel);
   const history = useHistory();
   const [maxImgCountError, setMaxImgCountError] = useState(false);
+  const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', rangeMessage: '' });
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
       dispatch(thunkGetProject(isTestModel));
     }
   }, [dispatch, cameraLoading, locationLoading, partLoading, isTestModel]);
+
+  useEffect(() => {
+    dispatch(getLabelImages());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isTestModel) {
@@ -116,8 +123,55 @@ export const PartIdentification: React.FC = () => {
     dispatch(updateProjectData({ [keyName]: value }));
   };
 
+  useEffect(() => {
+    const partsWithImageLength = images.reduce((acc, cur) => {
+      const id = cur.part;
+      const relatedPartIdx = acc.findIndex((e) => e.id === id);
+      if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
+      return acc;
+    }, selectedParts);
+
+    const minimumLengthPart = partsWithImageLength.reduce(
+      (acc, cur) => {
+        if (cur.length < acc.length) return { name: cur.name, length: cur.length };
+        return acc;
+      },
+      { name: '', length: Infinity },
+    );
+
+    if (minimumLengthPart.length === Infinity) return;
+    if (minimumLengthPart.length < 30)
+      setSuggestMessage({
+        min: 10,
+        max: 40,
+        partName: minimumLengthPart.name,
+        rangeMessage: 'lower than 30',
+      });
+    else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80)
+      setSuggestMessage({
+        min: 30,
+        max: 60,
+        partName: minimumLengthPart.name,
+        rangeMessage: 'between 30 to 80',
+      });
+    else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130)
+      setSuggestMessage({
+        min: 50,
+        max: 80,
+        partName: minimumLengthPart.name,
+        rangeMessage: 'between 80 to 130',
+      });
+    else if (minimumLengthPart.length >= 130)
+      setSuggestMessage({
+        min: 60,
+        max: 90,
+        partName: minimumLengthPart.name,
+        rangeMessage: 'more than 130',
+      });
+  }, [accuracyRangeMin, dispatch, images, selectedParts]);
+
   const accracyRangeDisabled = !needRetraining || isTestModel;
-  const messageToCloudDisabled = !sendMessageToCloud || isTestModel;
+  const messageToCloudDisabled = !sendMessageToCloud;
 
   return (
     <>
@@ -185,6 +239,9 @@ export const PartIdentification: React.FC = () => {
               />
               %
             </Text>
+            <Text styles={{ fontSize: '12px' }} success>
+              {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
+            </Text>
             <Text disabled={accracyRangeDisabled}>
               Maximum Images to Store:{' '}
               <Input
@@ -206,7 +263,6 @@ export const PartIdentification: React.FC = () => {
               label="Send message to cloud"
               checked={sendMessageToCloud}
               onChange={(_, { checked }): void => setData('sendMessageToCloud', checked)}
-              disabled={isTestModel}
             />
             <Text disabled={messageToCloudDisabled}>
               Frames per minute:{' '}

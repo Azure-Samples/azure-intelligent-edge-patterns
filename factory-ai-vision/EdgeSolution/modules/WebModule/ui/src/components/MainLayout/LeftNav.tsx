@@ -5,7 +5,7 @@ import { useProject } from '../../hooks/useProject';
 import { useCameras } from '../../hooks/useCameras';
 
 const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
-  const project = useProject();
+  const project = useProject(false);
   const cameras = useCameras();
   const cameraInUsed = cameras.find((e) => e.id === project.data.camera);
 

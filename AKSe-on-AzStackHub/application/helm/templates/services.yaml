@@ -1,0 +1,35 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ratings-web
+  labels:
+    app: ratings-web
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  selector:
+    app: ratings-web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: {{ int .Values.frontend.port }}
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ratings-api
+  labels:
+    app: ratings-api
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  selector:
+    app: ratings-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: {{ int .Values.midtier.port }}
+  type: ClusterIP

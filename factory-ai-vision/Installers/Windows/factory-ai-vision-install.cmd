@@ -67,6 +67,7 @@ IF !count! leq 1 (
 
 REM ############################## Install Custom Vision ###########################
 
+ECHO This tool uses custom vision service to handle projects and training jobs(for more information visit www.customvision.ai)
 ECHO You can use your existing Custom Vision service, or create a new one
 CHOICE /c yn /m "Would you like to use an existing Custom Vision Service?" /n
 
@@ -119,6 +120,8 @@ ECHO Endpoint: %cv-training-endpoint%
 
 GOTO :NOEXISTINGCV
 :EXISTINGCV
+
+ECHO Endpoint and key information can be found at www.customvision.ai - settings(top right corner)
 SET /P cv-training-endpoint="Please enter your Custom Vision endpoint: "
 SET /P cv-training-api-key="Please enter your Custom Vision Key: "
 

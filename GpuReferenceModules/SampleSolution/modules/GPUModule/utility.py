@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 import torch
 from datetime import datetime
+from time import time
 
 #device_name = sys.argv[1]  # Choose device from cmd line. Options: gpu or cpu
 #shape = (int(sys.argv[2]), int(sys.argv[2]))
@@ -21,7 +22,8 @@ def benchmark_tf(device_name="cpu",in_shape=10000):
 
     startTime = datetime.now()
     with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as session:
-            result = session.run(sum_operation)
+            for i in range(1,100):
+                result = session.run(sum_operation)
             print(result)
     timetaken = datetime.now() - startTime
     # It can be hard to see the results on the terminal with lots of output -- add some newlines to improve readability.
@@ -31,7 +33,7 @@ def benchmark_tf(device_name="cpu",in_shape=10000):
     return timetaken
 
 def benchmark_pt(device_name="cpu",in_shape=10000):
-    shape = (in_shape, in_shape)
+    #shape = (in_shape, in_shape)
     timetaken = None
     if device_name == "gpu":
         if(not torch.cuda.is_available()):
@@ -39,19 +41,58 @@ def benchmark_pt(device_name="cpu",in_shape=10000):
             return 0
         with torch.cuda.device(0):
             startTime = datetime.now()
-            random_matrix = torch.cuda.FloatTensor(shape).uniform_(0,1)
-            dot_operation = random_matrix * random_matrix.t()
-            sum_operation = torch.sum(dot_operation)
+            for i in range(1,100):
+                random_matrix = torch.cuda.FloatTensor(in_shape,in_shape).uniform_(0,1)
+                dot_operation = random_matrix * random_matrix.t()
+                sum_operation = torch.sum(dot_operation)
             timetaken = datetime.now() - startTime
             print(sum_operation)
 
     elif device_name == "cpu":
         startTime = datetime.now()
-        random_matrix = torch.FloatTensor(shape).uniform_(0,1)
-        dot_operation = random_matrix * random_matrix.t()
-        sum_operation = torch.sum(dot_operation)
+        for i in range(1,100):
+            random_matrix = torch.FloatTensor(in_shape,in_shape).uniform_(0,1)
+            dot_operation = random_matrix * random_matrix.t()
+            sum_operation = torch.sum(dot_operation)
         timetaken = datetime.now() - startTime
     print("\n" * 5)
-    print("Shape:", shape, "Device:", device_name)
+    print("Shape:", in_shape, "Device:", device_name)
     print(device_name," time taken on :", str(timetaken))
     return timetaken
+
+def benchmark_pt_nv(device_name="cpu",in_shape=10000):
+    #shape = (in_shape/10, in_shape/10)
+    timetaken = None
+    #Iter = 100000
+    if device_name == "gpu":
+        if(not torch.cuda.is_available()):
+            print("Gpu not detected returning ...")
+            return 0
+        tensor1 = torch.cuda.FloatTensor(in_shape,in_shape)
+        tensor2 = torch.cuda.FloatTensor(in_shape,in_shape)
+        startTime = datetime.now()
+        for i in range(1,100):
+            tensor3 = tensor1.matmul(tensor2)
+            sum = torch.sum(tensor3)
+        timetaken = datetime.now() - startTime
+
+    elif device_name == "cpu":
+            tensor1 = torch.FloatTensor(in_shape,in_shape)
+            tensor2 = torch.FloatTensor(in_shape,in_shape)
+            startTime = datetime.now()
+            for i in range(1,100):
+                tensor3 = tensor1.matmul(tensor2)
+                sum = torch.sum(tensor3)
+            timetaken = datetime.now() - startTime
+
+    print("\n" * 5)
+    print("Shape:", in_shape, "Device:", device_name)
+    print(device_name," time taken on :", str(timetaken))
+    return timetaken
+def device_info():
+    gpu = torch.cuda.get_device_name(0)
+    with open("/proc/cpuinfo", "r")  as f:
+        info = f.readlines()
+    cpuinfo = [x.strip().split(":")[1] for x in info if "model name"  in x]
+    cpu = cpuinfo[1]
+    return (gpu,cpu)

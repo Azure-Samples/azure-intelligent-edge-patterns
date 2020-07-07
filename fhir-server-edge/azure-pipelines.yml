@@ -1,0 +1,191 @@
+# Build Pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- azure-pipelines
+
+
+variables:
+  group: dev-env
+#  mycertificatename.pfx
+#  
+
+
+# pool:
+#   vmImage: 'ubuntu-latest'
+
+stages:
+- stage: deployments
+  pool:
+    vmImage: 'ubuntu-latest'
+  jobs:
+  - job: kubernetes
+    displayName: Deploy to AKS cluster
+    steps:
+    - task: DownloadSecureFile@1
+      displayName: 'Downloading configuration file'
+      inputs:
+        secureFile: '.env'
+    - task: DownloadSecureFile@1
+      displayName: 'Downloading configuration file'
+      inputs:
+        secureFile: 'mycertificatename.pfx'
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Write your commands here
+          chmod +x $(Agent.TempDirectory)/.env
+          cp $(Agent.TempDirectory)/.env fhir-server-edge/azure-stack-edge/.env
+          cp $(Agent.TempDirectory)/.env fhir-server-edge/azure-stack-hub/.env    
+
+    - task: Kubernetes@1
+      displayName: Delete existing namespace
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'FHIR Server AKS'
+        namespace: 'fhir-cicd'
+        command: 'delete'
+        arguments: 'namespace fhir-cicd'
+    - task: Kubernetes@1
+      displayName: Create namespace
+      condition: succeededOrFailed()
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'FHIR Server AKS'
+        command: 'create'
+        arguments: 'namespace fhir-cicd'
+
+    - task: Kubernetes@1
+      displayName: Create environment secret
+      condition: succeeded()
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'FHIR Server AKS'
+        namespace: 'fhir-cicd'
+        command: 'create'
+        arguments: 'secret generic fhir-env --from-env-file $(Agent.TempDirectory)/.env'
+
+    - task: Kubernetes@1
+      displayName: Create cert secret
+      condition: succeeded()
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'FHIR Server AKS'
+        namespace: 'fhir-cicd'
+        command: 'create'
+        arguments: 'secret generic fhir-server-certificate --from-file=certificate=$(Agent.TempDirectory)/mycertificatename.pfx'
+
+    - task: HelmDeploy@0
+      displayName: Install Helm Chart
+      condition: succeeded()
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceConnection: 'FHIR Server AKS'
+        namespace: 'fhir-cicd'
+        command: 'install'
+        chartType: 'FilePath'
+        chartPath: 'fhir-server-edge/azure-stack-hub/helm/fhirk8s'
+        releaseName: 'cicddeployment'
+        overrideValues: 'mssql.storageClass=default'
+        arguments: '--timeout 1200s'
+
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'Microsoft Azure Sponsorship(f5bd5266-d744-4701-9aea-18998cfb54e9)'
+        scriptType: 'bash'
+        scriptLocation: 'scriptPath'
+        scriptPath: 'fhir-server-edge/azure-stack-hub/run_tests.sh'
+
+  - job: iotedge
+    displayName: Deploy to iotedge device
+    dependsOn: kubernetes
+    steps:
+    - task: DownloadSecureFile@1
+      displayName: 'Downloading configuration file'
+      inputs:
+        secureFile: '.env'
+    - task: DownloadSecureFile@1
+      displayName: 'Downloading configuration file'
+      inputs:
+        secureFile: 'mycertificatename.pfx'
+
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Write your commands here
+          chmod +x $(Agent.TempDirectory)/.env          
+          cp $(Agent.TempDirectory)/.env fhir-server-edge/azure-stack-edge/.env
+          ls -la fhir-server-edge/azure-stack-edge/.env
+
+    - task: AzureIoTEdge@2
+      displayName: 'Generate deployment manifest'
+      inputs:
+        action: 'Generate deployment manifest'
+        templateFilePath: 'fhir-server-edge/azure-stack-edge/deployment.template.json'
+        defaultPlatform: 'amd64'
+        deploymentManifestOutputPath: '$(System.DefaultWorkingDirectory)/config/deployment.json'
+        validateGeneratedDeploymentManifest: 'true'
+
+    - task: AzureIoTEdge@2
+      inputs:
+        action: 'Deploy to IoT Edge devices'
+        deploymentFilePath: '$(System.DefaultWorkingDirectory)/config/deployment.json'
+        azureSubscription: 'Microsoft Azure Sponsorship(f5bd5266-d744-4701-9aea-18998cfb54e9)'
+        iothubname: 'fhir-server-iothub'
+        deploymentid: '$(System.TeamProject)-devops-deployment'
+        priority: '0'
+        deviceOption: 'Single Device'
+        deviceId: 'edgeDeviceDEV'
+
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'Microsoft Azure Sponsorship(f5bd5266-d744-4701-9aea-18998cfb54e9)'
+        scriptType: 'bash'
+        scriptLocation: 'scriptPath'
+        scriptPath: 'fhir-server-edge/azure-stack-edge/run_tests.sh'
+
+    - task: CopyFiles@2    
+      displayName: 'Copy Files to: Drop folder'
+      inputs:
+        Contents: |
+          $(System.DefaultWorkingDirectory)/config/deployment.json
+          fhir-server-edge/azure-stack-edge/deployment.template.json
+          deployment.template.json
+          deployment.json
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish build artifacts to drop location'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+
+#   inputs:
+#     targetType: 'inline'
+#     script: |
+#       # Write your commands here
+#       curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+#       chmod +x minikube
+#       sudo mkdir -p /usr/local/bin/
+#       sudo install minikube /usr/local/bin/
+#       minikube start
+
+
+
+
+
+# - task: Bash@3
+#   inputs:
+#     targetType: 'inline'
+#     script: |
+#       # Write your commands here            
+#       mv $(Agent.TempDirectory)/.env fhir-server-edge/azure-stack-edge/.env
+#       chmod +x fhir-server-edge/azure-stack-edge/.env
+#       ls -la fhir-server-edge/azure-stack-edge
+#       /usr/local/bin/iotedgedev genconfig --file fhir-server-edge/azure-stack-edge/deployment.template.json
+

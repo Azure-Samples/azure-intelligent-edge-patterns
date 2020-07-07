@@ -1,0 +1,87 @@
+# This is the configuration for Porter
+
+name: MLServicesInstaller
+version: 1.0
+description: "Installer for ML Services on Azure Stack. Installs Kubeflow and MLflow"
+# TODO: update the registry to your own, e.g. myregistry/porter-mlflow:v1.0
+tag: naedwebs/stack-ml-services:v1.0
+
+# Uncomment the line below to use a template Dockerfile for your invocation image
+dockerfile: Dockerfile.tmpl
+
+mixins:
+  - exec
+  - kubernetes
+
+parameters:
+  - name: kf_ctl_dir
+    type: string
+    default: /root/kubeflow/
+
+  - name: kf_username
+    type: string
+    default: root
+
+  - name: kf_name
+    type: string
+    default: sandboxASkf
+
+  - name: kf_base_dir
+    type: string
+    default: /opt
+
+  - name: kfctl_release_filename
+    type: string
+    default: "kfctl_v1.0.2-0-ga476281_linux.tar.gz"
+
+  - name: kfctl_release_uri
+    type: string
+    default: "https://github.com/kubeflow/kfctl/releases/download/v1.0.2/kfctl_v1.0.2-0-ga476281_linux.tar.gz"
+
+  - name: kf_config_filename
+    type: string
+    default: "kfctl_k8s_istio.v1.0.2.yaml"
+
+  - name: kf_config_uri
+    type: string
+    default: "https://raw.githubusercontent.com/kubeflow/manifests/v1.0-branch/kfdef/kfctl_k8s_istio.v1.0.2.yaml"
+
+credentials:
+  - name: kubeconfig
+    path: /root/.kube/config
+
+install:
+  - exec:
+      description: "Install mlflow"
+      command: ./mlflow.sh
+      arguments:
+        - "install"
+  - exec:
+      description: "Install Kubeflow"
+      command: ./kubeflow.sh
+      arguments:
+        - "install"
+
+upgrade:
+  - exec:
+      description: "Upgrade MLflow"
+      command: ./mlflow.sh
+      arguments:
+        - "upgrade"
+  - exec:
+      description: "Upgrade Kubeflow"
+      command: ./kubeflow.sh
+      arguments:
+        - "upgrade"        
+
+uninstall:
+  - exec:
+      description: "Uninstall MLflow"
+      command: ./mlflow.sh
+      arguments:
+        - "uninstall"
+  - exec:
+      description: "Uninstall Kubeflow"
+      command: ./kubeflow.sh
+      arguments:
+        - "uninstall"           

@@ -1,0 +1,73 @@
+﻿<Page
+    x:Class="IntelligentKioskSample.Views.Ignite.ShoppingPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctl="using:IntelligentKioskSample.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    SizeChanged="OnPageSizeChanged"
+    x:DefaultBindMode="OneWay"
+    mc:Ignorable="d"
+    d:DesignWidth="1800"
+    d:DesignHeight="1200"
+    x:Name="page">
+    <Grid>
+        <Grid x:Name="ChoiceGrid" Visibility="{x:Bind ViewModel.IsChoice(ViewModel.CurrentScreenState)}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.25*" />
+                <RowDefinition Height="0.28*" />
+                <RowDefinition Height="0.25*" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.05*" />
+                <ColumnDefinition Width="0.40*" />
+                <ColumnDefinition Width="0.35*" />
+                <ColumnDefinition Width="0.40*" />
+                <ColumnDefinition Width="0.05*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid x:Name="cameraHostGrid" Visibility="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <ctl:CameraControl x:Name="cameraControl"/>
+            </Grid>
+
+            <Button x:Name="TopLeft" Grid.Row="1" Grid.Column="1" Padding="0"  Background="Transparent" Click="ChoiceButton_Click" HorizontalAlignment="Center">
+                <Image Source="{x:Bind ViewModel.imageSourceChoiceTopLeft}" Stretch="Uniform"></Image>
+            </Button>
+
+            <Button x:Name="TopRight" Grid.Row="1" Grid.Column="3" Padding="0"  Background="Transparent" Click="ChoiceButton_Click" HorizontalAlignment="Center">
+                <Image Source="{x:Bind ViewModel.imageSourceChoiceTopRight}" Stretch="Uniform"></Image>
+            </Button>
+        </Grid>
+
+        <Grid x:Name="SelectedGrid" Visibility="{x:Bind ViewModel.IsSelected(ViewModel.CurrentScreenState)}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.15*" />
+                <RowDefinition Height="0.45*" />
+                <RowDefinition Height="0.05*" />
+                <RowDefinition Height="0.2*" />
+                <RowDefinition Height="0.05*" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.2*" />
+                <ColumnDefinition Width="0.25*" />
+                <ColumnDefinition Width="0.2*" />
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="Selected" Grid.Row="1" Grid.Column="1" Padding="0"  Background="Transparent" Click="SelectedButton_Click" HorizontalAlignment="Center">
+                <Image Source="{x:Bind ViewModel.ImageSourceSelected}" Stretch="Uniform"></Image>
+            </Button>
+
+            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center">
+                <Viewbox>
+                    <TextBlock x:Name="greetingTextBlock" HorizontalAlignment="Center" FontFamily="Open Sans" Foreground="#686868">
+                        <Run Text="{x:Bind ViewModel.SelectedPromoLine1}"/>
+                        <LineBreak/><Run Text="{x:Bind ViewModel.SelectedPromoLine2}"/>
+                        <LineBreak/><Run Text="{x:Bind ViewModel.SelectedPromoLine3}"/>
+                    </TextBlock>
+                </Viewbox>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>
