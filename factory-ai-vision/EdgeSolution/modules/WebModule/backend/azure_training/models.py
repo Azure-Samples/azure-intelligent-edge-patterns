@@ -16,12 +16,14 @@ from django.db.models.signals import post_save, pre_save
 from azure_settings.models import Setting
 from cameras.models import Camera, Image, Part
 from locations.models import Location
+from notifications.models import Notification, dequeue_notification
 
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
 
 logger = logging.getLogger(__name__)
+
 
 def is_edge():
     """Determine is edge or not. Return bool"""
@@ -203,6 +205,7 @@ class Project(models.Model):
             iterations = trainer.get_iterations(self.customvision_project_id)
             if len(iterations) > max_iterations:
                 # TODO delete train in Train Model
+                logger.info("dequeue_iteration %s",iterations[-1].as_dict()["id"])
                 trainer.delete_iteration(self.customvision_project_id,
                                          iterations[-1].as_dict()["id"])
         except CustomVisionErrorException as customvision_err:
@@ -282,6 +285,7 @@ class Project(models.Model):
         trainer.delete_tag(project_id=self.customvision_project_id,
                            tag_id=tag_id)
         return
+
     def update_app_insight_counter(
             self,
             has_new_parts: bool,
@@ -351,7 +355,8 @@ class Project(models.Model):
             trainer = self.setting.revalidate_and_get_trainer_obj()
             if not trainer:
                 logger.error("Trainer is invalid. Not going to train...")
-
+            
+            self.dequeue_iterations()
             # Submit training task to CustomVision
             logger.info("%s submit training task to CustomVision",
                         self.customvision_project_name)
@@ -361,11 +366,20 @@ class Project(models.Model):
             update_fields.append("deployed")
             logger.info("set deployed = False")
 
+
+            # Notification
+            dequeue_notification()
+            Notification.objects.create(
+                notification_type="project",
+                sender="system",
+                title="Project start training",
+                details="Project is now training on Custom Vision")
+
             # If all above is success
             is_task_success = True
             return is_task_success
         except CustomVisionErrorException as customvision_err:
-            logger.error("From Custom Vision: %s", customvision_err.message)
+            logger.exception("From Custom Vision: %s", customvision_err.message)
             raise
         except Exception:
             logger.exception("Unexpected error while Project.train_project")

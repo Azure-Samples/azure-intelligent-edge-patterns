@@ -31,6 +31,14 @@ class Notification(models.Model):
             [self.timestamp, self.notification_type, self.title, self.details])
 
 
+def dequeue_notification(max_num: int = 10):
+    """dequeue some outdated notification
+    """
+    # notification_count = Notification.objects.count()
+    # while notification_count > max_num:
+    #    Notification.objects.or
+
+
 @receiver(post_save, sender=Notification)
 def notification_post_save(sender, **kwargs):
     """Notification pre_save

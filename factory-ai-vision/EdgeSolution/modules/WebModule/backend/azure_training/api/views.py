@@ -20,12 +20,12 @@ from azure.iot.hub.models import Twin, TwinProperties
 from django.http import JsonResponse
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 
 from cameras.models import Camera, Image, Part
-# First Party Import
 from general import error_messages
+from notifications.models import Notification, dequeue_notification
 from vision_on_edge.settings import (DEVICE_ID, IOT_HUB_CONNECTION_STRING,
                                      MODULE_ID)
 
@@ -235,6 +235,12 @@ def update_train_status(project_id):
                 log="Status : model training completed",
                 performance=json.dumps(train_performance_list),
             )
+            dequeue_notification()
+            Notification.objects.create(
+                notification_type="project",
+                sender="system",
+                title="Training Complete",
+                details="Project is trained and deployed")
             break
 
     threading.Thread(target=_train_status_worker, args=(project_id, )).start()
@@ -621,7 +627,7 @@ def _train(project_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    except Exception as e:
+    except Exception:
         # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception("Exception: %s", err_msg)
@@ -769,7 +775,7 @@ def pull_cv_project(request, project_id):
     update_fields = []
     # FIXME: Should send correct id
     # project_obj = Project.objects.get(pk=project_id)
-    if len(Project.objects.filter(is_demo=False)):
+    if len(Project.objects.filter(is_demo=False)) > 0:
         project_obj = Project.objects.filter(is_demo=False)[0]
     # Check Project
     if project_obj.is_demo:
