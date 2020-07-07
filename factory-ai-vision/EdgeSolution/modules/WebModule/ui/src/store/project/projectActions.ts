@@ -52,7 +52,6 @@ import {
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
 } from './projectTypes';
-import { getIdFromUrl } from '../../util/GetIDFromUrl';
 
 const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
 const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
@@ -157,9 +156,9 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
     .then(({ data }) => {
       const project: ProjectData = {
         id: data[0]?.id ?? null,
-        camera: getIdFromUrl(data[0]?.camera) ?? null,
-        location: getIdFromUrl(data[0]?.location) ?? null,
-        parts: data[0]?.parts.map((ele) => getIdFromUrl(ele)) ?? [],
+        camera: data[0]?.camera ?? null,
+        location: data[0]?.location ?? null,
+        parts: data[0]?.parts ?? [],
         modelUrl: data[0]?.download_uri ?? '',
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
@@ -195,9 +194,9 @@ export const thunkPostProject = (
 
   return Axios(url, {
     data: {
-      location: `http://localhost:8000/api/locations/${selectedLocations.id}/`,
-      parts: selectedParts.map((e) => `http://localhost:8000/api/parts/${e.id}/`),
-      camera: `http://localhost:8000/api/cameras/${selectedCamera.id}/`,
+      location: selectedLocations.id,
+      parts: selectedParts.map((e) => e.id),
+      camera: selectedCamera.id,
       download_uri: projectData.modelUrl,
       needRetraining: projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,

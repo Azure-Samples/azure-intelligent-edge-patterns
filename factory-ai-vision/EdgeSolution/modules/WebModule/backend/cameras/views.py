@@ -118,7 +118,7 @@ def connect_stream(request):
 
     try:
         Part.objects.get(pk=int(part_id))
-        s = Stream(rtsp, part_id=part_id, inference=inference)
+        s = Stream(rtsp, part_id=int(part_id), inference=inference)
         streams.append(s)
         return JsonResponse({"status": "ok", "stream_id": s.id})
     except ObjectDoesNotExist:

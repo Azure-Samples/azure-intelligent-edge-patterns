@@ -19,7 +19,6 @@ import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/p
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
 import { formatDropdownValue, Value } from '../util/formatDropdownValue';
-import { getIdFromUrl } from '../util/GetIDFromUrl';
 import { getAppInsights } from '../TelemetryService';
 import { WarningDialog } from '../components/WarningDialog';
 import { AddCameraLink } from '../components/AddModuleDialog/AddCameraLink';
@@ -32,7 +31,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
 
   const selectedPartIds = selectedParts.map((e) => e.id);
-  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(getIdFromUrl(e.part))).length;
+  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(e.part)).length;
   const appInsight = getAppInsights();
   if (appInsight)
     appInsight.trackEvent({
@@ -126,7 +125,7 @@ export const PartIdentification: React.FC = () => {
 
   useEffect(() => {
     const partsWithImageLength = images.reduce((acc, cur) => {
-      const id = getIdFromUrl(cur.part);
+      const id = cur.part;
       const relatedPartIdx = acc.findIndex((e) => e.id === id);
       if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
       return acc;

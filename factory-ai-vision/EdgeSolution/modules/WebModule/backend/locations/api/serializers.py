@@ -11,7 +11,7 @@ from ..models import Location
 logger = logging.getLogger(__name__)
 
 
-class LocationSerializer(serializers.HyperlinkedModelSerializer):
+class LocationSerializer(serializers.ModelSerializer):
     """LocationSerializer"""
 
     class Meta:
