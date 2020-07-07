@@ -166,6 +166,12 @@ IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
 
+CHANNEL_LAYERS={
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+     }
+}
+
 print('************************************')
 print('CONFIGURATION:')
 print('  TRAINING_KEY:', TRAINING_KEY)

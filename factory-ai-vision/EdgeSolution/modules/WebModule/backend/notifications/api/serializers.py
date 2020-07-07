@@ -16,4 +16,9 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ["id", "title", "details"]
+        fields = "__all__"
+        extra_kwargs = {
+            "timestamp": {
+                "required": False
+            },
+        }
