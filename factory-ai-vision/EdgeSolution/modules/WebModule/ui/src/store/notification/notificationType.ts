@@ -3,6 +3,7 @@ export type Notification = {
   title: string;
   content: string;
   linkTo: string;
+  unRead: boolean;
 };
 
 export type AddNotificationAction = {
@@ -19,4 +20,8 @@ export type RemoveNotificationAction = {
   };
 };
 
-export type NotificationActions = AddNotificationAction | RemoveNotificationAction;
+export type SetReadAction = {
+  type: 'SET_READ';
+};
+
+export type NotificationActions = AddNotificationAction | RemoveNotificationAction | SetReadAction;

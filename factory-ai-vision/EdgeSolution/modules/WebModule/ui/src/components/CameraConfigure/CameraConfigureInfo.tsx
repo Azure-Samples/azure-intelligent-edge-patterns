@@ -2,7 +2,6 @@ import React, { useEffect, FC, useState, useCallback } from 'react';
 import { Flex, Text, Button, Loader, Grid, Alert, Input } from '@fluentui/react-northstar';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import uniqid from 'uniqid';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
@@ -218,7 +217,11 @@ function useNotification(targetState: number, checkPeriod: number, title: string
     if (notificationMsg) {
       timer = setTimeout(() => setNotificationMsg(''), 10000);
       dispatch(
-        addNotification({ id: uniqid(), title, content, linkTo: `${location.pathname}${location.search}` }),
+        addNotification({
+          title,
+          content,
+          linkTo: `${location.pathname}${location.search}`,
+        }),
       );
     }
     return (): void => {
