@@ -94,12 +94,5 @@ export const initialState: State = {
     isTrainerValid: false,
     appInsightHasInit: false,
   },
-  notifications: [
-    {
-      id: 'test',
-      content: 'test',
-      title: 'test',
-      linkTo: '/home',
-    },
-  ],
+  notifications: [],
 };
