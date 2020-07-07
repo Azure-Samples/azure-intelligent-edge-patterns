@@ -3,7 +3,7 @@ export type LabelImage = {
   id: number;
   image: string;
   labels: string;
-  part: string;
+  part: number;
   is_relabel: boolean;
   confidence: number;
 };
