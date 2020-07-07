@@ -25,7 +25,9 @@ Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to se
 
 # Prerequiste
 ## Hardware
+You need to have one of the following:
 -	**Azure Stack Edge**
+or
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
      * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
