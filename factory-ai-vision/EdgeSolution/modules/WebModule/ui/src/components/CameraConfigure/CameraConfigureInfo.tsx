@@ -1,7 +1,8 @@
 import React, { useEffect, FC, useState, useCallback } from 'react';
 import { Flex, Text, Button, Loader, Grid, Alert, Input } from '@fluentui/react-northstar';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import uniqid from 'uniqid';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
@@ -18,6 +19,7 @@ import { Project, Status as CameraConfigStatus, TrainingMetrics } from '../../st
 import { State } from '../../store/State';
 import { useQuery } from '../../hooks/useQuery';
 import { ListItem } from '../ListItem';
+import { addNotification } from '../../store/notification/notificationAction';
 
 export const CameraConfigureInfoContainer: React.FC<{ projectId: number }> = ({ projectId }) => {
   return (
@@ -44,8 +46,18 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
   const isDemo = useQuery().get('isDemo') === 'true';
   const history = useHistory();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
-  const successInferenceFooter = useNotification(inferenceMetrics.successfulInferences, 60000);
-  const unIdentifiedItemFooter = useNotification(inferenceMetrics.successfulInferences, 120000);
+  const successInferenceFooter = useNotification(
+    inferenceMetrics.successfulInferences,
+    60000,
+    'Low successful inference rate',
+    'If you are not seeing inference result, we recommend to change the confidence level to 10%.',
+  );
+  const unIdentifiedItemFooter = useNotification(
+    inferenceMetrics.successfulInferences,
+    120000,
+    'Low rate of capturing images',
+    'If you are not receiving any images, we recommend to change the accuracy range to minimum 10%.',
+  );
 
   const onDeleteConfigure = useCallback((): void => {
     // eslint-disable-next-line no-restricted-globals
@@ -128,26 +140,12 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
           {`${Math.round(inferenceMetrics.averageTime * 100) / 100}/ms`}
         </ListItem>
         <div style={{ gridColumn: '1 / span 2' }}>
-          <ListItem
-            title="Successful Inferences"
-            footerText={
-              successInferenceFooter
-                ? 'If you are not seeing inference result, we recommend to change the confidence level to 10%.'
-                : ''
-            }
-          >
+          <ListItem title="Successful Inferences" footerText={successInferenceFooter}>
             {inferenceMetrics.successfulInferences}
           </ListItem>
         </div>
       </Grid>
-      <ListItem
-        title="Unidentified Items"
-        footerText={
-          unIdentifiedItemFooter
-            ? 'If you are not receiving any images, we recommend to change the accuracy range to minimum 10%.'
-            : ''
-        }
-      >
+      <ListItem title="Unidentified Items" footerText={unIdentifiedItemFooter}>
         <Text styles={{ margin: '5px' }} size="medium">
           {inferenceMetrics.unIdetifiedItems}
         </Text>
@@ -210,31 +208,36 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
  * @param targetState Check this state if it equals to zero
  * @param checkPeriod How long it last when it is zero
  */
-function useNotification(targetState: number, checkPeriod: number): boolean {
-  const [showNotification, setShowNotification] = useState(false);
+function useNotification(targetState: number, checkPeriod: number, title: string, content: string): string {
+  const [notificationMsg, setNotificationMsg] = useState('');
+  const dispatch = useDispatch();
+  const location = useLocation();
 
   useEffect(() => {
     let timer;
-    if (showNotification) {
-      timer = setTimeout(() => setShowNotification(false), 10000);
+    if (notificationMsg) {
+      timer = setTimeout(() => setNotificationMsg(''), 10000);
+      dispatch(
+        addNotification({ id: uniqid(), title, content, linkTo: `${location.pathname}${location.search}` }),
+      );
     }
     return (): void => {
       if (timer) clearTimeout(timer);
     };
-  }, [showNotification]);
+  }, [notificationMsg, content, title, location.pathname, location.search, dispatch]);
 
   useEffect(() => {
     // The effect only need to be trigger when inferenceMetrics.successfulInferences keep 0 for the check period
     if (targetState === 0) {
       const timer = setTimeout(() => {
-        if (targetState === 0) setShowNotification(true);
+        if (targetState === 0) setNotificationMsg(content);
       }, checkPeriod);
 
       return (): void => clearTimeout(timer);
     }
-  }, [checkPeriod, targetState]);
+  }, [checkPeriod, content, targetState]);
 
-  return showNotification;
+  return notificationMsg;
 }
 
 /**
