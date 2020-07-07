@@ -56,10 +56,10 @@ Before installation, please make sure you have the following:
    1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
    2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
 ### Get Started:
-Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip) 
+Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/bash.zip) 
 
 For Windows: 
-   1.	Click and download the [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip), and unzip the zipped files. It contains three files:
+   1.	Click and download the [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/Windows.zip), and unzip the zipped files. It contains three files:
    a. deploy-custom-vision-arm.json
    b. deployment.amd64.json 
    c. factory-ai-vision-install.cmd
@@ -71,7 +71,7 @@ For Windows:
 
 For Mac:
    1.	Open terminal 
-   2.	Locate the file, [unzip bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip)
+   2.	Locate the file, [unzip bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/bash.zip)
    3.	excute ```bash factory-ai-vision-install.sh```
    4.	It will direct you to azure subscription login page
    5.	Choose your subscription 
