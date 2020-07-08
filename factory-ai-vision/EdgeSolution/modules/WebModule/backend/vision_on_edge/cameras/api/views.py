@@ -15,13 +15,16 @@ from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 from rest_framework.decorators import api_view
+
+from configs.app_insight import APP_INSIGHT_INST_KEY
+
+from ..models import Annotation, Camera, Image, Part, Stream
+from .serializers import (AnnotationSerializer, CameraSerializer,
+                          ImageSerializer, PartSerializer)
+
 # from rest_framework import status
 # from rest_framework.response import Response
 
-from configs.app_insight import APP_INSIGHT_INST_KEY
-from .models import Annotation, Camera, Image, Part, Stream
-from .serializers import (AnnotationSerializer, CameraSerializer,
-                          ImageSerializer, PartSerializer)
 
 # from azure.iot.hub import IoTHubRegistryManager
 # from azure.iot.hub.models import Twin, TwinProperties

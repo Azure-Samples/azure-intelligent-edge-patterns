@@ -7,7 +7,7 @@ import logging
 from django.db.utils import IntegrityError
 from rest_framework import serializers
 
-from .models import (Annotation, Camera, Image, Part)
+from ..models import Annotation, Camera, Image, Part
 
 logger = logging.getLogger(__name__)
 

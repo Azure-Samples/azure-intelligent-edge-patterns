@@ -21,8 +21,8 @@ from django.conf import settings
 
 from rest_framework import routers
 
-from vision_on_edge.cameras import views
-from vision_on_edge.cameras import util_views as camera_util_views
+from vision_on_edge.cameras.api import views
+from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.azure_settings.api import views as setting_views
 from vision_on_edge.locations.api import views as location_views
 from vision_on_edge.image_predictions.api import views as image_prediction_views
