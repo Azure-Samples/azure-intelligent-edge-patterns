@@ -264,6 +264,11 @@ command (default editor is vi, to edit you need to press `i`, and to save and ex
 
     $ ./edit_external_access.sh
 
+Or you can patch it like so:
+
+    $ kubectl patch svc/istio-ingressgateway -p '{"spec":{"type": "LoadBalancer"}}' -n istio-system
+    service/istio-ingressgateway patched
+
 It will look something like this: 
 
 ![pics/ingress_loadbalancer.png](pics/ingress_loadbalancer.png)
@@ -650,6 +655,18 @@ Here is an example of how you can connect to the model you trained:
     MAE: 69.52472687854122
     R2: -0.02072575078015859
 
+In our case, if you built the image from MLFlow section and pushed it to your account,
+
+    $ curl --header "Content-Type: application/json" \
+                    --request POST \
+                    --data '{"AGE":123,"SEX":1,"BMI":32.1,"BP":101.0}' \
+             http://localhost:5050/invocations
+    Elasticnet model (alpha=0.050000, l1_ratio=0.050000):
+
+    RMSE: 82.16359959591213
+    MAE: 69.52472687854122
+    R2: -0.02072575078015859
+
 ## Next Steps
 
 Proceed to [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack)
@@ -658,7 +675,8 @@ to learn how to execute `TFJob`s on Kubeflow, in the environment that we just cr
 And then run [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) tutorial to learn running
 `PyTorchJob`s.
 
-The PyTorch example we run will log data for TensorBoard, you will see something like this:
+Some of our examples provide data to Tensorboard, see [Working with TensorBoard](working_with_tensorboard.md) for more information.
+The simplier PyTorch example we run will log data that looks something like this:
 
 ![pytorch-on-kubeflow/images/tensorboard_scalars.png](pytorch-on-kubeflow/images/tensorboard_scalars.png)
 
