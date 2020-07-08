@@ -20,14 +20,13 @@ from azure.iot.hub.models import Twin, TwinProperties
 from django.http import JsonResponse
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+
+from configs.settings import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 
 from ...cameras.models import Camera, Image, Part
 from ...general import error_messages
-from configs.settings import (DEVICE_ID, IOT_HUB_CONNECTION_STRING,
-                                     MODULE_ID)
-
 from ..models import Project, Task, Train
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 

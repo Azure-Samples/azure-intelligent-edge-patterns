@@ -7,7 +7,6 @@ import logging
 from rest_framework import serializers
 
 from ...azure_settings.models import Setting
-
 from ..models import Project, Task, Train
 
 logger = logging.getLogger(__name__)

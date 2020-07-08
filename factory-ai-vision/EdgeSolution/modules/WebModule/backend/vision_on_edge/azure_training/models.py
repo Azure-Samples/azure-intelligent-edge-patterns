@@ -16,7 +16,6 @@ from django.db.models.signals import post_save, pre_save
 from ..azure_settings.models import Setting
 from ..cameras.models import Camera, Image, Part
 from ..locations.models import Location
-
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)

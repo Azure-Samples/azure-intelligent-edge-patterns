@@ -5,11 +5,11 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from azure.cognitiveservices.vision.customvision.training.models import \
+    CustomVisionErrorException
 from rest_framework import status, viewsets
-from rest_framework.response import Response
 from rest_framework.decorators import action
-from azure.cognitiveservices.vision.customvision.training.models import (
-    CustomVisionErrorException)
+from rest_framework.response import Response
 
 from ...general import error_messages
 from ..models import Setting

@@ -1,8 +1,8 @@
 """
 Location REST API Test
 """
-import logging
 import json
+import logging
 
 from django.urls import reverse
 from rest_framework import status
