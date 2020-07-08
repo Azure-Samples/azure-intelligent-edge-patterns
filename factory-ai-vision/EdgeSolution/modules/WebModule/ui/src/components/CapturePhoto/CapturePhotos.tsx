@@ -16,9 +16,10 @@ import { formatDropdownValue } from '../../util/formatDropdownValue';
 
 export const CapturePhotos: React.FC<{
   partId: number;
+  partName: string;
   goLabelImageIdx: number;
   setGoLabelImageIdx: Dispatch<number>;
-}> = ({ partId, goLabelImageIdx, setGoLabelImageIdx }) => {
+}> = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
@@ -44,6 +45,7 @@ export const CapturePhotos: React.FC<{
         <RTSPVideo
           rtsp={selectedCamera?.rtsp}
           partId={partId}
+          partName={partName}
           canCapture={true}
           setOpenLabelingPage={setOpenLabelingPage}
         />
