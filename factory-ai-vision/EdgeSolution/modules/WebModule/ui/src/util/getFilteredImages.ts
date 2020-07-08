@@ -9,5 +9,5 @@ export const getFilteredImages = (
   { partId, isRelabel = false }: Options,
 ): LabelImage[] => {
   if (partId === undefined) return images;
-  return images.filter((image) => image.part === partId && image.is_relabel === isRelabel);
+  return images.filter((image) => image.part.id === partId && image.is_relabel === isRelabel);
 };

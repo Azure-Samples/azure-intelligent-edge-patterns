@@ -67,6 +67,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
         <Scene
           url={imageUrl ?? '/icons/Play.png'}
           annotations={annotations}
+          partName={images[index]?.part.name}
           workState={workState}
           setWorkState={setWorkState}
           labelingType={labelingType}

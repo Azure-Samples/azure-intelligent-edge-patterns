@@ -34,16 +34,32 @@ export const postLabelImageSuccess = (image: LabelImage): PostLabelImageSuccess 
 });
 
 export const getLabelImages = () => (dispatch): Promise<void> => {
-  return axios('/api/images/')
-    .then(({ data }) => {
-      dispatch(getLabelImagesSuccess(data));
-      return void 0;
-    })
+  const imagesAPI = axios('/api/images/');
+  const partsAPI = axios('/api/parts/');
+
+  return axios
+    .all([imagesAPI, partsAPI])
+    .then(
+      axios.spread((...res) => {
+        const imagesRes = res[0].data;
+        const partsRes = res[1].data;
+
+        const imagesWithPartName = imagesRes.map((img) => ({
+          ...img,
+          part: {
+            id: img.part,
+            name: partsRes.find((e) => e.id === img.part).name,
+          },
+        }));
+
+        dispatch(getLabelImagesSuccess(imagesWithPartName));
+        return void 0;
+      }),
+    )
     .catch((err) => {
       dispatch(requestLabelImagesFailure(err));
     });
 };
-
 
 export const postLabelImage = (newImage: LabelImage | FormData) => (dispatch): Promise<void> => {
   return axios('/api/images/', {
