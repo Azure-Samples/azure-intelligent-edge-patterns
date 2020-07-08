@@ -16,9 +16,10 @@ import { formatDropdownValue } from '../../util/formatDropdownValue';
 
 export const CapturePhotos: React.FC<{
   partId: number;
+  partName: string;
   goLabelImageIdx: number;
   setGoLabelImageIdx: Dispatch<number>;
-}> = ({ partId, goLabelImageIdx, setGoLabelImageIdx }) => {
+}> = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
@@ -38,17 +39,18 @@ export const CapturePhotos: React.FC<{
   }, [openLabelingPage, filteredImages, setGoLabelImageIdx]);
 
   return (
-    <Flex gap="gap.small" styles={{ height: '90%', maxHeight: '650px' }}>
+    <Flex gap="gap.small">
       <Flex column gap="gap.small" styles={{ width: '70%' }}>
         <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
         <RTSPVideo
           rtsp={selectedCamera?.rtsp}
           partId={partId}
+          partName={partName}
           canCapture={true}
           setOpenLabelingPage={setOpenLabelingPage}
         />
       </Flex>
-      <Flex column gap="gap.small" styles={{ width: '30%' }}>
+      <Flex column gap="gap.small" styles={{ width: '30%', minWidth: '450px' }}>
         <CapturedImagesContainer partId={partId} goLabelImageIdx={goLabelImageIdx} />
       </Flex>
     </Flex>
@@ -95,20 +97,20 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
   const imageCount = filteredImages.length;
 
   return (
-    <>
+    <Flex column styles={{ height: '100%' }}>
       <Text>Total: {imageCount}</Text>
       {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
       <Grid
         columns="2"
         styles={{
           border: '1px solid grey',
-          height: '40rem',
           gridGap: '10px',
           padding: '10px',
           borderColor: isValid ? '' : 'red',
           justifyItems: 'center',
           alignItems: 'center',
           overflow: 'scroll',
+          maxHeight: '600px',
         }}
       >
         {filteredImages.map((image, i, arr) => (
@@ -133,6 +135,6 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
         when={imageCount < 15}
         message="The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?"
       />
-    </>
+    </Flex>
   );
 };
