@@ -7,7 +7,7 @@ import { LabelingType, Annotation, WorkState } from '../store/labelingPage/label
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
-import { saveLabelImageAnnotation } from '../store/image/imageActions';
+import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
 import { RelabelImage } from '../components/ManualIdentification/types';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
@@ -35,6 +35,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
   };
   const onBoxCreated = (): void => {
     if (index === images.length - 1) onSave();
+  };
+
+  const onDeleteImage = (): void => {
+    dispatch(deleteLabelImage(images[imageIndex].id));
   };
 
   useEffect(() => {
@@ -82,11 +86,13 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
           onClick={onSave}
         />
         <Button
+          primary
           content="Cancel"
           onClick={(): void => {
             closeDialog();
           }}
         />
+        <Button primary content="Delete Image" onClick={onDeleteImage} />
       </Flex>
     </Flex>
   );
