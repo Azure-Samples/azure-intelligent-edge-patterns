@@ -7,6 +7,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from rest_framework.test import APITransactionTestCase
 
 from cameras.models import Camera
+
 from .test_special_strings import special_strings
 
 

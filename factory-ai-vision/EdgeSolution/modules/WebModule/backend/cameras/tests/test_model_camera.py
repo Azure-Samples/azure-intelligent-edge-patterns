@@ -2,8 +2,11 @@
 Camere Model Testcase
 """
 from unittest.mock import patch
+
 from rest_framework.test import APITransactionTestCase
+
 from cameras.models import Camera
+
 from .test_special_strings import special_strings
 
 

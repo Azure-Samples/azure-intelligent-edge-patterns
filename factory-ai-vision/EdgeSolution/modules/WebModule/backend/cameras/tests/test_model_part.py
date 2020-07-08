@@ -1,10 +1,11 @@
 """
 Part Model and method unittest
 """
-from rest_framework.test import APITransactionTestCase
 from django.core.exceptions import MultipleObjectsReturned
+from rest_framework.test import APITransactionTestCase
 
 from cameras.models import Part
+
 from .test_special_strings import special_strings
 
 

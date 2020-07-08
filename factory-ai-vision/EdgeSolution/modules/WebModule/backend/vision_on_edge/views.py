@@ -1,12 +1,12 @@
 """
 Project Views
 """
-import os
 import logging
+import os
 
-from django.views.generic import View
-from django.http import HttpResponse
 from django.conf import settings
+from django.http import HttpResponse
+from django.views.generic import View
 
 
 class UIAppView(View):

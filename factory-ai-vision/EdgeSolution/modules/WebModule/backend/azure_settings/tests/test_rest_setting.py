@@ -2,10 +2,12 @@
 Camera REST API Test
 """
 import logging
+
 from django.urls import reverse
+from rest_framework.test import APITransactionTestCase
+
 #from rest_framework import status
 
-from rest_framework.test import APITransactionTestCase
 
 logger = logging.getLogger(__name__)
 

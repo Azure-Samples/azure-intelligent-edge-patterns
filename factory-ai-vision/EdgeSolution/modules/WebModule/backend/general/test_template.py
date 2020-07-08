@@ -6,6 +6,7 @@ import logging
 # from django.urls import reverse
 # from rest_framework import status
 from rest_framework.test import APITransactionTestCase
+
 # from configs.customvision_config import ENDPOINT, TRAINING_KEY
 #
 # PROJECT_PREFIX = "UnitTest"

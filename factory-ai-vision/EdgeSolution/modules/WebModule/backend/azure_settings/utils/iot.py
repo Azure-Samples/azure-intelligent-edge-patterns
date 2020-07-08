@@ -1,8 +1,8 @@
 """
 Azure IOT related function
 """
-from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.device import IoTHubModuleClient
+from azure.iot.hub import IoTHubRegistryManager
 
 from configs.iot_config import IOT_HUB_CONNECTION_STRING
 
