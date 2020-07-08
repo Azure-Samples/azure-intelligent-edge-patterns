@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
 import { Button, CloseIcon } from '@fluentui/react-northstar';
-import { Stage, Layer, Image, Group, Text as KonvaText } from 'react-konva';
+import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
@@ -28,6 +28,7 @@ const defaultSize: Size2D = {
 
 interface SceneProps {
   url?: string;
+  partName: string;
   labelingType: LabelingType;
   annotations: Annotation[];
   workState: WorkState;
@@ -36,6 +37,7 @@ interface SceneProps {
 }
 const Scene: FC<SceneProps> = ({
   url = '',
+  partName,
   labelingType,
   annotations,
   workState,
@@ -176,6 +178,13 @@ const Scene: FC<SceneProps> = ({
                   selected={i === selectedAnnotationIndex}
                   dispatch={dispatch}
                   changeCursorState={changeCursorState}
+                />
+                <Text
+                  x={annotation.label.x1}
+                  y={annotation.label.y1 - 25 / scale.current}
+                  fontSize={20 / scale.current}
+                  fill="red"
+                  text={partName}
                 />
               </Group>
             ))}
