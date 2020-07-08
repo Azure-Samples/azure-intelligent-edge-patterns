@@ -28,6 +28,15 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
   const imageUrl = images[index]?.image;
   const imageId = images[index]?.id;
 
+  const onSave = (): void => {
+    dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+    if (index === images.length - 1) closeDialog();
+    setIndex((prev) => (prev + 1) % images.length);
+  };
+  const onBoxCreated = (): void => {
+    if (index === images.length - 1) onSave();
+  };
+
   useEffect(() => {
     if (typeof imageId === 'number') dispatch(getAnnotations(imageId));
     return (): void => {
@@ -61,6 +70,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
           workState={workState}
           setWorkState={setWorkState}
           labelingType={labelingType}
+          onBoxCreated={onBoxCreated}
         />
       </PrevNextButton>
       <Flex gap="gap.medium">
@@ -68,11 +78,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
           primary
           content={index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
           disabled={isOnePointBox || workState === WorkState.Creating}
-          onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
-            if (index === images.length - 1) closeDialog();
-            setIndex((prev) => (prev + 1) % images.length);
-          }}
+          onClick={onSave}
         />
         <Button
           content="Cancel"

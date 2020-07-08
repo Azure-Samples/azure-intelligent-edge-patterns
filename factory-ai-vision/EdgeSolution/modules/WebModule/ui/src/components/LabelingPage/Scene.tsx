@@ -32,8 +32,16 @@ interface SceneProps {
   annotations: Annotation[];
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
+  onBoxCreated?: () => void;
 }
-const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState, setWorkState }) => {
+const Scene: FC<SceneProps> = ({
+  url = '',
+  labelingType,
+  annotations,
+  workState,
+  setWorkState,
+  onBoxCreated,
+}) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
@@ -82,6 +90,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState,
       );
       if (annotations.length - 1 === selectedAnnotationIndex) {
         setWorkState(WorkState.Selecting);
+        if (onBoxCreated) onBoxCreated();
       } else {
         setWorkState(WorkState.None);
       }
