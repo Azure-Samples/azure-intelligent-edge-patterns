@@ -70,6 +70,7 @@ For Windows:
    3.	Choose your subscription
    4.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
    5.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
+   6.   This solution takes 5-10 mins to install based on your internet speed, After 5-10 mins open your browser and connect to ```http://<your-edge-ip:8080>.
 
 For Mac:
    1.	Open terminal 
@@ -79,6 +80,7 @@ For Mac:
    5.	Choose your subscription 
    6.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
    7.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
+   8.   This solution takes 5-10 mins to install based on your internet speed, After 5-10 mins open your browser and connect to ```http://<your-edge-ip:8080>.
 
 ## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
 
