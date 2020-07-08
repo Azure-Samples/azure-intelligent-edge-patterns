@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
-from general import error_messages
+from vision_on_edge.general import error_messages
 
 from ..models import Setting
 

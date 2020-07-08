@@ -17,10 +17,10 @@ from azure.cognitiveservices.vision.customvision.training import \
     CustomVisionTrainingClient
 from rest_framework.test import APITransactionTestCase
 
-from azure_settings.models import Setting
-from cameras.models import Camera, Part
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
-from locations.models import Location
+from vision_on_edge.azure_settings.models import Setting
+from vision_on_edge.cameras.models import Camera, Part
+from vision_on_edge.locations.models import Location
 
 from ..models import Project
 

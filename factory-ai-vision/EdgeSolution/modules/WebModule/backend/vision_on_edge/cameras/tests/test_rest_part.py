@@ -1,14 +1,14 @@
 """
 Part REST API Test
 """
-import logging
 import json
+import logging
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
-from cameras.models import Part
+from ..models import Part
 from .test_special_strings import special_strings
 
 logger = logging.getLogger(__name__)
