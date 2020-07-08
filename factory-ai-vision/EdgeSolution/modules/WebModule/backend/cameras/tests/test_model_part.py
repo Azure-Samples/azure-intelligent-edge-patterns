@@ -41,7 +41,8 @@ class PartTestCase(APITransactionTestCase):
         """
         self.assertEqual(Part.objects.count(), self.exist_num)
         self.assertRaises(MultipleObjectsReturned,
-                          Part.objects.get, name='Part1')
+                          Part.objects.get,
+                          name='Part1')
         part_1 = Part.objects.filter(name='Part1').last()
         self.assertFalse(part_1.is_demo)
         part_2 = Part.objects.filter(name='Part2').last()
@@ -64,8 +65,6 @@ class PartTestCase(APITransactionTestCase):
         Object created. Description is ''
         """
         part_name = "Part without Desb"
-        Part.objects.create(name=part_name,
-                            is_demo=False)
+        Part.objects.create(name=part_name, is_demo=False)
         part_obj = Part.objects.get(name=part_name)
-        self.assertEqual(part_obj.description,
-                         '')
+        self.assertEqual(part_obj.description, '')

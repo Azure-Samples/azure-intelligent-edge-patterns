@@ -102,10 +102,10 @@ class Setting(models.Model):
             logger.info("Validating CustomVisionClient %s", instance.name)
             trainer = Setting._get_trainer_obj_static(
                 training_key=instance.training_key, endpoint=instance.endpoint)
-            obj_detection_domain = next(domain
-                                        for domain in trainer.get_domains()
-                                        if domain.type == "ObjectDetection"
-                                        and domain.name == "General (compact)")
+            obj_detection_domain = next(
+                domain for domain in trainer.get_domains()
+                if domain.type == "ObjectDetection" and
+                domain.name == "General (compact)")
 
             logger.info("Validating Trainer %s Key + Endpoint... Pass",
                         instance.name)

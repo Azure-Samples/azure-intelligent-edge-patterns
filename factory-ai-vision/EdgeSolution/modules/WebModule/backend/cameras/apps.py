@@ -63,13 +63,13 @@ class CamerasConfig(AppConfig):
                         defaults={'description': "Demo"})
 
                 logger.info("Creating Demo Camera")
-                Camera.objects.update_or_create(name="Demo Video",
-                                                is_demo=True,
-                                                defaults={
-                                                    'rtsp':
-                                                    'sample_video/video.mp4',
-                                                    'area': ""
-                                                })
+                Camera.objects.update_or_create(
+                    name="Demo Video",
+                    is_demo=True,
+                    defaults={
+                        'rtsp': 'sample_video/video.mp4',
+                        'area': ""
+                    })
 
                 logger.info("Creating Demo... End")
 

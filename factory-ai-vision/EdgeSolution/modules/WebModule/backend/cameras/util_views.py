@@ -12,6 +12,7 @@ from .models import Camera
 
 logger = logging.getLogger(__name__)
 
+
 @api_view()
 def verify_rtsp(request):
     """test if a rtsp is valid"""

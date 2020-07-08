@@ -56,8 +56,7 @@ class ViewTrainTestCase(APITransactionTestCase):
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='super_valid_project_id',
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
-            is_demo=False
-        )
+            is_demo=False)
         invalid_project_obj.parts.add(part_obj)
 
         valid_project_obj = Project.objects.create(
@@ -66,8 +65,7 @@ class ViewTrainTestCase(APITransactionTestCase):
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='super_valid_project_id',
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
-            is_demo=False
-        )
+            is_demo=False)
         valid_project_obj.parts.add(part_obj)
 
     def test_setup_is_valid(self):
@@ -98,12 +96,11 @@ class ViewTrainTestCase(APITransactionTestCase):
         project_obj = Project.objects.filter(setting=valid_setting).first()
         response = self.client.get(f'{url}/{project_obj.id}/train')
 
-        self.assertEqual(response.status_code,
-                         status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'failed')
-        self.assertEqual(json.loads(response.content)['log'],
-                         'Not enough images for training')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'], 'failed')
+        self.assertEqual(
+            json.loads(response.content)['log'],
+            'Not enough images for training')
 
     def test_train_invalid_project(self):
         """
@@ -128,13 +125,12 @@ class ViewTrainTestCase(APITransactionTestCase):
 
         self.assertEqual(response.status_code,
                          status.HTTP_503_SERVICE_UNAVAILABLE)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'failed')
+        self.assertEqual(json.loads(response.content)['status'], 'failed')
 
     @classmethod
     def tearDownClass(cls):
-        trainer = CustomVisionTrainingClient(
-            api_key=TRAINING_KEY, endpoint=ENDPOINT)
+        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
+                                             endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
             if project.name.find(PROJECT_PREFIX) == 0:

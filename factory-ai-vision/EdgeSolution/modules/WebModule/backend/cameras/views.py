@@ -59,7 +59,7 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     queryset = Part.objects.all()
     serializer_class = PartSerializer
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "is_demo": "is_demo",
     }
@@ -75,10 +75,11 @@ class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "is_demo": "is_demo",
     }
+
 
 class ImageViewSet(viewsets.ModelViewSet):
     """
@@ -241,10 +242,8 @@ def relabel_update(request):
 def inference_video_feed(request, project_id):
     """Return inferenced video feed"""
     return JsonResponse({
-        "status":
-        "ok",
-        "url":
-        "http://" + inference_module_url() + "/video_feed?inference=1",
+        "status": "ok",
+        "url": "http://" + inference_module_url() + "/video_feed?inference=1",
     })
 
 

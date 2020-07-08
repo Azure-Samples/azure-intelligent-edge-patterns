@@ -71,8 +71,7 @@ class ViewListProjectTestCase(APITransactionTestCase):
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         response = self.client.get(f'{url}/{valid_setting.id}/list_projects')
 
-        self.assertEqual(response.status_code,
-                         status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(len(json.loads(response.content)) > 0)
 
     def test_empty_setting_list_project(self):
@@ -88,40 +87,35 @@ class ViewListProjectTestCase(APITransactionTestCase):
              'log': 'xxx'}
         """
         url = reverse('setting-list')
-        empty_setting = Setting.objects.filter(
-            name='empty_setting').first()
+        empty_setting = Setting.objects.filter(name='empty_setting').first()
         response = self.client.get(f'{url}/{empty_setting.id}/list_projects')
 
-        self.assertEqual(response.status_code,
-                         status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'failed')
-        self.assertEqual(json.loads(response.content)['log'],
-                         error_messages.CUSTOM_VISION_MISSING_FIELD)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'], 'failed')
+        self.assertEqual(
+            json.loads(response.content)['log'],
+            error_messages.CUSTOM_VISION_MISSING_FIELD)
 
         empty_endpoint_setting = Setting.objects.filter(
             name='empty_endpoint_setting').first()
         response = self.client.get(
             f'{url}/{empty_endpoint_setting.id}/list_projects')
 
-        self.assertEqual(response.status_code,
-                         status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'failed')
-        self.assertEqual(json.loads(response.content)['log'],
-                         error_messages.CUSTOM_VISION_MISSING_FIELD)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'], 'failed')
+        self.assertEqual(
+            json.loads(response.content)['log'],
+            error_messages.CUSTOM_VISION_MISSING_FIELD)
 
         empty_key_setting = Setting.objects.filter(
             name='empty_training_key_setting').first()
-        response = self.client.get(
-            f'{url}/{empty_key_setting}/list_projects')
+        response = self.client.get(f'{url}/{empty_key_setting}/list_projects')
 
-        self.assertEqual(response.status_code,
-                         status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'failed')
-        self.assertEqual(json.loads(response.content)['log'],
-                         error_messages.CUSTOM_VISION_MISSING_FIELD)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content)['status'], 'failed')
+        self.assertEqual(
+            json.loads(response.content)['log'],
+            error_messages.CUSTOM_VISION_MISSING_FIELD)
 
     def test_invalid_setting_list_project(self):
         """
@@ -142,15 +136,15 @@ class ViewListProjectTestCase(APITransactionTestCase):
 
         self.assertEqual(response.status_code,
                          status.HTTP_503_SERVICE_UNAVAILABLE)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'failed')
-        self.assertEqual(json.loads(response.content)['log'],
-                         error_messages.CUSTOM_VISION_ACCESS_ERROR)
+        self.assertEqual(json.loads(response.content)['status'], 'failed')
+        self.assertEqual(
+            json.loads(response.content)['log'],
+            error_messages.CUSTOM_VISION_ACCESS_ERROR)
 
     @classmethod
     def tearDownClass(cls):
-        trainer = CustomVisionTrainingClient(
-            api_key=TRAINING_KEY, endpoint=ENDPOINT)
+        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
+                                             endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
             if project.name.find(PROJECT_PREFIX) == 0:

@@ -74,22 +74,21 @@ class ModelProjectTestCases(APITransactionTestCase):
         """
         Making sure setup is valid
         """
-        self.assertEqual(Setting.objects.filter(
-            training_key='').count(), 1)
-        self.assertEqual(Setting.objects.filter(
-            training_key=TRAINING_KEY).count(), 1)
-        self.assertEqual(Camera.objects.filter(
-            is_demo=True).count(), self.exist_num)
-        self.assertEqual(Camera.objects.filter(
-            is_demo=True).count(), self.exist_num)
-        self.assertEqual(Location.objects.filter(
-            is_demo=True).count(), self.exist_num)
-        self.assertEqual(Location.objects.filter(
-            is_demo=True).count(), self.exist_num)
-        self.assertEqual(Part.objects.filter(
-            is_demo=True).count(), self.exist_num)
-        self.assertEqual(Part.objects.filter(
-            is_demo=True).count(), self.exist_num)
+        self.assertEqual(Setting.objects.filter(training_key='').count(), 1)
+        self.assertEqual(
+            Setting.objects.filter(training_key=TRAINING_KEY).count(), 1)
+        self.assertEqual(
+            Camera.objects.filter(is_demo=True).count(), self.exist_num)
+        self.assertEqual(
+            Camera.objects.filter(is_demo=True).count(), self.exist_num)
+        self.assertEqual(
+            Location.objects.filter(is_demo=True).count(), self.exist_num)
+        self.assertEqual(
+            Location.objects.filter(is_demo=True).count(), self.exist_num)
+        self.assertEqual(
+            Part.objects.filter(is_demo=True).count(), self.exist_num)
+        self.assertEqual(
+            Part.objects.filter(is_demo=True).count(), self.exist_num)
 
     def test_create_1(self):
         """invalid setting -> customvision_id = ''
@@ -100,26 +99,24 @@ class ModelProjectTestCases(APITransactionTestCase):
             location=Location.objects.filter(name='demo_location_1').first(),
             customvision_project_id='super_valid_project_id',
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
-            is_demo=False
-        )
-        self.assertFalse(project_obj.customvision_project_id ==
-                         'super_valid_project_id')
+            is_demo=False)
+        self.assertFalse(
+            project_obj.customvision_project_id == 'super_valid_project_id')
         self.assertEqual(project_obj.customvision_project_id, '')
 
     def test_create_2(self):
         """valid setting will not create project on customvision
         will wait until train for the first time
         """
-        trainer = CustomVisionTrainingClient(
-            api_key=TRAINING_KEY, endpoint=ENDPOINT)
+        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
+                                             endpoint=ENDPOINT)
         project_count = len(trainer.get_projects())
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
-            is_demo=False
-        )
+            is_demo=False)
 
         project_count_after = len(trainer.get_projects())
         self.assertEqual(project_obj.customvision_project_id, '')
@@ -132,12 +129,9 @@ class ModelProjectTestCases(APITransactionTestCase):
         Will not create project on customvision
         """
         project_obj = Project.objects.create(
-            setting=Setting.objects.filter(
-                name='valid_setting').first(),
-            camera=Camera.objects.filter(
-                name='demo_camera_1').first(),
-            location=Location.objects.filter(
-                name='demo_location_1').first(),
+            setting=Setting.objects.filter(name='valid_setting').first(),
+            camera=Camera.objects.filter(name='demo_camera_1').first(),
+            location=Location.objects.filter(name='demo_location_1').first(),
             customvision_project_id='5566thebest',
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_3',
             is_demo=False)
@@ -164,18 +158,15 @@ class ModelProjectTestCases(APITransactionTestCase):
             location=Location.objects.filter(name='demo_location_1').first(),
             is_demo=False,
             customvision_project_id='56cannotdie',
-            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1'
-        )
+            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1')
 
         # Check
         project_obj.save()
-        self.assertEqual(project_obj.customvision_project_id,
-                         '')
+        self.assertEqual(project_obj.customvision_project_id, '')
 
         # Create project and check
         project_obj.create_project()
-        self.assertNotEqual(project_obj.customvision_project_id,
-                            '')
+        self.assertNotEqual(project_obj.customvision_project_id, '')
 
     def test_update_1(self):
         """
@@ -193,8 +184,7 @@ class ModelProjectTestCases(APITransactionTestCase):
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
             is_demo=False,
-            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1'
-        )
+            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1')
         # Project already created
         project_obj.customvision_project_id = '56cannotdie'
         project_obj.save()
@@ -203,8 +193,8 @@ class ModelProjectTestCases(APITransactionTestCase):
     @classmethod
     def tearDownClass(cls):
         logger.info("Deleting Projects on CustomVision")
-        trainer = CustomVisionTrainingClient(
-            api_key=TRAINING_KEY, endpoint=ENDPOINT)
+        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
+                                             endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
             if project.name.find(PROJECT_PREFIX) == 0:

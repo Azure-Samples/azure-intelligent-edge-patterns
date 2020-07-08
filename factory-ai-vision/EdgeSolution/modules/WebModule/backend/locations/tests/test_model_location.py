@@ -66,8 +66,6 @@ class LocationTestCase(APITransactionTestCase):
         Object created. Description is ''
         """
         location_name = "Location without Desb"
-        Location.objects.create(name=location_name,
-                                is_demo=False)
+        Location.objects.create(name=location_name, is_demo=False)
         location_obj = Location.objects.get(name=location_name)
-        self.assertEqual(location_obj.description,
-                         '')
+        self.assertEqual(location_obj.description, '')

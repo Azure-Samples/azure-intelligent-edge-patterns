@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ImagePredictionSerializer(serializers.ModelSerializer):
     """Image Prediction Serializer"""
+
     class Meta:
         model = ImagePrediction
         fields = ['id', 'image', 'predicted']

@@ -23,6 +23,7 @@ from .utils.app_insight import (get_app_insight_logger, img_monitor,
 
 logger = logging.getLogger(__name__)
 
+
 def is_edge():
     """Determine is edge or not. Return bool"""
     try:
@@ -192,6 +193,7 @@ class Project(models.Model):
     @staticmethod
     def pre_delete(sender, instance, using):
         """pre_delete"""
+
     def dequeue_iterations(self, max_iterations=2):
         """Dequeue training iterations of a project"""
         try:
@@ -282,6 +284,7 @@ class Project(models.Model):
         trainer.delete_tag(project_id=self.customvision_project_id,
                            tag_id=tag_id)
         return
+
     def update_app_insight_counter(
             self,
             has_new_parts: bool,
@@ -426,6 +429,7 @@ class Task(models.Model):
 
     def start_exporting(self):
         """Start Exporting"""
+
         def _export_worker(self):
             """Export Model Worker"""
             project_obj = self.project
@@ -471,7 +475,7 @@ class Task(models.Model):
                 break
             return
 
-        threading.Thread(target=_export_worker, args=(self, )).start()
+        threading.Thread(target=_export_worker, args=(self,)).start()
 
 
 pre_save.connect(Project.pre_save, Project, dispatch_uid="Project_pre")

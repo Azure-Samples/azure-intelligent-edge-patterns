@@ -49,7 +49,8 @@ class CameraTestCases(APITransactionTestCase):
         """
         self.assertEqual(Camera.objects.count(), self.exist_num)
         self.assertRaises(MultipleObjectsReturned,
-                          Camera.objects.get, name='Camera1')
+                          Camera.objects.get,
+                          name='Camera1')
         camera1 = Camera.objects.filter(name='Camera1').last()
         self.assertFalse(camera1.is_demo)
         camera1 = Camera.objects.filter(name='Camera2').last()

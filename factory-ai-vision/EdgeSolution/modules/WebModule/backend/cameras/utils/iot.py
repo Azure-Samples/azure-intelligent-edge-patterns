@@ -6,6 +6,7 @@ from azure.iot.device import IoTHubModuleClient
 
 from configs.iot_config import IOT_HUB_CONNECTION_STRING
 
+
 def get_iot():
     """get iot"""
     try:

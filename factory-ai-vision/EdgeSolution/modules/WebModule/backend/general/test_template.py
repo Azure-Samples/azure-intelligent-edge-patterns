@@ -17,14 +17,17 @@ class StreamViewTestCase(APITransactionTestCase):
     """
     Testing stream api view
     """
+
     def setUp(self):
         """
         Create setting, camera, location and parts.
         """
+
     def test_setup_is_valid(self):
         """
         Make sure setup is valid
         """
+
     def test_valid_setting_list_project(self):
         """
         @Type
@@ -33,6 +36,7 @@ class StreamViewTestCase(APITransactionTestCase):
 
         @Expected Results
         """
+
     def test_invalid_setting_list_project(self):
         """
         @Type
@@ -41,6 +45,7 @@ class StreamViewTestCase(APITransactionTestCase):
 
         @Expected Results
         """
+
     @classmethod
     def tearDownClass(cls):
         # trainer = CustomVisionTrainingClient(
