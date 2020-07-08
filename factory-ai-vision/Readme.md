@@ -45,7 +45,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
   4.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
 
 # Vision on Edge Installer
-## Option 1: Installation with Installer:
+## Option 1: Automated installation with Vision on Edge Installer
 
 ### Prerequisites
 To install the solution on a PC running Windows, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.cmd script.
@@ -78,7 +78,7 @@ For Mac:
    6.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
    7.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
 
-## Option 2: Install with vs code
+## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
 
 ### Prerequisites
 
