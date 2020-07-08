@@ -7,7 +7,6 @@ import {
 } from './partTypes';
 import { LabelImage } from '../image/imageTypes';
 import { postLabelImageSuccess } from '../image/imageActions';
-import { getIdFromUrl } from '../../util/GetIDFromUrl';
 
 export const addCapturedImages = (newCapturedImage: LabelImage): AddCapturedImageAction => ({
   type: ADD_CAPTURED_IMAGE,
@@ -19,13 +18,16 @@ export const updateCapturedImages = (capturedImages: LabelImage[]): UpdateCaptur
   payload: { capturedImages },
 });
 
-export const thunkAddCapturedImages = (streamId: string): PartThunk => async (dispatch): Promise<void> => {
+export const thunkAddCapturedImages = (streamId: string, partName: string): PartThunk => async (
+  dispatch,
+): Promise<void> => {
   fetch(`/api/streams/${streamId}/capture`)
     .then((response) => response.json())
     .then((data) => {
       if (data.status === 'ok') {
-        dispatch(addCapturedImages(data.image));
-        dispatch(postLabelImageSuccess(data.image));
+        const labelImage = { ...data.image, part: { id: data.image.part, name: partName } };
+        dispatch(addCapturedImages(labelImage));
+        dispatch(postLabelImageSuccess(labelImage));
       }
       return null;
     })
@@ -39,7 +41,7 @@ export const thunkGetCapturedImages = (partId: string): PartThunk => async (disp
     .then((response) => response.json())
     .then((data) => {
       const imagesWithRelatedPart = data.reduce((acc, cur) => {
-        if (getIdFromUrl(cur.part).toString() === partId) acc.push(cur);
+        if (cur.part === partId) acc.push(cur);
         return acc;
       }, []);
       dispatch(updateCapturedImages(imagesWithRelatedPart));

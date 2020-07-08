@@ -6,7 +6,8 @@ Get custom vision related config from
 2. config.py
 """
 import os
-from config import (TRAINING_KEY, ENDPOINT)
+
+from config import ENDPOINT, TRAINING_KEY
 
 if 'TRAINING_KEY' in os.environ:
     TRAINING_KEY = os.environ['TRAINING_KEY']

@@ -259,17 +259,25 @@ For more tutorials and How-Tos, see TensorFlow's [save_and_load.ipynb](https://g
 
 There is another useful tool to monitor some ML applications if they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
 
-A concrete example of a tensorboard-using script is in folder `mnist-w-tb`. You will need your
+A concrete example of a tensorboard-using script is in folder `tf-mnist-w-tb`. You will need your
 github account to build the image(substitute `rollingstone` for yours) and run:
 
     $ cd mnist-w-tb
     $ docker build -t rollingstone/tf-mnist-w-tb:latest .
     $ docker push rollingstone/tf-mnist-w-tb:latest
-    $ kubectl create -f tb.yaml
+    $ kubectl create -f tb_tf.yaml
     $ kubectl create -f tfjob.yaml
 
 You might contact your cloud administrator to help you establish network access, or you can
 use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
+This is how it looks like(run it on the machine where your web browser is):
+
+     $ ssh -NfL 6006:localhost:6006 -i id_rsa_for_kubernetes azureuser@<public_ip_address_or_dns_name>
+
+An alternative would be to create an RDP and XWindows server at the master node and RDP to it.
+If you did the ssh port fowarding, you do not need it.
+
+Now you can access the port you forward from your Kubernetes environment:
 
     $ export PODNAME=$(kubectl get pod -l app=tensorboard -o jsonpath='{.items[0].metadata.name}')
     $ kubectl port-forward ${PODNAME} 6006:6006

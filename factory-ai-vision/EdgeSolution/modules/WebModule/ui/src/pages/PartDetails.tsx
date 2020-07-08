@@ -64,6 +64,7 @@ export const PartDetails = (): JSX.Element => {
       <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2' }}>
         <CaptureImagePanel
           partId={partId}
+          partName={name}
           goLabelImageIdx={goLabelImageIdx}
           setGoLabelImageIdx={setGoLabelImageIdx}
         />
@@ -137,12 +138,13 @@ const PartInfoForm = ({ partId, name, setName, description, setDescription }): J
   );
 };
 
-const CaptureImagePanel = ({ partId, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
+const CaptureImagePanel = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
   return (
     <Switch>
       <Route path={`/parts/detail/capturePhotos`}>
         <CapturePhotos
           partId={parseInt(partId, 10)}
+          partName={partName}
           goLabelImageIdx={goLabelImageIdx}
           setGoLabelImageIdx={setGoLabelImageIdx}
         />
