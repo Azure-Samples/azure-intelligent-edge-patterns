@@ -6,7 +6,8 @@ Get custom vision related config from
 2. config.py
 """
 import os
-from config import (IOT_HUB_CONNECTION_STRING, DEVICE_ID, MODULE_ID)
+
+from config import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 
 if 'IOT_HUB_CONNECTION_STRING' in os.environ:
     IOT_HUB_CONNECTION_STRING = os.environ['IOT_HUB_CONNECTION_STRING']

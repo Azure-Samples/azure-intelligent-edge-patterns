@@ -15,7 +15,3 @@ opencensus-context==0.1.1
 opencensus-ext-azure==1.0.2
 opencensus-ext-django==0.7.2
 opencensus-ext-stackdriver==0.7.2
-isort==4.3.21
-yapf==0.28.0
-pylint==2.5.3
-pylint-django==2.0.15
