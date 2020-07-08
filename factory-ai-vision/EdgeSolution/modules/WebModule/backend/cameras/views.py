@@ -25,7 +25,6 @@ from .serializers import (AnnotationSerializer, CameraSerializer,
 # from rest_framework import status
 # from rest_framework.response import Response
 
-
 # from azure.iot.hub import IoTHubRegistryManager
 # from azure.iot.hub.models import Twin, TwinProperties
 # try:
