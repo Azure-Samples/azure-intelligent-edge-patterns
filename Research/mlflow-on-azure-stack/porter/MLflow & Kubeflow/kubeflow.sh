@@ -53,7 +53,7 @@ uninstall() {
   wget ${KF_CONFIG_URI}
   ls -la
   cat $KF_CONFIG_FILENAME
-  $KF_CTL_DIR/kfctl delete -f ${KF_DIR}/${KF_CONFIG_FILENAME}
+  $KF_CTL_DIR/kfctl delete -f ${KF_DIR}/${KF_CONFIG_FILENAME} --force-deletion
 }
 
 # Call the requested function and pass the arguments as-is
