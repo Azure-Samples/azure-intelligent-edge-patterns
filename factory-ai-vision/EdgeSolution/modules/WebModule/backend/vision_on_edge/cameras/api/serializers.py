@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class PartSerializer(serializers.ModelSerializer):
     """PartSerializer"""
+
     class Meta:
         model = Part
         fields = ["id", "name", "description", "is_demo"]
@@ -30,7 +31,7 @@ class PartSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 detail={
                     "status":
-                    "failed",
+                        "failed",
                     "log": ("dataset with same name exists," +
                             "please change another name"),
                 })
@@ -49,7 +50,7 @@ class PartSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 detail={
                     "status":
-                    "failed",
+                        "failed",
                     "log": ("dataset with same name exists, " +
                             "please change another name"),
                 })
@@ -63,6 +64,7 @@ class PartSerializer(serializers.ModelSerializer):
 
 class CameraSerializer(serializers.ModelSerializer):
     """CameraSerializer"""
+
     class Meta:
         model = Camera
         fields = ["id", "name", "rtsp", "area", "is_demo"]
@@ -89,6 +91,7 @@ class CameraSerializer(serializers.ModelSerializer):
 
 class ImageSerializer(serializers.ModelSerializer):
     """ImageSerializer"""
+
     class Meta:
         model = Image
         fields = ["id", "image", "labels", "part", "is_relabel", "confidence"]
@@ -96,6 +99,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
 class AnnotationSerializer(serializers.ModelSerializer):
     """AnnotationSerializer"""
+
     class Meta:
         model = Annotation
         fields = ["id", "image", "labels"]

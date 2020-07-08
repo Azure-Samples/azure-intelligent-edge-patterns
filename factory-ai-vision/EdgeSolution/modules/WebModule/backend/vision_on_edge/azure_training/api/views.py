@@ -64,7 +64,7 @@ class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "project": "project",
     }
@@ -80,7 +80,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "is_demo": "is_demo",
     }
@@ -133,6 +133,7 @@ def update_train_status(project_id):
     This function not only update status, but also send request to inference
     model
     """
+
     def _train_status_worker(project_id):
         project_obj = Project.objects.get(pk=project_id)
         trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -235,7 +236,7 @@ def update_train_status(project_id):
             )
             break
 
-    threading.Thread(target=_train_status_worker, args=(project_id, )).start()
+    threading.Thread(target=_train_status_worker, args=(project_id,)).start()
 
 
 @api_view()
@@ -278,10 +279,10 @@ def export(request, project_id):
         return JsonResponse(
             {
                 "status":
-                "failed",
+                    "failed",
                 "log":
-                "Export failed. Inference module url: " +
-                f"{inference_module_url()} unreachable",
+                    "Export failed. Inference module url: " +
+                    f"{inference_module_url()} unreachable",
             },
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
@@ -602,9 +603,9 @@ def _train(project_id):
             return JsonResponse(
                 {
                     "status":
-                    "failed",
+                        "failed",
                     "log":
-                    "Training key or Endpoint is invalid. Please change the settings",
+                        "Training key or Endpoint is invalid. Please change the settings",
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )

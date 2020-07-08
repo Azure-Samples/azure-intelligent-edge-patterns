@@ -7,6 +7,7 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
+
 class ImagePredictionsConfig(AppConfig):
     """
     Image Prediction App Config.

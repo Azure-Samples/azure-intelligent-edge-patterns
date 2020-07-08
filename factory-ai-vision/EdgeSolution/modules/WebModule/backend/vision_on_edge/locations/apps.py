@@ -9,7 +9,6 @@ from django.apps import AppConfig
 logger = logging.getLogger(__name__)
 
 
-
 class LocationsConfig(AppConfig):
     """
     Locations App Config
@@ -32,11 +31,11 @@ class LocationsConfig(AppConfig):
             create_demo = True
             if create_demo:
                 logger.info("Creating Demo Location")
-                Location.objects.update_or_create(
-                    name="Demo Location",
-                    is_demo=True,
-                    defaults={
-                        'description': "Demo Location",
-                    })
+                Location.objects.update_or_create(name="Demo Location",
+                                                  is_demo=True,
+                                                  defaults={
+                                                      'description':
+                                                          "Demo Location",
+                                                  })
 
             logger.info("Locations App Config End while running server")

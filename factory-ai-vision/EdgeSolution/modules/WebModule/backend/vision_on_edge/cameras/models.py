@@ -232,6 +232,7 @@ class Camera(models.Model):
 # FIXME consider move this out of models.py
 class Stream(object):
     """Stream Class"""
+
     def __init__(self, rtsp, part_id=None, inference=False):
         if rtsp == "0":
             self.rtsp = 0
@@ -300,7 +301,7 @@ class Stream(object):
                 #    self.mutex.release()
 
         # if self.iot:
-        threading.Thread(target=_listener, args=(self, )).start()
+        threading.Thread(target=_listener, args=(self,)).start()
 
     def gen(self):
         """generator for stream"""
@@ -322,8 +323,8 @@ class Stream(object):
             self.last_img = img.copy()
             self.cur_img_index = (self.cur_img_index + 1) % 10000
             self.mutex.acquire()
-            predictions = list(prediction.copy()
-                               for prediction in self.predictions)
+            predictions = list(
+                prediction.copy() for prediction in self.predictions)
             self.mutex.release()
 
             # print('bboxes', bboxes)

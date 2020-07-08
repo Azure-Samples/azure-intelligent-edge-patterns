@@ -70,7 +70,7 @@ class SettingViewSet(viewsets.ModelViewSet):
         except CustomVisionErrorException as customvision_error:
             if (customvision_error.message ==
                     "Operation returned an invalid status code 'Access Denied'"
-                ):
+               ):
 
                 return Response(
                     {
@@ -91,6 +91,7 @@ class SettingViewSet(viewsets.ModelViewSet):
             return Response(
                 {
                     "status": "failed",
-                    "log": str(exception)  # Force yapf to change line...
+                    "log":
+                        str(exception)  # Force yapf to change line...
                 },
                 status=status.HTTP_400_BAD_REQUEST)

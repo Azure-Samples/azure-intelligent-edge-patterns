@@ -57,8 +57,7 @@ class ResetProjectTestCase(APITransactionTestCase):
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='foo',
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
-            is_demo=False
-        )
+            is_demo=False)
         invalid_project_obj.parts.add(part_obj)
 
         valid_project_obj = Project.objects.create(
@@ -67,8 +66,7 @@ class ResetProjectTestCase(APITransactionTestCase):
             location=Location.objects.filter(name='location_1').first(),
             customvision_project_id='bar',
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
-            is_demo=False
-        )
+            is_demo=False)
         valid_project_obj.parts.add(part_obj)
 
     def test_setup_is_valid(self):
@@ -89,17 +87,14 @@ class ResetProjectTestCase(APITransactionTestCase):
         200 {'status': 'ok'}
         """
         url = reverse('project-list')
-        valid_setting = Setting.objects.filter(
-            name='valid_setting').first()
+        valid_setting = Setting.objects.filter(name='valid_setting').first()
         valid_project = Project.objects.filter(setting=valid_setting).first()
         response = self.client.get(
             path=f'{url}/{valid_project.id}/reset_project',
             data={'project_name': f'{PROJECT_PREFIX}-test-reset-1'})
 
-        self.assertEqual(response.status_code,
-                         status.HTTP_200_OK)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'ok')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content)['status'], 'ok')
 
     def test_valid_setting_reset_project_2(self):
         """
@@ -115,17 +110,14 @@ class ResetProjectTestCase(APITransactionTestCase):
              ... : ...}
         """
         url = reverse('project-list')
-        valid_setting = Setting.objects.filter(
-            name='valid_setting').first()
+        valid_setting = Setting.objects.filter(name='valid_setting').first()
         valid_project = Project.objects.filter(setting=valid_setting).first()
         response = self.client.get(
             path=f'{url}/{valid_project.id}/reset_project',
             data={'project_name': f'{PROJECT_PREFIX}-test-reset-1'})
 
-        self.assertEqual(response.status_code,
-                         status.HTTP_200_OK)
-        self.assertEqual(json.loads(response.content)['status'],
-                         'ok')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content)['status'], 'ok')
 
         response = self.client.get(path=f'{url}/{valid_project.id}')
         self.assertTrue(json.loads(response.content)['needRetraining'])
@@ -175,13 +167,13 @@ class ResetProjectTestCase(APITransactionTestCase):
 
         self.assertNotEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('failed', json.loads(response.content)['status'])
-        self.assertTrue(json.loads(response.content)[
-                        'log'].find('project_name') >= 0)
+        self.assertTrue(
+            json.loads(response.content)['log'].find('project_name') >= 0)
 
-    @ classmethod
+    @classmethod
     def tearDownClass(cls):
-        trainer = CustomVisionTrainingClient(
-            api_key=TRAINING_KEY, endpoint=ENDPOINT)
+        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
+                                             endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
             if project.name.find(PROJECT_PREFIX) == 0:

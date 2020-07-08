@@ -13,25 +13,27 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls import include, url
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from django.conf.urls import url, include
-from django.conf.urls.static import static
-from django.conf import settings
-
 from rest_framework import routers
 
-from vision_on_edge.cameras.api import views
-from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.azure_settings.api import views as setting_views
-from vision_on_edge.locations.api import views as location_views
-from vision_on_edge.image_predictions.api import views as image_prediction_views
 from vision_on_edge.azure_training.api import views as azure_training_views
+from vision_on_edge.cameras.api import util_views as camera_util_views
+from vision_on_edge.cameras.api import views
+from vision_on_edge.image_predictions.api import \
+    views as image_prediction_views
+from vision_on_edge.locations.api import views as location_views
+
 from . import views as site_views
 
 
 class OptionalSlashRouter(routers.DefaultRouter):
     """Make slash ('/') in url to be optional"""
+
     def __init__(self):
         super().__init__()
         self.trailing_slash = '/?'

@@ -104,11 +104,9 @@ class SettingTestCase(APITransactionTestCase):
         """
         default_setting = Setting.objects.get(name="DEFAULT_SETTING")
         invalid_setting = Setting.objects.get(name="INVALID_SETTING")
-        self.assertIsInstance(
-            default_setting.revalidate_and_get_trainer_obj(),
-            CustomVisionTrainingClient)
-        self.assertIsNone(
-            invalid_setting.revalidate_and_get_trainer_obj())
+        self.assertIsInstance(default_setting.revalidate_and_get_trainer_obj(),
+                              CustomVisionTrainingClient)
+        self.assertIsNone(invalid_setting.revalidate_and_get_trainer_obj())
 
     def test_create_project_positive(self):
         """
@@ -127,8 +125,7 @@ class SettingTestCase(APITransactionTestCase):
         project = valid_setting.create_project(
             f"{PROJECT_PREFIX}-django_unittest")
 
-        self.assertIsInstance(project,
-                              Project)
+        self.assertIsInstance(project, Project)
         valid_setting.get_trainer_obj().get_project(project.id)
 
     def test_create_project_negative(self):
@@ -151,11 +148,11 @@ class SettingTestCase(APITransactionTestCase):
         # NA
         self.assertIsNone(project)
 
-    @ classmethod
+    @classmethod
     def tearDownClass(cls):
         logger.info("Deleting Projects on CustomVision")
-        trainer = CustomVisionTrainingClient(
-            api_key=TRAINING_KEY, endpoint=ENDPOINT)
+        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
+                                             endpoint=ENDPOINT)
         projects = trainer.get_projects()
         for project in projects:
             if project.name.find(PROJECT_PREFIX) == 0:

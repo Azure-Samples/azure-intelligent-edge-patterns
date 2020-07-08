@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class ProjectSerializer(serializers.ModelSerializer):
     """Project Serializer"""
+
     class Meta:
         model = Project
         fields = [
@@ -60,6 +61,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class TrainSerializer(serializers.ModelSerializer):
     """TrainSerializer"""
+
     class Meta:
         model = Train
         fields = ["id", "status", "log", "project"]
@@ -67,6 +69,7 @@ class TrainSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     """TaskSerializer"""
+
     class Meta:
         model = Task
         fields = ["task_type", "status", "log", "project"]
