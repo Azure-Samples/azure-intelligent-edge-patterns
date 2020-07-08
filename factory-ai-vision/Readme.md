@@ -29,9 +29,10 @@ Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to se
 You need to have one of the following:
 -	**Azure Stack Edge**  
 or
-- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
+- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
-     * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
+     * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
+### NOTE:This solution is only supported on linux based Azure IoT edge devices 
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
 
