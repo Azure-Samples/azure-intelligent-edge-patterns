@@ -133,7 +133,10 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
       </Grid>
       <Prompt
         when={imageCount < 15}
-        message="The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?"
+        message={(location): string => {
+          if (location.state === 'AFTER_DELETE') return;
+          return 'The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?';
+        }}
       />
     </Flex>
   );
