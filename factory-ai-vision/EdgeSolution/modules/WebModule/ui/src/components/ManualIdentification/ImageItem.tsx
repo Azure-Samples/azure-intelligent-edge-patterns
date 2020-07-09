@@ -1,4 +1,4 @@
-import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo } from 'react';
+import React, { useState, SetStateAction, Dispatch, FC, memo } from 'react';
 import { Text, RadioGroup } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
