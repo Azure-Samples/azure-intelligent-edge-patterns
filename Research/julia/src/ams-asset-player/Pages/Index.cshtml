@@ -1,0 +1,271 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@section Meta {
+  <link href="//amp.azure.net/libs/amp/latest/skins/amp-default/azuremediaplayer.min.css" rel="stylesheet">
+}
+
+@section Scripts {
+  <script src= "//amp.azure.net/libs/amp/latest/azuremediaplayer.min.js"></script>
+  <script>
+
+        $.fn.ajaxFunction = function(el) {
+            var precision ='year';
+            var parentId = "availableMedia";                                        
+            var childId = "yearList";
+
+            parentId = el.parent().parent().attr("id");
+            var startTime = el.parent().attr("id");
+
+            if (parentId.startsWith('yearList')) {
+                precision = "month";
+                childId = "monthList-" + startTime;
+            }
+            else if (parentId.startsWith("monthList")) {
+                precision = "day";
+                childId = "dayList-" + startTime;
+            }
+            else if (parentId.startsWith("dayList")) {
+                precision = "full";
+                childId = "fullList-" + startTime;
+            }
+
+            var assetName = $('#assetName').val();
+                        
+            $.getJSON(`?handler=AvailableMedia&assetName=${assetName}&precision=${precision}&startTime=${startTime}`, (data) => {
+
+                el.after(`<ul id="${childId}" class="expanded"></ul>`);
+                var obj = jQuery.parseJSON(data);
+                $.each(obj, function(i, item) {       
+                    if (precision == "full") {
+                        $(`#${childId}`).append(`<li id="${item.id}"><span class="timeRange">${item.value}</span></li>`);
+                    }
+                    else {
+                        $(`#${childId}`).append(`<li id="${item.id}"><span class="arrow">${item.value}</span></li>`);
+                    }
+                });
+
+            });
+        }
+      
+        $(function () {
+            // Trigger AJAX call to Get Available Media Time Range
+            $('#availableMediaList').on('click', '.arrow', function() {
+                                
+                if ($(this).hasClass("arrow-down")) {
+
+                    $(this).removeClass("arrow-down");
+                    $(this).siblings().remove();
+
+                }
+                else {
+
+                    $(this).addClass("arrow-down");
+                    $.fn.ajaxFunction($(this));          
+                }                                
+            });  
+
+            // Get streaming URL for selected time 
+            $('#availableMediaList').on('click', '.timeRange', function() {
+
+                var parentId = $(this).parent().attr("id");
+                var assetName = $('#assetName').val();
+                var precision = "full";
+
+                $.getJSON(`?handler=StreamingUrl&assetName=${assetName}&precision=${precision}&startTime=${parentId}`, (data) => {
+
+                    var obj = jQuery.parseJSON(data);
+                    var myPlayer = amp("video-player");
+                    myPlayer.src([{ src: obj.url, type: "application/vnd.ms-sstr+xml" }, ]);
+
+                    $('#surl').html(obj.url);
+
+                });
+
+            });
+
+            // Get streaming URL for selected time range
+            $('#btnPlayByTimeRange').on('click', function(event) {
+
+                var assetName = $('#assetName').val();
+                var precision = "range";
+
+                var startTime = "";
+                var endTime = "";
+
+                if ($('#assetStartDate').val() == "") {
+                    startTime = "";
+                }
+                else if ($('#assetStartTime').val() == "") {
+                    startTime = $('#assetStartDate').val() + "T00:00:00"
+                }
+                else {
+                    startTime = $('#assetStartDate').val() + "T" + $('#assetStartTime').val();
+                }
+
+                if (startTime != "") {
+                    if ($('#assetEndDate').val() == "") {
+                        endTime = "";
+                    }
+                    else if ($('#assetEndTime').val() == "") {
+                        endTime = $('#assetEndDate').val() + "T00:00:00"
+                    }
+                    else {
+                        endTime = $('#assetEndDate').val() + "T" + $('#assetEndTime').val();
+                    }                    
+                }
+
+                $.getJSON(`?handler=StreamingUrl&assetName=${assetName}&precision=${precision}&startTime=${startTime}&endTime=${endTime}`, (data) => {
+
+                    var obj = jQuery.parseJSON(data);
+                    var myPlayer = amp("video-player");
+                    myPlayer.src([{ src: obj.url, type: "application/vnd.ms-sstr+xml" }, ]);
+
+                    $('#surl').html(obj.url);
+
+                });
+
+
+            });
+
+        });
+  </script>
+}
+
+<style>
+    ul, #availableMediaList {
+        list-style-type: none;
+    }
+
+    #availableMediaList {
+        margin: 0;
+        padding: 0;
+    }
+
+    .arrow {
+        cursor: pointer;
+        -webkit-user-select: none; 
+        -moz-user-select: none; 
+        -ms-user-select: none; 
+        user-select: none;
+    }
+
+    .arrow::before {
+        content: "\25B6";
+        color: blue;
+        display: inline-block;
+        margin-right: 4px;
+    }
+
+    .arrow-down::before {
+        -ms-transform: rotate(90deg); 
+        -webkit-transform: rotate(90deg); 
+        transform: rotate(90deg);  
+    }
+
+    .expanded {
+        display: block;
+    }    
+
+    .timeRange {
+        cursor: pointer;
+        -webkit-user-select: none; 
+        -moz-user-select: none; 
+        -ms-user-select: none; 
+        user-select: none;    
+        color:blue;    
+    }
+
+    .divfloat {
+        float:left;
+        padding-top:20px;
+        padding-bottom:10px;
+        padding-right:10px;
+    }
+</style>
+
+<div>
+
+    <form asp-page-handler="asset" method="post">
+        <div class="form-group">
+            <label class="control-label">Provide asset name and click submit</label>
+            <input class="form-control" name="amsAssetName" id="assetName" value="@Model.assetName" />                        
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Submit" class="btn btn-primary" />
+        </div>
+    </form>    
+
+    <div style="display:@Model.playerVisibility">
+        <div style="float:left;padding-right:20px">
+            <video id="video-player" class="azuremediaplayer amp-default-skin" autoplay controls width="680" height="500" poster="" data-setup='{"nativeControlsForTouch": false, "wallClockTimeDisplaySettings":{"enabled":true}}'>
+                <source src="@Model.streamingUrl" type="application/dash+xml"   />
+            </video>
+            <br>
+
+        </div>
+
+        <div style="float:left;width:400px;height:500px;overflow-y:auto;overflow-x:hidden;padding-bottom:20px;">   
+
+            <ul id="availableMediaList">
+                <li><span class="arrow" id="availableMedia">Available Media</span>                
+                </li>
+            </ul>
+        </div>
+        <div style="clear: both;"></div>    
+        <div>
+            <b>Streaming Url: &nbsp;</b>
+            <span id="surl">@Model.streamingUrl</span>
+        </div>
+    </div>
+
+    <br>
+
+    <div style="display:@Model.playerVisibility">        
+        <hr/>
+        <br>
+        <h4>Select Start time and End time and click Submit</h4>
+        <div>
+            <div class="divfloat">Start time</div>
+            <div class="divfloat">
+                <input name="assetStartDate" id="assetStartDate" type="date" />
+            </div>
+            <div class="divfloat">
+                <input name="assetStartTime" id="assetStartTime" type="time" />
+            </div>
+
+            <div style="clear:both"></div>
+        </div>
+
+        <div>
+            <div class="divfloat">End time &nbsp;</div>
+            <div class="divfloat">
+                <input name="assetEndDate" id="assetEndDate" type="date" />
+            </div>
+            <div class="divfloat">
+                <input name="assetEndTime" id="assetEndTime" type="time" />
+            </div>
+
+            <div style="clear:both"></div>
+        </div>
+
+        <div>
+            <button class="btn btn-primary" style="padding:top:10px;" id="btnPlayByTimeRange">Submit</button>
+            <span style="padding-left: 10px;">(Note that difference between Start Time and End Time should be less than 25 hours)</span>
+        </div>
+
+        <div style="clear: both;"></div>        
+
+    </div>
+    
+
+    <div style="display: @Model.errorMessageVisibility;color:Red">
+        Error occured when creating a streaming URL for the provided asset name. Please check the asset name you provided.
+    </div>
+
+
+
+</div>
