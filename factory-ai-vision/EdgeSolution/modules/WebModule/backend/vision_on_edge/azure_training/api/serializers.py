@@ -7,7 +7,7 @@ import logging
 from rest_framework import serializers
 
 from ...azure_settings.models import Setting
-from ..models import Project, Task, Train
+from ..models import Image, Project, Task, Train
 
 logger = logging.getLogger(__name__)
 
@@ -17,23 +17,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = [
-            "setting",
-            "id",
-            "camera",
-            "location",
-            "parts",
-            "download_uri",
-            "customvision_project_id",
-            "needRetraining",
-            "accuracyRangeMin",
-            "accuracyRangeMax",
-            "maxImages",
-            "metrics_is_send_iothub",
-            "metrics_accuracy_threshold",
-            "metrics_frame_per_minutes",
-            "prob_threshold",
-        ]
+        fields = '__all__'
         extra_kwargs = {
             "setting": {
                 "required": False
@@ -64,7 +48,7 @@ class TrainSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Train
-        fields = ["id", "status", "log", "project"]
+        fields = '__all__'
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -72,4 +56,11 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ["task_type", "status", "log", "project"]
+        fields = '__all__'
+
+class ImageSerializer(serializers.ModelSerializer):
+    """ImageSerializer"""
+
+    class Meta:
+        model = Image
+        fields = '__all__'
