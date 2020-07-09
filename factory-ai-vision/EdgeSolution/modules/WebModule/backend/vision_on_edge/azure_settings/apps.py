@@ -24,7 +24,6 @@ class AzureSettingsConfig(AppConfig):
         """
         Azure Settings App ready
         """
-        # FIXME test may use this as well
         if 'runserver' in sys.argv:
             # pylint: disable=C0415
             from .models import Setting

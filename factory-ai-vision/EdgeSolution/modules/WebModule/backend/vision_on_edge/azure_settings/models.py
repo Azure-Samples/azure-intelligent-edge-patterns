@@ -5,8 +5,10 @@ import logging
 
 from azure.cognitiveservices.vision.customvision.training import \
     CustomVisionTrainingClient
+# pylint: disable=line-too-long
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
+# pylint: enable=line-too-long
 from django.db import models
 from django.db.models.signals import pre_save
 
@@ -78,8 +80,6 @@ class Setting(models.Model):
             is_trainer_valid = True
         except CustomVisionErrorException:
             trainer = None
-        except Exception:
-            trainer = None
         return is_trainer_valid, trainer
 
     def revalidate_and_get_trainer_obj(self):
@@ -95,9 +95,12 @@ class Setting(models.Model):
         return None
 
     @staticmethod
-    def pre_save(instance, **kwargs):
+    def pre_save(**kwargs):
         """Setting pre_save"""
         logger.info("Setting Presave")
+        if 'instance' not in kwargs:
+            return
+        instance = kwargs['instance']
         try:
             logger.info("Validating CustomVisionClient %s", instance.name)
             trainer = Setting._get_trainer_obj_static(

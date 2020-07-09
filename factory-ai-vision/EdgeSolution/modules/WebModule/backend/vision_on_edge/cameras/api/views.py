@@ -1,6 +1,7 @@
 """
 Camera views
 """
+
 from __future__ import absolute_import, unicode_literals
 
 import logging
@@ -18,8 +19,7 @@ from .serializers import CameraSerializer
 logger = logging.getLogger(__name__)
 
 
-
-
+# pylint: disable=too-many-ancestors
 class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Camera ModelViewSet
@@ -34,7 +34,6 @@ class CameraViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "is_demo": "is_demo",
     }
-
 
 
 @api_view()

@@ -18,6 +18,7 @@ from .serializers import SettingSerializer
 logger = logging.getLogger(__name__)
 
 
+# pylint: disable=too-many-ancestors
 class SettingViewSet(viewsets.ModelViewSet):
     """
     Setting ModelViewSet
@@ -27,12 +28,12 @@ class SettingViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
 
     @action(detail=True, methods=["get"])
-    def list_projects(self, request, pk=None):
+    def list_projects(self, request, **kwargs):
         """
-        List Project under Training Key + Endpoint
+        List projects under Training Key + Endpoint
         """
         try:
-            setting_obj = Setting.objects.get(pk=pk)
+            setting_obj = self.queryset.get(pk=kwargs['pk'])
             if not setting_obj.training_key:
                 raise ValueError("Training Key")
             if not setting_obj.endpoint:
@@ -95,3 +96,4 @@ class SettingViewSet(viewsets.ModelViewSet):
                         str(exception)  # Force yapf to change line...
                 },
                 status=status.HTTP_400_BAD_REQUEST)
+# pylint: enable=too-many-ancestors

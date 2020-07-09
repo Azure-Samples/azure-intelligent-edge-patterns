@@ -8,6 +8,7 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
+
 class CamerasConfig(AppConfig):
     """
     Cameras App Config
