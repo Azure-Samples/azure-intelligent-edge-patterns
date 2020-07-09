@@ -279,8 +279,8 @@ if test -z "$(az role definition list -n "$ROLE_DEFINITION_NAME" | grep "roleNam
     sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $ROLE_DEFINITION_FILE
     sed -i "s/\$ROLE_DEFINITION_NAME/$ROLE_DEFINITION_NAME/" $ROLE_DEFINITION_FILE
     
-    az role definition create --role-definition $ROLE_DEFINITION_URL
-    #checkForError
+    az role definition create --role-definition $ROLE_DEFINITION_FILE
+    checkForError
 fi
 # capture object_id
 echo "made it to line 225"
@@ -295,11 +295,11 @@ echo -e "The service principal with object id ${OBJECT_ID} is now linked with cu
 
 echo -e "
 Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint."
- az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
+az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
 
- echo "Kicking off the async start of the Premium streaming endpoint."
+echo "Kicking off the async start of the Premium streaming endpoint."
 echo "  This is needed to run samples or tutorials involving video playback."
- az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
+az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
 
 # # write env file for edge deployment
  echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" >> $ENV_FILE
