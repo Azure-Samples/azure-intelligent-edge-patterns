@@ -1,5 +1,5 @@
-import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo, useMemo } from 'react';
-import { Dropdown, DropdownItemProps, Text, RadioGroup } from '@fluentui/react-northstar';
+import React, { useState, useEffect, SetStateAction, Dispatch, FC, memo } from 'react';
+import { Text, RadioGroup } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
 import { JudgedImageList, RelabelImage } from './types';
@@ -10,7 +10,6 @@ interface ImageIdentificationItemProps {
   imageIndex: number;
   setJudgedImageList: Dispatch<SetStateAction<JudgedImageList>>;
   partId: number;
-  partItems: DropdownItemProps[];
   isPartCorrect: number;
 }
 const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
@@ -19,39 +18,8 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   imageIndex,
   setJudgedImageList,
   partId,
-  partItems,
   isPartCorrect,
 }) => {
-  const filteredPartItems = useMemo(
-    () => [
-      {
-        header: 'No Object',
-        content: {
-          key: null,
-        },
-      },
-      ...partItems.filter((e) => (e.content as { key: number }).key !== partId),
-    ],
-    [partId, partItems],
-  );
-  const [selectedPartItem, setSelectedPartItem] = useState<DropdownItemProps>(filteredPartItems[0]);
-
-  const onDropdownChange = (_, { value }): void => {
-    if (value !== null) {
-      setSelectedPartItem(value);
-
-      setJudgedImageList((prev) => {
-        const next = [...prev];
-        const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
-
-        if (idx === -1) throw new Error("Image id doesn't match");
-        next[idx] = { ...next[idx], partId: value.content.key };
-
-        return next;
-      });
-    }
-  };
-
   const [forceDialogOpen, setForceDialogOpen] = useState(false);
 
   const onRadioGroupChange = (_, newProps): void => {
@@ -82,8 +50,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
 
   useEffect(() => {
     setJudgedImageList([]);
-    setSelectedPartItem(filteredPartItems[0]);
-  }, [filteredPartItems, setSelectedPartItem, setJudgedImageList]);
+  }, [setJudgedImageList]);
 
   return (
     <div
@@ -151,16 +118,6 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
               },
             ]}
           />
-          {isPartCorrect === 0 && filteredPartItems.length > 0 && (
-            <div style={{ width: '50%' }}>
-              <Dropdown
-                fluid
-                items={filteredPartItems}
-                onChange={onDropdownChange}
-                value={selectedPartItem}
-              />
-            </div>
-          )}
         </div>
       </div>
     </div>

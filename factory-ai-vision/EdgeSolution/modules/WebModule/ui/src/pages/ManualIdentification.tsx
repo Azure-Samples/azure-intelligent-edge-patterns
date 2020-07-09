@@ -198,7 +198,6 @@ const ManualIdentification: FC = () => {
           judgedImageList={judgedImageList}
           setJudgedImageList={setJudgedImageList}
           selectedPartId={selectedPartId}
-          partItems={partItems}
         />
         <Button
           content="Update"
