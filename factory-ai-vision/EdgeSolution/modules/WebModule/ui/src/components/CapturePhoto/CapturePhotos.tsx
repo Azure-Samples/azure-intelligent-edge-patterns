@@ -16,13 +16,15 @@ import { formatDropdownValue } from '../../util/formatDropdownValue';
 
 export const CapturePhotos: React.FC<{
   partId: number;
+  partName: string;
   goLabelImageIdx: number;
   setGoLabelImageIdx: Dispatch<number>;
-}> = ({ partId, goLabelImageIdx, setGoLabelImageIdx }) => {
+}> = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
   const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const availableCameras = useCameras();
   const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
   const prevImageLength = useRef<number>(filteredImages.length);
 
@@ -37,15 +39,23 @@ export const CapturePhotos: React.FC<{
     }
   }, [openLabelingPage, filteredImages, setGoLabelImageIdx]);
 
+  const autoPlay = availableCameras.length === 1 && !!selectedCamera;
+
   return (
     <Flex gap="gap.small">
       <Flex column gap="gap.small" styles={{ width: '70%' }}>
-        <CameraSelector selectedCamera={selectedCamera} setSelectedCamera={setSelectedCamera} />
+        <CameraSelector
+          selectedCamera={selectedCamera}
+          setSelectedCamera={setSelectedCamera}
+          availableCameras={availableCameras}
+        />
         <RTSPVideo
           rtsp={selectedCamera?.rtsp}
           partId={partId}
+          partName={partName}
           canCapture={true}
           setOpenLabelingPage={setOpenLabelingPage}
+          autoPlay={autoPlay}
         />
       </Flex>
       <Flex column gap="gap.small" styles={{ width: '30%', minWidth: '450px' }}>
@@ -55,9 +65,7 @@ export const CapturePhotos: React.FC<{
   );
 };
 
-const CameraSelector = ({ selectedCamera, setSelectedCamera }): JSX.Element => {
-  const availableCameras = useCameras();
-
+const CameraSelector = ({ selectedCamera, setSelectedCamera, availableCameras }): JSX.Element => {
   const items: DropdownItemProps[] = availableCameras.map((ele) => ({
     header: ele.name,
     content: {
@@ -131,7 +139,10 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
       </Grid>
       <Prompt
         when={imageCount < 15}
-        message="The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?"
+        message={(location): string => {
+          if (location.state === 'AFTER_DELETE') return;
+          return 'The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?';
+        }}
       />
     </Flex>
   );

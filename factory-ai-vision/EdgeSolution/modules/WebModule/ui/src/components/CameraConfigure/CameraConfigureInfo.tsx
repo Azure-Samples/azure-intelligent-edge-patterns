@@ -100,7 +100,7 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
   return (
     <>
       {error && <Alert danger header={error.name} content={`${error.message}`} />}
-      <ListItem title="Maximum Confidence Level">
+      <ListItem title="Threshold to see current model detection result on objects">
         <Input
           value={project.probThreshold}
           onChange={(_, { value }): void => {
@@ -110,7 +110,7 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
         <span>%</span>
         <Button
           primary
-          content="Update Confidence Level"
+          content="Update Threshold level"
           onClick={(): void => {
             dispatch(thunkUpdateProbThreshold());
           }}
@@ -132,7 +132,7 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
             title="Successful Inferences"
             footerText={
               successInferenceFooter
-                ? 'If you are not seeing inference result, we recommend to change the confidence level to 10%.'
+                ? 'If you are not seeing inference result, we recommend to change the capture image range to current model accuracy accordingly.'
                 : ''
             }
           >
@@ -144,7 +144,7 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
         title="Unidentified Items"
         footerText={
           unIdentifiedItemFooter
-            ? 'If you are not receiving any images, we recommend to change the accuracy range to minimum 10%.'
+            ? 'If you are not receiving any images, we recommend to chance the capture image range to minimum 10%.'
             : ''
         }
       >
@@ -153,7 +153,7 @@ const CameraConfigureInfo: React.FC<{ projectId: number }> = ({ projectId }) => 
         </Text>
         <Button content="Identify Manually" primary styles={{ marginLeft: '100px' }} as={Link} to="/manual" />
       </ListItem>
-      <Text>Accuracy Range: </Text>
+      <Text>Capture image and model successful result: </Text>
       <Flex gap="gap.medium" vAlign="center">
         <Text>Minimum:</Text>
         <Input

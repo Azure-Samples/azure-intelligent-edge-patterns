@@ -1,3 +1,4 @@
+
 ---
 languages:
 - json
@@ -135,5 +136,4 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
-
 
