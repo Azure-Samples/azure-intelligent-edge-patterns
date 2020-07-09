@@ -48,10 +48,6 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
     if (newProps.value === 1) setForceDialogOpen(true);
   };
 
-  useEffect(() => {
-    setJudgedImageList([]);
-  }, [setJudgedImageList]);
-
   return (
     <div
       style={{
