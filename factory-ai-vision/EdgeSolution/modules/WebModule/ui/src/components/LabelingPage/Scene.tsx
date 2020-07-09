@@ -100,9 +100,11 @@ const Scene: FC<SceneProps> = ({
     }
   };
 
+  // FIXIME: Probably use useReduce for this case
   const onSelect = (index: number): void => {
     setSelectedAnnotationIndex(index);
-    setWorkState(WorkState.Selecting);
+    if (index === null) setWorkState(WorkState.None);
+    else setWorkState(WorkState.Selecting);
   };
 
   useEffect(() => {
@@ -200,11 +202,12 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
-      {annotations[0] && (
+      {selectedAnnotationIndex !== null && (
         <PartForm
           top={annotations[0]?.label.y1 * scale.current - 10}
           left={annotations[0]?.label.x2 * scale.current + 10}
           open={true}
+          onDismiss={(): void => onSelect(null)}
         />
       )}
     </div>

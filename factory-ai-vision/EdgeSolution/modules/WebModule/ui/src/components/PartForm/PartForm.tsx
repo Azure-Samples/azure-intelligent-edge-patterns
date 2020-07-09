@@ -1,5 +1,5 @@
 import React from 'react';
-import { RadioGroup } from '@fluentui/react-northstar';
+import { RadioGroup, Button, CloseIcon } from '@fluentui/react-northstar';
 import { useParts } from '../../hooks/useParts';
 import { useProject } from '../../hooks/useProject';
 
@@ -7,9 +7,10 @@ type PartFormProps = {
   top: number;
   left: number;
   open: boolean;
+  onDismiss: () => void;
 };
 
-export const PartForm: React.FC<PartFormProps> = ({ top, left, open }) => {
+export const PartForm: React.FC<PartFormProps> = ({ top, left, open, onDismiss }) => {
   const parts = useParts();
   const project = useProject();
 
@@ -32,6 +33,7 @@ export const PartForm: React.FC<PartFormProps> = ({ top, left, open }) => {
         zIndex: 1000,
         backgroundColor: '#fff',
         padding: '15px',
+        paddingTop: '25px',
         boxShadow: 'rgb(187, 187, 187) 0px 2px 8px',
         border: '1px solid rgba(34,36,38,.15)',
         borderRadius: '5px',
@@ -43,6 +45,13 @@ export const PartForm: React.FC<PartFormProps> = ({ top, left, open }) => {
         vertical
         items={items}
         onCheckedValueChange={(_, newProps) => console.log(newProps.value)}
+      />
+      <Button
+        icon={<CloseIcon />}
+        styles={{ position: 'absolute', right: 0, top: 0 }}
+        text
+        iconOnly
+        onClick={onDismiss}
       />
     </div>
   );
