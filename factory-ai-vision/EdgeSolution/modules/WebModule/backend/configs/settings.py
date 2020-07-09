@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'vision_on_edge.parts',
+    'vision_on_edge.streams',
     'vision_on_edge.azure_settings',
     'vision_on_edge.locations',
     'vision_on_edge.cameras',
@@ -64,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 if APP_INSIGHT_ON:
     from configs.app_insight import APP_INSIGHT_CONN_STR
@@ -173,4 +176,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = logging_config.LOGGING_CONFIG_DEV
+LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION

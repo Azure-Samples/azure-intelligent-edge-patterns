@@ -12,13 +12,16 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Camera',
+            name='Part',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=200)),
-                ('rtsp', models.CharField(max_length=1000)),
-                ('area', models.CharField(blank=True, max_length=1000)),
+                ('description', models.CharField(blank=True, default='', max_length=1000)),
                 ('is_demo', models.BooleanField(default=False)),
+                ('name_lower', models.CharField(default='<django.db.models.fields.charfield>', max_length=200)),
             ],
+            options={
+                'unique_together': {('name_lower', 'is_demo')},
+            },
         ),
     ]
