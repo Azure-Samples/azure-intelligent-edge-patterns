@@ -30,6 +30,7 @@ def inference_module_url():
 
 # Create your models here.
 
+
 class Camera(models.Model):
     """Camera Model"""
 
@@ -60,8 +61,11 @@ class Camera(models.Model):
         return True
 
     @staticmethod
-    def pre_save(instance, update_fields, **kwargs):
+    def pre_save(**kwargs):
         """Camera pre_save"""
+        if 'instance' not in kwargs:
+            return
+        instance = kwargs['instance']
         if instance.is_demo:
             return
         if instance.rtsp is None:
@@ -71,8 +75,11 @@ class Camera(models.Model):
             raise ValueError('rtsp is not valid')
 
     @staticmethod
-    def post_save(instance, update_fields, **kwargs):
+    def post_save(**kwargs):
         """Camera post_save"""
+        if 'instance' not in kwargs:
+            return
+        instance = kwargs['instance']
         if len(instance.area) > 1:
             logger.info("Sending new AOI to Inference Module...")
             try:
