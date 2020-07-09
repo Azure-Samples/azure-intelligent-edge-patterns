@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Image, Tooltip, Flex, RadioGroup } from '@fluentui/react-northstar';
 
@@ -10,18 +10,15 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   partId,
   partName,
   canCapture,
-  onVideoStart,
-  onVideoPause,
   setOpenLabelingPage,
+  autoPlay,
 }) => {
   const dispatch = useDispatch();
   const [streamId, setStreamId] = useState<string>('');
   const [captureLabelMode, setCaptureLabelMode] = useState<number>(0);
 
-  const onCreateStream = (): void => {
-    let url = `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
-    if (!canCapture) url += '&inference=1';
-    fetch(url)
+  const onCreateStream = useCallback((): void => {
+    fetch(`/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`)
       .then((response) => response.json())
       .then((data) => {
         if (data?.status === 'ok') {
@@ -32,8 +29,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
       .catch((err) => {
         console.error(err);
       });
-    if (onVideoStart) onVideoStart();
-  };
+  }, [partId, rtsp]);
 
   const onCapturePhoto = (): void => {
     dispatch(thunkAddCapturedImages(streamId, partName));
@@ -53,7 +49,6 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
       .catch((err) => {
         console.error(err);
       });
-    if (onVideoPause) onVideoPause();
   };
 
   useEffect(() => {
@@ -62,6 +57,10 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
       window.removeEventListener('beforeunload', onDisconnect);
     };
   });
+
+  useEffect(() => {
+    if (autoPlay) onCreateStream();
+  }, [autoPlay, onCreateStream]);
 
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
