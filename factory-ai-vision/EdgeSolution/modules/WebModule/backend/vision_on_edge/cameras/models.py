@@ -115,7 +115,7 @@ class Image(models.Model):
                 logger.error("%s, %s, %s, %s must be greater than 0", left,
                              top, width, height)
                 return
-            elif left + width > 1:
+            if left + width > 1:
                 logger.error("left + width: %s + %s must be less than 1", left,
                              width)
                 return
@@ -306,7 +306,7 @@ class Stream(object):
     def gen(self):
         """generator for stream"""
         self.status = "running"
-        logger.info(f"start streaming with {self.rtsp}")
+        logger.info("start streaming with %s", self.rtsp)
         self.cap = cv2.VideoCapture(self.rtsp)
         while self.status == "running":
             if not self.cap.isOpened():
