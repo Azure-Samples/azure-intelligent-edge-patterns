@@ -20,6 +20,7 @@ import {
   removeAnnotation,
 } from '../../store/labelingPage/labelingPageActions';
 import RemoveBoxButton from './RemoveBoxButton';
+import { PartForm } from '../PartForm';
 
 const defaultSize: Size2D = {
   width: 800,
@@ -125,7 +126,7 @@ const Scene: FC<SceneProps> = ({
   const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
   return (
-    <div style={{ margin: '0.2em' }}>
+    <div style={{ margin: '0.2em', position: 'relative' }}>
       {annotations.length !== 0 &&
       showOuterRemoveButton &&
       !isDragging &&
@@ -199,6 +200,13 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
+      {annotations[0] && (
+        <PartForm
+          top={annotations[0]?.label.y1 * scale.current - 10}
+          left={annotations[0]?.label.x2 * scale.current + 10}
+          open={true}
+        />
+      )}
     </div>
   );
 };
