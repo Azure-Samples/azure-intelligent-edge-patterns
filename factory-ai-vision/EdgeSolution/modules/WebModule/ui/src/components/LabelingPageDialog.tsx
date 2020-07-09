@@ -1,10 +1,10 @@
 import React, { memo, FC, useState, useEffect } from 'react';
-import { Dialog } from '@fluentui/react-northstar';
 
 import LabelingPage from '../pages/LabelingPage';
 import { LabelingType } from '../store/labelingPage/labelingPageTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { RelabelImage } from './ManualIdentification/types';
+import { Dialog } from './Dialog';
 
 interface LabelingPageDialogProps {
   trigger: JSX.Element;
