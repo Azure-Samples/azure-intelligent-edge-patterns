@@ -52,6 +52,8 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
     }
   };
 
+  const [forceDialogOpen, setForceDialogOpen] = useState(false);
+
   const onRadioGroupChange = (_, newProps): void => {
     setJudgedImageList((prev) => {
       const next = [...prev];
@@ -74,6 +76,8 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
       }
       return next;
     });
+
+    if (newProps.value === 1) setForceDialogOpen(true);
   };
 
   useEffect(() => {
@@ -95,6 +99,8 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         imageIndex={imageIndex}
         images={relabelImages}
         isRelabel={true}
+        forceOpen={forceDialogOpen}
+        setForceOpen={setForceDialogOpen}
         trigger={
           <div
             style={{
