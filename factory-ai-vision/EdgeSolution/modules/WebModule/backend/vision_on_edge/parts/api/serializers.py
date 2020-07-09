@@ -15,7 +15,7 @@ class PartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Part
-        fields = ["id", "name", "description", "is_demo"]
+        fields = "__all__"
         extra_kwargs = {
             "description": {
                 "required": False

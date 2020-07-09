@@ -2,16 +2,12 @@
 Camera models
 """
 import logging
-import sys
-import threading
-import time
 
 import cv2
 import requests
 from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
-from django.db.utils import IntegrityError
 
 logger = logging.getLogger(__name__)
 

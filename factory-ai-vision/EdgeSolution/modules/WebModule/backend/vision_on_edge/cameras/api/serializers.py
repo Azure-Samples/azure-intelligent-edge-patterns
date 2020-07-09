@@ -16,7 +16,7 @@ class CameraSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Camera
-        fields = ["id", "name", "rtsp", "area", "is_demo"]
+        fields = "__all__"
 
     def create(self, validated_data):
         try:

@@ -3,12 +3,8 @@ Camera views
 """
 from __future__ import absolute_import, unicode_literals
 
-import base64
-import datetime
-import io
 import logging
 
-from django.core.files.images import ImageFile
 from django.http import JsonResponse
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
@@ -16,7 +12,6 @@ from rest_framework.decorators import api_view
 
 from configs.app_insight import APP_INSIGHT_INST_KEY
 
-from ...parts.models import Part
 from ..models import Camera
 from .serializers import CameraSerializer
 
