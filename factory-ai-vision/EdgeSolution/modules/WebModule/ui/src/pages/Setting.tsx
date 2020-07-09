@@ -10,7 +10,6 @@ import {
   Dropdown,
   DropdownItemProps,
   Checkbox,
-  Dialog,
   QuestionCircleIcon,
   Tooltip,
 } from '@fluentui/react-northstar';
@@ -31,6 +30,7 @@ import {
   thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
 import { updateProjectData, updateOriginProjectData, thunkGetProject } from '../store/project/projectActions';
+import { Dialog } from '../components/Dialog';
 
 export const Setting = (): JSX.Element => {
   const {

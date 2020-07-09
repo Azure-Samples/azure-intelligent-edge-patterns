@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Dialog, Input, Flex, TextArea } from '@fluentui/react-northstar';
+import { Input, Flex, TextArea } from '@fluentui/react-northstar';
 import * as R from 'ramda';
 
 import AddButton from '../AddButton';
+import { Dialog } from '../Dialog';
 
 export type AddModuleDialogProps = {
   header: string;
