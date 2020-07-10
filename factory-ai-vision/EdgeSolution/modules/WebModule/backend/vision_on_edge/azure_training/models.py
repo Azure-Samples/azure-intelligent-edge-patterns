@@ -18,11 +18,6 @@ from django.db.models.signals import post_save, pre_delete, pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
-from ..azure_settings.models import Setting
-from ..cameras.models import Camera
-from ..locations.models import Location
-# from ..images.models import Image
-from ..parts.models import Part
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
@@ -52,10 +47,16 @@ def inference_module_url():
 class Project(models.Model):
     """Project Model"""
 
-    setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
-    parts = models.ManyToManyField(Part, related_name="part")
+    setting = models.ForeignKey("azure_settings.Setting",
+                                on_delete=models.CASCADE,
+                                default=1)
+    camera = models.ForeignKey("cameras.Camera",
+                               on_delete=models.CASCADE,
+                               null=True)
+    location = models.ForeignKey("locations.Location",
+                                 on_delete=models.CASCADE,
+                                 null=True)
+    parts = models.ManyToManyField("part.Part", related_name="part")
     customvision_project_id = models.CharField(max_length=200,
                                                null=True,
                                                blank=True,
@@ -488,7 +489,7 @@ class Image(models.Model):
     """Image Model"""
 
     image = models.ImageField(upload_to="images/")
-    part = models.ForeignKey(Part, on_delete=models.CASCADE)
+    part = models.ForeignKey("part.Part", on_delete=models.CASCADE)
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)

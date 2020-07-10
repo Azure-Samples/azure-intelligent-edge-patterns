@@ -12,17 +12,17 @@ class PartsConfig(AppConfig):
     """
     Parts App Config
     """
-    name = 'vision_on_edge.parts'
+    name = 'vision_on_edge.part'
 
     def ready(self):
         """
-        Parts App ready
+        Part App ready
         """
         # FIXME test may use this as well
         if 'runserver' in sys.argv:
             # Import models in migrate/makemigration will occurs error.
             # pylint: disable=C0415
-            from vision_on_edge.parts.models import Part
+            from vision_on_edge.part.models import Part
             # pylint: enable=C0415
 
             logger.info("Part App Config ready while running server")

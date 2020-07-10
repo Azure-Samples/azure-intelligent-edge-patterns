@@ -27,7 +27,7 @@ from vision_on_edge.cameras.api import views
 from vision_on_edge.image_predictions.api import \
     views as image_prediction_views
 from vision_on_edge.locations.api import views as location_views
-from vision_on_edge.parts.api import views as part_views
+from vision_on_edge.part.api import views as part_views
 from vision_on_edge.streams.api import views as stream_views
 #from vision_on_edge.images.api import views as image_views
 from vision_on_edge.relabeling.api import views as relabel_views

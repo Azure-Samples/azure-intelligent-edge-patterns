@@ -14,7 +14,7 @@ from rest_framework.decorators import api_view
 
 from ...azure_training.api.serializers import ImageSerializer
 from ...azure_training.models import Image
-from ...parts.models import Part
+from ...part.models import Part
 from ..models import Stream
 
 logger = logging.getLogger(__name__)

@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 from ...azure_training.models import Image
-from ...parts.models import Part
+from ...part.models import Part
 
 logger = logging.getLogger(__name__)
 
