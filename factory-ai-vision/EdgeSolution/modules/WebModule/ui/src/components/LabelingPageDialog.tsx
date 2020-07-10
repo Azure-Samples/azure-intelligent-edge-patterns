@@ -1,4 +1,4 @@
-import React, { memo, FC, useState, useEffect, Dispatch } from 'react';
+import React, { memo, FC, useState, useEffect } from 'react';
 
 import LabelingPage from '../pages/LabelingPage';
 import { LabelingType } from '../store/labelingPage/labelingPageTypes';
@@ -12,14 +12,12 @@ interface LabelingPageDialogProps {
   images: LabelImage[] | RelabelImage[];
   isRelabel: boolean;
   forceOpen?: boolean;
-  setForceOpen?: Dispatch<boolean>;
 }
 const LabelingPageDialog: FC<LabelingPageDialogProps> = ({
   trigger,
   images,
   imageIndex,
-  forceOpen,
-  setForceOpen,
+  forceOpen = false,
 }): JSX.Element => {
   const [open, setOpen] = useState(false);
 
@@ -35,10 +33,7 @@ const LabelingPageDialog: FC<LabelingPageDialogProps> = ({
       onOpen={(): void => setOpen(true)}
       content={
         <LabelingPage
-          closeDialog={(): void => {
-            if (setForceOpen) setForceOpen(false);
-            setOpen(false);
-          }}
+          closeDialog={(): void => setOpen(false)}
           labelingType={LabelingType.SingleAnnotation}
           images={images}
           imageIndex={imageIndex}
