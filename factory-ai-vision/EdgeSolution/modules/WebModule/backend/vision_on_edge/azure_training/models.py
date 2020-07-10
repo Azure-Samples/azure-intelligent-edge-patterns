@@ -1,5 +1,5 @@
 """
-Models for Azure CustomVIsion training.
+Models for Azure Custom Vision training.
 """
 import datetime
 import json
@@ -44,7 +44,6 @@ def inference_module_url():
 
 
 # Create your models here.
-
 
 class Project(models.Model):
     """Project Model"""
@@ -135,8 +134,6 @@ class Project(models.Model):
             #    f'Got Custom Vision Project Id: {project.id}. Saving...')
             # instance.customvision_project_id = project.id
         else:
-            # logger.info('Has not set the key, Got DUMMY PRJ ID')
-            # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
             instance.customvision_project_id = ""
         logger.info("Project pre_save... End")
 

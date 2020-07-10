@@ -81,6 +81,10 @@ class Setting(models.Model):
             is_trainer_valid = True
         except CustomVisionErrorException:
             trainer = None
+        except MSClientRequestError:
+            trainer = None
+        except Exception:
+            trainer = None
         return is_trainer_valid, trainer
 
     def revalidate_and_get_trainer_obj(self):
@@ -97,7 +101,9 @@ class Setting(models.Model):
 
     @staticmethod
     def pre_save(**kwargs):
-        """Setting pre_save"""
+        """
+        Setting pre_save
+        """
         logger.info("Setting Presave")
         if 'instance' not in kwargs:
             return
@@ -111,35 +117,20 @@ class Setting(models.Model):
                 if domain.type == "ObjectDetection" and
                 domain.name == "General (compact)")
 
-            logger.info("Validating Trainer %s Key + Endpoint... Pass",
-                        instance.name)
+            logger.info("Setting %s is valid", instance.name)
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
-        except CustomVisionErrorException as customvision_err:
-            logger.error("Setting Presave occur CustomVisionError: %s",
-                         customvision_err)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except KeyError as key_err:
-            logger.error("Setting Presave occur KeyError: %s", key_err)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
+            return
+        except CustomVisionErrorException:
+            logger.exception("Setting Presave occur CustomVisionError")
+        except KeyError:
+            logger.exception("Setting pre_save occur KeyError")
         except MSClientRequestError:
-            logger.error("=============")
-            logger.error("Network Error")
-            logger.error("=============")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except Exception as unexpected_error:
-            logger.exception("Setting pre_save occur unexpected Error")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        finally:
-            logger.info("Setting Presave... End")
+            logger.exception("Setting pre_save occur MSClientRequestError...")
+        except Exception:
+            logger.exception("Setting pre_save occur unexpected Error...")
+        instance.is_trainer_valid = False
+        instance.obj_detection_domain_id = ""
 
     def create_project(self, project_name: str):
         """
@@ -156,13 +147,14 @@ class Setting(models.Model):
             project = trainer.create_project(
                 name=project_name, domain_id=self.obj_detection_domain_id)
             return project
-        except CustomVisionErrorException as customvision_err:
-            logger.error("Setting creating_project errors %s",
-                         customvision_err)
-            return None
+        except CustomVisionErrorException:
+            logger.error("Create project occur CustomVisionErrorException")
+        except MSClientRequestError:
+            logger.exception("Create project occur MSClientRequestError")
         except Exception:
-            logger.exception("Setting Presave: Unexpected Error")
+            logger.exception("Create project occur unexpected error...")
             raise
+        return None
 
     def delete_project(self, project_id: str):
         """

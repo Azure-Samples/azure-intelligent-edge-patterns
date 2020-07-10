@@ -8,6 +8,7 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
+
 class PartsConfig(AppConfig):
     """
     Parts App Config
@@ -18,18 +19,19 @@ class PartsConfig(AppConfig):
         """
         Part App ready
         """
-        # FIXME test may use this as well
         if 'runserver' in sys.argv:
             # Import models in migrate/makemigration will occurs error.
-            # pylint: disable=C0415
+            # pylint: disable = import-outside-toplevel
+            # pylint: disable = unused-import
+
             from vision_on_edge.part.models import Part
-            # pylint: enable=C0415
+            from .signals import azure_setting_change_handler
 
             logger.info("Part App Config ready while running server")
 
             create_demo = True
             if create_demo:
-                logger.info("Creating Demo Parts")
+                logger.info("Creating demo parts...")
                 # for partname in ['Box', 'Barrel', 'Hammer',
                 #   'Screwdriver', 'Bottle', 'Plastic bag']:
                 for partname in [
@@ -58,7 +60,6 @@ class PartsConfig(AppConfig):
                         name=partname,
                         is_demo=True,
                         defaults={'description': "Demo"})
+                logger.info("Creating demo parts finished.")
 
-                logger.info("Creating Demo... End")
-
-            logger.info("Part AppConfig end while running server")
+            logger.info("Part App Config end while running server")

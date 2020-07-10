@@ -10,6 +10,7 @@ from django.db.utils import IntegrityError
 
 logger = logging.getLogger(__name__)
 
+
 class Part(models.Model):
     """Part Model"""
 
@@ -36,5 +37,6 @@ class Part(models.Model):
             raise integrity_error
         except:
             logger.exception("Unexpected Error in Part Presave")
+
 
 pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")

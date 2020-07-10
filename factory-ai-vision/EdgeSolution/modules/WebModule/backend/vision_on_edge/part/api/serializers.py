@@ -10,6 +10,7 @@ from ..models import Part
 
 logger = logging.getLogger(__name__)
 
+
 class PartSerializer(serializers.ModelSerializer):
     """PartSerializer"""
 
