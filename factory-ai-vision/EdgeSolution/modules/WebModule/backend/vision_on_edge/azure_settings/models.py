@@ -126,7 +126,8 @@ class Setting(models.Model):
             instance.obj_detection_domain_id = ""
         except Exception as unexpected_error:
             logger.exception("Setting Presave: Unexpected Error")
-            raise unexpected_error
+            instance.is_trainer_valid = False
+            instance.obj_detection_domain_id = ""
         finally:
             logger.info("Setting Presave... End")
 
