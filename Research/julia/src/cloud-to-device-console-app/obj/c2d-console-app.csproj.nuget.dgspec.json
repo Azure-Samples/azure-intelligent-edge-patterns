@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj": {}
+    "C:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj": {}
   },
   "projects": {
-    "c:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj": {
+    "C:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj",
+        "projectUniqueName": "C:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj",
         "projectName": "c2d-console-app",
-        "projectPath": "c:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj",
+        "projectPath": "C:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj",
         "packagesPath": "C:\\Users\\t-jull\\.nuget\\packages\\",
-        "outputPath": "c:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\obj\\",
+        "outputPath": "C:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
