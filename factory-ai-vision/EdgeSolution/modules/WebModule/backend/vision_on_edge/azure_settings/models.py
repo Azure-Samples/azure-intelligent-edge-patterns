@@ -9,6 +9,7 @@ from azure.cognitiveservices.vision.customvision.training import \
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
 # pylint: enable=line-too-long
+from msrest.exceptions import ClientRequestError as MSClientRequestError
 from django.db import models
 from django.db.models.signals import pre_save
 
@@ -127,9 +128,16 @@ class Setting(models.Model):
                 "Set is_trainer_valid to False, obj_detection_domain_id to ''")
             instance.is_trainer_valid = False
             instance.obj_detection_domain_id = ""
+        except MSClientRequestError:
+            logger.error("=============")
+            logger.error("Network Error")
+            logger.error("=============")
+            instance.is_trainer_valid = False
+            instance.obj_detection_domain_id = ""
         except Exception as unexpected_error:
-            logger.exception("Setting Presave: Unexpected Error")
-            raise unexpected_error
+            logger.exception("Setting pre_save occur unexpected Error")
+            instance.is_trainer_valid = False
+            instance.obj_detection_domain_id = ""
         finally:
             logger.info("Setting Presave... End")
 
