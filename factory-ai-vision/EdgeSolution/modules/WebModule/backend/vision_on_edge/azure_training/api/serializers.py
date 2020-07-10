@@ -7,7 +7,7 @@ import logging
 from rest_framework import serializers
 
 from ...azure_settings.models import Setting
-from ..models import Image, Project, Task, Train
+from ..models import Project, Task, Train
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +56,4 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = '__all__'
-
-class ImageSerializer(serializers.ModelSerializer):
-    """ImageSerializer"""
-
-    class Meta:
-        model = Image
         fields = '__all__'

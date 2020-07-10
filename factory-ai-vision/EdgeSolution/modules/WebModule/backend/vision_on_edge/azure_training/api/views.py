@@ -28,9 +28,8 @@ from configs.settings import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 from ...cameras.models import Camera
 from ...general import error_messages
 from ...part.models import Part
-from ..models import Image, Project, Task, Train
-from .serializers import (ImageSerializer, ProjectSerializer, TaskSerializer,
-                          TrainSerializer)
+from ..models import Project, Task, Train
+from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
 try:
     iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
@@ -120,6 +119,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
+
 class TrainViewSet(viewsets.ModelViewSet):
     """
     Train ModelViewSet
@@ -127,14 +127,6 @@ class TrainViewSet(viewsets.ModelViewSet):
 
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
-
-class ImageViewSet(viewsets.ModelViewSet):
-    """
-    Image ModelViewSet
-    """
-
-    queryset = Image.objects.all()
-    serializer_class = ImageSerializer
 
 
 def update_train_status(project_id):
