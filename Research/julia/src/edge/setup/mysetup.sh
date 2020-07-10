@@ -18,13 +18,14 @@ BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
 # script configuration
-BASE_URL='~/clouddrive/live-video-analytics-master/live-video-analytics-iot-edge-csharp-master/src/edge/setup' # location of remote files used by the script
+BASE_URL='https://raw.githubusercontent.com/julialieberman/azure-intelligent-edge-patterns/t-jull/Research/julia/src/edge' # location of remote files used by the script
 DEFAULT_REGION='westus2'
 ENV_FILE='edge-deployment/.env'
 APP_SETTINGS_FILE='appsettings.json'
 #ARM_TEMPLATE_URL="$BASE_URL/deploy.json"
-DEPLOYMENT_MANIFEST_URL="deployment.yolov3.template.json"
-DEPLOYMENT_MANIFEST_FILE='edge-deployment/deployment.yolov3.amd64.json'
+DEPLOYMENT_MANIFEST_URL="$BASE_URL/setup/deployment.yolov3.template.json"
+DEPLOYMENT_MANIFEST_FILE='edge-deployment/deployment.yolov3.template.json'
+ROLE_DEFINITION_URL="$BASE_URL/setup/LVAEdgeUserRoleDefinition.json"
 ROLE_DEFINITION_FILE="LVAEdgeUserRoleDefinition.json"
 RESOURCE_GROUP='teamlvarg'
 APPDATA_FOLDER_ON_DEVICE="/var/local/mediaservices" #you must change this later but it is ok for now
@@ -64,9 +65,9 @@ sleep 2 # time for the reader
 #This overwrites any output files previously generated."
  mkdir -p $(dirname $ENV_FILE) && echo -n "" > $ENV_FILE
  mkdir -p $(dirname $APP_SETTINGS_FILE) && echo -n "" > $APP_SETTINGS_FILE
-# mkdir -p $(dirname $DEPLOYMENT_MANIFEST_URL) && echo -n "" > $DEPLOYMENT_MANIFEST_FILE
+ mkdir -p $(dirname $DEPLOYMENT_MANIFEST_FILE) && echo -n "" > $DEPLOYMENT_MANIFEST_FILE
 
-# install the Azure CLI IoT extension
+# # install the Azure CLI IoT extension
 echo -e "Checking for the ${BLUE}azure-iot${NC} cli extension."
 az extension show -n azure-iot -o none
 if [ $? -ne 0 ]; then
@@ -236,7 +237,7 @@ EXISTING=$(az ams account check-name -l ${REGION} -n ${AMS_ACCOUNT_NAME})
      echo "Media services account named ${AMS_ACCOUNT_NAME} already exists!"
  fi
 
-# this includes everything in the resource group, and not just the resources deployed by the template
+# # this includes everything in the resource group, and not just the resources deployed by the template
 
 echo -e "\nResource group now contains these resources:"
 RESOURCES=$(az resource list --resource-group $RESOURCE_GROUP --query '[].{name:name,"Resource Type":type}' -o table)
@@ -275,7 +276,7 @@ SUBSCRIPTION_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
 # create new role definition in the subscription
 if test -z "$(az role definition list -n "$ROLE_DEFINITION_NAME" | grep "roleName")"; then
     echo -e "Creating a custom role named ${BLUE}$ROLE_DEFINITION_NAME${NC}."
-    #curl -sL $ROLE_DEFINITION_URL > $ROLE_DEFINITION_FILE
+     curl -sL $ROLE_DEFINITION_URL > $ROLE_DEFINITION_FILE
     sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $ROLE_DEFINITION_FILE
     sed -i "s/\$ROLE_DEFINITION_NAME/$ROLE_DEFINITION_NAME/" $ROLE_DEFINITION_FILE
     
@@ -290,16 +291,16 @@ OBJECT_ID=$(az ad sp show --id ${AAD_SERVICE_PRINCIPAL_ID} --query 'objectId' | 
 az role assignment create --role "$ROLE_DEFINITION_NAME" --assignee-object-id $OBJECT_ID -o none
 echo -e "The service principal with object id ${OBJECT_ID} is now linked with custom role ${BLUE}$ROLE_DEFINITION_NAME${NC}."
 
-# The brand-new AMS account has a standard streaming endpoint in stopped state. 
-# A Premium streaming endpoint is recommended when recording multiple days’ worth of video
+#The brand-new AMS account has a standard streaming endpoint in stopped state. 
+#A Premium streaming endpoint is recommended when recording multiple days’ worth of video
 
 echo -e "
 Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint."
-az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
+ az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
 
-echo "Kicking off the async start of the Premium streaming endpoint."
-echo "  This is needed to run samples or tutorials involving video playback."
-az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
+ echo "Kicking off the async start of the Premium streaming endpoint."
+ echo "  This is needed to run samples or tutorials involving video playback."
+ az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
 
 # # write env file for edge deployment
  echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" >> $ENV_FILE
@@ -315,13 +316,15 @@ az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name 
  echo "CONTAINER_REGISTRY_USERNAME_myacr=$CONTAINER_REGISTRY_USERNAME" >> $ENV_FILE
  echo "CONTAINER_REGISTRY_PASSWORD_myacr=$CONTAINER_REGISTRY_PASSWORD" >> $ENV_FILE
 
-#  echo -e "
-#  We've generated some configuration files for the deployed resource.
-#  This .env can be used with the ${GREEN}Azure IoT Tools${NC} extension in ${GREEN}Visual Studio Code${NC}.
-#  You can find it here:
-#  ${BLUE}${ENV_FILE}${NC}"
+ echo -e "
+ We've generated some configuration files for the deployed resource.
+ This .env can be used with the ${GREEN}Azure IoT Tools${NC} extension in ${GREEN}Visual Studio Code${NC}.
+ You can find it here:
+ ${BLUE}${ENV_FILE}${NC}"
+IOTHUB_CONNECTION_STRING="testingstring"
+EDGE_DEVICE="edgedevice"
 
-# write appsettings for sample code
+# # write appsettings for sample code
  echo "{" >> $APP_SETTINGS_FILE
  echo "    \"IoThubConnectionString\" : $IOTHUB_CONNECTION_STRING," >> $APP_SETTINGS_FILE
  echo "    \"deviceId\" : \"$EDGE_DEVICE\"," >> $APP_SETTINGS_FILE
@@ -346,7 +349,6 @@ az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name 
 # set up deployment manifest
 curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
 
-
  sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $DEPLOYMENT_MANIFEST_FILE
  sed -i "s/\$RESOURCE_GROUP/$RESOURCE_GROUP/" $DEPLOYMENT_MANIFEST_FILE
  sed -i "s/\$AMS_ACCOUNT/$AMS_ACCOUNT/" $DEPLOYMENT_MANIFEST_FILE
@@ -359,7 +361,3 @@ curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
  You can find the deployment manifest file here:
  - ${BLUE}${DEPLOYMENT_MANIFEST_FILE}${NC}
  "
-
-# # # cleanup
-# # # rm $ROLE_DEFINITION_FILE &> /dev/null
-# # # rm $CLOUD_INIT_FILE &> /dev/null
