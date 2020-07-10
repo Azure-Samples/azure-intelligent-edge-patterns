@@ -66,6 +66,9 @@ sleep 2 # time for the reader
  mkdir -p $(dirname $ENV_FILE) && echo -n "" > $ENV_FILE
  mkdir -p $(dirname $APP_SETTINGS_FILE) && echo -n "" > $APP_SETTINGS_FILE
  mkdir -p $(dirname $DEPLOYMENT_MANIFEST_FILE) && echo -n "" > $DEPLOYMENT_MANIFEST_FILE
+chmod +x ${APP_SETTINGS_FILE}
+chmod +x ${ENV_FILE}
+chmod +x ${DEPLOYMENT_MANIFEST_FILE}
 
 # # install the Azure CLI IoT extension
 echo -e "Checking for the ${BLUE}azure-iot${NC} cli extension."
@@ -187,7 +190,7 @@ fi
 
 #ROLE_DEFINITION_NAME=$(az deployment group create --resource-group $RESOURCE_GROUP --template-uri $ARM_TEMPLATE_URL --query properties.outputs.roleName.value | tr -d \")
 #checkForError
-ROLE_DEFINITION_NAME="LVAEdgeUserTest"
+ROLE_DEFINITION_NAME="LVAEdgeUsertest"
 
 #create container registry
 AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
@@ -296,7 +299,11 @@ echo -e "The service principal with object id ${OBJECT_ID} is now linked with cu
 
 echo -e "
 Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint."
- az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
+EXISTING=$(az ams streaming-endpoint list --account-name ${AMS_ACCOUNT} --resource-group ${RESOURCE_GROUP} --query '[].name')
+if ! [[ "$EXISTING" =~ "default" ]]; then
+    echo "Scaling new endpoint"
+    az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
+fi
 
  echo "Kicking off the async start of the Premium streaming endpoint."
  echo "  This is needed to run samples or tutorials involving video playback."

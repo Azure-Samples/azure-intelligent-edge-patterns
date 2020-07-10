@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zfA+RnsY50jGxbw2BUKpeftHlOC44CINXb6KmpZNniB488NAYQgPvK+chraIP3kP1OrztwiEaYYv8ZwyGZCuNQ==",
+  "dgSpecHash": "m6O82wugingkzMSUUaG2uzfggWMLq5aQ4jPuIUy6vnkLXS0xyf8GKaOf1Y7yGwUAv0vyz0cuUceJc2Yxah1csg==",
   "success": true,
-  "projectFilePath": "c:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj",
+  "projectFilePath": "C:\\julialva\\azure-intelligent-edge-patterns\\Research\\julia\\src\\cloud-to-device-console-app\\c2d-console-app.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\t-jull\\.nuget\\packages\\microsoft.azure.amqp\\2.4.2\\microsoft.azure.amqp.2.4.2.nupkg.sha512",
     "C:\\Users\\t-jull\\.nuget\\packages\\microsoft.azure.devices\\1.20.1\\microsoft.azure.devices.1.20.1.nupkg.sha512",
