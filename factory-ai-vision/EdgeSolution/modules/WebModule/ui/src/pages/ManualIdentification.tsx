@@ -168,31 +168,6 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
-        <div style={{ display: 'flex', minWidth: '20em', maxWidth: '20%', justifyContent: 'space-around' }}>
-          <Button
-            primary
-            content="Yes to all"
-            onClick={(): void => {
-              setJudgedImageList(relabelImages.map((e) => ({ imageId: e.id, partId: selectedPartId })));
-            }}
-          />
-          <Button
-            styles={{
-              backgroundColor: '#E97548',
-              color: 'white',
-              ':hover': { backgroundColor: '#CC4A31', color: 'white' },
-            }}
-            content="No to remaining"
-            onClick={(): void => {
-              setJudgedImageList((prev) =>
-                relabelImages.map((relabelImage) => {
-                  const judgedImage = prev.find((imgInList) => imgInList.imageId === relabelImage.id);
-                  return judgedImage ?? { imageId: relabelImage.id, partId: null };
-                }),
-              );
-            }}
-          />
-        </div>
         <ImagesContainer
           images={relabelImages}
           judgedImageList={judgedImageList}

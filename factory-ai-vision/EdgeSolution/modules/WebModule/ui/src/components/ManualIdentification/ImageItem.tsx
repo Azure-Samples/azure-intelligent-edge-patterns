@@ -1,5 +1,5 @@
-import React, { useState, SetStateAction, Dispatch, FC, memo } from 'react';
-import { Text, RadioGroup } from '@fluentui/react-northstar';
+import React, { SetStateAction, Dispatch, FC, memo } from 'react';
+import { Text } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
 import { JudgedImageList, RelabelImage } from './types';
@@ -16,34 +16,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   confidenceLevel,
   relabelImages,
   imageIndex,
-  setJudgedImageList,
-  partId,
-  isPartCorrect,
 }) => {
-  const onRadioGroupChange = (_, newProps): void => {
-    setJudgedImageList((prev) => {
-      const next = [...prev];
-
-      if (newProps.value === 1) {
-        const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
-
-        if (idx >= 0) next[idx] = { ...next[idx], partId };
-        else next.push({ imageId: relabelImages[imageIndex].id, partId });
-      } else if (newProps.value === 0) {
-        const idx = next.findIndex((e) => e.imageId === relabelImages[imageIndex].id);
-
-        if (idx >= 0) next[idx] = { ...next[idx], partId: null };
-        else {
-          next.push({
-            imageId: relabelImages[imageIndex].id,
-            partId: null,
-          });
-        }
-      }
-      return next;
-    });
-  };
-
   return (
     <div
       style={{
@@ -91,24 +64,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
             height: '50%',
             padding: '0.2em',
           }}
-        >
-          <RadioGroup
-            checkedValue={isPartCorrect}
-            onCheckedValueChange={onRadioGroupChange}
-            items={[
-              {
-                key: '1',
-                label: 'Yes',
-                value: 1,
-              },
-              {
-                key: '0',
-                label: 'No',
-                value: 0,
-              },
-            ]}
-          />
-        </div>
+        ></div>
       </div>
     </div>
   );
