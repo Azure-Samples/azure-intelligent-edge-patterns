@@ -1,5 +1,5 @@
 """
-Camera admin
+Azure Training admin
 """
 from django.contrib import admin
 
