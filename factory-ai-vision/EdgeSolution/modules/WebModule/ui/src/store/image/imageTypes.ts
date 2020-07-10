@@ -24,7 +24,7 @@ export type DeleteLabelImageSuccess = { type: typeof DELETE_LABEL_IMAGE_SUCCESS;
 export type RequestLabelImagesFailure = { type: typeof REQUEST_LABEL_IMAGE_FAILURE };
 export type UpdateLabelImageAnnotation = {
   type: typeof UPDATE_LABEL_IMAGE_ANNOTATION;
-  payload: { id: number; labels: any };
+  payload: { id: number; labels: any; part: { id: number; name: string } };
 };
 
 export type LabelImageAction =

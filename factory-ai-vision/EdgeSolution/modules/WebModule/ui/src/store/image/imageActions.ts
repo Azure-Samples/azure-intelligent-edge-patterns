@@ -97,11 +97,17 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
     method: 'PATCH',
     data: {
       labels: JSON.stringify(annotations.map((e) => e.label)),
+      part: annotations[0].part.id,
     },
   })
     .then(({ data }) => {
       console.info('Save successfully');
-      dispatch(updateLabelImageAnnotation(data.id, data.labels));
+      dispatch(
+        updateLabelImageAnnotation(data.id, data.labels, {
+          id: annotations[0].part.id,
+          name: annotations[0].part.name,
+        }),
+      );
       // dispatch(requestAnnotationsSuccess(annotations));
       return void 0;
     })
@@ -110,7 +116,11 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
     });
 };
 
-export const updateLabelImageAnnotation = (imageId: number, labels: any): UpdateLabelImageAnnotation => ({
+const updateLabelImageAnnotation = (
+  imageId: number,
+  labels: any,
+  part: { id: number; name: string },
+): UpdateLabelImageAnnotation => ({
   type: UPDATE_LABEL_IMAGE_ANNOTATION,
-  payload: { id: imageId, labels },
+  payload: { id: imageId, labels, part },
 });

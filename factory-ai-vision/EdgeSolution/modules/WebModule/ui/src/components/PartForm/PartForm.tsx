@@ -7,10 +7,19 @@ type PartFormProps = {
   top: number;
   left: number;
   open: boolean;
+  selectedPart: { id: number; name: string };
+  setSelectedPart: (part: { id: number; name: string }) => void;
   onDismiss: () => void;
 };
 
-export const PartForm: React.FC<PartFormProps> = ({ top, left, open, onDismiss }) => {
+export const PartForm: React.FC<PartFormProps> = ({
+  top,
+  left,
+  open,
+  onDismiss,
+  selectedPart,
+  setSelectedPart,
+}) => {
   const parts = useParts();
   const project = useProject();
 
@@ -44,7 +53,10 @@ export const PartForm: React.FC<PartFormProps> = ({ top, left, open, onDismiss }
       <RadioGroup
         vertical
         items={items}
-        onCheckedValueChange={(_, newProps) => console.log(newProps.value)}
+        onCheckedValueChange={(_, newProps): void =>
+          setSelectedPart({ id: newProps.value as number, name: newProps.name })
+        }
+        checkedValue={selectedPart.id}
       />
       <Button
         icon={<CloseIcon />}

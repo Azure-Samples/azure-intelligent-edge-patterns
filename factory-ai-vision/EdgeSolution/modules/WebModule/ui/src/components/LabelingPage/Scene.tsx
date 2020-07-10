@@ -3,6 +3,7 @@ import { Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
+import * as R from 'ramda';
 
 import useImage from './util/useImage';
 import getResizeImageFunction from './util/resizeImage';
@@ -18,6 +19,7 @@ import {
   createAnnotation,
   updateCreatingAnnotation,
   removeAnnotation,
+  updateAnnotation,
 } from '../../store/labelingPage/labelingPageActions';
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
@@ -29,7 +31,6 @@ const defaultSize: Size2D = {
 
 interface SceneProps {
   url?: string;
-  partName: string;
   labelingType: LabelingType;
   annotations: Annotation[];
   workState: WorkState;
@@ -38,7 +39,6 @@ interface SceneProps {
 }
 const Scene: FC<SceneProps> = ({
   url = '',
-  partName,
   labelingType,
   annotations,
   workState,
@@ -187,7 +187,7 @@ const Scene: FC<SceneProps> = ({
                   y={annotation.label.y1 - 25 / scale.current}
                   fontSize={20 / scale.current}
                   fill="red"
-                  text={partName}
+                  text={annotations[selectedAnnotationIndex].part.name}
                 />
               </Group>
             ))}
@@ -208,6 +208,15 @@ const Scene: FC<SceneProps> = ({
           left={annotations[0]?.label.x2 * scale.current + 10}
           open={true}
           onDismiss={(): void => onSelect(null)}
+          selectedPart={annotations[selectedAnnotationIndex].part}
+          setSelectedPart={(newPart): void => {
+            dispatch(
+              updateAnnotation(
+                selectedAnnotationIndex,
+                R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
+              ),
+            );
+          }}
         />
       )}
     </div>
