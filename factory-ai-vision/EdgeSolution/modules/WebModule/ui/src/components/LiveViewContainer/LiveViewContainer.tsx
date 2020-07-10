@@ -3,7 +3,8 @@ import * as R from 'ramda';
 import Axios from 'axios';
 import uniqid from 'uniqid';
 
-import { Text, Checkbox, Flex, Button, Alert } from '@fluentui/react-northstar';
+import { Text, Checkbox, Flex, Alert } from '@fluentui/react-northstar';
+import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
 import { AOIData, Box } from '../../type';
 import useImage from '../LabelingPage/util/useImage';
@@ -87,39 +88,35 @@ export const LiveViewContainer: React.FC<{
 
   return (
     <Flex column gap="gap.medium">
-      <Flex space="between">
-        <Text styles={{ width: '150px' }} size="medium">
-          Live View:
-        </Text>
+      <Flex gap="gap.small">
         {error && <Alert danger header="Failed to Update!" content={`${error.name}: ${error.message}`} />}
-        <Flex hAlign="end" gap="gap.small">
-          <Checkbox
-            labelPosition="start"
-            label="Enable area of interest"
-            toggle
-            checked={showAOI}
-            onClick={onCheckboxClick}
-          />
-          <Button
-            content="Create AOI"
-            primary={creatingAOI !== CreatingState.Disabled}
-            disabled={!showAOI}
-            onClick={(): void => {
-              if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
-              else setCreatingAOI(CreatingState.Disabled);
-            }}
-            circular
-            styles={{ padding: '0 5px' }}
-          />
-          <Button
-            content="Update"
-            primary
-            disabled={updateBtnDisabled}
-            onClick={onUpdate}
-            loading={loading}
-          />
-          <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
-        </Flex>
+        <Checkbox
+          labelPosition="start"
+          label="Enable area of interest"
+          toggle
+          checked={showAOI}
+          onClick={onCheckboxClick}
+        />
+        <Button
+          content="Create AOI"
+          primary={creatingAOI !== CreatingState.Disabled}
+          disabled={!showAOI}
+          onClick={(): void => {
+            if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
+            else setCreatingAOI(CreatingState.Disabled);
+          }}
+          circular
+          styles={{ padding: '0 5px' }}
+        />
+        <Button
+          content="Update"
+          primary
+          disabled={updateBtnDisabled}
+          onClick={onUpdate}
+          loading={loading}
+          circular
+        />
+        <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
       <div style={{ width: '100%', height: '50vh', backgroundColor: 'black' }}>
         {showVideo ? (
