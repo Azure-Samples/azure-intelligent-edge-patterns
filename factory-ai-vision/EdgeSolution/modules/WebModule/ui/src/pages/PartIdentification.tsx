@@ -4,7 +4,6 @@ import {
   Text,
   Flex,
   Dropdown,
-  Button,
   DropdownItemProps,
   Checkbox,
   Input,
@@ -27,6 +26,7 @@ import { AddLocationLink } from '../components/AddModuleDialog/AddLocationLink';
 import { AddPartLink } from '../components/AddModuleDialog/AddPartLink';
 import { LabelImage } from '../store/image/imageTypes';
 import { getLabelImages } from '../store/image/imageActions';
+import { Button } from '../components/Button';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -318,6 +318,7 @@ export const PartIdentification: React.FC = () => {
         onClick={handleSubmitConfigure}
         disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
         loading={isLoading}
+        circular
       />
       <Divider color="black" styles={{ width: '100%' }} />
       <Text>Try pretrained detection</Text>
@@ -344,7 +345,7 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
           <p>For retraining experience, please create a new model</p>
         </>
       }
-      trigger={<Button content="Pretrained Detection" primary />}
+      trigger={<Button content="Pretrained Detection" primary circular />}
     />
   );
 };
