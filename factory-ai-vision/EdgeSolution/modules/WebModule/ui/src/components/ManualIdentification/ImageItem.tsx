@@ -16,6 +16,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   confidenceLevel,
   relabelImages,
   imageIndex,
+  setJudgedImageList,
 }) => {
   return (
     <div
@@ -31,6 +32,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         imageIndex={imageIndex}
         images={relabelImages}
         isRelabel={true}
+        setJudgedImageList={setJudgedImageList}
         trigger={
           <div
             style={{

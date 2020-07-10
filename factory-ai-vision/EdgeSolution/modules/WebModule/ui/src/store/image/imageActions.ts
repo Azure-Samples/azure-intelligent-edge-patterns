@@ -10,6 +10,8 @@ import {
   POST_LABEL_IMAGE_SUCCESS,
   UPDATE_LABEL_IMAGE_ANNOTATION,
   UpdateLabelImageAnnotation,
+  REMOVE_IMAGES_FROM_PART,
+  RemoveImagesFromPartAction,
 } from './imageTypes';
 import { Annotation } from '../labelingPage/labelingPageTypes';
 
@@ -124,3 +126,10 @@ const updateLabelImageAnnotation = (
   type: UPDATE_LABEL_IMAGE_ANNOTATION,
   payload: { id: imageId, labels, part },
 });
+
+export const removeImagesFromPart = (imageIds: number[]): RemoveImagesFromPartAction => {
+  return {
+    type: REMOVE_IMAGES_FROM_PART,
+    payload: { imageIds },
+  };
+};

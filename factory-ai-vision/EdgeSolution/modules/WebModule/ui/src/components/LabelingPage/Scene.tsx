@@ -187,7 +187,7 @@ const Scene: FC<SceneProps> = ({
                   y={annotation.label.y1 - 25 / scale.current}
                   fontSize={20 / scale.current}
                   fill="red"
-                  text={annotations[selectedAnnotationIndex].part.name}
+                  text={annotations[selectedAnnotationIndex]?.part.name}
                 />
               </Group>
             ))}
