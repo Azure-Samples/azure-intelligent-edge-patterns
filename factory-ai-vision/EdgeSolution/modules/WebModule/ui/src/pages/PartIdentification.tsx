@@ -186,15 +186,15 @@ export const PartIdentification: React.FC = () => {
   const messageToCloudDisabled = !sendMessageToCloud;
 
   return (
-    <>
+    <Flex hAlign="center" styles={{ width: '600px' }} column gap="gap.medium">
       <Text size="larger" weight="semibold">
         Part Identification
       </Text>
-      <Divider color="black" />
+      <Divider color="black" styles={{ width: '100%' }} />
       {error && (
         <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
       )}
-      <Flex column gap="gap.large" design={{ paddingTop: '30px' }}>
+      <Flex column>
         <ModuleSelector
           moduleName="camera"
           to="/cameras"
@@ -220,17 +220,21 @@ export const PartIdentification: React.FC = () => {
           isMultiple={false}
           isTestModel={isTestModel}
         />
-        <Flex gap="gap.large">
-          <Flex column gap="gap.medium">
-            <Checkbox
-              label="Set up retraining"
-              checked={needRetraining}
-              onChange={(_, { checked }): void => setData('needRetraining', checked)}
-              disabled={isTestModel}
-            />
-            <Text disabled={accracyRangeDisabled}>Capture Image</Text>
-            <Text disabled={accracyRangeDisabled}>
-              Minimum:{' '}
+      </Flex>
+      <Flex styles={{ height: '250px' }}>
+        <Flex column gap="gap.medium" styles={{ width: '50%' }}>
+          <Checkbox
+            label="Set up retraining"
+            checked={needRetraining}
+            onChange={(_, { checked }): void => setData('needRetraining', checked)}
+            disabled={isTestModel}
+          />
+          <Text disabled={accracyRangeDisabled} weight="bold">
+            Accuracy for capture image
+          </Text>
+          <Flex gap="gap.small">
+            <Flex column hAlign="center">
+              <Text disabled={accracyRangeDisabled} content="Minimum: " />
               <Input
                 type="number"
                 disabled={accracyRangeDisabled}
@@ -240,11 +244,12 @@ export const PartIdentification: React.FC = () => {
                   if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
                   setData('accuracyRangeMin', value);
                 }}
+                icon="%"
+                fluid
               />
-              %
-            </Text>
-            <Text disabled={accracyRangeDisabled}>
-              Maximum:{' '}
+            </Flex>
+            <Flex column hAlign="center">
+              <Text disabled={accracyRangeDisabled}>Maximum: </Text>
               <Input
                 type="number"
                 disabled={accracyRangeDisabled}
@@ -254,68 +259,70 @@ export const PartIdentification: React.FC = () => {
                   if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
                   setData('accuracyRangeMax', value);
                 }}
+                icon="%"
+                fluid
               />
-              %
-            </Text>
-            <Text styles={{ fontSize: '12px' }} success>
-              {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
-            </Text>
-            <Text disabled={accracyRangeDisabled}>
-              Maximum Images to Store:{' '}
-              <Input
-                type="number"
-                disabled={accracyRangeDisabled}
-                inline
-                value={maxImage}
-                onChange={(_, { value }): void => {
-                  if ((value as any) < 15) setMaxImgCountError(true);
-                  else setMaxImgCountError(false);
-                  setData('maxImages', value);
-                }}
-              />
-              {maxImgCountError && <Text error>Cannot be less than 15</Text>}
-            </Text>
+            </Flex>
           </Flex>
-          <Flex column gap="gap.medium">
-            <Checkbox
-              label="Send message to cloud"
-              checked={sendMessageToCloud}
-              onChange={(_, { checked }): void => setData('sendMessageToCloud', checked)}
+          <Text styles={{ fontSize: '12px' }} success>
+            {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
+          </Text>
+          <Flex column hAlign="center">
+            <Text disabled={accracyRangeDisabled}>Maximum Images to Store: </Text>
+            <Input
+              type="number"
+              disabled={accracyRangeDisabled}
+              inline
+              value={maxImage}
+              onChange={(_, { value }): void => {
+                if ((value as any) < 15) setMaxImgCountError(true);
+                else setMaxImgCountError(false);
+                setData('maxImages', value);
+              }}
             />
-            <Text disabled={messageToCloudDisabled}>
-              Frames per minute:{' '}
-              <Input
-                type="number"
-                disabled={messageToCloudDisabled}
-                inline
-                value={framesPerMin}
-                onChange={(_, { value }): void => setData('framesPerMin', value)}
-              />
-            </Text>
-            <Text disabled={messageToCloudDisabled}>
-              Accuracy threshold:{' '}
-              <Input
-                type="number"
-                disabled={messageToCloudDisabled}
-                inline
-                value={accuracyThreshold}
-                onChange={(_, { value }): void => setData('accuracyThreshold', value)}
-              />
-            </Text>
+            {maxImgCountError && <Text error>Cannot be less than 15</Text>}
           </Flex>
         </Flex>
-        <Flex gap="gap.large">
-          <Button
-            content="Configure"
-            primary
-            onClick={handleSubmitConfigure}
-            disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
-            loading={isLoading}
+        <Divider vertical color="black" styles={{ margin: '0px 10px' }} />
+        <Flex column gap="gap.medium">
+          <Checkbox
+            label="Send message to cloud"
+            checked={sendMessageToCloud}
+            onChange={(_, { checked }): void => setData('sendMessageToCloud', checked)}
           />
-          <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
+          <Flex column hAlign="center">
+            <Text disabled={messageToCloudDisabled}>Frames per minute: </Text>
+            <Input
+              type="number"
+              disabled={messageToCloudDisabled}
+              inline
+              value={framesPerMin}
+              onChange={(_, { value }): void => setData('framesPerMin', value)}
+            />
+          </Flex>
+          <Flex column hAlign="center">
+            <Text disabled={messageToCloudDisabled}>Accuracy threshold: </Text>
+            <Input
+              type="number"
+              disabled={messageToCloudDisabled}
+              inline
+              value={accuracyThreshold}
+              onChange={(_, { value }): void => setData('accuracyThreshold', value)}
+            />
+          </Flex>
         </Flex>
       </Flex>
-    </>
+      <Button
+        content="Configure"
+        primary
+        onClick={handleSubmitConfigure}
+        disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
+        loading={isLoading}
+      />
+      <Divider color="black" styles={{ width: '100%' }} />
+      <Text>Try pretrained detection</Text>
+      <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
+    </Flex>
   );
 };
 
@@ -337,7 +344,7 @@ const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
           <p>For retraining experience, please create a new model</p>
         </>
       }
-      trigger={<Button content="Demo Pretrained Detection" primary />}
+      trigger={<Button content="Pretrained Detection" primary />}
     />
   );
 };
@@ -457,7 +464,7 @@ const ModuleSelector: React.FC<ModuleSelectorProps> = ({
 
   return (
     <Flex vAlign="center" gap="gap.medium">
-      <Text styles={{ width: '150px' }}>{`Select ${moduleName}`}</Text>
+      <Text styles={{ width: '90px' }}>{`Select ${moduleName}`}</Text>
       {isTestModel ? (
         <Dropdown items={items} value={formatDropdownValue(value)} multiple={isMultiple} open={false} />
       ) : (
