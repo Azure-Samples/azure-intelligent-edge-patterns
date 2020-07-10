@@ -202,7 +202,7 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
-      {selectedAnnotationIndex !== null && (
+      {selectedAnnotationIndex !== null && workState !== WorkState.Creating && (
         <PartForm
           top={annotations[0]?.label.y1 * scale.current - 10}
           left={annotations[0]?.label.x2 * scale.current + 10}
