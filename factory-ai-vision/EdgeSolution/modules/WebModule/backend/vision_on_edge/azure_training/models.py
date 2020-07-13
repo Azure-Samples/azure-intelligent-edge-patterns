@@ -232,8 +232,8 @@ class Project(models.Model):
         obj, created = Train.objects.update_or_create(
             project=self,
             defaults={
-                "status": "Status : "+status,
-                "log": log,
+                "status": status,
+                "log": "Status : "+log.capitalize(),
                 "performance": performance
             },
         )
