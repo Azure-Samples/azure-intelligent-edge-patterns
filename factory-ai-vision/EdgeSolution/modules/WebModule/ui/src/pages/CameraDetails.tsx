@@ -1,6 +1,6 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Grid, Flex, Divider, Text } from '@fluentui/react-northstar';
+import { Grid, Flex, Divider, Text, Provider } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Camera } from '../store/camera/cameraTypes';
@@ -8,6 +8,11 @@ import { State } from '../store/State';
 import { useQuery } from '../hooks/useQuery';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { CreateButton } from '../components/CreateButton';
+import { errorTheme } from '../themes/errorTheme';
+import { WarningDialog } from '../components/WarningDialog';
+import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
+import { Button } from '../components/Button';
+import { deleteCamera } from '../store/camera/cameraActions';
 
 const infoDivStyle: React.CSSProperties = {
   display: 'flex',
@@ -23,8 +28,19 @@ const CameraDetails: FC = (): JSX.Element => {
   const dispatch = useDispatch();
   const name = useQuery().get('name');
   const camera = useSelector<State, Camera>((state) => state.cameras.find((ele) => ele.name === name));
+  const [status, setStatus] = useState<Status>(Status.None);
 
   if (!camera) return <Redirect to="/cameras" />;
+
+  const onDelete = async (): Promise<void> => {
+    setStatus(Status.Loading);
+    try {
+      await dispatch(deleteCamera(camera.id));
+      setStatus(Status.Success);
+    } catch (e) {
+      setStatus(Status.Failed);
+    }
+  };
 
   return (
     <Grid columns="70% 30%" rows="100px auto" design={{ height: '100%' }}>
@@ -32,6 +48,18 @@ const CameraDetails: FC = (): JSX.Element => {
         <div style={infoDivStyle}>
           <Text content="Name" weight="bold" />
           <Text content={camera.name} />
+          <Provider theme={errorTheme}>
+            <WarningDialog
+              contentText={
+                <p>
+                  Sure you want to delete the camera <b>{camera.name}</b>?
+                </p>
+              }
+              trigger={<Button content="Delete Camera" primary circular />}
+              onConfirm={onDelete}
+            />
+          </Provider>
+          <LoadingDialog status={status} />
         </div>
         <Divider vertical color="black" styles={{ height: '80px' }} />
         <div style={infoDivStyle}>
