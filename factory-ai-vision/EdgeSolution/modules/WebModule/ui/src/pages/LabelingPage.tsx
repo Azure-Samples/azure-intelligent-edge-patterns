@@ -45,6 +45,10 @@ const LabelingPage: FC<LabelingPageProps> = ({
     dispatch(saveLabelImageAnnotation(images[index].id, annotations));
     if (setJudgedImageList)
       setJudgedImageList((prev) => [...prev, { partId: annotations[0].part.id, imageId: images[index].id }]);
+  };
+
+  const onSaveBtnClick = (): void => {
+    onSave();
     if (index === images.length - 1) closeDialog();
     setIndex((prev) => (prev + 1) % images.length);
   };
@@ -75,11 +79,11 @@ const LabelingPage: FC<LabelingPageProps> = ({
         prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
         nextDisabled={index === images.length - 1 || workState === WorkState.Creating || isOnePointBox}
         onPrevClick={(): void => {
-          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          onSave();
           setIndex((prev) => (prev - 1 + images.length) % images.length);
         }}
         onNextClick={(): void => {
-          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          onSave();
           setIndex((prev) => (prev + 1) % images.length);
         }}
       >
@@ -97,19 +101,14 @@ const LabelingPage: FC<LabelingPageProps> = ({
           primary
           content={index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
           disabled={isOnePointBox || workState === WorkState.Creating}
-          onClick={onSave}
+          onClick={onSaveBtnClick}
         />
         {isRelabel ? (
           <Button
             primary
             content="Done"
             onClick={(): void => {
-              dispatch(saveLabelImageAnnotation(images[index].id, annotations));
-              if (setJudgedImageList)
-                setJudgedImageList((prev) => [
-                  ...prev,
-                  { partId: annotations[0].part.id, imageId: images[index].id },
-                ]);
+              onSave();
               // eslint-disable-next-line no-restricted-globals
               const finishLabel = confirm('The Rest of the image will be removed');
               if (finishLabel) {
