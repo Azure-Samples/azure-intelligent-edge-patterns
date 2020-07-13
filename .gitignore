@@ -105,16 +105,5 @@ venv.bak/
 /.vs
 /staged-data-analytics
 
-# VS Code
-.vscode
-
 # vi
 *~
-
-# julia binaries
-Research/julia/src/cloud-to-device-console-app/bin*
-Research/julia/src/cloud-to-device-console-app/obj/Debug/netcoreapp3.1
-Research/julia/src/ams-asset-player/bin*
-Research/julia/src/edge/modules/objectCounter/bin
-Research/julia/src/cloud-to-device-console-app/bin/Debug/netcoreapp3.1
-Research/julia/src/cloud-to-device-console-app/obj/Debug/netcoreapp3.1
