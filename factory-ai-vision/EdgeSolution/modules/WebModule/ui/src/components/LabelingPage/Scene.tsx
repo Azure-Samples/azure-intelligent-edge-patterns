@@ -84,7 +84,8 @@ const Scene: FC<SceneProps> = ({
     if (noMoreCreate || workState === WorkState.Creating) return;
 
     dispatch(createAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
-    // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
+    // FIXME Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
+    // Should put this state in redux
     setSelectedAnnotationIndex(annotations.length);
     setWorkState(WorkState.Creating);
   };
