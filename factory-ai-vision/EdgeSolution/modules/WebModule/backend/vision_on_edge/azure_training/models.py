@@ -320,7 +320,9 @@ class Project(models.Model):
 
                 # Metrics
                 logger.info("Sending Logs to App Insight")
+                # TODO: Move this to other places to aviod import Part
                 part_monitor(len(Part.objects.filter(is_demo=False)))
+                # TODO: Move this to other places to aviod import Image
                 img_monitor(len(Image.objects.all()))
                 training_job_monitor(self.training_counter)
                 retraining_job_monitor(self.retraining_counter)
