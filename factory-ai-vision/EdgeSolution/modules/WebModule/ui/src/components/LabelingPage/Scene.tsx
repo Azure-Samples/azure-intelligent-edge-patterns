@@ -192,6 +192,7 @@ const Scene: FC<SceneProps> = ({
                   fontSize={20 / scale.current}
                   fill="red"
                   text={annotations[selectedAnnotationIndex]?.part.name}
+                  visible={!partFormDisabled}
                 />
               </Group>
             ))}
