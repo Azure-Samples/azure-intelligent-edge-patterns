@@ -42,21 +42,23 @@ export const CapturePhotos: React.FC<{
   const autoPlay = availableCameras.length === 1 && !!selectedCamera;
 
   return (
-    <Flex gap="gap.small">
-      <Flex column gap="gap.small" styles={{ width: '70%' }}>
+    <Flex gap="gap.small" styles={{ height: '100%' }}>
+      <Flex column gap="gap.small" styles={{ width: '70%', height: '100%' }}>
         <CameraSelector
           selectedCamera={selectedCamera}
           setSelectedCamera={setSelectedCamera}
           availableCameras={availableCameras}
         />
-        <RTSPVideo
-          rtsp={selectedCamera?.rtsp}
-          partId={partId}
-          partName={partName}
-          canCapture={true}
-          setOpenLabelingPage={setOpenLabelingPage}
-          autoPlay={autoPlay}
-        />
+        <div style={{ minHeight: '600px' }}>
+          <RTSPVideo
+            rtsp={selectedCamera?.rtsp}
+            partId={partId}
+            partName={partName}
+            canCapture={true}
+            setOpenLabelingPage={setOpenLabelingPage}
+            autoPlay={autoPlay}
+          />
+        </div>
       </Flex>
       <Flex column gap="gap.small" styles={{ width: '30%', minWidth: '450px' }}>
         <CapturedImagesContainer partId={partId} goLabelImageIdx={goLabelImageIdx} />

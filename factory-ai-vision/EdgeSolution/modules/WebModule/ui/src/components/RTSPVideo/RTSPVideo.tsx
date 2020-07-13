@@ -7,8 +7,8 @@ import { RTSPVideoProps } from './RTSPVideo.type';
 
 export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   rtsp = null,
-  partId,
-  partName,
+  partId = null,
+  partName = '',
   canCapture,
   setOpenLabelingPage,
   autoPlay,
@@ -65,8 +65,8 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
   return (
-    <>
-      <div style={{ width: '100%', height: '30rem', backgroundColor: 'black' }}>
+    <Flex gap="gap.small" styles={{ width: '100%', height: '100%' }} column>
+      <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
         {src ? <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
       </div>
       <Flex column hAlign="center" gap="gap.small">
@@ -87,26 +87,28 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
           )}
           <ImageBtn name="Stop" src="/icons/stop.png" disabled={!streamId} onClick={onDisconnect} />
         </Flex>
-        <RadioGroup
-          checkedValue={captureLabelMode}
-          onCheckedValueChange={(_, newProps): void => {
-            setCaptureLabelMode(newProps.value as number);
-          }}
-          items={[
-            {
-              key: '0',
-              label: 'Capture image and label per image',
-              value: 0,
-            },
-            {
-              key: '1',
-              label: 'Capture image and label all later',
-              value: 1,
-            },
-          ]}
-        />
+        {canCapture && (
+          <RadioGroup
+            checkedValue={captureLabelMode}
+            onCheckedValueChange={(_, newProps): void => {
+              setCaptureLabelMode(newProps.value as number);
+            }}
+            items={[
+              {
+                key: '0',
+                label: 'Capture image and label per image',
+                value: 0,
+              },
+              {
+                key: '1',
+                label: 'Capture image and label all later',
+                value: 1,
+              },
+            ]}
+          />
+        )}
       </Flex>
-    </>
+    </Flex>
   );
 };
 
