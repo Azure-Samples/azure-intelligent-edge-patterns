@@ -10,7 +10,6 @@ import {
   Alert,
   ShorthandCollection,
 } from '@fluentui/react-northstar';
-import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 import * as R from 'ramda';

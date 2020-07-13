@@ -46,7 +46,8 @@ const sectionStyle: React.CSSProperties = {
   justifyContent: 'space-between',
   alignItems: 'center',
   height: '100%',
-  flexGrow: 1,
+  width: '25%',
+  overflow: 'scroll',
 };
 
 const highLightTextStyles: ComponentSlotStyle = {
