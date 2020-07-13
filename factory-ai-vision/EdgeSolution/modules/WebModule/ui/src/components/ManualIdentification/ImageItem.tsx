@@ -66,7 +66,11 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
             height: '50%',
             padding: '0.2em',
           }}
-        ></div>
+        >
+          <Text truncated>
+            Part Name: <b>{relabelImages[imageIndex].part.name}</b>
+          </Text>
+        </div>
       </div>
     </div>
   );
