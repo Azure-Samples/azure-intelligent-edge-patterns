@@ -23,7 +23,7 @@ class AzureTrainingConfig(AppConfig):
         """
         if 'runserver' in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
-            from . import signals
+            from .signals import azure_setting_change_handler
             from .models import Project, Train
             from ..cameras.models import Camera
             from ..locations.models import Location

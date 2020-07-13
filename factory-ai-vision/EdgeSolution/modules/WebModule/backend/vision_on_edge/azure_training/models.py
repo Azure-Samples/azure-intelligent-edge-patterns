@@ -2,24 +2,23 @@
 Models for Azure Custom Vision training.
 """
 import datetime
-import json
 import logging
 import threading
 import time
-from io import BytesIO
 
 import requests
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
 from azure.iot.device import IoTHubModuleClient
-from django.core import files
 from django.db import models
-from django.db.models.signals import post_save, pre_delete, pre_save
-from PIL import Image as PILImage
-from rest_framework import status
+from django.db.models.signals import post_save, pre_save
 
 from ..images.models import Image
 from ..part.models import Part
+from ..cameras.models import Camera
+from ..azure_settings.models import Setting
+from ..locations.models import Location
+
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
@@ -48,16 +47,16 @@ def inference_module_url():
 class Project(models.Model):
     """Project Model"""
 
-    setting = models.ForeignKey("azure_settings.Setting",
+    setting = models.ForeignKey(Setting,
                                 on_delete=models.CASCADE,
                                 default=1)
-    camera = models.ForeignKey("cameras.Camera",
+    camera = models.ForeignKey(Camera,
                                on_delete=models.CASCADE,
                                null=True)
-    location = models.ForeignKey("locations.Location",
+    location = models.ForeignKey(Location,
                                  on_delete=models.CASCADE,
                                  null=True)
-    parts = models.ManyToManyField("part.Part", related_name="part")
+    parts = models.ManyToManyField(Part, related_name="part")
     customvision_project_id = models.CharField(max_length=200,
                                                null=True,
                                                blank=True,

@@ -15,6 +15,8 @@ from django.db.models.signals import pre_delete, pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
+from ..part.models import Part
+
 logger = logging.getLogger(__name__)
 
 # Create your models here.
@@ -24,7 +26,7 @@ class Image(models.Model):
     """Image Model"""
 
     image = models.ImageField(upload_to="images/")
-    part = models.ForeignKey("part.Part", on_delete=models.CASCADE)
+    part = models.ForeignKey(Part, on_delete=models.CASCADE)
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)

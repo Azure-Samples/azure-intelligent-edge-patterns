@@ -129,6 +129,8 @@ class Setting(models.Model):
             logger.exception("Setting pre_save occur MSClientRequestError...")
         except Exception:
             logger.exception("Setting pre_save occur unexpected Error...")
+        logger.info("Setting.is_trainer_valid = False")
+        logger.info("Setting.obj_detection_domain = ''")
         instance.is_trainer_valid = False
         instance.obj_detection_domain_id = ""
 
