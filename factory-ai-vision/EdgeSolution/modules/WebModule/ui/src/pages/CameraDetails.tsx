@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import { Grid, Flex, Divider, Text, Provider } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -31,6 +31,7 @@ const CameraDetails: FC = (): JSX.Element => {
     state.cameras.find((ele) => ele.id === parseInt(camerId, 10)),
   );
   const [status, setStatus] = useState<Status>(Status.None);
+  const history = useHistory();
 
   if (!camera) return <Redirect to="/cameras" />;
 
@@ -78,7 +79,12 @@ const CameraDetails: FC = (): JSX.Element => {
         vAlign="center"
         hAlign="center"
       >
-        <CreateButton title="Configure Task" onClick={() => {}} />
+        <CreateButton
+          title="Configure Task"
+          onClick={() => {
+            history.push(`/partIdentification?cameraId=${camera.id}`);
+          }}
+        />
         <Divider color="black" vertical styles={{ height: '150px' }} />
         <CreateButton title="Create Parts" onClick={() => {}} />
       </Flex>

@@ -29,8 +29,8 @@ import { AddCameraLink } from '../AddModuleDialog/AddCameraLink';
 import { AddLocationLink } from '../AddModuleDialog/AddLocationLink';
 import { AddPartLink } from '../AddModuleDialog/AddPartLink';
 import { LabelImage } from '../../store/image/imageTypes';
-import { getLabelImages } from '../../store/image/imageActions';
 import { Button } from '../Button';
+import { useQuery } from '../../hooks/useQuery';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -51,6 +51,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
 
 export const ProjectConfig: React.FC = () => {
   const dispatch = useDispatch();
+  const cameraId = useQuery().get('cameraId');
   const { isLoading, error, data } = useSelector<State, Project>((state) => state.project);
   const {
     id: projectId,
@@ -71,6 +72,8 @@ export const ProjectConfig: React.FC = () => {
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
     isTestModel,
+    false,
+    cameraId === null ? undefined : parseInt(cameraId, 10),
   );
   const [partLoading, dropDownParts, selectedParts, setSelectedPartsById] = useDropdownItems<any>(
     'parts',
@@ -94,7 +97,7 @@ export const ProjectConfig: React.FC = () => {
     if (!isTestModel) {
       if (location) setSelectedLocationById(location);
       if (parts.length) setSelectedPartsById(parts);
-      if (camera) setSelectedCameraById(camera);
+      if (camera && cameraId !== null) setSelectedCameraById(camera);
     }
   }, [
     camera,
@@ -104,6 +107,7 @@ export const ProjectConfig: React.FC = () => {
     setSelectedCameraById,
     setSelectedLocationById,
     setSelectedPartsById,
+    cameraId,
   ]);
 
   const handleSubmitConfigure = async (): Promise<void> => {
@@ -353,6 +357,7 @@ function useDropdownItems<T>(
   moduleName: string,
   isTestModel: boolean,
   isMultiple?: boolean,
+  defaultId?: number | number[],
 ): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => void] {
   const originItems = useRef<(T & { id: number })[]>([]);
   const [dropDownItems, setDropDownItems] = useState<DropdownItemProps[]>([]);
@@ -390,14 +395,16 @@ function useDropdownItems<T>(
         if (isMultiple) {
           setSelectedItem(data);
         } else {
-          setSelectedItem(data[0]);
+          let targetIdx = 0;
+          if (defaultId) targetIdx = data.findIndex((e) => e.id === defaultId);
+          setSelectedItem(data[targetIdx]);
         }
         setLoading(false);
         return void 0;
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [isMultiple, moduleName, isTestModel]);
+  }, [isMultiple, moduleName, isTestModel, defaultId]);
 
   const setSelectedItemById = useCallback((id: string | string[]): void => {
     if (Array.isArray(id)) {
