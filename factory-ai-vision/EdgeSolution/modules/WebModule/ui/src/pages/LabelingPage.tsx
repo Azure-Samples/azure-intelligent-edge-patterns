@@ -94,6 +94,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
           setWorkState={setWorkState}
           labelingType={labelingType}
           onBoxCreated={onBoxCreated}
+          partFormDisabled={!isRelabel}
         />
       </PrevNextButton>
       <Flex gap="gap.medium">

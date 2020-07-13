@@ -36,6 +36,7 @@ interface SceneProps {
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
+  partFormDisabled: boolean;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
@@ -44,6 +45,7 @@ const Scene: FC<SceneProps> = ({
   workState,
   setWorkState,
   onBoxCreated,
+  partFormDisabled,
 }) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
@@ -202,7 +204,7 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
-      {selectedAnnotationIndex !== null && workState !== WorkState.Creating && (
+      {!partFormDisabled && selectedAnnotationIndex !== null && workState !== WorkState.Creating && (
         <PartForm
           top={annotations[0]?.label.y1 * scale.current - 10}
           left={annotations[0]?.label.x2 * scale.current + 10}
