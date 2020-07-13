@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Input, Text, ComponentSlotStyle } from '@fluentui/react-northstar';
+import { Flex, Input, Text, ComponentSlotStyle, Divider } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -86,12 +86,14 @@ export const InferenceMetricDashboard: React.FC = () => {
           circular
         />
       </section>
+      <Divider color="black" vertical />
       <section style={sectionStyle}>
         <Text weight="bold" content="Success Rate" />
         <Text styles={highLightTextStyles}>{`${inferenceMetrics.successRate}%`}</Text>
         <Text content={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`} />
         <Text content={`${Math.round(inferenceMetrics.averageTime * 100) / 100}/ms`} />
       </section>
+      <Divider color="black" vertical />
       <section style={sectionStyle}>
         <Text weight="bold" content="Successful Inferences" />
         <Text styles={highLightTextStyles} content={inferenceMetrics.successfulInferences} />
@@ -101,6 +103,7 @@ export const InferenceMetricDashboard: React.FC = () => {
             : ''}
         </footer>
       </section>
+      <Divider color="black" vertical />
       <section style={sectionStyle}>
         <Text weight="bold" content="Unidentified Items" />
         <Text styles={highLightTextStyles}>{inferenceMetrics.unIdetifiedItems}</Text>

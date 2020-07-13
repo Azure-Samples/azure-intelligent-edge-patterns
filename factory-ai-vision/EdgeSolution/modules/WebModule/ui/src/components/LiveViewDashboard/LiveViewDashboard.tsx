@@ -62,7 +62,7 @@ export const LiveViewDashboard: React.FC<{ projectId: number }> = ({ projectId }
 
   return (
     <Flex column gap="gap.medium" styles={{ height: '100%' }}>
-      <Flex column style={{ height: '100%' }}>
+      <Flex column style={{ height: '100%' }} gap="gap.small">
         {error && <Alert danger header={error.name} content={`${error.message}`} />}
         <div style={{ flexGrow: 2 }}>
           <LiveViewContainer showVideo={true} initialAOIData={{ useAOI: false, AOIs: [] }} cameraId={0} />
