@@ -3,6 +3,7 @@ import { Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
+import * as R from 'ramda';
 
 import useImage from './util/useImage';
 import getResizeImageFunction from './util/resizeImage';
@@ -18,8 +19,10 @@ import {
   createAnnotation,
   updateCreatingAnnotation,
   removeAnnotation,
+  updateAnnotation,
 } from '../../store/labelingPage/labelingPageActions';
 import RemoveBoxButton from './RemoveBoxButton';
+import { PartForm } from '../PartForm';
 
 const defaultSize: Size2D = {
   width: 800,
@@ -28,21 +31,21 @@ const defaultSize: Size2D = {
 
 interface SceneProps {
   url?: string;
-  partName: string;
   labelingType: LabelingType;
   annotations: Annotation[];
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
+  partFormDisabled: boolean;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
-  partName,
   labelingType,
   annotations,
   workState,
   setWorkState,
   onBoxCreated,
+  partFormDisabled,
 }) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
@@ -81,7 +84,9 @@ const Scene: FC<SceneProps> = ({
     if (noMoreCreate || workState === WorkState.Creating) return;
 
     dispatch(createAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
-    setSelectedAnnotationIndex(annotations.length - 1);
+    // FIXME Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
+    // Should put this state in redux
+    setSelectedAnnotationIndex(annotations.length);
     setWorkState(WorkState.Creating);
   };
 
@@ -99,9 +104,11 @@ const Scene: FC<SceneProps> = ({
     }
   };
 
+  // FIXIME: Probably use useReduce for this case
   const onSelect = (index: number): void => {
     setSelectedAnnotationIndex(index);
-    setWorkState(WorkState.Selecting);
+    if (index === null) setWorkState(WorkState.None);
+    else setWorkState(WorkState.Selecting);
   };
 
   useEffect(() => {
@@ -125,7 +132,7 @@ const Scene: FC<SceneProps> = ({
   const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
   return (
-    <div style={{ margin: '0.2em' }}>
+    <div style={{ margin: '0.2em', position: 'relative' }}>
       {annotations.length !== 0 &&
       showOuterRemoveButton &&
       !isDragging &&
@@ -184,7 +191,8 @@ const Scene: FC<SceneProps> = ({
                   y={annotation.label.y1 - 25 / scale.current}
                   fontSize={20 / scale.current}
                   fill="red"
-                  text={partName}
+                  text={annotations[selectedAnnotationIndex]?.part.name}
+                  visible={!partFormDisabled}
                 />
               </Group>
             ))}
@@ -199,6 +207,23 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
+      {!partFormDisabled && selectedAnnotationIndex !== null && workState !== WorkState.Creating && (
+        <PartForm
+          top={annotations[0]?.label.y1 * scale.current - 10}
+          left={annotations[0]?.label.x2 * scale.current + 10}
+          open={true}
+          onDismiss={(): void => onSelect(null)}
+          selectedPart={annotations[selectedAnnotationIndex].part}
+          setSelectedPart={(newPart): void => {
+            dispatch(
+              updateAnnotation(
+                selectedAnnotationIndex,
+                R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
+              ),
+            );
+          }}
+        />
+      )}
     </div>
   );
 };

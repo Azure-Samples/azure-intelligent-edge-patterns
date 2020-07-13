@@ -16,6 +16,7 @@ import {
   RemoveAnnotationAction,
   ResetAnnotationAction,
 } from './labelingPageTypes';
+import { LabelImage } from '../image/imageTypes';
 
 export const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotationSuccessAction => ({
   type: REQUEST_ANNOTATION_SUCCESS,
@@ -23,8 +24,8 @@ export const requestAnnotationsSuccess = (data: Annotation[]): RequestAnnotation
 });
 
 export const getAnnotations = (imageId: number) => (dispatch, getState): void => {
-  const { images } = getState();
-  const { labels } = images.find((image) => image.id === imageId);
+  const { images }: { images: LabelImage[] } = getState();
+  const { labels, part } = images.find((image) => image.id === imageId);
 
   if (labels === null) {
     dispatch(requestAnnotationsSuccess([]));
@@ -32,7 +33,7 @@ export const getAnnotations = (imageId: number) => (dispatch, getState): void =>
     const annotations: Annotation[] = JSON.parse(labels).map((parsedLabels, i) => ({
       id: i,
       label: parsedLabels,
-      attribute: '',
+      part,
       annotationState: AnnotationState.Finish,
     }));
 
@@ -76,7 +77,7 @@ export const BoxObj: BoxObject = {
     return {
       id: null,
       label: { x1: 0, y1: 0, x2: 0, y2: 0 },
-      attribute: '',
+      part: { id: null, name: '' },
       annotationState: AnnotationState.Empty,
     };
   },
