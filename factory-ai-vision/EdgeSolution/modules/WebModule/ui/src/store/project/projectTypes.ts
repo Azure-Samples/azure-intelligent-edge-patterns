@@ -187,9 +187,9 @@ export type StopInferenceAction = {
   type: typeof STOP_INFERENCE;
 };
 
-export const RESET_STATUS = 'RESET_STATUS';
-export type ResetStatusAction = {
-  type: typeof RESET_STATUS;
+export type ChangeStatusAction = {
+  type: 'CHANGE_STATUS';
+  status: Status;
 };
 
 export type UpdateProbThresholdRequestAction = {
@@ -227,7 +227,7 @@ export type ProjectActionTypes =
   | GetInferenceMetricsFailedAction
   | StartInferenceAction
   | StopInferenceAction
-  | ResetStatusAction
+  | ChangeStatusAction
   | UpdateProbThresholdRequestAction
   | UpdateProbThresholdSuccessAction
   | UpdateProbThresholdFailedAction;

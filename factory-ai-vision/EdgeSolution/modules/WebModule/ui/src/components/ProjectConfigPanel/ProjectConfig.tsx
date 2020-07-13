@@ -15,8 +15,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 import * as R from 'ramda';
 
-import { thunkGetProject, thunkPostProject, updateProjectData } from '../../store/project/projectActions';
-import { Project, ProjectData } from '../../store/project/projectTypes';
+import {
+  thunkGetProject,
+  thunkPostProject,
+  updateProjectData,
+  changeStatus,
+} from '../../store/project/projectActions';
+import { Project, ProjectData, Status } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { formatDropdownValue, Value } from '../../util/formatDropdownValue';
 import { getAppInsights } from '../../TelemetryService';
@@ -115,8 +120,7 @@ export const ProjectConfig: React.FC = () => {
         thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
       );
 
-      if (typeof id !== 'undefined')
-        history.push(`/cameras/detail?name=${selectedCamera.name}&isDemo=${isTestModel}`);
+      if (typeof id !== 'undefined') dispatch(changeStatus(Status.WaitTraining));
     } catch (e) {
       alert(e);
     }

@@ -7,7 +7,7 @@ import {
   thunkGetTrainingLog,
   thunkGetTrainingMetrics,
   thunkGetInferenceMetrics,
-  resetStatus,
+  changeStatus,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -16,10 +16,14 @@ import { InferenceMetricDashboard } from './InferenceMetricDashboard';
 import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
 
-export const LiveViewDashboard: React.FC<{ projectId: number }> = ({ projectId }) => {
-  const { error, trainingLog, status, trainingMetrics } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+export const LiveViewDashboard: React.FC = () => {
+  const {
+    error,
+    trainingLog,
+    status,
+    trainingMetrics,
+    data: { id: projectId },
+  } = useSelector<State, Project>((state) => state.project);
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
@@ -49,7 +53,7 @@ export const LiveViewDashboard: React.FC<{ projectId: number }> = ({ projectId }
 
   useEffect(() => {
     return (): void => {
-      dispatch(resetStatus());
+      dispatch(changeStatus(CameraConfigStatus.None));
     };
   }, [dispatch]);
 

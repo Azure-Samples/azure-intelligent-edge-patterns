@@ -46,8 +46,7 @@ import {
   StopInferenceAction,
   UPDATE_ORIGIN_PROJECT_DATA,
   UpdateOriginProjectDataAction,
-  ResetStatusAction,
-  RESET_STATUS,
+  ChangeStatusAction,
   UpdateProbThresholdRequestAction,
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
@@ -130,8 +129,9 @@ export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({
   type: UPDATE_ORIGIN_PROJECT_DATA,
 });
 
-export const resetStatus = (): ResetStatusAction => ({
-  type: RESET_STATUS,
+export const changeStatus = (status: Status): ChangeStatusAction => ({
+  type: 'CHANGE_STATUS',
+  status,
 });
 
 const updateProbThresholdRequest = (): UpdateProbThresholdRequestAction => ({

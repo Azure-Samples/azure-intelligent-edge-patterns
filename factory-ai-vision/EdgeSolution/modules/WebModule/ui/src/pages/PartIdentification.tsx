@@ -10,7 +10,7 @@ export const PartIdentification: React.FC = () => {
         <ProjectConfig />
       </div>
       <div style={{ flexGrow: 3 }}>
-        <LiveViewDashboard projectId={0} />
+        <LiveViewDashboard />
       </div>
     </Flex>
   );
