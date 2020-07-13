@@ -15,6 +15,19 @@ import { LiveViewContainer } from '../LiveViewContainer';
 import { InferenceMetricDashboard } from './InferenceMetricDashboard';
 import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
+import { useCameras } from '../../hooks/useCameras';
+import { AOIData } from '../../type';
+
+const getAOIData = (cameraArea: string): AOIData => {
+  try {
+    return JSON.parse(cameraArea);
+  } catch (e) {
+    return {
+      useAOI: false,
+      AOIs: [],
+    };
+  }
+};
 
 export const LiveViewDashboard: React.FC = () => {
   const {
@@ -22,11 +35,15 @@ export const LiveViewDashboard: React.FC = () => {
     trainingLog,
     status,
     trainingMetrics,
-    data: { id: projectId },
+    data: { id: projectId, camera: projectCameraId },
   } = useSelector<State, Project>((state) => state.project);
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
+  // FIXME Integrate this with Redux
+  const cameras = useCameras();
+  const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
+  const aoiData = getAOIData(selectedCamera?.area);
 
   useEffect(() => {
     dispatch(thunkGetTrainingLog(projectId));
@@ -70,7 +87,7 @@ export const LiveViewDashboard: React.FC = () => {
       <Flex column style={{ height: '100%' }} gap="gap.small">
         {error && <Alert danger header={error.name} content={`${error.message}`} />}
         <div style={{ flexGrow: 2 }}>
-          <LiveViewContainer showVideo={true} initialAOIData={{ useAOI: false, AOIs: [] }} cameraId={0} />
+          <LiveViewContainer showVideo={true} initialAOIData={aoiData} cameraId={projectCameraId} />
         </div>
         <InferenceMetricDashboard />
       </Flex>
