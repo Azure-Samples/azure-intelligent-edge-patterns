@@ -1,5 +1,5 @@
 """
-Models for Azure CustomVIsion training.
+Models for Azure Custom Vision training.
 """
 import datetime
 import logging
@@ -13,9 +13,12 @@ from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
+from ..images.models import Image
+from ..part.models import Part
+from ..cameras.models import Camera
 from ..azure_settings.models import Setting
-from ..cameras.models import Camera, Image, Part
 from ..locations.models import Location
+
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
@@ -41,13 +44,18 @@ def inference_module_url():
 
 # Create your models here.
 
-
 class Project(models.Model):
     """Project Model"""
 
-    setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
+    setting = models.ForeignKey(Setting,
+                                on_delete=models.CASCADE,
+                                default=1)
+    camera = models.ForeignKey(Camera,
+                               on_delete=models.CASCADE,
+                               null=True)
+    location = models.ForeignKey(Location,
+                                 on_delete=models.CASCADE,
+                                 null=True)
     parts = models.ManyToManyField(Part, related_name="part")
     customvision_project_id = models.CharField(max_length=200,
                                                null=True,
@@ -62,14 +70,16 @@ class Project(models.Model):
                                     blank=True,
                                     default="")
     needRetraining = models.BooleanField(default=True)
+    training_counter = models.IntegerField(default=0)
+    is_demo = models.BooleanField(default=False)
+    deployed = models.BooleanField(default=False)
+
+    # TODO: Move this to a new App.
+    # e.g. relabel
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
     maxImages = models.IntegerField(default=20)
-    deployed = models.BooleanField(default=False)
-    training_counter = models.IntegerField(default=0)
     retraining_counter = models.IntegerField(default=0)
-    is_demo = models.BooleanField(default=False)
-
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
@@ -125,8 +135,6 @@ class Project(models.Model):
             #    f'Got Custom Vision Project Id: {project.id}. Saving...')
             # instance.customvision_project_id = project.id
         else:
-            # logger.info('Has not set the key, Got DUMMY PRJ ID')
-            # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
             instance.customvision_project_id = ""
         logger.info("Project pre_save... End")
 
@@ -224,7 +232,7 @@ class Project(models.Model):
         obj, created = Train.objects.update_or_create(
             project=self,
             defaults={
-                "status": status,
+                "status": "Status : "+status,
                 "log": log,
                 "performance": performance
             },
@@ -312,7 +320,9 @@ class Project(models.Model):
 
                 # Metrics
                 logger.info("Sending Logs to App Insight")
+                # TODO: Move this to other places to aviod import Part
                 part_monitor(len(Part.objects.filter(is_demo=False)))
+                # TODO: Move this to other places to aviod import Image
                 img_monitor(len(Image.objects.all()))
                 training_job_monitor(self.training_counter)
                 retraining_job_monitor(self.retraining_counter)

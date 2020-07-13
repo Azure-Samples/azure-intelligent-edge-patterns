@@ -16,7 +16,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Location
-        fields = ["id", "name", "description", "is_demo"]
+        fields = "__all__"
         extra_kwargs = {
             "description": {
                 "required": False
