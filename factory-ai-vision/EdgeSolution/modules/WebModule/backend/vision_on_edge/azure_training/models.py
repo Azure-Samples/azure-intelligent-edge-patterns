@@ -232,7 +232,7 @@ class Project(models.Model):
         obj, created = Train.objects.update_or_create(
             project=self,
             defaults={
-                "status": status,
+                "status": "Status : "+status,
                 "log": log,
                 "performance": performance
             },

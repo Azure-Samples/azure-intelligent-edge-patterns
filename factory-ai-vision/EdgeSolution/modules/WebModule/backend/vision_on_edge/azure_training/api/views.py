@@ -152,7 +152,7 @@ def update_train_status(project_id):
             if len(iterations) == 0:
                 project_obj.upcreate_training_status(
                     status="preparing",
-                    log="Status : preparing custom vision environment",
+                    log="preparing custom vision environment",
                 )
                 wait_prepare += 1
                 if wait_prepare > max_wait_prepare:
@@ -164,7 +164,7 @@ def update_train_status(project_id):
                 project_obj.upcreate_training_status(
                     status="training",
                     log=
-                    "Status : training (Training job might take up to 10-15 minutes)",
+                    "training (Training job might take up to 10-15 minutes)",
                 )
 
                 continue
@@ -173,7 +173,7 @@ def update_train_status(project_id):
                                           iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
                 project_obj.upcreate_training_status(
-                    status="exporting", log="Status : exporting model")
+                    status="exporting", log="exporting model")
                 res = project_obj.export_iterationv3_2(iteration.id)
                 logger.info(res.json())
                 continue
@@ -220,7 +220,7 @@ def update_train_status(project_id):
                         update_fields=["download_uri", "deployed"])
 
                 project_obj.upcreate_training_status(
-                    status="deploying", log="Status : deploying model")
+                    status="deploying", log="deploying model")
                 continue
 
             logger.info("Training Status: Completed")
@@ -233,7 +233,7 @@ def update_train_status(project_id):
             logger.info("Training Performance: %s", train_performance_list)
             project_obj.upcreate_training_status(
                 status="ok",
-                log="Status : model training completed",
+                log="model training completed",
                 performance=json.dumps(train_performance_list),
             )
             break
@@ -416,7 +416,7 @@ def _train(project_id):
         )
 
     project_obj.upcreate_training_status(
-        status="Status: preparing data (images and annotations)", log="")
+        status="preparing", log="preparing data (images and annotations)")
 
     project_obj.dequeue_iterations()
 
@@ -437,14 +437,14 @@ def _train(project_id):
             project_obj.upcreate_training_status(
                 status="preparing",
                 log=(
-                    f"Status : Project {project_obj.customvision_project_name}"
+                    f"Project {project_obj.customvision_project_name}"
                     + "found on Custom Vision"),
             )
         except:
             project_obj.create_project()
             project_obj.upcreate_training_status(
                 status="preparing",
-                log=("Status : Project created on CustomVision. " +
+                log=("Project created on CustomVision. " +
                      f"Name: {project_obj.customvision_project_name}"),
             )
 
@@ -456,7 +456,7 @@ def _train(project_id):
 
         project_obj.upcreate_training_status(
             status="sending",
-            log="Status : sending data (images and annotations)")
+            log="sending data (images and annotations)")
         tags = trainer.get_tags(customvision_project_id)
         tag_dict = {}
         project_partnames = {}
@@ -576,11 +576,11 @@ def _train(project_id):
         # Submit training task to Custom Vision
         if not project_changed:
             project_obj.upcreate_training_status(
-                status="ok", log="Status: Nothing changed. Not training")
+                status="ok", log="Nothing changed. Not training")
         else:
             project_obj.upcreate_training_status(
                 status="training",
-                log="Status: Project changed. Submitting training task...")
+                log="Project changed. Submitting training task...")
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
                 project_obj.update_app_insight_counter(
@@ -627,10 +627,10 @@ def _train(project_id):
         err_msg = traceback.format_exc()
         logger.exception("Exception: %s", err_msg)
         project_obj.upcreate_training_status(
-            status="failed", log=f"Status : failed {str(err_msg)}")
+            status="failed", log=f"failed {str(err_msg)}")
         return JsonResponse({
             "status": "failed",
-            "log": f"Status : failed {str(err_msg)}"
+            "log": f"failed {str(err_msg)}"
         })
 
 
@@ -690,12 +690,12 @@ def train(request, project_id):
         )
 
         project_obj.upcreate_training_status(status="ok",
-                                             log="Status : demo ok")
+                                             log="demo ok")
         # FIXME pass the new model info to inference server (willy implement)
         return JsonResponse({"status": "ok"})
 
     project_obj.upcreate_training_status(
-        status="Status: preparing data (images and annotations)", log="")
+        status="preparing", log="preparing data (images and annotations)")
     logger.info("sleeping")
 
     def _send(rtsp, parts, download_uri):
@@ -937,7 +937,7 @@ def pull_cv_project(request, project_id):
         logger.exception("Exception: %s", err_msg)
         return JsonResponse({
             "status": "failed",
-            "log": f"Status : failed {str(err_msg)}"
+            "log": f"failed {str(err_msg)}"
         })
     finally:
         project_obj.save(update_fields=update_fields)
