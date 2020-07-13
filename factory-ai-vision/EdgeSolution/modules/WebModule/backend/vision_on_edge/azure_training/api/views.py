@@ -25,8 +25,10 @@ from rest_framework.response import Response
 
 from configs.settings import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 
-from ...cameras.models import Camera, Image, Part
+from ...cameras.models import Camera
 from ...general import error_messages
+from ...images.models import Image
+from ...part.models import Part
 from ..models import Project, Task, Train
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
@@ -831,7 +833,11 @@ def pull_cv_project(request, project_id):
                         take=1)[0]
                     image_uri = img.original_image_uri
                     img_obj, created = Image.objects.update_or_create(
-                        part=part_obj, remote_url=image_uri, uploaded=True)
+                        part=part_obj,
+                        remote_url=image_uri,
+                        customvision_id=img.id,
+                        project=project_obj,
+                        uploaded=True)
                     logger.info("loading from remote url: %s",
                                 img_obj.remote_url)
                     img_obj.get_remote_image()
@@ -887,7 +893,10 @@ def pull_cv_project(request, project_id):
                     part_obj = Part.objects.filter(name=region.tag_name,
                                                    is_demo=False)[0]
                     img_obj, created = Image.objects.update_or_create(
-                        part=part_obj, remote_url=img.original_image_uri)
+                        part=part_obj,
+                        remote_url=img.original_image_uri,
+                        project=project_obj,
+                        customvision_id=img.id)
                     if created:
                         logger.info("Downloading img %s", img.id)
                         img_obj.get_remote_image()
