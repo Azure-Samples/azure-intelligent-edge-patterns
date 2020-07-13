@@ -81,7 +81,6 @@ export const ProjectConfig: React.FC = () => {
   const [locationLoading, dropDownLocations, selectedLocations, setSelectedLocationById] = useDropdownItems<
     any
   >('locations', isTestModel);
-  const history = useHistory();
   const [maxImgCountError, setMaxImgCountError] = useState(false);
   const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', rangeMessage: '' });
   const hasUserUpdateAccuracyRange = useRef(false);
@@ -333,7 +332,7 @@ export const ProjectConfig: React.FC = () => {
 
 const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
   if (isTestModel) {
-    return <Button content="Back" onClick={(): void => setIsTestModel(false)} primary />;
+    return <Button content="Back" onClick={(): void => setIsTestModel(false)} primary circular />;
   }
 
   return (
