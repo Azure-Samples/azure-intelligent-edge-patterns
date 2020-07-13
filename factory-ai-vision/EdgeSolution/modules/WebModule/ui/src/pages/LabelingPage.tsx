@@ -44,10 +44,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
   const onSave = (): void => {
     dispatch(saveLabelImageAnnotation(images[index].id, annotations));
     if (setJudgedImageList)
-      setJudgedImageList((prev) => [
-        ...prev,
-        { partId: annotations[0].part.id, imageId: images[imageIndex].id },
-      ]);
+      setJudgedImageList((prev) => [...prev, { partId: annotations[0].part.id, imageId: images[index].id }]);
     if (index === images.length - 1) closeDialog();
     setIndex((prev) => (prev + 1) % images.length);
   };
@@ -56,7 +53,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
   };
 
   const onDeleteImage = (): void => {
-    dispatch(deleteLabelImage(images[imageIndex].id));
+    dispatch(deleteLabelImage(images[index].id));
   };
 
   useEffect(() => {
@@ -111,7 +108,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
               if (setJudgedImageList)
                 setJudgedImageList((prev) => [
                   ...prev,
-                  { partId: annotations[0].part.id, imageId: images[imageIndex].id },
+                  { partId: annotations[0].part.id, imageId: images[index].id },
                 ]);
               // eslint-disable-next-line no-restricted-globals
               const finishLabel = confirm('The Rest of the image will be removed');
