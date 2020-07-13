@@ -1,5 +1,5 @@
 {
-    "Name": "$ROLE_DEFINITION_NAME",
+    "Name": "LVAEdgeUsertest",
     "IsCustom": true,
     "Description": "Can create assets, view list of containers and view Edge policies",
     "Actions": [

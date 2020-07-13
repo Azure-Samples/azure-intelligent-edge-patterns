@@ -28,7 +28,7 @@ Create a file named appsettings.json in this folder. Add the following text and 
 * **deviceId** - Refers to your IoT Edge device id (registered with your IoT Hub)
 * **moduleId** - Refers to the module id of Live Video Analytics on IoT Edge module (when deployed to the IoT Edge device)
 
-You can run the [LVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to generate a **appsettings.json** file with values filled out.
+You can run the [LVA resources setup script](https://raw.githubusercontent.com/julialieberman/azure-intelligent-edge-patterns/t-jull/Research/julia/src/edge/setup' # location of remote files used by the script) to generate a **appsettings.json** file with values filled out.
 
 Create a file named .env in src/edge folder and add the following text to it. Provide values for all variables.
 

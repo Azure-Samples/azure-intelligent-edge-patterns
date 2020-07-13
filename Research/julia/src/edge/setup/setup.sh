@@ -22,7 +22,6 @@ BASE_URL='https://raw.githubusercontent.com/julialieberman/azure-intelligent-edg
 DEFAULT_REGION='westus2'
 ENV_FILE='edge-deployment/.env'
 APP_SETTINGS_FILE='appsettings.json'
-#ARM_TEMPLATE_URL="$BASE_URL/deploy.json"
 DEPLOYMENT_MANIFEST_URL="$BASE_URL/setup/deployment.yolov3.template.json"
 DEPLOYMENT_MANIFEST_FILE='edge-deployment/deployment.yolov3.template.json'
 ROLE_DEFINITION_URL="$BASE_URL/setup/LVAEdgeUserRoleDefinition.json"
@@ -61,8 +60,8 @@ sleep 2 # time for the reader
 #     DEPLOYMENT_MANIFEST_FILE="$CLOUD_SHELL_FOLDER/$DEPLOYMENT_MANIFEST_FILE"
 #     ROLE_DEFINITION_FILE="$CLOUD_SHELL_FOLDER/$ROLE_DEFINITION_FILE"
 # fi
-#echo "Initialzing output files.
-#This overwrites any output files previously generated."
+echo "Initialzing output files.
+This overwrites any output files previously generated."
  mkdir -p $(dirname $ENV_FILE) && echo -n "" > $ENV_FILE
  mkdir -p $(dirname $APP_SETTINGS_FILE) && echo -n "" > $APP_SETTINGS_FILE
  mkdir -p $(dirname $DEPLOYMENT_MANIFEST_FILE) && echo -n "" > $DEPLOYMENT_MANIFEST_FILE
@@ -180,19 +179,14 @@ fi
 
 
 
-# deploy resources using a template
+# deploy resources
  echo -e "
  Now we'll deploy some resources to ${GREEN}${RESOURCE_GROUP}.${NC}
  Including a container registry, storage account, and a media services account."
 
-# The resources are defined in a template here:
-# ${BLUE}${ARM_TEMPLATE_URL}${NC}"
-
-#ROLE_DEFINITION_NAME=$(az deployment group create --resource-group $RESOURCE_GROUP --template-uri $ARM_TEMPLATE_URL --query properties.outputs.roleName.value | tr -d \")
-#checkForError
 ROLE_DEFINITION_NAME="LVAEdgeUsertest"
 
-#create container registry
+#create or find container registry
 AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
 CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
 IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --hub-name ${IOTHUB} --query='connectionString')
@@ -222,7 +216,6 @@ AVAILABLE=$(az acr check-name -n ${CONTAINER_REGISTRY} | jq .nameAvailable)
 CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $CONTAINER_REGISTRY --query 'username' | tr -d \")
 CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
 
-
 AMS_ACCOUNT_NAME="teamlvamediaservices"
 echo -e "
 ${YELLOW}What is the name of the storage account to use?${NC}
@@ -240,18 +233,15 @@ EXISTING=$(az ams account check-name -l ${REGION} -n ${AMS_ACCOUNT_NAME})
      echo "Media services account named ${AMS_ACCOUNT_NAME} already exists!"
  fi
 
-# # this includes everything in the resource group, and not just the resources deployed by the template
+# this includes everything in the resource group
 
 echo -e "\nResource group now contains these resources:"
 RESOURCES=$(az resource list --resource-group $RESOURCE_GROUP --query '[].{name:name,"Resource Type":type}' -o table)
 echo "${RESOURCES}"
 
 # capture resource configuration in variables
-IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
-
 AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
 EDGE_DEVICE=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.DataBoxEdge\/DataBoxEdgeDevices$/ {print $1}')
-CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
 
 # creating the AMS account creates a service principal, so well just reset it to get the credentials
 echo "setting up service principal..."
