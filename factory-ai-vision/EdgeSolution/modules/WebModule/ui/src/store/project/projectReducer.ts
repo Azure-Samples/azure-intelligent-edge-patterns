@@ -41,7 +41,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case POST_PROJECT_REQUEST:
       return { ...state, isLoading: true };
     case POST_PROJECT_SUCCESS:
-      return { ...state, isLoading: false };
+      return { ...state, isLoading: false, data: action.data, originData: action.data };
     case POST_PROJECT_FALIED:
       return { ...state, isLoading: false, error: action.error };
     case DELETE_PROJECT_SUCCESS:

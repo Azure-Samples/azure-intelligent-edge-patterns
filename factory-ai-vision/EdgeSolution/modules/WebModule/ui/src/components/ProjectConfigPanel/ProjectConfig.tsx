@@ -91,10 +91,6 @@ export const ProjectConfig: React.FC = () => {
   }, [dispatch, cameraLoading, locationLoading, partLoading, isTestModel]);
 
   useEffect(() => {
-    dispatch(getLabelImages());
-  }, [dispatch]);
-
-  useEffect(() => {
     if (!isTestModel) {
       if (location) setSelectedLocationById(location);
       if (parts.length) setSelectedPartsById(parts);

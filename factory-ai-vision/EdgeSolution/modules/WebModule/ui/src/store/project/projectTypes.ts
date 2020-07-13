@@ -148,6 +148,7 @@ export type PostProjectRequestAction = {
 export const POST_PROJECT_SUCCESS = 'POST_PROJECT_SUCCESS';
 export type PostProjectSuccessAction = {
   type: typeof POST_PROJECT_SUCCESS;
+  data: ProjectData;
 };
 
 export const POST_PROJECT_FALIED = 'POST_PROJECT_FALIED';

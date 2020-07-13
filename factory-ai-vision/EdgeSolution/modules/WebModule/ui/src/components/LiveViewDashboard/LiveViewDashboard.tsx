@@ -15,8 +15,8 @@ import { LiveViewContainer } from '../LiveViewContainer';
 import { InferenceMetricDashboard } from './InferenceMetricDashboard';
 import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
-import { useCameras } from '../../hooks/useCameras';
 import { AOIData } from '../../type';
+import { Camera } from '../../store/camera/cameraTypes';
 
 const getAOIData = (cameraArea: string): AOIData => {
   try {
@@ -40,10 +40,6 @@ export const LiveViewDashboard: React.FC = () => {
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
-  // FIXME Integrate this with Redux
-  const cameras = useCameras();
-  const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
-  const aoiData = getAOIData(selectedCamera?.area);
 
   useEffect(() => {
     dispatch(thunkGetTrainingLog(projectId));
@@ -73,6 +69,14 @@ export const LiveViewDashboard: React.FC = () => {
       dispatch(changeStatus(CameraConfigStatus.None));
     };
   }, [dispatch]);
+
+  // FIXME Integrate this with Redux
+  const cameras = useSelector<State, Camera[]>((state) => state.cameras);
+  const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
+
+  if (!selectedCamera || selectedCamera.is_demo) return null;
+
+  const aoiData = getAOIData(selectedCamera?.area);
 
   if (status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None)
     return (

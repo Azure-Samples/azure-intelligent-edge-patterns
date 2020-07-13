@@ -2,19 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as R from 'ramda';
 import Axios from 'axios';
 import uniqid from 'uniqid';
+import { Text, Checkbox, Flex, Alert, Provider } from '@fluentui/react-northstar';
+import { useDispatch } from 'react-redux';
 
-import { Text, Checkbox, Flex, Alert } from '@fluentui/react-northstar';
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
 import { AOIData, Box } from '../../type';
 import useImage from '../LabelingPage/util/useImage';
 import { CreatingState } from './LiveViewContainer.type';
+import { errorTheme } from '../../themes/errorTheme';
+import { WarningDialog } from '../WarningDialog';
+import { thunkDeleteProject } from '../../store/project/projectActions';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
   initialAOIData: AOIData;
   cameraId: number;
 }> = ({ showVideo, initialAOIData, cameraId }) => {
+  const dispatch = useDispatch();
   const [showAOI, setShowAOI] = useState(initialAOIData.useAOI);
   const lasteUpdatedAOIs = useRef(initialAOIData.AOIs);
   const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
@@ -117,6 +122,17 @@ export const LiveViewContainer: React.FC<{
           circular
         />
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
+        <Provider theme={errorTheme}>
+          <WarningDialog
+            contentText={<p>Sure you want to delete the configuration?</p>}
+            trigger={
+              <Button content="Delete Configuration" primary circular styles={{ marginRight: 'auto' }} />
+            }
+            onConfirm={(): void => {
+              dispatch(thunkDeleteProject());
+            }}
+          />
+        </Provider>
       </Flex>
       <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
         {showVideo ? (
