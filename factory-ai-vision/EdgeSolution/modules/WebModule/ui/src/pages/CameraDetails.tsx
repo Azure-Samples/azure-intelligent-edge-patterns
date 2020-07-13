@@ -26,8 +26,10 @@ const infoDivStyle: React.CSSProperties = {
 
 const CameraDetails: FC = (): JSX.Element => {
   const dispatch = useDispatch();
-  const name = useQuery().get('name');
-  const camera = useSelector<State, Camera>((state) => state.cameras.find((ele) => ele.name === name));
+  const camerId = useQuery().get('cameraId');
+  const camera = useSelector<State, Camera>((state) =>
+    state.cameras.find((ele) => ele.id === parseInt(camerId, 10)),
+  );
   const [status, setStatus] = useState<Status>(Status.None);
 
   if (!camera) return <Redirect to="/cameras" />;
