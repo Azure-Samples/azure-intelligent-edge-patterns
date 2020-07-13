@@ -55,10 +55,11 @@ def upload_relabel_image(request):
         logger.info("Already reach project maxImages limit")
 
         # Delete some images if already exceed maxImages
-        for i in len(
-                Image.objects.filter(project=project_obj,
-                                     part=part,
-                                     is_relabel=True)) - project_obj.maxImages:
+        for i in range(
+                len(
+                    Image.objects.filter(
+                        project=project_obj, part=part, is_relabel=True)) -
+                project_obj.maxImages):
             Image.objects.filter(project=project_obj,
                                  part=part,
                                  is_relabel=True).last().delete()
