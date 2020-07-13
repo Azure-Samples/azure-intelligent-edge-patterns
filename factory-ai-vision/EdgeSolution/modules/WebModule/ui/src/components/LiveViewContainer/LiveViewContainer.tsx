@@ -87,7 +87,7 @@ export const LiveViewContainer: React.FC<{
   const updateBtnDisabled = !showAOI || !hasEdit;
 
   return (
-    <Flex column gap="gap.medium">
+    <Flex column gap="gap.medium" styles={{ height: '100%' }}>
       <Flex gap="gap.small">
         {error && <Alert danger header="Failed to Update!" content={`${error.name}: ${error.message}`} />}
         <Checkbox
@@ -118,7 +118,7 @@ export const LiveViewContainer: React.FC<{
         />
         <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       </Flex>
-      <div style={{ width: '100%', height: '50vh', backgroundColor: 'black' }}>
+      <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
