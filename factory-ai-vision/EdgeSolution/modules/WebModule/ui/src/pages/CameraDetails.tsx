@@ -81,12 +81,17 @@ const CameraDetails: FC = (): JSX.Element => {
       >
         <CreateButton
           title="Configure Task"
-          onClick={() => {
+          onClick={(): void => {
             history.push(`/partIdentification?cameraId=${camera.id}`);
           }}
         />
         <Divider color="black" vertical styles={{ height: '150px' }} />
-        <CreateButton title="Create Parts" onClick={() => {}} />
+        <CreateButton
+          title="Create Parts"
+          onClick={(): void => {
+            history.push(`/parts/`);
+          }}
+        />
       </Flex>
     </Grid>
   );
