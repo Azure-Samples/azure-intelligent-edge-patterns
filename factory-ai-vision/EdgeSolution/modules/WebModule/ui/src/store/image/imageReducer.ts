@@ -6,6 +6,7 @@ import {
   LabelImageAction,
   LabelImage,
   UPDATE_LABEL_IMAGE_ANNOTATION,
+  REMOVE_IMAGES_FROM_PART,
 } from './imageTypes';
 import { initialState } from '../State';
 
@@ -28,9 +29,15 @@ const labelImagesReducer = (state = initialState.images, action: LabelImageActio
       newState[updatedImageIdx] = {
         ...newState[updatedImageIdx],
         labels: action.payload.labels,
+        part: action.payload.part,
       };
       return newState;
     }
+    case REMOVE_IMAGES_FROM_PART:
+      return state.map((image) => {
+        if (action.payload.imageIds.includes(image?.id)) return { ...image, part: { id: null, name: '' } };
+        return image;
+      });
     default:
       return state;
   }

@@ -16,7 +16,7 @@ class ImagePredictionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImagePrediction
-        fields = ['id', 'image', 'predicted']
+        fields = "__all__"
         extra_kwargs = {
             "predicted": {
                 "required": False

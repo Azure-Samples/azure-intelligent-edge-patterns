@@ -5,7 +5,7 @@ Location ModelViewSet test
 from rest_framework.test import APITransactionTestCase
 
 from ..models import Location
-from .test_special_strings import special_strings
+from vision_on_edge.general.tests.test_special_strings import special_strings
 
 
 class LocationTestCase(APITransactionTestCase):

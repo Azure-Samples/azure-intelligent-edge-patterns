@@ -13,7 +13,8 @@ from rest_framework.test import APITransactionTestCase
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
 from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.azure_training.models import Project
-from vision_on_edge.cameras.models import Camera, Part
+from vision_on_edge.cameras.models import Camera
+from vision_on_edge.part.models import Part
 from vision_on_edge.locations.models import Location
 
 PROJECT_PREFIX = "UnitTest"
