@@ -20,8 +20,8 @@ export const PartForm: React.FC<PartFormProps> = ({
   selectedPart,
   setSelectedPart,
 }) => {
-  const parts = useParts();
-  const project = useProject();
+  const parts = useParts(false);
+  const project = useProject(false);
 
   const items = project.data.parts
     .map((e) => parts.find((part) => part.id === e))
