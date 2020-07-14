@@ -53,7 +53,8 @@ const LabelingPage: FC<LabelingPageProps> = ({
     setIndex((prev) => (prev + 1) % images.length);
   };
   const onBoxCreated = (): void => {
-    if (index === images.length - 1) onSave();
+    // TODO
+    // if (index === images.length - 1) onSaveBtnClick();
   };
 
   const onDeleteImage = (): void => {
