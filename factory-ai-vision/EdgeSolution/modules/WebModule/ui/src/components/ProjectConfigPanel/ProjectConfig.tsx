@@ -13,7 +13,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 import * as R from 'ramda';
-import { useHistory } from 'react-router-dom';
 
 import {
   thunkGetProject,
@@ -25,7 +24,6 @@ import { Project, ProjectData, Status } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { formatDropdownValue, Value } from '../../util/formatDropdownValue';
 import { getAppInsights } from '../../TelemetryService';
-import { WarningDialog } from '../WarningDialog';
 import { AddCameraLink } from '../AddModuleDialog/AddCameraLink';
 import { AddLocationLink } from '../AddModuleDialog/AddLocationLink';
 import { AddPartLink } from '../AddModuleDialog/AddPartLink';
@@ -343,37 +341,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         loading={isLoading}
         circular
       />
-      <TestModelButton isDemo={isDemo} />
     </Flex>
-  );
-};
-
-const TestModelButton = ({ isDemo }): JSX.Element => {
-  const history = useHistory();
-
-  if (isDemo) {
-    return null;
-  }
-
-  return (
-    <>
-      <Divider color="black" styles={{ width: '100%' }} />
-      <Text>Try pretrained detection</Text>
-      <WarningDialog
-        confirmButton="Confirm"
-        onConfirm={(): void => history.push('/pretrainDetection/')}
-        contentText={
-          <>
-            <p>
-              &quot;Demo Pretrained Detection&quot; is for seeing inference result, no retraining experience
-              here.
-            </p>
-            <p>For retraining experience, please create a new model</p>
-          </>
-        }
-        trigger={<Button content="Pretrained Detection" primary circular />}
-      />
-    </>
   );
 };
 
