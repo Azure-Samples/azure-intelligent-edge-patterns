@@ -32,6 +32,7 @@ export const LiveViewContainer: React.FC<{
   const onCheckboxClick = async (): Promise<void> => {
     setShowAOI(!showAOI);
     setLoading(true);
+    setError(null);
     try {
       await Axios.patch(`/api/cameras/${cameraId}/`, {
         area: JSON.stringify({
@@ -51,6 +52,7 @@ export const LiveViewContainer: React.FC<{
 
   const onUpdate = async (): Promise<void> => {
     setLoading(true);
+    setError(null);
     try {
       await Axios.patch(`/api/cameras/${cameraId}/`, {
         area: JSON.stringify({
