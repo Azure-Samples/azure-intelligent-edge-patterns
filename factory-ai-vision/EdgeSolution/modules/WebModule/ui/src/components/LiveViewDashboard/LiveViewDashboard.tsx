@@ -41,9 +41,6 @@ export const LiveViewDashboard: React.FC = () => {
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
 
-  useEffect(() => {
-    dispatch(thunkGetTrainingLog(projectId));
-  }, [dispatch, projectId]);
   useInterval(
     () => {
       dispatch(thunkGetTrainingLog(projectId));
@@ -64,21 +61,15 @@ export const LiveViewDashboard: React.FC = () => {
     status === CameraConfigStatus.StartInference ? 5000 : null,
   );
 
-  useEffect(() => {
-    return (): void => {
-      dispatch(changeStatus(CameraConfigStatus.None));
-    };
-  }, [dispatch]);
-
   // FIXME Integrate this with Redux
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
   const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
 
-  if (!selectedCamera || selectedCamera.is_demo) return null;
+  if (status === CameraConfigStatus.None) return null;
 
   const aoiData = getAOIData(selectedCamera?.area);
 
-  if (status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None)
+  if (status === CameraConfigStatus.WaitTraining)
     return (
       <>
         <Loader size="smallest" />
