@@ -283,9 +283,9 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                   />
                 </Flex>
               </Flex>
-              <Text styles={{ fontSize: '12px' }} success>
+              {/* <Text styles={{ fontSize: '12px' }} success>
                 {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
-              </Text>
+              </Text> */}
               <Flex column hAlign="center">
                 <Text disabled={accracyRangeDisabled}>Maximum Images to Store: </Text>
                 <Input
