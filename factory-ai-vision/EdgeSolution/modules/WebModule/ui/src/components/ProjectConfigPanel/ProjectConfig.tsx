@@ -190,7 +190,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   return (
     <Flex hAlign="center" styles={{ width: '600px' }} column gap="gap.medium">
       <Text size="larger" weight="semibold">
-        {isDemo ? 'Pretraind Detection' : 'Part Identification'}
+        {isDemo ? 'Pretrained Detection' : 'Part Identification'}
       </Text>
       <Divider color="black" styles={{ width: '100%' }} />
       {error && (
@@ -198,20 +198,22 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       )}
       <Flex column gap="gap.small">
         {/* TODO: Get the actual model from backend */}
-        <ModuleSelector
-          moduleName="model"
-          setSelectedModuleItem={() => {}}
-          items={[
-            {
-              header: `Demo 1`,
-              content: {
-                key: 'demo1',
+        {isDemo && (
+          <ModuleSelector
+            moduleName="model"
+            setSelectedModuleItem={() => {}}
+            items={[
+              {
+                header: `Demo 1`,
+                content: {
+                  key: 'demo1',
+                },
               },
-            },
-          ]}
-          isMultiple={false}
-          isDemo={isDemo}
-        />
+            ]}
+            isMultiple={false}
+            isDemo={isDemo}
+          />
+        )}
         <ModuleSelector
           moduleName="camera"
           value={selectedCamera}
