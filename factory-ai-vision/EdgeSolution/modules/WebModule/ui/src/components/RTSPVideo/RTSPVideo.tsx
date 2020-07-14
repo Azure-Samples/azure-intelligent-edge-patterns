@@ -18,7 +18,11 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   const [captureLabelMode, setCaptureLabelMode] = useState<number>(0);
 
   const onCreateStream = useCallback((): void => {
-    fetch(`/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`)
+    const url =
+      partId === null
+        ? `/api/streams/connect/?rtsp=${rtsp}`
+        : `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
         if (data?.status === 'ok') {
