@@ -31,6 +31,7 @@ from vision_on_edge.part.api import views as part_views
 from vision_on_edge.streams.api import views as stream_views
 from vision_on_edge.images.api import views as image_views
 from vision_on_edge.relabeling.api import views as relabel_views
+from vision_on_edge.feedback.api import views as feedback_views
 
 
 from . import views as site_views
@@ -56,6 +57,7 @@ router.register('projects', azure_training_views.ProjectViewSet)
 router.register('train', azure_training_views.TrainViewSet)
 router.register('tasks', azure_training_views.TaskViewSet)
 router.register('images', image_views.ImageViewSet)
+router.register('feedback', feedback_views.FeedbackViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
