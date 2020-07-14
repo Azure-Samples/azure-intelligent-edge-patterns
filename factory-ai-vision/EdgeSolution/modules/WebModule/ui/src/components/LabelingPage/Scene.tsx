@@ -78,6 +78,7 @@ const Scene: FC<SceneProps> = ({
     dispatch(removeAnnotation(selectedAnnotationIndex));
     setWorkState(WorkState.None);
     setShowOuterRemoveButton(false);
+    setSelectedAnnotationIndex(null);
   }, [dispatch, selectedAnnotationIndex, setWorkState, setShowOuterRemoveButton]);
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
