@@ -5,10 +5,13 @@ import logging
 
 from azure.cognitiveservices.vision.customvision.training import \
     CustomVisionTrainingClient
+# pylint: disable=line-too-long
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
 from django.db import models
 from django.db.models.signals import pre_save
+# pylint: enable=line-too-long
+from msrest.exceptions import ClientRequestError as MSClientRequestError
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +81,8 @@ class Setting(models.Model):
             is_trainer_valid = True
         except CustomVisionErrorException:
             trainer = None
+        except MSClientRequestError:
+            trainer = None
         except Exception:
             trainer = None
         return is_trainer_valid, trainer
@@ -95,9 +100,14 @@ class Setting(models.Model):
         return None
 
     @staticmethod
-    def pre_save(instance, **kwargs):
-        """Setting pre_save"""
+    def pre_save(**kwargs):
+        """
+        Setting pre_save
+        """
         logger.info("Setting Presave")
+        if 'instance' not in kwargs:
+            return
+        instance = kwargs['instance']
         try:
             logger.info("Validating CustomVisionClient %s", instance.name)
             trainer = Setting._get_trainer_obj_static(
@@ -107,28 +117,22 @@ class Setting(models.Model):
                 if domain.type == "ObjectDetection" and
                 domain.name == "General (compact)")
 
-            logger.info("Validating Trainer %s Key + Endpoint... Pass",
-                        instance.name)
+            logger.info("Setting %s is valid", instance.name)
             instance.is_trainer_valid = True
             instance.obj_detection_domain_id = obj_detection_domain.id
-        except CustomVisionErrorException as customvision_err:
-            logger.error("Setting Presave occur CustomVisionError: %s",
-                         customvision_err)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except KeyError as key_err:
-            logger.error("Setting Presave occur KeyError: %s", key_err)
-            logger.error(
-                "Set is_trainer_valid to False, obj_detection_domain_id to ''")
-            instance.is_trainer_valid = False
-            instance.obj_detection_domain_id = ""
-        except Exception as unexpected_error:
-            logger.exception("Setting Presave: Unexpected Error")
-            raise unexpected_error
-        finally:
-            logger.info("Setting Presave... End")
+            return
+        except CustomVisionErrorException:
+            logger.exception("Setting Presave occur CustomVisionError")
+        except KeyError:
+            logger.exception("Setting pre_save occur KeyError")
+        except MSClientRequestError:
+            logger.exception("Setting pre_save occur MSClientRequestError...")
+        except Exception:
+            logger.exception("Setting pre_save occur unexpected Error...")
+        logger.info("Setting.is_trainer_valid = False")
+        logger.info("Setting.obj_detection_domain = ''")
+        instance.is_trainer_valid = False
+        instance.obj_detection_domain_id = ""
 
     def create_project(self, project_name: str):
         """
@@ -145,13 +149,14 @@ class Setting(models.Model):
             project = trainer.create_project(
                 name=project_name, domain_id=self.obj_detection_domain_id)
             return project
-        except CustomVisionErrorException as customvision_err:
-            logger.error("Setting creating_project errors %s",
-                         customvision_err)
-            return None
+        except CustomVisionErrorException:
+            logger.error("Create project occur CustomVisionErrorException")
+        except MSClientRequestError:
+            logger.exception("Create project occur MSClientRequestError")
         except Exception:
-            logger.exception("Setting Presave: Unexpected Error")
+            logger.exception("Create project occur unexpected error...")
             raise
+        return None
 
     def delete_project(self, project_id: str):
         """

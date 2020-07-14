@@ -21,6 +21,7 @@ const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
         <NavItem disabled={disabled} src="/icons/part.png" to="/parts"></NavItem>
         <NavItem disabled={disabled} src="/icons/partIdentification.png" to="/partIdentification"></NavItem>
         <NavItem disabled={disabled} src="/icons/manual.png" to="/manual"></NavItem>
+        <NavItem disabled={disabled} src="/icons/pretrained-model.png" to="/pretrainDetection"></NavItem>
       </Flex>
     </Segment>
   );

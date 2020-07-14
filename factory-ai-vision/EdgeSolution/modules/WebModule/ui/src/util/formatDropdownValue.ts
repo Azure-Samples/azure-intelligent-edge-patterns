@@ -19,5 +19,5 @@ export const formatDropdownValue = (value: Value): DropdownItemProps | DropdownI
       },
     };
   }
-  return null;
+  return undefined;
 };

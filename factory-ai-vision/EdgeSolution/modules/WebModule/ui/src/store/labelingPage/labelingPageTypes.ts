@@ -50,7 +50,10 @@ export type Size2D = { width: number; height: number };
 export type Annotation = {
   id: number;
   label: BoxLabel;
-  attribute: string;
+  part: {
+    id: number;
+    name: string;
+  };
   annotationState: AnnotationState;
 };
 

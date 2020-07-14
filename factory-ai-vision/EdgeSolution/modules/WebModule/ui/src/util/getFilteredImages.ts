@@ -8,6 +8,8 @@ export const getFilteredImages = (
   images: LabelImage[],
   { partId, isRelabel = false }: Options,
 ): LabelImage[] => {
-  if (partId === undefined) return images;
-  return images.filter((image) => image.part.id === partId && image.is_relabel === isRelabel);
+  let filteredImages = images.filter((img) => img.part.id !== null);
+  if (partId !== undefined) filteredImages = filteredImages.filter((img) => img.part.id === partId);
+  if (isRelabel !== undefined) filteredImages = filteredImages.filter((img) => img.is_relabel === isRelabel);
+  return filteredImages;
 };

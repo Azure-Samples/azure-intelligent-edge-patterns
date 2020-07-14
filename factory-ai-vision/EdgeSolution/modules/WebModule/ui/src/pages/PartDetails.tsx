@@ -84,8 +84,8 @@ export const PartDetails = (): JSX.Element => {
         </Provider>
         <LoadingDialog
           status={status}
-          onConfirm={() => {
-            if (status === Status.Success) history.push(`/parts/`);
+          onConfirm={(): void => {
+            if (status === Status.Success) history.push(`/parts/`, 'AFTER_DELETE');
           }}
         />
         {!!error && <Alert danger content={error} dismissible />}

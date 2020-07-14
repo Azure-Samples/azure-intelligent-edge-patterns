@@ -1,6 +1,7 @@
 import React from 'react';
-import { Dialog, Flex, ExclamationCircleIcon } from '@fluentui/react-northstar';
+import { Flex, ExclamationCircleIcon } from '@fluentui/react-northstar';
 import { WarningDialogProps } from './WarningDialog.type';
+import { Dialog } from '../Dialog';
 
 export const WarningDialog: React.FC<WarningDialogProps> = ({
   onConfirm = null,

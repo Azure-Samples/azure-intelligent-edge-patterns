@@ -1,5 +1,5 @@
 """
-Models for Azure CustomVIsion training.
+Models for Azure Custom Vision training.
 """
 import datetime
 import logging
@@ -14,8 +14,10 @@ from django.db import models
 from django.db.models.signals import post_save, pre_save
 
 from ..azure_settings.models import Setting
-from ..cameras.models import Camera, Image, Part
+from ..cameras.models import Camera
+from ..images.models import Image
 from ..locations.models import Location
+from ..part.models import Part
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
@@ -62,14 +64,16 @@ class Project(models.Model):
                                     blank=True,
                                     default="")
     needRetraining = models.BooleanField(default=True)
+    training_counter = models.IntegerField(default=0)
+    is_demo = models.BooleanField(default=False)
+    deployed = models.BooleanField(default=False)
+
+    # TODO: Move this to a new App.
+    # e.g. relabel
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
     maxImages = models.IntegerField(default=20)
-    deployed = models.BooleanField(default=False)
-    training_counter = models.IntegerField(default=0)
     retraining_counter = models.IntegerField(default=0)
-    is_demo = models.BooleanField(default=False)
-
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
@@ -125,8 +129,6 @@ class Project(models.Model):
             #    f'Got Custom Vision Project Id: {project.id}. Saving...')
             # instance.customvision_project_id = project.id
         else:
-            # logger.info('Has not set the key, Got DUMMY PRJ ID')
-            # instance.customvision_project_id = 'DUMMY-PROJECT-ID'
             instance.customvision_project_id = ""
         logger.info("Project pre_save... End")
 
@@ -225,7 +227,7 @@ class Project(models.Model):
             project=self,
             defaults={
                 "status": status,
-                "log": log,
+                "log": "Status : " + log.capitalize(),
                 "performance": performance
             },
         )
@@ -312,7 +314,9 @@ class Project(models.Model):
 
                 # Metrics
                 logger.info("Sending Logs to App Insight")
+                # TODO: Move this to other places to aviod import Part
                 part_monitor(len(Part.objects.filter(is_demo=False)))
+                # TODO: Move this to other places to aviod import Image
                 img_monitor(len(Image.objects.all()))
                 training_job_monitor(self.training_counter)
                 retraining_job_monitor(self.retraining_counter)

@@ -22,7 +22,6 @@ import {
   GET_INFERENCE_METRICS_SUCCESS,
   GET_INFERENCE_METRICS_FAILED,
   UPDATE_ORIGIN_PROJECT_DATA,
-  RESET_STATUS,
 } from './projectTypes';
 
 const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
@@ -42,7 +41,7 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
     case POST_PROJECT_REQUEST:
       return { ...state, isLoading: true };
     case POST_PROJECT_SUCCESS:
-      return { ...state, isLoading: false };
+      return { ...state, isLoading: false, data: action.data, originData: action.data };
     case POST_PROJECT_FALIED:
       return { ...state, isLoading: false, error: action.error };
     case DELETE_PROJECT_SUCCESS:
@@ -137,8 +136,8 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
       return { ...state, inferenceMetrics: action.payload };
     case GET_INFERENCE_METRICS_FAILED:
       return { ...state, error: action.error };
-    case RESET_STATUS:
-      return { ...state, status: Status.None };
+    case 'CHANGE_STATUS':
+      return { ...state, status: action.status };
     case 'UPDATE_PROB_THRESHOLD_REQUEST':
       return { ...state, isLoading: true, error: null };
     case 'UPDATE_PROB_THRESHOLD_SUCCESS':

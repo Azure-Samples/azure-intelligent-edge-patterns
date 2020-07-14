@@ -10,6 +10,8 @@ import {
   POST_LABEL_IMAGE_SUCCESS,
   UPDATE_LABEL_IMAGE_ANNOTATION,
   UpdateLabelImageAnnotation,
+  REMOVE_IMAGES_FROM_PART,
+  RemoveImagesFromPartAction,
 } from './imageTypes';
 import { Annotation } from '../labelingPage/labelingPageTypes';
 
@@ -97,11 +99,18 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
     method: 'PATCH',
     data: {
       labels: JSON.stringify(annotations.map((e) => e.label)),
+      ...(annotations[0].part.id !== null && { part: annotations[0].part.id }),
     },
   })
     .then(({ data }) => {
       console.info('Save successfully');
-      dispatch(updateLabelImageAnnotation(data.id, data.labels));
+      dispatch(
+        updateLabelImageAnnotation(data.id, data.labels, {
+          // FIXME
+          id: annotations[0].part.id ?? data.part,
+          name: annotations[0].part.name,
+        }),
+      );
       // dispatch(requestAnnotationsSuccess(annotations));
       return void 0;
     })
@@ -110,7 +119,18 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
     });
 };
 
-export const updateLabelImageAnnotation = (imageId: number, labels: any): UpdateLabelImageAnnotation => ({
+const updateLabelImageAnnotation = (
+  imageId: number,
+  labels: any,
+  part: { id: number; name: string },
+): UpdateLabelImageAnnotation => ({
   type: UPDATE_LABEL_IMAGE_ANNOTATION,
-  payload: { id: imageId, labels },
+  payload: { id: imageId, labels, part },
 });
+
+export const removeImagesFromPart = (imageIds: number[]): RemoveImagesFromPartAction => {
+  return {
+    type: REMOVE_IMAGES_FROM_PART,
+    payload: { imageIds },
+  };
+};
