@@ -106,7 +106,8 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
       console.info('Save successfully');
       dispatch(
         updateLabelImageAnnotation(data.id, data.labels, {
-          id: annotations[0].part.id,
+          // FIXME
+          id: annotations[0].part.id ?? data.part,
           name: annotations[0].part.name,
         }),
       );
