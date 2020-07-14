@@ -45,7 +45,7 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/visionwebmodule:0.1.10-amd64",
+              "image": "intelligentedge/visionwebmodule:0.1.11-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8080\"}]}}}"
             }
           },
@@ -55,7 +55,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/inferencemodule:0.1.10-<cpu or gpu>amd64",
+              "image": "intelligentedge/inferencemodule:0.1.11-<cpu or gpu>amd64",
               "createOptions": "{\"HostConfig\":{\"NetworkMode\":\"host\",\"runtime\":\"<Docker Runtime>\"},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}"
             }
           }
