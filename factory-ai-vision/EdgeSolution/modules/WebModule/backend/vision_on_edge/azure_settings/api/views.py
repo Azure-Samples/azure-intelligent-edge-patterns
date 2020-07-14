@@ -96,4 +96,6 @@ class SettingViewSet(viewsets.ModelViewSet):
                         str(exception)  # Force yapf to change line...
                 },
                 status=status.HTTP_400_BAD_REQUEST)
+
+
 # pylint: enable=too-many-ancestors

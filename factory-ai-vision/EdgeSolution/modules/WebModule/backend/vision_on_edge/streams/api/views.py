@@ -49,10 +49,9 @@ def connect_stream(request):
     rtsp = request.query_params.get("rtsp") or "0"
     inference = (not not request.query_params.get("inference")) or False
     if part_id is None:
-        return JsonResponse({
-            "status": "failed",
-            "reason": "part_id is missing"
-        })
+        s = Stream(rtsp, part_id=None, inference=inference)
+        streams.append(s)
+        return JsonResponse({"status": "ok", "stream_id": s.id})
 
     try:
         Part.objects.get(pk=int(part_id))
@@ -92,6 +91,7 @@ def video_feed(request, stream_id):
     return HttpResponse("<h1>Unknown Stream " + str(stream_id) + " </h1>")
 
 
+@api_view()
 def capture(request, stream_id):
     """Capture image"""
     for i in range(len(streams)):
@@ -103,7 +103,13 @@ def capture(request, stream_id):
             img.name = datetime.datetime.utcnow().isoformat() + ".jpg"
             logger.info(stream)
             logger.info(stream.part_id)
-            img_obj = Image(image=img, part_id=stream.part_id)
+            part_id = request.query_params.get("part_id") or stream.part_id
+            if not part_id:
+                return JsonResponse({
+                    "status": "failed",
+                    "reason": "neither Stream and capture request have part_id"
+                })
+            img_obj = Image(image=img, part_id=part_id)
             img_obj.save()
             img_serialized = ImageSerializer(img_obj,
                                              context={"request": request})

@@ -46,8 +46,7 @@ import {
   StopInferenceAction,
   UPDATE_ORIGIN_PROJECT_DATA,
   UpdateOriginProjectDataAction,
-  ResetStatusAction,
-  RESET_STATUS,
+  ChangeStatusAction,
   UpdateProbThresholdRequestAction,
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
@@ -74,7 +73,25 @@ const getTrainingStatusFailed = (error: Error): GetTrainingLogFailedAction => ({
 });
 
 const postProjectRequest = (): PostProjectRequestAction => ({ type: POST_PROJECT_REQUEST });
-const postProjectSuccess = (): PostProjectSuccessAction => ({ type: POST_PROJECT_SUCCESS });
+const postProjectSuccess = (data: any): PostProjectSuccessAction => ({
+  type: POST_PROJECT_SUCCESS,
+  data: {
+    id: data?.id ?? null,
+    camera: data?.camera ?? null,
+    location: data?.location ?? null,
+    parts: data?.parts ?? [],
+    modelUrl: data?.download_uri ?? '',
+    needRetraining: data?.needRetraining ?? true,
+    accuracyRangeMin: data?.accuracyRangeMin ?? 60,
+    accuracyRangeMax: data?.accuracyRangeMax ?? 80,
+    maxImages: data?.maxImages ?? 20,
+    sendMessageToCloud: data?.metrics_is_send_iothub,
+    framesPerMin: data?.metrics_frame_per_minutes,
+    accuracyThreshold: data?.metrics_accuracy_threshold,
+    cvProjectId: data?.customvision_project_id,
+    probThreshold: data?.prob_threshold.toString() ?? '10',
+  },
+});
 const postProjectFail = (error: Error): PostProjectFaliedAction => ({ type: POST_PROJECT_FALIED, error });
 
 const deleteProjectSuccess = (): DeleteProjectSuccessAction => ({ type: DELETE_PROJECT_SUCCESS });
@@ -130,8 +147,9 @@ export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({
   type: UPDATE_ORIGIN_PROJECT_DATA,
 });
 
-export const resetStatus = (): ResetStatusAction => ({
-  type: RESET_STATUS,
+export const changeStatus = (status: Status): ChangeStatusAction => ({
+  type: 'CHANGE_STATUS',
+  status,
 });
 
 const updateProbThresholdRequest = (): UpdateProbThresholdRequestAction => ({
@@ -212,7 +230,7 @@ export const thunkPostProject = (
     },
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess());
+      dispatch(postProjectSuccess(data));
       getTrain(data.id, isTestModel);
       return data.id;
     })
@@ -225,7 +243,8 @@ const getTrain = (projectId, isTestModel: boolean): void => {
   Axios.get(url).catch((err) => console.error(err));
 };
 
-export const thunkDeleteProject = (projectId): ProjectThunk => (dispatch): Promise<any> => {
+export const thunkDeleteProject = (): ProjectThunk => (dispatch, getState): Promise<any> => {
+  const projectId = getState().project.data.id;
   return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
       return dispatch(deleteProjectSuccess());
@@ -326,8 +345,8 @@ export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState)
     accuracyRangeMin,
     accuracyRangeMax,
   })
-    .then(() => {
-      dispatch(postProjectSuccess());
+    .then(({ data }) => {
+      dispatch(postProjectSuccess(data));
       return void 0;
     })
     .catch((e) => {

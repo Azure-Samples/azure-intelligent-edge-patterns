@@ -172,8 +172,8 @@ def update_train_status(project_id):
             exports = trainer.get_exports(customvision_project_id,
                                           iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
-                project_obj.upcreate_training_status(
-                    status="exporting", log="exporting model")
+                project_obj.upcreate_training_status(status="exporting",
+                                                     log="exporting model")
                 res = project_obj.export_iterationv3_2(iteration.id)
                 logger.info(res.json())
                 continue
@@ -219,8 +219,8 @@ def update_train_status(project_id):
                     project_obj.save(
                         update_fields=["download_uri", "deployed"])
 
-                project_obj.upcreate_training_status(
-                    status="deploying", log="deploying model")
+                project_obj.upcreate_training_status(status="deploying",
+                                                     log="deploying model")
                 continue
 
             logger.info("Training Status: Completed")
@@ -436,9 +436,8 @@ def _train(project_id):
             trainer.get_project(customvision_project_id)
             project_obj.upcreate_training_status(
                 status="preparing",
-                log=(
-                    f"Project {project_obj.customvision_project_name}"
-                    + "found on Custom Vision"),
+                log=(f"Project {project_obj.customvision_project_name}" +
+                     "found on Custom Vision"),
             )
         except:
             project_obj.create_project()
@@ -455,8 +454,7 @@ def _train(project_id):
             customvision_project_id = project_obj.customvision_project_id
 
         project_obj.upcreate_training_status(
-            status="sending",
-            log="sending data (images and annotations)")
+            status="sending", log="sending data (images and annotations)")
         tags = trainer.get_tags(customvision_project_id)
         tag_dict = {}
         project_partnames = {}
@@ -626,8 +624,8 @@ def _train(project_id):
         # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception("Exception: %s", err_msg)
-        project_obj.upcreate_training_status(
-            status="failed", log=f"failed {str(err_msg)}")
+        project_obj.upcreate_training_status(status="failed",
+                                             log=f"failed {str(err_msg)}")
         return JsonResponse({
             "status": "failed",
             "log": f"failed {str(err_msg)}"
@@ -689,8 +687,7 @@ def train(request, project_id):
             },
         )
 
-        project_obj.upcreate_training_status(status="ok",
-                                             log="demo ok")
+        project_obj.upcreate_training_status(status="ok", log="demo ok")
         # FIXME pass the new model info to inference server (willy implement)
         return JsonResponse({"status": "ok"})
 

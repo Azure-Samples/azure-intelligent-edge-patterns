@@ -13,7 +13,7 @@ from .serializers import ImageSerializer
 logger = logging.getLogger(__name__)
 
 
-class ImageViewSet(viewsets.ModelViewSet): # pylint: disable=R0901 
+class ImageViewSet(viewsets.ModelViewSet):  # pylint: disable=R0901
     """
     Image ModelViewSet
     """

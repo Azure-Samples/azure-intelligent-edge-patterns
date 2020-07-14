@@ -3,13 +3,15 @@ import { Dispatch } from 'react';
 export type RTSPVideoProps = {
   rtsp: string;
 
-  partId: number;
-
-  partName: string;
-
   canCapture: boolean;
+  /**
+   * partId, partName, setOpenLabelingPage should be provided if canCapture is true
+   */
+  partId?: number;
 
-  setOpenLabelingPage: Dispatch<boolean>;
+  partName?: string;
+
+  setOpenLabelingPage?: Dispatch<boolean>;
   /**
    * Will automatically create stream if it is true.
    */

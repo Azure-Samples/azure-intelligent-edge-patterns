@@ -13,12 +13,11 @@ from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
-from ..images.models import Image
-from ..part.models import Part
-from ..cameras.models import Camera
 from ..azure_settings.models import Setting
+from ..cameras.models import Camera
+from ..images.models import Image
 from ..locations.models import Location
-
+from ..part.models import Part
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
@@ -44,18 +43,13 @@ def inference_module_url():
 
 # Create your models here.
 
+
 class Project(models.Model):
     """Project Model"""
 
-    setting = models.ForeignKey(Setting,
-                                on_delete=models.CASCADE,
-                                default=1)
-    camera = models.ForeignKey(Camera,
-                               on_delete=models.CASCADE,
-                               null=True)
-    location = models.ForeignKey(Location,
-                                 on_delete=models.CASCADE,
-                                 null=True)
+    setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
     parts = models.ManyToManyField(Part, related_name="part")
     customvision_project_id = models.CharField(max_length=200,
                                                null=True,
@@ -233,7 +227,7 @@ class Project(models.Model):
             project=self,
             defaults={
                 "status": status,
-                "log": "Status : "+log.capitalize(),
+                "log": "Status : " + log.capitalize(),
                 "performance": performance
             },
         )
