@@ -22,10 +22,10 @@ export const RootRouter: FC = () => {
       <PrivateRoute path="/cameras" component={Cameras} />
       <PrivateRoute path="/parts/detail" component={PartDetails} />
       <PrivateRoute path="/parts" component={Parts} />
-      <PrivateRoute path="/pretrainDetection/">
+      <PrivateRoute path="/pretrainDetection">
         <PartIdentification isDemo={true} />
       </PrivateRoute>
-      <PrivateRoute path="/partIdentification/">
+      <PrivateRoute path="/partIdentification">
         <PartIdentification isDemo={false} />
       </PrivateRoute>
       <Route path="/setting" component={Setting} />
