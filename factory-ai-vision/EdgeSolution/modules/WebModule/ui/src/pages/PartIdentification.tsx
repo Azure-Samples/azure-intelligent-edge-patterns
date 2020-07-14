@@ -10,7 +10,7 @@ export const PartIdentification: React.FC<{ isDemo: boolean }> = ({ isDemo }) =>
         <ProjectConfig isDemo={isDemo} />
       </div>
       <div style={{ flexGrow: 3 }}>
-        <LiveViewDashboard />
+        <LiveViewDashboard isDemo={isDemo} />
       </div>
     </Flex>
   );

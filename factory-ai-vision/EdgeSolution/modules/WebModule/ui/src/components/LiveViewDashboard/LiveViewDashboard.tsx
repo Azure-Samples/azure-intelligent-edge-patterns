@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Flex, Text, Loader, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
@@ -29,7 +30,7 @@ const getAOIData = (cameraArea: string): AOIData => {
   }
 };
 
-export const LiveViewDashboard: React.FC = () => {
+export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
     error,
     trainingLog,
@@ -40,6 +41,26 @@ export const LiveViewDashboard: React.FC = () => {
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
+  const history = useHistory();
+
+  useEffect(() => {
+    if (status !== CameraConfigStatus.None && isDemo) {
+      if (
+        // eslint-disable-next-line no-restricted-globals
+        !confirm(
+          'If you are leaving to pretrained demo page, your current project will be temporarily on hold. You need to configure again to get your project up running again.',
+        )
+      ) {
+        history.goBack();
+      } else {
+        dispatch(changeStatus(CameraConfigStatus.None));
+      }
+    }
+
+    return (): void => {
+      if (isDemo) dispatch(changeStatus(CameraConfigStatus.None));
+    };
+  }, [dispatch, history, isDemo]);
 
   useInterval(
     () => {
