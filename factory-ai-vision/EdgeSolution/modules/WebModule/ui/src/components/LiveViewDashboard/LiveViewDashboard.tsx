@@ -107,7 +107,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
         <div style={{ flexGrow: 2 }}>
           <LiveViewContainer showVideo={true} initialAOIData={aoiData} cameraId={projectCameraId} />
         </div>
-        <InferenceMetricDashboard />
+        <InferenceMetricDashboard isDemo={isDemo} />
       </Flex>
       <Flex hAlign="center" column gap="gap.small">
         <Text weight="bold">Detail of Training Metric</Text>
