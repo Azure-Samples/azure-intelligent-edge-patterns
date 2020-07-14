@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Dispatch } from 'react';
+import React, { useState, useEffect, Dispatch } from 'react';
 import { Flex, Dropdown, Text, DropdownItemProps, Grid } from '@fluentui/react-northstar';
 import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -13,6 +13,8 @@ import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
 import { getFilteredImages } from '../../util/getFilteredImages';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
+import { thunkAddCapturedImages } from '../../store/part/partActions';
+import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -22,22 +24,18 @@ export const CapturePhotos: React.FC<{
 }> = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const [openLabelingPage, setOpenLabelingPage] = useState<boolean>(false);
   const images = useSelector<State, LabelImage[]>((state) => state.images);
   const availableCameras = useCameras();
   const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
-  const prevImageLength = useRef<number>(filteredImages.length);
+
+  const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
+    dispatch(thunkAddCapturedImages(streamId, partName));
+    if (mode === CaptureLabelMode.PerImage) setGoLabelImageIdx(filteredImages.length);
+  };
 
   useEffect(() => {
     dispatch(getLabelImages());
   }, [dispatch]);
-  useEffect(() => {
-    if (openLabelingPage && prevImageLength.current !== filteredImages.length) {
-      setGoLabelImageIdx(filteredImages.length - 1);
-      setOpenLabelingPage(false);
-      prevImageLength.current = filteredImages.length;
-    }
-  }, [openLabelingPage, filteredImages, setGoLabelImageIdx]);
 
   const autoPlay = availableCameras.length === 1 && !!selectedCamera;
 
@@ -55,7 +53,7 @@ export const CapturePhotos: React.FC<{
             partId={partId}
             partName={partName}
             canCapture={true}
-            setOpenLabelingPage={setOpenLabelingPage}
+            onCapturePhoto={onCapturePhoto}
             autoPlay={autoPlay}
           />
         </div>
