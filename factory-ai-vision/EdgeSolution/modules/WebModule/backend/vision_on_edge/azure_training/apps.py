@@ -63,13 +63,12 @@ class AzureTrainingConfig(AppConfig):
                         'location': demo_locations.first(),
                     })
 
-                Train.objects.update_or_create(
-                    project=demo_project,
-                    defaults={
-                        'status': 'demo ok',
-                        'log': 'demo log',
-                        'performance': 1,
-                    })
+                Train.objects.update_or_create(project=demo_project,
+                                               defaults={
+                                                   'status': 'demo ok',
+                                                   'log': 'demo log',
+                                                   'performance': 1,
+                                               })
                 logger.info("Creating demo objects end.")
 
             logger.info("Azure Training AppConfig End while running server")
