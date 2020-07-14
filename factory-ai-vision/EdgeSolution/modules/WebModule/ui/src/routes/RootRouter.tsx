@@ -23,10 +23,10 @@ export const RootRouter: FC = () => {
       <PrivateRoute path="/parts/detail" component={PartDetails} />
       <PrivateRoute path="/parts" component={Parts} />
       <PrivateRoute path="/pretrainDetection/">
-        <PartIdentification />
+        <PartIdentification isDemo={true} />
       </PrivateRoute>
       <PrivateRoute path="/partIdentification/">
-        <PartIdentification />
+        <PartIdentification isDemo={false} />
       </PrivateRoute>
       <Route path="/setting" component={Setting} />
       <PrivateRoute path="/" component={Home} />
