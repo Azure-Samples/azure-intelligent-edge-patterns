@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Flex, Text, Loader, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
@@ -29,7 +30,7 @@ const getAOIData = (cameraArea: string): AOIData => {
   }
 };
 
-export const LiveViewDashboard: React.FC = () => {
+export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
     error,
     trainingLog,
@@ -40,10 +41,29 @@ export const LiveViewDashboard: React.FC = () => {
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
-    dispatch(thunkGetTrainingLog(projectId));
-  }, [dispatch, projectId]);
+    let needReset = true;
+    if (status !== CameraConfigStatus.None && isDemo) {
+      if (
+        // eslint-disable-next-line no-restricted-globals
+        !confirm(
+          'If you are leaving to pretrained demo page, your current project will be temporarily on hold. You need to configure again to get your project up running again.',
+        )
+      ) {
+        history.goBack();
+        needReset = false;
+      } else {
+        dispatch(changeStatus(CameraConfigStatus.None));
+      }
+    }
+
+    return (): void => {
+      if (isDemo && needReset) dispatch(changeStatus(CameraConfigStatus.None));
+    };
+  }, [dispatch, history, isDemo]);
+
   useInterval(
     () => {
       dispatch(thunkGetTrainingLog(projectId));
@@ -64,21 +84,15 @@ export const LiveViewDashboard: React.FC = () => {
     status === CameraConfigStatus.StartInference ? 5000 : null,
   );
 
-  useEffect(() => {
-    return (): void => {
-      dispatch(changeStatus(CameraConfigStatus.None));
-    };
-  }, [dispatch]);
-
   // FIXME Integrate this with Redux
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
   const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
 
-  if (!selectedCamera || selectedCamera.is_demo) return null;
+  if (status === CameraConfigStatus.None) return null;
 
   const aoiData = getAOIData(selectedCamera?.area);
 
-  if (status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None)
+  if (status === CameraConfigStatus.WaitTraining)
     return (
       <>
         <Loader size="smallest" />
