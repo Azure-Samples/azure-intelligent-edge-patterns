@@ -44,6 +44,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
   const history = useHistory();
 
   useEffect(() => {
+    let needReset = true;
     if (status !== CameraConfigStatus.None && isDemo) {
       if (
         // eslint-disable-next-line no-restricted-globals
@@ -52,13 +53,14 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
         )
       ) {
         history.goBack();
+        needReset = false;
       } else {
         dispatch(changeStatus(CameraConfigStatus.None));
       }
     }
 
     return (): void => {
-      if (isDemo) dispatch(changeStatus(CameraConfigStatus.None));
+      if (isDemo && needReset) dispatch(changeStatus(CameraConfigStatus.None));
     };
   }, [dispatch, history, isDemo]);
 
