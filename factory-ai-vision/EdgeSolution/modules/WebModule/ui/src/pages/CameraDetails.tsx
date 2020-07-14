@@ -71,7 +71,7 @@ const CameraDetails: FC = (): JSX.Element => {
         </div>
       </Flex>
       <section style={{ width: '100%', height: '100%', gridColumn: '1 / span 1', gridRow: '2 / span 1' }}>
-        <RTSPVideo rtsp={camera.rtsp} canCapture={false} autoPlay={true} partId={1} />
+        <RTSPVideo rtsp={camera.rtsp} canCapture={false} autoPlay={true} />
       </section>
       <Flex
         style={{ gridColumn: '2 / span 1', gridRow: '1 / span 2' }}
