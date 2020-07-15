@@ -299,7 +299,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                             # No limit for the max_images in inference module now, the logic is moved to webmodule
                                         #    pass
                                         #else:
-                                        if True
+                                        if True:
 
                                             labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
                                             print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images.get(tag, 0), labels)
