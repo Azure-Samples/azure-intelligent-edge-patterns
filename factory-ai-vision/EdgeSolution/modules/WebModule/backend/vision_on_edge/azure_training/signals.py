@@ -55,10 +55,10 @@ def azure_setting_change_handler(**kwargs):
           dispatch_uid="create_train_if_not_exist")
 def azure_project_train_status_handler(**kwargs):
     """
-    Listen on azure_settings.models.Setting Change.
-    Delete project under this setting
+    Listen on azure_training.models.Project change.
+    If a Project is created, create a Train(Training Status) as well.
     """
-    logger.info("Azure Setting changed.")
+    logger.info("Azure Project changed.")
     logger.info("Checking...")
 
     if 'sender' not in kwargs or kwargs['sender'] != Project:
