@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app/c2d-console-app.csproj",
+                "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/c2d-console-app.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -23,7 +23,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Research/julia/src/ams-asset-player/ams-asset-player.csproj",
+                "${workspaceFolder}/Research/lva-ase-sample/src/ams-asset-player/ams-asset-player.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -40,7 +40,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app/c2d-console-app.csproj",
+                "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/c2d-console-app.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -54,7 +54,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app/c2d-console-app.csproj",
+                "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/c2d-console-app.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -68,7 +68,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app/c2d-console-app.csproj",
+                "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/c2d-console-app.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -84,7 +84,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app/c2d-console-app.csproj",
+                "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/c2d-console-app.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -97,7 +97,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app/c2d-console-app.csproj",
+                "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/c2d-console-app.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

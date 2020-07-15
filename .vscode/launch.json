@@ -10,9 +10,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build-c2d-console-app",
-           "program": "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app/bin/Debug/netcoreapp3.1/c2d-console-app.dll",
+           "program": "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/bin/Debug/netcoreapp3.1/c2d-console-app.dll",
            "args": [],
-           "cwd": "${workspaceFolder}/Research/julia/src/cloud-to-device-console-app",
+           "cwd": "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app",
            "stopAtEntry": false,
            "console": "integratedTerminal",
            "internalConsoleOptions": "neverOpen"
@@ -23,9 +23,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build-ams-asset-player",
-            "program": "${workspaceFolder}/Research/julia/src/ams-asset-player/bin/Debug/netcoreapp3.1/ams-asset-player.dll",
+            "program": "${workspaceFolder}/Research/lva-ase-sample/src/ams-asset-player/bin/Debug/netcoreapp3.1/ams-asset-player.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Research/julia/src/ams-asset-player",
+            "cwd": "${workspaceFolder}/Research/lva-ase-sample/src/ams-asset-player",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -35,7 +35,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Research/julia/src/ams-asset-player/Views"
+                "/Views": "${workspaceFolder}/Research/lva-ase-sample/src/ams-asset-player/Views"
             }
         }
     ]
