@@ -210,7 +210,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
             setSelectedModuleItem={() => {}}
             items={[
               {
-                header: `Demo 1`,
+                header: `yolov3_PascalVoc`,
                 content: {
                   key: 'demo1',
                 },
