@@ -35,12 +35,11 @@ pylint
 Go to project directory (same level with manage.py)
 
 ```bash
-python manage.py test cameras.tests
+python manage.py test
 ```
 
 ## Test coverage
 
 ```bash
-coverage run --source='cameras' manage.py test cameras.tests
+coverage run --source='vision_on_edge' manage.py test vision_on_edge.tests
 ```
-
