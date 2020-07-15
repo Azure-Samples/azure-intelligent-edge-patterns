@@ -1,10 +1,6 @@
 from django.db import models
 import logging
-# importing the built-in signal
 from django.db.models.signals import pre_save, post_save
-from django.contrib.auth.models import User
-
-# Create your models here.
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +28,8 @@ class Feedback(models.Model):
 
     @staticmethod
     def post_save(instance, **kwargs):
-        logger.warning(instance.description)
+        logger.warning('Satisfaction: %s' % instance.satisfaction)
+        logger.warning('Description: %s' % instance.description)
 
 
 post_save.connect(Feedback.post_save, Feedback, dispatch_uid="Feedback_post")
