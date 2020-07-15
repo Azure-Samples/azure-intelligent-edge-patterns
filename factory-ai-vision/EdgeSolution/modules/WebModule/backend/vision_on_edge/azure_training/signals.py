@@ -4,7 +4,7 @@ Signals
 
 import logging
 
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from ..azure_settings.models import Setting
@@ -50,6 +50,7 @@ def azure_setting_change_handler(**kwargs):
     logger.info("Creating a none-demo project....")
     Project.objects.update_or_create(setting=kwargs['instance'], is_demo=False)
 
+
 @receiver(signal=post_save,
           sender=Project,
           dispatch_uid="create_train_if_not_exist")
@@ -79,6 +80,7 @@ def azure_project_train_status_handler(**kwargs):
                 "performance": ""
             },
         )
+
 
 @receiver(signal=post_save,
           sender=Project,

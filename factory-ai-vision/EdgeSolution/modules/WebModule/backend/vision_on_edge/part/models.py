@@ -26,8 +26,11 @@ class Part(models.Model):
         return self.name
 
     @staticmethod
-    def pre_save(instance, update_fields, **kwargs):
+    def pre_save(update_fields, **kwargs):
         """Part pre_save"""
+        if 'instance' not in kwargs:
+            return
+        instance = kwargs['instance']
         try:
             update_fields = []
             instance.name_lower = str(instance.name).lower()
