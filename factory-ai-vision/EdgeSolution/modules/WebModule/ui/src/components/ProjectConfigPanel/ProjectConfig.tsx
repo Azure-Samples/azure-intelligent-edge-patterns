@@ -19,6 +19,7 @@ import {
   thunkPostProject,
   updateProjectData,
   changeStatus,
+  thunkUpdateAccuracyRange,
 } from '../../store/project/projectActions';
 import { Project, ProjectData, Status } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -51,7 +52,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
 export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const dispatch = useDispatch();
   const cameraId = useQuery().get('cameraId');
-  const { isLoading, error, data } = useSelector<State, Project>((state) => state.project);
+  const { isLoading, error, data, status } = useSelector<State, Project>((state) => state.project);
   const {
     id: projectId,
     camera,
@@ -249,7 +250,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                 disabled={isDemo}
               />
               <Text disabled={accracyRangeDisabled} weight="bold">
-                Accuracy for capture image
+                Accuracy range to capture images
               </Text>
               <Flex gap="gap.small">
                 <Flex column hAlign="center">
@@ -283,6 +284,17 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                   />
                 </Flex>
               </Flex>
+              {status === Status.StartInference && (
+                <Button
+                  circular
+                  content="Update Accuracy Range"
+                  primary
+                  loading={isLoading}
+                  onClick={(): void => {
+                    dispatch(thunkUpdateAccuracyRange());
+                  }}
+                />
+              )}
               {/* <Text styles={{ fontSize: '12px' }} success>
                 {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
               </Text> */}
