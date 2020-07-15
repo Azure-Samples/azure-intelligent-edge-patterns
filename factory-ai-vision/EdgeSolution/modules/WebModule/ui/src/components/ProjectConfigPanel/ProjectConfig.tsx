@@ -31,6 +31,7 @@ import { AddPartLink } from '../AddModuleDialog/AddPartLink';
 import { LabelImage } from '../../store/image/imageTypes';
 import { Button } from '../Button';
 import { useQuery } from '../../hooks/useQuery';
+import { WarningDialog } from '../WarningDialog';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -347,7 +348,8 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
           </Flex>
         </Flex>
       </Flex>
-      <Button
+      <ConfigureButton
+        isDemo={isDemo}
         content="Configure"
         primary
         onClick={handleSubmitConfigure}
@@ -357,6 +359,21 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       />
     </Flex>
   );
+};
+
+const ConfigureButton = ({ isDemo, onClick, ...props }): JSX.Element => {
+  const getButton = (): JSX.Element => <Button {...props} onClick={onClick} />;
+  if (isDemo)
+    return (
+      <WarningDialog
+        contentText={
+          <p>Trying demo model will replace the current project you created, do you want to continue?</p>
+        }
+        onConfirm={onClick}
+        trigger={getButton()}
+      />
+    );
+  return getButton();
 };
 
 // TODO Make this integrate with Redux
