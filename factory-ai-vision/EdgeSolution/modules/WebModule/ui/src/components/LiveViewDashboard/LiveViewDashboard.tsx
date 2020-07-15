@@ -95,16 +95,20 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
         </div>
         <InferenceMetricDashboard isDemo={isDemo} />
       </Flex>
-      <Flex hAlign="center" column gap="gap.small">
-        <Text weight="bold">Detail of Training Metric</Text>
-        <Button
-          content={showConsequenceDashboard ? 'Hide' : 'Show'}
-          primary
-          onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
-          circular
-        />
-        {showConsequenceDashboard && <ConsequenceDashboard trainingMetrics={trainingMetrics} />}
-      </Flex>
+      {!isDemo && (
+        <>
+          <Flex hAlign="center" column gap="gap.small">
+            <Text weight="bold">Detail of Training Metric</Text>
+            <Button
+              content={showConsequenceDashboard ? 'Hide' : 'Show'}
+              primary
+              onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
+              circular
+            />
+            <ConsequenceDashboard visible={showConsequenceDashboard} trainingMetrics={trainingMetrics} />
+          </Flex>
+        </>
+      )}
     </Flex>
   );
 };
