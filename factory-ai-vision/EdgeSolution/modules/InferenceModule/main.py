@@ -295,14 +295,15 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                 if self.confidence_min <= prediction['probability'] <= self.confidence_max:
                                     if self.is_upload_image:
                                         #if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
-                                        if tag in onnx.current_uploaded_images:
+                                        #if tag in onnx.current_uploaded_images:
                                             # No limit for the max_images in inference module now, the logic is moved to webmodule
-                                            pass
-                                        else:
+                                        #    pass
+                                        #else:
+                                        if True
 
                                             labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
                                             print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images.get(tag, 0), labels)
-                                            self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
+                                            #self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
                                             self.last_upload_time = time.time()
 
                                             jpg = cv2.imencode('.jpg', img)[1].tobytes()
