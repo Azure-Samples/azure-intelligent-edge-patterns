@@ -68,7 +68,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
 if APP_INSIGHT_ON:
     from configs.app_insight import APP_INSIGHT_CONN_STR
     MIDDLEWARE.append('opencensus.ext.django.middleware.OpencensusMiddleware')
