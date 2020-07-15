@@ -1,4 +1,4 @@
-# Camera App
+# Vision On Edge Web Module
 
 ## How to run
 
