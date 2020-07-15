@@ -1,5 +1,5 @@
 """
-Models for Azure CustomVIsion training.
+Models for Azure CustomVision images
 """
 import datetime
 import json

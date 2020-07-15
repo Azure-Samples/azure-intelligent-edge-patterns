@@ -10,6 +10,7 @@ from ..models import Location
 from .serializers import LocationSerializer
 
 
+# pylint: disable=too-many-ancestors
 class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Location ModelViewSet
@@ -24,3 +25,6 @@ class LocationViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "is_demo": "is_demo",
     }
+
+
+# pylint: enable=too-many-ancestors
