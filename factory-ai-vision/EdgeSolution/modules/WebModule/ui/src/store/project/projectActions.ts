@@ -52,28 +52,52 @@ import {
   UpdateProbThresholdFailedAction,
 } from './projectTypes';
 
-const getProjectRequest = (): GetProjectRequestAction => ({ type: GET_PROJECT_REQUEST });
-const getProjectSuccess = (project: ProjectData): GetProjectSuccessAction => ({
-  type: GET_PROJECT_SUCCESS,
-  payload: { project },
+const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
+  type: GET_PROJECT_REQUEST,
+  isDemo,
 });
-const getProjectFailed = (error: Error): GetProjectFailedAction => ({ type: GET_PROJECT_FAILED, error });
+const getProjectSuccess = (
+  project: ProjectData,
+  hasConfigured: boolean,
+  isDemo: boolean,
+): GetProjectSuccessAction => ({
+  type: GET_PROJECT_SUCCESS,
+  payload: { project, hasConfigured },
+  isDemo,
+});
+const getProjectFailed = (error: Error, isDemo: boolean): GetProjectFailedAction => ({
+  type: GET_PROJECT_FAILED,
+  error,
+  isDemo,
+});
 
-const getTrainingLogRequest = (): GetTrainingLogRequesAction => ({ type: GET_TRAINING_LOG_REQUEST });
-const getTrainingLogSuccess = (trainingLog: string, newStatus: Status): GetTrainingLogSuccessAction => ({
+const getTrainingLogRequest = (isDemo: boolean): GetTrainingLogRequesAction => ({
+  type: GET_TRAINING_LOG_REQUEST,
+  isDemo,
+});
+const getTrainingLogSuccess = (
+  trainingLog: string,
+  newStatus: Status,
+  isDemo: boolean,
+): GetTrainingLogSuccessAction => ({
   type: GET_TRAINING_LOG_SUCCESS,
   payload: {
     trainingLog,
     newStatus,
   },
+  isDemo,
 });
-const getTrainingStatusFailed = (error: Error): GetTrainingLogFailedAction => ({
+const getTrainingStatusFailed = (error: Error, isDemo: boolean): GetTrainingLogFailedAction => ({
   type: GET_TRAINING_LOG_FAILED,
   error,
+  isDemo,
 });
 
-const postProjectRequest = (): PostProjectRequestAction => ({ type: POST_PROJECT_REQUEST });
-const postProjectSuccess = (data: any): PostProjectSuccessAction => ({
+const postProjectRequest = (isDemo: boolean): PostProjectRequestAction => ({
+  type: POST_PROJECT_REQUEST,
+  isDemo,
+});
+const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessAction => ({
   type: POST_PROJECT_SUCCESS,
   data: {
     id: data?.id ?? null,
@@ -91,29 +115,45 @@ const postProjectSuccess = (data: any): PostProjectSuccessAction => ({
     cvProjectId: data?.customvision_project_id,
     probThreshold: data?.prob_threshold.toString() ?? '10',
   },
+  isDemo,
 });
-const postProjectFail = (error: Error): PostProjectFaliedAction => ({ type: POST_PROJECT_FALIED, error });
+const postProjectFail = (error: Error, isDemo: boolean): PostProjectFaliedAction => ({
+  type: POST_PROJECT_FALIED,
+  error,
+  isDemo,
+});
 
-const deleteProjectSuccess = (): DeleteProjectSuccessAction => ({ type: DELETE_PROJECT_SUCCESS });
-const deleteProjectFailed = (): DeleteProjectFaliedAction => ({ type: DELETE_PROJECT_FALIED });
+const deleteProjectSuccess = (isDemo: boolean): DeleteProjectSuccessAction => ({
+  type: DELETE_PROJECT_SUCCESS,
+  isDemo,
+});
+const deleteProjectFailed = (isDemo: boolean): DeleteProjectFaliedAction => ({
+  type: DELETE_PROJECT_FALIED,
+  isDemo,
+});
 
-const getTrainingMetricsRequest = (): GetTrainingMetricsRequestAction => ({
+const getTrainingMetricsRequest = (isDemo: boolean): GetTrainingMetricsRequestAction => ({
   type: GET_TRAINING_METRICS_REQUEST,
+  isDemo,
 });
 const getTrainingMetricsSuccess = (
   curConsequence: Consequence,
   prevConsequence: Consequence,
+  isDemo: boolean,
 ): GetTrainingMetricsSuccessAction => ({
   type: GET_TRAINING_METRICS_SUCCESS,
   payload: { prevConsequence, curConsequence },
+  isDemo,
 });
-const getTrainingMetricsFailed = (error: Error): GetTrainingMetricsFailedAction => ({
+const getTrainingMetricsFailed = (error: Error, isDemo: boolean): GetTrainingMetricsFailedAction => ({
   type: GET_TRAINING_METRICS_FAILED,
   error,
+  isDemo,
 });
 
-const getInferenceMetricsRequest = (): GetInferenceMetricsRequestAction => ({
+const getInferenceMetricsRequest = (isDemo: boolean): GetInferenceMetricsRequestAction => ({
   type: GET_INFERENCE_METRICS_REQUEST,
+  isDemo,
 });
 const getInferenceMetricsSuccess = (
   successRate: number,
@@ -121,54 +161,68 @@ const getInferenceMetricsSuccess = (
   unIdetifiedItems: number,
   isGpu: boolean,
   averageTime: number,
+  isDemo: boolean,
 ): GetInferenceMetricsSuccessAction => ({
   type: GET_INFERENCE_METRICS_SUCCESS,
   payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime },
+  isDemo,
 });
-const getInferenceMetricsFailed = (error: Error): GetInferenceMetricsFailedAction => ({
+const getInferenceMetricsFailed = (error: Error, isDemo: boolean): GetInferenceMetricsFailedAction => ({
   type: GET_INFERENCE_METRICS_FAILED,
   error,
+  isDemo,
 });
 
-export const startInference = (): StartInferenceAction => ({
+export const startInference = (isDemo: boolean): StartInferenceAction => ({
   type: START_INFERENCE,
+  isDemo,
 });
 
-export const stopInference = (): StopInferenceAction => ({
+export const stopInference = (isDemo: boolean): StopInferenceAction => ({
   type: STOP_INFERENCE,
+  isDemo,
 });
 
-export const updateProjectData = (partialProjectData: Partial<ProjectData>): UpdateProjectDataAction => ({
+export const updateProjectData = (
+  partialProjectData: Partial<ProjectData>,
+  isDemo: boolean,
+): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
   payload: partialProjectData,
+  isDemo,
 });
 
-export const updateOriginProjectData = (): UpdateOriginProjectDataAction => ({
+export const updateOriginProjectData = (isDemo: boolean): UpdateOriginProjectDataAction => ({
   type: UPDATE_ORIGIN_PROJECT_DATA,
+  isDemo,
 });
 
-export const changeStatus = (status: Status): ChangeStatusAction => ({
+export const changeStatus = (status: Status, isDemo: boolean): ChangeStatusAction => ({
   type: 'CHANGE_STATUS',
   status,
+  isDemo,
 });
 
-const updateProbThresholdRequest = (): UpdateProbThresholdRequestAction => ({
+const updateProbThresholdRequest = (isDemo: boolean): UpdateProbThresholdRequestAction => ({
   type: 'UPDATE_PROB_THRESHOLD_REQUEST',
+  isDemo,
 });
 
-const updateProbThresholdSuccess = (): UpdateProbThresholdSuccessAction => ({
+const updateProbThresholdSuccess = (isDemo: boolean): UpdateProbThresholdSuccessAction => ({
   type: 'UPDATE_PROB_THRESHOLD_SUCCESS',
+  isDemo,
 });
 
-const updateProbThresholdFailed = (error: Error): UpdateProbThresholdFailedAction => ({
+const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThresholdFailedAction => ({
   type: 'UPDATE_PROB_THRESHOLD_FAILED',
   error,
+  isDemo,
 });
 
-export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatch): Promise<void> => {
-  dispatch(getProjectRequest());
+export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Promise<void> => {
+  dispatch(getProjectRequest(isDemo));
 
-  const url = isTestModel === undefined ? '/api/projects/' : `/api/projects/?is_demo=${Number(isTestModel)}`;
+  const url = isDemo === undefined ? '/api/projects/' : `/api/projects/?is_demo=${Number(isDemo)}`;
 
   return Axios.get(url)
     .then(({ data }) => {
@@ -188,11 +242,11 @@ export const thunkGetProject = (isTestModel?: boolean): ProjectThunk => (dispatc
         cvProjectId: data[0]?.customvision_project_id,
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
       };
-      dispatch(getProjectSuccess(project));
+      dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
       return void 0;
     })
     .catch((err) => {
-      dispatch(getProjectFailed(err));
+      dispatch(getProjectFailed(err, isDemo));
     });
 };
 
@@ -201,12 +255,12 @@ export const thunkPostProject = (
   selectedLocations,
   selectedParts,
   selectedCamera,
-  isTestModel,
+  isDemo,
 ): ProjectThunk => (dispatch, getState): Promise<number> => {
   const isProjectEmpty = projectId === null;
   const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
 
-  dispatch(postProjectRequest());
+  dispatch(postProjectRequest(isDemo));
 
   const projectData = getState().project.data;
 
@@ -230,12 +284,12 @@ export const thunkPostProject = (
     },
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data));
-      getTrain(data.id, isTestModel);
+      dispatch(postProjectSuccess(data, isDemo));
+      getTrain(data.id, isDemo);
       return data.id;
     })
     .catch((err) => {
-      dispatch(postProjectFail(err));
+      dispatch(postProjectFail(err, isDemo));
     }) as Promise<number>;
 };
 const getTrain = (projectId, isTestModel: boolean): void => {
@@ -243,34 +297,34 @@ const getTrain = (projectId, isTestModel: boolean): void => {
   Axios.get(url).catch((err) => console.error(err));
 };
 
-export const thunkDeleteProject = (): ProjectThunk => (dispatch, getState): Promise<any> => {
+export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
   const projectId = getState().project.data.id;
   return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
-      return dispatch(deleteProjectSuccess());
+      return dispatch(deleteProjectSuccess(isDemo));
     })
     .catch((err) => {
       alert(err);
-      dispatch(deleteProjectFailed());
+      dispatch(deleteProjectFailed(isDemo));
     });
 };
 
-export const thunkGetTrainingLog = (projectId: number) => (dispatch): Promise<any> => {
-  dispatch(getTrainingLogRequest());
+export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
+  dispatch(getTrainingLogRequest(isDemo));
 
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining));
-      else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining));
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo));
+      else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo));
       return void 0;
     })
-    .catch((err) => dispatch(getTrainingStatusFailed(err)));
+    .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
 };
 
-export const thunkGetTrainingMetrics = (projectId: number) => (dispacth): Promise<any> => {
-  dispacth(getTrainingMetricsRequest());
+export const thunkGetTrainingMetrics = (projectId: number, isDemo: boolean) => (dispacth): Promise<any> => {
+  dispacth(getTrainingMetricsRequest(isDemo));
 
   return Axios.get(`/api/projects/${projectId}/train_performance`)
     .then(({ data }) => {
@@ -290,13 +344,13 @@ export const thunkGetTrainingMetrics = (projectId: number) => (dispacth): Promis
           }
         : null;
 
-      return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence));
+      return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence, isDemo));
     })
-    .catch((err) => dispacth(getTrainingMetricsFailed(err)));
+    .catch((err) => dispacth(getTrainingMetricsFailed(err, isDemo)));
 };
 
-export const thunkGetInferenceMetrics = (projectId: number) => (dispatch): Promise<any> => {
-  dispatch(getInferenceMetricsRequest());
+export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
+  dispatch(getInferenceMetricsRequest(isDemo));
 
   return Axios.get(`/api/projects/${projectId}/export`)
     .then(({ data }) => {
@@ -307,20 +361,24 @@ export const thunkGetInferenceMetrics = (projectId: number) => (dispatch): Promi
           data.unidentified_num,
           data.gpu,
           data.average_time,
+          isDemo,
         ),
       );
     })
-    .catch((err) => dispatch(getInferenceMetricsFailed(err)));
+    .catch((err) => dispatch(getInferenceMetricsFailed(err, isDemo)));
 };
 
-export const thunkUpdateProbThreshold = (): ProjectThunk => (dispatch, getState): Promise<any> => {
-  dispatch(updateProbThresholdRequest());
+export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
+  dispatch,
+  getState,
+): Promise<any> => {
+  dispatch(updateProbThresholdRequest(isDemo));
 
   const projectId = getState().project.data.id;
   const { probThreshold } = getState().project.data;
 
   return Axios.get(`/api/projects/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
-    .then(() => dispatch(updateProbThresholdSuccess()))
+    .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
     .catch((e) => {
       if (e.response) {
         throw new Error(e.response.data.log);
@@ -331,12 +389,15 @@ export const thunkUpdateProbThreshold = (): ProjectThunk => (dispatch, getState)
       }
     })
     .catch((e) => {
-      dispatch(updateProbThresholdFailed(e));
+      dispatch(updateProbThresholdFailed(e, isDemo));
     });
 };
 
-export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState): Promise<any> => {
-  dispatch(postProjectRequest());
+export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
+  dispatch,
+  getState,
+): Promise<any> => {
+  dispatch(postProjectRequest(isDemo));
 
   const projectId = getState().project.data.id;
   const { accuracyRangeMin, accuracyRangeMax } = getState().project.data;
@@ -346,7 +407,7 @@ export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState)
     accuracyRangeMax,
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data));
+      dispatch(postProjectSuccess(data, isDemo));
       return void 0;
     })
     .catch((e) => {
@@ -359,6 +420,6 @@ export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState)
       }
     })
     .catch((e) => {
-      dispatch(postProjectFail(e));
+      dispatch(postProjectFail(e, isDemo));
     });
 };

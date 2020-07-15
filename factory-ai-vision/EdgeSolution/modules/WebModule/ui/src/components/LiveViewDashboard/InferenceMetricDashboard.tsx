@@ -72,7 +72,7 @@ export const InferenceMetricDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo
         <Input
           value={project.probThreshold}
           onChange={(_, { value }): void => {
-            dispatch(updateProjectData({ probThreshold: value }));
+            dispatch(updateProjectData({ probThreshold: value }, isDemo));
           }}
           icon="%"
         />
@@ -80,7 +80,7 @@ export const InferenceMetricDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo
           primary
           content="Update"
           onClick={(): void => {
-            dispatch(thunkUpdateProbThreshold());
+            dispatch(thunkUpdateProbThreshold(isDemo));
           }}
           disabled={!project.probThreshold}
           loading={isLoading}

@@ -24,7 +24,17 @@ import {
   UPDATE_ORIGIN_PROJECT_DATA,
 } from './projectTypes';
 
-const projectReducer = (state = initialState.project, action: ProjectActionTypes): Project => {
+/**
+ * Share this reducer between project and demoProject
+ * Check the `isDemo` property in action to check if it is right reducer
+ * @param isDemo
+ */
+const createProjectReducerByIsDemo = (isDemo: boolean) => (
+  state = initialState.project,
+  action: ProjectActionTypes,
+): Project => {
+  if (isDemo !== action.isDemo) return state;
+
   switch (action.type) {
     case GET_PROJECT_REQUEST:
       return { ...state, isLoading: true, error: null };
@@ -34,6 +44,8 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
         isLoading: false,
         data: { ...action.payload.project },
         originData: { ...action.payload.project },
+        // If the project has configured, set status to wait training so it will start calling export and get the latest status
+        status: action.payload.hasConfigured ? Status.WaitTraining : Status.None,
         error: null,
       };
     case GET_PROJECT_FAILED:
@@ -149,4 +161,4 @@ const projectReducer = (state = initialState.project, action: ProjectActionTypes
   }
 };
 
-export default projectReducer;
+export default createProjectReducerByIsDemo;
