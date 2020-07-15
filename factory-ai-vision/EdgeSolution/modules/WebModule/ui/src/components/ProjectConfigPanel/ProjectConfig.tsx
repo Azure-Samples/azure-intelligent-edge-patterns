@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Divider,
   Text,
@@ -12,7 +12,6 @@ import {
 } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
-import * as R from 'ramda';
 
 import {
   thunkGetProject,
@@ -20,6 +19,7 @@ import {
   updateProjectData,
   changeStatus,
   thunkUpdateAccuracyRange,
+  thunkCheckAndSetAccuracyRange,
 } from '../../store/project/projectActions';
 import { Project, ProjectData, Status } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -28,7 +28,6 @@ import { getAppInsights } from '../../TelemetryService';
 import { AddCameraLink } from '../AddModuleDialog/AddCameraLink';
 import { AddLocationLink } from '../AddModuleDialog/AddLocationLink';
 import { AddPartLink } from '../AddModuleDialog/AddPartLink';
-import { LabelImage } from '../../store/image/imageTypes';
 import { Button } from '../Button';
 import { useQuery } from '../../hooks/useQuery';
 import { WarningDialog } from '../WarningDialog';
@@ -69,8 +68,6 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     framesPerMin,
     accuracyThreshold,
   } = data;
-  const allImages = useSelector<State, LabelImage[]>((state) => state.images);
-  const images = useMemo(() => allImages.filter((e) => !e.is_relabel), [allImages]);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
     isDemo,
@@ -86,7 +83,6 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     any
   >('locations', isDemo);
   const [maxImgCountError, setMaxImgCountError] = useState(false);
-  const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', rangeMessage: '' });
   const hasUserUpdateAccuracyRange = useRef(false);
 
   useEffect(() => {
@@ -134,62 +130,6 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     dispatch(updateProjectData({ [keyName]: value }, isDemo));
   };
 
-  useEffect(() => {
-    const partsWithImageLength = images.reduce((acc, cur) => {
-      const { id } = cur.part;
-      const relatedPartIdx = acc.findIndex((e) => e.id === id);
-      if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
-      return acc;
-    }, R.clone(selectedParts));
-
-    const minimumLengthPart = partsWithImageLength.reduce(
-      (acc, cur) => {
-        if (cur.length < acc.length) return { name: cur.name, length: cur.length };
-        return acc;
-      },
-      { name: '', length: Infinity },
-    );
-
-    if (minimumLengthPart.length === Infinity) return;
-    if (minimumLengthPart.length < 30) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }, isDemo));
-      setSuggestMessage({
-        min: 10,
-        max: 40,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'lower than 30',
-      });
-    } else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }, isDemo));
-      setSuggestMessage({
-        min: 30,
-        max: 60,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'between 30 to 80',
-      });
-    } else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }, isDemo));
-      setSuggestMessage({
-        min: 50,
-        max: 80,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'between 80 to 130',
-      });
-    } else if (minimumLengthPart.length >= 130) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }, isDemo));
-      setSuggestMessage({
-        min: 60,
-        max: 90,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'more than 130',
-      });
-    }
-  }, [accuracyRangeMin, dispatch, images, isDemo, selectedParts]);
-
   const accracyRangeDisabled = !needRetraining || isDemo;
   const messageToCloudDisabled = !sendMessageToCloud;
 
@@ -231,7 +171,11 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         <ModuleSelector
           moduleName="parts"
           value={selectedParts}
-          setSelectedModuleItem={setSelectedPartsById}
+          setSelectedModuleItem={(ids): void => {
+            const newSelectedParts = setSelectedPartsById(ids);
+            if (!hasUserUpdateAccuracyRange.current)
+              dispatch(thunkCheckAndSetAccuracyRange(newSelectedParts, isDemo));
+          }}
           items={dropDownParts}
           isMultiple={true}
           isDemo={isDemo}
@@ -302,9 +246,6 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                   }}
                 />
               )}
-              {/* <Text styles={{ fontSize: '12px' }} success>
-                {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
-              </Text> */}
               <Flex column hAlign="center">
                 <Text disabled={accracyRangeDisabled}>Maximum Images to Store: </Text>
                 <Input
@@ -385,7 +326,7 @@ function useDropdownItems<T>(
   isTestModel: boolean,
   isMultiple?: boolean,
   defaultId?: number | number[],
-): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => void] {
+): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => any] {
   const originItems = useRef<(T & { id: number })[]>([]);
   const [dropDownItems, setDropDownItems] = useState<DropdownItemProps[]>([]);
   const [selectedItem, setSelectedItem] = useState<T | T[]>(isMultiple ? [] : null);
@@ -433,7 +374,7 @@ function useDropdownItems<T>(
       .finally(() => setLoading(false));
   }, [isMultiple, moduleName, isTestModel, defaultId]);
 
-  const setSelectedItemById = useCallback((id: string | string[]): void => {
+  const setSelectedItemById = useCallback((id: string | string[]): any => {
     if (Array.isArray(id)) {
       const correspondedItems = id.reduce((acc, cur) => {
         const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === cur.toString());
@@ -441,10 +382,11 @@ function useDropdownItems<T>(
         return acc;
       }, []);
       setSelectedItem(correspondedItems as any);
-    } else {
-      const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === id.toString());
-      if (correspondedItem) setSelectedItem(correspondedItem);
+      return correspondedItems;
     }
+    const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === id.toString());
+    if (correspondedItem) setSelectedItem(correspondedItem);
+    return correspondedItem;
   }, []);
 
   return [loading, dropDownItems, selectedItem, setSelectedItemById];
