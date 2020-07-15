@@ -550,9 +550,8 @@ def upload_and_train(project_id):
         # Submit training task to Custom Vision
         if not project_changed:
             project_obj.upcreate_training_status(
-                status="ok", log="Nothing changed. Not training")
-            project_obj.has_configured = True
-            project_obj.save()
+                status="deploying",
+                log="No new parts or new images to train. Deploying")
         else:
             project_obj.upcreate_training_status(
                 status="training",
