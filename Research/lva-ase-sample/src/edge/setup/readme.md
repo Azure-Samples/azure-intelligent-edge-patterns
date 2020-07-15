@@ -7,7 +7,7 @@ This folder contains a bash script and other files listed below, which can be us
 - [LVAEdgeUserRoleDefinition.json] defines a [custom role](https://docs.microsoft.com/azure/role-based-access-control/custom-roles) so that the Live Video Analytics on Edge module can use a service principal with minimal privileges when making calls to Azure Media Services
 
 
-## Prerequesites
+## Prerequisites
 * Azure subscription with __owner__ level privileges
 * Resource group on the subscription with the following resources
     * Azure Stack Edge device - set up with compute-enabled shares
@@ -28,13 +28,18 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-
 The script will prompt you for a few things, including the subscription, the resource group, storage account name, a container registry name, and a media services account name. If you already have such resources in the resource group, the script will find them for you and make sure you want to use those.
 When this is done running, expand the {} brackets in the upper left of the Cloud Shell to see your files.
-    
+
+An error may be thrown when starting your streaming endpoint. If this happens (the script should still finish!) then run the following command from the cloud shell. Replace $RESOURCE_GROUP and $AMS_ACCOUNT with the name of your resource group and azure media services account
+``` az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait" ```
+
 After the script finishes, you will have certain Azure resources deployed in the Azure subscription, including:
 
 * Container registry
 * Azure Media Services account
-* Service principal with custome defined role
+* Service principal with custom defined role
 
+#### Next Steps
+
+Follow the directions in the cloud-to-device-console-app [readme](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/yadavm_curbside/Research/lva-ase-sample/src/cloud-to-device-console-app/readme.md) to finish up!

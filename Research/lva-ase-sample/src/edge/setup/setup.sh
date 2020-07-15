@@ -142,6 +142,16 @@ if test -z "$EDGE_DEVICE"
 then
     echo "Azure Stack Edge device not found in resource group. Please go make sure you have set it up in the same resource group, then run this script again."
     exit
+else
+    echo -e "\nFound the following Azure Stack Edge device, hit enter to use this, otherwise provide the name of the correct device(${BLUE}${EDGE_DEVICE}${NC})."
+    read -p ">> " tmp
+    EDGE_DEVICE=${tmp:-$EDGE_DEVICE}
+    FOUND=$(az resource show -n ${EDGE_DEVICE} --resource-type "Microsoft.DataBoxEdge/DataBoxEdgeDevices" -g ${RESOURCE_GROUP} --query 'name')
+    if ! [[ "$FOUND" =~ "$EDGE_DEVICE" ]]; 
+    then
+        echo "Device not found. Please go back and make sure you have the correct device setup and name! Then run this script again."
+        exit
+    fi
 fi
 
 if test -z "$IOTHUB"
@@ -165,12 +175,9 @@ read -p ">> " tmp
 STORAGE_ACCOUNT=${tmp:-$STORAGE_ACCOUNT}
 AVAILABLE=$(az storage account check-name -n ${STORAGE_ACCOUNT} | jq .nameAvailable)
 if $AVAILABLE; then
-    #STORAGE_ACCOUNT="$(az storage account create -n ${STORAGE_ACCOUNT} -g ${RESOURCE_GROUP} -l ${REGION} --sku Standard_LRS --kind StorageV2 --access-tier hot)"
     echo "That storage account was not found in the resource group. Please go check the name of the one you would like to use, and rerun this script."
     exit
 fi
-
-
 
 # deploy resources
  echo -e "
@@ -191,12 +198,14 @@ then
 else
     CONTAINER_REGISTRY="teamlvacontainerregistry"
 fi
+
 echo -e "
 ${YELLOW}What is the name of the container registry to use?${NC}
 This will create a new one if one doesn't exist.
 Hit enter to use the default (${BLUE}${CONTAINER_REGISTRY}${NC})."
 read -p ">> " tmp
 CONTAINER_REGISTRY=${tmp:-$CONTAINER_REGISTRY}
+
 AVAILABLE=$(az acr check-name -n ${CONTAINER_REGISTRY} | jq .nameAvailable)
  if ! $AVAILABLE; then
     echo "Container registry already exists... gathering credentials for you"
@@ -234,7 +243,7 @@ echo "${RESOURCES}"
 
 # capture resource configuration in variables
 AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
-EDGE_DEVICE=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.DataBoxEdge\/DataBoxEdgeDevices$/ {print $1}')
+
 
 # creating the AMS account creates a service principal, so well just reset it to get the credentials
 echo "setting up service principal..."

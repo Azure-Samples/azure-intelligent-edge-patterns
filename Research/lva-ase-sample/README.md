@@ -57,23 +57,22 @@ Open a PowerShell window and open your hosts file by running the following comma
 ``` notepad C:\Windows\System32\drivers\etc\hosts ```
 
 Here you will add two entries
-* <device IP> <device name>
+* device IP device name
 	* You should have already added this during the ASE tutorial
 	* note the space between device IP and name!
-* <Kubernetes API service IP> <Kubernetes API service endpoint>
+* Kubernetes API service IP Kubernetes API service endpoint
 
 #### Get the sample camera stream
 Since we don't have an actual camera to stream from, we will use a simulated video. Download the file from [here](https://lvamedia.blob.core.windows.net/public/camera-300s.mkv) and place it in your local share on your ASE. It should be titled 'camera-300s.mkv' but if you choose to use another video, make sure to update the operations.json file so that the rtspUrl points at the correct file. 
 
 ## SET UP LVA RESOURCES: ##
 
-Follow the directions in the setup [readme file](https://github.com/julialieberman/azure-intelligent-edge-patterns/tree/t-jull-lvasample/Research/lva-ase-sample/src/edge/setup/readme.md)
-
+Follow the directions in the setup [readme file](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/edge/setup/readme.md)
 
 ## Running the sample from VS Code
 Open your local clone of this git repository in Visual Studio Code.
 
-Follow the instructions outlined in **[src/cloud-to-device-console-app/readme.md]**(https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/cloud-to-device-console-app/readme.md) to setup the console app and next steps, and instructions in **src/ams-asset-player/readme.md** to setup the ASP dotnet core app.
+Follow the instructions outlined in [src/cloud-to-device-console-app/readme.md](https://github.com/julialieberman/azure-intelligent-edge-patterns/tree/t-jull-lvasample/Research/lva-ase-sample/src/cloud-to-device-console-app/readme.md) to setup the console app and next steps, and instructions in **src/ams-asset-player/readme.md** to setup the ASP dotnet core app.
 
 ## Key concepts
 

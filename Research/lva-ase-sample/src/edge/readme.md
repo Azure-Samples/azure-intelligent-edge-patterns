@@ -19,3 +19,6 @@ The folder **./modules/objectCounter** contains source code for an IoT Edge modu
 ## Learn more
 
 * [Develop IoT Edge modules](https://docs.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux)
+
+## Next steps
+Instructions for setting up LVA resources can be found [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/yadavm_curbside/Research/lva-ase-sample/src/edge/setup/readme.md)
