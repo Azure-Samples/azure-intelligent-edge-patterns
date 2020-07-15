@@ -24,6 +24,12 @@ import {
   UPDATE_ORIGIN_PROJECT_DATA,
 } from './projectTypes';
 
+const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Status => {
+  if (hasConfigured && status === Status.None) return Status.WaitTraining;
+  if (hasConfigured) return status;
+  return Status.None;
+};
+
 /**
  * Share this reducer between project and demoProject
  * Check the `isDemo` property in action to check if it is right reducer
@@ -45,7 +51,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
         data: { ...action.payload.project },
         originData: { ...action.payload.project },
         // If the project has configured, set status to wait training so it will start calling export and get the latest status
-        status: action.payload.hasConfigured ? Status.WaitTraining : Status.None,
+        status: getStatusAfterGetProject(state.status, action.payload.hasConfigured),
         error: null,
       };
     case GET_PROJECT_FAILED:
