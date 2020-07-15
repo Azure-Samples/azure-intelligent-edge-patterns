@@ -88,7 +88,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
         }}
       >
         <Scene
-          url={imageUrl ?? '/icons/Play.png'}
+          url={imageUrl}
           annotations={annotations}
           workState={workState}
           setWorkState={setWorkState}
