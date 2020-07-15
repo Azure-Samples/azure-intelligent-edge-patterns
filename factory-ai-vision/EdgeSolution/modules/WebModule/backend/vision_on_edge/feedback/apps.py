@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class FeedbackConfig(AppConfig):
-    name = 'feedback'
+    name = 'vision_on_edge.feedback'
