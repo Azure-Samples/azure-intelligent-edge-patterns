@@ -52,7 +52,9 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
 export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const dispatch = useDispatch();
   const cameraId = useQuery().get('cameraId');
-  const { isLoading, error, data, status } = useSelector<State, Project>((state) => state.project);
+  const { isLoading, error, data, status } = useSelector<State, Project>((state) =>
+    isDemo ? state.demoProject : state.project,
+  );
   const {
     id: projectId,
     camera,
@@ -117,14 +119,14 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isDemo),
       );
 
-      if (typeof id !== 'undefined') dispatch(changeStatus(Status.WaitTraining));
+      if (typeof id !== 'undefined') dispatch(changeStatus(Status.WaitTraining, isDemo));
     } catch (e) {
       alert(e);
     }
   };
 
   const setData = (keyName: keyof ProjectData, value: ProjectData[keyof ProjectData]): void => {
-    dispatch(updateProjectData({ [keyName]: value }));
+    dispatch(updateProjectData({ [keyName]: value }, isDemo));
   };
 
   useEffect(() => {
@@ -146,7 +148,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     if (minimumLengthPart.length === Infinity) return;
     if (minimumLengthPart.length < 30) {
       if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }));
+        dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }, isDemo));
       setSuggestMessage({
         min: 10,
         max: 40,
@@ -155,7 +157,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       });
     } else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80) {
       if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }));
+        dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }, isDemo));
       setSuggestMessage({
         min: 30,
         max: 60,
@@ -164,7 +166,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       });
     } else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130) {
       if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }));
+        dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }, isDemo));
       setSuggestMessage({
         min: 50,
         max: 80,
@@ -173,7 +175,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       });
     } else if (minimumLengthPart.length >= 130) {
       if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }));
+        dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }, isDemo));
       setSuggestMessage({
         min: 60,
         max: 90,
@@ -181,7 +183,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         rangeMessage: 'more than 130',
       });
     }
-  }, [accuracyRangeMin, dispatch, images, selectedParts]);
+  }, [accuracyRangeMin, dispatch, images, isDemo, selectedParts]);
 
   const accracyRangeDisabled = !needRetraining || isDemo;
   const messageToCloudDisabled = !sendMessageToCloud;
@@ -291,7 +293,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                   primary
                   loading={isLoading}
                   onClick={(): void => {
-                    dispatch(thunkUpdateAccuracyRange());
+                    dispatch(thunkUpdateAccuracyRange(isDemo));
                   }}
                 />
               )}
