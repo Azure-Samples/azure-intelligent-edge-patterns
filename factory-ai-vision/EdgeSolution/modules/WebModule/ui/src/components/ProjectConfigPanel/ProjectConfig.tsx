@@ -120,7 +120,11 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isDemo),
       );
 
-      if (typeof id !== 'undefined') dispatch(changeStatus(Status.WaitTraining, isDemo));
+      if (typeof id !== 'undefined') {
+        // Set the opposite project state to None so entering the opposite page won't see the stream
+        dispatch(changeStatus(Status.WaitTraining, isDemo));
+        dispatch(changeStatus(Status.None, !isDemo));
+      }
     } catch (e) {
       alert(e);
     }
@@ -362,7 +366,6 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
 };
 
 const ConfigureButton = ({ isDemo, onClick, ...props }): JSX.Element => {
-  const getButton = (): JSX.Element => <Button {...props} onClick={onClick} />;
   if (isDemo)
     return (
       <WarningDialog
@@ -370,10 +373,10 @@ const ConfigureButton = ({ isDemo, onClick, ...props }): JSX.Element => {
           <p>Trying demo model will replace the current project you created, do you want to continue?</p>
         }
         onConfirm={onClick}
-        trigger={getButton()}
+        trigger={<Button {...props} />}
       />
     );
-  return getButton();
+  return <Button {...props} onClick={onClick} />;
 };
 
 // TODO Make this integrate with Redux
