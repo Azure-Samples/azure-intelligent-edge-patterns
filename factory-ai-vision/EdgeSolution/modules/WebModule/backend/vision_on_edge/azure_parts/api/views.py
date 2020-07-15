@@ -1,5 +1,5 @@
 """
-Part views
+Azure Parts views
 """
 from __future__ import absolute_import, unicode_literals
 

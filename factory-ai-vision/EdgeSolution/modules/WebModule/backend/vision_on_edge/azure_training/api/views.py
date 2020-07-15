@@ -25,10 +25,10 @@ from rest_framework.response import Response
 
 from configs.settings import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 
+from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general import error_messages
 from ...images.models import Image
-from ...part.models import Part
 from ..models import Project, Task, Train
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
