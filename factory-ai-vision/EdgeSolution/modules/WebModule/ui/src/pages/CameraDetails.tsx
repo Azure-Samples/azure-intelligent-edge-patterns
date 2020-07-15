@@ -67,7 +67,7 @@ const CameraDetails: FC = (): JSX.Element => {
         <Divider vertical color="black" styles={{ height: '80px' }} />
         <div style={infoDivStyle}>
           <Text content="Camera URL" weight="bold" />
-          <Text content={camera.rtsp} />
+          <Text content={camera.rtsp.replace(/(rtsp:\/\/[\w]+)\.([\s\S])+/, '$1.**********')} />
         </div>
       </Flex>
       <section style={{ width: '100%', height: '100%', gridColumn: '1 / span 1', gridRow: '2 / span 1' }}>
