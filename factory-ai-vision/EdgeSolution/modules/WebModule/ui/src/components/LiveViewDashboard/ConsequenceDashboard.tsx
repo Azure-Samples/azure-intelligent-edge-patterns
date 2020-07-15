@@ -3,12 +3,14 @@ import { TrainingMetrics } from '../../store/project/projectTypes';
 
 interface ConsequenceDashboardProps {
   trainingMetrics: TrainingMetrics;
+  visible: boolean;
 }
 export const ConsequenceDashboard: React.FC<ConsequenceDashboardProps> = ({
   trainingMetrics: { curConsequence, prevConsequence },
+  visible,
 }) => {
   return (
-    <table style={{ textAlign: 'center', width: '60%' }}>
+    <table style={{ textAlign: 'center', width: '60%', display: visible ? '' : 'none' }}>
       <tr>
         <td style={{ width: '200px' }}></td>
         <td>Precision</td>

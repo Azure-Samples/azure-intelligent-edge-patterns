@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as R from 'ramda';
-import Axios from 'axios';
 import uniqid from 'uniqid';
-import { Text, Checkbox, Flex, Alert, Provider } from '@fluentui/react-northstar';
+import { Text, Checkbox, Flex, Provider } from '@fluentui/react-northstar';
 import { useDispatch } from 'react-redux';
 
 import { Button } from '../Button';
@@ -12,58 +11,45 @@ import useImage from '../LabelingPage/util/useImage';
 import { CreatingState } from './LiveViewContainer.type';
 import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
-import { thunkDeleteProject } from '../../store/project/projectActions';
+import { patchCameraArea } from '../../store/camera/cameraActions';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
   initialAOIData: AOIData;
   cameraId: number;
-}> = ({ showVideo, initialAOIData, cameraId }) => {
-  const dispatch = useDispatch();
+  onDeleteProject: () => void;
+}> = ({ showVideo, initialAOIData, cameraId, onDeleteProject }) => {
   const [showAOI, setShowAOI] = useState(initialAOIData.useAOI);
   const lasteUpdatedAOIs = useRef(initialAOIData.AOIs);
   const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error>(null);
   const imageInfo = useImage(`http://${window.location.hostname}:5000/video_feed?inference=1`, '', true);
   const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
+  const dispatch = useDispatch();
 
   const onCheckboxClick = async (): Promise<void> => {
     setShowAOI(!showAOI);
     setLoading(true);
-    setError(null);
     try {
-      await Axios.patch(`/api/cameras/${cameraId}/`, {
-        area: JSON.stringify({
-          useAOI: !showAOI,
-          AOIs: lasteUpdatedAOIs.current,
-        }),
-      });
+      await dispatch(patchCameraArea({ AOIs: lasteUpdatedAOIs.current, useAOI: !showAOI }, cameraId));
       setShowUpdateSuccessTxt(true);
       if (!showAOI) setAOIs(lasteUpdatedAOIs.current);
     } catch (e) {
       // Set back to the state before updating for switch case
       setShowAOI(showAOI);
-      setError(e);
     }
     setLoading(false);
   };
 
   const onUpdate = async (): Promise<void> => {
     setLoading(true);
-    setError(null);
     try {
-      await Axios.patch(`/api/cameras/${cameraId}/`, {
-        area: JSON.stringify({
-          useAOI: showAOI,
-          AOIs,
-        }),
-      });
+      await dispatch(patchCameraArea({ AOIs, useAOI: showAOI }, cameraId));
       setShowUpdateSuccessTxt(true);
       lasteUpdatedAOIs.current = R.clone(AOIs);
     } catch (e) {
-      setError(e);
+      console.error(e);
     }
     setLoading(false);
   };
@@ -96,7 +82,7 @@ export const LiveViewContainer: React.FC<{
   return (
     <Flex column gap="gap.medium" styles={{ height: '100%' }}>
       <Flex gap="gap.small">
-        {error && <Alert danger header="Failed to Update!" content={`${error.name}: ${error.message}`} />}
+        {/* {error && <Alert danger header="Failed to Update!" content={`${error.name}: ${error.message}`} />} */}
         <Checkbox
           labelPosition="start"
           label="Enable area of interest"
@@ -130,9 +116,7 @@ export const LiveViewContainer: React.FC<{
             trigger={
               <Button content="Delete Configuration" primary circular styles={{ marginRight: 'auto' }} />
             }
-            onConfirm={(): void => {
-              dispatch(thunkDeleteProject());
-            }}
+            onConfirm={onDeleteProject}
           />
         </Provider>
       </Flex>

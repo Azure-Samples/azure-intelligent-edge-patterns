@@ -12,9 +12,9 @@ from django.core.files.images import ImageFile
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from rest_framework.decorators import api_view
 
-from ...azure_training.models import Image
+from ...azure_parts.models import Part
 from ...images.api.serializers import ImageSerializer
-from ...part.models import Part
+from ...images.models import Image
 from ..models import Stream
 
 logger = logging.getLogger(__name__)

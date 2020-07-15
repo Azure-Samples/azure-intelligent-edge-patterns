@@ -1,5 +1,5 @@
 """
-Part views
+Azure Parts views
 """
 from __future__ import absolute_import, unicode_literals
 
@@ -10,6 +10,7 @@ from ..models import Part
 from .serializers import PartSerializer
 
 
+# pylint: disable=too-many-ancestors
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
     Part ModelViewSet.Partname should be unique.
@@ -24,3 +25,6 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "is_demo": "is_demo",
     }
+
+
+# pylint: enable=too-many-ancestors

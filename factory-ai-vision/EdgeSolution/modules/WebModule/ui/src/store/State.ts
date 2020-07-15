@@ -13,11 +13,60 @@ export interface State {
   labelingPageState: LabelingPageState;
   part: Part;
   project: Project;
+  demoProject: Project;
   images: LabelImage[];
   setting: Setting;
 }
 
 export type LabelingPageState = { annotations: Annotation[] };
+
+const initialProject: Project = {
+  isLoading: false,
+  data: {
+    id: null,
+    camera: null,
+    location: null,
+    parts: [],
+    needRetraining: true,
+    accuracyRangeMin: 60,
+    accuracyRangeMax: 80,
+    maxImages: 20,
+    modelUrl: '',
+    sendMessageToCloud: false,
+    framesPerMin: 6,
+    accuracyThreshold: 50,
+    probThreshold: '10',
+  },
+  originData: {
+    id: null,
+    camera: null,
+    location: null,
+    parts: [],
+    needRetraining: true,
+    accuracyRangeMin: 60,
+    accuracyRangeMax: 80,
+    maxImages: 50,
+    modelUrl: '',
+    sendMessageToCloud: false,
+    framesPerMin: 6,
+    accuracyThreshold: 50,
+    probThreshold: '10',
+  },
+  trainingMetrics: {
+    prevConsequence: null,
+    curConsequence: null,
+  },
+  inferenceMetrics: {
+    successRate: null,
+    successfulInferences: null,
+    unIdetifiedItems: null,
+    isGpu: false,
+    averageTime: null,
+  },
+  status: Status.None,
+  error: null,
+  trainingLog: '',
+};
 
 export const initialState: State = {
   dialogIsOpen: false,
@@ -29,53 +78,8 @@ export const initialState: State = {
     capturedImages: [],
     isValid: true,
   },
-  project: {
-    isLoading: false,
-    data: {
-      id: null,
-      camera: null,
-      location: null,
-      parts: [],
-      needRetraining: true,
-      accuracyRangeMin: 60,
-      accuracyRangeMax: 80,
-      maxImages: 20,
-      modelUrl: '',
-      sendMessageToCloud: false,
-      framesPerMin: 6,
-      accuracyThreshold: 50,
-      probThreshold: '10',
-    },
-    originData: {
-      id: null,
-      camera: null,
-      location: null,
-      parts: [],
-      needRetraining: true,
-      accuracyRangeMin: 60,
-      accuracyRangeMax: 80,
-      maxImages: 50,
-      modelUrl: '',
-      sendMessageToCloud: false,
-      framesPerMin: 6,
-      accuracyThreshold: 50,
-      probThreshold: '10',
-    },
-    trainingMetrics: {
-      prevConsequence: null,
-      curConsequence: null,
-    },
-    inferenceMetrics: {
-      successRate: null,
-      successfulInferences: null,
-      unIdetifiedItems: null,
-      isGpu: false,
-      averageTime: null,
-    },
-    status: Status.None,
-    error: null,
-    trainingLog: '',
-  },
+  project: initialProject,
+  demoProject: initialProject,
   setting: {
     loading: false,
     error: null,

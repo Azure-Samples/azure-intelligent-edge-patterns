@@ -13,11 +13,11 @@ from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
+from ..azure_parts.models import Part
 from ..azure_settings.models import Setting
 from ..cameras.models import Camera
 from ..images.models import Image
 from ..locations.models import Location
-from ..part.models import Part
 from .utils.app_insight import (get_app_insight_logger, img_monitor,
                                 part_monitor, retraining_job_monitor,
                                 training_job_monitor)
@@ -67,6 +67,7 @@ class Project(models.Model):
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
     deployed = models.BooleanField(default=False)
+    has_configured = models.BooleanField(default=False)
 
     # TODO: Move this to a new App.
     # e.g. relabel

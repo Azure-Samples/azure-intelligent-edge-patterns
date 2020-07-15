@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'vision_on_edge.part',
+    'vision_on_edge.azure_parts',
     'vision_on_edge.images',
     'vision_on_edge.streams',
     'vision_on_edge.azure_settings',
@@ -67,7 +67,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 
 if APP_INSIGHT_ON:
     from configs.app_insight import APP_INSIGHT_CONN_STR

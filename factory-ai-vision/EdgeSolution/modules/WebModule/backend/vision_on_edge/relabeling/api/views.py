@@ -12,9 +12,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from ...azure_parts.models import Part
 from ...azure_training.models import Project
 from ...images.models import Image
-from ...part.models import Part
 
 logger = logging.getLogger(__name__)
 

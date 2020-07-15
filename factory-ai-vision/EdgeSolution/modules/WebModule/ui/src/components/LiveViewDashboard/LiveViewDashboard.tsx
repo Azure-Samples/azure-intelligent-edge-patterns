@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Flex, Text, Loader, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import { useInterval } from '../../hooks/useInterval';
 import {
   thunkGetTrainingLog,
   thunkGetTrainingMetrics,
   thunkGetInferenceMetrics,
-  changeStatus,
+  thunkDeleteProject,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -37,52 +36,34 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
     status,
     trainingMetrics,
     data: { id: projectId, camera: projectCameraId },
-  } = useSelector<State, Project>((state) => state.project);
+  } = useSelector<State, Project>((state) => (isDemo ? state.demoProject : state.project));
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
-  const history = useHistory();
-
-  useEffect(() => {
-    let needReset = true;
-    if (status !== CameraConfigStatus.None && isDemo) {
-      if (
-        // eslint-disable-next-line no-restricted-globals
-        !confirm(
-          'If you are leaving to pretrained demo page, your current project will be temporarily on hold. You need to configure again to get your project up running again.',
-        )
-      ) {
-        history.goBack();
-        needReset = false;
-      } else {
-        dispatch(changeStatus(CameraConfigStatus.None));
-      }
-    }
-
-    return (): void => {
-      if (isDemo && needReset) dispatch(changeStatus(CameraConfigStatus.None));
-    };
-  }, [dispatch, history, isDemo]);
 
   useInterval(
     () => {
-      dispatch(thunkGetTrainingLog(projectId));
+      dispatch(thunkGetTrainingLog(projectId, isDemo));
     },
     status === CameraConfigStatus.WaitTraining ? 5000 : null,
   );
 
   useEffect(() => {
     if (status === CameraConfigStatus.FinishTraining) {
-      dispatch(thunkGetTrainingMetrics(projectId));
+      dispatch(thunkGetTrainingMetrics(projectId, isDemo));
     }
-  }, [dispatch, status, projectId]);
+  }, [dispatch, status, projectId, isDemo]);
 
   useInterval(
     () => {
-      dispatch(thunkGetInferenceMetrics(projectId));
+      dispatch(thunkGetInferenceMetrics(projectId, isDemo));
     },
     status === CameraConfigStatus.StartInference ? 5000 : null,
   );
+
+  const onDeleteProject = (): void => {
+    dispatch(thunkDeleteProject);
+  };
 
   // FIXME Integrate this with Redux
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
@@ -105,20 +86,29 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
       <Flex column style={{ height: '100%' }} gap="gap.small">
         {error && <Alert danger header={error.name} content={`${error.message}`} />}
         <div style={{ flexGrow: 2 }}>
-          <LiveViewContainer showVideo={true} initialAOIData={aoiData} cameraId={projectCameraId} />
+          <LiveViewContainer
+            showVideo={true}
+            initialAOIData={aoiData}
+            cameraId={projectCameraId}
+            onDeleteProject={onDeleteProject}
+          />
         </div>
         <InferenceMetricDashboard isDemo={isDemo} />
       </Flex>
-      <Flex hAlign="center" column gap="gap.small">
-        <Text weight="bold">Detail of Training Metric</Text>
-        <Button
-          content={showConsequenceDashboard ? 'Hide' : 'Show'}
-          primary
-          onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
-          circular
-        />
-        {showConsequenceDashboard && <ConsequenceDashboard trainingMetrics={trainingMetrics} />}
-      </Flex>
+      {!isDemo && (
+        <>
+          <Flex hAlign="center" column gap="gap.small">
+            <Text weight="bold">Detail of Training Metric</Text>
+            <Button
+              content={showConsequenceDashboard ? 'Hide' : 'Show'}
+              primary
+              onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
+              circular
+            />
+            <ConsequenceDashboard visible={showConsequenceDashboard} trainingMetrics={trainingMetrics} />
+          </Flex>
+        </>
+      )}
     </Flex>
   );
 };

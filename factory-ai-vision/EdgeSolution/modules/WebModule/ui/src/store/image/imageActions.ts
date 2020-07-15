@@ -90,9 +90,8 @@ export const deleteLabelImage = (id: number) => (dispatch): Promise<void> => {
     });
 };
 
-export const saveLabelImageAnnotation = (imageId: number, annotations: Annotation[]) => (
-  dispatch,
-): Promise<void> => {
+export const saveLabelImageAnnotation = (imageId: number) => (dispatch, getState): Promise<void> => {
+  const { annotations } = getState().labelingPageState;
   const url = `/api/images/${imageId}/`;
   return axios({
     url,

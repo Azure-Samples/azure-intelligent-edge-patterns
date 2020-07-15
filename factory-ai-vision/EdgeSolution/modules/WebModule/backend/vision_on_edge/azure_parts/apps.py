@@ -1,5 +1,5 @@
 """
-Parts App
+Azure Parts App
 """
 import logging
 import sys
@@ -9,25 +9,25 @@ from django.apps import AppConfig
 logger = logging.getLogger(__name__)
 
 
-class PartsConfig(AppConfig):
+class AzurePartsConfig(AppConfig):
     """
-    Parts App Config
+    Azure Parts App Config
     """
-    name = 'vision_on_edge.part'
+    name = 'vision_on_edge.azure_parts'
 
     def ready(self):
         """
-        Part App ready
+        Azure Parts App ready
         """
         if 'runserver' in sys.argv:
             # Import models in migrate/makemigration will occurs error.
             # pylint: disable = import-outside-toplevel
             # pylint: disable = unused-import
 
-            from vision_on_edge.part.models import Part
-            from .signals import azure_setting_change_handler
+            from vision_on_edge.azure_parts.models import Part
+            from vision_on_edge.azure_parts import signals
 
-            logger.info("Part App Config ready while running server")
+            logger.info("Azure Part App Config ready while running server")
 
             create_demo = True
             if create_demo:

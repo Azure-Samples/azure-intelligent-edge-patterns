@@ -241,9 +241,9 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
   const dispatch = useDispatch();
 
   const onDropdownChange = (_, data): void => {
-    if (data.value === null) dispatch(updateProjectData({ cvProjectId: projectData.cvProjectId }));
+    if (data.value === null) dispatch(updateProjectData({ cvProjectId: projectData.cvProjectId }, false));
     else if (data.value.content.key === initialDropdownItem[0].content.key) setCreateProjectModel(true);
-    else dispatch(updateProjectData({ cvProjectId: data.value.content.key }));
+    else dispatch(updateProjectData({ cvProjectId: data.value.content.key }, false));
   };
 
   const onLoad = (): void => {
@@ -254,7 +254,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
       }&partial=${Number(!loadFullImages)}`,
     )
       .then(() => {
-        dispatch(updateOriginProjectData());
+        dispatch(updateOriginProjectData(false));
         setSuccessDialog('Load Project Success');
         return void 0;
       })
@@ -362,7 +362,7 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
           open={createProjectModel}
           onConfirm={(): void => {
             setCreateProjectModel(false);
-            dispatch(updateProjectData({ ...projectData, cvProjectId: 'NEW' }));
+            dispatch(updateProjectData({ ...projectData, cvProjectId: 'NEW' }, false));
           }}
           onCancel={(): void => setCreateProjectModel(false)}
         />

@@ -21,7 +21,7 @@ const getTitle = (pathname: string): string => {
     case 'partIdentification':
       return 'Job Configuration';
     case 'pretrainDetection':
-      return 'Pretrained Detection';
+      return 'Demo Model';
     case 'capturePhotos':
       return null;
     case 'uploadPhotos':

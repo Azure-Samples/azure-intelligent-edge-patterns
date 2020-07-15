@@ -20,7 +20,6 @@ class LocationsConfig(AppConfig):
         Only load to data when runserver
         if ready run in migration will failed
         """
-        # FIXME test may use this as well
         if 'runserver' in sys.argv:
             # pylint: disable=C0415
             from .models import Location

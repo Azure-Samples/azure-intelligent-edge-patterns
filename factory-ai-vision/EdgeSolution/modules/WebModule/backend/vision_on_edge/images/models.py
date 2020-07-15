@@ -1,5 +1,5 @@
 """
-Models for Azure CustomVIsion training.
+Models for Azure CustomVision images
 """
 import datetime
 import json
@@ -15,7 +15,7 @@ from django.db.models.signals import pre_delete, pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
-from ..part.models import Part
+from ..azure_parts.models import Part
 
 logger = logging.getLogger(__name__)
 
