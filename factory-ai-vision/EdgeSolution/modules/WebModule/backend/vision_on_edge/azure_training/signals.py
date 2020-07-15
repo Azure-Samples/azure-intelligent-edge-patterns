@@ -79,3 +79,27 @@ def azure_project_train_status_handler(**kwargs):
                 "performance": ""
             },
         )
+
+@receiver(signal=post_save,
+          sender=Project,
+          dispatch_uid="change_project_is_configured")
+def azure_project_is_configured_handler(**kwargs):
+    """
+    For now, only one project can have is configured = True
+    """
+    logger.info("Azure Project changed.")
+    logger.info("Checking...")
+
+    if 'sender' not in kwargs or kwargs['sender'] != Project:
+        logger.info("'sender' not in kwargs or kwargs['sender'] != Project")
+        logger.info("nothing to do")
+        return
+    if 'instance' not in kwargs:
+        logger.info("'instance' not in kwargs:'")
+        logger.info("Nothing to do")
+        return
+    instance = kwargs['instance']
+    if instance.has_configured:
+        for other_project in Project.objects.exclude(id=instance.id):
+            other_project.has_configured = False
+            other_project.save()
