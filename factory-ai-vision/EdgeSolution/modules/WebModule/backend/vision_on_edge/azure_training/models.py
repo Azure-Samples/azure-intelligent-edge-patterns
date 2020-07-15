@@ -67,6 +67,7 @@ class Project(models.Model):
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
     deployed = models.BooleanField(default=False)
+    has_configured = models.BooleanField(default=False)
 
     # TODO: Move this to a new App.
     # e.g. relabel
