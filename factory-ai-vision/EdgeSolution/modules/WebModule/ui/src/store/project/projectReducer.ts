@@ -44,6 +44,8 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
         isLoading: false,
         data: { ...action.payload.project },
         originData: { ...action.payload.project },
+        // If the project has configured, set status to wait training so it will start calling export and get the latest status
+        status: action.payload.hasConfigured ? Status.WaitTraining : Status.None,
         error: null,
       };
     case GET_PROJECT_FAILED:

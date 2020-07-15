@@ -71,6 +71,7 @@ export type GetProjectSuccessAction = ProjectAction & {
   type: typeof GET_PROJECT_SUCCESS;
   payload: {
     project: ProjectData;
+    hasConfigured: boolean;
   };
 };
 

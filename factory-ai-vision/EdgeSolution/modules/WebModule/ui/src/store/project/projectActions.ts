@@ -56,9 +56,13 @@ const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
   isDemo,
 });
-const getProjectSuccess = (project: ProjectData, isDemo: boolean): GetProjectSuccessAction => ({
+const getProjectSuccess = (
+  project: ProjectData,
+  hasConfigured: boolean,
+  isDemo: boolean,
+): GetProjectSuccessAction => ({
   type: GET_PROJECT_SUCCESS,
-  payload: { project },
+  payload: { project, hasConfigured },
   isDemo,
 });
 const getProjectFailed = (error: Error, isDemo: boolean): GetProjectFailedAction => ({
@@ -238,7 +242,7 @@ export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Pr
         cvProjectId: data[0]?.customvision_project_id,
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
       };
-      dispatch(getProjectSuccess(project, isDemo));
+      dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
       return void 0;
     })
     .catch((err) => {
