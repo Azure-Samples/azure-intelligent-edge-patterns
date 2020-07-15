@@ -47,7 +47,7 @@ const Home: FC = () => {
         <ImageLink
           imgSrc="/icons/pretrained-model-filled.png"
           to="/pretrainDetection/"
-          label="Pretrained Detection"
+          label="Demo Model"
           width="6.25em"
         />
       </Flex>

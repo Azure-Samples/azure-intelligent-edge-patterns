@@ -189,7 +189,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   return (
     <Flex hAlign="center" styles={{ width: '600px' }} column gap="gap.medium">
       <Text size="larger" weight="semibold">
-        {isDemo ? 'Pretrained Detection' : 'Part Identification'}
+        {isDemo ? 'Demo Model' : 'Part Identification'}
       </Text>
       <Divider color="black" styles={{ width: '100%' }} />
       {error && (
