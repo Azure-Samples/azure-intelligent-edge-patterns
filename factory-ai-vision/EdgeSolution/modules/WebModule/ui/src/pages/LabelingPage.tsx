@@ -42,7 +42,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
   const imageId = images[index]?.id;
 
   const onSave = (): void => {
-    dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+    dispatch(saveLabelImageAnnotation(images[index].id));
     if (setJudgedImageList)
       setJudgedImageList((prev) => [...prev, { partId: annotations[0].part.id, imageId: images[index].id }]);
   };
@@ -53,8 +53,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
     setIndex((prev) => (prev + 1) % images.length);
   };
   const onBoxCreated = (): void => {
-    // TODO
-    // if (index === images.length - 1) onSaveBtnClick();
+    if (index === images.length - 1) onSaveBtnClick();
   };
 
   const onDeleteImage = (): void => {
