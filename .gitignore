@@ -105,8 +105,5 @@ venv.bak/
 /.vs
 /staged-data-analytics
 
-# VS Code
-.vscode
-
 # vi
 *~

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>ams_asset_player</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.3"/>
+    <PackageReference Include="Microsoft.Azure.Devices" Version="1.20.1"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.3"/>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3"/>
+    <PackageReference Include="Microsoft.Azure.Management.Media" Version="2.0.4"/>
+    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.7"/>
+    <PackageReference Include="Microsoft.Rest.ClientRuntime.Azure.Authentication" Version="2.4.0"/>    
+  </ItemGroup>
+
+</Project>

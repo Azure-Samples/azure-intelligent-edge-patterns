@@ -1,0 +1,211 @@
+{
+    "apiVersion": "1.0",
+    "operations": [
+        {
+            "opName": "GraphTopologyList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphInstanceList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphTopologySet",
+            "opParams": {
+                "topologyFile": "..\\edge\\httpwithmotiontopology.json"
+            }
+        },
+        {
+            "opName": "GraphInstanceSet",
+            "opParams": {
+                "name": "Sample-Graph1",
+                "properties": {
+                    "topologyName": "EVROnMotionPlusHttpExtension",
+                    "description": "Sample graph description",
+                    "parameters": [
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://rtspsim:554/media/camera-300s.mkv"
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://yolov3/score"
+                        },
+                        {
+                            "name": "rtspUserName",
+                            "value": "testuser"
+                        },
+                        {
+                            "name": "rtspPassword",
+                            "value": "testpassword"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "opName": "GraphInstanceSet",
+            "opParams": {
+                "name": "Sample-Graph2",
+                "properties": {
+                    "topologyName": "EVROnMotionPlusHttpExtension",
+                    "description": "Sample graph description",
+                    "parameters": [
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://rtspsim:554/media/camera-300s.mkv"
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://yolov3/score"
+                        },
+                        {
+                            "name": "rtspUserName",
+                            "value": "testuser"
+                        },
+                        {
+                            "name": "rtspPassword",
+                            "value": "testpassword"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "opName": "GraphInstanceSet",
+            "opParams": {
+                "name": "Sample-Graph3",
+                "properties": {
+                    "topologyName": "EVROnMotionPlusHttpExtension",
+                    "description": "Sample graph description",
+                    "parameters": [
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://rtspsim:554/media/camera-300s.mkv"
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://yolov3/score"
+                        },
+                        {
+                            "name": "rtspUserName",
+                            "value": "testuser"
+                        },
+                        {
+                            "name": "rtspPassword",
+                            "value": "testpassword"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "opName": "GraphInstanceActivate",
+            "opParams": {
+                "name": "Sample-Graph1"
+            }
+        },
+        {
+            "opName": "GraphInstanceActivate",
+            "opParams": {
+                "name": "Sample-Graph2"
+            }
+        },
+        {
+            "opName": "GraphInstanceActivate",
+            "opParams": {
+                "name": "Sample-Graph3"
+            }
+        },
+        {
+            "opName": "GraphInstanceList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "The topology will now be deactivated. Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphInstanceDeactivate",
+            "opParams": {
+                "name": "Sample-Graph1"
+            }
+        },
+        {
+            "opName": "GraphInstanceDeactivate",
+            "opParams": {
+                "name": "Sample-Graph2"
+            }
+        },
+        {
+            "opName": "GraphInstanceDeactivate",
+            "opParams": {
+                "name": "Sample-Graph3"
+            }
+        },
+        {
+            "opName": "GraphInstanceDelete",
+            "opParams": {
+                "name": "Sample-Graph1"
+            }
+        },
+        {
+            "opName": "GraphInstanceDelete",
+            "opParams": {
+                "name": "Sample-Graph2"
+            }
+        },
+        {
+            "opName": "GraphInstanceDelete",
+            "opParams": {
+                "name": "Sample-Graph3"
+            }
+        },
+        {
+            "opName": "GraphInstanceList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphTopologyDelete",
+            "opParams": {
+                "name": "EVROnMotionPlusHttpExtension"
+            }
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphTopologyList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        }
+    ]
+}
