@@ -29,7 +29,7 @@ from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general import error_messages
 from ...images.models import Image
-from ...notifications.models import Notification, dequeue_notification
+from ...notifications.models import Notification
 from ..models import Project, Task, Train
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
@@ -129,6 +129,7 @@ class TrainViewSet(viewsets.ModelViewSet):
 
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
+
 
 @api_view()
 def export(request, project_id):
@@ -715,7 +716,6 @@ def update_train_status(project_id):
                 log="model training completed",
                 performance=json.dumps(train_performance_list),
             )
-            dequeue_notification()
             Notification.objects.create(
                 notification_type="project",
                 sender="system",

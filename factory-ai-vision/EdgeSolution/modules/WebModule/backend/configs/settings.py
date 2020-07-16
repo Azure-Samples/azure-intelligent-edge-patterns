@@ -167,10 +167,10 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 ICON_URL = '/icons/'
 ICON_ROOT = os.path.join(UI_DIR, 'icons')
 
-CHANNEL_LAYERS={
+CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
-     }
+    }
 }
 
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
@@ -183,4 +183,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION
+LOGGING = logging_config.LOGGING_CONFIG_DEV

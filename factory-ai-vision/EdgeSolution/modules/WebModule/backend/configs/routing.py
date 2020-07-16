@@ -10,8 +10,8 @@ from vision_on_edge.notifications.consumers import NotificationConsumer
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
     'websocket':
-    AllowedHostsOriginValidator(
-        URLRouter([
-            url(r"api/notifications", NotificationConsumer),
-        ]))
+        AllowedHostsOriginValidator(
+            URLRouter([
+                url(r"api/notifications", NotificationConsumer),
+            ]))
 })

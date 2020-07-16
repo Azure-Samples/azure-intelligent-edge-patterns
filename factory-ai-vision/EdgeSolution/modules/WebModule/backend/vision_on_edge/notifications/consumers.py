@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class NotificationConsumer(AsyncJsonWebsocketConsumer):
     """NotificationConsumer
     """
+
     async def websocket_connect(self, event):
         """websocket connect
         """
@@ -24,7 +25,6 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         #self.channel_name = "notification"
         await self.channel_layer.group_add("notification", self.channel_name)
         logger.info("connect %s", event)
-
 
     async def websocket_receive(self, event):
         """websocket receive

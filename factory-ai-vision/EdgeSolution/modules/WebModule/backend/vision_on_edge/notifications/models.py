@@ -29,35 +29,3 @@ class Notification(models.Model):
     def __str__(self):
         return " ".join(
             [self.timestamp, self.notification_type, self.title, self.details])
-
-
-def dequeue_notification(max_num: int = 10):
-    """dequeue some outdated notification
-    """
-    # notification_count = Notification.objects.count()
-    # while notification_count > max_num:
-    #    Notification.objects.or
-
-
-@receiver(post_save, sender=Notification)
-def notification_post_save(sender, **kwargs):
-    """Notification pre_save
-    """
-    logger.info("notification_pre_save...")
-    if "instance" not in kwargs:
-        return
-    logger.info("Sending notifications...")
-
-    instance = kwargs['instance']
-    channels_layer = get_channel_layer()
-    async_to_sync(channels_layer.group_send)(
-        "notification",
-        {
-            "type": "notification.send",
-            "notification_type": instance.notification_type,
-            "timestamp": str(instance.timestamp),
-            "sender": instance.sender,
-            "title": instance.title,
-            "message": instance.details
-        },
-    )
