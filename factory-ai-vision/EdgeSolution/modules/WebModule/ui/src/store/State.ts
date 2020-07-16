@@ -5,6 +5,7 @@ import { Location } from './location/locationTypes';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
+import { Notification } from './notification/notificationType';
 
 export interface State {
   dialogIsOpen: boolean;
@@ -16,6 +17,7 @@ export interface State {
   demoProject: Project;
   images: LabelImage[];
   setting: Setting;
+  notifications: Notification[];
 }
 
 export type LabelingPageState = { annotations: Annotation[] };
@@ -96,4 +98,5 @@ export const initialState: State = {
     isTrainerValid: false,
     appInsightHasInit: false,
   },
+  notifications: [],
 };
