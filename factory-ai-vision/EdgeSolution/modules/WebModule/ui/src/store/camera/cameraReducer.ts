@@ -5,6 +5,9 @@ import {
   Camera,
   CameraAction,
   DELETE_CAMERA_SUCCESS,
+  PATCH_CAMERA_AREA_REQUEST,
+  PATCH_CAMERA_AREA_SUCCESS,
+  PATCH_CAMERA_AREA_FAILED,
 } from './cameraTypes';
 import { initialState } from '../State';
 
@@ -21,6 +24,15 @@ const camerasReducer = (state = initialState.cameras, action: CameraAction): Cam
       if (idx !== -1) return state.slice(0, idx).concat(state.slice(idx + 1));
       return state;
     }
+    case PATCH_CAMERA_AREA_REQUEST:
+      return state;
+    case PATCH_CAMERA_AREA_SUCCESS:
+      return state.map((e) => {
+        if (e.id === action.payload.id) return action.payload.data;
+        return e;
+      });
+    case PATCH_CAMERA_AREA_FAILED:
+      return state;
     default:
       return state;
   }

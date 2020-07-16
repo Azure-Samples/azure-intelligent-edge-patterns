@@ -48,6 +48,30 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
             return True
     return False
 
+def parse_bbox(prediction, width, height):
+    x1 = int(prediction['boundingBox']['left'] * width)
+    y1 = int(prediction['boundingBox']['top'] * height)
+    x2 = x1 + int(prediction['boundingBox']['width'] * width)
+    y2 = y1 + int(prediction['boundingBox']['height'] * height)
+    return (x1, y1), (x2, y2)
+
+
+def draw_confidence_level(img, prediction):
+    height, width = img.shape[0], img.shape[1]
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 1
+    thickness = 3
+
+    prob_str = str(int(prediction['probability']*1000)/10)
+    prob_str = ' (' + prob_str + '%)'
+
+    (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
+
+    img = cv2.putText(img, prediction['tagName']+prob_str, (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
+
+    return img
+
 
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
@@ -225,20 +249,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                     detection = DETECTION_TYPE_NOTHING
                     if True:
                         send_counter += 1
-                        # Modify here to change the threshold (deprecated)
-                        #if send_counter == 200:
-                        #    if iot:
-                        #        iot.send_message_to_output(json.dumps(self.last_prediction), 'metrics')
-                        #    else:
-                        #        print('[METRICS]', json.dumps(self.last_prediction))
-                        #    send_counter = 0
                         if self.iothub_is_send:
                             if self.iothub_last_send_time + self.iothub_interval < time.time():
-                                #print('1', self.iothub_last_send_time)
-                                #print('2', self.iothub_interval)
-                                #print('3', self.iothub_last_send_time + self.iothub_interval)
-                                #print('4', time.time())
-                                #print('wew')
                                 predictions_to_send = []
                                 for prediction in self.last_prediction:
                                     _tag = prediction['tagName']
@@ -262,40 +274,38 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                         pass
                                     self.iothub_last_send_time = time.time()
 
-
-
-
                         for prediction in self.last_prediction:
 
                             tag = prediction['tagName']
-                            if tag not in self.parts: continue
+                            if tag not in self.parts:
+                                continue
+
+                            (x1, y1) , (x2, y2) = parse_bbox(prediction, width, height)
+                            if self.has_aoi:
+                                if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info): continue
+
+                            if detection != DETECTION_TYPE_SUCCESS:
+                                if prediction['probability'] >= self.threshold:
+                                    detection = DETECTION_TYPE_SUCCESS
+                                else:
+                                    detection = DETECTION_TYPE_UNIDENTIFIED
+
 
                             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
-                                x1 = int(prediction['boundingBox']['left'] * width)
-                                y1 = int(prediction['boundingBox']['top'] * height)
-                                x2 = x1 + int(prediction['boundingBox']['width'] * width)
-                                y2 = y1 + int(prediction['boundingBox']['height'] * height)
-                                labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
-
-                                if self.has_aoi:
-                                    if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info): continue
-
-                                if prediction['probability'] > self.confidence_max:
-                                    detection = DETECTION_TYPE_SUCCESS
-
-                                elif self.confidence_min <= prediction['probability'] <= self.confidence_max:
-
-                                    if detection != DETECTION_TYPE_SUCCESS: detection = DETECTION_TYPE_UNIDENTIFIED
-
-
+                                if self.confidence_min <= prediction['probability'] <= self.confidence_max:
                                     if self.is_upload_image:
-                                        if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
-                                            pass
-                                        else:
-                                            self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
-                                            #print(tag, onnx.current_uploaded_images[tag], j) 
+                                        #if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
+                                        #if tag in onnx.current_uploaded_images:
+                                            # No limit for the max_images in inference module now, the logic is moved to webmodule
+                                        #    pass
+                                        #else:
+                                        if True:
+
+                                            labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
+                                            print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images.get(tag, 0), labels)
+                                            #self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
                                             self.last_upload_time = time.time()
-                                            print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images[tag], labels)
+
                                             jpg = cv2.imencode('.jpg', img)[1].tobytes()
                                             try:
                                                 requests.post('http://'+web_module_url()+'/api/relabel', data={
@@ -324,7 +334,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                 self.detection_unidentified_num += 1
                             elif detection == DETECTION_TYPE_SUCCESS:
                                 self.detection_success_num += 1
-                        
                         else:
                             self.detections.append(detection)
                             if detection == DETECTION_TYPE_UNIDENTIFIED:
@@ -332,7 +341,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                             elif detection == DETECTION_TYPE_SUCCESS:
                                 self.detection_success_num += 1
                             self.detection_total += 1
-                        
+
                     self.lock.release()
                     #print(detection)
                 else:
@@ -389,7 +398,7 @@ def metrics():
 
 @app.route('/update_retrain_parameters')
 def update_retrain_parameters():
-    
+
     confidence_min = request.args.get('confidence_min')
     if not confidence_min: return 'missing confidence_min'
 
@@ -485,15 +494,10 @@ def update_parts():
 
     return 'ok'
 
-@app.route('/update_threshold')
-def update_threshold():
-    #threshold = float(request.args.get('threshold'))
-
-    #print('[INFO] update theshold to', threshold)
-
-    #onnx.threshold = threshold
-    print('[WARNING] is depreciated')
-    return 'ok'
+#@app.route('/update_threshold')
+#def update_threshold():
+#    print('[WARNING] is depreciated')
+#    return 'ok'
 
 @app.route('/update_iothub_parameters')
 def update_iothub_parameters():
@@ -527,6 +531,13 @@ def update_prob_threshold():
     print('[INFO] updaing prob_threshold to')
     print('  prob_threshold:', prob_threshold)
 
+    onnx.lock.acquire()
+    onnx.detection_success_num = 0
+    onnx.detection_unidentified_num = 0
+    onnx.detection_total = 0
+    onnx.detections = []
+    onnx.lock.release()
+
     return 'ok'
 
 @app.route('/video_feed')
@@ -539,9 +550,6 @@ def video_feed():
             if inference:
                 height, width = img.shape[0], img.shape[1]
                 predictions = onnx.last_prediction
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                font_scale = 1
-                thickness = 3
                 for prediction in predictions:
                     tag = prediction['tagName']
                     if tag not in onnx.parts: continue
@@ -550,32 +558,21 @@ def video_feed():
                         for aoi_area in onnx.aoi_info:
                             img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
 
-                    #if prediction['probability'] > onnx.confidence_max:
-                    #print(prediction)
                     if prediction['probability'] > onnx.threshold:
-                        x1 = int(prediction['boundingBox']['left'] * width)
-                        y1 = int(prediction['boundingBox']['top'] * height)
-                        x2 = x1 + int(prediction['boundingBox']['width'] * width)
-                        y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                        (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
                         if onnx.has_aoi:
                             if not is_inside_aoi(x1, y1, x2, y2, onnx.aoi_info): continue
 
                         img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                        prob_str = str(int(prediction['probability']*1000)/10)
-                        prob_str = ' (' + prob_str + '%)'
-                        img = cv2.putText(img, prediction['tagName']+prob_str, (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
+                        img = draw_confidence_level(img, prediction)
 
 
-            time.sleep(0.03)
+            time.sleep(0.02)
             yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
 
     return Response(_gen(),
             mimetype='multipart/x-mixed-replace; boundary=frame')
-
-# for debugging
-#onnx.update_cam(cam_type='rtsp', cam_source='sample_video/video.mp4', has_aoi=True, aoi_info={'x1': 100, 'x2': 1000, 'y1': 100, 'y2': 500})
-#requests.get('http://localhost:5000/update_cam', params={'cam_type':'rtsp', 'cam_source':'0', 'aoi':'{\"useAOI\":true,\"AOIs\":[{\"x1\":100,\"y1\":216.36363636363637,\"x2\":3314.909090909091,\"y2\":1762.181818181818}]}'})
 
 
 def main():

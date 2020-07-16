@@ -1,1 +1,0 @@
-export const getIdFromUrl = (url: string): number => parseInt(url.split("/")[5], 10) ;

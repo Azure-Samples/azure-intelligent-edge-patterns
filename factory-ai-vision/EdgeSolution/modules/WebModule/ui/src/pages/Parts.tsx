@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Flex, Image, Text } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
-import { getIdFromUrl } from '../util/GetIDFromUrl';
 import { AddModuleDialog } from '../components/AddModuleDialog';
 
 export const Parts: React.FC = () => {
@@ -20,7 +19,7 @@ export const Parts: React.FC = () => {
           setParts(
             partsRes.map((e) => ({
               ...e,
-              images: images.find((img) => getIdFromUrl(img.part) === e.id)?.image,
+              images: images.find((img) => img.part === e.id)?.image,
             })),
           );
         }),

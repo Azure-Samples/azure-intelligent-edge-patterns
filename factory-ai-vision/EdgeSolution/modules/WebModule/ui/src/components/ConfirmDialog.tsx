@@ -1,5 +1,6 @@
 import React, { FC, useState, CSSProperties } from 'react';
-import { Flex, Text, Button, Dialog } from '@fluentui/react-northstar';
+import { Flex, Text, Button } from '@fluentui/react-northstar';
+import { Dialog } from './Dialog';
 
 /**
  * @param trigger Trigger Button
