@@ -1,3 +1,4 @@
+
 ---
 languages:
 - json
@@ -25,12 +26,16 @@ Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to se
 
 # Prerequiste
 ## Hardware
--	**Azure Stack Edge**
+You need to have one of the following:
+-	**Azure Stack Edge**  
+or
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
      * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
 ## Services
-Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:
+Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
+
+![Communication patterns between modules](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/azure%20stack.png)
 
  
 ## Get Started 
@@ -41,7 +46,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
   4.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
 
 # Vision on Edge Installer
-## Option 1: Installation with Installer:
+## Option 1: Automated installation with Vision on Edge Installer
 
 ### Prerequisites
 To install the solution on a PC running Windows, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.cmd script.
@@ -52,10 +57,10 @@ Before installation, please make sure you have the following:
    1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
    2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
 ### Get Started:
-Go to factory-ai-vision repo and click on Installers folder, there are two zip files, Windows.zip and bash.zip 
+Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/bash.zip) 
 
 For Windows: 
-   1.	Click and download the Windows.zip, and unzip the zipped files. It contains three files:
+   1.	Click and download the [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/Windows.zip), and unzip the zipped files. It contains three files:
    a. deploy-custom-vision-arm.json
    b. deployment.amd64.json 
    c. factory-ai-vision-install.cmd
@@ -67,14 +72,14 @@ For Windows:
 
 For Mac:
    1.	Open terminal 
-   2.	Location the file, unzip bash.zip
+   2.	Locate the file, [unzip bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/bash.zip)
    3.	excute ```bash factory-ai-vision-install.sh```
    4.	It will direct you to azure subscription login page
    5.	Choose your subscription 
    6.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
    7.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
 
-## Option 2: Install with vs code
+## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
 
 ### Prerequisites
 
@@ -86,7 +91,10 @@ Before installation, You must have the following services set up to use Vision o
    5.	**Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
    6. **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
  
-To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) 
+To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) and [this video](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52):
+
+
+[![Visual Studio Code Extension Video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/VSCodeExtensionVideo.png)](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52)
 
 ### Get Started:
 
@@ -103,6 +111,7 @@ To learn more about this development environment, check out [this tutorial](http
 # Video Tutorial 
 
 - Vision on Edge installer: https://youtu.be/NWKLk8ENo-g
+[![video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/Installer%20instruction.png)](https://youtu.be/NWKLk8ENo-g)
 - Test with pretrained mode: https://youtu.be/7PWGNC7rkCE
 - Start from scratch- setup camera, add parts, label and train: https://youtu.be/jLY-VkxU99U
 - Retrain the model: https://youtu.be/dXh9isASvcY
@@ -127,5 +136,4 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
-
 

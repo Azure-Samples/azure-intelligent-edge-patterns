@@ -10,6 +10,8 @@ import { Badge } from '../Badge';
 import { NotificationPanel } from '../NotificationPanel';
 import { setRead } from '../../store/notification/notificationAction';
 
+const LEFT_NAV_WIDTH = 80;
+
 export const MainLayout: FC = ({ children }) => {
   const dispatch = useDispatch();
   const isTrainerValid = useSelector<State, boolean>((state) => state.setting.isTrainerValid);
@@ -25,7 +27,7 @@ export const MainLayout: FC = ({ children }) => {
 
   return (
     <Grid
-      columns="60px auto"
+      columns={`${LEFT_NAV_WIDTH}px auto`}
       rows="50px auto"
       design={{ height: '100vh' }}
       styles={{ justifyContent: 'stretch' }}
@@ -43,6 +45,7 @@ export const MainLayout: FC = ({ children }) => {
           zIndex: 1,
         }}
         disabled={!isTrainerValid}
+        width={LEFT_NAV_WIDTH - 40}
       />
 
       <Segment styles={{ gridColumn: 'span 1', padding: '30px', position: 'relative' }}>

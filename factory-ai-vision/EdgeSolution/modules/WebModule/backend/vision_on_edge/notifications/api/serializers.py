@@ -11,7 +11,7 @@ from ..models import Notification
 logger = logging.getLogger(__name__)
 
 
-class NotificationSerializer(serializers.HyperlinkedModelSerializer):
+class NotificationSerializer(serializers.ModelSerializer):
     """NotificationSerializer"""
 
     class Meta:

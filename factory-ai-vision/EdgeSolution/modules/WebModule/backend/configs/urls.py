@@ -56,6 +56,7 @@ router.register('train', azure_training_views.TrainViewSet)
 router.register('tasks', azure_training_views.TaskViewSet)
 router.register('images', image_views.ImageViewSet)
 router.register('notifications', notifications_views.NotificationViewSet)
+router.register('images', image_views.ImageViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \

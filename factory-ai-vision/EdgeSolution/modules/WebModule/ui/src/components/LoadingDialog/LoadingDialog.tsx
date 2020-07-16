@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, Flex, Loader, ErrorIcon, Text, AcceptIcon } from '@fluentui/react-northstar';
+import { Flex, Loader, ErrorIcon, Text, AcceptIcon } from '@fluentui/react-northstar';
+import { Dialog } from '../Dialog';
 
 export enum Status {
   None,

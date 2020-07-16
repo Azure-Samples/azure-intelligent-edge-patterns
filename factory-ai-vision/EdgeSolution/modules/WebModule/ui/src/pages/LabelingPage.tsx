@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text } from '@fluentui/react-northstar';
 
@@ -7,8 +7,12 @@ import { LabelingType, Annotation, WorkState } from '../store/labelingPage/label
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
-import { saveLabelImageAnnotation } from '../store/image/imageActions';
-import { RelabelImage } from '../components/ManualIdentification/types';
+import {
+  saveLabelImageAnnotation,
+  deleteLabelImage,
+  removeImagesFromPart,
+} from '../store/image/imageActions';
+import { RelabelImage, JudgedImageList } from '../components/ManualIdentification/types';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
 interface LabelingPageProps {
@@ -16,8 +20,17 @@ interface LabelingPageProps {
   images: LabelImage[] | RelabelImage[];
   imageIndex: number;
   closeDialog: () => void;
+  setJudgedImageList?: Dispatch<SetStateAction<JudgedImageList>>;
+  isRelabel: boolean;
 }
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex, closeDialog }) => {
+const LabelingPage: FC<LabelingPageProps> = ({
+  labelingType,
+  images,
+  imageIndex,
+  closeDialog,
+  setJudgedImageList,
+  isRelabel,
+}) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -27,6 +40,25 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
   const isOnePointBox = checkOnePointBox(annotations);
   const imageUrl = images[index]?.image;
   const imageId = images[index]?.id;
+
+  const onSave = (): void => {
+    dispatch(saveLabelImageAnnotation(images[index].id));
+    if (setJudgedImageList)
+      setJudgedImageList((prev) => [...prev, { partId: annotations[0].part.id, imageId: images[index].id }]);
+  };
+
+  const onSaveBtnClick = (): void => {
+    onSave();
+    if (index === images.length - 1) closeDialog();
+    setIndex((prev) => (prev + 1) % images.length);
+  };
+  const onBoxCreated = (): void => {
+    if (index === images.length - 1) onSaveBtnClick();
+  };
+
+  const onDeleteImage = (): void => {
+    dispatch(deleteLabelImage(images[index].id));
+  };
 
   useEffect(() => {
     if (typeof imageId === 'number') dispatch(getAnnotations(imageId));
@@ -47,20 +79,22 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
         prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
         nextDisabled={index === images.length - 1 || workState === WorkState.Creating || isOnePointBox}
         onPrevClick={(): void => {
-          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          onSave();
           setIndex((prev) => (prev - 1 + images.length) % images.length);
         }}
         onNextClick={(): void => {
-          dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+          onSave();
           setIndex((prev) => (prev + 1) % images.length);
         }}
       >
         <Scene
-          url={imageUrl ?? '/icons/Play.png'}
+          url={imageUrl}
           annotations={annotations}
           workState={workState}
           setWorkState={setWorkState}
           labelingType={labelingType}
+          onBoxCreated={onBoxCreated}
+          partFormDisabled={!isRelabel}
         />
       </PrevNextButton>
       <Flex gap="gap.medium">
@@ -68,18 +102,37 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex,
           primary
           content={index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
           disabled={isOnePointBox || workState === WorkState.Creating}
-          onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
-            if (index === images.length - 1) closeDialog();
-            setIndex((prev) => (prev + 1) % images.length);
-          }}
+          onClick={onSaveBtnClick}
         />
-        <Button
-          content="Cancel"
-          onClick={(): void => {
-            closeDialog();
-          }}
-        />
+        {isRelabel ? (
+          <Button
+            primary
+            content="Done"
+            onClick={(): void => {
+              onSave();
+              // eslint-disable-next-line no-restricted-globals
+              const finishLabel = confirm('The Rest of the image will be removed');
+              if (finishLabel) {
+                setJudgedImageList((prev) => {
+                  const notInJudged = (imgId: number): boolean => !prev.find((e) => e.imageId === imgId);
+                  const imageIdsNotInJudge = images.filter((image) => notInJudged(image.id)).map((e) => e.id);
+                  dispatch(removeImagesFromPart(imageIdsNotInJudge));
+                  return [...prev, ...imageIdsNotInJudge.map((e) => ({ imageId: e, partId: null }))];
+                });
+                closeDialog();
+              }
+            }}
+          />
+        ) : (
+          <Button
+            primary
+            content="Cancel"
+            onClick={(): void => {
+              closeDialog();
+            }}
+          />
+        )}
+        <Button primary content="Delete Image" onClick={onDeleteImage} />
       </Flex>
     </Flex>
   );
