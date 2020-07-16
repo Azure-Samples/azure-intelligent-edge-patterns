@@ -30,6 +30,7 @@ from ...cameras.models import Camera
 from ...general import error_messages
 from ...images.models import Image
 from ..models import Project, Task, Train
+from ..utils import update_app_insight_counter
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
 try:
@@ -558,7 +559,8 @@ def upload_and_train(project_id):
                 log="Project changed. Submitting training task...")
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
-                project_obj.update_app_insight_counter(
+                update_app_insight_counter(
+                    project_obj=project_obj,
                     has_new_parts=has_new_parts,
                     has_new_images=has_new_images,
                     parts_last_train=parts_last_train,

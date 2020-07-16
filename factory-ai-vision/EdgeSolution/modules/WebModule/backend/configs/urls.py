@@ -23,6 +23,7 @@ from rest_framework import routers
 from vision_on_edge.azure_parts.api import views as azure_part_views
 from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training.api import views as azure_training_views
+from vision_on_edge.azure_app_insight.api import views as app_insight_views
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views
 from vision_on_edge.image_predictions.api import \
@@ -84,7 +85,7 @@ urlpatterns = \
         path('api/projects/null/export', azure_training_views.export_null),
         path('api/relabel', relabel_views.upload_relabel_image),
         path('api/relabel/update', relabel_views.relabel_update),
-        path('api/appinsight/key', views.instrumentation_key),
+        path('api/appinsight/key', app_insight_views.instrumentation_key),
         path('api/camera_utils/verify_rtsp',
              camera_util_views.verify_rtsp),
         path('admin/', admin.site.urls),

@@ -1,7 +1,7 @@
 """
 Azure Custom Vision Settings
 
-Get custom vision related config from
+Get Custom Vision related configs order by:
 1. Environment variables
 2. config.py
 """
@@ -9,7 +9,5 @@ import os
 
 from config import ENDPOINT, TRAINING_KEY
 
-if 'TRAINING_KEY' in os.environ:
-    TRAINING_KEY = os.environ['TRAINING_KEY']
-if 'ENDPOINT' in os.environ:
-    ENDPOINT = os.environ['ENDPOINT']
+TRAINING_KEY = os.environ.get('TRAINING_KEY', TRAINING_KEY)
+ENDPOINT = os.environ.get('ENDPOINT', ENDPOINT)
