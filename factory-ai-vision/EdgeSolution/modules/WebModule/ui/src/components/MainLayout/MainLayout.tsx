@@ -1,5 +1,5 @@
 import React, { FC, MouseEvent } from 'react';
-import { Grid, Segment, Image, Flex, Text, MenuIcon, Button } from '@fluentui/react-northstar';
+import { Grid, Segment, Image, Flex, Text } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -7,12 +7,14 @@ import Breadcrumb from '../Breadcrumb';
 import LeftNav from './LeftNav';
 import { State } from '../../store/State';
 
+const LEFT_NAV_WIDTH = 80;
+
 export const MainLayout: FC = ({ children }) => {
   const isTrainerValid = useSelector<State, boolean>((state) => state.setting.isTrainerValid);
 
   return (
     <Grid
-      columns="60px auto"
+      columns={`${LEFT_NAV_WIDTH}px auto`}
       rows="50px auto"
       design={{ height: '100vh' }}
       styles={{ justifyContent: 'stretch' }}
@@ -26,6 +28,7 @@ export const MainLayout: FC = ({ children }) => {
           zIndex: 1,
         }}
         disabled={!isTrainerValid}
+        width={LEFT_NAV_WIDTH - 40}
       />
 
       <Segment styles={{ gridColumn: 'span 1', padding: '30px' }}>
