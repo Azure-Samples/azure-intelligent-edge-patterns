@@ -21,7 +21,7 @@ class FeedbackRestTestCases(APITransactionTestCase):
     """
 
     def setUp(self):
-        logger.warning('Start est api test')
+        logger.warning('Start REST API test')
         url = reverse('feedback-list')
 
         data = {
