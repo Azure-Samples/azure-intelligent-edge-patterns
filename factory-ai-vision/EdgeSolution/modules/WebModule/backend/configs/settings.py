@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'channels',
     'vision_on_edge.azure_parts',
     'vision_on_edge.images',
     'vision_on_edge.streams',
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     'vision_on_edge.cameras',
     'vision_on_edge.image_predictions',
     'vision_on_edge.azure_training',
+    'vision_on_edge.notifications',
     'rest_framework',
     'drf_yasg',
 ]
@@ -102,8 +104,7 @@ TEMPLATES = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-# WSGI_APPLICATION = 'vision_on_edge.wsgi.application'
-ASGI_APPLICATION = 'vision_on_edge.asgi.application'
+ASGI_APPLICATION = 'configs.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -166,6 +167,12 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 ICON_URL = '/icons/'
 ICON_ROOT = os.path.join(UI_DIR, 'icons')
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
@@ -176,4 +183,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION
+LOGGING = logging_config.LOGGING_CONFIG_DEV
