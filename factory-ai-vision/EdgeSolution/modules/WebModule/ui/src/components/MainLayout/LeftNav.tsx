@@ -1,42 +1,40 @@
 import React, { memo, MouseEvent, FC } from 'react';
-import { Segment, Image, Flex, Tooltip } from '@fluentui/react-northstar';
+import { Segment, Image, Flex, Text } from '@fluentui/react-northstar';
 import { NavLink } from 'react-router-dom';
-import { useProject } from '../../hooks/useProject';
-import { useCameras } from '../../hooks/useCameras';
 
-const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
-  const project = useProject(false);
-  const cameras = useCameras();
-  const cameraInUsed = cameras.find((e) => e.id === project.data.camera);
-
+const LeftNav: FC<any> = ({ styles, disabled, width }): JSX.Element => {
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
       <Flex column gap="gap.large" hAlign="center">
-        <NavItem title="Location" disabled={disabled} src="/icons/location.png" to="/locations"></NavItem>
         <NavItem
-          title="Camera"
+          title="Location"
           disabled={disabled}
-          src="/icons/camera.png"
-          to={cameraInUsed ? `/cameras/detail?name=${cameraInUsed.name}` : '/cameras'}
-        />
-        <NavItem title="Part" disabled={disabled} src="/icons/part.png" to="/parts"></NavItem>
+          src="/icons/location.png"
+          to="/locations"
+          width={width}
+        ></NavItem>
+        <NavItem title="Camera" disabled={disabled} src="/icons/camera.png" to="/cameras" width={width} />
+        <NavItem title="Part" disabled={disabled} src="/icons/part.png" to="/parts" width={width}></NavItem>
         <NavItem
           title="Part Identification"
           disabled={disabled}
           src="/icons/partIdentification.png"
           to="/partIdentification"
+          width={width}
         ></NavItem>
         <NavItem
           title="Manual Identification"
           disabled={disabled}
           src="/icons/manual.png"
           to="/manual"
+          width={width}
         ></NavItem>
         <NavItem
           title="Demo Model"
           disabled={disabled}
           src="/icons/pretrained-model.png"
           to="/pretrainDetection"
+          width={width}
         ></NavItem>
       </Flex>
     </Segment>
@@ -48,30 +46,29 @@ interface NavItemProps {
   src: string;
   to: string;
   disabled: boolean;
+  width: number;
 }
-const NavItem: FC<NavItemProps> = ({ title, src, to, disabled }): JSX.Element => {
+const NavItem: FC<NavItemProps> = ({ title, src, to, disabled, width }): JSX.Element => {
   return (
-    <Tooltip
-      content={title}
-      position="after"
-      trigger={
-        <NavLink
-          to={to}
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            padding: '0.8em',
-            cursor: disabled && 'default',
-          }}
-          activeStyle={{ backgroundColor: 'rgba(250, 83, 5, 0.5)' }}
-          onClick={(e: MouseEvent): void => {
-            if (disabled) e.preventDefault();
-          }}
-        >
-          <Image src={src} design={{ width: '100%' }} />
-        </NavLink>
-      }
-    />
+    <NavLink
+      to={to}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '0.8em',
+        cursor: disabled && 'default',
+        width: '100%',
+        textDecoration: 'none',
+      }}
+      activeStyle={{ backgroundColor: 'rgba(250, 83, 5, 0.5)' }}
+      onClick={(e: MouseEvent): void => {
+        if (disabled) e.preventDefault();
+      }}
+    >
+      <Image src={src} styles={{ width: `${width}px` }} />
+      <Text color="white" content={title} align="center" size="small" />
+    </NavLink>
   );
 };
 

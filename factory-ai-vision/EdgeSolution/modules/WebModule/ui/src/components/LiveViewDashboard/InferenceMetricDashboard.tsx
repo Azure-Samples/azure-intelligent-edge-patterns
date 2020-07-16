@@ -58,8 +58,8 @@ const highLightTextStyles: ComponentSlotStyle = {
 };
 
 export const InferenceMetricDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
-  const { data: project, isLoading, inferenceMetrics } = useSelector<State, Project>(
-    (state) => state.project,
+  const { data: project, isLoading, inferenceMetrics } = useSelector<State, Project>((state) =>
+    isDemo ? state.demoProject : state.project,
   );
   const dispatch = useDispatch();
   const successInferenceFooter = useNotification(inferenceMetrics.successfulInferences, 60000);

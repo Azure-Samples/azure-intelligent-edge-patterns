@@ -23,6 +23,7 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
       overflow: 'scroll',
       borderWidth: '0.0625em',
       borderStyle: 'solid',
+      rowGap: '10px',
     }}
   >
     {images

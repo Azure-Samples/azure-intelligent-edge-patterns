@@ -21,7 +21,6 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   return (
     <div
       style={{
-        minHeight: '16em',
         height: '100%',
         display: 'flex',
         justifyContent: 'center',
