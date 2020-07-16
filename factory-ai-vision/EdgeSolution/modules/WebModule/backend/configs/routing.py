@@ -12,6 +12,6 @@ application = ProtocolTypeRouter({
     'websocket':
     AllowedHostsOriginValidator(
         URLRouter([
-            url(r"notifications", NotificationConsumer),
+            url(r"api/notifications", NotificationConsumer),
         ]))
 })
