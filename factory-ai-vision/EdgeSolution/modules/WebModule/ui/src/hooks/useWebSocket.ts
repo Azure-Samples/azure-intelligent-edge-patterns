@@ -6,7 +6,11 @@ export const useWebSocket = (): void => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://${window.location.hostname}:8000/api/notifications/`);
+    const endPoint =
+      process.env.NODE_ENV === 'development'
+        ? `ws://${window.location.hostname}:8000/api/notifications/`
+        : `ws://${window.location.href}/api/notifications/`;
+    const ws = new WebSocket(endPoint);
 
     ws.onmessage = ({ data }): void => {
       const deSerializedData = JSON.parse(data);
