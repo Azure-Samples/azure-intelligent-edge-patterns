@@ -18,9 +18,15 @@ logger = logging.getLogger(__name__)
           sender=Notification,
           dispatch_uid="send_to_websocket")
 def notification_post_save_websocket_handler(**kwargs):
+    """notification_post_save_websocket_handler.
+
+    When there is a notification been save, push to channel
+    layer to send to websocket.
+
+    Args:
+        kwargs:
     """
-    Send notification to websocket at post_save
-    """
+
     logger.info("notification_post_save...")
     if "instance" not in kwargs:
         return
@@ -45,9 +51,15 @@ def notification_post_save_websocket_handler(**kwargs):
           sender=Notification,
           dispatch_uid="dequeue_notification")
 def notification_post_save_dequeue_handler(**kwargs):
+    """notification_post_save_dequeue_handler.
+
+    When a new notification been created, delete the
+    earliest notification with same sender.
+
+    Args:
+        kwargs:
     """
-    Send notification to websocket at post_save
-    """
+
     logger.info("dequeue notification...")
     if "instance" not in kwargs:
         return

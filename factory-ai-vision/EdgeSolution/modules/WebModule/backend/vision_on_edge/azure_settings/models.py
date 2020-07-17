@@ -120,11 +120,15 @@ class Setting(models.Model):
 
     @staticmethod
     def pre_save(**kwargs):
-        """Setting pre_save.
+        """pre_save.
 
-        Validate CustomVisionClient by get projects. Update the relevent
+        Validate training_key + endpoint. Update related
         fields.
+
+        Args:
+            kwargs:
         """
+
         logger.info("Setting Presave")
         if 'instance' not in kwargs:
             return

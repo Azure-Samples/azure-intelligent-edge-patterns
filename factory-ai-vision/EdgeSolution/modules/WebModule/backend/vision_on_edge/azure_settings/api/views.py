@@ -19,14 +19,27 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=too-many-ancestors
 class SettingViewSet(viewsets.ModelViewSet):
-    """Setting ModelViewSet"""
+    """SettingViewSet.
+    """
 
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
 
     @action(detail=True, methods=["get"])
-    def list_projects(self, request, **kwargs):
-        """List projects under Training Key + Endpoint."""
+    def list_projects(self, request, **kwargs) -> Response:
+        """list_projects.
+
+        Args:
+            request:
+            kwargs:
+
+        Returns:
+            Response: Project lists in below format
+            {
+                'project_id_1' : 'project_name_1',
+                'project_id_2' : 'project_name_2'
+            }
+        """
 
         try:
             setting_obj = self.queryset.get(pk=kwargs['pk'])

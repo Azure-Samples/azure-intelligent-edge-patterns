@@ -14,11 +14,13 @@ from azure.iot.device import IoTHubModuleClient
 logger = logging.getLogger(__name__)
 
 
-def is_edge():
-    """Determine is edge or not.
+def is_edge() -> bool:
+    """is_edge.
+
+    Args:
 
     Returns:
-        is_edge (bool)
+        bool:
     """
 
     try:
@@ -28,11 +30,13 @@ def is_edge():
         return False
 
 
-def inference_module_url():
-    """Inference URL.
+def inference_module_url() -> str:
+    """inference_module_url.
+
+    Args:
 
     Returns:
-        inference_module_url (str)
+        str:
     """
 
     if is_edge():

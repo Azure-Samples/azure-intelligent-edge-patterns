@@ -1,6 +1,5 @@
-"""
-Camera models
-"""
+"""App models."""
+
 import logging
 
 import cv2
@@ -28,7 +27,14 @@ class Camera(models.Model):
 
     @staticmethod
     def verify_rtsp(rtsp):
-        """ Return True if the rtsp is ok, otherwise return False """
+        """Validate a rtsp.
+        Args:
+            rtsp (str)
+
+        Returns:
+            is_rtsp_valid (bool)
+        """
+
         logger.info("Camera static method: verify_rtsp")
         logger.info(rtsp)
         if rtsp == '0':
@@ -47,6 +53,7 @@ class Camera(models.Model):
     @staticmethod
     def pre_save(**kwargs):
         """Camera pre_save"""
+
         if 'instance' not in kwargs:
             return
         instance = kwargs['instance']
@@ -61,6 +68,7 @@ class Camera(models.Model):
     @staticmethod
     def post_save(**kwargs):
         """Camera post_save"""
+
         if 'instance' not in kwargs:
             return
         instance = kwargs['instance']
