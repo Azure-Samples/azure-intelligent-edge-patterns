@@ -20,9 +20,8 @@ def is_edge() -> bool:
     Args:
 
     Returns:
-        bool:
+        is_edge -> bool
     """
-
     try:
         IoTHubModuleClient.create_from_edge_environment()
         return True
@@ -36,7 +35,7 @@ def inference_module_url() -> str:
     Args:
 
     Returns:
-        str:
+        str: inference_module_url
     """
 
     if is_edge():
