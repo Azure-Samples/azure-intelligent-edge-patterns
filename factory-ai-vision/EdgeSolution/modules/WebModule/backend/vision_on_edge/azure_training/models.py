@@ -1,6 +1,8 @@
+"""App Models.
+
+Include Project, Train and Task.
 """
-Models for Azure Custom Vision training.
-"""
+
 import datetime
 import logging
 import threading
@@ -9,10 +11,10 @@ import time
 import requests
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
-from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
+from ..azure_iot.utils import inference_module_url
 from ..azure_parts.models import Part
 from ..azure_settings.models import Setting
 from ..cameras.models import Camera
@@ -20,28 +22,11 @@ from ..locations.models import Location
 
 logger = logging.getLogger(__name__)
 
-
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
-
-
 # Create your models here.
 
 
 class Project(models.Model):
-    """Project Model"""
+    """Azure Custom Vision Project Model"""
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)

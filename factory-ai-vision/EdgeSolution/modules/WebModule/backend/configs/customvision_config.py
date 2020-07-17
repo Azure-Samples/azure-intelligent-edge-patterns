@@ -1,8 +1,7 @@
-"""
-Azure Custom Vision Settings
+"""Azure Custom Vision Settings
 
-Get Custom Vision related configs order by:
-1. Environment variables
+This module finds Custom Vision related configs with following order:
+1. System environment variables
 2. config.py
 """
 import os

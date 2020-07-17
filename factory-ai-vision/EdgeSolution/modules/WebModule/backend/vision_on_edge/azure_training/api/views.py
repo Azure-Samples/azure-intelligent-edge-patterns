@@ -1,6 +1,5 @@
-"""
-Azure training views
-"""
+"""App views"""
+
 from __future__ import absolute_import, unicode_literals
 
 import datetime
@@ -14,17 +13,13 @@ from distutils.util import strtobool
 import requests
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException, ImageFileCreateEntry, Region)
-from azure.iot.device import IoTHubModuleClient
-from azure.iot.hub import IoTHubRegistryManager
-from azure.iot.hub.models import Twin, TwinProperties
 from django.http import JsonResponse
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 
-from configs.settings import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
-
+from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general import error_messages
@@ -34,33 +29,11 @@ from ..models import Project, Task, Train
 from ..utils import update_app_insight_counter
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
-try:
-    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-except:
-    iot = None
-
 logger = logging.getLogger(__name__)
 
 
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
-
-
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """
-    Task ModelViewSet
+    """Task ModelViewSet
 
     Available filters:
     @project
@@ -75,8 +48,7 @@ class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
 
 
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """
-    Project ModelViewSet
+    """Project ModelViewSet
 
     Available filters
     @is_demo
@@ -91,9 +63,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def delete_tag(self, request, pk=None):
-        """
-        List Project under Training Key + Endpoint
-        """
+        """delete tag"""
         try:
             project_obj = self.get_object()
             part_id = request.query_params.get("part_id") or None
@@ -124,9 +94,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
 
 class TrainViewSet(viewsets.ModelViewSet):
-    """
-    Train ModelViewSet
-    """
+    """Train ModelViewSet"""
 
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
@@ -204,6 +172,7 @@ def export(request, project_id):
 @api_view()
 def export_null(request):
     """FIXME tmp workaround"""
+
     project_obj = Project.objects.all()[0]
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
 
@@ -232,9 +201,6 @@ def export_null(request):
 
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=["download_uri"])
-
-    # if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-    # update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
 
     return JsonResponse({
         "status": "ok",
@@ -670,9 +636,6 @@ def update_train_status(project_id):
             logger.info("Project is deployed before: %s", project_obj.deployed)
             if not project_obj.deployed:
                 if exports[0].download_uri:
-                    # update_twin(iteration.id,
-                    # exports[0].download_uri,
-                    # camera.rtsp)
 
                     def _send(download_uri, rtsp, parts):
                         requests.get(
@@ -728,45 +691,6 @@ def update_train_status(project_id):
             break
 
     threading.Thread(target=_train_status_worker, args=(project_id,)).start()
-
-
-# FIXME will need to find a better way to deal with this
-iteration_ids = set([])
-
-
-def update_twin(iteration_id, download_uri, rtsp):
-    """Update twin"""
-    if iot is None:
-        return
-
-    if iteration_id in iteration_ids:
-        logger.info("This iteration already deployed on the Edge")
-        return
-
-    try:
-        module = iot.get_module(DEVICE_ID, MODULE_ID)
-    except:
-        logger.error("Module does not exist. Device ID: %s, Module ID: %s",
-                     DEVICE_ID, MODULE_ID)
-        return
-
-    twin = Twin()
-    twin.properties = TwinProperties(
-        desired={
-            "inference_files_zip_url": download_uri,
-            "cam_type": "rtsp_stream",
-            "cam_source": rtsp,
-        })
-
-    iot.update_module_twin(DEVICE_ID, MODULE_ID, twin, module.etag)
-
-    logger.info(
-        "Updated IoT Module Twin with uri and rtsp. Download URI: %s RSTP: %s",
-        download_uri,
-        rtsp,
-    )
-
-    iteration_ids.add(iteration_id)
 
 
 @api_view()

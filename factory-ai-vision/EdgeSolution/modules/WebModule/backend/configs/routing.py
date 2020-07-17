@@ -1,5 +1,6 @@
-"""
-Websocket router
+"""Project Protocol router.
+
+Place websocket endpoint here.
 """
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator

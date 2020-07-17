@@ -1,5 +1,4 @@
-"""
-Azure Setting Serializer
+"""App Serializer
 """
 
 import logging
@@ -12,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class SettingSerializer(serializers.ModelSerializer):
-    """SettingSerializer"""
+    """Setting Serializer"""
 
     class Meta:
         model = Setting

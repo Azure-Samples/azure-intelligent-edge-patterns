@@ -1,5 +1,4 @@
-"""
-Setting ViewSet
+"""App Views
 """
 from __future__ import absolute_import, unicode_literals
 
@@ -20,18 +19,15 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=too-many-ancestors
 class SettingViewSet(viewsets.ModelViewSet):
-    """
-    Setting ModelViewSet
-    """
+    """Setting ModelViewSet"""
 
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
 
     @action(detail=True, methods=["get"])
     def list_projects(self, request, **kwargs):
-        """
-        List projects under Training Key + Endpoint
-        """
+        """List projects under Training Key + Endpoint."""
+
         try:
             setting_obj = self.queryset.get(pk=kwargs['pk'])
             if not setting_obj.training_key:

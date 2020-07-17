@@ -1,5 +1,6 @@
-"""
-Azure App Insight
+"""Utilities
+
+App Insight Utilities.
 """
 import logging
 
