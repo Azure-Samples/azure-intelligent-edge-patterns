@@ -29,6 +29,7 @@ from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general import error_messages
 from ...images.models import Image
+from ...notifications.models import Notification
 from ..models import Project, Task, Train
 from ..utils import update_app_insight_counter
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
@@ -717,6 +718,11 @@ def update_train_status(project_id):
                 log="model training completed",
                 performance=json.dumps(train_performance_list),
             )
+            Notification.objects.create(
+                notification_type="project",
+                sender="system",
+                title="Training Complete",
+                details="Project is trained and deployed")
             project_obj.has_configured = True
             project_obj.save()
             break

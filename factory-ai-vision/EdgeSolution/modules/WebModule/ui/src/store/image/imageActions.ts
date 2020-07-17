@@ -69,7 +69,18 @@ export const postLabelImage = (newImage: LabelImage | FormData) => (dispatch): P
     data: newImage,
   })
     .then(({ data }) => {
-      dispatch(postLabelImageSuccess(data));
+      const newLabelImage: LabelImage = {
+        id: data.id,
+        image: data.image,
+        labels: data.labels,
+        part: {
+          id: data.part,
+          name: '',
+        },
+        is_relabel: data.is_relabel,
+        confidence: data.confidence,
+      };
+      dispatch(postLabelImageSuccess(newLabelImage));
       return void 0;
     })
     .catch((err) => {

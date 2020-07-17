@@ -32,7 +32,7 @@ from vision_on_edge.images.api import views as image_views
 from vision_on_edge.locations.api import views as location_views
 from vision_on_edge.relabeling.api import views as relabel_views
 from vision_on_edge.streams.api import views as stream_views
-
+from vision_on_edge.notifications.api import views as notifications_views
 from . import views as site_views
 
 
@@ -55,6 +55,8 @@ router.register('image_predictions',
 router.register('projects', azure_training_views.ProjectViewSet)
 router.register('train', azure_training_views.TrainViewSet)
 router.register('tasks', azure_training_views.TaskViewSet)
+router.register('images', image_views.ImageViewSet)
+router.register('notifications', notifications_views.NotificationViewSet)
 router.register('images', image_views.ImageViewSet)
 
 urlpatterns = \
