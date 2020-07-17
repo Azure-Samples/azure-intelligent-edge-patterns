@@ -7,6 +7,7 @@ from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 from configs.app_insight import APP_INSIGHT_CONN_STR
 
+
 def get_app_insight_logger():
     app_insight_logger = logging.getLogger("Backend-Training-App-Insight")
     app_insight_logger.handlers = []
