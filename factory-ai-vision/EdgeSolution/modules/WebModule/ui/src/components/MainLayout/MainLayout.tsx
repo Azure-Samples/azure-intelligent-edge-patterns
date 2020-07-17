@@ -53,6 +53,7 @@ export const MainLayout: FC = ({ children }) => {
         {children}
         <div
           style={{
+            display: notificationOpen ? '' : 'none',
             height: '100%',
             width: '320px',
             position: 'absolute',
@@ -61,7 +62,7 @@ export const MainLayout: FC = ({ children }) => {
             zIndex: 3,
           }}
         >
-          <NotificationPanel isOpen={notificationOpen} onDismiss={(): void => setNotificationOpen(false)} />
+          <NotificationPanel onDismiss={(): void => setNotificationOpen(false)} />
         </div>
       </Segment>
     </Grid>
