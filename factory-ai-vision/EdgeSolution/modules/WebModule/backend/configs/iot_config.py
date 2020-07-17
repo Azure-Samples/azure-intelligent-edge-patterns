@@ -1,7 +1,6 @@
-"""
-Azure IOT Settings
+"""Azure IOT Settings
 
-Get custom vision related config from
+Get custom vision related config from following order
 1. Environment variables
 2. config.py
 """

@@ -1,5 +1,6 @@
-"""
-Project Views
+"""Project Static Views.
+
+This view host static file generate from WebModule/ui
 """
 import logging
 import os
@@ -10,14 +11,10 @@ from django.views.generic import View
 
 
 class UIAppView(View):
-    """
-    Project UI View
-    """
+    """Project Static UI View"""
 
     def get(self, request):
-        """
-        get index
-        """
+        """get"""
         try:
             with open(os.path.join(settings.UI_DIR, 'index.html')) as f:
                 return HttpResponse(f.read())
