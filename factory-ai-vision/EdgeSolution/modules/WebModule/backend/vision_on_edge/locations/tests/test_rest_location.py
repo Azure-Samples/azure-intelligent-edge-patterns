@@ -8,8 +8,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
+from vision_on_edge.general.tests.test_special_strings import special_strings
+
 from ..models import Location
-from .test_special_strings import special_strings
 
 logger = logging.getLogger(__name__)
 

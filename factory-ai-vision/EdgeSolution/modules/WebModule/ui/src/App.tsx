@@ -6,8 +6,12 @@ import { RootRouter } from './routes/RootRouter';
 import { MainLayout } from './components/MainLayout';
 import { mainTheme } from './themes/mainTheme';
 import TelemetryProvider from './components/TelemetryProvider';
+import { useWebSocket } from './hooks/useWebSocket';
 
 const App: FC = (): JSX.Element => {
+  // Listen for the notification boardcast.
+  useWebSocket();
+
   const [appInsightInfo, setAppInsightInfo] = useState({
     key: '',
     isAppInsightOn: false,

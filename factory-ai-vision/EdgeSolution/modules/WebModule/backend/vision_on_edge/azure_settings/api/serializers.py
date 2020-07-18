@@ -16,19 +16,7 @@ class SettingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Setting
-        fields = [
-            "id",
-            "name",
-            "training_key",
-            "endpoint",
-            "is_trainer_valid",
-            "iot_hub_connection_string",
-            "device_id",
-            "module_id",
-            "is_collect_data",
-            "obj_detection_domain_id",
-            "app_insight_has_init",
-        ]
+        fields = "__all__"
 
     def create(self, validated_data):
         obj, _ = Setting.objects.get_or_create(

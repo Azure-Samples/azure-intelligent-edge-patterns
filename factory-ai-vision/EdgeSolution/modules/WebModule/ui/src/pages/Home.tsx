@@ -44,6 +44,12 @@ const Home: FC = () => {
           label="Identify items manually"
           width="6.25em"
         />
+        <ImageLink
+          imgSrc="/icons/pretrained-model-filled.png"
+          to="/pretrainDetection/"
+          label="Demo Model"
+          width="6.25em"
+        />
       </Flex>
     </Flex>
   );

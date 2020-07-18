@@ -11,8 +11,9 @@ from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
+from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_settings.models import Setting
-from vision_on_edge.cameras.models import Camera, Part
+from vision_on_edge.cameras.models import Camera
 from vision_on_edge.locations.models import Location
 
 from ..models import Project

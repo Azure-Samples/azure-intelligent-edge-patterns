@@ -20,14 +20,18 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework import routers
 
-from vision_on_edge.azure_settings.api import views as setting_views
+from vision_on_edge.azure_parts.api import views as azure_part_views
+from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training.api import views as azure_training_views
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views
 from vision_on_edge.image_predictions.api import \
     views as image_prediction_views
+from vision_on_edge.images.api import views as image_views
 from vision_on_edge.locations.api import views as location_views
-
+from vision_on_edge.relabeling.api import views as relabel_views
+from vision_on_edge.streams.api import views as stream_views
+from vision_on_edge.notifications.api import views as notifications_views
 from . import views as site_views
 
 
@@ -41,34 +45,36 @@ class OptionalSlashRouter(routers.DefaultRouter):
 
 #router = ters.DefaultRouter(trailing_slash=False)
 router = OptionalSlashRouter()
-router.register('settings', setting_views.SettingViewSet)
+router.register('settings', azure_setting_views.SettingViewSet)
 router.register('cameras', views.CameraViewSet)
-router.register('parts', views.PartViewSet)
-router.register('images', views.ImageViewSet)
+router.register('parts', azure_part_views.PartViewSet)
 router.register('locations', location_views.LocationViewSet)
-router.register('annotations', views.AnnotationViewSet)
 router.register('image_predictions',
                 image_prediction_views.ImagePredictionViewSet)
 router.register('projects', azure_training_views.ProjectViewSet)
 router.register('train', azure_training_views.TrainViewSet)
 router.register('tasks', azure_training_views.TaskViewSet)
+router.register('images', image_views.ImageViewSet)
+router.register('notifications', notifications_views.NotificationViewSet)
+router.register('images', image_views.ImageViewSet)
 
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.ICON_URL, document_root=settings.ICON_ROOT) + \
     [
         url('^api/', include(router.urls)),
-        url('api/streams/connect', views.connect_stream),
-        path('api/streams/<int:stream_id>/disconnect', views.disconnect_stream),
-        path('api/streams/<int:stream_id>/video_feed', views.video_feed),
-        path('api/streams/<int:stream_id>/capture', views.capture),
+        url('api/streams/connect', stream_views.connect_stream),
+        path('api/streams/<int:stream_id>/disconnect',
+             stream_views.disconnect_stream),
+        path('api/streams/<int:stream_id>/video_feed', stream_views.video_feed),
+        path('api/streams/<int:stream_id>/capture', stream_views.capture),
         path('api/projects/<int:project_id>/train', azure_training_views.train),
         path('api/projects/<int:project_id>/export',
              azure_training_views.export),
         path('api/projects/<int:project_id>/train_performance',
              azure_training_views.train_performance),
         path('api/projects/<int:project_id>/inference_video_feed',
-             views.inference_video_feed),
+             stream_views.inference_video_feed),
         path('api/projects/<int:project_id>/pull_cv_project',
              azure_training_views.pull_cv_project),
         path('api/projects/<int:project_id>/update_prob_threshold',
@@ -78,8 +84,8 @@ urlpatterns = \
         path('api/projects/<int:project_id>/reset_camera',
              azure_training_views.project_reset_camera),
         path('api/projects/null/export', azure_training_views.export_null),
-        path('api/relabel', views.upload_relabel_image),
-        path('api/relabel/update', views.relabel_update),
+        path('api/relabel', relabel_views.upload_relabel_image),
+        path('api/relabel/update', relabel_views.relabel_update),
         path('api/appinsight/key', views.instrumentation_key),
         path('api/camera_utils/verify_rtsp',
              camera_util_views.verify_rtsp),

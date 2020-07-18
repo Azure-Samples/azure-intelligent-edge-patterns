@@ -25,8 +25,11 @@ from rest_framework.response import Response
 
 from configs.settings import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 
-from ...cameras.models import Camera, Image, Part
+from ...azure_parts.models import Part
+from ...cameras.models import Camera
 from ...general import error_messages
+from ...images.models import Image
+from ...notifications.models import Notification
 from ..models import Project, Task, Train
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
@@ -126,117 +129,6 @@ class TrainViewSet(viewsets.ModelViewSet):
 
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
-
-
-def update_train_status(project_id):
-    """
-    This function not only update status, but also send request to inference
-    model
-    """
-
-    def _train_status_worker(project_id):
-        project_obj = Project.objects.get(pk=project_id)
-        trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-        camera_id = project_obj.camera_id
-        customvision_project_id = project_obj.customvision_project_id
-        camera = Camera.objects.get(pk=camera_id)
-        wait_prepare = 0
-        # If exceed, this project probably not going to be trained
-        max_wait_prepare = 60
-        while True:
-            time.sleep(1)
-
-            iterations = trainer.get_iterations(customvision_project_id)
-            if len(iterations) == 0:
-                project_obj.upcreate_training_status(
-                    status="preparing",
-                    log="Status : preparing custom vision environment",
-                )
-                wait_prepare += 1
-                if wait_prepare > max_wait_prepare:
-                    break
-                continue
-
-            iteration = iterations[0]
-            if not iteration.exportable or iteration.status != "Completed":
-                project_obj.upcreate_training_status(
-                    status="training",
-                    log=
-                    "Status : training (Training job might take up to 10-15 minutes)",
-                )
-
-                continue
-
-            exports = trainer.get_exports(customvision_project_id,
-                                          iteration.id)
-            if len(exports) == 0 or not exports[0].download_uri:
-                project_obj.upcreate_training_status(
-                    status="exporting", log="Status : exporting model")
-                res = project_obj.export_iterationv3_2(iteration.id)
-                logger.info(res.json())
-                continue
-
-            project_obj.download_uri = exports[0].download_uri
-            project_obj.save(update_fields=["download_uri"])
-            parts = [p.name for p in project_obj.parts.all()]
-
-            logger.info("Successfulling export model: %s",
-                        project_obj.download_uri)
-            logger.info("Preparing to deploy to inference")
-            logger.info("Project is deployed before: %s", project_obj.deployed)
-            if not project_obj.deployed:
-                if exports[0].download_uri:
-                    # update_twin(iteration.id,
-                    # exports[0].download_uri,
-                    # camera.rtsp)
-
-                    def _send(download_uri, rtsp, parts):
-                        requests.get(
-                            "http://" + inference_module_url() + "/update_cam",
-                            params={
-                                "cam_type": "rtsp",
-                                "cam_source": rtsp
-                            },
-                        )
-                        requests.get(
-                            "http://" + inference_module_url() +
-                            "/update_model",
-                            params={"model_uri": download_uri},
-                        )
-                        requests.get(
-                            "http://" + inference_module_url() +
-                            "/update_parts",
-                            params={"parts": parts},
-                        )
-
-                    threading.Thread(target=_send,
-                                     args=(exports[0].download_uri,
-                                           camera.rtsp, parts)).start()
-
-                    project_obj.deployed = True
-                    project_obj.save(
-                        update_fields=["download_uri", "deployed"])
-
-                project_obj.upcreate_training_status(
-                    status="deploying", log="Status : deploying model")
-                continue
-
-            logger.info("Training Status: Completed")
-            train_performance_list = []
-            for iteration in iterations[:2]:
-                train_performance_list.append(
-                    trainer.get_iteration_performance(customvision_project_id,
-                                                      iteration.id).as_dict())
-
-            logger.info("Training Performance: %s", train_performance_list)
-            project_obj.upcreate_training_status(
-                status="ok",
-                log="Status : model training completed",
-                performance=json.dumps(train_performance_list),
-            )
-            break
-
-    threading.Thread(target=_train_status_worker, args=(project_id,)).start()
 
 
 @api_view()
@@ -395,7 +287,94 @@ def train_performance(request, project_id):
     return JsonResponse(ret)
 
 
-def _train(project_id):
+@api_view()
+def train(request, project_id):
+    """
+    Train a project
+    """
+    is_demo = request.query_params.get("demo")
+    project_obj = Project.objects.get(pk=project_id)
+    parts = [p.name for p in project_obj.parts.all()]
+    rtsp = project_obj.camera.rtsp
+    download_uri = project_obj.download_uri
+
+    if is_demo and (is_demo.lower() == "true") or project_obj.is_demo:
+        logger.info("demo... bypass training process")
+
+        cam_is_demo = project_obj.camera.is_demo
+        # Camera FIXME peter, check here
+        if cam_is_demo:
+            rtsp = project_obj.camera.rtsp
+            requests.get(
+                "http://" + inference_module_url() + "/update_cam",
+                params={
+                    "cam_type": "rtsp",
+                    "cam_source": rtsp
+                },
+            )
+        else:
+            rtsp = project_obj.camera.rtsp
+            requests.get(
+                "http://" + inference_module_url() + "/update_cam",
+                params={
+                    "cam_type": "rtsp",
+                    "cam_source": rtsp
+                },
+            )
+
+        requests.get(
+            "http://" + inference_module_url() + "/update_model",
+            params={"model_dir": "default_model"},
+        )
+        # '/update_model', params={'model_dir': 'default_model_6parts'})
+
+        logger.info("Update parts %s", parts)
+        requests.get(
+            "http://" + inference_module_url() + "/update_parts",
+            params={"parts": parts},
+        )
+        requests.get(
+            "http://" + inference_module_url() + "/update_retrain_parameters",
+            params={
+                "confidence_min": 30,
+                "confidence_max": 30,
+                "max_images": 10
+            },
+        )
+
+        project_obj.upcreate_training_status(status="ok", log="demo ok")
+        project_obj.has_configured = True
+        project_obj.save()
+        # FIXME pass the new model info to inference server (willy implement)
+        return JsonResponse({"status": "ok"})
+
+    project_obj.upcreate_training_status(
+        status="preparing", log="preparing data (images and annotations)")
+    logger.info("sleeping")
+
+    def _send(rtsp, parts, download_uri):
+        logger.info("**** updating cam to %s", rtsp)
+        requests.get(
+            "http://" + inference_module_url() + "/update_cam",
+            params={
+                "cam_type": "rtsp",
+                "cam_source": rtsp
+            },
+        )
+        requests.get(
+            "http://" + inference_module_url() + "/update_model",
+            params={"model_uri": download_uri},
+        )
+        requests.get(
+            "http://" + inference_module_url() + "/update_parts",
+            params={"parts": parts},
+        )
+
+    threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
+    return upload_and_train(project_id)
+
+
+def upload_and_train(project_id):
     """Actually do uplaod, train and deploy"""
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
@@ -414,7 +393,7 @@ def _train(project_id):
         )
 
     project_obj.upcreate_training_status(
-        status="Status: preparing data (images and annotations)", log="")
+        status="preparing", log="preparing data (images and annotations)")
 
     project_obj.dequeue_iterations()
 
@@ -434,15 +413,14 @@ def _train(project_id):
             trainer.get_project(customvision_project_id)
             project_obj.upcreate_training_status(
                 status="preparing",
-                log=(
-                    f"Status : Project {project_obj.customvision_project_name}"
-                    + "found on Custom Vision"),
+                log=(f"Project {project_obj.customvision_project_name}" +
+                     "found on Custom Vision"),
             )
         except:
             project_obj.create_project()
             project_obj.upcreate_training_status(
                 status="preparing",
-                log=("Status : Project created on CustomVision. " +
+                log=("Project created on CustomVision. " +
                      f"Name: {project_obj.customvision_project_name}"),
             )
 
@@ -453,8 +431,7 @@ def _train(project_id):
             customvision_project_id = project_obj.customvision_project_id
 
         project_obj.upcreate_training_status(
-            status="sending",
-            log="Status : sending data (images and annotations)")
+            status="sending", log="sending data (images and annotations)")
         tags = trainer.get_tags(customvision_project_id)
         tag_dict = {}
         project_partnames = {}
@@ -574,11 +551,12 @@ def _train(project_id):
         # Submit training task to Custom Vision
         if not project_changed:
             project_obj.upcreate_training_status(
-                status="ok", log="Status: Nothing changed. Not training")
+                status="deploying",
+                log="No new parts or new images to train. Deploying")
         else:
             project_obj.upcreate_training_status(
                 status="training",
-                log="Status: Project changed. Submitting training task...")
+                log="Project changed. Submitting training task...")
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
                 project_obj.update_app_insight_counter(
@@ -624,98 +602,130 @@ def _train(project_id):
         # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception("Exception: %s", err_msg)
-        project_obj.upcreate_training_status(
-            status="failed", log=f"Status : failed {str(err_msg)}")
+        project_obj.upcreate_training_status(status="failed",
+                                             log=f"failed {str(err_msg)}")
         return JsonResponse({
             "status": "failed",
-            "log": f"Status : failed {str(err_msg)}"
+            "log": f"failed {str(err_msg)}"
         })
 
 
-@api_view()
-def train(request, project_id):
+def update_train_status(project_id):
     """
-    Train a project
+    This function not only update status, but also send request to inference
+    model
     """
-    is_demo = request.query_params.get("demo")
-    project_obj = Project.objects.get(pk=project_id)
-    parts = [p.name for p in project_obj.parts.all()]
-    rtsp = project_obj.camera.rtsp
-    download_uri = project_obj.download_uri
 
-    if is_demo and (is_demo.lower() == "true") or project_obj.is_demo:
-        logger.info("demo... bypass training process")
+    def _train_status_worker(project_id):
+        project_obj = Project.objects.get(pk=project_id)
+        trainer = project_obj.setting.revalidate_and_get_trainer_obj()
+        camera_id = project_obj.camera_id
+        customvision_project_id = project_obj.customvision_project_id
+        camera = Camera.objects.get(pk=camera_id)
+        wait_prepare = 0
+        # If exceed, this project probably not going to be trained
+        max_wait_prepare = 60
+        while True:
+            time.sleep(1)
 
-        cam_is_demo = project_obj.camera.is_demo
-        # Camera FIXME peter, check here
-        if cam_is_demo:
-            rtsp = project_obj.camera.rtsp
-            requests.get(
-                "http://" + inference_module_url() + "/update_cam",
-                params={
-                    "cam_type": "rtsp",
-                    "cam_source": rtsp
-                },
+            iterations = trainer.get_iterations(customvision_project_id)
+            if len(iterations) == 0:
+                project_obj.upcreate_training_status(
+                    status="preparing",
+                    log="preparing custom vision environment",
+                )
+                wait_prepare += 1
+                if wait_prepare > max_wait_prepare:
+                    break
+                continue
+
+            iteration = iterations[0]
+            if not iteration.exportable or iteration.status != "Completed":
+                project_obj.upcreate_training_status(
+                    status="training",
+                    log=
+                    "training (Training job might take up to 10-15 minutes)",
+                )
+
+                continue
+
+            exports = trainer.get_exports(customvision_project_id,
+                                          iteration.id)
+            if len(exports) == 0 or not exports[0].download_uri:
+                project_obj.upcreate_training_status(status="exporting",
+                                                     log="exporting model")
+                res = project_obj.export_iterationv3_2(iteration.id)
+                logger.info(res.json())
+                continue
+
+            project_obj.download_uri = exports[0].download_uri
+            project_obj.save(update_fields=["download_uri"])
+            parts = [p.name for p in project_obj.parts.all()]
+
+            logger.info("Successfulling export model: %s",
+                        project_obj.download_uri)
+            logger.info("Preparing to deploy to inference")
+            logger.info("Project is deployed before: %s", project_obj.deployed)
+            if not project_obj.deployed:
+                if exports[0].download_uri:
+                    # update_twin(iteration.id,
+                    # exports[0].download_uri,
+                    # camera.rtsp)
+
+                    def _send(download_uri, rtsp, parts):
+                        requests.get(
+                            "http://" + inference_module_url() + "/update_cam",
+                            params={
+                                "cam_type": "rtsp",
+                                "cam_source": rtsp
+                            },
+                        )
+                        requests.get(
+                            "http://" + inference_module_url() +
+                            "/update_model",
+                            params={"model_uri": download_uri},
+                        )
+                        requests.get(
+                            "http://" + inference_module_url() +
+                            "/update_parts",
+                            params={"parts": parts},
+                        )
+
+                    threading.Thread(target=_send,
+                                     args=(exports[0].download_uri,
+                                           camera.rtsp, parts)).start()
+
+                    project_obj.deployed = True
+                    project_obj.save(
+                        update_fields=["download_uri", "deployed"])
+
+                project_obj.upcreate_training_status(status="deploying",
+                                                     log="deploying model")
+                continue
+
+            logger.info("Training Status: Completed")
+            train_performance_list = []
+            for iteration in iterations[:2]:
+                train_performance_list.append(
+                    trainer.get_iteration_performance(customvision_project_id,
+                                                      iteration.id).as_dict())
+
+            logger.info("Training Performance: %s", train_performance_list)
+            project_obj.upcreate_training_status(
+                status="ok",
+                log="model training completed",
+                performance=json.dumps(train_performance_list),
             )
-        else:
-            rtsp = project_obj.camera.rtsp
-            requests.get(
-                "http://" + inference_module_url() + "/update_cam",
-                params={
-                    "cam_type": "rtsp",
-                    "cam_source": rtsp
-                },
-            )
+            Notification.objects.create(
+                notification_type="project",
+                sender="system",
+                title="Training Complete",
+                details="Project is trained and deployed")
+            project_obj.has_configured = True
+            project_obj.save()
+            break
 
-        requests.get(
-            "http://" + inference_module_url() + "/update_model",
-            params={"model_dir": "default_model"},
-        )
-        # '/update_model', params={'model_dir': 'default_model_6parts'})
-
-        logger.info("Update parts %s", parts)
-        requests.get(
-            "http://" + inference_module_url() + "/update_parts",
-            params={"parts": parts},
-        )
-        requests.get(
-            "http://" + inference_module_url() + "/update_retrain_parameters",
-            params={
-                "confidence_min": 30,
-                "confidence_max": 30,
-                "max_images": 10
-            },
-        )
-
-        project_obj.upcreate_training_status(status="ok",
-                                             log="Status : demo ok")
-        # FIXME pass the new model info to inference server (willy implement)
-        return JsonResponse({"status": "ok"})
-
-    project_obj.upcreate_training_status(
-        status="Status: preparing data (images and annotations)", log="")
-    logger.info("sleeping")
-
-    def _send(rtsp, parts, download_uri):
-        logger.info("**** updating cam to %s", rtsp)
-        requests.get(
-            "http://" + inference_module_url() + "/update_cam",
-            params={
-                "cam_type": "rtsp",
-                "cam_source": rtsp
-            },
-        )
-        requests.get(
-            "http://" + inference_module_url() + "/update_model",
-            params={"model_uri": download_uri},
-        )
-        requests.get(
-            "http://" + inference_module_url() + "/update_parts",
-            params={"parts": parts},
-        )
-
-    threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
-    return _train(project_id)
+    threading.Thread(target=_train_status_worker, args=(project_id,)).start()
 
 
 # FIXME will need to find a better way to deal with this
@@ -831,7 +841,11 @@ def pull_cv_project(request, project_id):
                         take=1)[0]
                     image_uri = img.original_image_uri
                     img_obj, created = Image.objects.update_or_create(
-                        part=part_obj, remote_url=image_uri, uploaded=True)
+                        part=part_obj,
+                        remote_url=image_uri,
+                        customvision_id=img.id,
+                        project=project_obj,
+                        uploaded=True)
                     logger.info("loading from remote url: %s",
                                 img_obj.remote_url)
                     img_obj.get_remote_image()
@@ -887,7 +901,10 @@ def pull_cv_project(request, project_id):
                     part_obj = Part.objects.filter(name=region.tag_name,
                                                    is_demo=False)[0]
                     img_obj, created = Image.objects.update_or_create(
-                        part=part_obj, remote_url=img.original_image_uri)
+                        part=part_obj,
+                        remote_url=img.original_image_uri,
+                        project=project_obj,
+                        customvision_id=img.id)
                     if created:
                         logger.info("Downloading img %s", img.id)
                         img_obj.get_remote_image()
@@ -928,7 +945,7 @@ def pull_cv_project(request, project_id):
         logger.exception("Exception: %s", err_msg)
         return JsonResponse({
             "status": "failed",
-            "log": f"Status : failed {str(err_msg)}"
+            "log": f"failed {str(err_msg)}"
         })
     finally:
         project_obj.save(update_fields=update_fields)

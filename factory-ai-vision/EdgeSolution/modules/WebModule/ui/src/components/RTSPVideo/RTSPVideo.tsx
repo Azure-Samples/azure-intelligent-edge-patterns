@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Image, Tooltip, Flex, RadioGroup } from '@fluentui/react-northstar';
 
-import { thunkAddCapturedImages } from '../../store/part/partActions';
-import { RTSPVideoProps } from './RTSPVideo.type';
+import { RTSPVideoProps, CaptureLabelMode } from './RTSPVideo.type';
 
 export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   rtsp = null,
-  partId,
-  partName,
+  partId = null,
   canCapture,
-  onVideoStart,
-  onVideoPause,
-  setOpenLabelingPage,
+  onCapturePhoto,
+  autoPlay,
 }) => {
-  const dispatch = useDispatch();
   const [streamId, setStreamId] = useState<string>('');
-  const [captureLabelMode, setCaptureLabelMode] = useState<number>(0);
+  const [captureLabelMode, setCaptureLabelMode] = useState<CaptureLabelMode>(CaptureLabelMode.PerImage);
 
-  const onCreateStream = (): void => {
-    let url = `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
-    if (!canCapture) url += '&inference=1';
+  const onCreateStream = useCallback((): void => {
+    const url =
+      partId === null
+        ? `/api/streams/connect/?rtsp=${rtsp}`
+        : `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
@@ -32,15 +29,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
       .catch((err) => {
         console.error(err);
       });
-    if (onVideoStart) onVideoStart();
-  };
-
-  const onCapturePhoto = (): void => {
-    dispatch(thunkAddCapturedImages(streamId, partName));
-    if (captureLabelMode === 0) {
-      setOpenLabelingPage(true);
-    }
-  };
+  }, [partId, rtsp]);
 
   const onDisconnect = (): void => {
     setStreamId('');
@@ -53,7 +42,6 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
       .catch((err) => {
         console.error(err);
       });
-    if (onVideoPause) onVideoPause();
   };
 
   useEffect(() => {
@@ -63,11 +51,15 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
     };
   });
 
+  useEffect(() => {
+    if (autoPlay) onCreateStream();
+  }, [autoPlay, onCreateStream]);
+
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
   return (
-    <>
-      <div style={{ width: '100%', height: '30rem', backgroundColor: 'black' }}>
+    <Flex gap="gap.small" styles={{ width: '100%', height: '100%' }} column>
+      <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
         {src ? <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
       </div>
       <Flex column hAlign="center" gap="gap.small">
@@ -83,31 +75,33 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
               name="Capture"
               src="/icons/screenshot.png"
               disabled={!streamId}
-              onClick={onCapturePhoto}
+              onClick={(): void => onCapturePhoto(streamId, captureLabelMode)}
             />
           )}
           <ImageBtn name="Stop" src="/icons/stop.png" disabled={!streamId} onClick={onDisconnect} />
         </Flex>
-        <RadioGroup
-          checkedValue={captureLabelMode}
-          onCheckedValueChange={(_, newProps): void => {
-            setCaptureLabelMode(newProps.value as number);
-          }}
-          items={[
-            {
-              key: '0',
-              label: 'Capture image and label per image',
-              value: 0,
-            },
-            {
-              key: '1',
-              label: 'Capture image and label all later',
-              value: 1,
-            },
-          ]}
-        />
+        {canCapture && (
+          <RadioGroup
+            checkedValue={captureLabelMode}
+            onCheckedValueChange={(_, newProps): void => {
+              setCaptureLabelMode(newProps.value as number);
+            }}
+            items={[
+              {
+                key: '0',
+                label: 'Capture image and label per image',
+                value: CaptureLabelMode.PerImage,
+              },
+              {
+                key: '1',
+                label: 'Capture image and label all later',
+                value: CaptureLabelMode.AllLater,
+              },
+            ]}
+          />
+        )}
       </Flex>
-    </>
+    </Flex>
   );
 };
 

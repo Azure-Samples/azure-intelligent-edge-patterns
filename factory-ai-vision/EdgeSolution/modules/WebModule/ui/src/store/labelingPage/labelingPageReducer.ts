@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import {
   AnnotationState,
   UPDATE_ANNOTATION,
@@ -15,7 +16,7 @@ const labelingPageStateReducer = (
   state = initialState.labelingPageState,
   action: AnnotationAction,
 ): LabelingPageState => {
-  const newState = state;
+  const newState = R.clone(state);
   switch (action.type) {
     case REQUEST_ANNOTATION_SUCCESS:
       newState.annotations = action.payload.annotations;
