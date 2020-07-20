@@ -19,7 +19,7 @@ const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
 
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
-      <Flex column gap="gap.large" hAlign="center">
+      <Flex column gap="gap.large" hAlign="center" styles={{ height: '100%' }}>
         <NavItem disabled={disabled} src="/icons/location.png" to="/locations"></NavItem>
         <NavItem
           disabled={disabled}
@@ -34,6 +34,7 @@ const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
             <Box
               styles={mergeStyles(itemStyles(disabled), {
                 ':hover': { cursor: 'pointer' },
+                marginTop: 'auto',
               })()}
               onClick={(e: MouseEvent): void => {
                 if (disabled) e.preventDefault();
