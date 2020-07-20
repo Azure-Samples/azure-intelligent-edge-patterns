@@ -53,6 +53,10 @@ def parse_bbox(prediction, width, height):
     y1 = int(prediction['boundingBox']['top'] * height)
     x2 = x1 + int(prediction['boundingBox']['width'] * width)
     y2 = y1 + int(prediction['boundingBox']['height'] * height)
+    x1 = min(max(x1, 0), width-1)
+    x2 = min(max(x2, 0), width-1)
+    y1 = min(max(y1, 0), height-1)
+    y2 = min(max(y2, 0), height-1)
     return (x1, y1), (x2, y2)
 
 
