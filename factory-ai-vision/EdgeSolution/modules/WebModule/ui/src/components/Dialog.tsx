@@ -11,13 +11,13 @@ const isButtonProps = (obj: ShorthandValue<ButtonProps>): obj is ButtonProps =>
 export const Dialog: React.FC<DialogProps> = (props) => {
   const confirmButton: ShorthandValue<ButtonProps> = useMemo(() => {
     if (typeof props.confirmButton === 'string') return { primary: true, content: props.confirmButton };
-    if (isButtonProps(props.confirmButton)) return { ...props.confirmButton, primary: true };
+    if (isButtonProps(props.confirmButton)) return { primary: true, ...props.confirmButton };
     return props.confirmButton;
   }, [props.confirmButton]);
 
   const cancelButton: ShorthandValue<ButtonProps> = useMemo(() => {
     if (typeof props.cancelButton === 'string') return { primary: false, content: props.cancelButton };
-    if (isButtonProps(props.cancelButton)) return { ...props.cancelButton, primary: false };
+    if (isButtonProps(props.cancelButton)) return { primary: false, ...props.cancelButton };
     return props.cancelButton;
   }, [props.cancelButton]);
 
