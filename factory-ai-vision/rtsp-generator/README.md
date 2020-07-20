@@ -20,6 +20,9 @@ sudo apt-get install python3-opencv
 
 ```sh
 Download gst-rtsp.py to current folder
+
+Modify Line 14 for your own video or url 
+> - self.cap = cv2.VideoCapture("your own video file or url ")
 python3 gst-rtsp.py
 ```
 
