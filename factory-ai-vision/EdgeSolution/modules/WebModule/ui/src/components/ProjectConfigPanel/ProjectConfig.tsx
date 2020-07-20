@@ -148,11 +148,15 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
           <ModuleSelector
             moduleName="model"
             setSelectedModuleItem={() => {}}
+            value={{
+              id: 0,
+              name: 'yolov3_PascalVoc',
+            }}
             items={[
               {
                 header: `yolov3_PascalVoc`,
                 content: {
-                  key: 'demo1',
+                  key: 0,
                 },
               },
             ]}

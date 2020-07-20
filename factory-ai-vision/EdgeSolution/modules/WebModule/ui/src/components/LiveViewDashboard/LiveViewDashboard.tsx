@@ -62,7 +62,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
   );
 
   const onDeleteProject = (): void => {
-    dispatch(thunkDeleteProject);
+    dispatch(thunkDeleteProject(isDemo));
   };
 
   // FIXME Integrate this with Redux
