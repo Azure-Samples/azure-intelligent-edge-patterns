@@ -22,6 +22,9 @@ DETECTION_TYPE_SUCCESS = 'success'
 DETECTION_TYPE_UNIDENTIFIED = 'unidentified'
 DETECTION_BUFFER_SIZE = 10000
 
+IMG_WIDTH=960
+IMG_HEIGHT=540
+
 def is_edge():
     try:
         IoTHubModuleClient.create_from_edge_environment()
@@ -53,6 +56,10 @@ def parse_bbox(prediction, width, height):
     y1 = int(prediction['boundingBox']['top'] * height)
     x2 = x1 + int(prediction['boundingBox']['width'] * width)
     y2 = y1 + int(prediction['boundingBox']['height'] * height)
+    x1 = min(max(x1, 0), width-1)
+    x2 = min(max(x2, 0), width-1)
+    y1 = min(max(y1, 0), height-1)
+    y2 = min(max(y2, 0), height-1)
     return (x1, y1), (x2, y2)
 
 
@@ -60,15 +67,15 @@ def draw_confidence_level(img, prediction):
     height, width = img.shape[0], img.shape[1]
 
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 1
-    thickness = 3
+    font_scale = 0.7
+    thickness = 2
 
     prob_str = str(int(prediction['probability']*1000)/10)
     prob_str = ' (' + prob_str + '%)'
 
     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
-    img = cv2.putText(img, prediction['tagName']+prob_str, (x1+10, y1+30), font, font_scale, (0, 0, 255), thickness)
+    img = cv2.putText(img, prediction['tagName']+prob_str, (x1+10, y1+20), font, font_scale, (20, 20, 255), thickness)
 
     return img
 
@@ -77,6 +84,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
     def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    #def __init__(self, model_dir, cam_type="video_file", cam_source="./mov_bbb.mp4"):
     #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
         #def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
         # Default system params
@@ -236,6 +244,18 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             while True:
                 self.lock.acquire()
                 b, img = self.cam.read()
+
+                if b:
+                    width = IMG_WIDTH
+                    ratio = IMG_WIDTH / img.shape[1]
+                    height = int(img.shape[0] * ratio + 0.000001)
+                    if height >= IMG_HEIGHT:
+                        height = IMG_HEIGHT
+                        ratio = IMG_HEIGHT / img.shape[0]
+                        width = int(img.shape[1] * ratio + 0.000001)
+
+                    img = cv2.resize(img, (width, height))
+
                 self.lock.release()
 
                 # if b is false, restart the video if the type is video
@@ -261,6 +281,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                     y1 = int(prediction['boundingBox']['top'] * height)
                                     x2 = x1 + int(prediction['boundingBox']['width'] * width)
                                     y2 = y1 + int(prediction['boundingBox']['height'] * height)
+                                    x1 = min(max(x1, 0), width-1)
+                                    x2 = min(max(x2, 0), width-1)
+                                    y1 = min(max(y1, 0), height-1)
+                                    y2 = min(max(y2, 0), height-1)
                                     if self.has_aoi:
                                         if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info): continue
 
@@ -295,14 +319,15 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                 if self.confidence_min <= prediction['probability'] <= self.confidence_max:
                                     if self.is_upload_image:
                                         #if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
-                                        if tag in onnx.current_uploaded_images:
+                                        #if tag in onnx.current_uploaded_images:
                                             # No limit for the max_images in inference module now, the logic is moved to webmodule
-                                            pass
-                                        else:
+                                        #    pass
+                                        #else:
+                                        if True:
 
                                             labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
                                             print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images.get(tag, 0), labels)
-                                            self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
+                                            #self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
                                             self.last_upload_time = time.time()
 
                                             jpg = cv2.imencode('.jpg', img)[1].tobytes()

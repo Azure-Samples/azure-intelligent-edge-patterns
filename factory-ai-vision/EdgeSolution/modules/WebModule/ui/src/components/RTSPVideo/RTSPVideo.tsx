@@ -1,21 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { Image, Tooltip, Flex, RadioGroup } from '@fluentui/react-northstar';
 
-import { thunkAddCapturedImages } from '../../store/part/partActions';
-import { RTSPVideoProps } from './RTSPVideo.type';
+import { RTSPVideoProps, CaptureLabelMode } from './RTSPVideo.type';
 
 export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   rtsp = null,
   partId = null,
-  partName = '',
   canCapture,
-  setOpenLabelingPage,
+  onCapturePhoto,
   autoPlay,
 }) => {
-  const dispatch = useDispatch();
   const [streamId, setStreamId] = useState<string>('');
-  const [captureLabelMode, setCaptureLabelMode] = useState<number>(0);
+  const [captureLabelMode, setCaptureLabelMode] = useState<CaptureLabelMode>(CaptureLabelMode.PerImage);
 
   const onCreateStream = useCallback((): void => {
     const url =
@@ -34,13 +30,6 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
         console.error(err);
       });
   }, [partId, rtsp]);
-
-  const onCapturePhoto = (): void => {
-    dispatch(thunkAddCapturedImages(streamId, partName));
-    if (captureLabelMode === 0) {
-      setOpenLabelingPage(true);
-    }
-  };
 
   const onDisconnect = (): void => {
     setStreamId('');
@@ -86,7 +75,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
               name="Capture"
               src="/icons/screenshot.png"
               disabled={!streamId}
-              onClick={onCapturePhoto}
+              onClick={(): void => onCapturePhoto(streamId, captureLabelMode)}
             />
           )}
           <ImageBtn name="Stop" src="/icons/stop.png" disabled={!streamId} onClick={onDisconnect} />
@@ -101,12 +90,12 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
               {
                 key: '0',
                 label: 'Capture image and label per image',
-                value: 0,
+                value: CaptureLabelMode.PerImage,
               },
               {
                 key: '1',
                 label: 'Capture image and label all later',
-                value: 1,
+                value: CaptureLabelMode.AllLater,
               },
             ]}
           />

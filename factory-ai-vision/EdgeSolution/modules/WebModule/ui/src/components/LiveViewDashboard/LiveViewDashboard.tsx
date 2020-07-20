@@ -7,7 +7,7 @@ import {
   thunkGetTrainingLog,
   thunkGetTrainingMetrics,
   thunkGetInferenceMetrics,
-  changeStatus,
+  thunkDeleteProject,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
@@ -29,56 +29,51 @@ const getAOIData = (cameraArea: string): AOIData => {
   }
 };
 
-export const LiveViewDashboard: React.FC = () => {
+export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
     error,
     trainingLog,
     status,
     trainingMetrics,
     data: { id: projectId, camera: projectCameraId },
-  } = useSelector<State, Project>((state) => state.project);
+  } = useSelector<State, Project>((state) => (isDemo ? state.demoProject : state.project));
   const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
 
-  useEffect(() => {
-    dispatch(thunkGetTrainingLog(projectId));
-  }, [dispatch, projectId]);
   useInterval(
     () => {
-      dispatch(thunkGetTrainingLog(projectId));
+      dispatch(thunkGetTrainingLog(projectId, isDemo));
     },
     status === CameraConfigStatus.WaitTraining ? 5000 : null,
   );
 
   useEffect(() => {
     if (status === CameraConfigStatus.FinishTraining) {
-      dispatch(thunkGetTrainingMetrics(projectId));
+      dispatch(thunkGetTrainingMetrics(projectId, isDemo));
     }
-  }, [dispatch, status, projectId]);
+  }, [dispatch, status, projectId, isDemo]);
 
   useInterval(
     () => {
-      dispatch(thunkGetInferenceMetrics(projectId));
+      dispatch(thunkGetInferenceMetrics(projectId, isDemo));
     },
     status === CameraConfigStatus.StartInference ? 5000 : null,
   );
 
-  useEffect(() => {
-    return (): void => {
-      dispatch(changeStatus(CameraConfigStatus.None));
-    };
-  }, [dispatch]);
+  const onDeleteProject = (): void => {
+    dispatch(thunkDeleteProject(isDemo));
+  };
 
   // FIXME Integrate this with Redux
   const cameras = useSelector<State, Camera[]>((state) => state.cameras);
   const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
 
-  if (!selectedCamera || selectedCamera.is_demo) return null;
+  if (status === CameraConfigStatus.None) return null;
 
   const aoiData = getAOIData(selectedCamera?.area);
 
-  if (status === CameraConfigStatus.WaitTraining || status === CameraConfigStatus.None)
+  if (status === CameraConfigStatus.WaitTraining)
     return (
       <>
         <Loader size="smallest" />
@@ -91,20 +86,29 @@ export const LiveViewDashboard: React.FC = () => {
       <Flex column style={{ height: '100%' }} gap="gap.small">
         {error && <Alert danger header={error.name} content={`${error.message}`} />}
         <div style={{ flexGrow: 2 }}>
-          <LiveViewContainer showVideo={true} initialAOIData={aoiData} cameraId={projectCameraId} />
+          <LiveViewContainer
+            showVideo={true}
+            initialAOIData={aoiData}
+            cameraId={projectCameraId}
+            onDeleteProject={onDeleteProject}
+          />
         </div>
-        <InferenceMetricDashboard />
+        <InferenceMetricDashboard isDemo={isDemo} />
       </Flex>
-      <Flex hAlign="center" column gap="gap.small">
-        <Text weight="bold">Detail of Training Metric</Text>
-        <Button
-          content={showConsequenceDashboard ? 'Hide' : 'Show'}
-          primary
-          onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
-          circular
-        />
-        {showConsequenceDashboard && <ConsequenceDashboard trainingMetrics={trainingMetrics} />}
-      </Flex>
+      {!isDemo && (
+        <>
+          <Flex hAlign="center" column gap="gap.small">
+            <Text weight="bold">Detail of Training Metric</Text>
+            <Button
+              content={showConsequenceDashboard ? 'Hide' : 'Show'}
+              primary
+              onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
+              circular
+            />
+            <ConsequenceDashboard visible={showConsequenceDashboard} trainingMetrics={trainingMetrics} />
+          </Flex>
+        </>
+      )}
     </Flex>
   );
 };

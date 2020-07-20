@@ -40,15 +40,15 @@ function useNotification(targetState: number, checkPeriod: number): boolean {
   return showNotification;
 }
 
-const sectionStyle: React.CSSProperties = {
+const getSectionStyle = (isDemo): React.CSSProperties => ({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
   alignItems: 'center',
   height: '100%',
-  width: '25%',
+  width: isDemo ? '33%' : '25%',
   overflow: 'scroll',
-};
+});
 
 const highLightTextStyles: ComponentSlotStyle = {
   color: 'rgb(244, 152, 40)',
@@ -57,9 +57,9 @@ const highLightTextStyles: ComponentSlotStyle = {
   padding: '5px, 0px',
 };
 
-export const InferenceMetricDashboard: React.FC = () => {
-  const { data: project, isLoading, inferenceMetrics } = useSelector<State, Project>(
-    (state) => state.project,
+export const InferenceMetricDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
+  const { data: project, isLoading, inferenceMetrics } = useSelector<State, Project>((state) =>
+    isDemo ? state.demoProject : state.project,
   );
   const dispatch = useDispatch();
   const successInferenceFooter = useNotification(inferenceMetrics.successfulInferences, 60000);
@@ -67,12 +67,12 @@ export const InferenceMetricDashboard: React.FC = () => {
 
   return (
     <Flex gap="gap.small" styles={{ height: '100px' }}>
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(isDemo)}>
         <Text weight="bold" content="Max Confidence Level" />
         <Input
           value={project.probThreshold}
           onChange={(_, { value }): void => {
-            dispatch(updateProjectData({ probThreshold: value }));
+            dispatch(updateProjectData({ probThreshold: value }, isDemo));
           }}
           icon="%"
         />
@@ -80,7 +80,7 @@ export const InferenceMetricDashboard: React.FC = () => {
           primary
           content="Update"
           onClick={(): void => {
-            dispatch(thunkUpdateProbThreshold());
+            dispatch(thunkUpdateProbThreshold(isDemo));
           }}
           disabled={!project.probThreshold}
           loading={isLoading}
@@ -88,14 +88,14 @@ export const InferenceMetricDashboard: React.FC = () => {
         />
       </section>
       <Divider color="black" vertical />
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(isDemo)}>
         <Text weight="bold" content="Success Rate" />
         <Text styles={highLightTextStyles}>{`${inferenceMetrics.successRate}%`}</Text>
         <Text content={`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated)`} />
         <Text content={`${Math.round(inferenceMetrics.averageTime * 100) / 100}/ms`} />
       </section>
       <Divider color="black" vertical />
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(isDemo)}>
         <Text weight="bold" content="Successful Inferences" />
         <Text styles={highLightTextStyles} content={inferenceMetrics.successfulInferences} />
         <footer>
@@ -104,17 +104,21 @@ export const InferenceMetricDashboard: React.FC = () => {
             : ''}
         </footer>
       </section>
-      <Divider color="black" vertical />
-      <section style={sectionStyle}>
-        <Text weight="bold" content="Unidentified Items" />
-        <Text styles={highLightTextStyles}>{inferenceMetrics.unIdetifiedItems}</Text>
-        <Button content="Identify Manually" primary as={Link} to="/manual" circular />
-        <footer>
-          {unIdentifiedItemFooter
-            ? 'If you are not receiving any images, we recommend to chance the capture image range to minimum 10%.'
-            : ''}
-        </footer>
-      </section>
+      {!isDemo && (
+        <>
+          <Divider color="black" vertical />
+          <section style={getSectionStyle(isDemo)}>
+            <Text weight="bold" content="Unidentified Items" />
+            <Text styles={highLightTextStyles}>{inferenceMetrics.unIdetifiedItems}</Text>
+            <Button content="Identify Manually" primary as={Link} to="/manual" circular />
+            <footer>
+              {unIdentifiedItemFooter
+                ? 'If you are not receiving any images, we recommend to chance the capture image range to minimum 10%.'
+                : ''}
+            </footer>
+          </section>
+        </>
+      )}
     </Flex>
   );
 };

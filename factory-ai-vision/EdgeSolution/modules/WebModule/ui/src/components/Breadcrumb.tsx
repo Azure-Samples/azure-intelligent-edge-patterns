@@ -20,6 +20,8 @@ const getTitle = (pathname: string): string => {
       return 'Details';
     case 'partIdentification':
       return 'Job Configuration';
+    case 'pretrainDetection':
+      return 'Demo Model';
     case 'capturePhotos':
       return null;
     case 'uploadPhotos':

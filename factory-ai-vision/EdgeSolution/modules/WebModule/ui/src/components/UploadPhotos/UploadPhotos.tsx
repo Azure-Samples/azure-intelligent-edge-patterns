@@ -23,7 +23,7 @@ export const UploadPhotos = ({ partId }): JSX.Element => {
     for (let i = 0; i < e.target.files.length; i++) {
       const formData = new FormData();
       formData.append('image', e.target.files[i]);
-      formData.append('part', `/api/parts/${partId}/`);
+      formData.append('part', partId);
       dispatch(postLabelImage(formData));
     }
   }

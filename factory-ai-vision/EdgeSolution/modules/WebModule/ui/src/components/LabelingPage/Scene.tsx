@@ -78,6 +78,7 @@ const Scene: FC<SceneProps> = ({
     dispatch(removeAnnotation(selectedAnnotationIndex));
     setWorkState(WorkState.None);
     setShowOuterRemoveButton(false);
+    setSelectedAnnotationIndex(null);
   }, [dispatch, selectedAnnotationIndex, setWorkState, setShowOuterRemoveButton]);
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
@@ -207,23 +208,26 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
-      {!partFormDisabled && selectedAnnotationIndex !== null && workState !== WorkState.Creating && (
-        <PartForm
-          top={annotations[0]?.label.y1 * scale.current - 10}
-          left={annotations[0]?.label.x2 * scale.current + 10}
-          open={true}
-          onDismiss={(): void => onSelect(null)}
-          selectedPart={annotations[selectedAnnotationIndex].part}
-          setSelectedPart={(newPart): void => {
-            dispatch(
-              updateAnnotation(
-                selectedAnnotationIndex,
-                R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
-              ),
-            );
-          }}
-        />
-      )}
+      {!partFormDisabled &&
+        selectedAnnotationIndex !== null &&
+        workState !== WorkState.Creating &&
+        annotations[selectedAnnotationIndex] && (
+          <PartForm
+            top={annotations[0]?.label.y1 * scale.current - 10}
+            left={annotations[0]?.label.x2 * scale.current + 10}
+            open={true}
+            onDismiss={(): void => onSelect(null)}
+            selectedPart={annotations[selectedAnnotationIndex]?.part}
+            setSelectedPart={(newPart): void => {
+              dispatch(
+                updateAnnotation(
+                  selectedAnnotationIndex,
+                  R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
+                ),
+              );
+            }}
+          />
+        )}
     </div>
   );
 };

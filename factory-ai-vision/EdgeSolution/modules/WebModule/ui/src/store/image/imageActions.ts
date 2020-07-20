@@ -69,7 +69,18 @@ export const postLabelImage = (newImage: LabelImage | FormData) => (dispatch): P
     data: newImage,
   })
     .then(({ data }) => {
-      dispatch(postLabelImageSuccess(data));
+      const newLabelImage: LabelImage = {
+        id: data.id,
+        image: data.image,
+        labels: data.labels,
+        part: {
+          id: data.part,
+          name: '',
+        },
+        is_relabel: data.is_relabel,
+        confidence: data.confidence,
+      };
+      dispatch(postLabelImageSuccess(newLabelImage));
       return void 0;
     })
     .catch((err) => {
@@ -90,9 +101,8 @@ export const deleteLabelImage = (id: number) => (dispatch): Promise<void> => {
     });
 };
 
-export const saveLabelImageAnnotation = (imageId: number, annotations: Annotation[]) => (
-  dispatch,
-): Promise<void> => {
+export const saveLabelImageAnnotation = (imageId: number) => (dispatch, getState): Promise<void> => {
+  const { annotations } = getState().labelingPageState;
   const url = `/api/images/${imageId}/`;
   return axios({
     url,
@@ -106,7 +116,8 @@ export const saveLabelImageAnnotation = (imageId: number, annotations: Annotatio
       console.info('Save successfully');
       dispatch(
         updateLabelImageAnnotation(data.id, data.labels, {
-          id: annotations[0].part.id,
+          // FIXME
+          id: annotations[0].part.id ?? data.part,
           name: annotations[0].part.name,
         }),
       );

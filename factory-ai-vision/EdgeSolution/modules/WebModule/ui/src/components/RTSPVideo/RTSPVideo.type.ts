@@ -1,4 +1,7 @@
-import { Dispatch } from 'react';
+export enum CaptureLabelMode {
+  PerImage,
+  AllLater,
+}
 
 export type RTSPVideoProps = {
   rtsp: string;
@@ -11,7 +14,7 @@ export type RTSPVideoProps = {
 
   partName?: string;
 
-  setOpenLabelingPage?: Dispatch<boolean>;
+  onCapturePhoto?: (streamId?: string, mode?: CaptureLabelMode) => void;
   /**
    * Will automatically create stream if it is true.
    */

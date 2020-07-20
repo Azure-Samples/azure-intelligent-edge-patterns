@@ -1,6 +1,4 @@
-"""
-Azure Training App
-"""
+"""App"""
 import logging
 import sys
 
@@ -12,9 +10,11 @@ DEFAULT_SETTING_NAME = 'DEFAULT_SETTING'
 
 
 class AzureTrainingConfig(AppConfig):
+    """App Config
+
+    Import signals and create demo objects.
     """
-    Azure Training App Config
-    """
+
     name = 'vision_on_edge.azure_training'
 
     def ready(self):
@@ -23,7 +23,7 @@ class AzureTrainingConfig(AppConfig):
         """
         if 'runserver' in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
-            from .signals import azure_setting_change_handler
+            from vision_on_edge.azure_training import signals
             from .models import Project, Train
             from ..cameras.models import Camera
             from ..locations.models import Location
@@ -55,20 +55,14 @@ class AzureTrainingConfig(AppConfig):
                     return
 
                 logger.info("Creating demo project")
-                demo_project, created = Project.objects.update_or_create(
+                Project.objects.update_or_create(
                     is_demo=True,
                     defaults={
                         'setting': default_settings.first(),
                         'camera': demo_cameras.first(),
                         'location': demo_locations.first(),
                     })
-
-                Train.objects.update_or_create(project=demo_project,
-                                               defaults={
-                                                   'status': 'demo ok',
-                                                   'log': 'demo log',
-                                                   'performance': 1,
-                                               })
+                # Train is created by signals
                 logger.info("Creating demo objects end.")
 
             logger.info("Azure Training AppConfig End while running server")

@@ -1,6 +1,8 @@
+"""App Models.
+
+Include Project, Train and Task.
 """
-Models for Azure Custom Vision training.
-"""
+
 import datetime
 import logging
 import threading
@@ -9,43 +11,22 @@ import time
 import requests
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
-from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
+from ..azure_iot.utils import inference_module_url
+from ..azure_parts.models import Part
 from ..azure_settings.models import Setting
 from ..cameras.models import Camera
-from ..images.models import Image
 from ..locations.models import Location
-from ..part.models import Part
-from .utils.app_insight import (get_app_insight_logger, img_monitor,
-                                part_monitor, retraining_job_monitor,
-                                training_job_monitor)
 
 logger = logging.getLogger(__name__)
-
-
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
-
 
 # Create your models here.
 
 
 class Project(models.Model):
-    """Project Model"""
+    """Azure Custom Vision Project Model"""
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
@@ -67,6 +48,7 @@ class Project(models.Model):
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
     deployed = models.BooleanField(default=False)
+    has_configured = models.BooleanField(default=False)
 
     # TODO: Move this to a new App.
     # e.g. relabel
@@ -285,62 +267,6 @@ class Project(models.Model):
         trainer.delete_tag(project_id=self.customvision_project_id,
                            tag_id=tag_id)
         return
-
-    def update_app_insight_counter(
-            self,
-            has_new_parts: bool,
-            has_new_images: bool,
-            parts_last_train: int,
-            images_last_train: int,
-    ):
-        """Send message to app insight"""
-        try:
-            retrain = train = 0
-            if has_new_parts:
-                logger.info("This is a training job")
-                self.training_counter += 1
-                self.save(update_fields=["training_counter"])
-                train = 1
-            elif has_new_images:
-                logger.info("This is a re-training job")
-                self.retraining_counter += 1
-                self.save(update_fields=["retraining_counter"])
-                retrain = 1
-            else:
-                logger.info("Project not changed")
-            logger.info("Sending Data to App Insight %s",
-                        self.setting.is_collect_data)
-            if self.setting.is_collect_data:
-
-                # Metrics
-                logger.info("Sending Logs to App Insight")
-                # TODO: Move this to other places to aviod import Part
-                part_monitor(len(Part.objects.filter(is_demo=False)))
-                # TODO: Move this to other places to aviod import Image
-                img_monitor(len(Image.objects.all()))
-                training_job_monitor(self.training_counter)
-                retraining_job_monitor(self.retraining_counter)
-                trainer = self.setting.get_trainer_obj()
-                images_now = trainer.get_tagged_image_count(
-                    self.customvision_project_id)
-                parts_now = len(trainer.get_tags(self.customvision_project_id))
-                # Traces
-                az_logger = get_app_insight_logger()
-                az_logger.warning(
-                    "training",
-                    extra={
-                        "custom_dimensions": {
-                            "train": train,
-                            "images": images_now - images_last_train,
-                            "parts": parts_now - parts_last_train,
-                            "retrain": retrain,
-                        }
-                    },
-                )
-        except:
-            logger.exception(
-                "update_app_insight_counter occur unexcepted error")
-            raise
 
     def train_project(self):
         """

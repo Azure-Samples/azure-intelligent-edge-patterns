@@ -1,5 +1,5 @@
 """
-Models for Azure CustomVIsion training.
+Models for Azure CustomVision images
 """
 import datetime
 import json
@@ -15,7 +15,7 @@ from django.db.models.signals import pre_delete, pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
-from ..part.models import Part
+from ..azure_parts.models import Part
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +140,8 @@ class Image(models.Model):
         if not instance.project or \
                 not instance.project.setting or \
                 not instance.project.setting.is_trainer_valid:
+            return
+        if not instance.customvision_id:
             return
         trainer = instance.project.setting.get_trainer_obj()
         trainer.delete_images(

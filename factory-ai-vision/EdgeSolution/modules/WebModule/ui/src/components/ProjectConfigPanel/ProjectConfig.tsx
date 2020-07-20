@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Divider,
   Text,
@@ -12,25 +12,25 @@ import {
 } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
-import * as R from 'ramda';
 
 import {
   thunkGetProject,
   thunkPostProject,
   updateProjectData,
   changeStatus,
+  thunkUpdateAccuracyRange,
+  thunkCheckAndSetAccuracyRange,
 } from '../../store/project/projectActions';
 import { Project, ProjectData, Status } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { formatDropdownValue, Value } from '../../util/formatDropdownValue';
 import { getAppInsights } from '../../TelemetryService';
-import { WarningDialog } from '../WarningDialog';
 import { AddCameraLink } from '../AddModuleDialog/AddCameraLink';
 import { AddLocationLink } from '../AddModuleDialog/AddLocationLink';
 import { AddPartLink } from '../AddModuleDialog/AddPartLink';
-import { LabelImage } from '../../store/image/imageTypes';
 import { Button } from '../Button';
 import { useQuery } from '../../hooks/useQuery';
+import { WarningDialog } from '../WarningDialog';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -49,10 +49,12 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
     });
 };
 
-export const ProjectConfig: React.FC = () => {
+export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const dispatch = useDispatch();
   const cameraId = useQuery().get('cameraId');
-  const { isLoading, error, data } = useSelector<State, Project>((state) => state.project);
+  const { isLoading, error, data, status } = useSelector<State, Project>((state) =>
+    isDemo ? state.demoProject : state.project,
+  );
   const {
     id: projectId,
     camera,
@@ -66,42 +68,38 @@ export const ProjectConfig: React.FC = () => {
     framesPerMin,
     accuracyThreshold,
   } = data;
-  const allImages = useSelector<State, LabelImage[]>((state) => state.images);
-  const images = useMemo(() => allImages.filter((e) => !e.is_relabel), [allImages]);
-  const [isTestModel, setIsTestModel] = useState(false);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
-    isTestModel,
+    isDemo,
     false,
     cameraId === null ? undefined : parseInt(cameraId, 10),
   );
   const [partLoading, dropDownParts, selectedParts, setSelectedPartsById] = useDropdownItems<any>(
     'parts',
-    isTestModel,
+    isDemo,
     true,
   );
   const [locationLoading, dropDownLocations, selectedLocations, setSelectedLocationById] = useDropdownItems<
     any
-  >('locations', isTestModel);
+  >('locations', isDemo);
   const [maxImgCountError, setMaxImgCountError] = useState(false);
-  const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', rangeMessage: '' });
   const hasUserUpdateAccuracyRange = useRef(false);
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
-      dispatch(thunkGetProject(isTestModel));
+      dispatch(thunkGetProject(isDemo));
     }
-  }, [dispatch, cameraLoading, locationLoading, partLoading, isTestModel]);
+  }, [dispatch, cameraLoading, locationLoading, partLoading, isDemo]);
 
   useEffect(() => {
-    if (!isTestModel) {
+    if (!isDemo) {
       if (location) setSelectedLocationById(location);
       if (parts.length) setSelectedPartsById(parts);
       if (camera && cameraId !== null) setSelectedCameraById(camera);
     }
   }, [
     camera,
-    isTestModel,
+    isDemo,
     location,
     parts,
     setSelectedCameraById,
@@ -112,180 +110,165 @@ export const ProjectConfig: React.FC = () => {
 
   const handleSubmitConfigure = async (): Promise<void> => {
     try {
-      if (!isTestModel) sendTrainInfoToAppInsight(selectedParts);
+      if (!isDemo) sendTrainInfoToAppInsight(selectedParts);
 
       const id = await dispatch(
-        thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isTestModel),
+        thunkPostProject(projectId, selectedLocations, selectedParts, selectedCamera, isDemo),
       );
 
-      if (typeof id !== 'undefined') dispatch(changeStatus(Status.WaitTraining));
+      if (typeof id !== 'undefined') {
+        // Set the opposite project state to None so entering the opposite page won't see the stream
+        dispatch(changeStatus(Status.WaitTraining, isDemo));
+        dispatch(changeStatus(Status.None, !isDemo));
+      }
     } catch (e) {
       alert(e);
     }
   };
 
   const setData = (keyName: keyof ProjectData, value: ProjectData[keyof ProjectData]): void => {
-    dispatch(updateProjectData({ [keyName]: value }));
+    dispatch(updateProjectData({ [keyName]: value }, isDemo));
   };
 
-  useEffect(() => {
-    const partsWithImageLength = images.reduce((acc, cur) => {
-      const { id } = cur.part;
-      const relatedPartIdx = acc.findIndex((e) => e.id === id);
-      if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
-      return acc;
-    }, R.clone(selectedParts));
-
-    const minimumLengthPart = partsWithImageLength.reduce(
-      (acc, cur) => {
-        if (cur.length < acc.length) return { name: cur.name, length: cur.length };
-        return acc;
-      },
-      { name: '', length: Infinity },
-    );
-
-    if (minimumLengthPart.length === Infinity) return;
-    if (minimumLengthPart.length < 30) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }));
-      setSuggestMessage({
-        min: 10,
-        max: 40,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'lower than 30',
-      });
-    } else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }));
-      setSuggestMessage({
-        min: 30,
-        max: 60,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'between 30 to 80',
-      });
-    } else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }));
-      setSuggestMessage({
-        min: 50,
-        max: 80,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'between 80 to 130',
-      });
-    } else if (minimumLengthPart.length >= 130) {
-      if (!hasUserUpdateAccuracyRange.current)
-        dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }));
-      setSuggestMessage({
-        min: 60,
-        max: 90,
-        partName: minimumLengthPart.name,
-        rangeMessage: 'more than 130',
-      });
-    }
-  }, [accuracyRangeMin, dispatch, images, selectedParts]);
-
-  const accracyRangeDisabled = !needRetraining || isTestModel;
+  const accracyRangeDisabled = !needRetraining || isDemo;
   const messageToCloudDisabled = !sendMessageToCloud;
 
   return (
     <Flex hAlign="center" styles={{ width: '600px' }} column gap="gap.medium">
       <Text size="larger" weight="semibold">
-        Part Identification
+        {isDemo ? 'Demo Model' : 'Part Identification'}
       </Text>
       <Divider color="black" styles={{ width: '100%' }} />
       {error && (
         <Alert danger header="Load Part Identification Error" content={`${error.name}: ${error.message}`} />
       )}
-      <Flex column>
+      <Flex column gap="gap.small">
+        {/* TODO: Get the actual model from backend */}
+        {isDemo && (
+          <ModuleSelector
+            moduleName="model"
+            setSelectedModuleItem={() => {}}
+            value={{
+              id: 0,
+              name: 'yolov3_PascalVoc',
+            }}
+            items={[
+              {
+                header: `yolov3_PascalVoc`,
+                content: {
+                  key: 0,
+                },
+              },
+            ]}
+            isMultiple={false}
+            isDemo={isDemo}
+          />
+        )}
         <ModuleSelector
           moduleName="camera"
-          to="/cameras"
           value={selectedCamera}
           setSelectedModuleItem={setSelectedCameraById}
           items={dropDownCameras}
           isMultiple={false}
+          isDemo={isDemo}
         />
         <ModuleSelector
           moduleName="parts"
-          to="/parts"
           value={selectedParts}
-          setSelectedModuleItem={setSelectedPartsById}
+          setSelectedModuleItem={(ids): void => {
+            const newSelectedParts = setSelectedPartsById(ids);
+            if (!hasUserUpdateAccuracyRange.current)
+              dispatch(thunkCheckAndSetAccuracyRange(newSelectedParts, isDemo));
+          }}
           items={dropDownParts}
           isMultiple={true}
+          isDemo={isDemo}
         />
         <ModuleSelector
           moduleName="location"
-          to="/locations"
           value={selectedLocations}
           setSelectedModuleItem={setSelectedLocationById}
           items={dropDownLocations}
           isMultiple={false}
-          isTestModel={isTestModel}
+          isDemo={isDemo}
+          block={isDemo}
         />
       </Flex>
       <Flex styles={{ height: '250px' }}>
-        <Flex column gap="gap.medium" styles={{ width: '50%' }}>
-          <Checkbox
-            label="Set up retraining"
-            checked={needRetraining}
-            onChange={(_, { checked }): void => setData('needRetraining', checked)}
-            disabled={isTestModel}
-          />
-          <Text disabled={accracyRangeDisabled} weight="bold">
-            Accuracy for capture image
-          </Text>
-          <Flex gap="gap.small">
-            <Flex column hAlign="center">
-              <Text disabled={accracyRangeDisabled} content="Minimum: " />
-              <Input
-                type="number"
-                disabled={accracyRangeDisabled}
-                inline
-                value={accuracyRangeMin}
-                onChange={(_, { value }): void => {
-                  if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
-                  setData('accuracyRangeMin', value);
-                }}
-                icon="%"
-                fluid
+        {!isDemo && (
+          <>
+            <Flex column gap="gap.medium" styles={{ width: '50%' }}>
+              <Checkbox
+                label="Set up retraining"
+                checked={needRetraining}
+                onChange={(_, { checked }): void => setData('needRetraining', checked)}
+                disabled={isDemo}
               />
+              <Text disabled={accracyRangeDisabled} weight="bold">
+                Accuracy range to capture images
+              </Text>
+              <Flex gap="gap.small">
+                <Flex column hAlign="center">
+                  <Text disabled={accracyRangeDisabled} content="Minimum: " />
+                  <Input
+                    type="number"
+                    disabled={accracyRangeDisabled}
+                    inline
+                    value={accuracyRangeMin}
+                    onChange={(_, { value }): void => {
+                      if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
+                      setData('accuracyRangeMin', value);
+                    }}
+                    icon="%"
+                    fluid
+                  />
+                </Flex>
+                <Flex column hAlign="center">
+                  <Text disabled={accracyRangeDisabled}>Maximum: </Text>
+                  <Input
+                    type="number"
+                    disabled={accracyRangeDisabled}
+                    inline
+                    value={accuracyRangeMax}
+                    onChange={(_, { value }): void => {
+                      if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
+                      setData('accuracyRangeMax', value);
+                    }}
+                    icon="%"
+                    fluid
+                  />
+                </Flex>
+              </Flex>
+              {status === Status.StartInference && (
+                <Button
+                  circular
+                  content="Update Accuracy Range"
+                  primary
+                  loading={isLoading}
+                  onClick={(): void => {
+                    dispatch(thunkUpdateAccuracyRange(isDemo));
+                  }}
+                />
+              )}
+              <Flex column hAlign="center">
+                <Text disabled={accracyRangeDisabled}>Maximum Images to Store: </Text>
+                <Input
+                  type="number"
+                  disabled={accracyRangeDisabled}
+                  inline
+                  value={maxImage}
+                  onChange={(_, { value }): void => {
+                    if ((value as any) < 15) setMaxImgCountError(true);
+                    else setMaxImgCountError(false);
+                    setData('maxImages', value);
+                  }}
+                />
+                {maxImgCountError && <Text error>Cannot be less than 15</Text>}
+              </Flex>
             </Flex>
-            <Flex column hAlign="center">
-              <Text disabled={accracyRangeDisabled}>Maximum: </Text>
-              <Input
-                type="number"
-                disabled={accracyRangeDisabled}
-                inline
-                value={accuracyRangeMax}
-                onChange={(_, { value }): void => {
-                  if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
-                  setData('accuracyRangeMax', value);
-                }}
-                icon="%"
-                fluid
-              />
-            </Flex>
-          </Flex>
-          <Text styles={{ fontSize: '12px' }} success>
-            {`The Part ${suggestMessage.partName} contains images ${suggestMessage.rangeMessage}, recommend to set the range to Min ${suggestMessage.min}% and Max ${suggestMessage.max}% `}
-          </Text>
-          <Flex column hAlign="center">
-            <Text disabled={accracyRangeDisabled}>Maximum Images to Store: </Text>
-            <Input
-              type="number"
-              disabled={accracyRangeDisabled}
-              inline
-              value={maxImage}
-              onChange={(_, { value }): void => {
-                if ((value as any) < 15) setMaxImgCountError(true);
-                else setMaxImgCountError(false);
-                setData('maxImages', value);
-              }}
-            />
-            {maxImgCountError && <Text error>Cannot be less than 15</Text>}
-          </Flex>
-        </Flex>
-        <Divider vertical color="black" styles={{ margin: '0px 10px' }} />
+            <Divider vertical color="black" styles={{ margin: '0px 10px' }} />
+          </>
+        )}
         <Flex column gap="gap.medium">
           <Checkbox
             label="Send message to cloud"
@@ -314,42 +297,31 @@ export const ProjectConfig: React.FC = () => {
           </Flex>
         </Flex>
       </Flex>
-      <Button
+      <ConfigureButton
+        isDemo={isDemo}
         content="Configure"
         primary
         onClick={handleSubmitConfigure}
-        disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isTestModel}
+        disabled={(!selectedCamera || !selectedLocations || !selectedParts || isLoading) && !isDemo}
         loading={isLoading}
         circular
       />
-      <Divider color="black" styles={{ width: '100%' }} />
-      <Text>Try pretrained detection</Text>
-      <TestModelButton isTestModel={isTestModel} setIsTestModel={setIsTestModel} />
     </Flex>
   );
 };
 
-const TestModelButton = ({ isTestModel, setIsTestModel }): JSX.Element => {
-  if (isTestModel) {
-    return <Button content="Back" onClick={(): void => setIsTestModel(false)} primary circular />;
-  }
-
-  return (
-    <WarningDialog
-      confirmButton="Confirm"
-      onConfirm={(): void => setIsTestModel(true)}
-      contentText={
-        <>
-          <p>
-            &quot;Demo Pretrained Detection&quot; is for seeing inference result, no retraining experience
-            here.
-          </p>
-          <p>For retraining experience, please create a new model</p>
-        </>
-      }
-      trigger={<Button content="Pretrained Detection" primary circular />}
-    />
-  );
+const ConfigureButton = ({ isDemo, onClick, ...props }): JSX.Element => {
+  if (isDemo)
+    return (
+      <WarningDialog
+        contentText={
+          <p>Trying demo model will replace the current project you created, do you want to continue?</p>
+        }
+        onConfirm={onClick}
+        trigger={<Button {...props} />}
+      />
+    );
+  return <Button {...props} onClick={onClick} />;
 };
 
 // TODO Make this integrate with Redux
@@ -358,7 +330,7 @@ function useDropdownItems<T>(
   isTestModel: boolean,
   isMultiple?: boolean,
   defaultId?: number | number[],
-): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => void] {
+): [boolean, DropdownItemProps[], T | T[], (id: string | string[]) => any] {
   const originItems = useRef<(T & { id: number })[]>([]);
   const [dropDownItems, setDropDownItems] = useState<DropdownItemProps[]>([]);
   const [selectedItem, setSelectedItem] = useState<T | T[]>(isMultiple ? [] : null);
@@ -406,7 +378,7 @@ function useDropdownItems<T>(
       .finally(() => setLoading(false));
   }, [isMultiple, moduleName, isTestModel, defaultId]);
 
-  const setSelectedItemById = useCallback((id: string | string[]): void => {
+  const setSelectedItemById = useCallback((id: string | string[]): any => {
     if (Array.isArray(id)) {
       const correspondedItems = id.reduce((acc, cur) => {
         const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === cur.toString());
@@ -414,10 +386,11 @@ function useDropdownItems<T>(
         return acc;
       }, []);
       setSelectedItem(correspondedItems as any);
-    } else {
-      const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === id.toString());
-      if (correspondedItem) setSelectedItem(correspondedItem);
+      return correspondedItems;
     }
+    const correspondedItem = originItems.current.find((ele) => ele.id.toString(10) === id.toString());
+    if (correspondedItem) setSelectedItem(correspondedItem);
+    return correspondedItem;
   }, []);
 
   return [loading, dropDownItems, selectedItem, setSelectedItemById];
@@ -427,22 +400,22 @@ function useDropdownItems<T>(
 
 type ModuleSelectorProps = {
   moduleName: string;
-  to: string;
-  value: Value;
+  value?: Value;
   setSelectedModuleItem: (id: string | string[]) => void;
   items: ShorthandCollection<DropdownItemProps>;
   isMultiple: boolean;
-  isTestModel?: boolean;
+  isDemo?: boolean;
+  block?: boolean;
 };
 
 const ModuleSelector: React.FC<ModuleSelectorProps> = ({
   moduleName,
-  to,
   value,
   setSelectedModuleItem,
   items,
   isMultiple,
-  isTestModel,
+  isDemo,
+  block = false,
 }): JSX.Element => {
   const onDropdownChange = (_, data): void => {
     if (data.value === null) return;
@@ -464,14 +437,14 @@ const ModuleSelector: React.FC<ModuleSelectorProps> = ({
       case 'parts':
         return <AddPartLink />;
       default:
-        return <p>Un supported module</p>;
+        return <p>Unsupported module</p>;
     }
   };
 
   return (
     <Flex vAlign="center" gap="gap.medium">
-      <Text styles={{ width: '90px' }}>{`Select ${moduleName}`}</Text>
-      {isTestModel ? (
+      <Text styles={{ width: '90px' }}>{`${block ? 'Default' : 'Select'} ${moduleName}`}</Text>
+      {block ? (
         <Dropdown items={items} value={formatDropdownValue(value)} multiple={isMultiple} open={false} />
       ) : (
         <Dropdown
@@ -481,7 +454,7 @@ const ModuleSelector: React.FC<ModuleSelectorProps> = ({
           multiple={isMultiple}
         />
       )}
-      {getAddModuleLink()}
+      {!isDemo && getAddModuleLink()}
     </Flex>
   );
 };

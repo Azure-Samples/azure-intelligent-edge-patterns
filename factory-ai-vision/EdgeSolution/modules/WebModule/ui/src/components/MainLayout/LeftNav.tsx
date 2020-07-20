@@ -1,34 +1,52 @@
 import React, { memo, MouseEvent, FC } from 'react';
-import { Segment, Image, Flex, Box, mergeStyles } from '@fluentui/react-northstar';
+import { Segment, Image, Flex, Box, mergeStyles, Text } from '@fluentui/react-northstar';
 import { NavLink } from 'react-router-dom';
-import { useProject } from '../../hooks/useProject';
-import { useCameras } from '../../hooks/useCameras';
 import FeedbackDialog from '../FeedbackDialog';
 
 const itemStyles = (disabled): React.CSSProperties => ({
   display: 'flex',
-  justifyContent: 'center',
+  flexDirection: 'column',
+  alignItems: 'center',
   padding: '0.8em',
   cursor: disabled && 'default',
+  width: '100%',
+  textDecoration: 'none',
 });
 
-const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
-  const project = useProject(false);
-  const cameras = useCameras();
-  const cameraInUsed = cameras.find((e) => e.id === project.data.camera);
-
+const LeftNav: FC<any> = ({ styles, disabled, width }): JSX.Element => {
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
       <Flex column gap="gap.large" hAlign="center" styles={{ height: '100%' }}>
-        <NavItem disabled={disabled} src="/icons/location.png" to="/locations"></NavItem>
         <NavItem
+          title="Location"
           disabled={disabled}
-          src="/icons/camera.png"
-          to={cameraInUsed ? `/cameras/detail?name=${cameraInUsed.name}` : '/cameras'}
-        />
-        <NavItem disabled={disabled} src="/icons/part.png" to="/parts"></NavItem>
-        <NavItem disabled={disabled} src="/icons/partIdentification.png" to="/partIdentification"></NavItem>
-        <NavItem disabled={disabled} src="/icons/manual.png" to="/manual"></NavItem>
+          src="/icons/location.png"
+          to="/locations"
+          width={width}
+        ></NavItem>
+        <NavItem title="Camera" disabled={disabled} src="/icons/camera.png" to="/cameras" width={width} />
+        <NavItem title="Part" disabled={disabled} src="/icons/part.png" to="/parts" width={width}></NavItem>
+        <NavItem
+          title="Part Identification"
+          disabled={disabled}
+          src="/icons/partIdentification.png"
+          to="/partIdentification"
+          width={width}
+        ></NavItem>
+        <NavItem
+          title="Manual Identification"
+          disabled={disabled}
+          src="/icons/manual.png"
+          to="/manual"
+          width={width}
+        ></NavItem>
+        <NavItem
+          title="Demo Model"
+          disabled={disabled}
+          src="/icons/pretrained-model.png"
+          to="/pretrainDetection"
+          width={width}
+        ></NavItem>
         <FeedbackDialog
           trigger={
             <Box
@@ -40,7 +58,8 @@ const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
                 if (disabled) e.preventDefault();
               }}
             >
-              <Image src="/icons/feedback.png" design={{ width: '100%' }} />
+              <Image src="/icons/feedback.png" design={{ width: `${width}px` }} />
+              <Text color="white" content="Feedback" align="center" size="small" />
             </Box>
           }
         />
@@ -50,11 +69,13 @@ const LeftNav: FC<any> = ({ styles, disabled }): JSX.Element => {
 };
 
 interface NavItemProps {
+  title: string;
   src: string;
   to: string;
   disabled: boolean;
+  width: number;
 }
-const NavItem: FC<NavItemProps> = ({ src, to, disabled }): JSX.Element => {
+const NavItem: FC<NavItemProps> = ({ title, src, to, disabled, width }): JSX.Element => {
   return (
     <NavLink
       to={to}
@@ -64,7 +85,8 @@ const NavItem: FC<NavItemProps> = ({ src, to, disabled }): JSX.Element => {
         if (disabled) e.preventDefault();
       }}
     >
-      <Image src={src} design={{ width: '100%' }} />
+      <Image src={src} styles={{ width: `${width}px` }} />
+      <Text color="white" content={title} align="center" size="small" />
     </NavLink>
   );
 };

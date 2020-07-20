@@ -12,31 +12,14 @@ from django.core.files.images import ImageFile
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from rest_framework.decorators import api_view
 
-from ...azure_training.models import Image
+from ...azure_iot.utils import inference_module_url
+from ...azure_parts.models import Part
 from ...images.api.serializers import ImageSerializer
-from ...part.models import Part
+from ...images.models import Image
 from ..models import Stream
 
 logger = logging.getLogger(__name__)
 
-
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
-
-
-#
 # Stream Views
 #
 streams = []
