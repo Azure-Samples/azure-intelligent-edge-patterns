@@ -3,13 +3,13 @@ import React, { memo, FC, useState, useEffect, Dispatch, SetStateAction } from '
 import LabelingPage from '../pages/LabelingPage';
 import { LabelingType } from '../store/labelingPage/labelingPageTypes';
 import { LabelImage } from '../store/image/imageTypes';
-import { RelabelImage, JudgedImageList } from './ManualIdentification/types';
+import { JudgedImageList } from './ManualIdentification/types';
 import { Dialog } from './Dialog';
 
 interface LabelingPageDialogProps {
   trigger: JSX.Element;
   imageIndex: number;
-  images: LabelImage[] | RelabelImage[];
+  images: LabelImage[];
   isRelabel: boolean;
   forceOpen?: boolean;
   setJudgedImageList?: Dispatch<SetStateAction<JudgedImageList>>;

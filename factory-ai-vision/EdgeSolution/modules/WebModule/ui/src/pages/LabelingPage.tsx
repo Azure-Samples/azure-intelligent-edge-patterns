@@ -12,12 +12,12 @@ import {
   deleteLabelImage,
   removeImagesFromPart,
 } from '../store/image/imageActions';
-import { RelabelImage, JudgedImageList } from '../components/ManualIdentification/types';
+import { JudgedImageList } from '../components/ManualIdentification/types';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
-  images: LabelImage[] | RelabelImage[];
+  images: LabelImage[];
   imageIndex: number;
   closeDialog: () => void;
   setJudgedImageList?: Dispatch<SetStateAction<JudgedImageList>>;
@@ -42,9 +42,9 @@ const LabelingPage: FC<LabelingPageProps> = ({
   const imageId = images[index]?.id;
 
   const onSave = (): void => {
-    dispatch(saveLabelImageAnnotation(images[index].id));
-    if (setJudgedImageList)
-      setJudgedImageList((prev) => [...prev, { partId: annotations[0].part.id, imageId: images[index].id }]);
+    dispatch(saveLabelImageAnnotation(images[index].id, isRelabel));
+    // if (setJudgedImageList)
+    //   setJudgedImageList((prev) => [...prev, { partId: annotations[0].part.id, imageId: images[index].id }]);
   };
 
   const onSaveBtnClick = (): void => {

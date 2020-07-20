@@ -101,7 +101,10 @@ export const deleteLabelImage = (id: number) => (dispatch): Promise<void> => {
     });
 };
 
-export const saveLabelImageAnnotation = (imageId: number) => (dispatch, getState): Promise<void> => {
+export const saveLabelImageAnnotation = (imageId: number, needJustify: boolean) => (
+  dispatch,
+  getState,
+): Promise<void> => {
   const { annotations } = getState().labelingPageState;
   const url = `/api/images/${imageId}/`;
   return axios({
@@ -115,11 +118,16 @@ export const saveLabelImageAnnotation = (imageId: number) => (dispatch, getState
     .then(({ data }) => {
       console.info('Save successfully');
       dispatch(
-        updateLabelImageAnnotation(data.id, data.labels, {
-          // FIXME
-          id: annotations[0].part.id ?? data.part,
-          name: annotations[0].part.name,
-        }),
+        updateLabelImageAnnotation(
+          data.id,
+          data.labels,
+          {
+            // FIXME
+            id: annotations[0].part.id ?? data.part,
+            name: annotations[0].part.name,
+          },
+          needJustify,
+        ),
       );
       // dispatch(requestAnnotationsSuccess(annotations));
       return void 0;
@@ -133,9 +141,10 @@ const updateLabelImageAnnotation = (
   imageId: number,
   labels: any,
   part: { id: number; name: string },
+  needJustify,
 ): UpdateLabelImageAnnotation => ({
   type: UPDATE_LABEL_IMAGE_ANNOTATION,
-  payload: { id: imageId, labels, part },
+  payload: { id: imageId, labels, part, needJustify },
 });
 
 export const removeImagesFromPart = (imageIds: number[]): RemoveImagesFromPartAction => {

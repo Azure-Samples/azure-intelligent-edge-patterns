@@ -30,6 +30,7 @@ const labelImagesReducer = (state = initialState.images, action: LabelImageActio
         ...newState[updatedImageIdx],
         labels: action.payload.labels,
         part: action.payload.part,
+        needJustify: action.payload.needJustify,
       };
       return newState;
     }

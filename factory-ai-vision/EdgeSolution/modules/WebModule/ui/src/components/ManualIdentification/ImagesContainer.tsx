@@ -1,10 +1,11 @@
 import React, { FC, Dispatch, memo } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import ImageIdentificationItem from './ImageItem';
-import { JudgedImageList, RelabelImage } from './types';
+import { JudgedImageList } from './types';
+import { LabelImage } from '../../store/image/imageTypes';
 
 interface ImagesContainerProps {
-  images: RelabelImage[];
+  images: LabelImage[];
   judgedImageList: JudgedImageList;
   setJudgedImageList: Dispatch<JudgedImageList>;
   selectedPartId: number;
@@ -26,33 +27,28 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
       rowGap: '10px',
     }}
   >
-    {images
-      .filter((img) => img.display)
-      .map((img, i, arr) => {
-        if (img.display) {
-          let isPartCorrect: number = null;
-          const idx = judgedImageList.findIndex((e) => e.imageId === img.id);
+    {images.map((img, i) => {
+      let isPartCorrect: number = null;
+      const idx = judgedImageList.findIndex((e) => e.imageId === img.id);
 
-          if (idx >= 0) {
-            if (judgedImageList[idx].partId === selectedPartId) {
-              isPartCorrect = 1;
-            } else isPartCorrect = 0;
-          }
+      if (idx >= 0) {
+        if (judgedImageList[idx].partId === selectedPartId) {
+          isPartCorrect = 1;
+        } else isPartCorrect = 0;
+      }
 
-          return (
-            <ImageIdentificationItem
-              key={img.id}
-              confidenceLevel={img.confidenceLevel}
-              imageIndex={i}
-              relabelImages={arr}
-              isPartCorrect={isPartCorrect}
-              setJudgedImageList={setJudgedImageList}
-              partId={selectedPartId}
-            />
-          );
-        }
-        return void 0;
-      })}
+      return (
+        <ImageIdentificationItem
+          key={img.id}
+          confidenceLevel={img.confidence}
+          imageIndex={i}
+          relabelImages={images}
+          isPartCorrect={isPartCorrect}
+          setJudgedImageList={setJudgedImageList}
+          partId={selectedPartId}
+        />
+      );
+    })}
   </Grid>
 );
 
