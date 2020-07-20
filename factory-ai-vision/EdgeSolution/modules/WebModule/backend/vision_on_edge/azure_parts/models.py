@@ -1,6 +1,4 @@
-"""
-Part models
-"""
+"""App models"""
 
 import logging
 

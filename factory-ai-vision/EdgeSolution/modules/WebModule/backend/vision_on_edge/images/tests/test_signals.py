@@ -6,13 +6,13 @@ import logging
 from rest_framework.test import APITransactionTestCase
 
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
-
-PROJECT_PREFIX = "UnitTest"
-
+from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.azure_training.models import Project
-from vision_on_edge.azure_parts.models import Part
+
 from ..models import Image
+
+PROJECT_PREFIX = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +30,16 @@ class ImageSignalsTestCase(APITransactionTestCase):
                                endpoint=ENDPOINT,
                                training_key=TRAINING_KEY)
 
+        Setting.objects.create(name="invalid_setting")
         Project.objects.create(
-            setting=Setting.objects.first(),
-            customvision_project_id='super_valid_project_id',
+            setting=Setting.objects.get(name="valid_setting"),
+            customvision_project_id='valid_project_id',
             customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
+            is_demo=False)
+        Project.objects.create(
+            setting=Setting.objects.get(name="invalid_setting"),
+            customvision_project_id='invalid_project_id',
+            customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
             is_demo=False)
         Part.objects.create(name="part_1",
                             description="description_1",
@@ -41,11 +47,10 @@ class ImageSignalsTestCase(APITransactionTestCase):
 
     def test_setup_is_valid(self):
         """test_delete_relable_if_acc_range_change.
-        
+
         @Description:
         Make sure setup is valid
         """
-
 
     def test_delete_relable_if_acc_range_change(self):
         """test_delete_relable_if_acc_range_change.
@@ -61,17 +66,19 @@ class ImageSignalsTestCase(APITransactionTestCase):
         All relabel images deleted
         """
 
-        for i in range(40):
-            Image.objects.create(project=Project.objects.first(),
-                                 part=Part.objects.first(),
-                                 is_relabel=True)
-        self.assertEqual(Image.objects.all().count(), 40)
+        for setting_name in ["valid_setting", "invalid_setting"]:
+            project_obj = Project.objects.get(setting__name=setting_name)
 
-        project_obj = Project.objects.first()
-        project_obj.accuracyRangeMin = 80
-        project_obj.accuracyRangeMax = 90
-        project_obj.save()
-        self.assertEqual(Image.objects.all().count(), 0)
+            for i in range(40):
+                Image.objects.create(project=project_obj,
+                                     part=Part.objects.first(),
+                                     is_relabel=True)
+            self.assertEqual(Image.objects.all().count(), 40)
+
+            project_obj.accuracyRangeMin += 1
+            project_obj.accuracyRangeMax -= 1
+            project_obj.save()
+            self.assertEqual(Image.objects.all().count(), 0)
 
     def test_delete_relable_if_acc_range_min_change(self):
         """test_delete_relable_if_acc_range_min_change.
@@ -86,16 +93,18 @@ class ImageSignalsTestCase(APITransactionTestCase):
         @Expected Results
         All relabel images deleted
         """
-        for i in range(40):
-            Image.objects.create(project=Project.objects.first(),
-                                 part=Part.objects.first(),
-                                 is_relabel=True)
-        self.assertEqual(Image.objects.all().count(), 40)
+        for setting_name in ["valid_setting", "invalid_setting"]:
+            project_obj = Project.objects.get(setting__name=setting_name)
 
-        project_obj = Project.objects.first()
-        project_obj.accuracyRangeMin += 1
-        project_obj.save()
-        self.assertEqual(Image.objects.all().count(), 0)
+            for i in range(40):
+                Image.objects.create(project=project_obj,
+                                     part=Part.objects.first(),
+                                     is_relabel=True)
+            self.assertEqual(Image.objects.all().count(), 40)
+
+            project_obj.accuracyRangeMin += 1
+            project_obj.save()
+            self.assertEqual(Image.objects.all().count(), 0)
 
     def test_delete_relable_if_acc_range_max_change(self):
         """test_delete_relable_if_acc_range_max_change.
@@ -110,20 +119,23 @@ class ImageSignalsTestCase(APITransactionTestCase):
         @Expected Results
         All relabel images deleted
         """
-        for i in range(40):
-            Image.objects.create(project=Project.objects.first(),
-                                 part=Part.objects.first(),
-                                 is_relabel=True)
-        self.assertEqual(Image.objects.all().count(), 40)
 
-        project_obj = Project.objects.first()
-        project_obj.accuracyRangeMax -=1
-        project_obj.save()
-        self.assertEqual(Image.objects.all().count(), 0)
+        for setting_name in ["valid_setting", "invalid_setting"]:
+            project_obj = Project.objects.get(setting__name=setting_name)
+
+            for i in range(40):
+                Image.objects.create(project=project_obj,
+                                     part=Part.objects.first(),
+                                     is_relabel=True)
+            self.assertEqual(Image.objects.all().count(), 40)
+
+            project_obj.accuracyRangeMax -= 1
+            project_obj.save()
+            self.assertEqual(Image.objects.all().count(), 0)
 
     def test_not_delete_relable_if_acc_range_not_change(self):
         """test_not_delete_relable_if_acc_range_not_change.
-        
+
         @Type
         Negative
 
@@ -134,16 +146,20 @@ class ImageSignalsTestCase(APITransactionTestCase):
         @Expected Results
         All relabel images kept.
         """
-        for i in range(40):
-            Image.objects.create(project=Project.objects.first(),
-                                 part=Part.objects.first(),
-                                 is_relabel=True)
-        self.assertEqual(Image.objects.all().count(), 40)
 
-        project_obj = Project.objects.first()
-        project_obj.is_demo = True
-        project_obj.save()
-        self.assertEqual(Image.objects.all().count(), 40)
+        for setting_name in ["valid_setting", "invalid_setting"]:
+            project_obj = Project.objects.get(setting__name=setting_name)
+
+            for i in range(40):
+                Image.objects.create(project=project_obj,
+                                     part=Part.objects.first(),
+                                     is_relabel=True)
+            self.assertEqual(Image.objects.all().count(), 40)
+
+            project_obj.is_demo = not project_obj.is_demo
+            project_obj.save()
+            self.assertEqual(Image.objects.all().count(), 40)
+            Image.objects.all().delete()
 
     @classmethod
     def tearDownClass(cls):

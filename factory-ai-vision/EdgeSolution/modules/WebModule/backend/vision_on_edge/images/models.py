@@ -141,6 +141,8 @@ class Image(models.Model):
                 not instance.project.setting or \
                 not instance.project.setting.is_trainer_valid:
             return
+        if not instance.customvision_id:
+            return
         trainer = instance.project.setting.get_trainer_obj()
         trainer.delete_images(
             project_id=instance.project.customvision_project_id,

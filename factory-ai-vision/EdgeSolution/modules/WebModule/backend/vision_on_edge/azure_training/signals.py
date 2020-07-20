@@ -1,6 +1,4 @@
-"""
-Signals
-"""
+"""App Signals"""
 
 import logging
 
@@ -17,9 +15,11 @@ logger = logging.getLogger(__name__)
           sender=Setting,
           dispatch_uid="delete_project_on_setting_change")
 def azure_setting_change_handler(**kwargs):
-    """
-    Listen on azure_settings.models.Setting Change.
-    Delete project under this setting
+    """Azure Setting Change handler
+
+    Delete project under this setting. However, since user
+    may have just change the settings, project should not
+    be deleted on Custom Vision.
     """
     logger.info("Azure Setting changed.")
     logger.info("Checking...")
@@ -55,8 +55,8 @@ def azure_setting_change_handler(**kwargs):
           sender=Project,
           dispatch_uid="create_train_if_not_exist")
 def azure_project_train_status_handler(**kwargs):
-    """
-    Listen on azure_training.models.Project change.
+    """Project create change.
+
     If a Project is created, create a Train(Training Status) as well.
     """
     logger.info("Azure Project changed.")
@@ -86,9 +86,11 @@ def azure_project_train_status_handler(**kwargs):
           sender=Project,
           dispatch_uid="change_project_is_configured")
 def azure_project_is_configured_handler(**kwargs):
-    """
+    """Project is_configured handler
+
     For now, only one project can have is configured = True
     """
+
     logger.info("Azure Project changed.")
     logger.info("Checking...")
 

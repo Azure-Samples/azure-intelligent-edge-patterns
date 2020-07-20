@@ -44,7 +44,8 @@ def relabel_setting_change_handler(**kwargs):
     old_project = Project.objects.get(pk=instance.id)
     if old_project.accuracyRangeMin == instance.accuracyRangeMin and \
             old_project.accuracyRangeMax == instance.accuracyRangeMax:
-        logger.info("Project accuracyRangeMin and accuracyRangeMax not changed")
+        logger.info(
+            "Project accuracyRangeMin and accuracyRangeMax not changed")
         logger.info("Nothing to do")
         return
 

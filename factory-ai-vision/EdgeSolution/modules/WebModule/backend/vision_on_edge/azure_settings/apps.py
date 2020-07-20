@@ -1,6 +1,5 @@
-"""
-Azure Settings App
-"""
+"""App"""
+
 import logging
 import sys
 
@@ -15,15 +14,16 @@ DEFAULT_SETTING_NAME = 'DEFAULT_SETTING'
 
 
 class AzureSettingsConfig(AppConfig):
-    """
-    Azure Settings App Config
-    """
+    """AppConfig"""
+
     name = 'vision_on_edge.azure_settings'
 
     def ready(self):
+        """App ready.
+
+        Import models and signals, create some demo objects.
         """
-        Azure Settings App ready
-        """
+
         if 'runserver' in sys.argv:
             # pylint: disable=C0415
             from .models import Setting
