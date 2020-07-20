@@ -69,7 +69,7 @@ class ImageSignalsTestCase(APITransactionTestCase):
         for setting_name in ["valid_setting", "invalid_setting"]:
             project_obj = Project.objects.get(setting__name=setting_name)
 
-            for i in range(40):
+            for _ in range(40):
                 Image.objects.create(project=project_obj,
                                      part=Part.objects.first(),
                                      is_relabel=True)
@@ -96,7 +96,7 @@ class ImageSignalsTestCase(APITransactionTestCase):
         for setting_name in ["valid_setting", "invalid_setting"]:
             project_obj = Project.objects.get(setting__name=setting_name)
 
-            for i in range(40):
+            for _ in range(40):
                 Image.objects.create(project=project_obj,
                                      part=Part.objects.first(),
                                      is_relabel=True)
@@ -123,7 +123,7 @@ class ImageSignalsTestCase(APITransactionTestCase):
         for setting_name in ["valid_setting", "invalid_setting"]:
             project_obj = Project.objects.get(setting__name=setting_name)
 
-            for i in range(40):
+            for _ in range(40):
                 Image.objects.create(project=project_obj,
                                      part=Part.objects.first(),
                                      is_relabel=True)
@@ -150,7 +150,7 @@ class ImageSignalsTestCase(APITransactionTestCase):
         for setting_name in ["valid_setting", "invalid_setting"]:
             project_obj = Project.objects.get(setting__name=setting_name)
 
-            for i in range(40):
+            for _ in range(40):
                 Image.objects.create(project=project_obj,
                                      part=Part.objects.first(),
                                      is_relabel=True)
