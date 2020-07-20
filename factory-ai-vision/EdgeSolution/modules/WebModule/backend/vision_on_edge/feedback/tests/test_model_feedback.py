@@ -16,14 +16,9 @@ class FeedbackModelTestCases(APITransactionTestCase):
     """
 
     def setUp(self):
-        Feedback.objects.create(satisfaction='GD',
-                                description='good test')
-        Feedback.objects.create(satisfaction='EX',
-                                description='excellent test')
-        for special_string in special_strings:
-            Feedback.objects.create(satisfaction=special_string,
-                                    description=special_string)
-        self.exist_num = 2 + len(special_strings)
+        Feedback.objects.create(satisfaction='GD')
+        Feedback.objects.create(satisfaction='EX')
+        self.exist_num = 2
 
     def test_setup_is_valid(self):
         """

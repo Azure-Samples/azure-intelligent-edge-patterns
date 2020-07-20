@@ -26,18 +26,10 @@ class FeedbackRestTestCases(APITransactionTestCase):
 
         data = {
             'satisfaction': 'PR',
-            'description': 'poor test',
         }
         self.client.post(url, data, format='json')
 
-        for special_string in special_strings:
-            data = {
-                'satisfaction': 'VB',
-                'description': special_string,
-            }
-            self.client.post(url, data, format='json')
-
-        self.exist_num = 1 + len(special_strings)
+        self.exist_num = 1
 
     def test_setup_is_valid(self):
         """
@@ -59,19 +51,14 @@ class FeedbackRestTestCases(APITransactionTestCase):
         """
         url = reverse('feedback-list')
         feedback_sat = 'FR'
-        feedback_des = 'test description'
 
-        data = {'satisfaction': feedback_sat, 'description': feedback_des}
+        data = {'satisfaction': feedback_sat}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(json.loads(response.content)[
                          'satisfaction'], feedback_sat)
-        self.assertEqual(json.loads(response.content)[
-                         'description'], feedback_des)
         # Get feedback list
         response = self.client.get(url, format='json')
         self.assertEqual(len(json.loads(response.content)), self.exist_num + 1)
         # Check using db
         self.assertEqual(Feedback.objects.count(), self.exist_num + 1)
-        self.assertEqual(Feedback.objects.get(
-            satisfaction=feedback_sat).description, feedback_des)

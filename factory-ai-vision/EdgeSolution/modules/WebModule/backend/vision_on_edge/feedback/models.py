@@ -24,12 +24,10 @@ class Feedback(models.Model):
         choices=SATISFACTION_CHOCES,
         default=FAIR,
     )
-    description = models.CharField(max_length=3000, default='')
 
     @staticmethod
     def post_save(instance, **kwargs):
         logger.warning('Satisfaction: %s' % instance.satisfaction)
-        logger.warning('Description: %s' % instance.description)
 
 
 post_save.connect(Feedback.post_save, Feedback, dispatch_uid="Feedback_post")
