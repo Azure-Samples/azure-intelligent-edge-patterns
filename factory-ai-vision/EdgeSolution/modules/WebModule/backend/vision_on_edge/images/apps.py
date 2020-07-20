@@ -18,5 +18,5 @@ class ImagesConfig(AppConfig):
         """
         Images App Ready
         """
-        # pylint: disable = unused-import, import-outside-toplevel 
+        # pylint: disable = unused-import, import-outside-toplevel
         from . import signals
