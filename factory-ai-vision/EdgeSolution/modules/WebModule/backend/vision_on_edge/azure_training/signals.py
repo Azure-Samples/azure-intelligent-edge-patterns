@@ -103,7 +103,8 @@ def azure_project_is_configured_handler(**kwargs):
         logger.info("Nothing to do")
         return
     instance = kwargs['instance']
-    if instance.has_configured:
+    if instance.has_configured and instance.has_configured != Project.objects.get(
+            pk=instance.id).has_configured:
         for other_project in Project.objects.exclude(id=instance.id):
             other_project.has_configured = False
             other_project.save()

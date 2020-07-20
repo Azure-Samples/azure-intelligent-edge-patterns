@@ -42,6 +42,7 @@ def relabel_setting_change_handler(**kwargs):
         logger.info("Nothing to do")
         return
     old_project = Project.objects.get(pk=instance.id)
+
     if old_project.accuracyRangeMin == instance.accuracyRangeMin and \
             old_project.accuracyRangeMax == instance.accuracyRangeMax:
         logger.info(
@@ -50,5 +51,7 @@ def relabel_setting_change_handler(**kwargs):
         return
 
     logger.info("Project accuracyRangeMin and accuracyRangeMax changed...")
-    logger.info("Deleting all relabel project....")
-    Image.objects.filter(project=kwargs['instance'], is_relabel=True).delete()
+    logger.info("Deleting all relabel images...")
+    logger.info("Project id: %s", instance.id)
+    Image.objects.filter(project=instance, is_relabel=True).delete()
+    logger.info("Deleting all relabel images... complete")
