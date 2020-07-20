@@ -20,7 +20,7 @@
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <PackageCertificateThumbprint>A3C772A4046598B34695682A113D38B3FF323C71</PackageCertificateThumbprint>
@@ -31,7 +31,7 @@
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
-    <AppInstallerUri>https://ignitedemoappupdate.azurewebsites.net</AppInstallerUri>
+    <AppInstallerUri>https://ignitedemoapp.azurewebsites.net</AppInstallerUri>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageDir>C:\Ignite\Install\</AppxPackageDir>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
@@ -203,6 +203,7 @@
     <Compile Include="Models\CustomerCounterViewModel.cs" />
     <Compile Include="Models\CustomerCounterVisViewModel.cs" />
     <Compile Include="Models\CustomerRegistrationViewModel.cs" />
+    <Compile Include="Models\ShoppingViewModel.cs" />
     <Compile Include="Models\DemoWelcomeViewModel.cs" />
     <Compile Include="Models\ProductViewModel.cs" />
     <Compile Include="Models\FaqViewModel.cs" />
@@ -225,6 +226,9 @@
     </Compile>
     <Compile Include="Views\Ignite\DemoWelcomePage.xaml.cs">
       <DependentUpon>DemoWelcomePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Ignite\ShoppingPage.xaml.cs">
+      <DependentUpon>ShoppingPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Ignite\InsightsPage.xaml.cs">
       <DependentUpon>InsightsPage.xaml</DependentUpon>
@@ -322,6 +326,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Ignite\DemoWelcomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Ignite\ShoppingPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

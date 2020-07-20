@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratings-web
+  labels:
+    app: ratings-web
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ratings-web
+  template:
+    metadata:
+      labels:
+        app: ratings-web
+      #annotations:
+    spec:
+      containers:
+      - name: ratings-web
+        image: {{ .Values.container.registry }}/{{ .Values.frontend.image }}:{{ .Values.frontend.tag }}
+        ports:
+        - containerPort: {{ int .Values.frontend.port }}
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: "125m"
+            #memory: "300Mi"
+          requests:
+            cpu: "25m"
+            #memory: "50Mi"
+        env:
+          - name: API
+            value: ratings-api:80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratings-api
+  labels:
+    app: ratings-api
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ratings-api
+  template:
+    metadata:
+      labels:
+        app: ratings-api
+      #annotations:
+    spec:
+      containers:
+      - name: ratings-api
+        image: {{ .Values.container.registry }}/{{ .Values.midtier.image }}:{{ .Values.midtier.tag }}
+        ports:
+        - containerPort: {{ int .Values.midtier.port }}
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: "125m"
+            #memory: "300Mi"
+          requests:
+            cpu: "25m"
+            #memory: "50Mi"
+        env:
+          - name: MONGODB_URI
+            value: mongodb://{{ .Values.database.user }}:{{ .Values.database.pass }}@ratings-mongodb:27017/admin

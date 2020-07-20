@@ -12,16 +12,9 @@ using Windows.System.Threading;
 
 namespace ServiceListener
 {
-    public sealed class GapListenerHub
+    public sealed class GapListenerHub : ServicePointBase
     {
-        const int MinGapListenIntervalSec = 2;
-
         public event GapDetection GapDetectionEvent;
-
-        TimeSpan timerPeriod;
-        ThreadPoolTimer gapTimer = null;
-
-        GapDetection gapDetectionEvent;
 
         List<PartitionReceiver> receivers = new List<PartitionReceiver>();
 
@@ -44,20 +37,17 @@ namespace ServiceListener
                 ed.Properties.ContainsKey(GapConfig.SchemaKey)
                 && (IsRecognitionMessage(ed) || IsUploadMessage(ed));
 
-        public GapListenerHub(int pulseSec, string cameraId)
+        public GapListenerHub(int pulseSec, string cameraId) : base(cameraId, pulseSec)
         {
-            timerPeriod = TimeSpan.FromSeconds(Math.Max(MinGapListenIntervalSec, pulseSec));
             // preallocate to minimize thrashing
             blobData = new byte[GapConfig.BlobMaxSize];
-            this.cameraId = cameraId;
+            this.cameraId = base.url;
         }
 
         static object lockObj = new object();
 
-        public async void StartListening(GapDetection detectionEvent)
+        public override async void StartListening()
         {
-            if (gapDetectionEvent != null) return;
-
             try
             {
                 var connectionString =
@@ -79,10 +69,7 @@ namespace ServiceListener
                         .Select(d2c => eventHubClient.CreateReceiver("$Default", d2c, EventPosition.FromEnqueuedTime(DateTime.Now)))
                         .ToList();
 
-                gapTimer = ThreadPoolTimer.CreatePeriodicTimer(BackgroundListen, timerPeriod);
-
-                GapDetectionEvent += detectionEvent;
-                gapDetectionEvent = detectionEvent;
+                listenerTimer = ThreadPoolTimer.CreatePeriodicTimer(BackgoundListen, timerPeriod);
             }
             catch (Exception e)
             {
@@ -90,7 +77,7 @@ namespace ServiceListener
             }
         }
 
-        void BackgroundListen(ThreadPoolTimer timer)
+        public override void BackgoundListen(ThreadPoolTimer timer)
         {
             List<Task> tasks = new List<Task>();
             //Run tasks with cancellation
@@ -167,7 +154,7 @@ namespace ServiceListener
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
+                Debug.WriteLine($"Gap Detection: {e.Message}");
             }
         }
 
@@ -244,24 +231,20 @@ namespace ServiceListener
             return imagesAndInferencesTimes;
         }
 
-        public void StopListening()
+        public override void StopListening()
         {
             try
             {
-                if (gapDetectionEvent == null) return;
-
-                gapDetectionEvent -= gapDetectionEvent;
                 receivers.ForEach(r => r.Close());
 
                 eventHubClient.Close();
                 eventHubClient = null;
-                gapDetectionEvent = null;
-                gapTimer?.Cancel();
+                listenerTimer?.Cancel();
             }
             catch (Exception e)
             {
 
-                Debug.WriteLine($"{e.Message}");
+                Debug.WriteLine($"Gap Detection: {e.Message}");
             }
         }
 

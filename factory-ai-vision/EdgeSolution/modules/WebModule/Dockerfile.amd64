@@ -1,0 +1,30 @@
+FROM node:12 as builder
+
+WORKDIR /
+COPY ui app
+WORKDIR /app
+RUN rm -rf node_modules/
+RUN rm -rf build/
+RUN yarn install
+RUN yarn build
+
+FROM amd64/python:3.8
+
+WORKDIR /app
+
+COPY backend/requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY backend/manage.py .
+COPY backend/config.py .
+COPY backend/vision_on_edge vision_on_edge
+COPY backend/configs configs
+RUN rm -f vision_on_edge/*/migrations/[0-9]*.py
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+
+RUN rm -rf ui_production
+COPY --from=builder /app/build vision_on_edge/ui_production
+EXPOSE 8000
+
+CMD python manage.py runserver 0.0.0.0:8000

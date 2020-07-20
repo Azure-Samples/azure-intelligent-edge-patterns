@@ -1,0 +1,22 @@
+apiVersion: "kubeflow.org/v1"
+kind: "TFJob"
+metadata:
+  name: "dist-mnist-for-e2e-test-demo"
+spec:
+  tfReplicaSpecs:
+    PS:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+          - name: tensorflow
+            image: kubeflow/tf-dist-mnist-test:1.0
+    Worker:
+      replicas: 3
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+          - name: tensorflow
+            image: kubeflow/tf-dist-mnist-test:1.0

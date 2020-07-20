@@ -1,0 +1,6 @@
+name: ratings
+description: ratings application
+version: 0.0.0 # is overriden by the build id
+appVersion: 0.0.1
+apiVersion: "v2"
+kubeVersion: ">=1.14.0"

@@ -78,7 +78,7 @@ namespace IntelligentKioskSample.Data
             {
                 CounterListener counterListener = new CounterListener(SettingsHelper.Instance.CustomerCounterEndpoint,
                     Util.ToIntSafely(SettingsHelper.Instance.CustomerCounterTiming, 5));
-                counterListener.StartListening(null);
+                counterListener.StartListening();
                 succeeded = await counterListener.ResetAsync(val);
                 counterListener.StopListening();
             }

@@ -1,0 +1,744 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "solutionName": {
+            "type": "string",
+            "defaultValue": "igniteshelf",
+            "metadata": {
+                "description": "The name of the solution"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },        
+        "username": {
+            "type": "string",
+            "metadata": {
+                "description": "username for SQL database"
+            }
+        },
+        "password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "password for SQL database"
+            }
+        },
+        "dataBoxEdgeDevices_dbe_test_name": {
+            "defaultValue": "retailASE",
+            "type": "String"
+        },
+        "uniqueID": {
+            "type": "string",
+            "defaultValue": "[take(uniqueString(subscription().subscriptionId, resourceGroup().id, parameters('solutionName')), 5)]",
+            "metadata": {
+                "description": "unique string appended to all resource names"
+            }
+        },
+        "serverfarms_EastUS2Plan_name": {
+            "defaultValue": "EastUS2Plan",
+            "type": "String"
+        },
+        "sites_FunctionAppArrivals_name": {
+            "defaultValue": "[concat('FunctionAppArrivals-', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "components_FunctionAppArrivals_name": {
+            "defaultValue": "FunctionAppArrivals",
+            "type": "String"
+        },
+        "registries_ignitecr_name": {
+            "defaultValue": "[concat('ignitecr', parameters('uniqueID'))]",
+            "type": "String"
+        },
+        "databaseAccounts_facedbedb_name": {
+            "defaultValue": "[concat('facedbedb-', parameters('uniqueID'))]",
+            "type": "String"
+        }
+    },
+    "variables": {
+        "solutionType": "RemoteMonitoring",
+        "arrivalsFunctionApp": {
+            "azFunction": {
+                "siteName": "[concat('FunctionAppArrivals-', parameters('uniqueID'))]",
+                "componentsName": "FunctionAppArrivals"
+            },
+            "asaJob": {
+                "name": "StreamingJob-Arrivals",
+                "streamingUnits": 3,
+                "query": "SELECT\n System.Timestamp() AS ArrivalTime,\n CAST(SUM(\"in\") AS BIGINT) AS ArrivalCount,\n \"source\" AS SeriesId\n INTO arrivals\n FROM dbe TIMESTAMP BY \"time\"\n WHERE \"in\" > 0\n GROUP BY \"source\", TUMBLINGWINDOW(s, 5)"  
+            }
+        },
+        "iotHub": {
+            "name": "[concat(parameters('uniqueID'), '-hub')]",            
+            "sku": "S1",
+            "tier": "Standard",
+            "apiVersion": "2019-11-04",
+            "keyName": "iothubowner",
+            "defaultEndpoint": "events"
+        },
+        "iotHubResourceId": "[resourceId('Microsoft.Devices/Iothubs', variables('iotHub').name)]",
+        "iotHubKeyResource": "[resourceId('Microsoft.Devices/Iothubs/Iothubkeys', variables('iotHub').name, variables('iotHub').keyName)]",
+
+        "storageAccounts": {
+            "imageStorage":{
+                "name": "[concat(parameters('uniqueID'), 'storage')]",
+                "sku": "Standard_LRS",
+                "endpointSuffix": "core.windows.net",
+                "resourceId": "[resourceId('Microsoft.Storage/storageAccounts/',  concat(parameters('uniqueID'), 'storage'))]"
+            },
+            "diagnosticsStorage": {
+                "name": "[concat('diag', parameters('uniqueID'))]"
+            },
+            "faceStorage":{
+                "name": "[concat('storagedbeface', parameters('uniqueID'))]"
+            }
+        },
+        "storageApiVersion": "2017-06-01",
+        
+        "cognitiveServices": {
+            "customSpeech":"ignitedemo-speech",
+            "luisAuthoring":"[concat('ignitedemo-luis-Authoring-', parameters('uniqueID'))]",
+            "general": "ignitedemo-cognitiveservices"
+        },
+
+        "sqlServer":{
+            "serverName": "[concat('igniteretaildemo-', parameters('uniqueID'))]",
+            "sqlDatabaseName": "retailexperience",
+            "sqlDatabaseServiceObjective": "Basic",
+            "sqlDatabaseEdition": "Basic"
+        }  
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-02-01",
+            "name": "pid-8db6bde3-9a9c-5d75-894e-6cb26b5547c7",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "comments": "Azure IoT Hub",
+            "apiVersion": "[variables('iotHub').apiVersion]",
+            "type": "Microsoft.Devices/Iothubs",
+            "name": "[variables('iotHub').name]",
+            "location": "[Parameters('location')]",
+            "sku": {
+                "name": "[variables('iotHub').sku]",
+                "tier": "[variables('iotHub').tier]",
+                "capacity": 1
+            },
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "properties": {
+                "location": "[Parameters('location')]",
+                "routing": {
+                    "endpoints": {
+                    },
+                    "routes": [
+                    ],
+                    "fallbackRoute": {
+                        "name": "$fallback",
+                        "source": "DeviceMessages",
+                        "condition": "true",
+                        "endpointNames": [
+                            "[variables('iotHub').defaultEndpoint]"
+                        ],
+                        "isEnabled": true
+                    }
+                }
+            },
+            "dependsOn": [
+            ]
+        },
+        {
+            "comments": "Consumer Group for IoT Hub",
+            "apiVersion": "[variables('iotHub').apiVersion]",
+            "name": "[concat(variables('iotHub').name, '/events/', 'arrivalsstreamingjobconsumergroup')]",
+            "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
+            "dependsOn": [
+                "[concat('Microsoft.Devices/Iothubs/', variables('iotHub').name)]"
+            ]
+        },
+        {
+            "comments": "Azure Container Registry",
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2019-05-01",
+            "name": "[parameters('registries_ignitecr_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard"
+            },
+            "properties": {
+                "adminUserEnabled": true,
+                "policies": {
+                    "quarantinePolicy": {
+                        "status": "disabled"
+                    },
+                    "trustPolicy": {
+                        "type": "Notary",
+                        "status": "disabled"
+                    },
+                    "retentionPolicy": {
+                        "days": 7,
+                        "status": "disabled"
+                    }
+                }
+            }
+        },
+        {
+            "comments": "Storage account for images",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccounts').imageStorage.name]",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "location": "[Parameters('location')]",
+            "tags": {
+                "IotSuiteType": "[variables('solutionType')]"
+            },
+            "kind": "Storage",
+            "sku": {
+                "name": "[variables('storageAccounts').imageStorage.sku]"
+            },
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            }
+        },
+        {
+            "comments": "Blob services connection for above images storage account",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(variables('storageAccounts').imageStorage.name, '/default/still-images')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts').imageStorage.name)]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "comments": "SQL Server",
+            "type": "Microsoft.Sql/servers",
+            "kind": "v12.0",
+            "name": "[variables('sqlServer').serverName]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[parameters('location')]",
+            "properties": {
+                "administratorLogin": "[parameters('username')]",
+                "administratorLoginPassword": "[parameters('password')]",
+                "version": "12.0"
+            },
+            "resources": [
+                {
+                    "comments": "Database for storing images",
+                    "name": "[variables('sqlServer').sqlDatabaseName]",
+                    "type": "databases",
+                    "apiVersion": "2015-05-01-preview",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[variables('sqlServer').serverName]"
+                    ],
+                    "properties": {
+                        "edition": "[variables('sqlServer').sqlDatabaseEdition]",
+                        "requestedServiceObjectiveName": "[variables('sqlServer').sqlDatabaseServiceObjective]"
+                    }
+                }
+            ]
+        },
+        {
+            "comments": "Cognitive services account for edge deployment",
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[variables('cognitiveServices').general]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "CognitiveServices",
+            "properties": {
+                "apiProperties": {
+                    "statisticsEnabled": false
+                }
+            }
+        },
+        {
+            "comments": "LUIS authoring endpoint",
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[variables('cognitiveServices').luisAuthoring]",
+            "location": "westus",
+            "sku": {
+                "name": "F0"
+            },
+            "kind": "LUIS.Authoring",
+            "properties": {
+                "customSubDomainName": "[variables('cognitiveServices').luisAuthoring]"
+            }
+        },
+        {
+            "comments": "Custom Speech account",
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2017-04-18",
+            "name": "[variables('cognitiveServices').customSpeech]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "SpeechServices",
+            "properties": {
+            }
+        },
+        {
+            "comments": "Storage account for Face API Cognitive services",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('storageAccounts').faceStorage.name]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_RAGRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [
+                    ],
+                    "ipRules": [
+                    ],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },        
+        {
+            "comments": "blob services for Face API",
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(variables('storageAccounts').faceStorage.name, '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts').faceStorage.name)]"
+            ],
+            "sku": {
+                "name": "Standard_RAGRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": [
+                    ]
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "comments": "container for Face API",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(variables('storageAccounts').faceStorage.name, '/default/pgtr')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccounts').faceStorage.name, 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts').faceStorage.name)]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "comments": "Cosmos DB account for persisting Face data across container runs",
+            "type": "Microsoft.DocumentDB/databaseAccounts",
+            "apiVersion": "2019-08-01",
+            "name": "[parameters('databaseAccounts_facedbedb_name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "defaultExperience": "Azure Cosmos DB for MongoDB API"
+            },
+            "kind": "MongoDB",
+            "properties": {
+                "enableAutomaticFailover": false,
+                "enableMultipleWriteLocations": false,
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [
+                ],
+                "disableKeyBasedMetadataWriteAccess": false,
+                "databaseAccountOfferType": "Standard",
+                "consistencyPolicy": {
+                    "defaultConsistencyLevel": "Session",
+                    "maxIntervalInSeconds": 5,
+                    "maxStalenessPrefix": 100
+                },
+                "locations": [
+                    {
+                        "locationName": "[parameters('location')]",
+                        "provisioningState": "Succeeded",
+                        "failoverPriority": 0,
+                        "isZoneRedundant": false
+                    }
+                ],
+                "capabilities": [
+                ]
+            }
+        },
+        {
+            "comments": "ASA Job for tracking foot traffic to SQL DB",
+            "type": "Microsoft.StreamAnalytics/streamingjobs",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('arrivalsFunctionApp').asaJob.name]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "sku": {
+                    "name": "Standard"
+                },
+                "inputs": [
+                    {
+                        "name": "dbe",
+                        "properties": {
+                            "datasource": {
+                                "properties": {
+                                    "consumerGroupName": "arrivalsstreamingjobconsumergroup",
+                                    "iotHubNamespace": "[variables('iotHub').name]",
+                                    "sharedAccessPolicyKey": "[listkeys(variables('iotHubKeyResource'), variables('iotHub').apiVersion).primaryKey]",
+                                    "sharedAccessPolicyName": "[variables('iotHub').keyName]",
+                                    "endpoint": "messages/events"
+                                },
+                                "type": "Microsoft.Devices/IotHubs"
+                            },
+                            "serialization": {
+                                "properties": {
+                                    "encoding": "UTF8"
+                                },
+                                "type": "Json"
+                            },
+                            "type": "Stream"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "Arrivals",
+                        "properties": {
+                            "datasource": {
+                                "type": "Microsoft.Sql/Server/Database",
+                                "properties": {
+                                    "table": "dbo.arrivals",
+                                    "server": "[concat(variables('sqlServer').serverName, '.database.windows.net')]",
+                                    "database": "[variables('sqlServer').sqlDatabaseName]",
+                                    "user": "[parameters('username')]",
+                                    "password": "[parameters('password')]"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "transformation": {
+                    "name": "get_arrivals",
+                    "properties": {
+                        "query": "[variables('arrivalsFunctionApp').asaJob.query]",
+                        "streamingUnits": "[variables('arrivalsFunctionApp').asaJob.streamingUnits]"
+                    }
+                },
+                "outputStartMode": "JobStartTime",
+                "eventsOutOfOrderPolicy": "Adjust",
+                "outputErrorPolicy": "Stop",
+                "eventsOutOfOrderMaxDelayInSeconds": 0,
+                "eventsLateArrivalMaxDelayInSeconds": 5,
+                "dataLocale": "en-US",
+                "compatibilityLevel": "1.1"
+            }
+        },
+        {
+            "comments": "Server Farm for AZ Function Arrivals App",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('serverfarms_EastUS2Plan_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "kind": "functionapp",
+            "properties": {
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "comments": "App Insights account for Arrivals App",
+            "type": "microsoft.insights/components",
+            "apiVersion": "2015-05-01",
+            "name": "[parameters('components_FunctionAppArrivals_name')]",
+            "location": "[parameters('location')]",
+            "tags": {                
+                "[concat('hidden-link:/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/', parameters('components_FunctionAppArrivals_name'))]": "Resource"
+            },
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Flow_Type": "Bluefield",
+                "Request_Source": "rest"
+            }
+        },
+        {
+            "comments": "Site for Arrivals App",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('sites_FunctionAppArrivals_name')]",
+            "location": "[parameters('location')]",
+            "kind": "functionapp",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "functionapparrivals.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "functionapparrivals.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_EastUS2Plan_name'))]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 1536,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_EastUS2Plan_name'))]"
+            ]
+        },
+        {
+            "comments": "Site configuration for Arrivals App",
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_FunctionAppArrivals_name'), '/web')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_FunctionAppArrivals_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$FunctionAppArrivals",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": [
+                    ]
+                },
+                "autoHealEnabled": false,
+                "cors": {
+                    "allowedOrigins": [
+                        "https://functions.azure.com",
+                        "https://functions-staging.azure.com",
+                        "https://functions-next.azure.com"
+                    ],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "comments": "Host Name Reservation for Arrivals App",
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_FunctionAppArrivals_name'), '/', parameters('sites_FunctionAppArrivals_name'), '.azurewebsites.net')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_FunctionAppArrivals_name'))]"
+            ],
+            "properties": {
+                "siteName": "FunctionAppArrivals",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "comments": "Diagnostics Storage Account",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('storageAccounts').diagnosticsStorage.name]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [
+                    ],
+                    "ipRules": [
+                    ],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(variables('storageAccounts').diagnosticsStorage.name, '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts').diagnosticsStorage.name)]"
+            ],
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": [
+                    ]
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(variables('storageAccounts').diagnosticsStorage.name, '/default/bootdiagnostics-container-766a8efd-e593-47b7-b991-d9be310a7006')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccounts').diagnosticsStorage.name, 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts').diagnosticsStorage.name)]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        }
+    ],
+    "outputs": {
+        "subscriptionId": {
+            "type": "string",
+            "value": "[subscription().subscriptionId]"
+        },
+        "resourceGroup": {
+            "type": "string",
+            "value": "[resourceGroup().name]"
+        },
+        "iotHubHostName": {
+            "type": "string",
+            "value": "[variables('iotHub').name]"
+        },
+        "iotHubConnectionString": {
+            "type": "string",
+            "value": "[concat('HostName=', reference(variables('iotHubResourceId')).hostName, ';SharedAccessKeyName=', variables('iotHub').keyName, ';SharedAccessKey=', listkeys(variables('iotHubKeyResource'), variables('iotHub').apiVersion).primaryKey)]"
+        },      
+        "storageAccountName": {
+            "type": "string",
+            "value": "[variables('storageAccounts').imageStorage.name]"
+        },
+        "storageAccountKey": {
+            "type": "string",
+            "value": "[listKeys(variables('storageAccounts').imageStorage.resourceId, providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+        },
+        "storageConnectionString": {
+            "type": "string",
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccounts').imageStorage.name, ';AccountKey=', listkeys(variables('storageAccounts').imageStorage.resourceId, variables('storageApiVersion')).keys[0].value, ';EndpointSuffix=', variables('storageAccounts').imageStorage.endpointSuffix)]"
+        }
+    }
+}

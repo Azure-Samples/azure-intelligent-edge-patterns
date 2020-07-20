@@ -1,0 +1,50 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  name: tf-mnist-w-tb
+spec:
+  tfReplicaSpecs:
+    MASTER:
+      replicas: 1
+      template:
+        spec:
+          volumes:
+            - name: samba-share-volume2
+              persistentVolumeClaim:
+                claimName: samba-share-claim
+          containers:
+          - image: rollingstone/tf-mnist-w-tb:latest
+            name: tensorflow
+            imagePullPolicy: Always
+            resources:
+              limits:
+            #    nvidia.com/gpu: 1
+            volumeMounts:
+              - mountPath: /tmp/tensorflow
+                subPath: tf-mnist-w-tb
+                name: samba-share-volume2
+          restartPolicy: OnFailure
+    WORKER:
+      replicas: 2
+      template:
+        spec:
+          containers:
+          - image: rollingstone/tf-mnist-w-tb:latest
+            name: tensorflow
+            imagePullPolicy: Always
+            resources:
+              limits:
+            #    nvidia.com/gpu: 1
+            volumeMounts:
+          restartPolicy: OnFailure
+    PS:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - image: rollingstone/tf-mnist-w-tb:latest
+            name: tensorflow
+            imagePullPolicy: Always
+            ports:
+            - containerPort: 6006
+          restartPolicy: OnFailure

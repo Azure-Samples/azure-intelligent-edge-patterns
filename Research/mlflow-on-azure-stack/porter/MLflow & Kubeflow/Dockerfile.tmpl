@@ -1,0 +1,6 @@
+FROM debian:stretch
+ARG BUNDLE_DIR
+RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get install -y wget
+# Use the BUNDLE_DIR build argument to copy files into the bundle
+COPY . $BUNDLE_DIR

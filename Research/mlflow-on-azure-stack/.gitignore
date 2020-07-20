@@ -1,0 +1,3 @@
+# CNAB generated files
+*.cnab
+porter/Dockerfile

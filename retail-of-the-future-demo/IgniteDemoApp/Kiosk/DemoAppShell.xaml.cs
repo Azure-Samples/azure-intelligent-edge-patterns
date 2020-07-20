@@ -33,6 +33,7 @@ namespace IntelligentKioskSample
                 new NavMenuItem() { Glyph = "\uE7BF", Label = "Checkout", DestPage = typeof(CheckoutPage) },
                 new NavMenuItem() { Glyph = "\uE781", Label = "Retail Insights", DestPage = typeof(InsightsPage) },
                 new NavMenuItem() { Glyph = "\uE8BD", Label = "Welcome", DestPage = typeof(DemoWelcomePage) },
+                new NavMenuItem() { Glyph = "\uE719", Label = "Shopping", DestPage = typeof(ShoppingPage) },
                 new NavMenuItem() { Glyph = "\uE8D4", Label = "Face Identification Setup", DestPage = typeof(FaceIdentificationSetup) },
                 new NavMenuItem() { Glyph = "\uE77B", Label = "Greeting Kiosk", DestPage = typeof(GreetingKiosk) }
             }
@@ -51,7 +52,7 @@ namespace IntelligentKioskSample
             // Hide debug only items
             if (!SettingsHelper.Instance.ShowDebugInfo)
             {
-                for (int i = 4; i < DemoMenuItems.Count; i++)
+                for (int i = 5; i < DemoMenuItems.Count; i++)
                 {
                     var containerMenuItem = nvTopLevelNav.ContainerFromMenuItem(DemoMenuItems[i]) as NavigationViewItem;
                     if (containerMenuItem != null) { containerMenuItem.Visibility = Visibility.Collapsed; }

@@ -258,7 +258,7 @@
             "properties": {
               "addressPrefix": "[variables('VNet2AddressSpace')]",
               "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('VNet2InternalGW')]"
+              "nextHopIpAddress": "[variables('VNet1InternalGW')]"
             }
           }
         ]
@@ -276,7 +276,7 @@
             "properties": {
               "addressPrefix": "[variables('VNet1AddressSpace')]",
               "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('VNet1InternalGW')]"
+              "nextHopIpAddress": "[variables('VNet2InternalGW')]"
             }
           }
         ]

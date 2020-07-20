@@ -1,4 +1,4 @@
-FROM  ignite/base:latest
+FROM  intelligentretail/base:latest
 
 COPY ./camera-stream /camera-stream
 RUN /bin/bash -c "chmod +x ./camera-stream/run_camera.sh"
