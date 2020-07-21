@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text } from '@fluentui/react-northstar';
 
@@ -8,7 +8,6 @@ import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
-import { JudgedImageList } from '../components/ManualIdentification/types';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
 interface LabelingPageProps {
@@ -16,7 +15,6 @@ interface LabelingPageProps {
   images: LabelImage[];
   imageIndex: number;
   closeDialog: () => void;
-  setJudgedImageList?: Dispatch<SetStateAction<JudgedImageList>>;
   isRelabel: boolean;
 }
 const LabelingPage: FC<LabelingPageProps> = ({

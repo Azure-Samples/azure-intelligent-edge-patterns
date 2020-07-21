@@ -25,7 +25,6 @@ import { LabelImage } from '../store/image/imageTypes';
 import { getFilteredImages } from '../util/getFilteredImages';
 import { thunkGetProject } from '../store/project/projectActions';
 import { getLabelImages } from '../store/image/imageActions';
-import { JudgedImageList } from '../components/ManualIdentification/types';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
 
 const ManualIdentification: FC = () => {
