@@ -73,6 +73,6 @@
     E.  Verify the logs on inference module : some onnxruntime warning but
         initializer scalepreprocessor scale.
 
-    > ![](media/image12.png)
+   > ![](media/image12.png)
 
     F.  Done and Enjoy your WSL2 !
