@@ -11,9 +11,21 @@ export type Location = {
 export const GET_LOCATION_SUCCESS = 'GET_LOCATION_SUCCESS';
 export const REQUEST_LOCATION_FAILURE = 'REQUEST_LOCATION_FAILURE';
 export const POST_LOCATION_SUCCESS = 'POST_LOCATION_SUCCESS';
+export const DELETE_LOCATION_REQUEST = 'DELETE_LOCATION_REQUEST';
+export const DELETE_LOCATION_FAILURE = 'DELETE_LOCATION_FAILURE';
+export const DELETE_LOCATION_SUCCESS = 'DELETE_LOCATION_SUCCESS';
 
 export type GetLocationsSuccess = { type: typeof GET_LOCATION_SUCCESS; payload: Location[] };
 export type RequestLocationsFailure = { type: typeof REQUEST_LOCATION_FAILURE };
 export type PostLocationSuccess = { type: typeof POST_LOCATION_SUCCESS; payload: Location };
+export type DeleteLocationRequest = { type: typeof DELETE_LOCATION_REQUEST };
+export type DeleteLocationSuccess = { type: typeof DELETE_LOCATION_SUCCESS; payload: { id: number } };
+export type DeleteLocationFaliure = { type: typeof DELETE_LOCATION_FAILURE };
 
-export type LocationAction = GetLocationsSuccess | RequestLocationsFailure | PostLocationSuccess;
+export type LocationAction =
+  | GetLocationsSuccess
+  | RequestLocationsFailure
+  | PostLocationSuccess
+  | DeleteLocationRequest
+  | DeleteLocationSuccess
+  | DeleteLocationFaliure;
