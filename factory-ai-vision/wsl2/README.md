@@ -1,3 +1,6 @@
+# RUNNING FACTORY AI ON WSL2 with GPU Acceleration Enabled
+
+
 1.  WSL2 Environment Setup :
 
     A.  Surface Book2 with GTX 1060
