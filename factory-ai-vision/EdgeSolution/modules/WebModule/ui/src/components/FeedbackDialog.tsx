@@ -6,6 +6,7 @@ import {
   Flex,
   ShorthandCollection,
   RadioGroupItemProps,
+  CloseIcon,
 } from '@fluentui/react-northstar';
 import Axios from 'axios';
 
@@ -67,6 +68,7 @@ const feedbackItems: ShorthandCollection<RadioGroupItemProps> = [
 ];
 
 const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [satisfaction, setSatisfaction] = useState<Feedback>(null);
   const [status, setStatus] = useState<Status>(Status.None);
   const [error, setError] = useState<Error>(null);
@@ -80,11 +82,14 @@ const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
       setStatus(Status.Failed);
       setError(handleAxiosError(e));
     }
+    setDialogOpen(false);
   };
 
   return (
     <>
       <Dialog
+        open={dialogOpen}
+        onOpen={(): void => setDialogOpen(true)}
         styles={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         header="Your Feedback is greatly Appreciated!"
         content={
@@ -113,6 +118,12 @@ const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
           },
         }}
         trigger={trigger}
+        headerAction={{
+          icon: <CloseIcon />,
+          title: 'Close',
+          onClick: (): void => setDialogOpen(false),
+          styles: { position: 'absolute', right: '10px', top: '10px' },
+        }}
       />
       <LoadingDialog
         status={status}
