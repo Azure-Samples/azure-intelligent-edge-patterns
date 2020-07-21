@@ -115,19 +115,9 @@ class Project(models.Model):
         logger.info("Project pre_save... End")
 
     @staticmethod
-    def post_save(created, update_fields, **kwargs):
+    def post_save(sender, instance, created, update_fields, **kwargs):
         """Project post_save"""
         logger.info("Project post_save")
-
-        if 'sender' not in kwargs or kwargs['sender'] is not Project:
-            return
-        if 'instance' not in kwargs:
-            return
-
-        instance = kwargs['instance']
-        if not instance.has_configured:
-            return
-
         logger.info("Saving instance: %s %s", instance, update_fields)
 
         confidence_min = 30

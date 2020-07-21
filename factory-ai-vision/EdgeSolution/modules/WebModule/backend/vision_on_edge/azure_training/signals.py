@@ -82,11 +82,11 @@ def azure_project_train_status_handler(**kwargs):
         )
 
 
-@receiver(signal=pre_save,
+@receiver(signal=post_save,
           sender=Project,
-          dispatch_uid="change_project_has_configured")
-def azure_project_has_configured_handler(**kwargs):
-    """Project has_configured handler
+          dispatch_uid="change_project_is_configured")
+def azure_project_is_configured_handler(**kwargs):
+    """Project is_configured handler
 
     For now, only one project can have is configured = True
     """
@@ -99,11 +99,12 @@ def azure_project_has_configured_handler(**kwargs):
         logger.info("nothing to do")
         return
     if 'instance' not in kwargs:
-        logger.info("'instance' not in kwargs'")
+        logger.info("'instance' not in kwargs:'")
         logger.info("Nothing to do")
         return
     instance = kwargs['instance']
-    if instance.has_configured:
+    if instance.has_configured and instance.has_configured != Project.objects.get(
+            pk=instance.id).has_configured:
         for other_project in Project.objects.exclude(id=instance.id):
             other_project.has_configured = False
             other_project.save()
