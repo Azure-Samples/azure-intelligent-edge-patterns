@@ -291,7 +291,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                     predictions_to_send.append(prediction)
                                 if len(predictions_to_send) > 0:
                                     if iot:
-                                        iot.send_message_to_output(json.dumps(predictions_to_send), 'metrics')
+                                        try:
+                                            iot.send_message_to_output(json.dumps(predictions_to_send), 'metrics')
+                                        except:
+                                            print('[ERROR] Failed to send message to iothub', flush=True)
                                         print('[INFO] sending metrics to iothub')
                                     else:
                                         #print('[METRICS]', json.dumps(predictions_to_send))
