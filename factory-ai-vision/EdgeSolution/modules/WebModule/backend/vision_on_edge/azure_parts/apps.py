@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class AzurePartsConfig(AppConfig):
     """App Config
-    
+
     Import models and signals and create some demo objects
     """
     name = 'vision_on_edge.azure_parts'

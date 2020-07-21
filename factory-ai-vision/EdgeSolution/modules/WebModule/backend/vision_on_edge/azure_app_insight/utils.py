@@ -12,7 +12,7 @@ from configs.app_insight import APP_INSIGHT_CONN_STR
 
 def get_app_insight_logger() -> logging.Logger:
     """get_app_insight_logger.
-    
+
     Return a logger with AzureLogHandler added.
 
     Args:
