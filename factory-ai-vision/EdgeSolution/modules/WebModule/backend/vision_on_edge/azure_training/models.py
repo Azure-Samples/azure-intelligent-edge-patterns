@@ -64,13 +64,22 @@ class Project(models.Model):
 
     @staticmethod
     def pre_save(sender, instance, update_fields, **kwargs):
-        """Project pre_save"""
+        """pre_save.
+
+        Args:
+            kwargs:
+        """
+
         logger.info("Project pre_save")
         logger.info("Saving instance: %s %s", instance, update_fields)
-        if update_fields is not None:
+        if 'sender' not in kwargs or kwargs['sender'] is not Project:
             return
-        # if instance.id is not None:
-        #    return
+        if 'instance' not in kwargs:
+            return
+        if 'update_fields' not in kwargs or kwargs['update_fields'] is not None:
+            return
+
+        instance = kwargs['instance']
 
         trainer = instance.setting.revalidate_and_get_trainer_obj()
         if instance.is_demo:
@@ -115,17 +124,31 @@ class Project(models.Model):
         logger.info("Project pre_save... End")
 
     @staticmethod
-    def post_save(sender, instance, created, update_fields, **kwargs):
-        """Project post_save"""
+    def post_save(created, update_fields, **kwargs):
+        """Project post_save
+        """
         logger.info("Project post_save")
-        logger.info("Saving instance: %s %s", instance, update_fields)
 
+        if 'sender' not in kwargs or kwargs['sender'] is not Project:
+            return
+
+        if 'instance' not in kwargs:
+            return
+
+        if not kwargs['instance'].has_configured:
+            logger.error("This project is not configured to as inference")
+            logger.error("Not sending any request to inference")
+            return
+
+        instance = kwargs['instance']
         confidence_min = 30
         confidence_max = 80
         max_images = 10
         metrics_is_send_iothub = False
         metrics_accuracy_threshold = 50
         metrics_frame_per_minutes = 6
+
+        logger.info("Saving instance: %s %s", instance, update_fields)
 
         if instance.accuracyRangeMin is not None:
             confidence_min = instance.accuracyRangeMin

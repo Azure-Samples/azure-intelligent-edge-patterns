@@ -59,6 +59,7 @@ def azure_project_train_status_handler(**kwargs):
 
     If a Project is created, create a Train(Training Status) as well.
     """
+
     logger.info("Azure Project changed.")
     logger.info("Checking...")
 
@@ -70,7 +71,9 @@ def azure_project_train_status_handler(**kwargs):
         logger.info("'instance' not in kwargs:'")
         logger.info("Nothing to do")
         return
+
     instance = kwargs['instance']
+    logger.info("Creating Train objects")
     if Train.objects.filter(project_id=instance.id).count() < 1:
         Train.objects.update_or_create(
             project_id=instance.id,
@@ -80,9 +83,10 @@ def azure_project_train_status_handler(**kwargs):
                 "performance": ""
             },
         )
+    logger.info("Signals end")
 
 
-@receiver(signal=post_save,
+@receiver(signal=pre_save,
           sender=Project,
           dispatch_uid="change_project_is_configured")
 def azure_project_is_configured_handler(**kwargs):
@@ -102,9 +106,12 @@ def azure_project_is_configured_handler(**kwargs):
         logger.info("'instance' not in kwargs:'")
         logger.info("Nothing to do")
         return
+
     instance = kwargs['instance']
-    if instance.has_configured and instance.has_configured != Project.objects.get(
-            pk=instance.id).has_configured:
+    logger.info("Changing has_configured")
+    if instance.has_configured:
         for other_project in Project.objects.exclude(id=instance.id):
             other_project.has_configured = False
             other_project.save()
+
+    logger.info("Signal end")
