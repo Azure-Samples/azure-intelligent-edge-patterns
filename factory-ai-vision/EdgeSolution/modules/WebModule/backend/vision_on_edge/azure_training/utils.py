@@ -1,6 +1,7 @@
 """
 Project Utilities
 """
+
 import logging
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
