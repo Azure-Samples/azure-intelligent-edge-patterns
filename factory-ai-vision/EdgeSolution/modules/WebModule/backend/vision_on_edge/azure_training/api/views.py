@@ -734,11 +734,13 @@ def pull_cv_project(request, project_id):
 
     try:
         # Invalid CustomVision Project ID handled by exception
-        trainer.get_project(project_id=customvision_project_id)
-
+        project_obj.customvision_project_name = trainer.get_project(
+            project_id=customvision_project_id).name
         project_obj.customvision_project_id = customvision_project_id
         project_obj.deployed = False
-        update_fields.extend(["customvision_project_id", "deployed"])
+        update_fields.extend([
+            "customvision_project_name", "customvision_project_id", "deployed"
+        ])
 
         logger.info("Deleting all parts and images...")
         Part.objects.filter(is_demo=False).delete()
