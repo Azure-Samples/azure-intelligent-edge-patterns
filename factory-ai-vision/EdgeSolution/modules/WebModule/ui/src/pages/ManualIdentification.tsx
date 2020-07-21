@@ -65,7 +65,6 @@ const ManualIdentification: FC = () => {
   ]);
   const [ascend, setAscend] = useState<boolean>(false);
   const sortRef = useRef({ sorted: false, prevIsAscend: false });
-  const [judgedImageList, setJudgedImageList] = useState<JudgedImageList>([]);
 
   useEffect(() => {
     dispatch(thunkGetProject(false));
@@ -142,13 +141,8 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
-        <ImagesContainer
-          images={relabelImages}
-          judgedImageList={judgedImageList}
-          setJudgedImageList={setJudgedImageList}
-          selectedPartId={selectedPartId}
-        />
-        <Button
+        <ImagesContainer images={relabelImages} selectedPartId={selectedPartId} />
+        {/* <Button
           content="Update"
           styles={{ width: '15%' }}
           primary
@@ -168,7 +162,7 @@ const ManualIdentification: FC = () => {
                 console.error(err);
               });
           }}
-        />
+        /> */}
       </Flex>
     </>
   );

@@ -13,7 +13,6 @@ import {
   REMOVE_IMAGES_FROM_PART,
   RemoveImagesFromPartAction,
 } from './imageTypes';
-import { Annotation } from '../labelingPage/labelingPageTypes';
 
 const getLabelImagesSuccess = (data: LabelImage[]): GetLabelImagesSuccess => ({
   type: GET_LABEL_IMAGE_SUCCESS,
@@ -101,7 +100,7 @@ export const deleteLabelImage = (id: number) => (dispatch): Promise<void> => {
     });
 };
 
-export const saveLabelImageAnnotation = (imageId: number, needJustify: boolean) => (
+export const saveLabelImageAnnotation = (imageId: number, hasRelabeled: boolean, isRelabelDone?: boolean) => (
   dispatch,
   getState,
 ): Promise<void> => {
@@ -126,10 +125,10 @@ export const saveLabelImageAnnotation = (imageId: number, needJustify: boolean) 
             id: annotations[0].part.id ?? data.part,
             name: annotations[0].part.name,
           },
-          needJustify,
+          hasRelabeled,
         ),
       );
-      // dispatch(requestAnnotationsSuccess(annotations));
+      if (isRelabelDone) dispatch(removeImagesFromPart());
       return void 0;
     })
     .catch((err) => {
@@ -144,12 +143,11 @@ const updateLabelImageAnnotation = (
   needJustify,
 ): UpdateLabelImageAnnotation => ({
   type: UPDATE_LABEL_IMAGE_ANNOTATION,
-  payload: { id: imageId, labels, part, needJustify },
+  payload: { id: imageId, labels, part, hasRelabeled: needJustify },
 });
 
-export const removeImagesFromPart = (imageIds: number[]): RemoveImagesFromPartAction => {
+export const removeImagesFromPart = (): RemoveImagesFromPartAction => {
   return {
     type: REMOVE_IMAGES_FROM_PART,
-    payload: { imageIds },
   };
 };

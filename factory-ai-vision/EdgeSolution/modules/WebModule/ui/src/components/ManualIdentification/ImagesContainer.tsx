@@ -1,21 +1,13 @@
-import React, { FC, Dispatch, memo } from 'react';
+import React, { FC, memo } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import ImageIdentificationItem from './ImageItem';
-import { JudgedImageList } from './types';
 import { LabelImage } from '../../store/image/imageTypes';
 
 interface ImagesContainerProps {
   images: LabelImage[];
-  judgedImageList: JudgedImageList;
-  setJudgedImageList: Dispatch<JudgedImageList>;
   selectedPartId: number;
 }
-const ImagesContainer: FC<ImagesContainerProps> = ({
-  images,
-  judgedImageList,
-  setJudgedImageList,
-  selectedPartId,
-}) => (
+const ImagesContainer: FC<ImagesContainerProps> = ({ images, selectedPartId }) => (
   <Grid
     columns="2"
     styles={{
@@ -27,28 +19,15 @@ const ImagesContainer: FC<ImagesContainerProps> = ({
       rowGap: '10px',
     }}
   >
-    {images.map((img, i) => {
-      let isPartCorrect: number = null;
-      const idx = judgedImageList.findIndex((e) => e.imageId === img.id);
-
-      if (idx >= 0) {
-        if (judgedImageList[idx].partId === selectedPartId) {
-          isPartCorrect = 1;
-        } else isPartCorrect = 0;
-      }
-
-      return (
-        <ImageIdentificationItem
-          key={img.id}
-          confidenceLevel={img.confidence}
-          imageIndex={i}
-          relabelImages={images}
-          isPartCorrect={isPartCorrect}
-          setJudgedImageList={setJudgedImageList}
-          partId={selectedPartId}
-        />
-      );
-    })}
+    {images.map((img, i) => (
+      <ImageIdentificationItem
+        key={img.id}
+        confidenceLevel={img.confidence}
+        imageIndex={i}
+        relabelImages={images}
+        partId={selectedPartId}
+      />
+    ))}
   </Grid>
 );
 

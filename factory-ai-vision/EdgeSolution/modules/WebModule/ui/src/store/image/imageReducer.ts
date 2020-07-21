@@ -30,14 +30,14 @@ const labelImagesReducer = (state = initialState.images, action: LabelImageActio
         ...newState[updatedImageIdx],
         labels: action.payload.labels,
         part: action.payload.part,
-        needJustify: action.payload.needJustify,
+        hasRelabeled: action.payload.hasRelabeled,
       };
       return newState;
     }
     case REMOVE_IMAGES_FROM_PART:
-      return state.map((image) => {
-        if (action.payload.imageIds.includes(image?.id)) return { ...image, part: { id: null, name: '' } };
-        return image;
+      return state.map((img) => {
+        if (!img.is_relabel) return img;
+        return { ...img, part: img.hasRelabeled ? img.part : { id: null, name: '' } };
       });
     default:
       return state;

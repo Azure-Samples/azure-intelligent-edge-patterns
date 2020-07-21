@@ -1,23 +1,19 @@
-import React, { SetStateAction, Dispatch, FC, memo } from 'react';
+import React, { FC, memo } from 'react';
 import { Text } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
 import LabelingPageDialog from '../LabelingPageDialog';
-import { JudgedImageList } from './types';
 import { LabelImage } from '../../store/image/imageTypes';
 
 interface ImageIdentificationItemProps {
   confidenceLevel: number;
   relabelImages: LabelImage[];
   imageIndex: number;
-  setJudgedImageList: Dispatch<SetStateAction<JudgedImageList>>;
   partId: number;
-  isPartCorrect: number;
 }
 const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   confidenceLevel,
   relabelImages,
   imageIndex,
-  setJudgedImageList,
 }) => {
   return (
     <div
@@ -32,7 +28,6 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         imageIndex={imageIndex}
         images={relabelImages}
         isRelabel={true}
-        setJudgedImageList={setJudgedImageList}
         trigger={
           <div
             style={{
