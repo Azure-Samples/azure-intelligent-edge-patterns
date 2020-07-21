@@ -57,7 +57,7 @@
 
     A.  Check WebModule is running :
 
-> iotedge logs -f WebModule \--tail 500
+         iotedge logs -f WebModule \--tail 500
 
     B.  Go to <http://localhost:8080/> and add a new location.
 
