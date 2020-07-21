@@ -11,7 +11,6 @@ import {
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
 import { useHistory } from 'react-router-dom';
-import Axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
@@ -24,7 +23,7 @@ import { ProjectData } from '../store/project/projectTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { getFilteredImages } from '../util/getFilteredImages';
 import { thunkGetProject } from '../store/project/projectActions';
-import { getLabelImages } from '../store/image/imageActions';
+import { getLabelImages, thunkUpdateRelabel } from '../store/image/imageActions';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
 
 const ManualIdentification: FC = () => {
@@ -86,11 +85,23 @@ const ManualIdentification: FC = () => {
     [ascend, confidenceLevelRange, images],
   );
 
+  const updateBtnDisabled = useMemo(() => images.filter((e) => e.hasRelabeled).length === 0, [images]);
+
   // const onDropdownChange = (_, { value }): void => {
   //   if (value !== null) {
   //     setSelectedPartItem(value);
   //   }
   // };
+
+  const onUpdate = async (): Promise<void> => {
+    try {
+      await dispatch(thunkUpdateRelabel());
+      history.push('/partIdentification');
+      dispatch(getLabelImages());
+    } catch (e) {
+      alert(e);
+    }
+  };
 
   return (
     <>
@@ -141,27 +152,13 @@ const ManualIdentification: FC = () => {
           </Flex>
         </Grid>
         <ImagesContainer images={relabelImages} selectedPartId={selectedPartId} />
-        {/* <Button
+        <Button
           content="Update"
           styles={{ width: '15%' }}
           primary
-          disabled={judgedImageList.length === 0}
-          onClick={(): void => {
-            Axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
-              .then(() => {
-                // * Check if all relabelImages are updated
-                // TODO: Use response to update
-                history.push('/partIdentification');
-
-                dispatch(getLabelImages());
-                setJudgedImageList([]);
-                return void 0;
-              })
-              .catch((err) => {
-                console.error(err);
-              });
-          }}
-        /> */}
+          disabled={updateBtnDisabled}
+          onClick={onUpdate}
+        />
       </Flex>
     </>
   );

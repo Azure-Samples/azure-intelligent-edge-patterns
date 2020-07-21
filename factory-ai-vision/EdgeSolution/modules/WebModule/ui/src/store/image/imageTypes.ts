@@ -20,6 +20,10 @@ export const REQUEST_LABEL_IMAGE_FAILURE = 'REQUEST_LABEL_IMAGE_FAILURE';
 export const UPDATE_LABEL_IMAGE_ANNOTATION = 'UPDATE_LABEL_IMAGE_ANNOTATION';
 export const REMOVE_IMAGES_FROM_PART = 'REMOVE_IMAGES_FROM_PART';
 
+export const UPDATE_RELABEL_REQUEST = 'UPDATE_RELABEL_REQUEST';
+export const UPDATE_RELABEL_SUCCESS = 'UPDATE_RELABEL_SUCCESS';
+export const UPDATE_RELABEL_FAILED = 'UPDATE_RELABEL_FAILED';
+
 export type GetLabelImagesSuccess = { type: typeof GET_LABEL_IMAGE_SUCCESS; payload: LabelImage[] };
 export type PostLabelImageSuccess = { type: typeof POST_LABEL_IMAGE_SUCCESS; payload: LabelImage };
 export type DeleteLabelImageSuccess = { type: typeof DELETE_LABEL_IMAGE_SUCCESS; payload: { id: number } };
@@ -32,10 +36,17 @@ export type RemoveImagesFromPartAction = {
   type: typeof REMOVE_IMAGES_FROM_PART;
 };
 
+export type UpdateRelabelRequestAction = { type: typeof UPDATE_RELABEL_REQUEST };
+export type UpdateRelabelSuccessAction = { type: typeof UPDATE_RELABEL_SUCCESS };
+export type UpdateRelabelFailedAction = { type: typeof UPDATE_RELABEL_FAILED };
+
 export type LabelImageAction =
   | GetLabelImagesSuccess
   | PostLabelImageSuccess
   | DeleteLabelImageSuccess
   | RequestLabelImagesFailure
   | UpdateLabelImageAnnotation
-  | RemoveImagesFromPartAction;
+  | RemoveImagesFromPartAction
+  | UpdateRelabelRequestAction
+  | UpdateRelabelSuccessAction
+  | UpdateRelabelFailedAction;

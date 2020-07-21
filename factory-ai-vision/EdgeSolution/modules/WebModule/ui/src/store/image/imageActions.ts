@@ -12,7 +12,14 @@ import {
   UpdateLabelImageAnnotation,
   REMOVE_IMAGES_FROM_PART,
   RemoveImagesFromPartAction,
+  UpdateRelabelRequestAction,
+  UPDATE_RELABEL_REQUEST,
+  UPDATE_RELABEL_SUCCESS,
+  UPDATE_RELABEL_FAILED,
+  UpdateRelabelSuccessAction,
+  UpdateRelabelFailedAction,
 } from './imageTypes';
+import { handleAxiosError } from '../../util/handleAxiosError';
 
 const getLabelImagesSuccess = (data: LabelImage[]): GetLabelImagesSuccess => ({
   type: GET_LABEL_IMAGE_SUCCESS,
@@ -33,6 +40,26 @@ export const postLabelImageSuccess = (image: LabelImage): PostLabelImageSuccess 
   type: POST_LABEL_IMAGE_SUCCESS,
   payload: image,
 });
+
+const updateLabelImageAnnotation = (
+  imageId: number,
+  labels: any,
+  part: { id: number; name: string },
+  needJustify,
+): UpdateLabelImageAnnotation => ({
+  type: UPDATE_LABEL_IMAGE_ANNOTATION,
+  payload: { id: imageId, labels, part, hasRelabeled: needJustify },
+});
+
+export const removeImagesFromPart = (): RemoveImagesFromPartAction => {
+  return {
+    type: REMOVE_IMAGES_FROM_PART,
+  };
+};
+
+const updateRelabelRequest = (): UpdateRelabelRequestAction => ({ type: UPDATE_RELABEL_REQUEST });
+const updateRelabelSuccess = (): UpdateRelabelSuccessAction => ({ type: UPDATE_RELABEL_SUCCESS });
+const updateRelabelFailed = (): UpdateRelabelFailedAction => ({ type: UPDATE_RELABEL_FAILED });
 
 export const getLabelImages = () => (dispatch): Promise<void> => {
   const imagesAPI = axios('/api/images/');
@@ -136,18 +163,21 @@ export const saveLabelImageAnnotation = (imageId: number, hasRelabeled: boolean,
     });
 };
 
-const updateLabelImageAnnotation = (
-  imageId: number,
-  labels: any,
-  part: { id: number; name: string },
-  needJustify,
-): UpdateLabelImageAnnotation => ({
-  type: UPDATE_LABEL_IMAGE_ANNOTATION,
-  payload: { id: imageId, labels, part, hasRelabeled: needJustify },
-});
+export const thunkUpdateRelabel = () => (dispatch, getState) => {
+  dispatch(updateRelabelRequest());
 
-export const removeImagesFromPart = (): RemoveImagesFromPartAction => {
-  return {
-    type: REMOVE_IMAGES_FROM_PART,
-  };
+  const data: { partId: number; imageId: number }[] = getState()
+    .images.filter((e) => e.is_relabel)
+    .map((e) => ({ partId: e.part.id, imageId: e.id }));
+
+  return axios
+    .post('/api/relabel/update', data)
+    .then(() => {
+      dispatch(updateRelabelSuccess());
+      return void 0;
+    })
+    .catch((err) => {
+      dispatch(updateRelabelFailed());
+      throw handleAxiosError(err);
+    });
 };
