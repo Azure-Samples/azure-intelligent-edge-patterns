@@ -26,13 +26,13 @@ from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training.api import views as azure_training_views
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views
+from vision_on_edge.feedback.api import views as feedback_views
 from vision_on_edge.image_predictions.api import \
     views as image_prediction_views
 from vision_on_edge.images.api import views as image_views
 from vision_on_edge.locations.api import views as location_views
 from vision_on_edge.notifications.api import views as notifications_views
 from vision_on_edge.relabeling.api import views as relabel_views
-from vision_on_edge.feedback.api import views as feedback_views
 from vision_on_edge.streams.api import views as stream_views
 
 from . import views as site_views
