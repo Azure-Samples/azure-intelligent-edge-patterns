@@ -8,8 +8,6 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
 
-from vision_on_edge.general.tests.test_special_strings import special_strings
-
 from ..models import Feedback
 
 logger = logging.getLogger(__name__)
@@ -55,8 +53,8 @@ class FeedbackRestTestCases(APITransactionTestCase):
         data = {'satisfaction': feedback_sat}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(json.loads(response.content)[
-                         'satisfaction'], feedback_sat)
+        self.assertEqual(
+            json.loads(response.content)['satisfaction'], feedback_sat)
         # Get feedback list
         response = self.client.get(url, format='json')
         self.assertEqual(len(json.loads(response.content)), self.exist_num + 1)
