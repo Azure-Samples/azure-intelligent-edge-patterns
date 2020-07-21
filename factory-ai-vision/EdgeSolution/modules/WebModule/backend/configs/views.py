@@ -16,8 +16,8 @@ class UIAppView(View):
     def get(self, request):
         """get"""
         try:
-            with open(os.path.join(settings.UI_DIR, 'index.html')) as f:
-                return HttpResponse(f.read())
+            with open(os.path.join(settings.UI_DIR, 'index.html')) as ui_file:
+                return HttpResponse(ui_file.read())
         except FileNotFoundError:
             logging.exception('Production build of app not found')
             return HttpResponse(

@@ -9,9 +9,11 @@ import os
 from config import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 
 if 'IOT_HUB_CONNECTION_STRING' in os.environ:
-    IOT_HUB_CONNECTION_STRING = os.environ['IOT_HUB_CONNECTION_STRING']
+    IOT_HUB_CONNECTION_STRING = os.getenv('IOT_HUB_CONNECTION_STRING',
+                                          IOT_HUB_CONNECTION_STRING)
+
 if 'DEVICE_ID' in os.environ:
-    DEVICE_ID = os.environ['DEVICE_ID']
+    DEVICE_ID = os.getenv('DEVICE_ID', DEVICE_ID)
 
 if 'MODULE_ID' in os.environ:
-    MODULE_ID = os.environ['MODULE_ID']
+    MODULE_ID = os.getenv('MODULE_ID', MODULE_ID)
