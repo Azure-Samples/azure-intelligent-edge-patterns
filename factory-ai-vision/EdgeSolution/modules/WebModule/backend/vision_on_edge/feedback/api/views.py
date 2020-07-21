@@ -1,11 +1,13 @@
+import json
+import logging
+
+from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.response import Response
+
 from ..models import Feedback
 from .serializers import FeedbackSerializer
-import logging
-import json
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 
 logger = logging.getLogger(__name__)
 
