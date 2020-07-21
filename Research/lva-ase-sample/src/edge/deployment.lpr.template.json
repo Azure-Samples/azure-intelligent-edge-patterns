@@ -121,7 +121,7 @@
                 "status": "running",
                 "restartPolicy": "always",
                 "settings": {
-                    "image": "teamlvacontainerregistry.azurecr.io/samples/lva:latest",
+                    "image": "teamlvacontainerregistry.azurecr.io/2:2",
                     "createOptions": {
                         "HostConfig": {
                             "runtime": "nvidia",
