@@ -92,7 +92,10 @@ class ModelProjectTestCases(APITransactionTestCase):
             Part.objects.filter(is_demo=True).count(), self.exist_num)
 
     def test_create_1(self):
-        """invalid setting -> customvision_id = ''
+        """test_create_1.
+        
+        @Description
+        invalid setting or null setting-> customvision_id = ''
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='invalid_setting').first(),

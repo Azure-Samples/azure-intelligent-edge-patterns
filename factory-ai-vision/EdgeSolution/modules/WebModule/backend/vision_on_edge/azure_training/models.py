@@ -9,8 +9,8 @@ import threading
 import time
 
 import requests
-from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
-    CustomVisionErrorException
+from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import (
+    CustomVisionErrorException,)
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
@@ -63,7 +63,7 @@ class Project(models.Model):
     prob_threshold = models.IntegerField(default=10)
 
     @staticmethod
-    def pre_save(sender, instance, update_fields, **kwargs):
+    def pre_save(**kwargs):
         """pre_save.
 
         Args:
@@ -71,15 +71,15 @@ class Project(models.Model):
         """
 
         logger.info("Project pre_save")
-        logger.info("Saving instance: %s %s", instance, update_fields)
-        if 'sender' not in kwargs or kwargs['sender'] is not Project:
+        if "sender" not in kwargs or kwargs["sender"] is not Project:
             return
-        if 'instance' not in kwargs:
+        if "instance" not in kwargs:
             return
-        if 'update_fields' not in kwargs or kwargs['update_fields'] is not None:
+        if "update_fields" not in kwargs:
             return
 
-        instance = kwargs['instance']
+        instance = kwargs["instance"]
+        logger.info("Saving instance: %s", instance)
 
         trainer = instance.setting.revalidate_and_get_trainer_obj()
         if instance.is_demo:
@@ -95,11 +95,13 @@ class Project(models.Model):
                 logger.error(customvision_err)
                 logger.error(
                     "Project %s not belong to Training Key + Endpoint pair.",
-                    instance.customvision_project_id)
+                    instance.customvision_project_id,
+                )
                 logger.error("Set Project Id to ''")
                 instance.customvision_project_id = ""
             except:
                 logger.exception("Unexpected error")
+                instance.customvision_project_id = ""
         elif trainer:
             # Endpoint and Training_key is valid, and trying to save without
             # customvision_project_id
@@ -129,18 +131,18 @@ class Project(models.Model):
         """
         logger.info("Project post_save")
 
-        if 'sender' not in kwargs or kwargs['sender'] is not Project:
+        if "sender" not in kwargs or kwargs["sender"] is not Project:
             return
 
-        if 'instance' not in kwargs:
+        if "instance" not in kwargs:
             return
 
-        if not kwargs['instance'].has_configured:
+        if not kwargs["instance"].has_configured:
             logger.error("This project is not configured to as inference")
             logger.error("Not sending any request to inference")
             return
 
-        instance = kwargs['instance']
+        instance = kwargs["instance"]
         confidence_min = 30
         confidence_max = 80
         max_images = 10
@@ -177,13 +179,15 @@ class Project(models.Model):
                 },
             )
 
-            requests.get('http://' + inference_module_url() +
-                         '/update_iothub_parameters',
-                         params={
-                             'is_send': metrics_is_send_iothub,
-                             'threshold': metrics_accuracy_threshold,
-                             'fpm': metrics_frame_per_minutes,
-                         })
+            requests.get(
+                "http://" + inference_module_url() +
+                "/update_iothub_parameters",
+                params={
+                    "is_send": metrics_is_send_iothub,
+                    "threshold": metrics_accuracy_threshold,
+                    "fpm": metrics_frame_per_minutes,
+                },
+            )
 
         threading.Thread(target=_r,
                          args=(confidence_min, confidence_max,
@@ -233,7 +237,7 @@ class Project(models.Model):
             defaults={
                 "status": status,
                 "log": "Status : " + log.capitalize(),
-                "performance": performance
+                "performance": performance,
             },
         )
         return obj, created
@@ -308,8 +312,10 @@ class Project(models.Model):
                 logger.error("Trainer is invalid. Not going to train...")
 
             # Submit training task to CustomVision
-            logger.info("%s submit training task to CustomVision",
-                        self.customvision_project_name)
+            logger.info(
+                "%s submit training task to CustomVision",
+                self.customvision_project_name,
+            )
             trainer.train_project(self.customvision_project_id)
             # Set deployed
             self.deployed = False
@@ -351,7 +357,7 @@ class Project(models.Model):
         self.prob_threshold = prob_threshold
 
         if prob_threshold > 100 or prob_threshold < 0:
-            raise ValueError('prob_threshold out of range')
+            raise ValueError("prob_threshold out of range")
 
         requests.get(
             "http://" + inference_module_url() + "/update_prob_threshold",
@@ -359,7 +365,7 @@ class Project(models.Model):
                 "prob_threshold": prob_threshold,
             },
         )
-        self.save(update_fields=['prob_threshold'])
+        self.save(update_fields=["prob_threshold"])
 
 
 class Train(models.Model):
