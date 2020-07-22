@@ -61,7 +61,7 @@ export const PartDetails = (): JSX.Element => {
         description={description}
         setDescription={setDescription}
       />
-      <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2' }}>
+      <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2', height: '100%' }}>
         <CaptureImagePanel
           partId={partId}
           partName={name}
