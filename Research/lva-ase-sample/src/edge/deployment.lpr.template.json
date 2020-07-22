@@ -126,30 +126,10 @@
                         "HostConfig": {
                             "runtime": "nvidia",
                             "PortBindings": {
-                                "5671/tcp": [
-                                {
-                                    "HostPort": "5671"
-                                }
-                                ],
-                                "8883/tcp": [
-                                    {
-                                        "HostPort": "8883"
-                                    }
-                                    ],
-                                "443/tcp": [
-                                {
-                                    "HostPort": "443"
-                                }
-                                ],
                                 "5001/tcp": [
                                 {
                                     "HostPort": "5001"
                                 }
-                                ],
-                                "80/tcp": [
-                                    {
-                                        "HostPort": "80"
-                                    }
                                 ]
                             },
                             "DeviceCgroupRules": [
