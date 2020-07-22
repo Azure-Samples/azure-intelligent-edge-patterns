@@ -67,7 +67,7 @@ const initialProject: Project = {
   },
   status: Status.None,
   error: null,
-  trainingLog: '',
+  trainingLogs: [],
 };
 
 export const initialState: State = {
