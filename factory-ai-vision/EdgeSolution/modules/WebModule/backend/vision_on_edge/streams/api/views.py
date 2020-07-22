@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.images import ImageFile
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
@@ -34,15 +35,15 @@ def connect_stream(request):
     if part_id is None:
         s = Stream(rtsp, part_id=None, inference=inference)
         streams.append(s)
-        return JsonResponse({"status": "ok", "stream_id": s.id})
+        return Response({"status": "ok", "stream_id": s.id})
 
     try:
         Part.objects.get(pk=int(part_id))
         s = Stream(rtsp, part_id=int(part_id), inference=inference)
         streams.append(s)
-        return JsonResponse({"status": "ok", "stream_id": s.id})
+        return Response({"status": "ok", "stream_id": s.id})
     except ObjectDoesNotExist:
-        return JsonResponse({
+        return Response({
             "status": "failed",
             "reason": "part_id doesnt exist"
         })
@@ -50,20 +51,24 @@ def connect_stream(request):
 
 @api_view()
 def disconnect_stream(request, stream_id):
-    """Disconnect from stream"""
+    """Disconnect from stream
+    """
+
     for i in range(len(streams)):
         stream = streams[i]
         if stream.id == stream_id:
             stream.close()
-            return JsonResponse({"status": "ok"})
-    return JsonResponse({
+            return Response({"status": "ok"})
+    return Response({
         "status": "failed",
         "reason": "cannot find stream_id " + str(stream_id)
     })
 
 
 def video_feed(request, stream_id):
-    """video feed"""
+    """video feed
+    """
+
     for i in range(len(streams)):
         stream = streams[i]
         if stream.id == stream_id:
@@ -76,7 +81,9 @@ def video_feed(request, stream_id):
 
 @api_view()
 def capture(request, stream_id):
-    """Capture image"""
+    """Capture image
+    """
+
     for i in range(len(streams)):
         stream = streams[i]
         if stream.id == stream_id:
@@ -88,7 +95,7 @@ def capture(request, stream_id):
             logger.info(stream.part_id)
             part_id = request.query_params.get("part_id") or stream.part_id
             if not part_id:
-                return JsonResponse({
+                return Response({
                     "status": "failed",
                     "reason": "neither Stream and capture request have part_id"
                 })
@@ -100,7 +107,7 @@ def capture(request, stream_id):
 
             return JsonResponse({"status": "ok", "image": img_serialized.data})
 
-    return JsonResponse({
+    return Response({
         "status": "failed",
         "reason": "cannot find stream_id " + str(stream_id)
     })
@@ -109,7 +116,7 @@ def capture(request, stream_id):
 @api_view()
 def inference_video_feed(request, project_id):
     """Return inferenced video feed"""
-    return JsonResponse({
+    return Response({
         "status": "ok",
         "url": "http://" + inference_module_url() + "/video_feed?inference=1",
     })
