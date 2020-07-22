@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import sys
 
 import config
 from configs import logging_config
@@ -69,7 +70,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-if APP_INSIGHT_ON:
+if APP_INSIGHT_ON and 'test' not in sys.argv:
     from configs.app_insight import APP_INSIGHT_CONN_STR
     MIDDLEWARE.append('opencensus.ext.django.middleware.OpencensusMiddleware')
     OPENCENSUS = {
