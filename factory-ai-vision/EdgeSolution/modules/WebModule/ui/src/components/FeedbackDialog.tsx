@@ -90,12 +90,19 @@ const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
       <Dialog
         open={dialogOpen}
         onOpen={(): void => setDialogOpen(true)}
-        styles={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        styles={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '30%',
+        }}
         header="Your Feedback is greatly Appreciated!"
         content={
-          <Flex column hAlign="center" gap="gap.medium">
-            <Text size="large">Rate your experience</Text>
-            <Flex vAlign="end">
+          <Flex column hAlign="center">
+            <Text size="large" styles={{ padding: '20px' }}>
+              Rate your experience
+            </Text>
+            <Flex vAlign="end" styles={{ padding: '20px' }}>
               <Text weight="bold" styles={{ marginRight: '0.75rem' }}>
                 Poor
               </Text>

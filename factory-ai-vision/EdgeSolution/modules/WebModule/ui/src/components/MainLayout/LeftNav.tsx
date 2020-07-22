@@ -53,6 +53,7 @@ const LeftNav: FC<any> = ({ styles, disabled, width }): JSX.Element => {
               styles={mergeStyles(itemStyles(disabled), {
                 ':hover': { cursor: 'pointer' },
                 marginTop: 'auto',
+                marginBottom: '20px',
               })()}
               onClick={(e: MouseEvent): void => {
                 if (disabled) e.preventDefault();
