@@ -62,6 +62,8 @@ class Stream():
                 continue
             ret, frame = self.cap.read()
             if not ret:
+                self.cap.release()
+                self.cap = cv2.VideoCapture(self.rtsp)
                 time.sleep(0.1)
                 continue
             if self.frame_q.qsize() >= self.frame_q_maxsize:
