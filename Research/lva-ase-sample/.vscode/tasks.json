@@ -20,23 +20,6 @@
         },
 
         {
-            "label": "build-ams-asset-player",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/src/ams-asset-player/ams-asset-player.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },        
-
-        {
             "label": "publish-c2d-console-app",
             "command": "dotnet",
             "type": "process",

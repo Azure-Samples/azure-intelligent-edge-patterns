@@ -22,8 +22,6 @@ BASE_URL='https://raw.githubusercontent.com/julialieberman/azure-intelligent-edg
 DEFAULT_REGION='westus2'
 ENV_FILE='edge-deployment/.env'
 APP_SETTINGS_FILE='appsettings.json'
-DEPLOYMENT_MANIFEST_URL="$BASE_URL/setup/deployment.yolov3.template.json"
-DEPLOYMENT_MANIFEST_FILE='edge-deployment/deployment.yolov3.template.json'
 ROLE_DEFINITION_URL="$BASE_URL/setup/LVAEdgeUserRoleDefinition.json"
 ROLE_DEFINITION_FILE="LVAEdgeUserRoleDefinition.json"
 RESOURCE_GROUP='teamlvarg'
@@ -50,17 +48,20 @@ Welcome! \U1F9D9\n
 This script will set up a number of prerequisite resources so 
 that you can run the ${BLUE}Live Video Analytics${NC} samples:
 https://github.com/Azure-Samples/live-video-analytics-edge
+You should already have an active subscription with owner level permissions, 
+an Azure Stack Edge (ASE) setup and connected to an IoT Hub, two local compute-enabled SMB shares,
+and a storage account. If you haven't already gone through those steps refer back to the 
+ASE documentation: https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-deploy-prep
+Then resume this script. 
 "
 sleep 2 # time for the reader 
 
 echo "Initialzing output files.
 This overwrites any output files previously generated."
- mkdir -p $(dirname $ENV_FILE) && echo -n "" > $ENV_FILE
- mkdir -p $(dirname $APP_SETTINGS_FILE) && echo -n "" > $APP_SETTINGS_FILE
- mkdir -p $(dirname $DEPLOYMENT_MANIFEST_FILE) && echo -n "" > $DEPLOYMENT_MANIFEST_FILE
+mkdir -p $(dirname $ENV_FILE) && echo -n "" > $ENV_FILE
+mkdir -p $(dirname $APP_SETTINGS_FILE) && echo -n "" > $APP_SETTINGS_FILE
 chmod +x ${APP_SETTINGS_FILE}
 chmod +x ${ENV_FILE}
-chmod +x ${DEPLOYMENT_MANIFEST_FILE}
 
 # # install the Azure CLI IoT extension
 echo -e "Checking for the ${BLUE}azure-iot${NC} cli extension."
@@ -88,7 +89,7 @@ echo -e "\n${GREEN}Your current subscription is:${NC}"
 az account show --query '[name,id]'
 
 echo -e "
-You will need to use a subscription with permissions for creating service principals (owner role provides this).
+You will need to use a subscription with owner level permissions for creating service principals.
 ${YELLOW}If you want to change to a different subscription, enter the name or id.${NC}
 Or just press enter to continue with the current subscription."
 read -p ">> " SUBSCRIPTION_ID
@@ -117,8 +118,7 @@ fi
 # choose a resource group
 echo -e "
 ${YELLOW}What is the name of the resource group to use? This should be the same one where you put your Azure Stack Edge Device${NC}
-This will create a new resource group if one doesn't exist.
-Hit enter to use the default (${BLUE}${RESOURCE_GROUP}${NC})."
+."
 read -p ">> " tmp
 RESOURCE_GROUP=${tmp:-$RESOURCE_GROUP}
 
@@ -126,9 +126,8 @@ EXISTING=$(az group exists -g ${RESOURCE_GROUP})
 
 if ! $EXISTING; then
     echo -e "\n${GREEN}The resource group does not currently exist.${NC}"
-    echo -e "We will create it in ${BLUE}${REGION}${NC}. Make sure when you set up your ASE device to put it in the same resource group!"
-    az group create --name ${RESOURCE_GROUP} --location ${REGION} -o none
-    checkForError
+    echo -e "\n${RED}Please go back and verify the name of your resource group that contains your ASE. Then run this script again.${NC}"
+    exit 1
 fi
 
 echo -e "\nResource group currently contains these resources:"
@@ -140,8 +139,8 @@ EDGE_DEVICE=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.DataBoxEdge\/DataBoxEdg
 
 if test -z "$EDGE_DEVICE"
 then
-    echo "Azure Stack Edge device not found in resource group. Please go make sure you have set it up in the same resource group, then run this script again."
-    exit
+    echo "\n${RED}Azure Stack Edge device not found in resource group. Please go make sure you have set it up in the same resource group, then run this script again.${NC}"
+    exit 1
 else
     echo -e "\nFound the following Azure Stack Edge device, hit enter to use this, otherwise provide the name of the correct device(${BLUE}${EDGE_DEVICE}${NC})."
     read -p ">> " tmp
@@ -149,23 +148,23 @@ else
     FOUND=$(az resource show -n ${EDGE_DEVICE} --resource-type "Microsoft.DataBoxEdge/DataBoxEdgeDevices" -g ${RESOURCE_GROUP} --query 'name')
     if ! [[ "$FOUND" =~ "$EDGE_DEVICE" ]]; 
     then
-        echo "Device not found. Please go back and make sure you have the correct device setup and name! Then run this script again."
-        exit
+        echo "\n${RED}Device not found. Please go back and make sure you have the correct device setup and name! Then run this script again.${NC}"
+        exit 1
     fi
 fi
 
 if test -z "$IOTHUB"
 then 
-    echo "IoTHub not found, please go make sure you have enabled compute on your ASE device, then run this script again."
-    exit
+    echo "\n${RED}IoTHub not found, please go make sure you have enabled compute on your ASE device, then run this script again.${NC}"
+    exit 1
 fi
 
 #Check there is already a valid storage account
 STORAGE_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Storage\/storageAccounts$/ {print $1}')
 if test -z "$STORAGE_ACCOUNT"
 then 
-    echo "No storage account found, please go make sure you have gone through setting up a compute share on your ASE device, then run this script again."
-    exit
+    echo "\n${RED}No storage account found, please go make sure you have gone through setting up a share on your ASE device, then run this script again.${NC}"
+    exit 1
 fi
 
 echo -e "
@@ -175,8 +174,8 @@ read -p ">> " tmp
 STORAGE_ACCOUNT=${tmp:-$STORAGE_ACCOUNT}
 AVAILABLE=$(az storage account check-name -n ${STORAGE_ACCOUNT} | jq .nameAvailable)
 if $AVAILABLE; then
-    echo "That storage account was not found in the resource group. Please go check the name of the one you would like to use, and rerun this script."
-    exit
+    echo "\n${RED}That storage account was not found. Please go check the name of the one you would like to use, and run this script again.${NC}"
+    exit 1
 fi
 
 # deploy resources
@@ -187,7 +186,6 @@ fi
 ROLE_DEFINITION_NAME="LVAEdgeUsertest"
 
 #create or find container registry
-AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
 CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
 IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --hub-name ${IOTHUB} --query='connectionString')
 
@@ -219,20 +217,28 @@ CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $CONTAINER_REGISTRY --qu
 CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
 
 #create or find existing media services account
-AMS_ACCOUNT_NAME="teamlvamediaservices"
+AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
+
+if ! test -z "$AMS_ACCOUNT"
+then
+    echo -e "
+    ${YELLOW}Found existing Media Services Account called: ${AMS_ACCOUNT}. This will be used by default unless otherwise specified"
+else
+    AMS_ACCOUNT="teamlvamediaservices"
+fi
 echo -e "
 ${YELLOW}What is the name of the media services account to use?${NC}
-This will create a new one if one doesn't exist. Make sure the name is composed of all lowercase letters
-Hit enter to use the default (${BLUE}${AMS_ACCOUNT_NAME}${NC})."
+This will create a new one if one doesn't exist. Make sure the name is composed of all lowercase letters.
+Hit enter to use the default (${BLUE}${AMS_ACCOUNT}${NC})."
 read -p ">> " tmp
-AMS_ACCOUNT_NAME=${tmp:-$AMS_ACCOUNT_NAME}
+AMS_ACCOUNT=${tmp:-$AMS_ACCOUNT}
 
-EXISTING=$(az ams account check-name -l ${REGION} -n ${AMS_ACCOUNT_NAME})
+EXISTING=$(az ams account check-name -l ${REGION} -n ${AMS_ACCOUNT})
  if [[ "$EXISTING" =~ "Name available." ]]; then
-    echo "Creating new ams account named ${AMS_ACCOUNT_NAME}"
-    AMS_ACCOUNT=$(az ams account create --name ${AMS_ACCOUNT_NAME} --resource-group ${RESOURCE_GROUP}  -l ${REGION} --storage-account ${STORAGE_ACCOUNT})
+    echo "Creating new AMS account named ${AMS_ACCOUNT}"
+    AMS_ACCOUNT=$(az ams account create --name ${AMS_ACCOUNT} --resource-group ${RESOURCE_GROUP}  -l ${REGION} --storage-account ${STORAGE_ACCOUNT})
  else
-     echo "Media services account named ${AMS_ACCOUNT_NAME} already exists!"
+     echo "Media services account named ${AMS_ACCOUNT} already exists!"
  fi
 
 # this includes everything in the resource group
@@ -271,7 +277,7 @@ SUBSCRIPTION_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
 # create new role definition in the subscription
 if test -z "$(az role definition list -n "$ROLE_DEFINITION_NAME" | grep "roleName")"; then
     echo -e "Creating a custom role named ${BLUE}$ROLE_DEFINITION_NAME${NC}."
-     curl -sL $ROLE_DEFINITION_URL > $ROLE_DEFINITION_FILE
+    curl -sL $ROLE_DEFINITION_URL > $ROLE_DEFINITION_FILE
     sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $ROLE_DEFINITION_FILE
     sed -i "s/\$ROLE_DEFINITION_NAME/$ROLE_DEFINITION_NAME/" $ROLE_DEFINITION_FILE
     
@@ -290,19 +296,18 @@ echo -e "The service principal with object id ${OBJECT_ID} is now linked with cu
 #A Premium streaming endpoint is recommended when recording multiple days’ worth of video
 
 echo -e "
-Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint."
+Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint. There is a standard streaming endpoint by default in stopped state."
 EXISTING=$(az ams streaming-endpoint list --account-name ${AMS_ACCOUNT} --resource-group ${RESOURCE_GROUP} --query '[].name')
 if ! [[ "$EXISTING" =~ "default" ]]; then
     echo "Scaling new endpoint"
     az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
 fi
 
- echo "Kicking off the async start of the Premium streaming endpoint."
- echo "This is needed to run samples or tutorials involving video playback. Occasionally this command throws errors. If that happens, no worries.
+ echo "Kicking off the async start of the Premium streaming endpoint. This is needed to run samples or tutorials involving video playback. Occasionally this command throws errors. If that happens, no worries.
  When the script is done running, run the command from your cloud shell:
     az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait"
 
- az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
+az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
 
 # write env file for edge deployment
  echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" >> $ENV_FILE
@@ -327,12 +332,13 @@ fi
 # # write appsettings for sample code
  echo "{" >> $APP_SETTINGS_FILE
  echo "    \"IoThubConnectionString\" : $IOTHUB_CONNECTION_STRING," >> $APP_SETTINGS_FILE
- echo "    \"deviceId\" : \"$EDGE_DEVICE\"," >> $APP_SETTINGS_FILE
+ echo "    \"deviceId\" : \"$EDGE_DEVICE-edge\"," >> $APP_SETTINGS_FILE
  echo "    \"moduleId\" : \"lvaEdge\"" >> $APP_SETTINGS_FILE
  echo -n "}" >> $APP_SETTINGS_FILE
 
  echo -e "
- The appsettings.json file is for the .NET Core sample application.
+ The appsettings.json file is for the .NET Core sample application. The instructions for copying the files over 
+ are in the readme you are following ${GREEN}https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/edge/setup/readme.md${NC}
  You can find it here and once you create your IoT Hub and device you'll need to replace the values:
  ${BLUE}${APP_SETTINGS_FILE}${NC}"
 
@@ -344,20 +350,4 @@ fi
  - ${BLUE}${ENV_FILE}${NC}
 
  Go to ${GREEN}https://aka.ms/lva-edge-quickstart${NC} to learn more about getting started with ${BLUE}Live Video Analytics${NC} on IoT Edge.
- "
-
-# set up deployment manifest
-curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
-
- sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $DEPLOYMENT_MANIFEST_FILE
- sed -i "s/\$RESOURCE_GROUP/$RESOURCE_GROUP/" $DEPLOYMENT_MANIFEST_FILE
- sed -i "s/\$AMS_ACCOUNT/$AMS_ACCOUNT/" $DEPLOYMENT_MANIFEST_FILE
- sed -i "s/\$AAD_TENANT_ID/$AAD_TENANT_ID/" $DEPLOYMENT_MANIFEST_FILE
- sed -i "s/\$AAD_SERVICE_PRINCIPAL_ID/$AAD_SERVICE_PRINCIPAL_ID/" $DEPLOYMENT_MANIFEST_FILE
- sed -i "s/\$AAD_SERVICE_PRINCIPAL_SECRET/$AAD_SERVICE_PRINCIPAL_SECRET/" $DEPLOYMENT_MANIFEST_FILE
-
-
- echo -e "
- You can find the deployment manifest file here:
- - ${BLUE}${DEPLOYMENT_MANIFEST_FILE}${NC}
  "

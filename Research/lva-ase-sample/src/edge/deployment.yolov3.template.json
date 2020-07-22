@@ -148,16 +148,16 @@
       "lvaEdge": {
         "properties.desired": {
           "applicationDataDirectory": "/var/lib/azuremediaservices",
-          "azureMediaServicesArmId": "/subscriptions/8eb87630-972c-4c36-a270-f330e6c063df/resourceGroups/teamlvarg/providers/microsoft.media/mediaservices/teamlvamediaservices",
-          "aadTenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-          "aadServicePrincipalAppId": "3c4a3bb7-32cc-4cee-bef5-31a4b93e52f4",
-          "aadServicePrincipalSecret": "a9eb7273-be60-4eb6-90b7-49275ebaad2d",
+          "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$AMS_ACCOUNT",
+          "aadTenantId": "$AAD_TENANT_ID",
+          "aadServicePrincipalAppId": "$AAD_SERVICE_PRINCIPAL_ID",
+          "aadServicePrincipalSecret": "$AAD_SERVICE_PRINCIPAL_SECRET",
           "aadEndpoint": "https://login.microsoftonline.com",
           "aadResourceId": "https://management.core.windows.net/",
           "armEndpoint": "https://management.azure.com/",
           "diagnosticsEventsOutputName": "AmsDiagnostics",
           "operationalEventsOutputName": "AmsOperational",
-          "logLevel": "Information",
+          "logLevel": "Verbose",
           "logCategories": "Application,Events",
           "allowUnsecuredEndpoints": true,
           "telemetryOptOut": false

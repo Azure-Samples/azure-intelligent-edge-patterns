@@ -24,7 +24,7 @@
         {
             "opName": "GraphTopologySet",
             "opParams": {
-                "topologyFile": "..\\edge\\topology-httpextension.json"
+                "topologyFile": ".\\httpwithmotiontopologylocal.json"
             }
         },
         {
@@ -32,16 +32,20 @@
             "opParams": {
                 "name": "Sample-Graph1",
                 "properties": {
-                    "topologyName": "InferencingWithHttpExtension",
+                    "topologyName": "EVROnMotionExtensionLocal",
                     "description": "Sample graph description",
                     "parameters": [
                         {
                             "name": "rtspUrl",
-                            "value": "rtsp://rtspsim:554/media/mhtestdrive.mkv"
+                            "value": "rtsp://rtspsim:554/media/camera-300s.mkv"
                         },
                         {
                             "name": "rtspUserName",
                             "value": "testuser"
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://yolov3/score"
                         },
                         {
                             "name": "rtspPassword",
@@ -92,7 +96,7 @@
         {
             "opName": "GraphTopologyDelete",
             "opParams": {
-                "name": "InferencingWithHttpExtension"
+                "name": "EVROnMotionExtensionLocal"
             }
         },
         {

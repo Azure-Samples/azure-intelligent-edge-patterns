@@ -15,26 +15,6 @@
            "stopAtEntry": false,
            "console": "integratedTerminal",
            "internalConsoleOptions": "neverOpen"
-       },
-       {
-            "name": "AMS Asset Player - ASP .NET core",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build-ams-asset-player",
-            "program": "${workspaceFolder}/src/ams-asset-player/bin/Debug/netcoreapp3.1/ams-asset-player.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/src/ams-asset-player",
-            "stopAtEntry": false,
-            "serverReadyAction": {
-                "action": "openExternally",
-                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
-            },
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceFolder}/src/ams-asset-player/Views"
-            }
-        }         
+       }
     ]
 }
