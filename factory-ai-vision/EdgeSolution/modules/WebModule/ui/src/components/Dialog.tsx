@@ -29,6 +29,7 @@ export const Dialog: React.FC<DialogProps> = (props) => {
       onCancel={props.onConfirm}
       confirmButton={props.cancelButton && cancelButton}
       cancelButton={props.confirmButton && confirmButton}
+      closeOnOutsideClick={false}
     >
       {props.children}
     </FluentDialog>
