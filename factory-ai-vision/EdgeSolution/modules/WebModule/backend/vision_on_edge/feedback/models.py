@@ -49,7 +49,7 @@ class Feedback(models.Model):
         if Setting.objects.first().is_collect_data:
             az_logger = get_app_insight_logger()
             az_logger.warning(
-                "training",
+                "feedback",
                 extra={
                     "custom_dimensions": {
                         "satisfaction": instance.satisfaction,
