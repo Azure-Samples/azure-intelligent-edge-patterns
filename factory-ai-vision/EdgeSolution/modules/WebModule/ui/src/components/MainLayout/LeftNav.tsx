@@ -1,17 +1,6 @@
 import React, { memo, MouseEvent, FC } from 'react';
-import { Segment, Image, Flex, Box, mergeStyles, Text } from '@fluentui/react-northstar';
+import { Segment, Image, Flex, Text } from '@fluentui/react-northstar';
 import { NavLink } from 'react-router-dom';
-import FeedbackDialog from '../FeedbackDialog';
-
-const itemStyles = (disabled): React.CSSProperties => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  padding: '0.8em',
-  cursor: disabled && 'default',
-  width: '100%',
-  textDecoration: 'none',
-});
 
 const LeftNav: FC<any> = ({ styles, disabled, width }): JSX.Element => {
   return (
@@ -47,23 +36,6 @@ const LeftNav: FC<any> = ({ styles, disabled, width }): JSX.Element => {
           to="/pretrainDetection"
           width={width}
         ></NavItem>
-        <FeedbackDialog
-          trigger={
-            <Box
-              styles={mergeStyles(itemStyles(disabled), {
-                ':hover': { cursor: 'pointer' },
-                marginTop: 'auto',
-                marginBottom: '20px',
-              })()}
-              onClick={(e: MouseEvent): void => {
-                if (disabled) e.preventDefault();
-              }}
-            >
-              <Image src="/icons/feedback.png" design={{ width: `${width}px` }} />
-              <Text color="white" content="Feedback" align="center" size="small" />
-            </Box>
-          }
-        />
       </Flex>
     </Segment>
   );
@@ -80,7 +52,15 @@ const NavItem: FC<NavItemProps> = ({ title, src, to, disabled, width }): JSX.Ele
   return (
     <NavLink
       to={to}
-      style={itemStyles(disabled)}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '0.8em',
+        cursor: disabled && 'default',
+        width: '100%',
+        textDecoration: 'none',
+      }}
       activeStyle={{ backgroundColor: 'rgba(250, 83, 5, 0.5)' }}
       onClick={(e: MouseEvent): void => {
         if (disabled) e.preventDefault();

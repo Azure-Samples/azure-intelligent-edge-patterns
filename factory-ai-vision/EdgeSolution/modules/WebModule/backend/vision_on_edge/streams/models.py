@@ -14,6 +14,7 @@ from ..azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
 
+KEEP_ALIVE_THRESHOLD = 10
 
 class Stream():
     """Stream Class"""
@@ -38,6 +39,7 @@ class Stream():
         self.predictions = []
         self.inference = inference
         self.iot = None
+        self.keep_alive = time.time()
         try:
             self.iot = IoTHubModuleClient.create_from_edge_environment()
         except KeyError as key_error:
@@ -49,6 +51,9 @@ class Stream():
 
         logger.info("inference %s", self.inference)
         logger.info("iot %s", self.iot)
+
+        def update_keep_alive(self):
+            self.keep_alive = time.time()
 
         def _listener(self):
             if not self.inference:
@@ -93,7 +98,7 @@ class Stream():
         self.status = "running"
         logger.info("start streaming with %s", self.rtsp)
         self.cap = cv2.VideoCapture(self.rtsp)
-        while self.status == "running":
+        while self.status == "running" and (self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
             if not self.cap.isOpened():
                 raise ValueError("Cannot connect to rtsp")
             t, img = self.cap.read()
@@ -141,9 +146,12 @@ class Stream():
                         (0, 0, 255),
                         thickness,
                     )
+            print('by')
             yield (b"--frame\r\n"
                    b"Content-Type: image/jpeg\r\n\r\n" +
                    cv2.imencode(".jpg", img)[1].tobytes() + b"\r\n")
+            print('ay')
+        print('RELEASSSSIINNNGGG')
         self.cap.release()
 
     def get_frame(self):
