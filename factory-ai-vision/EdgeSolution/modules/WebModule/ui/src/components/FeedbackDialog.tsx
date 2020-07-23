@@ -47,9 +47,10 @@ const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
             <Rating max={5} value={rate} onChange={setRate} />
           </Flex>
         }
-        cancelButton={{ content: 'OK', primary: true, disabled: rate <= 0, onClick: onUpdate }}
-        confirmButton={{
-          content: 'Help us improve',
+        confirmButton={{ content: 'OK', primary: true, disabled: rate <= 0, onClick: onUpdate }}
+        cancelButton={{
+          primary: true,
+          content: 'Give detail feedback',
           onClick: (): void => {
             window.open('https://github.com/Azure-Samples/azure-intelligent-edge-patterns/issues');
           },

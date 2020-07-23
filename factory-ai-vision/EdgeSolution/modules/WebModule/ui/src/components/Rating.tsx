@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, Button, StarIcon, ComponentSlotStyle } from '@fluentui/react-northstar';
+import { Flex, StarIcon, ComponentSlotStyle } from '@fluentui/react-northstar';
 
 export type RatingProps = {
   max: number;
