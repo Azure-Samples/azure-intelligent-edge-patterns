@@ -35,7 +35,7 @@ class Stream():
         self.cap = None
         self.recieve_thread = threading.Thread(target=self.receive_from_rtsp)
         self.frame_q_maxsize = 100
-        self.frame_q = queue.Queue(100)
+        self.frame_q = queue.Queue(self.frame_q_maxsize)
         self.recieve_thread.start()
 
         logger.info("stream %s init finish", self.id)
@@ -58,13 +58,13 @@ class Stream():
             if not self.cap.isOpened:
                 self.cap.release()
                 self.cap = cv2.VideoCapture(self.rtsp)
-                time.sleep(0.1)
+                time.sleep(0.01)
                 continue
             ret, frame = self.cap.read()
             if not ret:
                 self.cap.release()
                 self.cap = cv2.VideoCapture(self.rtsp)
-                time.sleep(0.1)
+                time.sleep(0.01)
                 continue
             if self.frame_q.qsize() >= self.frame_q_maxsize:
                 # Dequeue...
@@ -82,7 +82,7 @@ class Stream():
         logger.info("getting frame from self.frame_q")
         while True:
             if self.frame_q.empty():
-                time.sleep(0.01)
+                time.sleep(0.001)
             img = self.frame_q.get()
             img = cv2.resize(img, None, fx=0.5, fy=0.5)
             self.last_active = time.time()
