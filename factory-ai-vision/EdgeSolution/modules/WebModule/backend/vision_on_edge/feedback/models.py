@@ -6,6 +6,8 @@ import logging
 
 from django.db import models
 from django.db.models.signals import post_save
+from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
+from vision_on_edge.azure_settings.models import Setting
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +45,17 @@ class Feedback(models.Model):
             return
         instance = kwargs['instance']
         logger.warning('Satisfaction: %s', instance.satisfaction)
+        
+        if Setting.objects.first().is_collect_data:
+            az_logger = get_app_insight_logger()
+            az_logger.warning(
+                "training",
+                extra={
+                    "custom_dimensions": {
+                        "satisfaction": instance.satisfaction,
+                    }
+                },
+            )
 
 
 post_save.connect(Feedback.post_save, Feedback, dispatch_uid="Feedback_post")
