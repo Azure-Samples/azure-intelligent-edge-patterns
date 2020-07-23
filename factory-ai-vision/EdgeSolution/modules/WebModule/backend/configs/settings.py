@@ -10,11 +10,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-import sys
 
 import config
 from configs import logging_config
-from configs.app_insight import APP_INSIGHT_ON
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -69,20 +67,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-if APP_INSIGHT_ON and 'test' not in sys.argv:
-    from configs.app_insight import APP_INSIGHT_CONN_STR
-    MIDDLEWARE.append('opencensus.ext.django.middleware.OpencensusMiddleware')
-    OPENCENSUS = {
-        'TRACE': {
-            'SAMPLER':
-                'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
-            'EXPORTER':
-                f'''opencensus.ext.azure.trace_exporter.AzureExporter(
-                connection_string="{APP_INSIGHT_CONN_STR}"
-            )''',
-        }
-    }
 
 ROOT_URLCONF = 'configs.urls'
 
