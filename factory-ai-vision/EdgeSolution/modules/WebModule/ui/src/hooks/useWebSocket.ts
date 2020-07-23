@@ -9,7 +9,7 @@ export const useWebSocket = (): void => {
     const endPoint =
       process.env.NODE_ENV === 'development'
         ? `ws://${window.location.hostname}:8000/api/notifications/`
-        : `ws://${window.location.href}api/notifications/`;
+        : `ws://${window.location.hostname}:${window.location.port}/api/notifications/`;
     const ws = new WebSocket(endPoint);
 
     ws.onmessage = ({ data }): void => {
