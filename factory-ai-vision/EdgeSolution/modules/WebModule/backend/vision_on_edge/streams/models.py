@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 KEEP_ALIVE_THRESHOLD = 10
 
+
 class Stream():
     """Stream Class
     """
@@ -46,7 +47,6 @@ class Stream():
     def update_keep_alive(self):
         self.keep_alive = time.time()
 
-
     def receive_from_rtsp(self):
         """receive_from_rtsp
 
@@ -59,7 +59,8 @@ class Stream():
             self.frame_q.get()
 
         self.frame_q.put(frame)
-        while self.status == "running" and (self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
+        while self.status == "running" and (
+                self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
             if not self.cap.isOpened:
                 self.cap.release()
                 self.cap = cv2.VideoCapture(self.rtsp)
@@ -85,7 +86,17 @@ class Stream():
 
         logger.info("start streaming with %s", self.rtsp)
         logger.info("getting frame from self.frame_q")
-        while True:
+
+        self.recieve_thread = threading.Thread(target=self.receive_from_rtsp)
+        self.recieve_thread.start()
+
+        i = 0
+        while self.status == "running" and (
+                self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
+            if i > 20:
+                logger.info("Generating stream ...")
+                i = 0
+            i += 1
             if self.frame_q.empty():
                 time.sleep(0.001)
             img = self.frame_q.get()
@@ -94,11 +105,9 @@ class Stream():
             self.last_img = img.copy()
             self.cur_img_index = (self.cur_img_index + 1) % 10000
 
-            logger.info('by')
             yield (b"--frame\r\n"
                    b"Content-Type: image/jpeg\r\n\r\n" +
                    cv2.imencode(".jpg", img)[1].tobytes() + b"\r\n")
-            logger.info('ay')
         logger.info('RELEASSSSIINNNGGG')
         self.cap.release()
 
