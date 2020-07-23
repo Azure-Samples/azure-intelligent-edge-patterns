@@ -138,7 +138,7 @@ export const saveLabelImageAnnotation = (imageId: number, hasRelabeled: boolean,
     method: 'PATCH',
     data: {
       labels: JSON.stringify(annotations.map((e) => e.label)),
-      ...(annotations[0].part.id !== null && { part: annotations[0].part.id }),
+      ...(annotations[0] && annotations[0].part.id !== null && { part: annotations[0].part.id }),
     },
   })
     .then(({ data }) => {
