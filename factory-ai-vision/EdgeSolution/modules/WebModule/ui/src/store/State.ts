@@ -95,8 +95,10 @@ export const initialState: State = {
       key: '',
       namespace: '',
     },
-    isTrainerValid: false,
-    appInsightHasInit: false,
+    isTrainerValid: true,
+    appInsightHasInit: true,
+    isCollectData: false,
+    appInsightKey: '',
   },
   notifications: [],
 };
