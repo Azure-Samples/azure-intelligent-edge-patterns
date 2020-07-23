@@ -72,6 +72,7 @@ urlpatterns = \
              stream_views.disconnect_stream),
         path('api/streams/<int:stream_id>/video_feed', stream_views.video_feed),
         path('api/streams/<int:stream_id>/capture', stream_views.capture),
+        path('api/streams/<int:stream_id>/keep_alive', stream_views.keep_alive),
         path('api/projects/<int:project_id>/train', azure_training_views.train),
         path('api/projects/<int:project_id>/export',
              azure_training_views.export),
