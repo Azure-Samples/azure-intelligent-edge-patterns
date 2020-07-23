@@ -1,82 +1,24 @@
 import React, { useState } from 'react';
-import {
-  Text,
-  RadioGroup,
-  ComponentSlotStyle,
-  Flex,
-  ShorthandCollection,
-  RadioGroupItemProps,
-  CloseIcon,
-} from '@fluentui/react-northstar';
+import { Text, Flex, CloseIcon } from '@fluentui/react-northstar';
 import Axios from 'axios';
 
 import { Dialog } from './Dialog';
 import { LoadingDialog, Status } from './LoadingDialog/LoadingDialog';
 import { handleAxiosError } from '../util/handleAxiosError';
+import { Rating } from './Rating';
 
-const radioGroupItemStyles: ComponentSlotStyle = {
-  display: 'flex',
-  flexDirection: 'column-reverse',
-  alignItems: 'start',
-  padding: 0,
-};
-
-enum Feedback {
-  VeryBad = 'VB',
-  Poor = 'PR',
-  Fair = 'FR',
-  Good = 'GD',
-  Excellent = 'EX',
-}
-
-const feedbackItems: ShorthandCollection<RadioGroupItemProps> = [
-  {
-    name: 'rate',
-    key: 0,
-    label: '1',
-    value: Feedback.VeryBad,
-    styles: radioGroupItemStyles,
-  },
-  {
-    name: 'rate',
-    key: 1,
-    label: '2',
-    value: Feedback.Poor,
-    styles: radioGroupItemStyles,
-  },
-  {
-    name: 'rate',
-    key: 2,
-    label: '3',
-    value: Feedback.Fair,
-    styles: radioGroupItemStyles,
-  },
-  {
-    name: 'rate',
-    key: 3,
-    label: '4',
-    value: Feedback.Good,
-    styles: radioGroupItemStyles,
-  },
-  {
-    name: 'rate',
-    key: 4,
-    label: '5',
-    value: Feedback.Excellent,
-    styles: radioGroupItemStyles,
-  },
-];
+const SATISFACTION = ['VB', 'PR', 'FR', 'GD', 'EX'];
 
 const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [satisfaction, setSatisfaction] = useState<Feedback>(null);
+  const [rate, setRate] = useState(0);
   const [status, setStatus] = useState<Status>(Status.None);
   const [error, setError] = useState<Error>(null);
 
   const onUpdate = async (): Promise<void> => {
     setStatus(Status.Loading);
     try {
-      await Axios.post('/api/feedback', { satisfaction });
+      await Axios.post('/api/feedback', { satisfaction: SATISFACTION[rate - 1] });
       setStatus(Status.Success);
     } catch (e) {
       setStatus(Status.Failed);
@@ -102,22 +44,10 @@ const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
             <Text size="large" styles={{ padding: '20px' }}>
               Rate your experience
             </Text>
-            <Flex vAlign="end" styles={{ padding: '20px' }}>
-              <Text weight="bold" styles={{ marginRight: '0.75rem' }}>
-                Poor
-              </Text>
-              <RadioGroup
-                styles={{ display: 'flex', flexDirection: 'row', margin: 0 }}
-                onCheckedValueChange={(_, { value }): void => {
-                  setSatisfaction(value as Feedback);
-                }}
-                items={feedbackItems}
-              />
-              <Text weight="bold">Great</Text>
-            </Flex>
+            <Rating max={5} value={rate} onChange={setRate} />
           </Flex>
         }
-        cancelButton={{ content: 'OK', primary: true, disabled: satisfaction === null, onClick: onUpdate }}
+        cancelButton={{ content: 'OK', primary: true, disabled: rate <= 0, onClick: onUpdate }}
         confirmButton={{
           content: 'Help us improve',
           onClick: (): void => {
