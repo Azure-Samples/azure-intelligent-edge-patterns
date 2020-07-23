@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Route, Redirect, RouteProps } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../store/State';
-import { thunkGetSetting } from '../store/setting/settingAction';
+import { checkSettingStatus } from '../store/setting/settingAction';
 import { Setting } from '../store/setting/settingType';
 
 export const PrivateRoute: React.FC<RouteProps> = ({ component, ...rest }) => {
@@ -10,7 +10,7 @@ export const PrivateRoute: React.FC<RouteProps> = ({ component, ...rest }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(thunkGetSetting());
+    dispatch(checkSettingStatus());
   }, [dispatch]);
 
   if (isTrainerValid && appInsightHasInit) return <Route {...rest} component={component} />;

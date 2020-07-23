@@ -11,11 +11,13 @@ import cv2
 
 logger = logging.getLogger(__name__)
 
+KEEP_ALIVE_THRESHOLD = 10
 
 class Stream():
-    """Stream Class"""
+    """Stream Class
+    """
 
-    def __init__(self, rtsp, part_id=None, inference=False):
+    def __init__(self, rtsp, part_id=None):
         if rtsp == "0":
             self.rtsp = 0
         elif rtsp == "1":
@@ -32,13 +34,18 @@ class Stream():
         self.id = id(self)
 
         # Thread cv2
-        self.cap = None
+        self.cap = cv2.VideoCapture(self.rtsp)
         self.recieve_thread = threading.Thread(target=self.receive_from_rtsp)
         self.frame_q_maxsize = 100
         self.frame_q = queue.Queue(self.frame_q_maxsize)
         self.recieve_thread.start()
 
+        self.keep_alive = time.time()
         logger.info("stream %s init finish", self.id)
+
+    def update_keep_alive(self):
+        self.keep_alive = time.time()
+
 
     def receive_from_rtsp(self):
         """receive_from_rtsp
@@ -47,14 +54,12 @@ class Stream():
         """
 
         logger.info("start receiving from rtsp")
-
-        self.cap = cv2.VideoCapture(self.rtsp)
         ret, frame = self.cap.read()
         if self.frame_q.qsize() >= self.frame_q_maxsize:
             self.frame_q.get()
 
         self.frame_q.put(frame)
-        while True:
+        while self.status == "running" and (self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
             if not self.cap.isOpened:
                 self.cap.release()
                 self.cap = cv2.VideoCapture(self.rtsp)
@@ -89,10 +94,13 @@ class Stream():
             self.last_img = img.copy()
             self.cur_img_index = (self.cur_img_index + 1) % 10000
 
+            logger.info('by')
             yield (b"--frame\r\n"
                    b"Content-Type: image/jpeg\r\n\r\n" +
                    cv2.imencode(".jpg", img)[1].tobytes() + b"\r\n")
-        # self.cap.release()
+            logger.info('ay')
+        logger.info('RELEASSSSIINNNGGG')
+        self.cap.release()
 
     def get_frame(self):
         """get_frame
