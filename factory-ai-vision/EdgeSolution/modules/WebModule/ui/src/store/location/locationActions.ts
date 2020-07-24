@@ -3,7 +3,6 @@ import {
   GET_LOCATION_SUCCESS,
   POST_LOCATION_SUCCESS,
   REQUEST_LOCATION_FAILURE,
-  GetLocationsSuccess,
   RequestLocationsFailure,
   PostLocationSuccess,
   Location,
@@ -13,13 +12,12 @@ import {
   DELETE_LOCATION_SUCCESS,
   DeleteLocationFaliure,
   DELETE_LOCATION_FAILURE,
+  GET_LOCATION_FAILED,
+  GET_LOCATION_REQUEST,
 } from './locationTypes';
 import { handleAxiosError } from '../../util/handleAxiosError';
-
-const getLocationsSuccess = (data: Location[]): GetLocationsSuccess => ({
-  type: GET_LOCATION_SUCCESS,
-  payload: data,
-});
+import { CallAPIAction } from '../../middlewares/callAPIMiddleware';
+import { State } from '../State';
 
 const requestLocationsFailure = (error: any): RequestLocationsFailure => {
   console.error(error);
@@ -45,16 +43,11 @@ const deleteLocationFailure = (): DeleteLocationFaliure => ({
   type: DELETE_LOCATION_FAILURE,
 });
 
-export const getLocations = () => (dispatch): Promise<void> => {
-  return axios('/api/locations/')
-    .then(({ data }) => {
-      dispatch(getLocationsSuccess(data));
-      return void 0;
-    })
-    .catch((err) => {
-      dispatch(requestLocationsFailure(err));
-    });
-};
+export const getLocations = (): CallAPIAction<State> => ({
+  types: [GET_LOCATION_REQUEST, GET_LOCATION_SUCCESS, GET_LOCATION_FAILED],
+  callAPI: (): Promise<void> => axios.get('/api/locations/').then(({ data }) => data),
+  shouldCallAPI: (state): boolean => state.locations.length === 0,
+});
 
 export const postLocation = (newLocation: Location) => (dispatch): Promise<void> => {
   return axios('/api/locations/', {

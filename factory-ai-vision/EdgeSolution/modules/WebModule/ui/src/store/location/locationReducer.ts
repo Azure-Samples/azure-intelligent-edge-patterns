@@ -1,4 +1,3 @@
-import * as R from 'ramda';
 import {
   GET_LOCATION_SUCCESS,
   REQUEST_LOCATION_FAILURE,
@@ -12,7 +11,7 @@ import { initialState } from '../State';
 const locationsReducer = (state = initialState.locations, action: LocationAction): Location[] => {
   switch (action.type) {
     case GET_LOCATION_SUCCESS:
-      return action.payload;
+      return action.response;
     case REQUEST_LOCATION_FAILURE:
       return state;
     case POST_LOCATION_SUCCESS:
