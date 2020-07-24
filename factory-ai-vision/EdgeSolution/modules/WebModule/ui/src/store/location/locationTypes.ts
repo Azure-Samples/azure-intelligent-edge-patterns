@@ -13,35 +13,32 @@ export type Location = {
 export const GET_LOCATION_REQUEST = 'GET_LOCATION_REQUEST';
 export const GET_LOCATION_SUCCESS = 'GET_LOCATION_SUCCESS';
 export const GET_LOCATION_FAILURE = 'GET_LOCATION_FAILURE';
-export const REQUEST_LOCATION_FAILURE = 'REQUEST_LOCATION_FAILURE';
 export const POST_LOCATION_REQUEST = 'POST_LOCATION_REQUEST';
 export const POST_LOCATION_SUCCESS = 'POST_LOCATION_SUCCESS';
 export const POST_LOCATION_FAILURE = 'POST_LOCATION_FAILURE';
 export const DELETE_LOCATION_REQUEST = 'DELETE_LOCATION_REQUEST';
-export const DELETE_LOCATION_FAILURE = 'DELETE_LOCATION_FAILURE';
 export const DELETE_LOCATION_SUCCESS = 'DELETE_LOCATION_SUCCESS';
+export const DELETE_LOCATION_FAILURE = 'DELETE_LOCATION_FAILURE';
 
 export type GetLocationRequest = APIRequestAction<typeof GET_LOCATION_REQUEST>;
 export type GetLocationSuccess = APISuccessAction<typeof GET_LOCATION_SUCCESS>;
-export type GetLocationFailed = APIFailureAction<typeof GET_LOCATION_FAILURE>;
+export type GetLocationFailure = APIFailureAction<typeof GET_LOCATION_FAILURE>;
 
 export type PostLocationRequest = APIRequestAction<typeof POST_LOCATION_REQUEST>;
 export type PostLocationSuccess = APISuccessAction<typeof POST_LOCATION_SUCCESS>;
-export type PostLocationFalure = APIFailureAction<typeof POST_LOCATION_FAILURE>;
+export type PostLocationFailure = APIFailureAction<typeof POST_LOCATION_FAILURE>;
 
-export type RequestLocationsFailure = { type: typeof REQUEST_LOCATION_FAILURE };
-export type DeleteLocationRequest = { type: typeof DELETE_LOCATION_REQUEST };
-export type DeleteLocationSuccess = { type: typeof DELETE_LOCATION_SUCCESS; payload: { id: number } };
-export type DeleteLocationFaliure = { type: typeof DELETE_LOCATION_FAILURE };
+export type DeleteLocationRequest = APIRequestAction<typeof DELETE_LOCATION_REQUEST>;
+export type DeleteLocationSuccess = APISuccessAction<typeof DELETE_LOCATION_SUCCESS, null, { id: number }>;
+export type DeleteLocationFaliure = APIFailureAction<typeof DELETE_LOCATION_FAILURE>;
 
 export type LocationAction =
   | GetLocationRequest
-  | GetLocationFailed
+  | GetLocationFailure
   | GetLocationSuccess
   | PostLocationRequest
   | PostLocationSuccess
-  | PostLocationFalure
-  | RequestLocationsFailure
+  | PostLocationFailure
   | PostLocationSuccess
   | DeleteLocationRequest
   | DeleteLocationSuccess
