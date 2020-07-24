@@ -9,7 +9,7 @@ from io import BytesIO
 import requests
 from django.core import files
 from django.db import models
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
@@ -153,30 +153,4 @@ class Image(models.Model):
         if not instance.customvision_id:
             return
 
-    @staticmethod
-    def pre_delete(**kwargs):
-        """pre_delete.
-
-        Args:
-            kwargs:
-        """
-
-        if 'sender' not in kwargs or kwargs['sender'] is not Image:
-            return
-        if 'instance' not in kwargs:
-            return
-        instance = kwargs['instance']
-        if not instance.project or \
-                not instance.project.setting or \
-                not instance.project.setting.is_trainer_valid:
-            return
-        if not instance.customvision_id:
-            return
-        trainer = instance.project.setting.get_trainer_obj()
-        trainer.delete_images(
-            project_id=instance.project.customvision_project_id,
-            image_ids=[instance.customvision_id])
-
-
 pre_save.connect(Image.pre_save, Image, dispatch_uid="Image_pre")
-pre_delete.connect(Image.pre_delete, Image, dispatch_uid="Image_pre_delete")
