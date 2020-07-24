@@ -2,10 +2,11 @@
 
 import logging
 
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 
 from ..azure_settings.models import Setting
+from ..azure_training.models import Project
 from .models import Part
 
 logger = logging.getLogger(__name__)
@@ -48,3 +49,41 @@ def azure_setting_change_handler(**kwargs):
     logger.info("Setting endpoint or training_key changed...")
     logger.info("Deleting all none-demo part....")
     Part.objects.filter(is_demo=False).delete()
+
+@receiver(signal=pre_delete,
+          sender=Part,
+          dispatch_uid="delete_part_on_customvision")
+def delete_part_on_customvision_handler(**kwargs):
+    """delete_part_on_customvision_handler.
+
+    If part delete with customvision_id, delete on Custom Vision.
+
+    Args:
+        kwargs:
+    """
+
+    logger.info("Part is deleting")
+    logger.info("Checking...")
+
+    if 'sender' not in kwargs or kwargs['sender'] != Part:
+        logger.info("'sender' not in kwargs or kwargs['sender'] != setting")
+        logger.info("nothing to do")
+        return
+    if 'instance' not in kwargs:
+        logger.info("'instance' not in kwargs:'")
+        logger.info("Nothing to do")
+        return
+    instance = kwargs['instance']
+    if not instance.customvision_id:
+        logger.info("Part have no customvision_id. Skip")
+    
+    # FIXME: Use Part foreign key project if availible
+    if not Project.objects.filter(is_demo=False).count() == 1:
+        logger.error("Have customvision_id but can not guess the project...")
+        return
+    
+    project_obj = Project.objects.get(is_demo=False)
+    trainer = project_obj.setting.get_trainer_obj()
+    
+    pass
+
