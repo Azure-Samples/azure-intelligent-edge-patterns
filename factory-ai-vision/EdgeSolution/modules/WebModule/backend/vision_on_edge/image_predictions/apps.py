@@ -2,8 +2,8 @@
 Image Prediction App
 """
 
-import sys
 import logging
+import sys
 
 from django.apps import AppConfig
 

@@ -84,7 +84,8 @@ def upload_relabel_image(request):
     if (confidence_float < project_obj.accuracyRangeMin or \
          confidence_float > project_obj.accuracyRangeMax):
         logger.error("Inferenece confidence %s out of range", confidence_float)
-        logger.error("range %s ~ %s", project_obj.accuracyRangeMin, project_obj.accuracyRangeMax)
+        logger.error("range %s ~ %s", project_obj.accuracyRangeMin,
+                     project_obj.accuracyRangeMax)
 
         return Response(
             {

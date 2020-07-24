@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 KEEP_ALIVE_THRESHOLD = 10
 
+
 class Stream():
     """Stream Class"""
 
@@ -51,8 +52,6 @@ class Stream():
 
         logger.info("inference %s", self.inference)
         logger.info("iot %s", self.iot)
-
-
 
         def _listener(self):
             if not self.inference:
@@ -91,7 +90,7 @@ class Stream():
 
         # if self.iot:
         threading.Thread(target=_listener, args=(self,)).start()
-    
+
     def update_keep_alive(self):
         self.keep_alive = time.time()
 
@@ -100,7 +99,8 @@ class Stream():
         self.status = "running"
         logger.info("start streaming with %s", self.rtsp)
         self.cap = cv2.VideoCapture(self.rtsp)
-        while self.status == "running" and (self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
+        while self.status == "running" and (
+                self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
             if not self.cap.isOpened():
                 raise ValueError("Cannot connect to rtsp")
             t, img = self.cap.read()
