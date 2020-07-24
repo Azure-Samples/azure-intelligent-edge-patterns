@@ -21,7 +21,12 @@ logger = logging.getLogger(__name__)
 
 @api_view(["POST"])
 def upload_relabel_image(request):
-    """upload relable image"""
+    """upload_relabel_image.
+
+    Args:
+        request:
+    """
+
     part_name = request.data["part_name"]
     labels = request.data["labels"]
     img_data = base64.b64decode(request.data["img"])
@@ -35,6 +40,7 @@ def upload_relabel_image(request):
         return Response({"status": "failed"})
 
     part = parts[0]
+
     # FIXME: use part foreign key to get project
     project_objs = Project.objects.filter(is_demo=part.is_demo)
     if len(project_objs) <= 0:
@@ -55,7 +61,7 @@ def upload_relabel_image(request):
         logger.info("Already reach project maxImages limit")
 
         # Delete some images if already exceed maxImages
-        for i in range(
+        for _ in range(
                 len(
                     Image.objects.filter(
                         project=project_obj, part=part, is_relabel=True)) -
@@ -71,6 +77,21 @@ def upload_relabel_image(request):
             status=status.HTTP_400_BAD_REQUEST)
 
     # Relabel images count does not exceed project.maxImages
+    # Handled by signals
+
+    # Confidence check
+    if (confidence < project_obj.accuracyRangeMin or \
+            project_obj.accuracyRangeMax):
+        logger.error("Inferenece using confidence out of range")
+
+        return Response(
+            {
+                "status": "failed",
+                'log': 'Confidence out of range',  # yapf...
+            },
+            status=status.HTTP_400_BAD_REQUEST)
+
+    # All pass
     img_io = io.BytesIO(img_data)
 
     img = ImageFile(img_io)
@@ -90,13 +111,16 @@ def upload_relabel_image(request):
 
 @api_view(["POST"])
 def relabel_update(request):
+    """relabel_update.
+
+    Args:
+        request:
     """
-    Update relabel image
-    """
+
     logger.info("update relabeling")
     data = request.data
-    if type(data) is not type([]):
-        logger.info("data should be array of object {}")
+    if not isinstance(data, list):
+        logger.info("data should be list of object {}")
         return Response({"status": "failed"})
 
     for item in data:
