@@ -66,8 +66,7 @@ def update_app_insight_counter(
         raise
 
 
-def pull_cv_project_helper(project_id, customvision_project_id: str,
-                           is_partial: bool):
+def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial: bool):
     """pull_cv_project_helper.
 
     Args:
