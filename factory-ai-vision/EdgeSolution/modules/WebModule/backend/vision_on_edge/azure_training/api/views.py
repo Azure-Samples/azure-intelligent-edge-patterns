@@ -342,7 +342,9 @@ def train(request, project_id):
 
 
 def upload_and_train(project_id):
-    """Actually do uplaod, train and deploy"""
+    """Actually do uplaod, train and deploy
+    """
+
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
@@ -604,6 +606,10 @@ def update_train_status(project_id):
                 )
                 wait_prepare += 1
                 if wait_prepare > max_wait_prepare:
+                    project_obj.upcreate_training_status(
+                        status="failed",
+                        log="Get iteration from Custom Vision occurs error.",
+                    )
                     break
                 continue
 
