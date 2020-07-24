@@ -373,7 +373,7 @@ class Train(models.Model):
 
     status = models.CharField(max_length=200)
     log = models.CharField(max_length=1000)
-    performance = models.CharField(max_length=1000, default="{}")
+    performance = models.CharField(max_length=2000, default="{}")
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
