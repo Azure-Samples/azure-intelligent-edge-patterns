@@ -153,4 +153,5 @@ class Image(models.Model):
         if not instance.customvision_id:
             return
 
+
 pre_save.connect(Image.pre_save, Image, dispatch_uid="Image_pre")

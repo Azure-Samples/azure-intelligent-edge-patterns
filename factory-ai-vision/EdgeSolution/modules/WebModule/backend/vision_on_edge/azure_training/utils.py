@@ -4,15 +4,16 @@ Project Utilities
 
 import logging
 
-from .models import Project, Task, Train
-from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.images.models import Image
-from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
-from django.http import JsonResponse
-from vision_on_edge.general import error_messages
-
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException, ImageFileCreateEntry, Region)
+from django.http import JsonResponse
+
+from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
+from vision_on_edge.azure_parts.models import Part
+from vision_on_edge.general import error_messages
+from vision_on_edge.images.models import Image
+
+from .models import Project, Task, Train
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,8 @@ def update_app_insight_counter(
         raise
 
 
-def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial: bool):
+def pull_cv_project_helper(project_id, customvision_project_id: str,
+                           is_partial: bool):
     """pull_cv_project_helper.
 
     Args:

@@ -26,7 +26,7 @@ from ...general import error_messages
 from ...images.models import Image
 from ...notifications.models import Notification
 from ..models import Project, Task, Train
-from ..utils import update_app_insight_counter, pull_cv_project_helper
+from ..utils import pull_cv_project_helper, update_app_insight_counter
 from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
 
 logger = logging.getLogger(__name__)
@@ -730,7 +730,8 @@ def pull_cv_project(request, project_id):
         return Response(
             {
                 "status": "failed",
-                "log": str(err_msg)  # Change line plz...
+                "log":
+                    str(err_msg)  # Change line plz...
             },
             status=status.HTTP_400_BAD_REQUEST)
 

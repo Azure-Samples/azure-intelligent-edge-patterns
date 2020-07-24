@@ -4,7 +4,7 @@ Signals
 
 import logging
 
-from django.db.models.signals import pre_save, pre_delete
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 
 from ..azure_training.models import Project
@@ -55,6 +55,7 @@ def relabel_setting_change_handler(**kwargs):
     logger.info("Project id: %s", instance.id)
     Image.objects.filter(project=instance, is_relabel=True).delete()
     logger.info("Deleting all relabel images... complete")
+
 
 @receiver(signal=pre_delete,
           sender=Image,
