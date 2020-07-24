@@ -87,7 +87,7 @@
             "status": "running",
             "restartPolicy": "always",
             "env": {
-              "POSTGRES_PASSWORD": { "value": "password" }
+              "POSTGRES_PASSWORD": { "value": "vision_on_edge" }
             },
             "settings": {
               "image": "${MODULES.WebDBModule}",

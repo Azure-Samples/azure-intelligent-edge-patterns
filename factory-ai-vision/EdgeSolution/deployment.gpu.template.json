@@ -81,6 +81,29 @@
               }
             }
           },
+          "WebDBModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "POSTGRES_PASSWORD": { "value": "vision_on_edge" }
+            },
+            "settings": {
+              "image": "${MODULES.WebDBModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5432/tcp": [
+                      {
+                        "HostPort": "5432"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           "InferenceModule": {
             "version": "1.0",
             "type": "docker",
