@@ -15,7 +15,7 @@ const locationsReducer = (state = initialState.locations, action: LocationAction
     case REQUEST_LOCATION_FAILURE:
       return state;
     case POST_LOCATION_SUCCESS:
-      return state.concat(action.payload);
+      return [...state, action.response];
     case DELETE_LOCATION_SUCCESS:
       return state.filter((e) => e.id !== action.payload.id);
     default:
