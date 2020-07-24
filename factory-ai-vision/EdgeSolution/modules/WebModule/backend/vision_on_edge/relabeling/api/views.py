@@ -79,10 +79,12 @@ def upload_relabel_image(request):
     # Relabel images count does not exceed project.maxImages
     # Handled by signals
 
+    confidence_float = float(confidence) * 100
     # Confidence check
-    if (confidence < project_obj.accuracyRangeMin or \
-            project_obj.accuracyRangeMax):
-        logger.error("Inferenece using confidence out of range")
+    if (confidence_float < project_obj.accuracyRangeMin or \
+         confidence_float > project_obj.accuracyRangeMax):
+        logger.error("Inferenece confidence %s out of range", confidence_float)
+        logger.error("range %s ~ %s", project_obj.accuracyRangeMin, project_obj.accuracyRangeMax)
 
         return Response(
             {
