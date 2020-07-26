@@ -1,7 +1,9 @@
 """
 Image Prediction App
 """
+
 import logging
+import sys
 
 from django.apps import AppConfig
 
@@ -20,4 +22,5 @@ class ImagePredictionsConfig(AppConfig):
         Only load to data when runserver
         if ready run in migration will failed.
         """
-        logger.info("Image Prediction App Ready")
+        if 'runserver' in sys.argv:
+            logger.info("Image Prediction App Ready")

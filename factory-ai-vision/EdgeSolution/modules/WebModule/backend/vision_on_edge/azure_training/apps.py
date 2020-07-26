@@ -1,6 +1,4 @@
-"""
-Azure Training App
-"""
+"""App"""
 import logging
 import sys
 
@@ -12,9 +10,11 @@ DEFAULT_SETTING_NAME = 'DEFAULT_SETTING'
 
 
 class AzureTrainingConfig(AppConfig):
+    """App Config
+
+    Import signals and create demo objects.
     """
-    Azure Training App Config
-    """
+
     name = 'vision_on_edge.azure_training'
 
     def ready(self):

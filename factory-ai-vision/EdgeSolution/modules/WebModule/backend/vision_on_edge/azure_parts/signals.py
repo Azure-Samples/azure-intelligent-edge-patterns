@@ -1,6 +1,4 @@
-"""
-Part Signals
-"""
+"""App Signals"""
 
 import logging
 
@@ -17,10 +15,14 @@ logger = logging.getLogger(__name__)
           sender=Setting,
           dispatch_uid="delete_part_on_setting_change")
 def azure_setting_change_handler(**kwargs):
+    """azure_setting_change_handler.
+
+    If setting changed, remove all part.
+
+    Args:
+        kwargs:
     """
-    Listen on azure_settings.models.Setting change.
-    Delete all none-demo parts.
-    """
+
     logger.info("Azure Setting changed.")
     logger.info("Checking...")
 

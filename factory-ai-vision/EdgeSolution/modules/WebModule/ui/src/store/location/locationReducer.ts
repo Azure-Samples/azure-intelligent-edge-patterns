@@ -1,7 +1,9 @@
+import * as R from 'ramda';
 import {
   GET_LOCATION_SUCCESS,
   REQUEST_LOCATION_FAILURE,
   POST_LOCATION_SUCCESS,
+  DELETE_LOCATION_SUCCESS,
   Location,
   LocationAction,
 } from './locationTypes';
@@ -15,6 +17,8 @@ const locationsReducer = (state = initialState.locations, action: LocationAction
       return state;
     case POST_LOCATION_SUCCESS:
       return state.concat(action.payload);
+    case DELETE_LOCATION_SUCCESS:
+      return state.filter((e) => e.id !== action.payload.id);
     default:
       return state;
   }

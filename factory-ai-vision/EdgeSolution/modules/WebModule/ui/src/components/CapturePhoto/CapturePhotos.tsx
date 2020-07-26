@@ -47,7 +47,7 @@ export const CapturePhotos: React.FC<{
           setSelectedCamera={setSelectedCamera}
           availableCameras={availableCameras}
         />
-        <div style={{ minHeight: '600px' }}>
+        <div style={{ minHeight: '600px', height: '100%' }}>
           <RTSPVideo
             rtsp={selectedCamera?.rtsp}
             partId={partId}

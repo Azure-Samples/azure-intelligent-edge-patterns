@@ -4,8 +4,9 @@ Part Model and method unittest
 from django.core.exceptions import MultipleObjectsReturned
 from rest_framework.test import APITransactionTestCase
 
+from vision_on_edge.general.tests.test_special_strings import special_strings
+
 from ..models import Part
-from .test_special_strings import special_strings
 
 
 class PartTestCase(APITransactionTestCase):

@@ -1,6 +1,8 @@
+"""App Models.
+
+Include Project, Train and Task.
 """
-Models for Azure Custom Vision training.
-"""
+
 import datetime
 import logging
 import threading
@@ -9,43 +11,22 @@ import time
 import requests
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
-from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
+from ..azure_iot.utils import inference_module_url
 from ..azure_parts.models import Part
 from ..azure_settings.models import Setting
 from ..cameras.models import Camera
-from ..images.models import Image
 from ..locations.models import Location
-from .utils.app_insight import (get_app_insight_logger, img_monitor,
-                                part_monitor, retraining_job_monitor,
-                                training_job_monitor)
 
 logger = logging.getLogger(__name__)
-
-
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
-
 
 # Create your models here.
 
 
 class Project(models.Model):
-    """Project Model"""
+    """Azure Custom Vision Project Model"""
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
@@ -82,14 +63,23 @@ class Project(models.Model):
     prob_threshold = models.IntegerField(default=10)
 
     @staticmethod
-    def pre_save(sender, instance, update_fields, **kwargs):
-        """Project pre_save"""
+    def pre_save(**kwargs):
+        """pre_save.
+
+        Args:
+            kwargs:
+        """
+
         logger.info("Project pre_save")
-        logger.info("Saving instance: %s %s", instance, update_fields)
-        if update_fields is not None:
+        if "sender" not in kwargs or kwargs["sender"] is not Project:
             return
-        # if instance.id is not None:
-        #    return
+        if "instance" not in kwargs:
+            return
+        if "update_fields" not in kwargs:
+            return
+
+        instance = kwargs["instance"]
+        logger.info("Saving instance: %s", instance)
 
         trainer = instance.setting.revalidate_and_get_trainer_obj()
         if instance.is_demo:
@@ -105,11 +95,13 @@ class Project(models.Model):
                 logger.error(customvision_err)
                 logger.error(
                     "Project %s not belong to Training Key + Endpoint pair.",
-                    instance.customvision_project_id)
+                    instance.customvision_project_id,
+                )
                 logger.error("Set Project Id to ''")
                 instance.customvision_project_id = ""
             except:
                 logger.exception("Unexpected error")
+                instance.customvision_project_id = ""
         elif trainer:
             # Endpoint and Training_key is valid, and trying to save without
             # customvision_project_id
@@ -134,17 +126,31 @@ class Project(models.Model):
         logger.info("Project pre_save... End")
 
     @staticmethod
-    def post_save(sender, instance, created, update_fields, **kwargs):
-        """Project post_save"""
+    def post_save(created, update_fields, **kwargs):
+        """Project post_save
+        """
         logger.info("Project post_save")
-        logger.info("Saving instance: %s %s", instance, update_fields)
 
+        if "sender" not in kwargs or kwargs["sender"] is not Project:
+            return
+
+        if "instance" not in kwargs:
+            return
+
+        if not kwargs["instance"].has_configured:
+            logger.error("This project is not configured to as inference")
+            logger.error("Not sending any request to inference")
+            return
+
+        instance = kwargs["instance"]
         confidence_min = 30
         confidence_max = 80
         max_images = 10
         metrics_is_send_iothub = False
         metrics_accuracy_threshold = 50
         metrics_frame_per_minutes = 6
+
+        logger.info("Saving instance: %s %s", instance, update_fields)
 
         if instance.accuracyRangeMin is not None:
             confidence_min = instance.accuracyRangeMin
@@ -173,13 +179,15 @@ class Project(models.Model):
                 },
             )
 
-            requests.get('http://' + inference_module_url() +
-                         '/update_iothub_parameters',
-                         params={
-                             'is_send': metrics_is_send_iothub,
-                             'threshold': metrics_accuracy_threshold,
-                             'fpm': metrics_frame_per_minutes,
-                         })
+            requests.get(
+                "http://" + inference_module_url() +
+                "/update_iothub_parameters",
+                params={
+                    "is_send": metrics_is_send_iothub,
+                    "threshold": metrics_accuracy_threshold,
+                    "fpm": metrics_frame_per_minutes,
+                },
+            )
 
         threading.Thread(target=_r,
                          args=(confidence_min, confidence_max,
@@ -229,7 +237,7 @@ class Project(models.Model):
             defaults={
                 "status": status,
                 "log": "Status : " + log.capitalize(),
-                "performance": performance
+                "performance": performance,
             },
         )
         return obj, created
@@ -287,62 +295,6 @@ class Project(models.Model):
                            tag_id=tag_id)
         return
 
-    def update_app_insight_counter(
-            self,
-            has_new_parts: bool,
-            has_new_images: bool,
-            parts_last_train: int,
-            images_last_train: int,
-    ):
-        """Send message to app insight"""
-        try:
-            retrain = train = 0
-            if has_new_parts:
-                logger.info("This is a training job")
-                self.training_counter += 1
-                self.save(update_fields=["training_counter"])
-                train = 1
-            elif has_new_images:
-                logger.info("This is a re-training job")
-                self.retraining_counter += 1
-                self.save(update_fields=["retraining_counter"])
-                retrain = 1
-            else:
-                logger.info("Project not changed")
-            logger.info("Sending Data to App Insight %s",
-                        self.setting.is_collect_data)
-            if self.setting.is_collect_data:
-
-                # Metrics
-                logger.info("Sending Logs to App Insight")
-                # TODO: Move this to other places to aviod import Part
-                part_monitor(len(Part.objects.filter(is_demo=False)))
-                # TODO: Move this to other places to aviod import Image
-                img_monitor(len(Image.objects.all()))
-                training_job_monitor(self.training_counter)
-                retraining_job_monitor(self.retraining_counter)
-                trainer = self.setting.get_trainer_obj()
-                images_now = trainer.get_tagged_image_count(
-                    self.customvision_project_id)
-                parts_now = len(trainer.get_tags(self.customvision_project_id))
-                # Traces
-                az_logger = get_app_insight_logger()
-                az_logger.warning(
-                    "training",
-                    extra={
-                        "custom_dimensions": {
-                            "train": train,
-                            "images": images_now - images_last_train,
-                            "parts": parts_now - parts_last_train,
-                            "retrain": retrain,
-                        }
-                    },
-                )
-        except:
-            logger.exception(
-                "update_app_insight_counter occur unexcepted error")
-            raise
-
     def train_project(self):
         """
         Submit training task to CustomVision.
@@ -360,8 +312,10 @@ class Project(models.Model):
                 logger.error("Trainer is invalid. Not going to train...")
 
             # Submit training task to CustomVision
-            logger.info("%s submit training task to CustomVision",
-                        self.customvision_project_name)
+            logger.info(
+                "%s submit training task to CustomVision",
+                self.customvision_project_name,
+            )
             trainer.train_project(self.customvision_project_id)
             # Set deployed
             self.deployed = False
@@ -403,7 +357,7 @@ class Project(models.Model):
         self.prob_threshold = prob_threshold
 
         if prob_threshold > 100 or prob_threshold < 0:
-            raise ValueError('prob_threshold out of range')
+            raise ValueError("prob_threshold out of range")
 
         requests.get(
             "http://" + inference_module_url() + "/update_prob_threshold",
@@ -411,7 +365,7 @@ class Project(models.Model):
                 "prob_threshold": prob_threshold,
             },
         )
-        self.save(update_fields=['prob_threshold'])
+        self.save(update_fields=["prob_threshold"])
 
 
 class Train(models.Model):
@@ -419,7 +373,7 @@ class Train(models.Model):
 
     status = models.CharField(max_length=200)
     log = models.CharField(max_length=1000)
-    performance = models.CharField(max_length=1000, default="{}")
+    performance = models.CharField(max_length=2000, default="{}")
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 

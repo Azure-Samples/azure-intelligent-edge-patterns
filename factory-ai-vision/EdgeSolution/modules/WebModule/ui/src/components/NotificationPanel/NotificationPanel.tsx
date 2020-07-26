@@ -8,11 +8,10 @@ import { State } from '../../store/State';
 import { Notification } from '../../store/notification/notificationType';
 
 type NotificationPanelProps = {
-  isOpen: boolean;
   onDismiss: Function;
 };
 
-export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onDismiss }) => {
+export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onDismiss }) => {
   const notifications = useSelector<State, Notification[]>((state) => state.notifications);
   const history = useHistory();
 
@@ -23,7 +22,6 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
         border: `solid ${mainTheme.siteVariables.colorScheme.brand.border} 1px`,
         height: '100%',
         width: '100%',
-        visibility: isOpen ? 'visible' : 'hidden',
         overflow: 'scroll',
       }}
     >

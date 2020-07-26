@@ -20,18 +20,21 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework import routers
 
+from vision_on_edge.azure_app_insight.api import views as app_insight_views
 from vision_on_edge.azure_parts.api import views as azure_part_views
 from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training.api import views as azure_training_views
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views
+from vision_on_edge.feedback.api import views as feedback_views
 from vision_on_edge.image_predictions.api import \
     views as image_prediction_views
 from vision_on_edge.images.api import views as image_views
 from vision_on_edge.locations.api import views as location_views
+from vision_on_edge.notifications.api import views as notifications_views
 from vision_on_edge.relabeling.api import views as relabel_views
 from vision_on_edge.streams.api import views as stream_views
-from vision_on_edge.notifications.api import views as notifications_views
+
 from . import views as site_views
 
 
@@ -55,6 +58,7 @@ router.register('projects', azure_training_views.ProjectViewSet)
 router.register('train', azure_training_views.TrainViewSet)
 router.register('tasks', azure_training_views.TaskViewSet)
 router.register('images', image_views.ImageViewSet)
+router.register('feedback', feedback_views.FeedbackViewSet)
 router.register('notifications', notifications_views.NotificationViewSet)
 router.register('images', image_views.ImageViewSet)
 
@@ -68,6 +72,7 @@ urlpatterns = \
              stream_views.disconnect_stream),
         path('api/streams/<int:stream_id>/video_feed', stream_views.video_feed),
         path('api/streams/<int:stream_id>/capture', stream_views.capture),
+        path('api/streams/<int:stream_id>/keep_alive', stream_views.keep_alive),
         path('api/projects/<int:project_id>/train', azure_training_views.train),
         path('api/projects/<int:project_id>/export',
              azure_training_views.export),
@@ -86,7 +91,7 @@ urlpatterns = \
         path('api/projects/null/export', azure_training_views.export_null),
         path('api/relabel', relabel_views.upload_relabel_image),
         path('api/relabel/update', relabel_views.relabel_update),
-        path('api/appinsight/key', views.instrumentation_key),
+        path('api/appinsight/key', app_insight_views.instrumentation_key),
         path('api/camera_utils/verify_rtsp',
              camera_util_views.verify_rtsp),
         path('admin/', admin.site.urls),
