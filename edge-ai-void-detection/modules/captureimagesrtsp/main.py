@@ -40,10 +40,11 @@ FILE_PATH = ""
 # Choose HTTP, AMQP or MQTT as transport protocol.  Currently only MQTT is supported.
 PROTOCOL = IoTHubTransportProvider.MQTT
 
-MODULE_ID=""
-IMAGE_URL=""
-FRAMES_PER_SECOND = 0
-CROP_COORDINATES = ""
+# Add Default Twins settings
+MODULE_ID="captureimagesrtsp"
+IMAGE_URL="rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
+FRAMES_PER_SECOND = 20
+CROP_COORDINATES = "0,0,320,240"
 
 # Callback received when the message that we're forwarding is processed.
 def send_confirmation_callback(message, result, user_context):
