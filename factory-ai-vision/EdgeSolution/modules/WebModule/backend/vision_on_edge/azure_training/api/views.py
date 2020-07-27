@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     """Project ModelViewSet
 
-    Available filters
-    @is_demo
+    Filters:
+        is_demo
     """
 
     queryset = Project.objects.all()
@@ -181,7 +181,7 @@ def export_null(request):
 @api_view()
 def train_performance(request, project_id):
     """train_performance.
-    
+
     Get train performace of this iter and previous iter
 
     Args:
@@ -239,7 +239,7 @@ def train_performance(request, project_id):
 @api_view()
 def train(request, project_id):
     """train.
-    
+
     Configure button. Train/Export/Deploy a project.
 
     Args:
@@ -301,7 +301,7 @@ def train(request, project_id):
                                  log="demo ok")
         project_obj.has_configured = True
         project_obj.save()
-        # FIXME pass the new model info to inference server (willy implement)
+        # pass the new model info to inference server in post_save()
         return Response({"status": "ok"})
 
     upcreate_training_status(project_id=project_obj.id,
@@ -333,7 +333,7 @@ def train(request, project_id):
 
 def upload_and_train(project_id):
     """upload_and_train.
-    
+
     Actually do upload, train and deploy.
 
     Args:
