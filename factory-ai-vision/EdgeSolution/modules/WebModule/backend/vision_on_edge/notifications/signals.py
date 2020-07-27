@@ -37,6 +37,7 @@ def notification_post_save_websocket_handler(**kwargs):
     async_to_sync(channels_layer.group_send)(
         "notification",
         {
+            "id": instance.id,
             "type": "notification.send",
             "notification_type": instance.notification_type,
             "timestamp": str(instance.timestamp),
