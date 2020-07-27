@@ -183,4 +183,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = logging_config.LOGGING_CONFIG_DEV
+LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION

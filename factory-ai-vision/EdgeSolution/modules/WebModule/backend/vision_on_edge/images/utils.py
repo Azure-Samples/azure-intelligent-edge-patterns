@@ -91,14 +91,13 @@ def upload_images_to_customvision_helper(project_id,
             logger.info("Uploading %s images", len(img_entries))
             upload_result = trainer.create_images_from_files(
                 customvision_project_id, images=img_entries)
-            from IPython import embed
-            embed(using=False)
             logger.info(
                 "Uploading images... Is batch success: %s",
                 upload_result.is_batch_successful,
             )
             img_entries = []
-            for img_obj in img_objs:
+            for i, img_obj in enumerate(img_objs):
+                img_obj.customvision_id = upload_result.images[i].image.id
                 img_obj.uploaded = True
                 img_obj.save()
             img_objs = []
@@ -111,7 +110,9 @@ def upload_images_to_customvision_helper(project_id,
             "Uploading images... Is batch success: %s",
             upload_result.is_batch_successful,
         )
-        for img_obj in img_objs:
+        for i, img_obj in enumerate(img_objs):
+            img_obj.customvision_id = upload_result.images[i].image.id
+            img_obj.remote_url = upload_result.images[i].image.original_image_uri
             img_obj.uploaded = True
             img_obj.save()
     logger.info("Uploading images... Done")
