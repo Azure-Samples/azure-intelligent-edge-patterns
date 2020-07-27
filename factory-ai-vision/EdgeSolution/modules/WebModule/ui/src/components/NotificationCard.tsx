@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Card, CloseIcon, Button, CardHeader, Flex, CardBody, Text, Loader } from '@fluentui/react-northstar';
+import {
+  Card,
+  CloseIcon,
+  Button,
+  CardHeader,
+  Flex,
+  CardBody,
+  Text,
+  Loader,
+  ComponentEventHandler,
+  ButtonProps,
+} from '@fluentui/react-northstar';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Notification } from '../store/notification/notificationType';
@@ -11,7 +22,8 @@ export const NotificationCard: React.FC<{ notification: Notification }> = ({ not
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  const onDelete = async (): Promise<void> => {
+  const onDelete: ComponentEventHandler<ButtonProps> = async (evt): Promise<void> => {
+    evt.stopPropagation();
     setLoading(true);
     try {
       await dispatch(deleteNotification(notification.id));
