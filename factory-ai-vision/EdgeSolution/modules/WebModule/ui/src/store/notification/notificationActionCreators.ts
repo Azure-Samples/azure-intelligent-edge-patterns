@@ -1,6 +1,5 @@
 import Axios from 'axios';
 
-import { SetReadAction } from './notificationType';
 import { CallAPIAction } from '../../middlewares/callAPIMiddleware';
 import { State } from '../State';
 import {
@@ -12,6 +11,8 @@ import {
   DELETE_NOTIFICATION_SUCCESS,
   ReceiveNotification,
   RECEIVE_NOTIFICATION,
+  OpenNotificationPanel,
+  OPEN_NOTIFICATION_PANEL,
 } from '../../action';
 
 export const receiveNotification = (newNotification: any): ReceiveNotification => ({
@@ -19,9 +20,7 @@ export const receiveNotification = (newNotification: any): ReceiveNotification =
   response: newNotification,
 });
 
-export const setRead = (): SetReadAction => ({
-  type: 'SET_READ',
-});
+export const openNotificationPanel = (): OpenNotificationPanel => ({ type: OPEN_NOTIFICATION_PANEL });
 
 export const getNotifications = (): CallAPIAction<State> => ({
   types: [GET_NOTIFICATIONS_REQUEST, GET_NOTIFICATIONS_SUCCESS, GET_NOTIFICATIONS_FAILURE],

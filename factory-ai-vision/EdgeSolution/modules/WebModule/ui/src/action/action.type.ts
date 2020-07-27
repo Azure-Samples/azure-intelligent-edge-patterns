@@ -22,6 +22,8 @@ export type ReceiveNotification = {
   response: any;
 };
 
+export type OpenNotificationPanel = { type: typeof constants.OPEN_NOTIFICATION_PANEL };
+
 export type ActionTypes =
   | GetNotificationsRequest
   | GetNotificationsSuccess
@@ -29,4 +31,5 @@ export type ActionTypes =
   | DeleteNotificationRequest
   | DeleteNotificationSuccess
   | DeleteNotificationFailure
-  | ReceiveNotification;
+  | ReceiveNotification
+  | OpenNotificationPanel;

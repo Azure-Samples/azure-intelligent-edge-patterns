@@ -8,7 +8,7 @@ import LeftNav from './LeftNav';
 import { State } from '../../store/State';
 import { Badge } from '../Badge';
 import { NotificationPanel } from '../NotificationPanel';
-import { setRead } from '../../store/notification/notificationActionCreators';
+import { openNotificationPanel } from '../../store/notification/notificationActionCreators';
 import FeedbackDialog from '../FeedbackDialog';
 
 const LEFT_NAV_WIDTH = 80;
@@ -22,7 +22,7 @@ export const MainLayout: FC = ({ children }) => {
   const [notificationOpen, setNotificationOpen] = useState(false);
 
   const openNotification = (open: boolean): void => {
-    if (open && notificationCount > 0) dispatch(setRead());
+    if (open && notificationCount > 0) dispatch(openNotificationPanel());
     setNotificationOpen(open);
   };
 
