@@ -24,8 +24,8 @@ from vision_on_edge.azure_app_insight.api import views as app_insight_views
 from vision_on_edge.azure_parts.api import views as azure_part_views
 from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training.api import views as azure_training_views
-from vision_on_edge.azure_training_status.api import views as \
-        azure_training_status_views
+from vision_on_edge.azure_training_status.api import \
+    views as azure_training_status_views
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views
 from vision_on_edge.feedback.api import views as feedback_views
@@ -57,7 +57,8 @@ router.register('locations', location_views.LocationViewSet)
 router.register('image_predictions',
                 image_prediction_views.ImagePredictionViewSet)
 router.register('projects', azure_training_views.ProjectViewSet)
-router.register('train', azure_training_status_views.TrainingStatusViewSet)
+router.register('training_status',
+                azure_training_status_views.TrainingStatusViewSet)
 router.register('tasks', azure_training_views.TaskViewSet)
 router.register('images', image_views.ImageViewSet)
 router.register('feedback', feedback_views.FeedbackViewSet)

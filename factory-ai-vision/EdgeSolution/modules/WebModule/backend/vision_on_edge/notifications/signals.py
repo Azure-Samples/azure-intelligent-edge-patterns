@@ -65,6 +65,6 @@ def notification_post_save_dequeue_handler(**kwargs):
         return
 
     instance = kwargs['instance']
-    if Notification.objects.filter(sender=instance.sender).count() >= 5:
+    if Notification.objects.filter(sender=instance.sender).count() >= 10:
         Notification.objects.filter(
             sender=instance.sender).order_by('timestamp').first().delete()

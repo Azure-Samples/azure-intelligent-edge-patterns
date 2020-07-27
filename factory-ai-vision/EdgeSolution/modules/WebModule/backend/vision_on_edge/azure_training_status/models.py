@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 # Create your models here.
 
+
 class TrainingStatus(models.Model):
     """Training Status Model
     """
@@ -20,4 +21,5 @@ class TrainingStatus(models.Model):
     status = models.CharField(max_length=200)
     log = models.CharField(max_length=1000)
     performance = models.CharField(max_length=2000, default="{}")
+    need_to_send_notification = models.BooleanField(default=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)

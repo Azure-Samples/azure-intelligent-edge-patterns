@@ -6,8 +6,9 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from vision_on_edge.azure_settings.models import Setting
-from .models import Project
 from vision_on_edge.azure_training_status.models import TrainingStatus
+
+from .models import Project
 
 logger = logging.getLogger(__name__)
 
