@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Flex, CloseIcon, Button, Card, CardHeader, CardBody, Text } from '@fluentui/react-northstar';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { mainTheme } from '../../themes/mainTheme';
 import { State } from '../../store/State';
 import { Notification } from '../../store/notification/notificationType';
+import { getNotifications } from '../../store/notification/notificationActionCreators';
 
 type NotificationPanelProps = {
   onDismiss: Function;
@@ -14,6 +15,11 @@ type NotificationPanelProps = {
 export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onDismiss }) => {
   const notifications = useSelector<State, Notification[]>((state) => state.notifications);
   const history = useHistory();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getNotifications());
+  }, [dispatch]);
 
   return (
     <div

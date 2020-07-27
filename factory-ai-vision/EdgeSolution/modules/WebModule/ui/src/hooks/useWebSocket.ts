@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { addNotification } from '../store/notification/notificationAction';
+import { addNotification } from '../store/notification/notificationActionCreators';
 
 export const useWebSocket = (): void => {
   const dispatch = useDispatch();
