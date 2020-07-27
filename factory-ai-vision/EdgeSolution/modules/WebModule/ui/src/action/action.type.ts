@@ -5,8 +5,28 @@
 import * as constants from './constants';
 import { APIRequestAction, APISuccessAction, APIFailureAction } from '../middlewares/callAPIMiddleware';
 
-export type GetLocationRequest = APIRequestAction<typeof constants.GET_NOTIFICATIONS_REQUEST>;
-export type GetLocationSuccess = APISuccessAction<typeof constants.GET_NOTIFICATIONS_SUCCESS>;
-export type GetLocationFailure = APIFailureAction<typeof constants.GET_NOTIFICATIONS_FAILURE>;
+export type GetNotificationsRequest = APIRequestAction<typeof constants.GET_NOTIFICATIONS_REQUEST>;
+export type GetNotificationsSuccess = APISuccessAction<typeof constants.GET_NOTIFICATIONS_SUCCESS>;
+export type GetNotificationsFailure = APIFailureAction<typeof constants.GET_NOTIFICATIONS_FAILURE>;
 
-export type ActionTypes = GetLocationRequest | GetLocationSuccess | GetLocationFailure;
+export type DeleteNotificationRequest = APIRequestAction<typeof constants.DELETE_NOTIFICATION_REQUEST>;
+export type DeleteNotificationSuccess = APISuccessAction<
+  typeof constants.DELETE_NOTIFICATION_SUCCESS,
+  any,
+  { id: number }
+>;
+export type DeleteNotificationFailure = APIFailureAction<typeof constants.DELETE_NOTIFICATION_FAILURE>;
+
+export type ReceiveNotification = {
+  type: typeof constants.RECEIVE_NOTIFICATION;
+  response: any;
+};
+
+export type ActionTypes =
+  | GetNotificationsRequest
+  | GetNotificationsSuccess
+  | GetNotificationsFailure
+  | DeleteNotificationRequest
+  | DeleteNotificationSuccess
+  | DeleteNotificationFailure
+  | ReceiveNotification;
