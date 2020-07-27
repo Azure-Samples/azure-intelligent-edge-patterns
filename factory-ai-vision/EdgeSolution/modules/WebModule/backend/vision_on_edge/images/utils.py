@@ -3,31 +3,48 @@
 """
 
 import datetime
+import json
 import logging
 
-import json
-from vision_on_edge.azure_parts.models import Part
-from .models import Image
 from azure.cognitiveservices.vision.customvision.training.models import (
     ImageFileCreateEntry, Region)
+
+from vision_on_edge.azure_parts.models import Part
+from vision_on_edge.azure_training.models import Project
+
+from .models import Image
 
 logger = logging.getLogger(__name__)
 
 
-def customvision_upload_images_helper(part_id):
-    """customvision_upload_images_helper.
+def upload_images_to_customvision_helper(project_id,
+                                         part_id,
+                                         batch_size: int = 10) -> bool:
+    """upload_images_to_customvision_helper.
+
+    Helper function for uploading images to Custom Vision.
+    Make sure part already upload to Custom Vision (
+    customvision_id not null or blank).
 
     Args:
+        project_id:
         part_id:
+        batch_size (int): batch_size
 
-    Return:
-        has_new_images
+    Returns:
+        bool:
     """
+
+    logger.info("Uploading images with part_id %s", part_id)
+
     has_new_images = False
+    project_obj = Project.objects.get(pk=project_id)
+    trainer = project_obj.setting.get_trainer_obj()
+    customvision_project_id = project_obj.customvision_project_id
     images = Image.objects.filter(part_id=part_id,
                                   is_relabel=False,
                                   uploaded=False).all()
-    logger.info("Uploading images...")
+
     count = 0
     img_entries = []
     img_objs = []
@@ -37,7 +54,6 @@ def customvision_upload_images_helper(part_id):
         logger.info("*** image %s, %s", index + 1, image_obj)
         has_new_images = True
         part: Part = image_obj.part
-        part_name = part.name
         tag_id = part.customvision_id
         img_name = "img-" + datetime.datetime.utcnow().isoformat()
 
@@ -49,15 +65,15 @@ def customvision_upload_images_helper(part_id):
             if len(labels) == 0:
                 continue
             for label in labels:
-                x = label["x1"] / width
-                y = label["y1"] / height
-                w = (label["x2"] - label["x1"]) / width
-                h = (label["y2"] - label["y1"]) / height
+                label_x = label["x1"] / width
+                label_y = label["y1"] / height
+                label_w = (label["x2"] - label["x1"]) / width
+                label_h = (label["y2"] - label["y1"]) / height
                 region = Region(tag_id=tag_id,
-                                left=x,
-                                top=y,
-                                width=w,
-                                height=h)
+                                left=label_x,
+                                top=label_y,
+                                width=label_w,
+                                height=label_h)
                 regions.append(region)
 
             image = image_obj.image
@@ -67,17 +83,16 @@ def customvision_upload_images_helper(part_id):
                                              regions=regions)
             img_objs.append(image_obj)
             img_entries.append(img_entry)
-            project_changed = project_changed or (not image_obj.uploaded)
-            if project_changed:
-                logger.info("project_changed: %s", project_changed)
             count += 1
         except:
             logger.exception("unexpected error")
 
-        if len(img_entries) >= 5:
+        if len(img_entries) >= batch_size:
             logger.info("Uploading %s images", len(img_entries))
             upload_result = trainer.create_images_from_files(
                 customvision_project_id, images=img_entries)
+            from IPython import embed
+            embed(using=False)
             logger.info(
                 "Uploading images... Is batch success: %s",
                 upload_result.is_batch_successful,
@@ -100,4 +115,5 @@ def customvision_upload_images_helper(part_id):
             img_obj.uploaded = True
             img_obj.save()
     logger.info("Uploading images... Done")
+    logger.info("Has new images: %s", has_new_images)
     return has_new_images
