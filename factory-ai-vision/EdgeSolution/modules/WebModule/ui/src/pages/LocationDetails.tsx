@@ -3,12 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Text, Grid, Divider, Provider, Button } from '@fluentui/react-northstar';
 import { useHistory } from 'react-router-dom';
 import ImageLink from '../components/ImageLink';
-import { Location } from '../store/location/locationTypes';
+import { Location } from '../reducers/type';
 import { State } from '../store/State';
 import { useQuery } from '../hooks/useQuery';
 import { errorTheme } from '../themes/errorTheme';
 import { WarningDialog } from '../components/WarningDialog';
-import { deleteLocation } from '../store/location/locationActions';
+import { deleteLocation } from '../action/creators/locationActionCreators';
 import { Status, LoadingDialog } from '../components/LoadingDialog/LoadingDialog';
 
 const LocationDetails: FC = () => {

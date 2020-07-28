@@ -3,7 +3,7 @@ import { combineReducers } from 'redux';
 import camerasReducer from './camera/cameraReducer';
 import partReducer from './part/partReducer';
 import labelingPageStateReducer from './labelingPage/labelingPageReducer';
-import locationsReducer from './location/locationReducer';
+import locationsReducer from '../reducers/locationReducer';
 import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
 import createProjectReducerByIsDemo from './project/projectReducer';
 import labelImagesReducer from './image/imageReducer';

@@ -3,9 +3,9 @@ import { Grid } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from '../store/State';
-import { Location } from '../store/location/locationTypes';
+import { Location } from '../reducers/type';
 import ImageLink from '../components/ImageLink';
-import { getLocations, postLocation } from '../store/location/locationActions';
+import { getLocations, postLocation } from '../action/creators/locationActionCreators';
 import { AddModuleDialog } from '../components/AddModuleDialog';
 
 const Locations: FC = () => {

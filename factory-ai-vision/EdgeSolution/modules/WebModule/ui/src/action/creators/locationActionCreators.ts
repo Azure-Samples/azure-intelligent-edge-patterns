@@ -1,6 +1,5 @@
 import axios from 'axios';
 import {
-  Location,
   DELETE_LOCATION_REQUEST,
   DELETE_LOCATION_SUCCESS,
   DELETE_LOCATION_FAILURE,
@@ -10,9 +9,9 @@ import {
   POST_LOCATION_REQUEST,
   POST_LOCATION_SUCCESS,
   POST_LOCATION_FAILURE,
-} from './locationTypes';
+} from '../constants';
 import { CallAPIAction } from '../../middlewares/callAPIMiddleware';
-import { State } from '../State';
+import { State } from '../../store/State';
 
 export const getLocations = (isDemo: boolean): CallAPIAction<State> => ({
   types: [GET_LOCATION_REQUEST, GET_LOCATION_SUCCESS, GET_LOCATION_FAILURE],
@@ -21,7 +20,11 @@ export const getLocations = (isDemo: boolean): CallAPIAction<State> => ({
   shouldCallAPI: (state): boolean => state.locations.result.length === 0,
 });
 
-export const postLocation = (newLocation: Location): CallAPIAction<State> => ({
+export const postLocation = (newLocation: {
+  name: string;
+  description: string;
+  is_demo: boolean;
+}): CallAPIAction<State> => ({
   types: [POST_LOCATION_REQUEST, POST_LOCATION_SUCCESS, POST_LOCATION_FAILURE],
   callAPI: (): Promise<void> => axios.post('/api/locations/', newLocation).then(({ data }) => data),
 });

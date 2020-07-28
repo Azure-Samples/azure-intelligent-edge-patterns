@@ -1,12 +1,8 @@
 import * as R from 'ramda';
-import {
-  GET_LOCATION_SUCCESS,
-  POST_LOCATION_SUCCESS,
-  DELETE_LOCATION_SUCCESS,
-  LocationAction,
-  NormalizedLocation,
-} from './locationTypes';
-import { initialState } from '../State';
+import { GET_LOCATION_SUCCESS, POST_LOCATION_SUCCESS, DELETE_LOCATION_SUCCESS } from '../action/constants';
+import { ActionTypes } from '../action';
+import { initialState } from '../store/State';
+import { NormalizedLocation } from './type';
 
 const normalizeLocation = (response): NormalizedLocation =>
   response.reduce(
@@ -18,7 +14,7 @@ const normalizeLocation = (response): NormalizedLocation =>
     { entities: {}, result: [] },
   );
 
-const locationsReducer = (state = initialState.locations, action: LocationAction): NormalizedLocation => {
+const locationsReducer = (state = initialState.locations, action: ActionTypes): NormalizedLocation => {
   switch (action.type) {
     case GET_LOCATION_SUCCESS:
       return normalizeLocation(action.response);

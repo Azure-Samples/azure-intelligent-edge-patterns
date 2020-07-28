@@ -1,7 +1,7 @@
 import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
 import { Part } from './part/partTypes';
-import { NormalizedLocation } from './location/locationTypes';
+import { NormalizedLocation } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
