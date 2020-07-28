@@ -21,6 +21,7 @@ from rest_framework.response import Response
 
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
+from ...azure_parts.utils import batch_upload_parts_to_customvision
 from ...cameras.models import Camera
 from ...general import error_messages
 from ...images.models import Image
@@ -368,14 +369,7 @@ def upload_and_train(project_id):
     project_obj.dequeue_iterations()
 
     try:
-        count = 10
-        while count > 0:
-            part_ids = [part.id for part in project_obj.parts.all()]
-            if len(part_ids) > 0:
-                break
-            logging.info("waiting parts...")
-            time.sleep(1)
-            count -= 1
+        part_ids = [part.id for part in project_obj.parts.all()]
 
         logger.info("Project id: %s", project_obj.id)
         logger.info("Part ids: %s", part_ids)
@@ -402,43 +396,24 @@ def upload_and_train(project_id):
 
         project_obj.upcreate_training_status(
             status="sending", log="sending data (images and annotations)")
-        tags = trainer.get_tags(customvision_project_id)
-        tag_dict = {}
-        project_partnames = {}
+
+        tags = trainer.get_tags(project_id=project_obj.customvision_project_id)
+        # Get tags_dict to avoid getting tags every time
+        tags_dict = {tag.name: tag.id for tag in tags}
+
+        # App Insight
         project_changed = False
         has_new_parts = False
         has_new_images = False
-        for tag in tags:
-            tag_dict[tag.name] = tag.id
         parts_last_train = len(tags)
         images_last_train = trainer.get_tagged_image_count(
             project_obj.customvision_project_id)
-        # Update existing tags
-        # TODO: update tags
-        # trainer.update_tags(project_id, tag_id, new_tag)
 
-        # Create tags on CustomVisioin Project
-        # Maybe move to Project Model?
-        logger.info("Creating tags before training...")
-        counter = 0
-        for part_id in part_ids:
-            part_name = Part.objects.get(id=part_id).name
-            part_description = Part.objects.get(id=part_id).description
-            project_partnames[part_name] = "foo"
-            if part_name not in tag_dict:
-                logger.info("Creating tag: %s. Description: %s", part_name,
-                            part_description)
-                tag = trainer.create_tag(
-                    project_id=customvision_project_id,
-                    name=part_name,
-                    description=part_description,
-                )
-                has_new_parts = True
-                tag_dict[tag.name] = tag.id
-                counter += 1
-        project_changed = project_changed or (counter > 0)
-        logger.info("Created %s tags", counter)
-        logger.info("Creating tags... Done")
+        # Create/update tags on CustomVisioin Project
+        has_new_parts = batch_upload_parts_to_customvision(
+            project_id=project_id, part_ids=part_ids, tags_dict=tags_dict)
+        if has_new_parts:
+            project_changed = True
 
         # Upload images to CustomVisioin Project
         for part_id in part_ids:
@@ -468,7 +443,7 @@ def upload_and_train(project_id):
                 )
         # A Thread/Task to keep updating the status
         update_train_status(project_id)
-        return JsonResponse({"status": "ok"})
+        return Response({"status": "ok"})
 
     except CustomVisionErrorException as customvision_err:
         logger.error("CustomVisionErrorException: %s", customvision_err)
@@ -479,7 +454,7 @@ def upload_and_train(project_id):
                 log=
                 "Training key or Endpoint is invalid. Please change the settings",
             )
-            return JsonResponse(
+            return Response(
                 {
                     "status":
                         "failed",
@@ -491,7 +466,7 @@ def upload_and_train(project_id):
 
         project_obj.upcreate_training_status(status="failed",
                                              log=customvision_err.message)
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": customvision_err.message
@@ -505,10 +480,7 @@ def upload_and_train(project_id):
         logger.exception("Exception: %s", err_msg)
         project_obj.upcreate_training_status(status="failed",
                                              log=f"failed {str(err_msg)}")
-        return JsonResponse({
-            "status": "failed",
-            "log": f"failed {str(err_msg)}"
-        })
+        return Response({"status": "failed", "log": f"failed {str(err_msg)}"})
 
 
 def update_train_status(project_id):

@@ -40,21 +40,22 @@ def upload_images_to_customvision_helper(project_id,
     has_new_images = False
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.get_trainer_obj()
-    customvision_project_id = project_obj.customvision_project_id
+    part_obj: Part = Part.objects.get(pk=part_id)
+    tag_id = part_obj.customvision_id
     images = Image.objects.filter(part_id=part_id,
                                   is_relabel=False,
-                                  uploaded=False).all()
-
+                                  uploaded=False)
+    logger.info("Tag id %s", tag_id)
     count = 0
     img_entries = []
     img_objs = []
+
     logger.info("Image length: %s", len(images))
 
     for index, image_obj in enumerate(images):
         logger.info("*** image %s, %s", index + 1, image_obj)
         has_new_images = True
-        part: Part = image_obj.part
-        tag_id = part.customvision_id
+
         img_name = "img-" + datetime.datetime.utcnow().isoformat()
 
         regions = []
@@ -90,7 +91,8 @@ def upload_images_to_customvision_helper(project_id,
         if len(img_entries) >= batch_size:
             logger.info("Uploading %s images", len(img_entries))
             upload_result = trainer.create_images_from_files(
-                customvision_project_id, images=img_entries)
+                project_id=project_obj.customvision_project_id,
+                images=img_entries)
             logger.info(
                 "Uploading images... Is batch success: %s",
                 upload_result.is_batch_successful,
@@ -105,14 +107,15 @@ def upload_images_to_customvision_helper(project_id,
     if len(img_entries) >= 1:
         logger.info("Uploading %s images", len(img_entries))
         upload_result = trainer.create_images_from_files(
-            customvision_project_id, images=img_entries)
+            project_id=project_obj.customvision_project_id, images=img_entries)
         logger.info(
             "Uploading images... Is batch success: %s",
             upload_result.is_batch_successful,
         )
         for i, img_obj in enumerate(img_objs):
             img_obj.customvision_id = upload_result.images[i].image.id
-            img_obj.remote_url = upload_result.images[i].image.original_image_uri
+            img_obj.remote_url = (
+                upload_result.images[i].image.original_image_uri)
             img_obj.uploaded = True
             img_obj.save()
     logger.info("Uploading images... Done")
