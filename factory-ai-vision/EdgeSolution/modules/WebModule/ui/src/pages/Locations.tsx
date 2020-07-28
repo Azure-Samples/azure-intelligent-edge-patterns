@@ -10,9 +10,7 @@ import { AddModuleDialog } from '../components/AddModuleDialog';
 
 const Locations: FC = () => {
   const dispatch = useDispatch();
-  const locations = useSelector<State, Location[]>((state) =>
-    state.locations.result.map((id) => state.locations.entities[id]),
-  );
+  const locations = useSelector<State, Location[]>((state) => Object.values(state.locations.entities));
 
   useEffect(() => {
     dispatch(getLocations(false));
