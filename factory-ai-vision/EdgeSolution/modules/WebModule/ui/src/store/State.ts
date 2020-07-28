@@ -1,11 +1,10 @@
 import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
 import { Part } from './part/partTypes';
-import { NormalizedLocation } from '../reducers/type';
+import { NormalizedLocation, Notification } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
-import { Notification } from './notification/notificationType';
 
 export interface State {
   dialogIsOpen: boolean;

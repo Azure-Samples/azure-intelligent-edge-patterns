@@ -8,7 +8,7 @@ import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
 import createProjectReducerByIsDemo from './project/projectReducer';
 import labelImagesReducer from './image/imageReducer';
 import settingReducer from './setting/settingReducer';
-import notificationReducer from './notification/notificationReducer';
+import notificationReducer from '../reducers/notificationReducer';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,

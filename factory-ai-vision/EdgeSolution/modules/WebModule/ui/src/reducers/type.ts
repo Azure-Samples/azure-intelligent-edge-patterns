@@ -7,3 +7,11 @@ export type Location = {
 };
 
 export type NormalizedLocation = { entities: Record<string, Location>; result: number[] };
+
+export type Notification = {
+  id: number;
+  title: string;
+  content: string;
+  linkTo: string;
+  unRead: boolean;
+};

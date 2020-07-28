@@ -4,8 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { mainTheme } from '../../themes/mainTheme';
 import { State } from '../../store/State';
-import { Notification } from '../../store/notification/notificationType';
-import { getNotifications } from '../../store/notification/notificationActionCreators';
+import { Notification } from '../../reducers/type';
+import { getNotifications } from '../../action/creators/notificationActionCreators';
 import { NotificationCard } from '../NotificationCard';
 
 type NotificationPanelProps = {

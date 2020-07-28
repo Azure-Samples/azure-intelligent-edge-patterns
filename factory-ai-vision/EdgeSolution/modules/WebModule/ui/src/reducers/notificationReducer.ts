@@ -1,12 +1,12 @@
-import { initialState } from '../State';
-import { Notification } from './notificationType';
-import { ActionTypes } from '../../action';
+import { initialState } from '../store/State';
 import {
-  GET_NOTIFICATIONS_SUCCESS,
-  DELETE_NOTIFICATION_SUCCESS,
+  ActionTypes,
   RECEIVE_NOTIFICATION,
   OPEN_NOTIFICATION_PANEL,
-} from '../../action/constants';
+  GET_NOTIFICATIONS_SUCCESS,
+  DELETE_NOTIFICATION_SUCCESS
+} from '../action';
+import { Notification } from '../reducers/type';
 
 const getLinkByNotificationType = (notificationType: string): string => {
   if (notificationType) {
