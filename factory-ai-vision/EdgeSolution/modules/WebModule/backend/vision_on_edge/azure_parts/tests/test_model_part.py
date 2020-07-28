@@ -1,15 +1,16 @@
 """
 Part Model and method unittest
 """
-from django.core.exceptions import MultipleObjectsReturned
-from rest_framework.test import APITransactionTestCase
 
+from django.core.exceptions import MultipleObjectsReturned
+
+from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 from vision_on_edge.general.tests.test_special_strings import special_strings
 
 from ..models import Part
 
 
-class PartTestCase(APITransactionTestCase):
+class PartTestCase(CustomVisionTestCase):
     """
     Part Model and method unittest
     """
@@ -55,15 +56,15 @@ class PartTestCase(APITransactionTestCase):
 
     def test_create_without_description(self):
         """
-        @Type
-        Positive
+        Type:
+            Positive
 
-        @Description
-        Create parts without description assigned
-        Description column is now not mandatory
+        Description:
+            Try to create parts without description assigned.
+            Description column is now not mandatory.
 
-        @Expected Results
-        Object created. Description is ''
+        Expected Results:
+            Object created. Description is ''
         """
         part_name = "Part without Desb"
         Part.objects.create(name=part_name, is_demo=False)

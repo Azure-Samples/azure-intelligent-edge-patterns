@@ -1,4 +1,6 @@
-"""App Signals"""
+# -*- coding: utf-8 -*-
+"""App Signals
+"""
 
 import logging
 

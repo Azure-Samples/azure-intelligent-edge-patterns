@@ -1,21 +1,22 @@
+# -*- coding: utf-8 -*-
+"""Part REST API Test
 """
-Part REST API Test
-"""
+
 import json
 import logging
 
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITransactionTestCase
 
 from vision_on_edge.general.tests.test_special_strings import special_strings
+from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 
 from ..models import Part
 
 logger = logging.getLogger(__name__)
 
 
-class PartRestTestCases(APITransactionTestCase):
+class PartRestTestCases(CustomVisionTestCase):
     """
     Test Cases for Part API
     """
@@ -65,15 +66,18 @@ class PartRestTestCases(APITransactionTestCase):
 
     def test_create_part(self):
         """
-        @Type
-        Positive
+        Type:
+            Positive
 
-        @Description
-        Ensure we can created a part by rest api.
+        Description:
+            Ensure we can created a part by rest api.
 
-        @Expected Results
-        200 {'name': 'part_name',
-             'description': 'part_description'}
+        Expected Results:
+            200
+            {
+                'name': 'part_name',
+                'description': 'part_description'
+            }
         """
         url = reverse('part-list')
         part_name = 'Unittest Box'
@@ -91,15 +95,18 @@ class PartRestTestCases(APITransactionTestCase):
 
     def test_create_dup_parts(self):
         """
-        @Type
-        Negative
+        Type:
+            Negative
 
-        @Description
-        Ensure create duplicate Part objects will failed.
+        Description:
+            Ensure create duplicate Part objects will failed.
 
-        @Expected Results
-        400 {'status':'failed',
-             'log': 'xxx'}
+        Expected Results
+            400
+            {
+                'status':'failed',
+                'log': 'xxx'
+            }
         """
         # Var
         url = reverse('part-list')
@@ -117,16 +124,20 @@ class PartRestTestCases(APITransactionTestCase):
         self.assertEqual(Part.objects.count(), self.exist_num)
 
     def test_create_same_lowercase_parts(self):
-        """
-        @Type
-        Negative
+        """test_create_same_lowercase_parts.
 
-        @Description
-        Ensure Part (name, is_demo) is unique together.
+        Type:
+            Negative
 
-        @Expected Results
-        400 {'status':'failed',
-             'log': 'xxx'}
+        Description:
+            Ensure Part (name, is_demo) is unique together.
+
+        Expected Results
+            400
+            {
+                'status':'failed',
+                'log': 'xxx'
+            }
         """
         # Random Case
         url = reverse('part-list')
@@ -165,17 +176,20 @@ class PartRestTestCases(APITransactionTestCase):
 
     def test_create_no_desb_parts(self):
         """
-        @Type
-        Positive
+        Type:
+            Positive
 
-        @Description
-        Create a part without description assigned.
-        Description column is now not mandatory.
-        Thus, request is valid
+        Description:
+            Create a part without description assigned.
+            Description column is now not mandatory.
+            Thus, request is valid
 
-        @Expected Results
-        201 {'name': 'part_name',
-             'description': 'xxx'}
+        Expected Results:
+            201
+            {
+                'name': 'part_name',
+                'description': 'xxx'
+            }
         """
         # Var
         url = reverse('part-list')

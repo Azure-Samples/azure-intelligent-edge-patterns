@@ -1,58 +1,38 @@
+# -*- coding: utf-8 -*-
 """
 Testing Template
 """
+
 import logging
 
-# from django.urls import reverse
-# from rest_framework import status
-from rest_framework.test import APITransactionTestCase
-
-# from configs.customvision_config import ENDPOINT, TRAINING_KEY
-#
-# PROJECT_PREFIX = "UnitTest"
+from .customvision_testcase import CustomVisionTestCase
 
 logger = logging.getLogger(__name__)
 
 
-class StreamViewTestCase(APITransactionTestCase):
+class TemplateTestCase(CustomVisionTestCase):
     """
-    Testing stream api view
+    Test case template
     """
 
     def setUp(self):
-        """
-        Create setting, camera, location and parts.
-        """
+        logger.info(self.training_key)
+        logger.info(self.endpoint)
+        logger.info(self.project_prefix)
 
     def test_setup_is_valid(self):
         """
         Make sure setup is valid
         """
 
-    def test_valid_setting_list_project(self):
+    def test_1(self):
         """
-        @Type
+        Type:
+            Positive/Negative/Marginal
 
-        @Description
+        Description:
+            Test case 1 description.
 
-        @Expected Results
+        Expected Results:
+            pass
         """
-
-    def test_invalid_setting_list_project(self):
-        """
-        @Type
-
-        @Description
-
-        @Expected Results
-        """
-
-    @classmethod
-    def tearDownClass(cls):
-        # trainer = CustomVisionTrainingClient(
-        #     api_key=TRAINING_KEY, endpoint=ENDPOINT)
-        # projects = trainer.get_projects()
-        # for project in projects:
-        #    if project.name.find(PROJECT_PREFIX) == 0:
-        # trainer.delete_project(project_id=project.id)
-        pass

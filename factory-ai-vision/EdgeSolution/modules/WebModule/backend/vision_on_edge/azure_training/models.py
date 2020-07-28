@@ -26,7 +26,8 @@ logger = logging.getLogger(__name__)
 
 
 class Project(models.Model):
-    """Azure Custom Vision Project Model"""
+    """Azure Custom Vision Project Model
+    """
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
@@ -118,8 +119,7 @@ class Project(models.Model):
 
             # logger.info('Creating Project on Custom Vision')
             # project = instance.setting.create_project(name)
-            # logger.info(
-            #    f'Got Custom Vision Project Id: {project.id}. Saving...')
+            # logger.info('Got Custom Vision Project Id: %s', project.id)
             # instance.customvision_project_id = project.id
         else:
             instance.customvision_project_id = ""
