@@ -10,10 +10,12 @@ import { AddModuleDialog } from '../components/AddModuleDialog';
 
 const Locations: FC = () => {
   const dispatch = useDispatch();
-  const locations = useSelector<State, Location[]>((state) => state.locations.filter((e) => !e.is_demo));
+  const locations = useSelector<State, Location[]>((state) =>
+    state.locations.result.map((id) => state.locations.entities[id]),
+  );
 
   useEffect(() => {
-    dispatch(getLocations());
+    dispatch(getLocations(false));
   }, [dispatch]);
   return (
     <div
@@ -29,7 +31,7 @@ const Locations: FC = () => {
         {locations.map((location, i) => (
           <ImageLink
             key={i}
-            to={`/locations/detail?name=${location.name}`}
+            to={`/locations/detail?id=${location.id}`}
             defaultSrc="/icons/defaultLocation.png"
             width="6.25em"
             height="6.25em"

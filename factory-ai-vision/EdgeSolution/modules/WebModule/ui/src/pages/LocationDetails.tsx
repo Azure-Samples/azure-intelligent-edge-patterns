@@ -12,8 +12,8 @@ import { deleteLocation } from '../store/location/locationActions';
 import { Status, LoadingDialog } from '../components/LoadingDialog/LoadingDialog';
 
 const LocationDetails: FC = () => {
-  const name = useQuery().get('name');
-  const location = useSelector<State, Location>((state) => state.locations.find((e) => e.name === name));
+  const id = useQuery().get('id');
+  const location = useSelector<State, Location>((state) => state.locations.entities[id]);
   const dispatch = useDispatch();
   const history = useHistory();
   const [status, setStatus] = useState<Status>(Status.None);
@@ -52,7 +52,7 @@ const LocationDetails: FC = () => {
         <WarningDialog
           contentText={
             <p>
-              Sure you want to delete the part <b>{name}</b>?
+              Sure you want to delete the part <b>{id}</b>?
             </p>
           }
           trigger={<Button content="Delete" primary />}

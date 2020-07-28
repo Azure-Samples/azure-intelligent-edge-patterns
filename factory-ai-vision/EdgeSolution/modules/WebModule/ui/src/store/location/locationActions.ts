@@ -14,10 +14,11 @@ import {
 import { CallAPIAction } from '../../middlewares/callAPIMiddleware';
 import { State } from '../State';
 
-export const getLocations = (): CallAPIAction<State> => ({
+export const getLocations = (isDemo: boolean): CallAPIAction<State> => ({
   types: [GET_LOCATION_REQUEST, GET_LOCATION_SUCCESS, GET_LOCATION_FAILURE],
-  callAPI: (): Promise<void> => axios.get('/api/locations/').then(({ data }) => data),
-  shouldCallAPI: (state): boolean => state.locations.length === 0,
+  callAPI: (): Promise<void> =>
+    axios.get(`/api/locations?is_demo=${Number(isDemo)}`).then(({ data }) => data),
+  shouldCallAPI: (state): boolean => state.locations.result.length === 0,
 });
 
 export const postLocation = (newLocation: Location): CallAPIAction<State> => ({

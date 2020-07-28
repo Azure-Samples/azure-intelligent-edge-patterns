@@ -1,7 +1,7 @@
 import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
 import { Part } from './part/partTypes';
-import { Location } from './location/locationTypes';
+import { NormalizedLocation } from './location/locationTypes';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
@@ -10,7 +10,7 @@ import { Notification } from './notification/notificationType';
 export interface State {
   dialogIsOpen: boolean;
   cameras: Camera[];
-  locations: Location[];
+  locations: NormalizedLocation;
   labelingPageState: LabelingPageState;
   part: Part;
   project: Project;
@@ -73,7 +73,10 @@ const initialProject: Project = {
 export const initialState: State = {
   dialogIsOpen: false,
   cameras: [],
-  locations: [],
+  locations: {
+    entities: {},
+    result: [],
+  },
   images: [],
   labelingPageState: { annotations: [] },
   part: {

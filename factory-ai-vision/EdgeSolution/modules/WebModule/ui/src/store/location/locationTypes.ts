@@ -9,6 +9,8 @@ export type Location = {
   is_demo: boolean;
 };
 
+export type NormalizedLocation = { entities: Record<string, Location>; result: number[] };
+
 // Describing the different ACTION NAMES available
 export const GET_LOCATION_REQUEST = 'GET_LOCATION_REQUEST';
 export const GET_LOCATION_SUCCESS = 'GET_LOCATION_SUCCESS';
