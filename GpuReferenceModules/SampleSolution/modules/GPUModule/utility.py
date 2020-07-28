@@ -96,3 +96,13 @@ def device_info():
     cpuinfo = [x.strip().split(":")[1] for x in info if "model name"  in x]
     cpu = cpuinfo[1]
     return (gpu,cpu)
+
+def hello_world():
+    #echo("Hello World!")
+    #cmd = "date"
+    # returns output as byte string 
+    #returned_output = subprocess.check_output(cmd) #
+    #  using decode() function to convert byte string to string
+    hw = 'Hello World! Current date is:' #+ returned_output.decode("utf-8")
+    print(hw)
+    return (hw)
