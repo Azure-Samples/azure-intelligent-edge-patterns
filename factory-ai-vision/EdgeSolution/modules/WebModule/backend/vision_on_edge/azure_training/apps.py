@@ -1,4 +1,5 @@
 """App"""
+
 import logging
 import sys
 
@@ -23,8 +24,10 @@ class AzureTrainingConfig(AppConfig):
         """
         if 'runserver' in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
-            from vision_on_edge.azure_training import signals
-            from .models import Project, Train
+            logger.info("ready while running server")
+            logger.info("Importing Signals")
+            from . import signals
+            from .models import Project
             from ..cameras.models import Camera
             from ..locations.models import Location
             from ..azure_settings.models import Setting

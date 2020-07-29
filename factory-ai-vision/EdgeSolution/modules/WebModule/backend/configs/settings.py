@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'vision_on_edge.images',
     'vision_on_edge.streams',
     'vision_on_edge.azure_settings',
+    'vision_on_edge.azure_training_status',
     'vision_on_edge.feedback',
     'vision_on_edge.locations',
     'vision_on_edge.cameras',
