@@ -5,18 +5,23 @@ import { NormalizedLocation, Notification } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
+import { NormalizedPart } from '../reducers/partReducer';
 
 export interface State {
-  dialogIsOpen: boolean;
+  // Domain Data
   cameras: Camera[];
   locations: NormalizedLocation;
-  labelingPageState: LabelingPageState;
-  part: Part;
+  parts?: NormalizedPart;
   project: Project;
   demoProject: Project;
   images: LabelImage[];
   setting: Setting;
   notifications: Notification[];
+  // App State
+  labelingPageState: LabelingPageState;
+  // UI State FIXME: Should be removed
+  dialogIsOpen: boolean;
+  part: Part;
 }
 
 export type LabelingPageState = { annotations: Annotation[] };

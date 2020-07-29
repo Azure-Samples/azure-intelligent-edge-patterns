@@ -61,6 +61,31 @@ export type DeleteLocationSuccess = APISuccessAction<
 >;
 export type DeleteLocationFaliure = APIFailureAction<typeof constants.DELETE_LOCATION_FAILURE>;
 
+/**
+ * GET parts
+ */
+export type GetPartsRequest = APIRequestAction<typeof constants.GET_PARTS_REQUEST>;
+export type GetPartsSuccess = APISuccessAction<typeof constants.GET_PARTS_SUCCESS>;
+export type GetPartsFailure = APIFailureAction<typeof constants.GET_PARTS_FAILURE>;
+
+/**
+ * POST parts
+ */
+export type PostPartRequest = APIRequestAction<typeof constants.POST_PART_REQUEST>;
+export type PostPartSuccess = APISuccessAction<typeof constants.POST_PART_SUCCESS>;
+export type PostPartFailure = APIFailureAction<typeof constants.POST_PART_FAILURE>;
+
+/**
+ * DELETE parts
+ */
+export type DeletePartRequest = APIRequestAction<typeof constants.DELETE_PART_REQUEST>;
+export type DeletePartSuccess = APISuccessAction<
+  typeof constants.DELETE_PART_SUCCESS,
+  null,
+  { id: number }
+>;
+export type DeletePartFaliure = APIFailureAction<typeof constants.DELETE_PART_FAILURE>;
+
 export type ActionTypes =
   | GetNotificationsRequest
   | GetNotificationsSuccess
@@ -76,7 +101,15 @@ export type ActionTypes =
   | PostLocationRequest
   | PostLocationSuccess
   | PostLocationFailure
-  | PostLocationSuccess
   | DeleteLocationRequest
   | DeleteLocationSuccess
-  | DeleteLocationFaliure;
+  | DeleteLocationFaliure
+  | GetPartsRequest
+  | GetPartsFailure
+  | GetPartsSuccess
+  | PostPartRequest
+  | PostPartSuccess
+  | PostPartSuccess
+  | DeletePartRequest
+  | DeletePartSuccess
+  | DeletePartFaliure;;

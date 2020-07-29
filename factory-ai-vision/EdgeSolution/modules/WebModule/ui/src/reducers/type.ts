@@ -1,3 +1,5 @@
+export type NormalizedState<T> = {entities: Record<string, T>; result: number[]};
+
 export type Location = {
   id: number;
   name: string;
