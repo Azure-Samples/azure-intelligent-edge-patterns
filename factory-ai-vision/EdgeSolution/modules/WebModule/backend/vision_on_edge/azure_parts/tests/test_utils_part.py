@@ -9,7 +9,8 @@ from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.azure_training.models import Project
 from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_parts.utils import upload_part_to_customvision_helper, batch_upload_parts_to_customvision
+from vision_on_edge.azure_parts.utils import (
+    upload_part_to_customvision_helper, batch_upload_parts_to_customvision)
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +43,7 @@ class PartUtilTestCase(CustomVisionTestCase):
         """
         part_obj = Part.objects.create(name="test_part_1")
         Project.objects.get().create_project()
-        
+
         upload_part_to_customvision_helper(project_id=Project.objects.get().id,
                                            part_id=part_obj.id)
 
@@ -51,7 +52,7 @@ class PartUtilTestCase(CustomVisionTestCase):
             project_id=Project.objects.first().customvision_project_id)
 
         self.assertEqual(len(tags), 1)
-    
+
     def test_upload_multi_parts(self):
         """
         Type:
@@ -64,7 +65,7 @@ class PartUtilTestCase(CustomVisionTestCase):
             pass
         """
         for i in range(40):
-            part_obj = Part.objects.create(name=f"test_part_{i}")
+            Part.objects.create(name=f"test_part_{i}")
 
         part_ids = [part.id for part in Part.objects.all()]
         Project.objects.get().create_project()

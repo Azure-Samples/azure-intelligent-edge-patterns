@@ -4,16 +4,12 @@ Project Utilities
 
 import logging
 
-from azure.cognitiveservices.vision.customvision.training.models import (
-    CustomVisionErrorException, ImageFileCreateEntry, Region)
-from django.http import JsonResponse
-
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.general import error_messages
 from vision_on_edge.images.models import Image
 
-from .models import Project, Task, Train
+from .models import Project, Task
 
 logger = logging.getLogger(__name__)
 

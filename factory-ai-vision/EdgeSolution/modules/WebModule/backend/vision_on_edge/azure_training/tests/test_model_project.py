@@ -1,16 +1,7 @@
+# -*- coding: utf-8 -*-
+"""Project Model Test.
 """
-Project Model Test.
-In this test, projects will be created on Azure CustomVision.
 
-Requirements:
-1. ENDPOINT, TRAINING_KEY is valid.
-2. ENDPOINT, TRAINING_KEY is able to create projects on CustomVision.
-
-Notes:
-1. Projects will be created on Azure CustomVision with name starting with
-   PROJECT_PREFIX.
-2. Projects with name starting with PROJECT_PREFIX will be deleted.
-"""
 import logging
 
 from azure.cognitiveservices.vision.customvision.training import \
@@ -30,14 +21,12 @@ PROJECT_PREFIX = "UnitTest"
 logger = logging.getLogger(__name__)
 
 
-class ModelProjectTestCases(APITransactionTestCase):
-    """
-    Project Model Test Cases
+class ProjectModelTestCases(APITransactionTestCase):
+    """ProjectModelTestCases
     """
 
     def setUp(self):
-        """
-        Setup. Create Objects
+        """setUp.
         """
         Setting.objects.create(name="valid_setting",
                                endpoint=ENDPOINT,
@@ -93,9 +82,15 @@ class ModelProjectTestCases(APITransactionTestCase):
 
     def test_create_1(self):
         """test_create_1.
-        
-        @Description
-        invalid setting or null setting-> customvision_id = ''
+
+        Type:
+            Negative
+
+        Description:
+            Create projet given invalid/null azure_setting
+
+        Expected Result:
+            customvision_id = ''
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='invalid_setting').first(),
@@ -109,8 +104,15 @@ class ModelProjectTestCases(APITransactionTestCase):
         self.assertEqual(project_obj.customvision_project_id, '')
 
     def test_create_2(self):
-        """valid setting will not create project on customvision
-        will wait until train for the first time
+        """test_create_2.
+
+        Type:
+            Positive
+
+        Description:
+            Project will not be created on Custom Vision
+            until first train or create_project() get
+            called.
         """
         trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
                                              endpoint=ENDPOINT)
@@ -127,10 +129,18 @@ class ModelProjectTestCases(APITransactionTestCase):
         self.assertEqual(project_count, project_count_after)
 
     def test_create_3(self):
-        """valid setting with wrong customvision_project_id
-        This state should not occur often...
-        Set the customvision_project_id = ''
-        Will not create project on customvision
+        """test_create_3
+
+        Type:
+            Negative
+
+        Description:
+            Valid setting with wrong customvision_project_id
+            This state should not occur often...
+
+        Expected results:
+            customvision_project_id set to ''
+            Will not create project on customvision.
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
@@ -143,18 +153,17 @@ class ModelProjectTestCases(APITransactionTestCase):
         self.assertTrue(project_obj.customvision_project_id == '')
 
     def test_create_project(self):
-        """
-        @type
-        Positvie
+        """test_create_project.
 
-        @Description
-        Create project with a valid setting.
-        Project name should start with PROJECT_PREFIX so it get deleted while
-        teardown.
+        Type:
+            Positive
 
-        @Expected result
-        Project created on custom vision.
-        Project.customvision_project_id been set.
+        Description:
+            Create project with a valid setting.
+
+        Expected results:
+            Project created on custom vision.
+            project_obj.customvision_project_id set.
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
@@ -173,15 +182,15 @@ class ModelProjectTestCases(APITransactionTestCase):
         self.assertNotEqual(project_obj.customvision_project_id, '')
 
     def test_update_1(self):
-        """
-        @Type
-        Negative
+        """test_update_1
+        Type:
+            Negative
 
-        @Description
-        Update customvision_project_id with an invalid string.
+        Description:
+            Update customvision_project_id with an invalid string.
 
-        @Expected result
-        After save called, customvision_project_id should be set to ''
+        Expected result:
+            After save called, customvision_project_id should be set to ''
         """
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
@@ -189,17 +198,8 @@ class ModelProjectTestCases(APITransactionTestCase):
             location=Location.objects.filter(name='demo_location_1').first(),
             is_demo=False,
             customvision_project_name=f'{PROJECT_PREFIX}-test_update_1')
+
         # Project already created
         project_obj.customvision_project_id = '56cannotdie'
         project_obj.save()
         self.assertTrue(project_obj.customvision_project_id == '')
-
-    @classmethod
-    def tearDownClass(cls):
-        logger.info("Deleting Projects on CustomVision")
-        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
-                                             endpoint=ENDPOINT)
-        projects = trainer.get_projects()
-        for project in projects:
-            if project.name.find(PROJECT_PREFIX) == 0:
-                trainer.delete_project(project_id=project.id)

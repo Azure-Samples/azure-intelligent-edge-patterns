@@ -93,5 +93,5 @@ def delete_part_on_customvision_handler(**kwargs):
         trainer = project_obj.setting.get_trainer_obj()
         trainer.delete_tag(project_id=project_obj.customvision_project_id,
                            tag_id=instance.customvision_id)
-    except Exception as unexpected_error:
+    except Exception:
         logger.exception("delete_tag unexpected_error")

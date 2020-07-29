@@ -3,7 +3,15 @@
 
 This is a wrapper of APITransactionTestCase.
 
-Delete project starting with PROJECT_PREFIX on TearDown
+Requirements:
+    * ENDPOINT, TRAINING_KEY in config.py is valid.
+    * Custom Vision is able to create projects
+
+Notes:
+    * All test projects created on Azure Custom Vision
+        will/should use name started with PROJECT_PREFIX.
+    * All projects on Azure Custom Vision started with
+        PROJECT_PREFIX will be deleted after testing.
 """
 
 import logging

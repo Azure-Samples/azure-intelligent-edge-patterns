@@ -1,5 +1,5 @@
-"""
-Part Model and method unittest
+# -*- coding: utf-8 -*-
+"""Azure Part Models testcases.
 """
 
 from django.core.exceptions import MultipleObjectsReturned
@@ -10,9 +10,10 @@ from vision_on_edge.general.tests.test_special_strings import special_strings
 from ..models import Part
 
 
-class PartTestCase(CustomVisionTestCase):
-    """
-    Part Model and method unittest
+class AzurePartTestCase(CustomVisionTestCase):
+    """AzurePartTestCase.
+
+    Azure Part model testcases.
     """
 
     def setUp(self):

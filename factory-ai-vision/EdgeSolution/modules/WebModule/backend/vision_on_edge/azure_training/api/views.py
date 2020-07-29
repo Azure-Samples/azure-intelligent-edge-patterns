@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 """App views"""
 
 from __future__ import absolute_import, unicode_literals
 
-import datetime
 import json
 import logging
 import threading
@@ -12,8 +12,7 @@ from distutils.util import strtobool
 
 import requests
 from azure.cognitiveservices.vision.customvision.training.models import (
-    CustomVisionErrorException, ImageFileCreateEntry, Region)
-from django.http import JsonResponse
+    CustomVisionErrorException)
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
@@ -139,7 +138,7 @@ def export(request, project_id):
             "Export failed. Inference module url: %s unreachable",
             inference_module_url(),
         )
-        return JsonResponse(
+        return Response(
             {
                 "status":
                     "failed",
@@ -149,9 +148,9 @@ def export(request, project_id):
             },
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
-    except:
+    except Exception:
         logger.exception("unexpected error while exporting project")
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": "unexpected error",
@@ -159,7 +158,7 @@ def export(request, project_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    return JsonResponse({
+    return Response({
         "status": train_obj.status,
         "log": train_obj.log,
         "download_uri": project_obj.download_uri,
@@ -182,29 +181,29 @@ def export_null(request):
 
     if trainer is None:
         logger.error("trainer obj is invalid")
-        return JsonResponse({"status": "trainer invalid"})
+        return Response({"status": "trainer invalid"})
     iterations = trainer.get_iterations(customvision_project_id)
     if len(iterations) == 0:
         logger.info("not yet training ...")
-        return JsonResponse({"status": "waiting training"})
+        return Response({"status": "waiting training"})
 
     iteration = iterations[0]
 
     if not iteration.exportable or iteration.status != "Completed":
         logger.info("waiting training ...")
-        return JsonResponse({"status": "waiting training"})
+        return Response({"status": "waiting training"})
 
     exports = trainer.get_exports(customvision_project_id, iteration.id)
     if len(exports) == 0:
         logger.info("exporting ...")
         res = project_obj.export_iterationv3_2(iteration.id)
         logger.info(res.json())
-        return JsonResponse({"status": "exporting"})
+        return Response({"status": "exporting"})
 
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=["download_uri"])
 
-    return JsonResponse({
+    return Response({
         "status": "ok",
         "download_uri": exports[-1].download_uri
     })
@@ -218,7 +217,7 @@ def train_performance(request, project_id):
     customvision_project_id = project_obj.customvision_project_id
 
     if project_obj.is_demo:
-        return JsonResponse({
+        return Response({
             "status": "ok",
             "precision": 1,
             "recall": "demo_recall",
@@ -253,7 +252,7 @@ def train_performance(request, project_id):
     if len(iterations) >= 2:
         ret["previous"] = _parse(iterations[1])
 
-    return JsonResponse(ret)
+    return Response(ret)
 
 
 @api_view()
@@ -315,7 +314,7 @@ def train(request, project_id):
         project_obj.has_configured = True
         project_obj.save()
         # FIXME pass the new model info to inference server (willy implement)
-        return JsonResponse({"status": "ok"})
+        return Response({"status": "ok"})
 
     project_obj.upcreate_training_status(
         status="preparing", log="preparing data (images and annotations)")
@@ -344,7 +343,9 @@ def train(request, project_id):
 
 
 def upload_and_train(project_id):
-    """Actually do uplaod, train and deploy
+    """upload_and_train.
+
+    Actually do uplaod, train and deploy
     """
 
     project_obj = Project.objects.get(pk=project_id)
@@ -355,7 +356,7 @@ def upload_and_train(project_id):
     if not trainer:
         project_obj.upcreate_training_status(
             status="failed", log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": error_messages.CUSTOM_VISION_ACCESS_ERROR
@@ -380,7 +381,7 @@ def upload_and_train(project_id):
                 log=(f"Project {project_obj.customvision_project_name}" +
                      "found on Custom Vision"),
             )
-        except:
+        except Exception:
             project_obj.create_project()
             project_obj.upcreate_training_status(
                 status="preparing",
@@ -474,7 +475,7 @@ def upload_and_train(project_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    except Exception as e:
+    except Exception:
         # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception("Exception: %s", err_msg)
@@ -604,11 +605,16 @@ def update_train_status(project_id):
 
 @api_view()
 def pull_cv_project(request, project_id):
+    """pull_cv_project.
+
+    Delete the local project, parts and images. Pull the
+    remote project from Custom Vision.
+
+    Args:
+        request:
+        project_id:
     """
-    Delete the local project, parts and images. Pull the remote project from
-    Custom Vision.
-    TODO: open a Thread/Task
-    """
+    # FIXME: open a Thread/Task
     logger.info("Pulling CustomVision Project")
 
     # Check Customvision Project id
@@ -619,7 +625,7 @@ def pull_cv_project(request, project_id):
     # Check Partial
     try:
         is_partial = bool(strtobool(request.query_params.get("partial")))
-    except:
+    except Exception:
         is_partial = True
     logger.info("Loading Project in Partial Mode: %s", is_partial)
 
@@ -628,7 +634,7 @@ def pull_cv_project(request, project_id):
                                customvision_project_id=customvision_project_id,
                                is_partial=is_partial)
         return Response({"status": "ok"}, status=status.HTTP_200_OK)
-    except Exception as unexpected_error:
+    except Exception:
         err_msg = traceback.format_exc()
         return Response(
             {
@@ -644,20 +650,28 @@ def project_reset_camera(request, project_id):
     """Set Project Camera to demo"""
     try:
         project_obj = Project.objects.get(pk=project_id)
-    except:
+    except Exception:
         if len(Project.objects.filter(is_demo=False)) > 0:
             project_obj = Project.objects.filter(is_demo=False)[0]
     project_obj.camera = Camera.objects.filter(is_demo=True).first()
     project_obj.save(update_fields=["camera"])
-    return JsonResponse({"status": "ok"})
+    return Response({"status": "ok"})
 
 
 @api_view()
 def reset_project(request, project_id):
-    """Reset the project without deleting it"""
+    """reset_project.
+
+    Reset the project but not deleting.
+
+    Args:
+        request:
+        project_id:
+    """
+
     try:
         project_obj = Project.objects.get(pk=project_id)
-    except:
+    except Exception:
         if len(Project.objects.filter(is_demo=False)) > 0:
             project_obj = Project.objects.filter(is_demo=False)[0]
     try:
@@ -682,16 +696,16 @@ def reset_project(request, project_id):
         project_obj.retraining_counter = 0
         project_obj.save()
         project_obj.create_project()
-        return JsonResponse({"status": "ok"})
+        return Response({"status": "ok"})
     except KeyError as key_err:
         if str(key_err) in ["Endpoint", "'Endpoint'"]:
             # Probably reseting without training key and endpoint. When user
             # click configure, project will check customvision_id. If empty
             # than create project, Thus we can pass for now. Wait for
             # configure/training to create project...
-            return JsonResponse({"status": "ok"})
+            return Response({"status": "ok"})
         logger.exception("Reset project unexpected key error")
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": str(key_err)
@@ -700,7 +714,7 @@ def reset_project(request, project_id):
         )
     except ValueError as value_err:
         logger.exception("Reset Project Value Error")
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": str(value_err)
@@ -711,14 +725,14 @@ def reset_project(request, project_id):
         logger.exception("Error from Custom Vision")
         if (customvision_err.message ==
                 "Operation returned an invalid status code 'Access Denied'"):
-            return JsonResponse(
+            return Response(
                 {
                     "status": "failed",
                     "log": error_messages.CUSTOM_VISION_ACCESS_ERROR
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": customvision_err.message
