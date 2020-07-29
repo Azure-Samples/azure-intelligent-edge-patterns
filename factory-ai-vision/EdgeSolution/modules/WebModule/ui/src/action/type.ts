@@ -86,6 +86,13 @@ export type DeletePartSuccess = APISuccessAction<
 >;
 export type DeletePartFaliure = APIFailureAction<typeof constants.DELETE_PART_FAILURE>;
 
+/**
+ * GET images
+ */
+export type GetImagesRequest = APIRequestAction<typeof constants.GET_IMAGES_REQUEST>;
+export type GetImagesSuccess = APISuccessAction<typeof constants.GET_IMAGES_SUCCESS>;
+export type GetImagesFailure = APIFailureAction<typeof constants.GET_IMAGES_FAILURE>;
+
 export type ActionTypes =
   | GetNotificationsRequest
   | GetNotificationsSuccess
@@ -112,4 +119,7 @@ export type ActionTypes =
   | PostPartSuccess
   | DeletePartRequest
   | DeletePartSuccess
-  | DeletePartFaliure;;
+  | DeletePartFaliure
+  | GetImagesRequest
+  | GetImagesFailure
+  | GetImagesSuccess;

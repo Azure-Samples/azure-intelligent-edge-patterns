@@ -6,16 +6,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getParts, postPart } from '../action/creators/partActionCreators';
 import { State } from '../store/State';
 import { Part } from '../reducers/partReducer';
+import { getImages } from '../action/creators/imageActionCreators';
+
+const partsWithImgSelector = (state: State): (Part & { image: string })[] => {
+  const parts: Part[] = Object.values(state.parts.entities);
+  return parts.map(p => {
+    const relatedImage = Object.values(state.labelImages.entities).find(i => i.part === p.id );
+    return {...p, image: relatedImage?.image || ''};
+  });
+}
 
 export const Parts: React.FC = () => {
-  // TODO: Get Image
-  const partsWithImg = useSelector<State, (Part & { image: string })[]>((state) =>
-    Object.values(state.parts.entities).map((e) => ({ ...e, image: '' })),
-  );
+  const partsWithImg = useSelector<State, (Part & { image: string })[]>(partsWithImgSelector);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getParts(false));
+    dispatch(getImages());
   }, []);
 
   return (

@@ -10,6 +10,7 @@ import createProjectReducerByIsDemo from './project/projectReducer';
 import labelImagesReducer from './image/imageReducer';
 import settingReducer from './setting/settingReducer';
 import notificationReducer from '../reducers/notificationReducer';
+import imagesReducer from '../reducers/imageReducer';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,
@@ -22,5 +23,6 @@ export const rootReducer = combineReducers({
   images: labelImagesReducer,
   setting: settingReducer,
   notifications: notificationReducer,
-  parts:partsReducer
+  parts:partsReducer,
+  labelImages: imagesReducer
 });

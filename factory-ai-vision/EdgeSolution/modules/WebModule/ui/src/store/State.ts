@@ -6,17 +6,21 @@ import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
 import { NormalizedPart } from '../reducers/partReducer';
+import { NormalizedImage } from '../reducers/imageReducer';
 
 export interface State {
   // Domain Data
-  cameras: Camera[];
-  locations: NormalizedLocation;
   parts?: NormalizedPart;
+  locations: NormalizedLocation;
+  notifications: Notification[];
+  // FIXME Change it to images
+  labelImages?: NormalizedImage;
+  // TODO: Refactor
+  cameras: Camera[];
   project: Project;
   demoProject: Project;
   images: LabelImage[];
   setting: Setting;
-  notifications: Notification[];
   // App State
   labelingPageState: LabelingPageState;
   // UI State FIXME: Should be removed
