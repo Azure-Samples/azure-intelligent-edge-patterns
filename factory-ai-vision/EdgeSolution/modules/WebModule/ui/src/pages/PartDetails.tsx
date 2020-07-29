@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/react-northstar';
-import { Link, useLocation, Switch, Route, useHistory } from 'react-router-dom';
+import { Link, useLocation, Switch, Route, useHistory, Redirect } from 'react-router-dom';
 import axios from 'axios';
 
 import { CapturePhotos } from '../components/CapturePhoto';
@@ -10,52 +10,61 @@ import { WarningDialog } from '../components/WarningDialog';
 import { errorTheme } from '../themes/errorTheme';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { useProject } from '../hooks/useProject';
+import { useSelector, useDispatch } from 'react-redux';
+import { State } from '../store/State';
+import { Part } from '../reducers/partReducer';
+import { getParts, putPart, deletePart } from '../action/creators/partActionCreators';
 
 export const PartDetails = (): JSX.Element => {
-  const partId = useQuery().get('partId');
+  const partId = parseInt(useQuery().get('partId'), 10);
   const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const part = useSelector<State, Part>(state => state.parts.entities[partId]);
+  const [name, setName] = useState(part?.name);
+  const [description, setDescription] = useState(part?.description);
   const [error, setError] = useState('');
   const history = useHistory();
   const [status, setStatus] = useState<Status>(Status.None);
   const project = useProject(false);
+  const dispatch = useDispatch();
 
-  const onSave = (): void => {
-    axios({
-      method: 'PUT',
-      url: `/api/parts/${partId}/`,
-      data: {
-        name,
-        description,
-      },
-    })
-      .then(() => {
-        history.push(`/parts/`);
-        return void 0;
-      })
-      .catch((err) => {
-        setError(JSON.stringify(err.response.data));
-      });
-  };
+  useEffect(() => {
+    dispatch(getParts(false));
+  }, [dispatch]);
+
+  useEffect(() => {
+      setName(part?.name);
+      setDescription(part?.description);
+  }, [part?.name, part?.description]);
+
+  const onSave = async(): Promise<void> => {
+    setStatus(Status.Loading);
+    try{
+      await dispatch(putPart({name, description, is_demo: false}, partId));
+      setStatus(Status.Success);
+    } catch (e) {
+      setError(e);
+    }
+  }
 
   const onDelete = async (): Promise<void> => {
     setStatus(Status.Loading);
 
     try {
       await axios.get(`/api/projects/${project.data.id}/delete_tag?part_name=${name}`);
-      await axios.delete(`/api/parts/${partId}/`);
-      setStatus(Status.Success);
+      await dispatch(deletePart(partId));
     } catch (e) {
       setError(e);
     }
   };
 
+  if(!part) return <Redirect to="/parts"/>;
+
+  const saveBtnDisabled = !name || (name === part.name && description === part.description);
+
   return (
     <Grid columns={'68% 30%'} rows={'80px auto 30px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       {partId ? <Tab partId={partId} /> : null}
       <PartInfoForm
-        partId={partId}
         name={name}
         setName={setName}
         description={description}
@@ -74,7 +83,7 @@ export const PartDetails = (): JSX.Element => {
         />
       </Flex>
       <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" gap="gap.small">
-        <Button content="Save" primary onClick={onSave} disabled={!name} />
+        <Button content="Save" primary onClick={onSave} disabled={saveBtnDisabled} />
         <Provider theme={errorTheme}>
           <WarningDialog
             contentText={
@@ -98,22 +107,7 @@ export const PartDetails = (): JSX.Element => {
   );
 };
 
-const PartInfoForm = ({ partId, name, setName, description, setDescription }): JSX.Element => {
-  useEffect(() => {
-    if (partId) {
-      axios
-        .get(`/api/parts/${partId}/`)
-        .then(({ data }) => {
-          setName(data.name);
-          setDescription(data.description);
-          return void 0;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-  }, [partId, setDescription, setName]);
-
+const PartInfoForm = ({ name, setName, description, setDescription }): JSX.Element => {
   return (
     <div
       style={{

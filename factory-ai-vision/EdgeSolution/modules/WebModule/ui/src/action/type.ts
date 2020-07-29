@@ -76,6 +76,14 @@ export type PostPartSuccess = APISuccessAction<typeof constants.POST_PART_SUCCES
 export type PostPartFailure = APIFailureAction<typeof constants.POST_PART_FAILURE>;
 
 /**
+ * PUT parts
+ */
+export type PutPartRequest = APIRequestAction<typeof constants.PUT_PART_REQUEST>;
+export type PutPartSuccess = APISuccessAction<typeof constants.PUT_PART_SUCCESS, any, {id: number}>;
+export type PutPartFailure = APIFailureAction<typeof constants.PUT_PART_FAILURE>;
+
+
+/**
  * DELETE parts
  */
 export type DeletePartRequest = APIRequestAction<typeof constants.DELETE_PART_REQUEST>;
@@ -117,6 +125,9 @@ export type ActionTypes =
   | PostPartRequest
   | PostPartSuccess
   | PostPartSuccess
+  | PutPartRequest
+  | PutPartSuccess
+  | PutPartSuccess
   | DeletePartRequest
   | DeletePartSuccess
   | DeletePartFaliure
