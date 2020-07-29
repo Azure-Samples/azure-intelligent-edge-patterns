@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Dispatch } from 'react';
+import * as R from 'ramda';
 import { Flex, Dropdown, Text, DropdownItemProps, Grid } from '@fluentui/react-northstar';
 import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -11,7 +12,6 @@ import LabelDisplayImage from '../LabelDisplayImage';
 import { RTSPVideo } from '../RTSPVideo';
 import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
-import { getFilteredImages } from '../../util/getFilteredImages';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
 import { captureImage } from '../../action/creators/imageActionCreators';
@@ -24,13 +24,11 @@ export const CapturePhotos: React.FC<{
 }> = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const images = useSelector<State, LabelImage[]>((state) => state.images);
   const availableCameras = useCameras();
-  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
     dispatch(captureImage(streamId));
-    if (mode === CaptureLabelMode.PerImage) setGoLabelImageIdx(filteredImages.length);
+    // if (mode === CaptureLabelMode.PerImage) setGoLabelImageIdx(filteredImages.length);
   };
 
   useEffect(() => {
@@ -96,11 +94,27 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera, availableCameras })
   );
 };
 
-export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Element => {
-  const images = useSelector<State, LabelImage[]>((state) => state.images);
-  const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
-  const isValid = filteredImages.filter((image) => image.labels).length >= 15;
-  const imageCount = filteredImages.length;
+const imageSelector = (state: State, partId: number): LabelImage[] =>
+  R.intersection(state.labelImages.byPartId[partId], state.labelImages.notRelabel)
+    .map((id) => state.labelImages.entities[id])
+    // FIXME: Redesign the shape
+    .map((img) => ({
+      id: img.id,
+      image: img.image,
+      labels: '',
+      part: {
+        id: img.part,
+        name: state.parts.entities[img.part].name,
+      },
+      is_relabel: false,
+      confidence: 0,
+    }));
+
+export const CapturedImagesContainer = ({ partId, goLabelImageIdx }): JSX.Element => {
+  const images = useSelector<State, LabelImage[]>((state) => imageSelector(state, partId));
+
+  const isValid = images.filter((image) => image.labels).length >= 15;
+  const imageCount = images.length;
 
   return (
     <Flex column styles={{ height: '100%' }}>
@@ -119,23 +133,21 @@ export const CapturedImagesContainer = ({ goLabelImageIdx, partId }): JSX.Elemen
           maxHeight: '600px',
         }}
       >
-        {filteredImages.map((image, i, arr) => (
+        {images.map((image, i) => (
           <div key={image.id} style={{ height: '100%', width: '100%' }}>
             <span>{i + 1}</span>
-            <LabelingPageDialog
-              key={i}
-              imageIndex={i}
-              images={arr}
-              forceOpen={goLabelImageIdx === i}
-              trigger={
-                <div style={{ height: 150, width: 200 }}>
-                  <LabelDisplayImage labelImage={image} pointerCursor />
-                </div>
-              }
-              isRelabel={false}
-            />
+            <div style={{ height: 150, width: 200 }}>
+              <LabelDisplayImage labelImage={image} pointerCursor />
+            </div>
           </div>
         ))}
+        <LabelingPageDialog
+          imageIndex={0}
+          images={images}
+          forceOpen={false}
+          trigger={null}
+          isRelabel={false}
+        />
       </Grid>
       <Prompt
         when={imageCount < 15}
