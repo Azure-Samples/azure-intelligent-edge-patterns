@@ -95,8 +95,8 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera, availableCameras })
 };
 
 const imageSelector = (state: State, partId: number): LabelImage[] =>
-  R.intersection(state.labelImages.byPartId[partId], state.labelImages.notRelabel)
-    .map((id) => state.labelImages.entities[id])
+  Object.values(state.labelImages.entities)
+    .filter((e) => e.part === partId && e.isRelabel === false)
     // FIXME: Redesign the shape
     .map((img) => ({
       id: img.id,
@@ -106,7 +106,7 @@ const imageSelector = (state: State, partId: number): LabelImage[] =>
         id: img.part,
         name: state.parts.entities[img.part].name,
       },
-      is_relabel: false,
+      is_relabel: img.isRelabel,
       confidence: 0,
     }));
 

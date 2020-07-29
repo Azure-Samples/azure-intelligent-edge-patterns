@@ -7,6 +7,7 @@ import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
 import { NormalizedPart } from '../reducers/partReducer';
 import { NormalizedImage } from '../reducers/imageReducer';
+import { NormalizedLabel } from '../reducers/labelReducer';
 
 export interface State {
   // Domain Data
@@ -15,6 +16,7 @@ export interface State {
   notifications: Notification[];
   // FIXME Change it to images
   labelImages?: NormalizedImage;
+  labels?: NormalizedLabel;
   // TODO: Refactor
   cameras: Camera[];
   project: Project;

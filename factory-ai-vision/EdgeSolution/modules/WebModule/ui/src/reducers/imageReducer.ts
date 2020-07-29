@@ -1,47 +1,37 @@
 import * as R from 'ramda';
 import { GET_IMAGES_SUCCESS, CAPTURE_IMAGE_SUCCESS } from '../action/constants';
 import { ActionTypes } from '../action';
+import { NormalizedState } from './type';
 
 export type Image = {
   id: number;
   image: string;
   part: number;
+  labels: string[];
+  isRelabel: boolean;
 };
 
-export type NormalizedImage = {
-  entities: Record<string, Image>;
-  byPartId: Record<string, number[]>;
-  relabel: number[];
-  notRelabel: number[];
+export type NormalizedImage = NormalizedState<Image>;
+
+const initialImages: NormalizedImage = { entities: {}, result: [] };
+
+export const normalizeImageShape = (response: any): Image => {
+  return {
+    id: response.id,
+    image: response.image,
+    part: response.part,
+    labels: response.labels,
+    isRelabel: response.is_relabel,
+  };
 };
-
-const initialImages: NormalizedImage = { entities: {}, byPartId: {}, relabel: [], notRelabel: [] };
-
-const normalizeImageShape = (response: any): Image => ({
-  id: response.id,
-  image: response.image,
-  part: response.part,
-});
-
-function changeArrayToMap(originImages: any): NormalizedImage {
-  return originImages.reduce((acc, cur) => {
-    acc.entities[cur.id] = cur;
-    if (cur.part) {
-      if (acc.byPartId[cur.part]) acc.byPartId[cur.part].push(cur.id);
-      else acc.byPartId[cur.part] = [cur.id];
-    }
-    if (cur.is_relabel) acc.relabel.push(cur.id);
-    else acc.notRelabel.push(cur.id);
-    return acc;
-  }, initialImages);
-}
-
-const normalizeImage = R.compose(changeArrayToMap, R.map(normalizeImageShape));
 
 const imagesReducer = (state = initialImages, action: ActionTypes): NormalizedImage => {
   switch (action.type) {
     case GET_IMAGES_SUCCESS:
-      return normalizeImage(action.response);
+      return {
+        entities: action.response.entities.images,
+        result: action.response.result,
+      };
     case CAPTURE_IMAGE_SUCCESS: {
       const transform = {
         entities: R.assoc(action.response.id, normalizeImageShape(action.response)),
