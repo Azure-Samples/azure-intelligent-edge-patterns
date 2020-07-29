@@ -35,19 +35,3 @@ export const thunkAddCapturedImages = (streamId: string, partName: string): Part
       console.error(err);
     });
 };
-
-export const thunkGetCapturedImages = (partId: string): PartThunk => async (dispatch): Promise<void> => {
-  fetch(`/api/images`)
-    .then((response) => response.json())
-    .then((data) => {
-      const imagesWithRelatedPart = data.reduce((acc, cur) => {
-        if (cur.part === partId) acc.push(cur);
-        return acc;
-      }, []);
-      dispatch(updateCapturedImages(imagesWithRelatedPart));
-      return null;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-};

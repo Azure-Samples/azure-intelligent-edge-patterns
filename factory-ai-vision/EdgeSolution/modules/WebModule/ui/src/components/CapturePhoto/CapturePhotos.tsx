@@ -13,8 +13,8 @@ import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
 import { getFilteredImages } from '../../util/getFilteredImages';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
-import { thunkAddCapturedImages } from '../../store/part/partActions';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
+import { captureImage } from '../../action/creators/imageActionCreators';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -29,7 +29,7 @@ export const CapturePhotos: React.FC<{
   const filteredImages = getFilteredImages(images, { partId, isRelabel: false });
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
-    dispatch(thunkAddCapturedImages(streamId, partName));
+    dispatch(captureImage(streamId));
     if (mode === CaptureLabelMode.PerImage) setGoLabelImageIdx(filteredImages.length);
   };
 

@@ -79,19 +79,14 @@ export type PostPartFailure = APIFailureAction<typeof constants.POST_PART_FAILUR
  * PUT parts
  */
 export type PutPartRequest = APIRequestAction<typeof constants.PUT_PART_REQUEST>;
-export type PutPartSuccess = APISuccessAction<typeof constants.PUT_PART_SUCCESS, any, {id: number}>;
+export type PutPartSuccess = APISuccessAction<typeof constants.PUT_PART_SUCCESS, any, { id: number }>;
 export type PutPartFailure = APIFailureAction<typeof constants.PUT_PART_FAILURE>;
-
 
 /**
  * DELETE parts
  */
 export type DeletePartRequest = APIRequestAction<typeof constants.DELETE_PART_REQUEST>;
-export type DeletePartSuccess = APISuccessAction<
-  typeof constants.DELETE_PART_SUCCESS,
-  null,
-  { id: number }
->;
+export type DeletePartSuccess = APISuccessAction<typeof constants.DELETE_PART_SUCCESS, null, { id: number }>;
 export type DeletePartFaliure = APIFailureAction<typeof constants.DELETE_PART_FAILURE>;
 
 /**
@@ -100,6 +95,13 @@ export type DeletePartFaliure = APIFailureAction<typeof constants.DELETE_PART_FA
 export type GetImagesRequest = APIRequestAction<typeof constants.GET_IMAGES_REQUEST>;
 export type GetImagesSuccess = APISuccessAction<typeof constants.GET_IMAGES_SUCCESS>;
 export type GetImagesFailure = APIFailureAction<typeof constants.GET_IMAGES_FAILURE>;
+
+/**
+ * Capture image
+ */
+export type CaptureImagesRequest = APIRequestAction<typeof constants.CAPTURE_IMAGE_REQUEST>;
+export type CaptureImagesSuccess = APISuccessAction<typeof constants.CAPTURE_IMAGE_SUCCESS>;
+export type CaptureImagesFailure = APIFailureAction<typeof constants.CAPTURE_IMAGE_FAILURE>;
 
 export type ActionTypes =
   | GetNotificationsRequest
@@ -133,4 +135,7 @@ export type ActionTypes =
   | DeletePartFaliure
   | GetImagesRequest
   | GetImagesFailure
-  | GetImagesSuccess;
+  | GetImagesSuccess
+  | CaptureImagesRequest
+  | CaptureImagesSuccess
+  | CaptureImagesFailure;

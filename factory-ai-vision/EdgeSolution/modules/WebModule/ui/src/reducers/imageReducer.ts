@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import { GET_IMAGES_SUCCESS } from '../action/constants';
+import { GET_IMAGES_SUCCESS, CAPTURE_IMAGE_SUCCESS } from '../action/constants';
 import { ActionTypes } from '../action';
 import { changeArrayToMap } from './util';
 import { NormalizedState } from './type';
@@ -29,6 +29,8 @@ const imagesReducer = (state = initialImages, action: ActionTypes): NormalizedIm
   switch (action.type) {
     case GET_IMAGES_SUCCESS:
       return normalizeImage(action.response);
+    case CAPTURE_IMAGE_SUCCESS:
+      return R.assocPath(['entities', action.response.id], normalizeImageShape(action.response), state);
     default:
       return state;
   }
