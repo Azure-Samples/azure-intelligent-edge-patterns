@@ -223,25 +223,6 @@ class Project(models.Model):
             logger.exception("dequeue_iteration error")
             raise
 
-    def upcreate_training_status(self,
-                                 status: str,
-                                 log: str,
-                                 performance: str = "{}"):
-        """
-        A wrapper function to create or update the training status of a
-        project
-        """
-        logger.info("Updating Training Status: %s %s", status, log)
-        obj, created = Train.objects.update_or_create(
-            project=self,
-            defaults={
-                "status": status,
-                "log": "Status : " + log.capitalize(),
-                "performance": performance,
-            },
-        )
-        return obj, created
-
     def create_project(self):
         """Create a project for local project_obj (self) on CustomVision"""
         trainer = self.setting.get_trainer_obj()
@@ -366,15 +347,6 @@ class Project(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
-
-
-class Train(models.Model):
-    """Training Status Model"""
-
-    status = models.CharField(max_length=200)
-    log = models.CharField(max_length=1000)
-    performance = models.CharField(max_length=2000, default="{}")
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
 class Task(models.Model):

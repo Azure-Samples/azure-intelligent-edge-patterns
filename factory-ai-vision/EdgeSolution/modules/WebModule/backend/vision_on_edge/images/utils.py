@@ -121,3 +121,11 @@ def upload_images_to_customvision_helper(project_id,
     logger.info("Uploading images... Done")
     logger.info("Has new images: %s", has_new_images)
     return has_new_images
+
+
+def upload_and_sync_images(part_id):
+    """upload_and_sync_images.
+
+    Args:
+        part_id:
+    """

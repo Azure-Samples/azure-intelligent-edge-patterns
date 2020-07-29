@@ -4,7 +4,7 @@ Signals
 
 import logging
 
-from django.db.models.signals import pre_delete, post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from ..azure_training.models import Project
@@ -67,7 +67,6 @@ def delete_img_on_customvision(**kwargs):
             not instance.project.setting or \
             not instance.project.setting.is_trainer_valid or \
             not instance.customvision_id:
-        logger.info("Not enough info to delete on Custom Vision")
         return
 
     if 'delete_on_customvision' in dir(

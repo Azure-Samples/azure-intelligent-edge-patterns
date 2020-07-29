@@ -7,7 +7,7 @@ import logging
 from rest_framework import serializers
 
 from ...azure_settings.models import Setting
-from ..models import Project, Task, Train
+from ..models import Project, Task
 
 logger = logging.getLogger(__name__)
 
@@ -41,14 +41,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         project = Project.objects.create(**validated_data)
         project.parts.set(parts)
         return project
-
-
-class TrainSerializer(serializers.ModelSerializer):
-    """TrainSerializer"""
-
-    class Meta:
-        model = Train
-        fields = '__all__'
 
 
 class TaskSerializer(serializers.ModelSerializer):
