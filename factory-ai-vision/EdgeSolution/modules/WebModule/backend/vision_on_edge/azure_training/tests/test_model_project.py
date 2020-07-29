@@ -6,22 +6,19 @@ import logging
 
 from azure.cognitiveservices.vision.customvision.training import \
     CustomVisionTrainingClient
-from rest_framework.test import APITransactionTestCase
 
-from configs.customvision_config import ENDPOINT, TRAINING_KEY
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.cameras.models import Camera
 from vision_on_edge.locations.models import Location
+from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 
 from ..models import Project
-
-PROJECT_PREFIX = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
 
-class ProjectModelTestCases(APITransactionTestCase):
+class ProjectModelTestCases(CustomVisionTestCase):
     """ProjectModelTestCases
     """
 
@@ -29,11 +26,11 @@ class ProjectModelTestCases(APITransactionTestCase):
         """setUp.
         """
         Setting.objects.create(name="valid_setting",
-                               endpoint=ENDPOINT,
-                               training_key=TRAINING_KEY,
+                               endpoint=self.endpoint,
+                               training_key=self.training_key,
                                is_trainer_valid=False)
         Setting.objects.create(name="invalid_setting",
-                               endpoint=ENDPOINT,
+                               endpoint=self.endpoint,
                                training_key='',
                                is_trainer_valid=False)
         for i in range(3):
@@ -66,7 +63,7 @@ class ProjectModelTestCases(APITransactionTestCase):
         """
         self.assertEqual(Setting.objects.filter(training_key='').count(), 1)
         self.assertEqual(
-            Setting.objects.filter(training_key=TRAINING_KEY).count(), 1)
+            Setting.objects.filter(training_key=self.training_key).count(), 1)
         self.assertEqual(
             Camera.objects.filter(is_demo=True).count(), self.exist_num)
         self.assertEqual(
@@ -97,7 +94,7 @@ class ProjectModelTestCases(APITransactionTestCase):
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
             customvision_project_id='super_valid_project_id',
-            customvision_project_name=f'{PROJECT_PREFIX}-test_create_1',
+            customvision_project_name=f'{self.project_prefix}-test_create_1',
             is_demo=False)
         self.assertFalse(
             project_obj.customvision_project_id == 'super_valid_project_id')
@@ -114,14 +111,14 @@ class ProjectModelTestCases(APITransactionTestCase):
             until first train or create_project() get
             called.
         """
-        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
-                                             endpoint=ENDPOINT)
+        trainer = CustomVisionTrainingClient(api_key=self.training_key,
+                                             endpoint=self.endpoint)
         project_count = len(trainer.get_projects())
         project_obj = Project.objects.create(
             setting=Setting.objects.filter(name='valid_setting').first(),
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
-            customvision_project_name=f'{PROJECT_PREFIX}-test_create_2',
+            customvision_project_name=f'{self.project_prefix}-test_create_2',
             is_demo=False)
 
         project_count_after = len(trainer.get_projects())
@@ -147,7 +144,7 @@ class ProjectModelTestCases(APITransactionTestCase):
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
             customvision_project_id='5566thebest',
-            customvision_project_name=f'{PROJECT_PREFIX}-test_create_3',
+            customvision_project_name=f'{self.project_prefix}-test_create_3',
             is_demo=False)
 
         self.assertTrue(project_obj.customvision_project_id == '')
@@ -171,7 +168,7 @@ class ProjectModelTestCases(APITransactionTestCase):
             location=Location.objects.filter(name='demo_location_1').first(),
             is_demo=False,
             customvision_project_id='56cannotdie',
-            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1')
+            customvision_project_name=f'{self.project_prefix}-test_update_1')
 
         # Check
         project_obj.save()
@@ -197,7 +194,7 @@ class ProjectModelTestCases(APITransactionTestCase):
             camera=Camera.objects.filter(name='demo_camera_1').first(),
             location=Location.objects.filter(name='demo_location_1').first(),
             is_demo=False,
-            customvision_project_name=f'{PROJECT_PREFIX}-test_update_1')
+            customvision_project_name=f'{self.project_prefix}-test_update_1')
 
         # Project already created
         project_obj.customvision_project_id = '56cannotdie'
