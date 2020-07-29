@@ -9,7 +9,7 @@ import threading
 import time
 
 import requests
-from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
+from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 from django.db import models
 from django.db.models.signals import post_save, pre_save

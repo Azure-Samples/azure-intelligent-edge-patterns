@@ -21,6 +21,7 @@ from rest_framework.response import Response
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...azure_training_status.models import TrainingStatus
+from ...azure_training_status.utils import upcreate_training_status
 from ...azure_parts.utils import batch_upload_parts_to_customvision
 from ...cameras.models import Camera
 from ...general import error_messages
@@ -395,7 +396,7 @@ def upload_and_train(project_id):
         upcreate_training_status(project_id=project_obj.id,
                                  status="sending",
                                  log="sending data (images and annotations)")
-        
+
         # Get tags_dict to avoid getting tags every time
         tags = trainer.get_tags(project_id=project_obj.customvision_project_id)
         tags_dict = {tag.name: tag.id for tag in tags}

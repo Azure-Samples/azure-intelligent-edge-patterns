@@ -9,8 +9,6 @@ from django.dispatch import receiver
 from vision_on_edge.azure_training_status.models import TrainingStatus
 from vision_on_edge.notifications.models import Notification
 
-from .models import Project
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,10 +21,6 @@ def training_status_send_notification_handler(**kwargs):
     Args:
         kwargs:
     """
-
-    logger.info("Azure Project changed.")
-    logger.info("Checking...")
-
     if 'sender' not in kwargs or kwargs['sender'] != TrainingStatus:
         logger.info(
             "'sender' not in kwargs or kwargs['sender'] != TrainingStatus")
@@ -40,6 +34,9 @@ def training_status_send_notification_handler(**kwargs):
     instance = kwargs['instance']
     if 'need_to_send_notification' in dir(
             instance) and instance.need_to_send_notification:
+        logger.info("Azure TrainingStatus changed.")
+        logger.info("instance.need_to_send_notification %s",
+                    instance.need_to_send_notification)
         Notification.objects.create(notification_type="project",
                                     sender="system",
                                     title=instance.status.capitalize(),
