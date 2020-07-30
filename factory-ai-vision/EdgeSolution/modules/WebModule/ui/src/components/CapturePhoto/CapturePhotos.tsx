@@ -21,14 +21,29 @@ export const CapturePhotos: React.FC<{
   partName: string;
   goLabelImageIdx: number;
   setGoLabelImageIdx: Dispatch<number>;
-}> = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }) => {
+}> = ({ partId, partName }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
+  const images = useSelector<State, LabelImage[]>((state) => imageSelector(state, partId));
   const availableCameras = useCameras();
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
-    dispatch(captureImage(streamId));
-    // if (mode === CaptureLabelMode.PerImage) setGoLabelImageIdx(filteredImages.length);
+    dispatch(
+      captureImage(
+        streamId,
+        mode === CaptureLabelMode.PerImage,
+        images.map((e) => e.id),
+      ),
+    );
+  };
+
+  const onDisplayImageClick = (imageId: number): void => {
+    dispatch(
+      openLabelingPage(
+        images.map((e) => e.id),
+        imageId,
+      ),
+    );
   };
 
   useEffect(() => {
@@ -57,7 +72,7 @@ export const CapturePhotos: React.FC<{
         </div>
       </Flex>
       <Flex column gap="gap.small" styles={{ width: '30%', minWidth: '450px' }}>
-        <CapturedImagesContainer partId={partId} goLabelImageIdx={goLabelImageIdx} />
+        <CapturedImagesContainer onDisplayImageClick={onDisplayImageClick} images={images} />
       </Flex>
     </Flex>
   );
@@ -110,21 +125,9 @@ const imageSelector = (state: State, partId: number): LabelImage[] =>
       confidence: 0,
     }));
 
-export const CapturedImagesContainer = ({ partId, goLabelImageIdx }): JSX.Element => {
-  const images = useSelector<State, LabelImage[]>((state) => imageSelector(state, partId));
-  const dispatch = useDispatch();
-
+export const CapturedImagesContainer = ({ images, onDisplayImageClick }): JSX.Element => {
   const isValid = images.filter((image) => image.labels).length >= 15;
   const imageCount = images.length;
-
-  const onDisplayImageClick = (imageId: number): void => {
-    dispatch(
-      openLabelingPage(
-        images.map((e) => e.id),
-        imageId,
-      ),
-    );
-  };
 
   return (
     <Flex column styles={{ height: '100%' }}>

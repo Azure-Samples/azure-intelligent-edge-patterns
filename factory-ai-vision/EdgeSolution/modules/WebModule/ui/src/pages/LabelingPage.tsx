@@ -55,12 +55,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
     dispatch(deleteLabelImage(selectedImageId));
   };
 
-  useEffect(() => {
-    if (typeof selectedImageId === 'number') dispatch(getAnnotations(selectedImageId));
-    return (): void => {
-      dispatch(resetAnnotation());
-    };
-  }, [dispatch, selectedImageId]);
+  // useEffect(() => {
+  //   if (typeof selectedImageId === 'number') dispatch(getAnnotations(selectedImageId));
+  //   return (): void => {
+  //     dispatch(resetAnnotation());
+  //   };
+  // }, [dispatch, selectedImageId]);
 
   return (
     <LabelingPageDialog open={selectedImageId !== null}>

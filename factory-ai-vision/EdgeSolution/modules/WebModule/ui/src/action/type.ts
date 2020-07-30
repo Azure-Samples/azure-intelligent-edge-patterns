@@ -100,7 +100,11 @@ export type GetImagesFailure = APIFailureAction<typeof constants.GET_IMAGES_FAIL
  * Capture image
  */
 export type CaptureImagesRequest = APIRequestAction<typeof constants.CAPTURE_IMAGE_REQUEST>;
-export type CaptureImagesSuccess = APISuccessAction<typeof constants.CAPTURE_IMAGE_SUCCESS>;
+export type CaptureImagesSuccess = APISuccessAction<
+  typeof constants.CAPTURE_IMAGE_SUCCESS,
+  any,
+  { shouldOpenLabelingPage: boolean; imageIds: number[] }
+>;
 export type CaptureImagesFailure = APIFailureAction<typeof constants.CAPTURE_IMAGE_FAILURE>;
 
 /**
