@@ -1,0 +1,2 @@
+Left-entrance	1	134	253	240	272	0.3
+Right-exit	1	417	116	509	94	0.3

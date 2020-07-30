@@ -1,0 +1,57 @@
+{
+    "name": "CVRToAMSAsset",
+    "@apiVersion": "1.0",
+    "properties": {
+        "description": "Continuous video recording to an Azure Media Services Asset",
+        "parameters": [
+            {
+                "name": "rtspUserName",
+                "type": "String",
+                "description": "rtsp source user name.",
+                "default": "dummyUserName"
+            },
+            {
+                "name": "rtspPassword",
+                "type": "String",
+                "description": "rtsp source password.",
+                "default" : "dummyPassword"
+            },
+            {
+                "name": "rtspUrl",
+                "type": "String",
+                "description": "rtsp Url"
+            }
+        ],        
+
+        "sources": [
+            {
+                "@type": "#Microsoft.Media.MediaGraphRtspSource",
+                "name": "rtspSource",
+                "endpoint":{
+                    "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                    "url": "${rtspUrl}",
+                    "credentials": {
+                        "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                        "username": "${rtspUserName}",
+                        "password": "${rtspPassword}"
+                    }
+                }
+            }
+        ],
+        "sinks": [
+            {
+                "@type": "#Microsoft.Media.MediaGraphAssetSink",
+                "name": "assetSink",
+                "assetNamePattern": "sampleAsset-${System.GraphTopologyName}-${System.GraphInstanceName}",
+                "segmentLength": "PT30S",
+                "localMediaCacheMaximumSizeMiB": "2048",
+                "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
+                "inputs": [
+                    {
+                        "nodeName": "rtspSource"
+                    }
+                ]
+            }
+        ]
+    }
+}
