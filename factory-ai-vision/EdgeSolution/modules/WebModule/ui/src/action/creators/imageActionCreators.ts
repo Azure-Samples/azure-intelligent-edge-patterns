@@ -39,7 +39,7 @@ const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeL
 export const getImages = (): CallAPIAction<State> => ({
   types: [GET_IMAGES_REQUEST, GET_IMAGES_SUCCESS, GET_IMAGES_FAILURE],
   callAPI: (): Promise<any> => Axios.get(`/api/images/`).then(({ data }) => normalizeImages(data)),
-  shouldCallAPI: (state): boolean => state.parts.result.length === 0,
+  shouldCallAPI: (state): boolean => state.labelImages.result.length === 0,
 });
 
 export const captureImage = (streamId: string): CallAPIAction<State> => ({

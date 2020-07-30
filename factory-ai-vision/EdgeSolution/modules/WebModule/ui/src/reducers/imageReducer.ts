@@ -29,7 +29,7 @@ const imagesReducer = (state = initialImages, action: ActionTypes): NormalizedIm
   switch (action.type) {
     case GET_IMAGES_SUCCESS:
       return {
-        entities: action.response.entities.images,
+        entities: action.response.entities.images || {},
         result: action.response.result,
       };
     case CAPTURE_IMAGE_SUCCESS: {

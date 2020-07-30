@@ -14,11 +14,13 @@ const initialLabel = { entities: {}, result: [] };
 
 const labelReducer = (state = initialLabel, action: ActionTypes): NormalizedLabel => {
   switch (action.type) {
-    case GET_IMAGES_SUCCESS:
+    case GET_IMAGES_SUCCESS: {
+      const { labels } = action.response.entities;
       return {
-        entities: action.response.entities.labels,
-        result: Object.keys(action.response.entities.labels),
+        entities: labels || {},
+        result: labels ? Object.keys(labels) : [],
       };
+    }
     default:
       return state;
   }
