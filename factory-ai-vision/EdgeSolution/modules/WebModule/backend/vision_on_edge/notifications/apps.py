@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+"""Notifications App
 """
-Notifications App
-"""
+
 import logging
 
 from django.apps import AppConfig
@@ -9,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class NotificationsConfig(AppConfig):
+    """Notifications App Config
     """
-    Notifications App Config
-    """
+
     name = 'vision_on_edge.notifications'
 
     def ready(self):

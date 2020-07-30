@@ -79,5 +79,5 @@ def delete_img_on_customvision(**kwargs):
         trainer.delete_images(
             project_id=instance.project.customvision_project_id,
             image_ids=[instance.customvision_id])
-    except Exception as unexpected_error:
+    except Exception:
         logger.exception("delete_tag unexpected_error")

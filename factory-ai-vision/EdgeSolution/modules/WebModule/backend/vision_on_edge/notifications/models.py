@@ -1,13 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Notification model
 """
-Notification model
-"""
+
 import logging
 
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +13,8 @@ NOTIFICATION_TYPE_CHOICES = [(i, i) for i in NOTIFICATION_TYPES]
 
 
 class Notification(models.Model):
-    """Notification Model"""
+    """Notification Model
+    """
 
     notification_type = models.CharField(max_length=20,
                                          choices=NOTIFICATION_TYPE_CHOICES,
