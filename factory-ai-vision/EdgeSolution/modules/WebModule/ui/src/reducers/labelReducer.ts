@@ -8,7 +8,20 @@ export type BoxLabel = {
   y2: number;
 };
 
-export type NormalizedLabel = NormalizedState<BoxLabel, string>;
+export enum AnnotationState {
+  Empty = 'Empty',
+  P1Added = 'P1Added',
+  Finish = 'Finish',
+}
+
+export type Annotation = {
+  id: string;
+  label: BoxLabel;
+  image: number;
+  annotationState: AnnotationState;
+};
+
+export type NormalizedLabel = NormalizedState<Annotation, string>;
 
 const initialLabel = { entities: {}, result: [] };
 

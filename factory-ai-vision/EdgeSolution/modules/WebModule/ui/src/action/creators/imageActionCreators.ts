@@ -14,24 +14,35 @@ import {
 import { CallAPIAction } from '../../middlewares/callAPIMiddleware';
 import { State } from '../../store/State';
 import { normalizeImageShape } from '../../reducers/imageReducer';
+import { Annotation, AnnotationState } from '../../reducers/labelReducer';
 
 const normalizeImagesAndLabelByNormalizr = (data) => {
-  const image = new schema.Entity('images');
-  const labels = new schema.Entity('labels', { image }, { idAttribute: () => uniqid() });
-  const imageWithLabel = new schema.Entity(
+  const labels = new schema.Entity('labels', undefined, {
+    processStrategy: (value, parent): Annotation => {
+      const { id, ...label } = value;
+      return {
+        id,
+        image: parent.id,
+        label,
+        annotationState: AnnotationState.Finish,
+      };
+    },
+  });
+
+  const images = new schema.Entity(
     'images',
-    { image, labels: [labels] },
+    { labels: [labels] },
     {
       processStrategy: normalizeImageShape,
     },
   );
 
-  return normalize(data, [imageWithLabel]);
+  return normalize(data, [images]);
 };
 
 const serializeLabels = R.map<any, any>((e) => ({
   ...e,
-  labels: JSON.parse(e.labels),
+  labels: (JSON.parse(e.labels) || []).map((l) => ({ ...l, id: uniqid() })),
 }));
 
 const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeLabels);
