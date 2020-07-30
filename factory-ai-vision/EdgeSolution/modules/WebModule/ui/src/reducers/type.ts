@@ -1,3 +1,8 @@
+import { Reducer as ReduxReducer } from 'redux';
+import { ActionTypes } from '../action';
+
+export type Reducer<S> = ReduxReducer<S, ActionTypes>;
+
 export type NormalizedState<E, R = number> = { entities: Record<string, E>; result: R[] };
 
 export type Location = {

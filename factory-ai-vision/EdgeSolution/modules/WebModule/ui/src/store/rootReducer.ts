@@ -12,10 +12,10 @@ import settingReducer from './setting/settingReducer';
 import notificationReducer from '../reducers/notificationReducer';
 import imagesReducer from '../reducers/imageReducer';
 import labelReducer from '../reducers/labelReducer';
+import labelingPageReducer from '../reducers/labelingPageReducer';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,
-  locations: locationsReducer,
   part: partReducer,
   labelingPageState: labelingPageStateReducer,
   dialogIsOpen: dialogIsOpenReducer,
@@ -23,8 +23,11 @@ export const rootReducer = combineReducers({
   demoProject: createProjectReducerByIsDemo(true),
   images: labelImagesReducer,
   setting: settingReducer,
+  // The Below state has been refactor
+  locations: locationsReducer,
   notifications: notificationReducer,
   parts: partsReducer,
   labelImages: imagesReducer,
   labels: labelReducer,
+  labelingPage: labelingPageReducer,
 });

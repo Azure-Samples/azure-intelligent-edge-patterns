@@ -15,6 +15,7 @@ import { LabelImage } from '../../store/image/imageTypes';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
 import { captureImage } from '../../action/creators/imageActionCreators';
+import { openLabelingPage } from '../../action/creators/labelingPageActionCreators';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -112,9 +113,19 @@ const imageSelector = (state: State, partId: number): LabelImage[] =>
 
 export const CapturedImagesContainer = ({ partId, goLabelImageIdx }): JSX.Element => {
   const images = useSelector<State, LabelImage[]>((state) => imageSelector(state, partId));
+  const dispatch = useDispatch();
 
   const isValid = images.filter((image) => image.labels).length >= 15;
   const imageCount = images.length;
+
+  const onDisplayImageClick = (imageId: number): void => {
+    dispatch(
+      openLabelingPage(
+        images.map((e) => e.id),
+        imageId,
+      ),
+    );
+  };
 
   return (
     <Flex column styles={{ height: '100%' }}>
@@ -137,7 +148,11 @@ export const CapturedImagesContainer = ({ partId, goLabelImageIdx }): JSX.Elemen
           <div key={image.id} style={{ height: '100%', width: '100%' }}>
             <span>{i + 1}</span>
             <div style={{ height: 150, width: 200 }}>
-              <LabelDisplayImage labelImage={image} pointerCursor />
+              <LabelDisplayImage
+                labelImage={image}
+                pointerCursor
+                onClick={(): void => onDisplayImageClick(image.id)}
+              />
             </div>
           </div>
         ))}
