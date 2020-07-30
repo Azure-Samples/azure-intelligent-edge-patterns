@@ -121,7 +121,7 @@
                 "status": "running",
                 "restartPolicy": "always",
                 "settings": {
-                    "image": "containerregistry12345.azurecr.io/m1:v1",
+                    "image": "containerregistry12345.azurecr.io/lpr:v1",
                     "createOptions": {
                         "HostConfig": {
                             "runtime": "nvidia",
