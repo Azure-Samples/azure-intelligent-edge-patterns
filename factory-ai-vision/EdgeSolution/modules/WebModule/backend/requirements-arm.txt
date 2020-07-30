@@ -7,6 +7,7 @@ azure-cognitiveservices-vision-customvision==1.0.0
 requests
 django-cors-headers
 python-dateutil
+azure-iot-device~=2.0.0
 opencensus==0.7.7
 opencensus-context==0.1.1
 opencensus-ext-azure==1.0.2
