@@ -103,10 +103,16 @@ export type CaptureImagesRequest = APIRequestAction<typeof constants.CAPTURE_IMA
 export type CaptureImagesSuccess = APISuccessAction<typeof constants.CAPTURE_IMAGE_SUCCESS>;
 export type CaptureImagesFailure = APIFailureAction<typeof constants.CAPTURE_IMAGE_FAILURE>;
 
+/**
+ * Label Page Action
+ */
 export type OpenLabelingPage = {
   type: typeof constants.OPEN_LABELING_PAGE;
   imageIds: number[];
   selectedImageId: number;
+};
+export type CloseLabelingPage = {
+  type: typeof constants.CLOSE_LABELING_PAGE;
 };
 
 export type ActionTypes =
@@ -145,4 +151,5 @@ export type ActionTypes =
   | CaptureImagesRequest
   | CaptureImagesSuccess
   | CaptureImagesFailure
-  | OpenLabelingPage;
+  | OpenLabelingPage
+  | CloseLabelingPage;

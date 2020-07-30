@@ -1,5 +1,5 @@
 import { Reducer } from './type';
-import { OPEN_LABELING_PAGE } from '../action';
+import { OPEN_LABELING_PAGE, CLOSE_LABELING_PAGE } from '../action';
 
 export type LabelPageState = {
   imageIds: number[];
@@ -17,6 +17,11 @@ const labelingPageReducer: Reducer<LabelPageState> = (state = initialState, acti
       return {
         imageIds: action.imageIds,
         selectedImageId: action.selectedImageId,
+      };
+    case CLOSE_LABELING_PAGE:
+      return {
+        imageIds: [],
+        selectedImageId: null,
       };
     default:
       return state;

@@ -8,29 +8,21 @@ import { State } from '../store/State';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
-// import LabelingPageDialog from '../components/LabelingPageDialog';
+import { closeLabelingPage } from '../action/creators/labelingPageActionCreators';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
-  // images: LabelImage[];
-  // imageIndex: number;
-  // closeDialog: () => void;
   isRelabel: boolean;
 }
 
-const LabelingPage: FC<LabelingPageProps> = ({
-  labelingType,
-  // images,
-  // imageIndex,
-  // closeDialog,
-  isRelabel,
-}) => {
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const imageUrl = useSelector<State, string>(
     (state) => state.labelImages.entities[state.labelingPage.selectedImageId]?.image,
   );
+  const closeDialog = () => dispatch(closeLabelingPage());
   const [index, setIndex] = useState<number>(0);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
 
@@ -115,7 +107,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
               primary
               content="Cancel"
               onClick={(): void => {
-                // closeDialog();
+                closeDialog();
               }}
             />
           )}
