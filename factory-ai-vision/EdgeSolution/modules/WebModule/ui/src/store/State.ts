@@ -8,24 +8,24 @@ import { Setting } from './setting/settingType';
 import { NormalizedPart } from '../reducers/partReducer';
 import { NormalizedImage } from '../reducers/imageReducer';
 import { NormalizedLabel } from '../reducers/labelReducer';
+import { LabelPageState } from '../reducers/labelingPageReducer';
 
 export interface State {
   // Domain Data
   parts?: NormalizedPart;
   locations: NormalizedLocation;
   notifications: Notification[];
-  // FIXME Change it to images
   labelImages?: NormalizedImage;
   labels?: NormalizedLabel;
+  // App State
+  labelingPage?: LabelPageState;
   // TODO: Refactor
   cameras: Camera[];
   project: Project;
   demoProject: Project;
   images: LabelImage[];
   setting: Setting;
-  // App State
   labelingPageState: LabelingPageState;
-  // UI State FIXME: Should be removed
   dialogIsOpen: boolean;
   part: Part;
 }

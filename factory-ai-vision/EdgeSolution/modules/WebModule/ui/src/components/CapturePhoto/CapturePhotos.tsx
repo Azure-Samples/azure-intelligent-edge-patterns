@@ -1,5 +1,4 @@
 import React, { useState, useEffect, Dispatch } from 'react';
-import * as R from 'ramda';
 import { Flex, Dropdown, Text, DropdownItemProps, Grid } from '@fluentui/react-northstar';
 import { Link, Prompt } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -7,7 +6,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useCameras } from '../../hooks/useCameras';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
-import LabelingPageDialog from '../LabelingPageDialog';
 import LabelDisplayImage from '../LabelDisplayImage';
 import { RTSPVideo } from '../RTSPVideo';
 import { getLabelImages } from '../../store/image/imageActions';
@@ -16,6 +14,7 @@ import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
 import { captureImage } from '../../action/creators/imageActionCreators';
 import { openLabelingPage } from '../../action/creators/labelingPageActionCreators';
+import LabelingPage from '../../pages/LabelingPage';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -156,13 +155,7 @@ export const CapturedImagesContainer = ({ partId, goLabelImageIdx }): JSX.Elemen
             </div>
           </div>
         ))}
-        <LabelingPageDialog
-          imageIndex={0}
-          images={images}
-          forceOpen={false}
-          trigger={null}
-          isRelabel={false}
-        />
+        <LabelingPage isRelabel={false} labelingType={0} />
       </Grid>
       <Prompt
         when={imageCount < 15}

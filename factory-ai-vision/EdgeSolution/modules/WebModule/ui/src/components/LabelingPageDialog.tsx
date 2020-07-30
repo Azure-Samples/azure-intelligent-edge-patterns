@@ -32,13 +32,14 @@ const LabelingPageDialog: FC<LabelingPageDialogProps> = ({
       open={open}
       onOpen={(): void => setOpen(true)}
       content={
-        <LabelingPage
-          closeDialog={(): void => setOpen(false)}
-          labelingType={LabelingType.SingleAnnotation}
-          images={images}
-          imageIndex={imageIndex}
-          isRelabel={isRelabel}
-        />
+        // <LabelingPage
+        //   closeDialog={(): void => setOpen(false)}
+        //   labelingType={LabelingType.SingleAnnotation}
+        //   images={images}
+        //   imageIndex={imageIndex}
+        //   isRelabel={isRelabel}
+        // />
+        null
       }
     />
   );
