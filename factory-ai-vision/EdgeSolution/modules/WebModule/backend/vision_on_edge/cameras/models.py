@@ -39,6 +39,9 @@ class Camera(models.Model):
         logger.info(rtsp)
         if rtsp == '0':
             rtsp = 0
+        elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
+            logger.error("This is a rtsp")
+            rtsp = "rtsp" + rtsp[4:]
         cap = cv2.VideoCapture(rtsp)
         if not cap.isOpened():
             cap.release()
