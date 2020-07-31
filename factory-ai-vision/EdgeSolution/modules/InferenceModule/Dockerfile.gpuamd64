@@ -40,7 +40,7 @@ RUN pip install --upgrade pip
 RUN pip install -U certifi --ignore-installed
 RUN pip install -r requirements.txt --ignore-installed && \
     pip install flask opencv-python onnx
-RUN pip install onnxruntime-gpu
+RUN pip install onnxruntime onnxruntime-gpu
 
 COPY main.py ./
 COPY object_detection.py ./
