@@ -4,8 +4,9 @@ Stream views
 
 import datetime
 import io
-import threading
 import logging
+import sys
+import threading
 import time
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -63,6 +64,7 @@ class StreamManager():
         IMPORTANT, autoreloader will not reload threading,
         please restart the server if you modify the thread
         """
+
         def _gc(self):
             while True:
                 self.mutex.acquire()
@@ -88,7 +90,7 @@ class StreamManager():
 
         threading.Thread(target=_gc, args=(self,)).start()
 
-import sys
+
 if 'runserver' in sys.argv:
     stream_manager = StreamManager()
 

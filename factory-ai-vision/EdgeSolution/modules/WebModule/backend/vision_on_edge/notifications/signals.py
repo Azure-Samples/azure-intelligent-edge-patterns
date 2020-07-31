@@ -37,6 +37,7 @@ def notification_post_save_websocket_handler(**kwargs):
     async_to_sync(channels_layer.group_send)(
         "notification",
         {
+            "id": instance.id,
             "type": "notification.send",
             "notification_type": instance.notification_type,
             "timestamp": str(instance.timestamp),
@@ -65,6 +66,6 @@ def notification_post_save_dequeue_handler(**kwargs):
         return
 
     instance = kwargs['instance']
-    if Notification.objects.filter(sender=instance.sender).count() >= 5:
+    if Notification.objects.filter(sender=instance.sender).count() >= 10:
         Notification.objects.filter(
             sender=instance.sender).order_by('timestamp').first().delete()

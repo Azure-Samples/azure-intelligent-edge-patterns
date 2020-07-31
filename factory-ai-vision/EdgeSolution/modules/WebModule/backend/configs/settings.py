@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'vision_on_edge.images',
     'vision_on_edge.streams',
     'vision_on_edge.azure_settings',
+    'vision_on_edge.azure_training_status',
     'vision_on_edge.feedback',
     'vision_on_edge.locations',
     'vision_on_edge.cameras',
@@ -167,4 +168,4 @@ print('  TRAINING_KEY:', TRAINING_KEY)
 print('  ENDPOINT:', ENDPOINT)
 print('************************************')
 
-LOGGING = logging_config.LOGGING_CONFIG_DEV
+LOGGING = logging_config.LOGGING_CONFIG_PRODUCTION

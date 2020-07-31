@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+"""Camere Model Testcase
 """
-Camere Model Testcase
-"""
+
 from unittest.mock import patch
 
 from rest_framework.test import APITransactionTestCase
@@ -11,13 +12,13 @@ from ..models import Camera
 
 
 class CameraTestCase(APITransactionTestCase):
-    """
-    Camere Model Test Cases
+    """CameraTestCase.
+
+    Camere Model testcases.
     """
 
     def setUp(self):
-        """
-        Setup objects
+        """setUp.
         """
         with patch('requests.get') as mock_request:
             mock_request.return_value.status_code = 200
@@ -44,8 +45,3 @@ class CameraTestCase(APITransactionTestCase):
                                       area=special_string,
                                       is_demo=False)
         self.exist_num = 4 + len(special_strings)
-
-    def test_setup_is_valid(self):
-        """
-        Make sure setup valid
-        """

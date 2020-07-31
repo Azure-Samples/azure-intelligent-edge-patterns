@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { addNotification } from '../store/notification/notificationAction';
+import { receiveNotification } from '../store/notification/notificationActionCreators';
 
 export const useWebSocket = (): void => {
   const dispatch = useDispatch();
@@ -13,14 +13,9 @@ export const useWebSocket = (): void => {
     const ws = new WebSocket(endPoint);
 
     ws.onmessage = ({ data }): void => {
+      console.log(data);
       const deSerializedData = JSON.parse(data);
-      dispatch(
-        addNotification({
-          title: deSerializedData.title,
-          content: deSerializedData.details,
-          linkTo: '/partIdentification/',
-        }),
-      );
+      dispatch(receiveNotification(deSerializedData));
     };
 
     ws.onerror = (evt): void => {
@@ -28,5 +23,5 @@ export const useWebSocket = (): void => {
     };
 
     return (): void => ws.close();
-  }, []);
+  }, [dispatch]);
 };

@@ -35,11 +35,10 @@ class SettingViewSet(viewsets.ModelViewSet):
             kwargs:
 
         Returns:
-            Response: Project lists in below format
-            {
-                'project_id_1' : 'project_name_1',
-                'project_id_2' : 'project_name_2'
-            }
+            200 { 'project_id_1' : 'project_name_1',
+                'project_id_2' : 'project_name_2'}
+            or
+            400 bad_request
         """
 
         try:
