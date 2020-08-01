@@ -13,7 +13,3 @@ def test_location_detail(location: Location):
             reverse("api:location-detail", kwargs={"pk": location.id}) == f"/api/locations/{location.id}/"
     )
     assert resolve(f"/api/locations/{location.id}/").view_name == "api:location-detail" 
-
-def test_location_list():
-    assert reverse("api:location-list") == "/api/locations/"
-    assert resolve("/api/locations/").view_name == "api:location-list"
