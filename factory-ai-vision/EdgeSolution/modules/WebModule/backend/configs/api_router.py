@@ -42,31 +42,31 @@ router.register('images', image_views.ImageViewSet)
 
 urlpatterns = router.urls
 
-# urlpatterns += [
-    # url('streams/connect', stream_views.connect_stream),
-    # path('streams/<int:stream_id>/disconnect', stream_views.disconnect_stream),
-    # path('streams/<int:stream_id>/video_feed', stream_views.video_feed),
-    # path('streams/<int:stream_id>/capture', stream_views.capture),
-    # path('streams/<int:stream_id>/keep_alive', stream_views.keep_alive),
-    # path('projects/<int:project_id>/train', azure_training_views.train),
-    # path('projects/<int:project_id>/export', azure_training_views.export),
-    # path('projects/<int:project_id>/train_performance',
-         # azure_training_views.train_performance),
-    # path('projects/<int:project_id>/inference_video_feed',
-         # stream_views.inference_video_feed),
-    # path('projects/<int:project_id>/pull_cv_project',
-         # azure_training_views.pull_cv_project),
-    # path('projects/<int:project_id>/update_prob_threshold',
-         # azure_training_views.update_prob_threshold),
-    # path('projects/<int:project_id>/reset_project',
-         # azure_training_views.reset_project),
-    # path('projects/<int:project_id>/reset_camera',
-         # azure_training_views.project_reset_camera),
-    # path('projects/null/export', azure_training_views.export_null),
-    # path('relabel', relabel_views.upload_relabel_image),
-    # path('relabel/update', relabel_views.relabel_update),
-    # path('appinsight/key', app_insight_views.instrumentation_key),
-    # path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp)
-# ]
+urlpatterns += [
+    url('streams/connect', stream_views.connect_stream),
+    path('streams/<int:stream_id>/disconnect', stream_views.disconnect_stream),
+    path('streams/<int:stream_id>/video_feed', stream_views.video_feed),
+    path('streams/<int:stream_id>/capture', stream_views.capture),
+    path('streams/<int:stream_id>/keep_alive', stream_views.keep_alive),
+    path('projects/<int:project_id>/train', azure_training_views.train),
+    path('projects/<int:project_id>/export', azure_training_views.export),
+    path('projects/<int:project_id>/train_performance',
+         azure_training_views.train_performance),
+    path('projects/<int:project_id>/inference_video_feed',
+         stream_views.inference_video_feed),
+    path('projects/<int:project_id>/pull_cv_project',
+         azure_training_views.pull_cv_project),
+    path('projects/<int:project_id>/update_prob_threshold',
+         azure_training_views.update_prob_threshold),
+    path('projects/<int:project_id>/reset_project',
+         azure_training_views.reset_project),
+    path('projects/<int:project_id>/reset_camera',
+         azure_training_views.project_reset_camera),
+    path('projects/null/export', azure_training_views.export_null),
+    path('relabel', relabel_views.upload_relabel_image),
+    path('relabel/update', relabel_views.relabel_update),
+    path('appinsight/key', app_insight_views.instrumentation_key),
+    path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp)
+]
 
 app_name = "api"

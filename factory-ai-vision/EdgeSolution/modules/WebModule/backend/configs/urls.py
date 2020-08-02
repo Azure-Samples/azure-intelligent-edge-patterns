@@ -21,7 +21,6 @@ from django.urls import path
 
 from . import views as site_views
 
-
 urlpatterns = \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.ICON_URL, document_root=settings.ICON_ROOT) + \
