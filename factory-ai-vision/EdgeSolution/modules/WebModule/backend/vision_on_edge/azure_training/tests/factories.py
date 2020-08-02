@@ -1,16 +1,25 @@
-"""Location Factories
+"""Azure Project Factories
 """
 
 from typing import Any, Sequence
+
+import factory
 from factory import DjangoModelFactory, Faker, post_generation
 
-from vision_on_edge.locations.models import Location
+from vision_on_edge.azure_settings.tests.factories import SettingFactory
+from vision_on_edge.azure_training.models import Project
 
-class LocationFactory(DjangoModelFactory):
 
-    name = Faker("city")
-    description = Faker("sentence")
+class ProjectFactory(DjangoModelFactory):
+    """ProjectFactory.
+    """
+
+    setting = factory.SubFactory(SettingFactory)
+    customvision_project_name = Faker("sentence")
 
     class Meta:
-        model = Location
-        django_get_or_create = ["name"]
+        """Meta.
+        """
+
+        model = Project
+        django_get_or_create = ["customvision_project_name"]

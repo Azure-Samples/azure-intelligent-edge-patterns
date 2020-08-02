@@ -14,6 +14,7 @@ from vision_on_edge.cameras.models import Camera
 from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 from vision_on_edge.locations.models import Location
 
+
 class ResetProjectTestCase(CustomVisionTestCase):
     """ResetProjectTestCase.
 
@@ -79,11 +80,12 @@ class ResetProjectTestCase(CustomVisionTestCase):
         Expected Results:
             200 { 'status': 'ok' }
         """
-        url = reverse('project-list')
+
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         valid_project = Project.objects.filter(setting=valid_setting).first()
+        url = reverse('api:project-detail', kwargs={'pk': valid_project.id})
         response = self.client.get(
-            path=f'{url}/{valid_project.id}/reset_project',
+            path=f'{url}reset_project',
             data={'project_name': f'{self.project_prefix}-test-reset-1'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -103,17 +105,17 @@ class ResetProjectTestCase(CustomVisionTestCase):
                  'needRetraining': true
                  ... : ...}
         """
-        url = reverse('project-list')
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         valid_project = Project.objects.filter(setting=valid_setting).first()
+        url = reverse('api:project-detail', kwargs={'pk': valid_project.id})
         response = self.client.get(
-            path=f'{url}/{valid_project.id}/reset_project',
+            path=f'{url}reset_project',
             data={'project_name': f'{self.project_prefix}-test-reset-1'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content)['status'], 'ok')
 
-        response = self.client.get(path=f'{url}/{valid_project.id}')
+        response = self.client.get(path=url)
         self.assertTrue(json.loads(response.content)['needRetraining'])
 
     def test_invalid_setting_reset_project(self):
@@ -128,15 +130,16 @@ class ResetProjectTestCase(CustomVisionTestCase):
         Expected Results:
             400 { 'status': 'failed', 'log': 'xxx' }
         """
-        url = reverse('project-list')
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
         invalid_project = Project.objects.filter(
             setting=invalid_setting).first()
+        url = reverse('api:project-detail', kwargs={'pk': invalid_project.id})
         response = self.client.get(
-            path=f'{url}/{invalid_project.id}/reset_project',
+            path=f'{url}reset_project',
             data={'project_name': f'{self.project_prefix}-test-reset-2'})
 
+        print(f"{url}/reset_project")
         self.assertNotEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('failed', json.loads(response.content)['status'])
         self.assertTrue(len(json.loads(response.content)['log']) > 0)
@@ -154,13 +157,13 @@ class ResetProjectTestCase(CustomVisionTestCase):
         Expected Results:
             400 { 'status': 'failed', 'log': 'xxx' }
         """
-        url = reverse('project-list')
+
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
         invalid_project = Project.objects.filter(
             setting=invalid_setting).first()
-        response = self.client.get(
-            path=f'{url}/{invalid_project.id}/reset_project')
+        url = reverse('api:project-detail', kwargs={'pk': invalid_project.id})
+        response = self.client.get(path=f'{url}reset_project')
 
         self.assertNotEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('failed', json.loads(response.content)['status'])

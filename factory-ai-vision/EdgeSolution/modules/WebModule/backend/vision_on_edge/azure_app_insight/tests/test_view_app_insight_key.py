@@ -1,6 +1,7 @@
 """
 App Insight API_VIEW key test
 """
+
 import json
 import logging
 
@@ -18,13 +19,16 @@ class AppInsightAPIKeyTestCases(APITransactionTestCase):
     """
 
     def test_can_get_key(self):
-        """
-        @Type: Positive
+        """test_can_get_key.
 
-        @Description: Frontend use this api to get key
+        Type:
+            Positive
 
-        @Expected Results: 200
-        {'status':'ok', 'key': $APP_INSIGHT_INST_KEY}
+        Description:
+            Frontend use this api to get key
+
+        Expected Results:
+        200 {'status':'ok', 'key': $APP_INSIGHT_INST_KEY}
         """
         response = self.client.get('/api/appinsight/key', format='json')
 

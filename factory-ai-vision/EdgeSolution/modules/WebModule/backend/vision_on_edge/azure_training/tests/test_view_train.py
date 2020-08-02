@@ -85,10 +85,11 @@ class ViewTrainTestCase(CustomVisionTestCase):
             Project get trained
             400 { 'status': 'failed', 'log': 'Not enough images for training' }
         """
-        url = reverse('project-list')
+
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         project_obj = Project.objects.filter(setting=valid_setting).first()
-        response = self.client.get(f'{url}/{project_obj.id}/train')
+        url = reverse('api:project-detail', kwargs={'pk': project_obj.id})
+        response = self.client.get(path=url + 'train')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -110,11 +111,11 @@ class ViewTrainTestCase(CustomVisionTestCase):
             Project not trained. customvision_project_id set to ''
             503 { 'status': 'failed', 'log': 'training key + endpoint invalid' }
         """
-        url = reverse('project-list')
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
         project_obj = Project.objects.filter(setting=invalid_setting).first()
-        response = self.client.get(f'{url}/{project_obj.id}/train')
+        url = reverse('api:project-detail', kwargs={'pk': project_obj.id})
+        response = self.client.get(path=url + 'train')
 
         self.assertEqual(response.status_code,
                          status.HTTP_503_SERVICE_UNAVAILABLE)

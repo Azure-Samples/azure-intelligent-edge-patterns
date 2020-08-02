@@ -4,11 +4,11 @@
 
 import logging
 
-from azure.cognitiveservices.vision.customvision.training import (
-        CustomVisionTrainingClient)
+from azure.cognitiveservices.vision.customvision.training import \
+    CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.training.models import (
-    CustomVisionErrorException)
-from azure.cognitiveservices.vision.customvision.training.models import Tag
+    CustomVisionErrorException, Tag)
+
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_training.models import Project
 

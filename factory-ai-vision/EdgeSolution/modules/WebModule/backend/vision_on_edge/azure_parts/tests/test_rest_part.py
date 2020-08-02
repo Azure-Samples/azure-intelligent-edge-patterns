@@ -8,8 +8,8 @@ import logging
 from django.urls import reverse
 from rest_framework import status
 
-from vision_on_edge.general.tests.test_special_strings import special_strings
 from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
+from vision_on_edge.general.tests.test_special_strings import special_strings
 
 from ..models import Part
 
@@ -25,7 +25,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
     def setUp(self):
         """setUp.
         """
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         data = {'name': 'Part1', 'description': 'Desb1'}
         self.client.post(url, data, format='json')
 
@@ -62,7 +62,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
     def test_setup_is_valid(self):
         """test_setup_is_valid.
         """
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         response = self.client.get(url, format='json')
         self.assertEqual(len(json.loads(response.content)), self.exist_num)
 
@@ -78,7 +78,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
         Expected Results:
             200 { 'name':'part_name', 'description':'part_description' }
         """
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         part_name = 'Unittest Box'
         part_desb = 'Unittest Box Description'
 
@@ -104,7 +104,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
             400 { 'status': 'failed', 'log': 'xxx'}
         """
         # Var
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         part_name = 'Part1'
         part_desb = 'Unittest Part1 Description'
 
@@ -131,7 +131,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
             400 { 'status': 'failed', 'log': 'xxx' }
         """
         # Random Case
-        url = reverse('part-list')
+        url = reverse('api:part-list')
 
         # Request
         data = {'name': 'pArT1', 'description': 'New Description'}
@@ -179,7 +179,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
             201 { 'name': 'part_name', 'description': 'xxx' }
         """
         # Var
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         default_desb = ''
 
         # Request
@@ -219,7 +219,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
         Expected Results:
             pass
         """
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         data = {'name': 'Part1', 'description': 'Desb1', 'is_demo': True}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -252,7 +252,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
         Expected Results:
             Failed.
         """
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         data = {'name': 'Part1', 'description': 'Desb1', 'is_demo': False}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -286,7 +286,7 @@ class AzurePartRestTestCases(CustomVisionTestCase):
             200 OK
         """
         # New description
-        url = reverse('part-list')
+        url = reverse('api:part-list')
         response = self.client.get(url)
         for part in response.data:
             if part['name'] == 'Part2':
@@ -294,10 +294,13 @@ class AzurePartRestTestCases(CustomVisionTestCase):
             if part['name'] == 'Part1':
                 part1_id = part['id']
         data = {'name': 'New Part Name', 'description': 'New Description'}
-        response = self.client.put(f'{url}/{part1_id}', data, format='json')
+        url = reverse('api:part-detail', kwargs={'pk': part1_id})
+        response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Part.objects.count(), self.exist_num)
+
         data = {'name': 'DemoPart1', 'description': 'New Description'}
-        response = self.client.put(f'{url}/{part2_id}', data, format='json')
+        url = reverse('api:part-detail', kwargs={'pk': part2_id})
+        response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Part.objects.count(), self.exist_num)

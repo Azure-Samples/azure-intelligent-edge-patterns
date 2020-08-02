@@ -11,8 +11,8 @@ import traceback
 from distutils.util import strtobool
 
 import requests
-from azure.cognitiveservices.vision.customvision.training.models import (
-    CustomVisionErrorException)
+from azure.cognitiveservices.vision.customvision.training.models import \
+    CustomVisionErrorException
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
@@ -20,9 +20,9 @@ from rest_framework.response import Response
 
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
+from ...azure_parts.utils import batch_upload_parts_to_customvision
 from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
-from ...azure_parts.utils import batch_upload_parts_to_customvision
 from ...cameras.models import Camera
 from ...general import error_messages
 from ...images.models import Image
@@ -174,10 +174,7 @@ def export_null(request):
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=["download_uri"])
 
-    return Response({
-        "status": "ok",
-        "download_uri": exports[-1].download_uri
-    })
+    return Response({"status": "ok", "download_uri": exports[-1].download_uri})
 
 
 @api_view()
