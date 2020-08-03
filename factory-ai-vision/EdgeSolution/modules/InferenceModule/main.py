@@ -12,6 +12,7 @@ import requests
 from azure.iot.device import IoTHubModuleClient
 
 from object_detection import ObjectDetection
+from onnxruntime_predict import ONNXRuntimeObjectDetection
 from utility import get_file_zip
 
 MODEL_DIR = 'model'
@@ -96,7 +97,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.cam_source = cam_source
         self.cam = cv2.VideoCapture(cam_source)
 
-        self.model = self.load_model(model_dir)
+        self.model = self.load_model(model_dir, is_default_model=True)
         self.model_uri = None
 
         self.last_img = None
@@ -178,17 +179,26 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.lock.release()
 
 
-    def load_model(self, model_dir):
-        print('[INFO] Loading Model ...')
+    def load_model(self, model_dir, is_default_model):
+        if is_default_model:
+            print('[INFO] Loading Default Model ...')
 
-        model = None
+            model = None
 
-        with open(model_dir + str('/cvexport.manifest')) as f:
-            data = json.load(f)
+            with open(model_dir + str('/cvexport.manifest')) as f:
+                data = json.load(f)
 
-        # FIXME to check whether we need to close the previous session
-        if data['DomainType'] == 'ObjectDetection':
-            model = ObjectDetection(data, model_dir, None)
+            # FIXME to check whether we need to close the previous session
+            if data['DomainType'] == 'ObjectDetection':
+                model = ObjectDetection(data, model_dir, None)
+                return model
+
+        else:
+            print('[INFO] Loading Default Model ...')
+            with open('model/labels.txt', 'r') as f:
+                labels = [l.strip() for l in f.readlines()]
+            model = ONNXRuntimeObjectDetection('model/model.onnx', labels)
+
             return model
 
         return None
@@ -200,7 +210,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.threshold = self.confidence_max
 
     def update_model(self, model_dir):
-        model = self.load_model( model_dir)
+        is_default_model = ('default_model' in model_dir)
+        model = self.load_model(model_dir, is_default_model)
 
         # Protected by Mutex
         self.lock.acquire()
