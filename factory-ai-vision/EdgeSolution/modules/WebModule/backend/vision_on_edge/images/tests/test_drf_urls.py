@@ -19,12 +19,12 @@ def test_image_detail(image: Image):
 
     assert (reverse("api:image-detail",
                     kwargs={"pk": image.id
-                           }) == f"/api/images/{image.id}/")
+                           }) == f"/api/images/{image.id}")
     assert resolve(
-        f"/api/images/{image.id}/").view_name == "api:image-detail"
+        f"/api/images/{image.id}").view_name == "api:image-detail"
 
 def test_image_list():
     """test_image_list.
     """
-    assert reverse("api:image-list") == "/api/images/"
-    assert resolve("/api/images/").view_name == "api:image-list"
+    assert reverse("api:image-list") == "/api/images"
+    assert resolve("/api/images").view_name == "api:image-list"

@@ -89,7 +89,7 @@ class ViewTrainTestCase(CustomVisionTestCase):
         valid_setting = Setting.objects.filter(name='valid_setting').first()
         project_obj = Project.objects.filter(setting=valid_setting).first()
         url = reverse('api:project-detail', kwargs={'pk': project_obj.id})
-        response = self.client.get(path=url + 'train')
+        response = self.client.get(path=url + '/train')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -115,7 +115,7 @@ class ViewTrainTestCase(CustomVisionTestCase):
             name='invalid_setting').first()
         project_obj = Project.objects.filter(setting=invalid_setting).first()
         url = reverse('api:project-detail', kwargs={'pk': project_obj.id})
-        response = self.client.get(path=url + 'train')
+        response = self.client.get(path=url + '/train')
 
         self.assertEqual(response.status_code,
                          status.HTTP_503_SERVICE_UNAVAILABLE)

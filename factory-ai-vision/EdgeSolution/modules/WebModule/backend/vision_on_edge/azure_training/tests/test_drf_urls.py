@@ -15,17 +15,15 @@ def test_project_detail(project: Project):
     Args:
         project (Project): project
     """
-    project_id = project.id
-
     assert (reverse("api:project-detail",
                     kwargs={"pk": project.id
-                           }) == f"/api/projects/{project.id}/")
+                           }) == f"/api/projects/{project.id}")
     assert resolve(
-        f"/api/projects/{project.id}/").view_name == "api:project-detail"
+        f"/api/projects/{project.id}").view_name == "api:project-detail"
 
 
 def test_project_list():
     """test_project_list.
     """
-    assert reverse("api:project-list") == "/api/projects/"
-    assert resolve("/api/projects/").view_name == "api:project-list"
+    assert reverse("api:project-list") == "/api/projects"
+    assert resolve("/api/projects").view_name == "api:project-list"

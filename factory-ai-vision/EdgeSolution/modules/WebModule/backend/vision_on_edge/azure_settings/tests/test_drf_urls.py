@@ -15,17 +15,16 @@ def test_setting_detail(setting: Setting):
     Args:
         setting (Setting): setting
     """
-    setting_id = setting.id
 
     assert (reverse("api:setting-detail",
                     kwargs={"pk": setting.id
-                           }) == f"/api/settings/{setting.id}/")
+                           }) == f"/api/settings/{setting.id}")
     assert resolve(
-        f"/api/settings/{setting.id}/").view_name == "api:setting-detail"
+        f"/api/settings/{setting.id}").view_name == "api:setting-detail"
 
 
 def test_setting_list():
     """test_setting_list.
     """
-    assert reverse("api:setting-list") == "/api/settings/"
-    assert resolve("/api/settings/").view_name == "api:setting-list"
+    assert reverse("api:setting-list") == "/api/settings"
+    assert resolve("/api/settings").view_name == "api:setting-list"
