@@ -1,10 +1,9 @@
 """API router
 """
 
-from django.conf import settings
 from django.conf.urls import url
 from django.urls import path
-from rest_framework.routers import DefaultRouter, SimpleRouter
+from rest_framework.routers import DefaultRouter
 
 from vision_on_edge.azure_app_insight.api import views as app_insight_views
 from vision_on_edge.azure_parts.api import views as azure_part_views

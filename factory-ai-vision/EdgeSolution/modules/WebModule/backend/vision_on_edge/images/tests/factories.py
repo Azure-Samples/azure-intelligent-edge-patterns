@@ -1,18 +1,35 @@
-"""Location Factories
+"""Image Factories
 """
 
-from typing import Any, Sequence
-
+import factory
 from factory import DjangoModelFactory, Faker, post_generation
 
-from vision_on_edge.locations.models import Location
+from vision_on_edge.images.models import Image
+from vision_on_edge.azure_training.tests.factories import ProjectFactory
+from vision_on_edge.azure_parts.tests.factories import PartFactory
 
+class ImageFactory(DjangoModelFactory):
+    """ImageFactory.
+    """
 
-class LocationFactory(DjangoModelFactory):
-
-    name = Faker("city")
-    description = Faker("sentence")
+    project = factory.SubFactory(ProjectFactory)
+    part = factory.SubFactory(PartFactory)
+    remote_url = Faker("image_url")
 
     class Meta:
-        model = Location
-        django_get_or_create = ["name"]
+        """Meta.
+        """
+
+        model = Image
+        django_get_or_create = ["remote_url"]
+
+    @post_generation
+    def post(obj, *args, **kwargs):
+        """post.
+
+        Args:
+            obj:
+            args:
+            kwargs:
+        """
+        obj.get_remote_image()
