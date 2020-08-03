@@ -2,6 +2,7 @@ django
 djangorestframework
 drf-yasg
 drf-url-filters
+numpy
 opencv-python
 pillow
 azure-cognitiveservices-vision-customvision==1.0.0

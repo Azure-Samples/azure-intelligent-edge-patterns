@@ -21,7 +21,7 @@ class LocationRestTestCases(APITransactionTestCase):
     """
 
     def setUp(self):
-        url = reverse('location-list')
+        url = reverse('api:location-list')
         data = {'name': 'Location1', 'description': 'Desb1'}
         self.client.post(url, data, format='json')
 
@@ -71,7 +71,7 @@ class LocationRestTestCases(APITransactionTestCase):
         """
         Make sure setup is valid
         """
-        url = reverse('location-list')
+        url = reverse('api:location-list')
         response = self.client.get(url, format='json')
         self.assertEqual(len(json.loads(response.content)), self.exist_num)
 
@@ -87,7 +87,7 @@ class LocationRestTestCases(APITransactionTestCase):
         200 {'name': 'location_name',
              'description': 'location_description'}
         """
-        url = reverse('location-list')
+        url = reverse('api:location-list')
         location_name = 'Unittest Location'
         location_desb = 'Unittest Location Description'
 

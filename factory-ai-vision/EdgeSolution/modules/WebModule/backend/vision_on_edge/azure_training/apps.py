@@ -34,10 +34,11 @@ class AzureTrainingConfig(AppConfig):
 
             logger.info("ready while running server")
             logger.info("Create/update a none-demo project...")
-            _, created = Project.objects.update_or_create(is_demo=False)
-            logger.info(
-                "None-demo project found: %s. Default project created: %s",
-                not created, created)
+            if Project.objects.filter(is_demo=False).count() <= 1:
+                _, created = Project.objects.update_or_create(is_demo=False)
+                logger.info(
+                    "None-demo project found: %s. Default project created: %s",
+                    not created, created)
 
             create_demo = True
             if create_demo:
@@ -56,15 +57,17 @@ class AzureTrainingConfig(AppConfig):
                     name=DEFAULT_SETTING_NAME)
                 if len(default_settings) <= 0:
                     return
-
-                logger.info("Creating demo project")
-                Project.objects.update_or_create(
-                    is_demo=True,
-                    defaults={
-                        'setting': default_settings.first(),
-                        'camera': demo_cameras.first(),
-                        'location': demo_locations.first(),
-                    })
+                
+                # Projects
+                if Project.objects.filter(is_demo=True).count() <= 1:
+                    logger.info("Creating demo project")
+                    Project.objects.update_or_create(
+                        is_demo=True,
+                        defaults={
+                            'setting': default_settings.first(),
+                            'camera': demo_cameras.first(),
+                            'location': demo_locations.first(),
+                        })
                 # Train is created by signals
                 logger.info("Creating demo objects end.")
 

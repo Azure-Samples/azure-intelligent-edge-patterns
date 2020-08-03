@@ -103,7 +103,8 @@ class Stream():
         self.status = "running"
         if self.rtsp == '0':
             self.rtsp = 0
-        elif isinstance(self.rtsp, str) and self.rtsp.lower().find("rtsp") == 0:
+        elif isinstance(self.rtsp,
+                        str) and self.rtsp.lower().find("rtsp") == 0:
             self.rtsp = "rtsp" + self.rtsp[4:]
         logger.info("start streaming with %s", self.rtsp)
         self.cap = cv2.VideoCapture(self.rtsp)
