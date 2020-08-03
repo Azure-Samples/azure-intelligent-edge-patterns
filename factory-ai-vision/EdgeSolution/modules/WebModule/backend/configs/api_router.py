@@ -23,6 +23,7 @@ from vision_on_edge.relabeling.api import views as relabel_views
 from vision_on_edge.streams.api import views as stream_views
 
 router = DefaultRouter()
+router.trailing_slash = '/?'
 
 router.register('settings', azure_setting_views.SettingViewSet)
 router.register('cameras', views.CameraViewSet)
