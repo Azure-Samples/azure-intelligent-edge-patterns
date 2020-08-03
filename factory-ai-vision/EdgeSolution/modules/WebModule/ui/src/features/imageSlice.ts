@@ -3,6 +3,7 @@ import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
 import { Annotation, AnnotationState } from '../reducers/labelReducer';
+import { State } from '../store/State';
 
 export type Image = {
   id: number;
@@ -72,3 +73,5 @@ const slice = createSlice({
 
 const { reducer } = slice;
 export default reducer;
+
+export const { selectAll: selectAllImages } = imageAdapter.getSelectors<State>((state) => state.labelImages);

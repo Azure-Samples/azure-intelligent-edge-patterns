@@ -111,9 +111,9 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera, availableCameras })
 
 const imageSelector = (state: State, partId: number): LabelImage[] =>
   Object.values(state.labelImages.entities)
-    .filter((e) => e.part === partId && e.isRelabel === false)
+    .filter((e: any) => e.part === partId && e.isRelabel === false)
     // FIXME: Redesign the shape
-    .map((img) => ({
+    .map((img: any) => ({
       id: img.id,
       image: img.image,
       labels: '',

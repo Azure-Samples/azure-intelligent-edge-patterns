@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 
 import camerasReducer from './camera/cameraReducer';
 import partReducer from './part/partReducer';
-import partsReducer from '../reducers/partReducer';
+import partsReducer from '../features/partSlice';
 import labelingPageStateReducer from './labelingPage/labelingPageReducer';
 import locationsReducer from '../features/locationSlice';
 import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
@@ -10,7 +10,7 @@ import createProjectReducerByIsDemo from './project/projectReducer';
 import labelImagesReducer from './image/imageReducer';
 import settingReducer from './setting/settingReducer';
 import notificationReducer from '../reducers/notificationReducer';
-import imagesReducer from '../reducers/imageReducer';
+import imagesReducer from '../features/imageSlice';
 import labelReducer from '../reducers/labelReducer';
 import labelingPageReducer from '../reducers/labelingPageReducer';
 

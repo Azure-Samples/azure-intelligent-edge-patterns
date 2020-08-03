@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/react-northstar';
 import { Link, useLocation, Switch, Route, useHistory, Redirect } from 'react-router-dom';
 import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
@@ -10,7 +11,6 @@ import { WarningDialog } from '../components/WarningDialog';
 import { errorTheme } from '../themes/errorTheme';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { useProject } from '../hooks/useProject';
-import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../store/State';
 import { Part } from '../reducers/partReducer';
 import { getParts, putPart, deletePart } from '../action/creators/partActionCreators';
@@ -18,7 +18,7 @@ import { getParts, putPart, deletePart } from '../action/creators/partActionCrea
 export const PartDetails = (): JSX.Element => {
   const partId = parseInt(useQuery().get('partId'), 10);
   const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
-  const part = useSelector<State, Part>(state => state.parts.entities[partId]);
+  const part = useSelector<State, Part>((state) => state.parts.entities[partId]);
   const [name, setName] = useState(part?.name);
   const [description, setDescription] = useState(part?.description);
   const [error, setError] = useState('');
@@ -32,19 +32,19 @@ export const PartDetails = (): JSX.Element => {
   }, [dispatch]);
 
   useEffect(() => {
-      setName(part?.name);
-      setDescription(part?.description);
+    setName(part?.name);
+    setDescription(part?.description);
   }, [part?.name, part?.description]);
 
-  const onSave = async(): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     setStatus(Status.Loading);
-    try{
-      await dispatch(putPart({name, description, is_demo: false}, partId));
+    try {
+      await dispatch(putPart({ name, description, is_demo: false }, partId));
       setStatus(Status.Success);
     } catch (e) {
       setError(e);
     }
-  }
+  };
 
   const onDelete = async (): Promise<void> => {
     setStatus(Status.Loading);
@@ -57,19 +57,14 @@ export const PartDetails = (): JSX.Element => {
     }
   };
 
-  if(!part) return <Redirect to="/parts"/>;
+  if (!part) return <Redirect to="/parts" />;
 
   const saveBtnDisabled = !name || (name === part.name && description === part.description);
 
   return (
     <Grid columns={'68% 30%'} rows={'80px auto 30px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       {partId ? <Tab partId={partId} /> : null}
-      <PartInfoForm
-        name={name}
-        setName={setName}
-        description={description}
-        setDescription={setDescription}
-      />
+      <PartInfoForm name={name} setName={setName} description={description} setDescription={setDescription} />
       <Flex
         column
         gap="gap.small"

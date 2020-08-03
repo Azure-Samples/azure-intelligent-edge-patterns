@@ -1,22 +1,20 @@
 import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
 import { Part } from './part/partTypes';
-import { NormalizedLocation, Notification } from '../reducers/type';
+import { Notification } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
-import { NormalizedPart } from '../reducers/partReducer';
-import { NormalizedImage } from '../reducers/imageReducer';
 import { NormalizedLabel } from '../reducers/labelReducer';
 import { LabelPageState } from '../reducers/labelingPageReducer';
 
 export interface State {
   // Domain Data
-  parts?: NormalizedPart;
+  parts?: any;
   // locations: NormalizedLocation;
   locations?: any;
   notifications: Notification[];
-  labelImages?: NormalizedImage;
+  labelImages?: any;
   labels?: NormalizedLabel;
   // App State
   labelingPage?: LabelPageState;

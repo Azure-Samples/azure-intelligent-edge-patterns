@@ -1,20 +1,23 @@
 import React, { useEffect } from 'react';
 import { Flex, Image, Text } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
-import { AddModuleDialog } from '../components/AddModuleDialog';
 import { useDispatch, useSelector } from 'react-redux';
-import { getParts, postPart } from '../action/creators/partActionCreators';
+
+import { AddModuleDialog } from '../components/AddModuleDialog';
+import { postPart } from '../action/creators/partActionCreators';
 import { State } from '../store/State';
 import { Part } from '../reducers/partReducer';
-import { getImages } from '../action/creators/imageActionCreators';
+import { getImages, selectAllImages } from '../features/imageSlice';
+import { getParts, selectAllParts } from '../features/partSlice';
 
 const partsWithImgSelector = (state: State): (Part & { image: string })[] => {
-  const parts: Part[] = Object.values(state.parts.entities);
-  return parts.map(p => {
-    const relatedImage = Object.values(state.labelImages.entities).find(i => i.part === p.id );
-    return {...p, image: relatedImage?.image || ''};
+  const parts = selectAllParts(state);
+  const images = selectAllImages(state);
+  return parts.map((p) => {
+    const relatedImage = images.find((i) => i.part === p.id);
+    return { ...p, image: relatedImage?.image || '' };
   });
-}
+};
 
 export const Parts: React.FC = () => {
   const partsWithImg = useSelector<State, (Part & { image: string })[]>(partsWithImgSelector);
@@ -23,7 +26,7 @@ export const Parts: React.FC = () => {
   useEffect(() => {
     dispatch(getParts(false));
     dispatch(getImages());
-  }, []);
+  }, [dispatch]);
 
   return (
     <div style={{ position: 'relative', height: '100%' }}>
