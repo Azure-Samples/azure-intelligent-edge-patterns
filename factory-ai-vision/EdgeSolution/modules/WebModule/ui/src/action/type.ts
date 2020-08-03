@@ -37,31 +37,6 @@ export type ReceiveNotification = {
 export type OpenNotificationPanel = { type: typeof constants.OPEN_NOTIFICATION_PANEL };
 
 /**
- * GET locations
- */
-export type GetLocationRequest = APIRequestAction<typeof constants.GET_LOCATION_REQUEST>;
-export type GetLocationSuccess = APISuccessAction<typeof constants.GET_LOCATION_SUCCESS>;
-export type GetLocationFailure = APIFailureAction<typeof constants.GET_LOCATION_FAILURE>;
-
-/**
- * POST locations
- */
-export type PostLocationRequest = APIRequestAction<typeof constants.POST_LOCATION_REQUEST>;
-export type PostLocationSuccess = APISuccessAction<typeof constants.POST_LOCATION_SUCCESS>;
-export type PostLocationFailure = APIFailureAction<typeof constants.POST_LOCATION_FAILURE>;
-
-/**
- * DELETE locations
- */
-export type DeleteLocationRequest = APIRequestAction<typeof constants.DELETE_LOCATION_REQUEST>;
-export type DeleteLocationSuccess = APISuccessAction<
-  typeof constants.DELETE_LOCATION_SUCCESS,
-  null,
-  { id: number }
->;
-export type DeleteLocationFaliure = APIFailureAction<typeof constants.DELETE_LOCATION_FAILURE>;
-
-/**
  * GET parts
  */
 export type GetPartsRequest = APIRequestAction<typeof constants.GET_PARTS_REQUEST>;
@@ -128,15 +103,6 @@ export type ActionTypes =
   | DeleteNotificationFailure
   | ReceiveNotification
   | OpenNotificationPanel
-  | GetLocationRequest
-  | GetLocationFailure
-  | GetLocationSuccess
-  | PostLocationRequest
-  | PostLocationSuccess
-  | PostLocationFailure
-  | DeleteLocationRequest
-  | DeleteLocationSuccess
-  | DeleteLocationFaliure
   | GetPartsRequest
   | GetPartsFailure
   | GetPartsSuccess

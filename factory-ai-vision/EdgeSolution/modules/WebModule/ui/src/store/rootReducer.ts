@@ -4,7 +4,7 @@ import camerasReducer from './camera/cameraReducer';
 import partReducer from './part/partReducer';
 import partsReducer from '../reducers/partReducer';
 import labelingPageStateReducer from './labelingPage/labelingPageReducer';
-import locationsReducer from '../reducers/locationReducer';
+import locationsReducer from '../features/locationSlice';
 import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
 import createProjectReducerByIsDemo from './project/projectReducer';
 import labelImagesReducer from './image/imageReducer';

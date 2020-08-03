@@ -2,15 +2,13 @@ import React, { useEffect, FC } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { State } from '../store/State';
-import { Location } from '../reducers/type';
 import ImageLink from '../components/ImageLink';
-import { getLocations, postLocation } from '../action/creators/locationActionCreators';
 import { AddModuleDialog } from '../components/AddModuleDialog';
+import { getLocations, selectAllLocations, postLocation } from '../features/locationSlice';
 
 const Locations: FC = () => {
   const dispatch = useDispatch();
-  const locations = useSelector<State, Location[]>((state) => Object.values(state.locations.entities));
+  const locations = useSelector(selectAllLocations);
 
   useEffect(() => {
     dispatch(getLocations(false));

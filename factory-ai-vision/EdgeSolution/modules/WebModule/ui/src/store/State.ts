@@ -13,7 +13,8 @@ import { LabelPageState } from '../reducers/labelingPageReducer';
 export interface State {
   // Domain Data
   parts?: NormalizedPart;
-  locations: NormalizedLocation;
+  // locations: NormalizedLocation;
+  locations?: any;
   notifications: Notification[];
   labelImages?: NormalizedImage;
   labels?: NormalizedLabel;
@@ -83,10 +84,10 @@ const initialProject: Project = {
 export const initialState: State = {
   dialogIsOpen: false,
   cameras: [],
-  locations: {
-    entities: {},
-    result: [],
-  },
+  // locations: {
+  //   entities: {},
+  //   result: [],
+  // },
   images: [],
   labelingPageState: { annotations: [] },
   part: {

@@ -8,12 +8,12 @@ import { State } from '../store/State';
 import { useQuery } from '../hooks/useQuery';
 import { errorTheme } from '../themes/errorTheme';
 import { WarningDialog } from '../components/WarningDialog';
-import { deleteLocation } from '../action/creators/locationActionCreators';
 import { Status, LoadingDialog } from '../components/LoadingDialog/LoadingDialog';
+import { selectLocationById, deleteLocation } from '../features/locationSlice';
 
 const LocationDetails: FC = () => {
   const id = useQuery().get('id');
-  const location = useSelector<State, Location>((state) => state.locations.entities[id]);
+  const location = useSelector<State, Location>((state) => selectLocationById(state, id));
   const dispatch = useDispatch();
   const history = useHistory();
   const [status, setStatus] = useState<Status>(Status.None);
