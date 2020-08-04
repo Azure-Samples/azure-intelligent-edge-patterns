@@ -16,3 +16,4 @@ opencensus-ext-azure==1.0.2
 opencensus-ext-django==0.7.2
 opencensus-ext-stackdriver==0.7.2
 channels==2.4.0
+psycopg2-binary

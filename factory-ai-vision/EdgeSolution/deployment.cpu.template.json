@@ -64,7 +64,12 @@
             "restartPolicy": "always",
             "env": {
               "TRAINING_KEY": { "value": "<CUSTOM-VISION-TRAINING-KEY>" },
-              "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" }
+              "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" },
+	      "DJANGO_ENV" : { "value": "production" },
+	      "DBNAME": { "value": "vision_on_edge" },
+	      "DBHOST": { "value": "172.18.0.1" },
+	      "DBUSER": { "value": "vision_on_edge" },
+	      "DBPASS": { "value": "vision_on_edge" }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
@@ -87,7 +92,9 @@
             "status": "running",
             "restartPolicy": "always",
             "env": {
-              "POSTGRES_PASSWORD": { "value": "vision_on_edge" }
+              "POSTGRES_PASSWORD": { "value": "vision_on_edge" },
+	      "POSTGRES_USER": {"value": "vision_on_edge" },
+	      "POSTGRES_DB": {"value": "vision_on_edge" }
             },
             "settings": {
               "image": "${MODULES.WebDBModule}",
