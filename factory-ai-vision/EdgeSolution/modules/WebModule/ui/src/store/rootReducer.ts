@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux';
 
 import camerasReducer from './camera/cameraReducer';
-import partReducer from './part/partReducer';
 import partsReducer from '../features/partSlice';
 import labelingPageStateReducer from './labelingPage/labelingPageReducer';
 import locationsReducer from '../features/locationSlice';
@@ -16,7 +15,6 @@ import labelingPageReducer from '../features/labelingPageSlice';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,
-  part: partReducer,
   labelingPageState: labelingPageStateReducer,
   dialogIsOpen: dialogIsOpenReducer,
   project: createProjectReducerByIsDemo(false),

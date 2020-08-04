@@ -11,8 +11,7 @@ import { errorTheme } from '../themes/errorTheme';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { useProject } from '../hooks/useProject';
 import { State } from '../store/State';
-import { Part } from '../reducers/partReducer';
-import { getParts, patchPart, deletePart, selectPartById } from '../features/partSlice';
+import { getParts, patchPart, deletePart, selectPartById, Part } from '../features/partSlice';
 import { getImages } from '../features/imageSlice';
 
 export const PartDetails = (): JSX.Element => {

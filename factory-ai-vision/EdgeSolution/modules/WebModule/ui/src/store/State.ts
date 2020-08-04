@@ -1,6 +1,5 @@
 import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
-import { Part } from './part/partTypes';
 import { Notification } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
@@ -26,7 +25,6 @@ export interface State {
   setting: Setting;
   labelingPageState: LabelingPageState;
   dialogIsOpen: boolean;
-  part: Part;
 }
 
 export type LabelingPageState = { annotations: Annotation[] };
@@ -88,10 +86,6 @@ export const initialState: State = {
   // },
   images: [],
   labelingPageState: { annotations: [] },
-  part: {
-    capturedImages: [],
-    isValid: true,
-  },
   project: initialProject,
   demoProject: initialProject,
   setting: {
