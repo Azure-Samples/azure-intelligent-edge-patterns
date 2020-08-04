@@ -13,7 +13,7 @@ from azure.iot.device import IoTHubModuleClient
 
 from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
-from utility import get_file_zip
+from utility import get_file_zip, normalize_rtsp
 
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1 # sec
@@ -95,7 +95,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.cam_type = cam_type
         self.cam_source = cam_source
-        self.cam = cv2.VideoCapture(cam_source)
+        self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
 
         self.model = self.load_model(model_dir, is_default_model=True)
         self.model_uri = None
@@ -142,7 +142,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         print('[INFO] Restarting Cam')
 
-        cam = cv2.VideoCapture(self.cam_source)
+        cam = cv2.VideoCapture(normalize_rtsp(self.cam_source))
 
         # Protected by Mutex
         self.lock.acquire()
@@ -170,7 +170,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.cam_source = cam_source
         self.has_aoi    = has_aoi
         self.aoi_info   = aoi_info
-        cam = cv2.VideoCapture(cam_source)
+        cam = cv2.VideoCapture(normalize_rtsp(cam_source))
 
         # Protected by Mutex
         self.lock.acquire()
