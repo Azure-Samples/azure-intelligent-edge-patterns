@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { AddModuleDialog } from '../components/AddModuleDialog';
-import { postPart } from '../action/creators/partActionCreators';
 import { State } from '../store/State';
 import { Part } from '../reducers/partReducer';
 import { getImages, selectAllImages } from '../features/imageSlice';
-import { getParts, selectAllParts } from '../features/partSlice';
+import { getParts, postPart, selectAllParts } from '../features/partSlice';
 
 const partsWithImgSelector = (state: State): (Part & { image: string })[] => {
   const parts = selectAllParts(state);
@@ -53,7 +52,7 @@ export const Parts: React.FC = () => {
             },
           ]}
           onConfirm={({ name, description }): void => {
-            dispatch(postPart({ name, description, is_demo: false }));
+            dispatch(postPart({ name, description }));
           }}
         />
       </div>

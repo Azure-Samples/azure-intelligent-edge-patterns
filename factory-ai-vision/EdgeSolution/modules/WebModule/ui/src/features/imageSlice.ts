@@ -67,7 +67,7 @@ const slice = createSlice({
   reducers: {},
   extraReducers: (builder) =>
     builder.addCase(getImages.fulfilled, (state, action) => {
-      imageAdapter.setAll(state, action.payload.images);
+      imageAdapter.setAll(state, action.payload.images || {});
     }),
 });
 

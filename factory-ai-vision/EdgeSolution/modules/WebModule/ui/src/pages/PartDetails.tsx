@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/react-northstar';
 import { Link, useLocation, Switch, Route, useHistory, Redirect } from 'react-router-dom';
-import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { CapturePhotos } from '../components/CapturePhoto';
@@ -13,33 +12,47 @@ import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog
 import { useProject } from '../hooks/useProject';
 import { State } from '../store/State';
 import { Part } from '../reducers/partReducer';
-import { getParts, putPart, deletePart } from '../action/creators/partActionCreators';
+import { getParts, patchPart, deletePart, selectPartById } from '../features/partSlice';
+import { getImages } from '../features/imageSlice';
 
 export const PartDetails = (): JSX.Element => {
   const partId = parseInt(useQuery().get('partId'), 10);
   const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
-  const part = useSelector<State, Part>((state) => state.parts.entities[partId]);
+  const part = useSelector<State, Part>(
+    (state) => selectPartById(state, partId) || { id: null, name: '', description: '' },
+  );
   const [name, setName] = useState(part?.name);
   const [description, setDescription] = useState(part?.description);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const history = useHistory();
   const [status, setStatus] = useState<Status>(Status.None);
-  const project = useProject(false);
+  // Because we need project ID for delete part
+  useProject(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getParts(false));
+    const loadData = async (): Promise<void> => {
+      try {
+        await Promise.all([dispatch(getParts(false)), dispatch(getImages())]);
+      } catch (e) {
+        setError(e);
+      }
+      setLoading(false);
+    };
+
+    loadData();
   }, [dispatch]);
 
   useEffect(() => {
-    setName(part?.name);
-    setDescription(part?.description);
-  }, [part?.name, part?.description]);
+    setName(part.name);
+    setDescription(part.description);
+  }, [part.name, part.description]);
 
   const onSave = async (): Promise<void> => {
     setStatus(Status.Loading);
     try {
-      await dispatch(putPart({ name, description, is_demo: false }, partId));
+      await dispatch(patchPart({ data: { name, description }, id: partId }));
       setStatus(Status.Success);
     } catch (e) {
       setError(e);
@@ -50,14 +63,15 @@ export const PartDetails = (): JSX.Element => {
     setStatus(Status.Loading);
 
     try {
-      await axios.get(`/api/projects/${project.data.id}/delete_tag?part_name=${name}`);
       await dispatch(deletePart(partId));
     } catch (e) {
       setError(e);
     }
   };
 
-  if (!part) return <Redirect to="/parts" />;
+  if (loading) return <h1>Loading...</h1>;
+
+  if (!part.id) return <Redirect to="/parts" />;
 
   const saveBtnDisabled = !name || (name === part.name && description === part.description);
 
