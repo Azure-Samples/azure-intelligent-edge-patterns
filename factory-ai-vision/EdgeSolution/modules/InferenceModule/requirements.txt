@@ -18,3 +18,4 @@ transitions==0.8.1
 typing-extensions==3.7.4.2
 urllib3==1.25.9
 Werkzeug==1.0.1
+Pillow
