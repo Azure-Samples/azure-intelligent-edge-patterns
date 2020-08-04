@@ -11,16 +11,17 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from pathlib import Path
 
 import config
 from configs import logging_config
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Mimic cookie-cutter django
+ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 
 # Project root
-PROJECT_ROOT = BASE_DIR + '/vision_on_edge'
+PROJECT_ROOT = ROOT_DIR / 'vision_on_edge'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -98,7 +99,7 @@ ASGI_APPLICATION = 'configs.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(ROOT_DIR, 'db.sqlite3'),
     }
 }
 
@@ -140,18 +141,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-UI_DIR = os.path.join(PROJECT_ROOT, 'ui_production')
+UI_DIR = PROJECT_ROOT/'ui_production'
 STATICFILES_DIRS = [
-    os.path.join(UI_DIR, 'static'),
+    UI_DIR/'static',
 ]
 
 STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
+MEDIA_ROOT = PROJECT_ROOT/'media'
 
 ICON_URL = '/icons/'
-ICON_ROOT = os.path.join(UI_DIR, 'icons')
+ICON_ROOT = UI_DIR/'icons'
 
 CHANNEL_LAYERS = {
     "default": {
