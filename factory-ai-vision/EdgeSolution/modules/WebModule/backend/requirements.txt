@@ -1,7 +1,7 @@
-django
-djangorestframework
-drf-yasg
-drf-url-filters
+django==3.0.8
+djangorestframework==3.11.0
+drf-yasg==1.17.1
+drf-url-filters==0.5.1
 numpy
 opencv-python
 pillow
