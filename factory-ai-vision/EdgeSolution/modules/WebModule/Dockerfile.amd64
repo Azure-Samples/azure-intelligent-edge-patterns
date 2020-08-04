@@ -19,7 +19,6 @@ COPY backend/manage.py .
 COPY backend/config.py .
 COPY backend/vision_on_edge vision_on_edge
 COPY backend/configs configs
-RUN rm -f vision_on_edge/*/migrations/[0-9]*.py
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
