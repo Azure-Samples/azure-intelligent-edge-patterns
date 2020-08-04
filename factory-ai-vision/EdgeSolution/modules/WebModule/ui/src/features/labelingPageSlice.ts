@@ -5,6 +5,14 @@ export type LabelPageState = {
   selectedImageId: number;
 };
 
+const changeSelectedImage = (offset: 1 | -1) => (state: LabelPageState) => {
+  const selectedImageIdx = state.imageIds.findIndex((e) => e === state.selectedImageId);
+  return {
+    ...state,
+    selectedImageId: state.imageIds[selectedImageIdx + offset],
+  };
+};
+
 const slice = createSlice({
   name: 'labelingPage',
   initialState: { imageIds: [], selectedImageId: null },
@@ -17,10 +25,12 @@ const slice = createSlice({
       imageIds: [],
       selectedImageId: null,
     }),
+    goNextImage: changeSelectedImage(1),
+    goPrevImage: changeSelectedImage(-1),
   },
 });
 
 const { reducer } = slice;
 export default reducer;
 
-export const { openLabelingPage, closeLabelingPage } = slice.actions;
+export const { openLabelingPage, closeLabelingPage, goNextImage, goPrevImage } = slice.actions;

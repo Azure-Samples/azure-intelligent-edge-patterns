@@ -95,7 +95,9 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { selectAll: selectAllImages } = imageAdapter.getSelectors<State>((state) => state.labelImages);
+export const { selectAll: selectAllImages, selectEntities: selectImageEntities } = imageAdapter.getSelectors<
+  State
+>((state) => state.labelImages);
 
 export const makeImageWithPartSelector = (partId) =>
   createSelector([selectAllImages, selectPartEntities], (images, partEntities) =>

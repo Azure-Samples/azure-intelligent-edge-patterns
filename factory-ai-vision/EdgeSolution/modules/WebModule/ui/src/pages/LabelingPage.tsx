@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
 import { Flex, Button, Text, Dialog } from '@fluentui/react-northstar';
 
 import Scene from '../components/LabelingPage/Scene';
@@ -8,7 +9,14 @@ import { State } from '../store/State';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
-import { closeLabelingPage } from '../features/labelingPageSlice';
+import { closeLabelingPage, goPrevImage, goNextImage } from '../features/labelingPageSlice';
+import { selectImageEntities } from '../features/imageSlice';
+
+const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
+export const imageUrlSelector = createSelector(
+  [getSelectedImageId, selectImageEntities],
+  (selectedImageId, imageEntities) => imageEntities[selectedImageId]?.image || '',
+);
 
 interface LabelingPageProps {
   labelingType: LabelingType;
@@ -19,11 +27,9 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
-  const imageUrl = useSelector<State, string>(
-    (state) => state.labelImages.entities[state.labelingPage.selectedImageId]?.image,
-  );
+  const index = imageIds.findIndex((e) => e === selectedImageId);
+  const imageUrl = useSelector<State, string>(imageUrlSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
-  const [index, setIndex] = useState<number>(0);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
 
   const annotations = useSelector<State, Annotation[]>((state) => state.labelingPageState.annotations);
@@ -76,11 +82,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
           nextDisabled={index === imageIds.length - 1 || workState === WorkState.Creating || isOnePointBox}
           onPrevClick={(): void => {
             onSave(false);
-            setIndex((prev) => (prev - 1 + imageIds.length) % imageIds.length);
+            dispatch(goPrevImage());
           }}
           onNextClick={(): void => {
             onSave(false);
-            setIndex((prev) => (prev + 1) % imageIds.length);
+            dispatch(goNextImage());
           }}
         >
           <Scene
