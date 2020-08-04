@@ -12,9 +12,9 @@ import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
-import { openLabelingPage } from '../../action/creators/labelingPageActionCreators';
 import LabelingPage from '../../pages/LabelingPage';
 import { makeImageWithPartSelector, captureImage } from '../../features/imageSlice';
+import { openLabelingPage } from '../../features/labelingPageSlice';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -38,12 +38,7 @@ export const CapturePhotos: React.FC<{
   };
 
   const onDisplayImageClick = (imageId: number): void => {
-    dispatch(
-      openLabelingPage(
-        images.map((e) => e.id),
-        imageId,
-      ),
-    );
+    dispatch(openLabelingPage({ imageIds: images.map((e) => e.id), selectedImageId: imageId }));
   };
 
   useEffect(() => {

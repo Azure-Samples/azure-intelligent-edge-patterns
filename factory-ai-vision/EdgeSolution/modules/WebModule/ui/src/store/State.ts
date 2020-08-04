@@ -5,18 +5,16 @@ import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
 import { NormalizedLabel } from '../reducers/labelReducer';
-import { LabelPageState } from '../reducers/labelingPageReducer';
 
 export interface State {
   // Domain Data
   parts?: any;
-  // locations: NormalizedLocation;
   locations?: any;
   notifications: Notification[];
   labelImages?: any;
   labels?: NormalizedLabel;
   // App State
-  labelingPage?: LabelPageState;
+  labelingPage?: any;
   // TODO: Refactor
   cameras: Camera[];
   project: Project;
@@ -80,10 +78,6 @@ const initialProject: Project = {
 export const initialState: State = {
   dialogIsOpen: false,
   cameras: [],
-  // locations: {
-  //   entities: {},
-  //   result: [],
-  // },
   images: [],
   labelingPageState: { annotations: [] },
   project: initialProject,
