@@ -36,17 +36,50 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
-			      "env": {
-              "ENDPOINT": {
-                "value": "<Training Endpoint>"
-              },
+            "env": {
               "TRAINING_KEY": {
-                "value": "<Training API Key>"
+                "value": "<CUSTOM-VISION-TRAINING-KEY>"
+              },
+              "ENDPOINT": {
+                "value": "<CUSTOM-VISION-ENDPOINT>"
+              },
+              "DBNAME": {
+                "value": "vision_on_edge"
+              },
+              "DBHOST": {
+                "value": "172.18.0.1"
+              },
+              "DBUSER": {
+                "value": "vision_on_edge"
+              },
+              "DBPASS": {
+                "value": "vision_on_edge"
               }
             },
             "settings": {
               "image": "intelligentedge/visionwebmodule:0.1.18-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8080\"}]}}}"
+            }
+          },
+          "WebDBModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "POSTGRES_PASSWORD": {
+                "value": "vision_on_edge"
+              },
+              "POSTGRES_USER": {
+                "value": "vision_on_edge"
+              },
+              "POSTGRES_DB": {
+                "value": "vision_on_edge"
+              }
+            },
+            "settings": {
+              "image": "intelligentedge/webdbmodule:0.1.18-amd64",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5432/tcp\":[{\"HostPort\":\"5432\"}]}}}"
             }
           },
           "InferenceModule": {
