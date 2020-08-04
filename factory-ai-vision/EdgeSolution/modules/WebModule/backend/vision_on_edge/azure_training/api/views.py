@@ -24,6 +24,7 @@ from ...azure_parts.utils import batch_upload_parts_to_customvision
 from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
 from ...cameras.models import Camera
+from ...general.utils import normalize_rtsp
 from ...general import error_messages
 from ...images.models import Image
 from ...images.utils import upload_images_to_customvision_helper
@@ -262,7 +263,7 @@ def train(request, project_id):
                 "http://" + inference_module_url() + "/update_cam",
                 params={
                     "cam_type": "rtsp",
-                    "cam_source": rtsp
+                    "cam_source": normalize_rtsp(rtsp)
                 },
             )
         else:
@@ -271,7 +272,7 @@ def train(request, project_id):
                 "http://" + inference_module_url() + "/update_cam",
                 params={
                     "cam_type": "rtsp",
-                    "cam_source": rtsp
+                    "cam_source": normalize_rtsp(rtsp)
                 },
             )
 
@@ -314,7 +315,7 @@ def train(request, project_id):
             "http://" + inference_module_url() + "/update_cam",
             params={
                 "cam_type": "rtsp",
-                "cam_source": rtsp
+                "cam_source": normalize_rtsp(rtsp)
             },
         )
         requests.get(
@@ -580,7 +581,7 @@ def update_train_status(project_id):
                             "http://" + inference_module_url() + "/update_cam",
                             params={
                                 "cam_type": "rtsp",
-                                "cam_source": rtsp
+                                "cam_source": normalize_rtsp(rtsp)
                             },
                         )
                         requests.get(
