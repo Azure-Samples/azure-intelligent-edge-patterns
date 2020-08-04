@@ -6,6 +6,8 @@
 import numpy as np
 import math
 import time
+import cv2
+from PIL import Image
 
 
 class ObjectDetection(object):
@@ -124,9 +126,17 @@ class ObjectDetection(object):
 
     def predict_image(self, image):
         start = time.time()
+
+        # Convert to PIL
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(image)
+
         inputs = self.preprocess(image)
         prediction_outputs = self.predict(inputs)
+
+        end = time.time()
         inference_time = end - start
+
         return self.postprocess(prediction_outputs), inference_time
 
     def preprocess(self, image):
