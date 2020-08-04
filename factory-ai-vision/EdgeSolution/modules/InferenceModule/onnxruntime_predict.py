@@ -12,8 +12,8 @@ from PIL import Image, ImageDraw
 from object_detection2 import ObjectDetection
 import tempfile
 
-#MODEL_FILENAME = 'model.onnx'
-#LABELS_FILENAME = 'labels.txt'
+MODEL_FILENAME = 'model/model.onnx'
+LABELS_FILENAME = 'model/labels.txt'
 
 class ONNXRuntimeObjectDetection(ObjectDetection):
     """Object Detection class for ONNX Runtime"""
