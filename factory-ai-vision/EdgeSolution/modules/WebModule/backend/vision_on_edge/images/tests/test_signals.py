@@ -130,15 +130,15 @@ class ImageSignalsTestCase(CustomVisionTestCase):
             project_obj.save()
             self.assertEqual(Image.objects.all().count(), 0)
 
-    def test_not_delete_relable_if_acc_range_not_change(self):
-        """test_not_delete_relable_if_acc_range_not_change.
+    def test_not_delete_relabel_if_acc_range_not_change(self):
+        """test_not_delete_relabel_if_acc_range_not_change.
 
         Type:
             Negative
 
         Description:
             If Project relabel accuracy range not change,
-            keep all relabel images
+            keep all relabel images.
 
         Expected Results:
             All relabel images kept.
