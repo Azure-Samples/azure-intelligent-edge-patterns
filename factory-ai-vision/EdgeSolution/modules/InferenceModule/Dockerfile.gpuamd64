@@ -44,6 +44,8 @@ RUN pip install onnxruntime onnxruntime-gpu
 
 COPY main.py ./
 COPY object_detection.py ./
+COPY object_detection2.py ./
+COPy onnxruntime_predict.py ./
 COPY utility.py ./
 COPY default_model/cvexport.manifest default_model/
 COPY default_model default_model/
