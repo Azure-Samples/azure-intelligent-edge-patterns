@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """App Models.
 
 Include Project, Train and Task.
@@ -21,8 +22,6 @@ from ..cameras.models import Camera
 from ..locations.models import Location
 
 logger = logging.getLogger(__name__)
-
-# Create your models here.
 
 
 class Project(models.Model):
@@ -50,6 +49,7 @@ class Project(models.Model):
     is_demo = models.BooleanField(default=False)
     deployed = models.BooleanField(default=False)
     has_configured = models.BooleanField(default=False)
+    # delete_inference : bool
 
     # TODO: Move this to a new App.
     # e.g. relabel
