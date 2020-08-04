@@ -28,7 +28,13 @@ export const CapturePhotos: React.FC<{
   const availableCameras = useCameras();
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
-    dispatch(captureImage(streamId));
+    dispatch(
+      captureImage({
+        streamId,
+        imageIds: images.map((e) => e.id),
+        shouldOpenLabelingPage: mode === CaptureLabelMode.PerImage,
+      }),
+    );
   };
 
   const onDisplayImageClick = (imageId: number): void => {

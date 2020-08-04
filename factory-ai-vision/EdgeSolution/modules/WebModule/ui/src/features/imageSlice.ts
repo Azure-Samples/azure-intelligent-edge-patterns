@@ -4,6 +4,7 @@ import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
 import { Annotation, AnnotationState } from '../reducers/labelReducer';
 import { selectPartEntities } from './partSlice';
+import { openLabelingPage } from './labelingPageSlice';
 import { State } from '../store/State';
 
 export type Image = {
@@ -60,8 +61,18 @@ export const getImages = createAsyncThunk('images/get', async () => {
   return normalizeImages(response.data).entities;
 });
 
-export const captureImage = createAsyncThunk('image/capture', async (streamId: string) => {
+export const captureImage = createAsyncThunk<
+  any,
+  { streamId: string; imageIds: number[]; shouldOpenLabelingPage: boolean }
+>('image/capture', async ({ streamId, imageIds, shouldOpenLabelingPage }, { dispatch }) => {
   const response = await Axios.get(`/api/streams/${streamId}/capture`);
+  const capturedImage = response.data.image;
+
+  if (shouldOpenLabelingPage)
+    dispatch(
+      openLabelingPage({ imageIds: [...imageIds, capturedImage.id], selectedImageId: capturedImage.id }),
+    );
+
   return normalizeImages([response.data.image]).entities;
 });
 

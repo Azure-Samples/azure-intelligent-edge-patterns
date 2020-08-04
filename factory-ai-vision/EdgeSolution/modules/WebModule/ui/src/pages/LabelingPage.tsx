@@ -8,7 +8,7 @@ import { State } from '../store/State';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
 import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
-import { closeLabelingPage } from '../action/creators/labelingPageActionCreators';
+import { closeLabelingPage } from '../features/labelingPageSlice';
 
 interface LabelingPageProps {
   labelingType: LabelingType;

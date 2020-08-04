@@ -12,7 +12,7 @@ import settingReducer from './setting/settingReducer';
 import notificationReducer from '../reducers/notificationReducer';
 import imagesReducer from '../features/imageSlice';
 import labelReducer from '../reducers/labelReducer';
-import labelingPageReducer from '../reducers/labelingPageReducer';
+import labelingPageReducer from '../features/labelingPageSlice';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,
