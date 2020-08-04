@@ -140,8 +140,8 @@ echo "Checking if Web Module need to build new container image..."
 echo "	Yes..."
 echo '	Building new container images'
 echo "	Build & push Web Module version: ${WEB_MODULE_NEW_VERSION}"
-docker build  --rm -f "${DIR}/modules/WebModule/Dockerfile.amd64" -t ${CONTAINER_REGISTRY_NAME}/intelligentedge/webmodule:${WEB_MODULE_NEW_VERSION}-amd64 "${DIR}/modules/WebModule"
-docker push ${CONTAINER_REGISTRY_NAME}/intelligentedge/webmodule:${WEB_MODULE_NEW_VERSION}-amd64
+docker build  --rm -f "${DIR}/modules/WebModule/Dockerfile.amd64" -t ${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule:${WEB_MODULE_NEW_VERSION}-amd64 "${DIR}/modules/WebModule"
+docker push ${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule:${WEB_MODULE_NEW_VERSION}-amd64
 next_step
 
 echo 'Updating deployment file'
@@ -156,7 +156,7 @@ if [ -f "${DEPLOY_FILE}" ]; then
 		mv ${DEPLOY_FILE}.tmp ${DEPLOY_FILE}
 	fi
 	if [ ! -z ${WEB_MODULE_NEW_VERSION} ]; then
-		cat ${DEPLOY_FILE} | jq ".modulesContent.\"\$edgeAgent\".\"properties.desired\".modules.WebModule.settings.image = \"${CONTAINER_REGISTRY_NAME}/intelligentedge/webmodule:${WEB_MODULE_NEW_VERSION}-amd64\"" > ${DEPLOY_FILE}.tmp
+		cat ${DEPLOY_FILE} | jq ".modulesContent.\"\$edgeAgent\".\"properties.desired\".modules.WebModule.settings.image = \"${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule:${WEB_MODULE_NEW_VERSION}-amd64\"" > ${DEPLOY_FILE}.tmp
 		mv ${DEPLOY_FILE}.tmp ${DEPLOY_FILE}
 	fi
 else

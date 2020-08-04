@@ -68,15 +68,16 @@ class ActionListProjectTestCase(CustomVisionTestCase):
         Expected Results:
             200 { 'project_id':'project_name' }
         """
-        url = reverse('setting-list')
         valid_setting = Setting.objects.filter(name='valid_setting').first()
-        response = self.client.get(f'{url}/{valid_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': valid_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(len(json.loads(response.content)) > 0)
 
-    def test_empty_setting_list_project(self):
-        """test_empty_setting_list_project.
+    def test_empty_setting_list_project_1(self):
+        """test_empty_setting_list_project_1.
 
         Type:
             Negative
@@ -87,9 +88,11 @@ class ActionListProjectTestCase(CustomVisionTestCase):
         Expected Results:
             400 { 'status':'failed', 'log':'xxx' }
         """
-        url = reverse('setting-list')
+        # Setting with empty key + endpoint
         empty_setting = Setting.objects.filter(name='empty_setting').first()
-        response = self.client.get(f'{url}/{empty_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': empty_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -97,10 +100,25 @@ class ActionListProjectTestCase(CustomVisionTestCase):
             json.loads(response.content)['log'],
             error_messages.CUSTOM_VISION_MISSING_FIELD)
 
+    def test_empty_setting_list_project_2(self):
+        """test_empty_setting_list_project_2.
+
+        Type:
+            Negative
+
+        Description:
+            List projects with invalid Azure Setting.
+
+        Expected Results:
+            400 { 'status':'failed', 'log':'xxx' }
+        """
+
+        # Setting with empty endpoint
         empty_endpoint_setting = Setting.objects.filter(
             name='empty_endpoint_setting').first()
-        response = self.client.get(
-            f'{url}/{empty_endpoint_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': empty_endpoint_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -108,9 +126,25 @@ class ActionListProjectTestCase(CustomVisionTestCase):
             json.loads(response.content)['log'],
             error_messages.CUSTOM_VISION_MISSING_FIELD)
 
+    def test_empty_setting_list_project_3(self):
+        """test_empty_setting_list_project_3.
+
+        Type:
+            Negative
+
+        Description:
+            List projects with invalid Azure Setting.
+
+        Expected Results:
+            400 { 'status':'failed', 'log':'xxx' }
+        """
+
+        # Setting with empty_key
         empty_key_setting = Setting.objects.filter(
             name='empty_training_key_setting').first()
-        response = self.client.get(f'{url}/{empty_key_setting}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': empty_key_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -130,10 +164,11 @@ class ActionListProjectTestCase(CustomVisionTestCase):
         Expected Results:
             503 { 'status':'failed', 'log':'xxx' }
         """
-        url = reverse('setting-list')
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
-        response = self.client.get(f'{url}/{invalid_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': invalid_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code,
                          status.HTTP_503_SERVICE_UNAVAILABLE)

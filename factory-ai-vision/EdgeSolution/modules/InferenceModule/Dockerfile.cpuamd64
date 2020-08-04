@@ -20,12 +20,14 @@ ENV LC_ALL en_US.UTF-8
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt --ignore-installed && \
-    pip install flask opencv-python onnx
+    pip install flask opencv-python onnx onnxruntime
 
 ARG DEVICE
 
 COPY main.py ./
 COPY object_detection.py ./
+COPY object_detection2.py ./
+COPy onnxruntime_predict.py ./
 COPY utility.py ./
 COPY default_model/cvexport.manifest default_model/
 COPY default_model default_model/

@@ -10,8 +10,8 @@ from azure.cognitiveservices.vision.customvision.training import \
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.cameras.models import Camera
-from vision_on_edge.locations.models import Location
 from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
+from vision_on_edge.locations.models import Location
 
 from ..models import Project
 
