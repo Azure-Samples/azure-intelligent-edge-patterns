@@ -15,6 +15,7 @@ import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
 import { captureImage } from '../../action/creators/imageActionCreators';
 import { openLabelingPage } from '../../action/creators/labelingPageActionCreators';
 import LabelingPage from '../../pages/LabelingPage';
+import { makeImageWithPartSelector } from '../../features/imageSlice';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -24,7 +25,7 @@ export const CapturePhotos: React.FC<{
 }> = ({ partId, partName }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const images = useSelector<State, LabelImage[]>((state) => imageSelector(state, partId));
+  const images = useSelector<State, LabelImage[]>(makeImageWithPartSelector(partId));
   const availableCameras = useCameras();
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
@@ -108,22 +109,6 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera, availableCameras })
     </Flex>
   );
 };
-
-const imageSelector = (state: State, partId: number): LabelImage[] =>
-  Object.values(state.labelImages.entities)
-    .filter((e: any) => e.part === partId && e.isRelabel === false)
-    // FIXME: Redesign the shape
-    .map((img: any) => ({
-      id: img.id,
-      image: img.image,
-      labels: '',
-      part: {
-        id: img.part,
-        name: state.parts.entities[img.part].name,
-      },
-      is_relabel: img.isRelabel,
-      confidence: 0,
-    }));
 
 export const CapturedImagesContainer = ({ images, onDisplayImageClick }): JSX.Element => {
   const isValid = images.filter((image) => image.labels).length >= 15;

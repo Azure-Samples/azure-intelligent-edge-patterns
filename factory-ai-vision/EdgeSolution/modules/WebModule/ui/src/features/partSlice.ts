@@ -66,6 +66,8 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { selectAll: selectAllParts, selectById: selectPartById } = entityAdapter.getSelectors<State>(
-  (state) => state.parts,
-);
+export const {
+  selectAll: selectAllParts,
+  selectById: selectPartById,
+  selectEntities: selectPartEntities,
+} = entityAdapter.getSelectors<State>((state) => state.parts);
