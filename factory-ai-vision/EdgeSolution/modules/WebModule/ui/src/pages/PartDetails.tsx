@@ -17,19 +17,26 @@ import { getImages } from '../features/imageSlice';
 
 export const PartDetails = (): JSX.Element => {
   const partId = parseInt(useQuery().get('partId'), 10);
+
   const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
+
   const part = useSelector<State, Part>(
     (state) => selectPartById(state, partId) || { id: null, name: '', description: '' },
   );
-  const [name, setName] = useState(part?.name);
-  const [description, setDescription] = useState(part?.description);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const history = useHistory();
-  const [status, setStatus] = useState<Status>(Status.None);
+  const dispatch = useDispatch();
   // Because we need project ID for delete part
   useProject(false);
-  const dispatch = useDispatch();
+
+  const [name, setName] = useState(part?.name);
+  const [description, setDescription] = useState(part?.description);
+
+  // Describe if parts and images is getting
+  const [loading, setLoading] = useState(true);
+  // Describe if parts is patching or deleting
+  const [status, setStatus] = useState<Status>(Status.None);
+  const [error, setError] = useState('');
+
+  const history = useHistory();
 
   useEffect(() => {
     const loadData = async (): Promise<void> => {
