@@ -12,10 +12,9 @@ import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
-import { captureImage } from '../../action/creators/imageActionCreators';
 import { openLabelingPage } from '../../action/creators/labelingPageActionCreators';
 import LabelingPage from '../../pages/LabelingPage';
-import { makeImageWithPartSelector } from '../../features/imageSlice';
+import { makeImageWithPartSelector, captureImage } from '../../features/imageSlice';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -29,13 +28,7 @@ export const CapturePhotos: React.FC<{
   const availableCameras = useCameras();
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
-    dispatch(
-      captureImage(
-        streamId,
-        mode === CaptureLabelMode.PerImage,
-        images.map((e) => e.id),
-      ),
-    );
+    dispatch(captureImage(streamId));
   };
 
   const onDisplayImageClick = (imageId: number): void => {

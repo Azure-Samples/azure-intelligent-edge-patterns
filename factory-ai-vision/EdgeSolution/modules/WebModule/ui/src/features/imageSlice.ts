@@ -60,6 +60,11 @@ export const getImages = createAsyncThunk('images/get', async () => {
   return normalizeImages(response.data).entities;
 });
 
+export const captureImage = createAsyncThunk('image/capture', async (streamId: string) => {
+  const response = await Axios.get(`/api/streams/${streamId}/capture`);
+  return normalizeImages([response.data.image]).entities;
+});
+
 const imageAdapter = createEntityAdapter<Image>();
 
 const slice = createSlice({
@@ -67,9 +72,13 @@ const slice = createSlice({
   initialState: imageAdapter.getInitialState(),
   reducers: {},
   extraReducers: (builder) =>
-    builder.addCase(getImages.fulfilled, (state, action) => {
-      imageAdapter.setAll(state, action.payload.images || {});
-    }),
+    builder
+      .addCase(getImages.fulfilled, (state, action) => {
+        imageAdapter.setAll(state, action.payload.images || {});
+      })
+      .addCase(captureImage.fulfilled, (state, action) => {
+        imageAdapter.upsertMany(state, action.payload.images);
+      }),
 });
 
 const { reducer } = slice;
