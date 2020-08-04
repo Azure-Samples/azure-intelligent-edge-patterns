@@ -1,20 +1,18 @@
 import React, { useState, useEffect, Dispatch } from 'react';
-import { Flex, Dropdown, Text, DropdownItemProps, Grid } from '@fluentui/react-northstar';
-import { Link, Prompt } from 'react-router-dom';
+import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
+import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { useCameras } from '../../hooks/useCameras';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
-import LabelDisplayImage from '../LabelDisplayImage';
 import { RTSPVideo } from '../RTSPVideo';
 import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
-import LabelingPage from '../../pages/LabelingPage';
 import { makeImageWithPartSelector, captureImage } from '../../features/imageSlice';
-import { openLabelingPage } from '../../features/labelingPageSlice';
+import { CapturedImagesContainer } from '../CapturedImagesContainer';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -35,10 +33,6 @@ export const CapturePhotos: React.FC<{
         shouldOpenLabelingPage: mode === CaptureLabelMode.PerImage,
       }),
     );
-  };
-
-  const onDisplayImageClick = (imageId: number): void => {
-    dispatch(openLabelingPage({ imageIds: images.map((e) => e.id), selectedImageId: imageId }));
   };
 
   useEffect(() => {
@@ -66,8 +60,8 @@ export const CapturePhotos: React.FC<{
           />
         </div>
       </Flex>
-      <Flex column gap="gap.small" styles={{ width: '30%', minWidth: '450px' }}>
-        <CapturedImagesContainer onDisplayImageClick={onDisplayImageClick} images={images} />
+      <Flex column gap="gap.small" styles={{ width: '30%', minWidth: '450px', height: '100%' }}>
+        <CapturedImagesContainer images={images} gridColumn={2} />
       </Flex>
     </Flex>
   );
@@ -100,52 +94,6 @@ const CameraSelector = ({ selectedCamera, setSelectedCamera, availableCameras })
       <Text>Select Camera</Text>
       <Dropdown items={items} onChange={onDropdownChange} value={formatDropdownValue(selectedCamera)} />
       <Link to="/cameras">Add Camera</Link>
-    </Flex>
-  );
-};
-
-export const CapturedImagesContainer = ({ images, onDisplayImageClick }): JSX.Element => {
-  const isValid = images.filter((image) => image.labels).length >= 15;
-  const imageCount = images.length;
-
-  return (
-    <Flex column styles={{ height: '100%' }}>
-      <Text>Total: {imageCount}</Text>
-      {!isValid && <Text error>*Please capture and label more then 15 images</Text>}
-      <Grid
-        columns="2"
-        styles={{
-          border: '1px solid grey',
-          gridGap: '10px',
-          padding: '10px',
-          borderColor: isValid ? '' : 'red',
-          justifyItems: 'center',
-          alignItems: 'center',
-          overflow: 'scroll',
-          maxHeight: '600px',
-        }}
-      >
-        {images.map((image, i) => (
-          <div key={image.id} style={{ height: '100%', width: '100%' }}>
-            <span>{i + 1}</span>
-            <div style={{ height: 150, width: 200 }}>
-              <LabelDisplayImage
-                labelImage={image}
-                pointerCursor
-                onClick={(): void => onDisplayImageClick(image.id)}
-              />
-            </div>
-          </div>
-        ))}
-        <LabelingPage isRelabel={false} labelingType={0} />
-      </Grid>
-      <Prompt
-        when={imageCount < 15}
-        message={(location): string => {
-          if (location.state === 'AFTER_DELETE') return;
-          return 'The count of images is less than 15, which may cause error when configure part identification. Sure you want to leave?';
-        }}
-      />
     </Flex>
   );
 };
