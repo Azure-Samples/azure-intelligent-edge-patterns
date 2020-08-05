@@ -17,8 +17,6 @@ import { getImages } from '../features/imageSlice';
 export const PartDetails = (): JSX.Element => {
   const partId = parseInt(useQuery().get('partId'), 10);
 
-  const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
-
   const part = useSelector<State, Part>(
     (state) => selectPartById(state, partId) || { id: null, name: '', description: '' },
   );
@@ -90,12 +88,7 @@ export const PartDetails = (): JSX.Element => {
         gap="gap.small"
         styles={{ gridColumn: '1 / span 2', gridRow: '2 / span 1', height: '100%' }}
       >
-        <CaptureImagePanel
-          partId={partId}
-          partName={name}
-          goLabelImageIdx={goLabelImageIdx}
-          setGoLabelImageIdx={setGoLabelImageIdx}
-        />
+        <CaptureImagePanel partId={partId} partName={name} />
       </Flex>
       <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" gap="gap.small">
         <Button content="Save" primary onClick={onSave} disabled={saveBtnDisabled} />
@@ -151,16 +144,11 @@ const PartInfoForm = ({ name, setName, description, setDescription }): JSX.Eleme
   );
 };
 
-const CaptureImagePanel = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
+const CaptureImagePanel = ({ partId, partName }): JSX.Element => {
   return (
     <Switch>
       <Route path={`/parts/detail/capturePhotos`}>
-        <CapturePhotos
-          partId={parseInt(partId, 10)}
-          partName={partName}
-          goLabelImageIdx={goLabelImageIdx}
-          setGoLabelImageIdx={setGoLabelImageIdx}
-        />
+        <CapturePhotos partId={parseInt(partId, 10)} partName={partName} />
       </Route>
       <Route path={`/parts/detail/uploadPhotos`}>
         <UploadPhotos partId={parseInt(partId, 10)} />

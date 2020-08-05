@@ -2,6 +2,7 @@ import { createSlice, createEntityAdapter } from '@reduxjs/toolkit';
 
 import { getImages } from './imageSlice';
 import { Annotation } from './type';
+import { State } from '../store/State';
 
 const entityAdapter = createEntityAdapter<Annotation>();
 
@@ -17,3 +18,7 @@ const slice = createSlice({
 
 const { reducer } = slice;
 export default reducer;
+
+export const { selectById: selectAnnoById, selectEntities: selectAnnoEntities } = entityAdapter.getSelectors(
+  (state: State) => state.annotations,
+);

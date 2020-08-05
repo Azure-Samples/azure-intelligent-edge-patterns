@@ -1,9 +1,8 @@
-import { createSlice, createAsyncThunk, nanoid, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, nanoid, createEntityAdapter } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
 import { Annotation, AnnotationState } from './type';
-import { selectPartEntities } from './partSlice';
 import { openLabelingPage } from './labelingPageSlice';
 import { State } from '../store/State';
 
@@ -116,23 +115,8 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { selectAll: selectAllImages, selectEntities: selectImageEntities } = imageAdapter.getSelectors<
-  State
->((state) => state.labelImages);
-
-export const makeImageWithPartSelector = (partId) =>
-  createSelector([selectAllImages, selectPartEntities], (images, partEntities) =>
-    images
-      .filter((img) => img.part === partId)
-      .map((img) => ({
-        id: img.id,
-        image: img.image,
-        labels: '',
-        part: {
-          id: img.part,
-          name: partEntities[img.part].name,
-        },
-        is_relabel: img.isRelabel,
-        confidence: 0,
-      })),
-  );
+export const {
+  selectAll: selectAllImages,
+  selectEntities: selectImageEntities,
+  selectById: selectImageById,
+} = imageAdapter.getSelectors<State>((state) => state.labelImages);

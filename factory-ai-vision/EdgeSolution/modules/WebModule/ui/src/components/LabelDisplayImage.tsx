@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useCallback, useLayoutEffect, memo, MouseEvent, FC, useRef } from 'react';
+import React, { useEffect, useCallback, useLayoutEffect, memo, MouseEvent, FC, useRef } from 'react';
 import Konva from 'konva';
 import { Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
-import { AnnotationState, Annotation, Size2D } from '../store/labelingPage/labelingPageTypes';
+import { Annotation, Size2D } from '../store/labelingPage/labelingPageTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import getResizeImageFunction from './LabelingPage/util/resizeImage';
 
@@ -28,17 +28,8 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   const shapes = useRef<BoxShape[]>([]);
   const [image, , size] = useImage(labelImage.image, 'anonymous');
   const resizeImage = useCallback(getResizeImageFunction(imgSize.current), [imgSize.current]);
+  const annotations = (labelImage.labels as any) as Annotation[];
 
-  const annotations = useMemo<Annotation[]>(() => {
-    if (!labelImage?.labels) return [];
-
-    return JSON.parse(labelImage.labels).map((parsedLabels, i) => ({
-      id: i,
-      label: parsedLabels,
-      attribute: '',
-      annotationState: AnnotationState.Finish,
-    }));
-  }, [labelImage]);
   useLayoutEffect(() => {
     const container: HTMLDivElement = document.querySelector('#container');
     const width = container.offsetWidth;

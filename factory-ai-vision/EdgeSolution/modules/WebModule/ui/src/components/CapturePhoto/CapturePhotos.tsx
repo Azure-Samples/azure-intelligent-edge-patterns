@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -11,18 +11,17 @@ import { getLabelImages } from '../../store/image/imageActions';
 import { LabelImage } from '../../store/image/imageTypes';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
-import { makeImageWithPartSelector, captureImage } from '../../features/imageSlice';
+import { captureImage } from '../../features/imageSlice';
+import { makeImageLabelImageSelector } from '../../features/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
 
 export const CapturePhotos: React.FC<{
   partId: number;
   partName: string;
-  goLabelImageIdx: number;
-  setGoLabelImageIdx: Dispatch<number>;
 }> = ({ partId, partName }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const images = useSelector<State, LabelImage[]>(makeImageWithPartSelector(partId));
+  const images = useSelector<State, any[]>(makeImageLabelImageSelector(partId));
   const availableCameras = useCameras();
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
