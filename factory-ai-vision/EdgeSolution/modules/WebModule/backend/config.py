@@ -2,8 +2,9 @@
 Settings
 
 Do not import this file in code. Instead, import configs.xxx, which read
-environment variables as well. Related fields will be override by environment
-variables.
+environment variables as well.
+
+Related fields will be overwritten by environment variables (if set).
 """
 # Azure Custom Vision
 TRAINING_KEY = ''

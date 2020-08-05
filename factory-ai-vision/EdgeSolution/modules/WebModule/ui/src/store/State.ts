@@ -67,7 +67,7 @@ const initialProject: Project = {
   },
   status: Status.None,
   error: null,
-  trainingLog: '',
+  trainingLogs: [],
 };
 
 export const initialState: State = {
@@ -95,8 +95,10 @@ export const initialState: State = {
       key: '',
       namespace: '',
     },
-    isTrainerValid: false,
-    appInsightHasInit: false,
+    isTrainerValid: true,
+    appInsightHasInit: true,
+    isCollectData: false,
+    appInsightKey: '',
   },
   notifications: [],
 };

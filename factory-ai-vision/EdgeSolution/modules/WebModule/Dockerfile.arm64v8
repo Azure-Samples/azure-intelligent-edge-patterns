@@ -1,10 +1,33 @@
-FROM arm64v8/python:3.7-slim-buster
+FROM node:12 as builder
+
+WORKDIR /
+COPY ui app
+WORKDIR /app
+RUN rm -rf node_modules/
+RUN rm -rf build/
+RUN yarn install
+RUN yarn build
+
+FROM arm64v8/python:3.8-slim-buster
+
+RUN apt-get update
+RUN apt install -y build-essential libffi-dev libssl-dev python3-dev python3-opencv
+RUN ln -s /usr/lib/python3/dist-packages/cv2.cpython-37m-aarch64-linux-gnu.so /usr/local/lib/python3.8/site-packages/cv2.so
+RUN pip install numpy
 
 WORKDIR /app
+COPY backend/requirements-arm.txt .
+RUN pip install -r requirements-arm.txt
 
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+COPY backend/manage.py .
+COPY backend/config.py .
+COPY backend/vision_on_edge vision_on_edge
+COPY backend/configs configs
+RUN rm -f vision_on_edge/*/migrations/[0-9]*.py
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+RUN rm -rf ui_production
+COPY --from=builder /app/build vision_on_edge/ui_production
+EXPOSE 8000
 
-COPY . .
-
-CMD [ "python3", "-u", "./main.py" ]
+CMD python manage.py runserver 0.0.0.0:8000

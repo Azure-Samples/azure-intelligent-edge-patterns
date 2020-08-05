@@ -32,12 +32,11 @@ const getAOIData = (cameraArea: string): AOIData => {
 export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
     error,
-    trainingLog,
+    trainingLogs,
     status,
     trainingMetrics,
     data: { id: projectId, camera: projectCameraId },
   } = useSelector<State, Project>((state) => (isDemo ? state.demoProject : state.project));
-  const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
 
@@ -62,7 +61,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
   );
 
   const onDeleteProject = (): void => {
-    dispatch(thunkDeleteProject);
+    dispatch(thunkDeleteProject(isDemo));
   };
 
   // FIXME Integrate this with Redux
@@ -77,7 +76,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
     return (
       <>
         <Loader size="smallest" />
-        <pre>{allTrainingLog}</pre>
+        <pre>{trainingLogs.join('\n')}</pre>
       </>
     );
 
@@ -111,16 +110,4 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
       )}
     </Flex>
   );
-};
-
-/**
- * Retrun a string which contains all logs get from server during training
- * @param trainingLog The log get from the api export
- */
-const useAllTrainingLog = (trainingLog: string): string => {
-  const [allLogs, setAllLogs] = useState(trainingLog);
-  useEffect(() => {
-    setAllLogs((prev) => `${prev}\n${trainingLog}`);
-  }, [trainingLog]);
-  return allLogs;
 };

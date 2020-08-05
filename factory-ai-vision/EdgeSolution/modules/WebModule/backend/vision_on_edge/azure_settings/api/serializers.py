@@ -1,5 +1,4 @@
-"""
-Azure Setting Serializer
+"""App Serializers.
 """
 
 import logging
@@ -12,13 +11,23 @@ logger = logging.getLogger(__name__)
 
 
 class SettingSerializer(serializers.ModelSerializer):
-    """SettingSerializer"""
+    """SettingSerializer.
+    """
 
     class Meta:
+        """Meta.
+        """
+
         model = Setting
         fields = "__all__"
 
     def create(self, validated_data):
+        """create.
+
+        Args:
+            validated_data:
+        """
+
         obj, _ = Setting.objects.get_or_create(
             endpoint=validated_data["endpoint"],
             training_key=validated_data["training_key"],

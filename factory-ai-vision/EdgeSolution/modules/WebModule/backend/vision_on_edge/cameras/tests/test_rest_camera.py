@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+"""Camera REST API Test
 """
-Camera REST API Test
-"""
+
 from unittest.mock import patch
 
 from django.core.exceptions import MultipleObjectsReturned
@@ -11,12 +12,15 @@ from vision_on_edge.general.tests.test_special_strings import special_strings
 from ..models import Camera
 
 
-class CameraTestCases(APITransactionTestCase):
-    """
-    Camera REST API TestCases
+class CameraRestTestCases(APITransactionTestCase):
+    """CameraRestTestCases
+
+    Camera REST API testcases.
     """
 
     def setUp(self):
+        """setUp.
+        """
         with patch('requests.get') as mock_request:
             mock_request.return_value.status_code = 200
             Camera.objects.create(name="Camera1",
@@ -45,7 +49,8 @@ class CameraTestCases(APITransactionTestCase):
         self.exist_num = 4 + len(special_strings)
 
     def test_setup_is_valid(self):
-        """
+        """test_setup_is_valid.
+
         Make sure setup is valid
         """
         self.assertEqual(Camera.objects.count(), self.exist_num)

@@ -1,5 +1,4 @@
-"""
-ASGI config for vision_on_edge project.
+"""Project ASGI configs.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

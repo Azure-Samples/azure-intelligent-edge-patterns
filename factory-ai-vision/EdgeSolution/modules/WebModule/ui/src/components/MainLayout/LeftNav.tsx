@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom';
 const LeftNav: FC<any> = ({ styles, disabled, width }): JSX.Element => {
   return (
     <Segment color="grey" inverted styles={{ ...styles, padding: 0, paddingTop: '1em' }}>
-      <Flex column gap="gap.large" hAlign="center">
+      <Flex column gap="gap.large" hAlign="center" styles={{ height: '100%' }}>
         <NavItem
           title="Location"
           disabled={disabled}
