@@ -10,7 +10,6 @@ import getResizeImageFunction from './util/resizeImage';
 import { Box2d } from './Box';
 import {
   Size2D,
-  Annotation,
   WorkState,
   LabelingType,
   LabelingCursorStates,
@@ -23,6 +22,7 @@ import {
 } from '../../store/labelingPage/labelingPageActions';
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
+import { Annotation } from '../../features/type';
 
 const defaultSize: Size2D = {
   width: 800,
@@ -192,7 +192,8 @@ const Scene: FC<SceneProps> = ({
                   y={annotation.label.y1 - 25 / scale.current}
                   fontSize={20 / scale.current}
                   fill="red"
-                  text={annotations[selectedAnnotationIndex]?.part.name}
+                  // text={annotations[selectedAnnotationIndex]?.part.name}
+                  test="part"
                   visible={!partFormDisabled}
                 />
               </Group>
@@ -217,14 +218,15 @@ const Scene: FC<SceneProps> = ({
             left={annotations[0]?.label.x2 * scale.current + 10}
             open={true}
             onDismiss={(): void => onSelect(null)}
-            selectedPart={annotations[selectedAnnotationIndex]?.part}
+            // selectedPart={annotations[selectedAnnotationIndex]?.part}
+            selectedPart={null}
             setSelectedPart={(newPart): void => {
-              dispatch(
-                updateAnnotation(
-                  selectedAnnotationIndex,
-                  R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
-                ),
-              );
+              // dispatch(
+              //   updateAnnotation(
+              //     selectedAnnotationIndex,
+              //     R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
+              //   ),
+              // );
             }}
           />
         )}

@@ -3,7 +3,7 @@ import { selectAllImages } from './imageSlice';
 import { selectPartEntities } from './partSlice';
 import { selectAnnoEntities } from './annotationSlice';
 
-export const makeImageLabelImageSelector = (partId) =>
+export const makeLabelImageSelector = (partId) =>
   createSelector(
     [selectAllImages, selectPartEntities, selectAnnoEntities],
     (images, partEntities, annoEntities) =>

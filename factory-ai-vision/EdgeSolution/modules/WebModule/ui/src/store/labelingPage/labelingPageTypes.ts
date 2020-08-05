@@ -1,3 +1,5 @@
+import { Annotation as NewAnno } from '../../features/type';
+
 // * Request Operation
 export const REQUEST_ANNOTATION_FAILURE = 'REQUEST_ANNOTATION_FAILURE';
 export type RequestAnnotationSuccessAction = { type: typeof REQUEST_ANNOTATION_SUCCESS; payload: any };
@@ -74,7 +76,7 @@ export interface Box2dComponentProps {
   workState: WorkState;
   scale: number;
   onSelect: Function;
-  annotation: Annotation;
+  annotation: NewAnno;
   annotationIndex: number;
   selected: boolean;
   visible?: boolean;

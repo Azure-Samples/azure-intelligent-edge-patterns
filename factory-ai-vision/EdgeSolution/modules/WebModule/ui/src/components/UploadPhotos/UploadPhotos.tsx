@@ -5,12 +5,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { State } from '../../store/State';
 import { LabelImage } from '../../store/image/imageTypes';
 import { getLabelImages, postLabelImage } from '../../store/image/imageActions';
-import { makeImageLabelImageSelector } from '../../features/selectors';
+import { makeLabelImageSelector } from '../../features/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
 
 export const UploadPhotos = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();
-  const images = useSelector<State, any[]>(makeImageLabelImageSelector(partId));
+  const images = useSelector<State, any[]>(makeLabelImageSelector(partId));
 
   useEffect(() => {
     dispatch(getLabelImages());

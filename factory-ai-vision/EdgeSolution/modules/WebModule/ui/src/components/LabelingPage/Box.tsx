@@ -32,7 +32,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
     if (!dispatch) return;
     const newAnnotation = { ...annotation };
     newAnnotation.label = vertices;
-    dispatch(updateAnnotation(annotationIndex, newAnnotation));
+    // dispatch(updateAnnotation(annotationIndex, newAnnotation));
   };
 
   const mouseMoveListener = useCallback(
