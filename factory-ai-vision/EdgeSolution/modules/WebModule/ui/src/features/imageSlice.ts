@@ -2,10 +2,25 @@ import { createSlice, createAsyncThunk, nanoid, createEntityAdapter, createSelec
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
-import { Annotation, AnnotationState } from '../reducers/labelReducer';
+import { Annotation, AnnotationState } from './type';
 import { selectPartEntities } from './partSlice';
 import { openLabelingPage } from './labelingPageSlice';
 import { State } from '../store/State';
+
+type ImageFromServer = {
+  id: number;
+  image: string;
+  labels: string;
+  is_relabel: boolean;
+  confidence: number;
+  uploaded: boolean;
+  customvision_id: string;
+  remote_url: string;
+  part: number;
+  project: number;
+};
+
+type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
 
 export type Image = {
   id: number;
@@ -15,7 +30,7 @@ export type Image = {
   isRelabel: boolean;
 };
 
-const normalizeImageShape = (response: any): Image => {
+const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
   return {
     id: response.id,
     image: response.image,
@@ -25,8 +40,8 @@ const normalizeImageShape = (response: any): Image => {
   };
 };
 
-const normalizeImagesAndLabelByNormalizr = (data) => {
-  const labels = new schema.Entity('labels', undefined, {
+const normalizeImagesAndLabelByNormalizr = (data: ImageFromServerWithSerializedLabels[]) => {
+  const labels = new schema.Entity<Annotation>('labels', undefined, {
     processStrategy: (value, parent): Annotation => {
       const { id, ...label } = value;
       return {
@@ -46,10 +61,16 @@ const normalizeImagesAndLabelByNormalizr = (data) => {
     },
   );
 
-  return normalize(data, [images]);
+  return (normalize(data, [images]) as any) as {
+    entities: {
+      images: Record<string, Image>;
+      labels: Record<string, Annotation>;
+    };
+    result: number[];
+  };
 };
 
-const serializeLabels = R.map<any, any>((e) => ({
+const serializeLabels = R.map<ImageFromServer, ImageFromServerWithSerializedLabels>((e) => ({
   ...e,
   labels: (JSON.parse(e.labels) || []).map((l) => ({ ...l, id: nanoid() })),
 }));

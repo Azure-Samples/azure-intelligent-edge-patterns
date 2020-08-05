@@ -10,7 +10,7 @@ import labelImagesReducer from './image/imageReducer';
 import settingReducer from './setting/settingReducer';
 import notificationReducer from '../reducers/notificationReducer';
 import imagesReducer from '../features/imageSlice';
-import labelReducer from '../reducers/labelReducer';
+import annotationReducer from '../features/annotationSlice';
 import labelingPageReducer from '../features/labelingPageSlice';
 
 export const rootReducer = combineReducers({
@@ -26,6 +26,6 @@ export const rootReducer = combineReducers({
   notifications: notificationReducer,
   parts: partsReducer,
   labelImages: imagesReducer,
-  labels: labelReducer,
+  annotations: annotationReducer,
   labelingPage: labelingPageReducer,
 });

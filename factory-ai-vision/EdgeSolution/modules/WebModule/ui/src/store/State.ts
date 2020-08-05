@@ -4,7 +4,6 @@ import { Notification } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
 import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
-import { NormalizedLabel } from '../reducers/labelReducer';
 
 export interface State {
   // Domain Data
@@ -12,7 +11,7 @@ export interface State {
   locations?: any;
   notifications: Notification[];
   labelImages?: any;
-  labels?: NormalizedLabel;
+  annotations?: any;
   // App State
   labelingPage?: any;
   // TODO: Refactor
