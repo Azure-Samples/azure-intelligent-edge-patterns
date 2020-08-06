@@ -1,4 +1,3 @@
-import { Annotation } from './labelingPage/labelingPageTypes';
 import { Camera } from './camera/cameraTypes';
 import { Notification } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
@@ -20,11 +19,8 @@ export interface State {
   demoProject: Project;
   images: LabelImage[];
   setting: Setting;
-  labelingPageState: LabelingPageState;
   dialogIsOpen: boolean;
 }
-
-export type LabelingPageState = { annotations: Annotation[] };
 
 const initialProject: Project = {
   isLoading: false,
@@ -78,7 +74,6 @@ export const initialState: State = {
   dialogIsOpen: false,
   cameras: [],
   images: [],
-  labelingPageState: { annotations: [] },
   project: initialProject,
   demoProject: initialProject,
   setting: {

@@ -3,15 +3,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import { Flex, Button, Text, Dialog } from '@fluentui/react-northstar';
 
-import Scene from '../components/LabelingPage/Scene';
-import { LabelingType, WorkState } from '../store/labelingPage/labelingPageTypes';
-import { State } from '../store/State';
-import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
-import PrevNextButton from '../components/LabelingPage/PrevNextButton';
-import { closeLabelingPage, goPrevImage, goNextImage } from '../features/labelingPageSlice';
-import { selectImageEntities } from '../features/imageSlice';
-import { labelPageAnnoSelector } from '../features/annotationSlice';
-import { Annotation } from '../features/type';
+import Scene from './Scene';
+import { LabelingType, WorkState } from './type';
+import { State } from '../../store/State';
+import { saveLabelImageAnnotation, deleteLabelImage } from '../../store/image/imageActions';
+import PrevNextButton from './PrevNextButton';
+import { closeLabelingPage, goPrevImage, goNextImage } from '../../features/labelingPageSlice';
+import { selectImageEntities } from '../../features/imageSlice';
+import { labelPageAnnoSelector } from '../../features/annotationSlice';
+import { Annotation } from '../../features/type';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageUrlSelector = createSelector(

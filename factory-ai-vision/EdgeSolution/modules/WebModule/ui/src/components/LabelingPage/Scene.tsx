@@ -8,12 +8,7 @@ import * as R from 'ramda';
 import useImage from './util/useImage';
 import getResizeImageFunction from './util/resizeImage';
 import { Box2d } from './Box';
-import {
-  Size2D,
-  WorkState,
-  LabelingType,
-  LabelingCursorStates,
-} from '../../store/labelingPage/labelingPageTypes';
+import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
   updateCreatingAnnotation,
   removeAnnotation,
@@ -22,7 +17,7 @@ import {
 } from '../../features/annotationSlice';
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
-import { Annotation } from '../../features/type';
+import { Annotation, Size2D } from '../../features/type';
 
 const defaultSize: Size2D = {
   width: 800,

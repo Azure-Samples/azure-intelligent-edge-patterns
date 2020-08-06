@@ -11,9 +11,8 @@ import {
 import * as R from 'ramda';
 
 import { getImages } from './imageSlice';
-import { Annotation, AnnotationState } from './type';
+import { Annotation, AnnotationState, Position2D } from './type';
 import { State } from '../store/State';
-import { Position2D } from '../store/labelingPage/labelingPageTypes';
 import { closeLabelingPage } from './labelingPageSlice';
 
 // * Annotation Functions

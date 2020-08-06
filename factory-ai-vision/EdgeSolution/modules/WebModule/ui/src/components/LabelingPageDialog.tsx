@@ -1,7 +1,7 @@
 import React, { memo, FC, useState, useEffect } from 'react';
 
-import LabelingPage from '../pages/LabelingPage';
-import { LabelingType } from '../store/labelingPage/labelingPageTypes';
+// import LabelingPage from './LabelingPage/LabelingPage';
+// import { LabelingType } from '../store/labelingPage/labelingPageTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { Dialog } from './Dialog';
 

@@ -3,10 +3,9 @@ import Konva from 'konva';
 import { Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
-import { Size2D } from '../store/labelingPage/labelingPageTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import getResizeImageFunction from './LabelingPage/util/resizeImage';
-import { Annotation } from '../features/type';
+import { Annotation, Size2D } from '../features/type';
 
 interface LabelDisplayImageProps {
   labelImage: LabelImage;

@@ -17,3 +17,10 @@ export type Annotation = {
   image: number;
   annotationState: AnnotationState;
 };
+
+export type Position2D = {
+  x: number;
+  y: number;
+};
+
+export type Size2D = { width: number; height: number };

@@ -5,7 +5,7 @@ import { Flex, Grid, Text } from '@fluentui/react-northstar';
 
 import { openLabelingPage } from '../features/labelingPageSlice';
 import LabelDisplayImage from './LabelDisplayImage';
-import LabelingPage from '../pages/LabelingPage';
+import LabelingPage from './LabelingPage/LabelingPage';
 import { LabelImage } from '../store/image/imageTypes';
 
 type CapturedImagesContainer = {

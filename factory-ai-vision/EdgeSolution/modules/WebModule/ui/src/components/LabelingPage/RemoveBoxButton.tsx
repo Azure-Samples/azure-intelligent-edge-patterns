@@ -1,7 +1,8 @@
 import React, { FC, memo, Dispatch, useState, useEffect } from 'react';
 import { Group, Line, Rect } from 'react-konva';
 
-import { Size2D, LabelingCursorStates, BoxLabel } from '../../store/labelingPage/labelingPageTypes';
+import { LabelingCursorStates } from './type';
+import { Size2D, BoxLabel } from '../../features/type';
 
 interface RemoveBoxButtonProps {
   visible: boolean;

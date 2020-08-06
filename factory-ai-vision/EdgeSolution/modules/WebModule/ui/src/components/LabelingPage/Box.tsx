@@ -2,13 +2,9 @@ import React, { useState, useRef, useEffect, FC, useCallback } from 'react';
 import { Line, Group, Circle } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import {
-  BoxLabel,
-  Box2dComponentProps,
-  WorkState,
-  LabelingCursorStates,
-} from '../../store/labelingPage/labelingPageTypes';
+import { Box2dComponentProps, WorkState, LabelingCursorStates } from './type';
 import { updateAnnotation } from '../../features/annotationSlice';
+import { BoxLabel } from '../../features/type';
 
 export const Box2d: FC<Box2dComponentProps> = ({
   scale,
