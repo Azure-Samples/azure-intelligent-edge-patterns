@@ -6,6 +6,7 @@ import {
   ThunkAction,
   Action,
   createSelector,
+  Reducer,
 } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 
@@ -13,6 +14,7 @@ import { getImages } from './imageSlice';
 import { Annotation, AnnotationState } from './type';
 import { State } from '../store/State';
 import { Position2D } from '../store/labelingPage/labelingPageTypes';
+import { closeLabelingPage } from './labelingPageSlice';
 
 // * Annotation Functions
 export const BoxObj = {
@@ -105,7 +107,6 @@ const slice = createSlice({
       entityAdapter.updateOne(state, action.payload);
     },
     removeAnnotation: entityAdapter.removeOne,
-    resetAnnotation: () => entityAdapter.getInitialState(),
   },
   extraReducers: (builder) =>
     builder.addCase(getImages.fulfilled, (state, action) => {
@@ -114,14 +115,28 @@ const slice = createSlice({
 });
 
 const { reducer } = slice;
-export default reducer;
+/**
+ * A reducer enhancer to add a field `originEntities` to store the data from server. No user edit
+ */
+const addOriginEntitiesReducer: Reducer<
+  ReturnType<typeof reducer> & { originEntities: Record<string, Annotation> }
+> = (state, action) => {
+  if (getImages.fulfilled.match(action)) {
+    return { ...reducer(state, action), originEntities: action.payload.labels || {} };
+  }
+  if (closeLabelingPage.match(action)) {
+    return { ...state, entities: R.clone(state.originEntities) };
+  }
+  return { ...state, ...reducer(state, action) };
+};
+
+export default addOriginEntitiesReducer;
 
 export const {
   createAnnotation,
   updateCreatingAnnotation,
   updateAnnotation,
   removeAnnotation,
-  resetAnnotation,
 } = slice.actions;
 
 export const thunkCreateAnnotation = (
