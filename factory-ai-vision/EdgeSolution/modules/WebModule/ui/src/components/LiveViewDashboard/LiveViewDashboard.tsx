@@ -17,6 +17,7 @@ import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
 import { AOIData } from '../../type';
 import { Camera } from '../../store/camera/cameraTypes';
+import { ProgressBar } from '../ProgressBar';
 
 const getAOIData = (cameraArea: string): AOIData => {
   try {
@@ -75,7 +76,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
   if (status === CameraConfigStatus.WaitTraining)
     return (
       <>
-        <Loader size="smallest" />
+        <ProgressBar percentage={10} />
         <pre>{trainingLogs.join('\n')}</pre>
       </>
     );
