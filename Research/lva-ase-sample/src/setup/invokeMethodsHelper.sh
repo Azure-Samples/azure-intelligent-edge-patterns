@@ -1,31 +1,19 @@
-# #Julia Lieberman bash script to simplify LVA process.
-# # this will take a deployment manifest, deploy it, then run all the functions 
-# # the Program.cs / operations.json files specify
-# # and monitor the iot hub! Woohoo!
+# Bash script to simplify LVA process.
+# this will invoke all the direct methods to the module
+# the Program.cs / operations.json files specify
+# and monitor the iot hub! Woohoo!
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
 HUBNAME=${1:-}
 DEVICE_ID=${2:-}
-IOTHUB_CONNECTION_STRING=${3:-}
+IOTHUB_CONNECTION_STRING="\"${3:-}\""
 
-# add quotes
-IOTHUB_CONNECTION_STRING="\"${IOTHUB_CONNECTION_STRING}\""
 SAS_TOKEN=$(az iot hub generate-sas-token -n ${HUBNAME} | jq .sas)
-
-HEADER=$(echo -e "Authorization: ${SAS_TOKEN}" | tr -d '"')
-auth="'"$HEADER"'"
 MODULE_URL="https://${HUBNAME}.azure-devices.net/twins/${DEVICE_ID}/modules/lvaEdge/methods?api-version=2018-06-30"
 FILE="jsonfiles/instanceset.json"
 
-# if `/bin/grep -q "FILENAME" $FILE`; then #if hasn't been replaced yet
-#     # update json file to contain correct file name
-#     echo -e "What is the name of the rtsp video file? This should be in your input video folder on device share.
-#     If you downloaded it as advised, it should be named mhtestdrive.mkv: "
-#     read -p ">> " FILENAME
-#     sed -i "s/\$FILENAME/$FILENAME/" $FILE
-# else
-#     echo "no replacements"
-# fi
-
+# invoke direct method on edge module
 function sendQuery()
 {
     echo ${2}
@@ -37,10 +25,13 @@ function sendQuery()
     | json_pp
 }
 
+#wait to hit enter, print the next function to be run
 function waitToHitEnter()
 {
     arg1=${1:-}
-    echo "${arg1}"
+    echo -e "
+    ${YELLOW}${arg1}${NC}
+    "
     while [ true ]; do
     read -n 1 -r -p "Press enter to continue" key
 
@@ -67,7 +58,7 @@ done
 
 echo -e "
 In order to monitor and view the output, please open another Azure cloud shell by going to https://shell.azure.com and type in the following command into the terminal:
-az iot hub monitor-events -n ${HUBNAME} --login ${IOTHUB_CONNECTION_STRING}
+${YELLOW}az iot hub monitor-events -n ${HUBNAME} --login ${IOTHUB_CONNECTION_STRING}${NC}
 Once you have that window open, continue this script and you can view output! Close that window whenever you would like, but we recommend you keep it open for a few minutes
 so you can see the real-time inferences!"
 

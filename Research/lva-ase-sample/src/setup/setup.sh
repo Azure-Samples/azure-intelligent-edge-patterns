@@ -1,14 +1,14 @@
-#!/usr/bin/env bash
+# #!/usr/bin/env bash
 
-#######################################################################################################################
-# This script deploys resources in Azure for use with Azure Media Services Live Video Analytics samples.              #
-# It is primarily meant to run in https://shell.azure.com/ in the Bash environment. (It will not work in PowerShell.) #
-#                                                                                                                     #
-# You will need an Azure subscription with permissions for creating service principals (owner role provides this).    #                                                                                                                #
-#                                                                                                                     #
-# Do not be in the habit of executing scripts from the internet with root-level access to your machine. Only trust    #
-# well-known publishers.                                                                                              #
-#######################################################################################################################
+# #######################################################################################################################
+# # This script deploys resources in Azure for use with Azure Media Services Live Video Analytics samples.              #
+# # It is primarily meant to run in https://shell.azure.com/ in the Bash environment. (It will not work in PowerShell.) #
+# #                                                                                                                     #
+# # You will need an Azure subscription with permissions for creating service principals (owner role provides this).    #                                                                                                                #
+# #                                                                                                                     #
+# # Do not be in the habit of executing scripts from the internet with root-level access to your machine. Only trust    #
+# # well-known publishers.                                                                                              #
+# #######################################################################################################################
 
 # colors for formatting the ouput
 YELLOW='\033[1;33m'
@@ -17,15 +17,20 @@ RED='\033[0;31m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
-# script configuration
-BASE_URL='https://raw.githubusercontent.com/julialieberman/azure-intelligent-edge-patterns/t-jull-lvasample/Research/lva-ase-sample/src/edge' # location of remote files used by the script
+# # script configuration
+BASE_URL='https://raw.githubusercontent.com/julialieberman/azure-intelligent-edge-patterns/t-jull-lvasample/Research/lva-ase-sample/src' # location of remote files used by the script
 DEFAULT_REGION='westus2'
 ENV_FILE='edge-deployment/.env'
 APP_SETTINGS_FILE='appsettings.json'
 ROLE_DEFINITION_URL="$BASE_URL/setup/LVAEdgeUserRoleDefinition.json"
 ROLE_DEFINITION_FILE="LVAEdgeUserRoleDefinition.json"
+DEPLOYMENT_MANIFEST_URL="$BASE_URL/deployment.yolov3.template.json"
+DEPLOYMENT_MANIFEST_FILE='edge-deployment/deployment.yolov3.template.json'
+JSONFILEPATH="$BASE_URL/setup/jsonfiles/"
+JSONOUTPUTFILEPATH="jsonfiles/"
+HELPER_SCRIPT_URL="$BASE_URL/setup/invokeMethodsHelper.sh"
+HELPER_SCRIPT="invokeMethodsHelper.sh"
 RESOURCE_GROUP='teamlvarg'
-APPDATA_FOLDER_ON_DEVICE="/var/local/mediaservices" #you must change this later but it is ok for now
 
 checkForError() {
     if [ $? -ne 0 ]; then
@@ -49,19 +54,33 @@ This script will set up a number of prerequisite resources so
 that you can run the ${BLUE}Live Video Analytics${NC} samples:
 https://github.com/Azure-Samples/live-video-analytics-edge
 You should already have an active subscription with owner level permissions, 
-an Azure Stack Edge (ASE) setup and connected to an IoT Hub, two local compute-enabled SMB shares,
+an Azure Stack Edge (ASE) setup and connected to an IoT Hub, two compute-enabled SMB shares,
 and a storage account. If you haven't already gone through those steps refer back to the 
 ASE documentation: https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-deploy-prep
 Then resume this script. 
+
+This script will first create all the necessary resources and files for you to be successful, and then it will deploy modules to your ASE, and run through a series of commands for you 
+to visualize output of your first run of Live Video Analytics!
 "
 sleep 2 # time for the reader 
 
 echo "Initialzing output files.
 This overwrites any output files previously generated."
-mkdir -p $(dirname $ENV_FILE) && echo -n "" > $ENV_FILE
-mkdir -p $(dirname $APP_SETTINGS_FILE) && echo -n "" > $APP_SETTINGS_FILE
-chmod +x ${APP_SETTINGS_FILE}
-chmod +x ${ENV_FILE}
+
+mkdir -p $(dirname $DEPLOYMENT_MANIFEST_FILE) && echo -n "" > $DEPLOYMENT_MANIFEST_FILE
+chmod +x ${DEPLOYMENT_MANIFEST_FILE}
+
+# get files for media graph / operations payloads
+declare -a jsonOnlineFiles
+jsonOnlineFiles=("instanceactivate.json" "instancedelete.json" "instanceset.json" "topologylist.json"
+"instancedeactivate.json"  "instancelist.json" "topologydelete.json" "topologyset.json")
+
+for i in "${jsonOnlineFiles[@]}"
+do
+    mkdir -p $(dirname "${JSONOUTPUTFILEPATH}${i}") && echo -n "" > "${JSONOUTPUTFILEPATH}${i}"
+    chmod +x "${JSONOUTPUTFILEPATH}${i}"
+    curl -sL "${JSONFILEPATH}${i}" > "${JSONOUTPUTFILEPATH}${i}"
+done
 
 # # install the Azure CLI IoT extension
 echo -e "Checking for the ${BLUE}azure-iot${NC} cli extension."
@@ -101,7 +120,7 @@ then
     az account show --query '[name,id]'
 fi 
 
-# select a region for deployment. currently, to use LVA, you must use westus2 !!!
+# # select a region for deployment.
 echo -e "
 ${YELLOW}Please select a region to deploy resources from this list, but know that do use LVA as of July 2020 you must use westus2: canadaeast, centralus, eastus2, francecentral, japanwest, northcentralus, switzerlandnorth, uksouth, westcentralus, westus2, eastus2euap, centraluseuap.${NC}
 Or just press enter to use ${DEFAULT_REGION}."
@@ -159,7 +178,7 @@ then
     exit 1
 fi
 
-#Check there is already a valid storage account
+# #Check there is already a valid storage account
 STORAGE_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Storage\/storageAccounts$/ {print $1}')
 if test -z "$STORAGE_ACCOUNT"
 then 
@@ -180,15 +199,13 @@ fi
 
 # deploy resources
  echo -e "
- Now we'll deploy some resources to ${GREEN}${RESOURCE_GROUP}.${NC}
+ Now we will deploy some resources to ${GREEN}${RESOURCE_GROUP}.${NC}
  Including a container registry, and a media services account."
 
 ROLE_DEFINITION_NAME="LVAEdgeUsertest"
 
 #create or find container registry
 CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
-IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --hub-name ${IOTHUB} --query='connectionString')
-
 if ! test -z "$CONTAINER_REGISTRY"
 then
     echo -e "
@@ -212,7 +229,7 @@ AVAILABLE=$(az acr check-name -n ${CONTAINER_REGISTRY} | jq .nameAvailable)
      az acr create -g ${RESOURCE_GROUP} -n ${CONTAINER_REGISTRY} -l ${REGION} --sku Basic --admin-enabled true
  fi
 
-#Get container registry credentials
+# #Get container registry credentials
 CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $CONTAINER_REGISTRY --query 'username' | tr -d \")
 CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
 
@@ -241,7 +258,6 @@ EXISTING=$(az ams account check-name -l ${REGION} -n ${AMS_ACCOUNT})
      echo "Media services account named ${AMS_ACCOUNT} already exists!"
  fi
 
-# this includes everything in the resource group
 
 echo -e "\nResource group now contains these resources:"
 RESOURCES=$(az resource list --resource-group $RESOURCE_GROUP --query '[].{name:name,"Resource Type":type}' -o table)
@@ -253,12 +269,12 @@ AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ 
 
 # creating the AMS account creates a service principal, so well just reset it to get the credentials
 echo "setting up service principal..."
-SPN="$AMS_ACCOUNT_NAME-access-sp" # this is the default naming convention used by `az ams account sp`
+SPN="$AMS_ACCOUNT-access-sp" # this is the default naming convention used by `az ams account sp`
 if test -z "$(az ad sp list --display-name $SPN --query="[].displayName" -o tsv)"; then
-    AMS_CONNECTION=$(az ams account sp create -o yaml --resource-group $RESOURCE_GROUP --account-name ${AMS_ACCOUNT_NAME})
+    AMS_CONNECTION=$(az ams account sp create -o yaml --resource-group $RESOURCE_GROUP --account-name ${AMS_ACCOUNT})
     echo "creating new sp ${AMS_CONNECTION}"
 else
-    AMS_CONNECTION=$(az ams account sp reset-credentials -o yaml --resource-group $RESOURCE_GROUP --account-name ${AMS_ACCOUNT_NAME})
+    AMS_CONNECTION=$(az ams account sp reset-credentials -o yaml --resource-group $RESOURCE_GROUP --account-name ${AMS_ACCOUNT})
 fi
 
 # capture config information
@@ -309,45 +325,74 @@ fi
 
 az ams streaming-endpoint start --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
 
-# write env file for edge deployment
- echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" >> $ENV_FILE
- echo "RESOURCE_GROUP=\"$RESOURCE_GROUP\"" >> $ENV_FILE
- echo "AMS_ACCOUNT=\"$AMS_ACCOUNT\"" >> $ENV_FILE
- echo "IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> $ENV_FILE
- echo "AAD_TENANT_ID=$AAD_TENANT_ID" >> $ENV_FILE
- echo "AAD_SERVICE_PRINCIPAL_ID=$AAD_SERVICE_PRINCIPAL_ID" >> $ENV_FILE
- echo "AAD_SERVICE_PRINCIPAL_SECRET=$AAD_SERVICE_PRINCIPAL_SECRET" >> $ENV_FILE
- echo "INPUT_VIDEO_FOLDER_ON_DEVICE=\"/home/lvaadmin/samples/input\"" >> $ENV_FILE #this would be your local share
- echo "OUTPUT_VIDEO_FOLDER_ON_DEVICE=\"/home/lvaadmin/samples/output\"" >> $ENV_FILE
- echo "APPDATA_FOLDER_ON_DEVICE=\"/var/local/mediaservices\"" >> $ENV_FILE
- echo "CONTAINER_REGISTRY_USERNAME_myacr=$CONTAINER_REGISTRY_USERNAME" >> $ENV_FILE
- echo "CONTAINER_REGISTRY_PASSWORD_myacr=$CONTAINER_REGISTRY_PASSWORD" >> $ENV_FILE
+echo -e "
+${YELLOW}What is the name of the input video folder on the device to use? This should be your local share with the sample video${NC}"
+read -p ">> " tmp
+INPUT_VIDEO_FOLDER_ON_DEVICE=${tmp:-$INPUT_VIDEO_FOLDER_ON_DEVICE}
 
- echo -e "
- We've generated some configuration files for the deployed resource.
- This .env can be used with the ${GREEN}Azure IoT Tools${NC} extension in ${GREEN}Visual Studio Code${NC}.
- You can find it here:
- ${BLUE}${ENV_FILE}${NC}"
+echo -e "
+${YELLOW}What is the name of the output video folder on the device to use? This is where output files will be placed. Make sure it points to a share!${NC}"
+read -p ">> " tmp
+OUTPUT_VIDEO_FOLDER_ON_DEVICE=${tmp:-$OUTPUT_VIDEO_FOLDER_ON_DEVICE}
 
-# # write appsettings for sample code
- echo "{" >> $APP_SETTINGS_FILE
- echo "    \"IoThubConnectionString\" : $IOTHUB_CONNECTION_STRING," >> $APP_SETTINGS_FILE
- echo "    \"deviceId\" : \"$EDGE_DEVICE-edge\"," >> $APP_SETTINGS_FILE
- echo "    \"moduleId\" : \"lvaEdge\"" >> $APP_SETTINGS_FILE
- echo -n "}" >> $APP_SETTINGS_FILE
+echo -e "
+${YELLOW}What is the name of the app data video folder on the device to use? This is where output files will be placed. Make sure it points to a share!${NC}"
+read -p ">> " tmp
+APPDATA_FOLDER_ON_DEVICE=${tmp:-$APPDATA_FOLDER_ON_DEVICE}
 
- echo -e "
- The appsettings.json file is for the .NET Core sample application. The instructions for copying the files over 
- are in the readme you are following ${GREEN}https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/edge/setup/readme.md${NC}
- You can find it here and once you create your IoT Hub and device you'll need to replace the values:
- ${BLUE}${APP_SETTINGS_FILE}${NC}"
-
+set up deployment manifest
+curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$RESOURCE_GROUP/$RESOURCE_GROUP/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$AMS_ACCOUNT/$AMS_ACCOUNT/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$AAD_TENANT_ID/$AAD_TENANT_ID/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$AAD_SERVICE_PRINCIPAL_ID/$AAD_SERVICE_PRINCIPAL_ID/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$AAD_SERVICE_PRINCIPAL_SECRET/$AAD_SERVICE_PRINCIPAL_SECRET/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$CONTAINER_REGISTRY_USERNAME_myacr/$CONTAINER_REGISTRY_USERNAME_myacr/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$CONTAINER_REGISTRY_PASSWORD_myacr/$CONTAINER_REGISTRY_PASSWORD_myacr/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$INPUT_VIDEO_FOLDER_ON_DEVICE/$INPUT_VIDEO_FOLDER_ON_DEVICE/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$OUTPUT_VIDEO_FOLDER_ON_DEVICE/$OUTPUT_VIDEO_FOLDER_ON_DEVICE/" $DEPLOYMENT_MANIFEST_FILE
+ sed -i "s/\$APPDATA_FOLDER_ON_DEVICE/$APPDATA_FOLDER_ON_DEVICE/" $DEPLOYMENT_MANIFEST_FILE
  echo -e "
  ${GREEN}All done!${NC} \U1F44D\n
-
- Next, copy these generated files into your local copy of the sample app:
- - ${BLUE}${APP_SETTINGS_FILE}${NC}
- - ${BLUE}${ENV_FILE}${NC}
+    Next, we will deploy modules to your device (including the Live Video Analytics module, an RTSP module, and a YoloV3 AI inferencing module!)
+    using the deployment manifest generated here, found here:
+         - ${BLUE}${DEPLOYMENT_MANIFEST_FILE}${NC}
 
  Go to ${GREEN}https://aka.ms/lva-edge-quickstart${NC} to learn more about getting started with ${BLUE}Live Video Analytics${NC} on IoT Edge.
  "
+
+EDGE_DEVICE="${EDGE_DEVICE}-edge"
+
+modules=$(jq '.modulesContent."$edgeAgent"."properties.desired".modules' $DEPLOYMENT_MANIFEST_FILE)
+echo "Found the following modules to be deployed: "
+modules=$(echo $modules | jq -j 'keys | @sh' | tr -d "'")
+for i in $modules
+do
+    echo $i
+done
+echo "Deploying modules now..."
+
+# deploy!!!
+az iot edge set-modules --hub-name ${IOTHUB} --device-id ${EDGE_DEVICE} --content $DEPLOYMENT_MANIFEST_FILE
+
+IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --hub-name ${IOTHUB} --query='connectionString' | tr -d "\"")
+
+lvaState=$(az iot hub module-twin show --device-id ${EDGE_DEVICE} --module-id lvaEdge --hub-name ${IOTHUB} --login ${IOTHUB_CONNECTION_STRING} | jq .properties.reported.State)
+
+#wait for modules to deploy successfully - may need more time
+sleep 5
+# ensure lvaEdge module is in State "Running"
+lvaState=$(az iot hub module-twin show --device-id ${EDGE_DEVICE} --module-id lvaEdge --hub-name ${IOTHUB} --login "${IOTHUB_CONNECTION_STRING}")
+echo "lvaEdge module is in State:"
+echo $lvaState | jq .properties.reported.State
+
+#install helper
+mkdir -p $(dirname "${HELPER_SCRIPT}") && echo -n "" > ${HELPER_SCRIPT}
+chmod +x $HELPER_SCRIPT
+curl -sL ${HELPER_SCRIPT_URL} > ${HELPER_SCRIPT}
+
+echo "Now we will invoke methods on the lvaEdge module, which runs the sample program"
+source invokeMethodsHelper.sh $IOTHUB $EDGE_DEVICE $IOTHUB_CONNECTION_STRING
+
+echo "Congratulations, you have successfully run LVA on the ASE!"

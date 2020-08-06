@@ -29,27 +29,16 @@ This repository contains C# samples for Live Video Analytics on Azure Stack Edge
 | `README.md`          | This README file.                          |
 | `camera-300s.mkv`    | The sample video to use as a simulated RTSP stream            |
 
-The 'src' folder contains three sub-folders
-
-* **cloud-to-device-console-app** - This folder contains a dotnet core console app that enables you to invoke direct methods of Live Video Analytics on IoT Edge module, with parameters defined by you in a JSON file (operations.json).
-* **edge** - This folder has a few IoT Edge deployment manifest templates, along with sample code for an IoT Edge module (under 'modules' folder) that can be used in conjunction with the Live Video Analytics on IoT Edge module. The setup resources are also found here.
+The 'src' folder contains the setup subfolder with all necessary files to run this sample
 
 ## Prerequisites
 
 1. An active Azure subscription with owner level permissions
-2. [Visual Studio Code](https://code.visualstudio.com/) on your development machine with following extensions
+2. Azure Stack Edge device
 
-    a. [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools)
-
-    b. [C#](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
-
-3. [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1) on your development machine
-4. Azure Stack Edge device
-
-You will complete three phases to run through this entire sample. By the end, you will be running a YoloV3 object detection AI on the Azure Stack Edge with Live Video Analytics. 
+You will complete two phases to run through this entire sample. By the end, you will be running a YoloV3 object detection AI on the Azure Stack Edge with Live Video Analytics. 
 Step 1: Setup the Azure Stack Edge
-Step 2: Deploy resources for Live Video Analytics
-Step 3: VS Code configuration and sample running!
+Step 2: Run script to deploy resources for Live Video Analytics and run the sample
 
 ## STEP 1: SETUP THE AZURE STACK EDGE (ASE) ##
 Complete steps 1-4 of the [setup](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-deploy-prep) for your Azure Stack Edge with the following notes in mind:
@@ -83,12 +72,8 @@ Since we don't have an actual camera to stream from, we will use a simulated vid
 
 ## STEP 2: SET UP LVA RESOURCES: ##
 
-Follow the directions in the setup [readme file](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/edge/setup/readme.md)
+Follow the directions in the setup [readme file](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/readme.md)
 
-## STEP 3: RUNNING THE SAMPLE FROM VS CODE ##
-Open your local clone of this git repository in Visual Studio Code.
-
-Follow the instructions outlined in [src/cloud-to-device-console-app/readme.md](https://github.com/julialieberman/azure-intelligent-edge-patterns/tree/t-jull-lvasample/Research/lva-ase-sample/src/cloud-to-device-console-app/readme.md) to setup the console app and next steps, and instructions in **src/ams-asset-player/readme.md** to setup the ASP dotnet core app.
 
 ## Key concepts
 
