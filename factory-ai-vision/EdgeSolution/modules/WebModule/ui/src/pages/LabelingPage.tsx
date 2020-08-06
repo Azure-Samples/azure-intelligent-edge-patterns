@@ -10,13 +10,13 @@ import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/image
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 import { closeLabelingPage, goPrevImage, goNextImage } from '../features/labelingPageSlice';
 import { selectImageEntities } from '../features/imageSlice';
-import { selectAnnoById } from '../features/annotationSlice';
+import { labelPageAnnoSelector } from '../features/annotationSlice';
 import { Annotation } from '../features/type';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
-export const imageSelector = createSelector(
+export const imageUrlSelector = createSelector(
   [getSelectedImageId, selectImageEntities],
-  (selectedImageId, imageEntities) => imageEntities[selectedImageId] || {},
+  (selectedImageId, imageEntities) => imageEntities[selectedImageId]?.image || '',
 );
 
 interface LabelingPageProps {
@@ -29,13 +29,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const index = imageIds.findIndex((e) => e === selectedImageId);
-  const { image: imageUrl, labels = [] } = useSelector<State, any>(imageSelector);
+  const imageUrl = useSelector<State, string>(imageUrlSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
 
-  const annotations = useSelector<State, Annotation[]>(
-    (state) => labels.map((e) => selectAnnoById(state, e)) || [],
-  );
+  const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
 
   const isOnePointBox = checkOnePointBox(annotations);
 
