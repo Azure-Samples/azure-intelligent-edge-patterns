@@ -1,0 +1,7 @@
+{
+    "methodName": "GraphInstanceList",
+    "responseTimeoutInSeconds": 200,
+    "payload": {
+     "@apiVersion": "1.0"
+    }
+}

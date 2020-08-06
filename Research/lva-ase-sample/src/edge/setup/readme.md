@@ -4,6 +4,7 @@ This folder contains a bash script and other files listed below, which can be us
 
 - [setup.sh](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/edge/setup/setup.sh) is bash script intended to be use in [Azure Cloud Shell](http://shell.azure.com/). This script makes use of the other files in the folder.
 - [LVAEdgeUserRoleDefinition.json] defines a [custom role](https://docs.microsoft.com/azure/role-based-access-control/custom-roles) so that the Live Video Analytics on Edge module can use a service principal with minimal privileges when making calls to Azure Media Services
+- [setupautomated.sh](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/edge/setup/setupautomated.sh) if you choose to run this script instead, you can skip the VS Code download portion, and run the entire sample in the Azure Cloud Shell
 
 ## Prerequisites
 * Azure subscription with __owner__ level privileges
