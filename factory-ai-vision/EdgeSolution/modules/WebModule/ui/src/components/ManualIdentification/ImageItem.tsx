@@ -1,20 +1,14 @@
 import React, { FC, memo } from 'react';
 import { Text } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
-import LabelingPageDialog from '../LabelingPageDialog';
-import { LabelImage } from '../../store/image/imageTypes';
+import { LabelImage } from '../../features/type';
 
 interface ImageIdentificationItemProps {
   confidenceLevel: number;
-  relabelImages: LabelImage[];
-  imageIndex: number;
+  relabelImage: LabelImage;
   partId: number;
 }
-const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
-  confidenceLevel,
-  relabelImages,
-  imageIndex,
-}) => {
+const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, relabelImage }) => {
   return (
     <div
       style={{
@@ -24,22 +18,15 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         alignItems: 'center',
       }}
     >
-      <LabelingPageDialog
-        imageIndex={imageIndex}
-        images={relabelImages}
-        isRelabel={true}
-        trigger={
-          <div
-            style={{
-              padding: '0.5em',
-              height: '96%',
-              flex: '1 0 0',
-            }}
-          >
-            <LabelDisplayImage pointerCursor labelImage={relabelImages[imageIndex]} />
-          </div>
-        }
-      />
+      <div
+        style={{
+          padding: '0.5em',
+          height: '96%',
+          flex: '1 0 0',
+        }}
+      >
+        <LabelDisplayImage pointerCursor labelImage={relabelImage} />
+      </div>
       <div
         style={{
           height: '96%',
@@ -63,7 +50,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           }}
         >
           <Text truncated>
-            Part Name: <b>{relabelImages[imageIndex].part.name}</b>
+            Part Name: <b>{relabelImage.part.name}</b>
           </Text>
         </div>
       </div>

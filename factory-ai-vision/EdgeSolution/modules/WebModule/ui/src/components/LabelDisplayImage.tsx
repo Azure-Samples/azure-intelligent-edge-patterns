@@ -3,9 +3,8 @@ import Konva from 'konva';
 import { Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
-import { LabelImage } from '../store/image/imageTypes';
 import getResizeImageFunction from './LabelingPage/util/resizeImage';
-import { Annotation, Size2D } from '../features/type';
+import { Annotation, Size2D, LabelImage } from '../features/type';
 
 interface LabelDisplayImageProps {
   labelImage: LabelImage;
@@ -28,7 +27,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   const shapes = useRef<BoxShape[]>([]);
   const [image, , size] = useImage(labelImage.image, 'anonymous');
   const resizeImage = useCallback(getResizeImageFunction(imgSize.current), [imgSize.current]);
-  const annotations = (labelImage.labels as any) as Annotation[];
+  const annotations = labelImage.labels;
 
   useLayoutEffect(() => {
     const container: HTMLDivElement = document.querySelector('#container');

@@ -8,12 +8,12 @@ import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
 import { getLabelImages } from '../../store/image/imageActions';
-import { LabelImage } from '../../store/image/imageTypes';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
 import { captureImage } from '../../features/imageSlice';
 import { makeLabelImageSelector } from '../../features/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
+import { LabelImage } from '../../features/type';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -21,7 +21,7 @@ export const CapturePhotos: React.FC<{
 }> = ({ partId, partName }) => {
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
-  const images = useSelector<State, any[]>(makeLabelImageSelector(partId));
+  const images = useSelector<State, LabelImage[]>(makeLabelImageSelector(partId));
   const availableCameras = useCameras();
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {

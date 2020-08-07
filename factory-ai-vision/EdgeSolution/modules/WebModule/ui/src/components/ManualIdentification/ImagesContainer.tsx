@@ -1,7 +1,7 @@
 import React, { FC, memo } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import ImageIdentificationItem from './ImageItem';
-import { LabelImage } from '../../store/image/imageTypes';
+import { LabelImage } from '../../features/type';
 
 interface ImagesContainerProps {
   images: LabelImage[];
@@ -23,8 +23,7 @@ const ImagesContainer: FC<ImagesContainerProps> = ({ images, selectedPartId }) =
       <ImageIdentificationItem
         key={img.id}
         confidenceLevel={img.confidence}
-        imageIndex={i}
-        relabelImages={images}
+        relabelImage={img}
         partId={selectedPartId}
       />
     ))}

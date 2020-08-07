@@ -23,18 +23,17 @@ import { ProjectData } from '../store/project/projectTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { getFilteredImages } from '../util/getFilteredImages';
 import { thunkGetProject } from '../store/project/projectActions';
-import { getLabelImages, thunkUpdateRelabel } from '../store/image/imageActions';
+import { thunkUpdateRelabel } from '../store/image/imageActions';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
+import { selectRelabelImages } from '../features/selectors';
+import { getImages } from '../features/imageSlice';
+import { getParts } from '../features/partSlice';
 
 const ManualIdentification: FC = () => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
-    (state) => ({
-      projectData: state.project.data,
-      images: state.images,
-    }),
-  );
+  const projectData = useSelector<State, ProjectData>((state) => state.project.data);
+  const images = useSelector(selectRelabelImages);
   // const parts = useParts(false);
   // const partItems = useMemo<DropdownItemProps[]>(() => {
   //   if (parts.length === 0 || projectData.parts.length === 0) return [];
@@ -66,14 +65,13 @@ const ManualIdentification: FC = () => {
 
   useEffect(() => {
     dispatch(thunkGetProject(false));
-    dispatch(getLabelImages());
+    dispatch(getImages());
+    dispatch(getParts(false));
   }, [dispatch]);
 
   const relabelImages = useMemo(
     () =>
-      getFilteredImages(images, {
-        isRelabel: true,
-      })
+      images
         .filter((e) => {
           const confidenceLevel = ((e.confidence * 1000) | 0) / 10;
           return confidenceLevel >= confidenceLevelRange[0] && confidenceLevel <= confidenceLevelRange[1];
@@ -97,7 +95,7 @@ const ManualIdentification: FC = () => {
     try {
       await dispatch(thunkUpdateRelabel());
       history.push('/partIdentification');
-      dispatch(getLabelImages());
+      dispatch(getImages());
     } catch (e) {
       alert(e);
     }

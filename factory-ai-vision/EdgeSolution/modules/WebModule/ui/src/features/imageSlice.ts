@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, nanoid, createEntityAdapter } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, nanoid, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
@@ -27,6 +27,8 @@ export type Image = {
   image: string;
   part: number;
   isRelabel: boolean;
+  confidence: number;
+  hasRelabeled: boolean;
 };
 
 // Normalization
@@ -37,6 +39,8 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     part: response.part,
     labels: response.labels,
     isRelabel: response.is_relabel,
+    confidence: response.confidence,
+    hasRelabeled: false,
   };
 };
 

@@ -24,3 +24,16 @@ export type Position2D = {
 };
 
 export type Size2D = { width: number; height: number };
+
+export type LabelImage = {
+  id: number;
+  image: string;
+  labels: Annotation[];
+  part: {
+    id: number;
+    name: string;
+  };
+  is_relabel: boolean;
+  confidence: number;
+  hasRelabeled?: boolean;
+};
