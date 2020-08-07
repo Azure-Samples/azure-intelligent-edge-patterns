@@ -19,7 +19,6 @@ export interface State {
   demoProject: Project;
   images: LabelImage[];
   setting: Setting;
-  dialogIsOpen: boolean;
 }
 
 const initialProject: Project = {
@@ -71,7 +70,6 @@ const initialProject: Project = {
 };
 
 export const initialState: State = {
-  dialogIsOpen: false,
   cameras: [],
   images: [],
   project: initialProject,

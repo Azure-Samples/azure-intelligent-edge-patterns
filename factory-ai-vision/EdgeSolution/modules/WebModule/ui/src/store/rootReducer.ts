@@ -3,7 +3,6 @@ import { combineReducers } from 'redux';
 import camerasReducer from './camera/cameraReducer';
 import partsReducer from '../features/partSlice';
 import locationsReducer from '../features/locationSlice';
-import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
 import createProjectReducerByIsDemo from './project/projectReducer';
 import labelImagesReducer from './image/imageReducer';
 import settingReducer from './setting/settingReducer';
@@ -14,7 +13,6 @@ import labelingPageReducer from '../features/labelingPageSlice';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,
-  dialogIsOpen: dialogIsOpenReducer,
   project: createProjectReducerByIsDemo(false),
   demoProject: createProjectReducerByIsDemo(true),
   images: labelImagesReducer,

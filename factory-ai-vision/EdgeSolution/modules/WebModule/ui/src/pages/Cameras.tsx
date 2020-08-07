@@ -11,10 +11,7 @@ import { AddModuleDialog } from '../components/AddModuleDialog/AddModuleDialog';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
-  const { cameras } = useSelector<State, { dialogIsOpen: boolean; cameras: Camera[] }>((state) => ({
-    dialogIsOpen: state.dialogIsOpen,
-    cameras: state.cameras.filter((e) => !e.is_demo),
-  }));
+  const cameras = useSelector<State, Camera[]>((state) => state.cameras.filter((e) => !e.is_demo));
 
   useEffect(() => {
     dispatch(getCameras());
