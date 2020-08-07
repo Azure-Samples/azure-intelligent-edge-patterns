@@ -6,10 +6,10 @@ import { Flex, Button, Text, Dialog } from '@fluentui/react-northstar';
 import Scene from './Scene';
 import { LabelingType, WorkState } from './type';
 import { State } from '../../store/State';
-import { saveLabelImageAnnotation, deleteLabelImage } from '../../store/image/imageActions';
+import { deleteLabelImage } from '../../store/image/imageActions';
 import PrevNextButton from './PrevNextButton';
 import { closeLabelingPage, goPrevImage, goNextImage } from '../../features/labelingPageSlice';
-import { selectImageEntities } from '../../features/imageSlice';
+import { selectImageEntities, saveLabelImageAnnotation } from '../../features/imageSlice';
 import { labelPageAnnoSelector } from '../../features/annotationSlice';
 import { Annotation } from '../../features/type';
 
@@ -38,7 +38,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   const isOnePointBox = checkOnePointBox(annotations);
 
   const onSave = (isRelabelDone: boolean): void => {
-    dispatch(saveLabelImageAnnotation(selectedImageId, isRelabel, isRelabelDone));
+    dispatch(saveLabelImageAnnotation());
   };
 
   const onSaveBtnClick = (): void => {

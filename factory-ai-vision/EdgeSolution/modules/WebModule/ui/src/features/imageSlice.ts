@@ -5,7 +5,9 @@ import { schema, normalize } from 'normalizr';
 import { Annotation, AnnotationState } from './type';
 import { openLabelingPage } from './labelingPageSlice';
 import { State } from '../store/State';
+import { createAnnotation } from './sharedActions';
 
+// Type definition
 type ImageFromServer = {
   id: number;
   image: string;
@@ -29,6 +31,7 @@ export type Image = {
   isRelabel: boolean;
 };
 
+// Normalization
 const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
   return {
     id: response.id,
@@ -76,6 +79,7 @@ const serializeLabels = R.map<ImageFromServer, ImageFromServerWithSerializedLabe
 
 const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeLabels);
 
+// Async Thunk Actions
 export const getImages = createAsyncThunk('images/get', async () => {
   const response = await Axios.get(`/api/images/`);
   return normalizeImages(response.data).entities;
@@ -96,6 +100,18 @@ export const captureImage = createAsyncThunk<
   return normalizeImages([response.data.image]).entities;
 });
 
+export const saveLabelImageAnnotation = createAsyncThunk<any, undefined, { state: State }>(
+  'image/saveAnno',
+  async (_, { getState }) => {
+    const imageId = getState().labelingPage.selectedImageId;
+    const labelIds = getState().labelImages.entities[imageId].labels;
+    const annoEntities = getState().annotations.entities;
+    const labels = labelIds.map((e) => annoEntities[e].label);
+
+    await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels) });
+  },
+);
+
 const imageAdapter = createEntityAdapter<Image>();
 
 const slice = createSlice({
@@ -109,6 +125,9 @@ const slice = createSlice({
       })
       .addCase(captureImage.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
+      })
+      .addCase(createAnnotation, (state, action) => {
+        state.entities[action.payload.imageId].labels.push(action.payload.id);
       }),
 });
 

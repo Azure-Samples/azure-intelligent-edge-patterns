@@ -9,15 +9,11 @@ import useImage from './util/useImage';
 import getResizeImageFunction from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
-import {
-  updateCreatingAnnotation,
-  removeAnnotation,
-  updateAnnotation,
-  thunkCreateAnnotation,
-} from '../../features/annotationSlice';
+import { updateCreatingAnnotation, removeAnnotation, updateAnnotation } from '../../features/annotationSlice';
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
 import { Annotation, Size2D } from '../../features/type';
+import { thunkCreateAnnotation } from '../../features/sharedActions';
 
 const defaultSize: Size2D = {
   width: 800,
