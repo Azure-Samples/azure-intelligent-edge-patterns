@@ -13,7 +13,7 @@ import { updateCreatingAnnotation, removeAnnotation, updateAnnotation } from '..
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
 import { Annotation, Size2D } from '../../features/type';
-import { thunkCreateAnnotation } from '../../features/sharedActions';
+import { thunkCreateAnnotation } from '../../features/annotationSlice';
 
 const defaultSize: Size2D = {
   width: 800,

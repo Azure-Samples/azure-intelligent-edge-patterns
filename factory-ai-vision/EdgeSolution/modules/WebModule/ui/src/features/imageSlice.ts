@@ -5,7 +5,6 @@ import { schema, normalize } from 'normalizr';
 import { Annotation, AnnotationState } from './type';
 import { openLabelingPage } from './labelingPageSlice';
 import { State } from '../store/State';
-import { createAnnotation } from './sharedActions';
 
 // Type definition
 type ImageFromServer = {
@@ -27,7 +26,6 @@ export type Image = {
   id: number;
   image: string;
   part: number;
-  labels: string[];
   isRelabel: boolean;
 };
 
@@ -125,9 +123,6 @@ const slice = createSlice({
       })
       .addCase(captureImage.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
-      })
-      .addCase(createAnnotation, (state, action) => {
-        state.entities[action.payload.imageId].labels.push(action.payload.id);
       }),
 });
 

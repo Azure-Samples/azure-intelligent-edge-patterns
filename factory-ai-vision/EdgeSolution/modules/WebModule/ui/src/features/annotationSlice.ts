@@ -1,11 +1,19 @@
-import { createSlice, createEntityAdapter, PayloadAction, createSelector, Reducer } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createEntityAdapter,
+  PayloadAction,
+  createSelector,
+  Reducer,
+  nanoid,
+  ThunkAction,
+  Action,
+} from '@reduxjs/toolkit';
 import * as R from 'ramda';
 
-import { getImages } from './imageSlice';
+import { getImages, saveLabelImageAnnotation } from './imageSlice';
 import { Annotation, AnnotationState, Position2D } from './type';
 import { State } from '../store/State';
 import { closeLabelingPage } from './labelingPageSlice';
-import { createAnnotation } from './sharedActions';
 
 // * Annotation Functions
 export const BoxObj = {
@@ -74,6 +82,20 @@ const slice = createSlice({
   name: 'label',
   initialState: entityAdapter.getInitialState(),
   reducers: {
+    createAnnotation: {
+      prepare: (point: Position2D, imageId: number) => ({
+        payload: {
+          id: nanoid(),
+          point,
+          imageId,
+        },
+      }),
+      reducer: (state, action: PayloadAction<{ point: Position2D; imageId: number; id: string }>) => {
+        const { point, imageId, id } = action.payload;
+        const newAnno = BoxObj.createWithPoint(point, imageId, id);
+        entityAdapter.upsertOne(state, newAnno);
+      },
+    },
     updateCreatingAnnotation: (state, action: PayloadAction<Position2D>) => {
       const idOfLastAnno = R.last(state.ids);
       const creatingAnnotation = BoxObj.add(action.payload, state.entities[idOfLastAnno]);
@@ -95,18 +117,9 @@ const slice = createSlice({
     removeAnnotation: entityAdapter.removeOne,
   },
   extraReducers: (builder) =>
-    builder
-      .addCase(getImages.fulfilled, (state, action) => {
-        entityAdapter.setAll(state, action.payload.labels || {});
-      })
-      .addCase(
-        createAnnotation,
-        (state, action: PayloadAction<{ point: Position2D; imageId: number; id: string }>) => {
-          const { point, imageId, id } = action.payload;
-          const newAnno = BoxObj.createWithPoint(point, imageId, id);
-          entityAdapter.upsertOne(state, newAnno);
-        },
-      ),
+    builder.addCase(getImages.fulfilled, (state, action) => {
+      entityAdapter.setAll(state, action.payload.labels || {});
+    }),
 });
 
 const { reducer } = slice;
@@ -120,14 +133,29 @@ const addOriginEntitiesReducer: Reducer<
     return { ...reducer(state, action), originEntities: action.payload.labels || {} };
   }
   if (closeLabelingPage.match(action)) {
-    return { ...state, entities: R.clone(state.originEntities) };
+    return { ...state, entities: R.clone(state.originEntities), ids: Object.keys(state.originEntities) };
+  }
+  if (saveLabelImageAnnotation.fulfilled.match(action)) {
+    return { ...state, originEntities: R.clone(state.entities) };
   }
   return { ...state, ...reducer(state, action) };
 };
 
 export default addOriginEntitiesReducer;
 
-export const { updateCreatingAnnotation, updateAnnotation, removeAnnotation } = slice.actions;
+export const {
+  updateCreatingAnnotation,
+  updateAnnotation,
+  removeAnnotation,
+  createAnnotation,
+} = slice.actions;
+
+export const thunkCreateAnnotation = (
+  point: Position2D,
+): ThunkAction<void, State, unknown, Action<string>> => (dispatch, getState) => {
+  const id = getState().labelingPage.selectedImageId;
+  dispatch(createAnnotation(point, id));
+};
 
 export const { selectAll: selectAllAnno, selectEntities: selectAnnoEntities } = entityAdapter.getSelectors(
   (state: State) => state.annotations,
