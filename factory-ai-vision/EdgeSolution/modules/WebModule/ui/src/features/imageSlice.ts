@@ -102,9 +102,10 @@ export const saveLabelImageAnnotation = createAsyncThunk<any, undefined, { state
   'image/saveAnno',
   async (_, { getState }) => {
     const imageId = getState().labelingPage.selectedImageId;
-    const labelIds = getState().labelImages.entities[imageId].labels;
     const annoEntities = getState().annotations.entities;
-    const labels = labelIds.map((e) => annoEntities[e].label);
+    const labels = Object.values(annoEntities)
+      .filter((e: Annotation) => e.image === imageId)
+      .map((e: Annotation) => e.label);
 
     await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels) });
   },
