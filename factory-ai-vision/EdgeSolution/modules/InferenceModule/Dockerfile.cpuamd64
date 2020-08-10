@@ -17,6 +17,10 @@ RUN apt-get update \
 ENV LANG en_US.UTF-8 
 ENV LC_ALL en_US.UTF-8
 
+# OPENCV workaround
+RUN apt-get install -y libgl1-mesa-glx
+
+
 
 COPY requirements.txt ./
 RUN pip install --upgrade pip
