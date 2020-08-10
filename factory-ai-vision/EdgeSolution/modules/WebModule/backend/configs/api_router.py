@@ -14,6 +14,7 @@ from vision_on_edge.azure_training_status.api import \
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views
 from vision_on_edge.feedback.api import views as feedback_views
+from vision_on_edge.video_feed.api import views as videofeed_views
 from vision_on_edge.image_predictions.api import \
     views as image_prediction_views
 from vision_on_edge.images.api import views as image_views
@@ -48,6 +49,8 @@ urlpatterns += [
     path('streams/<int:stream_id>/video_feed', stream_views.video_feed),
     path('streams/<int:stream_id>/capture', stream_views.capture),
     path('streams/<int:stream_id>/keep_alive', stream_views.keep_alive),
+    path('inference/video_feed', videofeed_views.video_feed),
+    path('inference/video_feed/keep_alive', videofeed_views.keep_alive),
     path('projects/<int:project_id>/train', azure_training_views.train),
     path('projects/<int:project_id>/export', azure_training_views.export),
     path('projects/<int:project_id>/train_performance',

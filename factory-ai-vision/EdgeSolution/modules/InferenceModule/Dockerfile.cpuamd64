@@ -17,8 +17,13 @@ RUN apt-get update \
 ENV LANG en_US.UTF-8 
 ENV LC_ALL en_US.UTF-8
 
+# OPENCV workaround
+RUN apt-get install -y libgl1-mesa-glx
+
+
 
 COPY requirements.txt ./
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt --ignore-installed && \
     pip install flask opencv-python onnx onnxruntime
 

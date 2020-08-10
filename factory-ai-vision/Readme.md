@@ -112,11 +112,10 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Vision on Edge installer: https://youtu.be/NWKLk8ENo-g
 [![video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/Installer%20instruction.png)](https://youtu.be/NWKLk8ENo-g)
-
 - Getting started with default model and message to cloud: https://youtu.be/WdNyS0PI6Zo
 - Define area of interest and show message to cloud: https://youtu.be/vN-SSxdKbkI
 - Your own stuff, add camera, location, part train and deploy a model: https://youtu.be/VNfOqP2Ag5U
-- Retrain your model with auto labeling: https://youtu.be/dXh9isASvcY
+- Retrain your model with auto labeling: https://youtu.be/F_E1NxbiQyw
 - Giving feedback and changing projects in setting: https://youtu.be/i92pMdUVrng
 
 
