@@ -19,6 +19,7 @@ ENV LC_ALL en_US.UTF-8
 
 
 COPY requirements.txt ./
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt --ignore-installed && \
     pip install flask opencv-python onnx onnxruntime
 
