@@ -5,6 +5,7 @@ drf-url-filters==0.5.1
 numpy
 opencv-python
 pillow
+pyzmq
 azure-cognitiveservices-vision-customvision==1.0.0
 requests
 django-cors-headers

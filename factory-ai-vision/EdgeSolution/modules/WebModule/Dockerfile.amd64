@@ -10,6 +10,9 @@ RUN yarn build
 
 FROM amd64/python:3.8
 
+RUN apt-get update
+RUN apt-get install -y libgl1-mesa-glx
+
 WORKDIR /app
 
 COPY backend/requirements.txt .
