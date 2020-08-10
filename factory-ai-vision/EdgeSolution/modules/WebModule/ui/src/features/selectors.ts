@@ -25,6 +25,7 @@ const mapImageToLabelImage = (images, partEntities, allAnno): LabelImage[] =>
     },
     is_relabel: img.isRelabel,
     confidence: img.confidence,
+    hasRelabeled: img.hasRelabeled,
   }));
 
 export const makeLabelImageSelector = (partId) =>

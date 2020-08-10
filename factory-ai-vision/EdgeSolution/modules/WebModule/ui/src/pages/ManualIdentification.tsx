@@ -31,6 +31,7 @@ import { getParts } from '../features/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { LabelingType } from '../components/LabelingPage/type';
 import { openLabelingPage } from '../features/labelingPageSlice';
+import { updateRelabelImages } from '../features/actions';
 
 const ManualIdentification: FC = () => {
   const history = useHistory();
@@ -96,9 +97,8 @@ const ManualIdentification: FC = () => {
 
   const onUpdate = async (): Promise<void> => {
     try {
-      await dispatch(thunkUpdateRelabel());
+      await dispatch(updateRelabelImages());
       history.push('/partIdentification');
-      dispatch(getImages());
     } catch (e) {
       alert(e);
     }

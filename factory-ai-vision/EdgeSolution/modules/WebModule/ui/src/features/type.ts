@@ -35,5 +35,5 @@ export type LabelImage = {
   };
   is_relabel: boolean;
   confidence: number;
-  hasRelabeled?: boolean;
+  hasRelabeled: boolean;
 };
