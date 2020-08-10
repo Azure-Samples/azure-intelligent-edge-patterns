@@ -51,6 +51,7 @@ import {
   UpdateProbThresholdRequestAction,
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
+  TrainingStatus,
 } from './projectTypes';
 import { State } from '../State';
 
@@ -81,11 +82,13 @@ const getTrainingLogSuccess = (
   trainingLog: string,
   newStatus: Status,
   isDemo: boolean,
+  progress: number,
 ): GetTrainingLogSuccessAction => ({
   type: GET_TRAINING_LOG_SUCCESS,
   payload: {
     trainingLog,
     newStatus,
+    progress,
   },
   isDemo,
 });
@@ -323,8 +326,9 @@ export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (disp
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo));
-      else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo));
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo, 0));
+      else
+        dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo, TrainingStatus[data.status]));
       return void 0;
     })
     .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));

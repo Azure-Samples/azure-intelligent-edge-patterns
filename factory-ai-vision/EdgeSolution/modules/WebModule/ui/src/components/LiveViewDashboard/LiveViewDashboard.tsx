@@ -37,6 +37,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
     status,
     trainingMetrics,
     data: { id: projectId, camera: projectCameraId },
+    progress,
   } = useSelector<State, Project>((state) => (isDemo ? state.demoProject : state.project));
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
@@ -75,10 +76,10 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
 
   if (status === CameraConfigStatus.WaitTraining)
     return (
-      <>
-        <ProgressBar percentage={10} />
+      <div style={{ width: '600px' }}>
+        {progress !== 0 && <ProgressBar percentage={progress} />}
         <pre>{trainingLogs.join('\n')}</pre>
-      </>
+      </div>
     );
 
   return (

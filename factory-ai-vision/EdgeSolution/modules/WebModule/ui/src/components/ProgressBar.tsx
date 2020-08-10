@@ -17,6 +17,7 @@ const getProgressStyle = (percentage) => ({ theme: { siteVariables } }): any => 
   height: '100%',
   borderRadius: '5px',
   width: `${percentage}%`,
+  transitionDuration: '3s',
 });
 
 export const ProgressBar: React.FC<{ percentage: number }> = ({ percentage }) => {
