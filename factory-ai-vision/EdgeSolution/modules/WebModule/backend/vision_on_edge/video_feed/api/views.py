@@ -1,17 +1,13 @@
-from django.shortcuts import render
-import json
+"""views
+"""
+
 import logging
 import sys
-import time
-import zmq
-import cv2
-import base64
 import threading
-import numpy as np
+import time
 
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
-from django.shortcuts import render
-from rest_framework import viewsets
+from django.http import StreamingHttpResponse
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from ..models import VideoFeed
@@ -48,8 +44,8 @@ class StreamManager():
                 logger.info("streams: %s", self.streams)
                 to_delete = []
                 for index, stream in enumerate(self.streams):
-                    logger.info('Stream %s elapse time: %s, Currnet time: %s' % (
-                        index, stream.keep_alive, time.time()))
+                    logger.info('Stream %s elapse time: %s, Currnet time: %s',
+                                index, stream.keep_alive, time.time())
                     if stream.keep_alive + STREAM_GC_TIME_THRESHOLD < time.time(
                     ):
 
@@ -74,7 +70,10 @@ if 'runserver' in sys.argv:
     stream_manager = StreamManager()
 
 
+@api_view()
 def video_feed(request):
+    """videofeed return
+    """
 
     s = VideoFeed()
     stream_manager.add(s)
@@ -84,13 +83,14 @@ def video_feed(request):
         content_type="multipart/x-mixed-replace;boundary=frame")
 
 
+@api_view()
 def keep_alive(request):
     """keep stream alive
     """
 
     logger.info("Keeping streams alive")
     cnt = 0
-    for index, stream in enumerate(stream_manager.streams):
+    for stream in stream_manager.streams:
         cnt += 1
         stream.update_keep_alive()
-    return JsonResponse({'status': 'ok', 'detail': 'keep %s stream(s) alive' % cnt})
+    return Response({'status': 'ok', 'detail': 'keep %s stream(s) alive' % cnt})

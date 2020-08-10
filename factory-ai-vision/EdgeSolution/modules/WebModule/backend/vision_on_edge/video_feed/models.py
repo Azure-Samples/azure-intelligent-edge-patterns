@@ -3,14 +3,12 @@ Models
 """
 
 import logging
-import zmq
-import time
-import numpy as np
-import cv2
 import threading
+import time
 
-from django.db import models
-from django.db.models.signals import post_save
+import cv2
+import numpy as np
+import zmq
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_settings.models import Setting
@@ -25,12 +23,16 @@ class VideoFeed():
     def __init__(self):
         self.keep_alive = time.time()
         self.last_active = time.time()
-        self.id = id(self)
         self.context = zmq.Context()
         self.mutex = threading.Lock()
         self.receiver = self.context.socket(zmq.PULL)
 
     def gen(self):
+        """gen
+
+        video feed genarator
+        """
+
         # context = zmq.Context()
         # receiver = context.socket(zmq.PULL)
         self.receiver.connect("tcp://localhost:5558")
@@ -40,8 +42,8 @@ class VideoFeed():
 
             nparr = np.frombuffer(np.array(ret['data']), np.uint8)
 
-            logger.warning('Receive: %s' % ret['ts'])
-            logger.warning('Time elapsed: %s' % (time.time()-self.keep_alive))
+            logger.warning('Receive: %s', ret['ts'])
+            logger.warning('Time elapsed: %s', (time.time()-self.keep_alive))
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
             # ret2 = receiver.recv_pyobj()
@@ -57,5 +59,8 @@ class VideoFeed():
         self.keep_alive = time.time()
 
     def close(self):
+        """close connection
+        """
+
         self.receiver.close()
         logging.warning('connection close')
