@@ -6,9 +6,13 @@ import { LabelImage } from '../../features/type';
 interface ImageIdentificationItemProps {
   confidenceLevel: number;
   relabelImage: LabelImage;
-  partId: number;
+  onDisplayImageClick: (imgId: number) => void;
 }
-const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceLevel, relabelImage }) => {
+const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
+  confidenceLevel,
+  relabelImage,
+  onDisplayImageClick,
+}) => {
   return (
     <div
       style={{
@@ -25,7 +29,11 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({ confidenceL
           flex: '1 0 0',
         }}
       >
-        <LabelDisplayImage pointerCursor labelImage={relabelImage} />
+        <LabelDisplayImage
+          pointerCursor
+          labelImage={relabelImage}
+          onClick={() => onDisplayImageClick(relabelImage.id)}
+        />
       </div>
       <div
         style={{

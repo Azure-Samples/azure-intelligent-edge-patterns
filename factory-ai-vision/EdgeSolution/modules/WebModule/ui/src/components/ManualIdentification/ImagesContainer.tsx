@@ -5,9 +5,9 @@ import { LabelImage } from '../../features/type';
 
 interface ImagesContainerProps {
   images: LabelImage[];
-  selectedPartId: number;
+  onDisplayImageClick: (imgId: number) => void;
 }
-const ImagesContainer: FC<ImagesContainerProps> = ({ images, selectedPartId }) => (
+const ImagesContainer: FC<ImagesContainerProps> = ({ images, onDisplayImageClick }) => (
   <Grid
     columns="2"
     styles={{
@@ -19,12 +19,12 @@ const ImagesContainer: FC<ImagesContainerProps> = ({ images, selectedPartId }) =
       rowGap: '10px',
     }}
   >
-    {images.map((img, i) => (
+    {images.map((img) => (
       <ImageIdentificationItem
         key={img.id}
         confidenceLevel={img.confidence}
         relabelImage={img}
-        partId={selectedPartId}
+        onDisplayImageClick={onDisplayImageClick}
       />
     ))}
   </Grid>

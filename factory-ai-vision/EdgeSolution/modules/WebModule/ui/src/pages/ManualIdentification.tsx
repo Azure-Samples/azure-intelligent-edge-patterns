@@ -28,6 +28,9 @@ import ImagesContainer from '../components/ManualIdentification/ImagesContainer'
 import { selectRelabelImages } from '../features/selectors';
 import { getImages } from '../features/imageSlice';
 import { getParts } from '../features/partSlice';
+import LabelingPage from '../components/LabelingPage/LabelingPage';
+import { LabelingType } from '../components/LabelingPage/type';
+import { openLabelingPage } from '../features/labelingPageSlice';
 
 const ManualIdentification: FC = () => {
   const history = useHistory();
@@ -101,6 +104,10 @@ const ManualIdentification: FC = () => {
     }
   };
 
+  const onDisplayImageClick = (imgId: number) => {
+    dispatch(openLabelingPage({ imageIds: images.map((e) => e.id), selectedImageId: imgId }));
+  };
+
   return (
     <>
       <Text size="larger" weight="semibold">
@@ -149,7 +156,8 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
-        <ImagesContainer images={relabelImages} selectedPartId={selectedPartId} />
+        <ImagesContainer images={relabelImages} onDisplayImageClick={onDisplayImageClick} />
+        <LabelingPage labelingType={LabelingType.SingleAnnotation} isRelabel={true} />
         <Button
           content="Update"
           styles={{ width: '15%' }}
