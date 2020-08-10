@@ -23,6 +23,7 @@ from ...azure_parts.models import Part
 from ...azure_parts.utils import batch_upload_parts_to_customvision
 from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
+from ...azure_training_status import constants as progress_constants
 from ...cameras.models import Camera
 from ...general.utils import normalize_rtsp
 from ...general import error_messages
@@ -358,8 +359,7 @@ def upload_and_train(project_id):
         )
 
     upcreate_training_status(project_id=project_obj.id,
-                             status="preparing",
-                             log="preparing data (images and annotations)")
+                             **progress_constants.PROGRESS_1_FINDING_PROJECT)
 
     project_obj.dequeue_iterations()
 
@@ -380,10 +380,8 @@ def upload_and_train(project_id):
             project_obj.create_project()
             upcreate_training_status(
                 project_id=project_obj.id,
-                status="preparing",
-                log=("Project created on CustomVision. " +
-                     f"Name: {project_obj.customvision_project_name}"),
-                need_to_send_notification=True)
+                need_to_send_notification=True,
+                **progress_constants.PROGRESS_2_PROJECT_CREATED)
 
             logger.info("Project created on CustomVision.")
             logger.info("Project Id: %s", project_obj.customvision_project_id)
@@ -391,9 +389,10 @@ def upload_and_train(project_id):
                         project_obj.customvision_project_name)
             customvision_project_id = project_obj.customvision_project_id
 
-        upcreate_training_status(project_id=project_obj.id,
-                                 status="sending",
-                                 log="sending data (images and annotations)")
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress_constants.PROGRESS_3_UPLOADING_PARTS)
 
         # Get tags_dict to avoid getting tags every time
         tags = trainer.get_tags(project_id=project_obj.customvision_project_id)
@@ -412,6 +411,11 @@ def upload_and_train(project_id):
             project_id=project_id, part_ids=part_ids, tags_dict=tags_dict)
         if has_new_parts:
             project_changed = True
+        
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress_constants.PROGRESS_4_UPLOADING_IMAGES)
 
         # Upload images to CustomVisioin Project
         for part_id in part_ids:
@@ -430,9 +434,8 @@ def upload_and_train(project_id):
         else:
             upcreate_training_status(
                 project_id=project_obj.id,
-                status="training",
-                log="Project changed. Submitting training task...",
-                need_to_send_notification=True)
+                need_to_send_notification=True,
+                **progress_constants.PROGRESS_5_SUBMITTING_TRAINING_TASK)
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
                 update_app_insight_counter(
@@ -527,9 +530,8 @@ def update_train_status(project_id):
             if len(iterations) == 0:
                 upcreate_training_status(
                     project_id=project_obj.id,
-                    status="preparing",
-                    log="Preparing Custom Vision environment",
-                )
+                    **
+                    progress_constants.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
                 wait_prepare += 1
                 if wait_prepare > max_wait_prepare:
                     upcreate_training_status(
@@ -545,10 +547,8 @@ def update_train_status(project_id):
             if not iteration.exportable or iteration.status != "Completed":
                 upcreate_training_status(
                     project_id=project_obj.id,
-                    status="training",
-                    log=
-                    "training (Training job might take up to 10-15 minutes)",
-                    need_to_send_notification=(not training_init))
+                    need_to_send_notification=(not training_init),
+                    **progress_constants.PROGRESS_7_TRAINING)
                 training_init = True
                 continue
 
@@ -557,9 +557,8 @@ def update_train_status(project_id):
             if len(exports) == 0 or not exports[0].download_uri:
                 upcreate_training_status(
                     project_id=project_obj.id,
-                    status="exporting",
-                    log="exporting model",
-                    need_to_send_notification=(not export_init))
+                    need_to_send_notification=(not export_init),
+                    **progress_constants.PROGRESS_8_EXPORTING)
                 export_init = True
                 res = project_obj.export_iterationv3_2(iteration.id)
                 logger.info(res.json())
@@ -605,9 +604,8 @@ def update_train_status(project_id):
 
                 upcreate_training_status(
                     project_id=project_obj.id,
-                    status="deploying",
-                    log="deploying model",
-                    need_to_send_notification=(not deploy_init))
+                    need_to_send_notification=(not deploy_init),
+                    **progress_constants.PROGRESS_9_DEPLOYING)
                 deploy_init = True
                 continue
 
@@ -621,10 +619,9 @@ def update_train_status(project_id):
             logger.info("Training Performance: %s", train_performance_list)
             upcreate_training_status(
                 project_id=project_obj.id,
-                status="ok",
-                log="model trained and deployed.",
                 performance=json.dumps(train_performance_list),
-                need_to_send_notification=True)
+                need_to_send_notification=True,
+                **progress_constants.PROGRESS_0_OK)
             project_obj.has_configured = True
             project_obj.save()
             break
