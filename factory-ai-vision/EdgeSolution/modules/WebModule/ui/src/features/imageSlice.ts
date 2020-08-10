@@ -1,4 +1,11 @@
-import { createSlice, createAsyncThunk, nanoid, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  nanoid,
+  createEntityAdapter,
+  createSelector,
+  PayloadAction,
+} from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
@@ -102,18 +109,20 @@ export const captureImage = createAsyncThunk<
   return normalizeImages([response.data.image]).entities;
 });
 
-export const saveLabelImageAnnotation = createAsyncThunk<any, undefined, { state: State }>(
-  'image/saveAnno',
-  async (_, { getState }) => {
-    const imageId = getState().labelingPage.selectedImageId;
-    const annoEntities = getState().annotations.entities;
-    const labels = Object.values(annoEntities)
-      .filter((e: Annotation) => e.image === imageId)
-      .map((e: Annotation) => e.label);
+export const saveLabelImageAnnotation = createAsyncThunk<
+  any,
+  { isRelabel: boolean; isRelabelDone: boolean },
+  { state: State }
+>('image/saveAnno', async ({ isRelabel, isRelabelDone }, { getState }) => {
+  const imageId = getState().labelingPage.selectedImageId;
+  const annoEntities = getState().annotations.entities;
+  const labels = Object.values(annoEntities)
+    .filter((e: Annotation) => e.image === imageId)
+    .map((e: Annotation) => e.label);
 
-    await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels) });
-  },
-);
+  await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels) });
+  return { isRelabel, imageId, isRelabelDone };
+});
 
 const imageAdapter = createEntityAdapter<Image>();
 
@@ -128,7 +137,19 @@ const slice = createSlice({
       })
       .addCase(captureImage.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
-      }),
+      })
+      .addCase(
+        saveLabelImageAnnotation.fulfilled,
+        (state, action: PayloadAction<{ isRelabel: boolean; imageId: number; isRelabelDone: boolean }>) => {
+          if (action.payload.isRelabel)
+            imageAdapter.updateOne(state, { id: action.payload.imageId, changes: { hasRelabeled: true } });
+          if (action.payload.isRelabelDone)
+            state.ids.forEach((id) => {
+              const { hasRelabeled } = state.entities[id];
+              if (!hasRelabeled) state.entities[id].part = null;
+            });
+        },
+      ),
 });
 
 const { reducer } = slice;

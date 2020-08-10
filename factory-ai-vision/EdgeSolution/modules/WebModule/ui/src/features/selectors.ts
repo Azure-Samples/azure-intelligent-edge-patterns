@@ -5,7 +5,9 @@ import { selectAllAnno } from './annotationSlice';
 import { LabelImage } from './type';
 
 const selectImagesByRelabel = (isRelabel) =>
-  createSelector(selectAllImages, (images) => images.filter((img) => img.isRelabel === isRelabel));
+  createSelector(selectAllImages, (images) =>
+    images.filter((img) => img.isRelabel === isRelabel && img.part !== null),
+  );
 
 const selectImagesByPart = (partId) =>
   createSelector(selectAllImages, selectImagesByRelabel(false), (images) =>
@@ -19,7 +21,7 @@ const mapImageToLabelImage = (images, partEntities, allAnno): LabelImage[] =>
     labels: allAnno.filter((e) => e.image === img.id),
     part: {
       id: img.part,
-      name: partEntities[img.part].name,
+      name: partEntities[img.part]?.name,
     },
     is_relabel: img.isRelabel,
     confidence: img.confidence,

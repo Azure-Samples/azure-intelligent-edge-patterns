@@ -38,7 +38,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   const isOnePointBox = checkOnePointBox(annotations);
 
   const onSave = (isRelabelDone: boolean): void => {
-    dispatch(saveLabelImageAnnotation());
+    dispatch(saveLabelImageAnnotation({ isRelabel, isRelabelDone }));
   };
 
   const onSaveBtnClick = (): void => {

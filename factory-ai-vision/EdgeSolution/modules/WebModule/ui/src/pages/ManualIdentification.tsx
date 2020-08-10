@@ -68,8 +68,8 @@ const ManualIdentification: FC = () => {
 
   useEffect(() => {
     dispatch(thunkGetProject(false));
-    dispatch(getImages());
     dispatch(getParts(false));
+    dispatch(getImages());
   }, [dispatch]);
 
   const relabelImages = useMemo(
