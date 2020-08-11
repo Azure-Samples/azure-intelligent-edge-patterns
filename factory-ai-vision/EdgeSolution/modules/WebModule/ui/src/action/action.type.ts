@@ -24,6 +24,10 @@ export type ReceiveNotification = {
 
 export type OpenNotificationPanel = { type: typeof constants.OPEN_NOTIFICATION_PANEL };
 
+export type ClearAllNotificationsRequest = APIRequestAction<typeof constants.CLEAR_ALL_NOTIFICATION_REQUEST>;
+export type ClearAllNotificationsSuccess = APISuccessAction<typeof constants.CLEAR_ALL_NOTIFICATION_SUCCESS>;
+export type ClearAllNotificationsFailure = APIFailureAction<typeof constants.CLEAR_ALL_NOTIFICATION_FAILURE>;
+
 export type ActionTypes =
   | GetNotificationsRequest
   | GetNotificationsSuccess
@@ -32,4 +36,7 @@ export type ActionTypes =
   | DeleteNotificationSuccess
   | DeleteNotificationFailure
   | ReceiveNotification
-  | OpenNotificationPanel;
+  | OpenNotificationPanel
+  | ClearAllNotificationsRequest
+  | ClearAllNotificationsSuccess
+  | ClearAllNotificationsFailure;
