@@ -653,7 +653,6 @@ def video_feed():
                         img = cv2.rectangle(
                             img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                         img = draw_confidence_level(img, prediction)
-                        onnx.last_drawn_img = img
 
             time.sleep(0.02)
             yield (b'--frame\r\n'
@@ -695,7 +694,7 @@ def gen():
                 img = cv2.rectangle(
                     img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 img = draw_confidence_level(img, prediction)
-                onnx.last_drawn_img = img
+        onnx.last_drawn_img = img
 
         time.sleep(0.02)
 
