@@ -3,7 +3,6 @@ import {
   createAsyncThunk,
   nanoid,
   createEntityAdapter,
-  createSelector,
   PayloadAction,
   ThunkAction,
   Action,
@@ -88,6 +87,11 @@ export const getImages = createAsyncThunk('images/get', async () => {
   return normalizeImages(response.data).entities;
 });
 
+export const postImages = createAsyncThunk('image/post', async (newImage: FormData) => {
+  const response = await Axios.post('/api/images/', newImage);
+  return normalizeImages([response.data]).entities;
+});
+
 export const captureImage = createAsyncThunk<
   any,
   { streamId: string; imageIds: number[]; shouldOpenLabelingPage: boolean }
@@ -146,7 +150,10 @@ const slice = createSlice({
             });
         },
       )
-      .addCase(deleteImage.fulfilled, imageAdapter.removeOne),
+      .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
+      .addCase(postImages.fulfilled, (state, action) => {
+        imageAdapter.upsertMany(state, action.payload.images);
+      }),
 });
 
 const { reducer } = slice;
