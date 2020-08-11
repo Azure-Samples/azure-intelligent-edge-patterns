@@ -105,7 +105,7 @@ const ManualIdentification: FC = () => {
   };
 
   const onDisplayImageClick = (imgId: number) => {
-    dispatch(openLabelingPage({ imageIds: images.map((e) => e.id), selectedImageId: imgId }));
+    dispatch(openLabelingPage({ imageIds: relabelImages.map((e) => e.id), selectedImageId: imgId }));
   };
 
   return (

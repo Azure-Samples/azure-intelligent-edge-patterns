@@ -3,17 +3,21 @@ import { Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
-import * as R from 'ramda';
 
 import useImage from './util/useImage';
 import getResizeImageFunction from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
-import { updateCreatingAnnotation, removeAnnotation, updateAnnotation } from '../../features/annotationSlice';
+import {
+  updateCreatingAnnotation,
+  removeAnnotation,
+  thunkCreateAnnotation,
+} from '../../features/annotationSlice';
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
 import { Annotation, Size2D } from '../../features/type';
-import { thunkCreateAnnotation } from '../../features/annotationSlice';
+import { Part } from '../../features/partSlice';
+import { thunkChangeImgPart } from '../../features/imageSlice';
 
 const defaultSize: Size2D = {
   width: 800,
@@ -28,6 +32,7 @@ interface SceneProps {
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
   partFormDisabled: boolean;
+  imgPart: Part;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
@@ -37,6 +42,7 @@ const Scene: FC<SceneProps> = ({
   setWorkState,
   onBoxCreated,
   partFormDisabled,
+  imgPart,
 }) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
@@ -183,7 +189,7 @@ const Scene: FC<SceneProps> = ({
                   y={annotation.label.y1 - 25 / scale.current}
                   fontSize={20 / scale.current}
                   fill="red"
-                  // text={annotations[selectedAnnotationIndex]?.part.name}
+                  text={imgPart?.name}
                   test="part"
                   visible={!partFormDisabled}
                 />
@@ -209,15 +215,9 @@ const Scene: FC<SceneProps> = ({
             left={annotations[0]?.label.x2 * scale.current + 10}
             open={true}
             onDismiss={(): void => onSelect(null)}
-            // selectedPart={annotations[selectedAnnotationIndex]?.part}
-            selectedPart={null}
-            setSelectedPart={(newPart): void => {
-              // dispatch(
-              //   updateAnnotation(
-              //     selectedAnnotationIndex,
-              //     R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
-              //   ),
-              // );
+            selectedPart={imgPart}
+            setSelectedPart={(part): void => {
+              dispatch(thunkChangeImgPart(part));
             }}
           />
         )}

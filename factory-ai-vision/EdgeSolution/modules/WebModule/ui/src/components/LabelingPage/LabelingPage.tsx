@@ -12,12 +12,17 @@ import { closeLabelingPage, goPrevImage, goNextImage } from '../../features/labe
 import { selectImageEntities, saveLabelImageAnnotation } from '../../features/imageSlice';
 import { labelPageAnnoSelector } from '../../features/annotationSlice';
 import { Annotation } from '../../features/type';
+import { selectPartEntities, Part } from '../../features/partSlice';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
-export const imageUrlSelector = createSelector(
+export const imageSelector = createSelector(
   [getSelectedImageId, selectImageEntities],
-  (selectedImageId, imageEntities) => imageEntities[selectedImageId]?.image || '',
+  (selectedImageId, imageEntities) => imageEntities[selectedImageId],
 );
+const imagePartSelector = createSelector([imageSelector, selectPartEntities], (img, partEntities) => {
+  if (img) return partEntities[img.part];
+  return { id: null, name: '', description: '' };
+});
 
 interface LabelingPageProps {
   labelingType: LabelingType;
@@ -29,7 +34,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const index = imageIds.findIndex((e) => e === selectedImageId);
-  const imageUrl = useSelector<State, string>(imageUrlSelector);
+  const imageUrl = useSelector<State, string>((state) => imageSelector(state)?.image || '');
+  const imgPart = useSelector<State, Part>(imagePartSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
 
@@ -90,6 +96,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
             labelingType={labelingType}
             onBoxCreated={onBoxCreated}
             partFormDisabled={!isRelabel}
+            imgPart={imgPart}
           />
         </PrevNextButton>
         <Flex gap="gap.medium">

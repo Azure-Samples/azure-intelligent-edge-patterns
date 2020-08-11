@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { RadioGroup, Button, CloseIcon } from '@fluentui/react-northstar';
 import { useParts } from '../../hooks/useParts';
 import { useProject } from '../../hooks/useProject';
@@ -8,7 +8,7 @@ type PartFormProps = {
   left: number;
   open: boolean;
   selectedPart: { id: number; name: string };
-  setSelectedPart: (part: { id: number; name: string }) => void;
+  setSelectedPart: (newPart: number) => void;
   onDismiss: () => void;
 };
 
@@ -37,11 +37,6 @@ export const PartForm: React.FC<PartFormProps> = ({
     [parts, project.data.parts],
   );
 
-  useEffect(() => {
-    // FIXME
-    if (items?.length > 0) setSelectedPart({ id: items[0].key, name: items[0].name });
-  }, [items]);
-
   if (!open) return null;
 
   return (
@@ -62,9 +57,7 @@ export const PartForm: React.FC<PartFormProps> = ({
       <RadioGroup
         vertical
         items={items}
-        onCheckedValueChange={(_, newProps): void =>
-          setSelectedPart({ id: newProps.value as number, name: newProps.name })
-        }
+        onCheckedValueChange={(_, newProps): void => setSelectedPart(newProps.value as number)}
         checkedValue={selectedPart.id}
       />
       <Button

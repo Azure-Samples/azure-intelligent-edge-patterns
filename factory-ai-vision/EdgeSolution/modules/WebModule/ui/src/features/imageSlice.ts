@@ -5,6 +5,8 @@ import {
   createEntityAdapter,
   createSelector,
   PayloadAction,
+  ThunkAction,
+  Action,
 } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
@@ -129,7 +131,9 @@ const imageAdapter = createEntityAdapter<Image>();
 const slice = createSlice({
   name: 'images',
   initialState: imageAdapter.getInitialState(),
-  reducers: {},
+  reducers: {
+    changeImgPart: imageAdapter.updateOne,
+  },
   extraReducers: (builder) =>
     builder
       .addCase(getImages.fulfilled, (state, action) => {
@@ -154,6 +158,15 @@ const slice = createSlice({
 
 const { reducer } = slice;
 export default reducer;
+
+export const { changeImgPart } = slice.actions;
+export const thunkChangeImgPart = (newPartId: number): ThunkAction<void, State, unknown, Action<string>> => (
+  dispatch,
+  getState,
+) => {
+  const { selectedImageId } = getState().labelingPage;
+  dispatch(changeImgPart({ id: selectedImageId, changes: { part: newPartId } }));
+};
 
 export const {
   selectAll: selectAllImages,
