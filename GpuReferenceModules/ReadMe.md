@@ -1,4 +1,4 @@
-# Deploy a GPU enabled IoT Module on Azure Stack Hub
+# Deploy a GPU enabled IoT Module on Azure Stack Hub and Edge
 ## About this sample
 ### Overview
 In this article you'll learn how to:
