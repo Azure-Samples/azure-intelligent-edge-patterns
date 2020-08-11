@@ -717,6 +717,7 @@ def gen_zmq():
             {"data": cv2.imencode(".jpg", onnx.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
         # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
         # time.sleep(2)
+        time.sleep(0.04)
 
 
 def main():
