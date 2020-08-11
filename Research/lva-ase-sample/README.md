@@ -1,27 +1,15 @@
----
-page_type: sample
-languages:
-  - bash
-products:
-  - azure
-  - azure-media-services
-  - azure-live-video-analytics
-  - azure stack edge
-description: "The sample in this repo shows how to use the Live Video Analytics on IoT Edge module to analyze live video using the YoloV3 AI module and record video on the Azure Stack Edge device."  
----
+# LIVE VIDEO ANALYTICS ON AZURE STACK EDGE SAMPLES
+
+This repository contains instructions to run a sample that uses the Live Video Analytics on IoT Edge Module to analyze live video using a YoloV3 AI module, and record video on the Azure Stack Edge device
 
 This tutorial will walk you through setting up an Azure Stack Edge device and deploying the following modules:
 - Live Video Analytics
 - RTSP simulation
-- Yolo V3 machine learning model to detect objects
+- Yolo V3 AI model to detect objects
 
-You can choose to set this up so the RTSP simulation videos are uploaded to the cloud or used locally. This tutorial will set things up to run locally.
+You can choose to set this up so the RTSP simulation videos are uploaded to the cloud or to your local files. This tutorial will set things up to run locally, but see instructions under [Next Steps](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/readme.md) to change this.
 
-# Live Video Analytics on Azure Stack Edge samples
-
-This repository contains C# samples for Live Video Analytics on Azure Stack Edge
-
-## Contents
+## Contents ##
 
 | File/folder       | Description                                |
 |----------------------|--------------------------------------------|
@@ -32,7 +20,7 @@ This repository contains C# samples for Live Video Analytics on Azure Stack Edge
 
 The 'src' folder contains the setup subfolder with all necessary files to run this sample
 
-## Prerequisites
+## Prerequisites ##
 
 1. An active Azure subscription with owner level permissions
 2. Azure Stack Edge device
