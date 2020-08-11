@@ -49,6 +49,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
 
   const onSaveBtnClick = (): void => {
     onSave(false);
+    dispatch(goNextImage());
     if (index === imageIds.length - 1) closeDialog();
   };
 
