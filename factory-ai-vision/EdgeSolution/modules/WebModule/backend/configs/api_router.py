@@ -69,7 +69,9 @@ urlpatterns += [
     path('relabel', relabel_views.upload_relabel_image),
     path('relabel/update', relabel_views.relabel_update),
     path('appinsight/key', app_insight_views.instrumentation_key),
-    path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp)
+    path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp),
+    # FIXME PETER please find a better place to put this
+    path('notifications/delete_all', notifications_views.delete_all)
 ]
 
 app_name = "api"
