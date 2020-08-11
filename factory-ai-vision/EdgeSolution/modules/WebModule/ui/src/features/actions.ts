@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from '../store/State';
-import { Image } from './imageSlice';
+import { Image } from './type';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -16,3 +16,8 @@ export const updateRelabelImages = createAsyncThunk<any, undefined, { state: Sta
     await Axios.post('/api/relabel/update', data);
   },
 );
+
+export const deleteImage = createAsyncThunk('images/delete', async (id: number) => {
+  await Axios.delete(`/api/images/${id}`);
+  return id;
+});

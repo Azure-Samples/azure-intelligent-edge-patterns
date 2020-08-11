@@ -37,3 +37,12 @@ export type LabelImage = {
   confidence: number;
   hasRelabeled: boolean;
 };
+
+export type Image = {
+  id: number;
+  image: string;
+  part: number;
+  isRelabel: boolean;
+  confidence: number;
+  hasRelabeled: boolean;
+};

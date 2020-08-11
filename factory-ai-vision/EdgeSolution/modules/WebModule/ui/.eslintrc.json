@@ -90,7 +90,8 @@
           "$scope", // for Angular 1 scopes
           "staticContext", // for ReactRouter context
           // Above configs are based on airbnb-base
-          "evt" // for Konva Object
+          "evt", // for Konva Object
+          "state" // for redux toolkit reducer
         ]
       }
     ]

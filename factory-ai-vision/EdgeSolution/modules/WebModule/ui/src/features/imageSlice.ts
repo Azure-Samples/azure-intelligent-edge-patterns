@@ -11,9 +11,10 @@ import {
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
-import { Annotation, AnnotationState } from './type';
+import { Annotation, AnnotationState, Image } from './type';
 import { openLabelingPage } from './labelingPageSlice';
 import { State } from '../store/State';
+import { deleteImage } from './actions';
 
 // Type definition
 type ImageFromServer = {
@@ -30,15 +31,6 @@ type ImageFromServer = {
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
-
-export type Image = {
-  id: number;
-  image: string;
-  part: number;
-  isRelabel: boolean;
-  confidence: number;
-  hasRelabeled: boolean;
-};
 
 // Normalization
 const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
@@ -153,7 +145,8 @@ const slice = createSlice({
               if (!hasRelabeled) state.entities[id].part = null;
             });
         },
-      ),
+      )
+      .addCase(deleteImage.fulfilled, imageAdapter.removeOne),
 });
 
 const { reducer } = slice;

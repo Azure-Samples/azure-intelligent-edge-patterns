@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { deleteImage } from './actions';
 
 export type LabelPageState = {
   imageIds: number[];
@@ -28,6 +29,13 @@ const slice = createSlice({
     goNextImage: changeSelectedImage(1),
     goPrevImage: changeSelectedImage(-1),
   },
+  extraReducers: (builder) =>
+    builder.addCase(deleteImage.fulfilled, (state, action) => {
+      const removeIdx = state.imageIds.findIndex((id) => id === action.payload);
+      state.imageIds.splice(removeIdx, 1);
+      if (state.imageIds.length === 0) state.selectedImageId = null;
+      else state.selectedImageId = state.imageIds[removeIdx] || state.imageIds[0];
+    }),
 });
 
 const { reducer } = slice;

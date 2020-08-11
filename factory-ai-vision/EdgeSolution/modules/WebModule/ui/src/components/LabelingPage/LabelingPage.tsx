@@ -6,13 +6,13 @@ import { Flex, Button, Text, Dialog } from '@fluentui/react-northstar';
 import Scene from './Scene';
 import { LabelingType, WorkState } from './type';
 import { State } from '../../store/State';
-import { deleteLabelImage } from '../../store/image/imageActions';
 import PrevNextButton from './PrevNextButton';
 import { closeLabelingPage, goPrevImage, goNextImage } from '../../features/labelingPageSlice';
 import { selectImageEntities, saveLabelImageAnnotation } from '../../features/imageSlice';
 import { labelPageAnnoSelector } from '../../features/annotationSlice';
 import { Annotation } from '../../features/type';
 import { selectPartEntities, Part } from '../../features/partSlice';
+import { deleteImage } from '../../features/actions';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -65,7 +65,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   };
 
   const onDeleteImage = (): void => {
-    dispatch(deleteLabelImage(selectedImageId));
+    dispatch(deleteImage(selectedImageId));
   };
 
   return (
