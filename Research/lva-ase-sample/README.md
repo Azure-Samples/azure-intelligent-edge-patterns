@@ -1,12 +1,13 @@
 ---
 page_type: sample
 languages:
-  - csharp
+  - bash
 products:
   - azure
   - azure-media-services
   - azure-live-video-analytics
-description: "The sample in this repo shows how to use the Live Video Analytics on IoT Edge module to analyze live video using AI modules of your choice and record video on the Azure Stack Edge device."  
+  - azure stack edge
+description: "The sample in this repo shows how to use the Live Video Analytics on IoT Edge module to analyze live video using the YoloV3 AI module and record video on the Azure Stack Edge device."  
 ---
 
 This tutorial will walk you through setting up an Azure Stack Edge device and deploying the following modules:
@@ -68,7 +69,7 @@ Here you will add two entries
 * (Kubernetes API service IP) (Kubernetes API service endpoint)
 
 #### Get the sample camera stream
-Since we don't have an actual camera to stream from, we will use a simulated video. Download the file from this folder (camera-300s.mkv) and place it in your local share on your ASE, from file explorer. This will correspond to your "INPUT_VIDEO_FOLDER_ON_DEVICE" variable later on. The video should be titled 'camera-300s.mkv' but if you choose to use another video, make sure to update the operations.json file so that the rtspUrl points at the correct file. Note that Live Video Analytics currently runs best with .mkv files.
+Since we don't have an actual camera to stream from, we will use a simulated video. Download the file from this folder (camera-300s.mkv) and place it in your local share on your ASE, from file explorer. This will correspond to your "INPUT_VIDEO_FOLDER_ON_DEVICE" variable later on. The video should be titled 'camera-300s.mkv' but if you choose to use another video, make sure to update the instanceset.json file that will be downloaded in the next step, so that the rtspUrl points at the correct file. Note that Live Video Analytics currently runs best with .mkv files.
 
 ## STEP 2: SET UP LVA RESOURCES: ##
 

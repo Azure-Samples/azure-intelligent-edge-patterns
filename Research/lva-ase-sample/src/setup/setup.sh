@@ -1,8 +1,8 @@
 # #!/usr/bin/env bash
-
+# Last updated August 2020
 # #######################################################################################################################
-# # This script deploys resources in Azure for use with Azure Media Services Live Video Analytics samples.              #
-# # It is primarily meant to run in https://shell.azure.com/ in the Bash environment. (It will not work in PowerShell.) #
+# # This script deploys resources in Azure for use with Azure Media Services Live Video Analytics and runs a sample from the Azure Cloud Shell              #
+# # It is  meant to run in https://shell.azure.com/ in the Bash environment. (It will not work in PowerShell.) #
 # #                                                                                                                     #
 # # You will need an Azure subscription with permissions for creating service principals (owner role provides this).    #                                                                                                                #
 # #                                                                                                                     #
@@ -340,7 +340,7 @@ ${YELLOW}What is the name of the app data video folder on the device to use? Thi
 read -p ">> " tmp
 APPDATA_FOLDER_ON_DEVICE=${tmp:-$APPDATA_FOLDER_ON_DEVICE}
 
-set up deployment manifest
+#set up deployment manifest
 curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
  sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $DEPLOYMENT_MANIFEST_FILE
  sed -i "s/\$RESOURCE_GROUP/$RESOURCE_GROUP/" $DEPLOYMENT_MANIFEST_FILE
@@ -381,7 +381,7 @@ IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --hub-name ${IOTHUB
 lvaState=$(az iot hub module-twin show --device-id ${EDGE_DEVICE} --module-id lvaEdge --hub-name ${IOTHUB} --login ${IOTHUB_CONNECTION_STRING} | jq .properties.reported.State)
 
 #wait for modules to deploy successfully - may need more time
-sleep 5
+sleep 2
 # ensure lvaEdge module is in State "Running"
 lvaState=$(az iot hub module-twin show --device-id ${EDGE_DEVICE} --module-id lvaEdge --hub-name ${IOTHUB} --login "${IOTHUB_CONNECTION_STRING}")
 echo "lvaEdge module is in State:"
@@ -396,3 +396,10 @@ echo "Now we will invoke methods on the lvaEdge module, which runs the sample pr
 source invokeMethodsHelper.sh $IOTHUB $EDGE_DEVICE $IOTHUB_CONNECTION_STRING
 
 echo "Congratulations, you have successfully run LVA on the ASE!"
+
+echo -e "You can run the program again without rerunning this whole script. To do so, in the same Azure Cloud Shell, run the command 
+${YELLOW}./invokeMethodsHelper.sh ${IOTHUB} ${EDGE_DEVICE} \"${IOTHUB_CONNECTION_STRING}\"${NC}
+
+If you would like to change the media graph you create, look through the jsonfiles folder and modify as you see fit. Modify topologyset.json to modify the media graph itself. Modify instanceset.json to change the rtsp URL to point to an actual stream instead of a simulated video.
+"
+

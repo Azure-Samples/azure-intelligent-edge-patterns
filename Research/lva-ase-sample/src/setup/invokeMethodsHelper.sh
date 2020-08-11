@@ -1,19 +1,25 @@
-# Bash script to simplify LVA process.
-# this will invoke all the direct methods to the module
-# the Program.cs / operations.json files specify
-# and monitor the iot hub! Woohoo!
+# Bash script to simplify LVA process. Last Updated August 2020
+# this will invoke direct methods on the lvaEdge module
+# this script enables running the sample entirely in the Azure Cloud Shell
+# this script takes 3 parameters
+# @param 1 - the name of your IOTHUB (ex "teamlvahub")
+# @param 2 - the name of your Azure Stack Edge device. Note that even if you named your device "mysampledbe" it should be passed in as "mysampledbe-edge" (the setup.sh script does this for you)
+# @param 3 - optional: your IOTHUB connection string
+
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-HUBNAME=${1:-}
-DEVICE_ID=${2:-}
-IOTHUB_CONNECTION_STRING="\"${3:-}\""
+HUBNAME=${1}
+DEVICE_ID=${2}
+IOTHUB_CONNECTION_STRING="\"${3:-iothubconnectionstring}\""
 
 SAS_TOKEN=$(az iot hub generate-sas-token -n ${HUBNAME} | jq .sas)
 MODULE_URL="https://${HUBNAME}.azure-devices.net/twins/${DEVICE_ID}/modules/lvaEdge/methods?api-version=2018-06-30"
 FILE="jsonfiles/instanceset.json"
 
 # invoke direct method on edge module
+# @param 1 - the module URL (constructed above)
+# @param 2 - the filename containing the json with the method instructions
 function sendQuery()
 {
     echo ${2}
@@ -26,6 +32,7 @@ function sendQuery()
 }
 
 #wait to hit enter, print the next function to be run
+# @param 1 - optional message to print to console
 function waitToHitEnter()
 {
     arg1=${1:-}
@@ -50,6 +57,7 @@ starters=("topologylist" "instancelist" "topologyset" "instanceset")
 activators=("instanceactivate" "instancelist")
 cleanup=("instancedeactivate" "instancedelete" "instancelist" "topologydelete" "topologylist")
 
+# run all the desired methods
 waitToHitEnter "Hit enter to list your current graph instances"
 for i in "${starters[@]}"
 do
