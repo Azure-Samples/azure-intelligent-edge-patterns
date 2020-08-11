@@ -77,7 +77,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
   if (status === CameraConfigStatus.WaitTraining)
     return (
       <div style={{ width: '600px' }}>
-        {progress !== 0 && <ProgressBar percentage={progress} />}
+        {progress !== null && <ProgressBar percentage={progress} />}
         <pre>{trainingLogs.join('\n')}</pre>
       </div>
     );
