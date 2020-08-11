@@ -7,10 +7,9 @@ import { useCameras } from '../../hooks/useCameras';
 import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
-import { getLabelImages } from '../../store/image/imageActions';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
-import { captureImage } from '../../features/imageSlice';
+import { captureImage, getImages } from '../../features/imageSlice';
 import { makeLabelImageSelector } from '../../features/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
 import { LabelImage } from '../../features/type';
@@ -35,7 +34,7 @@ export const CapturePhotos: React.FC<{
   };
 
   useEffect(() => {
-    dispatch(getLabelImages());
+    dispatch(getImages());
   }, [dispatch]);
 
   const autoPlay = availableCameras.length === 1 && !!selectedCamera;

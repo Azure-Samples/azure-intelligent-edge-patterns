@@ -1,7 +1,6 @@
 import { Camera } from './camera/cameraTypes';
 import { Notification } from '../reducers/type';
 import { Project, Status } from './project/projectTypes';
-import { LabelImage } from './image/imageTypes';
 import { Setting } from './setting/settingType';
 
 export interface State {
@@ -17,7 +16,6 @@ export interface State {
   cameras: Camera[];
   project: Project;
   demoProject: Project;
-  images: LabelImage[];
   setting: Setting;
 }
 
@@ -71,7 +69,6 @@ const initialProject: Project = {
 
 export const initialState: State = {
   cameras: [],
-  images: [],
   project: initialProject,
   demoProject: initialProject,
   setting: {
