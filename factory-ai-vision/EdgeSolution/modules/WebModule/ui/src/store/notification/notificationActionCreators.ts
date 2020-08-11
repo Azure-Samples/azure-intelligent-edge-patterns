@@ -9,6 +9,9 @@ import {
   DELETE_NOTIFICATION_REQUEST,
   DELETE_NOTIFICATION_FAILURE,
   DELETE_NOTIFICATION_SUCCESS,
+  CLEAR_ALL_NOTIFICATION_REQUEST,
+  CLEAR_ALL_NOTIFICATION_SUCCESS,
+  CLEAR_ALL_NOTIFICATION_FAILURE,
   ReceiveNotification,
   RECEIVE_NOTIFICATION,
   OpenNotificationPanel,
@@ -32,4 +35,12 @@ export const deleteNotification = (id: number): CallAPIAction<State> => ({
   types: [DELETE_NOTIFICATION_REQUEST, DELETE_NOTIFICATION_SUCCESS, DELETE_NOTIFICATION_FAILURE],
   callAPI: (): Promise<void> => Axios.delete(`/api/notifications/${id}`).then(({ data }) => data),
   payload: { id },
+});
+
+export const clearAllNotifications = (): CallAPIAction<State> => ({
+  types: [CLEAR_ALL_NOTIFICATION_REQUEST, CLEAR_ALL_NOTIFICATION_SUCCESS, CLEAR_ALL_NOTIFICATION_FAILURE],
+  callAPI: async (state): Promise<void> => {
+    const notificationIds = state.notifications.map((e) => e.id);
+    // TODO API
+  },
 });
