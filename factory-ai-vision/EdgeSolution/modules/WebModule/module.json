@@ -11,6 +11,7 @@
         "arm32v7": "./Dockerfile.arm32v7",
         "arm32v7.debug": "./Dockerfile.arm32v7.debug",
         "arm64v8": "./Dockerfile.arm64v8",
+        "arm64v8-ubuntu": "./Dockerfile.arm64v8-ubuntu",
         "arm64v8.debug": "./Dockerfile.arm64v8.debug"
       }
     },

@@ -65,4 +65,5 @@ class VideoFeed():
         """
         self.is_opened = False
         # self.receiver.close()
-        logging.warning('connection close')
+        logger.warning('connection close')
+
