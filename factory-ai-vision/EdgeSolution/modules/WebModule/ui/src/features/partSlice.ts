@@ -53,7 +53,9 @@ export const deletePart = createAsyncThunk<any, number, { state: State }>(
 const slice = createSlice({
   name: 'parts',
   initialState: entityAdapter.getInitialState(),
-  reducers: {},
+  reducers: {
+    clearParts: () => entityAdapter.getInitialState(),
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getParts.fulfilled, entityAdapter.setAll)
@@ -65,6 +67,8 @@ const slice = createSlice({
 
 const { reducer } = slice;
 export default reducer;
+
+export const { clearParts } = slice.actions;
 
 export const {
   selectAll: selectAllParts,
