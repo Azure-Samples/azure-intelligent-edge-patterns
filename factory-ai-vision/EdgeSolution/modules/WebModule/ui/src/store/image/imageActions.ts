@@ -149,8 +149,8 @@ export const saveLabelImageAnnotation = (imageId: number, hasRelabeled: boolean,
           data.labels,
           {
             // FIXME
-            id: annotations[0].part.id ?? data.part,
-            name: annotations[0].part.name,
+            id: annotations[0]?.part.id ?? data.part,
+            name: annotations[0]?.part.name,
           },
           hasRelabeled,
         ),
