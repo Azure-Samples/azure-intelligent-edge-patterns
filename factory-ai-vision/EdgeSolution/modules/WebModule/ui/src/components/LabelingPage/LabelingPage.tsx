@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
-import { Flex, Button, Text, Dialog } from '@fluentui/react-northstar';
+import { Flex, Text, Dialog } from '@fluentui/react-northstar';
 
 import Scene from './Scene';
 import { LabelingType, WorkState } from './type';
@@ -13,6 +13,7 @@ import { labelPageAnnoSelector } from '../../features/annotationSlice';
 import { Annotation } from '../../features/type';
 import { selectPartEntities, Part } from '../../features/partSlice';
 import { deleteImage } from '../../features/actions';
+import { Button } from '../Button';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -38,17 +39,20 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
   const imgPart = useSelector<State, Part>(imagePartSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
+  const [loading, setLoading] = useState(false);
 
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
 
   const isOnePointBox = checkOnePointBox(annotations);
 
-  const onSave = (isRelabelDone: boolean): void => {
-    dispatch(saveLabelImageAnnotation({ isRelabel, isRelabelDone }));
+  const onSave = async (isRelabelDone: boolean) => {
+    setLoading(true);
+    await dispatch(saveLabelImageAnnotation({ isRelabel, isRelabelDone }));
+    setLoading(false);
   };
 
-  const onSaveBtnClick = (): void => {
-    onSave(false);
+  const onSaveBtnClick = async () => {
+    await onSave(false);
     dispatch(goNextImage());
     if (index === imageIds.length - 1) closeDialog();
   };
@@ -64,8 +68,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
     if (index === imageIds.length - 1) onSaveBtnClick();
   };
 
-  const onDeleteImage = (): void => {
-    dispatch(deleteImage(selectedImageId));
+  const onDeleteImage = async () => {
+    setLoading(true);
+    await dispatch(deleteImage(selectedImageId));
+    setLoading(false);
   };
 
   return (
@@ -78,8 +84,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
           {index + 1}
         </Text>
         <PrevNextButton
-          prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
-          nextDisabled={index === imageIds.length - 1 || workState === WorkState.Creating || isOnePointBox}
+          prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox || loading}
+          nextDisabled={
+            index === imageIds.length - 1 || workState === WorkState.Creating || isOnePointBox || loading
+          }
           onPrevClick={(): void => {
             onSave(false);
             dispatch(goPrevImage());
@@ -106,9 +114,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
             content={index === imageIds.length - 1 ? 'Save and Done' : 'Save and Next'}
             disabled={isOnePointBox || workState === WorkState.Creating}
             onClick={onSaveBtnClick}
+            loading={loading}
           />
           {isRelabel ? (
-            <Button primary content="Done" onClick={onDoneBtnClick} />
+            <Button primary content="Done" onClick={onDoneBtnClick} loading={loading} />
           ) : (
             <Button
               primary
@@ -116,9 +125,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
               onClick={(): void => {
                 closeDialog();
               }}
+              loading={loading}
             />
           )}
-          <Button primary content="Delete Image" onClick={onDeleteImage} />
+          <Button primary content="Delete Image" onClick={onDeleteImage} loading={loading} />
         </Flex>
       </Flex>
     </LabelingPageDialog>
