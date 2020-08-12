@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { mainTheme } from '../../themes/mainTheme';
 import { State } from '../../store/State';
 import { Notification } from '../../reducers/type';
-import { getNotifications } from '../../action/creators/notificationActionCreators';
+import { getNotifications, clearAllNotifications } from '../../action/creators/notificationActionCreators';
 import { NotificationCard } from '../NotificationCard';
 
 type NotificationPanelProps = {
@@ -19,6 +19,10 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onDismiss 
   useEffect(() => {
     dispatch(getNotifications());
   }, [dispatch]);
+
+  const clearAll = () => {
+    dispatch(clearAllNotifications());
+  };
 
   return (
     <div
@@ -34,6 +38,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onDismiss 
         <h2>Notification</h2>
         <Button icon={<CloseIcon />} text iconOnly size="large" onClick={(): void => onDismiss()} />
       </Flex>
+      <Button text content="Clear All" onClick={clearAll} />
       <Flex column hAlign="center" gap="gap.medium" styles={{ padding: '10px' }}>
         {notifications.map((e) => (
           <NotificationCard key={e.id} notification={e} />

@@ -1,10 +1,11 @@
 import { initialState } from '../store/State';
 import {
   ActionTypes,
+  GET_NOTIFICATIONS_SUCCESS,
+  DELETE_NOTIFICATION_SUCCESS,
+  CLEAR_ALL_NOTIFICATION_SUCCESS,
   RECEIVE_NOTIFICATION,
   OPEN_NOTIFICATION_PANEL,
-  GET_NOTIFICATIONS_SUCCESS,
-  DELETE_NOTIFICATION_SUCCESS
 } from '../action';
 import { Notification } from '../reducers/type';
 
@@ -33,6 +34,8 @@ const notificationReducer = (state = initialState.notifications, action: ActionT
       return action.response.map((e) => getNormalizeNotification(e, false));
     case DELETE_NOTIFICATION_SUCCESS:
       return state.filter((notif) => notif.id !== action.id);
+    case CLEAR_ALL_NOTIFICATION_SUCCESS:
+      return [];
     default:
       return state;
   }

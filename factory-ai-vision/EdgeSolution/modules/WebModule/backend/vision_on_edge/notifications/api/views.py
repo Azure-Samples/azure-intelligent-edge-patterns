@@ -9,6 +9,8 @@ from rest_framework import filters, viewsets
 from ..models import Notification
 from .serializers import NotificationSerializer
 
+from rest_framework.decorators import api_view
+
 
 class NotificationViewSet(FiltersMixin, viewsets.ModelViewSet):
     """
@@ -21,3 +23,8 @@ class NotificationViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {
         "id": "id",
     }
+
+# FIXME Peter please find a better way to put this
+@api_view(['DELETE'])
+def delete_all(request):
+    Notification.objects.all().delete()

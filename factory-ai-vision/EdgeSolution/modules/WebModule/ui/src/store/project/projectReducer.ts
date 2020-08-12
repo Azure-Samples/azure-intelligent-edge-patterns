@@ -131,6 +131,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
       return {
         ...state,
         trainingLogs,
+        progress: action.payload.progress ?? state.progress,
         status: action.payload.newStatus,
       };
     }

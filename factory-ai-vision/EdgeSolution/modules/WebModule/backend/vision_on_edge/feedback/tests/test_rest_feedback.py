@@ -20,7 +20,7 @@ class FeedbackRestTestCases(APITransactionTestCase):
 
     def setUp(self):
         logger.warning('Start REST API test')
-        url = reverse('feedback-list')
+        url = reverse('api:feedback-list')
 
         data = {
             'satisfaction': 'PR',
@@ -33,7 +33,7 @@ class FeedbackRestTestCases(APITransactionTestCase):
         """
         Make sure setup is valid
         """
-        url = reverse('feedback-list')
+        url = reverse('api:feedback-list')
         response = self.client.get(url, format='json')
         # logger.warning(response.content)
         self.assertEqual(len(json.loads(response.content)), self.exist_num)
@@ -47,7 +47,7 @@ class FeedbackRestTestCases(APITransactionTestCase):
         Ensure we can created a feedback by rest api.
 
         """
-        url = reverse('feedback-list')
+        url = reverse('api:feedback-list')
         feedback_sat = 'FR'
 
         data = {'satisfaction': feedback_sat}

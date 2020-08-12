@@ -147,13 +147,13 @@ class Setting(models.Model):
             instance.obj_detection_domain_id = obj_detection_domain.id
             return
         except CustomVisionErrorException:
-            logger.exception("Setting Presave occur CustomVisionError")
+            logger.info("Setting Presave occur CustomVisionError")
         except KeyError:
-            logger.exception("Setting pre_save occur KeyError")
+            logger.info("Setting pre_save occur KeyError")
         except MSClientRequestError:
-            logger.exception("Setting pre_save occur MSClientRequestError...")
+            logger.info("Setting pre_save occur MSClientRequestError...")
         except Exception:
-            logger.exception("Setting pre_save occur unexpected Error...")
+            logger.info("Setting pre_save occur unexpected Error...")
         logger.info("Setting.is_trainer_valid = False")
         logger.info("Setting.obj_detection_domain = ''")
         instance.is_trainer_valid = False

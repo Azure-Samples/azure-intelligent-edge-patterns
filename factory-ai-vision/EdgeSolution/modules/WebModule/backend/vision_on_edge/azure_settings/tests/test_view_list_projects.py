@@ -1,40 +1,38 @@
+# -*- coding: utf-8 -*-
+"""Azure Setting List Project test case.
 """
-Testing List Project API View (Under settings)
-"""
+
 import json
 import logging
 
-from azure.cognitiveservices.vision.customvision.training import \
-    CustomVisionTrainingClient
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITransactionTestCase
 
-from configs.customvision_config import ENDPOINT, TRAINING_KEY
 from vision_on_edge.general import error_messages
+from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 
 from ..models import Setting
-
-PROJECT_PREFIX = "UnitTest"
 
 logger = logging.getLogger(__name__)
 
 
-class ViewListProjectTestCase(APITransactionTestCase):
-    """
-    Testing setting-instance's custom action 'list_projects'
+class ActionListProjectTestCase(CustomVisionTestCase):
+    """ActionListProjectTestCase.
+
+    Testing azure-setting's action: list_projects
     """
 
     def setUp(self):
-        """
+        """setUp.
+
         Create setting, camera, location and parts.
         """
         Setting.objects.create(name="valid_setting",
-                               endpoint=ENDPOINT,
-                               training_key=TRAINING_KEY,
+                               endpoint=self.endpoint,
+                               training_key=self.training_key,
                                is_trainer_valid=False)
         Setting.objects.create(name="invalid_setting",
-                               endpoint=ENDPOINT,
+                               endpoint=self.endpoint,
                                training_key='5566',
                                is_trainer_valid=False)
         Setting.objects.create(name="empty_endpoint_setting",
@@ -42,7 +40,7 @@ class ViewListProjectTestCase(APITransactionTestCase):
                                training_key='5566',
                                is_trainer_valid=True)
         Setting.objects.create(name="empty_training_key_setting",
-                               endpoint=ENDPOINT,
+                               endpoint=self.endpoint,
                                training_key='',
                                is_trainer_valid=True)
         Setting.objects.create(name="empty_setting",
@@ -51,44 +49,50 @@ class ViewListProjectTestCase(APITransactionTestCase):
                                is_trainer_valid=True)
 
     def test_setup_is_valid(self):
-        """
+        """test_setup_is_valid.
+
         Make sure setup is valid
         """
         self.assertEqual(len(Setting.objects.all()), 5)
 
     def test_valid_setting_list_project(self):
-        """
-        @Type
-        Positive
+        """test_valid_setting_list_project.
 
-        @Description
-        List project with valid setting.
+        Type:
+            Positive
 
-        @Expected Results
-        200 {'project_id', 'project_name'}
+        Description:
+            With given valid azure settings, list_project
+            show list all project under this namespace.
+
+        Expected Results:
+            200 { 'project_id':'project_name' }
         """
-        url = reverse('setting-list')
         valid_setting = Setting.objects.filter(name='valid_setting').first()
-        response = self.client.get(f'{url}/{valid_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': valid_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(len(json.loads(response.content)) > 0)
 
-    def test_empty_setting_list_project(self):
-        """
-        @Type
-        Negative
+    def test_empty_setting_list_project_1(self):
+        """test_empty_setting_list_project_1.
 
-        @Description
-        List project with setting that has empty key/endpoint
+        Type:
+            Negative
 
-        @Expected Results
-        400 {'status':'failed',
-             'log': 'xxx'}
+        Description:
+            List projects with invalid Azure Setting.
+
+        Expected Results:
+            400 { 'status':'failed', 'log':'xxx' }
         """
-        url = reverse('setting-list')
+        # Setting with empty key + endpoint
         empty_setting = Setting.objects.filter(name='empty_setting').first()
-        response = self.client.get(f'{url}/{empty_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': empty_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -96,10 +100,25 @@ class ViewListProjectTestCase(APITransactionTestCase):
             json.loads(response.content)['log'],
             error_messages.CUSTOM_VISION_MISSING_FIELD)
 
+    def test_empty_setting_list_project_2(self):
+        """test_empty_setting_list_project_2.
+
+        Type:
+            Negative
+
+        Description:
+            List projects with invalid Azure Setting.
+
+        Expected Results:
+            400 { 'status':'failed', 'log':'xxx' }
+        """
+
+        # Setting with empty endpoint
         empty_endpoint_setting = Setting.objects.filter(
             name='empty_endpoint_setting').first()
-        response = self.client.get(
-            f'{url}/{empty_endpoint_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': empty_endpoint_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -107,9 +126,25 @@ class ViewListProjectTestCase(APITransactionTestCase):
             json.loads(response.content)['log'],
             error_messages.CUSTOM_VISION_MISSING_FIELD)
 
+    def test_empty_setting_list_project_3(self):
+        """test_empty_setting_list_project_3.
+
+        Type:
+            Negative
+
+        Description:
+            List projects with invalid Azure Setting.
+
+        Expected Results:
+            400 { 'status':'failed', 'log':'xxx' }
+        """
+
+        # Setting with empty_key
         empty_key_setting = Setting.objects.filter(
             name='empty_training_key_setting').first()
-        response = self.client.get(f'{url}/{empty_key_setting}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': empty_key_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content)['status'], 'failed')
@@ -118,21 +153,22 @@ class ViewListProjectTestCase(APITransactionTestCase):
             error_messages.CUSTOM_VISION_MISSING_FIELD)
 
     def test_invalid_setting_list_project(self):
-        """
-        @Type
-        Negative
+        """test_invalid_setting_list_project.
 
-        @Description
-        List project with invalid setting.
+        Type:
+            Negative
 
-        @Expected Results
-        503 {'status':'failed',
-             'log': 'xxx'}
+        Description:
+            List project with invalid setting.
+
+        Expected Results:
+            503 { 'status':'failed', 'log':'xxx' }
         """
-        url = reverse('setting-list')
         invalid_setting = Setting.objects.filter(
             name='invalid_setting').first()
-        response = self.client.get(f'{url}/{invalid_setting.id}/list_projects')
+        url = reverse('api:setting-list-projects',
+                      kwargs={'pk': invalid_setting.id})
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code,
                          status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -140,12 +176,3 @@ class ViewListProjectTestCase(APITransactionTestCase):
         self.assertEqual(
             json.loads(response.content)['log'],
             error_messages.CUSTOM_VISION_ACCESS_ERROR)
-
-    @classmethod
-    def tearDownClass(cls):
-        trainer = CustomVisionTrainingClient(api_key=TRAINING_KEY,
-                                             endpoint=ENDPOINT)
-        projects = trainer.get_projects()
-        for project in projects:
-            if project.name.find(PROJECT_PREFIX) == 0:
-                trainer.delete_project(project_id=project.id)

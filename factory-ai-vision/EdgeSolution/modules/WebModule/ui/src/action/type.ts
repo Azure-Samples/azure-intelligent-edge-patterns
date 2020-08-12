@@ -36,23 +36,9 @@ export type ReceiveNotification = {
  */
 export type OpenNotificationPanel = { type: typeof constants.OPEN_NOTIFICATION_PANEL };
 
-/**
- * GET images
- */
-export type GetImagesRequest = APIRequestAction<typeof constants.GET_IMAGES_REQUEST>;
-export type GetImagesSuccess = APISuccessAction<typeof constants.GET_IMAGES_SUCCESS>;
-export type GetImagesFailure = APIFailureAction<typeof constants.GET_IMAGES_FAILURE>;
-
-/**
- * Capture image
- */
-export type CaptureImagesRequest = APIRequestAction<typeof constants.CAPTURE_IMAGE_REQUEST>;
-export type CaptureImagesSuccess = APISuccessAction<
-  typeof constants.CAPTURE_IMAGE_SUCCESS,
-  any,
-  { shouldOpenLabelingPage: boolean; imageIds: number[] }
->;
-export type CaptureImagesFailure = APIFailureAction<typeof constants.CAPTURE_IMAGE_FAILURE>;
+export type ClearAllNotificationsRequest = APIRequestAction<typeof constants.CLEAR_ALL_NOTIFICATION_REQUEST>;
+export type ClearAllNotificationsSuccess = APISuccessAction<typeof constants.CLEAR_ALL_NOTIFICATION_SUCCESS>;
+export type ClearAllNotificationsFailure = APIFailureAction<typeof constants.CLEAR_ALL_NOTIFICATION_FAILURE>;
 
 export type ActionTypes =
   | GetNotificationsRequest
@@ -63,9 +49,6 @@ export type ActionTypes =
   | DeleteNotificationFailure
   | ReceiveNotification
   | OpenNotificationPanel
-  | GetImagesRequest
-  | GetImagesFailure
-  | GetImagesSuccess
-  | CaptureImagesRequest
-  | CaptureImagesSuccess
-  | CaptureImagesFailure;
+  | ClearAllNotificationsRequest
+  | ClearAllNotificationsSuccess
+  | ClearAllNotificationsFailure;

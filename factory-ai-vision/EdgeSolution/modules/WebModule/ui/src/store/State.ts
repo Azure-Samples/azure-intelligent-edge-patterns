@@ -62,6 +62,7 @@ const initialProject: Project = {
     isGpu: false,
     averageTime: null,
   },
+  progress: null,
   status: Status.None,
   error: null,
   trainingLogs: [],

@@ -7,6 +7,7 @@ import requests
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
+from vision_on_edge.general.utils import normalize_rtsp
 from ..azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,9 @@ class Camera(models.Model):
         logger.info(rtsp)
         if rtsp == '0':
             rtsp = 0
+        elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
+            logger.error("This is a rtsp")
+            rtsp = "rtsp" + rtsp[4:]
         cap = cv2.VideoCapture(rtsp)
         if not cap.isOpened():
             cap.release()
@@ -79,7 +83,7 @@ class Camera(models.Model):
                     url="http://" + inference_module_url() + "/update_cam",
                     params={
                         "cam_type": "rtsp",
-                        "cam_source": instance.rtsp,
+                        "cam_source": normalize_rtsp(instance.rtsp),
                         "aoi": instance.area,
                     },
                 )
