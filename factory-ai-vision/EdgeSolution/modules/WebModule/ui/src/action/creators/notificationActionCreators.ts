@@ -38,10 +38,7 @@ export const deleteNotification = (id: number): CallAPIAction<State> => ({
 
 export const clearAllNotifications = (): CallAPIAction<State> => ({
   types: [CLEAR_ALL_NOTIFICATION_REQUEST, CLEAR_ALL_NOTIFICATION_SUCCESS, CLEAR_ALL_NOTIFICATION_FAILURE],
-  callAPI: async (state): Promise<void> => {
-    const notificationIds = state.notifications.map((e) => e.id);
-    // FIXME Wait for BE API
-    const apis = notificationIds.map((id) => Axios.delete(`api/notifications/${id}`));
-    await Promise.all(apis);
+  callAPI: async (): Promise<void> => {
+    return Axios.delete(`api/notifications/delete_all/`);
   },
 });
