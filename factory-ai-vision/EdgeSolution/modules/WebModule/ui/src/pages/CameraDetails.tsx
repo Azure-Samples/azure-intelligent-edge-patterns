@@ -3,8 +3,8 @@ import { Redirect, useHistory } from 'react-router-dom';
 import { Grid, Flex, Divider, Text, Provider } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { Camera } from '../store/camera/cameraTypes';
-import { State } from '../store/State';
 import { useQuery } from '../hooks/useQuery';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { CreateButton } from '../components/CreateButton';

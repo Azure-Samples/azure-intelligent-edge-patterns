@@ -3,9 +3,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import { Flex, Text, Dialog } from '@fluentui/react-northstar';
 
+import { State } from 'RootStateType';
 import Scene from './Scene';
 import { LabelingType, WorkState } from './type';
-import { State } from '../../store/State';
 import PrevNextButton from './PrevNextButton';
 import { closeLabelingPage, goPrevImage, goNextImage } from '../../features/labelingPageSlice';
 import { selectImageEntities, saveLabelImageAnnotation } from '../../features/imageSlice';

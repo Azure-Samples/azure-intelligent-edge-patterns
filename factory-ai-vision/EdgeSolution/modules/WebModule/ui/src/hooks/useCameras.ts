@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 
-import { State } from '../store/State';
+import { State } from 'RootStateType';
 import { Camera } from '../store/camera/cameraTypes';
 import { getCameras } from '../store/camera/cameraActions';
 

@@ -1,4 +1,4 @@
-import { combineReducers } from 'redux';
+import { combineReducers } from '@reduxjs/toolkit';
 
 import camerasReducer from './camera/cameraReducer';
 import partsReducer from '../features/partSlice';

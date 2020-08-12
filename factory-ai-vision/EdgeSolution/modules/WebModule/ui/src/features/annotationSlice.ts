@@ -10,9 +10,9 @@ import {
 } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 
+import { State } from 'RootStateType';
 import { getImages, saveLabelImageAnnotation } from './imageSlice';
 import { Annotation, AnnotationState, Position2D } from './type';
-import { State } from '../store/State';
 import { closeLabelingPage } from './labelingPageSlice';
 
 // * Annotation Functions

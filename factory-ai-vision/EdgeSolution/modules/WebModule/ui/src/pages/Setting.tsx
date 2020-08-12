@@ -17,10 +17,10 @@ import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { useProject } from '../hooks/useProject';
 import { getAppInsights } from '../TelemetryService';
 import { WarningDialog } from '../components/WarningDialog';
-import { State } from '../store/State';
 import { Setting as SettingType } from '../store/setting/settingType';
 import {
   updateNamespace,

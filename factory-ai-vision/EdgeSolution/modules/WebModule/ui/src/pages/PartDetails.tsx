@@ -3,6 +3,7 @@ import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/reac
 import { Link, useLocation, Switch, Route, useHistory, Redirect } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
 import { useQuery } from '../hooks/useQuery';
@@ -10,7 +11,6 @@ import { WarningDialog } from '../components/WarningDialog';
 import { errorTheme } from '../themes/errorTheme';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { useProject } from '../hooks/useProject';
-import { State } from '../store/State';
 import { getParts, patchPart, deletePart, selectPartById, Part } from '../features/partSlice';
 import { getImages } from '../features/imageSlice';
 

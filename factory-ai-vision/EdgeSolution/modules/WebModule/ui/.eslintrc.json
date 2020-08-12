@@ -31,7 +31,8 @@
   "settings": {
     "react": {
       "version": "detect"
-    }
+    },
+    "import/core-modules": ["RootStateType"]
   },
   "rules": {
     "class-methods-use-this": "off",

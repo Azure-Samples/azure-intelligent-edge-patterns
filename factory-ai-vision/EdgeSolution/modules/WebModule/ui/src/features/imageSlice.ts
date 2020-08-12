@@ -10,9 +10,10 @@ import {
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
+
+import { State } from 'RootStateType';
 import { Annotation, AnnotationState, Image } from './type';
 import { openLabelingPage } from './labelingPageSlice';
-import { State } from '../store/State';
 import { deleteImage } from './actions';
 
 // Type definition
@@ -130,7 +131,7 @@ const slice = createSlice({
   reducers: {
     changeImgPart: imageAdapter.updateOne,
   },
-  extraReducers: (builder) =>
+  extraReducers: (builder) => {
     builder
       .addCase(getImages.fulfilled, (state, action) => {
         imageAdapter.setAll(state, action.payload.images || {});
@@ -153,7 +154,8 @@ const slice = createSlice({
       .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
       .addCase(postImages.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
-      }),
+      });
+  },
 });
 
 const { reducer } = slice;

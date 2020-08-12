@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Flex } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { State } from '../../store/State';
+import { State } from 'RootStateType';
 import { makeLabelImageSelector } from '../../features/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
 import { getImages, postImages } from '../../features/imageSlice';

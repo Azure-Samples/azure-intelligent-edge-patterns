@@ -1,7 +1,7 @@
 import { createEntityAdapter, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
-import { State } from '../store/State';
+import { State } from 'RootStateType';
 
 export type Part = {
   id: number;

@@ -3,8 +3,8 @@ import { Flex, Dropdown, Text, DropdownItemProps } from '@fluentui/react-northst
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { useCameras } from '../../hooks/useCameras';
-import { State } from '../../store/State';
 import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
 import { formatDropdownValue } from '../../util/formatDropdownValue';

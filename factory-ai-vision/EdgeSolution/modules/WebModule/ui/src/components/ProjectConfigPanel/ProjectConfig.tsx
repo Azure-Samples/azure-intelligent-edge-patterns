@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
+import { State } from 'RootStateType';
 import {
   thunkGetProject,
   thunkPostProject,
@@ -22,7 +23,6 @@ import {
   thunkCheckAndSetAccuracyRange,
 } from '../../store/project/projectActions';
 import { Project, ProjectData, Status } from '../../store/project/projectTypes';
-import { State } from '../../store/State';
 import { formatDropdownValue, Value } from '../../util/formatDropdownValue';
 import { getAppInsights } from '../../TelemetryService';
 import { AddCameraLink } from '../AddModuleDialog/AddCameraLink';

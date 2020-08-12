@@ -17,7 +17,7 @@ import { Range, Handle } from 'rc-slider';
 import 'rc-tooltip/assets/bootstrap.css';
 import '../rc-slider.css';
 
-import { State } from '../store/State';
+import { State } from 'RootStateType';
 // import { useParts } from '../hooks/useParts';
 import { ProjectData } from '../store/project/projectTypes';
 import { thunkGetProject } from '../store/project/projectActions';

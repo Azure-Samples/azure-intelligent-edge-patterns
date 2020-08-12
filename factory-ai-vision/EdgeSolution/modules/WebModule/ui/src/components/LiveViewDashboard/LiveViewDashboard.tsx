@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Flex, Text, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { useInterval } from '../../hooks/useInterval';
 import {
   thunkGetTrainingLog,
@@ -10,7 +11,6 @@ import {
   thunkDeleteProject,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
-import { State } from '../../store/State';
 import { LiveViewContainer } from '../LiveViewContainer';
 import { InferenceMetricDashboard } from './InferenceMetricDashboard';
 import { Button } from '../Button';

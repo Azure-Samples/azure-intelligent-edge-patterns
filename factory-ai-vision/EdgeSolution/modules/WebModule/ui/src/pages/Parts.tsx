@@ -3,8 +3,8 @@ import { Flex, Image, Text } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { AddModuleDialog } from '../components/AddModuleDialog';
-import { State } from '../store/State';
 import { getImages, selectAllImages } from '../features/imageSlice';
 import { Part, getParts, postPart, selectAllParts } from '../features/partSlice';
 

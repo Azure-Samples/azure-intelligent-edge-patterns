@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, createEntityAdapter } from '@reduxjs/toolkit';
 import Axios from 'axios';
-import { State } from '../store/State';
+import { State } from 'RootStateType';
 
 export type Location = {
   id: number;

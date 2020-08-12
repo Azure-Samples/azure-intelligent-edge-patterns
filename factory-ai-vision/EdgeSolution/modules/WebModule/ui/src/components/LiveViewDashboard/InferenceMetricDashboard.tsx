@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Flex, Input, Text, ComponentSlotStyle, Divider } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { State } from 'RootStateType';
 
 import { updateProjectData, thunkUpdateProbThreshold } from '../../store/project/projectActions';
 import { Project } from '../../store/project/projectTypes';
-import { State } from '../../store/State';
 import { Button } from '../Button';
 
 /**

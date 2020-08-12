@@ -1,7 +1,7 @@
 import Axios from 'axios';
+import { State } from 'RootStateType';
 
 import { CallAPIAction } from '../../middlewares/callAPIMiddleware';
-import { State } from '../../store/State';
 import {
   GET_NOTIFICATIONS_REQUEST,
   GET_NOTIFICATIONS_SUCCESS,

@@ -3,9 +3,9 @@ import React, { useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid } from '@fluentui/react-northstar';
 
+import { State } from 'RootStateType';
 import { postCamera, getCameras } from '../store/camera/cameraActions';
 import ImageLink from '../components/ImageLink';
-import { State } from '../store/State';
 import { Camera } from '../store/camera/cameraTypes';
 import { AddModuleDialog } from '../components/AddModuleDialog/AddModuleDialog';
 

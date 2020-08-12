@@ -9,9 +9,8 @@ import {
   PATCH_CAMERA_AREA_SUCCESS,
   PATCH_CAMERA_AREA_FAILED,
 } from './cameraTypes';
-import { initialState } from '../State';
 
-const camerasReducer = (state = initialState.cameras, action: CameraAction): Camera[] => {
+const camerasReducer = (state = [], action: CameraAction): Camera[] => {
   switch (action.type) {
     case GET_CAMERA_SUCCESS:
       return action.payload;

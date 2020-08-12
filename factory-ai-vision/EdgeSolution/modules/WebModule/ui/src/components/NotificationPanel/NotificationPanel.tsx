@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { Flex, CloseIcon, Button } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { mainTheme } from '../../themes/mainTheme';
-import { State } from '../../store/State';
 import { Notification } from '../../reducers/type';
 import { getNotifications, clearAllNotifications } from '../../action/creators/notificationActionCreators';
 import { NotificationCard } from '../NotificationCard';

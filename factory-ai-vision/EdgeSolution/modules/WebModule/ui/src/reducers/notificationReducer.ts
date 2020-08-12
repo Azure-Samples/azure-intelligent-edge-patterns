@@ -1,4 +1,3 @@
-import { initialState } from '../store/State';
 import {
   ActionTypes,
   GET_NOTIFICATIONS_SUCCESS,
@@ -24,7 +23,7 @@ const getNormalizeNotification = (response: any, unRead: boolean): Notification 
   unRead,
 });
 
-const notificationReducer = (state = initialState.notifications, action: ActionTypes): Notification[] => {
+const notificationReducer = (state = [], action: ActionTypes): Notification[] => {
   switch (action.type) {
     case RECEIVE_NOTIFICATION:
       return [getNormalizeNotification(action.response, true), ...state];
