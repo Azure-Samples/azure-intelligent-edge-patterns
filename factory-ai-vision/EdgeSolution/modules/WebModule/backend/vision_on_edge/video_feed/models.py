@@ -25,6 +25,7 @@ class VideoFeed():
         self.last_active = time.time()
         self.context = zmq.Context()
         self.mutex = threading.Lock()
+        self.is_opened = True
         self.receiver = self.context.socket(zmq.PULL)
 
     def gen(self):
@@ -37,7 +38,7 @@ class VideoFeed():
         # receiver = context.socket(zmq.PULL)
         self.receiver.connect("tcp://localhost:5558")
 
-        while True:
+        while self.is_opened:
             ret = self.receiver.recv_pyobj()
 
             nparr = np.frombuffer(np.array(ret['data']), np.uint8)
@@ -52,6 +53,7 @@ class VideoFeed():
 
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
+        self.receiver.close()
 
     def update_keep_alive(self):
         """update_keep_alive.
@@ -61,6 +63,7 @@ class VideoFeed():
     def close(self):
         """close connection
         """
-
-        self.receiver.close()
+        self.is_opened = False
+        # self.receiver.close()
         logger.warning('connection close')
+
