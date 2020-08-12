@@ -32,15 +32,15 @@ ENV LD_LIBRARY_PATH /opt/miniconda/lib:$LD_LIBRARY_PATH
 
 # Prepare onnxruntime repository & build onnxruntime with TensorRT
 RUN apt-get install -y git
-RUN git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime &&\
-    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
-    cp onnxruntime/docs/Privacy.md /code/Privacy.md &&\
-    cp onnxruntime/dockerfiles/LICENSE-IMAGE.txt /code/LICENSE-IMAGE.txt &&\
-    cp onnxruntime/ThirdPartyNotices.txt /code/ThirdPartyNotices.txt &&\
-    cd onnxruntime &&\
-    /bin/sh ./build.sh --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /workspace/tensorrt --config Release --build_wheel --update --build --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER) &&\
-    pip3 install /code/onnxruntime/build/Linux/Release/dist/*.whl &&\
-    cd .. &&\
+RUN git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime
+RUN /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh
+RUN cp onnxruntime/docs/Privacy.md /code/Privacy.md
+RUN cp onnxruntime/dockerfiles/LICENSE-IMAGE.txt /code/LICENSE-IMAGE.txt
+RUN cp onnxruntime/ThirdPartyNotices.txt /code/ThirdPartyNotices.txt
+RUN cd onnxruntime &&\
+    /bin/sh ./build.sh --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /workspace/tensorrt --config Release --build_wheel --update --build --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER)
+RUN pip3 install /code/onnxruntime/build/Linux/Release/dist/*.whl
+RUN cd .. &&\
     rm -rf onnxruntime cmake-3.14.3-Linux-x86_64
 
 # Final result
