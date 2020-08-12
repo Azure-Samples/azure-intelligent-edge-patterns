@@ -1,5 +1,25 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt-l4t-r32.2
+# Base
+# --------------------------------------------------------
+FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt-l4t-r32.2 as base
 
+RUN apt-get update
+RUN apt-get install -y git libprotobuf-dev protobuf-compiler
+
+# Onnx builder
+# --------------------------------------------------------
+FROM base as builder
+RUN pip install cython protobuf
+
+RUN mkdir /code
+WORKDIR /code
+RUN git clone --single-branch https://github.com/onnx/onnx.git
+WORKDIR /code/onnx
+RUN git submodule update --init --recursive
+RUN python3 setup.py install
+
+# Final Result
+# --------------------------------------------------------
+FROM builder as final
 #FROM nvidia/cuda:10.1-cudnn7-devel
 WORKDIR /app
 
@@ -15,10 +35,11 @@ ARG DEVICE
 #RUN sudo apt-get -y install cuda
 
 COPY requirements.txt ./
+RUN apt-get install -y python3-numpy python3-zmq
 RUN pip install --upgrade pip
 RUN pip install -U certifi --ignore-installed
-RUN pip install -r requirements.txt --ignore-installed && \
-    pip install flask 
+RUN pip install -r requirements.txt \
+    pip install flask
 #RUN pip install onnxruntime-gpu
 
 COPY main.py ./

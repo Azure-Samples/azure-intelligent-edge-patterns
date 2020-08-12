@@ -1,6 +1,34 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:latest
+# Base
+# --------------------------------------------------------
+FROM mcr.microsoft.com/azureml/onnxruntime:latest as base
+
+RUN apt-get update
+RUN apt-get install -y git libprotobuf-dev protobuf-compiler
 
 #FROM nvidia/cuda:10.1-cudnn7-devel
+
+# Some package builder
+# --------------------------------------------------------
+FROM base as builder-1
+RUN apt-get install -y python3-numpy python3-zmq
+
+# Onnx builder
+# --------------------------------------------------------
+FROM builder-1 as builder-2
+RUN pip install cython protobuf
+
+WORKDIR /code
+RUN git clone --single-branch https://github.com/onnx/onnx.git
+WORKDIR /code/onnx
+RUN git submodule update --init --recursive
+RUN apt-get -y install python3-dev cmake
+RUN python3 setup.py install
+
+
+# Final Result
+# --------------------------------------------------------
+FROM builder-2 as final
+
 WORKDIR /app
 
 ARG DEVICE
@@ -17,7 +45,7 @@ ARG DEVICE
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install -U certifi --ignore-installed
-RUN pip install -r requirements.txt --ignore-installed && \
+RUN pip install -r requirements.txt && \
     pip install flask 
 #RUN pip install onnxruntime-gpu
 
@@ -33,4 +61,3 @@ COPY sample_video sample_video/
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 CMD [ "python3", "main.py" ]
-
