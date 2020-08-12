@@ -26,7 +26,7 @@ export const LiveViewContainer: React.FC<{
   const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
-  const imageInfo = useImage('/api/inference/video_feed', '', true);
+  const imageInfo = useImage('/api/inference/video_feed', '', true, true);
   const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
   const dispatch = useDispatch();
 
