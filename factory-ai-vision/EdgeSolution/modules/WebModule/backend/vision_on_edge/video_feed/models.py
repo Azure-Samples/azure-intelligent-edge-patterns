@@ -63,4 +63,4 @@ class VideoFeed():
         """
 
         self.receiver.close()
-        logging.warning('connection close')
+        logger.warning('connection close')
