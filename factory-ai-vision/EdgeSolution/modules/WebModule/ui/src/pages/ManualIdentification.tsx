@@ -22,13 +22,13 @@ import { State } from 'RootStateType';
 import { ProjectData } from '../store/project/projectTypes';
 import { thunkGetProject } from '../store/project/projectActions';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
-import { selectRelabelImages } from '../features/selectors';
-import { getImages } from '../features/imageSlice';
-import { getParts } from '../features/partSlice';
+import { selectRelabelImages } from '../store/selectors';
+import { getImages } from '../store/imageSlice';
+import { getParts } from '../store/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { LabelingType } from '../components/LabelingPage/type';
-import { openLabelingPage } from '../features/labelingPageSlice';
-import { updateRelabelImages } from '../features/actions';
+import { openLabelingPage } from '../store/labelingPageSlice';
+import { updateRelabelImages } from '../store/actions';
 
 const ManualIdentification: FC = () => {
   const history = useHistory();

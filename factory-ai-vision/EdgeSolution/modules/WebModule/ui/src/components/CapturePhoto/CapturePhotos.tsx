@@ -9,10 +9,10 @@ import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
-import { captureImage, getImages } from '../../features/imageSlice';
-import { makeLabelImageSelector } from '../../features/selectors';
+import { captureImage, getImages } from '../../store/imageSlice';
+import { makeLabelImageSelector } from '../../store/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
-import { LabelImage } from '../../features/type';
+import { LabelImage } from '../../store/type';
 
 export const CapturePhotos: React.FC<{
   partId: number;

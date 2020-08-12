@@ -1,7 +1,7 @@
 import React, { FC, memo } from 'react';
 import { Text } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
-import { LabelImage } from '../../features/type';
+import { LabelImage } from '../../store/type';
 
 interface ImageIdentificationItemProps {
   confidenceLevel: number;

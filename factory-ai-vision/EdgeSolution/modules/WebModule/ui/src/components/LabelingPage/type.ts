@@ -1,4 +1,4 @@
-import { Annotation } from '../../features/type';
+import { Annotation } from '../../store/type';
 
 export enum LabelingCursorStates {
   default = 'default',

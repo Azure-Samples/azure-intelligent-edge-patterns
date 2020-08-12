@@ -3,9 +3,9 @@ import { Flex } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
-import { makeLabelImageSelector } from '../../features/selectors';
+import { makeLabelImageSelector } from '../../store/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
-import { getImages, postImages } from '../../features/imageSlice';
+import { getImages, postImages } from '../../store/imageSlice';
 
 export const UploadPhotos = ({ partId }): JSX.Element => {
   const dispatch = useDispatch();

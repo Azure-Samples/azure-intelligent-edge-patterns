@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { AddModuleDialog } from '../components/AddModuleDialog';
-import { getImages, selectAllImages } from '../features/imageSlice';
-import { Part, getParts, postPart, selectAllParts } from '../features/partSlice';
+import { getImages, selectAllImages } from '../store/imageSlice';
+import { Part, getParts, postPart, selectAllParts } from '../store/partSlice';
 
 const partsWithImgSelector = (state: State): (Part & { image: string })[] => {
   const parts = selectAllParts(state);

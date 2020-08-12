@@ -3,8 +3,8 @@ import { Line, Group, Circle } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
 import { Box2dComponentProps, WorkState, LabelingCursorStates } from './type';
-import { updateAnnotation } from '../../features/annotationSlice';
-import { BoxLabel } from '../../features/type';
+import { updateAnnotation } from '../../store/annotationSlice';
+import { BoxLabel } from '../../store/type';
 
 export const Box2d: FC<Box2dComponentProps> = ({
   scale,

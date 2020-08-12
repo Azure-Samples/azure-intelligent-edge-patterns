@@ -3,10 +3,10 @@ import { useDispatch } from 'react-redux';
 import { Prompt } from 'react-router-dom';
 import { Flex, Grid, Text } from '@fluentui/react-northstar';
 
-import { openLabelingPage } from '../features/labelingPageSlice';
+import { openLabelingPage } from '../store/labelingPageSlice';
 import LabelDisplayImage from './LabelDisplayImage';
 import LabelingPage from './LabelingPage/LabelingPage';
-import { LabelImage } from '../features/type';
+import { LabelImage } from '../store/type';
 
 type CapturedImagesContainer = {
   images: LabelImage[];

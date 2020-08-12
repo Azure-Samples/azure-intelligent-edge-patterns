@@ -12,12 +12,12 @@ import {
   updateCreatingAnnotation,
   removeAnnotation,
   thunkCreateAnnotation,
-} from '../../features/annotationSlice';
+} from '../../store/annotationSlice';
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
-import { Annotation, Size2D } from '../../features/type';
-import { Part } from '../../features/partSlice';
-import { thunkChangeImgPart } from '../../features/imageSlice';
+import { Annotation, Size2D } from '../../store/type';
+import { Part } from '../../store/partSlice';
+import { thunkChangeImgPart } from '../../store/imageSlice';
 
 const defaultSize: Size2D = {
   width: 800,

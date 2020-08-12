@@ -11,8 +11,8 @@ import { WarningDialog } from '../components/WarningDialog';
 import { errorTheme } from '../themes/errorTheme';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { useProject } from '../hooks/useProject';
-import { getParts, patchPart, deletePart, selectPartById, Part } from '../features/partSlice';
-import { getImages } from '../features/imageSlice';
+import { getParts, patchPart, deletePart, selectPartById, Part } from '../store/partSlice';
+import { getImages } from '../store/imageSlice';
 
 export const PartDetails = (): JSX.Element => {
   const partId = parseInt(useQuery().get('partId'), 10);

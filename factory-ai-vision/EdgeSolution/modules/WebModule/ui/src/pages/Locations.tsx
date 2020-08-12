@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import ImageLink from '../components/ImageLink';
 import { AddModuleDialog } from '../components/AddModuleDialog';
-import { getLocations, selectAllLocations, postLocation } from '../features/locationSlice';
+import { getLocations, selectAllLocations, postLocation } from '../store/locationSlice';
 
 const Locations: FC = () => {
   const dispatch = useDispatch();

@@ -1,7 +1,7 @@
 import React, { FC, memo } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import ImageIdentificationItem from './ImageItem';
-import { LabelImage } from '../../features/type';
+import { LabelImage } from '../../store/type';
 
 interface ImagesContainerProps {
   images: LabelImage[];

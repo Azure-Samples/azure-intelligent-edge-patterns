@@ -9,7 +9,7 @@ import { useQuery } from '../hooks/useQuery';
 import { errorTheme } from '../themes/errorTheme';
 import { WarningDialog } from '../components/WarningDialog';
 import { Status, LoadingDialog } from '../components/LoadingDialog/LoadingDialog';
-import { selectLocationById, deleteLocation } from '../features/locationSlice';
+import { selectLocationById, deleteLocation } from '../store/locationSlice';
 
 const LocationDetails: FC = () => {
   const id = useQuery().get('id');

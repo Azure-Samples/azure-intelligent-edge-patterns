@@ -4,7 +4,7 @@ import { Text } from '@fluentui/react-northstar';
 
 import useImage from './LabelingPage/util/useImage';
 import getResizeImageFunction from './LabelingPage/util/resizeImage';
-import { Annotation, Size2D, LabelImage } from '../features/type';
+import { Annotation, Size2D, LabelImage } from '../store/type';
 
 interface LabelDisplayImageProps {
   labelImage: LabelImage;

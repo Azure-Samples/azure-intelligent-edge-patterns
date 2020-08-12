@@ -7,12 +7,12 @@ import { State } from 'RootStateType';
 import Scene from './Scene';
 import { LabelingType, WorkState } from './type';
 import PrevNextButton from './PrevNextButton';
-import { closeLabelingPage, goPrevImage, goNextImage } from '../../features/labelingPageSlice';
-import { selectImageEntities, saveLabelImageAnnotation } from '../../features/imageSlice';
-import { labelPageAnnoSelector } from '../../features/annotationSlice';
-import { Annotation } from '../../features/type';
-import { selectPartEntities, Part } from '../../features/partSlice';
-import { deleteImage } from '../../features/actions';
+import { closeLabelingPage, goPrevImage, goNextImage } from '../../store/labelingPageSlice';
+import { selectImageEntities, saveLabelImageAnnotation } from '../../store/imageSlice';
+import { labelPageAnnoSelector } from '../../store/annotationSlice';
+import { Annotation } from '../../store/type';
+import { selectPartEntities, Part } from '../../store/partSlice';
+import { deleteImage } from '../../store/actions';
 import { Button } from '../Button';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;

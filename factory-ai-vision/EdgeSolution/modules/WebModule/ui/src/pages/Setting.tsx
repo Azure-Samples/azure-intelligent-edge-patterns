@@ -31,7 +31,7 @@ import {
 } from '../store/setting/settingAction';
 import { updateProjectData, updateOriginProjectData, thunkGetProject } from '../store/project/projectActions';
 import { Dialog } from '../components/Dialog';
-import { clearParts } from '../features/partSlice';
+import { clearParts } from '../store/partSlice';
 
 export const Setting = (): JSX.Element => {
   const {

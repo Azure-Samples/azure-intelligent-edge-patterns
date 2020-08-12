@@ -2,7 +2,7 @@ import React, { FC, memo, Dispatch, useState, useEffect } from 'react';
 import { Group, Line, Rect } from 'react-konva';
 
 import { LabelingCursorStates } from './type';
-import { Size2D, BoxLabel } from '../../features/type';
+import { Size2D, BoxLabel } from '../../store/type';
 
 interface RemoveBoxButtonProps {
   visible: boolean;
