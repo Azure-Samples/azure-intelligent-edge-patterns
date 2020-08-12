@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Text, Loader, Alert } from '@fluentui/react-northstar';
+import { Flex, Text, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
