@@ -61,7 +61,13 @@ const LabelingPage: FC<LabelingPageProps> = ({
 
   const onDeleteImage = async (): Promise<void> => {
     setLoading(true);
-    await dispatch(deleteLabelImage(images[index].id));
+    try {
+      await dispatch(deleteLabelImage(images[index].id));
+      if (index === images.length - 1) setIndex(index - 1);
+      if (images.length === 1) closeDialog();
+    } catch (e) {
+      alert(e);
+    }
     setLoading(false);
   };
 

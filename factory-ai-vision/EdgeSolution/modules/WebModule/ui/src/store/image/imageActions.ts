@@ -123,7 +123,7 @@ export const deleteLabelImage = (id: number) => (dispatch): Promise<void> => {
       return void 0;
     })
     .catch((err) => {
-      dispatch(requestLabelImagesFailure(err));
+      throw handleAxiosError(err);
     });
 };
 
