@@ -29,7 +29,9 @@ class StreamManager():
     def add(self, stream: VideoFeed):
         """add stream
         """
+        self.mutex.acquire()
         self.streams.append(stream)
+        self.mutex.release()
 
     def gc(self):
         """Garbage collector
@@ -65,6 +67,15 @@ class StreamManager():
 
         threading.Thread(target=_gc, args=(self,)).start()
 
+    def keep_alive_(self):
+        cnt = 0
+        self.mutex.acquire()
+        for stream in stream_manager.streams:
+            cnt += 1
+            stream.update_keep_alive()
+        self.mutex.release()
+        return cnt
+
 
 if 'runserver' in sys.argv:
     stream_manager = StreamManager()
@@ -89,8 +100,6 @@ def keep_alive(request):
     """
 
     logger.info("Keeping streams alive")
-    cnt = 0
-    for stream in stream_manager.streams:
-        cnt += 1
-        stream.update_keep_alive()
+
+    cnt = stream_manager.keep_alive_()
     return Response({'status': 'ok', 'detail': 'keep %s stream(s) alive' % cnt})
