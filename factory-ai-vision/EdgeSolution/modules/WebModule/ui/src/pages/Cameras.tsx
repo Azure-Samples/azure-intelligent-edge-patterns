@@ -3,18 +3,17 @@ import React, { useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid } from '@fluentui/react-northstar';
 
-import { State } from 'RootStateType';
-import { postCamera, getCameras } from '../store/camera/cameraActions';
+import { postCamera } from '../store/camera/cameraActions';
+import { getCameras, selectAllCameras } from '../store/cameraSlice';
 import ImageLink from '../components/ImageLink';
-import { Camera } from '../store/camera/cameraTypes';
 import { AddModuleDialog } from '../components/AddModuleDialog/AddModuleDialog';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
-  const cameras = useSelector<State, Camera[]>((state) => state.cameras.filter((e) => !e.is_demo));
+  const cameras = useSelector(selectAllCameras);
 
   useEffect(() => {
-    dispatch(getCameras());
+    dispatch(getCameras(false));
   }, [dispatch]);
 
   return (

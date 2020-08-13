@@ -1,14 +1,15 @@
 import { combineReducers } from '@reduxjs/toolkit';
 
 import camerasReducer from './camera/cameraReducer';
-import partsReducer from '../store/partSlice';
-import locationsReducer from '../store/locationSlice';
+import partsReducer from './partSlice';
+import locationsReducer from './locationSlice';
 import createProjectReducerByIsDemo from './project/projectReducer';
 import settingReducer from './setting/settingReducer';
 import notificationReducer from '../reducers/notificationReducer';
-import imagesReducer from '../store/imageSlice';
-import annotationReducer from '../store/annotationSlice';
-import labelingPageReducer from '../store/labelingPageSlice';
+import imagesReducer from './imageSlice';
+import annotationReducer from './annotationSlice';
+import labelingPageReducer from './labelingPageSlice';
+import cameraReducer from './cameraSlice';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,
@@ -16,6 +17,7 @@ export const rootReducer = combineReducers({
   demoProject: createProjectReducerByIsDemo(true),
   setting: settingReducer,
   // The Below state has been refactor
+  camera: cameraReducer,
   locations: locationsReducer,
   notifications: notificationReducer,
   parts: partsReducer,

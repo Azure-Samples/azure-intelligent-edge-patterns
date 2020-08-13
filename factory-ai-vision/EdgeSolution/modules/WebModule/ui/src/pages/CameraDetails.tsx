@@ -4,7 +4,6 @@ import { Grid, Flex, Divider, Text, Provider } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from 'RootStateType';
-import { Camera } from '../store/camera/cameraTypes';
 import { useQuery } from '../hooks/useQuery';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { CreateButton } from '../components/CreateButton';
@@ -13,6 +12,7 @@ import { WarningDialog } from '../components/WarningDialog';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { Button } from '../components/Button';
 import { deleteCamera } from '../store/camera/cameraActions';
+import { selectCameraById, Camera } from '../store/cameraSlice';
 
 const infoDivStyle: React.CSSProperties = {
   display: 'flex',
@@ -27,9 +27,7 @@ const infoDivStyle: React.CSSProperties = {
 const CameraDetails: FC = (): JSX.Element => {
   const dispatch = useDispatch();
   const camerId = useQuery().get('cameraId');
-  const camera = useSelector<State, Camera>((state) =>
-    state.cameras.find((ele) => ele.id === parseInt(camerId, 10)),
-  );
+  const camera = useSelector<State, Camera>((state) => selectCameraById(state, camerId));
   const [status, setStatus] = useState<Status>(Status.None);
   const history = useHistory();
 
