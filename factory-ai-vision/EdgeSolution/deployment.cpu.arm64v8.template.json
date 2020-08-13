@@ -65,7 +65,6 @@
             "env": {
               "TRAINING_KEY": { "value": "<CUSTOM-VISION-TRAINING-KEY>" },
               "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" },
-              "DJANGO_ENV": { "value": "production" },
               "DBNAME": { "value": "vision_on_edge" },
               "DBHOST": { "value": "172.18.0.1" },
               "DBUSER": { "value": "vision_on_edge" },

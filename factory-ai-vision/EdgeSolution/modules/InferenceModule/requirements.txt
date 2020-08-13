@@ -21,4 +21,4 @@ Werkzeug==1.0.1
 Pillow
 pyzmq
 opencv-python
-onnx
+onnx==1.6.0

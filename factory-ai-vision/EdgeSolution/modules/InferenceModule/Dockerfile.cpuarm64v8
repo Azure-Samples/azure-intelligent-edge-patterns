@@ -49,8 +49,7 @@ ARG DEVICE
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install -U certifi --ignore-installed
-RUN pip install -r requirements.txt && \
-    pip install flask 
+RUN pip install -r requirements.txt 
 #RUN pip install onnxruntime-gpu
 
 COPY main.py ./

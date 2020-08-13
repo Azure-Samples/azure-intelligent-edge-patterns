@@ -115,7 +115,6 @@
               "image": "${MODULES.InferenceModule.gpuarm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "NetworkMode": "host",
                   "PortBindings": {
                     "5000/tcp": [
                       {
@@ -123,11 +122,10 @@
                       }
                     ],
                     "5558/tcp": [
-                        {
-                          "HostPort": "5558"
-                        }
-                      ]
-                    }
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
                   },
                   "runtime": "nvidia"
                 }

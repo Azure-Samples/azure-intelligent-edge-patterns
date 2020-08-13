@@ -1,6 +1,6 @@
 # Base
 # --------------------------------------------------------
-FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt-l4t-r32.2 as base
+FROM mcr.microsoft.com/azureml/onnxruntime:v.1.4.0-jetpack4.4-l4t-base-r32.4.3 as base
 
 RUN apt-get update
 RUN apt-get install -y git libprotobuf-dev protobuf-compiler
@@ -10,7 +10,7 @@ RUN apt-get install -y git libprotobuf-dev protobuf-compiler
 FROM base as builder
 RUN pip install cython protobuf
 
-RUN mkdir /code
+#RUN mkdir /code
 WORKDIR /code
 RUN git clone --single-branch https://github.com/onnx/onnx.git
 WORKDIR /code/onnx
@@ -38,14 +38,15 @@ COPY requirements.txt ./
 RUN apt-get install -y python3-numpy python3-zmq
 RUN pip install --upgrade pip
 RUN pip install -U certifi --ignore-installed
-RUN pip install -r requirements.txt \
-    pip install flask
+
+COPY requirements-gpuarm.txt ./
+RUN pip install -r requirements-gpuarm.txt
 #RUN pip install onnxruntime-gpu
 
 COPY main.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
-COPy onnxruntime_predict.py ./
+COPY onnxruntime_predict.py ./
 COPY utility.py ./
 COPY default_model/cvexport.manifest default_model/
 COPY default_model default_model/
