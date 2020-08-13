@@ -84,14 +84,16 @@ def delete_part_on_customvision_handler(**kwargs):
         return
 
     # Default delete tag on customvision
-    if 'delete_on_customvision' in dir(
-            instance) and not instance.delete_on_customvision:
+    if 'delete_on_customvision' not in dir(
+            instance) or not instance.delete_on_customvision:
         return
 
     try:
+        logger.info("Trying to delete %s %s on customvision",instance.name, instance.customvision_id)
         project_obj = Project.objects.get(is_demo=False)
         trainer = project_obj.setting.get_trainer_obj()
         trainer.delete_tag(project_id=project_obj.customvision_project_id,
                            tag_id=instance.customvision_id)
+        logger.info("Delete success")
     except Exception:
         logger.exception("delete_tag unexpected_error")
