@@ -95,7 +95,7 @@ def delete_img_on_customvision(**kwargs):
     Args:
         kwargs:
     """
-
+    logger.info("Deleting a image................................")
     if 'sender' not in kwargs or kwargs['sender'] is not Image:
         return
     if 'instance' not in kwargs:
