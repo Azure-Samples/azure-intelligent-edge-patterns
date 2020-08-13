@@ -67,7 +67,7 @@
               "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" }
             },
             "settings": {
-              "image": "${MODULES.WebModule}",
+              "image": "${MODULES.WebModule.arm64v8-ubuntu}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
@@ -121,16 +121,16 @@
                       {
                         "HostPort": "5000"
                       }
-                    ]
+                    ],
+                    "5558/tcp": [
+                        {
+                          "HostPort": "5558"
+                        }
+                      ]
+                    }
                   },
                   "runtime": "nvidia"
-                },
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "Env": ["DISPLAY=:0"]
+                }
               }
             }
           }
