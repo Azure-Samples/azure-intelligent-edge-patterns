@@ -27,6 +27,11 @@ export const postCamera = createAsyncThunk('cameras/post', async (newCamera: Omi
   return response.data;
 });
 
+export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number) => {
+  await Axios.delete(`/api/cameras/${id}/`);
+  return id;
+});
+
 const slice = createSlice({
   name: 'cameras',
   initialState: entityAdapter.getInitialState(),
@@ -34,7 +39,8 @@ const slice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getCameras.fulfilled, entityAdapter.setAll)
-      .addCase(postCamera.fulfilled, entityAdapter.addOne);
+      .addCase(postCamera.fulfilled, entityAdapter.addOne)
+      .addCase(deleteCamera.fulfilled, entityAdapter.removeOne);
   },
 });
 

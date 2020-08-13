@@ -11,8 +11,7 @@ import { errorTheme } from '../themes/errorTheme';
 import { WarningDialog } from '../components/WarningDialog';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { Button } from '../components/Button';
-import { deleteCamera } from '../store/camera/cameraActions';
-import { selectCameraById, Camera } from '../store/cameraSlice';
+import { selectCameraById, deleteCamera, Camera } from '../store/cameraSlice';
 
 const infoDivStyle: React.CSSProperties = {
   display: 'flex',
