@@ -32,7 +32,7 @@ const deleteLabelImageSuccess = (id: number): DeleteLabelImageSuccess => ({
 });
 
 const requestLabelImagesFailure = (error: any): any => {
-  alert(error);
+  console.error(error);
   return { type: REQUEST_LABEL_IMAGE_FAILURE };
 };
 
