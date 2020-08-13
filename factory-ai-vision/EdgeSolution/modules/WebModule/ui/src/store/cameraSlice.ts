@@ -11,10 +11,16 @@ export type Camera = {
 
 const entityAdapter = createEntityAdapter<Camera>();
 
-export const getCameras = createAsyncThunk('cameras/get', async (isDemo: boolean) => {
-  const response = await Axios(`/api/cameras?is_demo=${Number(isDemo)}`);
-  return response.data;
-});
+export const getCameras = createAsyncThunk<any, boolean, { state: State }>(
+  'cameras/get',
+  async (isDemo) => {
+    const response = await Axios(`/api/cameras?is_demo=${Number(isDemo)}`);
+    return response.data;
+  },
+  {
+    condition: (_, { getState }) => getState().camera.ids.length === 0,
+  },
+);
 
 export const postCamera = createAsyncThunk('cameras/post', async (newCamera: Omit<Camera, 'id' | 'area'>) => {
   const response = await Axios.post(`/api/cameras/`, newCamera);
