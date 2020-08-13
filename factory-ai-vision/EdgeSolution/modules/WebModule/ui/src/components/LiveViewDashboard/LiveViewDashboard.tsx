@@ -39,6 +39,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
     trainingMetrics,
     data: { id: projectId, camera: projectCameraId },
     progress,
+    inferenceMetrics: { partCount },
   } = useSelector<State, Project>((state) => (isDemo ? state.demoProject : state.project));
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
@@ -123,10 +124,12 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
           />
           {showDetectedPartsCount && (
             <Flex column hAlign="center">
-              <Text>Part Name</Text>
-              <Text styles={highLightTextStyles}>5</Text>
-              <Text>Part Name</Text>
-              <Text styles={highLightTextStyles}>10</Text>
+              {Object.entries(partCount).map((e) => (
+                <>
+                  <Text>{e[0]}</Text>
+                  <Text styles={highLightTextStyles}>{e[1]}</Text>
+                </>
+              ))}
             </Flex>
           )}
         </Flex>

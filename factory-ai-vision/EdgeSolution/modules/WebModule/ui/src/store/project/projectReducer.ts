@@ -102,6 +102,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
           unIdetifiedItems: 0,
           isGpu: false,
           averageTime: 0,
+          partCount: {},
         },
         trainingMetrics: {
           curConsequence: null,
