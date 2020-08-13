@@ -24,10 +24,14 @@ RUN git submodule update --init --recursive
 RUN apt-get -y install python3-dev cmake
 RUN python3 setup.py install
 
+# Opencv2 builder
+# --------------------------------------------------------
+FROM builder-2 as builder-3
+RUN apt-get install -y libgl1-mesa-glx libgtk2.0-dev
 
 # Final Result
 # --------------------------------------------------------
-FROM builder-2 as final
+FROM builder-3 as final
 
 WORKDIR /app
 
@@ -60,4 +64,6 @@ COPY default_model_6parts default_model_6parts/
 COPY sample_video sample_video/
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
+RUN python -c "import cv2; print(cv2.__version__)"
+RUN python -c "import onnx; print(onnx.__version__)"
 CMD [ "python3", "main.py" ]

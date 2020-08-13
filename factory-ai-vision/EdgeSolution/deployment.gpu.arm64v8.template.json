@@ -92,7 +92,7 @@
               "POSTGRES_DB": { "value": "vision_on_edge" }
             },
             "settings": {
-              "image": "${MODULES.WebDBModule}",
+              "image": "${MODULES.WebDBModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {

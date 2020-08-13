@@ -72,7 +72,7 @@
               "DBPASS": { "value": "vision_on_edge" }
             },
             "settings": {
-              "image": "${MODULES.WebModule}",
+              "image": "${MODULES.WebModule.arm64v8-ubuntu}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
@@ -97,7 +97,7 @@
               "POSTGRES_DB": { "value": "vision_on_edge" }
             },
             "settings": {
-              "image": "${MODULES.WebDBModule}",
+              "image": "${MODULES.WebDBModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
