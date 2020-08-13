@@ -16,12 +16,19 @@ export const getCameras = createAsyncThunk('cameras/get', async (isDemo: boolean
   return response.data;
 });
 
+export const postCamera = createAsyncThunk('cameras/post', async (newCamera: Omit<Camera, 'id' | 'area'>) => {
+  const response = await Axios.post(`/api/cameras/`, newCamera);
+  return response.data;
+});
+
 const slice = createSlice({
   name: 'cameras',
   initialState: entityAdapter.getInitialState(),
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(getCameras.fulfilled, entityAdapter.setAll);
+    builder
+      .addCase(getCameras.fulfilled, entityAdapter.setAll)
+      .addCase(postCamera.fulfilled, entityAdapter.addOne);
   },
 });
 

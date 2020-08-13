@@ -3,8 +3,7 @@ import React, { useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid } from '@fluentui/react-northstar';
 
-import { postCamera } from '../store/camera/cameraActions';
-import { getCameras, selectAllCameras } from '../store/cameraSlice';
+import { getCameras, postCamera, selectAllCameras } from '../store/cameraSlice';
 import ImageLink from '../components/ImageLink';
 import { AddModuleDialog } from '../components/AddModuleDialog/AddModuleDialog';
 
@@ -61,7 +60,7 @@ const Cameras: FC = (): JSX.Element => {
           },
         ]}
         onConfirm={({ name, rtsp }): void => {
-          dispatch(postCamera({ name, rtsp, is_demo: false }));
+          dispatch(postCamera({ name, rtsp }));
         }}
       />
     </div>
