@@ -56,7 +56,7 @@ RUN pip install -r requirements.txt && \
 COPY main.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
-COPy onnxruntime_predict.py ./
+COPY onnxruntime_predict.py ./
 COPY utility.py ./
 COPY default_model/cvexport.manifest default_model/
 COPY default_model default_model/
@@ -66,4 +66,8 @@ RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 RUN python -c "import cv2; print(cv2.__version__)"
 RUN python -c "import onnx; print(onnx.__version__)"
+
+EXPOSE 5558
+EXPOSE 5000
+
 CMD [ "python3", "main.py" ]

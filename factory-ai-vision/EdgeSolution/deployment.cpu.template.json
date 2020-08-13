@@ -119,15 +119,20 @@
               "image": "${MODULES.InferenceModule.cpuamd64}",
               "createOptions": {
                 "HostConfig": {
-                  "NetworkMode": "host",
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
+                  },
                   "runtime": "runc"
-                },
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "Env": ["DISPLAY=:0"]
+                }
               }
             }
           }
