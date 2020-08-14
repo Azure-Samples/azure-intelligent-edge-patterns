@@ -22,3 +22,23 @@ steps:
     action: 'Build module images'
     templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
     defaultPlatform: 'amd64'
+
+- task: AzureIoTEdge@2
+  inputs:
+    action: 'Push module images'
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscriptionEndpoint: 'Microsoft Azure Sponsorship(091725d9-aeba-4638-8faf-d0e81a03a93d)'
+    azureContainerRegistry: '{"loginServer":"factoryairegistry.azurecr.io", "id" : "/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourceGroups/customvision/providers/Microsoft.ContainerRegistry/registries/factoryairegistry"}'
+    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
+    defaultPlatform: 'amd64'
+    fillRegistryCredential: 'true'
+
+- task: AzureFileCopy@4
+  inputs:
+    Destination: 
+  
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
