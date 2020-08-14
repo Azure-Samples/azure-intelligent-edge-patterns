@@ -64,6 +64,7 @@ const initialProject: Project = {
     unIdetifiedItems: null,
     isGpu: false,
     averageTime: null,
+    partCount: {},
   },
   progress: null,
   status: Status.None,
