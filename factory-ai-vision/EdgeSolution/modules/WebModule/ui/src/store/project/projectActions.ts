@@ -374,7 +374,12 @@ export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => 
           data.gpu,
           data.average_time,
           // TODO: Get it from server
-          { part1: 10, part2: 20 },
+          Array.from({ length: 20 })
+            .map((_, i) => i)
+            .reduce((acc, cur) => {
+              acc[`${cur} part`] = cur;
+              return acc;
+            }, {}),
           isDemo,
         ),
       );

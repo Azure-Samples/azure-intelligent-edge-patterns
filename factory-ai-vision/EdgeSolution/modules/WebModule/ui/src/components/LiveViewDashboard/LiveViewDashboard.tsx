@@ -115,7 +115,13 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
           </>
         )}
         <Flex column hAlign="center" gap="gap.small" styles={{ width: '40%' }}>
-          <Text weight="bold">No. of parts detected</Text>
+          <Text weight="bold">
+            No. of{' '}
+            {Object.keys(partCount)
+              .map((e) => `${e} part`)
+              .join(', ')}{' '}
+            detected
+          </Text>
           <Button
             content={showDetectedPartsCount ? 'Hide' : 'Show'}
             primary
