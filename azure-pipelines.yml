@@ -27,7 +27,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: 'factory-ai-vision/EdgeSolution/'
+    SourceFolder: 'factory-ai-vision/EdgeSolution'
     Contents: |
       deployment.template.*.json
       **/module.json
