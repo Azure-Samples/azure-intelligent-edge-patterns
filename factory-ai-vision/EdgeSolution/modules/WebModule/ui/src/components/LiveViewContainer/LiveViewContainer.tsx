@@ -16,7 +16,7 @@ import { patchCameraArea } from '../../store/camera/cameraActions';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
 import { State } from 'RootStateType';
-import { selectAOIsByCamera, AOI } from '../../store/AOISlice';
+import { selectAOIsByCamera, createAOI, updateAOI, removeAOI } from '../../store/AOISlice';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -138,7 +138,9 @@ export const LiveViewContainer: React.FC<{
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
-            setAOIs={() => {}}
+            createAOI={(point) => dispatch(createAOI({ point, cameraId }))}
+            updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
+            removeAOI={(id) => dispatch(removeAOI(id))}
             visible={showAOI}
             imageInfo={imageInfo}
             creatingState={creatingAOI}

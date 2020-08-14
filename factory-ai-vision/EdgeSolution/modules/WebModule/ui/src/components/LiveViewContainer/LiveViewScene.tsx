@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle, Path } from 'react-konva';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
-import * as R from 'ramda';
-import uniqid from 'uniqid';
 
 import {
   LiveViewProps,
@@ -22,7 +20,9 @@ const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
 
 export const LiveViewScene: React.FC<LiveViewProps> = ({
   AOIs,
-  setAOIs,
+  createAOI,
+  updateAOI,
+  removeAOI,
   visible,
   imageInfo,
   creatingState,
@@ -71,7 +71,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     if (creatingState === CreatingState.Disabled) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    setAOIs((prev) => [...prev, { id: uniqid(), x1: x, y1: y, x2: x, y2: y }]);
+    createAOI({ x, y });
     setCreatingState(CreatingState.Creating);
   };
 
@@ -79,7 +79,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     if (creatingState !== CreatingState.Creating) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    setAOIs(R.adjust(-1, (rear) => ({ ...rear, x2: x, y2: y })));
+    updateAOI(AOIs[AOIs.length - 1].id, { x2: x, y2: y });
   };
 
   return (
@@ -101,7 +101,8 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
                 imgWidth={imgWidth}
                 imgHeight={imgHeight}
                 AOIs={AOIs}
-                setAOIs={setAOIs}
+                updateAOI={updateAOI}
+                removeAOI={removeAOI}
                 visible={visible}
                 creatingState={creatingState}
               />
@@ -117,7 +118,8 @@ const AOILayer: React.FC<AOILayerProps> = ({
   imgWidth,
   imgHeight,
   AOIs,
-  setAOIs,
+  updateAOI,
+  removeAOI,
   visible,
   creatingState,
 }): JSX.Element => {
@@ -130,29 +132,30 @@ const AOILayer: React.FC<AOILayerProps> = ({
           box={e}
           visible={visible}
           boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
-          onBoxChange={(updateBox): void =>
-            setAOIs((prev) => {
-              const newBox = updateBox(prev[i]);
-              if (newBox.x1 > newBox.x2) {
-                const tmp = newBox.x1;
-                newBox.x1 = newBox.x2;
-                newBox.x2 = tmp;
-              }
+          onBoxChange={(changes): void => {
+            updateAOI(e.id, changes);
+            // TODO put this logic into reducer
+            //   setAOIs((prev) => {
+            //     const newBox = updateBox(prev[i]);
+            //     if (newBox.x1 > newBox.x2) {
+            //       const tmp = newBox.x1;
+            //       newBox.x1 = newBox.x2;
+            //       newBox.x2 = tmp;
+            //     }
 
-              if (newBox.y1 > newBox.y2) {
-                const tmp = newBox.y1;
-                newBox.y1 = newBox.y2;
-                newBox.y2 = tmp;
-              }
+            //     if (newBox.y1 > newBox.y2) {
+            //       const tmp = newBox.y1;
+            //       newBox.y1 = newBox.y2;
+            //       newBox.y2 = tmp;
+            //     }
 
-              const newAOIs = [...prev];
-              newAOIs[i] = newBox;
-              return newAOIs;
-            })
-          }
-          removeBox={(id): void => {
-            setAOIs((prev) => prev.filter((ele) => ele.id !== id));
+            //     const newAOIs = [...prev];
+            //     newAOIs[i] = newBox;
+            //     return newAOIs;
+            //   })
+            // }
           }}
+          removeBox={() => removeAOI(e.id)}
           creatingState={creatingState}
         />
       ))}
@@ -222,16 +225,16 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, re
 
     switch (e.target.name()) {
       case 'leftTop':
-        onBoxChange((prev) => ({ ...prev, x1: x, y1: y }));
+        onBoxChange({ x1: x, y1: y });
         break;
       case 'rightTop':
-        onBoxChange((prev) => ({ ...prev, x2: x, y1: y }));
+        onBoxChange({ x2: x, y1: y });
         break;
       case 'rightBottom':
-        onBoxChange((prev) => ({ ...prev, x2: x, y2: y }));
+        onBoxChange({ x2: x, y2: y });
         break;
       case 'leftBottom':
-        onBoxChange((prev) => ({ ...prev, x1: x, y2: y }));
+        onBoxChange({ x1: x, y2: y });
         break;
       default:
         break;
