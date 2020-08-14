@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { RadioGroup, Button, CloseIcon } from '@fluentui/react-northstar';
 import { useParts } from '../../hooks/useParts';
 import { useProject } from '../../hooks/useProject';
@@ -23,15 +23,24 @@ export const PartForm: React.FC<PartFormProps> = ({
   const parts = useParts(false);
   const project = useProject(false);
 
-  const items = project.data.parts
-    .map((e) => parts.find((part) => part.id === e))
-    .filter((e) => e !== undefined)
-    .map((e) => ({
-      name: e.name,
-      key: e.id,
-      label: e.name,
-      value: e.id,
-    }));
+  const items = useMemo(
+    () =>
+      project.data.parts
+        .map((e) => parts.find((part) => part.id === e))
+        .filter((e) => e !== undefined)
+        .map((e) => ({
+          name: e.name,
+          key: e.id,
+          label: e.name,
+          value: e.id,
+        })),
+    [parts, project.data.parts],
+  );
+
+  useEffect(() => {
+    // FIXME
+    if (items?.length > 0) setSelectedPart({ id: items[0].key, name: items[0].name });
+  }, [items]);
 
   if (!open) return null;
 

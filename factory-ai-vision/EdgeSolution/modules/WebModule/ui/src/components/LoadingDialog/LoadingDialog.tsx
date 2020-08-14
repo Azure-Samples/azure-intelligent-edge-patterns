@@ -22,7 +22,7 @@ export const LoadingDialog = ({
         return (
           <>
             <ErrorIcon size="largest" />
-            <Text error>{errorMessage}</Text>
+            <pre>{errorMessage}</pre>
           </>
         );
       case Status.Success:

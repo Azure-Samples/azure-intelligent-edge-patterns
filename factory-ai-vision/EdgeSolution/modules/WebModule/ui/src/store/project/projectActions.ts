@@ -51,7 +51,9 @@ import {
   UpdateProbThresholdRequestAction,
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
+  TrainingStatus,
 } from './projectTypes';
+import { State } from '../State';
 
 const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -80,11 +82,13 @@ const getTrainingLogSuccess = (
   trainingLog: string,
   newStatus: Status,
   isDemo: boolean,
+  progress: number,
 ): GetTrainingLogSuccessAction => ({
   type: GET_TRAINING_LOG_SUCCESS,
   payload: {
     trainingLog,
     newStatus,
+    progress,
   },
   isDemo,
 });
@@ -220,6 +224,11 @@ const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThr
   isDemo,
 });
 
+const getProjectDataByDemo = (isDemo: boolean, state: State): ProjectData => {
+  if (isDemo) return state.demoProject.data;
+  return state.project.data;
+};
+
 export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest(isDemo));
 
@@ -263,7 +272,7 @@ export const thunkPostProject = (
 
   dispatch(postProjectRequest(isDemo));
 
-  const projectData = getState().project.data;
+  const projectData = getProjectDataByDemo(isDemo, getState());
 
   return Axios(url, {
     data: {
@@ -299,7 +308,7 @@ const getTrain = (projectId, isTestModel: boolean): void => {
 };
 
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
-  const projectId = getState().project.data.id;
+  const projectId = getProjectDataByDemo(isDemo, getState()).id;
   return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
       return dispatch(deleteProjectSuccess(isDemo));
@@ -317,8 +326,9 @@ export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (disp
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo));
-      else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo));
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo, 0));
+      else
+        dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo, TrainingStatus[data.status]));
       return void 0;
     })
     .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
@@ -374,9 +384,7 @@ export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(updateProbThresholdRequest(isDemo));
-
-  const projectId = getState().project.data.id;
-  const { probThreshold } = getState().project.data;
+  const { id: projectId, probThreshold } = getProjectDataByDemo(isDemo, getState());
 
   return Axios.get(`/api/projects/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
     .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
@@ -399,9 +407,7 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(postProjectRequest(isDemo));
-
-  const projectId = getState().project.data.id;
-  const { accuracyRangeMin, accuracyRangeMax } = getState().project.data;
+  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectDataByDemo(isDemo, getState());
 
   return Axios.patch(`/api/projects/${projectId}/`, {
     accuracyRangeMin,

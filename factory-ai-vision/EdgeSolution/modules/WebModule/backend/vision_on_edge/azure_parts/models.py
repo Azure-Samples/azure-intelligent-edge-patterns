@@ -1,6 +1,4 @@
-"""
-Part models
-"""
+"""App models"""
 
 import logging
 
@@ -18,6 +16,10 @@ class Part(models.Model):
     description = models.CharField(max_length=1000, blank=True, default="")
     is_demo = models.BooleanField(default=False)
     name_lower = models.CharField(max_length=200, default=str(name).lower())
+    customvision_id = models.CharField(max_length=200, blank=True, default="")
+    customvision_type = models.CharField(max_length=20,
+                                         blank=True,
+                                         default="Regular")
 
     class Meta:
         unique_together = ("name_lower", "is_demo")

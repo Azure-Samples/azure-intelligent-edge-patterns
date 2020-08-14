@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Text, Loader, Alert } from '@fluentui/react-northstar';
+import { Flex, Text, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
@@ -17,6 +17,7 @@ import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
 import { AOIData } from '../../type';
 import { Camera } from '../../store/camera/cameraTypes';
+import { ProgressBar } from '../ProgressBar';
 
 const getAOIData = (cameraArea: string): AOIData => {
   try {
@@ -32,12 +33,12 @@ const getAOIData = (cameraArea: string): AOIData => {
 export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
     error,
-    trainingLog,
+    trainingLogs,
     status,
     trainingMetrics,
     data: { id: projectId, camera: projectCameraId },
+    progress,
   } = useSelector<State, Project>((state) => (isDemo ? state.demoProject : state.project));
-  const allTrainingLog = useAllTrainingLog(trainingLog);
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
 
@@ -62,7 +63,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
   );
 
   const onDeleteProject = (): void => {
-    dispatch(thunkDeleteProject);
+    dispatch(thunkDeleteProject(isDemo));
   };
 
   // FIXME Integrate this with Redux
@@ -75,10 +76,10 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
 
   if (status === CameraConfigStatus.WaitTraining)
     return (
-      <>
-        <Loader size="smallest" />
-        <pre>{allTrainingLog}</pre>
-      </>
+      <div style={{ width: '600px' }}>
+        {progress !== null && <ProgressBar percentage={progress} />}
+        <pre>{trainingLogs.join('\n')}</pre>
+      </div>
     );
 
   return (
@@ -111,16 +112,4 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
       )}
     </Flex>
   );
-};
-
-/**
- * Retrun a string which contains all logs get from server during training
- * @param trainingLog The log get from the api export
- */
-const useAllTrainingLog = (trainingLog: string): string => {
-  const [allLogs, setAllLogs] = useState(trainingLog);
-  useEffect(() => {
-    setAllLogs((prev) => `${prev}\n${trainingLog}`);
-  }, [trainingLog]);
-  return allLogs;
 };

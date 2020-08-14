@@ -8,7 +8,7 @@ CR=$'\r'
 # ARM deployment script for Custom Vison solution (Free SKU)
 customVisionArm=deploy-custom-vision-arm.json
 # edge-deployment-json is the template, 
-edgeDeploymentJson=deployment.amd64.json
+#edgeDeploymentJson=deployment.amd64.json
 # edge-deploy-json is the deployment description with keys and endpoints added
 edgeDeployJson=deploy.modules.json
 # the solution resource group name
@@ -74,7 +74,14 @@ echo You can use your existing Custom Vision service, or create a new one
     read -p "Would you like to use an existing Custom Vision Service? (y or n): " -n 1 -r; echo
     case $REPLY in
         [Yy]* ) read -p "Please enter your Custom Vision endpoint: " cvTrainingEndpoint; echo
-                read -p "Please enter your Custom Vision Key: " cvTrainingApiKey; echo; break;;
+                read -p "Please enter your Custom Vision Key: " cvTrainingApiKey; echo
+                if [[ -z $cvTrainingEndpoint ]]; then
+                    cvTrainingEndpoint='<Training_Endpoint>'
+                fi
+                if [[ -z $cvTrainingApiKey ]]; then
+                    cvTrainingApiKey='<Training_API_Key>'
+                fi
+                break;;
         [Nn]* ) cvTrainingEndpoint=""; break;;
         * ) echo "Please answer yes or no.";;
     esac
@@ -232,6 +239,16 @@ while true; do
       * ) echo "Please answer yes or no.";;
   esac
 done
+
+################################ Check for Platform ###########################################
+echo 1 amd64
+echo 2 arm64v8
+read -p "Choose the platform you're going to deploy: "
+if [ "$REPLY" == "2" ]; then
+    edgeDeploymentJson=deployment.arm64v8.json
+else
+    edgeDeploymentJson=deployment.amd64.json
+fi
 
 ################################ Write Config ############################################
 

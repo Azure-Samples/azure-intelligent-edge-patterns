@@ -1,0 +1,1 @@
+FROM amd64/postgres:12.3

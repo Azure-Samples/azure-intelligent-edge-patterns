@@ -1,5 +1,5 @@
-"""
-Signals
+# -*- coding: utf-8 -*-
+"""App Signals
 """
 
 import logging
@@ -7,8 +7,10 @@ import logging
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from ..azure_settings.models import Setting
-from .models import Project, Train
+from vision_on_edge.azure_settings.models import Setting
+from vision_on_edge.azure_training_status.models import TrainingStatus
+
+from .models import Project
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +19,11 @@ logger = logging.getLogger(__name__)
           sender=Setting,
           dispatch_uid="delete_project_on_setting_change")
 def azure_setting_change_handler(**kwargs):
-    """
-    Listen on azure_settings.models.Setting Change.
-    Delete project under this setting
+    """Azure Setting Change handler
+
+    Delete project under this setting. However, since user
+    may have just change the settings, project should not
+    be deleted on Custom Vision.
     """
     logger.info("Azure Setting changed.")
     logger.info("Checking...")
@@ -54,11 +58,12 @@ def azure_setting_change_handler(**kwargs):
 @receiver(signal=post_save,
           sender=Project,
           dispatch_uid="create_train_if_not_exist")
-def azure_project_train_status_handler(**kwargs):
-    """
-    Listen on azure_training.models.Project change.
+def create_train_if_not_exist_handler(**kwargs):
+    """Project create change.
+
     If a Project is created, create a Train(Training Status) as well.
     """
+
     logger.info("Azure Project changed.")
     logger.info("Checking...")
 
@@ -70,9 +75,11 @@ def azure_project_train_status_handler(**kwargs):
         logger.info("'instance' not in kwargs:'")
         logger.info("Nothing to do")
         return
+
     instance = kwargs['instance']
-    if Train.objects.filter(project_id=instance.id).count() < 1:
-        Train.objects.update_or_create(
+    created = kwargs['created']
+    if created:
+        TrainingStatus.objects.update_or_create(
             project_id=instance.id,
             defaults={
                 "status": "ok",
@@ -80,15 +87,18 @@ def azure_project_train_status_handler(**kwargs):
                 "performance": ""
             },
         )
+    logger.info("Signals end")
 
 
-@receiver(signal=post_save,
+@receiver(signal=pre_save,
           sender=Project,
           dispatch_uid="change_project_is_configured")
 def azure_project_is_configured_handler(**kwargs):
-    """
+    """Project is_configured handler
+
     For now, only one project can have is configured = True
     """
+
     logger.info("Azure Project changed.")
     logger.info("Checking...")
 
@@ -100,8 +110,12 @@ def azure_project_is_configured_handler(**kwargs):
         logger.info("'instance' not in kwargs:'")
         logger.info("Nothing to do")
         return
+
     instance = kwargs['instance']
+    logger.info("Changing has_configured")
     if instance.has_configured:
         for other_project in Project.objects.exclude(id=instance.id):
             other_project.has_configured = False
             other_project.save()
+
+    logger.info("Signal end")

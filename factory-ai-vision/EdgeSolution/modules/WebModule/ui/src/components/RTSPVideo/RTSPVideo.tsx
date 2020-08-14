@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Image, Tooltip, Flex, RadioGroup } from '@fluentui/react-northstar';
+import Axios from 'axios';
 
 import { RTSPVideoProps, CaptureLabelMode } from './RTSPVideo.type';
+import { useInterval } from '../../hooks/useInterval';
 
 export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   rtsp = null,
@@ -43,6 +45,13 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
         console.error(err);
       });
   };
+
+  useInterval(
+    () => {
+      Axios.get(`/api/streams/${streamId}/keep_alive`).catch(console.error);
+    },
+    streamId ? 3000 : null,
+  );
 
   useEffect(() => {
     window.addEventListener('beforeunload', onDisconnect);

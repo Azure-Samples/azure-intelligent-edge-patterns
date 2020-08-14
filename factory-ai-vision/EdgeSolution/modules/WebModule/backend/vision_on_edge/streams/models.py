@@ -1,6 +1,6 @@
+"""Stream models
 """
-Stream models
-"""
+
 import logging
 import sys
 import threading
@@ -10,23 +10,11 @@ import cv2
 import requests
 from azure.iot.device import IoTHubModuleClient
 
+from ..azure_iot.utils import inference_module_url
+
 logger = logging.getLogger(__name__)
 
-
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
+KEEP_ALIVE_THRESHOLD = 10
 
 
 class Stream():
@@ -52,6 +40,8 @@ class Stream():
         self.predictions = []
         self.inference = inference
         self.iot = None
+        self.keep_alive = time.time()
+        self.cap = None
         try:
             self.iot = IoTHubModuleClient.create_from_edge_environment()
         except KeyError as key_error:
@@ -69,7 +59,7 @@ class Stream():
                 return
             while True:
                 if self.last_active + 10 < time.time():
-                    print("[INFO] stream finished")
+                    logger.info("stream finished")
                     break
                 sys.stdout.flush()
                 res = requests.get("http://" + inference_module_url() +
@@ -102,12 +92,24 @@ class Stream():
         # if self.iot:
         threading.Thread(target=_listener, args=(self,)).start()
 
+    def update_keep_alive(self):
+        """update_keep_alive.
+        """
+        self.keep_alive = time.time()
+
     def gen(self):
-        """generator for stream"""
+        """generator for stream.
+        """
         self.status = "running"
+        if self.rtsp == '0':
+            self.rtsp = 0
+        elif isinstance(self.rtsp,
+                        str) and self.rtsp.lower().find("rtsp") == 0:
+            self.rtsp = "rtsp" + self.rtsp[4:]
         logger.info("start streaming with %s", self.rtsp)
         self.cap = cv2.VideoCapture(self.rtsp)
-        while self.status == "running":
+        while self.status == "running" and (
+                self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
             if not self.cap.isOpened():
                 raise ValueError("Cannot connect to rtsp")
             t, img = self.cap.read()
@@ -158,11 +160,13 @@ class Stream():
             yield (b"--frame\r\n"
                    b"Content-Type: image/jpeg\r\n\r\n" +
                    cv2.imencode(".jpg", img)[1].tobytes() + b"\r\n")
+        logger.info('%s releasing self...', self)
         self.cap.release()
 
     def get_frame(self):
-        """Get frame"""
-        print("[INFO] get frame", self)
+        """get_frame.
+        """
+        logger.info("get frame %s", self)
         # b, img = self.cap.read()
         time_begin = time.time()
         while True:
@@ -179,6 +183,14 @@ class Stream():
         return cv2.imencode(".jpg", img)[1].tobytes()
 
     def close(self):
-        """close stream"""
+        """close.
+
+        close the stream.
+        """
         self.status = "stopped"
         logger.info("release %s", self)
+
+    def __repr__(self):
+        """__repr__.
+        """
+        return f"<{self.id}: {self.rtsp}>"

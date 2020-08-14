@@ -65,7 +65,9 @@ const ImageLink: FC<ImageLinkProps> = ({
           </div>
         </Link>
       )}
-      <Text align="center">{label}</Text>
+      <Text styles={{ overflowWrap: 'break-word' }} align="center">
+        {label}
+      </Text>
     </Flex>
   );
 };

@@ -107,7 +107,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
           curConsequence: null,
           prevConsequence: null,
         },
-        trainingLog: '',
+        trainingLogs: [],
         status: Status.None,
         error: null,
       };
@@ -121,16 +121,24 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
       return {
         ...state,
       };
-    case GET_TRAINING_LOG_SUCCESS:
+    case GET_TRAINING_LOG_SUCCESS: {
+      let trainingLogs;
+      if (action.payload.newStatus === Status.FinishTraining) trainingLogs = [];
+      else if (state.trainingLogs[state.trainingLogs.length - 1] !== action.payload.trainingLog)
+        trainingLogs = [...state.trainingLogs, action.payload.trainingLog];
+      else trainingLogs = state.trainingLogs;
+
       return {
         ...state,
-        trainingLog: action.payload.trainingLog,
+        trainingLogs,
+        progress: action.payload.progress ?? state.progress,
         status: action.payload.newStatus,
       };
+    }
     case GET_TRAINING_LOG_FAILED:
       return {
         ...state,
-        trainingLog: '',
+        trainingLogs: [],
         data: { ...state.data },
         status: Status.TrainingFailed,
         error: action.error,

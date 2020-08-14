@@ -51,7 +51,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
 
 export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const dispatch = useDispatch();
-  const cameraId = useQuery().get('cameraId');
+  const defaultCameraIdFromQuery = useQuery().get('cameraId');
   const { isLoading, error, data, status } = useSelector<State, Project>((state) =>
     isDemo ? state.demoProject : state.project,
   );
@@ -72,7 +72,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     'cameras',
     isDemo,
     false,
-    cameraId === null ? undefined : parseInt(cameraId, 10),
+    defaultCameraIdFromQuery === null ? undefined : parseInt(defaultCameraIdFromQuery, 10),
   );
   const [partLoading, dropDownParts, selectedParts, setSelectedPartsById] = useDropdownItems<any>(
     'parts',
@@ -95,7 +95,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     if (!isDemo) {
       if (location) setSelectedLocationById(location);
       if (parts.length) setSelectedPartsById(parts);
-      if (camera && cameraId !== null) setSelectedCameraById(camera);
+      if (camera && defaultCameraIdFromQuery === null) setSelectedCameraById(camera);
     }
   }, [
     camera,
@@ -105,7 +105,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     setSelectedCameraById,
     setSelectedLocationById,
     setSelectedPartsById,
-    cameraId,
+    defaultCameraIdFromQuery,
   ]);
 
   const handleSubmitConfigure = async (): Promise<void> => {
@@ -148,11 +148,15 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
           <ModuleSelector
             moduleName="model"
             setSelectedModuleItem={() => {}}
+            value={{
+              id: 0,
+              name: 'yolov3_PascalVoc',
+            }}
             items={[
               {
                 header: `yolov3_PascalVoc`,
                 content: {
-                  key: 'demo1',
+                  key: 0,
                 },
               },
             ]}

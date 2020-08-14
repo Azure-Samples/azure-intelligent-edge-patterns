@@ -16,8 +16,18 @@ class ImagePrediction(models.Model):
     predicted = models.BooleanField(default=False)
 
     @staticmethod
-    def pre_save(instance, **kwags):
-        """Image Prediction pre_save"""
+    def pre_save(**kwargs):
+        """pre_save.
+
+        Args:
+            kwargs:
+        """
+
+        if 'instance' not in kwargs:
+            logger.info("no instance given")
+            return
+
+        instance = kwargs['instacne']
         logger.info("Image Prediction Presave")
         if not instance.predicted:
             logger.info("Predictiing")
