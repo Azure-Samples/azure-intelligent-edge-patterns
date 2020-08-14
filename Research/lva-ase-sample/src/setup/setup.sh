@@ -143,10 +143,13 @@ RESOURCE_GROUP=${tmp:-$RESOURCE_GROUP}
 
 EXISTING=$(az group exists -g ${RESOURCE_GROUP})
 
-if ! $EXISTING; then
+while ! $EXISTING
+do
     echo -e "\n${GREEN}The resource group does not currently exist.${NC}"
-    echo -e "\n${RED}Please go back and verify the name of your resource group that contains your ASE. Then run this script again.${NC}"
-    exit 1
+    echo -e "\n${RED}Please go back and verify the name of your resource group that contains your ASE. What is the correct name? ${NC}"
+    read -p ">> " tmp
+    RESOURCE_GROUP=${tmp:-$RESOURCE_GROUP}
+    EXISTING=$(az group exists -g ${RESOURCE_GROUP})
 fi
 
 echo -e "\nResource group currently contains these resources:"
@@ -211,7 +214,8 @@ then
     echo -e "
     ${YELLOW}Found existing container registry called: ${CONTAINER_REGISTRY}. This will be used by default unless otherwise specified"
 else
-    CONTAINER_REGISTRY="teamlvacontainerregistry"
+    UUID=$(cat /proc/sys/kernel/random/uuid)
+    CONTAINER_REGISTRY="teamlvacontainerregistry-"$UUID
 fi
 
 echo -e "
@@ -222,12 +226,23 @@ read -p ">> " tmp
 CONTAINER_REGISTRY=${tmp:-$CONTAINER_REGISTRY}
 
 AVAILABLE=$(az acr check-name -n ${CONTAINER_REGISTRY} | jq .nameAvailable)
- if ! $AVAILABLE; then
+FOUND=$(az resource list --resource-group ${RESOURCE_GROUP} --name ${CONTAINER_REGISTRY} --query='[].name' -o tsv)
+
+while test -z "$FOUND" && ! $AVAILABLE
+do
+    echo "That name is either unavailable or not in your resource group. Please enter a new name. Note that it must be more than 5 characters: "
+    read -p ">> " tmp
+    CONTAINER_REGISTRY=${tmp:-$CONTAINER_REGISTRY}
+    AVAILABLE=$(az acr check-name -n ${CONTAINER_REGISTRY} | jq .nameAvailable)
+    FOUND=$(az resource list --resource-group ${RESOURCE_GROUP} --name ${CONTAINER_REGISTRY} --query='[].name' -o tsv)
+done
+
+if ! $AVAILABLE; then
     echo "Container registry already exists... gathering credentials for you"
- else
-     echo "Creating a new container registry called ${CONTAINER_REGISTRY}!"
-     az acr create -g ${RESOURCE_GROUP} -n ${CONTAINER_REGISTRY} -l ${REGION} --sku Basic --admin-enabled true
- fi
+else
+    echo "Creating a new container registry called ${CONTAINER_REGISTRY}!"
+    az acr create -g ${RESOURCE_GROUP} -n ${CONTAINER_REGISTRY} -l ${REGION} --sku Basic --admin-enabled true
+fi
 
 # #Get container registry credentials
 CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $CONTAINER_REGISTRY --query 'username' | tr -d \")
@@ -241,7 +256,8 @@ then
     echo -e "
     ${YELLOW}Found existing Media Services Account called: ${AMS_ACCOUNT}. This will be used by default unless otherwise specified"
 else
-    AMS_ACCOUNT="teamlvamediaservices"
+    UUID=$(cat /proc/sys/kernel/random/uuid | tr -dc '[:alnum:]\n\r' | tr '[:upper:]' '[:lower:]' | sed 's/[0-9]*//g')
+    AMS_ACCOUNT="teamlvamediaservices"-$UUID
 fi
 echo -e "
 ${YELLOW}What is the name of the media services account to use?${NC}
@@ -251,21 +267,28 @@ read -p ">> " tmp
 AMS_ACCOUNT=${tmp:-$AMS_ACCOUNT}
 
 EXISTING=$(az ams account check-name -l ${REGION} -n ${AMS_ACCOUNT})
- if [[ "$EXISTING" =~ "Name available." ]]; then
+FOUND=$(az resource list --resource-group ${RESOURCE_GROUP} --name ${AMS_ACCOUNT} --query='[].name' -o tsv)
+
+while ! [[ "$EXISTING" =~ "Name available." ]] && test -z "$FOUND"
+do
+    echo "That name is either unavailable or not in your resource group. Please enter a new name: "
+    read -p ">> " tmp
+    AMS_ACCOUNT=${tmp:-$AMS_ACCOUNT}
+    EXISTING=$(az ams account check-name -l ${REGION} -n ${AMS_ACCOUNT})
+    FOUND=$(az resource list --resource-group ${RESOURCE_GROUP} --name ${AMS_ACCOUNT} --query='[].name' -o tsv)
+done
+
+if [[ "$EXISTING" =~ "Name available." ]]; then
     echo "Creating new AMS account named ${AMS_ACCOUNT}"
     AMS_ACCOUNT=$(az ams account create --name ${AMS_ACCOUNT} --resource-group ${RESOURCE_GROUP}  -l ${REGION} --storage-account ${STORAGE_ACCOUNT})
- else
-     echo "Media services account named ${AMS_ACCOUNT} already exists!"
- fi
+else
+    echo "Using existing Media services account named ${AMS_ACCOUNT}!"
+fi
 
 
 echo -e "\nResource group now contains these resources:"
 RESOURCES=$(az resource list --resource-group $RESOURCE_GROUP --query '[].{name:name,"Resource Type":type}' -o table)
 echo "${RESOURCES}"
-
-# capture resource configuration in variables
-AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
-
 
 # creating the AMS account creates a service principal, so well just reset it to get the credentials
 echo "setting up service principal..."
