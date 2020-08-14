@@ -15,20 +15,7 @@ import { LiveViewContainer } from '../LiveViewContainer';
 import { InferenceMetricDashboard } from './InferenceMetricDashboard';
 import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
-import { AOIData } from '../../type';
-import { Camera } from '../../store/camera/cameraTypes';
 import { ProgressBar } from '../ProgressBar';
-
-const getAOIData = (cameraArea: string): AOIData => {
-  try {
-    return JSON.parse(cameraArea);
-  } catch (e) {
-    return {
-      useAOI: false,
-      AOIs: [],
-    };
-  }
-};
 
 export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
@@ -66,13 +53,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
     dispatch(thunkDeleteProject(isDemo));
   };
 
-  // FIXME Integrate this with Redux
-  const cameras = useSelector<State, Camera[]>((state) => state.cameras);
-  const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
-
   if (status === CameraConfigStatus.None) return null;
-
-  const aoiData = getAOIData(selectedCamera?.area);
 
   if (status === CameraConfigStatus.WaitTraining)
     return (

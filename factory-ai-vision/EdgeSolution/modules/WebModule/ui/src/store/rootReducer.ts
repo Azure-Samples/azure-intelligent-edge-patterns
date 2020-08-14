@@ -1,6 +1,5 @@
 import { combineReducers } from '@reduxjs/toolkit';
 
-import camerasReducer from './camera/cameraReducer';
 import partsReducer from './partSlice';
 import locationsReducer from './locationSlice';
 import createProjectReducerByIsDemo from './project/projectReducer';
@@ -13,7 +12,6 @@ import cameraReducer from './cameraSlice';
 import AOIsReducer from './AOISlice';
 
 export const rootReducer = combineReducers({
-  cameras: camerasReducer,
   project: createProjectReducerByIsDemo(false),
   demoProject: createProjectReducerByIsDemo(true),
   setting: settingReducer,

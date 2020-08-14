@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from 'RootStateType';
-import { useCameras } from '../../hooks/useCameras';
-import { Camera } from '../../store/camera/cameraTypes';
 import { RTSPVideo } from '../RTSPVideo';
 import { formatDropdownValue } from '../../util/formatDropdownValue';
 import { CaptureLabelMode } from '../RTSPVideo/RTSPVideo.type';
@@ -13,6 +11,7 @@ import { captureImage, getImages } from '../../store/imageSlice';
 import { makeLabelImageSelector } from '../../store/selectors';
 import { CapturedImagesContainer } from '../CapturedImagesContainer';
 import { LabelImage } from '../../store/type';
+import { getCameras, selectAllCameras, Camera } from '../../store/cameraSlice';
 
 export const CapturePhotos: React.FC<{
   partId: number;
@@ -21,7 +20,7 @@ export const CapturePhotos: React.FC<{
   const dispatch = useDispatch();
   const [selectedCamera, setSelectedCamera] = useState<Camera>(null);
   const images = useSelector<State, LabelImage[]>(makeLabelImageSelector(partId));
-  const availableCameras = useCameras();
+  const availableCameras = useSelector<State, Camera[]>(selectAllCameras);
 
   const onCapturePhoto = (streamId: string, mode: CaptureLabelMode): void => {
     dispatch(
@@ -35,6 +34,7 @@ export const CapturePhotos: React.FC<{
 
   useEffect(() => {
     dispatch(getImages());
+    dispatch(getCameras(false));
   }, [dispatch]);
 
   const autoPlay = availableCameras.length === 1 && !!selectedCamera;
