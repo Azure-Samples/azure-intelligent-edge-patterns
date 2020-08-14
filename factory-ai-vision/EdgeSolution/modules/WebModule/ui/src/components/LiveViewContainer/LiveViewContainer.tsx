@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as R from 'ramda';
 import uniqid from 'uniqid';
 import { Text, Checkbox, Flex, Provider } from '@fluentui/react-northstar';
@@ -9,27 +9,30 @@ import { nanoid } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
-import { AOIData, Box } from '../../type';
 import useImage from '../LabelingPage/util/useImage';
 import { CreatingState } from './LiveViewContainer.type';
 import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
-import { selectAOIsByCamera, updateAOI, createAOI, removeAOI } from '../../store/AOISlice';
+import {
+  selectAOIsByCamera,
+  updateAOI,
+  createAOI,
+  removeAOI,
+  createDefaultAOI,
+  selectOriginAOIsByCamera,
+} from '../../store/AOISlice';
 import { toggleShowAOI, updateCameraArea } from '../../store/actions';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
-  initialAOIData: AOIData;
   cameraId: number;
   onDeleteProject: () => void;
-}> = ({ showVideo, initialAOIData, cameraId, onDeleteProject }) => {
+}> = ({ showVideo, cameraId, onDeleteProject }) => {
   const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId).useAOI);
-  // const [showAOI, setShowAOI] = useState(initialAOIData.useAOI);
-  // const lasteUpdatedAOIs = useRef(initialAOIData.AOIs);
-  // const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
   const AOIs = useSelector(selectAOIsByCamera(cameraId));
+  const originAOIs = useSelector(selectOriginAOIsByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
   const imageInfo = useImage('/api/inference/video_feed', '', true, true);
@@ -67,25 +70,27 @@ export const LiveViewContainer: React.FC<{
     }
   }, [showUpdateSuccessTxt]);
 
+  // Extract the width and height to make the dependency array clearer.
+  const { width: imgWidth, height: imgHeight } = imageInfo[2];
   useEffect(() => {
-    // if (!AOIs.length)
-    //   setAOIs([
-    //     {
-    //       id: uniqid(),
-    //       x1: imageInfo[2].width * 0.1,
-    //       y1: imageInfo[2].height * 0.1,
-    //       x2: imageInfo[2].width * 0.9,
-    //       y2: imageInfo[2].height * 0.9,
-    //     },
-    //   ]);
-  }, [AOIs.length, imageInfo[2].width, imageInfo[2].height]);
+    if (imgWidth !== 0 && imgHeight !== 0 && AOIs.length === 0)
+      dispatch(
+        createDefaultAOI({
+          id: uniqid(),
+          x1: imgWidth * 0.1,
+          y1: imgHeight * 0.1,
+          x2: imgWidth * 0.9,
+          y2: imgHeight * 0.9,
+          camera: cameraId,
+        }),
+      );
+  }, [cameraId, dispatch, imgHeight, imgWidth, AOIs]);
 
   useInterval(() => {
     Axios.get('/api/inference/video_feed/keep_alive').catch(console.error);
   }, 3000);
 
-  // const hasEdit = !R.equals(lasteUpdatedAOIs.current, AOIs);
-  const hasEdit = false;
+  const hasEdit = !R.equals(originAOIs, AOIs);
   const updateBtnDisabled = !showAOI || !hasEdit;
 
   return (

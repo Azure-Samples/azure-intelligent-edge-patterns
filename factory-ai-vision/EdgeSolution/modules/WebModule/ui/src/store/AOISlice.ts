@@ -1,4 +1,4 @@
-import { createSlice, createEntityAdapter, createSelector, Reducer } from '@reduxjs/toolkit';
+import { createSlice, createEntityAdapter, createSelector, Reducer, PayloadAction } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
@@ -14,6 +14,17 @@ const slice = createSlice({
   name: 'AOI',
   initialState: entityAdapter.getInitialState(),
   reducers: {
+    createDefaultAOI: (state, action: PayloadAction<AOI>) => {
+      const { id, x1, x2, y1, y2, camera } = action.payload;
+      entityAdapter.upsertOne(state, {
+        id,
+        x1,
+        y1,
+        x2,
+        y2,
+        camera,
+      });
+    },
     createAOI: (state, action) => {
       const { x, y } = action.payload.point;
       entityAdapter.addOne(state, {
@@ -30,7 +41,7 @@ const slice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getCameras.fulfilled, (state, action) => {
-      entityAdapter.setAll(state, action.payload.entities.AOIs);
+      entityAdapter.setAll(state, action.payload.entities.AOIs || {});
     });
   },
 });
@@ -62,9 +73,15 @@ const addOriginEntitiesReducer: Reducer<
 
 export default addOriginEntitiesReducer;
 
-export const { updateAOI, createAOI, removeAOI } = slice.actions;
+export const { updateAOI, createAOI, removeAOI, createDefaultAOI } = slice.actions;
 
 export const { selectAll: selectAllAOIs } = entityAdapter.getSelectors<State>((state) => state.AOIs);
 
 export const selectAOIsByCamera = (cameraId: number) =>
   createSelector(selectAllAOIs, (aois) => aois.filter((e) => e.camera === cameraId));
+
+export const selectOriginAOIsByCamera = (cameraId: number) =>
+  createSelector(
+    (state: State) => Object.values(state.AOIs.originEntities || {}),
+    (originAOIs: AOI[]) => originAOIs.filter((e) => e.camera === cameraId),
+  );

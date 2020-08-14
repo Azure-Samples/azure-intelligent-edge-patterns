@@ -87,12 +87,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
       <Flex column style={{ height: '100%' }} gap="gap.small">
         {error && <Alert danger header={error.name} content={`${error.message}`} />}
         <div style={{ flexGrow: 2 }}>
-          <LiveViewContainer
-            showVideo={true}
-            initialAOIData={aoiData}
-            cameraId={projectCameraId}
-            onDeleteProject={onDeleteProject}
-          />
+          <LiveViewContainer showVideo={true} cameraId={projectCameraId} onDeleteProject={onDeleteProject} />
         </div>
         <InferenceMetricDashboard isDemo={isDemo} />
       </Flex>
