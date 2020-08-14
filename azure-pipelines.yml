@@ -12,6 +12,7 @@ steps:
     action: 'Build module images'
     templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
     defaultPlatform: 'amd64'
+  displayName: 'Azure IoT Edge - Build module images'
 
 - task: AzureIoTEdge@2
   inputs:
@@ -22,7 +23,17 @@ steps:
     templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
     defaultPlatform: 'amd64'
     fillRegistryCredential: 'true'
+  displayName: 'Azure IoT Edge - Push module images'
 
-- task: AzureFileCopy@4
+- task: CopyFiles@2
   inputs:
-    Destination: 
+    Contents: '**'
+    TargetFolder: $(Build.ArtifactStagingDirectory)
+  displayName: 'Copy Files to Drop folder'
+  
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifact Drop.'
