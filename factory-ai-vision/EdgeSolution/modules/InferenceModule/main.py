@@ -446,11 +446,38 @@ onnx.start_session()
 
 app = Flask(__name__)
 @app.route('/prediction', methods=['GET'])
-def predict():
+def prediction():
     # print(onnx.last_prediction)
     # onnx.last_prediction
     return json.dumps(onnx.last_prediction)
 
+@app.route('/predict', methods=['POST'])
+def predict():
+    nparr = np.fromstring(request.data, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    predictions = onnx.predict(img)
+    results = []
+    for prediction in predictions:
+        tag_name = prediction['tagName']
+        if tag_name not in onnx.parts: continue
+        confidence = prediction['probability']
+        box = {
+            'l': prediction['boundingBox']['left'],
+            't': prediction['boundingBox']['top'],
+            'w': prediction['boundingBox']['width'],
+            'h': prediction['boundingBox']['height'],
+        }
+        results.append({
+            'type': 'entity',
+            'entity': {
+                'tag': {'value': tag_name, 'confidence': confidence},
+                'box': box
+            }
+        })
+
+    if len(results) > 0:
+        return json.dumps({'inferences': results}), 200
+    return '', 204
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
@@ -721,8 +748,6 @@ def gen_zmq():
     cnt = 0
     while True:
         cnt += 1
-        #print('sending ts:%s' % cnt)
-        #print(type(cv2.imencode(".jpg", onnx.last_drawn_img)[1].tobytes()))
         sender.send_pyobj(
             {"data": cv2.imencode(".jpg", onnx.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
         # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
