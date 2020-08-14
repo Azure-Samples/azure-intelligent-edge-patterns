@@ -140,6 +140,7 @@ def export(request, project_id):
         "unidentified_num": unidentified_num,
         "gpu": is_gpu,
         "average_time": average_inference_time,
+        "count": {'person': 2, 'hammer': 4}
     })
 
 
