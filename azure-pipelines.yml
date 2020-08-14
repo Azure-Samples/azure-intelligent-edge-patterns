@@ -17,3 +17,8 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
+- task: AzureIoTEdge@2
+  inputs:
+    action: 'Build module images'
+    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
+    defaultPlatform: 'amd64'
