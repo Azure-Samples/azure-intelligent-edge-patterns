@@ -33,3 +33,13 @@ export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: 
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: showAOI, AOIs }) });
   },
 );
+
+export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
+  'cameras/updateArea',
+  async (cameraId, { getState }) => {
+    const { useAOI, AOIs: AOIIds } = getState().camera.entities[cameraId];
+    const AOIEntities = getState().AOIs.entities;
+    const AOIs = AOIIds.map((e) => AOIEntities[e]);
+    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
+  },
+);

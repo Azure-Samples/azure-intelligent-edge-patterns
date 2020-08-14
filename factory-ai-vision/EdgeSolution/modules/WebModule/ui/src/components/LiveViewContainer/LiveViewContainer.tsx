@@ -14,11 +14,10 @@ import useImage from '../LabelingPage/util/useImage';
 import { CreatingState } from './LiveViewContainer.type';
 import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
-import { patchCameraArea } from '../../store/camera/cameraActions';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
 import { selectAOIsByCamera, updateAOI } from '../../store/AOISlice';
-import { createAOI, removeAOI, toggleShowAOI } from '../../store/actions';
+import { createAOI, removeAOI, toggleShowAOI, updateCameraArea } from '../../store/actions';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -52,15 +51,15 @@ export const LiveViewContainer: React.FC<{
   };
 
   const onUpdate = async (): Promise<void> => {
-    // setLoading(true);
-    // try {
-    //   await dispatch(patchCameraArea({ AOIs, useAOI: showAOI }, cameraId));
-    //   setShowUpdateSuccessTxt(true);
-    //   lasteUpdatedAOIs.current = R.clone(AOIs);
-    // } catch (e) {
-    //   console.error(e);
-    // }
-    // setLoading(false);
+    setLoading(true);
+    try {
+      await dispatch(updateCameraArea(cameraId));
+      setShowUpdateSuccessTxt(true);
+      //   lasteUpdatedAOIs.current = R.clone(AOIs);
+    } catch (e) {
+      alert(e);
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
