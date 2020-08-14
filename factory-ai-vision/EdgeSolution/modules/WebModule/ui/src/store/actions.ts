@@ -1,8 +1,7 @@
-import { createAsyncThunk, createAction } from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { Position2D } from './type';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -20,16 +19,11 @@ export const deleteImage = createAsyncThunk('images/delete', async (id: number) 
   return id;
 });
 
-export const createAOI = createAction<{ id: string; point: Position2D; cameraId: number }>('AOI/createAOI');
-
-export const removeAOI = createAction<{ AOIId: string; cameraId: number }>('AOI/removeAOI');
-
 export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: boolean }, { state: State }>(
   'cameras/toggleShowAOI',
   async ({ cameraId, showAOI }, { getState }) => {
-    const { AOIs: AOIIds } = getState().camera.entities[cameraId];
     const AOIEntities = getState().AOIs.entities;
-    const AOIs = AOIIds.map((e) => AOIEntities[e]);
+    const AOIs = Object.values(AOIEntities).filter((e) => e.camera === cameraId);
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: showAOI, AOIs }) });
   },
 );
@@ -37,9 +31,9 @@ export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: 
 export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   'cameras/updateArea',
   async (cameraId, { getState }) => {
-    const { useAOI, AOIs: AOIIds } = getState().camera.entities[cameraId];
+    const { useAOI } = getState().camera.entities[cameraId];
     const AOIEntities = getState().AOIs.entities;
-    const AOIs = AOIIds.map((e) => AOIEntities[e]);
+    const AOIs = Object.values(AOIEntities).filter((e) => e.camera === cameraId);
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
   },
 );

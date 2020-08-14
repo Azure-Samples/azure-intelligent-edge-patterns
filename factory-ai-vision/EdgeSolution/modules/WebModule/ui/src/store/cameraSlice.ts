@@ -4,7 +4,7 @@ import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
 import { BoxLabel } from './type';
-import { createAOI, removeAOI, toggleShowAOI } from './actions';
+import { toggleShowAOI } from './actions';
 
 type CameraFromServer = {
   id: number;
@@ -27,7 +27,6 @@ export type Camera = {
   rtsp: string;
   area: string;
   useAOI: boolean;
-  AOIs: string[];
 };
 
 const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
@@ -116,13 +115,6 @@ const slice = createSlice({
       )
       .addCase(postCamera.fulfilled, entityAdapter.addOne)
       .addCase(deleteCamera.fulfilled, entityAdapter.removeOne)
-      .addCase(createAOI, (state, action) => {
-        state.entities[action.payload.cameraId].AOIs.push(action.payload.id);
-      })
-      .addCase(removeAOI, (state, action) => {
-        let { AOIs } = state.entities[action.payload.cameraId];
-        AOIs = AOIs.filter((e) => e !== action.payload.AOIId);
-      })
       .addCase(toggleShowAOI.pending, (state, action) => {
         const { showAOI, cameraId } = action.meta.arg;
         state.entities[cameraId].useAOI = showAOI;

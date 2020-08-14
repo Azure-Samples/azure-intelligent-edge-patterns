@@ -16,8 +16,8 @@ import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
-import { selectAOIsByCamera, updateAOI } from '../../store/AOISlice';
-import { createAOI, removeAOI, toggleShowAOI, updateCameraArea } from '../../store/actions';
+import { selectAOIsByCamera, updateAOI, createAOI, removeAOI } from '../../store/AOISlice';
+import { toggleShowAOI, updateCameraArea } from '../../store/actions';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -135,7 +135,7 @@ export const LiveViewContainer: React.FC<{
             AOIs={AOIs}
             createAOI={(point) => dispatch(createAOI({ id: nanoid(), point, cameraId }))}
             updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
-            removeAOI={(AOIId) => dispatch(removeAOI({ AOIId, cameraId }))}
+            removeAOI={(AOIId) => dispatch(removeAOI(AOIId))}
             visible={showAOI}
             imageInfo={imageInfo}
             creatingState={creatingAOI}
