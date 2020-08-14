@@ -1,4 +1,11 @@
-import { createSlice, createEntityAdapter, createSelector, Reducer, PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createEntityAdapter,
+  createSelector,
+  Reducer,
+  PayloadAction,
+  Update,
+} from '@reduxjs/toolkit';
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
@@ -37,7 +44,24 @@ const slice = createSlice({
       });
     },
     removeAOI: entityAdapter.removeOne,
-    updateAOI: entityAdapter.updateOne,
+    updateAOI: (state, action: PayloadAction<Update<AOI>>) => {
+      const { id, changes } = action.payload;
+      const newAOI = R.mergeRight(state.entities[id], changes);
+
+      if (newAOI.x1 > newAOI.x2) {
+        const tmp = newAOI.x1;
+        newAOI.x1 = newAOI.x2;
+        newAOI.x2 = tmp;
+      }
+
+      if (newAOI.y1 > newAOI.y2) {
+        const tmp = newAOI.y1;
+        newAOI.y1 = newAOI.y2;
+        newAOI.y2 = tmp;
+      }
+
+      entityAdapter.updateOne(state, { id, changes: newAOI });
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getCameras.fulfilled, (state, action) => {
