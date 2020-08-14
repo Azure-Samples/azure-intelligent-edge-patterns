@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """App Models.
 
 Include Project, Train and Task.
@@ -9,7 +10,7 @@ import threading
 import time
 
 import requests
-from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
+from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 from django.db import models
 from django.db.models.signals import post_save, pre_save
@@ -22,11 +23,10 @@ from ..locations.models import Location
 
 logger = logging.getLogger(__name__)
 
-# Create your models here.
-
 
 class Project(models.Model):
-    """Azure Custom Vision Project Model"""
+    """Azure Custom Vision Project Model
+    """
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
@@ -49,6 +49,7 @@ class Project(models.Model):
     is_demo = models.BooleanField(default=False)
     deployed = models.BooleanField(default=False)
     has_configured = models.BooleanField(default=False)
+    # delete_inference : bool
 
     # TODO: Move this to a new App.
     # e.g. relabel
@@ -118,8 +119,7 @@ class Project(models.Model):
 
             # logger.info('Creating Project on Custom Vision')
             # project = instance.setting.create_project(name)
-            # logger.info(
-            #    f'Got Custom Vision Project Id: {project.id}. Saving...')
+            # logger.info('Got Custom Vision Project Id: %s', project.id)
             # instance.customvision_project_id = project.id
         else:
             instance.customvision_project_id = ""
@@ -222,25 +222,6 @@ class Project(models.Model):
         except:
             logger.exception("dequeue_iteration error")
             raise
-
-    def upcreate_training_status(self,
-                                 status: str,
-                                 log: str,
-                                 performance: str = "{}"):
-        """
-        A wrapper function to create or update the training status of a
-        project
-        """
-        logger.info("Updating Training Status: %s %s", status, log)
-        obj, created = Train.objects.update_or_create(
-            project=self,
-            defaults={
-                "status": status,
-                "log": "Status : " + log.capitalize(),
-                "performance": performance,
-            },
-        )
-        return obj, created
 
     def create_project(self):
         """Create a project for local project_obj (self) on CustomVision"""
@@ -366,15 +347,6 @@ class Project(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
-
-
-class Train(models.Model):
-    """Training Status Model"""
-
-    status = models.CharField(max_length=200)
-    log = models.CharField(max_length=1000)
-    performance = models.CharField(max_length=2000, default="{}")
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
 class Task(models.Model):

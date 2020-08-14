@@ -4,8 +4,6 @@ SET AZURE_CORE_ONLY_SHOW_ERRORS=True
 
 REM ARM deployment script for Custom Vison solution (Free SKU)
 SET custom-vision-arm=deploy-custom-vision-arm.json
-REM edge-deployment-json is the template, 
-SET edge-deployment-json=deployment.amd64.json
 REM edge-deploy-json is the deployment description with keys and endpoints added
 SET edge-deploy-json=deploy.modules.json
 REM the solution resource group name
@@ -123,9 +121,9 @@ GOTO :NOEXISTINGCV
 
 ECHO Endpoint and key information can be found at www.customvision.ai - settings(top right corner)
 SET /P cv-training-endpoint="Please enter your Custom Vision endpoint: "
-IF "%cv-training-endpoint%"=="" (SET cv-training-endpoint="<CUSTOM-VISION-TRAINING-KEY>")
+IF "%cv-training-endpoint%"=="" (SET cv-training-endpoint=CUSTOMVISIONTRAININGKEY)
 SET /P cv-training-api-key="Please enter your Custom Vision Key: "
-IF "%cv-training-api-key%"=="" (SET cv-training-api-key="<CUSTOM-VISION-ENDPOINT>")
+IF "%cv-training-api-key%"=="" (SET cv-training-api-key=CUSTOMVISIONENDPOINT)
 
 :NOEXISTINGCV
 
@@ -217,10 +215,24 @@ REM Using goto here due to issues with delayed expansion
 IF %errorlevel%==1 ( SET cpuGpu=gpu) ELSE ( SET cpuGpu=cpu)
 IF %cpuGpu%==gpu ( SET runtime=nvidia) ELSE ( SET runtime=runc)
 
+REM ################################ Check for Platform ######################################
+ECHO 1 amd64
+ECHO 2 arm64v8
+SET /p userinp=Choose the platform corresponding to your tenant:
+IF %userinp% == 2 (
+    SET edge-deployment-json=deployment.arm64v8.json
+) ELSE (
+    SET edge-deployment-json=deployment.amd64.json
+)
+ECHO.
+ECHO Using deployment file "%edge-deployment-json%"
+ECHO.
+
 REM ############################## Write Config ############################################
 
 REM clear file if it exists
 ECHO. > %edge-deploy-json%
+
 
 FOR /f "delims=" %%i IN (%edge-deployment-json%) DO (
     SET "line=%%i"

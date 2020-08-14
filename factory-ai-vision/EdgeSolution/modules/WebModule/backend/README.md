@@ -1,4 +1,4 @@
-# Vision On Edge Web Module
+# Vision On Edge - Web Module
 
 ## How to run
 
@@ -35,11 +35,18 @@ pylint
 Go to project directory (same level with manage.py)
 
 ```bash
-python manage.py test
+export ENDPOINT=${your_endpoint}
+export TRAINING_KEY=${your_key}
+pytest
 ```
 
 ## Test coverage
 
+To run the tests, check your test coverage, and generate an HTML coverage report::
+
 ```bash
-coverage run --source='vision_on_edge' manage.py test vision_on_edge.tests
+$ coverage run -m pytest
+$ coverage html
+$ open htmlcov/index.html
 ```
+

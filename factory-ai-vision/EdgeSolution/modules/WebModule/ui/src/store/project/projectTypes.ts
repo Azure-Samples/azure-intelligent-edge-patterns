@@ -13,7 +13,9 @@ export type Project = {
     unIdetifiedItems: number;
     isGpu: boolean;
     averageTime: number;
+    partCount: Record<string, number>;
   };
+  progress: number;
   trainingMetrics: TrainingMetrics;
   status: Status;
   error: Error;
@@ -31,6 +33,18 @@ export enum Status {
   TrainingFailed = 'trainingFailed',
   StartInference = 'startInference',
 }
+
+export const TrainingStatus = {
+  'finding project': 10,
+  'uploading project': 20,
+  'uploading parts': 30,
+  'uploading images': 40,
+  'preparing training task': 50,
+  'preparing custom vision environment': 60,
+  training: 70,
+  exporting: 80,
+  deploying: 90,
+};
 
 export type Consequence = {
   precision: number;
@@ -92,6 +106,7 @@ export type GetTrainingLogSuccessAction = ProjectAction & {
   payload: {
     trainingLog: string;
     newStatus: Status;
+    progress: number;
   };
 };
 
@@ -135,6 +150,7 @@ export type GetInferenceMetricsSuccessAction = ProjectAction & {
     unIdetifiedItems: number;
     isGpu: boolean;
     averageTime: number;
+    partCount: Record<string, number>;
   };
 };
 

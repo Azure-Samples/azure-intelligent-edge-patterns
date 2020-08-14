@@ -8,7 +8,7 @@ CR=$'\r'
 # ARM deployment script for Custom Vison solution (Free SKU)
 customVisionArm=deploy-custom-vision-arm.json
 # edge-deployment-json is the template, 
-edgeDeploymentJson=deployment.amd64.json
+#edgeDeploymentJson=deployment.amd64.json
 # edge-deploy-json is the deployment description with keys and endpoints added
 edgeDeployJson=deploy.modules.json
 # the solution resource group name
@@ -239,6 +239,16 @@ while true; do
       * ) echo "Please answer yes or no.";;
   esac
 done
+
+################################ Check for Platform ###########################################
+echo 1 amd64
+echo 2 arm64v8
+read -p "Choose the platform you're going to deploy: "
+if [ "$REPLY" == "2" ]; then
+    edgeDeploymentJson=deployment.arm64v8.json
+else
+    edgeDeploymentJson=deployment.amd64.json
+fi
 
 ################################ Write Config ############################################
 

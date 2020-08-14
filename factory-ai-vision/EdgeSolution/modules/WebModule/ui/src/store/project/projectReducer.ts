@@ -102,6 +102,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
           unIdetifiedItems: 0,
           isGpu: false,
           averageTime: 0,
+          partCount: {},
         },
         trainingMetrics: {
           curConsequence: null,
@@ -131,6 +132,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
       return {
         ...state,
         trainingLogs,
+        progress: action.payload.progress ?? state.progress,
         status: action.payload.newStatus,
       };
     }

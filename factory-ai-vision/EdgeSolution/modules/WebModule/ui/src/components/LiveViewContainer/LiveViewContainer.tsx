@@ -3,6 +3,7 @@ import * as R from 'ramda';
 import uniqid from 'uniqid';
 import { Text, Checkbox, Flex, Provider } from '@fluentui/react-northstar';
 import { useDispatch } from 'react-redux';
+import Axios from 'axios';
 
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
@@ -12,6 +13,7 @@ import { CreatingState } from './LiveViewContainer.type';
 import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
 import { patchCameraArea } from '../../store/camera/cameraActions';
+import { useInterval } from '../../hooks/useInterval';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -24,7 +26,7 @@ export const LiveViewContainer: React.FC<{
   const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
-  const imageInfo = useImage(`http://${window.location.hostname}:5000/video_feed?inference=1`, '', true);
+  const imageInfo = useImage('/api/inference/video_feed', '', true, true);
   const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
   const dispatch = useDispatch();
 
@@ -75,6 +77,10 @@ export const LiveViewContainer: React.FC<{
         },
       ]);
   }, [AOIs.length, imageInfo[2].width, imageInfo[2].height]);
+
+  useInterval(() => {
+    Axios.get('/api/inference/video_feed/keep_alive').catch(console.error);
+  }, 3000);
 
   const hasEdit = !R.equals(lasteUpdatedAOIs.current, AOIs);
   const updateBtnDisabled = !showAOI || !hasEdit;

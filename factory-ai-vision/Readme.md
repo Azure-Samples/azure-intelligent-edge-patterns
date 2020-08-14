@@ -1,4 +1,3 @@
-
 ---
 languages:
 - json
@@ -10,14 +9,14 @@ products:
 - Onnxruntime
 - azure-iot-edge
 page_type: sample solution
-description: "This is a easy to use UI solution showing how to realize a concept in a single day and setup a prototype without require any expert to complete a task, and get running on Azure IoT Edge."
+description: "This is a easy to use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop ."
 urlFragment: custom-vision-azure-iot
 ---
 
 
 # Custom vision + Azure IoT Edge for Factory AI
-This is a sample showing how to deploy a Custom Vision model to Azure IoT edge device and get AI model up running in a single day. 
-Custom Vision equipped with image classification and object detection that are trained in the cloud with your own images. You can define your location, camera and set up objects to detect any manufacturing parts, defeat area, etc. while keeping your vide footage private, lowering your badnwidth costs and even running offline. 
+This is a sample showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day. 
+You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU.
 
 Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to see brief introduction in action and understand how the value is delievered: 
 [![video](https://mediusprodstatic.studios.ms/video-28874/thumbnail.jpg?sv=2018-03-28&sr=c&sig=svseIEcORPXo2vyKdEbzetamD9qDI3gXgzKhlTbIHUM%3D&se=2025-05-15T13%3A06%3A01Z&sp=r)](https://channel9.msdn.com/Events/Build/2020/BOD131)
@@ -29,13 +28,14 @@ Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to se
 You need to have one of the following:
 -	**Azure Stack Edge**  
 or
-- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Windows](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-windows-with-linux), [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
+- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
-     * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
+     * For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
+### NOTE:This solution is only supported on linux based Azure IoT edge devices 
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
 
-![Communication patterns between modules](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/azure%20stack.png)
+![Communication patterns between modules](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/azure%20stack%20flow.png)
 
  
 ## Get Started 
@@ -57,10 +57,10 @@ Before installation, please make sure you have the following:
    1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
    2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
 ### Get Started:
-Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/bash.zip) 
+Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip) 
 
 For Windows: 
-   1.	Click and download the [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/Windows.zip), and unzip the zipped files. It contains three files:
+   1.	Click and download the [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip), and unzip the zipped files. It contains three files:
    a. deploy-custom-vision-arm.json
    b. deployment.amd64.json 
    c. factory-ai-vision-install.cmd
@@ -69,15 +69,17 @@ For Windows:
    3.	Choose your subscription
    4.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
    5.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
+   6.   This solution takes 5-10 mins to install based on your internet speed, After 5-10 mins open your browser and connect to ```http://<your-edge-ip:8080>.
 
 For Mac:
    1.	Open terminal 
-   2.	Locate the file, [unzip bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/Installers/bash.zip)
+   2.	Locate the file, [unzip bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip)
    3.	excute ```bash factory-ai-vision-install.sh```
    4.	It will direct you to azure subscription login page
    5.	Choose your subscription 
    6.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
    7.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
+   8.   This solution takes 5-10 mins to install based on your internet speed, After 5-10 mins open your browser and connect to ```http://<your-edge-ip:8080>.
 
 ## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
 
@@ -112,10 +114,12 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Vision on Edge installer: https://youtu.be/NWKLk8ENo-g
 [![video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/Installer%20instruction.png)](https://youtu.be/NWKLk8ENo-g)
-- Test with pretrained mode: https://youtu.be/7PWGNC7rkCE
-- Start from scratch- setup camera, add parts, label and train: https://youtu.be/jLY-VkxU99U
-- Retrain the model: https://youtu.be/dXh9isASvcY
-- Load project from Custom Vision: https://youtu.be/gTEWlu2V8yk
+- Getting started with default model and message to cloud: https://youtu.be/WdNyS0PI6Zo
+- Define area of interest and show message to cloud: https://youtu.be/vN-SSxdKbkI
+- Your own stuff, add camera, location, part train and deploy a model: https://youtu.be/VNfOqP2Ag5U
+- Retrain your model with auto labeling: https://youtu.be/F_E1NxbiQyw
+- Giving feedback and changing projects in setting: https://youtu.be/i92pMdUVrng
+
 
 
 # Troubleshooting 

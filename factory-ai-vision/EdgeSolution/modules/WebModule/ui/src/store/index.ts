@@ -4,9 +4,10 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import { State } from './State';
 import { rootReducer } from './rootReducer';
+import { callAPIMiddleware } from '../middlewares/callAPIMiddleware';
 
 const configureStore = (initialState: State): Store => {
-  const middleWares = [thunkMiddleware];
+  const middleWares = [thunkMiddleware, callAPIMiddleware];
   const middlewareEnhancer = applyMiddleware(...middleWares);
   const composedEnhancer = composeWithDevTools(middlewareEnhancer);
 

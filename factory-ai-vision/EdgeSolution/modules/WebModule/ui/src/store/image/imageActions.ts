@@ -123,7 +123,7 @@ export const deleteLabelImage = (id: number) => (dispatch): Promise<void> => {
       return void 0;
     })
     .catch((err) => {
-      dispatch(requestLabelImagesFailure(err));
+      throw handleAxiosError(err);
     });
 };
 
@@ -149,8 +149,8 @@ export const saveLabelImageAnnotation = (imageId: number, hasRelabeled: boolean,
           data.labels,
           {
             // FIXME
-            id: annotations[0].part.id ?? data.part,
-            name: annotations[0].part.name,
+            id: annotations[0]?.part.id ?? data.part,
+            name: annotations[0]?.part.name,
           },
           hasRelabeled,
         ),

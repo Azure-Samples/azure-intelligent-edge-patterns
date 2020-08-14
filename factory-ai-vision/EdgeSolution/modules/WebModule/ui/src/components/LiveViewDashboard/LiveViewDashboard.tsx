@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Text, Loader, Alert } from '@fluentui/react-northstar';
+import { Flex, Text, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useInterval } from '../../hooks/useInterval';
@@ -17,6 +17,8 @@ import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
 import { AOIData } from '../../type';
 import { Camera } from '../../store/camera/cameraTypes';
+import { ProgressBar } from '../ProgressBar';
+import { highLightTextStyles } from './style';
 
 const getAOIData = (cameraArea: string): AOIData => {
   try {
@@ -36,9 +38,12 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
     status,
     trainingMetrics,
     data: { id: projectId, camera: projectCameraId },
+    progress,
+    inferenceMetrics: { partCount },
   } = useSelector<State, Project>((state) => (isDemo ? state.demoProject : state.project));
   const dispatch = useDispatch();
   const [showConsequenceDashboard, setShowConsequenceDashboard] = useState(false);
+  const [showDetectedPartsCount, setShowshowDetectedPartsCount] = useState(false);
 
   useInterval(
     () => {
@@ -74,10 +79,10 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
 
   if (status === CameraConfigStatus.WaitTraining)
     return (
-      <>
-        <Loader size="smallest" />
+      <div style={{ width: '600px' }}>
+        {progress !== null && <ProgressBar percentage={progress} />}
         <pre>{trainingLogs.join('\n')}</pre>
-      </>
+      </div>
     );
 
   return (
@@ -94,20 +99,47 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
         </div>
         <InferenceMetricDashboard isDemo={isDemo} />
       </Flex>
-      {!isDemo && (
-        <>
-          <Flex hAlign="center" column gap="gap.small">
-            <Text weight="bold">Detail of Training Metric</Text>
-            <Button
-              content={showConsequenceDashboard ? 'Hide' : 'Show'}
-              primary
-              onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
-              circular
-            />
-            <ConsequenceDashboard visible={showConsequenceDashboard} trainingMetrics={trainingMetrics} />
-          </Flex>
-        </>
-      )}
+      <Flex space="evenly">
+        {!isDemo && (
+          <>
+            <Flex hAlign="center" column gap="gap.small" styles={{ width: '60%' }}>
+              <Text weight="bold">Detail of Training Metric</Text>
+              <Button
+                content={showConsequenceDashboard ? 'Hide' : 'Show'}
+                primary
+                onClick={(): void => setShowConsequenceDashboard((prev) => !prev)}
+                circular
+              />
+              <ConsequenceDashboard visible={showConsequenceDashboard} trainingMetrics={trainingMetrics} />
+            </Flex>
+          </>
+        )}
+        <Flex column hAlign="center" gap="gap.small" styles={{ width: '40%' }}>
+          <Text weight="bold">
+            No. of{' '}
+            {Object.keys(partCount)
+              .map((e) => `${e} part`)
+              .join(', ')}{' '}
+            detected
+          </Text>
+          <Button
+            content={showDetectedPartsCount ? 'Hide' : 'Show'}
+            primary
+            onClick={(): void => setShowshowDetectedPartsCount((prev) => !prev)}
+            circular
+          />
+          {showDetectedPartsCount && (
+            <Flex column hAlign="center">
+              {Object.entries(partCount).map((e) => (
+                <>
+                  <Text>{e[0]}</Text>
+                  <Text styles={highLightTextStyles}>{e[1]}</Text>
+                </>
+              ))}
+            </Flex>
+          )}
+        </Flex>
+      </Flex>
     </Flex>
   );
 };

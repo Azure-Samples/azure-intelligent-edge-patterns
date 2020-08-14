@@ -64,7 +64,11 @@
             "restartPolicy": "always",
             "env": {
               "TRAINING_KEY": { "value": "<CUSTOM-VISION-TRAINING-KEY>" },
-              "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" }
+              "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" },
+              "DBNAME": { "value": "vision_on_edge" },
+              "DBHOST": { "value": "172.18.0.1" },
+              "DBUSER": { "value": "vision_on_edge" },
+              "DBPASS": { "value": "vision_on_edge" }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
@@ -81,6 +85,31 @@
               }
             }
           },
+          "WebDBModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "POSTGRES_PASSWORD": { "value": "vision_on_edge" },
+              "POSTGRES_USER": { "value": "vision_on_edge" },
+              "POSTGRES_DB": { "value": "vision_on_edge" }
+            },
+            "settings": {
+              "image": "${MODULES.WebDBModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5432/tcp": [
+                      {
+                        "HostPort": "5432"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           "InferenceModule": {
             "version": "1.0",
             "type": "docker",
@@ -90,15 +119,20 @@
               "image": "${MODULES.InferenceModule.cpuamd64}",
               "createOptions": {
                 "HostConfig": {
-                  "NetworkMode": "host",
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
+                  },
                   "runtime": "runc"
-                },
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "Env": ["DISPLAY=:0"]
+                }
               }
             }
           }

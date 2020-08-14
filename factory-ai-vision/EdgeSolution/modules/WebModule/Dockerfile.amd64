@@ -5,12 +5,18 @@ COPY ui app
 WORKDIR /app
 RUN rm -rf node_modules/
 RUN rm -rf build/
-RUN yarn install
+RUN yarn install --production
 RUN yarn build
 
 FROM amd64/python:3.8
 
+RUN apt-get update
+RUN apt-get install -y libgl1-mesa-glx
+
 WORKDIR /app
+
+RUN apt-get update
+RUN apt-get install -y libgl1-mesa-glx
 
 COPY backend/requirements.txt .
 RUN pip install -r requirements.txt
@@ -19,7 +25,6 @@ COPY backend/manage.py .
 COPY backend/config.py .
 COPY backend/vision_on_edge vision_on_edge
 COPY backend/configs configs
-RUN rm -f vision_on_edge/*/migrations/[0-9]*.py
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
