@@ -1,7 +1,8 @@
-import { createSlice, createEntityAdapter, createSelector, PayloadAction, nanoid } from '@reduxjs/toolkit';
+import { createSlice, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
-import { BoxLabel, Position2D } from './type';
+import { BoxLabel } from './type';
 import { getCameras } from './cameraSlice';
+import { createAOI, removeAOI } from './actions';
 
 export type AOI = BoxLabel & { id: string; camera: number };
 
@@ -11,31 +12,34 @@ const slice = createSlice({
   name: 'AOI',
   initialState: entityAdapter.getInitialState(),
   reducers: {
-    createAOI: (state, action: PayloadAction<{ point: Position2D; cameraId: number }>) => {
-      const { x, y } = action.payload.point;
-      entityAdapter.addOne(state, {
-        id: nanoid(),
-        x1: x,
-        y1: y,
-        x2: x,
-        y2: y,
-        camera: action.payload.cameraId,
-      });
-    },
     updateAOI: entityAdapter.updateOne,
-    removeAOI: entityAdapter.removeOne,
   },
   extraReducers: (builder) => {
-    builder.addCase(getCameras.fulfilled, (state, action) => {
-      entityAdapter.setAll(state, action.payload.entities.AOIs);
-    });
+    builder
+      .addCase(getCameras.fulfilled, (state, action) => {
+        entityAdapter.setAll(state, action.payload.entities.AOIs);
+      })
+      .addCase(createAOI, (state, action) => {
+        const { x, y } = action.payload.point;
+        entityAdapter.addOne(state, {
+          id: action.payload.id,
+          x1: x,
+          y1: y,
+          x2: x,
+          y2: y,
+          camera: action.payload.cameraId,
+        });
+      })
+      .addCase(removeAOI, (state, action) => {
+        entityAdapter.removeOne(state, action.payload.AOIId);
+      });
   },
 });
 
 const { reducer } = slice;
 export default reducer;
 
-export const { createAOI, updateAOI, removeAOI } = slice.actions;
+export const { updateAOI } = slice.actions;
 
 export const { selectAll: selectAllAOIs } = entityAdapter.getSelectors<State>((state) => state.AOIs);
 

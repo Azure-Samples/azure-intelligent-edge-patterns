@@ -5,6 +5,8 @@ import { Text, Checkbox, Flex, Provider } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
+import { nanoid } from '@reduxjs/toolkit';
+import { State } from 'RootStateType';
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
 import { AOIData, Box } from '../../type';
@@ -15,8 +17,8 @@ import { WarningDialog } from '../WarningDialog';
 import { patchCameraArea } from '../../store/camera/cameraActions';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
-import { State } from 'RootStateType';
-import { selectAOIsByCamera, createAOI, updateAOI, removeAOI } from '../../store/AOISlice';
+import { selectAOIsByCamera, updateAOI } from '../../store/AOISlice';
+import { createAOI, removeAOI } from '../../store/actions';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -138,9 +140,9 @@ export const LiveViewContainer: React.FC<{
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
-            createAOI={(point) => dispatch(createAOI({ point, cameraId }))}
+            createAOI={(point) => dispatch(createAOI({ id: nanoid(), point, cameraId }))}
             updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
-            removeAOI={(id) => dispatch(removeAOI(id))}
+            removeAOI={(AOIId) => dispatch(removeAOI({ AOIId, cameraId }))}
             visible={showAOI}
             imageInfo={imageInfo}
             creatingState={creatingAOI}
