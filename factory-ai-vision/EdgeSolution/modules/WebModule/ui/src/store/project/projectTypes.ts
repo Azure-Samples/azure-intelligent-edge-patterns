@@ -13,6 +13,7 @@ export type Project = {
     unIdetifiedItems: number;
     isGpu: boolean;
     averageTime: number;
+    partCount: Record<string, number>;
   };
   progress: number;
   trainingMetrics: TrainingMetrics;
@@ -149,6 +150,7 @@ export type GetInferenceMetricsSuccessAction = ProjectAction & {
     unIdetifiedItems: number;
     isGpu: boolean;
     averageTime: number;
+    partCount: Record<string, number>;
   };
 };
 
