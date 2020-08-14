@@ -1,8 +1,10 @@
-import { createSlice, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
+import { createSlice, createEntityAdapter, createSelector, Reducer } from '@reduxjs/toolkit';
+import * as R from 'ramda';
+
 import { State } from 'RootStateType';
 import { BoxLabel } from './type';
 import { getCameras } from './cameraSlice';
-import { createAOI, removeAOI } from './actions';
+import { createAOI, removeAOI, toggleShowAOI, updateCameraArea } from './actions';
 
 export type AOI = BoxLabel & { id: string; camera: number };
 
@@ -37,7 +39,26 @@ const slice = createSlice({
 });
 
 const { reducer } = slice;
-export default reducer;
+/**
+ * A reducer enhancer to add a field `originEntities` to store the data from server. No user edit
+ */
+const addOriginEntitiesReducer: Reducer<
+  ReturnType<typeof reducer> & { originEntities: Record<string, AOI> }
+> = (state, action) => {
+  if (getCameras.fulfilled.match(action)) {
+    return { ...reducer(state, action), originEntities: R.clone(action.payload.entities.AOIs) || {} };
+  }
+  if (toggleShowAOI.fulfilled.match(action)) {
+    if (!action.meta.arg.showAOI)
+      return { ...state, ...reducer(state, action), entities: R.clone(state.originEntities) };
+  }
+  if (updateCameraArea.fulfilled.match(action)) {
+    return { ...reducer(state, action), originEntities: R.clone(state.entities) };
+  }
+  return { ...state, ...reducer(state, action) };
+};
+
+export default addOriginEntitiesReducer;
 
 export const { updateAOI } = slice.actions;
 

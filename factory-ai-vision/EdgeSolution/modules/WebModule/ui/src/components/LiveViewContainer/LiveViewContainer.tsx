@@ -41,9 +41,6 @@ export const LiveViewContainer: React.FC<{
     try {
       await dispatch(toggleShowAOI({ cameraId, showAOI: !showAOI }));
       setShowUpdateSuccessTxt(true);
-      // If showAOI is false, show the latest update aoi
-      // Note, probably use the same method `originEntites` like annoSlice
-      // if (!showAOI) setAOIs(lasteUpdatedAOIs.current);
     } catch (e) {
       alert(e);
     }
@@ -55,7 +52,6 @@ export const LiveViewContainer: React.FC<{
     try {
       await dispatch(updateCameraArea(cameraId));
       setShowUpdateSuccessTxt(true);
-      //   lasteUpdatedAOIs.current = R.clone(AOIs);
     } catch (e) {
       alert(e);
     }
