@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Input, Text, ComponentSlotStyle, Divider } from '@fluentui/react-northstar';
+import { Flex, Input, Text, Divider } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -7,6 +7,7 @@ import { updateProjectData, thunkUpdateProbThreshold } from '../../store/project
 import { Project } from '../../store/project/projectTypes';
 import { State } from '../../store/State';
 import { Button } from '../Button';
+import { highLightTextStyles } from './style';
 
 /**
  * Check the condition for certain time, and show the notification for the given period.
@@ -49,13 +50,6 @@ const getSectionStyle = (isDemo): React.CSSProperties => ({
   width: isDemo ? '33%' : '25%',
   overflow: 'scroll',
 });
-
-const highLightTextStyles: ComponentSlotStyle = {
-  color: 'rgb(244, 152, 40)',
-  fontWeight: 'bold',
-  fontSize: '2em',
-  padding: '5px, 0px',
-};
 
 export const InferenceMetricDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const { data: project, isLoading, inferenceMetrics } = useSelector<State, Project>((state) =>
