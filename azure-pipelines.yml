@@ -37,9 +37,3 @@ steps:
 - task: AzureFileCopy@4
   inputs:
     Destination: 
-  
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
