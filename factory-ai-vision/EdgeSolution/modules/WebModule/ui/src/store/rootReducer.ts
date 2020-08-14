@@ -10,6 +10,7 @@ import imagesReducer from './imageSlice';
 import annotationReducer from './annotationSlice';
 import labelingPageReducer from './labelingPageSlice';
 import cameraReducer from './cameraSlice';
+import AOIsReducer from './AOISlice';
 
 export const rootReducer = combineReducers({
   cameras: camerasReducer,
@@ -24,4 +25,5 @@ export const rootReducer = combineReducers({
   labelImages: imagesReducer,
   annotations: annotationReducer,
   labelingPage: labelingPageReducer,
+  AOIs: AOIsReducer,
 });

@@ -39,7 +39,14 @@ const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
 };
 
 const normalizeCamerasAndAOIsByNormalizr = (data: CameraFromServerWithSerializeArea[]) => {
-  const AOIs = new schema.Entity('AOIs');
+  const AOIs = new schema.Entity('AOIs', undefined, {
+    processStrategy: (value, parent) => {
+      return {
+        ...value,
+        camera: parent.id,
+      };
+    },
+  });
 
   const cameras = new schema.Entity(
     'cameras',
@@ -95,6 +102,8 @@ export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number
   await Axios.delete(`/api/cameras/${id}/`);
   return id;
 });
+
+export const toggleShowAOI = createAsyncThunk('cameras/toggleShowAOI', async () => {});
 
 const slice = createSlice({
   name: 'cameras',
