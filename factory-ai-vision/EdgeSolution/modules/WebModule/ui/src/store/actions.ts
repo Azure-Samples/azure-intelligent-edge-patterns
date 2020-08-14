@@ -23,3 +23,13 @@ export const deleteImage = createAsyncThunk('images/delete', async (id: number) 
 export const createAOI = createAction<{ id: string; point: Position2D; cameraId: number }>('AOI/createAOI');
 
 export const removeAOI = createAction<{ AOIId: string; cameraId: number }>('AOI/removeAOI');
+
+export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: boolean }, { state: State }>(
+  'cameras/toggleShowAOI',
+  async ({ cameraId, showAOI }, { getState }) => {
+    const { AOIs: AOIIds } = getState().camera.entities[cameraId];
+    const AOIEntities = getState().AOIs.entities;
+    const AOIs = AOIIds.map((e) => AOIEntities[e]);
+    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: showAOI, AOIs }) });
+  },
+);

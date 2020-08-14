@@ -18,7 +18,7 @@ import { patchCameraArea } from '../../store/camera/cameraActions';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
 import { selectAOIsByCamera, updateAOI } from '../../store/AOISlice';
-import { createAOI, removeAOI } from '../../store/actions';
+import { createAOI, removeAOI, toggleShowAOI } from '../../store/actions';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -38,19 +38,17 @@ export const LiveViewContainer: React.FC<{
   const dispatch = useDispatch();
 
   const onCheckboxClick = async (): Promise<void> => {
-    // setShowAOI(!showAOI);
-    // setLoading(true);
-    // try {
-    //   await dispatch(patchCameraArea({ AOIs: lasteUpdatedAOIs.current, useAOI: !showAOI }, cameraId));
-    //   setShowUpdateSuccessTxt(true);
-    //   // If showAOI is false, show the latest update aoi
-    //   // Note, probably use the same method `originEntites` like annoSlice
-    //   if (!showAOI) setAOIs(lasteUpdatedAOIs.current);
-    // } catch (e) {
-    //   // Set back to the state before updating for switch case
-    //   setShowAOI(showAOI);
-    // }
-    // setLoading(false);
+    setLoading(true);
+    try {
+      await dispatch(toggleShowAOI({ cameraId, showAOI: !showAOI }));
+      setShowUpdateSuccessTxt(true);
+      // If showAOI is false, show the latest update aoi
+      // Note, probably use the same method `originEntites` like annoSlice
+      // if (!showAOI) setAOIs(lasteUpdatedAOIs.current);
+    } catch (e) {
+      alert(e);
+    }
+    setLoading(false);
   };
 
   const onUpdate = async (): Promise<void> => {

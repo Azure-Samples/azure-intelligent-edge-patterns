@@ -4,7 +4,7 @@ import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
 import { BoxLabel } from './type';
-import { createAOI, removeAOI } from './actions';
+import { createAOI, removeAOI, toggleShowAOI } from './actions';
 
 type CameraFromServer = {
   id: number;
@@ -105,8 +105,6 @@ export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number
   return id;
 });
 
-export const toggleShowAOI = createAsyncThunk('cameras/toggleShowAOI', async () => {});
-
 const slice = createSlice({
   name: 'cameras',
   initialState: entityAdapter.getInitialState(),
@@ -124,6 +122,14 @@ const slice = createSlice({
       .addCase(removeAOI, (state, action) => {
         let { AOIs } = state.entities[action.payload.cameraId];
         AOIs = AOIs.filter((e) => e !== action.payload.AOIId);
+      })
+      .addCase(toggleShowAOI.pending, (state, action) => {
+        const { showAOI, cameraId } = action.meta.arg;
+        state.entities[cameraId].useAOI = showAOI;
+      })
+      .addCase(toggleShowAOI.rejected, (state, action) => {
+        const { showAOI, cameraId } = action.meta.arg;
+        state.entities[cameraId].useAOI = !showAOI;
       });
   },
 });
