@@ -150,7 +150,7 @@ do
     read -p ">> " tmp
     RESOURCE_GROUP=${tmp:-$RESOURCE_GROUP}
     EXISTING=$(az group exists -g ${RESOURCE_GROUP})
-fi
+done
 
 echo -e "\nResource group currently contains these resources:"
 RESOURCES=$(az resource list --resource-group $RESOURCE_GROUP --query '[].{name:name,"Resource Type":type}' -o table)
@@ -425,4 +425,3 @@ ${YELLOW}./invokeMethodsHelper.sh ${IOTHUB} ${EDGE_DEVICE} \"${IOTHUB_CONNECTION
 
 If you would like to change the media graph you create, look through the jsonfiles folder and modify as you see fit. Modify topologyset.json to modify the media graph itself. Modify instanceset.json to change the rtsp URL to point to an actual stream instead of a simulated video.
 "
-
