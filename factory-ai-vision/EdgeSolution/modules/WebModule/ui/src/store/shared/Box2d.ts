@@ -12,7 +12,7 @@ export type BBoxAOI = AOI & {
 export class BBox extends BaseShape {
   static init(p: Position2D, id: string, camera: number): BBoxAOI {
     const { x, y } = p;
-    return {
+    return BBox.setVerticesToValidValue({
       id,
       camera,
       type: Shape.BBox,
@@ -22,7 +22,7 @@ export class BBox extends BaseShape {
         x2: x,
         y2: y,
       },
-    };
+    });
   }
 
   static add(p: Position2D, obj: BBoxAOI): BBoxAOI {
@@ -34,7 +34,8 @@ export class BBox extends BaseShape {
   }
 
   static update(changes: Partial<BoxLabel>, obj: BBoxAOI): BBoxAOI {
-    return R.evolve({ vertices: R.mergeLeft(changes) }, obj) as BBoxAOI;
+    const change = R.evolve({ vertices: R.mergeLeft(changes) });
+    return R.compose(BBox.setVerticesToValidValue, change)(obj);
   }
 
   static setVerticesPointsOrder(obj: BBoxAOI): BBoxAOI {

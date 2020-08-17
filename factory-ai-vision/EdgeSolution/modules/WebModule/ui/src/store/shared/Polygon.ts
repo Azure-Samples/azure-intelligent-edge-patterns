@@ -11,12 +11,12 @@ export type PolygonAOI = AOI & {
 
 export class Polygon extends BaseShape {
   static init(p: Position2D, id: string, camera: number): PolygonAOI {
-    return {
+    return Polygon.setVerticesToValidValue({
       id,
       camera,
       type: Shape.Polygon,
       vertices: [p, p],
-    };
+    });
   }
 
   static add(p: Position2D, obj: PolygonAOI): PolygonAOI {
@@ -32,12 +32,13 @@ export class Polygon extends BaseShape {
   }
 
   static update(idx: number, p: Position2D, obj: PolygonAOI): PolygonAOI {
-    return R.evolve({ vertices: R.update(idx, p) }, obj) as PolygonAOI;
+    const update = R.evolve({ vertices: R.update(idx, p) });
+    return R.compose(Polygon.setVerticesToValidValue, update)(obj);
   }
 
   static setVerticesToInt(obj: PolygonAOI): PolygonAOI {
     const newObj = { ...obj };
-    newObj.vertices.map((e) => ({
+    newObj.vertices = newObj.vertices.map((e) => ({
       x: Math.round(e.x),
       y: Math.round(e.y),
     }));
