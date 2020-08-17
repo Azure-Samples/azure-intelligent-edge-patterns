@@ -5,11 +5,12 @@ import {
   Reducer,
   PayloadAction,
   Update,
+  nanoid,
 } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
-import { BoxLabel } from './type';
+import { BoxLabel, Position2D } from './type';
 import { getCameras } from './cameraSlice';
 import { toggleShowAOI, updateCameraArea } from './actions';
 
@@ -49,18 +50,39 @@ const slice = createSlice({
         camera,
       });
     },
-    createAOI: (state, action) => {
-      state.creatingState = CreatingState.Creating;
-
+    onCreatingPoint: (state, action: PayloadAction<{ point: Position2D; cameraId: number }>) => {
       const { x, y } = action.payload.point;
-      entityAdapter.addOne(state, {
-        id: action.payload.id,
-        x1: x,
-        y1: y,
-        x2: x,
-        y2: y,
-        camera: action.payload.cameraId,
-      });
+
+      if (state.creatingState === CreatingState.Waiting) {
+        state.creatingState = CreatingState.Creating;
+        entityAdapter.addOne(state, {
+          id: nanoid(),
+          x1: x,
+          y1: y,
+          x2: x,
+          y2: y,
+          camera: action.payload.cameraId,
+        });
+      } else if (state.creatingState === CreatingState.Creating) {
+        const id = state.ids[state.ids.length - 1];
+        const newAOI = R.mergeRight(state.entities[id], { x2: x, y2: y });
+
+        if (newAOI.x1 > newAOI.x2) {
+          const tmp = newAOI.x1;
+          newAOI.x1 = newAOI.x2;
+          newAOI.x2 = tmp;
+        }
+
+        if (newAOI.y1 > newAOI.y2) {
+          const tmp = newAOI.y1;
+          newAOI.y1 = newAOI.y2;
+          newAOI.y2 = tmp;
+        }
+
+        state.creatingState = CreatingState.Disabled;
+        state.shape = Shape.None;
+        entityAdapter.updateOne(state, { id, changes: newAOI });
+      }
     },
     removeAOI: entityAdapter.removeOne,
     updateAOI: (state, action: PayloadAction<Update<AOI>>) => {
@@ -127,7 +149,7 @@ const addOriginEntitiesReducer: Reducer<
 
 export default addOriginEntitiesReducer;
 
-export const { updateAOI, createAOI, removeAOI, createDefaultAOI, onCreateAOIBtnClick } = slice.actions;
+export const { updateAOI, onCreatingPoint, removeAOI, createDefaultAOI, onCreateAOIBtnClick } = slice.actions;
 
 export const { selectAll: selectAllAOIs } = entityAdapter.getSelectors<State>((state) => state.AOIs);
 

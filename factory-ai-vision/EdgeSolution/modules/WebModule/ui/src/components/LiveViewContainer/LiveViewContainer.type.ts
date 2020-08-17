@@ -1,15 +1,10 @@
 import { Box } from '../../type';
 import { Position2D, BoxLabel } from '../../store/type';
-
-export enum CreatingState {
-  Disabled,
-  Waiting,
-  Creating,
-}
+import { CreatingState } from '../../store/AOISlice';
 
 export type LiveViewProps = {
   AOIs: Box[];
-  createAOI: (point: Position2D) => void;
+  onCreatingPoint: (point: Position2D) => void;
   updateAOI: (id: string, changes: Partial<BoxLabel>) => void;
   removeAOI: (id: string) => void;
   visible: boolean;

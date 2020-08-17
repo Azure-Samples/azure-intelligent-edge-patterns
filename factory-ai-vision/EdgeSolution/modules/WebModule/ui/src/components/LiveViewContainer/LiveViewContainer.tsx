@@ -5,7 +5,6 @@ import { Text, Checkbox, Flex, Provider } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
-import { nanoid } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
@@ -17,7 +16,7 @@ import { selectCameraById } from '../../store/cameraSlice';
 import {
   selectAOIsByCamera,
   updateAOI,
-  createAOI,
+  onCreatingPoint,
   removeAOI,
   createDefaultAOI,
   selectOriginAOIsByCamera,
@@ -149,7 +148,7 @@ export const LiveViewContainer: React.FC<{
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
-            createAOI={(point) => dispatch(createAOI({ id: nanoid(), point, cameraId }))}
+            onCreatingPoint={(point) => dispatch(onCreatingPoint({ point, cameraId }))}
             updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
             removeAOI={(AOIId) => dispatch(removeAOI(AOIId))}
             visible={showAOI}

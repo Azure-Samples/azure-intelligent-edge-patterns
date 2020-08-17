@@ -3,13 +3,8 @@ import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle, Path } f
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import {
-  LiveViewProps,
-  MaskProps,
-  AOIBoxProps,
-  AOILayerProps,
-  CreatingState,
-} from './LiveViewContainer.type';
+import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
+import { CreatingState } from '../../store/AOISlice';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -20,7 +15,7 @@ const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
 
 export const LiveViewScene: React.FC<LiveViewProps> = ({
   AOIs,
-  createAOI,
+  onCreatingPoint,
   updateAOI,
   removeAOI,
   visible,
@@ -70,7 +65,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     if (creatingState === CreatingState.Disabled) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    createAOI({ x, y });
+    onCreatingPoint({ x, y });
   };
 
   const onMouseMove = (e: KonvaEventObject<MouseEvent>): void => {
@@ -83,15 +78,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   return (
     <div ref={divRef} style={{ width: '100%', height: '100%' }}>
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
-        <Layer
-          ref={layerRef}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={(): void => {
-            // TODO This event should be removed
-            // if (creatingState === CreatingState.Creating) setCreatingState(CreatingState.Disabled);
-          }}
-        >
+        <Layer ref={layerRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}>
           <KonvaImage image={imgEle} ref={imgRef} />
           {
             /* Render when image is loaded to prevent AOI boxes show in unscale size */
