@@ -756,7 +756,7 @@ def gen():
                 #for aoi_area in onnx.aoi_info:
                     #img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
                     #    aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
-                draw_aoi(img, aoi_info)
+                draw_aoi(img, onnx.aoi_info)
 
             if prediction['probability'] > onnx.threshold:
                 (x1, y1), (x2, y2) = parse_bbox(
