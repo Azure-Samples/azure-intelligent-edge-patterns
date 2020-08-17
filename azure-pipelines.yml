@@ -6,7 +6,17 @@
 trigger:
 - develop
 
+
+
 steps:
+
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your commands here
+      
+      sudo pip install --upgrade cryptography
 - task: AzureIoTEdge@2
   inputs:
     action: 'Build module images'
