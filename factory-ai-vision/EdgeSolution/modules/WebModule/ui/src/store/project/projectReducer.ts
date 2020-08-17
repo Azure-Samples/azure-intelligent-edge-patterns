@@ -29,7 +29,7 @@ const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Statu
   return Status.None;
 };
 
-const initialState = {
+const initialState: Project = {
   isLoading: false,
   data: {
     id: null,
@@ -71,6 +71,7 @@ const initialState = {
     unIdetifiedItems: null,
     isGpu: false,
     averageTime: null,
+    partCount: {},
   },
   status: Status.None,
   error: null,
