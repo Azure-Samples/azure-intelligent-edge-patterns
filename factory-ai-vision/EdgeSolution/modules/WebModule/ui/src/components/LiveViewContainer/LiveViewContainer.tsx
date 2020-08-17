@@ -5,12 +5,10 @@ import { Text, Checkbox, Flex, Provider } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
-import { nanoid } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
 import useImage from '../LabelingPage/util/useImage';
-import { CreatingState } from './LiveViewContainer.type';
 import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
 import { useInterval } from '../../hooks/useInterval';
@@ -18,12 +16,15 @@ import { selectCameraById } from '../../store/cameraSlice';
 import {
   selectAOIsByCamera,
   updateAOI,
-  createAOI,
+  onCreatingPoint,
   removeAOI,
   createDefaultAOI,
   selectOriginAOIsByCamera,
+  onCreateAOIBtnClick,
+  finishLabel,
 } from '../../store/AOISlice';
 import { toggleShowAOI, updateCameraArea } from '../../store/actions';
+import { Shape } from '../../store/shared/BaseShape';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -36,7 +37,8 @@ export const LiveViewContainer: React.FC<{
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
   const imageInfo = useImage('/api/inference/video_feed', '', true, true);
-  const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
+  const creatingAOI = useSelector((state: State) => state.AOIs.creatingState);
+  const AOIShape = useSelector((state: State) => state.AOIs.shape);
   const dispatch = useDispatch();
 
   const onCheckboxClick = async (): Promise<void> => {
@@ -77,10 +79,13 @@ export const LiveViewContainer: React.FC<{
       dispatch(
         createDefaultAOI({
           id: uniqid(),
-          x1: imgWidth * 0.1,
-          y1: imgHeight * 0.1,
-          x2: imgWidth * 0.9,
-          y2: imgHeight * 0.9,
+          type: Shape.BBox,
+          vertices: {
+            x1: imgWidth * 0.1,
+            y1: imgHeight * 0.1,
+            x2: imgWidth * 0.9,
+            y2: imgHeight * 0.9,
+          },
           camera: cameraId,
         }),
       );
@@ -105,12 +110,21 @@ export const LiveViewContainer: React.FC<{
           onClick={onCheckboxClick}
         />
         <Button
-          content="Create AOI"
-          primary={creatingAOI !== CreatingState.Disabled}
+          content="Create Box"
+          primary={AOIShape === Shape.BBox}
           disabled={!showAOI}
           onClick={(): void => {
-            if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
-            else setCreatingAOI(CreatingState.Disabled);
+            dispatch(onCreateAOIBtnClick(Shape.BBox));
+          }}
+          circular
+          styles={{ padding: '0 5px' }}
+        />
+        <Button
+          content="Create Polygon"
+          primary={AOIShape === Shape.Polygon}
+          disabled={!showAOI}
+          onClick={(): void => {
+            dispatch(onCreateAOIBtnClick(Shape.Polygon));
           }}
           circular
           styles={{ padding: '0 5px' }}
@@ -138,13 +152,14 @@ export const LiveViewContainer: React.FC<{
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
-            createAOI={(point) => dispatch(createAOI({ id: nanoid(), point, cameraId }))}
+            creatingShape={AOIShape}
+            onCreatingPoint={(point) => dispatch(onCreatingPoint({ point, cameraId }))}
             updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
             removeAOI={(AOIId) => dispatch(removeAOI(AOIId))}
+            finishLabel={() => dispatch(finishLabel())}
             visible={showAOI}
             imageInfo={imageInfo}
             creatingState={creatingAOI}
-            setCreatingState={setCreatingAOI}
           />
         ) : null}
       </div>

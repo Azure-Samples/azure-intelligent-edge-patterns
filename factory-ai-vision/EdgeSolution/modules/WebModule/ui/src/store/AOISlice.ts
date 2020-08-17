@@ -5,62 +5,104 @@ import {
   Reducer,
   PayloadAction,
   Update,
+  nanoid,
 } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
-import { BoxLabel } from './type';
+import { BoxLabel, Position2D, PolygonLabel } from './type';
 import { getCameras } from './cameraSlice';
 import { toggleShowAOI, updateCameraArea } from './actions';
+import { Shape, AOI } from './shared/BaseShape';
+import { BBox, BBoxAOI, isBBox } from './shared/Box2d';
+import { Polygon, PolygonAOI, isPolygon } from './shared/Polygon';
 
-export type AOI = BoxLabel & { id: string; camera: number };
+// Use enum string to make debugginh easier.
+export enum CreatingState {
+  Disabled = 'Disabled',
+  Waiting = 'Waiting',
+  Creating = 'Creating',
+}
 
 const entityAdapter = createEntityAdapter<AOI>();
 
 const slice = createSlice({
   name: 'AOI',
-  initialState: entityAdapter.getInitialState(),
+  initialState: {
+    ...entityAdapter.getInitialState(),
+    creatingState: CreatingState.Disabled,
+    shape: Shape.None,
+  },
   reducers: {
-    createDefaultAOI: (state, action: PayloadAction<AOI>) => {
-      const { id, x1, x2, y1, y2, camera } = action.payload;
-      entityAdapter.upsertOne(state, {
-        id,
-        x1,
-        y1,
-        x2,
-        y2,
-        camera,
-      });
+    createDefaultAOI: (state, action: PayloadAction<BBoxAOI>) => {
+      entityAdapter.upsertOne(state, action.payload);
     },
-    createAOI: (state, action) => {
-      const { x, y } = action.payload.point;
-      entityAdapter.addOne(state, {
-        id: action.payload.id,
-        x1: x,
-        y1: y,
-        x2: x,
-        y2: y,
-        camera: action.payload.cameraId,
-      });
+    onCreatingPoint: (
+      state,
+      action: PayloadAction<{ point: Position2D; cameraId: number; isDBClick?: boolean }>,
+    ) => {
+      const { point, cameraId } = action.payload;
+
+      if (state.creatingState === CreatingState.Waiting) {
+        state.creatingState = CreatingState.Creating;
+        if (state.shape === Shape.BBox) entityAdapter.addOne(state, BBox.init(point, nanoid(), cameraId));
+        else if (state.shape === Shape.Polygon)
+          entityAdapter.addOne(state, Polygon.init(point, nanoid(), cameraId));
+      } else if (state.creatingState === CreatingState.Creating) {
+        const id = state.ids[state.ids.length - 1];
+
+        if (state.shape === Shape.BBox) {
+          entityAdapter.updateOne(state, { id, changes: BBox.add(point, state.entities[id] as BBoxAOI) });
+          state.creatingState = CreatingState.Disabled;
+          state.shape = Shape.None;
+        } else if (state.shape === Shape.Polygon) {
+          entityAdapter.updateOne(state, {
+            id,
+            changes: Polygon.add(point, state.entities[id] as PolygonAOI),
+          });
+        }
+      }
     },
     removeAOI: entityAdapter.removeOne,
-    updateAOI: (state, action: PayloadAction<Update<AOI>>) => {
-      const { id, changes } = action.payload;
-      const newAOI = R.mergeRight(state.entities[id], changes);
-
-      if (newAOI.x1 > newAOI.x2) {
-        const tmp = newAOI.x1;
-        newAOI.x1 = newAOI.x2;
-        newAOI.x2 = tmp;
+    updateAOI: (
+      state,
+      action: PayloadAction<Update<BoxLabel> | Update<{ idx: number; vertex: Position2D }>>,
+    ) => {
+      const { id } = action.payload;
+      if (isBBox(state.entities[id])) {
+        const { changes } = action.payload as Update<BoxLabel>;
+        entityAdapter.updateOne(state, {
+          id,
+          changes: BBox.update(changes as Partial<BoxLabel>, state.entities[id] as BBoxAOI),
+        });
+      } else if (isPolygon(state.entities[id])) {
+        const { changes } = action.payload as Update<{ idx: number; vertex: Position2D }>;
+        entityAdapter.updateOne(state, {
+          id,
+          changes: Polygon.update(changes.idx, changes.vertex, state.entities[id] as PolygonAOI),
+        });
       }
-
-      if (newAOI.y1 > newAOI.y2) {
-        const tmp = newAOI.y1;
-        newAOI.y1 = newAOI.y2;
-        newAOI.y2 = tmp;
+    },
+    onCreateAOIBtnClick: (state, action: PayloadAction<Shape>) => {
+      if (state.creatingState === CreatingState.Disabled) {
+        state.creatingState = CreatingState.Waiting;
+        state.shape = action.payload;
+      } else if (state.shape !== action.payload) {
+        state.shape = action.payload;
+      } else {
+        state.creatingState = CreatingState.Disabled;
+        state.shape = Shape.None;
       }
-
-      entityAdapter.updateOne(state, { id, changes: newAOI });
+    },
+    finishLabel: (state) => {
+      if (state.shape === Shape.Polygon) {
+        const lastPoly = state.entities[state.ids[state.ids.length - 1]].vertices as PolygonLabel;
+        if (lastPoly.length > 3) {
+          lastPoly.pop();
+          state.creatingState = CreatingState.Disabled;
+          state.shape = Shape.None;
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -97,7 +139,14 @@ const addOriginEntitiesReducer: Reducer<
 
 export default addOriginEntitiesReducer;
 
-export const { updateAOI, createAOI, removeAOI, createDefaultAOI } = slice.actions;
+export const {
+  updateAOI,
+  onCreatingPoint,
+  removeAOI,
+  createDefaultAOI,
+  onCreateAOIBtnClick,
+  finishLabel,
+} = slice.actions;
 
 export const { selectAll: selectAllAOIs } = entityAdapter.getSelectors<State>((state) => state.AOIs);
 

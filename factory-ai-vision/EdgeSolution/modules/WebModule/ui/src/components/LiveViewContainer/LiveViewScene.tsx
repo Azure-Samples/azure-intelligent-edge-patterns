@@ -1,15 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle, Path } from 'react-konva';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import {
+  Stage,
+  Image as KonvaImage,
+  Shape as KonvaShape,
+  Group,
+  Line,
+  Layer,
+  Circle,
+  Path,
+} from 'react-konva';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import {
-  LiveViewProps,
-  MaskProps,
-  AOIBoxProps,
-  AOILayerProps,
-  CreatingState,
-} from './LiveViewContainer.type';
+import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
+import { CreatingState } from '../../store/AOISlice';
+import { isBBox } from '../../store/shared/Box2d';
+import { isPolygon } from '../../store/shared/Polygon';
+import { Shape } from '../../store/shared/BaseShape';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -20,13 +27,14 @@ const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
 
 export const LiveViewScene: React.FC<LiveViewProps> = ({
   AOIs,
-  createAOI,
+  creatingShape,
+  onCreatingPoint,
   updateAOI,
   removeAOI,
+  finishLabel,
   visible,
   imageInfo,
   creatingState,
-  setCreatingState,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
@@ -71,28 +79,35 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     if (creatingState === CreatingState.Disabled) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    createAOI({ x, y });
-    setCreatingState(CreatingState.Creating);
+    onCreatingPoint({ x, y });
   };
 
   const onMouseMove = (e: KonvaEventObject<MouseEvent>): void => {
     if (creatingState !== CreatingState.Creating) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    updateAOI(AOIs[AOIs.length - 1].id, { x2: x, y2: y });
+    if (creatingShape === Shape.BBox) updateAOI(AOIs[AOIs.length - 1].id, { x2: x, y2: y });
+    else if (creatingShape === Shape.Polygon)
+      updateAOI(AOIs[AOIs.length - 1].id, { idx: -1, vertex: { x, y } });
   };
 
+  useEffect(() => {
+    const div = divRef.current;
+    const handleFPress = (e) => {
+      if (e.key === 'f') {
+        finishLabel();
+      }
+    };
+    div.addEventListener('keydown', handleFPress);
+    return () => {
+      div.removeEventListener('keydown', handleFPress);
+    };
+  }, []);
+
   return (
-    <div ref={divRef} style={{ width: '100%', height: '100%' }}>
+    <div ref={divRef} style={{ width: '100%', height: '100%' }} tabIndex={0}>
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
-        <Layer
-          ref={layerRef}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={(): void => {
-            if (creatingState === CreatingState.Creating) setCreatingState(CreatingState.Disabled);
-          }}
-        >
+        <Layer ref={layerRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}>
           <KonvaImage image={imgEle} ref={imgRef} />
           {
             /* Render when image is loaded to prevent AOI boxes show in unscale size */
@@ -126,26 +141,55 @@ const AOILayer: React.FC<AOILayerProps> = ({
   return (
     <>
       <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
-      {AOIs.map((e, i) => (
-        <AOIBox
-          key={e.id}
-          box={e}
-          visible={visible}
-          boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
-          onBoxChange={(changes): void => {
-            updateAOI(e.id, changes);
-          }}
-          removeBox={() => removeAOI(e.id)}
-          creatingState={creatingState}
-        />
-      ))}
+      {AOIs.map((e) => {
+        if (isBBox(e)) {
+          return (
+            <AOIBox
+              key={e.id}
+              box={{ ...e.vertices, id: e.id }}
+              visible={visible}
+              boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+              onBoxChange={(changes): void => {
+                updateAOI(e.id, changes);
+              }}
+              removeBox={() => removeAOI(e.id)}
+              creatingState={creatingState}
+            />
+          );
+        }
+        if (isPolygon(e)) {
+          return (
+            <AOIPolygon
+              key={e.id}
+              id={e.id}
+              polygon={e.vertices}
+              visible={true}
+              removeBox={() => removeAOI(e.id)}
+              creatingState={creatingState}
+              handleChange={(idx, vertex) => updateAOI(e.id, { idx, vertex })}
+              boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+            />
+          );
+        }
+        return null;
+      })}
     </>
   );
 };
 
+function polygonArea(vertices) {
+  let area = 0;
+  for (let i = 0; i < vertices.length; i++) {
+    let j = (i + 1) % vertices.length;
+    area += vertices[i].x * vertices[j].y;
+    area -= vertices[j].x * vertices[i].y;
+  }
+  return area / 2;
+}
+
 const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   return (
-    <Shape
+    <KonvaShape
       width={width}
       height={height}
       fill={'rgba(0,0,0,0.5)'}
@@ -159,18 +203,137 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
         ctx.lineTo(0, 0);
 
         // Nonozero-rule
-        holes.forEach(({ x1, y1, x2, y2 }) => {
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x1, y2);
-          ctx.lineTo(x2, y2);
-          ctx.lineTo(x2, y1);
-          ctx.lineTo(x1, y1);
+        holes.forEach((e) => {
+          if (isBBox(e)) {
+            const { x1, y1, x2, y2 } = e.vertices;
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x1, y2);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x2, y1);
+            ctx.lineTo(x1, y1);
+          } else if (isPolygon(e)) {
+            const vertices = [...e.vertices];
+            const head = vertices[0];
+            ctx.moveTo(head.x, head.y);
+
+            // check if the array is in counter clockwise
+            if (polygonArea(vertices) > 0) vertices.reverse();
+
+            vertices.forEach((p) => {
+              ctx.lineTo(p.x, p.y);
+            });
+            ctx.lineTo(head.x, head.y);
+          }
         });
 
         ctx.fillStrokeShape(shape);
       }}
       listening={false}
     />
+  );
+};
+
+const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChange, boundary }) => {
+  const COLOR = 'white';
+  const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
+  const groupRef = useRef<Konva.Group>(null);
+
+  const scale = groupRef.current?.getLayer().scale().x || 1;
+
+  const radius = 5 / scale;
+
+  const borderPoints = useMemo(() => {
+    return polygon
+      .map((e, _, arr) => {
+        return { x: e.x - arr[0].x, y: e.y - arr[0].y };
+      })
+      .reduce((acc, cur) => {
+        acc.push(cur.x, cur.y);
+        return acc;
+      }, []);
+  }, [polygon]);
+
+  const onDragMove = (idx: number) => (e: KonvaEventObject<DragEvent>): void => {
+    let { x, y } = e.target.position();
+
+    if (x < boundary.x1) {
+      x = boundary.x1;
+      e.target.x(x);
+    }
+
+    if (x > boundary.x2) {
+      x = boundary.x2;
+      e.target.x(x);
+    }
+
+    if (y < boundary.y1) {
+      y = boundary.y1;
+      e.target.y(y);
+    }
+
+    if (y > boundary.y2) {
+      y = boundary.y2;
+      e.target.y(y);
+    }
+
+    handleChange(idx, { x, y });
+  };
+
+  const topPoint = useMemo(() => {
+    let point = { x: null, y: Infinity };
+    polygon.forEach((e) => {
+      if (e.y < point.y) point = e;
+    });
+    return point;
+  }, [polygon]);
+
+  return (
+    <Group
+      visible={visible}
+      onMouseEnter={(): void => setCanceBtnVisible(true)}
+      onMouseLeave={(): void => setCanceBtnVisible(false)}
+      cache={[{ drawBorder: true }]}
+      ref={groupRef}
+    >
+      {/** A bigger region for mouseEnter event */}
+      <Line x={polygon[0].x} y={polygon[0].y - 50} points={borderPoints} closed scale={{ x: 1.2, y: 1.2 }} />
+      <Line
+        x={polygon[0].x}
+        y={polygon[0].y}
+        points={borderPoints}
+        closed
+        stroke={COLOR}
+        strokeWidth={2 / scale}
+      />
+      {polygon.map((e, i) => (
+        <Circle
+          key={i}
+          draggable
+          name="leftTop"
+          x={e.x}
+          y={e.y}
+          radius={radius}
+          fill={COLOR}
+          onDragMove={onDragMove(i)}
+        />
+      ))}
+      <Path
+        x={topPoint.x}
+        y={topPoint.y - 30 / scale}
+        data="M 0 0 L 20 20 M 20 0 L 0 20"
+        stroke="red"
+        strokeWidth={5}
+        visible={cancelBtnVisible && creatingState === CreatingState.Disabled}
+        onMouseEnter={(e): void => {
+          e.target.getStage().container().style.cursor = 'pointer';
+        }}
+        onMouseLeave={(e): void => {
+          e.target.getStage().container().style.cursor = 'default';
+        }}
+        onClick={(): void => removeBox(id)}
+        scale={{ x: 1 / scale, y: 1 / scale }}
+      />
+    </Group>
   );
 };
 

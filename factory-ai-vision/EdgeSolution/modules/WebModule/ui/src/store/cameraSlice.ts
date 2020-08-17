@@ -3,7 +3,7 @@ import Axios from 'axios';
 import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
-import { BoxLabel } from './type';
+import { BoxLabel, PolygonLabel } from './type';
 import { toggleShowAOI } from './actions';
 
 type CameraFromServer = {
@@ -17,7 +17,11 @@ type CameraFromServer = {
 type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area'> & {
   area: {
     useAOI: boolean;
-    AOIs: BoxLabel & { id: string };
+    AOIs: {
+      id: string;
+      type: string;
+      label: BoxLabel | PolygonLabel;
+    };
   };
 };
 
@@ -43,7 +47,9 @@ const normalizeCamerasAndAOIsByNormalizr = (data: CameraFromServerWithSerializeA
   const AOIs = new schema.Entity('AOIs', undefined, {
     processStrategy: (value, parent) => {
       return {
-        ...value,
+        id: value.id,
+        type: value.type,
+        vertices: value.label,
         camera: parent.id,
       };
     },

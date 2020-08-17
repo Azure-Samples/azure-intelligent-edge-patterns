@@ -1,29 +1,25 @@
-import { Dispatch, SetStateAction } from 'react';
 import { Box } from '../../type';
 import { Position2D, BoxLabel } from '../../store/type';
-
-export enum CreatingState {
-  Disabled,
-  Waiting,
-  Creating,
-}
+import { CreatingState } from '../../store/AOISlice';
+import { AOI, Shape } from '../../store/shared/BaseShape';
 
 export type LiveViewProps = {
-  AOIs: Box[];
-  createAOI: (point: Position2D) => void;
-  updateAOI: (id: string, changes: Partial<BoxLabel>) => void;
+  AOIs: AOI[];
+  creatingShape: Shape;
+  onCreatingPoint: (point: Position2D) => void;
+  updateAOI: (id: string, changes) => void;
   removeAOI: (id: string) => void;
+  finishLabel: () => void;
   visible: boolean;
   imageInfo: [HTMLImageElement, string, { width: number; height: number }];
   creatingState: CreatingState;
-  setCreatingState: Dispatch<SetStateAction<CreatingState>>;
 };
 
 export type AOILayerProps = {
   imgWidth: number;
   imgHeight: number;
-  AOIs: Box[];
-  updateAOI: (id: string, changes: Partial<BoxLabel>) => void;
+  AOIs: AOI[];
+  updateAOI: (id: string, changes) => void;
   removeAOI: (id: string) => void;
   visible: boolean;
   creatingState: CreatingState;
@@ -32,7 +28,7 @@ export type AOILayerProps = {
 export type MaskProps = {
   width: number;
   height: number;
-  holes: Box[];
+  holes: AOI[];
   visible: boolean;
 };
 
