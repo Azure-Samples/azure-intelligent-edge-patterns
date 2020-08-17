@@ -5,7 +5,7 @@ COPY ui app
 WORKDIR /app
 RUN rm -rf node_modules/
 RUN rm -rf build/
-RUN yarn install
+RUN yarn install --production
 RUN yarn build
 
 FROM amd64/python:3.8
@@ -14,6 +14,9 @@ RUN apt-get update
 RUN apt-get install -y libgl1-mesa-glx
 
 WORKDIR /app
+
+RUN apt-get update
+RUN apt-get install -y libgl1-mesa-glx
 
 COPY backend/requirements.txt .
 RUN pip install -r requirements.txt

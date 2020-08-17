@@ -57,7 +57,7 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/visionwebmodule:0.1.18-arm64v8",
+              "image": "intelligentedge/visionwebmodule:0.1.20-arm64v8",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8080\"}]}}}"
             }
           },
@@ -67,8 +67,8 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/inferencemodule:0.1.18-<cpu or gpu>arm64v8",
-              "createOptions": "{\"HostConfig\":{\"NetworkMode\":\"host\",\"runtime\":\"<Docker Runtime>\"},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}"
+              "image": "intelligentedge/inferencemodule:0.1.20-<cpu or gpu>arm64v8",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"runtime\":\"<Docker Runtime>\"}}"
             }
           }
         }

@@ -166,10 +166,11 @@ const getInferenceMetricsSuccess = (
   unIdetifiedItems: number,
   isGpu: boolean,
   averageTime: number,
+  partCount: Record<string, number>,
   isDemo: boolean,
 ): GetInferenceMetricsSuccessAction => ({
   type: GET_INFERENCE_METRICS_SUCCESS,
-  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime },
+  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime, partCount },
   isDemo,
 });
 const getInferenceMetricsFailed = (error: Error, isDemo: boolean): GetInferenceMetricsFailedAction => ({
@@ -372,6 +373,7 @@ export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => 
           data.unidentified_num,
           data.gpu,
           data.average_time,
+          data.count,
           isDemo,
         ),
       );

@@ -112,6 +112,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.last_img = None
         self.last_drawn_img = None
         self.last_prediction = []
+        self.last_prediction_count = {}
 
         self.confidence_min = 30 * 0.01
         self.confidence_max = 30 * 0.01
@@ -285,6 +286,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                     self.last_img = img
                     self.last_prediction = self.predict(img)
                     # print(self.last_prediction)
+                    last_prediction_count = {}
 
                     height, width = img.shape[0], img.shape[1]
 
@@ -341,6 +343,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                             if tag not in self.parts:
                                 continue
 
+                            if prediction['probability'] > self.threshold:
+                                if tag not in last_prediction_count: last_prediction_count[tag] = 1
+                                else: last_prediction_count[tag] += 1
+
                             (x1, y1), (x2, y2) = parse_bbox(
                                 prediction, width, height)
                             if self.has_aoi:
@@ -383,6 +389,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                                             except:
                                                 print(
                                                     '[ERROR] Failed to update image for relabeling')
+
+                    self.last_prediction_count = last_prediction_count
 
                     self.lock.acquire()
                     if detection == DETECTION_TYPE_NOTHING:
@@ -438,11 +446,39 @@ onnx.start_session()
 
 app = Flask(__name__)
 @app.route('/prediction', methods=['GET'])
-def predict():
+def prediction():
     # print(onnx.last_prediction)
     # onnx.last_prediction
     return json.dumps(onnx.last_prediction)
 
+@app.route('/predict', methods=['POST'])
+def predict():
+    #print(request.data)
+    nparr = np.frombuffer(request.data, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    predictions = onnx.predict(img)
+    results = []
+    for prediction in predictions:
+        tag_name = prediction['tagName']
+        if tag_name not in onnx.parts: continue
+        confidence = prediction['probability']
+        box = {
+            'l': prediction['boundingBox']['left'],
+            't': prediction['boundingBox']['top'],
+            'w': prediction['boundingBox']['width'],
+            'h': prediction['boundingBox']['height'],
+        }
+        results.append({
+            'type': 'entity',
+            'entity': {
+                'tag': {'value': tag_name, 'confidence': confidence},
+                'box': box
+            }
+        })
+
+    if len(results) > 0:
+        return json.dumps({'inferences': results}), 200
+    return '', 204
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
@@ -451,6 +487,7 @@ def metrics():
     total = onnx.detection_total
     is_gpu = onnx.is_gpu
     average_inference_time = onnx.average_inference_time
+    last_prediction_count = onnx.last_prediction_count
     if total == 0:
         success_rate = 0
     else:
@@ -461,6 +498,7 @@ def metrics():
         'unidentified_num': unidentified_num,
         'is_gpu': is_gpu,
         'average_inference_time': average_inference_time,
+        'last_prediction_count': last_prediction_count
     })
 
 
@@ -711,8 +749,6 @@ def gen_zmq():
     cnt = 0
     while True:
         cnt += 1
-        print('sending ts:%s' % cnt)
-        print(type(cv2.imencode(".jpg", onnx.last_drawn_img)[1].tobytes()))
         sender.send_pyobj(
             {"data": cv2.imencode(".jpg", onnx.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
         # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
