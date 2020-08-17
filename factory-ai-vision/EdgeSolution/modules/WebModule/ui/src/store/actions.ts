@@ -24,7 +24,22 @@ export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: 
   'cameras/toggleShowAOI',
   async ({ cameraId, showAOI }, { getState }) => {
     const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities).filter((e) => e.camera === cameraId);
+    const AOIs = Object.values(AOIEntities)
+      .filter((e) => e.camera === cameraId)
+      .map((e) => {
+        if (e.type === Shape.BBox)
+          return {
+            id: e.id,
+            type: e.type,
+            label: e.vertices,
+          };
+        if (e.type === Shape.Polygon)
+          return {
+            id: e.id,
+            type: e.type,
+            label: e.vertices,
+          };
+      });
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: showAOI, AOIs }) });
   },
 );
