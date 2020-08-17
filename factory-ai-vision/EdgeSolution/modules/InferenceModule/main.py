@@ -453,7 +453,8 @@ def prediction():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    nparr = np.fromstring(request.data, np.uint8)
+    #print(request.data)
+    nparr = np.frombuffer(request.data, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     predictions = onnx.predict(img)
     results = []
