@@ -4,10 +4,11 @@ from __future__ import absolute_import, unicode_literals
 
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
+from rest_framework.response import Response
 
 from ..models import Part
 from .serializers import PartSerializer
-from rest_framework.response import Response
+
 
 # pylint: disable=too-many-ancestors
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
@@ -27,7 +28,7 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
         "is_demo": "is_demo",
     }
 
-    def destroy(self, request,*args, **kwargs):
+    def destroy(self, request, *args, **kwargs):
         if Part.objects.filter(pk=kwargs['pk']).exists():
             part_obj = Part.objects.get(pk=kwargs['pk'])
             part_obj.delete_on_customvision = True

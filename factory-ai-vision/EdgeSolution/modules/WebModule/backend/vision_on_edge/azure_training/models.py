@@ -14,6 +14,7 @@ from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 from django.db import models
 from django.db.models.signals import post_save, pre_save
+from django.utils import timezone
 
 from ..azure_iot.utils import inference_module_url
 from ..azure_parts.models import Part
@@ -60,6 +61,9 @@ class Project(models.Model):
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
+
+    # Time to when relable expired, and lock images
+    relabel_expired_time = models.DateTimeField(default=timezone.now)
 
     prob_threshold = models.IntegerField(default=10)
 

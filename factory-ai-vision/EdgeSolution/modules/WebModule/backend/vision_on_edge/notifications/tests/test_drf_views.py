@@ -10,11 +10,13 @@ from vision_on_edge.notifications.models import Notification
 
 pytestmark = pytest.mark.django_db
 
+
 class TestNotificationViewSet:
     """TestNotificationViewSet.
     """
 
-    def test_get_queryset(self, notification: Notification, rf: APIRequestFactory):
+    def test_get_queryset(self, notification: Notification,
+                          rf: APIRequestFactory):
         """test_get_queryset.
 
         Args:
@@ -23,11 +25,12 @@ class TestNotificationViewSet:
         """
         notification_list_view = NotificationViewSet.as_view({'get': 'list'})
         request = rf.get("/fake-url/")
-        
+
         #request.notification = notification
 
         #view.request = request
-        response = notification_list_view(request).render().content.decode('utf-8')
+        response = notification_list_view(request).render().content.decode(
+            'utf-8')
         print(response)
         print(type(response))
         assert notification in json.loads(response)

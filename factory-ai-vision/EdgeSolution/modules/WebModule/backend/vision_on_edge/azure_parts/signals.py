@@ -89,7 +89,8 @@ def delete_part_on_customvision_handler(**kwargs):
         return
 
     try:
-        logger.info("Trying to delete %s %s on customvision",instance.name, instance.customvision_id)
+        logger.info("Trying to delete %s %s on customvision", instance.name,
+                    instance.customvision_id)
         project_obj = Project.objects.get(is_demo=False)
         trainer = project_obj.setting.get_trainer_obj()
         trainer.delete_tag(project_id=project_obj.customvision_project_id,

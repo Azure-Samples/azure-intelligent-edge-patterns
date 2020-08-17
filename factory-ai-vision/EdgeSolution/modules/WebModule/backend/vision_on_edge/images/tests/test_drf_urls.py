@@ -2,7 +2,6 @@
 """
 
 import pytest
-
 from django.urls import resolve, reverse
 
 from vision_on_edge.images.models import Image
@@ -18,10 +17,9 @@ def test_image_detail(image: Image):
     """
 
     assert (reverse("api:image-detail",
-                    kwargs={"pk": image.id
-                           }) == f"/api/images/{image.id}")
-    assert resolve(
-        f"/api/images/{image.id}").view_name == "api:image-detail"
+                    kwargs={"pk": image.id}) == f"/api/images/{image.id}")
+    assert resolve(f"/api/images/{image.id}").view_name == "api:image-detail"
+
 
 def test_image_list():
     """test_image_list.
