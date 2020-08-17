@@ -254,6 +254,14 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChan
     handleChange(idx, { x, y });
   };
 
+  const topPoint = useMemo(() => {
+    let point = { x: null, y: Infinity };
+    polygon.forEach((e) => {
+      if (e.y < point.y) point = e;
+    });
+    return point;
+  }, [polygon]);
+
   return (
     <Group
       visible={visible}
@@ -262,7 +270,8 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChan
       cache={[{ drawBorder: true }]}
       ref={groupRef}
     >
-      {/** TODO A bigger region for mouseEnter event */}
+      {/** A bigger region for mouseEnter event */}
+      <Line x={polygon[0].x} y={polygon[0].y - 50} points={borderPoints} closed scale={{ x: 1.2, y: 1.2 }} />
       <Line
         x={polygon[0].x}
         y={polygon[0].y}
@@ -284,8 +293,8 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChan
         />
       ))}
       <Path
-        x={polygon[0].x}
-        y={polygon[0].x - 30 / scale}
+        x={topPoint.x}
+        y={topPoint.y - 30 / scale}
         data="M 0 0 L 20 20 M 20 0 L 0 20"
         stroke="red"
         strokeWidth={5}
