@@ -17,6 +17,7 @@ import { Range, Handle } from 'rc-slider';
 import 'rc-tooltip/assets/bootstrap.css';
 import '../rc-slider.css';
 
+import Axios from 'axios';
 import { State } from '../store/State';
 // import { useParts } from '../hooks/useParts';
 import { ProjectData } from '../store/project/projectTypes';
@@ -25,6 +26,7 @@ import { getFilteredImages } from '../util/getFilteredImages';
 import { thunkGetProject } from '../store/project/projectActions';
 import { getLabelImages, thunkUpdateRelabel } from '../store/image/imageActions';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
+import { useInterval } from '../hooks/useInterval';
 
 const ManualIdentification: FC = () => {
   const history = useHistory();
@@ -102,6 +104,10 @@ const ManualIdentification: FC = () => {
       alert(e);
     }
   };
+
+  useInterval(() => {
+    Axios.post(`/api/projects/${projectData.id}/relabel_keep_alive/`);
+  }, 3000);
 
   return (
     <>
