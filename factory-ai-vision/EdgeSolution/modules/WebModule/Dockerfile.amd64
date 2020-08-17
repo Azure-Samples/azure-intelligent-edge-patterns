@@ -15,6 +15,9 @@ RUN apt-get install -y libgl1-mesa-glx
 
 WORKDIR /app
 
+RUN apt-get update
+RUN apt-get install -y libgl1-mesa-glx
+
 COPY backend/requirements.txt .
 RUN pip install -r requirements.txt
 
