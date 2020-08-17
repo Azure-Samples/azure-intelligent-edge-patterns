@@ -22,3 +22,4 @@ Pillow
 pyzmq
 opencv-python
 onnx==1.6.0
+shapely

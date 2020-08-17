@@ -9,6 +9,7 @@ import numpy as np
 import onnxruntime
 from flask import Flask, request, Response
 import requests
+from shapely.geometry import Polygon
 
 from azure.iot.device import IoTHubModuleClient
 
@@ -48,14 +49,47 @@ def web_module_url():
     else:
         return 'localhost:8000'
 
+def draw_aoi(img, aoi_info):
+    for aoi_area in aoi_info:
+        aoi_type = aoi_area['type']
+        label = aoi_area['label']
+
+        if aoi_type == 'BBox':
+            cv2.rectangle(img,
+                (int(label['x1']), int(label['y1'])),
+                (int(label['x2']), int(label['y2'])), (0, 255, 255), 2)
+
+        elif aoi_area['type'] == 'Polygon':
+            l = len(label)
+            for index, point in enumerate(label):
+                p1 = (point['x'], point['y'])
+                p2 = (label[(index+1)%l]['x'], label[(index+1)%l]['y'])
+                cv2.line(img, p1, p2, (0, 255, 255), 2)
+
+    return
 
 def is_inside_aoi(x1, y1, x2, y2, aoi_info):
+
+    obj_shape = Polygon([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
+
     for aoi_area in aoi_info:
-        #print(x1, y1, x2, y2, aoi_area)
-        if ((aoi_area['x1'] <= x1 <= aoi_area['x2']) or (aoi_area['x1'] <= x2 <= aoi_area['x2'])) and \
-                ((aoi_area['y1'] <= y1 <= aoi_area['y2']) or (aoi_area['y1'] <= y2 <= aoi_area['y2'])):
-            # print('in')
-            return True
+        aoi_type = aoi_area['type']
+        label = aoi_area['label']
+
+        if aoi_area['type'] == 'BBox':
+            if ((label['x1'] <= x1 <= label['x2']) or (label['x1'] <= x2 <= label['x2'])) and \
+                ((label['y1'] <= y1 <= label['y2']) or (label['y1'] <= y2 <= label['y2'])):
+                return True
+
+        elif aoi_area['type'] == 'Polygon':
+            points = []
+            for point in label:
+                points.append([point['x'], point['y']])
+            aoi_shape = Polygon(points)
+            if aoi_shape.is_valid and aoi_shape.intersects(obj_shape):
+                return True
+
+
     return False
 
 
@@ -676,9 +710,10 @@ def video_feed():
                     #     continue
 
                     if onnx.has_aoi:
-                        for aoi_area in onnx.aoi_info:
-                            img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
-                                aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
+                        #for aoi_area in onnx.aoi_info:
+                            #img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
+                            #    aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
+                        draw_aoi(img, onnx.aoi_info)
 
                     if prediction['probability'] > onnx.threshold:
                         (x1, y1), (x2, y2) = parse_bbox(
@@ -717,9 +752,10 @@ def gen():
             #     continue
 
             if onnx.has_aoi:
-                for aoi_area in onnx.aoi_info:
-                    img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
-                        aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
+                #for aoi_area in onnx.aoi_info:
+                    #img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
+                    #    aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
+                draw_aoi(img, aoi_info)
 
             if prediction['probability'] > onnx.threshold:
                 (x1, y1), (x2, y2) = parse_bbox(
