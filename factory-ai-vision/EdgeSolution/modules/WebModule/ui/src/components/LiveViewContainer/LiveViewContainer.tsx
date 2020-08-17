@@ -21,9 +21,9 @@ import {
   createDefaultAOI,
   selectOriginAOIsByCamera,
   onCreateAOIBtnClick,
-  Shape,
 } from '../../store/AOISlice';
 import { toggleShowAOI, updateCameraArea } from '../../store/actions';
+import { Shape } from '../../store/shared/BaseShape';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -78,10 +78,13 @@ export const LiveViewContainer: React.FC<{
       dispatch(
         createDefaultAOI({
           id: uniqid(),
-          x1: imgWidth * 0.1,
-          y1: imgHeight * 0.1,
-          x2: imgWidth * 0.9,
-          y2: imgHeight * 0.9,
+          type: Shape.BBox,
+          vertices: {
+            x1: imgWidth * 0.1,
+            y1: imgHeight * 0.1,
+            x2: imgWidth * 0.9,
+            y2: imgHeight * 0.9,
+          },
           camera: cameraId,
         }),
       );

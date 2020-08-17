@@ -5,6 +5,7 @@ import { KonvaEventObject } from 'konva/types/Node';
 
 import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
 import { CreatingState } from '../../store/AOISlice';
+import { isBBox } from '../../store/shared/Box2d';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -111,20 +112,25 @@ const AOILayer: React.FC<AOILayerProps> = ({
 }): JSX.Element => {
   return (
     <>
-      <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
-      {AOIs.map((e, i) => (
-        <AOIBox
-          key={e.id}
-          box={e}
-          visible={visible}
-          boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
-          onBoxChange={(changes): void => {
-            updateAOI(e.id, changes);
-          }}
-          removeBox={() => removeAOI(e.id)}
-          creatingState={creatingState}
-        />
-      ))}
+      {/* <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} /> */}
+      {AOIs.map((e) => {
+        if (isBBox(e)) {
+          return (
+            <AOIBox
+              key={e.id}
+              box={{ ...e.vertices, id: e.id }}
+              visible={visible}
+              boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+              onBoxChange={(changes): void => {
+                updateAOI(e.id, changes);
+              }}
+              removeBox={() => removeAOI(e.id)}
+              creatingState={creatingState}
+            />
+          );
+        }
+        return null;
+      })}
     </>
   );
 };

@@ -13,20 +13,14 @@ import { State } from 'RootStateType';
 import { BoxLabel, Position2D } from './type';
 import { getCameras } from './cameraSlice';
 import { toggleShowAOI, updateCameraArea } from './actions';
-
-export type AOI = BoxLabel & { id: string; camera: number };
+import { Shape, AOI } from './shared/BaseShape';
+import { BBox, BBoxAOI } from './shared/Box2d';
 
 // Use enum string to make debugginh easier.
 export enum CreatingState {
   Disabled = 'Disabled',
   Waiting = 'Waiting',
   Creating = 'Creating',
-}
-
-export enum Shape {
-  None = 'None',
-  BBox = 'BBox',
-  Polygon = 'Polygon',
 }
 
 const entityAdapter = createEntityAdapter<AOI>();
@@ -39,45 +33,18 @@ const slice = createSlice({
     shape: Shape.None,
   },
   reducers: {
-    createDefaultAOI: (state, action: PayloadAction<AOI>) => {
-      const { id, x1, x2, y1, y2, camera } = action.payload;
-      entityAdapter.upsertOne(state, {
-        id,
-        x1,
-        y1,
-        x2,
-        y2,
-        camera,
-      });
+    createDefaultAOI: (state, action: PayloadAction<BBoxAOI>) => {
+      entityAdapter.upsertOne(state, action.payload);
     },
     onCreatingPoint: (state, action: PayloadAction<{ point: Position2D; cameraId: number }>) => {
-      const { x, y } = action.payload.point;
+      const { point, cameraId } = action.payload;
 
       if (state.creatingState === CreatingState.Waiting) {
         state.creatingState = CreatingState.Creating;
-        entityAdapter.addOne(state, {
-          id: nanoid(),
-          x1: x,
-          y1: y,
-          x2: x,
-          y2: y,
-          camera: action.payload.cameraId,
-        });
+        entityAdapter.addOne(state, BBox.init(point, nanoid(), cameraId));
       } else if (state.creatingState === CreatingState.Creating) {
         const id = state.ids[state.ids.length - 1];
-        const newAOI = R.mergeRight(state.entities[id], { x2: x, y2: y });
-
-        if (newAOI.x1 > newAOI.x2) {
-          const tmp = newAOI.x1;
-          newAOI.x1 = newAOI.x2;
-          newAOI.x2 = tmp;
-        }
-
-        if (newAOI.y1 > newAOI.y2) {
-          const tmp = newAOI.y1;
-          newAOI.y1 = newAOI.y2;
-          newAOI.y2 = tmp;
-        }
+        const newAOI = BBox.add(point, state.entities[id] as BBoxAOI);
 
         state.creatingState = CreatingState.Disabled;
         state.shape = Shape.None;
@@ -85,21 +52,9 @@ const slice = createSlice({
       }
     },
     removeAOI: entityAdapter.removeOne,
-    updateAOI: (state, action: PayloadAction<Update<AOI>>) => {
+    updateAOI: (state, action: PayloadAction<Update<BoxLabel>>) => {
       const { id, changes } = action.payload;
-      const newAOI = R.mergeRight(state.entities[id], changes);
-
-      if (newAOI.x1 > newAOI.x2) {
-        const tmp = newAOI.x1;
-        newAOI.x1 = newAOI.x2;
-        newAOI.x2 = tmp;
-      }
-
-      if (newAOI.y1 > newAOI.y2) {
-        const tmp = newAOI.y1;
-        newAOI.y1 = newAOI.y2;
-        newAOI.y2 = tmp;
-      }
+      const newAOI = BBox.update(changes, state.entities[id] as BBoxAOI);
 
       entityAdapter.updateOne(state, { id, changes: newAOI });
     },

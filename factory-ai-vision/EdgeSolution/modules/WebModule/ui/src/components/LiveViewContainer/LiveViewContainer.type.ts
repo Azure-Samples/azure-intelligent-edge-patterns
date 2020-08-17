@@ -1,9 +1,10 @@
 import { Box } from '../../type';
 import { Position2D, BoxLabel } from '../../store/type';
 import { CreatingState } from '../../store/AOISlice';
+import { AOI } from '../../store/shared/BaseShape';
 
 export type LiveViewProps = {
-  AOIs: Box[];
+  AOIs: AOI[];
   onCreatingPoint: (point: Position2D) => void;
   updateAOI: (id: string, changes: Partial<BoxLabel>) => void;
   removeAOI: (id: string) => void;
@@ -15,7 +16,7 @@ export type LiveViewProps = {
 export type AOILayerProps = {
   imgWidth: number;
   imgHeight: number;
-  AOIs: Box[];
+  AOIs: AOI[];
   updateAOI: (id: string, changes: Partial<BoxLabel>) => void;
   removeAOI: (id: string) => void;
   visible: boolean;

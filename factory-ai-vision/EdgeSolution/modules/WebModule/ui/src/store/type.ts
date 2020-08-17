@@ -5,6 +5,8 @@ export type BoxLabel = {
   y2: number;
 };
 
+export type PolygonLabel = Position2D[];
+
 export enum AnnotationState {
   Empty = 'Empty',
   P1Added = 'P1Added',
