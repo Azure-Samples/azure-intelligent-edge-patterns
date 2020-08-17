@@ -28,7 +28,7 @@ export type AOILayerProps = {
 export type MaskProps = {
   width: number;
   height: number;
-  holes: Box[];
+  holes: AOI[];
   visible: boolean;
 };
 
