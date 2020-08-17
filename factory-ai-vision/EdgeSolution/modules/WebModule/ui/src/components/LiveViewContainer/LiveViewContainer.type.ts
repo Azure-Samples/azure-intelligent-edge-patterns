@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from 'react';
 import { Box } from '../../type';
 import { Position2D, BoxLabel } from '../../store/type';
 
@@ -16,7 +15,6 @@ export type LiveViewProps = {
   visible: boolean;
   imageInfo: [HTMLImageElement, string, { width: number; height: number }];
   creatingState: CreatingState;
-  setCreatingState: Dispatch<SetStateAction<CreatingState>>;
 };
 
 export type AOILayerProps = {

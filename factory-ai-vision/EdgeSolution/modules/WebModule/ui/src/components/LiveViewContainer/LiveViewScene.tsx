@@ -26,7 +26,6 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   visible,
   imageInfo,
   creatingState,
-  setCreatingState,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
@@ -72,7 +71,6 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
 
     const { x, y } = getRelativePosition(e.target.getLayer());
     createAOI({ x, y });
-    setCreatingState(CreatingState.Creating);
   };
 
   const onMouseMove = (e: KonvaEventObject<MouseEvent>): void => {
@@ -90,7 +88,8 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={(): void => {
-            if (creatingState === CreatingState.Creating) setCreatingState(CreatingState.Disabled);
+            // TODO This event should be removed
+            // if (creatingState === CreatingState.Creating) setCreatingState(CreatingState.Disabled);
           }}
         >
           <KonvaImage image={imgEle} ref={imgRef} />

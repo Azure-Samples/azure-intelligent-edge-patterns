@@ -15,11 +15,28 @@ import { toggleShowAOI, updateCameraArea } from './actions';
 
 export type AOI = BoxLabel & { id: string; camera: number };
 
+// Use enum string to make debugginh easier.
+export enum CreatingState {
+  Disabled = 'Disabled',
+  Waiting = 'Waiting',
+  Creating = 'Creating',
+}
+
+export enum Shape {
+  None = 'None',
+  BBox = 'BBox',
+  Polygon = 'Polygon',
+}
+
 const entityAdapter = createEntityAdapter<AOI>();
 
 const slice = createSlice({
   name: 'AOI',
-  initialState: entityAdapter.getInitialState(),
+  initialState: {
+    ...entityAdapter.getInitialState(),
+    creatingState: CreatingState.Disabled,
+    shape: Shape.None,
+  },
   reducers: {
     createDefaultAOI: (state, action: PayloadAction<AOI>) => {
       const { id, x1, x2, y1, y2, camera } = action.payload;
@@ -33,6 +50,8 @@ const slice = createSlice({
       });
     },
     createAOI: (state, action) => {
+      state.creatingState = CreatingState.Creating;
+
       const { x, y } = action.payload.point;
       entityAdapter.addOne(state, {
         id: action.payload.id,
@@ -61,6 +80,17 @@ const slice = createSlice({
       }
 
       entityAdapter.updateOne(state, { id, changes: newAOI });
+    },
+    onCreateAOIBtnClick: (state, action: PayloadAction<Shape>) => {
+      if (state.creatingState === CreatingState.Disabled) {
+        state.creatingState = CreatingState.Waiting;
+        state.shape = action.payload;
+      } else if (state.shape !== action.payload) {
+        state.shape = action.payload;
+      } else {
+        state.creatingState = CreatingState.Disabled;
+        state.shape = Shape.None;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -97,7 +127,7 @@ const addOriginEntitiesReducer: Reducer<
 
 export default addOriginEntitiesReducer;
 
-export const { updateAOI, createAOI, removeAOI, createDefaultAOI } = slice.actions;
+export const { updateAOI, createAOI, removeAOI, createDefaultAOI, onCreateAOIBtnClick } = slice.actions;
 
 export const { selectAll: selectAllAOIs } = entityAdapter.getSelectors<State>((state) => state.AOIs);
 

@@ -10,7 +10,6 @@ import { State } from 'RootStateType';
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
 import useImage from '../LabelingPage/util/useImage';
-import { CreatingState } from './LiveViewContainer.type';
 import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
 import { useInterval } from '../../hooks/useInterval';
@@ -22,6 +21,8 @@ import {
   removeAOI,
   createDefaultAOI,
   selectOriginAOIsByCamera,
+  onCreateAOIBtnClick,
+  Shape,
 } from '../../store/AOISlice';
 import { toggleShowAOI, updateCameraArea } from '../../store/actions';
 
@@ -36,7 +37,8 @@ export const LiveViewContainer: React.FC<{
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
   const imageInfo = useImage('/api/inference/video_feed', '', true, true);
-  const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
+  const creatingAOI = useSelector((state: State) => state.AOIs.creatingState);
+  const AOIShape = useSelector((state: State) => state.AOIs.shape);
   const dispatch = useDispatch();
 
   const onCheckboxClick = async (): Promise<void> => {
@@ -105,12 +107,21 @@ export const LiveViewContainer: React.FC<{
           onClick={onCheckboxClick}
         />
         <Button
-          content="Create AOI"
-          primary={creatingAOI !== CreatingState.Disabled}
+          content="Create Box"
+          primary={AOIShape === Shape.BBox}
           disabled={!showAOI}
           onClick={(): void => {
-            if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
-            else setCreatingAOI(CreatingState.Disabled);
+            dispatch(onCreateAOIBtnClick(Shape.BBox));
+          }}
+          circular
+          styles={{ padding: '0 5px' }}
+        />
+        <Button
+          content="Create Polygon"
+          primary={AOIShape === Shape.Polygon}
+          disabled={!showAOI}
+          onClick={(): void => {
+            dispatch(onCreateAOIBtnClick(Shape.Polygon));
           }}
           circular
           styles={{ padding: '0 5px' }}
@@ -144,7 +155,6 @@ export const LiveViewContainer: React.FC<{
             visible={showAOI}
             imageInfo={imageInfo}
             creatingState={creatingAOI}
-            setCreatingState={setCreatingAOI}
           />
         ) : null}
       </div>
