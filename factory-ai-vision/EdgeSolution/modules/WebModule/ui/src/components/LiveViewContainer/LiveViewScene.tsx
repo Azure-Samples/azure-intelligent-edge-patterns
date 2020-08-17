@@ -134,26 +134,6 @@ const AOILayer: React.FC<AOILayerProps> = ({
           boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
           onBoxChange={(changes): void => {
             updateAOI(e.id, changes);
-            // TODO put this logic into reducer
-            //   setAOIs((prev) => {
-            //     const newBox = updateBox(prev[i]);
-            //     if (newBox.x1 > newBox.x2) {
-            //       const tmp = newBox.x1;
-            //       newBox.x1 = newBox.x2;
-            //       newBox.x2 = tmp;
-            //     }
-
-            //     if (newBox.y1 > newBox.y2) {
-            //       const tmp = newBox.y1;
-            //       newBox.y1 = newBox.y2;
-            //       newBox.y2 = tmp;
-            //     }
-
-            //     const newAOIs = [...prev];
-            //     newAOIs[i] = newBox;
-            //     return newAOIs;
-            //   })
-            // }
           }}
           removeBox={() => removeAOI(e.id)}
           creatingState={creatingState}
