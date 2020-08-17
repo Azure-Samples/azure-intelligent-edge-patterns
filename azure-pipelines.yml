@@ -6,6 +6,9 @@
 trigger:
 - develop
 
+pool:
+  vmImage: 'ubuntu-latest'
+
 
 
 steps:
