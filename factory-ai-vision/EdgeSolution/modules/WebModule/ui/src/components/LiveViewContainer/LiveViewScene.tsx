@@ -166,6 +166,8 @@ const AOILayer: React.FC<AOILayerProps> = ({
               visible={true}
               removeBox={() => removeAOI(e.id)}
               creatingState={creatingState}
+              handleChange={(idx, vertex) => updateAOI(e.id, { idx, vertex })}
+              boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
             />
           );
         }
@@ -206,7 +208,7 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   );
 };
 
-const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState }) => {
+const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChange, boundary }) => {
   const COLOR = 'white';
   const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
@@ -225,6 +227,32 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState }) => {
         return acc;
       }, []);
   }, [polygon]);
+
+  const onDragMove = (idx: number) => (e: KonvaEventObject<DragEvent>): void => {
+    let { x, y } = e.target.position();
+
+    if (x < boundary.x1) {
+      x = boundary.x1;
+      e.target.x(x);
+    }
+
+    if (x > boundary.x2) {
+      x = boundary.x2;
+      e.target.x(x);
+    }
+
+    if (y < boundary.y1) {
+      y = boundary.y1;
+      e.target.y(y);
+    }
+
+    if (y > boundary.y2) {
+      y = boundary.y2;
+      e.target.y(y);
+    }
+
+    handleChange(idx, { x, y });
+  };
 
   return (
     <Group
@@ -251,7 +279,8 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState }) => {
           x={e.x}
           y={e.y}
           radius={radius}
-          fill={COLOR} /* onDragMove={handleDrag} */
+          fill={COLOR}
+          onDragMove={onDragMove(i)}
         />
       ))}
       <Path

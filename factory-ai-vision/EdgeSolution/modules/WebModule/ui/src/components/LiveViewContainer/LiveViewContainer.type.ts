@@ -19,7 +19,7 @@ export type AOILayerProps = {
   imgWidth: number;
   imgHeight: number;
   AOIs: AOI[];
-  updateAOI: (id: string, changes: Partial<BoxLabel>) => void;
+  updateAOI: (id: string, changes) => void;
   removeAOI: (id: string) => void;
   visible: boolean;
   creatingState: CreatingState;
