@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
+import { Shape } from './shared/BaseShape';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -33,7 +34,22 @@ export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   async (cameraId, { getState }) => {
     const { useAOI } = getState().camera.entities[cameraId];
     const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities).filter((e) => e.camera === cameraId);
+    const AOIs = Object.values(AOIEntities)
+      .filter((e) => e.camera === cameraId)
+      .map((e) => {
+        if (e.type === Shape.BBox)
+          return {
+            id: e.id,
+            type: e.type,
+            label: e.vertices,
+          };
+        if (e.type === Shape.Polygon)
+          return {
+            id: e.id,
+            type: e.type,
+            label: e.vertices,
+          };
+      });
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
   },
 );
