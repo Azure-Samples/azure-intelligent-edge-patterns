@@ -21,6 +21,7 @@ import {
   createDefaultAOI,
   selectOriginAOIsByCamera,
   onCreateAOIBtnClick,
+  finishLabel,
 } from '../../store/AOISlice';
 import { toggleShowAOI, updateCameraArea } from '../../store/actions';
 import { Shape } from '../../store/shared/BaseShape';
@@ -151,9 +152,11 @@ export const LiveViewContainer: React.FC<{
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
+            creatingShape={AOIShape}
             onCreatingPoint={(point) => dispatch(onCreatingPoint({ point, cameraId }))}
             updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
             removeAOI={(AOIId) => dispatch(removeAOI(AOIId))}
+            finishLabel={() => dispatch(finishLabel())}
             visible={showAOI}
             imageInfo={imageInfo}
             creatingState={creatingAOI}

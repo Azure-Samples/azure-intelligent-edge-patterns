@@ -10,11 +10,12 @@ import {
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
-import { BoxLabel, Position2D } from './type';
+import { BoxLabel, Position2D, PolygonLabel } from './type';
 import { getCameras } from './cameraSlice';
 import { toggleShowAOI, updateCameraArea } from './actions';
 import { Shape, AOI } from './shared/BaseShape';
-import { BBox, BBoxAOI } from './shared/Box2d';
+import { BBox, BBoxAOI, isBBox } from './shared/Box2d';
+import { Polygon, PolygonAOI, isPolygon } from './shared/Polygon';
 
 // Use enum string to make debugginh easier.
 export enum CreatingState {
@@ -36,27 +37,51 @@ const slice = createSlice({
     createDefaultAOI: (state, action: PayloadAction<BBoxAOI>) => {
       entityAdapter.upsertOne(state, action.payload);
     },
-    onCreatingPoint: (state, action: PayloadAction<{ point: Position2D; cameraId: number }>) => {
+    onCreatingPoint: (
+      state,
+      action: PayloadAction<{ point: Position2D; cameraId: number; isDBClick?: boolean }>,
+    ) => {
       const { point, cameraId } = action.payload;
 
       if (state.creatingState === CreatingState.Waiting) {
         state.creatingState = CreatingState.Creating;
-        entityAdapter.addOne(state, BBox.init(point, nanoid(), cameraId));
+        if (state.shape === Shape.BBox) entityAdapter.addOne(state, BBox.init(point, nanoid(), cameraId));
+        else if (state.shape === Shape.Polygon)
+          entityAdapter.addOne(state, Polygon.init(point, nanoid(), cameraId));
       } else if (state.creatingState === CreatingState.Creating) {
         const id = state.ids[state.ids.length - 1];
-        const newAOI = BBox.add(point, state.entities[id] as BBoxAOI);
 
-        state.creatingState = CreatingState.Disabled;
-        state.shape = Shape.None;
-        entityAdapter.updateOne(state, { id, changes: newAOI });
+        if (state.shape === Shape.BBox) {
+          entityAdapter.updateOne(state, { id, changes: BBox.add(point, state.entities[id] as BBoxAOI) });
+          state.creatingState = CreatingState.Disabled;
+          state.shape = Shape.None;
+        } else if (state.shape === Shape.Polygon) {
+          entityAdapter.updateOne(state, {
+            id,
+            changes: Polygon.add(point, state.entities[id] as PolygonAOI),
+          });
+        }
       }
     },
     removeAOI: entityAdapter.removeOne,
-    updateAOI: (state, action: PayloadAction<Update<BoxLabel>>) => {
-      const { id, changes } = action.payload;
-      const newAOI = BBox.update(changes, state.entities[id] as BBoxAOI);
-
-      entityAdapter.updateOne(state, { id, changes: newAOI });
+    updateAOI: (
+      state,
+      action: PayloadAction<Update<BoxLabel> | Update<{ idx: number; vertex: Position2D }>>,
+    ) => {
+      const { id } = action.payload;
+      if (isBBox(state.entities[id])) {
+        const { changes } = action.payload as Update<BoxLabel>;
+        entityAdapter.updateOne(state, {
+          id,
+          changes: BBox.update(changes as Partial<BoxLabel>, state.entities[id] as BBoxAOI),
+        });
+      } else if (isPolygon(state.entities[id])) {
+        const { changes } = action.payload as Update<{ idx: number; vertex: Position2D }>;
+        entityAdapter.updateOne(state, {
+          id,
+          changes: Polygon.update(changes.idx, changes.vertex, state.entities[id] as PolygonAOI),
+        });
+      }
     },
     onCreateAOIBtnClick: (state, action: PayloadAction<Shape>) => {
       if (state.creatingState === CreatingState.Disabled) {
@@ -67,6 +92,16 @@ const slice = createSlice({
       } else {
         state.creatingState = CreatingState.Disabled;
         state.shape = Shape.None;
+      }
+    },
+    finishLabel: (state) => {
+      if (state.shape === Shape.Polygon) {
+        const lastPoly = state.entities[state.ids[state.ids.length - 1]].vertices as PolygonLabel;
+        if (lastPoly.length > 3) {
+          lastPoly.pop();
+          state.creatingState = CreatingState.Disabled;
+          state.shape = Shape.None;
+        }
       }
     },
   },
@@ -104,7 +139,14 @@ const addOriginEntitiesReducer: Reducer<
 
 export default addOriginEntitiesReducer;
 
-export const { updateAOI, onCreatingPoint, removeAOI, createDefaultAOI, onCreateAOIBtnClick } = slice.actions;
+export const {
+  updateAOI,
+  onCreatingPoint,
+  removeAOI,
+  createDefaultAOI,
+  onCreateAOIBtnClick,
+  finishLabel,
+} = slice.actions;
 
 export const { selectAll: selectAllAOIs } = entityAdapter.getSelectors<State>((state) => state.AOIs);
 

@@ -1,11 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Stage, Image as KonvaImage, Shape, Group, Line, Layer, Circle, Path } from 'react-konva';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import {
+  Stage,
+  Image as KonvaImage,
+  Shape as KonvaShape,
+  Group,
+  Line,
+  Layer,
+  Circle,
+  Path,
+} from 'react-konva';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
 import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
 import { CreatingState } from '../../store/AOISlice';
 import { isBBox } from '../../store/shared/Box2d';
+import { isPolygon } from '../../store/shared/Polygon';
+import { Shape } from '../../store/shared/BaseShape';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -16,9 +27,11 @@ const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
 
 export const LiveViewScene: React.FC<LiveViewProps> = ({
   AOIs,
+  creatingShape,
   onCreatingPoint,
   updateAOI,
   removeAOI,
+  finishLabel,
   visible,
   imageInfo,
   creatingState,
@@ -73,11 +86,26 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     if (creatingState !== CreatingState.Creating) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    updateAOI(AOIs[AOIs.length - 1].id, { x2: x, y2: y });
+    if (creatingShape === Shape.BBox) updateAOI(AOIs[AOIs.length - 1].id, { x2: x, y2: y });
+    else if (creatingShape === Shape.Polygon)
+      updateAOI(AOIs[AOIs.length - 1].id, { idx: -1, vertex: { x, y } });
   };
 
+  useEffect(() => {
+    const div = divRef.current;
+    const handleFPress = (e) => {
+      if (e.key === 'f') {
+        finishLabel();
+      }
+    };
+    div.addEventListener('keydown', handleFPress);
+    return () => {
+      div.removeEventListener('keydown', handleFPress);
+    };
+  }, []);
+
   return (
-    <div ref={divRef} style={{ width: '100%', height: '100%' }}>
+    <div ref={divRef} style={{ width: '100%', height: '100%' }} tabIndex={0}>
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
         <Layer ref={layerRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}>
           <KonvaImage image={imgEle} ref={imgRef} />
@@ -129,6 +157,18 @@ const AOILayer: React.FC<AOILayerProps> = ({
             />
           );
         }
+        if (isPolygon(e)) {
+          return (
+            <AOIPolygon
+              key={e.id}
+              id={e.id}
+              polygon={e.vertices}
+              visible={true}
+              removeBox={() => removeAOI(e.id)}
+              creatingState={creatingState}
+            />
+          );
+        }
         return null;
       })}
     </>
@@ -137,7 +177,7 @@ const AOILayer: React.FC<AOILayerProps> = ({
 
 const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   return (
-    <Shape
+    <KonvaShape
       width={width}
       height={height}
       fill={'rgba(0,0,0,0.5)'}
@@ -163,6 +203,74 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
       }}
       listening={false}
     />
+  );
+};
+
+const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState }) => {
+  const COLOR = 'white';
+  const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
+  const groupRef = useRef<Konva.Group>(null);
+
+  const scale = groupRef.current?.getLayer().scale().x || 1;
+
+  const radius = 5 / scale;
+
+  const borderPoints = useMemo(() => {
+    return polygon
+      .map((e, _, arr) => {
+        return { x: e.x - arr[0].x, y: e.y - arr[0].y };
+      })
+      .reduce((acc, cur) => {
+        acc.push(cur.x, cur.y);
+        return acc;
+      }, []);
+  }, [polygon]);
+
+  return (
+    <Group
+      visible={visible}
+      onMouseEnter={(): void => setCanceBtnVisible(true)}
+      onMouseLeave={(): void => setCanceBtnVisible(false)}
+      cache={[{ drawBorder: true }]}
+      ref={groupRef}
+    >
+      {/** TODO A bigger region for mouseEnter event */}
+      <Line
+        x={polygon[0].x}
+        y={polygon[0].y}
+        points={borderPoints}
+        closed
+        stroke={COLOR}
+        strokeWidth={2 / scale}
+      />
+      {polygon.map((e, i) => (
+        <Circle
+          key={i}
+          draggable
+          name="leftTop"
+          x={e.x}
+          y={e.y}
+          radius={radius}
+          fill={COLOR} /* onDragMove={handleDrag} */
+        />
+      ))}
+      <Path
+        x={polygon[0].x}
+        y={polygon[0].x - 30 / scale}
+        data="M 0 0 L 20 20 M 20 0 L 0 20"
+        stroke="red"
+        strokeWidth={5}
+        visible={cancelBtnVisible && creatingState === CreatingState.Disabled}
+        onMouseEnter={(e): void => {
+          e.target.getStage().container().style.cursor = 'pointer';
+        }}
+        onMouseLeave={(e): void => {
+          e.target.getStage().container().style.cursor = 'default';
+        }}
+        onClick={(): void => removeBox(id)}
+        scale={{ x: 1 / scale, y: 1 / scale }}
+      />
+    </Group>
   );
 };
 
