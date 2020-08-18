@@ -42,7 +42,7 @@ steps:
   inputs:
     SourceFolder: 'factory-ai-vision/EdgeSolution'
     Contents: |
-      deployment.cpu.template.json
+      deployment.*.template.json
       **/module.json
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
