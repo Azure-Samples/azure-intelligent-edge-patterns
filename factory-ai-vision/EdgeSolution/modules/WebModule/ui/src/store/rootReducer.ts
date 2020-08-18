@@ -10,6 +10,7 @@ import annotationReducer from './annotationSlice';
 import labelingPageReducer from './labelingPageSlice';
 import cameraReducer from './cameraSlice';
 import AOIsReducer from './AOISlice';
+import rejectMsgReducer from './rejectedReducer';
 
 export const rootReducer = combineReducers({
   project: createProjectReducerByIsDemo(false),
@@ -24,4 +25,5 @@ export const rootReducer = combineReducers({
   annotations: annotationReducer,
   labelingPage: labelingPageReducer,
   AOIs: AOIsReducer,
+  rejectMsg: rejectMsgReducer,
 });
