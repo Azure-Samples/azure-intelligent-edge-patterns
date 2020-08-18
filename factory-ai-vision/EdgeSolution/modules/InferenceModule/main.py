@@ -749,8 +749,8 @@ def gen():
         predictions = onnx.last_prediction
         for prediction in predictions:
             tag = prediction['tagName']
-            # if tag not in onnx.parts:
-            #     continue
+            if tag not in onnx.parts:
+                continue
 
             if onnx.has_aoi:
                 #for aoi_area in onnx.aoi_info:
