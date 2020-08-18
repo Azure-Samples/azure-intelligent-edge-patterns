@@ -11,18 +11,6 @@ pool:
 
 steps:
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      # Write your commands here
-      echo $(Build.SourceVersion)
-      echo $(SourceVersion)
-      echo ${SourceVersion}
-      echo $(SourceVersion1)
-      echo ${SourceVersion1}
-      echo $(Build.SourceVersion)
-
 - task: AzureIoTEdge@2
   inputs:
     action: 'Build module images'
