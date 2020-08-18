@@ -16,7 +16,8 @@ steps:
     targetType: 'inline'
     script: |
       # Write your commands here
-      echo $(Build.BuildId)
+      echo $(SourceVersion)
+      echo ${SourceVersion}
       echo $(Build.SourceVersion)
 
 - task: AzureIoTEdge@2
