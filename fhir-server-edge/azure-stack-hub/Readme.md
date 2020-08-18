@@ -62,25 +62,23 @@ This sample illustrates how to run a FHIR Server instance with SQL Server on Azu
 
 - Clone the FHIR Server repository from [here]()
 
-- Navigate to help chart directory of the repo
-```sh
-cd fhir-server/samples/kubernetes
-```
+- Navigate to helm chart directory of the repo
+    ```sh
+    cd fhir-server/samples/kubernetes
+    ```
 
 - Run through the deployment steps as specified in the [Readme.md](https://github.com/microsoft/fhir-server/tree/master/samples/kubernetes) file beginning at [Configuring FHIR server with ingress controller](https://github.com/microsoft/fhir-server/tree/master/samples/kubernetes#configuring-fhir-server-with-ingress-controller). Depending on your environment, you can either provide your own certificate or use [Let's Encrypt](https://letsencrypt.org/).
 
+    ```sh
+    helm install myfhirserverrelease helm/fhir-server/ \
+    -f ingress-values.yaml \
+    --set database.dataStore="SqlContainer" \
+    --set database.SqlContainer.acceptEula="Y"
+        
+    ```
 
 
-```sh
-helm install myfhirserverrelease helm/fhir-server/ \
-  -f ingress-values.yaml \
-  --set database.dataStore="SqlContainer" \
-  --set database.SqlContainer.acceptEula="Y"
-    
-```
-
-
-> Note: you may want to enable some optionfal features of the FHIR service like authentication. See the below table for common values to provide when installing the server on Azure Stack Hub.
+> **Note:** you may want to enable some optionfal features of the FHIR service like authentication. See the below table for common values to set provide when installing the server on Azure Stack Hub. To set these values, add additional --set flags to the above command to customize your configuration.
 
 |Value to set|Description|
 |------------|-----------|
