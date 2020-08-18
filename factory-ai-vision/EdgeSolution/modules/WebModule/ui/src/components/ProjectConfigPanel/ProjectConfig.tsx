@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
+import { State } from 'RootStateType';
 import {
   thunkGetProject,
   thunkPostProject,
@@ -22,7 +23,6 @@ import {
   thunkCheckAndSetAccuracyRange,
 } from '../../store/project/projectActions';
 import { Project, ProjectData, Status } from '../../store/project/projectTypes';
-import { State } from '../../store/State';
 import { formatDropdownValue, Value } from '../../util/formatDropdownValue';
 import { getAppInsights } from '../../TelemetryService';
 import { AddCameraLink } from '../AddModuleDialog/AddCameraLink';
@@ -31,6 +31,7 @@ import { AddPartLink } from '../AddModuleDialog/AddPartLink';
 import { Button } from '../Button';
 import { useQuery } from '../../hooks/useQuery';
 import { WarningDialog } from '../WarningDialog';
+import { getCameras } from '../../store/cameraSlice';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -84,6 +85,10 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   >('locations', isDemo);
   const [maxImgCountError, setMaxImgCountError] = useState(false);
   const hasUserUpdateAccuracyRange = useRef(false);
+
+  useEffect(() => {
+    dispatch(getCameras(isDemo));
+  }, [dispatch, isDemo]);
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {

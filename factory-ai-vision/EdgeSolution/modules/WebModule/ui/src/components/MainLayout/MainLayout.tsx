@@ -3,12 +3,12 @@ import { Grid, Segment, Image, Flex, Text, BellIcon } from '@fluentui/react-nort
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { State } from 'RootStateType';
 import Breadcrumb from '../Breadcrumb';
 import LeftNav from './LeftNav';
-import { State } from '../../store/State';
 import { Badge } from '../Badge';
 import { NotificationPanel } from '../NotificationPanel';
-import { openNotificationPanel } from '../../store/notification/notificationActionCreators';
+import { openNotificationPanel } from '../../action/creators/notificationActionCreators';
 import FeedbackDialog from '../FeedbackDialog';
 
 const LEFT_NAV_WIDTH = 80;

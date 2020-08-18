@@ -1,5 +1,6 @@
 import Axios from 'axios';
 import * as R from 'ramda';
+import { State } from 'RootStateType';
 import {
   ProjectThunk,
   GetProjectSuccessAction,
@@ -53,7 +54,6 @@ import {
   UpdateProbThresholdFailedAction,
   TrainingStatus,
 } from './projectTypes';
-import { State } from '../State';
 
 const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
