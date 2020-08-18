@@ -20,7 +20,7 @@ With Live video analytics on IoT Edge, you can continue to use your CCTV cameras
 ## This repo
 
 This repository is a starting point to learn about and engage in LVA open source projects.This repository is not an official LVA product support location, however, we will respond to issues filed here as best we can.
-To start implementing one of the samples go to [Jupyter Notebook Samples Readme](utilities/video-analysis/notebooks/readme.md)
+To start implementing one of the samples go to [Jupyter Notebook Samples](utilities/video-analysis/notebooks/readme.md)
 
 ## Contributing
 
