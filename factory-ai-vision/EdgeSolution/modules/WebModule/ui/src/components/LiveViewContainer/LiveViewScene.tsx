@@ -163,7 +163,7 @@ const AOILayer: React.FC<AOILayerProps> = ({
               key={e.id}
               id={e.id}
               polygon={e.vertices}
-              visible={true}
+              visible={visible}
               removeBox={() => removeAOI(e.id)}
               creatingState={creatingState}
               handleChange={(idx, vertex) => updateAOI(e.id, { idx, vertex })}
