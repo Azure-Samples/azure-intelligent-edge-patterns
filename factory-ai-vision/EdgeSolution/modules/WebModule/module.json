@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule",
     "tag": {
-      "version": "0.3.201-${Build.BuildNumber}",
+      "version": "0.3.201-${Build.BuildId}",
       "platforms": {
         "amd64": "./Dockerfile.amd64",
         "amd64.debug": "./Dockerfile.amd64.debug",
