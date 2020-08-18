@@ -86,16 +86,12 @@ const normalizeCameras = R.compose(normalizeCamerasAndAOIsByNormalizr, serialize
 
 const entityAdapter = createEntityAdapter<Camera>();
 
-export const getCameras = createAsyncThunk<any, boolean, { state: State }>(
-  'cameras/get',
-  async (isDemo) => {
-    const response = await Axios(`/api/cameras?is_demo=${Number(isDemo)}`);
-    return normalizeCameras(response.data);
-  },
-  {
-    condition: (_, { getState }) => getState().camera.ids.length === 0,
-  },
-);
+export const getCameras = createAsyncThunk<any, boolean, { state: State }>('cameras/get', async (isDemo) => {
+  let response;
+  if (isDemo) response = await Axios(`/api/cameras/`);
+  else response = await Axios(`/api/cameras?is_demo=${Number(isDemo)}`);
+  return normalizeCameras(response.data);
+});
 
 export const postCamera = createAsyncThunk(
   'cameras/post',

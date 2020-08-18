@@ -15,7 +15,7 @@ type CapturedImagesContainer = {
 
 export const CapturedImagesContainer: React.FC<CapturedImagesContainer> = ({ images, gridColumn }) => {
   const dispatch = useDispatch();
-  const isValid = images.filter((image) => image.labels).length >= 15;
+  const isValid = images.filter((image) => image.labels.length > 0).length >= 15;
   const imageCount = images.length;
 
   const onDisplayImageClick = (imageId: number): void => {
