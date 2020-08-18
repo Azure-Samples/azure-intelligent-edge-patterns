@@ -820,7 +820,7 @@ def twin_update_listener(client):
 
 def iothub_client_run():
     try:
-        module_client = IoTHubModuleClient.create_from_connection_string(IOT_HUB_CONNECTION_STRING)
+        module_client = IoTHubModuleClient.create_from_edge_environment()
 
         twin_update_listener_thread = threading.Thread(target=twin_update_listener, args=(module_client,))
         twin_update_listener_thread.daemon = True
