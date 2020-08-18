@@ -11,6 +11,16 @@ pool:
 
 steps:
 
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your commands here
+      
+      echo ${MY_BRANCH}
+      echo $(Build.BuildId)
+      echo ${Build.BuildId}
+
 - task: AzureIoTEdge@2
   inputs:
     action: 'Build module images'
