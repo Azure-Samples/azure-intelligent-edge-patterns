@@ -1,4 +1,4 @@
-import { Size2D } from '../../../store/labelingPage/labelingPageTypes';
+import { Size2D } from '../../../store/type';
 
 const getResizeImageFunction = (defaultSize: Size2D) => (size: Size2D): [Size2D, number] => {
   if (size.width !== 0) {

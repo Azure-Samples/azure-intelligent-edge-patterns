@@ -104,6 +104,7 @@ def export(request, project_id):
         unidentified_num = data["unidentified_num"]
         is_gpu = data["is_gpu"]
         average_inference_time = data["average_inference_time"]
+        last_prediction_count = data["last_prediction_count"] 
         logger.info("success_rate: %s. inference_num: %s", success_rate,
                     inference_num)
     except requests.exceptions.ConnectionError:
@@ -140,6 +141,7 @@ def export(request, project_id):
         "unidentified_num": unidentified_num,
         "gpu": is_gpu,
         "average_time": average_inference_time,
+        "count": last_prediction_count
     })
 
 
@@ -685,7 +687,8 @@ def project_reset_camera(request, project_id):
         if len(Project.objects.filter(is_demo=False)) > 0:
             project_obj = Project.objects.filter(is_demo=False)[0]
     project_obj.camera = Camera.objects.filter(is_demo=True).first()
-    project_obj.save(update_fields=["camera"])
+    project_obj.has_configured = False
+    project_obj.save(update_fields=["camera", "has_configured"])
     return Response({"status": "ok"})
 
 

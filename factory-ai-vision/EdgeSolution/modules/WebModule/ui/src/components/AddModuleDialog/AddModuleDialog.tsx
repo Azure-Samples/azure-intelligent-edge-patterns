@@ -12,12 +12,18 @@ export type AddModuleDialogProps = {
   trigger?: JSX.Element;
 };
 
+const getInitialFormData = (fields) =>
+  fields.reduce((acc, cur) => {
+    return { ...acc, [cur.key]: '' };
+  }, {});
+
 export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ trigger, header, fields, onConfirm }) => {
-  const [formData, setFormData] = useState(
-    fields.reduce((acc, cur) => {
-      return { ...acc, [cur.key]: '' };
-    }, {}),
-  );
+  const [formData, setFormData] = useState(getInitialFormData(fields));
+
+  const onConfirmClick = () => {
+    onConfirm(formData);
+    setFormData(getInitialFormData(fields));
+  };
 
   const isSubmitDisabled = fields.some((e) => e.required && !formData[e.key]);
 
@@ -31,7 +37,7 @@ export const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ trigger, heade
       }}
       confirmButton={{ content: 'Submit', disabled: isSubmitDisabled }}
       cancelButton="Cancel"
-      onConfirm={(): void => onConfirm(formData)}
+      onConfirm={(): void => onConfirmClick()}
       header={header}
       trigger={
         trigger || (

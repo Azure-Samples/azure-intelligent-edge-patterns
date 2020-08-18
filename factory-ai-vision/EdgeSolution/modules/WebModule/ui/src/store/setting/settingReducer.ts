@@ -1,7 +1,25 @@
-import { initialState } from '../State';
 import { SettingActionType, Setting } from './settingType';
 
-const settingReducer = (state = initialState.setting, action: SettingActionType): Setting => {
+const initialState = {
+  loading: false,
+  error: null,
+  current: {
+    id: -1,
+    key: '',
+    namespace: '',
+  },
+  origin: {
+    id: -1,
+    key: '',
+    namespace: '',
+  },
+  isTrainerValid: true,
+  appInsightHasInit: true,
+  isCollectData: false,
+  appInsightKey: '',
+};
+
+const settingReducer = (state = initialState, action: SettingActionType): Setting => {
   switch (action.type) {
     case 'UPDATE_KEY':
       return { ...state, current: { ...state.current, key: action.payload } };

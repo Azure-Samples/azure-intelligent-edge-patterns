@@ -1,6 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
-import type { State } from '../State';
+import { State } from 'RootStateType';
 
 export type Project = {
   isLoading: boolean;
@@ -13,6 +13,7 @@ export type Project = {
     unIdetifiedItems: number;
     isGpu: boolean;
     averageTime: number;
+    partCount: Record<string, number>;
   };
   progress: number;
   trainingMetrics: TrainingMetrics;
@@ -149,6 +150,7 @@ export type GetInferenceMetricsSuccessAction = ProjectAction & {
     unIdetifiedItems: number;
     isGpu: boolean;
     averageTime: number;
+    partCount: Record<string, number>;
   };
 };
 

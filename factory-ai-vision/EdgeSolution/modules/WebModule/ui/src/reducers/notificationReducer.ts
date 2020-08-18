@@ -1,13 +1,12 @@
-import { initialState } from '../State';
-import { Notification } from './notificationType';
-import { ActionTypes } from '../../action';
 import {
+  ActionTypes,
   GET_NOTIFICATIONS_SUCCESS,
   DELETE_NOTIFICATION_SUCCESS,
   CLEAR_ALL_NOTIFICATION_SUCCESS,
   RECEIVE_NOTIFICATION,
   OPEN_NOTIFICATION_PANEL,
-} from '../../action/constants';
+} from '../action';
+import { Notification } from '../reducers/type';
 
 const getLinkByNotificationType = (notificationType: string): string => {
   if (notificationType) {
@@ -24,7 +23,7 @@ const getNormalizeNotification = (response: any, unRead: boolean): Notification 
   unRead,
 });
 
-const notificationReducer = (state = initialState.notifications, action: ActionTypes): Notification[] => {
+const notificationReducer = (state = [], action: ActionTypes): Notification[] => {
   switch (action.type) {
     case RECEIVE_NOTIFICATION:
       return [getNormalizeNotification(action.response, true), ...state];

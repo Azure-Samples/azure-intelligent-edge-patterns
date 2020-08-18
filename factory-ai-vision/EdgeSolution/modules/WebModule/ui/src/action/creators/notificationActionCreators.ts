@@ -1,7 +1,7 @@
 import Axios from 'axios';
+import { State } from 'RootStateType';
 
 import { CallAPIAction } from '../../middlewares/callAPIMiddleware';
-import { State } from '../State';
 import {
   GET_NOTIFICATIONS_REQUEST,
   GET_NOTIFICATIONS_SUCCESS,
@@ -12,11 +12,10 @@ import {
   CLEAR_ALL_NOTIFICATION_REQUEST,
   CLEAR_ALL_NOTIFICATION_SUCCESS,
   CLEAR_ALL_NOTIFICATION_FAILURE,
-  ReceiveNotification,
   RECEIVE_NOTIFICATION,
-  OpenNotificationPanel,
   OPEN_NOTIFICATION_PANEL,
-} from '../../action';
+} from '../constants';
+import { ReceiveNotification, OpenNotificationPanel } from '../type';
 
 export const receiveNotification = (newNotification: any): ReceiveNotification => ({
   type: RECEIVE_NOTIFICATION,
@@ -33,7 +32,7 @@ export const getNotifications = (): CallAPIAction<State> => ({
 
 export const deleteNotification = (id: number): CallAPIAction<State> => ({
   types: [DELETE_NOTIFICATION_REQUEST, DELETE_NOTIFICATION_SUCCESS, DELETE_NOTIFICATION_FAILURE],
-  callAPI: (): Promise<void> => Axios.delete(`/api/notifications/${id}`).then(({ data }) => data),
+  callAPI: (): Promise<void> => Axios.delete(`/api/notifications/${id}/`).then(({ data }) => data),
   payload: { id },
 });
 
