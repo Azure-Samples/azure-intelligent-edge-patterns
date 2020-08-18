@@ -688,7 +688,7 @@ def project_reset_camera(request, project_id):
             project_obj = Project.objects.filter(is_demo=False)[0]
     project_obj.camera = Camera.objects.filter(is_demo=True).first()
     project_obj.has_configured = False
-    project_obj.save(update_fields=["camera"])
+    project_obj.save(update_fields=["camera", "has_configured"])
     return Response({"status": "ok"})
 
 

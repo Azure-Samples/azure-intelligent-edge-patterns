@@ -52,8 +52,8 @@ class VideoFeed():
 
             nparr = np.frombuffer(np.array(ret['data']), np.uint8)
 
-            logger.warning('Receive: %s', ret['ts'])
-            logger.warning('Time elapsed: %s', (time.time()-self.keep_alive))
+            # logger.warning('Receive: %s', ret['ts'])
+            # logger.warning('Time elapsed: %s', (time.time()-self.keep_alive))
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
             # ret2 = receiver.recv_pyobj()
