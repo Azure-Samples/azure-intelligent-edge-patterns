@@ -16,10 +16,8 @@ steps:
     targetType: 'inline'
     script: |
       # Write your commands here
-      
-      echo ${MY_BRANCH}
       echo $(Build.BuildId)
-      echo ${Build.BuildId}
+      echo $(Build.SourceVersion)
 
 - task: AzureIoTEdge@2
   inputs:
