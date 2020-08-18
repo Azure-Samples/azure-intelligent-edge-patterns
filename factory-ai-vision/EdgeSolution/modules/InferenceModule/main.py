@@ -1,3 +1,4 @@
+import sys
 import json
 import time
 import threading
@@ -16,6 +17,8 @@ from azure.iot.device import IoTHubModuleClient
 from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 from utility import get_file_zip, normalize_rtsp
+
+from config import IOT_HUB_CONNECTION_STRING
 
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec
@@ -488,30 +491,34 @@ def prediction():
 @app.route('/predict', methods=['POST'])
 def predict():
     #print(request.data)
-    nparr = np.frombuffer(request.data, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    predictions = onnx.predict(img)
-    results = []
-    for prediction in predictions:
-        tag_name = prediction['tagName']
-        if tag_name not in onnx.parts: continue
-        confidence = prediction['probability']
-        box = {
-            'l': prediction['boundingBox']['left'],
-            't': prediction['boundingBox']['top'],
-            'w': prediction['boundingBox']['width'],
-            'h': prediction['boundingBox']['height'],
-        }
-        results.append({
-            'type': 'entity',
-            'entity': {
-                'tag': {'value': tag_name, 'confidence': confidence},
-                'box': box
+    try:
+        nparr = np.frombuffer(request.data, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        predictions = onnx.predict(img)
+        results = []
+        for prediction in predictions:
+            tag_name = prediction['tagName']
+            if tag_name not in onnx.parts: continue
+            confidence = prediction['probability']
+            box = {
+                'l': prediction['boundingBox']['left'],
+                't': prediction['boundingBox']['top'],
+                'w': prediction['boundingBox']['width'],
+                'h': prediction['boundingBox']['height'],
             }
-        })
+            results.append({
+                'type': 'entity',
+                'entity': {
+                    'tag': {'value': tag_name, 'confidence': confidence},
+                    'box': box
+                }
+            })
 
-    if len(results) > 0:
-        return json.dumps({'inferences': results}), 200
+        if len(results) > 0:
+            return json.dumps({'inferences': results}), 200
+    except:
+        print("[ERROR] Unexpected error:", sys.exc_info()[0], flush=True)
+
     return '', 204
 
 @app.route('/metrics', methods=['GET'])
@@ -791,9 +798,41 @@ def gen_zmq():
         # time.sleep(2)
         time.sleep(0.04)
 
+def twin_update_listener(client):
+    while True:
+        patch = client.receive_twin_desired_properties_patch()  # blocking call
+        print("[INFO] Twin desired properties patch received:", flush=True)
+        print("[INFO]", patch, flush=True)
+
+        if model_uri not in patch:
+            print('[WARNING] missing model_uri')
+
+        print('[INFO] Got Model URI', path['model_uri'])
+
+        if model_uri == onnx.model_uri:
+            print('[INFO] Model Uri unchanged')
+        else:
+            get_file_zip(model_uri, MODEL_DIR)
+            onnx.model_uri = model_uri
+
+        onnx.update_model('model')
+        print('[INFO] Update Finished ...')
+
+def iothub_client_run():
+    try:
+        module_client = IoTHubModuleClient.create_from_connection_string(IOT_HUB_CONNECTION_STRING)
+
+        twin_update_listener_thread = threading.Thread(target=twin_update_listener, args=(module_client,))
+        twin_update_listener_thread.daemon = True
+        twin_update_listener_thread.start()
+    except:
+        print("[WARNING] Unexpected error:", sys.exc_info()[0], flush=True)
+        print('[WARNING] No IoT Edge Environment', flush=True)
+
 
 def main():
     threading.Thread(target=gen).start()
+    iothub_client_run()
     zmq_t = threading.Thread(target=gen_zmq)
     zmq_t.start()
     app.run(host='0.0.0.0', debug=False)
