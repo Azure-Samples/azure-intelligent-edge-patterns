@@ -10,9 +10,7 @@ const selectImagesByRelabel = (isRelabel) =>
   );
 
 const selectImagesByPart = (partId) =>
-  createSelector(selectAllImages, selectImagesByRelabel(false), (images) =>
-    images.filter((img) => img.part === partId),
-  );
+  createSelector(selectImagesByRelabel(false), (images) => images.filter((img) => img.part === partId));
 
 const mapImageToLabelImage = (images, partEntities, allAnno): LabelImage[] =>
   images.map((img) => ({
