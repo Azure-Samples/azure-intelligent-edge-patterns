@@ -1,7 +1,8 @@
 import React from 'react';
+import { MainLayout } from './components/MainLayout';
 
 function App() {
-  return <h1>Hello Visio on Edge</h1>;
+  return <MainLayout />;
 }
 
 export default App;
