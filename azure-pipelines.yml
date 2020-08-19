@@ -13,12 +13,4 @@ steps:
 
 - task: Bash@3
   inputs:
-    targetType: 'inline'
-    script: |
-      # Write your commands here
-      
-      jq
-      sudo apt-get install -y jq
-      echo "Build.BuildId $(Build.BuildId)"
-      echo "Build.BuildNumber $(Build.BuildNumber)"
-      echo "Build.SourceBranch $(Build.SourceBranch)"
+    filePath: './factory-ai-vision/EdgeSolution/azure-pipelines-build.sh'
