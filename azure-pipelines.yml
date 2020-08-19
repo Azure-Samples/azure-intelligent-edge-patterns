@@ -18,6 +18,6 @@ steps:
       # Write your commands here
       
       echo "Build.BuildId ${Build.BuildId}"
-      echo "Build.BuildId $(Build.BuildId)""
+      echo "Build.BuildId $(Build.BuildId)"
       echo "Build.BuildNumber	${Build.BuildNumber}"
       echo "Build.BuildNumber	$(Build.BuildNumber)"
