@@ -17,7 +17,6 @@ steps:
     script: |
       # Write your commands here
       
-      echo "Build.BuildId ${Build.BuildId}"
+      apt-get install -y jq
       echo "Build.BuildId $(Build.BuildId)"
-      echo "Build.BuildNumber	${Build.BuildNumber}"
-      echo "Build.BuildNumber	$(Build.BuildNumber)"
+      echo "Build.BuildNumber $(Build.BuildNumber)"
