@@ -12,11 +12,10 @@ pool:
 steps:
 - task: Bash@3
   inputs:
-    targetType: 'inline'
-    script: |
-      # Write your commands here
-      
-      sudo pip install --upgrade cryptography
+    filePath: './factory-ai-vision/EdgeSolution/azure-pipelines-build.sh'
+  env:
+    BUILD_BUILD_NUMBER: $(Build.BuildNumber)
+    BUILD_SOURCE_BRANCHNAME: $(Build.SourceBranchName)
 
 - task: AzureIoTEdge@2
   inputs:
