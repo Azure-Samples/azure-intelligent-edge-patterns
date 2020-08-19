@@ -97,7 +97,7 @@ For authentication to be enabled, the following will need to be setup in you Azu
 - [Register a confidential client application in Azure Active Directory](https://docs.microsoft.com/en-us/azure/healthcare-apis/register-resource-azure-ad-client-app).  You also have the option to register by [Public](https://docs.microsoft.com/en-us/azure/healthcare-apis/register-public-azure-ad-client-app) or [Service](https://docs.microsoft.com/en-us/azure/healthcare-apis/register-service-azure-ad-client-app) client.
 - [Add app roles in your application and receive them in the token](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps)
 
-## Step 3: Deployment Testing
+## Step 3: Testing your FHIR instance
 
 - Get the External IP of your FHIR Server
     ```
