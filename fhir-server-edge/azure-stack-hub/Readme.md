@@ -85,7 +85,7 @@ This sample illustrates how to run a FHIR Server instance with SQL Server on Azu
 |appInsights.secretKey|Instrumentation key to use if Application insights is to be used|
 |security.enabled|Set to true if you would like to enable security features. If set to true, then security.authority and security.audience values are required. For detailed instructions on configuring security, please refer to the [Azure Active Directory Application Registrations Documentation](https://github.com/microsoft/fhir-server/blob/master/docs/PortalAppRegistration.md)|
 |security.authority|Provide the authority created when configuring the AAD Authority. E.g. https://login.microsoftonline.com/your-AAD-tenant-ID |
-|security.audience|The configured audience. This is usually the URL of the FHIR server, e.g. https://MYACCOUNT.azurehealthcareapis.com or just https://azurehealthcareapis.com. |
+|security.audience|The configured audience. This is usually the IP or URL of the FHIR server|
 
 
 ### Authentication Setup
