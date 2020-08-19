@@ -19,11 +19,9 @@ echo "Step ${STEP}."
 # =========================================================
 # ===	Real script					===
 # =========================================================
-echo "Build.BuildNumber		: $(Build.BuildNumber)"
-echo "Build.SourceBranchName	: $(Build.SourceBranchName)"
-echo "Build.BuildNumber		: $(Build.BuildNumber)"
-echo "Build.SourceBranchName	: $(Build.SourceBranchName)"
-PIPELINE_MODULE_POSTFIX="$(Build.SourceBranchName)-$(Build.BuildNumber)"
+echo "Build.BuildNumber		: ${BUILD_BUILD_NUMBER}"
+echo "Build.SourceBranchName	: ${BUILD_SOURCE_BRANCHNAME}"
+PIPELINE_MODULE_POSTFIX="${BUILD_SOURCE_BRANCHNAME}-${BUILD_BUILD_NUMBER}"
 echo "Pipeline module postfix 	: ${PIPELINE_MODULE_POSTFIX}"
 next_step
 

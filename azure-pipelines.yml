@@ -15,3 +15,7 @@ steps:
   inputs:
     filePath: './factory-ai-vision/EdgeSolution/azure-pipelines-build.sh'
     noProfile: false
+  env:
+    BUILD_BUILD_NUMBER: $(Build.BuildNumber)
+    BUILD_SOURCE_BRANCHNAME: $(Build.SourceBranchName)
+
