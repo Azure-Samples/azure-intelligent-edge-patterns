@@ -11,35 +11,14 @@ pool:
 
 steps:
 
-- task: AzureIoTEdge@2
+- task: Bash@3
   inputs:
-    action: 'Build module images'
-    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
-    defaultPlatform: 'amd64'
-  displayName: 'Azure IoT Edge - Build module images'
-
-- task: AzureIoTEdge@2
-  inputs:
-    action: 'Push module images'
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscriptionEndpoint: 'Microsoft Azure Sponsorship(091725d9-aeba-4638-8faf-d0e81a03a93d)'
-    azureContainerRegistry: '{"loginServer":"factoryairegistry.azurecr.io", "id" : "/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourceGroups/customvision/providers/Microsoft.ContainerRegistry/registries/factoryairegistry"}'
-    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
-    defaultPlatform: 'amd64'
-    fillRegistryCredential: 'true'
-  displayName: 'Azure IoT Edge - Push module images'
-
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: 'factory-ai-vision/EdgeSolution'
-    Contents: |
-      deployment.*.template.json
-      **/module.json
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
-  displayName: 'Publish Artifact Drop.'
+    targetType: 'inline'
+    script: |
+      # Write your commands here
+      
+      jq
+      sudo apt-get install -y jq
+      echo "Build.BuildId $(Build.BuildId)"
+      echo "Build.BuildNumber $(Build.BuildNumber)"
+      echo "Build.SourceBranch $(Build.SourceBranch)"
