@@ -73,23 +73,23 @@ export const LiveViewContainer: React.FC<{
   }, [showUpdateSuccessTxt]);
 
   // Extract the width and height to make the dependency array clearer.
-  const { width: imgWidth, height: imgHeight } = imageInfo[2];
-  useEffect(() => {
-    if (imgWidth !== 0 && imgHeight !== 0 && AOIs.length === 0)
-      dispatch(
-        createDefaultAOI({
-          id: uniqid(),
-          type: Shape.BBox,
-          vertices: {
-            x1: imgWidth * 0.1,
-            y1: imgHeight * 0.1,
-            x2: imgWidth * 0.9,
-            y2: imgHeight * 0.9,
-          },
-          camera: cameraId,
-        }),
-      );
-  }, [cameraId, dispatch, imgHeight, imgWidth, AOIs]);
+  // const { width: imgWidth, height: imgHeight } = imageInfo[2];
+  // useEffect(() => {
+  //   if (imgWidth !== 0 && imgHeight !== 0 && AOIs.length === 0)
+  //     dispatch(
+  //       createDefaultAOI({
+  //         id: uniqid(),
+  //         type: Shape.BBox,
+  //         vertices: {
+  //           x1: imgWidth * 0.1,
+  //           y1: imgHeight * 0.1,
+  //           x2: imgWidth * 0.9,
+  //           y2: imgHeight * 0.9,
+  //         },
+  //         camera: cameraId,
+  //       }),
+  //     );
+  // }, [cameraId, dispatch, imgHeight, imgWidth, AOIs]);
 
   useInterval(() => {
     Axios.get('/api/inference/video_feed/keep_alive').catch(console.error);
@@ -120,7 +120,7 @@ export const LiveViewContainer: React.FC<{
           styles={{ padding: '0 5px' }}
         />
         <Button
-          content="Create Polygon"
+          content={AOIShape === Shape.Polygon ? 'Click F to Finish' : 'Create Polygon'}
           primary={AOIShape === Shape.Polygon}
           disabled={!showAOI}
           onClick={(): void => {
