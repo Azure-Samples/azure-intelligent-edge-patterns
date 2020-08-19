@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # =========================================================
 # ===	Setting up					===
@@ -16,22 +16,19 @@ echo
 echo "Step ${STEP}."
 }
 
-# Color
-color_end="\033[0m"
-color_gray="\033[37m"
-color_green="\033[0;32m"
-color_red="\033[0;31m"
-color_yellow="\033[0;33m"
-
-color_info=${color_green}
-color_warning=${yellow}
-color_error=${color_red}
-
-
 # =========================================================
 # ===	Real script					===
 # =========================================================
-echo "Running"
+echo "Build.BuildNumber		: $(Build.BuildNumber)"
+echo "Build.SourceBranchName	: $(Build.SourceBranchName)"
+PIPELINE_MODULE_POSTFIX="$(Build.SourceBranchName)-$(Build.BuildNumber)"
+echo "Pipeline module postfix 	: ${PIPELINE_MODULE_POSTFIX}"
+next_step
+
+# =========================================================
+# ===	Install jq					===
+# =========================================================
+sudo apt-get install -y jq
 next_step
 
 
@@ -66,17 +63,14 @@ next_step
 INFERENCE_MODULE_FILE="${DIR}"/modules/InferenceModule/module.json
 
 if [ ! -f ${INFERENCE_MODULE_FILE} ]; then
-	echo "${color_error}"
 	echo "INFERENCE_MODULE_FILE not found..."
 	echo "	${INFERENCE_MODULE_FILE}"
 	echo "exit 1..."
 	exit 1
 else	
-	echo "${color_info}"
 	echo "INFERENCE_MODULE_FILE found"
 	echo "	${INFERENCE_MODULE_FILE}"
 fi
-echo "${color_end}"
 next_step
 
 
@@ -85,17 +79,14 @@ next_step
 # =========================================================
 WEB_MODULE_FILE="${DIR}"/modules/WebModule/module.json
 if [ ! -f ${WEB_MODULE_FILE} ]; then
-	echo "${color_error}"
 	echo "WEB_MODULE_FILE not found..."
 	echo "	${WEB_MODULE_FILE}"
 	echo "exit 1..."
 	exit 1
 else
-	echo "${color_info}"
 	echo "WEB_MODULE_FILE found"
 	echo "	${WEB_MODULE_FILE}"
 fi
-echo ${color_end}
 next_step
 
 
@@ -108,11 +99,10 @@ echo "	Inference Module changed"
 echo "	Updating version"
 # Add version number
 #	0.3.87 -> 0.3.88
-INFERENCE_MODULE_NEW_VERSION=$(echo "${INFERENCE_MODULE_VERSION}" | perl -pe 's/^((\d+\.)*)(\d+)(.*)$/$1.($3+1).$4/e' )
+INFERENCE_MODULE_NEW_VERSION="${INFERENCE_MODULE_VERSION}-${PIPELINE_MODULE_POSTFIX}"
 echo "	Inference Module version: ${INFERENCE_MODULE_VERSION} => ${INFERENCE_MODULE_NEW_VERSION}"
 cat "${INFERENCE_MODULE_FILE}" | jq ".image.tag.version= \"${INFERENCE_MODULE_NEW_VERSION}\"" > ${INFERENCE_MODULE_FILE}.tmp
 mv ${INFERENCE_MODULE_FILE}.tmp ${INFERENCE_MODULE_FILE}
-git add ${INFERENCE_MODULE_FILE} 
 next_step
 
 
@@ -122,18 +112,14 @@ next_step
 echo "Checking webmodule change"
 WEB_MODULE_VERSION=$(cat "${WEB_MODULE_FILE}" | jq '.image.tag.version' |sed -e 's/^"//' -e 's/"$//')
 echo "	Web Module change"
-WEB_MODULE_NEW_VERSION=$(echo "${WEB_MODULE_VERSION}" | perl -pe 's/^((\d+\.)*)(\d+)(.*)$/$1.($3+1).$4/e' )
+WEB_MODULE_NEW_VERSION="${WEB_MODULE_VERSION}-${PIPELINE_MODULE_POSTFIX}"
 echo "	Web Module version: ${WEB_MODULE_VERSION} => ${WEB_MODULE_NEW_VERSION}"
 cat "${WEB_MODULE_FILE}" | jq ".image.tag.version= \"${WEB_MODULE_NEW_VERSION}\"" > ${WEB_MODULE_FILE}.tmp
 mv ${WEB_MODULE_FILE}.tmp ${WEB_MODULE_FILE}
-git add ${WEB_MODULE_FILE} 
 next_step
 
 
 # =========================================================
 # === Commit and let Azure pipelines to handle the rest.===
 # =========================================================
-echo 'All done. Commit new version to git'
-echo
-git commit -m "new version by ${THIS_SCRIPT_NAME}"
-git push
+echo 'All done...'

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
+FROM mcr.microsoft.com/azureml/onnxruntime:latest-tensorrt
 
 #FROM nvidia/cuda:10.1-cudnn7-devel
 WORKDIR /app
@@ -9,9 +9,10 @@ RUN apt-get update && \
     libssl-dev \
     libffi-dev \
     libboost-python-dev \
-    libboost-filesystem1.58.0 \
-    libboost-thread1.58.0 \
-    python3-pip   
+    libboost-filesystem-dev \
+    libboost-thread-dev \
+    python3-pip \
+    libgl1-mesa-glx
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
@@ -40,7 +41,7 @@ RUN pip install --upgrade pip
 RUN pip install -U certifi --ignore-installed
 RUN pip install -r requirements.txt --ignore-installed && \
     pip install flask opencv-python onnx
-RUN pip install onnxruntime onnxruntime-gpu
+#RUN pip install onnxruntime onnxruntime-gpu
 
 COPY main.py ./
 COPY config.py ./
