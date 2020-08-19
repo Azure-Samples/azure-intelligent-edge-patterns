@@ -17,6 +17,8 @@ steps:
     script: |
       # Write your commands here
       
-      apt-get install -y jq
+      jq
+      sudo apt-get install -y jq
       echo "Build.BuildId $(Build.BuildId)"
       echo "Build.BuildNumber $(Build.BuildNumber)"
+      echo "Build.SourceBranch $(Build.SourceBranch)"
