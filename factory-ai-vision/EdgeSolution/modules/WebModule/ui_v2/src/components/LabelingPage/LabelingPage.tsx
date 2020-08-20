@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
-import { Dialog, Button, DialogFooter, Stack, TextField } from '@fluentui/react';
+import { Dialog, Button, DialogFooter, Stack, TextField, DetailsList } from '@fluentui/react';
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
@@ -12,6 +12,7 @@ import { Annotation } from '../../store/type';
 import { selectPartEntities, Part } from '../../store/partSlice';
 import { deleteImage } from '../../store/actions';
 import Scene from './Scene';
+import { PartPicker } from './PartPicker';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -99,7 +100,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
           />
         </div>
         <div style={{ width: '30%' }}>
-          <TextField label="Part" />
+          <TextField label="Part" placeholder="Add a part" />
+          <PartPicker />
         </div>
       </Stack>
       <DialogFooter>
