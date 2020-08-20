@@ -18,6 +18,14 @@ steps:
     BUILD_SOURCE_BRANCHNAME: $(Build.SourceBranchName)
   displayName: 'Generating IoT Edge module tag from Azure Pipelines'
 
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your commands here
+      sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    displayName: 'Prepare Arm Docker'
+
 - task: AzureIoTEdge@2
   inputs:
     action: 'Build module images'
