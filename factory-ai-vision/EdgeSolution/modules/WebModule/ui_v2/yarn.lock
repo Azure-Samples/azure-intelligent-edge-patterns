@@ -1132,6 +1132,16 @@
     "@uifabric/utilities" "^7.28.0"
     tslib "^1.10.0"
 
+"@fluentui/react-icons@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@fluentui/react-icons/-/react-icons-0.2.0.tgz#060822f3a91c0230083a130df2d51cbd5eaa4302"
+  integrity sha512-rwODkc9P82V4k/l5dvxnyIkKErBloQbb+4Hn0/mRljSuWYLiHv3Ssp6rAFrcbAGpvd4pqNiizwRywUPGo+FSHw==
+  dependencies:
+    "@microsoft/load-themed-styles" "^1.10.26"
+    "@uifabric/set-version" "^7.0.21"
+    "@uifabric/utilities" "^7.29.0"
+    tslib "^1.10.0"
+
 "@fluentui/react@^7.128.2":
   version "7.128.2"
   resolved "https://registry.yarnpkg.com/@fluentui/react/-/react-7.128.2.tgz#653fa65bf8d8d99aaa4d3f4b3b38a76f023231f8"
@@ -1997,6 +2007,16 @@
   version "7.28.0"
   resolved "https://registry.yarnpkg.com/@uifabric/utilities/-/utilities-7.28.0.tgz#1cefd4097675b52efb163d0fe43db06d7500f8c1"
   integrity sha512-EHs1gA8jlqLBq6zGSXB5+iqukRXMFnwMQ5f1oqyPHVYBZkZgVoVX4OJxXqxxDG3HRDyOP+TlNWPtCDVFke/Bkw==
+  dependencies:
+    "@uifabric/merge-styles" "^7.16.6"
+    "@uifabric/set-version" "^7.0.21"
+    prop-types "^15.7.2"
+    tslib "^1.10.0"
+
+"@uifabric/utilities@^7.29.0":
+  version "7.29.0"
+  resolved "https://registry.yarnpkg.com/@uifabric/utilities/-/utilities-7.29.0.tgz#6bb19b3710d17b74129524c38953fefcd0709038"
+  integrity sha512-Fbyy9+WF2jyAE3HQvfv5M3u1LiqVYNHKpZIsk2lcQvDSwUagGz1jDNBvNdhMSj6nQq1IGeVSkqTZ2FMwe7Ta0A==
   dependencies:
     "@uifabric/merge-styles" "^7.16.6"
     "@uifabric/set-version" "^7.0.21"
