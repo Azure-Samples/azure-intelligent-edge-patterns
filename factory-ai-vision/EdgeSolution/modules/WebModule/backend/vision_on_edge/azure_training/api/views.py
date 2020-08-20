@@ -21,12 +21,12 @@ from rest_framework.response import Response
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...azure_parts.utils import batch_upload_parts_to_customvision
+from ...azure_training_status import constants as progress_constants
 from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
-from ...azure_training_status import constants as progress_constants
 from ...cameras.models import Camera
-from ...general.utils import normalize_rtsp
 from ...general import error_messages
+from ...general.utils import normalize_rtsp
 from ...images.models import Image
 from ...images.utils import upload_images_to_customvision_helper
 from ..models import Project, Task
@@ -104,7 +104,7 @@ def export(request, project_id):
         unidentified_num = data["unidentified_num"]
         is_gpu = data["is_gpu"]
         average_inference_time = data["average_inference_time"]
-        last_prediction_count = data["last_prediction_count"] 
+        last_prediction_count = data["last_prediction_count"]
         logger.info("success_rate: %s. inference_num: %s", success_rate,
                     inference_num)
     except requests.exceptions.ConnectionError:
@@ -413,7 +413,7 @@ def upload_and_train(project_id):
             project_id=project_id, part_ids=part_ids, tags_dict=tags_dict)
         if has_new_parts:
             project_changed = True
-        
+
         upcreate_training_status(
             project_id=project_obj.id,
             need_to_send_notification=True,

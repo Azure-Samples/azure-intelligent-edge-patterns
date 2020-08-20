@@ -5,7 +5,7 @@ Use in production.
 """
 
 import os
-# pylint: disable = wildcard-import, unused-wildcard-import
+
 from .base import *
 
 # Database

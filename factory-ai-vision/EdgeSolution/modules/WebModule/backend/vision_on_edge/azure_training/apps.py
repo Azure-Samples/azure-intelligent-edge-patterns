@@ -57,7 +57,7 @@ class AzureTrainingConfig(AppConfig):
                     name=DEFAULT_SETTING_NAME)
                 if len(default_settings) <= 0:
                     return
-                
+
                 # Projects
                 if Project.objects.filter(is_demo=True).count() <= 1:
                     logger.info("Creating demo project")
