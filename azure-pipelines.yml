@@ -24,7 +24,7 @@ steps:
     script: |
       # Write your commands here
       sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset
-    displayName: 'Prepare Arm Docker'
+  displayName: 'Prepare Arm Docker'
 
 - task: AzureIoTEdge@2
   inputs:
