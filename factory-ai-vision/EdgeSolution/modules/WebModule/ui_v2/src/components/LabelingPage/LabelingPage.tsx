@@ -11,6 +11,7 @@ import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
 import { selectPartEntities, Part } from '../../store/partSlice';
 import { deleteImage } from '../../store/actions';
+import Scene from './Scene';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -85,7 +86,18 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
       maxWidth={9999}
     >
       <Stack horizontal>
-        <div style={{ width: '70%' }}></div>
+        <div style={{ width: '70%' }}>
+          <Scene
+            url={imageUrl}
+            annotations={annotations}
+            workState={workState}
+            setWorkState={setWorkState}
+            labelingType={labelingType}
+            onBoxCreated={onBoxCreated}
+            partFormDisabled={!isRelabel}
+            imgPart={imgPart}
+          />
+        </div>
         <div style={{ width: '30%' }}>
           <TextField label="Part" />
         </div>
