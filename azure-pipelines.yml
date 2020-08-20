@@ -27,6 +27,13 @@ steps:
 
 - task: AzureIoTEdge@2
   inputs:
+    action: 'Build module images'
+    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.arm64v8.template.json'
+    defaultPlatform: 'amd64'
+  displayName: 'Azure IoT Edge - Build module images (arm64v8)'
+
+- task: AzureIoTEdge@2
+  inputs:
     action: 'Push module images'
     containerregistrytype: 'Azure Container Registry'
     azureSubscriptionEndpoint: 'Microsoft Azure Sponsorship(091725d9-aeba-4638-8faf-d0e81a03a93d)'
@@ -35,13 +42,6 @@ steps:
     defaultPlatform: 'amd64'
     fillRegistryCredential: 'true'
   displayName: 'Azure IoT Edge - Push module images'
-
-- task: AzureIoTEdge@2
-  inputs:
-    action: 'Build module images'
-    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.arm64v8.template.json'
-    defaultPlatform: 'amd64'
-  displayName: 'Azure IoT Edge - Build module images (arm64v8)'
 
 - task: AzureIoTEdge@2
   inputs:
