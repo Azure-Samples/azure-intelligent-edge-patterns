@@ -18,8 +18,8 @@ import { Part } from '../../store/partSlice';
 import { thunkChangeImgPart } from '../../store/imageSlice';
 
 const defaultSize: Size2D = {
-  width: 800,
-  height: 600,
+  width: 720,
+  height: 520,
 };
 
 interface SceneProps {
@@ -128,7 +128,7 @@ const Scene: FC<SceneProps> = ({
   const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
   return (
-    <div style={{ margin: '0.2em', position: 'relative' }}>
+    <div>
       <Stage
         width={imageSize.width}
         height={imageSize.height}

@@ -85,7 +85,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
       // Remove the default max-width
       maxWidth={9999}
     >
-      <Stack horizontal>
+      <Stack horizontal tokens={{ childrenGap: '10px' }}>
         <div style={{ width: '70%' }}>
           <Scene
             url={imageUrl}
