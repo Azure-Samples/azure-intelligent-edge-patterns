@@ -17,11 +17,13 @@ import { Range, Handle } from 'rc-slider';
 import 'rc-tooltip/assets/bootstrap.css';
 import '../rc-slider.css';
 
+import Axios from 'axios';
 import { State } from 'RootStateType';
 // import { useParts } from '../hooks/useParts';
 import { ProjectData } from '../store/project/projectTypes';
 import { thunkGetProject } from '../store/project/projectActions';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
+import { useInterval } from '../hooks/useInterval';
 import { selectRelabelImages } from '../store/selectors';
 import { getImages } from '../store/imageSlice';
 import { getParts } from '../store/partSlice';
@@ -101,6 +103,9 @@ const ManualIdentification: FC = () => {
     }
   };
 
+  useInterval(() => {
+    Axios.post(`/api/projects/${projectData.id}/relabel_keep_alive/`);
+  }, 3000);
   const onDisplayImageClick = (imgId: number) => {
     dispatch(openLabelingPage({ imageIds: relabelImages.map((e) => e.id), selectedImageId: imgId }));
   };

@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import datetime
 import json
 import logging
 import threading
@@ -13,6 +14,8 @@ from distutils.util import strtobool
 import requests
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
@@ -34,6 +37,8 @@ from ..utils import pull_cv_project_helper, update_app_insight_counter
 from .serializers import ProjectSerializer, TaskSerializer
 
 logger = logging.getLogger(__name__)
+
+PROJECT_RELABEL_TIME_THRESHOLD = 30  # Seconds
 
 
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
@@ -80,6 +85,25 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
+
+    @action(detail=True, methods=["post"])
+    def relabel_keep_alive(self, request, pk=None) -> Response:
+        """relabel_keep_alive.
+
+        Args:
+            request:
+            kwargs:
+
+        Returns:
+            Response:
+        """
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, pk=pk)
+        obj.relabel_expired_time = timezone.now() + datetime.timedelta(
+            seconds=PROJECT_RELABEL_TIME_THRESHOLD)
+        obj.save()
+        serializer = ProjectSerializer(obj)
+        return Response(serializer.data)
 
 
 @api_view()
