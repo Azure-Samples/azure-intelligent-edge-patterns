@@ -8,7 +8,7 @@ COPY ui app
 WORKDIR /app
 RUN rm -rf node_modules/
 RUN rm -rf build/
-RUN yarn install
+RUN yarn install --production
 RUN yarn build
 
 # =========================================================

@@ -16,6 +16,7 @@ steps:
   env:
     BUILD_BUILD_NUMBER: $(Build.BuildNumber)
     BUILD_SOURCE_BRANCHNAME: $(Build.SourceBranchName)
+  displayName: 'Generating IoT Edge module tag from Azure Pipelines'
 
 - task: AzureIoTEdge@2
   inputs:
