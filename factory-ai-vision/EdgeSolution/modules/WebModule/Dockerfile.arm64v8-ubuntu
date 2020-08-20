@@ -1,3 +1,6 @@
+# =========================================================
+# === Build Static UI                                   ===
+# =========================================================
 FROM node:12 as builder
 
 WORKDIR /
@@ -5,10 +8,13 @@ COPY ui app
 WORKDIR /app
 RUN rm -rf node_modules/
 RUN rm -rf build/
-RUN yarn install
+RUN yarn install --production
 RUN yarn build
 
-FROM arm64v8/ubuntu as base
+# =========================================================
+# === Build Backend Base                                ===
+# =========================================================
+FROM arm64v8/ubuntu as backend-base
 
 RUN apt-get update
 RUN apt-get install -y locales \
@@ -18,7 +24,7 @@ RUN apt-get install -y locales \
 ENV LANG en_US.UTF-8 
 ENV LC_ALL en_US.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
-# 
+
 RUN apt-get install -y python3
 RUN apt-get -y install python3-pip
 RUN apt-get install -y libgl1-mesa-glx
@@ -26,21 +32,25 @@ RUN apt-get install -y python3-cryptography
 RUN apt-get install -y python3-zmq
 RUN apt-get install -y python3-opencv
 RUN apt-get install -y python3-ruamel.yaml
+RUN apt-get install -y python3-psycopg2
 
-FROM base as final
+# =========================================================
+# === Build Backend Production                          ===
+# =========================================================
+FROM backend-base as backend-production
 
 WORKDIR /app
 
-COPY backend/requirements-arm.txt .
-RUN pip3 install -r requirements-arm.txt
+COPY backend/requirements requirements
+RUN pip3 install -r ./requirements/production-arm.txt
 
 COPY backend/manage.py .
 COPY backend/config.py .
 COPY backend/vision_on_edge vision_on_edge
 COPY backend/configs configs
-RUN rm -f vision_on_edge/*/migrations/[0-9]*.py
 RUN python3 manage.py makemigrations
 RUN python3 manage.py migrate
+
 RUN rm -rf ui_production
 COPY --from=builder /app/build vision_on_edge/ui_production
 EXPOSE 8000

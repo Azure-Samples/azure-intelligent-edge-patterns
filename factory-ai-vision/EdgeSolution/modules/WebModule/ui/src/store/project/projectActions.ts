@@ -1,5 +1,6 @@
 import Axios from 'axios';
 import * as R from 'ramda';
+import { State } from 'RootStateType';
 import {
   ProjectThunk,
   GetProjectSuccessAction,
@@ -53,7 +54,7 @@ import {
   UpdateProbThresholdFailedAction,
   TrainingStatus,
 } from './projectTypes';
-import { State } from '../State';
+import { selectAllImages } from '../imageSlice';
 
 const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -433,14 +434,14 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
     });
 };
 
-export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean) => (
+export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean): ProjectThunk => (
   dispatch,
   getState,
 ): void => {
-  const images = getState().images.filter((e) => !e.is_relabel);
+  const images = selectAllImages(getState()).filter((e) => !e.isRelabel);
 
   const partsWithImageLength = images.reduce((acc, cur) => {
-    const { id } = cur.part;
+    const id = cur.part;
     const relatedPartIdx = acc.findIndex((e) => e.id === id);
     if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
     return acc;

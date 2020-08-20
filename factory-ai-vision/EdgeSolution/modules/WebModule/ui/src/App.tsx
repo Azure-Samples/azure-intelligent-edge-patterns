@@ -2,13 +2,13 @@ import React, { FC, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
+import { State } from 'RootStateType';
 import { RootRouter } from './routes/RootRouter';
 import { MainLayout } from './components/MainLayout';
 import { mainTheme } from './themes/mainTheme';
 import TelemetryProvider from './components/TelemetryProvider';
 import { useWebSocket } from './hooks/useWebSocket';
 import { thunkGetSettingAndAppInsightKey } from './store/setting/settingAction';
-import { State } from './store/State';
 
 const App: FC = (): JSX.Element => {
   // Listen for the notification boardcast.

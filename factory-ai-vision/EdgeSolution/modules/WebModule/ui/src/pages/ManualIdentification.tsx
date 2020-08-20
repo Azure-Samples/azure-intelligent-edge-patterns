@@ -18,25 +18,25 @@ import 'rc-tooltip/assets/bootstrap.css';
 import '../rc-slider.css';
 
 import Axios from 'axios';
-import { State } from '../store/State';
+import { State } from 'RootStateType';
 // import { useParts } from '../hooks/useParts';
 import { ProjectData } from '../store/project/projectTypes';
-import { LabelImage } from '../store/image/imageTypes';
-import { getFilteredImages } from '../util/getFilteredImages';
 import { thunkGetProject } from '../store/project/projectActions';
-import { getLabelImages, thunkUpdateRelabel } from '../store/image/imageActions';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
 import { useInterval } from '../hooks/useInterval';
+import { selectRelabelImages } from '../store/selectors';
+import { getImages } from '../store/imageSlice';
+import { getParts } from '../store/partSlice';
+import LabelingPage from '../components/LabelingPage/LabelingPage';
+import { LabelingType } from '../components/LabelingPage/type';
+import { openLabelingPage } from '../store/labelingPageSlice';
+import { updateRelabelImages } from '../store/actions';
 
 const ManualIdentification: FC = () => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const { projectData, images } = useSelector<State, { projectData: ProjectData; images: LabelImage[] }>(
-    (state) => ({
-      projectData: state.project.data,
-      images: state.images,
-    }),
-  );
+  const projectData = useSelector<State, ProjectData>((state) => state.project.data);
+  const images = useSelector(selectRelabelImages);
   // const parts = useParts(false);
   // const partItems = useMemo<DropdownItemProps[]>(() => {
   //   if (parts.length === 0 || projectData.parts.length === 0) return [];
@@ -68,14 +68,13 @@ const ManualIdentification: FC = () => {
 
   useEffect(() => {
     dispatch(thunkGetProject(false));
-    dispatch(getLabelImages());
+    dispatch(getParts(false));
+    dispatch(getImages());
   }, [dispatch]);
 
   const relabelImages = useMemo(
     () =>
-      getFilteredImages(images, {
-        isRelabel: true,
-      })
+      images
         .filter((e) => {
           const confidenceLevel = ((e.confidence * 1000) | 0) / 10;
           return confidenceLevel >= confidenceLevelRange[0] && confidenceLevel <= confidenceLevelRange[1];
@@ -97,9 +96,8 @@ const ManualIdentification: FC = () => {
 
   const onUpdate = async (): Promise<void> => {
     try {
-      await dispatch(thunkUpdateRelabel());
+      await dispatch(updateRelabelImages());
       history.push('/partIdentification');
-      dispatch(getLabelImages());
     } catch (e) {
       alert(e);
     }
@@ -108,6 +106,9 @@ const ManualIdentification: FC = () => {
   useInterval(() => {
     Axios.post(`/api/projects/${projectData.id}/relabel_keep_alive/`);
   }, 3000);
+  const onDisplayImageClick = (imgId: number) => {
+    dispatch(openLabelingPage({ imageIds: relabelImages.map((e) => e.id), selectedImageId: imgId }));
+  };
 
   return (
     <>
@@ -157,7 +158,8 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
-        <ImagesContainer images={relabelImages} selectedPartId={selectedPartId} />
+        <ImagesContainer images={relabelImages} onDisplayImageClick={onDisplayImageClick} />
+        <LabelingPage labelingType={LabelingType.SingleAnnotation} isRelabel={true} />
         <Button
           content="Update"
           styles={{ width: '15%' }}

@@ -2,27 +2,35 @@
 """Test drf views
 """
 
+import json
+
 import pytest
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
 from vision_on_edge.notifications.api.views import NotificationViewSet
 from vision_on_edge.notifications.models import Notification
+from vision_on_edge.notifications.api.serializers import NotificationSerializer
 
 pytestmark = pytest.mark.django_db
 
 
-
-def test_get_list():
-    """test_get_list.
+class TestNotificationViewSet:
+    """TestNotificationViewSet.
     """
-    rf = APIRequestFactory()
-    list_view = NotificationViewSet.as_view({'get': 'list'})
-    response = list_view(rf.get(""))
-    assert response.status_code == status.HTTP_200_OK
 
-def test_get_detail(notification: Notification):
-    rf = APIRequestFactory()
-    detail_view = NotificationViewSet.as_view({'get': 'retrieve'})
-    response = detail_view(rf.get(""), pk=notification.id)
-    assert response.status_code == status.HTTP_200_OK
+    def test_get(self, notification: Notification, rf: APIRequestFactory):
+        """test_get_queryset.
+
+        Args:
+            notification (Notification): notification
+            rf (APIRequestFactory): rf
+        """
+        notification_list_view = NotificationViewSet.as_view({'get': 'list'})
+        request = rf.get("/fake-url/")
+
+        response = notification_list_view(request).render().content.decode(
+            'utf-8')
+
+        assert NotificationSerializer(notification).data in json.loads(
+            response)

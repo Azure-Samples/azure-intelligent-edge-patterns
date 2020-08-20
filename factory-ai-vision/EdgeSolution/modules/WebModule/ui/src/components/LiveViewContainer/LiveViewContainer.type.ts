@@ -1,26 +1,26 @@
-import { Dispatch, SetStateAction } from 'react';
 import { Box } from '../../type';
-
-export enum CreatingState {
-  Disabled,
-  Waiting,
-  Creating,
-}
+import { Position2D, BoxLabel } from '../../store/type';
+import { CreatingState } from '../../store/AOISlice';
+import { AOI, Shape } from '../../store/shared/BaseShape';
 
 export type LiveViewProps = {
-  AOIs: Box[];
-  setAOIs: Dispatch<SetStateAction<Box[]>>;
+  AOIs: AOI[];
+  creatingShape: Shape;
+  onCreatingPoint: (point: Position2D) => void;
+  updateAOI: (id: string, changes) => void;
+  removeAOI: (id: string) => void;
+  finishLabel: () => void;
   visible: boolean;
   imageInfo: [HTMLImageElement, string, { width: number; height: number }];
   creatingState: CreatingState;
-  setCreatingState: Dispatch<SetStateAction<CreatingState>>;
 };
 
 export type AOILayerProps = {
   imgWidth: number;
   imgHeight: number;
-  AOIs: Box[];
-  setAOIs: Dispatch<SetStateAction<Box[]>>;
+  AOIs: AOI[];
+  updateAOI: (id: string, changes) => void;
+  removeAOI: (id: string) => void;
   visible: boolean;
   creatingState: CreatingState;
 };
@@ -28,13 +28,13 @@ export type AOILayerProps = {
 export type MaskProps = {
   width: number;
   height: number;
-  holes: Box[];
+  holes: AOI[];
   visible: boolean;
 };
 
 export type AOIBoxProps = {
   box: Box;
-  onBoxChange: (updateBox: (prevBox: Box) => Box) => void;
+  onBoxChange: (changes: Partial<BoxLabel>) => void;
   boundary: { x1: number; y1: number; x2: number; y2: number };
   visible: boolean;
   removeBox: (id: string) => void;

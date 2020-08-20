@@ -2,18 +2,18 @@ import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Text, Grid, Divider, Provider, Button } from '@fluentui/react-northstar';
 import { useHistory } from 'react-router-dom';
+import { State } from 'RootStateType';
 import ImageLink from '../components/ImageLink';
-import { Location } from '../store/location/locationTypes';
-import { State } from '../store/State';
+import { Location } from '../reducers/type';
 import { useQuery } from '../hooks/useQuery';
 import { errorTheme } from '../themes/errorTheme';
 import { WarningDialog } from '../components/WarningDialog';
-import { deleteLocation } from '../store/location/locationActions';
 import { Status, LoadingDialog } from '../components/LoadingDialog/LoadingDialog';
+import { selectLocationById, deleteLocation } from '../store/locationSlice';
 
 const LocationDetails: FC = () => {
-  const name = useQuery().get('name');
-  const location = useSelector<State, Location>((state) => state.locations.find((e) => e.name === name));
+  const id = useQuery().get('id');
+  const location = useSelector<State, Location>((state) => selectLocationById(state, id));
   const dispatch = useDispatch();
   const history = useHistory();
   const [status, setStatus] = useState<Status>(Status.None);
@@ -52,7 +52,7 @@ const LocationDetails: FC = () => {
         <WarningDialog
           contentText={
             <p>
-              Sure you want to delete the part <b>{name}</b>?
+              Sure you want to delete the part <b>{id}</b>?
             </p>
           }
           trigger={<Button content="Delete" primary />}

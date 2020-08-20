@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 
 import { AddModuleDialog } from '.';
-import { postCamera } from '../../store/camera/cameraActions';
+import { postCamera } from '../../store/cameraSlice';
 
 export const AddCameraLink = () => {
   const dispatch = useDispatch();
@@ -25,10 +25,13 @@ export const AddCameraLink = () => {
         },
       ]}
       trigger={<p style={{ textDecoration: 'underline', cursor: 'pointer' }}>Add Camera</p>}
-      onConfirm={({ name, rtsp }): void => {
-        (dispatch(postCamera({ name, rtsp, is_demo: false })) as any)
-          .then(() => window.location.reload())
-          .catch(alert);
+      onConfirm={async ({ name, rtsp }) => {
+        try {
+          await dispatch(postCamera({ name, rtsp }));
+          window.location.reload();
+        } catch (e) {
+          alert(e);
+        }
       }}
     />
   );

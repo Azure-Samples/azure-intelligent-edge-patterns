@@ -19,4 +19,7 @@ class NotificationFactory(DjangoModelFactory):
     timestamp = timezone.now()
 
     class Meta:
+        """Meta.
+        """
+
         model = Notification

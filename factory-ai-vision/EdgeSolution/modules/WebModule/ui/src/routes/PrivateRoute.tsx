@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Route, Redirect, RouteProps } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { State } from '../store/State';
+import { State } from 'RootStateType';
 import { checkSettingStatus } from '../store/setting/settingAction';
 import { Setting } from '../store/setting/settingType';
 
