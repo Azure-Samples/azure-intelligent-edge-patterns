@@ -8,6 +8,7 @@ import { useWebSocket } from './hooks/useWebSocket';
 import { useDispatch, useSelector } from 'react-redux';
 import { State } from 'RootStateType';
 import { thunkGetSettingAndAppInsightKey } from './store/setting/settingAction';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 
 function App() {
   // Listen for the notification boardcast.
@@ -20,6 +21,10 @@ function App() {
   useEffect(() => {
     dispatch(thunkGetSettingAndAppInsightKey());
   }, [dispatch]);
+
+  useEffect(() => {
+    initializeIcons(/* optional base url */);
+  }, []);
 
   return (
     <BrowserRouter>
