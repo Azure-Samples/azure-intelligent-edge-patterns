@@ -18,27 +18,12 @@ steps:
     BUILD_SOURCE_BRANCHNAME: $(Build.SourceBranchName)
   displayName: 'Generating IoT Edge module tag from Azure Pipelines'
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      # Write your commands here
-      sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset
-  displayName: 'Prepare Arm Docker'
-
 - task: AzureIoTEdge@2
   inputs:
     action: 'Build module images'
     templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
     defaultPlatform: 'amd64'
   displayName: 'Azure IoT Edge - Build module images'
-
-- task: AzureIoTEdge@2
-  inputs:
-    action: 'Build module images'
-    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.arm64v8.template.json'
-    defaultPlatform: 'amd64'
-  displayName: 'Azure IoT Edge - Build module images (arm64v8)'
 
 - task: AzureIoTEdge@2
   inputs:
@@ -50,17 +35,6 @@ steps:
     defaultPlatform: 'amd64'
     fillRegistryCredential: 'true'
   displayName: 'Azure IoT Edge - Push module images'
-
-- task: AzureIoTEdge@2
-  inputs:
-    action: 'Push module images'
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscriptionEndpoint: 'Microsoft Azure Sponsorship(091725d9-aeba-4638-8faf-d0e81a03a93d)'
-    azureContainerRegistry: '{"loginServer":"factoryairegistry.azurecr.io", "id" : "/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourceGroups/customvision/providers/Microsoft.ContainerRegistry/registries/factoryairegistry"}'
-    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.arm64v8.template.json'
-    defaultPlatform: 'amd64'
-    fillRegistryCredential: 'true'
-  displayName: 'Azure IoT Edge - Push module images (arm64v8)'
 
 - task: CopyFiles@2
   inputs:
