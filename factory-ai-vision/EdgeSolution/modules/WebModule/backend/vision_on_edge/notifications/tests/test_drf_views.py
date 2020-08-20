@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Test drf views
 """
+
 import json
 
 import pytest
@@ -16,8 +18,7 @@ class TestNotificationViewSet:
     """TestNotificationViewSet.
     """
 
-    def test_get_queryset(self, notification: Notification,
-                          rf: APIRequestFactory):
+    def test_get(self, notification: Notification, rf: APIRequestFactory):
         """test_get_queryset.
 
         Args:
@@ -27,10 +28,8 @@ class TestNotificationViewSet:
         notification_list_view = NotificationViewSet.as_view({'get': 'list'})
         request = rf.get("/fake-url/")
 
-        #request.notification = notification
-
-        #view.request = request
         response = notification_list_view(request).render().content.decode(
             'utf-8')
 
-        assert NotificationSerializer(notification).data in json.loads(response)
+        assert NotificationSerializer(notification).data in json.loads(
+            response)
