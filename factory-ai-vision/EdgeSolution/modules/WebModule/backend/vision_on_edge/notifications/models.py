@@ -26,4 +26,4 @@ class Notification(models.Model):
 
     def __str__(self):
         return " ".join(
-            [self.timestamp, self.notification_type, self.title, self.details])
+            [str(self.timestamp), self.notification_type, self.title, self.details])

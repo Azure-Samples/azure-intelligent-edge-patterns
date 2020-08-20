@@ -431,7 +431,8 @@ good-names=i,
            Run,
            _,
 	   default_app_config,
-           pk
+           pk,
+           rf
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
