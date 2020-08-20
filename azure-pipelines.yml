@@ -53,6 +53,7 @@ steps:
     defaultPlatform: 'amd64'
     fillRegistryCredential: 'true'
   displayName: 'Azure IoT Edge - Push module images (arm64v8)'
+
 - task: CopyFiles@2
   inputs:
     SourceFolder: 'factory-ai-vision/EdgeSolution'
