@@ -8,8 +8,10 @@ import {
   PrimaryButton,
   DefaultButton,
   Stack,
+  Breadcrumb,
 } from '@fluentui/react';
 import { useConstCallback } from '@uifabric/react-hooks';
+import { CameraDetailList } from '../components/CameraDetailList';
 
 const theme = getTheme();
 
@@ -17,6 +19,7 @@ export const Cameras: React.FC = () => {
   const [isPanelOpen, setPanelOpen] = useState(false);
 
   const dismissPanel = useConstCallback(() => setPanelOpen(false));
+  const openPanel = useConstCallback(() => setPanelOpen(true));
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -26,7 +29,7 @@ export const Cameras: React.FC = () => {
         iconProps: {
           iconName: 'Add',
         },
-        onClick: () => setPanelOpen(true),
+        onClick: openPanel,
       },
     ],
     [],
@@ -40,11 +43,15 @@ export const Cameras: React.FC = () => {
   ));
 
   return (
-    <>
+    <Stack styles={{ root: { height: '100%' } }}>
       <CommandBar
         items={commandBarItems}
         styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
       />
+      <Stack styles={{ root: { padding: '15px' } }} grow>
+        <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
+        <CameraDetailList onAddBtnClick={openPanel} />
+      </Stack>
       <Panel
         isOpen={isPanelOpen}
         onDismiss={dismissPanel}
@@ -58,6 +65,6 @@ export const Cameras: React.FC = () => {
         <TextField label="RTSP URL" required />
         <TextField label="Location" required />
       </Panel>
-    </>
+    </Stack>
   );
 };
