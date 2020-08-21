@@ -6,6 +6,7 @@ Use in development.
 
 # pylint: disable = wildcard-import, unused-wildcard-import
 from configs import logging_config
+
 from .base import *
 
 # Database

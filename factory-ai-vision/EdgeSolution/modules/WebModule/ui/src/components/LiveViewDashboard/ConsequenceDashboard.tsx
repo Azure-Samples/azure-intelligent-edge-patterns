@@ -10,9 +10,15 @@ export const ConsequenceDashboard: React.FC<ConsequenceDashboardProps> = ({
   visible,
 }) => {
   return (
-    <table style={{ textAlign: 'center', width: '60%', display: visible ? '' : 'none' }}>
+    <table
+      style={{
+        textAlign: 'center',
+        borderSpacing: '15px 5px',
+        display: visible ? '' : 'none',
+      }}
+    >
       <tr>
-        <td style={{ width: '200px' }}></td>
+        <td></td>
         <td>Precision</td>
         <td>Recall</td>
         <td>mAP</td>

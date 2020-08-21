@@ -3,26 +3,21 @@ import { Button, CloseIcon } from '@fluentui/react-northstar';
 import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
-import * as R from 'ramda';
 
 import useImage from './util/useImage';
 import getResizeImageFunction from './util/resizeImage';
 import { Box2d } from './Box';
+import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
-  Size2D,
-  Annotation,
-  WorkState,
-  LabelingType,
-  LabelingCursorStates,
-} from '../../store/labelingPage/labelingPageTypes';
-import {
-  createAnnotation,
   updateCreatingAnnotation,
   removeAnnotation,
-  updateAnnotation,
-} from '../../store/labelingPage/labelingPageActions';
+  thunkCreateAnnotation,
+} from '../../store/annotationSlice';
 import RemoveBoxButton from './RemoveBoxButton';
 import { PartForm } from '../PartForm';
+import { Annotation, Size2D } from '../../store/type';
+import { Part } from '../../store/partSlice';
+import { thunkChangeImgPart } from '../../store/imageSlice';
 
 const defaultSize: Size2D = {
   width: 800,
@@ -37,6 +32,7 @@ interface SceneProps {
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
   partFormDisabled: boolean;
+  imgPart: Part;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
@@ -46,6 +42,7 @@ const Scene: FC<SceneProps> = ({
   setWorkState,
   onBoxCreated,
   partFormDisabled,
+  imgPart,
 }) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
@@ -75,16 +72,16 @@ const Scene: FC<SceneProps> = ({
     [noMoreCreate],
   );
   const removeBox = useCallback((): void => {
-    dispatch(removeAnnotation(selectedAnnotationIndex));
+    dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
     setShowOuterRemoveButton(false);
     setSelectedAnnotationIndex(null);
-  }, [dispatch, selectedAnnotationIndex, setWorkState, setShowOuterRemoveButton]);
+  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState]);
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
 
-    dispatch(createAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
+    dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
     // FIXME Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
     // Should put this state in redux
     setSelectedAnnotationIndex(annotations.length);
@@ -192,7 +189,8 @@ const Scene: FC<SceneProps> = ({
                   y={annotation.label.y1 - 25 / scale.current}
                   fontSize={20 / scale.current}
                   fill="red"
-                  text={annotations[selectedAnnotationIndex]?.part.name}
+                  text={imgPart?.name}
+                  test="part"
                   visible={!partFormDisabled}
                 />
               </Group>
@@ -217,14 +215,9 @@ const Scene: FC<SceneProps> = ({
             left={annotations[0]?.label.x2 * scale.current + 10}
             open={true}
             onDismiss={(): void => onSelect(null)}
-            selectedPart={annotations[selectedAnnotationIndex]?.part}
-            setSelectedPart={(newPart): void => {
-              dispatch(
-                updateAnnotation(
-                  selectedAnnotationIndex,
-                  R.assoc('part', newPart, annotations[selectedAnnotationIndex]),
-                ),
-              );
+            selectedPart={imgPart}
+            setSelectedPart={(part): void => {
+              dispatch(thunkChangeImgPart(part));
             }}
           />
         )}

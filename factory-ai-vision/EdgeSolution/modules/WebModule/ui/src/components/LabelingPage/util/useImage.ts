@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import uniqid from 'uniqid';
 
 type ImageState = {
   image: HTMLImageElement;
@@ -23,9 +24,11 @@ const useImage = (
   url: string,
   crossOrigin: string,
   isMixedReplace = false,
+  nocache = false,
 ): [HTMLImageElement, string, { width: number; height: number }] => {
   const [imageState, setImageState] = useState<ImageState>(defaultState);
   const { image, status, size } = imageState;
+  const uniqidRef = useRef(uniqid());
 
   const prevUrl = usePrevious<string>(url);
   const prevImageWidth = usePrevious(image?.width);
@@ -56,7 +59,9 @@ const useImage = (
     img.addEventListener('error', onerror);
     if (crossOrigin) img.crossOrigin = crossOrigin;
 
-    img.src = url;
+    // Use this hack to force web not caching image
+    // See https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
+    img.src = nocache ? `${url}?${uniqidRef.current}` : url;
 
     return (): void => {
       img.removeEventListener('load', onload);

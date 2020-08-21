@@ -1,45 +1,53 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as R from 'ramda';
 import uniqid from 'uniqid';
 import { Text, Checkbox, Flex, Provider } from '@fluentui/react-northstar';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
+import { State } from 'RootStateType';
 import { Button } from '../Button';
 import { LiveViewScene } from './LiveViewScene';
-import { AOIData, Box } from '../../type';
 import useImage from '../LabelingPage/util/useImage';
-import { CreatingState } from './LiveViewContainer.type';
 import { errorTheme } from '../../themes/errorTheme';
 import { WarningDialog } from '../WarningDialog';
-import { patchCameraArea } from '../../store/camera/cameraActions';
 import { useInterval } from '../../hooks/useInterval';
+import { selectCameraById } from '../../store/cameraSlice';
+import {
+  selectAOIsByCamera,
+  updateAOI,
+  onCreatingPoint,
+  removeAOI,
+  createDefaultAOI,
+  selectOriginAOIsByCamera,
+  onCreateAOIBtnClick,
+  finishLabel,
+} from '../../store/AOISlice';
+import { toggleShowAOI, updateCameraArea } from '../../store/actions';
+import { Shape } from '../../store/shared/BaseShape';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
-  initialAOIData: AOIData;
   cameraId: number;
   onDeleteProject: () => void;
-}> = ({ showVideo, initialAOIData, cameraId, onDeleteProject }) => {
-  const [showAOI, setShowAOI] = useState(initialAOIData.useAOI);
-  const lasteUpdatedAOIs = useRef(initialAOIData.AOIs);
-  const [AOIs, setAOIs] = useState<Box[]>(lasteUpdatedAOIs.current);
+}> = ({ showVideo, cameraId, onDeleteProject }) => {
+  const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId).useAOI);
+  const AOIs = useSelector(selectAOIsByCamera(cameraId));
+  const originAOIs = useSelector(selectOriginAOIsByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
-  const imageInfo = useImage('/api/inference/video_feed', '', true);
-  const [creatingAOI, setCreatingAOI] = useState(CreatingState.Disabled);
+  const imageInfo = useImage('/api/inference/video_feed', '', true, true);
+  const creatingAOI = useSelector((state: State) => state.AOIs.creatingState);
+  const AOIShape = useSelector((state: State) => state.AOIs.shape);
   const dispatch = useDispatch();
 
   const onCheckboxClick = async (): Promise<void> => {
-    setShowAOI(!showAOI);
     setLoading(true);
     try {
-      await dispatch(patchCameraArea({ AOIs: lasteUpdatedAOIs.current, useAOI: !showAOI }, cameraId));
+      await dispatch(toggleShowAOI({ cameraId, showAOI: !showAOI }));
       setShowUpdateSuccessTxt(true);
-      if (!showAOI) setAOIs(lasteUpdatedAOIs.current);
     } catch (e) {
-      // Set back to the state before updating for switch case
-      setShowAOI(showAOI);
+      alert(e);
     }
     setLoading(false);
   };
@@ -47,11 +55,10 @@ export const LiveViewContainer: React.FC<{
   const onUpdate = async (): Promise<void> => {
     setLoading(true);
     try {
-      await dispatch(patchCameraArea({ AOIs, useAOI: showAOI }, cameraId));
+      await dispatch(updateCameraArea(cameraId));
       setShowUpdateSuccessTxt(true);
-      lasteUpdatedAOIs.current = R.clone(AOIs);
     } catch (e) {
-      console.error(e);
+      alert(e);
     }
     setLoading(false);
   };
@@ -65,24 +72,30 @@ export const LiveViewContainer: React.FC<{
     }
   }, [showUpdateSuccessTxt]);
 
-  useEffect(() => {
-    if (!AOIs.length)
-      setAOIs([
-        {
-          id: uniqid(),
-          x1: imageInfo[2].width * 0.1,
-          y1: imageInfo[2].height * 0.1,
-          x2: imageInfo[2].width * 0.9,
-          y2: imageInfo[2].height * 0.9,
-        },
-      ]);
-  }, [AOIs.length, imageInfo[2].width, imageInfo[2].height]);
+  // Extract the width and height to make the dependency array clearer.
+  // const { width: imgWidth, height: imgHeight } = imageInfo[2];
+  // useEffect(() => {
+  //   if (imgWidth !== 0 && imgHeight !== 0 && AOIs.length === 0)
+  //     dispatch(
+  //       createDefaultAOI({
+  //         id: uniqid(),
+  //         type: Shape.BBox,
+  //         vertices: {
+  //           x1: imgWidth * 0.1,
+  //           y1: imgHeight * 0.1,
+  //           x2: imgWidth * 0.9,
+  //           y2: imgHeight * 0.9,
+  //         },
+  //         camera: cameraId,
+  //       }),
+  //     );
+  // }, [cameraId, dispatch, imgHeight, imgWidth, AOIs]);
 
   useInterval(() => {
     Axios.get('/api/inference/video_feed/keep_alive').catch(console.error);
   }, 3000);
 
-  const hasEdit = !R.equals(lasteUpdatedAOIs.current, AOIs);
+  const hasEdit = !R.equals(originAOIs, AOIs);
   const updateBtnDisabled = !showAOI || !hasEdit;
 
   return (
@@ -97,12 +110,21 @@ export const LiveViewContainer: React.FC<{
           onClick={onCheckboxClick}
         />
         <Button
-          content="Create AOI"
-          primary={creatingAOI !== CreatingState.Disabled}
+          content="Create Box"
+          primary={AOIShape === Shape.BBox}
           disabled={!showAOI}
           onClick={(): void => {
-            if (creatingAOI === CreatingState.Disabled) setCreatingAOI(CreatingState.Waiting);
-            else setCreatingAOI(CreatingState.Disabled);
+            dispatch(onCreateAOIBtnClick(Shape.BBox));
+          }}
+          circular
+          styles={{ padding: '0 5px' }}
+        />
+        <Button
+          content={AOIShape === Shape.Polygon ? 'Click F to Finish' : 'Create Polygon'}
+          primary={AOIShape === Shape.Polygon}
+          disabled={!showAOI}
+          onClick={(): void => {
+            dispatch(onCreateAOIBtnClick(Shape.Polygon));
           }}
           circular
           styles={{ padding: '0 5px' }}
@@ -130,11 +152,14 @@ export const LiveViewContainer: React.FC<{
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
-            setAOIs={setAOIs}
+            creatingShape={AOIShape}
+            onCreatingPoint={(point) => dispatch(onCreatingPoint({ point, cameraId }))}
+            updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
+            removeAOI={(AOIId) => dispatch(removeAOI(AOIId))}
+            finishLabel={() => dispatch(finishLabel())}
             visible={showAOI}
             imageInfo={imageInfo}
             creatingState={creatingAOI}
-            setCreatingState={setCreatingAOI}
           />
         ) : null}
       </div>

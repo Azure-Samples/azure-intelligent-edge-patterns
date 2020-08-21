@@ -32,7 +32,7 @@ export const callAPIMiddleware: Middleware = ({ dispatch, getState }) => (next) 
     }),
   );
 
-  return callAPI().then(
+  return callAPI(getState()).then(
     (response) =>
       dispatch(
         Object.assign({}, payload, {

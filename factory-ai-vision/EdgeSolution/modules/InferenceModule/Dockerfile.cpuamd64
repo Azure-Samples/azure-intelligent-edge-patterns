@@ -30,9 +30,10 @@ RUN pip install -r requirements.txt --ignore-installed && \
 ARG DEVICE
 
 COPY main.py ./
+COPY config.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
-COPy onnxruntime_predict.py ./
+COPY onnxruntime_predict.py ./
 COPY utility.py ./
 COPY default_model/cvexport.manifest default_model/
 COPY default_model default_model/
@@ -40,5 +41,9 @@ COPY default_model_6parts default_model_6parts/
 COPY sample_video sample_video/
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
+
+EXPOSE 5558
+EXPOSE 5000
+
 CMD [ "python3", "main.py" ]
 

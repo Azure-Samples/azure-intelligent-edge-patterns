@@ -1,3 +1,6 @@
+# =========================================================
+# === Build Static UI                                   ===
+# =========================================================
 FROM node:12 as builder
 
 WORKDIR /
@@ -5,18 +8,28 @@ COPY ui app
 WORKDIR /app
 RUN rm -rf node_modules/
 RUN rm -rf build/
-RUN yarn install
+RUN yarn install --production
 RUN yarn build
 
-FROM amd64/python:3.8
+# =========================================================
+# === Build Backend Base                                ===
+# =========================================================
+FROM amd64/python:3.8 as backend-base
 
 RUN apt-get update
+# libgl for opencv
 RUN apt-get install -y libgl1-mesa-glx
+
+
+# =========================================================
+# === Build Backend Production                          ===
+# =========================================================
+FROM backend-base as backend-production
 
 WORKDIR /app
 
-COPY backend/requirements.txt .
-RUN pip install -r requirements.txt
+COPY backend/requirements requirements
+RUN pip install -r ./requirements/production-x86.txt
 
 COPY backend/manage.py .
 COPY backend/config.py .

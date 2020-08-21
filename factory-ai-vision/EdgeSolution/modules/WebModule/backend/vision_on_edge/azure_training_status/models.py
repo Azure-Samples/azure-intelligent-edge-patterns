@@ -22,4 +22,4 @@ class TrainingStatus(models.Model):
     log = models.CharField(max_length=1000)
     performance = models.CharField(max_length=2000, default="{}")
     need_to_send_notification = models.BooleanField(default=False)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.OneToOneField(Project, on_delete=models.CASCADE)
