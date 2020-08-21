@@ -17,6 +17,7 @@
     "@types/react-dom": "^16.9.0",
     "@types/react-redux": "^7.1.7",
     "@uifabric/react-cards": "^0.111.2",
+    "@uifabric/react-hooks": "^7.9.1",
     "axios": "^0.19.2",
     "konva": "^6.0.0",
     "normalizr": "^3.6.0",
