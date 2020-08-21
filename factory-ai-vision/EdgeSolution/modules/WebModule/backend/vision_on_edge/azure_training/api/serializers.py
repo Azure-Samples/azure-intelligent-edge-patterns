@@ -35,11 +35,12 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         logger.info("Project Serializer create")
-        parts = validated_data.pop("parts")
+        logger.info(validated_data)
+        # parts = validated_data.pop("parts")
         if "setting" not in validated_data:
             validated_data["setting"] = Setting.objects.first()
         project = Project.objects.create(**validated_data)
-        project.parts.set(parts)
+        # project.parts.set(parts)
         return project
 
 

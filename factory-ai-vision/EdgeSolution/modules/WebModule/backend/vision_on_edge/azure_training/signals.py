@@ -36,11 +36,13 @@ def azure_setting_change_handler(**kwargs):
         logger.info("'instance' not in kwargs:'")
         logger.info("Nothing to do")
         return
-    instance = kwargs['instance']
-    if len(Setting.objects.filter(pk=instance.id)) <= 0:
+    if 'created' in kwargs:
         logger.info("Probably creating a new setting")
         logger.info("Nothing to do")
         return
+
+    # Changing settings, not creating a new setting.
+    instance = kwargs['instance']
     old_setting = Setting.objects.get(pk=instance.id)
     if old_setting.training_key == instance.training_key and \
             old_setting.endpoint == instance.endpoint:
@@ -49,10 +51,13 @@ def azure_setting_change_handler(**kwargs):
         return
 
     logger.info("Setting endpoint or training_key changed...")
-    logger.info("Deleting all none-demo project....")
+    logger.info("Deleting all project belong this settings....")
     Project.objects.filter(setting=kwargs['instance'], is_demo=False).delete()
     logger.info("Creating a none-demo project....")
-    Project.objects.update_or_create(setting=kwargs['instance'], is_demo=False)
+    if Project.objects.filter(setting=kwargs['instance'],
+                              is_demo=False).count() < 1:
+        Project.objects.update_or_create(setting=kwargs['instance'],
+                                         is_demo=False)
 
 
 @receiver(signal=post_save,
