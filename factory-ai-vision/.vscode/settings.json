@@ -13,5 +13,6 @@
     "typescriptreact"
   ],
   "typescript.format.enable": true,
-  "typescript.validate.enable": true
+  "typescript.validate.enable": true,
+  "git.ignoreLimitWarning": true
 }
