@@ -29,7 +29,23 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
   const [formData, setFormData] = useState<Form>(initialForm);
   const dispatch = useDispatch();
 
+  const validate = () => {
+    let hasError = false;
+
+    for (let key in formData) {
+      if (formData.hasOwnProperty(key)) {
+        if (!formData[key].value) {
+          setFormData(R.assocPath([key, 'errMsg'], `${formData[key].label} is required`));
+          hasError = true;
+        }
+      }
+    }
+    return hasError;
+  };
+
   const onAdd = async () => {
+    if (validate()) return;
+
     setLoading(true);
     await dispatch(postCamera({ name: formData.name.value, rtsp: formData.rtsp.value }));
     setLoading(false);
