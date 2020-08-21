@@ -107,15 +107,19 @@ def delete_img_on_customvision(**kwargs):
             not instance.customvision_id:
         return
 
-    if 'delete_on_customvision' in dir(
-            instance) and not instance.delete_on_customvision:
-        logger.info("Someone specify not to delete on Custom Vision")
+    # Default not to delete image on customvision
+    if 'delete_on_customvision' not in dir(
+            instance) or not instance.delete_on_customvision:
+        logger.info("Not specified to delete on Custom Vision. Passing")
         return
 
     try:
+        logger.info("Trying to delete %s %s on customvision", instance.name,
+                    instance.customvision_id)
         trainer = instance.project.setting.get_trainer_obj()
         trainer.delete_images(
             project_id=instance.project.customvision_project_id,
             image_ids=[instance.customvision_id])
+        logger.info("Delete success")
     except Exception:
         logger.exception("delete_tag unexpected_error")

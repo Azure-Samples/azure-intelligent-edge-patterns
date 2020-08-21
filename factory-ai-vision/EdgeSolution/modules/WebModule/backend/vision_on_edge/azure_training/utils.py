@@ -108,12 +108,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
 
     # Delete parts and images
     logger.info("Deleting all parts and images...")
-    for part in Part.objects.filter(is_demo=False):
-        part.delete_on_customvision = False
-        part.delete()
-    for img in Image.objects.all():
-        img.delete_on_customvision = False
-        img.delete()
+    logger.info("Handle by signals...")
 
     # Download parts and images
     logger.info("Pulling Parts...")
@@ -123,15 +118,16 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
         logger.info("Creating Part %s: %s %s", counter, tag.name,
                     tag.description)
         part_obj, created = Part.objects.update_or_create(
+            project_id=project_id,
             name=tag.name,
             description=tag.description if tag.description else "",
             customvision_id=tag.id)
         counter += 1
+        logger.info("Created Part %s: %s %s", counter, tag.name,
+                    tag.description)
 
-        if created:
-            project_obj.parts.add(part_obj)
-        else:
-            logging.error("%s not added", tag.name)
+        if not created:
+            logger.error("%s not created", tag.name)
 
         if is_partial:
             logger.info("loading one image as icon")
@@ -145,7 +141,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
                     part=part_obj,
                     remote_url=image_uri,
                     customvision_id=img.id,
-                    project=project_obj,
+                    project_id=project_id,
                     uploaded=True)
                 logger.info("loading from remote url: %s", img_obj.remote_url)
                 img_obj.get_remote_image()
@@ -195,7 +191,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
             logger.info("*** img %s", img_counter)
             for region in img.regions:
                 part_obj = Part.objects.filter(name=region.tag_name,
-                                               is_demo=False)[0]
+                                               project_id=project_id)
                 img_obj, created = Image.objects.update_or_create(
                     part=part_obj,
                     remote_url=img.original_image_uri,
