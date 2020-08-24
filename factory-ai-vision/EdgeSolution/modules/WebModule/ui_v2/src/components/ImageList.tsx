@@ -1,12 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FocusZone } from 'office-ui-fabric-react/lib/FocusZone';
 import { List } from 'office-ui-fabric-react/lib/List';
 import { IRectangle } from 'office-ui-fabric-react/lib/Utilities';
 import { mergeStyleSets } from 'office-ui-fabric-react/lib/Styling';
 import { useConstCallback } from '@uifabric/react-hooks';
 import { Image } from '../store/type';
-import { selectAllImages, getImages } from '../store/imageSlice';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import LabelDisplayImage from './LabelDisplayImage';
 import LabelingPage from './LabelingPage/LabelingPage';
 import { openLabelingPage } from '../store/labelingPageSlice';
@@ -20,7 +19,7 @@ const classNames = mergeStyleSets({
   },
 });
 
-export const ImageList: React.FC<{ isRelabel: boolean }> = ({ isRelabel }) => {
+export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ isRelabel, images }) => {
   const columnCount = React.useRef(0);
   const rowHeight = React.useRef(0);
   const dispatch = useDispatch();
@@ -56,17 +55,11 @@ export const ImageList: React.FC<{ isRelabel: boolean }> = ({ isRelabel }) => {
     return rowHeight.current * ROWS_PER_PAGE;
   });
 
-  const items = useSelector(selectAllImages);
-
-  useEffect(() => {
-    dispatch(getImages());
-  }, [dispatch]);
-
   return (
     <>
       <FocusZone>
         <List
-          items={items}
+          items={images}
           getItemCountForPage={getItemCountForPage}
           getPageHeight={getPageHeight}
           renderedWindowsAhead={4}
