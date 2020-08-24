@@ -2,6 +2,7 @@ import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import { Dialog, Button, DialogFooter, Stack, TextField, Text } from '@fluentui/react';
+import * as R from 'ramda';
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
@@ -42,6 +43,9 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
   const [loading, setLoading] = useState(false);
 
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
+  const noChanged = useSelector<State, boolean>((state) =>
+    R.equals(state.annotations.entities, state.annotations.originEntities),
+  );
 
   const isOnePointBox = checkOnePointBox(annotations);
 
@@ -122,7 +126,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
         <Button
           primary
           text={index === imageIds.length - 1 ? 'Save and Done' : 'Save and Next'}
-          disabled={isOnePointBox || workState === WorkState.Creating || loading}
+          disabled={isOnePointBox || workState === WorkState.Creating || loading || noChanged}
           onClick={onSaveBtnClick}
         />
         <Button text="Delete Image" onClick={onDeleteImage} disabled={loading} />
