@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
-import { Dialog, Button, DialogFooter, Stack, TextField, DetailsList } from '@fluentui/react';
+import { Dialog, Button, DialogFooter, Stack, TextField } from '@fluentui/react';
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
@@ -82,7 +82,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
       }}
       hidden={selectedImageId === null}
       onDismiss={closeDialog}
-      modalProps={{ isBlocking: true }}
+      modalProps={{
+        isBlocking: true,
+        layerProps: {
+          eventBubblingEnabled: true,
+        },
+      }}
       // Remove the default max-width
       maxWidth={9999}
     >
