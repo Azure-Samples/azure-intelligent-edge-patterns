@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
-import { Dialog, Button, DialogFooter, Stack, TextField } from '@fluentui/react';
+import { Dialog, Button, DialogFooter, Stack, TextField, Text } from '@fluentui/react';
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
@@ -35,6 +35,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const index = imageIds.findIndex((e) => e === selectedImageId);
   const imageUrl = useSelector<State, string>((state) => imageSelector(state)?.image || '');
+  const imageConfidenceLevel = useSelector<State, number>((state) => imageSelector(state)?.confidence || 0);
   const imgPart = useSelector<State, Part>(imagePartSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -106,6 +107,15 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
         <div style={{ width: '30%' }}>
           <TextField label="Part" placeholder="Add a part" />
           <PartPicker selectedPart={imgPart?.id} />
+          {isRelabel && (
+            <Stack tokens={{ childrenGap: 10 }} styles={{ root: { paddingTop: '30px' } }}>
+              <Text styles={{ root: { fontWeight: 'bold' } }}>Predictions</Text>
+              <Stack horizontal tokens={{ childrenGap: 30 }}>
+                <Text>{imgPart?.name}</Text>
+                <Text>{(imageConfidenceLevel * 100).toFixed(2)}%</Text>
+              </Stack>
+            </Stack>
+          )}
         </div>
       </Stack>
       <DialogFooter>
