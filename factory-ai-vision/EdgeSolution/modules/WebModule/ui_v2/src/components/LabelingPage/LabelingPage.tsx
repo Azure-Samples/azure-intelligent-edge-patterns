@@ -25,11 +25,11 @@ const imagePartSelector = createSelector([imageSelector, selectPartEntities], (i
 });
 
 interface LabelingPageProps {
-  labelingType: LabelingType;
+  labelingType?: LabelingType;
   isRelabel: boolean;
 }
 
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.SingleAnnotation, isRelabel }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
@@ -80,7 +80,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
         subText: 'Drag a box around object to tag a part',
         styles: { content: { width: '1080px' } },
       }}
-      hidden={false}
+      hidden={selectedImageId === null}
       onDismiss={closeDialog}
       modalProps={{ isBlocking: true }}
       // Remove the default max-width
