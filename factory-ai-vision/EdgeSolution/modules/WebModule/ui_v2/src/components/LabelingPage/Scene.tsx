@@ -28,7 +28,6 @@ interface SceneProps {
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
-  partFormDisabled: boolean;
   imgPart: Part;
 }
 const Scene: FC<SceneProps> = ({
@@ -38,7 +37,6 @@ const Scene: FC<SceneProps> = ({
   workState,
   setWorkState,
   onBoxCreated,
-  partFormDisabled,
   imgPart,
 }) => {
   const dispatch = useDispatch();
@@ -174,7 +172,6 @@ const Scene: FC<SceneProps> = ({
                   fill="red"
                   text={imgPart?.name}
                   test="part"
-                  visible={!partFormDisabled}
                 />
               </Group>
             ))}

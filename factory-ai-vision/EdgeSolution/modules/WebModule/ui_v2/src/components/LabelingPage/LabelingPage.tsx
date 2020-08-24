@@ -100,13 +100,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
             setWorkState={setWorkState}
             labelingType={labelingType}
             onBoxCreated={onBoxCreated}
-            partFormDisabled={!isRelabel}
             imgPart={imgPart}
           />
         </div>
         <div style={{ width: '30%' }}>
           <TextField label="Part" placeholder="Add a part" />
-          <PartPicker />
+          <PartPicker selectedPart={imgPart?.id} />
         </div>
       </Stack>
       <DialogFooter>
