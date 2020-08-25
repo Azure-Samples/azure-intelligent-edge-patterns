@@ -1,7 +1,8 @@
 import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
-import { Dialog, Button, DialogFooter, Stack, TextField, DetailsList } from '@fluentui/react';
+import { Dialog, Button, DialogFooter, Stack, TextField, Text } from '@fluentui/react';
+import * as R from 'ramda';
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
@@ -25,22 +26,26 @@ const imagePartSelector = createSelector([imageSelector, selectPartEntities], (i
 });
 
 interface LabelingPageProps {
-  labelingType: LabelingType;
+  labelingType?: LabelingType;
   isRelabel: boolean;
 }
 
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.SingleAnnotation, isRelabel }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const index = imageIds.findIndex((e) => e === selectedImageId);
   const imageUrl = useSelector<State, string>((state) => imageSelector(state)?.image || '');
+  const imageConfidenceLevel = useSelector<State, number>((state) => imageSelector(state)?.confidence || 0);
   const imgPart = useSelector<State, Part>(imagePartSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
 
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
+  const noChanged = useSelector<State, boolean>((state) =>
+    R.equals(state.annotations.entities, state.annotations.originEntities),
+  );
 
   const isOnePointBox = checkOnePointBox(annotations);
 
@@ -80,9 +85,14 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
         subText: 'Drag a box around object to tag a part',
         styles: { content: { width: '1080px' } },
       }}
-      hidden={false}
+      hidden={selectedImageId === null}
       onDismiss={closeDialog}
-      modalProps={{ isBlocking: true }}
+      modalProps={{
+        isBlocking: true,
+        layerProps: {
+          eventBubblingEnabled: true,
+        },
+      }}
       // Remove the default max-width
       maxWidth={9999}
     >
@@ -95,20 +105,28 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType, isRelabel }) => {
             setWorkState={setWorkState}
             labelingType={labelingType}
             onBoxCreated={onBoxCreated}
-            partFormDisabled={!isRelabel}
             imgPart={imgPart}
           />
         </div>
         <div style={{ width: '30%' }}>
           <TextField label="Part" placeholder="Add a part" />
-          <PartPicker />
+          <PartPicker selectedPart={imgPart?.id} />
+          {isRelabel && (
+            <Stack tokens={{ childrenGap: 10 }} styles={{ root: { paddingTop: '30px' } }}>
+              <Text styles={{ root: { fontWeight: 'bold' } }}>Predictions</Text>
+              <Stack horizontal tokens={{ childrenGap: 30 }}>
+                <Text>{imgPart?.name}</Text>
+                <Text>{(imageConfidenceLevel * 100).toFixed(2)}%</Text>
+              </Stack>
+            </Stack>
+          )}
         </div>
       </Stack>
       <DialogFooter>
         <Button
           primary
           text={index === imageIds.length - 1 ? 'Save and Done' : 'Save and Next'}
-          disabled={isOnePointBox || workState === WorkState.Creating || loading}
+          disabled={isOnePointBox || workState === WorkState.Creating || loading || noChanged}
           onClick={onSaveBtnClick}
         />
         <Button text="Delete Image" onClick={onDeleteImage} disabled={loading} />

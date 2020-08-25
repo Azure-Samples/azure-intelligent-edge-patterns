@@ -15,7 +15,6 @@ import {
 import RemoveBoxButton from './RemoveBoxButton';
 import { Annotation, Size2D } from '../../store/type';
 import { Part } from '../../store/partSlice';
-import { thunkChangeImgPart } from '../../store/imageSlice';
 
 const defaultSize: Size2D = {
   width: 720,
@@ -29,7 +28,6 @@ interface SceneProps {
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
-  partFormDisabled: boolean;
   imgPart: Part;
 }
 const Scene: FC<SceneProps> = ({
@@ -39,7 +37,6 @@ const Scene: FC<SceneProps> = ({
   workState,
   setWorkState,
   onBoxCreated,
-  partFormDisabled,
   imgPart,
 }) => {
   const dispatch = useDispatch();
@@ -175,7 +172,6 @@ const Scene: FC<SceneProps> = ({
                   fill="red"
                   text={imgPart?.name}
                   test="part"
-                  visible={!partFormDisabled}
                 />
               </Group>
             ))}
@@ -190,21 +186,6 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
-      {/* {false &&
-        selectedAnnotationIndex !== null &&
-        workState !== WorkState.Creating &&
-        annotations[selectedAnnotationIndex] && (
-          <PartForm
-            top={annotations[0]?.label.y1 * scale.current - 10}
-            left={annotations[0]?.label.x2 * scale.current + 10}
-            open={true}
-            onDismiss={(): void => onSelect(null)}
-            selectedPart={imgPart}
-            setSelectedPart={(part): void => {
-              dispatch(thunkChangeImgPart(part));
-            }}
-          />
-        )} */}
     </div>
   );
 };
