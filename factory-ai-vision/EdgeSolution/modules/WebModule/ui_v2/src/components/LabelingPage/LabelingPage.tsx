@@ -37,6 +37,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
   const index = imageIds.findIndex((e) => e === selectedImageId);
   const imageUrl = useSelector<State, string>((state) => imageSelector(state)?.image || '');
   const imageConfidenceLevel = useSelector<State, number>((state) => imageSelector(state)?.confidence || 0);
+  const imageTimeStamp = useSelector<State, Date>((state) => {
+    const timeStampString = imageSelector(state)?.timestamp || '';
+    return new Date(Date.parse(timeStampString));
+  });
   const imgPart = useSelector<State, Part>(imagePartSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -114,6 +118,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
           {isRelabel && (
             <Stack tokens={{ childrenGap: 10 }} styles={{ root: { paddingTop: '30px' } }}>
               <Text styles={{ root: { fontWeight: 'bold' } }}>Predictions</Text>
+              <Text variant="smallPlus">{`This image was collected on ${imageTimeStamp.toLocaleString()} `}</Text>
               <Stack horizontal tokens={{ childrenGap: 30 }}>
                 <Text>{imgPart?.name}</Text>
                 <Text>{(imageConfidenceLevel * 100).toFixed(2)}%</Text>

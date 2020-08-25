@@ -47,4 +47,5 @@ export type Image = {
   isRelabel: boolean;
   confidence: number;
   hasRelabeled: boolean;
+  timestamp: string;
 };
