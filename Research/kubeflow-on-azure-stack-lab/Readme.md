@@ -20,25 +20,26 @@ Main differences of the detached mode include limitations on:
 
 # Roadmap
 
-| | Module | Description |
+| | Module | Description and milestones |
 | --- | --- | --- |
-| 00 | [Pre-requisite check list](#Module-0-Pre-requisite-check-list) | Please validate your environment |
-| 01 | [Azure Stack](#Module-01-Azure-Stack) | Check-point: Azure Stack Portal, cloud shell, Azure CLI |
-| 02 | [Kubernetes](#Module-02-Kubernetes) | Check-point: Kubernetes, kubectl, Kubernetes Dashboard |
-| TODO | Docker | Check-point: docker containers |
-| TODO | DockerHub | Check-point: dockerhub as container artifactory |
-| 03 | [Persistence on Azure Stack](#Module-3-Persistence-on-Azure-Stack) | Check-point: cross-node file storage |
-| 04 | [Kubeflow](#Module-04-Kubeflow) | Check-point: Kubeflow installation |
-| 05 | [Kubeflow Dashboard](#Module-05.-Kubeflow-Dashboard) | Check-point: Kubeflow Dashboard, namespaces |
-| 06 | [Jupyter Servers and Notebooks](#Module-06-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter server, Jupyter Notebook |
-| 07 | [TFJobs](#Module-07.-TFJobs) | Check-point: TFJob |
-| 08 | [PyTorchJobs](#Module-08.-PyTorchJobs) | Check-point: PyTorchJob |
-| 09 | [TensorBoard](#Module-09.-Tensorboard) | Check-point: TensorBoard |
-| TODO | GPU | Check-point: GPU-facilitated operations |
-| 10 | [Using Models](#Module-10.-Using-Models) | Check-point: into to pipelines |
-| 11 | [Uninstalling Kubeflow](#Module-11.-Uninstalling-Kubeflow) | Check-point: clean environment |
+| 01 | [Pre-requisite check list](#Module-01-Pre-requisite-check-list) | Please validate your environment |
+| 02 | [Azure Stack](#Module-02-Azure-Stack) | Check-point: Azure Stack Portal, cloud shell, Azure CLI |
+| 03 | [Kubernetes](#Module-03-Kubernetes) | Check-point: Kubernetes, kubectl, Kubernetes Dashboard |
+| 04 | [Docker](#Module-04-Docker) | Check-point: docker containers |
+| 05 | [DockerHub](#Module-05-DockerHub) | Check-point: dockerhub as container artifactory |
+| 06 | [Persistence on Azure Stack](#Module-06-Persistence-on-Azure-Stack) | Check-point: cross-node file storage |
+| 07 | [Kubeflow](#Module-07-Kubeflow) | Check-point: Kubeflow installation |
+| 08 | [Kubeflow Dashboard](#Module-08-Kubeflow-Dashboard) | Check-point: Kubeflow Dashboard, namespaces |
+| 09 | [Jupyter Servers and Notebooks](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter server, Jupyter Notebook |
+| 10 | [ML with Python](#Module-10-ML-with-Python) | Check-point: Python programming, PyTorch and Tensorflow |
+| 11 | [TFJobs](#Module-11-TFJobs) | Check-point: TFJob |
+| 12 | [PyTorchJobs](#Module-12-PyTorchJobs) | Check-point: PyTorchJob |
+| 13 | [TensorBoard](#Module-13-Tensorboard) | Check-point: TensorBoard |
+| 14 | [GPU](#Module-14-GPU) | Check-point: GPU-facilitated operations |
+| 15 | [Using Models](#Module-15-Using-Models) | Check-point: into to pipelines |
+| 16 | [Uninstalling Kubeflow](#Module-16-Uninstalling-Kubeflow) | Check-point: clean environment |
 
-# Module 0. Pre-requisite check list
+# Module 01. Pre-requisite check list
 
 Even though the steps are very detailed, it is helpful if the reader is familiar with at least subset of the following:
 
@@ -53,9 +54,9 @@ Even though the steps are very detailed, it is helpful if the reader is familiar
   - [Tensorboard](https://www.tensorflow.org/tensorboard/)
 - (optional) [PyTorch](https://pytorch.org/)
 
-# Module 01. Azure Stack
+# Module 02. Azure Stack
 
-## Module 1.0 Azure Stack Portal
+## Module 2.0 Azure Stack Portal
 
 IMPORTANT: While you might have the premissions to retrieve some information on your
 own(see [User Information on Azure](acquiring_settings.md)) or create, but most likely
@@ -65,7 +66,7 @@ you will need to ask your cloud administrator. You need the following:
 
 See additional prerequisites if you are [Installing Kubernetes](installing_kubernetes.md) yourself.
 
-## Module 1.1 Azure Stack CLI
+## Module 2.1 Azure Stack CLI
 
 In spirit of infrastracture-as-code paradigm, most of things are better run using command like interface of configuration files.
 
@@ -91,9 +92,9 @@ later in this section):
     start_tb.sh
     tensorboard.yaml
 
-# Module 02. Kubernetes
+# Module 03. Kubernetes
 
-## Module 2.0. Check the integrity of your Kubernetes cluster
+## Module 3.0. Check the integrity of your Kubernetes cluster
 
 If you already have a Kubernetes cluster you may skip this chapter. However,
 **make sure you have the values from [Prerequisites](installing_kubernetes.md#prerequisites) section**.
@@ -128,7 +129,7 @@ something like the following:
     k8s-linuxpool-27515788-2   Ready    agent    22m   v1.15.5
     k8s-master-27515788-0      Ready    master   22m   v1.15.5
 
-## Module 2.1. Kubernetes Dashboard
+## Module 3.1. Kubernetes Dashboard
 
 You are welcome to check if you can see the Kubernetes board from your
 machine. You can get your Kubernetes Dashboard's address from `cluster-info`:
@@ -158,7 +159,15 @@ to access these links, you should be able to see the Kubernetes Dashboard in a b
 
 ![pics/kubernetes_dashboard_intro.png](pics/kubernetes_dashboard_intro.png)
 
-# Module 03. Persistence on Azure Stack
+# Module 04. Docker
+
+TODO
+
+# Module 05. DockerHub
+
+TODO
+
+# Module 06. Persistence on Azure Stack
 
 Most real-life applications need data storage. Azure Stack team actively works on making
 available the options available on the public cloud, however, there are nuances in a detauched
@@ -192,9 +201,9 @@ And you should see the Persisted Volume itself:
 Consult your cloud system administrator if you have any problems, there could be many other
 options sutable to particular scenarios and development lifecycle.
 
-# Module 04. Kubeflow
+# Module 07. Kubeflow
 
-## Module 4.0 Install Kubeflow
+## Module 7.0 Install Kubeflow
 
 The easiest way to install Kubeflow on Azure Stack is to run script `kubeflow_install.sh` from
 `sbin` directory. There are other useful scripts, all of which you should be running at
@@ -351,9 +360,9 @@ for the pods to come up:
 
 It will show the list of the services and pods for the cluster we just created.
 
-# Module 05. Kubeflow Dashboard
+# Module 08. Kubeflow Dashboard
 
-## Module 5.0 Preparing Kubeflow dashboard
+## Module 8.0 Preparing Kubeflow dashboard
 
 Make sure all the pods are up and running(Using `kubectl get all -n kubeflow`, wait until
 they are).
@@ -371,7 +380,7 @@ Then the EXTERNAL-IP will become available from:
     NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
     istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
 
-## Module 5.1 Example Kubeflow dashboard
+## Module 8.1 Example Kubeflow dashboard
 
 When you have your istio-ingressgateway's external ip(you can retrieve it using `get_kf_board_ip.sh`),
 open it in your browser, and make sure your firewall rules allow HTTP port 80.
@@ -383,15 +392,15 @@ let the pods create containers and start.
 
 For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/)
 
-# Module 06. Jupyter Servers and Notebooks
+# Module 09. Jupyter Servers and Notebooks
 
-## Module 6.0 Creating Jupyter Server
+## Module 9.0 Creating Jupyter Server
 
 You need to create a namespace to be able to create Jupyter servers. 
 
 ![pics/kubeflow_dashboard2_notebook_servers.png](pics/kubeflow_dashboard2_notebook_servers.png)
 
-## Module 6.1 Jupyter Notebooks
+## Module 9.1 Jupyter Notebooks
 
 Once you create a server, you can connect to it and upload Python files.
 
@@ -402,21 +411,24 @@ button `Run` to execute, you should see something like this:
 
 ![(pics/demo_notebook.png](pics/demo_notebook.png)
 
+# Module 10. ML with Python
 
-# Module 07. TFjobs
+TODO
+
+# Module 11. TFjobs
 
 [TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
 
 See [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack) for the demo of a `TFJob` execution in the environment that we create in this tutorial.
 
-# Module 08. PyTorchJobs
+# Module 12. PyTorchJobs
 
 [PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework, it has Python and C++ interfaces. PyTorch is rooted in [Torch library](https://github.com/torch/torch7)
 
 See [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) for the demo
 of a `PyTorchJob` execution in the environment that we create in this tutorial.
 
-# Module 09. Tensorboard
+# Module 13. Tensorboard
 
 You can skip this chapter for now. There is another useful tool to monitor some ML applications if
 they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
@@ -466,7 +478,11 @@ Here is how you would connect your Tensorboard with the persistence we discuss n
           dnsPolicy: ClusterFirst
           restartPolicy: Always
 
-# Module 10. Using Models
+# Module 14. GPU
+
+TODO
+
+# Module 15. Using Models
 
 After a model is created and trained, you have many options of how to use it. You can run inferencing directly
 in your script after loading the serialized parameters. Here is how it would look like in one of the
@@ -652,7 +668,7 @@ In our case, if you built the image from MLFlow section and pushed it to your ac
     MAE: 69.52472687854122
     R2: -0.02072575078015859
 
-# Module 11. Uninstalling Kubeflow
+# Module 16. Uninstalling Kubeflow
 
 If you installed Kubeflow using `kubeflow_install.sh`, you can remove it using `kubeflow_uninstall.sh`:
 
@@ -689,6 +705,8 @@ it will look like so:
 You can now re-install it if you would like.
 
 ## Next Steps
+
+Congratulations on finishing this lab.
 
 Proceed to [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack)
 to learn how to execute `TFJob`s on Kubeflow, in the environment that we just created.
