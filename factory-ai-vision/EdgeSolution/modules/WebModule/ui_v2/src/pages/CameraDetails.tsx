@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Breadcrumb,
   Stack,
@@ -88,7 +89,11 @@ const CameraInUsedMsgBar: React.FC<{ isInUsed: boolean }> = ({ isInUsed }) => {
   if (isInUsed && visible)
     return (
       <MessageBar
-        actions={<MessageBarButton>View Task</MessageBarButton>}
+        actions={
+          <Link to="/task">
+            <MessageBarButton>View Task</MessageBarButton>
+          </Link>
+        }
         onDismiss={() => setVisible(false)}
         isMultiline={false}
       >
