@@ -70,7 +70,7 @@ export const GetStarted: React.FC = () => {
           title="Ready to go!"
           contentTxt="Start identifying parts from your cameras’ live streams"
           actionTxt="Begin a task"
-          actionLink="/"
+          actionLink="/task"
         />
       </Stack>
     </Stack>
