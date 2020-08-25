@@ -36,7 +36,13 @@ const cardStyleSets = mergeStyleSets({
   mainSectionAction: { gridColumn: '2 / span 1', gridRow: '3 / span 1', fontSize: '13px' },
 });
 
-export const GetStarted: React.FC = () => {
+type GetStartedType = {
+  hasCamera: boolean;
+  hasImages: boolean;
+  hasTask: boolean;
+};
+
+export const GetStarted: React.FC<GetStartedType> = ({ hasCamera, hasImages, hasTask }) => {
   return (
     <Stack horizontalAlign="center">
       <Text variant="xLarge" styles={{ root: { margin: '4px' } }}>
@@ -50,7 +56,7 @@ export const GetStarted: React.FC = () => {
       <Stack horizontal tokens={{ childrenGap: 20 }}>
         <GetStartedCard
           no={1}
-          checked={false}
+          checked={hasCamera}
           title="Connect cameras"
           contentTxt="Add and configure the cameras in the factory"
           actionTxt="Go to Cameras"
@@ -58,7 +64,7 @@ export const GetStarted: React.FC = () => {
         />
         <GetStartedCard
           no={2}
-          checked={false}
+          checked={hasImages}
           title="Add images and tag parts"
           contentTxt="Capture images from your video streams and tag parts"
           actionTxt="Go to Images"
@@ -66,7 +72,7 @@ export const GetStarted: React.FC = () => {
         />
         <GetStartedCard
           no={3}
-          checked={false}
+          checked={hasTask}
           title="Ready to go!"
           contentTxt="Start identifying parts from your cameras’ live streams"
           actionTxt="Begin a task"
