@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DetailsList, SelectionMode, CheckboxVisibility, Text } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectAllParts, Part } from '../../store/partSlice';
+import { selectAllParts, Part, getParts } from '../../store/partSlice';
 import { thunkChangeImgPart } from '../../store/imageSlice';
 
-export const PartPicker: React.FC = () => {
+export const PartPicker: React.FC<{ selectedPart: number }> = ({ selectedPart }) => {
   const parts = useSelector(selectAllParts);
   const dispatch = useDispatch();
 
-  if (parts.length === 0)
+  useEffect(() => {
+    dispatch(getParts(false));
+  }, [dispatch]);
+
+  if (parts.length === 0 || selectedPart === undefined)
     return (
       <div
         style={{
