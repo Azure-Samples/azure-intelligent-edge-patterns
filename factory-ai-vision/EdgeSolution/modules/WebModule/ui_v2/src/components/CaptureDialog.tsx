@@ -10,6 +10,7 @@ import {
   mergeStyleSets,
 } from '@fluentui/react';
 import { RTSPVideo } from './RTSPVideo';
+import { CaptureLabelMode } from './RTSPVideo/RTSPVideo.type';
 
 const { palette } = getTheme();
 
@@ -18,7 +19,7 @@ const functionBtnStyleSets = mergeStyleSets({
   icon: { color: palette.themePrimary },
 });
 
-export const CaptureDialog: React.FC = () => {
+export const CaptureDialog: React.FC<{ captureLabelMode: CaptureLabelMode }> = ({ captureLabelMode }) => {
   return (
     <Dialog
       dialogContentProps={{ title: 'Capture', styles: { content: { width: '1080px' } } }}
@@ -45,6 +46,13 @@ export const CaptureDialog: React.FC = () => {
                 iconProps={{ iconName: 'Camera', className: functionBtnStyleSets.icon }}
                 className={functionBtnStyleSets.button}
               />
+              {captureLabelMode === CaptureLabelMode.AllLater && (
+                <DefaultButton
+                  text="Save capture"
+                  iconProps={{ iconName: 'Save', className: functionBtnStyleSets.icon }}
+                  className={functionBtnStyleSets.button}
+                />
+              )}
               <DefaultButton
                 text="Try again"
                 iconProps={{ iconName: 'Refresh', className: functionBtnStyleSets.icon }}
@@ -54,7 +62,7 @@ export const CaptureDialog: React.FC = () => {
           </Stack>
         </Stack>
         <DialogFooter>
-          <PrimaryButton text="Next" />
+          {captureLabelMode === CaptureLabelMode.PerImage && <PrimaryButton text="Next" />}
           <DefaultButton text="Cancel" />
         </DialogFooter>
       </>
