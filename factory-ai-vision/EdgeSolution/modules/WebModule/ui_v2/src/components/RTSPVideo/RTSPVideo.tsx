@@ -3,7 +3,7 @@ import Axios from 'axios';
 
 import { RTSPVideoProps, CaptureLabelMode } from './RTSPVideo.type';
 import { useInterval } from '../../hooks/useInterval';
-import { Stack, ActionButton } from '@fluentui/react';
+import { Stack } from '@fluentui/react';
 
 // TODO Check if we need two mode for capturing & the capturing UX
 export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
@@ -69,7 +69,6 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
 
   return (
     <Stack>
-      <ActionButton iconProps={{ iconName: 'Camera' }}>Capture image</ActionButton>
       <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
         {src ? <img src={src} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
       </div>

@@ -13,6 +13,7 @@ import {
   Spinner,
   MessageBar,
   MessageBarButton,
+  ActionButton,
 } from '@fluentui/react';
 import { useQuery } from '../hooks/useQuery';
 import { State } from 'RootStateType';
@@ -75,6 +76,7 @@ export const CameraDetails: React.FC = () => {
           <CameraInfo rtsp={camera.rtsp} location="" />
           <Stack style={{ width: '80%' }}>
             <Text styles={titleStyles}>Live feed</Text>
+            <ActionButton iconProps={{ iconName: 'Camera' }}>Capture image</ActionButton>
             <RTSPVideo rtsp={camera.rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
           </Stack>
         </Stack>
