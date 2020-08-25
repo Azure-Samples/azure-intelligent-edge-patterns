@@ -38,10 +38,10 @@
             "restartPolicy": "always",
             "env": {
               "TRAINING_KEY": {
-                "value": "<CUSTOM-VISION-TRAINING-KEY>"
+                "value": "<Training Endpoint>"
               },
               "ENDPOINT": {
-                "value": "<CUSTOM-VISION-ENDPOINT>"
+                "value": "<Training API Key>"
               },
               "DBNAME": {
                 "value": "vision_on_edge"
