@@ -1,0 +1,23 @@
+#
+# the pipeline to create an inferencing endpoint
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: inferencing-demo-curl-
+spec:
+  entrypoint: inferencing-example
+  templates:
+  - name: inferencing-example
+    steps:
+    - - name: run-inference-server
+        template: run-model
+
+  - name: run-model
+    container:
+      image: nginx:alpine
+      ports:
+      - containerPort: 80
+      #command: [sh, -c]
+      #args: ["do stuff"]
+

@@ -1,0 +1,36 @@
+apiVersion: "kubeflow.org/v1"
+kind: "TFJob"
+metadata:
+  name: "dist-mnist-for-e2e-test-demo"
+spec:
+  tfReplicaSpecs:
+    PS:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+          - name: tensorflow
+            image: kubeflow/tf-dist-mnist-test:1.0
+            volumeMounts:
+            - mountPath: "/tmp/mnist-data"
+              name: samba-share-volume2
+          volumes:
+          - name: samba-share-volume2
+            persistentVolumeClaim:
+              claimName: samba-share-claim
+    Worker:
+      replicas: 3
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+          - name: tensorflow
+            image: kubeflow/tf-dist-mnist-test:1.0
+            volumeMounts:
+            - mountPath: "/tmp/mnist-data"
+              name: samba-share-volume2
+          volumes:
+          - name: samba-share-volume2
+            persistentVolumeClaim:
+              claimName: samba-share-claim
