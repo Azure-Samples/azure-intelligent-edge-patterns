@@ -25,7 +25,6 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     queryset = Part.objects.all()
     serializer_class = PartSerializer
-    lookup_field = 'uuid'
     filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "is_demo": "project__is_demo",

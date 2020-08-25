@@ -25,7 +25,7 @@ def azure_project_change_handler(**kwargs):
     logger.info("Part azure_project_change_handler")
     instance = kwargs['instance']
     try:
-        old_project = Project.objects.get(uuid=instance.uuid)
+        old_project = Project.objects.get(pk=instance.id)
         if old_project.customvision_project_id == instance.customvision_project_id:
             logger.info("Custom Vision Project Id not changed")
             logger.info("Nothing to do")
