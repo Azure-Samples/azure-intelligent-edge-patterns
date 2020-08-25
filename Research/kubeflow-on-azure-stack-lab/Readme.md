@@ -22,16 +22,19 @@ Main differences of the detached mode include limitations on:
 
 | | Module | Description |
 | --- | --- | --- |
-| 00 | [Pre-requisit check list](#Module-0-Pre-requisit-check-list) | Please validate your environment |
-| 01 | [Azure Stack](#Module-01-Azure-Stack) | Check-point: Azure Stack Portal, Azure CLI |
-| 02 | [Kubernetes](#Module-02.-Kubernetes) | Check-point: Kubernetes, kubectl, Kubernetes Dashboard |
+| 00 | [Pre-requisite check list](#Module-0-Pre-requisite-check-list) | Please validate your environment |
+| 01 | [Azure Stack](#Module-01-Azure-Stack) | Check-point: Azure Stack Portal, cloud shell, Azure CLI |
+| 02 | [Kubernetes](#Module-02-Kubernetes) | Check-point: Kubernetes, kubectl, Kubernetes Dashboard |
+| TODO | Docker | Check-point: docker containers |
+| TODO | DockerHub | Check-point: dockerhub as container artifactory |
 | 03 | [Persistence on Azure Stack](#Module-3-Persistence-on-Azure-Stack) | Check-point: cross-node file storage |
-| 04 | [Kubeflow](#Module-04.-Kubeflow) | Check-point: Kubeflow installation |
+| 04 | [Kubeflow](#Module-04-Kubeflow) | Check-point: Kubeflow installation |
 | 05 | [Kubeflow Dashboard](#Module-05.-Kubeflow-Dashboard) | Check-point: Kubeflow Dashboard, namespaces |
 | 06 | [Jupyter Servers and Notebooks](#Module-06-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter server, Jupyter Notebook |
 | 07 | [TFJobs](#Module-07.-TFJobs) | Check-point: TFJob |
 | 08 | [PyTorchJobs](#Module-08.-PyTorchJobs) | Check-point: PyTorchJob |
 | 09 | [TensorBoard](#Module-09.-Tensorboard) | Check-point: TensorBoard |
+| TODO | GPU | Check-point: GPU-facilitated operations |
 | 10 | [Using Models](#Module-10.-Using-Models) | Check-point: into to pipelines |
 | 11 | [Uninstalling Kubeflow](#Module-11.-Uninstalling-Kubeflow) | Check-point: clean environment |
 
@@ -50,7 +53,7 @@ Even though the steps are very detailed, it is helpful if the reader is familiar
   - [Tensorboard](https://www.tensorflow.org/tensorboard/)
 - (optional) [PyTorch](https://pytorch.org/)
 
-# Module 1. Azure Stack
+# Module 01. Azure Stack
 
 ## Module 1.0 Azure Stack Portal
 
@@ -88,7 +91,7 @@ later in this section):
     start_tb.sh
     tensorboard.yaml
 
-# Module 2. Kubernetes
+# Module 02. Kubernetes
 
 ## Module 2.0. Check the integrity of your Kubernetes cluster
 
@@ -155,7 +158,7 @@ to access these links, you should be able to see the Kubernetes Dashboard in a b
 
 ![pics/kubernetes_dashboard_intro.png](pics/kubernetes_dashboard_intro.png)
 
-# Module 3. Persistence on Azure Stack
+# Module 03. Persistence on Azure Stack
 
 Most real-life applications need data storage. Azure Stack team actively works on making
 available the options available on the public cloud, however, there are nuances in a detauched
@@ -189,7 +192,7 @@ And you should see the Persisted Volume itself:
 Consult your cloud system administrator if you have any problems, there could be many other
 options sutable to particular scenarios and development lifecycle.
 
-# Module 4. Kubeflow
+# Module 04. Kubeflow
 
 ## Module 4.0 Install Kubeflow
 
