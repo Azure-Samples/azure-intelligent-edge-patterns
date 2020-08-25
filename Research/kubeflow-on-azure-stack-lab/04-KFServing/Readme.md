@@ -1,30 +1,6 @@
 # KF Serving
 
-The goal of this lab is:
-
-- TODO
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+TODO
 
 
 ---

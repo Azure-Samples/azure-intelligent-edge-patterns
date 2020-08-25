@@ -1,11 +1,5 @@
 # Pipelines
 
-The goal of this lab is:
-
-- TODO
-
-# Module 15. Using Models
-
 After a model is created and trained, you have many options of how to use it. You can run inferencing directly
 in your script after loading the serialized parameters. Here is how it would look like in one of the
 demos we cover, if we de-serialize the `model` and get `data` in the correct format:

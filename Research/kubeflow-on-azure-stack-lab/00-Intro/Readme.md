@@ -1,12 +1,6 @@
 # Lab0::Introduction and installation of Kubeflow on Azure Stack
 
-The goal of this lab is:
-
-- Installation of Kubeflow on Azure Stack
-
-# Module 01. Introduction
-
-Even though the steps are very detailed, it is helpful if the reader is familiar with at least subset of the following:
+The reader is expected to be familiar with the following:
 
 - [Docker](http://docker.com), see our [Introduction to Docker](introduction_to_docker.md) as a refresher.
 - [Azure](http://azure.com) CLI, and Microsoft Azure subscription covering AKS.
@@ -19,14 +13,6 @@ Even though the steps are very detailed, it is helpful if the reader is familiar
 - [Tensorboard](https://www.tensorflow.org/tensorboard/)
 - [PyTorch](https://pytorch.org/)
 
-If you see any of the above for the first time, we strongly encourage you to go to their website and read the introduction.
-
-**mini-QUIZ** before you continue:
-
- - Why is Microsoft Azure Stack so far ahead of its competitors?
- - Why is Kubeflow on Azure Stack is the best platform for ML in your company?
-
-# Module 01.1 Your base of operations
 
 Pick the machine from which you will do this lab. It would be convenient location for keeping the scripts,
 aliases, keys, setup certificates, keep track of your configuration files. For example, you could use:
@@ -45,7 +31,7 @@ You will need:
 
 We will be using Microsoft Edge browser, and Ubuntu terminal.
 
-# Module 01.2 Ubuntu terminal
+## Ubuntu terminal
 
 Follow these instructions to install Ubuntu on your Windows 10 machine:
 
@@ -53,7 +39,7 @@ Follow these instructions to install Ubuntu on your Windows 10 machine:
 
 Pin the shortcut to your task bar for convenience.
 
-# Module 01.3 Validate Ubuntu terminal
+## Validate Ubuntu terminal
 
 Try that Ubuntu termianal works, open the app, type a bash command:
 
@@ -62,9 +48,7 @@ Try that Ubuntu termianal works, open the app, type a bash command:
 Alternatives to it would be VirtualBox or WMVare clients. Or, you can always install Ubuntu directly
 on your laptop.
 
-# Module 02. Azure Stack
-
-## Module 02.0 Azure Stack Portal
+# Azure Stack Portal
 
 IMPORTANT: While you might have the premissions to retrieve some information on your
 own(see [User Information on Azure](acquiring_settings.md)) or create, but most likely
@@ -74,7 +58,7 @@ you will need to ask your cloud administrator. You need the following:
 
 See additional prerequisites if you are [Installing Kubernetes](installing_kubernetes.md) yourself.
 
-## Module 02.1 Azure Stack CLI
+## Azure Stack CLI
 
 In spirit of infrastracture-as-code paradigm, most of things are better run using command like interface of configuration files.
 
@@ -100,13 +84,13 @@ later in this section):
     start_tb.sh
     tensorboard.yaml
 
-# Module 03. Kubernetes
+# Kubernetes
 
-## Module 3.0. Installing Kubernetes
+## Installing Kubernetes
 
 If you do not have a Kubernetes cluster already, follow [Installing Kubernetes](installing_kubernetes.md).
 
-## Module 3.0.0 AKS-e
+## AKS-e
 
 Validate your aks-e is working. For example, check its version:
 
@@ -115,16 +99,20 @@ Validate your aks-e is working. For example, check its version:
     GitCommit: 8928a4094
     GitTreeState: clean
 
-## Module 3.0.1 AKS-e cluster configuration
+## AKS-e cluster configuration
 
 Follow [AKS-e section](installing_kubernetes.md). To make create the configuration file and apply it to
 your Azure Stack infrastructure.
 
-## Module 3.0.2 post-installation configuration
+## Post-installation configuration
 
 Make sure you have the right firewall rules and other settings before you start using your cluser.
 
-## Module 3.1. Check the integrity of your Kubernetes cluster
+# CNAP package (Porter)
+
+Installing via Porter package might be an apealing option. See [Installing CNAP](install_porter/Readme.md).
+
+## Check the integrity of your Kubernetes cluster
 
 **make sure you have the values from [Prerequisites](installing_kubernetes.md#prerequisites) section**.
 

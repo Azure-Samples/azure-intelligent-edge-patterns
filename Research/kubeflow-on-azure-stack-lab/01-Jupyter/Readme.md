@@ -98,7 +98,7 @@ Here is how you would connect your Tensorboard with the persistence we discuss n
 Some of our examples provide data to Tensorboard, see [Working with TensorBoard](working_with_tensorboard.md) for more information.
 The simplier PyTorch example we run will log data that looks something like this:
 
-![pytorch-on-kubeflow/images/tensorboard_scalars.png](pytorch-on-kubeflow/images/tensorboard_scalars.png)
+![pics/tensorboard_scalars.png](pics/tensorboard_scalars.png)
 
 ---
 
