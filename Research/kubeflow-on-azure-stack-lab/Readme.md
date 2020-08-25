@@ -14,34 +14,35 @@ Main differences of the detached mode include limitations on:
 
 # Table of content
 
-- [Roadmap](#Roadmap)
-- Modules(TBD)
-- [Links](#Links)
-
-# Roadmap
-
 | | Module | Description and milestones |
 | --- | --- | --- |
-| 01 | [Pre-requisite setup](#Module-01-Pre-requisite-setup) | Check-point: work machine, git, web browser, terminal |
-| 02 | [Azure Stack](#Module-02-Azure-Stack) | Check-point: Azure Stack Portal, cloud shell, Azure CLI |
-| 03+ | [AKS-E](#Module-03-Kubernetes) | Check-point: aks-e |
-| 03 | [Kubernetes](#Module-03-Kubernetes) | Check-point: Kubernetes, kubectl |
-| 03+ | [k8s Dashboard access](#Module-03-Kubernetes) | Check-point: Kubernetes Dashboard |
-| 04 | [Docker](#Module-04-Docker) | Check-point: docker containers |
-| 05 | [DockerHub](#Module-05-DockerHub) | Check-point: dockerhub as container artifactory |
-| 06 | [Persistence on Azure Stack](#Module-06-Persistence-on-Azure-Stack) | Check-point: cross-node file storage |
-| 07+ | [kfctl](#Module-07-Kubeflow) | Check-point: kfctl |
-| 07 | [Kubeflow](#Module-07-Kubeflow) | Check-point: Kubeflow installation, kfctl |
-| 08 | [Kubeflow Dashboard](#Module-08-Kubeflow-Dashboard) | Check-point: Kubeflow Dashboard, namespaces |
-| 09 | [Jupyter Server](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter server, web terminal |
-| 09+ | [Jupyter Notebook](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter Notebook |
-| 10 | [ML with Python](#Module-10-ML-with-Python) | Check-point: Python programming, PyTorch and Tensorflow |
-| 11 | [TFJobs](#Module-11-TFJobs) | Check-point: TFJob |
-| 12 | [PyTorchJobs](#Module-12-PyTorchJobs) | Check-point: PyTorchJob |
-| 13 | [TensorBoard](#Module-13-Tensorboard) | Check-point: TensorBoard |
-| 14 | [GPU](#Module-14-GPU) | Check-point: GPU-facilitated operations |
-| 15 | [Using Models](#Module-15-Using-Models) | Check-point: into to pipelines |
-| 16 | [Uninstalling Kubeflow](#Module-16-Uninstalling-Kubeflow) | Check-point: clean environment |
+| Lab0 | [Introduction and installation of Kubeflow on Azure Stack](00-Intro/Readme.md) | |
+|    | [Pre-requisite setup](#Module-01-Pre-requisite-setup) | Check-point: work machine, git, web browser, terminal |
+|    | [Azure Stack](#Module-02-Azure-Stack) | Check-point: Azure Stack Portal, cloud shell, Azure CLI |
+|    | [AKS-E](#Module-03-Kubernetes) | Check-point: aks-e |
+|    | [Kubernetes](#Module-03-Kubernetes) | Check-point: Kubernetes, kubectl |
+|    | [Docker](#Module-04-Docker) | Check-point: docker containers |
+|    | [DockerHub](#Module-05-DockerHub) | Check-point: dockerhub as container artifactory |
+|    | [Persistence on Azure Stack](#Module-06-Persistence-on-Azure-Stack) | Check-point: cross-node file storage |
+|    | [kfctl](#Module-07-Kubeflow) | Check-point: kfctl |
+|    | [Kubeflow](#Module-07-Kubeflow) | Check-point: Kubeflow installation, kfctl |
+|    | [Kubeflow Dashboard](#Module-08-Kubeflow-Dashboard) | Check-point: Kubeflow Dashboard, namespaces |
+|    | [GPU](#Module-14-GPU) | Check-point: GPU-facilitated operations |
+|    | [Using Models](#Module-15-Using-Models) | Check-point: into to pipelines |
+|    | [Uninstalling Kubeflow](#Module-16-Uninstalling-Kubeflow) | Check-point: clean environment |
+| Lab1 | [Create and use jupyter hub with sample notebook to train and inference on 1 node](01-Jupyter/Readme.md) | |
+|    | [Jupyter Server](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter server, web terminal |
+|    | [Jupyter Notebook](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter Notebook |
+|    | [ML with Python](#Module-10-ML-with-Python) | Check-point: Python programming, PyTorch and Tensorflow |
+|    | [TensorBoard](#Module-13-Tensorboard) | Check-point: TensorBoard |
+|    | [k8s Dashboard access](#Module-03-Kubernetes) | Check-point: Kubernetes Dashboard |
+| Lab2 | [Distributed training using TF Jobs](02-TFJobs/Readme.md) | |
+|    | [TFJobs](#Module-11-TFJobs) | Check-point: TFJob |
+| Lab3 | [Distributed training using Pytorch Jobs](03-PyTorchJobs/Readme.md) | |
+|    | [PyTorchJobs](#Module-12-PyTorchJobs) | Check-point: PyTorchJob |
+| Lab4 | [Serving models with KF Serving](04-KFServing/Readme.md) | |
+| Lab5 | [Create an end to end pipeline that train with TF Jobs and deploy on cluster](05-Pipelines/Readme.md) | |
+| Lab6 | [Hyperparameter tuning with Katib](06-Katib/Readme.md) | |
 
 # Module 01. Pre-requisite setup
 
