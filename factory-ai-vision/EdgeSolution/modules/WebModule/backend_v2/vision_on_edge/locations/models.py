@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+"""Location models
 """
-Location models
-"""
+
 from django.db import models
 
 

@@ -2,7 +2,6 @@
 """App Models."""
 
 import logging
-import uuid as uuid_lib
 
 from azure.cognitiveservices.vision.customvision.training import \
     CustomVisionTrainingClient
@@ -23,11 +22,6 @@ class Setting(models.Model):
     """A wrapper model of CustomVisionTraingClient.
     """
 
-    uuid = models.UUIDField(  # Used by the API to look up the record
-        db_index=True,
-        default=uuid_lib.uuid4,
-        editable=False,
-        unique=True)
     name = models.CharField(max_length=100,
                             blank=True,
                             default="",

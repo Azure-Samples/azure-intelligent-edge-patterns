@@ -6,7 +6,6 @@ import datetime
 import logging
 import threading
 import time
-import uuid as uuid_lib
 
 import requests
 from azure.cognitiveservices.vision.customvision.training.models import \
@@ -24,14 +23,9 @@ class Project(models.Model):
     """Azure Custom Vision Project Model
     """
 
-    uuid = models.UUIDField(  # Used by the API to look up the record
-        db_index=True,
-        default=uuid_lib.uuid4,
-        editable=False,
-        unique=True)
     setting = models.ForeignKey(Setting,
-                                on_delete=models.CASCADE
-                                lo)
+                                on_delete=models.CASCADE,
+                                null=True)
     customvision_id = models.CharField(max_length=200,
                                        null=True,
                                        blank=True,
@@ -41,7 +35,6 @@ class Project(models.Model):
                                     null=True,
                                     blank=True,
                                     default="")
-    needRetraining = models.BooleanField(default=True)
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
     # delete_inference : bool

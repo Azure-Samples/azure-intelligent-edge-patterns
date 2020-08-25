@@ -36,10 +36,10 @@ class AzureSettingsConfig(AppConfig):
                 name=DEFAULT_SETTING_NAME,
                 training_key=TRAINING_KEY,
                 endpoint=ENDPOINT)
-            if len(existing_settings) == 1:
+            if existing_settings.count() == 1:
                 logger.info("Found existing %s. Revalidating in pre_save...",
                             DEFAULT_SETTING_NAME)
-                default_setting = existing_settings[0]
+                default_setting = existing_settings.get()
                 default_setting.save()
 
             elif len(Setting.objects.filter(name=DEFAULT_SETTING_NAME)) > 0:

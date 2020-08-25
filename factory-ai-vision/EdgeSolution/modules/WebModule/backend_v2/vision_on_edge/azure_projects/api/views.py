@@ -50,7 +50,6 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    lookup_field = 'uuid'
     filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "is_demo": "is_demo",

@@ -26,14 +26,14 @@ class Image(models.Model):
 
     models.Model
     """
-
-    image = models.ImageField(upload_to="images/")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     part = models.ForeignKey(Part, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="images/")
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)
     uploaded = models.BooleanField(default=False)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+
     customvision_id = models.CharField(max_length=1000, null=True, blank=True)
     remote_url = models.CharField(max_length=1000, null=True)
     timestamp = models.DateTimeField(auto_now=True)
