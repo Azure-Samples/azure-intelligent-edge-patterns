@@ -22,15 +22,19 @@ Main differences of the detached mode include limitations on:
 
 | | Module | Description and milestones |
 | --- | --- | --- |
-| 01 | [Pre-requisite check list](#Module-01-Pre-requisite-check-list) | Please validate your environment |
+| 01 | [Pre-requisite setup](#Module-01-Pre-requisite-setup) | Check-point: work machine, git, web browser, terminal |
 | 02 | [Azure Stack](#Module-02-Azure-Stack) | Check-point: Azure Stack Portal, cloud shell, Azure CLI |
-| 03 | [Kubernetes](#Module-03-Kubernetes) | Check-point: Kubernetes, kubectl, Kubernetes Dashboard |
+| 03+ | [AKS-E](#Module-03-Kubernetes) | Check-point: aks-e |
+| 03 | [Kubernetes](#Module-03-Kubernetes) | Check-point: Kubernetes, kubectl |
+| 03+ | [k8s Dashboard access](#Module-03-Kubernetes) | Check-point: Kubernetes Dashboard |
 | 04 | [Docker](#Module-04-Docker) | Check-point: docker containers |
 | 05 | [DockerHub](#Module-05-DockerHub) | Check-point: dockerhub as container artifactory |
 | 06 | [Persistence on Azure Stack](#Module-06-Persistence-on-Azure-Stack) | Check-point: cross-node file storage |
-| 07 | [Kubeflow](#Module-07-Kubeflow) | Check-point: Kubeflow installation |
+| 07+ | [kfctl](#Module-07-Kubeflow) | Check-point: kfctl |
+| 07 | [Kubeflow](#Module-07-Kubeflow) | Check-point: Kubeflow installation, kfctl |
 | 08 | [Kubeflow Dashboard](#Module-08-Kubeflow-Dashboard) | Check-point: Kubeflow Dashboard, namespaces |
-| 09 | [Jupyter Servers and Notebooks](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter server, Jupyter Notebook |
+| 09 | [Jupyter Server](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter server, web terminal |
+| 09+ | [Jupyter Notebook](#Module-09-Jupyter-Servers-and-Notebooks) | Check-point: Jupyter Notebook |
 | 10 | [ML with Python](#Module-10-ML-with-Python) | Check-point: Python programming, PyTorch and Tensorflow |
 | 11 | [TFJobs](#Module-11-TFJobs) | Check-point: TFJob |
 | 12 | [PyTorchJobs](#Module-12-PyTorchJobs) | Check-point: PyTorchJob |
@@ -39,7 +43,7 @@ Main differences of the detached mode include limitations on:
 | 15 | [Using Models](#Module-15-Using-Models) | Check-point: into to pipelines |
 | 16 | [Uninstalling Kubeflow](#Module-16-Uninstalling-Kubeflow) | Check-point: clean environment |
 
-# Module 01. Pre-requisite check list
+# Module 01. Pre-requisite setup
 
 Even though the steps are very detailed, it is helpful if the reader is familiar with at least subset of the following:
 
@@ -49,14 +53,57 @@ Even though the steps are very detailed, it is helpful if the reader is familiar
 - [Kubernetes](https://kubernetes.io/)
 - [Kubeflow](https://github.com/kubeflow/kubeflow)
 - [Bash](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart)
-- (optional) [Jupyter](https://jupyter.org/).
-- (optional) [TensorFlow](https://www.tensorflow.org/)
-  - [Tensorboard](https://www.tensorflow.org/tensorboard/)
-- (optional) [PyTorch](https://pytorch.org/)
+- [Jupyter](https://jupyter.org/).
+- [TensorFlow](https://www.tensorflow.org/)
+- [Tensorboard](https://www.tensorflow.org/tensorboard/)
+- [PyTorch](https://pytorch.org/)
+
+If you see any of the above for the first time, we strongly encourage you to go to their website and read the introduction.
+
+**mini-QUIZ** before you continue:
+
+ - Why is Microsoft Azure Stack so far ahead of its competitors?
+ - Why is Kubeflow on Azure Stack is the best platform for ML in your company?
+
+# Module 01.1 Your base of operations
+
+Pick the machine from which you will do this lab. It would be convenient location for keeping the scripts,
+aliases, keys, setup certificates, keep track of your configuration files. For example, you could use:
+
+- laptop with Windows 10,
+- a "jump" server on the cloud. If you do not, we will create one in next few modules.
+
+You will need:
+
+- git (to clone this repository, or your own fork of it)
+- web browser
+  - to access Azure portals
+  - to work with dashboards
+  - to lookup updated information
+- terminal or a vm.
+
+We will be using Microsoft Edge browser, and Ubuntu terminal.
+
+# Module 01.2 Ubuntu terminal
+
+Follow these instructions to install Ubuntu on your Windows 10 machine:
+
+[https://ubuntu.com/tutorials/ubuntu-on-windows](https://ubuntu.com/tutorials/ubuntu-on-windows)
+
+Pin the shortcut to your task bar for convenience.
+
+# Module 01.3 Validate Ubuntu terminal
+
+Try that Ubuntu termianal works, open the app, type a bash command:
+
+![pics/module01_ubuntu_ternminal.png](pics/module01_ubuntu_ternminal.png)
+
+Alternatives to it would be VirtualBox or WMVare clients. Or, you can always install Ubuntu directly
+on your laptop.
 
 # Module 02. Azure Stack
 
-## Module 2.0 Azure Stack Portal
+## Module 02.0 Azure Stack Portal
 
 IMPORTANT: While you might have the premissions to retrieve some information on your
 own(see [User Information on Azure](acquiring_settings.md)) or create, but most likely
@@ -66,7 +113,7 @@ you will need to ask your cloud administrator. You need the following:
 
 See additional prerequisites if you are [Installing Kubernetes](installing_kubernetes.md) yourself.
 
-## Module 2.1 Azure Stack CLI
+## Module 02.1 Azure Stack CLI
 
 In spirit of infrastracture-as-code paradigm, most of things are better run using command like interface of configuration files.
 
@@ -94,12 +141,31 @@ later in this section):
 
 # Module 03. Kubernetes
 
-## Module 3.0. Check the integrity of your Kubernetes cluster
-
-If you already have a Kubernetes cluster you may skip this chapter. However,
-**make sure you have the values from [Prerequisites](installing_kubernetes.md#prerequisites) section**.
+## Module 3.0. Installing Kubernetes
 
 If you do not have a Kubernetes cluster already, follow [Installing Kubernetes](installing_kubernetes.md).
+
+## Module 3.0.0 AKS-e
+
+Validate your aks-e is working. For example, check its version:
+
+    azureuser@jump:~$ aks-engine version
+    Version: v0.43.0
+    GitCommit: 8928a4094
+    GitTreeState: clean
+
+## Module 3.0.1 AKS-e cluster configuration
+
+Follow [AKS-e section](installing_kubernetes.md). To make create the configuration file and apply it to
+your Azure Stack infrastructure.
+
+## Module 3.0.2 post-installation configuration
+
+Make sure you have the right firewall rules and other settings before you start using your cluser.
+
+## Module 3.1. Check the integrity of your Kubernetes cluster
+
+**make sure you have the values from [Prerequisites](installing_kubernetes.md#prerequisites) section**.
 
 If you did everything correctly, at this point you could ssh to the master node and check
 the cluster. You can find master node's public IP address at the Portal(select
@@ -107,13 +173,17 @@ subscription `KFDemo2Subscription` and click on the master node):
 
 ![pics/kubernetes_cluster.png](pics/kubernetes_cluster.png)
 
-It would be helpful to record the master ip, and a connecting script containing
-something like the following: 
+It would be helpful to record the master ip, and create a one-line script containing
+something like the following to connect from your "jump" server: 
 
     $ ssh -i ~/.ssh/id_rsa_demokey azureuser@12.345.123.45
     Authorized uses only. All activity may be monitored and reported.
     Welcome to Ubuntu 16.04.6 LTS (GNU/Linux 4.15.0-1061-azure x86_64)
     ...
+
+You should see the bash shell to a server with `master` in its name.
+
+## Module 3.2. Check that you can see the nodes:
 
     azureuser@k8s-master-27515788-0:~$ kubectl cluster-info
     Kubernetes master is running at https://kube-rg3-123456.demoe2.cloudapp.example.com
@@ -122,6 +192,8 @@ something like the following:
     Metrics-server is running at https://...
     To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
+## Module 3.3. Check that you can see the nodes:
+
     azureuser@k8s-master-27515788-0:~$ kubectl get nodes
     NAME                       STATUS   ROLES    AGE   VERSION
     k8s-linuxpool-27515788-0   Ready    agent    22m   v1.15.5
@@ -129,7 +201,7 @@ something like the following:
     k8s-linuxpool-27515788-2   Ready    agent    22m   v1.15.5
     k8s-master-27515788-0      Ready    master   22m   v1.15.5
 
-## Module 3.1. Kubernetes Dashboard
+## Module 3.4. Kubernetes Dashboard
 
 You are welcome to check if you can see the Kubernetes board from your
 machine. You can get your Kubernetes Dashboard's address from `cluster-info`:
@@ -161,11 +233,43 @@ to access these links, you should be able to see the Kubernetes Dashboard in a b
 
 # Module 04. Docker
 
-TODO
+See our [Introduction to Docker](introduction_to_docker.md) as a refresher.
+
+You can also check if your machine has cuda gpus, with `nvidia/cuda` image, running nvidia-smi:
+
+    $ sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+
+    +-----------------------------------------------------------------------------+
+    | NVIDIA-SMI 440.33.01    Driver Version: 440.33.01    CUDA Version: 10.2     |
+    |-------------------------------+----------------------+----------------------+
+    | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+    | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+    |===============================+======================+======================|
+    |   0  Tesla K80           On   | 0000828D:00:00.0 Off |                  Off |
+    | N/A   35C    P8    37W / 149W |      0MiB / 12206MiB |      0%      Default |
+    +-------------------------------+----------------------+----------------------+
+    +-----------------------------------------------------------------------------+
+    | Processes:                                                       GPU Memory |
+    |  GPU       PID   Type   Process name                             Usage      |
+    |=============================================================================|
+    |  No running processes found                                                 |
+    +-----------------------------------------------------------------------------+
+
+If it does not, it is also ok.
 
 # Module 05. DockerHub
 
-TODO
+In case you do not have it already, you need to create an account at dockerhub.com - it is a simple way for
+storing of the docker images for use in our clusters.
+
+Login, and to check that you are connected, run sistem-wide information:
+
+    $ docker login
+    ...
+
+    $ docker info
+    ...
+
 
 # Module 06. Persistence on Azure Stack
 
@@ -413,27 +517,47 @@ button `Run` to execute, you should see something like this:
 
 # Module 10. ML with Python
 
-TODO
+ML/NN and AI more broadly, are mathematical concepts and could be implemented in countless programming languages
+and frameworks. In this lab we will use mostly Python, but you are free to pick whatever you are comfortable
+with - many of the deployment options are language-agnostic as long as apis are satisfied. 
 
 # Module 11. TFjobs
 
 [TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
 
-See [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack) for the demo of a `TFJob` execution in the environment that we create in this tutorial.
+Follow [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack) for
+the demo of a `TFJob` execution in the environment that we create in this tutorial.
 
 # Module 12. PyTorchJobs
 
-[PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework, it has Python and C++ interfaces. PyTorch is rooted in [Torch library](https://github.com/torch/torch7)
+[PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework,
+it has Python and C++ interfaces. PyTorch is rooted in [Torch library](https://github.com/torch/torch7)
 
-See [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) for the demo
+Follow [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) for the demo
 of a `PyTorchJob` execution in the environment that we create in this tutorial.
 
 # Module 13. Tensorboard
 
-You can skip this chapter for now. There is another useful tool to monitor some ML applications if
+# Module 13.0 Tensorboard access
+
+There is another useful tool to monitor some ML applications if
 they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
 You might contact your cloud administrator to help you establish network access, or you can
 use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
+
+This is how it looks like(run it on the machine where your web browser is):
+
+    $ ssh -NfL 6006:localhost:6006 -i id_rsa_for_kubernetes azureuser@<public_ip_address_or_dns_name>
+
+An alternative would be to create an RDP and XWindows server at the master node and RDP to it.
+If you did the ssh port fowarding, you do not need it.
+
+Now you can access the port you forward from your Kubernetes environment:
+
+    $ export PODNAME=$(kubectl get pod -l app=tensorboard -o jsonpath='{.items[0].metadata.name}')
+    $ kubectl port-forward ${PODNAME} 6006:6006
+
+# Module 13.1 Tensorboard deployment
 
 Here is how you would connect your Tensorboard with the persistence we discuss next:
 
@@ -478,9 +602,36 @@ Here is how you would connect your Tensorboard with the persistence we discuss n
           dnsPolicy: ClusterFirst
           restartPolicy: Always
 
+Some of our examples provide data to Tensorboard, see [Working with TensorBoard](working_with_tensorboard.md) for more information.
+The simplier PyTorch example we run will log data that looks something like this:
+
+![pytorch-on-kubeflow/images/tensorboard_scalars.png](pytorch-on-kubeflow/images/tensorboard_scalars.png)
+
 # Module 14. GPU
 
-TODO
+You can verify the system with nvidia/cuda image, running nvidia-smi:
+
+    $ sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+
+    +-----------------------------------------------------------------------------+
+    | NVIDIA-SMI 440.33.01    Driver Version: 440.33.01    CUDA Version: 10.2     |
+    |-------------------------------+----------------------+----------------------+
+    | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+    | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+    |===============================+======================+======================|
+    |   0  Tesla K80           On   | 0000828D:00:00.0 Off |                  Off |
+    | N/A   35C    P8    37W / 149W |      0MiB / 12206MiB |      0%      Default |
+    +-------------------------------+----------------------+----------------------+
+    +-----------------------------------------------------------------------------+
+    | Processes:                                                       GPU Memory |
+    |  GPU       PID   Type   Process name                             Usage      |
+    |=============================================================================|
+    |  No running processes found                                                 |
+    +-----------------------------------------------------------------------------+
+
+There are certain changes you would need to make to your configuration and scripts to
+be able to utilize gpus and other hardware acceleration tools. Deeper discussion is
+beyond the scope of this lab.
 
 # Module 15. Using Models
 
@@ -706,28 +857,18 @@ You can now re-install it if you would like.
 
 ## Next Steps
 
-Congratulations on finishing this lab.
-
-Proceed to [TensorFlow on Kubeflow Tutorial](tensorflow-on-kubeflow/Readme.md#tensorflow-on-kubeflow-on-azure-stack)
-to learn how to execute `TFJob`s on Kubeflow, in the environment that we just created.
-
-And then run [PyTorch on Kubeflow Tutorial](pytorch-on-kubeflow/Readme.md#pytorch-on-kubeflow-on-azure-stack) tutorial to learn running
-`PyTorchJob`s.
-
-Some of our examples provide data to Tensorboard, see [Working with TensorBoard](working_with_tensorboard.md) for more information.
-The simplier PyTorch example we run will log data that looks something like this:
-
-![pytorch-on-kubeflow/images/tensorboard_scalars.png](pytorch-on-kubeflow/images/tensorboard_scalars.png)
+Congratulations on finishing this lab. Good luck on your next endeavor.
 
 # Links
 
 The following resources might help during troubleshooting or modifications:
 
-- https://docs.microsoft.com/en-us/azure-stack
-- https://github.com/Azure/kubeflow-labs
-- https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart
-- https://docs.microsoft.com/en-us/azure/aks/gpu-cluster
+- https://docs.microsoft.com/en-us/azure-stack - Azure Stack web page
+- https://github.com/Azure/kubeflow-labs - similar lab for Azure
+- https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart - Cloud shell into
+- https://docs.microsoft.com/en-us/azure/aks/gpu-cluster - GPU-related configuration using AKS
 - https://docs.microsoft.com/en-us/azure-stack/asdk/asdk-install
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux
 - https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-cluster
-- https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/AKSe-on-AzStackHub
+- https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/AKSe-on-AzStackHub - AKSe
+- https://ubuntu.com/tutorials/ubuntu-on-windows - Ubuntu on Windows10
