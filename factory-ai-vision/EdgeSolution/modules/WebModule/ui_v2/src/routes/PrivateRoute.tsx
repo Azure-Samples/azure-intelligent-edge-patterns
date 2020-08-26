@@ -13,7 +13,9 @@ export const PrivateRoute: React.FC<RouteProps> = ({ component, ...rest }) => {
     dispatch(checkSettingStatus());
   }, [dispatch]);
 
-  if (isTrainerValid && appInsightHasInit) return <Route {...rest} component={component} />;
+  return <Route {...rest} component={component} />;
+  // TODO Comment this out temporary
+  // if (isTrainerValid && appInsightHasInit) return <Route {...rest} component={component} />;
 
-  return <Route {...rest} render={(): JSX.Element => <Redirect to="/setting" />} />;
+  // return <Route {...rest} render={(): JSX.Element => <Redirect to="/setting" />} />;
 };

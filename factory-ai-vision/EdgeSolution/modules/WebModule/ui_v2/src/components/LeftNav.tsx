@@ -9,7 +9,7 @@ const navLinksGroup: INavLinkGroup[] = [
         url: '/',
         iconProps: {
           imageProps: {
-            src: '/icon/home.png',
+            src: '/icons/home.png',
           },
         },
       },
@@ -18,7 +18,7 @@ const navLinksGroup: INavLinkGroup[] = [
         url: '/cameras',
         iconProps: {
           imageProps: {
-            src: '/icon/cameras.png',
+            src: '/icons/cameras.png',
           },
         },
       },
@@ -27,7 +27,7 @@ const navLinksGroup: INavLinkGroup[] = [
         url: '/images',
         iconProps: {
           imageProps: {
-            src: '/icon/images.png',
+            src: '/icons/images.png',
           },
         },
       },
@@ -36,7 +36,7 @@ const navLinksGroup: INavLinkGroup[] = [
         url: '/parts',
         iconProps: {
           imageProps: {
-            src: '/icon/parts.png',
+            src: '/icons/parts.png',
           },
         },
       },
