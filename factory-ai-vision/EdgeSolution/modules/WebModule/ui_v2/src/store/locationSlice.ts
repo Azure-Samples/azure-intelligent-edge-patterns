@@ -5,8 +5,6 @@ import { State } from 'RootStateType';
 export type Location = {
   id: number;
   name: string;
-  description: string;
-  is_demo: boolean;
 };
 
 const locationsAdapter = createEntityAdapter<Location>();

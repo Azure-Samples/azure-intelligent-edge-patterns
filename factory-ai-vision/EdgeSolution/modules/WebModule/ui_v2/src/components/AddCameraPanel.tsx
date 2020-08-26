@@ -8,6 +8,7 @@ import {
   ProgressIndicator,
   Dropdown,
   IDropdownOption,
+  Link,
 } from '@fluentui/react';
 import * as R from 'ramda';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +16,7 @@ import { createSelector } from '@reduxjs/toolkit';
 
 import { postCamera } from '../store/cameraSlice';
 import { selectAllLocations, getLocations } from '../store/locationSlice';
+import { CreateLocationDialog } from './CreateLocationDialog';
 
 type AddCameraPanelProps = {
   isOpen: boolean;
@@ -45,6 +47,7 @@ const selectLocationOptions = createSelector(selectAllLocations, (locations) =>
 export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmiss }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Form>(initialForm);
+  const [dialogHidden, setDialogHidden] = useState(true);
   const locationOptions = useSelector(selectLocationOptions);
   const dispatch = useDispatch();
 
@@ -88,6 +91,10 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
     setFormData(R.assocPath(['location', 'value'], options.key));
   };
 
+  const onLocationCreateSuccess = (id: number) => {
+    setFormData(R.assocPath(['location', 'value'], id));
+  };
+
   useEffect(() => {
     dispatch(getLocations(false));
   }, [dispatch]);
@@ -103,7 +110,6 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
     >
       <ProgressIndicator progressHidden={!loading} />
       <TextField
-        key="name"
         label={formData.name.label}
         value={formData.name.value}
         errorMessage={formData.name.errMsg}
@@ -111,7 +117,6 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
         required
       />
       <TextField
-        key="rtsp"
         label={formData.rtsp.label}
         value={formData.rtsp.value}
         errorMessage={formData.rtsp.errMsg}
@@ -126,6 +131,12 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
         errorMessage={formData.location.errMsg}
         onChange={onChangeLocation}
         required
+      />
+      <Link onClick={() => setDialogHidden(false)}>Create location</Link>
+      <CreateLocationDialog
+        hidden={dialogHidden}
+        onDismiss={() => setDialogHidden(true)}
+        onCreatSuccess={onLocationCreateSuccess}
       />
     </Panel>
   );
