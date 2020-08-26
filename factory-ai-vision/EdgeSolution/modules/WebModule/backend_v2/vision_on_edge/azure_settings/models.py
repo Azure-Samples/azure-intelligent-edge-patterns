@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""App Models."""
+"""App Models
+"""
 
 import logging
 

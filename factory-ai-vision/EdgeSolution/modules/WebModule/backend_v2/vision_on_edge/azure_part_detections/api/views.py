@@ -80,7 +80,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         part_detection_obj = get_object_or_404(queryset, pk=pk)
         project_obj = part_detection_obj.project
-        train_obj = TrainingStatus.objects.get(project=project_obj)
+        training_status_obj = TrainingStatus.objects.get(project=project_obj)
 
         success_rate = 0.0
         inference_num = 0
@@ -115,8 +115,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         return Response({
-            "status": train_obj.status,
-            "log": "Status: " + train_obj.log,
+            "status": training_status_obj.status,
+            "log": "Status: " + training_status_obj.log,
             "download_uri": project_obj.download_uri,
             "success_rate": success_rate,
             "inference_num": inference_num,

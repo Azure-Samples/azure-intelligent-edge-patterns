@@ -26,15 +26,14 @@ def azure_project_change_handler(**kwargs):
     instance = kwargs['instance']
     try:
         old_project = Project.objects.get(pk=instance.id)
-        if old_project.customvision_project_id == instance.customvision_project_id:
-            logger.info("Custom Vision Project Id not changed")
-            logger.info("Nothing to do")
+        if old_project.customvision_id == instance.customvision_id:
+            logger.info("Custom Vision Project Id not changed... Pass")
             return
         instance.customvision_project_id_changed = True
         logger.info("Project customvision_project_id changed...")
         logger.info("Deleting all parts....")
     except:
-        logger.exception("Probably creating project")
+        logger.info("Probably creating project")
 
 
 @receiver(signal=post_save,
