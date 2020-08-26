@@ -1,9 +1,20 @@
-import React, { useState, useCallback } from 'react';
-import { Panel, TextField, Stack, PrimaryButton, DefaultButton, ProgressIndicator } from '@fluentui/react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  Panel,
+  TextField,
+  Stack,
+  PrimaryButton,
+  DefaultButton,
+  ProgressIndicator,
+  Dropdown,
+  IDropdownOption,
+} from '@fluentui/react';
 import * as R from 'ramda';
+import { useDispatch, useSelector } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
 
 import { postCamera } from '../store/cameraSlice';
+import { selectAllLocations, getLocations } from '../store/locationSlice';
 
 type AddCameraPanelProps = {
   isOpen: boolean;
@@ -24,26 +35,32 @@ const initialForm: Form = {
   location: { label: 'Location', value: '', errMsg: '' },
 };
 
+const selectLocationOptions = createSelector(selectAllLocations, (locations) =>
+  locations.map((l) => ({
+    key: l.id,
+    text: l.name,
+  })),
+);
+
 export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmiss }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Form>(initialForm);
+  const locationOptions = useSelector(selectLocationOptions);
   const dispatch = useDispatch();
 
-  const validate = () => {
+  const validate = useCallback(() => {
     let hasError = false;
 
-    for (let key in formData) {
-      if (formData.hasOwnProperty(key)) {
-        if (!formData[key].value) {
-          setFormData(R.assocPath([key, 'errMsg'], `${formData[key].label} is required`));
-          hasError = true;
-        }
+    Object.keys(formData).forEach((key) => {
+      if (!formData[key].value) {
+        setFormData(R.assocPath([key, 'errMsg'], `${formData[key].label} is required`));
+        hasError = true;
       }
-    }
+    });
     return hasError;
-  };
+  }, [formData]);
 
-  const onAdd = async () => {
+  const onAdd = useCallback(async () => {
     if (validate()) return;
 
     setLoading(true);
@@ -51,7 +68,7 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
     setLoading(false);
     setFormData(initialForm);
     onDissmiss();
-  };
+  }, [dispatch, formData.name.value, formData.rtsp.value, onDissmiss, validate]);
 
   const onRenderFooterContent = useCallback(
     () => (
@@ -67,6 +84,14 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
     setFormData(R.assocPath([key, 'value'], newValue));
   };
 
+  const onChangeLocation = (_, options: IDropdownOption) => {
+    setFormData(R.assocPath(['location', 'value'], options.key));
+  };
+
+  useEffect(() => {
+    dispatch(getLocations(false));
+  }, [dispatch]);
+
   return (
     <Panel
       isOpen={isOpen}
@@ -77,16 +102,31 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
       isFooterAtBottom={true}
     >
       <ProgressIndicator progressHidden={!loading} />
-      {Object.entries(formData).map(([key, value]) => (
-        <TextField
-          key={key}
-          label={value.label}
-          value={value.value}
-          errorMessage={value.errMsg}
-          onChange={onChange(key)}
-          required
-        />
-      ))}
+      <TextField
+        key="name"
+        label={formData.name.label}
+        value={formData.name.value}
+        errorMessage={formData.name.errMsg}
+        onChange={onChange('name')}
+        required
+      />
+      <TextField
+        key="rtsp"
+        label={formData.rtsp.label}
+        value={formData.rtsp.value}
+        errorMessage={formData.rtsp.errMsg}
+        onChange={onChange('rtsp')}
+        required
+      />
+      <Dropdown
+        key="location"
+        label={formData.location.label}
+        selectedKey={formData.location.value}
+        options={locationOptions}
+        errorMessage={formData.location.errMsg}
+        onChange={onChangeLocation}
+        required
+      />
     </Panel>
   );
 };
