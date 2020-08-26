@@ -1,0 +1,52 @@
+{
+    "resnet50_inference_FP32_batchsize_4": {
+     "eval_throughput_expected": "605.94",
+     "eval_latency_avg_ms_expected": "6.63",
+     "eval_latency_p90_ms_expected": "6.79",
+     "eval_latency_p95_ms_expected": "6.86",
+     "eval_latency_p99_ms_expected": "7.02"
+    },
+    "resnet50_inference_FP32_batchsize_8": {
+     "eval_throughput_expected": "802.13",
+     "eval_latency_avg_ms_expected": "9.98",
+     "eval_latency_p90_ms_expected": "10.14",
+     "eval_latency_p95_ms_expected": "10.22",
+     "eval_latency_p99_ms_expected": "10.36"
+    },
+    "resnet50_inference_FP32_batchsize_16": {
+     "eval_throughput_expected": "986.85",
+     "eval_latency_avg_ms_expected": "16.27",
+     "eval_latency_p90_ms_expected": "16.36",
+     "eval_latency_p95_ms_expected": "16.42",
+     "eval_latency_p99_ms_expected": "16.52"
+    },
+    "resnet50_inference_FP32_batchsize_32": {
+     "eval_throughput_expected": "1090.38",
+     "eval_latency_avg_ms_expected": "29.35",
+     "eval_latency_p90_ms_expected": "29.68",
+     "eval_latency_p95_ms_expected": "29.79",
+     "eval_latency_p99_ms_expected": "30.07"
+    },
+    "resnet50_inference_FP32_batchsize_64": {
+     "eval_throughput_expected": "1131.56",
+     "eval_latency_avg_ms_expected": "56.63",
+     "eval_latency_p90_ms_expected": "57.22",
+     "eval_latency_p95_ms_expected": "57.41",
+     "eval_latency_p99_ms_expected": "57.76"
+    },
+    "resnet50_inference_FP32_batchsize_128": {
+     "eval_throughput_expected": "1167.62",
+     "eval_latency_avg_ms_expected": "109.77",
+     "eval_latency_p90_ms_expected": "111.06",
+     "eval_latency_p95_ms_expected": "111.27",
+     "eval_latency_p99_ms_expected": "111.85"
+    },
+    "resnet50_inference_FP32_batchsize_256": {
+     "eval_throughput_expected": "1193.74",
+     "eval_latency_avg_ms_expected": "214.46",
+     "eval_latency_p90_ms_expected": "216.28",
+     "eval_latency_p95_ms_expected": "216.86",
+     "eval_latency_p99_ms_expected": "217.80"
+    }
+   }
+   

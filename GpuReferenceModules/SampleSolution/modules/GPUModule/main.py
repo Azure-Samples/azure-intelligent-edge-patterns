@@ -12,7 +12,7 @@ import random
 from azure.iot.device import Message
 from azure.iot.device.aio import IoTHubModuleClient
 from utility import benchmark_tf,benchmark_pt,benchmark_pt_nv,device_info,hello_world
-from inference_util import benchmark_gpu
+from inference_util import inference_benchmark_gpu
 
 import sys
 
@@ -127,11 +127,11 @@ async def main():
             mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))  
 
             ## Hello World for Inference run
-            msg_to_cloud_helloworld = hello_world()
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_helloworld))
+            #msg_to_cloud_helloworld = hello_world()
+            #mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_helloworld))
 
             ## Run and get GPU Inference benchmark results
-            msg_to_cloud_inference = benchmark_gpu()
+            msg_to_cloud_inference_benchmark = inference_benchmark_gpu()
             mylisteners = asyncio.gather(send_msg_to_cloud(module_client, msg_to_cloud_inference))
 
             ## Runing on tensorflow 
@@ -149,12 +149,6 @@ async def main():
 
             # Schedule task for sending message
             mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_tf)) 
-
-            # ## Hello World for Inference run
-            # msg_to_cloud_inference = hello_world()
-            # mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_inference))
-            msg_to_cloud_inference = hello_world()
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_inference))
 
         # Send a custom message to cloud 
         async def send_msg_to_cloud(module_client,input_message):
