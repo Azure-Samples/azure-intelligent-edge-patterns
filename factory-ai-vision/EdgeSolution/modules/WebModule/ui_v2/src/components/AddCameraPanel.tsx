@@ -14,17 +14,24 @@ import * as R from 'ramda';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 
-import { postCamera } from '../store/cameraSlice';
+import { postCamera, putCamera } from '../store/cameraSlice';
 import { selectAllLocations, getLocations } from '../store/locationSlice';
 import { CreateLocationDialog } from './CreateLocationDialog';
 
-type AddCameraPanelProps = {
+export enum PanelMode {
+  Create,
+  Update,
+}
+
+type AddEditCameraPanelProps = {
   isOpen: boolean;
   onDissmiss: () => void;
+  mode: PanelMode;
+  initialValue?: Form;
+  cameraId?: number;
 };
 
 type FormData = {
-  label: string;
   value: string;
   errMsg: string;
 };
@@ -32,9 +39,9 @@ type FormData = {
 type Form = Record<string, FormData>;
 
 const initialForm: Form = {
-  name: { label: 'Camera name', value: '', errMsg: '' },
-  rtsp: { label: 'RTSP URL', value: '', errMsg: '' },
-  location: { label: 'Location', value: '', errMsg: '' },
+  name: { value: '', errMsg: '' },
+  rtsp: { value: '', errMsg: '' },
+  location: { value: '', errMsg: '' },
 };
 
 const selectLocationOptions = createSelector(selectAllLocations, (locations) =>
@@ -44,9 +51,15 @@ const selectLocationOptions = createSelector(selectAllLocations, (locations) =>
   })),
 );
 
-export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmiss }) => {
+export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
+  isOpen,
+  onDissmiss,
+  mode,
+  initialValue = initialForm,
+  cameraId,
+}) => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Form>(initialForm);
+  const [formData, setFormData] = useState<Form>(initialValue);
   const [dialogHidden, setDialogHidden] = useState(true);
   const locationOptions = useSelector(selectLocationOptions);
   const dispatch = useDispatch();
@@ -56,33 +69,37 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
 
     Object.keys(formData).forEach((key) => {
       if (!formData[key].value) {
-        setFormData(R.assocPath([key, 'errMsg'], `${formData[key].label} is required`));
+        setFormData(R.assocPath([key, 'errMsg'], `This field is required`));
         hasError = true;
       }
     });
     return hasError;
   }, [formData]);
 
-  const onAdd = useCallback(async () => {
+  const onConfirm = useCallback(async () => {
     if (validate()) return;
 
     setLoading(true);
-    await dispatch(postCamera({ name: formData.name.value, rtsp: formData.rtsp.value }));
+    if (mode === PanelMode.Create) {
+      await dispatch(postCamera({ name: formData.name.value, rtsp: formData.rtsp.value }));
+      setFormData(initialForm);
+    } else {
+      await dispatch(putCamera({ id: cameraId, name: formData.name.value, rtsp: formData.rtsp.value }));
+    }
     setLoading(false);
-    setFormData(initialForm);
     onDissmiss();
-  }, [dispatch, formData.name.value, formData.rtsp.value, onDissmiss, validate]);
+  }, [cameraId, dispatch, formData.name.value, formData.rtsp.value, mode, onDissmiss, validate]);
 
   const onRenderFooterContent = useCallback(
     () => (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton onClick={onAdd} disabled={loading}>
-          Add
+        <PrimaryButton onClick={onConfirm} disabled={loading}>
+          {mode === PanelMode.Create ? 'Add' : 'Update'}
         </PrimaryButton>
         <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
       </Stack>
     ),
-    [loading, onAdd, onDissmiss],
+    [loading, mode, onConfirm, onDissmiss],
   );
 
   const onChange = (key: string) => (_, newValue) => {
@@ -112,22 +129,21 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
     >
       <ProgressIndicator progressHidden={!loading} />
       <TextField
-        label={formData.name.label}
+        label="Camera name"
         value={formData.name.value}
         errorMessage={formData.name.errMsg}
         onChange={onChange('name')}
         required
       />
       <TextField
-        label={formData.rtsp.label}
+        label="RTSP URL"
         value={formData.rtsp.value}
         errorMessage={formData.rtsp.errMsg}
         onChange={onChange('rtsp')}
         required
       />
       <Dropdown
-        key="location"
-        label={formData.location.label}
+        label="Location"
         selectedKey={formData.location.value}
         options={locationOptions}
         errorMessage={formData.location.errMsg}

@@ -23,6 +23,7 @@ import { selectCameraById, getCameras, deleteCamera } from '../store/cameraSlice
 import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
 import { CaptureDialog } from '../components/CaptureDialog';
+import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
@@ -35,6 +36,10 @@ export const CameraDetails: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  const [editPanelOpen, setEditPanelOpen] = useState(false);
+  const openPanel = () => setEditPanelOpen(true);
+  const closePanel = () => setEditPanelOpen(false);
+
   const commandBarItems: ICommandBarItemProps[] = [
     {
       key: 'edit',
@@ -42,6 +47,7 @@ export const CameraDetails: React.FC = () => {
       iconProps: {
         iconName: 'Edit',
       },
+      onClick: openPanel,
     },
     {
       key: 'delete',
@@ -101,6 +107,17 @@ export const CameraDetails: React.FC = () => {
         onDismiss={closeDialog}
         captureLabelMode={1}
         defaultSelectedCameraId={cameraId}
+      />
+      <AddEditCameraPanel
+        isOpen={editPanelOpen}
+        onDissmiss={closePanel}
+        mode={PanelMode.Update}
+        initialValue={{
+          name: { value: camera.name, errMsg: '' },
+          rtsp: { value: camera.rtsp, errMsg: '' },
+          location: { value: null, errMsg: '' },
+        }}
+        cameraId={cameraId}
       />
     </>
   );

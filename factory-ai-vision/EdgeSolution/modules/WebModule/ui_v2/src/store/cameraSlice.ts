@@ -101,6 +101,14 @@ export const postCamera = createAsyncThunk(
   },
 );
 
+export const putCamera = createAsyncThunk(
+  'cameras/put',
+  async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'id'>) => {
+    const response = await Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
+    return response.data;
+  },
+);
+
 export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number) => {
   await Axios.delete(`/api/cameras/${id}/`);
   return id;
@@ -116,6 +124,7 @@ const slice = createSlice({
         entityAdapter.setAll(state, action.payload.entities.cameras || {}),
       )
       .addCase(postCamera.fulfilled, entityAdapter.addOne)
+      .addCase(putCamera.fulfilled, entityAdapter.upsertOne)
       .addCase(deleteCamera.fulfilled, entityAdapter.removeOne)
       .addCase(toggleShowAOI.pending, (state, action) => {
         const { showAOI, cameraId } = action.meta.arg;

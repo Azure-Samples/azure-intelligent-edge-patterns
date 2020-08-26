@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
 import { useConstCallback } from '@uifabric/react-hooks';
 import { CameraDetailList } from '../components/CameraDetailList';
-import { AddCameraPanel } from '../components/AddCameraPanel';
+import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
 
 const theme = getTheme();
 
@@ -36,7 +36,7 @@ export const Cameras: React.FC = () => {
         <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
         <CameraDetailList onAddBtnClick={openPanel} />
       </Stack>
-      <AddCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} />
+      <AddEditCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
     </Stack>
   );
 };
