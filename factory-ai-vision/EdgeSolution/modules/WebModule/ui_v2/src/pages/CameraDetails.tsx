@@ -85,7 +85,11 @@ export const CameraDetails: React.FC = () => {
               <ActionButton iconProps={{ iconName: 'Camera' }} onClick={openDialog}>
                 Capture image
               </ActionButton>
-              <RTSPVideo rtsp={camera.rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
+              <Stack.Item grow>
+                <div style={{ height: '90%' }}>
+                  <RTSPVideo rtsp={camera.rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
+                </div>
+              </Stack.Item>
             </Stack>
           </Stack>
         </Stack>

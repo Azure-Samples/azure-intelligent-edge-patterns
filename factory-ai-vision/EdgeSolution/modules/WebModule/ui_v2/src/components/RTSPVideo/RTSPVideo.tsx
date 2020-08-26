@@ -68,11 +68,9 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
   return (
-    <Stack>
-      <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
-        {src ? <img src={src} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
-      </div>
-    </Stack>
+    <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
+      {src ? <img src={src} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
+    </div>
   );
 };
 
