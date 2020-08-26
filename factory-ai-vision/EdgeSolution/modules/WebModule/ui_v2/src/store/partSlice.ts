@@ -1,4 +1,4 @@
-import { createEntityAdapter, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createEntityAdapter, createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
@@ -75,3 +75,7 @@ export const {
   selectById: selectPartById,
   selectEntities: selectPartEntities,
 } = entityAdapter.getSelectors<State>((state) => state.parts);
+
+export const partOptionsSelector = createSelector(selectAllParts, (parts) =>
+  parts.map((p) => ({ key: p.id, text: p.name })),
+);
