@@ -8,9 +8,11 @@ import logging
 
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 
 from ...general import error_messages
 from ..models import Setting
@@ -27,23 +29,15 @@ class SettingViewSet(viewsets.ModelViewSet):
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
 
+    @swagger_auto_schema(operation_summary='List all Custom Vision projects.')
     @action(detail=True, methods=["get"])
-    def list_projects(self, request, **kwargs) -> Response:
+    def list_projects(self, request, pk=None) -> Response:
         """list_projects.
-
-        Args:
-            request:
-            kwargs:
-
-        Returns:
-            200 { 'project_id_1' : 'project_name_1',
-                'project_id_2' : 'project_name_2'}
-            or
-            400 bad_request
         """
+        queryset = self.get_queryset()
+        setting_obj = get_object_or_404(queryset, pk=pk)
 
         try:
-            setting_obj = self.queryset.get(pk=kwargs['pk'])
             if not setting_obj.training_key:
                 raise ValueError("Training Key")
             if not setting_obj.endpoint:
@@ -97,15 +91,6 @@ class SettingViewSet(viewsets.ModelViewSet):
                 },
                 status=customvision_error.response.status_code,
             )
-        except Exception as exception:
-            logger.exception("Unexpected Error while listing projects")
-            return Response(
-                {
-                    "status": "failed",
-                    "log":
-                        str(exception)  # Force yapf to change line...
-                },
-                status=status.HTTP_400_BAD_REQUEST)
 
 
 # pylint: enable=too-many-ancestors

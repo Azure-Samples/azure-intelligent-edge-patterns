@@ -3,14 +3,19 @@
 """
 
 import logging
+import json
 import time
+import threading
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.general import error_messages
 from vision_on_edge.images.models import Image
 from vision_on_edge.azure_training_status.utils import upcreate_training_status
+from ..azure_parts.utils import batch_upload_parts_to_customvision
+from ..images.utils import upload_images_to_customvision_helper
 from .models import Project, Task
+from ..azure_training_status import constants as progress_constants
 
 logger = logging.getLogger(__name__)
 
@@ -79,13 +84,8 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     logger.info("customvision_project_id: %s", customvision_project_id)
     logger.info("is_partial %s", is_partial)
 
-    # Get project
-    # FIXME: Should send correct id
-    try:
-        project_obj = Project.objects.get(pk=project_id)
-    except:
-        # Guessing...
-        project_obj = Project.objects.get(is_demo=False)
+    # Get project objects
+    project_obj = Project.objects.get(pk=project_id)
 
     # Check Project
     if project_obj.is_demo:
@@ -123,9 +123,9 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
             name=tag.name,
             description=tag.description if tag.description else "",
             customvision_id=tag.id)
-        counter += 1
-        logger.info("Created Part %s: %s %s", counter, tag.name,
+        logger.info("Create Part %s: %s %s Success!", counter, tag.name,
                     tag.description)
+        counter += 1
 
         if not created:
             logger.error("%s not created", tag.name)
@@ -223,132 +223,210 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     logger.info("Pulling Tagged Images... End")
     logger.info("Pulling CustomVision Project... End")
 
+
+def train_project_worker(project_id):
+    """train_project_worker.
+
+    Args:
+        project_id:
+    """
+    # Get Project
+    project_obj = Project.objects.get(pk=project_id)
+    logger.info("Project id: %s", project_obj.id)
+    if (not project_obj.setting or not project_obj.setting.is_trainer_valid):
+        upcreate_training_status(project_id=project_obj.id,
+                                 status="failed",
+                                 log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
+        return
+    if project_obj.is_demo:
+        logger.info("Demo project is already trained")
+        upcreate_training_status(project_id=project_obj.id,
+                                 need_to_send_notification=True,
+                                 **progress_constants.PROGRESS_0_OK)
+        return
+    trainer = project_obj.setting.get_trainer_obj()
+    customvision_project_id = project_obj.customvision_id
+    project_obj.dequeue_iterations()
+
+    part_ids = [part.id for part in Part.objects.filter(project=project_obj)]
+    logger.info("Part ids: %s", part_ids)
+
+    # Get/Create Project on Custom Vision
+    try:
+        trainer.get_project(customvision_project_id)
+        upcreate_training_status(
+            project_id=project_obj.id,
+            status="preparing",
+            log=(f"Project {project_obj.name} " + "found on Custom Vision"),
+        )
+    except Exception:
+        project_obj.create_project()
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress_constants.PROGRESS_2_PROJECT_CREATED)
+
+    project_obj = Project.objects.get(pk=project_id)
+    logger.info("Project created on CustomVision.")
+    logger.info("Project Id: %s", project_obj.customvision_id)
+    logger.info("Project Name: %s", project_obj.name)
+    customvision_id = project_obj.customvision_id
+
+    upcreate_training_status(project_id=project_obj.id,
+                             need_to_send_notification=True,
+                             **progress_constants.PROGRESS_3_UPLOADING_PARTS)
+
+    # Get tags_dict to avoid getting tags every time
+    tags = trainer.get_tags(project_id=project_obj.customvision_id)
+    tags_dict = {tag.name: tag.id for tag in tags}
+
+    # App Insight
+    project_changed = False
+    has_new_parts = False
+    has_new_images = False
+    parts_last_train = len(tags)
+    images_last_train = trainer.get_tagged_image_count(
+        project_obj.customvision_id)
+
+    # Create/update tags on CustomVisioin Project
+    has_new_parts = batch_upload_parts_to_customvision(project_id=project_id,
+                                                       part_ids=part_ids,
+                                                       tags_dict=tags_dict)
+    if has_new_parts:
+        project_changed = True
+
+    upcreate_training_status(project_id=project_obj.id,
+                             need_to_send_notification=True,
+                             **progress_constants.PROGRESS_4_UPLOADING_IMAGES)
+
+    # Upload images to CustomVisioin Project
+    for part_id in part_ids:
+        logger.info("Uploading images with part_id %s", part_id)
+        has_new_images = upload_images_to_customvision_helper(
+            project_id=project_obj.id, part_id=part_id)
+        if has_new_images:
+            project_changed = True
+
+    # Submit training task to Custom Vision
+    if not project_changed:
+        upcreate_training_status(project_id=project_obj.id,
+                                 need_to_send_notification=True,
+                                 **progress_constants.PROGRESS_0_OK)
+    else:
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress_constants.PROGRESS_5_SUBMITTING_TRAINING_TASK)
+        training_task_submit_success = project_obj.train_project()
+        if training_task_submit_success:
+            update_app_insight_counter(
+                project_obj=project_obj,
+                has_new_parts=has_new_parts,
+                has_new_images=has_new_images,
+                parts_last_train=parts_last_train,
+                images_last_train=images_last_train,
+            )
+        update_train_status_helper(project_id=project_obj.id)
+
+
+def update_train_status_worker(project_id):
+    """update_train_status_worker.
+
+    Args:
+        project_id:
+    """
+    project_obj = Project.objects.get(pk=project_id)
+    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
+    customvision_project_id = project_obj.customvision_project_id
+    wait_prepare = 0
+    # If exceed, this project probably not going to be trained
+    max_wait_prepare = 60
+
+    # Send notification only when init
+    training_init = False
+    export_init = False
+
+    while True:
+        time.sleep(1)
+
+        iterations = trainer.get_iterations(customvision_project_id)
+        if len(iterations) == 0:
+            upcreate_training_status(
+                project_id=project_obj.id,
+                **progress_constants.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
+            wait_prepare += 1
+            if wait_prepare > max_wait_prepare:
+                upcreate_training_status(
+                    project_id=project_obj.id,
+                    status="failed",
+                    log="Get iteration from Custom Vision occurs error.",
+                    need_to_send_notification=True,
+                )
+                break
+            continue
+
+        iteration = iterations[0]
+        if not iteration.exportable or iteration.status != "Completed":
+            upcreate_training_status(
+                project_id=project_obj.id,
+                need_to_send_notification=(not training_init),
+                **progress_constants.PROGRESS_7_TRAINING)
+            training_init = True
+            continue
+
+        exports = trainer.get_exports(customvision_project_id, iteration.id)
+        if len(exports) == 0 or not exports[0].download_uri:
+            upcreate_training_status(
+                project_id=project_obj.id,
+                need_to_send_notification=(not export_init),
+                **progress_constants.PROGRESS_8_EXPORTING)
+            export_init = True
+            res = project_obj.export_iterationv3_2(iteration.id)
+            logger.info(res.json())
+            continue
+
+        project_obj.download_uri = exports[0].download_uri
+        project_obj.save(update_fields=["download_uri"])
+
+        logger.info("Successfulling export model: %s",
+                    project_obj.download_uri)
+
+        logger.info("Training Status: Completed")
+        train_performance_list = []
+        for iteration in iterations[:2]:
+            train_performance_list.append(
+                trainer.get_iteration_performance(customvision_project_id,
+                                                  iteration.id).as_dict())
+
+            logger.info("Training Performance: %s", train_performance_list)
+            upcreate_training_status(
+                project_id=project_obj.id,
+                performance=json.dumps(train_performance_list),
+                need_to_send_notification=True,
+                **progress_constants.PROGRESS_0_OK)
+            project_obj.has_configured = True
+            project_obj.save()
+            break
+
+
+def train_project_helper(project_id):
+    """train_project_helper.
+
+    Open a thread to update the training status object.
+
+    Args:
+        project_id: Django ORM project id.
+    """
+    threading.Thread(target=train_project_worker, args=(project_id,)).start()
+
+
 def update_train_status_helper(project_id):
     """update_train_status.
 
     Open a thread to update the training status object.
 
     Args:
-        project_id:
+        project_id: Django ORM project id
     """
-    pass
-    # def _train_status_worker(project_id):
-        # """_train_status_worker.
-
-        # Args:
-            # project_id:
-        # """
-        # project_obj = Project.objects.get(pk=project_id)
-        # trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-        # customvision_project_id = project_obj.customvision_project_id
-        # wait_prepare = 0
-        # # If exceed, this project probably not going to be trained
-        # max_wait_prepare = 60
-
-        # # Send notification only when init
-        # training_init = False
-        # export_init = False
-
-        # while True:
-            # time.sleep(1)
-
-            # iterations = trainer.get_iterations(customvision_project_id)
-            # if len(iterations) == 0:
-                # upcreate_training_status(
-                    # project_id=project_obj.id,
-                    # **
-                    # progress_constants.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
-                # wait_prepare += 1
-                # if wait_prepare > max_wait_prepare:
-                    # upcreate_training_status(
-                        # project_id=project_obj.id,
-                        # status="failed",
-                        # log="Get iteration from Custom Vision occurs error.",
-                        # need_to_send_notification=True,
-                    # )
-                    # break
-                # continue
-
-            # iteration = iterations[0]
-            # if not iteration.exportable or iteration.status != "Completed":
-                # upcreate_training_status(
-                    # project_id=project_obj.id,
-                    # need_to_send_notification=(not training_init),
-                    # **progress_constants.PROGRESS_7_TRAINING)
-                # training_init = True
-                # continue
-
-            # exports = trainer.get_exports(customvision_project_id,
-                                          # iteration.id)
-            # if len(exports) == 0 or not exports[0].download_uri:
-                # upcreate_training_status(
-                    # project_id=project_obj.id,
-                    # need_to_send_notification=(not export_init),
-                    # **progress_constants.PROGRESS_8_EXPORTING)
-                # export_init = True
-                # res = project_obj.export_iterationv3_2(iteration.id)
-                # logger.info(res.json())
-                # continue
-
-            # project_obj.download_uri = exports[0].download_uri
-            # project_obj.save(update_fields=["download_uri"])
-            # parts = [p.name for p in Part.objects.filter(project=project_obj)]
-
-            # logger.info("Successfulling export model: %s",
-                        # project_obj.download_uri)
-            # logger.info("Preparing to deploy to inference")
-            # logger.info("Project is deployed before: %s", project_obj.deployed)
-            # if not project_obj.deployed:
-                # if exports[0].download_uri:
-
-                    # def _send(download_uri, rtsp, parts):
-                        # requests.get(
-                            # "http://" + inference_module_url() + "/update_cam",
-                            # params={
-                                # "cam_type": "rtsp",
-                                # "cam_source": normalize_rtsp(rtsp)
-                            # },
-                        # )
-                        # requests.get(
-                            # "http://" + inference_module_url() +
-                            # "/update_model",
-                            # params={"model_uri": download_uri},
-                        # )
-                        # requests.get(
-                            # "http://" + inference_module_url() +
-                            # "/update_parts",
-                            # params={"parts": parts},
-                        # )
-
-                    # threading.Thread(target=_send,
-                                     # args=(exports[0].download_uri,
-                                           # camera.rtsp, parts)).start()
-
-                    # project_obj.deployed = True
-                    # project_obj.save(
-                        # update_fields=["download_uri", "deployed"])
-
-                # upcreate_training_status(
-                    # project_id=project_obj.id,
-                    # need_to_send_notification=(not deploy_init),
-                    # **progress_constants.PROGRESS_9_DEPLOYING)
-                # deploy_init = True
-                # continue
-
-            # logger.info("Training Status: Completed")
-            # train_performance_list = []
-            # for iteration in iterations[:2]:
-                # train_performance_list.append(
-                    # trainer.get_iteration_performance(customvision_project_id,
-                                                      # iteration.id).as_dict())
-
-            # logger.info("Training Performance: %s", train_performance_list)
-            # upcreate_training_status(
-                # project_id=project_obj.id,
-                # performance=json.dumps(train_performance_list),
-                # need_to_send_notification=True,
-                # **progress_constants.PROGRESS_0_OK)
-            # project_obj.has_configured = True
-            # project_obj.save()
-            # break
-    # threading.Thread(target=_train_status_worker, args=(project_id,)).start()
+    threading.Thread(target=update_train_status_worker,
+                     args=(project_id,)).start()

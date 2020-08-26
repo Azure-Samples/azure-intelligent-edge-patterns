@@ -23,9 +23,7 @@ class Project(models.Model):
     """Azure Custom Vision Project Model
     """
 
-    setting = models.ForeignKey(Setting,
-                                on_delete=models.CASCADE,
-                                null=True)
+    setting = models.ForeignKey(Setting, on_delete=models.CASCADE, null=True)
     customvision_id = models.CharField(max_length=200,
                                        null=True,
                                        blank=True,
@@ -37,10 +35,10 @@ class Project(models.Model):
                                     default="")
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
-    # delete_inference : bool
 
     # e.g. relabel
     maxImages = models.IntegerField(default=20)
+    needRetraining = models.BooleanField(default=True)
     relabel_expired_time = models.DateTimeField(default=timezone.now)
 
     def __repr__(self):
@@ -53,51 +51,44 @@ class Project(models.Model):
         Args:
             kwargs:
         """
-        logger.info("Project pre_save")
         instance = kwargs["instance"]
-        logger.info(instance)
-        trainer = instance.setting.revalidate_and_get_trainer_obj()
-        if instance.is_demo:
-            logger.info("Project instance.is_demo: %s", instance.is_demo)
-        elif trainer and instance.customvision_id:
-            # Endpoint and Training_key is valid, and trying to save with
-            # customvision_id...
-            logger.info("Project CustomVision Id: %s",
+        try:
+            logger.info("Project pre_save start")
+            logger.info("Project id given: %s", instance.id)
+            logger.info("Project customvision_id given: %s",
                         instance.customvision_id)
-            try:
-                trainer.get_project(instance.customvision_id)
-            except CustomVisionErrorException as customvision_err:
-                logger.error(customvision_err)
-                logger.error(
-                    "Project %s not belong to Training Key + Endpoint pair.",
-                    instance.customvision_id,
-                )
-                logger.error("Set Project Id to ''")
+            logger.info("Project name given: %s", instance.name)
+            if instance.is_demo or not instance.setting:
+                logger.info("Project instance is demo. Pass pre_save")
+                return
+            if not instance.setting or not instance.setting.is_trainer_valid:
                 instance.customvision_id = ""
-            except:
-                logger.exception("Unexpected error")
-                instance.customvision_id = ""
-        elif trainer:
-            # Endpoint and Training_key is valid, and trying to save without
-            # customvision_id
-            logger.info("Setting project name")
-            try:
-                if not instance.customvision_project_name:
-                    raise ValueError("Use Default")
-                name = instance.customvision_project_name
-            except:
-                name = "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
-                instance.customvision_project_name = name
-            logger.info("Setting project name: %s",
-                        instance.customvision_project_name)
+                logger.info("Invalid setting. Set customvision id to ''")
+                return
+            trainer = instance.setting.get_trainer_obj()
+            if instance.customvision_id:
+                # Endpoint and Training_key is valid, and trying to save with
+                # customvision_id...
 
-            # logger.info('Creating Project on Custom Vision')
-            # project = instance.setting.create_project(name)
-            # logger.info('Got Custom Vision Project Id: %s', project.id)
-            # instance.customvision_id = project.id
-        else:
+                project = trainer.get_project(instance.customvision_id)
+                instance.name = project.name
+                logger.info("Project Found. Set instance.name to %s",
+                            instance.name)
+                return
+
+            # Setting is valid, no customvision_id
+            instance.name = (instance.customvision_project_name or
+                             "VisionOnEdge-" +
+                             datetime.datetime.utcnow().isoformat())
+        except:
+            logger.exception("Project pre_save Exception")
             instance.customvision_id = ""
-        logger.info("Project pre_save... End")
+        finally:
+            logger.info("Project id set: %s", instance.id)
+            logger.info("Project customvision_id set: %s",
+                        instance.customvision_id)
+            logger.info("Project name set: %s", instance.name)
+            logger.info("Project pre_save end")
 
     def dequeue_iterations(self, max_iterations: int = 2):
         """dequeue_iterations.
@@ -137,6 +128,7 @@ class Project(models.Model):
                 domain_id=self.setting.obj_detection_domain_id,
             )
             self.customvision_id = project.id
+            self.name = project.name
             update_fields = ["customvision_id", "name"]
             self.save(update_fields=update_fields)
         except CustomVisionErrorException as customvision_err:

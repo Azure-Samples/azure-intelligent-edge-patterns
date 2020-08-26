@@ -4,38 +4,33 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
-import json
 import logging
-import threading
-import time
 import traceback
 from distutils.util import strtobool
 
-import requests
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 #from ...azure_parts.utils import batch_upload_parts_to_customvision
 #from ...azure_training_status import constants as progress_constants
 #from ...azure_training_status.models import TrainingStatus
 #from ...azure_training_status.utils import upcreate_training_status
 #from ...cameras.models import Camera
-#from ...general import error_messages
+from ...general import error_messages
 #from ...general.utils import normalize_rtsp
-#from ...images.models import Image
+from ...images.models import Image
 #from ...images.utils import upload_images_to_customvision_helper
 from ..models import Project, Task
-from ..utils import pull_cv_project_helper  #, update_app_insight_counter
+from ..utils import pull_cv_project_helper, train_project_helper, update_train_status_helper  #, update_app_insight_counter
 from .serializers import ProjectSerializer, TaskSerializer
 
 logger = logging.getLogger(__name__)
@@ -57,16 +52,10 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         "is_demo": "is_demo",
     }
 
+    @swagger_auto_schema(operation_summary='Keep relabel alive.')
     @action(detail=True, methods=["post"])
     def relabel_keep_alive(self, request, pk=None) -> Response:
         """relabel_keep_alive.
-
-        Args:
-            request:
-            kwargs:
-
-        Returns:
-            Response: Return project with updated timestamp
         """
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, pk=pk)
@@ -76,11 +65,11 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         serializer = ProjectSerializer(obj)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary='Get training performace from Custom Vision.')
     @action(detail=True, methods=["get"])
     def train_performance(self, request, pk=None) -> Response:
         """train_performance.
-
-        Get train performace of this iter and previous iter
         """
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
@@ -129,15 +118,16 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             ret["previous"] = _parse(iterations[1])
         return Response(ret)
 
+    @swagger_auto_schema(operation_summary='reset project',
+                         manual_parameters=[
+                             openapi.Parameter('project_name',
+                                               openapi.IN_QUERY,
+                                               type=openapi.TYPE_STRING,
+                                               description='Project name'),
+                         ])
     @action(detail=True, methods=["get"])
     def reset_project(self, request, pk=None) -> Response:
         """reset_project.
-
-        Reset the project but not deleting.
-
-        Args:
-            request:
-            project_id:
         """
 
         queryset = self.get_queryset()
@@ -200,30 +190,32 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-    @swagger_auto_schema(method='get',
-                         operation_summary='Pull a Custom Vision project',
-                         manual_parameters=[
-                             openapi.Parameter(
-                                 'customvision_project_id',
-                                 openapi.IN_QUERY,
-                                 type=openapi.TYPE_STRING,
-                                 description='Custom Vision Id to Pull'),
-                             openapi.Parameter('partial',
-                                               openapi.IN_QUERY,
-                                               type=openapi.TYPE_BOOLEAN,
-                                               description='')
-                         ])
+    @swagger_auto_schema(
+        operation_summary='Pull a Custom Vision project',
+        manual_parameters=[
+            openapi.Parameter('customvision_project_id',
+                              openapi.IN_QUERY,
+                              type=openapi.TYPE_STRING,
+                              description='Custom Vision Id to Pull'),
+            openapi.Parameter('partial',
+                              openapi.IN_QUERY,
+                              type=openapi.TYPE_BOOLEAN,
+                              description='partial download or not')
+        ])
     @action(detail=True, methods=["get"])
     def pull_cv_project(self, request, pk=None) -> Response:
+        """pull_cv_project.
+        """
         logger.info("Pulling CustomVision Project")
 
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
+
         # Check Customvision Project id
         customvision_project_id = request.query_params.get(
             "customvision_project_id")
-        logger.info("customvision_project_id: %s", {customvision_project_id})
-        project_obj.customvision_project_id = customvision_project_id
+        logger.info("Project customvision_id: %s", {customvision_project_id})
+        project_obj.customvision_id = customvision_project_id
         project_obj.save()
         # Check Partial
         try:
@@ -249,16 +241,17 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(operation_summary='Train project')
     @action(detail=True, methods=["get"])
     def train(self, request, pk=None) -> Response:
         """train.
-
-        Configure button. Train/Export/Deploy a project.
-
-        Args:
-            request:
-            project_id:
         """
+        queryset = self.get_queryset()
+        project_obj = get_object_or_404(queryset, pk=pk)
+        train_project_helper(project_id=project_obj.id)
+        update_train_status_helper(project_id=project_obj.id)
+        return Response({'status': 'ok'})
+
         # is_demo = request.query_params.get("demo")
         # project_obj = Project.objects.get(pk=project_id)
         # parts = Part.objects.filter(project_id=project_obj.id)
@@ -342,167 +335,62 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         # threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
         # return upload_and_train(project_id)
-
-
-def upload_and_train(project_id):
-    """upload_and_train.
-
-    Args:
-        project_id:
-    """
-
-    project_obj = Project.objects.get(pk=project_id)
-    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-    customvision_project_id = project_obj.customvision_project_id
-
-    # Invalid Endpoint + Training Key
-    if not trainer:
-        upcreate_training_status(project_id=project_obj.id,
-                                 status="failed",
-                                 log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
-        return Response(
-            {
-                "status": "failed",
-                "log": error_messages.CUSTOM_VISION_ACCESS_ERROR
-            },
-            status=503,
-        )
-
-    upcreate_training_status(project_id=project_obj.id,
-                             **progress_constants.PROGRESS_1_FINDING_PROJECT)
-
-    project_obj.dequeue_iterations()
-
-    try:
-        part_ids = [
-            part.id for part in Part.objects.filter(project=project_obj)
-        ]
-
-        logger.info("Project id: %s", project_obj.id)
-        logger.info("Part ids: %s", part_ids)
-        try:
-            trainer.get_project(customvision_project_id)
-            upcreate_training_status(
-                project_id=project_obj.id,
-                status="preparing",
-                log=(f"Project {project_obj.customvision_project_name} " +
-                     "found on Custom Vision"),
-            )
-        except Exception:
-            project_obj.create_project()
-            upcreate_training_status(
-                project_id=project_obj.id,
-                need_to_send_notification=True,
-                **progress_constants.PROGRESS_2_PROJECT_CREATED)
-
-            logger.info("Project created on CustomVision.")
-            logger.info("Project Id: %s", project_obj.customvision_project_id)
-            logger.info("Project Name: %s",
-                        project_obj.customvision_project_name)
-            customvision_project_id = project_obj.customvision_project_id
-
-        upcreate_training_status(
-            project_id=project_obj.id,
-            need_to_send_notification=True,
-            **progress_constants.PROGRESS_3_UPLOADING_PARTS)
-
-        # Get tags_dict to avoid getting tags every time
-        tags = trainer.get_tags(project_id=project_obj.customvision_project_id)
-        tags_dict = {tag.name: tag.id for tag in tags}
-
-        # App Insight
-        project_changed = False
-        has_new_parts = False
-        has_new_images = False
-        parts_last_train = len(tags)
-        images_last_train = trainer.get_tagged_image_count(
-            project_obj.customvision_project_id)
-
-        # Create/update tags on CustomVisioin Project
-        has_new_parts = batch_upload_parts_to_customvision(
-            project_id=project_id, part_ids=part_ids, tags_dict=tags_dict)
-        if has_new_parts:
-            project_changed = True
-
-        upcreate_training_status(
-            project_id=project_obj.id,
-            need_to_send_notification=True,
-            **progress_constants.PROGRESS_4_UPLOADING_IMAGES)
-
-        # Upload images to CustomVisioin Project
-        for part_id in part_ids:
-            logger.info("Uploading images with part_id %s", part_id)
-            has_new_images = upload_images_to_customvision_helper(
-                project_id=project_obj.id, part_id=part_id)
-            if has_new_images:
-                project_changed = True
-
-        # Submit training task to Custom Vision
-        if not project_changed:
-            upcreate_training_status(
-                project_id=project_obj.id,
-                status="deploying",
-                log="No new parts or new images to train. Deploying")
-        else:
-            upcreate_training_status(
-                project_id=project_obj.id,
-                need_to_send_notification=True,
-                **progress_constants.PROGRESS_5_SUBMITTING_TRAINING_TASK)
-            training_task_submit_success = project_obj.train_project()
-            if training_task_submit_success:
-                update_app_insight_counter(
-                    project_obj=project_obj,
-                    has_new_parts=has_new_parts,
-                    has_new_images=has_new_images,
-                    parts_last_train=parts_last_train,
-                    images_last_train=images_last_train,
-                )
         # A Thread/Task to keep updating the status
-        update_train_status(project_id)
-        return Response({"status": "ok"})
+        # update_train_status(project_id)
+        # return Response({"status": "ok"})
 
-    except CustomVisionErrorException as customvision_err:
-        logger.error("CustomVisionErrorException: %s", customvision_err)
-        if customvision_err.message == \
-                "Operation returned an invalid status code 'Access Denied'":
-            upcreate_training_status(
-                project_id=project_obj.id,
-                status="failed",
-                log=
-                "Training key or Endpoint is invalid. Please change the settings",
-                need_to_send_notification=True,
-            )
-            return Response(
-                {
-                    "status":
-                        "failed",
-                    "log":
-                        "Training key or Endpoint is invalid. Please change the settings",
-                },
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
 
-        upcreate_training_status(project_id=project_obj.id,
-                                 status="failed",
-                                 log=customvision_err.message,
-                                 need_to_send_notification=True)
-        return Response(
-            {
-                "status": "failed",
-                "log": customvision_err.message
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+# def upload_and_train(project_id):
+    # """upload_and_train.
 
-    except Exception:
-        # TODO: Remove in production
-        err_msg = traceback.format_exc()
-        logger.exception("Exception: %s", err_msg)
-        upcreate_training_status(project_id=project_obj.id,
-                                 status="failed",
-                                 log=f"failed {str(err_msg)}",
-                                 need_to_send_notification=True)
-        return Response({"status": "failed", "log": f"failed {str(err_msg)}"})
+    # Args:
+        # project_id:
+    # """
+
+
+
+    # except CustomVisionErrorException as customvision_err:
+        # logger.error("CustomVisionErrorException: %s", customvision_err)
+        # if customvision_err.message == \
+                # "Operation returned an invalid status code 'Access Denied'":
+            # upcreate_training_status(
+                # project_id=project_obj.id,
+                # status="failed",
+                # log=
+                # "Training key or Endpoint is invalid. Please change the settings",
+                # need_to_send_notification=True,
+            # )
+            # return Response(
+                # {
+                    # "status":
+                        # "failed",
+                    # "log":
+                        # "Training key or Endpoint is invalid. Please change the settings",
+                # },
+                # status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            # )
+
+        # upcreate_training_status(project_id=project_obj.id,
+                                 # status="failed",
+                                 # log=customvision_err.message,
+                                 # need_to_send_notification=True)
+        # return Response(
+            # {
+                # "status": "failed",
+                # "log": customvision_err.message
+            # },
+            # status=status.HTTP_400_BAD_REQUEST,
+        # )
+
+    # except Exception:
+        # # TODO: Remove in production
+        # err_msg = traceback.format_exc()
+        # logger.exception("Exception: %s", err_msg)
+        # upcreate_training_status(project_id=project_obj.id,
+                                 # status="failed",
+                                 # log=f"failed {str(err_msg)}",
+                                 # need_to_send_notification=True)
+        # return Response({"status": "failed", "log": f"failed {str(err_msg)}"})
 
 
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
