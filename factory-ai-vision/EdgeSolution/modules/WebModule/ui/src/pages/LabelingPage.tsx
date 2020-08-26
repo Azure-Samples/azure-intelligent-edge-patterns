@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Flex, Button, Text } from '@fluentui/react-northstar';
 
@@ -7,20 +7,14 @@ import { LabelingType, Annotation, WorkState } from '../store/labelingPage/label
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
-import {
-  saveLabelImageAnnotation,
-  deleteLabelImage,
-  removeImagesFromPart,
-} from '../store/image/imageActions';
-import { RelabelImage, JudgedImageList } from '../components/ManualIdentification/types';
+import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
 interface LabelingPageProps {
   labelingType: LabelingType;
-  images: LabelImage[] | RelabelImage[];
+  images: LabelImage[];
   imageIndex: number;
   closeDialog: () => void;
-  setJudgedImageList?: Dispatch<SetStateAction<JudgedImageList>>;
   isRelabel: boolean;
 }
 const LabelingPage: FC<LabelingPageProps> = ({
@@ -28,7 +22,6 @@ const LabelingPage: FC<LabelingPageProps> = ({
   images,
   imageIndex,
   closeDialog,
-  setJudgedImageList,
   isRelabel,
 }) => {
   const dispatch = useDispatch();
@@ -41,17 +34,23 @@ const LabelingPage: FC<LabelingPageProps> = ({
   const imageUrl = images[index]?.image;
   const imageId = images[index]?.id;
 
-  const onSave = (): void => {
-    dispatch(saveLabelImageAnnotation(images[index].id));
-    if (setJudgedImageList)
-      setJudgedImageList((prev) => [...prev, { partId: annotations[0].part.id, imageId: images[index].id }]);
+  const onSave = (isRelabelDone: boolean): void => {
+    dispatch(saveLabelImageAnnotation(images[index].id, isRelabel, isRelabelDone));
   };
 
   const onSaveBtnClick = (): void => {
-    onSave();
+    onSave(false);
     if (index === images.length - 1) closeDialog();
     setIndex((prev) => (prev + 1) % images.length);
   };
+
+  const onDoneBtnClick = (): void => {
+    // eslint-disable-next-line no-restricted-globals
+    const isRelabelDone = confirm('The Rest of the image will be removed');
+    onSave(isRelabelDone);
+    if (isRelabelDone) closeDialog();
+  };
+
   const onBoxCreated = (): void => {
     if (index === images.length - 1) onSaveBtnClick();
   };
@@ -79,11 +78,11 @@ const LabelingPage: FC<LabelingPageProps> = ({
         prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
         nextDisabled={index === images.length - 1 || workState === WorkState.Creating || isOnePointBox}
         onPrevClick={(): void => {
-          onSave();
+          onSave(false);
           setIndex((prev) => (prev - 1 + images.length) % images.length);
         }}
         onNextClick={(): void => {
-          onSave();
+          onSave(false);
           setIndex((prev) => (prev + 1) % images.length);
         }}
       >
@@ -105,24 +104,7 @@ const LabelingPage: FC<LabelingPageProps> = ({
           onClick={onSaveBtnClick}
         />
         {isRelabel ? (
-          <Button
-            primary
-            content="Done"
-            onClick={(): void => {
-              onSave();
-              // eslint-disable-next-line no-restricted-globals
-              const finishLabel = confirm('The Rest of the image will be removed');
-              if (finishLabel) {
-                setJudgedImageList((prev) => {
-                  const notInJudged = (imgId: number): boolean => !prev.find((e) => e.imageId === imgId);
-                  const imageIdsNotInJudge = images.filter((image) => notInJudged(image.id)).map((e) => e.id);
-                  dispatch(removeImagesFromPart(imageIdsNotInJudge));
-                  return [...prev, ...imageIdsNotInJudge.map((e) => ({ imageId: e, partId: null }))];
-                });
-                closeDialog();
-              }
-            }}
-          />
+          <Button primary content="Done" onClick={onDoneBtnClick} />
         ) : (
           <Button
             primary

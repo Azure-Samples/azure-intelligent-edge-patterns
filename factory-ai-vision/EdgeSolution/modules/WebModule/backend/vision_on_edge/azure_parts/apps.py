@@ -1,6 +1,5 @@
-"""
-Azure Parts App
-"""
+"""App"""
+
 import logging
 import sys
 
@@ -10,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class AzurePartsConfig(AppConfig):
-    """
-    Azure Parts App Config
+    """App Config
+
+    Import models and signals and create some demo objects
     """
     name = 'vision_on_edge.azure_parts'
 

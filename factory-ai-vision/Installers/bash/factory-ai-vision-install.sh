@@ -74,7 +74,14 @@ echo You can use your existing Custom Vision service, or create a new one
     read -p "Would you like to use an existing Custom Vision Service? (y or n): " -n 1 -r; echo
     case $REPLY in
         [Yy]* ) read -p "Please enter your Custom Vision endpoint: " cvTrainingEndpoint; echo
-                read -p "Please enter your Custom Vision Key: " cvTrainingApiKey; echo; break;;
+                read -p "Please enter your Custom Vision Key: " cvTrainingApiKey; echo
+                if [[ -z $cvTrainingEndpoint ]]; then
+                    cvTrainingEndpoint='<Training_Endpoint>'
+                fi
+                if [[ -z $cvTrainingApiKey ]]; then
+                    cvTrainingApiKey='<Training_API_Key>'
+                fi
+                break;;
         [Nn]* ) cvTrainingEndpoint=""; break;;
         * ) echo "Please answer yes or no.";;
     esac

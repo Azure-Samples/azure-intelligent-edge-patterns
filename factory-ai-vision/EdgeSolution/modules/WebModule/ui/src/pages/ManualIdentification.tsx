@@ -11,7 +11,6 @@ import {
   ArrowUpIcon,
 } from '@fluentui/react-northstar';
 import { useHistory } from 'react-router-dom';
-import Axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from 'rc-tooltip';
 import { Range, Handle } from 'rc-slider';
@@ -24,8 +23,7 @@ import { ProjectData } from '../store/project/projectTypes';
 import { LabelImage } from '../store/image/imageTypes';
 import { getFilteredImages } from '../util/getFilteredImages';
 import { thunkGetProject } from '../store/project/projectActions';
-import { getLabelImages } from '../store/image/imageActions';
-import { JudgedImageList, RelabelImage } from '../components/ManualIdentification/types';
+import { getLabelImages, thunkUpdateRelabel } from '../store/image/imageActions';
 import ImagesContainer from '../components/ManualIdentification/ImagesContainer';
 
 const ManualIdentification: FC = () => {
@@ -65,59 +63,45 @@ const ManualIdentification: FC = () => {
   ]);
   const [ascend, setAscend] = useState<boolean>(false);
   const sortRef = useRef({ sorted: false, prevIsAscend: false });
-  const [judgedImageList, setJudgedImageList] = useState<JudgedImageList>([]);
-
-  const [relabelImages, setRelabelImages] = useState<RelabelImage[]>([]);
 
   useEffect(() => {
     dispatch(thunkGetProject(false));
     dispatch(getLabelImages());
   }, [dispatch]);
 
-  useEffect(() => {
-    setRelabelImages(
+  const relabelImages = useMemo(
+    () =>
       getFilteredImages(images, {
         isRelabel: true,
-      }).map((e) => {
-        const confidenceLevel = ((e.confidence * 1000) | 0) / 10;
-        return {
-          ...e,
-          confidenceLevel,
-          display: confidenceLevel >= confidenceLevelRange[0] && confidenceLevel <= confidenceLevelRange[1],
-        };
-      }),
-    );
-    return (): void => {
-      setAscend(false);
-      sortRef.current = { sorted: false, prevIsAscend: false };
-    };
-  }, [confidenceLevelRange, images, selectedPartId]);
+      })
+        .filter((e) => {
+          const confidenceLevel = ((e.confidence * 1000) | 0) / 10;
+          return confidenceLevel >= confidenceLevelRange[0] && confidenceLevel <= confidenceLevelRange[1];
+        })
+        .sort((a, b) => {
+          if (ascend) return a.confidence - b.confidence;
+          return b.confidence - a.confidence;
+        }),
+    [ascend, confidenceLevelRange, images],
+  );
 
-  useEffect(() => {
-    if (sortRef.current.sorted) {
-      if (sortRef.current.prevIsAscend !== ascend) {
-        setRelabelImages((prev) => {
-          const next = [...prev];
-          next.reverse();
-          return next;
-        });
-        sortRef.current.prevIsAscend = ascend;
-      }
-    } else {
-      setRelabelImages((prev) => {
-        if (ascend) prev.sort((a, b) => a.confidenceLevel - b.confidenceLevel);
-        else prev.sort((a, b) => b.confidenceLevel - a.confidenceLevel);
-        return [...prev];
-      });
-      sortRef.current = { sorted: true, prevIsAscend: true };
-    }
-  }, [ascend]);
+  const updateBtnDisabled = useMemo(() => images.filter((e) => e.hasRelabeled).length === 0, [images]);
 
   // const onDropdownChange = (_, { value }): void => {
   //   if (value !== null) {
   //     setSelectedPartItem(value);
   //   }
   // };
+
+  const onUpdate = async (): Promise<void> => {
+    try {
+      await dispatch(thunkUpdateRelabel());
+      history.push('/partIdentification');
+      dispatch(getLabelImages());
+    } catch (e) {
+      alert(e);
+    }
+  };
 
   return (
     <>
@@ -167,35 +151,13 @@ const ManualIdentification: FC = () => {
             />
           </Flex>
         </Grid>
-        <ImagesContainer
-          images={relabelImages}
-          judgedImageList={judgedImageList}
-          setJudgedImageList={setJudgedImageList}
-          selectedPartId={selectedPartId}
-        />
+        <ImagesContainer images={relabelImages} selectedPartId={selectedPartId} />
         <Button
           content="Update"
           styles={{ width: '15%' }}
           primary
-          disabled={judgedImageList.length === 0}
-          onClick={(): void => {
-            Axios({ method: 'POST', url: '/api/relabel/update', data: judgedImageList })
-              .then(() => {
-                // * Check if all relabelImages are updated
-                // TODO: Use response to update
-                const judgedIds = judgedImageList.map((e) => e.imageId);
-                if (relabelImages.every((e) => judgedIds.includes(e.id))) {
-                  history.push('/partIdentification');
-                }
-
-                dispatch(getLabelImages());
-                setJudgedImageList([]);
-                return void 0;
-              })
-              .catch((err) => {
-                console.error(err);
-              });
-          }}
+          disabled={updateBtnDisabled}
+          onClick={onUpdate}
         />
       </Flex>
     </>

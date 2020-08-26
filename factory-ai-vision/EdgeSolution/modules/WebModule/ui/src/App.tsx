@@ -1,50 +1,31 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from '@fluentui/react-northstar';
-import Axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootRouter } from './routes/RootRouter';
 import { MainLayout } from './components/MainLayout';
 import { mainTheme } from './themes/mainTheme';
 import TelemetryProvider from './components/TelemetryProvider';
 import { useWebSocket } from './hooks/useWebSocket';
+import { thunkGetSettingAndAppInsightKey } from './store/setting/settingAction';
+import { State } from './store/State';
 
 const App: FC = (): JSX.Element => {
   // Listen for the notification boardcast.
   useWebSocket();
 
-  const [appInsightInfo, setAppInsightInfo] = useState({
-    key: '',
-    isAppInsightOn: false,
-  });
+  const dispatch = useDispatch();
+  const appInsightKey = useSelector<State, string>((state) => state.setting.appInsightKey);
+  const isAppInsightOn = useSelector<State, boolean>((state) => state.setting.isCollectData);
 
   useEffect(() => {
-    const appInsightKey = Axios.get('/api/appinsight/key');
-    const settings = Axios.get('/api/settings/');
-
-    Axios.all([appInsightKey, settings])
-      .then(
-        Axios.spread((...responses) => {
-          const { data: appInsightKeyData } = responses[0];
-          const { data: settingsData } = responses[1];
-
-          if (appInsightKeyData.key)
-            return setAppInsightInfo({
-              key: appInsightKeyData.key,
-              isAppInsightOn: settingsData[0].is_collect_data,
-            });
-          throw new Error('No API Key');
-        }),
-      )
-      .catch((e) => console.error(e));
-  }, []);
+    dispatch(thunkGetSettingAndAppInsightKey());
+  }, [dispatch]);
 
   return (
     <Provider theme={mainTheme}>
       <BrowserRouter>
-        <TelemetryProvider
-          instrumentationKey={appInsightInfo.key}
-          isAppInsightOn={appInsightInfo.isAppInsightOn}
-        >
+        <TelemetryProvider instrumentationKey={appInsightKey} isAppInsightOn={isAppInsightOn}>
           <div className="App">
             <MainLayout>
               <RootRouter />
