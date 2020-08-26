@@ -21,7 +21,7 @@ class PartSerializer(serializers.ModelSerializer):
         """
 
         model = Part
-        exclude = ['id']
+        fields = '__all__'
         extra_kwargs = {
             "description": {
                 "required": False
