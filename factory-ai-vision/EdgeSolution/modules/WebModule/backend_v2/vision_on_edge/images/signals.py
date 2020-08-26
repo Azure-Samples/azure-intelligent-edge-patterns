@@ -31,20 +31,21 @@ def relabel_setting_change_handler_pre(**kwargs):
     Args:
         kwargs:
     """
-    instance = kwargs['instance']
+    # instance = kwargs['instance']
 
-    if not instance.has_configured:
-        return
-    if not Project.objects.filter(id=instance.id).exists():
-        return
-    old_project = Project.objects.get(id=instance.id)
-    for attr in ['accuracyRangeMin', 'accuracyRangeMax']:
-        if getattr(instance, attr) != getattr(old_project, attr):
-            instance.delete_relabel_imgs = True
-            logger.info(
-                "Project accuracyRangeMin and accuracyRangeMax changed...")
-            logger.info("Will deleting all relabel images at post_save")
-            break
+    # if not instance.has_configured:
+        # return
+    # if not Project.objects.filter(id=instance.id).exists():
+        # return
+    # old_project = Project.objects.get(id=instance.id)
+    # for attr in ['accuracyRangeMin', 'accuracyRangeMax']:
+        # if getattr(instance, attr) != getattr(old_project, attr):
+            # instance.delete_relabel_imgs = True
+            # logger.info(
+                # "Project accuracyRangeMin and accuracyRangeMax changed...")
+            # logger.info("Will deleting all relabel images at post_save")
+            # break
+    pass
 
 
 @receiver(signal=post_save,
@@ -61,12 +62,12 @@ def relabel_setting_change_handler(**kwargs):
     """
     instance = kwargs['instance']
 
-    if not instance.has_configured:
-        return
-    if hasattr(instance, 'delete_relabel_imgs') and \
-            instance.delete_relabel_imgs:
-        Image.objects.filter(project=instance, is_relabel=True).delete()
-        logger.info("Deleting all relabel images... complete")
+    # if not instance.has_configured:
+        # return
+    # if hasattr(instance, 'delete_relabel_imgs') and \
+            # instance.delete_relabel_imgs:
+        # Image.objects.filter(project=instance, is_relabel=True).delete()
+        # logger.info("Deleting all relabel images... complete")
 
 
 @receiver(signal=pre_delete,

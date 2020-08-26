@@ -45,8 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'channels',
-
-#    'vision_on_edge.streams',
+    'vision_on_edge.streams',
     'vision_on_edge.azure_settings',
     'vision_on_edge.azure_projects',
     'vision_on_edge.azure_training_status',
@@ -59,9 +58,7 @@ INSTALLED_APPS = [
 #    'vision_on_edge.feedback',
 #    'vision_on_edge.video_feed',
     'vision_on_edge.locations',
-
 #    'vision_on_edge.image_predictions',
-
     'rest_framework',
     'drf_yasg',
 ]

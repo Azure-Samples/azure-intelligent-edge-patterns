@@ -16,7 +16,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        exclude = ['id']
+        fields = '__all__'
         extra_kwargs = {
             "download_uri": {
                 "required": False
@@ -31,4 +31,4 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        exclude = ['id']
+        fields = '__all__'

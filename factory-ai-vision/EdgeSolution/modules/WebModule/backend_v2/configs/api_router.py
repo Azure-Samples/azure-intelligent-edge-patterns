@@ -28,7 +28,7 @@ from vision_on_edge.azure_part_detections.api import views as part_detection_vie
 # views as image_prediction_views
 
 # from vision_on_edge.relabeling.api import views as relabel_views
-# from vision_on_edge.streams.api import views as stream_views
+from vision_on_edge.streams.api import views as stream_views
 # from vision_on_edge.video_feed.api import views as videofeed_views
 
 router = DefaultRouter()
@@ -46,7 +46,7 @@ router.register('images', image_views.ImageViewSet)
 router.register('locations', location_views.LocationViewSet)
 router.register('inference_modules',
                 inference_module_views.InferenceModuleViewSet)
-router.register('azure_part_detections',
+router.register('part_detections',
                 part_detection_views.PartDetectionViewSet)
 # router.register('image_predictions',
 # image_prediction_views.ImagePredictionViewSet)
@@ -90,29 +90,29 @@ urlpatterns += [
         name='schema-redoc'),
 ]
 
-# urlpatterns += [
-# url('streams/connect', stream_views.connect_stream),
-# path('streams/<int:stream_id>/disconnect', stream_views.disconnect_stream),
-# path('streams/<int:stream_id>/video_feed', stream_views.video_feed),
-# path('streams/<int:stream_id>/capture', stream_views.capture),
-# path('streams/<int:stream_id>/keep_alive', stream_views.keep_alive),
-# path('inference/video_feed', videofeed_views.video_feed),
-# path('inference/video_feed/keep_alive', videofeed_views.keep_alive),
-# path('projects/<int:project_id>/train', azure_projects_views.train),
-# path('projects/<int:project_id>/train_performance',
-# azure_projects_views.train_performance),
-# path('projects/<int:project_id>/inference_video_feed',
-# stream_views.inference_video_feed),
-# path('projects/<int:project_id>/pull_cv_project',
-# azure_projects_views.pull_cv_project),
-# path('projects/<int:project_id>/update_prob_threshold',
-# azure_projects_views.update_prob_threshold),
-# path('projects/<int:project_id>/reset_project',
-# azure_projects_views.reset_project),
-# path('projects/<int:project_id>/reset_camera',
-# azure_projects_views.project_reset_camera),
-# path('relabel', relabel_views.upload_relabel_image),
-# path('relabel/update', relabel_views.relabel_update),
-# path('appinsight/key', app_insight_views.instrumentation_key),
-# path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp),
-# ]
+urlpatterns += [
+    url('streams/connect', stream_views.connect_stream),
+    path('streams/<int:stream_id>/disconnect', stream_views.disconnect_stream),
+    path('streams/<int:stream_id>/video_feed', stream_views.video_feed),
+    path('streams/<int:stream_id>/capture', stream_views.capture),
+    path('streams/<int:stream_id>/keep_alive', stream_views.keep_alive),
+    # path('inference/video_feed', videofeed_views.video_feed),
+    # path('inference/video_feed/keep_alive', videofeed_views.keep_alive),
+    # path('projects/<int:project_id>/train', azure_projects_views.train),
+    # path('projects/<int:project_id>/train_performance',
+    # azure_projects_views.train_performance),
+    # path('projects/<int:project_id>/inference_video_feed',
+    # stream_views.inference_video_feed),
+    # path('projects/<int:project_id>/pull_cv_project',
+    # azure_projects_views.pull_cv_project),
+    # path('projects/<int:project_id>/update_prob_threshold',
+    # azure_projects_views.update_prob_threshold),
+    # path('projects/<int:project_id>/reset_project',
+    # azure_projects_views.reset_project),
+    # path('projects/<int:project_id>/reset_camera',
+    # azure_projects_views.project_reset_camera),
+    # path('relabel', relabel_views.upload_relabel_image),
+    # path('relabel/update', relabel_views.relabel_update),
+    path('appinsight/key', app_insight_views.instrumentation_key),
+    # path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp),
+]

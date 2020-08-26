@@ -9,7 +9,6 @@ import requests
 from django.db import models
 from django.db.models.signals import post_save
 
-from ..azure_iot.utils import inference_module_url
 from ..azure_projects.models import Project
 from ..cameras.models import Camera
 from ..locations.models import Location
@@ -26,14 +25,13 @@ class PartDetection(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
-    inference = models.ForeignKey(InferenceModule,
-                                  on_delete=models.CASCADE,
-                                  null=True)
+    inference_module = models.ForeignKey(InferenceModule,
+                                         on_delete=models.CASCADE,
+                                         null=True)
     part = models.ManyToManyField(Part)
     needRetraining = models.BooleanField(default=True)
     deployed = models.BooleanField(default=False)
     has_configured = models.BooleanField(default=False)
-    # delete_inference : bool
 
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
@@ -82,7 +80,7 @@ class PartDetection(models.Model):
 
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
-                "http://" + inference_module_url() +
+                "http://" + instance.inference_module.url +
                 "/update_retrain_parameters",
                 params={
                     "confidence_min": confidence_min,
@@ -92,7 +90,7 @@ class PartDetection(models.Model):
             )
 
             requests.get(
-                "http://" + inference_module_url() +
+                "http://" + instance.inference_module.url +
                 "/update_iothub_parameters",
                 params={
                     "is_send": metrics_is_send_iothub,
@@ -121,7 +119,7 @@ class PartDetection(models.Model):
             raise ValueError("prob_threshold out of range")
 
         requests.get(
-            "http://" + inference_module_url() + "/update_prob_threshold",
+            "http://" + self.inference_module.url + "/update_prob_threshold",
             params={
                 "prob_threshold": prob_threshold,
             },
