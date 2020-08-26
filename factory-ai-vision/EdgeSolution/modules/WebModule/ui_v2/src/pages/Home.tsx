@@ -9,13 +9,15 @@ import {
   PivotItem,
   Spinner,
 } from '@fluentui/react';
-import { GetStarted } from '../components/GetStarted';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAllCameras, getCameras } from '../store/cameraSlice';
+
 import { State } from 'RootStateType';
+import { GetStarted } from '../components/GetStarted';
+import { selectAllCameras, getCameras } from '../store/cameraSlice';
 import { selectAllImages, getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
+import { ConfigTaskPanel } from '../components/ConfigTaskPanel';
 
 const theme = getTheme();
 
@@ -28,6 +30,10 @@ export const Home: React.FC = () => {
   const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
   const [loading, setLoading] = useState(false);
 
+  const [panelOpen, setPanelOpen] = useState(false);
+  const openPanel = () => setPanelOpen(true);
+  const closePanel = () => setPanelOpen(false);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -37,7 +43,7 @@ export const Home: React.FC = () => {
       setLoading(false);
       setLoading(false);
     })();
-  }, []);
+  }, [dispatch]);
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -47,7 +53,7 @@ export const Home: React.FC = () => {
         iconProps: {
           iconName: 'Add',
         },
-        onClick: () => {},
+        onClick: openPanel,
       },
     ],
     [],
@@ -60,21 +66,24 @@ export const Home: React.FC = () => {
   if (loading) return <Spinner label="Loading" />;
 
   return (
-    <Stack styles={{ root: { height: '100%' } }}>
-      <CommandBar
-        items={commandBarItems}
-        styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
-      />
-      <Stack styles={{ root: { padding: '15px' } }} grow>
-        <Pivot selectedKey={location.pathname.split('/')[1]} onLinkClick={onPivotChange}>
-          <PivotItem itemKey="getStarted" headerText="Get started">
-            <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
-          </PivotItem>
-          <PivotItem itemKey="task" headerText="Task">
-            Task
-          </PivotItem>
-        </Pivot>
+    <>
+      <Stack styles={{ root: { height: '100%' } }}>
+        <CommandBar
+          items={commandBarItems}
+          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+        />
+        <Stack styles={{ root: { padding: '15px' } }} grow>
+          <Pivot selectedKey={location.pathname.split('/')[1]} onLinkClick={onPivotChange}>
+            <PivotItem itemKey="getStarted" headerText="Get started">
+              <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
+            </PivotItem>
+            <PivotItem itemKey="task" headerText="Task">
+              Task
+            </PivotItem>
+          </Pivot>
+        </Stack>
       </Stack>
-    </Stack>
+      <ConfigTaskPanel isOpen={panelOpen} onDismiss={closePanel} />
+    </>
   );
 };
