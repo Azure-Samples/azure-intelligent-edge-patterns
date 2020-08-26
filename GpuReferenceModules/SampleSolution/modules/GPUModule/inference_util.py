@@ -155,23 +155,21 @@ def run_gpu_inference(model, precision='FP32', batchsize=256, resnet50_inference
     return None
 
 def inference_benchmark_gpu():
+    print("Running Inference Benchmark Perf on GPU...")
     batchsizes = [4, 8, 16, 32, 64, 128, 256]
     resnet50_inference_res_dict = {}
     resnet50_inference_res_dict_expected = import_expected_inference_benchmark_res()
     clone_benchmark_from_nvidia()
     install_nvidia_dllogger()
     for batchsize in batchsizes:
-        #print(batchsize)
         benchmark_res_resnet50_inference_FP32_dict = run_gpu_inference('resnet50', 'FP32', batchsize, resnet50_inference_res_dict_expected)
         #benchmark_res_resnet50_inference_FP16_dict = run_gpu_inference('resnet50', 'FP16', batchsize)
-
-        #resnet50_training_res_dict = {**benchmark_res_resnet50_training_FP32_dict, **benchmark_res_resnet50_training_FP16_dict}
         resnet50_inference_res_dict = {**resnet50_inference_res_dict, **benchmark_res_resnet50_inference_FP32_dict}
 
-    #benchmark_res_dict = {**resnet50_training_res_dict, **resnet50_inference_res_dict}
     benchmark_res_dict = {**resnet50_inference_res_dict}
     benchmark_res_json = get_json_result_from_dict(benchmark_res_dict)
-
+    print("Completed Inference Benchmark Perf on GPU.")
+    print(benchmark_res_json)
     cleanup_benchmark_dir()
 
     return benchmark_res_json
@@ -195,7 +193,7 @@ def training_benchmark_gpu():
 
     return benchmark_res_json
 
-# Runner <-- Needs to go in main.py
+# Runner <-- To test inference benchmark independently
 #gpu_perf_res = inference_benchmark_gpu()
 #print(gpu_perf_res)
 #gpu_perf_res_json = json.loads(gpu_perf_res)

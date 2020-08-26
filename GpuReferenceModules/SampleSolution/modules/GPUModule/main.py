@@ -112,7 +112,8 @@ async def main():
             final_cputime = 0
             final_gputime = 0
             warmup = inwarmup
-            iter = warmup + 1 
+            iter = warmup + 1
+            inference_benchmark_res = None
             (gpu,cpu)= device_info()
 
             #Running on pytorch 
@@ -126,13 +127,16 @@ async def main():
             # Schedule task for sending message
             mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))  
 
-            ## Hello World for Inference run
-            #msg_to_cloud_helloworld = hello_world()
-            #mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_helloworld))
-
             ## Run and get GPU Inference benchmark results
-            msg_to_cloud_inference_benchmark = inference_benchmark_gpu()
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client, msg_to_cloud_inference))
+            if inference == 1:
+                print("Running Inference Benchmark on Target...")
+                inference_benchmark_res = inference_benchmark_gpu()
+            msg_to_cloud_inference_benchmark = inference_benchmark_res
+            print("Detailed Inference Benchmark results with various batch sizes:")
+            print(msg_to_cloud_inference_benchmark)
+            msg_to_cloud_inference_benchmark_desc = "Detailed Inference Benchmark results with various batch sizes:"
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client, msg_to_cloud_inference_benchmark_desc))
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client, msg_to_cloud_inference_benchmark))
 
             ## Runing on tensorflow 
             # We observved on first iteration GPU does not do very well but after 
