@@ -4,15 +4,13 @@ The goal of this lab is:
 
 - Create and use jupyter hub with sample notebook to train and inference on 1 node
 
-# Module 09. Jupyter Servers and Notebooks
-
-## Module 9.0 Creating Jupyter Server
+## Creating Jupyter Server
 
 You need to create a namespace to be able to create Jupyter servers. 
 
 ![pics/kubeflow_dashboard2_notebook_servers.png](pics/kubeflow_dashboard2_notebook_servers.png)
 
-## Module 9.1 Jupyter Notebooks
+## Jupyter Notebooks
 
 Once you create a server, you can connect to it and upload Python files.
 
@@ -23,15 +21,15 @@ button `Run` to execute, you should see something like this:
 
 ![(pics/demo_notebook.png](pics/demo_notebook.png)
 
-# Module 10. ML with Python
+# Overview of ML with Python
 
 ML/NN and AI more broadly, are mathematical concepts and could be implemented in countless programming languages
 and frameworks. In this lab we will use mostly Python, but you are free to pick whatever you are comfortable
 with - many of the deployment options are language-agnostic as long as apis are satisfied. 
 
-# Module 13. Tensorboard
+#Tensorboard
 
-# Module 13.0 Tensorboard access
+## Tensorboard access
 
 There is another useful tool to monitor some ML applications if
 they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
@@ -50,7 +48,7 @@ Now you can access the port you forward from your Kubernetes environment:
     $ export PODNAME=$(kubectl get pod -l app=tensorboard -o jsonpath='{.items[0].metadata.name}')
     $ kubectl port-forward ${PODNAME} 6006:6006
 
-# Module 13.1 Tensorboard deployment
+## Tensorboard deployment
 
 Here is how you would connect your Tensorboard with the persistence we discuss next:
 

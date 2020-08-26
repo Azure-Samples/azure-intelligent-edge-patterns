@@ -1,6 +1,8 @@
 # PyTorchJobs
 
-This module demonstrates how to run PyTorch jobs on Kubeflow cluster on Azure Stack.
+The goal of this lab is:
+
+- To run PyTorchJobs within Kubeflow cluster on Azure Stack.
 
 [PyTorch](https://github.com/pytorch/pytorch) is a popular open source machine learning framework, it has Python and C++ interfaces, primarily developed by Facebook's AI Research Lab. PyTorch is rooted in [Torch library](https://github.com/torch/torch7).
 
@@ -239,7 +241,7 @@ To get the details about your particular PyTorch job:
 
 You can also monitor CPU usage on nodes while your PyTorchJob is running:
 
-![](images/pytorch_cluster_nodes.png)
+![pics/pytorch_cluster_nodes.png](pics/pytorch_cluster_nodes.png)
 
 Here is a sample of the output:
 

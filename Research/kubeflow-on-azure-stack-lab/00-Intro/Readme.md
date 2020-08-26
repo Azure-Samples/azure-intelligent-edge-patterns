@@ -108,10 +108,6 @@ your Azure Stack infrastructure.
 
 Make sure you have the right firewall rules and other settings before you start using your cluser.
 
-# CNAP package (Porter)
-
-Installing via Porter package might be an apealing option. See [Installing CNAP](install_porter/Readme.md).
-
 ## Check the integrity of your Kubernetes cluster
 
 **make sure you have the values from [Prerequisites](installing_kubernetes.md#prerequisites) section**.
@@ -132,7 +128,7 @@ something like the following to connect from your "jump" server:
 
 You should see the bash shell to a server with `master` in its name.
 
-## Module 3.2. Check that you can see the nodes:
+## Check that you can see the nodes:
 
     azureuser@k8s-master-27515788-0:~$ kubectl cluster-info
     Kubernetes master is running at https://kube-rg3-123456.demoe2.cloudapp.example.com
@@ -141,7 +137,7 @@ You should see the bash shell to a server with `master` in its name.
     Metrics-server is running at https://...
     To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
-## Module 3.3. Check that you can see the nodes:
+## Check that you can see the nodes:
 
     azureuser@k8s-master-27515788-0:~$ kubectl get nodes
     NAME                       STATUS   ROLES    AGE   VERSION
@@ -150,7 +146,7 @@ You should see the bash shell to a server with `master` in its name.
     k8s-linuxpool-27515788-2   Ready    agent    22m   v1.15.5
     k8s-master-27515788-0      Ready    master   22m   v1.15.5
 
-## Module 3.4. Kubernetes Dashboard
+## Kubernetes Dashboard
 
 You are welcome to check if you can see the Kubernetes board from your
 machine. You can get your Kubernetes Dashboard's address from `cluster-info`:
@@ -180,7 +176,7 @@ to access these links, you should be able to see the Kubernetes Dashboard in a b
 
 ![pics/kubernetes_dashboard_intro.png](pics/kubernetes_dashboard_intro.png)
 
-# Module 04. Docker
+## Docker
 
 See our [Introduction to Docker](introduction_to_docker.md) as a refresher.
 
@@ -206,7 +202,7 @@ You can also check if your machine has cuda gpus, with `nvidia/cuda` image, runn
 
 If it does not, it is also ok.
 
-# Module 05. DockerHub
+## DockerHub
 
 In case you do not have it already, you need to create an account at dockerhub.com - it is a simple way for
 storing of the docker images for use in our clusters.
@@ -220,7 +216,7 @@ Login, and to check that you are connected, run sistem-wide information:
     ...
 
 
-# Module 06. Persistence on Azure Stack
+# Persistence on Azure Stack
 
 Most real-life applications need data storage. Azure Stack team actively works on making
 available the options available on the public cloud, however, there are nuances in a detauched
@@ -254,9 +250,9 @@ And you should see the Persisted Volume itself:
 Consult your cloud system administrator if you have any problems, there could be many other
 options sutable to particular scenarios and development lifecycle.
 
-# Module 07. Kubeflow
+# Kubeflow
 
-## Module 7.0 Install Kubeflow
+## Install Kubeflow
 
 The easiest way to install Kubeflow on Azure Stack is to run script `kubeflow_install.sh` from
 `sbin` directory. There are other useful scripts, all of which you should be running at
@@ -413,9 +409,13 @@ for the pods to come up:
 
 It will show the list of the services and pods for the cluster we just created.
 
-# Module 08. Kubeflow Dashboard
+## Installation using Porter (CNAP packages)
 
-## Module 8.0 Preparing Kubeflow dashboard
+Installing via Porter packaging manager (CNAP packages) is easy. See [Installing CNAP](install_porter/Readme.md).
+
+# Kubeflow Dashboard
+
+## Preparing Kubeflow dashboard
 
 Make sure all the pods are up and running(Using `kubectl get all -n kubeflow`, wait until
 they are).
@@ -433,7 +433,7 @@ Then the EXTERNAL-IP will become available from:
     NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
     istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
 
-## Module 8.1 Example Kubeflow dashboard
+## Example Kubeflow dashboard
 
 When you have your istio-ingressgateway's external ip(you can retrieve it using `get_kf_board_ip.sh`),
 open it in your browser, and make sure your firewall rules allow HTTP port 80.
@@ -445,7 +445,7 @@ let the pods create containers and start.
 
 For more information see [Installing Kubeflow on Azure](https://www.kubeflow.org/docs/azure/deploy/install-kubeflow/)
 
-# Module 14. GPU
+## GPU
 
 You can verify the system with nvidia/cuda image, running nvidia-smi:
 
@@ -471,7 +471,7 @@ There are certain changes you would need to make to your configuration and scrip
 be able to utilize gpus and other hardware acceleration tools. Deeper discussion is
 beyond the scope of this lab.
 
-# Module 16. Uninstalling Kubeflow
+# Uninstalling Kubeflow
 
 If you installed Kubeflow using `kubeflow_install.sh`, you can remove it using `kubeflow_uninstall.sh`:
 

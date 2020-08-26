@@ -2,7 +2,7 @@
 
 The goal of this lab is:
 
-- TODO
+- To run TFJobs within kubeflow environment
 
 [TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
 
