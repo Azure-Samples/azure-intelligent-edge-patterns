@@ -5,8 +5,6 @@ import { State } from 'RootStateType';
 export type Location = {
   id: number;
   name: string;
-  description: string;
-  is_demo: boolean;
 };
 
 const locationsAdapter = createEntityAdapter<Location>();
@@ -51,4 +49,5 @@ export default reducer;
 export const {
   selectAll: selectAllLocations,
   selectById: selectLocationById,
+  selectEntities: selectLocationEntities,
 } = locationsAdapter.getSelectors<State>((state) => state.locations);

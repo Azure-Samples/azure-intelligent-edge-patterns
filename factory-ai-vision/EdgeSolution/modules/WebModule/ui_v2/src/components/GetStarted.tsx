@@ -105,7 +105,7 @@ const GetStartedCard: React.FC<{
   return (
     <Card className={cardStyleSets.container}>
       <Card.Item fill>
-        <Image src="/icon/get-started.png" width="100%" />
+        <Image src="/icons/get-started.png" width="100%" />
       </Card.Item>
       <Card.Section className={cardStyleSets.mainSection}>
         {renderIdxIcon()}

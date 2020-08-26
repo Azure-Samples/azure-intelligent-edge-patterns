@@ -807,7 +807,7 @@ def twin_update_listener(client):
             continue
 
         model_uri = patch['model_uri']
-        print('[INFO] Got Model URI', flush=True)
+        print('[INFO] Got Model URI', model_uri, flush=True)
 
         if model_uri == onnx.model_uri:
             print('[INFO] Model Uri unchanged', flush=True)
