@@ -21,20 +21,27 @@ class CamerasConfig(AppConfig):
 
         if 'runserver' in sys.argv:
             # pylint: disable=C0415
-            from vision_on_edge.cameras.models import Camera
+            from .models import Camera
+            from ..locations.models import Location
             # pylint: enable=C0415
 
             logger.info("App ready ready while running server")
 
             create_demo = True
+
             if create_demo:
                 logger.info("Creating a demo camera object.")
+                # Demo Location should be created already
+                demo_locations = Location.objects.filter(is_demo=True)
+                if not demo_locations.exists():
+                    return
                 Camera.objects.update_or_create(
                     name="Demo Video",
                     is_demo=True,
                     defaults={
                         'rtsp': 'sample_video/video.mp4',
-                        'area': ""
+                        'area': "",
+                        'location': demo_locations.first()
                     })
 
                 logger.info("Creating demo objects... end")

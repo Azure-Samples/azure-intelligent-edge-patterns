@@ -31,7 +31,6 @@ class Project(models.Model):
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
     parts = models.ManyToManyField(Part, related_name="part")
     customvision_project_id = models.CharField(max_length=200,
                                                null=True,
