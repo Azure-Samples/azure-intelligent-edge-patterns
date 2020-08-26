@@ -76,11 +76,13 @@ export const AddCameraPanel: React.FC<AddCameraPanelProps> = ({ isOpen, onDissmi
   const onRenderFooterContent = useCallback(
     () => (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton onClick={onAdd}>Add</PrimaryButton>
+        <PrimaryButton onClick={onAdd} disabled={loading}>
+          Add
+        </PrimaryButton>
         <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
       </Stack>
     ),
-    [onAdd, onDissmiss],
+    [loading, onAdd, onDissmiss],
   );
 
   const onChange = (key: string) => (_, newValue) => {
