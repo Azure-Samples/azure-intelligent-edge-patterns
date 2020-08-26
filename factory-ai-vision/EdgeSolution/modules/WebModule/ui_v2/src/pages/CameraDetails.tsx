@@ -80,17 +80,7 @@ export const CameraDetails: React.FC = () => {
           <Breadcrumb items={breadCrumbItems} />
           <Stack tokens={{ childrenGap: 20 }} horizontal grow>
             <CameraInfo rtsp={camera.rtsp} location="" />
-            <Stack style={{ width: '80%' }}>
-              <Text styles={titleStyles}>Live feed</Text>
-              <ActionButton iconProps={{ iconName: 'Camera' }} onClick={openDialog}>
-                Capture image
-              </ActionButton>
-              <Stack.Item grow>
-                <div style={{ height: '90%' }}>
-                  <RTSPVideo rtsp={camera.rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
-                </div>
-              </Stack.Item>
-            </Stack>
+            <CameraLiveFeed rtsp={camera.rtsp} onBtnClick={openDialog} />
           </Stack>
         </Stack>
       </Stack>
@@ -139,3 +129,19 @@ const CameraInfo: React.FC<{ rtsp: string; location: string }> = ({ rtsp, locati
     </Stack>
   </Stack>
 );
+
+const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: () => void }> = ({ rtsp, onBtnClick }) => {
+  return (
+    <Stack style={{ width: '80%' }}>
+      <Text styles={titleStyles}>Live feed</Text>
+      <ActionButton iconProps={{ iconName: 'Camera' }} onClick={onBtnClick}>
+        Capture image
+      </ActionButton>
+      <Stack.Item grow>
+        <div style={{ height: '90%' }}>
+          <RTSPVideo rtsp={rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
+        </div>
+      </Stack.Item>
+    </Stack>
+  );
+};
