@@ -1,10 +1,11 @@
-import { createSlice, createEntityAdapter, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import Axios from 'axios';
 import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
 import { BoxLabel, PolygonLabel } from './type';
 import { toggleShowAOI } from './actions';
+import { selectLocationEntities } from './locationSlice';
 
 type CameraFromServer = {
   id: number;
@@ -12,6 +13,7 @@ type CameraFromServer = {
   rtsp: string;
   area: string;
   is_demo: boolean;
+  location: number;
 };
 
 type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area'> & {
@@ -31,6 +33,7 @@ export type Camera = {
   rtsp: string;
   area: string;
   useAOI: boolean;
+  location: number;
 };
 
 const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
@@ -40,6 +43,7 @@ const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
     rtsp: response.rtsp,
     useAOI: response.area.useAOI,
     AOIs: response.area.AOIs,
+    location: response.location,
   };
 };
 
@@ -95,7 +99,7 @@ export const getCameras = createAsyncThunk<any, boolean, { state: State }>('came
 
 export const postCamera = createAsyncThunk(
   'cameras/post',
-  async (newCamera: Pick<Camera, 'name' | 'rtsp'>) => {
+  async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'location'>) => {
     const response = await Axios.post(`/api/cameras/`, newCamera);
     return response.data;
   },
@@ -103,7 +107,7 @@ export const postCamera = createAsyncThunk(
 
 export const putCamera = createAsyncThunk(
   'cameras/put',
-  async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'id'>) => {
+  async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'id' | 'location'>) => {
     const response = await Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
     return response.data;
   },
@@ -142,4 +146,14 @@ export default reducer;
 
 export const { selectAll: selectAllCameras, selectById: selectCameraById } = entityAdapter.getSelectors(
   (state: State) => state.camera,
+);
+
+export const selectAllCamerasWithLocation = createSelector(
+  [selectAllCameras, selectLocationEntities],
+  (cameras, locations) => {
+    return cameras.map((c) => ({
+      ...c,
+      location: locations[c.location]?.name ?? '',
+    }));
+  },
 );

@@ -23,7 +23,7 @@ export const Cameras: React.FC = () => {
         onClick: openPanel,
       },
     ],
-    [],
+    [openPanel],
   );
 
   return (

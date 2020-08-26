@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-
-import { selectAllCameras, getCameras, Camera } from '../store/cameraSlice';
-import { EmptyAddIcon } from './EmptyAddIcon';
 import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui/react';
+
+import { getCameras, Camera, selectAllCamerasWithLocation } from '../store/cameraSlice';
+import { EmptyAddIcon } from './EmptyAddIcon';
 
 export const CameraDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddBtnClick }) => {
   const [loading, setLoading] = useState(false);
-  const cameras = useSelector(selectAllCameras);
+  const cameras = useSelector(selectAllCamerasWithLocation);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -23,7 +23,7 @@ export const CameraDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAd
       await dispatch(getCameras(false));
       setLoading(false);
     })();
-  }, []);
+  }, [dispatch]);
 
   if (loading) return <Spinner size={SpinnerSize.large} />;
 

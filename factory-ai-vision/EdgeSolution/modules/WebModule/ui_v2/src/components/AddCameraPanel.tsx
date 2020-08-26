@@ -81,14 +81,36 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
 
     setLoading(true);
     if (mode === PanelMode.Create) {
-      await dispatch(postCamera({ name: formData.name.value, rtsp: formData.rtsp.value }));
+      await dispatch(
+        postCamera({
+          name: formData.name.value,
+          rtsp: formData.rtsp.value,
+          location: parseInt(formData.location.value, 10),
+        }),
+      );
       setFormData(initialForm);
     } else {
-      await dispatch(putCamera({ id: cameraId, name: formData.name.value, rtsp: formData.rtsp.value }));
+      await dispatch(
+        putCamera({
+          id: cameraId,
+          name: formData.name.value,
+          rtsp: formData.rtsp.value,
+          location: parseInt(formData.location.value, 10),
+        }),
+      );
     }
     setLoading(false);
     onDissmiss();
-  }, [cameraId, dispatch, formData.name.value, formData.rtsp.value, mode, onDissmiss, validate]);
+  }, [
+    cameraId,
+    dispatch,
+    formData.location.value,
+    formData.name.value,
+    formData.rtsp.value,
+    mode,
+    onDissmiss,
+    validate,
+  ]);
 
   const onRenderFooterContent = useCallback(
     () => (

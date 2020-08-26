@@ -24,6 +24,7 @@ import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
+import { selectLocationById } from '../store/locationSlice';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
@@ -32,6 +33,7 @@ const infoBlockTokens: IStackTokens = { childrenGap: 10 };
 export const CameraDetails: React.FC = () => {
   const cameraId = parseInt(useQuery().get('cameraId'), 10);
   const camera = useSelector((state: State) => selectCameraById(state, cameraId));
+  const locationName = useSelector((state: State) => selectLocationById(state, camera?.location)?.name);
   const projectCameraId = useSelector((state: State) => state.project.data.camera);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -97,7 +99,7 @@ export const CameraDetails: React.FC = () => {
         <Stack tokens={{ childrenGap: 30 }} styles={{ root: { padding: '15px' } }} grow>
           <Breadcrumb items={breadCrumbItems} />
           <Stack tokens={{ childrenGap: 20 }} horizontal grow>
-            <CameraInfo rtsp={camera.rtsp} location="" />
+            <CameraInfo rtsp={camera.rtsp} location={locationName} />
             <CameraLiveFeed rtsp={camera.rtsp} onBtnClick={openDialog} />
           </Stack>
         </Stack>
@@ -154,7 +156,7 @@ const CameraInfo: React.FC<{ rtsp: string; location: string }> = ({ rtsp, locati
     </Stack>
     <Stack tokens={infoBlockTokens}>
       <Text styles={titleStyles}>Location</Text>
-      <Text>{/** TODO add location */}</Text>
+      <Text>{location}</Text>
     </Stack>
   </Stack>
 );

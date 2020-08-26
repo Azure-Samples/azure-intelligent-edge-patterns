@@ -49,4 +49,5 @@ export default reducer;
 export const {
   selectAll: selectAllLocations,
   selectById: selectLocationById,
+  selectEntities: selectLocationEntities,
 } = locationsAdapter.getSelectors<State>((state) => state.locations);
