@@ -17,6 +17,7 @@ function App() {
   const dispatch = useDispatch();
   const appInsightKey = useSelector<State, string>((state) => state.setting.appInsightKey);
   const isAppInsightOn = useSelector<State, boolean>((state) => state.setting.isCollectData);
+  const rejectMsg = useSelector((state: State) => state.rejectMsg);
 
   useEffect(() => {
     dispatch(thunkGetSettingAndAppInsightKey());
@@ -25,6 +26,10 @@ function App() {
   useEffect(() => {
     initializeIcons(/* optional base url */);
   }, []);
+
+  useEffect(() => {
+    if (rejectMsg) alert(rejectMsg);
+  }, [rejectMsg]);
 
   return (
     <BrowserRouter>
