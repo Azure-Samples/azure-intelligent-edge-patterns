@@ -10,7 +10,7 @@ type EmptyAddIconProps = {
 export const EmptyAddIcon: React.FC<EmptyAddIconProps> = ({ onAddBtnClick, btnTxt, text }) => (
   <Stack tokens={{ childrenGap: 10 }} verticalAlign="center" grow>
     <Stack.Item align="center">
-      <img src="/icon/emptyIcon.png" />
+      <img src="/icons/emptyIcon.png" />
     </Stack.Item>
     <Stack.Item align="center">
       <Text>{text}</Text>
