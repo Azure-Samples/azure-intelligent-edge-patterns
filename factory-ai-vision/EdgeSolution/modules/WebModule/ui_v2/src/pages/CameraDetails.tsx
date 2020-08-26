@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import {
   Breadcrumb,
   Stack,
@@ -15,10 +15,11 @@ import {
   MessageBarButton,
   ActionButton,
 } from '@fluentui/react';
-import { useQuery } from '../hooks/useQuery';
-import { State } from 'RootStateType';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectCameraById, getCameras } from '../store/cameraSlice';
+
+import { State } from 'RootStateType';
+import { useQuery } from '../hooks/useQuery';
+import { selectCameraById, getCameras, deleteCamera } from '../store/cameraSlice';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
 import { CaptureDialog } from '../components/CaptureDialog';
@@ -28,10 +29,11 @@ const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } }
 const infoBlockTokens: IStackTokens = { childrenGap: 10 };
 
 export const CameraDetails: React.FC = () => {
-  const camerId = parseInt(useQuery().get('cameraId'), 10);
-  const camera = useSelector((state: State) => selectCameraById(state, camerId));
+  const cameraId = parseInt(useQuery().get('cameraId'), 10);
+  const camera = useSelector((state: State) => selectCameraById(state, cameraId));
   const projectCameraId = useSelector((state: State) => state.project.data.camera);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
@@ -46,6 +48,16 @@ export const CameraDetails: React.FC = () => {
       text: 'Delete',
       iconProps: {
         iconName: 'Delete',
+      },
+      onClick: () => {
+        // Because onClick cannot accept the return type Promise<void>, use the IIFE to workaround
+        (async () => {
+          // eslint-disable-next-line no-restricted-globals
+          if (!confirm('Sure you want to delete?')) return;
+
+          await dispatch(deleteCamera(cameraId));
+          history.push('/cameras');
+        })();
       },
     },
   ];
@@ -66,7 +78,7 @@ export const CameraDetails: React.FC = () => {
     { key: camera.name, text: camera.name },
   ];
 
-  const isCameraInUsed = projectCameraId === camerId;
+  const isCameraInUsed = projectCameraId === cameraId;
 
   return (
     <>
@@ -88,7 +100,7 @@ export const CameraDetails: React.FC = () => {
         isOpen={captureDialogOpen}
         onDismiss={closeDialog}
         captureLabelMode={1}
-        defaultSelectedCameraId={camerId}
+        defaultSelectedCameraId={cameraId}
       />
     </>
   );
@@ -125,7 +137,7 @@ const CameraInfo: React.FC<{ rtsp: string; location: string }> = ({ rtsp, locati
     </Stack>
     <Stack tokens={infoBlockTokens}>
       <Text styles={titleStyles}>Location</Text>
-      <Text>{/**TODO add location */}</Text>
+      <Text>{/** TODO add location */}</Text>
     </Stack>
   </Stack>
 );
