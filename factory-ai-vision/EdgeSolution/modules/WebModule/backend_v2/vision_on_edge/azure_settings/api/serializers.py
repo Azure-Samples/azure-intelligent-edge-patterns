@@ -20,7 +20,7 @@ class SettingSerializer(serializers.ModelSerializer):
         """
 
         model = Setting
-        exclude = ['id']
+        fields = '__all__'
 
     def create(self, validated_data):
         """create.
