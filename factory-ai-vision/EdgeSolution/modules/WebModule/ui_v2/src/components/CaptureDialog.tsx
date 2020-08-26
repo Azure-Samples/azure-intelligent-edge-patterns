@@ -10,12 +10,13 @@ import {
   mergeStyleSets,
   IDropdownOption,
 } from '@fluentui/react';
+import { useSelector } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
+
+import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
 import { CaptureLabelMode } from './RTSPVideo/RTSPVideo.type';
-import { useSelector } from 'react-redux';
 import { selectAllCameras, selectCameraById } from '../store/cameraSlice';
-import { createSelector } from '@reduxjs/toolkit';
-import { State } from 'RootStateType';
 
 const { palette } = getTheme();
 
@@ -101,7 +102,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
         </Stack>
         <DialogFooter>
           {captureLabelMode === CaptureLabelMode.PerImage && <PrimaryButton text="Next" />}
-          <DefaultButton text="Cancel" />
+          <DefaultButton text="Cancel" onClick={onDismiss} />
         </DialogFooter>
       </>
     </Dialog>
