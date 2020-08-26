@@ -48,9 +48,9 @@ def update_app_insight_counter(
             logger.info("Sending Logs to App Insight")
             trainer = project_obj.setting.get_trainer_obj()
             images_now = trainer.get_tagged_image_count(
-                project_obj.customvision_project_id)
+                project_obj.customvision_id)
             parts_now = len(
-                trainer.get_tags(project_obj.customvision_project_id))
+                trainer.get_tags(project_obj.customvision_id))
             # Traces
             az_logger = get_app_insight_logger()
             az_logger.warning(
@@ -101,9 +101,9 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     trainer.get_project(customvision_project_id)
 
     # Invalid CustomVision Project ID handled by exception
-    project_obj.customvision_project_name = trainer.get_project(
+    project_obj.name = trainer.get_project(
         project_id=customvision_project_id).name
-    project_obj.customvision_project_id = customvision_project_id
+    project_obj.customvision_id = customvision_project_id
     project_obj.deployed = False
     project_obj.save()
 
@@ -337,7 +337,7 @@ def update_train_status_worker(project_id):
     """
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-    customvision_project_id = project_obj.customvision_project_id
+    customvision_id = project_obj.customvision_id
     wait_prepare = 0
     # If exceed, this project probably not going to be trained
     max_wait_prepare = 60
@@ -349,7 +349,7 @@ def update_train_status_worker(project_id):
     while True:
         time.sleep(1)
 
-        iterations = trainer.get_iterations(customvision_project_id)
+        iterations = trainer.get_iterations(customvision_id)
         if len(iterations) == 0:
             upcreate_training_status(
                 project_id=project_obj.id,
@@ -374,7 +374,7 @@ def update_train_status_worker(project_id):
             training_init = True
             continue
 
-        exports = trainer.get_exports(customvision_project_id, iteration.id)
+        exports = trainer.get_exports(customvision_id, iteration.id)
         if len(exports) == 0 or not exports[0].download_uri:
             upcreate_training_status(
                 project_id=project_obj.id,
@@ -388,25 +388,24 @@ def update_train_status_worker(project_id):
         project_obj.download_uri = exports[0].download_uri
         project_obj.save(update_fields=["download_uri"])
 
-        logger.info("Successfulling export model: %s",
+        logger.info("Successfully export model: %s",
                     project_obj.download_uri)
 
         logger.info("Training Status: Completed")
         train_performance_list = []
         for iteration in iterations[:2]:
             train_performance_list.append(
-                trainer.get_iteration_performance(customvision_project_id,
+                trainer.get_iteration_performance(customvision_id,
                                                   iteration.id).as_dict())
 
             logger.info("Training Performance: %s", train_performance_list)
-            upcreate_training_status(
-                project_id=project_obj.id,
-                performance=json.dumps(train_performance_list),
-                need_to_send_notification=True,
-                **progress_constants.PROGRESS_0_OK)
-            project_obj.has_configured = True
-            project_obj.save()
-            break
+        upcreate_training_status(
+            project_id=project_obj.id,
+            performance=json.dumps(train_performance_list),
+            need_to_send_notification=True,
+            **progress_constants.PROGRESS_0_OK)
+        project_obj.save()
+        break
 
 
 def train_project_helper(project_id):
