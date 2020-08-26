@@ -33,11 +33,15 @@ const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
 
 type CaptureDialogProps = {
   captureLabelMode: CaptureLabelMode;
+  isOpen: boolean;
+  onDismiss: () => void;
   defaultSelectedCameraId?: number;
 };
 
 export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   captureLabelMode,
+  isOpen,
+  onDismiss,
   defaultSelectedCameraId,
 }) => {
   const [selectedCameraId, setSelectedCameraId] = useState(defaultSelectedCameraId);
@@ -51,8 +55,8 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   return (
     <Dialog
       dialogContentProps={{ title: 'Capture', styles: { content: { width: '1080px' } } }}
-      hidden={false}
-      onDismiss={() => {}}
+      hidden={!isOpen}
+      onDismiss={onDismiss}
       modalProps={{
         isBlocking: true,
         layerProps: {

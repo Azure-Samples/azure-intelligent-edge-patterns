@@ -21,6 +21,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectCameraById, getCameras } from '../store/cameraSlice';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
+import { CaptureDialog } from '../components/CaptureDialog';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
@@ -54,6 +55,10 @@ export const CameraDetails: React.FC = () => {
     dispatch(thunkGetProject(false));
   }, [dispatch]);
 
+  const [captureDialogOpen, setCaptureDialogOpen] = useState(false);
+  const openDialog = () => setCaptureDialogOpen(true);
+  const closeDialog = () => setCaptureDialogOpen(false);
+
   if (camera === undefined) return <Spinner label="Loading" />;
 
   const breadCrumbItems: IBreadcrumbItem[] = [
@@ -64,24 +69,34 @@ export const CameraDetails: React.FC = () => {
   const isCameraInUsed = projectCameraId === camerId;
 
   return (
-    <Stack styles={{ root: { height: '100%' } }}>
-      <CommandBar
-        items={commandBarItems}
-        styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
-      />
-      <CameraInUsedMsgBar isInUsed={isCameraInUsed} />
-      <Stack tokens={{ childrenGap: 30 }} styles={{ root: { padding: '15px' } }} grow>
-        <Breadcrumb items={breadCrumbItems} />
-        <Stack tokens={{ childrenGap: 20 }} horizontal grow>
-          <CameraInfo rtsp={camera.rtsp} location="" />
-          <Stack style={{ width: '80%' }}>
-            <Text styles={titleStyles}>Live feed</Text>
-            <ActionButton iconProps={{ iconName: 'Camera' }}>Capture image</ActionButton>
-            <RTSPVideo rtsp={camera.rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
+    <>
+      <Stack styles={{ root: { height: '100%' } }}>
+        <CommandBar
+          items={commandBarItems}
+          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+        />
+        <CameraInUsedMsgBar isInUsed={isCameraInUsed} />
+        <Stack tokens={{ childrenGap: 30 }} styles={{ root: { padding: '15px' } }} grow>
+          <Breadcrumb items={breadCrumbItems} />
+          <Stack tokens={{ childrenGap: 20 }} horizontal grow>
+            <CameraInfo rtsp={camera.rtsp} location="" />
+            <Stack style={{ width: '80%' }}>
+              <Text styles={titleStyles}>Live feed</Text>
+              <ActionButton iconProps={{ iconName: 'Camera' }} onClick={openDialog}>
+                Capture image
+              </ActionButton>
+              <RTSPVideo rtsp={camera.rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
+            </Stack>
           </Stack>
         </Stack>
       </Stack>
-    </Stack>
+      <CaptureDialog
+        isOpen={captureDialogOpen}
+        onDismiss={closeDialog}
+        captureLabelMode={1}
+        defaultSelectedCameraId={camerId}
+      />
+    </>
   );
 };
 
