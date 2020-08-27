@@ -8,6 +8,7 @@ import logging
 
 import requests
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
@@ -15,7 +16,7 @@ from rest_framework.response import Response
 
 from ...azure_training_status.models import TrainingStatus
 from ..models import PartDetection
-from .serializers import PartDetectionSerializer
+from .serializers import PartDetectionSerializer, ExportSerializer
 from ...azure_projects.utils import train_project_helper
 from ..utils import if_trained_then_deploy_helper
 
@@ -75,6 +76,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_summary='Export Part Detection status',
+        responses={'200': ExportSerializer})
     @action(detail=True, methods=["get"])
     def export(self, request, pk=None) -> Response:
         """get the status of train job sent to custom vision
