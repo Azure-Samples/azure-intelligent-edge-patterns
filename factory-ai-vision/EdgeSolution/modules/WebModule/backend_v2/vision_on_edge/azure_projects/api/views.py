@@ -74,7 +74,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
         trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-        customvision_project_id = project_obj.customvision_project_id
+        customvision_project_id = project_obj.customvision_id
 
         if project_obj.is_demo:
             return Response({

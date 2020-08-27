@@ -42,41 +42,26 @@ class PartDetection(models.Model):
     prob_threshold = models.IntegerField(default=10)
 
     @staticmethod
-    def post_save(created, update_fields, **kwargs):
-        """Project post_save
+    def post_save(**kwargs):
+        """PartDetection post_save
         """
-        logger.info("Project post_save")
+        logger.info("PartDetection post_save")
         instance = kwargs["instance"]
 
         if not instance.has_configured:
-            logger.error("This project is not configured to inference")
+            logger.error("This PartDetection is not configured")
             logger.error("Not sending any request to inference")
             return
 
-        confidence_min = 30
-        confidence_max = 80
-        max_images = 10
-        metrics_is_send_iothub = False
-        metrics_accuracy_threshold = 50
-        metrics_frame_per_minutes = 6
-
-        logger.info("Saving instance: %s %s", instance, update_fields)
-
-        if instance.accuracyRangeMin is not None:
-            confidence_min = instance.accuracyRangeMin
-
-        if instance.accuracyRangeMax is not None:
-            confidence_max = instance.accuracyRangeMax
-
-        if instance.maxImages is not None:
-            max_images = instance.maxImages
-
-        if instance.metrics_is_send_iothub is not None:
-            metrics_is_send_iothub = instance.metrics_is_send_iothub
-        if instance.metrics_accuracy_threshold is not None:
-            metrics_accuracy_threshold = instance.metrics_accuracy_threshold
-        if instance.metrics_frame_per_minutes is not None:
-            metrics_frame_per_minutes = instance.metrics_frame_per_minutes
+        confidence_min = getattr(instance, 'accuracyRangeMin', 30)
+        confidence_max = getattr(instance, 'accuracyRangeMax', 80)
+        max_images = getattr(instance.project, 'maxImages', 10)
+        metrics_is_send_iothub = getattr(instance, 'metrics_is_send_iothub',
+                                         False)
+        metrics_accuracy_threshold = getattr(instance,
+                                             'metrics_accuracy_threshold', 50)
+        metrics_frame_per_minutes = getattr(instance,
+                                            'metrics_frame_per_minutes', 6)
 
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
@@ -103,12 +88,7 @@ class PartDetection(models.Model):
                          args=(confidence_min, confidence_max,
                                max_images)).start()
 
-        if update_fields is not None:
-            return
-        if not created:
-            logger.info("Project modified")
-
-        logger.info("Project post_save... End")
+        logger.info("PartDetection post_save... End")
 
     def update_prob_threshold(self, prob_threshold):
         """update confidenece threshold of BoundingBox
