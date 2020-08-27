@@ -353,6 +353,53 @@ shared drive, and in the Tensorboard, and if not, please re-visit [Working with 
 
 See more on PyTorch at [https://github.com/pytorch/pytorch](https://github.com/pytorch/pytorch)
 
+# Performance metrics
+
+We can change the number of workers and find the configuration that is best suitable for a particular model.
+
+Here is a typical event log for the sample we built before, for 1 worker, it took 17 minutes:
+
+```
+...
+  Replica Statuses:
+    Master:
+      Succeeded:  1
+    Worker:
+      Succeeded:  1
+  Start Time:     2020-08-27T18:11:12Z
+Events:
+  Type    Reason                   Age   From              Message
+  ----    ------                   ----  ----              -------
+  Normal  SuccessfulCreatePod      17m   pytorch-operator  Created pod: pytorch-dist-mnist-gloo-demo-m1-master-0
+  Normal  SuccessfulCreateService  17m   pytorch-operator  Created service: pytorch-dist-mnist-gloo-demo-m1-master-0
+  Normal  SuccessfulCreatePod      17m   pytorch-operator  Created pod: pytorch-dist-mnist-gloo-demo-m1-worker-0
+  Normal  PyTorchJobSucceeded      105s  pytorch-operator  PyTorchJob pytorch-dist-mnist-gloo-demo-m1 is successfully completed.
+```
+
+For comparison, here is a typical even log for 3 workers:
+
+```
+...
+  Replica Statuses:
+    Master:
+      Succeeded:  1
+    Worker:
+      Succeeded:  3
+  Start Time:     2020-08-27T17:44:45Z
+Events:
+  Type    Reason                   Age   From              Message
+  ----    ------                   ----  ----              -------
+  Normal  SuccessfulCreatePod      24m   pytorch-operator  Created pod: pytorch-dist-mnist-gloo-demo-worker-0
+  Normal  SuccessfulCreatePod      24m   pytorch-operator  Created pod: pytorch-dist-mnist-gloo-demo-worker-1
+  Normal  SuccessfulCreatePod      24m   pytorch-operator  Created pod: pytorch-dist-mnist-gloo-demo-worker-2
+  Normal  SuccessfulCreatePod      24m   pytorch-operator  Created pod: pytorch-dist-mnist-gloo-demo-master-0
+  Normal  SuccessfulCreateService  24m   pytorch-operator  Created service: pytorch-dist-mnist-gloo-demo-master-0
+  Normal  PyTorchJobSucceeded      6s    pytorch-operator  PyTorchJob pytorch-dist-mnist-gloo-demo is successfully completed.
+```
+
+This sample did not benefit from the distribution, and it is matter of having the PyTorch implementation
+that does. It is outside of the scope of this lab, please see [Kubeflow PyTorch operator](https://www.kubeflow.org/docs/components/training/pytorch/) for more details.
+
 # Links
 
 For more information:
@@ -362,4 +409,4 @@ For more information:
 
 ---
 
-[Back to Lab::01](../02-TFJobs/Readme.md) | [Back to main page](../Readme.md) | [Next to Lab::04](../04-KFServing/Readme.md)
+[Back to Lab::02](../02-TFJobs/Readme.md) | [Back to main page](../Readme.md) | [Next to Lab::04](../04-KFServing/Readme.md)

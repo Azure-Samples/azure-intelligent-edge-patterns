@@ -307,7 +307,7 @@ There is a projector that animates the points in the NN layer dimensions:
 
 We can observe a simple speed-up indication by how fast the workers finish their portions.
 
-Here is a typical even log for 1 worker:
+Here is a typical event log for 1 worker:
 
 ```
 ...
