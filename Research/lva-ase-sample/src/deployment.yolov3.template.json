@@ -59,26 +59,6 @@
               "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Source\":\"$INPUT_VIDEO_FOLDER_ON_DEVICE\",\"Target\":\"/live/mediaServer/media\",\"Type\":\"volume\"}],\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
             }
-          },
-          "WebModule": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "teamlvacontainerregistry.azurecr.io/app:v1",
-              "createOptions": {
-                "HostConfig": {
-                  "PortBindings": {
-                    "8081/tcp": [
-                      {
-                        "HostPort": 8081
-                      }
-                    ]
-                  }
-                }
-              }
-            }
           }
         }
       }
