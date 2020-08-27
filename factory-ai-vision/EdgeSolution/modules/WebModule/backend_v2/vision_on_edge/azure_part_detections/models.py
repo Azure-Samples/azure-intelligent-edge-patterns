@@ -36,6 +36,7 @@ class PartDetection(models.Model):
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
     retraining_counter = models.IntegerField(default=0)
+    maxImage = models.IntegerField(default=10)
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
@@ -55,7 +56,7 @@ class PartDetection(models.Model):
 
         confidence_min = getattr(instance, 'accuracyRangeMin', 30)
         confidence_max = getattr(instance, 'accuracyRangeMax', 80)
-        max_images = getattr(instance.project, 'maxImages', 10)
+        max_images = getattr(instance, 'maxImages', 10)
         metrics_is_send_iothub = getattr(instance, 'metrics_is_send_iothub',
                                          False)
         metrics_accuracy_threshold = getattr(instance,
