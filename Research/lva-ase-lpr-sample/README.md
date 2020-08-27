@@ -1,6 +1,6 @@
 # Live Video Analytics License Plate Recognition Sample
 
-This directory contains all the necessary files and instructions to run a license plate recognition sample on the Azure Stack Edge, using Live Video Analytics. This uses two Microsoft internal PyTorch models, one to do license plate detection and one to do license plate recognition (OCR). They were built by an intern in MSR Asia.
+This directory contains all the necessary files and instructions to run a license plate recognition sample on the Azure Stack Edge, using Live Video Analytics. This uses two Microsoft internal PyTorch models, one to do license plate detection and one to do license plate recognition (OCR).
 
 This sample is for internal use only, until the models can be made public. The code for the model itself is not included in this sample, but we will be pulling it's docker image from Mahesh's Azure Container Registry (ACR). In order to run this sample, you will need the username and password for his ACR __containerregistry12345__
 
@@ -12,7 +12,7 @@ This sample is for internal use only, until the models can be made public. The c
 | `sample-lpr-topology.json`   | Media Graph topology file for lpr sample.                        |
 | `README.md`             | This README file.                                             |
 | `.gitignore`            | Files to ignore.                                              |
-| `jsonfiles` 			  | JSON files containing payloads for running LPR on LVA		  |
+| `jsonFiles` 			  | JSON files containing payloads for running LPR on LVA		  |
 | `lvaScript.sh` 		  | Script to run in cloud to automate deployment and LVA runtime of LPR models |
 | `sampleoperations.json` | JSON file defining the sequence of direct methods to invoke.  |
 | `sampledeployment.lpr.template.json` | The deployment manifest template to deploy this sample to your Azure Stack Edge device               |
@@ -32,7 +32,14 @@ This sample is for internal use only, until the models can be made public. The c
 * You should see output from the Azure IoT Hub when you run the YoloV3 sample, and see the corresponding videos in your output video folder
 * You will need to ask Mahesh for the password to his ACR. Without this, you will not be able to pull the required container image for the AI module
 
-If you have done the above correctly, this sample should take ~30 minutes. The hefty part of this is waiting for your device to finish downloading the Docker image containing the license plate detection and recognition. You will first run a script (or download content if working from VS Code), download the sample video, update your .env file, and then run the sample! 
+If you have done the above correctly, this sample should take ~30 minutes. The hefty part of this is waiting for your device to finish downloading the Docker image containing the license plate detection and recognition. You can choose option 1: run a script in the cloud to automate the process, or option 2: deploy from VS Code
+
+
+## Download the sample video
+Regardless of whether you choose option 1 or option 2, you must do the following:
+* Download the lprtestvideo.mkv file and put it in your local share that you used for the YoloV3 sample. This is meant to simulate a RTSP stream.
+	* If you wish to use a different share, you must update your .env file to match
+	* Don't rename the lprtestvideo.mkv file unless you plan to change it in the lprInstanceSet.json file!
 
 ### Option 1: run the script in the cloud ###
 First thing you must do, is modify the .env file (found in lva-sample-on-ase/edge-deployment/.env) in the cloud. Change the following two variables to use Mahesh's registry (you must obtain
@@ -55,7 +62,7 @@ After your deployment finishes (this can take up to 30 minutes!) run the command
 ```
 Then you're done! 
 
-Follow next steps directions [here](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/readme.md#next-steps) if you'd like to learn more.
+Follow next steps directions [here](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/readme.md#next-steps) to learn more.
 
 ### Option 2: VS Code ###
 ## Copy three files into your local repository
@@ -68,9 +75,6 @@ You can choose to download these files from online or create the files yourself 
 * Put this file in your src/cloud-to-device-console-app folder
     * Replace your __operations.json__ file with the contents in sampleoperations.json file in this folder
 
-## Download the sample video
-* Download the lprtestvideo.mkv file and put it in your local share. This is meant to simulate a RTSP stream.
-
 ## Update your .env file
 You will need to modify two values
 * CONTAINER_REGISTRY_USERNAME_myacr=containerregistry12345
@@ -78,7 +82,7 @@ You will need to modify two values
 
 ## Running the sample
 
-The process here is identical to the one used to deploy the YoloV3 model. For reference, here are the steps:
+Execute the following directions:
 
 * Right click on src/edge/deployment.lpr.template.json and select **“Generate Iot Edge deployment manifest”**. This will create an IoT Edge deployment manifest file in src/edge/config folder named deployment.yolov3.amd64.json.
 * Right click on src/edge/config /deployment.yolov3.amd64.json and select **"Create Deployment for single device"** and select the name of your edge device. This will trigger the deployment of the IoT Edge modules to your Edge device. You can view the status of the deployment in the Azure IoT Hub extension (expand 'Devices' and then 'Modules' under your IoT Edge device).

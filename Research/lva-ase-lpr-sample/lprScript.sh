@@ -3,8 +3,8 @@
 
 BASE_URL='https://raw.githubusercontent.com/julialieberman/azure-intelligent-edge-patterns/t-jull-lprsample/Research/lva-ase-lpr-sample'
 ENV_FILE='edge-deployment/.env'
-JSONFILEPATH="$BASE_URL/jsonfiles/"
-JSONOUTPUTFILEPATH="jsonfiles/"
+JSONFILEPATH="$BASE_URL/jsonFiles/"
+JSONOUTPUTFILEPATH="jsonFiles/"
 DEPLOYMENT_MANIFEST_URL="$BASE_URL/sampledeployment.lpr.template.json"
 DEPLOYMENT_MANIFEST_FILE='sampledeployment.lpr.template.json'
 
@@ -20,9 +20,9 @@ curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
 source $ENV_FILE
 
 # replace values in helper script to use updated method payloads
-sed -i "s/instanceset/lprInstanceSet/" $HELPER_SCRIPT
-sed -i "s/topologyset/lprTopologySet/" $HELPER_SCRIPT
-sed -i "s/topologydelete/lprTopologyDelete/" $HELPER_SCRIPT
+sed -i "s/instanceSet/lprInstanceSet/" $HELPER_SCRIPT
+sed -i "s/topologySet/lprTopologySet/" $HELPER_SCRIPT
+sed -i "s/topologyDelete/lprTopologyDelete/" $HELPER_SCRIPT
 
 # get updated files for media graph / instance payloads
 declare -a jsonOnlineFiles
