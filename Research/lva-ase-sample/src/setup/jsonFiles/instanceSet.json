@@ -1,0 +1,30 @@
+{
+    "methodName": "GraphInstanceSet",
+    "responseTimeoutInSeconds": 200,
+    "payload":    {
+      "@apiVersion": "1.0",
+      "name": "Sample-Instance-1",
+      "properties": {
+        "topologyName": "EVROnMotionExtensionLocal",
+        "description": "Sample graph description",
+        "parameters": [
+          {
+            "name": "rtspUrl",
+            "value": "rtsp://rtspsim:554/media/camera-300s.mkv"
+          },
+          {
+            "name": "rtspUserName",
+            "value": "testuser"
+          },
+          {
+            "name": "inferencingUrl",
+            "value": "http://yolov3/score"
+          },
+          {
+            "name": "rtspPassword",
+            "value": "testpassword"
+          }
+        ]
+      }
+    }
+}
