@@ -51,7 +51,7 @@ Hit Control+S to save.
 
 Assuming you are still inside your lva-sample-on-ase folder in the cloud shell, run the following commands
 ```
-curl -X GET https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lprsample/Research/lva-ase-lpr-sample/lprScript.sh > lprScript.sh
+curl -X GET https://raw.githubusercontent.com/julialieberman/azure-intelligent-edge-patterns/t-jull-lprsample/Research/lva-ase-lpr-sample/lprScript.sh > lprScript.sh
 chmod +x lprScript.sh
 ./lprScript.sh
 ```
