@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""App views"""
+"""App views
+"""
 
 from __future__ import absolute_import, unicode_literals
 
@@ -15,6 +16,7 @@ from rest_framework.response import Response
 from ...azure_training_status.models import TrainingStatus
 from ..models import PartDetection
 from .serializers import PartDetectionSerializer
+from ...azure_projects.utils import train_project_helper
 from ..utils import if_trained_then_deploy_helper
 
 logger = logging.getLogger(__name__)
@@ -132,9 +134,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         Train/Export/Deploy a part_detection_obj.
         """
         queryset = self.get_queryset()
-        part_detection_obj = get_object_or_404(queryset, pk=pk)
+        instance = get_object_or_404(queryset, pk=pk)
         # is_demo = request.query_params.get("demo")
         # if project is demo, let training status go to ok and should go on.
-        train_project_helper(project_id, parts)
-        if_trained_then_deploy_helper(part_detection_id=part_detection_obj.id)
+        train_project_helper(project_id=instance.project.id)
+        if_trained_then_deploy_helper(part_detection_id=instance.id)
         return Response({'status': 'ok'})

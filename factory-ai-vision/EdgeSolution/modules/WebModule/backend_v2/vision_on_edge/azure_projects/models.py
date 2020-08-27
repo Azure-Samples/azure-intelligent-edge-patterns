@@ -58,6 +58,8 @@ class Project(models.Model):
             logger.info("Project customvision_id given: %s",
                         instance.customvision_id)
             logger.info("Project name given: %s", instance.name)
+            logger.info("Checking...")
+
             if instance.is_demo or not instance.setting:
                 logger.info("Project instance is demo. Pass pre_save")
                 return
@@ -69,7 +71,6 @@ class Project(models.Model):
             if instance.customvision_id:
                 # Endpoint and Training_key is valid, and trying to save with
                 # customvision_id...
-
                 project = trainer.get_project(instance.customvision_id)
                 instance.name = project.name
                 logger.info("Project Found. Set instance.name to %s",
