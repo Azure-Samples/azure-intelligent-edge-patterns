@@ -3,9 +3,9 @@
     "responseTimeoutInSeconds": 200,
     "payload":    
     {
-  "@apiVersion": "1.0",
-  "name": "EVROnMotionExtensionLocal",
-  "properties": {
+      "@apiVersion": "1.0",
+      "name": "EVROnMotionExtensionLocal",
+      "properties": {
     "description": "Event-based video recording to Assets based on motion events, and using HTTP Extension to send images to an external inference engine",
     "parameters": [
       {
@@ -165,6 +165,6 @@
         ]
       }
     ]
-  }
-}
+      }
+    }
 }

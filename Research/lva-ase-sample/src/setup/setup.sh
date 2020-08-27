@@ -26,8 +26,8 @@ ROLE_DEFINITION_URL="$BASE_URL/setup/LVAEdgeUserRoleDefinition.json"
 ROLE_DEFINITION_FILE="LVAEdgeUserRoleDefinition.json"
 DEPLOYMENT_MANIFEST_URL="$BASE_URL/deployment.yolov3.template.json"
 DEPLOYMENT_MANIFEST_FILE='edge-deployment/deployment.yolov3.template.json'
-JSONFILEPATH="$BASE_URL/setup/jsonfiles/"
-JSONOUTPUTFILEPATH="jsonfiles/"
+JSONFILEPATH="$BASE_URL/setup/jsonFiles/"
+JSONOUTPUTFILEPATH="jsonFiles/"
 HELPER_SCRIPT_URL="$BASE_URL/setup/invokeMethodsHelper.sh"
 HELPER_SCRIPT="invokeMethodsHelper.sh"
 RESOURCE_GROUP='teamlvarg'
@@ -444,5 +444,5 @@ echo "Congratulations, you have successfully run LVA on the ASE!"
 echo -e "You can run the program again without rerunning this whole script. To do so, in the same Azure Cloud Shell, run the command 
 ${YELLOW}./invokeMethodsHelper.sh${NC}
 
-If you would like to change the media graph you create, look through the jsonfiles folder and modify as you see fit. Modify topologyset.json to modify the media graph itself. Modify instanceset.json to change the rtsp URL to point to an actual stream instead of a simulated video.
+If you would like to change the media graph you create, look through the jsonFiles folder and modify as you see fit. Modify topologyset.json to modify the media graph itself. Modify instanceset.json to change the rtsp URL to point to an actual stream instead of a simulated video.
 "

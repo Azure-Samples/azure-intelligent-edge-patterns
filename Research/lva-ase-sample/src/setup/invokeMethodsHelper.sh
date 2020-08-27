@@ -10,7 +10,6 @@ source ${ENV_FILE}
 
 SAS_TOKEN=$(az iot hub generate-sas-token -n ${IOTHUB} | jq .sas)
 MODULE_URL="https://${IOTHUB}.azure-devices.net/twins/${DEVICE_ID}/modules/lvaEdge/methods?api-version=2018-06-30"
-FILE="jsonfiles/instanceset.json"
 
 # invoke direct method on edge module
 # @param 1 - the module URL (constructed above)
@@ -22,7 +21,7 @@ function sendQuery()
         "${1}" \
         -H "Authorization: ${SAS_TOKEN}" \
         -H 'Content-Type: application/json' \
-        -d "@jsonfiles/${2}.json" \
+        -d "@jsonFiles/${2}.json" \
     | json_pp
 }
 
@@ -48,9 +47,9 @@ function waitToHitEnter()
 
 # arrays to reduce redundancy
 declare -a starters activators cleanup
-starters=("topologylist" "instancelist" "topologyset" "instanceset")
-activators=("instanceactivate" "instancelist")
-cleanup=("instancedeactivate" "instancedelete" "instancelist" "topologydelete" "topologylist")
+starters=("topologyList" "instanceList" "topologySet" "instanceSet")
+activators=("instanceActivate" "instanceList")
+cleanup=("instanceDeactivate" "instanceDelete" "instanceList" "topologyDelete" "topologyList")
 
 # run all the desired methods
 waitToHitEnter "Hit enter to list your current graph instances"
