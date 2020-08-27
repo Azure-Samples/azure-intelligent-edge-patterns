@@ -11,6 +11,7 @@ import labelingPageReducer from './labelingPageSlice';
 import cameraReducer from './cameraSlice';
 import AOIsReducer from './AOISlice';
 import rejectMsgReducer from './rejectedReducer';
+import trainingProjectReducer from './trainingProjectSlice';
 
 export const rootReducer = combineReducers({
   project: createProjectReducerByIsDemo(false),
@@ -27,4 +28,5 @@ export const rootReducer = combineReducers({
   labelingPage: labelingPageReducer,
   AOIs: AOIsReducer,
   rejectMsg: rejectMsgReducer,
+  trainingProject: trainingProjectReducer,
 });

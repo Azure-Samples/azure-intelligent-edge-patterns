@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { cameraOptionsSelector, getCameras } from '../store/cameraSlice';
 import { partOptionsSelector, getParts } from '../store/partSlice';
 import { ProjectData } from '../store/project/projectTypes';
+import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
 
 export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void }> = ({
   isOpen,
@@ -22,6 +23,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
 }) => {
   const cameraOptions = useSelector(cameraOptionsSelector);
   const partOptions = useSelector(partOptionsSelector);
+  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
   const dispatch = useDispatch();
 
   const [projectData, setProjectData] = useState<Partial<ProjectData>>({ camera: null, parts: [] });
@@ -33,6 +35,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
   useEffect(() => {
     dispatch(getParts(false));
     dispatch(getCameras(false));
+    dispatch(getTrainingProject());
   }, [dispatch]);
 
   const onStart = () => {
@@ -58,6 +61,15 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
       isFooterAtBottom={true}
     >
       <Stack tokens={{ childrenGap: 10 }}>
+        <Dropdown
+          label="Task"
+          options={trainingProjectOptions}
+          required
+          selectedKey={projectData.trainingProject}
+          onChange={(_, options) => {
+            onChange('trainingProject', options.key as number);
+          }}
+        />
         <Dropdown
           label="Camera"
           options={cameraOptions}
