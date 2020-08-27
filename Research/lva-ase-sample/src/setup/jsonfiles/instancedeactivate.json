@@ -1,9 +1,0 @@
-{
-    "methodName": "GraphInstanceDeactivate",
-    "responseTimeoutInSeconds": 200,
-    "payload": 
-    {
-     "@apiVersion": "1.0",
-     "name": "Sample-Instance-1"
-    }
-}
