@@ -1,7 +1,8 @@
 {
     "methodName": "GraphInstanceActivate",
     "responseTimeoutInSeconds": 200,
-    "payload": {
+    "payload": 
+    {
      "@apiVersion": "1.0",
      "name": "Sample-Instance-1"
     }
