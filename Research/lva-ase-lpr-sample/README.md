@@ -28,11 +28,27 @@ This sample is for internal use only, until the models can be made public. The c
 	* Streaming endpoint
 	* Container Registry
 * You should see output from the Azure IoT Hub when you run the YoloV3 sample, and see the corresponding videos in your output video folder
-* You should have your appsettings.json and .env files created in your local clone of the repository
 * You will need to ask Mahesh for the password to his ACR. Without this, you will not be able to pull the required container image for the AI module
 
-If you have done the above correctly, this sample should take ~30 minutes. You will first copy a few files into your local repository, download the sample video, update your .env file, and then run the sample! 
+If you have done the above correctly, this sample should take ~30 minutes. The hefty part of this is waiting for your device to finish downloading the Docker image containing the license plate detection and recognition. You will first run a script (or download content if working from VS Code), download the sample video, update your .env file, and then run the sample! 
 
+### Option 1: run the script in the cloud ###
+Assuming you are still inside your lva-sample-on-ase folder in the cloud shell, run the following commands
+```
+curl -X GET https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lprsample/Research/lva-ase-lpr-sample/lprscript.sh > lprscript.sh
+chmod +x lprscript.sh
+./lprscript.sh
+```
+
+After your deployment finishes (this can take up to 30 minutes!) run the command:
+```
+./invokeMethodsHelper.sh
+```
+Then you're done! 
+
+Follow next steps directions [here](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/readme.md#next-steps) if you'd like to learn more.
+
+### Option 2: VS Code ###
 ## Copy three files into your local repository
 
 You can choose to download these files from online or create the files yourself and copy paste their contents
