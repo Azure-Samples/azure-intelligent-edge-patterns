@@ -110,6 +110,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     camera: data?.camera ?? null,
     location: data?.location ?? null,
     parts: data?.parts ?? [],
+    trainingProject: data?.project ?? null,
     modelUrl: data?.download_uri ?? '',
     needRetraining: data?.needRetraining ?? true,
     accuracyRangeMin: data?.accuracyRangeMin ?? 60,
@@ -234,7 +235,8 @@ const getProjectDataByDemo = (isDemo: boolean, state: State): ProjectData => {
 export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest(isDemo));
 
-  const url = isDemo === undefined ? '/api/projects/' : `/api/projects/?is_demo=${Number(isDemo)}`;
+  const url =
+    isDemo === undefined ? '/api/part_detections/' : `/api/part_detections/?is_demo=${Number(isDemo)}`;
 
   return Axios.get(url)
     .then(({ data }) => {
@@ -253,6 +255,7 @@ export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Pr
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         cvProjectId: data[0]?.customvision_project_id,
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
+        trainingProject: data[0]?.project ?? null,
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
       return void 0;
@@ -267,10 +270,11 @@ export const thunkPostProject = (
   selectedLocations,
   selectedParts,
   selectedCamera,
+  selectedTrainingProject,
   isDemo,
 ): ProjectThunk => (dispatch, getState): Promise<number> => {
   const isProjectEmpty = projectId === null;
-  const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
+  const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
 
   dispatch(postProjectRequest(isDemo));
 
@@ -281,6 +285,7 @@ export const thunkPostProject = (
       location: selectedLocations.id,
       parts: selectedParts.map((e) => e.id),
       camera: selectedCamera.id,
+      project: selectedTrainingProject,
       download_uri: projectData.modelUrl,
       needRetraining: projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
@@ -304,11 +309,16 @@ export const thunkPostProject = (
       dispatch(postProjectFail(err, isDemo));
     }) as Promise<number>;
 };
-const getTrain = (projectId, isTestModel: boolean): void => {
-  const url = isTestModel ? `/api/projects/${projectId}/train?demo=True` : `/api/projects/${projectId}/train`;
+const getTrain = (traininProjectId, isTestModel: boolean): void => {
+  const url = isTestModel
+    ? `/api/projects/${traininProjectId}/train?demo=True`
+    : `/api/projects/${traininProjectId}/train`;
   Axios.get(url).catch((err) => console.error(err));
 };
 
+/**
+ * @deprecated
+ */
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
   const projectId = getProjectDataByDemo(isDemo, getState()).id;
   return Axios.get(`/api/projects/${projectId}/reset_camera`)
@@ -324,7 +334,7 @@ export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState)
 export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
   dispatch(getTrainingLogRequest(isDemo));
 
-  return Axios.get(`/api/projects/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
@@ -336,12 +346,17 @@ export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (disp
     .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
 };
 
-export const thunkGetTrainingMetrics = (projectId: number, isDemo: boolean) => (dispacth): Promise<any> => {
+export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boolean) => (
+  dispacth,
+): Promise<any> => {
   dispacth(getTrainingMetricsRequest(isDemo));
 
-  return Axios.get(`/api/projects/${projectId}/train_performance`)
+  return Axios.get(`/api/projects/${trainingProjectId}/train_performance`)
     .then(({ data }) => {
-      const curConsequence: Consequence = data.new
+      const newIteration = data.iterations.find((e) => e.iteration_name === 'new');
+      const prevIteration = data.iterations.find((e) => e.iteration_name === 'previous');
+
+      const curConsequence: Consequence = newIteration
         ? {
             precision: data.new.precision,
             recall: data.new.recall,
@@ -349,7 +364,7 @@ export const thunkGetTrainingMetrics = (projectId: number, isDemo: boolean) => (
           }
         : null;
 
-      const prevConsequence: Consequence = data.previous
+      const prevConsequence: Consequence = prevIteration
         ? {
             precision: data.previous.precision,
             recall: data.previous.recall,
@@ -365,7 +380,7 @@ export const thunkGetTrainingMetrics = (projectId: number, isDemo: boolean) => (
 export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
   dispatch(getInferenceMetricsRequest(isDemo));
 
-  return Axios.get(`/api/projects/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export`)
     .then(({ data }) => {
       return dispatch(
         getInferenceMetricsSuccess(
@@ -389,7 +404,7 @@ export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
   dispatch(updateProbThresholdRequest(isDemo));
   const { id: projectId, probThreshold } = getProjectDataByDemo(isDemo, getState());
 
-  return Axios.get(`/api/projects/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
+  return Axios.get(`/api/part_detections/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
     .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
     .catch((e) => {
       if (e.response) {
@@ -412,7 +427,7 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
   dispatch(postProjectRequest(isDemo));
   const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectDataByDemo(isDemo, getState());
 
-  return Axios.patch(`/api/projects/${projectId}/`, {
+  return Axios.patch(`/api/part_detections/${projectId}/`, {
     accuracyRangeMin,
     accuracyRangeMax,
   })
