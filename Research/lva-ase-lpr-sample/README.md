@@ -8,12 +8,14 @@ This sample is for internal use only, until the models can be made public. The c
 
 | File/folder             | Description                                                   |
 |-------------------------|---------------------------------------------------------------|
-| `lprtestvideo.mkv`| Sample video to run license plate model on.                                                 |
-| `sample-lpr-topology.json`            | Media Graph topology file for lpr sample.                        |
+| `lprtestvideo.mkv`	  | Sample video to run license plate model on.                   |
+| `sample-lpr-topology.json`   | Media Graph topology file for lpr sample.                        |
 | `README.md`             | This README file.                                             |
-| `.gitignore`             | Files to ignore.                                             |
-| `sampleoperations.json`       | JSON file defining the sequence of direct methods to invoke.  |
-| `sampledeployment.lpr.template.json`            | The deployment manifest template to deploy this sample to your Azure Stack Edge device                                         |
+| `.gitignore`            | Files to ignore.                                              |
+| `jsonfiles` 			  | JSON files containing payloads for running LPR on LVA		  |
+| `lvaScript.sh` 		  | Script to run in cloud to automate deployment and LVA runtime of LPR models |
+| `sampleoperations.json` | JSON file defining the sequence of direct methods to invoke.  |
+| `sampledeployment.lpr.template.json` | The deployment manifest template to deploy this sample to your Azure Stack Edge device               |
 
 ## Setup instructions
 
