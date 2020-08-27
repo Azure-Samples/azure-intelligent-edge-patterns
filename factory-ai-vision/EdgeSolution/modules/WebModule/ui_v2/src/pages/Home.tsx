@@ -18,6 +18,7 @@ import { selectAllImages, getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
 import { ConfigTaskPanel } from '../components/ConfigTaskPanel';
+import { TaskDetail } from '../components/TaskDetail';
 
 const theme = getTheme();
 
@@ -74,13 +75,16 @@ export const Home: React.FC = () => {
         />
         <Stack styles={{ root: { padding: '15px' } }} grow>
           <Pivot selectedKey={location.pathname.split('/')[1]} onLinkClick={onPivotChange}>
-            <PivotItem itemKey="getStarted" headerText="Get started">
-              <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
-            </PivotItem>
-            <PivotItem itemKey="task" headerText="Task">
-              Task
-            </PivotItem>
+            <PivotItem itemKey="getStarted" headerText="Get started" />
+            <PivotItem itemKey="task" headerText="Task" />
           </Pivot>
+          <Stack.Item grow>
+            {location.pathname.split('/')[1] === 'getStarted' ? (
+              <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
+            ) : (
+              <TaskDetail />
+            )}
+          </Stack.Item>
         </Stack>
       </Stack>
       <ConfigTaskPanel isOpen={panelOpen} onDismiss={closePanel} />
