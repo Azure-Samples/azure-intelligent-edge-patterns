@@ -8,8 +8,8 @@ ENV_FILE='edge-deployment/.env'
 
 source ${ENV_FILE}
 
-SAS_TOKEN=$(az iot hub generate-sas-token -n ${HUBNAME} | jq .sas)
-MODULE_URL="https://${HUBNAME}.azure-devices.net/twins/${DEVICE_ID}/modules/lvaEdge/methods?api-version=2018-06-30"
+SAS_TOKEN=$(az iot hub generate-sas-token -n ${IOTHUB} | jq .sas)
+MODULE_URL="https://${IOTHUB}.azure-devices.net/twins/${DEVICE_ID}/modules/lvaEdge/methods?api-version=2018-06-30"
 FILE="jsonfiles/instanceset.json"
 
 # invoke direct method on edge module
@@ -26,7 +26,7 @@ function sendQuery()
     | json_pp
 }
 
-#wait to hit enter, print the next function to be run
+# wait to hit enter, print the next function to be run
 # @param 1 - optional message to print to console
 function waitToHitEnter()
 {
@@ -61,7 +61,7 @@ done
 
 echo -e "
 In order to monitor and view the output, please open another Azure cloud shell by going to https://shell.azure.com and type in the following command into the terminal:
-${YELLOW}az iot hub monitor-events -n ${HUBNAME} --login ${IOTHUB_CONNECTION_STRING}${NC}
+${YELLOW}az iot hub monitor-events -n ${IOTHUB} --login \"${IOTHUB_CONNECTION_STRING}\"${NC}
 Once you have that window open, continue this script and you can view output! Close that window whenever you would like, but we recommend you keep it open for a few minutes
 so you can see the real-time inferences!"
 

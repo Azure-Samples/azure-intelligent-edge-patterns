@@ -420,8 +420,7 @@ echo "Deploying modules now..."
 az iot edge set-modules --hub-name ${IOTHUB} --device-id ${EDGE_DEVICE} --content $DEPLOYMENT_MANIFEST_FILE
 
 IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --hub-name ${IOTHUB} --query='connectionString' | tr -d "\"")
-
-echo "IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> $ENV_FILE
+echo "IOTHUB_CONNECTION_STRING=\"$IOTHUB_CONNECTION_STRING\"" >> $ENV_FILE
 
 lvaState=$(az iot hub module-twin show --device-id ${EDGE_DEVICE} --module-id lvaEdge --hub-name ${IOTHUB} --login ${IOTHUB_CONNECTION_STRING} | jq .properties.reported.State)
 
