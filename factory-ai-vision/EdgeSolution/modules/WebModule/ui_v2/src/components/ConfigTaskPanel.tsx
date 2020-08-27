@@ -64,7 +64,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
           required
           selectedKey={projectData.camera}
           onChange={(_, options) => {
-            onChange('camera', options.key);
+            onChange('camera', options.key as number);
           }}
         />
         <Dropdown
@@ -78,7 +78,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
               onChange(
                 'parts',
                 option.selected
-                  ? [...projectData.parts, option.key]
+                  ? [...projectData.parts, option.key as number]
                   : projectData.parts.filter((key) => key !== option.key),
               );
             }
