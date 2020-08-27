@@ -1,17 +1,12 @@
 # Bash script to simplify LVA process. Last Updated August 2020
 # this will invoke direct methods on the lvaEdge module
 # this script enables running the sample entirely in the Azure Cloud Shell
-# this script takes 3 parameters
-# @param 1 - the name of your IOTHUB (ex "teamlvahub")
-# @param 2 - the name of your Azure Stack Edge device. Note that even if you named your device "mysampledbe" it should be passed in as "mysampledbe-edge" (the setup.sh script does this for you)
-# @param 3 - optional: your IOTHUB connection string
 
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+ENV_FILE='edge-deployment/.env'
 
-HUBNAME=${1}
-DEVICE_ID=${2}
-IOTHUB_CONNECTION_STRING="\"${3:-iothubconnectionstring}\""
+source ${ENV_FILE}
 
 SAS_TOKEN=$(az iot hub generate-sas-token -n ${HUBNAME} | jq .sas)
 MODULE_URL="https://${HUBNAME}.azure-devices.net/twins/${DEVICE_ID}/modules/lvaEdge/methods?api-version=2018-06-30"

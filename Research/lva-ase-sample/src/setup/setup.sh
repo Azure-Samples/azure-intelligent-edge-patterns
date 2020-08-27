@@ -68,6 +68,8 @@ echo "Initialzing output files.
 This overwrites any output files previously generated."
 
 mkdir -p $(dirname $DEPLOYMENT_MANIFEST_FILE) && echo -n "" > $DEPLOYMENT_MANIFEST_FILE
+mkdir -p $(dirname $ENV_FILE) && echo -n "" > $ENV_FILE
+chmod +x ${ENV_FILE}
 chmod +x ${DEPLOYMENT_MANIFEST_FILE}
 
 # get files for media graph / operations payloads
@@ -363,6 +365,25 @@ ${YELLOW}What is the name of the app data video folder on the device to use? Thi
 read -p ">> " tmp
 APPDATA_FOLDER_ON_DEVICE=${tmp:-$APPDATA_FOLDER_ON_DEVICE}
 
+EDGE_DEVICE="${EDGE_DEVICE}-edge"
+
+
+echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" >> $ENV_FILE
+echo "RESOURCE_GROUP=\"$RESOURCE_GROUP\"" >> $ENV_FILE
+echo "AMS_ACCOUNT=\"$AMS_ACCOUNT\"" >> $ENV_FILE
+echo "AAD_TENANT_ID=$AAD_TENANT_ID" >> $ENV_FILE
+echo "AAD_SERVICE_PRINCIPAL_ID=$AAD_SERVICE_PRINCIPAL_ID" >> $ENV_FILE
+echo "AAD_SERVICE_PRINCIPAL_SECRET=$AAD_SERVICE_PRINCIPAL_SECRET" >> $ENV_FILE
+echo "INPUT_VIDEO_FOLDER_ON_DEVICE=\"/home/lvaadmin/samples/input\"" >> $ENV_FILE
+echo "OUTPUT_VIDEO_FOLDER_ON_DEVICE=\"/var/media\"" >> $ENV_FILE
+echo "APPDATA_FOLDER_ON_DEVICE=\"/var/lib/azuremediaservices\"" >> $ENV_FILE
+echo "CONTAINER_REGISTRY_USERNAME_myacr=$CONTAINER_REGISTRY_USERNAME" >> $ENV_FILE
+echo "CONTAINER_REGISTRY_PASSWORD_myacr=$CONTAINER_REGISTRY_PASSWORD" >> $ENV_FILE
+echo "IOTHUB=$IOTHUB" >> $ENV_FILE
+
+echo "DEVICE_ID=$EDGE_DEVICE" >> $ENV_FILE
+
+
 #set up deployment manifest
 curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
  sed -i "s/\$SUBSCRIPTION_ID/$SUBSCRIPTION_ID/" $DEPLOYMENT_MANIFEST_FILE
@@ -385,7 +406,6 @@ curl -s $DEPLOYMENT_MANIFEST_URL > $DEPLOYMENT_MANIFEST_FILE
  Go to ${GREEN}https://aka.ms/lva-edge-quickstart${NC} to learn more about getting started with ${BLUE}Live Video Analytics${NC} on IoT Edge.
  "
 
-EDGE_DEVICE="${EDGE_DEVICE}-edge"
 
 modules=$(jq '.modulesContent."$edgeAgent"."properties.desired".modules' $DEPLOYMENT_MANIFEST_FILE)
 echo "Found the following modules to be deployed: "
@@ -400,6 +420,8 @@ echo "Deploying modules now..."
 az iot edge set-modules --hub-name ${IOTHUB} --device-id ${EDGE_DEVICE} --content $DEPLOYMENT_MANIFEST_FILE
 
 IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --hub-name ${IOTHUB} --query='connectionString' | tr -d "\"")
+
+echo "IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> $ENV_FILE
 
 lvaState=$(az iot hub module-twin show --device-id ${EDGE_DEVICE} --module-id lvaEdge --hub-name ${IOTHUB} --login ${IOTHUB_CONNECTION_STRING} | jq .properties.reported.State)
 
@@ -416,12 +438,12 @@ chmod +x $HELPER_SCRIPT
 curl -sL ${HELPER_SCRIPT_URL} > ${HELPER_SCRIPT}
 
 echo "Now we will invoke methods on the lvaEdge module, which runs the sample program"
-source invokeMethodsHelper.sh $IOTHUB $EDGE_DEVICE $IOTHUB_CONNECTION_STRING
+source invokeMethodsHelper.sh
 
 echo "Congratulations, you have successfully run LVA on the ASE!"
 
 echo -e "You can run the program again without rerunning this whole script. To do so, in the same Azure Cloud Shell, run the command 
-${YELLOW}./invokeMethodsHelper.sh ${IOTHUB} ${EDGE_DEVICE} \"${IOTHUB_CONNECTION_STRING}\"${NC}
+${YELLOW}./invokeMethodsHelper.sh${NC}
 
 If you would like to change the media graph you create, look through the jsonfiles folder and modify as you see fit. Modify topologyset.json to modify the media graph itself. Modify instanceset.json to change the rtsp URL to point to an actual stream instead of a simulated video.
 "
