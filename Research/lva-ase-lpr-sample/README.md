@@ -33,13 +33,20 @@ This sample is for internal use only, until the models can be made public. The c
 If you have done the above correctly, this sample should take ~30 minutes. The hefty part of this is waiting for your device to finish downloading the Docker image containing the license plate detection and recognition. You will first run a script (or download content if working from VS Code), download the sample video, update your .env file, and then run the sample! 
 
 ### Option 1: run the script in the cloud ###
+First thing you must do, is modify the .env file (found in lva-sample-on-ase/edge-deployment/.env) in the cloud. Change the following two variables to use Mahesh's registry (you must obtain
+these values from Mahesh directly!):
+* CONTAINER_REGISTRY_USERNAME_myacr=containerregistry12345
+* CONTAINER_REGISTRY_PASSWORD_myacr= //@Mahesh
+
+Hit Control+S to save. 
+
 Assuming you are still inside your lva-sample-on-ase folder in the cloud shell, run the following commands
 ```
-curl -X GET https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lprsample/Research/lva-ase-lpr-sample/lprscript.sh > lprscript.sh
-chmod +x lprscript.sh
-./lprscript.sh
+curl -X GET https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lprsample/Research/lva-ase-lpr-sample/lprScript.sh > lprScript.sh
+chmod +x lprScript.sh
+./lprScript.sh
 ```
-
+Monitor your deployment status in the Azure Portal (Go to your IotHub / Automatic Device Management / IoT Edge / Your device name)
 After your deployment finishes (this can take up to 30 minutes!) run the command:
 ```
 ./invokeMethodsHelper.sh
@@ -65,7 +72,7 @@ You can choose to download these files from online or create the files yourself 
 ## Update your .env file
 You will need to modify two values
 * CONTAINER_REGISTRY_USERNAME_myacr=containerregistry12345
-* CONTAINER_REGISTRY_PASSWORD_myacr= // you will get this password from Mahesh Yadav!
+* CONTAINER_REGISTRY_PASSWORD_myacr= // @Mahesh
 
 ## Running the sample
 
