@@ -303,6 +303,58 @@ There is a projector that animates the points in the NN layer dimensions:
 
 ![pics/tensorboard_projector.png](pics/tensorboard_projector.png)
 
+## Performance metrics
+
+We can observe a simple speed-up indication by how fast the workers finish their portions.
+
+Here is a typical even log for 1 worker:
+
+```
+...
+Events:
+  Type    Reason                   Age    From         Message
+  ----    ------                   ----   ----         -------
+  Normal  SuccessfulCreatePod      2m51s  tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  Normal  SuccessfulCreateService  2m51s  tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  Normal  SuccessfulCreatePod      2m51s  tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m1-worker-0
+  Normal  SuccessfulCreateService  2m51s  tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m1-worker-0
+  Normal  ExitedWithCode           5s     tf-operator  Pod: default.dist-mnist-for-e2e-test-demo20200826-m1-worker-0 exited with code 0
+  Normal  TFJobSucceeded           5s     tf-operator  TFJob dist-mnist-for-e2e-test-demo20200826-m1 successfully completed.
+  Normal  SuccessfulDeletePod      5s     tf-operator  Deleted pod: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  Normal  SuccessfulDeleteService  5s     tf-operator  Deleted service: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  ```
+
+We can interpret it see that TFJob was done in around 3 minutes.
+
+In 10-worker case we get to the same milestone much faster, around 1.5 minutes, which is reasonable, because we have a 3-node k8s cluster.
+
+```
+Events:
+  Type    Reason                   Age                  From         Message
+  ----    ------                   ----                 ----         -------
+  Normal  SuccessfulCreateService  106s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-ps-0
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-0
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-1
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-2
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-3
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-ps-0
+  Normal  SuccessfulCreatePod      105s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-4
+  Normal  SuccessfulCreatePod      105s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-5
+  Normal  SuccessfulCreatePod      105s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-6
+  Normal  SuccessfulCreatePod      104s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-7
+  Normal  SuccessfulCreateService  103s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-1
+  Normal  SuccessfulCreateService  103s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-0
+  Normal  SuccessfulCreatePod      103s (x2 over 104s)  tf-operator  (combined from similar events): Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-9
+  Normal  SuccessfulCreateService  102s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-2
+  Normal  SuccessfulCreateService  102s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-3
+  Normal  SuccessfulCreateService  102s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-4
+  Normal  SuccessfulCreateService  101s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-5
+  Normal  SuccessfulCreateService  101s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-6
+  Normal  SuccessfulCreateService  100s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-7
+  Normal  SuccessfulCreateService  99s (x2 over 100s)   tf-operator  (combined from similar events): Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-9
+  Normal  ExitedWithCode           9s (x3 over 9s)      tf-operator  Pod: default.dist-mnist-for-e2e-test-demo20200826-m10-worker-1 exited with code 0
+```
+
 # Links
 
 - https://www.kubeflow.org/docs/components/training/tftraining/
