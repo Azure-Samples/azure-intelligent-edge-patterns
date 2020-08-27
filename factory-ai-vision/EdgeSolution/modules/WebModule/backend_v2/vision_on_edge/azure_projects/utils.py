@@ -9,7 +9,7 @@ import threading
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.general import error_messages
+from ..exceptions import api_exceptions as error_messages
 from vision_on_edge.images.models import Image
 from vision_on_edge.azure_training_status.utils import upcreate_training_status
 from ..azure_parts.utils import batch_upload_parts_to_customvision

@@ -26,9 +26,28 @@ class ProjectSerializer(serializers.ModelSerializer):
             },
         }
 
+
 class TaskSerializer(serializers.ModelSerializer):
     """TaskSerializer"""
 
     class Meta:
         model = Task
         fields = '__all__'
+
+# pylint: disable=abstract-method
+class IterationPerformanceSerializer(serializers.Serializer):
+    """TrainPerformanceSerializer.
+    """
+    iteration_name = serializers.ChoiceField(choices=[
+        "new", "previous", "demo"])
+    iteration_id = serializers.CharField(max_length=200)
+    status = serializers.CharField(max_length=100)
+    precision = serializers.FloatField(default=0.0)
+    recall = serializers.FloatField(default=0.0)
+    mAP = serializers.FloatField(default=0.0)
+
+
+class ProjectPerformanesSerializer(serializers.Serializer):
+    """ProjectPerformanesSerializer.
+    """
+    iterations = IterationPerformanceSerializer(many=True)

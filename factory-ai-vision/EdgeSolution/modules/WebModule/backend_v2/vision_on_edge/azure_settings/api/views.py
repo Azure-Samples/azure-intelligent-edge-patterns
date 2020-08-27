@@ -14,7 +14,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from ...general import error_messages
+from ...exceptions import api_exceptions as error_messages
 from ..models import Setting
 from .serializers import SettingSerializer
 

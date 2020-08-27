@@ -25,13 +25,13 @@ from ...azure_parts.models import Part
 #from ...azure_training_status.models import TrainingStatus
 #from ...azure_training_status.utils import upcreate_training_status
 #from ...cameras.models import Camera
-from ...general import error_messages
+from ...exceptions import api_exceptions as error_messages
 #from ...general.utils import normalize_rtsp
 from ...images.models import Image
 #from ...images.utils import upload_images_to_customvision_helper
 from ..models import Project, Task
 from ..utils import pull_cv_project_helper, train_project_helper, update_train_status_helper  #, update_app_insight_counter
-from .serializers import ProjectSerializer, TaskSerializer
+from .serializers import ProjectSerializer, TaskSerializer, IterationPerformanceSerializer, ProjectPerformanesSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary='Get training performace from Custom Vision.')
+        operation_summary='Get training performace from Custom Vision.',
+        responses={'200': ProjectPerformanesSerializer})
     @action(detail=True, methods=["get"])
     def train_performance(self, request, pk=None) -> Response:
         """train_performance.
@@ -76,23 +77,15 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         trainer = project_obj.setting.revalidate_and_get_trainer_obj()
         customvision_project_id = project_obj.customvision_id
 
-        if project_obj.is_demo:
-            return Response({
-                "status": "ok",
-                "precision": 1,
-                "recall": "demo_recall",
-                "map": "demo_map",
-            })
+        res_data = {"iterations": []}
 
-        ret = {}
-        iterations = trainer.get_iterations(customvision_project_id)
-
-        def _parse(iteration):
+        def _parse(iteration, iteration_name: str):
             """_parse.
 
             Args:
                 iteration:
             """
+            iteration_id = iteration.id
             iteration = iteration.as_dict()
             iteration_status = iteration["status"]
             if iteration_status == "Completed":
@@ -106,17 +99,44 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 recall = 0.0
                 mAP = 0.0
             return {
+                "iteration_name": iteration_name,
+                "iteration_id": iteration_id,
                 "status": iteration_status,
                 "precision": precision,
                 "recall": recall,
-                "map": mAP,
+                "mAP": mAP,
             }
 
-        if len(iterations) >= 1:
-            ret["new"] = _parse(iterations[0])
-        if len(iterations) >= 2:
-            ret["previous"] = _parse(iterations[1])
-        return Response(ret)
+        if project_obj.is_demo:
+            iteration_data = {
+                "iteration_name": "demo",
+                "iteration_id": "demo_iteration_id",
+                "status": "ok",
+                "precision": 1,
+                "recall": 0.0,
+                "mAP": 0.0,
+            }
+            iteration_serialzer = IterationPerformanceSerializer(
+                data=iteration_data)
+            if iteration_serialzer.is_valid(raise_exception=True):
+                res_data["iterations"].append(iteration_serialzer.data)
+            project_performance_serializer = ProjectPerformanesSerializer(
+                data=res_data)
+        else:
+            iterations = trainer.get_iterations(customvision_project_id)
+            for i in range(min(2, len(iterations))):
+                iteration_data = _parse(
+                    iterations[i],
+                    iteration_name=("new" if i == 0 else "previous"))
+                iteration_serialzer = IterationPerformanceSerializer(
+                    data=iteration_data)
+                if iteration_serialzer.is_valid(raise_exception=True):
+                    res_data["iterations"].append(iteration_serialzer.data)
+
+        project_performance_serializer = ProjectPerformanesSerializer(
+            data=res_data)
+        if project_performance_serializer.is_valid(raise_exception=True):
+            return Response(data=project_performance_serializer.data)
 
     @swagger_auto_schema(operation_summary='reset project',
                          manual_parameters=[
@@ -341,56 +361,54 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
 
 # def upload_and_train(project_id):
-    # """upload_and_train.
+# """upload_and_train.
 
-    # Args:
-        # project_id:
-    # """
+# Args:
+# project_id:
+# """
 
+# except CustomVisionErrorException as customvision_err:
+# logger.error("CustomVisionErrorException: %s", customvision_err)
+# if customvision_err.message == \
+# "Operation returned an invalid status code 'Access Denied'":
+# upcreate_training_status(
+# project_id=project_obj.id,
+# status="failed",
+# log=
+# "Training key or Endpoint is invalid. Please change the settings",
+# need_to_send_notification=True,
+# )
+# return Response(
+# {
+# "status":
+# "failed",
+# "log":
+# "Training key or Endpoint is invalid. Please change the settings",
+# },
+# status=status.HTTP_503_SERVICE_UNAVAILABLE,
+# )
 
+# upcreate_training_status(project_id=project_obj.id,
+# status="failed",
+# log=customvision_err.message,
+# need_to_send_notification=True)
+# return Response(
+# {
+# "status": "failed",
+# "log": customvision_err.message
+# },
+# status=status.HTTP_400_BAD_REQUEST,
+# )
 
-    # except CustomVisionErrorException as customvision_err:
-        # logger.error("CustomVisionErrorException: %s", customvision_err)
-        # if customvision_err.message == \
-                # "Operation returned an invalid status code 'Access Denied'":
-            # upcreate_training_status(
-                # project_id=project_obj.id,
-                # status="failed",
-                # log=
-                # "Training key or Endpoint is invalid. Please change the settings",
-                # need_to_send_notification=True,
-            # )
-            # return Response(
-                # {
-                    # "status":
-                        # "failed",
-                    # "log":
-                        # "Training key or Endpoint is invalid. Please change the settings",
-                # },
-                # status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            # )
-
-        # upcreate_training_status(project_id=project_obj.id,
-                                 # status="failed",
-                                 # log=customvision_err.message,
-                                 # need_to_send_notification=True)
-        # return Response(
-            # {
-                # "status": "failed",
-                # "log": customvision_err.message
-            # },
-            # status=status.HTTP_400_BAD_REQUEST,
-        # )
-
-    # except Exception:
-        # # TODO: Remove in production
-        # err_msg = traceback.format_exc()
-        # logger.exception("Exception: %s", err_msg)
-        # upcreate_training_status(project_id=project_obj.id,
-                                 # status="failed",
-                                 # log=f"failed {str(err_msg)}",
-                                 # need_to_send_notification=True)
-        # return Response({"status": "failed", "log": f"failed {str(err_msg)}"})
+# except Exception:
+# # TODO: Remove in production
+# err_msg = traceback.format_exc()
+# logger.exception("Exception: %s", err_msg)
+# upcreate_training_status(project_id=project_obj.id,
+# status="failed",
+# log=f"failed {str(err_msg)}",
+# need_to_send_notification=True)
+# return Response({"status": "failed", "log": f"failed {str(err_msg)}"})
 
 
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
