@@ -9,7 +9,7 @@ ENV_FILE='edge-deployment/.env'
 source ${ENV_FILE}
 
 SAS_TOKEN=$(az iot hub generate-sas-token -n ${IOTHUB} | jq .sas)
-MODULE_URL="https://${IOTHUB}.azure-devices.net/twins/${DEVICE_ID}/modules/lvaEdge/methods?api-version=2018-06-30"
+MODULE_URL="https://${IOTHUB}.azure-devices.net/twins/${EDGE_DEVICE}/modules/lvaEdge/methods?api-version=2018-06-30"
 
 # invoke direct method on edge module
 # @param 1 - the module URL (constructed above)
