@@ -7,7 +7,7 @@ This tutorial will walk you through setting up an Azure Stack Edge device and de
 - RTSP simulation
 - Yolo V3 AI model to detect objects
 
-You can choose to set this up so the RTSP simulation videos are uploaded to the cloud or to your local files. This tutorial will set things up to run locally, but see instructions under [Next Steps](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/readme.md) to change this.
+This tutorial will set things up to output files to a local share.
 
 ## Contents ##
 

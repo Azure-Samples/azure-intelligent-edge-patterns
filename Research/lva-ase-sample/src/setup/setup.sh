@@ -166,7 +166,7 @@ then
     echo "\n${RED}Azure Stack Edge device not found in resource group. Please go make sure you have set it up in the same resource group, then run this script again.${NC}"
     exit 1
 else
-    echo -e "\nFound the following Azure Stack Edge device, hit enter to use this, otherwise provide the name of the correct device(${BLUE}${EDGE_DEVICE}${NC})."
+    echo -e "\nFound the following Azure Stack Edge device. Please provide another device name below if you wish to change, otherwise press enter(${BLUE}${EDGE_DEVICE}${NC})."
     read -p ">> " tmp
     EDGE_DEVICE=${tmp:-$EDGE_DEVICE}
     FOUND=$(az resource show -n ${EDGE_DEVICE} --resource-type "Microsoft.DataBoxEdge/DataBoxEdgeDevices" -g ${RESOURCE_GROUP} --query 'name')
