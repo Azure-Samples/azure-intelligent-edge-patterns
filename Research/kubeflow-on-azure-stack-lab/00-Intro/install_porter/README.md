@@ -5,7 +5,7 @@ downloads Kubeflow and installs in in your Kubernetes cluster.
 
 # Pre-requisites
 
-1. Porter:
+## 1. Porter:
 
 If you do not have Portal on your system, here is how you install it on Linux:
 
@@ -26,14 +26,14 @@ Verify it works:
 
 See [Get Started](https://porter.sh/install/) if you have any questions.
 
-2. Kubernetes
+## 2. Kubernetes
 
 Verify you have Kubernetes installed, and you are on the master node of your cluster:
 
     $ kubectl version
     v1.15.5
 
-3. Docker
+## 3. Docker
 
 Verify you have Docker installed and can login to your image repository.
 

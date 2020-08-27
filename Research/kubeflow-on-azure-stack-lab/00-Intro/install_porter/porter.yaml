@@ -63,4 +63,3 @@ uninstall:
         - "--kf_config_filename {{bundle.parameters.kf_config_filename}}"
         - "--kf_name {{bundle.parameters.kf_name}}"
         - "--kf_dir_base {{bundle.parameters.kf_dir_base}}"
-

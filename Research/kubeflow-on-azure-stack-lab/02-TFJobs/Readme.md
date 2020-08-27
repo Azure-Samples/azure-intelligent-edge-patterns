@@ -32,15 +32,14 @@ Please see the `Kubeflow on Azure Stack` module of this repository, or [https://
 
 It is also recommended, but not necessary, to have Kubernetes Dashboard running on the cluster.
 
-
 # Building Docker image for distributed mnist model for e2e test
 
 We will run a popular scenario from Kubeflow's repository, 
 [K8s Custom Resource and Operator For TensorFlow jobs](https://github.com/kubeflow/tf-operator/)
 
-You do not have to re-build the image, you can use `kubeflow/tf-dist-mnist-test:1.0`. If you do decide to use your own image, here is how you could build it:
+You do not have to re-build the image, you can try using `kubeflow/tf-dist-mnist-test:1.0`. If you do decide to use your own image, here is how you could build it:
 
-    $ cd tensorflow-on-kubeflow/dist-mnist-e2e-test
+    $ cd dist-mnist-e2e-test
 
 Login to your Docker account(we use account `"rollingstone"`, but you will need to substitute it for your own
 in all commands and .yamls):
@@ -180,7 +179,7 @@ If you would like to save the results of model training, you can do so from you 
 using the Kubernetes volumes you mount. However, on Azure Stack you do not have `azurefile`
 available yet, but there are many other options, e.g. you can use a network storage.
 
-Please follow [Installing Storage](../installing_storage.md) to create `samba-share-claim` we
+Please follow [Installing Storage](../01-Jupyter/installing_storage.md) to create `samba-share-claim` we
 will be using in our .yaml files. Talk to your Azure Stack administrator to discuss other
 available options in your team.
 
