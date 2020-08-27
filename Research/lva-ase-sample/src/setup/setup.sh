@@ -75,7 +75,7 @@ chmod +x ${DEPLOYMENT_MANIFEST_FILE}
 # get files for media graph / operations payloads
 declare -a jsonOnlineFiles
 jsonOnlineFiles=("instanceActivate.json" "instanceDelete.json" "instanceSet.json" "topologyList.json"
-"instanceDeactivate.json"  "instanceList.json" "topologyDelete.json" "topologySet.json")
+"instanceDeactivate.json" "instanceList.json" "topologyDelete.json" "topologySet.json")
 
 for i in "${jsonOnlineFiles[@]}"
 do
