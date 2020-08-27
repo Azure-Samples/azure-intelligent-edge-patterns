@@ -24,21 +24,25 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
   const partOptions = useSelector(partOptionsSelector);
   const dispatch = useDispatch();
 
-  const [projectData, setProjectData] = useState<Partial<ProjectData>>({});
+  const [projectData, setProjectData] = useState<Partial<ProjectData>>({ camera: null, parts: [] });
 
-  const onChange = (key: string, value) => {
+  function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
     setProjectData(R.assoc(key, value));
-  };
+  }
 
   useEffect(() => {
     dispatch(getParts(false));
     dispatch(getCameras(false));
   }, [dispatch]);
 
+  const onStart = () => {
+    console.log(projectData);
+  };
+
   const onRenderFooterContent = () => {
     return (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton text="Start" />
+        <PrimaryButton text="Start" onClick={onStart} />
         <DefaultButton text="Cancel" onClick={onDismiss} />
       </Stack>
     );
@@ -54,8 +58,32 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
       isFooterAtBottom={true}
     >
       <Stack tokens={{ childrenGap: 10 }}>
-        <Dropdown label="Camera" options={cameraOptions} required />
-        <Dropdown label="Part" options={partOptions} required />
+        <Dropdown
+          label="Camera"
+          options={cameraOptions}
+          required
+          selectedKey={projectData.camera}
+          onChange={(_, options) => {
+            onChange('camera', options.key);
+          }}
+        />
+        <Dropdown
+          label="Part"
+          multiSelect
+          options={partOptions}
+          required
+          selectedKeys={projectData.parts}
+          onChange={(_, option) => {
+            if (option) {
+              onChange(
+                'parts',
+                option.selected
+                  ? [...projectData.parts, option.key]
+                  : projectData.parts.filter((key) => key !== option.key),
+              );
+            }
+          }}
+        />
         <Checkbox
           label="Set up retraining"
           checked={projectData.needRetraining}
@@ -69,7 +97,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
           type="number"
           value={projectData.accuracyRangeMin?.toString()}
           onChange={(_, newValue) => {
-            onChange('accuracyRangeMin', newValue);
+            onChange('accuracyRangeMin', parseInt(newValue, 10));
           }}
           suffix="%"
           disabled={!projectData.needRetraining}
@@ -79,7 +107,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
           type="number"
           value={projectData.accuracyRangeMax?.toString()}
           onChange={(_, newValue) => {
-            onChange('accuracyRangeMax', newValue);
+            onChange('accuracyRangeMax', parseInt(newValue, 10));
           }}
           suffix="%"
           disabled={!projectData.needRetraining}
@@ -89,7 +117,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
           type="number"
           value={projectData.maxImages?.toString()}
           onChange={(_, newValue) => {
-            onChange('maxImages', newValue);
+            onChange('maxImages', parseInt(newValue, 10));
           }}
           disabled={!projectData.needRetraining}
         />
@@ -105,7 +133,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
           type="number"
           value={projectData.framesPerMin?.toString()}
           onChange={(_, newValue) => {
-            onChange('framesPerMin', newValue);
+            onChange('framesPerMin', parseInt(newValue, 10));
           }}
           disabled={!projectData.sendMessageToCloud}
         />
@@ -114,7 +142,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
           type="number"
           value={projectData.accuracyThreshold?.toString()}
           onChange={(_, newValue) => {
-            onChange('accuracyThreshold', newValue);
+            onChange('accuracyThreshold', parseInt(newValue, 10));
           }}
           disabled={!projectData.sendMessageToCloud}
         />
