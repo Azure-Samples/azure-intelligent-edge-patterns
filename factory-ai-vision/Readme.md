@@ -119,6 +119,14 @@ To learn more about this development environment, check out [this tutorial](http
 - Retrain the model: https://youtu.be/dXh9isASvcY
 - Load project from Custom Vision: https://youtu.be/gTEWlu2V8yk
 
+# Privacy Notice 
+The software may collect information about your use of the software and send it to Microsoft.
+              Microsoft may use this information to provide services and improve our products and services.
+              You may turn off the telemetry as described in the repository or clicking settings on top right
+              corner. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704
+              . You can learn more about data collection and use in the help documentation and our privacy
+              statement. Your use of the software operates as your consent to these practices.
+
 
 # Troubleshooting 
 If you are running into issues, please check following for assistnat:
