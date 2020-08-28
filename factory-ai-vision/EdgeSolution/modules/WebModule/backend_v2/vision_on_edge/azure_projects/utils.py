@@ -14,7 +14,7 @@ from vision_on_edge.exceptions.api_exceptions import CustomVisionAccessFailed
 from vision_on_edge.images.models import Image
 
 from ..azure_parts.utils import batch_upload_parts_to_customvision
-from ..azure_training_status import constants as progress_constants
+from ..azure_training_status import progress
 from ..images.utils import upload_images_to_customvision_helper
 from .models import Project, Task
 
@@ -238,7 +238,7 @@ def train_project_worker(project_id):
         logger.info("Demo project is already trained")
         upcreate_training_status(project_id=project_obj.id,
                                  need_to_send_notification=True,
-                                 **progress_constants.PROGRESS_0_OK)
+                                 **progress.PROGRESS_0_OK)
         return
     trainer = project_obj.setting.get_trainer_obj()
     customvision_project_id = project_obj.customvision_id
@@ -260,7 +260,7 @@ def train_project_worker(project_id):
         upcreate_training_status(
             project_id=project_obj.id,
             need_to_send_notification=True,
-            **progress_constants.PROGRESS_2_PROJECT_CREATED)
+            **progress.PROGRESS_2_PROJECT_CREATED)
 
     project_obj = Project.objects.get(pk=project_id)
     logger.info("Project created on CustomVision.")
@@ -270,7 +270,7 @@ def train_project_worker(project_id):
 
     upcreate_training_status(project_id=project_obj.id,
                              need_to_send_notification=True,
-                             **progress_constants.PROGRESS_3_UPLOADING_PARTS)
+                             **progress.PROGRESS_3_UPLOADING_PARTS)
 
     # Get tags_dict to avoid getting tags every time
     tags = trainer.get_tags(project_id=project_obj.customvision_id)
@@ -293,7 +293,7 @@ def train_project_worker(project_id):
 
     upcreate_training_status(project_id=project_obj.id,
                              need_to_send_notification=True,
-                             **progress_constants.PROGRESS_4_UPLOADING_IMAGES)
+                             **progress.PROGRESS_4_UPLOADING_IMAGES)
 
     # Upload images to CustomVisioin Project
     for part_id in part_ids:
@@ -305,14 +305,15 @@ def train_project_worker(project_id):
 
     # Submit training task to Custom Vision
     if not project_changed:
+        logger.info("Project not changed. Not Training!!!")
         upcreate_training_status(project_id=project_obj.id,
                                  need_to_send_notification=True,
-                                 **progress_constants.PROGRESS_0_OK)
+                                 **progress.PROGRESS_0_OK)
     else:
         upcreate_training_status(
             project_id=project_obj.id,
             need_to_send_notification=True,
-            **progress_constants.PROGRESS_5_SUBMITTING_TRAINING_TASK)
+            **progress.PROGRESS_5_SUBMITTING_TRAINING_TASK)
         training_task_submit_success = project_obj.train_project()
         if training_task_submit_success:
             update_app_insight_counter(
@@ -349,7 +350,7 @@ def update_train_status_worker(project_id):
         if len(iterations) == 0:
             upcreate_training_status(
                 project_id=project_obj.id,
-                **progress_constants.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
+                **progress.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
             wait_prepare += 1
             if wait_prepare > max_wait_prepare:
                 upcreate_training_status(
@@ -366,7 +367,7 @@ def update_train_status_worker(project_id):
             upcreate_training_status(
                 project_id=project_obj.id,
                 need_to_send_notification=(not training_init),
-                **progress_constants.PROGRESS_7_TRAINING)
+                **progress.PROGRESS_7_TRAINING)
             training_init = True
             continue
 
@@ -375,7 +376,7 @@ def update_train_status_worker(project_id):
             upcreate_training_status(
                 project_id=project_obj.id,
                 need_to_send_notification=(not export_init),
-                **progress_constants.PROGRESS_8_EXPORTING)
+                **progress.PROGRESS_8_EXPORTING)
             export_init = True
             res = project_obj.export_iterationv3_2(iteration.id)
             logger.info(res.json())
@@ -398,7 +399,7 @@ def update_train_status_worker(project_id):
             project_id=project_obj.id,
             performance=json.dumps(train_performance_list),
             need_to_send_notification=True,
-            **progress_constants.PROGRESS_0_OK)
+            **progress.PROGRESS_0_OK)
         project_obj.save()
         break
 

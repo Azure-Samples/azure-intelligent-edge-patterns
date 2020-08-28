@@ -8,7 +8,7 @@ from django.db import models
 
 logger = logging.getLogger(__name__)
 
-NOTIFICATION_TYPES = ['project']
+NOTIFICATION_TYPES = ['project', 'part_detection']
 NOTIFICATION_TYPE_CHOICES = [(i, i) for i in NOTIFICATION_TYPES]
 
 
@@ -25,6 +25,12 @@ class Notification(models.Model):
     details = models.CharField(max_length=1000, blank=True, default="")
 
     def __str__(self):
+        return " ".join([
+            str(self.timestamp), self.notification_type, self.title,
+            self.details
+        ])
+
+    def __repr__(self):
         return " ".join([
             str(self.timestamp), self.notification_type, self.title,
             self.details

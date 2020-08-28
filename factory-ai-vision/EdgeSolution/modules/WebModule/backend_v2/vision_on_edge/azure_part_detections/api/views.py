@@ -14,9 +14,12 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from ...general.api.serializers import SimpleStatusSerializer
 from ...azure_projects.utils import (train_project_helper,
                                      update_train_status_helper)
 from ...azure_training_status.models import TrainingStatus
+from ...azure_training_status.utils import upcreate_training_status
+from ...azure_training_status import progress
 from ..models import PartDetection
 from ..utils import if_trained_then_deploy_helper
 from .serializers import ExportSerializer, PartDetectionSerializer
@@ -128,6 +131,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             "count": last_prediction_count
         })
 
+    @swagger_auto_schema(
+        operation_summary='Train the project then deploy to Inference',
+        responses={'200': SimpleStatusSerializer})
     @action(detail=True, methods=["get"])
     def configure(self, request, pk=None) -> Response:
         """configure.
@@ -141,10 +147,14 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             if not hasattr(instance, attr) or getattr(instance, attr) is None:
                 return Response(
                     {
-                        "status": "failed",
-                        "log": f"Part Detection must given a {attr} to configure."
+                        "status":
+                            "failed",
+                        "log":
+                            f"Part Detection must given a {attr} to configure."
                     },
                     status=status.HTTP_400_BAD_REQUEST)
+        upcreate_training_status(project_id=instance.project.id,
+                                 **progress.PROGRESS_1_FINDING_PROJECT)
         instance.has_configured = True
         instance.save()
         train_project_helper(project_id=instance.project.id)

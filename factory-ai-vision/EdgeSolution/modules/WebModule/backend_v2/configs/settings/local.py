@@ -12,6 +12,9 @@ from .base import *
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
 LOGGING = logging_config.LOGGING_CONFIG_DEV
 
 # pylint: enable = wildcard-import, unused-wildcard-import

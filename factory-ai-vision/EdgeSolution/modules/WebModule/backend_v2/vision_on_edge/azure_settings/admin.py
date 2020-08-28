@@ -1,8 +1,10 @@
-"""App admin."""
+# -*- coding: utf-8 -*-
+"""App admin.
+"""
 
 from django.contrib import admin
 
 from .models import Setting
 
-# Register your models here.
+# register your models here.
 admin.site.register(Setting)

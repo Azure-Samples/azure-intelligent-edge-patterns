@@ -9,8 +9,6 @@ import logging
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-# from .models import Notification
-
 logger = logging.getLogger(__name__)
 
 
@@ -47,5 +45,5 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
     async def notification_send(self, event):
         """websocket send
         """
-        logger.info("notification_send!!!!!!!!!!")
+        logger.info("notification_send!")
         await self.send_json(event)

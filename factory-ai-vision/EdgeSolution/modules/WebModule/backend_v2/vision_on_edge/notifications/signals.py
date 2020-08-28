@@ -1,5 +1,5 @@
-"""
-Notification Signals
+# -*- coding: utf-8 -*-
+"""App Signals
 """
 
 import logging
@@ -10,6 +10,8 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from .models import Notification
+from ..azure_training_status.models import TrainingStatus
+from ..azure_pd_deploy_status.models import DeployStatus
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +30,6 @@ def notification_post_save_websocket_handler(**kwargs):
     """
 
     logger.info("notification_post_save...")
-    if "instance" not in kwargs:
-        return
     logger.info("Sending notifications...")
 
     instance = kwargs['instance']
@@ -69,3 +69,46 @@ def notification_post_save_dequeue_handler(**kwargs):
     if Notification.objects.filter(sender=instance.sender).count() >= 10:
         Notification.objects.filter(
             sender=instance.sender).order_by('timestamp').first().delete()
+
+
+@receiver(signal=post_save,
+          sender=TrainingStatus,
+          dispatch_uid="training_status_listener")
+def training_status_listener(**kwargs):
+    """training_status_send_notification_handler.
+
+    Args:
+        kwargs:
+    """
+    instance = kwargs['instance']
+    if hasattr(instance, 'need_to_send_notification'
+              ) and instance.need_to_send_notification:
+        logger.info("Azure TrainingStatus changed.")
+        logger.info("instance.need_to_send_notification %s",
+                    instance.need_to_send_notification)
+        Notification.objects.create(notification_type="project",
+                                    sender="system",
+                                    title=instance.status.capitalize(),
+                                    details=instance.log.capitalize())
+    logger.info("Signal end")
+
+
+@receiver(signal=post_save,
+          sender=DeployStatus,
+          dispatch_uid="deploy_status_listener")
+def deploy_status_listener(**kwargs):
+    """deploy_status_send_notification_handler.
+
+    Args:
+        kwargs:
+    """
+    instance = kwargs['instance']
+    if hasattr(instance, 'need_to_send_notification'
+              ) and instance.need_to_send_notification:
+        logger.info("Azure TrainingStatus changed.")
+        logger.info("instance.need_to_send_notification %s",
+                    instance.need_to_send_notification)
+        Notification.objects.create(notification_type="part_detection",
+                                    sender="system",
+                                    title=instance.status.capitalize(),
+                                    details=instance.log.capitalize())

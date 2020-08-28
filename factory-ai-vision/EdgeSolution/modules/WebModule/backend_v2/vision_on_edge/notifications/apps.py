@@ -8,7 +8,7 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
-
+# pylint: disable=unused-import
 class NotificationsConfig(AppConfig):
     """Notifications App Config
     """
@@ -16,8 +16,6 @@ class NotificationsConfig(AppConfig):
     name = 'vision_on_edge.notifications'
 
     def ready(self):
-        """
-        Only load to data when runserver
-        if ready run in migration will failed
+        """ready.
         """
         from . import signals
