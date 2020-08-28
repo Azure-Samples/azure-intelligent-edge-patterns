@@ -114,7 +114,6 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
           />
         </div>
         <div style={{ width: '30%' }}>
-          <TextField label="Part" placeholder="Add a part" />
           <PartPicker selectedPart={imgPart?.id} />
           {isRelabel && (
             <Stack tokens={{ childrenGap: 10 }} styles={{ root: { paddingTop: '30px' } }}>
