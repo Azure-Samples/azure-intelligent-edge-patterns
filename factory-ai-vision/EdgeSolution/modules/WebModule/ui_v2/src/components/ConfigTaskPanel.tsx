@@ -7,9 +7,9 @@ import {
   PrimaryButton,
   DefaultButton,
   Dropdown,
-  Checkbox,
   Text,
   TextField,
+  Toggle,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -20,6 +20,7 @@ import { ProjectData } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
+import { ExpandPanel } from './ExpandPanel';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -132,68 +133,70 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             }
           }}
         />
-        <Checkbox
-          label="Set up retraining"
-          checked={projectData.needRetraining}
-          onChange={(_, checked) => {
-            onChange('needRetraining', checked);
-          }}
-        />
-        <Text styles={{ root: { fontWeight: 'bold' } }}>Accuracy for capture images</Text>
-        <TextField
-          label="Minimum"
-          type="number"
-          value={projectData.accuracyRangeMin?.toString()}
-          onChange={(_, newValue) => {
-            onChange('accuracyRangeMin', parseInt(newValue, 10));
-          }}
-          suffix="%"
-          disabled={!projectData.needRetraining}
-        />
-        <TextField
-          label="Maximum"
-          type="number"
-          value={projectData.accuracyRangeMax?.toString()}
-          onChange={(_, newValue) => {
-            onChange('accuracyRangeMax', parseInt(newValue, 10));
-          }}
-          suffix="%"
-          disabled={!projectData.needRetraining}
-        />
-        <TextField
-          label="Minimum Images to store"
-          type="number"
-          value={projectData.maxImages?.toString()}
-          onChange={(_, newValue) => {
-            onChange('maxImages', parseInt(newValue, 10));
-          }}
-          disabled={!projectData.needRetraining}
-        />
-        <Checkbox
-          label="Send message to cloud"
-          checked={projectData.sendMessageToCloud}
-          onChange={(_, checked) => {
-            onChange('sendMessageToCloud', checked);
-          }}
-        />
-        <TextField
-          label="Frame per minutes"
-          type="number"
-          value={projectData.framesPerMin?.toString()}
-          onChange={(_, newValue) => {
-            onChange('framesPerMin', parseInt(newValue, 10));
-          }}
-          disabled={!projectData.sendMessageToCloud}
-        />
-        <TextField
-          label="Accuracy threshold"
-          type="number"
-          value={projectData.accuracyThreshold?.toString()}
-          onChange={(_, newValue) => {
-            onChange('accuracyThreshold', parseInt(newValue, 10));
-          }}
-          disabled={!projectData.sendMessageToCloud}
-        />
+        <ExpandPanel title="Advanced settings">
+          <Toggle
+            label="Enable retraining"
+            checked={projectData.needRetraining}
+            onChange={(_, checked) => {
+              onChange('needRetraining', checked);
+            }}
+          />
+          <Text styles={{ root: { fontWeight: 'bold' } }}>Accuracy for capture images</Text>
+          <TextField
+            label="Minimum"
+            type="number"
+            value={projectData.accuracyRangeMin?.toString()}
+            onChange={(_, newValue) => {
+              onChange('accuracyRangeMin', parseInt(newValue, 10));
+            }}
+            suffix="%"
+            disabled={!projectData.needRetraining}
+          />
+          <TextField
+            label="Maximum"
+            type="number"
+            value={projectData.accuracyRangeMax?.toString()}
+            onChange={(_, newValue) => {
+              onChange('accuracyRangeMax', parseInt(newValue, 10));
+            }}
+            suffix="%"
+            disabled={!projectData.needRetraining}
+          />
+          <TextField
+            label="Minimum Images to store"
+            type="number"
+            value={projectData.maxImages?.toString()}
+            onChange={(_, newValue) => {
+              onChange('maxImages', parseInt(newValue, 10));
+            }}
+            disabled={!projectData.needRetraining}
+          />
+          <Toggle
+            label="Send message to Azure"
+            checked={projectData.sendMessageToCloud}
+            onChange={(_, checked) => {
+              onChange('sendMessageToCloud', checked);
+            }}
+          />
+          <TextField
+            label="Frame per minutes"
+            type="number"
+            value={projectData.framesPerMin?.toString()}
+            onChange={(_, newValue) => {
+              onChange('framesPerMin', parseInt(newValue, 10));
+            }}
+            disabled={!projectData.sendMessageToCloud}
+          />
+          <TextField
+            label="Accuracy threshold"
+            type="number"
+            value={projectData.accuracyThreshold?.toString()}
+            onChange={(_, newValue) => {
+              onChange('accuracyThreshold', parseInt(newValue, 10));
+            }}
+            disabled={!projectData.sendMessageToCloud}
+          />
+        </ExpandPanel>
       </Stack>
     </Panel>
   );
