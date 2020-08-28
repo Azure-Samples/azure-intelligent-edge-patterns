@@ -7,3 +7,4 @@ json-logging-py==0.2
 MarkupSafe==1.0
 olefile==0.44
 requests==2.12.3
+urllib3
