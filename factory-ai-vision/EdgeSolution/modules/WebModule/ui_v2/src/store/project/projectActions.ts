@@ -240,7 +240,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         id: data[0]?.id ?? null,
         camera: data[0]?.camera ?? null,
         location: data[0]?.location ?? null,
-        parts: data[0]?.part ?? [],
+        parts: data[0]?.parts ?? [],
         modelUrl: data[0]?.download_uri ?? '',
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
@@ -276,7 +276,7 @@ export const thunkPostProject = (
 
   return Axios(url, {
     data: {
-      part: selectedParts,
+      parts: selectedParts,
       camera: selectedCamera,
       project: selectedTrainingProject,
       needRetraining: projectData.needRetraining,
