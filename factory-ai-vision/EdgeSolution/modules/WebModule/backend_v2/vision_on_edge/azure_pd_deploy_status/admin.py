@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""App admin
+"""App admin.
 """
 
 from django.contrib import admin
 
-from .models import Notification
+from .models import DeployStatus
 
 # Register your models here.
-admin.site.register(Notification)
+admin.site.register(DeployStatus)

@@ -39,12 +39,7 @@ PROGRESS_8_EXPORTING: dict = {
     'status': 'exporting',  #Change line
     'log': 'Exporting model.'
 }
-PROGRESS_9_DEPLOYING: dict = {
-    'status': 'deploying',
-    'log': 'Deploying model to inference module.'
-}
-
 # Complete
-PROGRESS_0_OK: dict = {'status': 'ok', 'log': 'Model trained and deployed'}
+PROGRESS_0_OK: dict = {'status': 'ok', 'log': 'Model trained.'}
 
 # Failed

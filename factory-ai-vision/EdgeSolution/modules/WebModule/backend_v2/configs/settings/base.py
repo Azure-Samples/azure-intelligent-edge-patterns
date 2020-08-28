@@ -30,7 +30,7 @@ PROJECT_ROOT = ROOT_DIR / 'vision_on_edge'
 SECRET_KEY = 'gjfeo_pt@1$23c$*g8to4bewom59sml0%8fgbdgot=ypr84b$@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     #    'vision_on_edge.video_feed',
     'vision_on_edge.locations',
     #    'vision_on_edge.image_predictions',
+    'vision_on_edge.azure_pd_deploy_status',
     'rest_framework',
     'drf_yasg',
 ]

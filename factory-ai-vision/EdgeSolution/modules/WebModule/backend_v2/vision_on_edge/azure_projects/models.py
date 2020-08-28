@@ -38,12 +38,16 @@ class Project(models.Model):
     is_demo = models.BooleanField(default=False)
 
     # e.g. relabel
+    retraining_counter = models.IntegerField(default=0)
     maxImages = models.IntegerField(default=20)
     needRetraining = models.BooleanField(default=True)
     relabel_expired_time = models.DateTimeField(default=timezone.now)
 
     def __repr__(self):
-        return self.name
+        return self.name.__repr__()
+    
+    def __str__(self):
+        return self.name.__str__()
 
     @staticmethod
     def pre_save(**kwargs):
@@ -80,7 +84,7 @@ class Project(models.Model):
                 return
 
             # Setting is valid, no customvision_id
-            instance.name = (instance.customvision_project_name or
+            instance.name = (instance.name or
                              "VisionOnEdge-" +
                              datetime.datetime.utcnow().isoformat())
         except:
@@ -186,10 +190,6 @@ class Project(models.Model):
             logger.info("%s %s submit training task to CustomVision",
                         self.customvision_id, self.name)
             trainer.train_project(self.customvision_id)
-            # Set deployed
-            self.deployed = False
-            update_fields.append("deployed")
-            logger.info("set deployed = False")
 
             # If all above is success
             is_task_success = True

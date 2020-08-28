@@ -1,5 +1,5 @@
-"""
-Notification Views
+# -*- coding: utf-8 -*-
+"""App API Views
 """
 
 import logging
@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class NotificationViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """
-    Notification ModelViewSet
+    """Notification ModelViewSet
     """
 
     queryset = Notification.objects.all()

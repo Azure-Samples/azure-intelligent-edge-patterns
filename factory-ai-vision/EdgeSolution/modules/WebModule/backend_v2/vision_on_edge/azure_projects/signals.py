@@ -4,11 +4,10 @@
 
 import logging
 
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from vision_on_edge.azure_settings.models import Setting
-from vision_on_edge.azure_training_status.models import TrainingStatus
 
 from .models import Project
 
@@ -52,36 +51,4 @@ def azure_setting_change_handler(**kwargs):
                                          is_demo=False)
 
 
-@receiver(signal=post_save,
-          sender=Project,
-          dispatch_uid="create_train_if_not_exist")
-def create_train_if_not_exist_handler(**kwargs):
-    """Project create change.
 
-    If a Project is created, create a Train(Training Status) as well.
-    """
-
-    logger.info("Azure Project changed.")
-    logger.info("Checking...")
-
-    if 'sender' not in kwargs or kwargs['sender'] != Project:
-        logger.info("'sender' not in kwargs or kwargs['sender'] != Project")
-        logger.info("nothing to do")
-        return
-    if 'instance' not in kwargs:
-        logger.info("'instance' not in kwargs:'")
-        logger.info("Nothing to do")
-        return
-
-    instance = kwargs['instance']
-    created = kwargs['created']
-    if created:
-        TrainingStatus.objects.update_or_create(
-            project_id=instance.id,
-            defaults={
-                "status": "ok",
-                "log": "Status : Has not configured",
-                "performance": ""
-            },
-        )
-    logger.info("Signals end")

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """API router
 """
 
@@ -16,6 +17,8 @@ from vision_on_edge.azure_projects.api import views as azure_projects_views
 from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training_status.api import \
     views as azure_training_status_views
+from vision_on_edge.azure_pd_deploy_status.api import \
+    views as azure_deploy_status_views
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views as camera_views
 from vision_on_edge.images.api import views as image_views
@@ -48,6 +51,7 @@ router.register('locations', location_views.LocationViewSet)
 router.register('inference_modules',
                 inference_module_views.InferenceModuleViewSet)
 router.register('part_detections', part_detection_views.PartDetectionViewSet)
+router.register('deploy_status', azure_deploy_status_views.DeployStatusViewSet)
 # router.register('image_predictions',
 # image_prediction_views.ImagePredictionViewSet)
 
