@@ -40,7 +40,7 @@ export const Home: React.FC = () => {
       setLoading(true);
       await dispatch(getCameras(false));
       await dispatch(getImages());
-      await dispatch(thunkGetProject(false));
+      await dispatch(thunkGetProject());
       setLoading(false);
       setLoading(false);
     })();
@@ -82,7 +82,7 @@ export const Home: React.FC = () => {
             {location.pathname.split('/')[1] === 'getStarted' ? (
               <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
             ) : (
-              <TaskDetail />
+              <TaskDetail isDemo={false} />
             )}
           </Stack.Item>
         </Stack>

@@ -227,16 +227,12 @@ const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThr
   isDemo,
 });
 
-const getProjectDataByDemo = (isDemo: boolean, state: State): ProjectData => {
-  if (isDemo) return state.demoProject.data;
-  return state.project.data;
-};
+const getProjectData = (state: State): ProjectData => state.project.data;
 
-export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Promise<void> => {
-  dispatch(getProjectRequest(isDemo));
+export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
+  dispatch(getProjectRequest(false));
 
-  const url =
-    isDemo === undefined ? '/api/part_detections/' : `/api/part_detections/?is_demo=${Number(isDemo)}`;
+  const url = '/api/part_detections/';
 
   return Axios.get(url)
     .then(({ data }) => {
@@ -257,11 +253,11 @@ export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Pr
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
         trainingProject: data[0]?.project ?? null,
       };
-      dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
+      dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
       return void 0;
     })
     .catch((err) => {
-      dispatch(getProjectFailed(err, isDemo));
+      dispatch(getProjectFailed(err, false));
     });
 };
 
@@ -278,7 +274,7 @@ export const thunkPostProject = (
 
   dispatch(postProjectRequest(isDemo));
 
-  const projectData = getProjectDataByDemo(isDemo, getState());
+  const projectData = getProjectData(getState());
 
   return Axios(url, {
     data: {
@@ -320,7 +316,7 @@ const getTrain = (traininProjectId, isTestModel: boolean): void => {
  * @deprecated
  */
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
-  const projectId = getProjectDataByDemo(isDemo, getState()).id;
+  const projectId = getProjectData(getState()).id;
   return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
       return dispatch(deleteProjectSuccess(isDemo));
@@ -402,7 +398,7 @@ export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(updateProbThresholdRequest(isDemo));
-  const { id: projectId, probThreshold } = getProjectDataByDemo(isDemo, getState());
+  const { id: projectId, probThreshold } = getProjectData(getState());
 
   return Axios.get(`/api/part_detections/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
     .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
@@ -425,7 +421,7 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(postProjectRequest(isDemo));
-  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectDataByDemo(isDemo, getState());
+  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectData(getState());
 
   return Axios.patch(`/api/part_detections/${projectId}/`, {
     accuracyRangeMin,
