@@ -1,6 +1,8 @@
-# Tensorflow on Kubeflow on Azure Stack
+# TFJobs
 
-This module demonstrates how to run TensorFlow jobs on Kubeflow cluster on Azure Stack.
+The goal of this lab is:
+
+- To run TFJobs within kubeflow environment
 
 [TensorFlow](https://www.tensorflow.org/) is a popular open source machine learning framework.
 
@@ -30,15 +32,14 @@ Please see the `Kubeflow on Azure Stack` module of this repository, or [https://
 
 It is also recommended, but not necessary, to have Kubernetes Dashboard running on the cluster.
 
-
 # Building Docker image for distributed mnist model for e2e test
 
 We will run a popular scenario from Kubeflow's repository, 
 [K8s Custom Resource and Operator For TensorFlow jobs](https://github.com/kubeflow/tf-operator/)
 
-You do not have to re-build the image, you can use `kubeflow/tf-dist-mnist-test:1.0`. If you do decide to use your own image, here is how you could build it:
+You do not have to re-build the image, you can try using `kubeflow/tf-dist-mnist-test:1.0`. If you do decide to use your own image, here is how you could build it:
 
-    $ cd tensorflow-on-kubeflow/dist-mnist-e2e-test
+    $ cd dist-mnist-e2e-test
 
 Login to your Docker account(we use account `"rollingstone"`, but you will need to substitute it for your own
 in all commands and .yamls):
@@ -178,7 +179,7 @@ If you would like to save the results of model training, you can do so from you 
 using the Kubernetes volumes you mount. However, on Azure Stack you do not have `azurefile`
 available yet, but there are many other options, e.g. you can use a network storage.
 
-Please follow [Installing Storage](../installing_storage.md) to create `samba-share-claim` we
+Please follow [Installing Storage](../01-Jupyter/installing_storage.md) to create `samba-share-claim` we
 will be using in our .yaml files. Talk to your Azure Stack administrator to discuss other
 available options in your team.
 
@@ -284,33 +285,82 @@ Now you can access the port you forward from your Kubernetes environment:
 
 It will look something like this:
 
-![../pics/tensorboard_graph.png](../pics/tensorboard_graph.png)
+![pics/tensorboard_graph.png](pics/tensorboard_graph.png)
 
 Another tab shows the input images (train/test):
 
-![../pics/tensorboard_images.png](../pics/tensorboard_images.png)
+![pics/tensorboard_images.png](pics/tensorboard_images.png)
 
 There are scalars the model logged:
 
-![../pics/tensorboard_scalars.png](../pics/tensorboard_scalars.png)
+![pics/tensorboard_scalars.png](pics/tensorboard_scalars.png)
 
 And histograms for different parameters:
 
-![../pics/tensorboard_histograms.png](../pics/tensorboard_histograms.png)
+![pics/tensorboard_histograms.png](pics/tensorboard_histograms.png)
 
 There is a projector that animates the points in the NN layer dimensions:
 
-![../pics/tensorboard_projector.png](../pics/tensorboard_projector.png)
+![pics/tensorboard_projector.png](pics/tensorboard_projector.png)
 
+## Performance metrics
 
-## Next Steps
+We can observe a simple speed-up indication by how fast the workers finish their portions.
 
-Proceed to [PyTorch on Kubeflow Tutorial](../pytorch-on-kubeflow/Readme.md) tutorial to learn how to run `PyTorchJob`s.
+Here is a typical event log for 1 worker:
+
+```
+...
+Events:
+  Type    Reason                   Age    From         Message
+  ----    ------                   ----   ----         -------
+  Normal  SuccessfulCreatePod      2m51s  tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  Normal  SuccessfulCreateService  2m51s  tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  Normal  SuccessfulCreatePod      2m51s  tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m1-worker-0
+  Normal  SuccessfulCreateService  2m51s  tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m1-worker-0
+  Normal  ExitedWithCode           5s     tf-operator  Pod: default.dist-mnist-for-e2e-test-demo20200826-m1-worker-0 exited with code 0
+  Normal  TFJobSucceeded           5s     tf-operator  TFJob dist-mnist-for-e2e-test-demo20200826-m1 successfully completed.
+  Normal  SuccessfulDeletePod      5s     tf-operator  Deleted pod: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  Normal  SuccessfulDeleteService  5s     tf-operator  Deleted service: dist-mnist-for-e2e-test-demo20200826-m1-ps-0
+  ```
+
+We can interpret it see that TFJob was done in around 3 minutes.
+
+In 10-worker case we get to the same milestone much faster, around 1.5 minutes, which is reasonable, because we have a 3-node k8s cluster.
+
+```
+Events:
+  Type    Reason                   Age                  From         Message
+  ----    ------                   ----                 ----         -------
+  Normal  SuccessfulCreateService  106s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-ps-0
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-0
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-1
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-2
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-3
+  Normal  SuccessfulCreatePod      106s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-ps-0
+  Normal  SuccessfulCreatePod      105s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-4
+  Normal  SuccessfulCreatePod      105s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-5
+  Normal  SuccessfulCreatePod      105s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-6
+  Normal  SuccessfulCreatePod      104s                 tf-operator  Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-7
+  Normal  SuccessfulCreateService  103s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-1
+  Normal  SuccessfulCreateService  103s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-0
+  Normal  SuccessfulCreatePod      103s (x2 over 104s)  tf-operator  (combined from similar events): Created pod: dist-mnist-for-e2e-test-demo20200826-m10-worker-9
+  Normal  SuccessfulCreateService  102s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-2
+  Normal  SuccessfulCreateService  102s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-3
+  Normal  SuccessfulCreateService  102s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-4
+  Normal  SuccessfulCreateService  101s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-5
+  Normal  SuccessfulCreateService  101s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-6
+  Normal  SuccessfulCreateService  100s                 tf-operator  Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-7
+  Normal  SuccessfulCreateService  99s (x2 over 100s)   tf-operator  (combined from similar events): Created service: dist-mnist-for-e2e-test-demo20200826-m10-worker-9
+  Normal  ExitedWithCode           9s (x3 over 9s)      tf-operator  Pod: default.dist-mnist-for-e2e-test-demo20200826-m10-worker-1 exited with code 0
+```
 
 # Links
-
-For further information:
 
 - https://www.kubeflow.org/docs/components/training/tftraining/
 - https://www.tensorflow.org/
 - https://github.com/Azure/kubeflow-labs
+
+---
+
+[Back to 01-Jupyter](../01-Jupyter/Readme.md) | [Back to main page](../Readme.md) | [Next to 03-PyTorchJobs](../03-PyTorchJobs/Readme.md)

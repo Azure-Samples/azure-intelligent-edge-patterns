@@ -42,6 +42,19 @@ You can also verify the system with `nvidia/cuda` image, running `nvidia-smi`:
 
 You can create a virtual machine using [Azure Portal](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-portal), and replicate the steps described above if you select the image from N-Series, that provides GPU support.
 
+## DockerHub
+
+In case you do not have it already, you need to create an account at dockerhub.com - it is a simple way for
+storing of the docker images for use in our clusters.
+
+Login, and to check that you are connected, run sistem-wide information:
+
+    $ docker login
+    ...
+
+    $ docker info
+    ...
+
 ## Deploying this container to Kubernetes
 
 To deploy this container to your Kubernetes cluster, you need to create a .yaml. 
