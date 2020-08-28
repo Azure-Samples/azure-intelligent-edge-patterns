@@ -240,7 +240,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         id: data[0]?.id ?? null,
         camera: data[0]?.camera ?? null,
         location: data[0]?.location ?? null,
-        parts: data[0]?.parts ?? [],
+        parts: data[0]?.part ?? [],
         modelUrl: data[0]?.download_uri ?? '',
         needRetraining: data[0]?.needRetraining ?? true,
         accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
@@ -294,18 +294,15 @@ export const thunkPostProject = (
   })
     .then(({ data }) => {
       dispatch(postProjectSuccess(data, false));
-      getTrain(data.id, false);
+      getTrain(data.id);
       return data.id;
     })
     .catch((err) => {
       dispatch(postProjectFail(err, false));
     }) as Promise<number>;
 };
-const getTrain = (traininProjectId, isTestModel: boolean): void => {
-  const url = isTestModel
-    ? `/api/projects/${traininProjectId}/train?demo=True`
-    : `/api/projects/${traininProjectId}/train`;
-  Axios.get(url).catch((err) => console.error(err));
+const getTrain = (projectId): void => {
+  Axios.get(`/api/part_detections/${projectId}/configure`).catch((err) => console.error(err));
 };
 
 /**

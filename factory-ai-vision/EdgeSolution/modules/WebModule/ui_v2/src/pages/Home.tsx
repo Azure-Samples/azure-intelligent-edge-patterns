@@ -29,6 +29,7 @@ export const Home: React.FC = () => {
   const hasCamera = useSelector((state: State) => selectAllCameras(state).length > 0);
   const hasImages = useSelector((state: State) => selectAllImages(state).length > 0);
   const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
+  const projectData = useSelector((state: State) => state.project.data);
   const [loading, setLoading] = useState(false);
 
   const [panelOpen, setPanelOpen] = useState(false);
@@ -87,7 +88,7 @@ export const Home: React.FC = () => {
           </Stack.Item>
         </Stack>
       </Stack>
-      <ConfigTaskPanel isOpen={panelOpen} onDismiss={closePanel} />
+      <ConfigTaskPanel isOpen={panelOpen} projectData={projectData} onDismiss={closePanel} />
     </>
   );
 };
