@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import {
   Breadcrumb,
@@ -22,9 +22,10 @@ import { useQuery } from '../hooks/useQuery';
 import { selectCameraById, getCameras, deleteCamera } from '../store/cameraSlice';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
-import { CaptureDialog } from '../components/CaptureDialog';
 import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
 import { selectLocationById } from '../store/locationSlice';
+import LabelingPage from '../components/LabelingPage/LabelingPage';
+import { captureImage } from '../store/imageSlice';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
@@ -75,9 +76,9 @@ export const CameraDetails: React.FC = () => {
     dispatch(thunkGetProject(false));
   }, [dispatch]);
 
-  const [captureDialogOpen, setCaptureDialogOpen] = useState(false);
-  const openDialog = () => setCaptureDialogOpen(true);
-  const closeDialog = () => setCaptureDialogOpen(false);
+  const onCaptureBtnClick = (streamId) => {
+    dispatch(captureImage({ streamId, imageIds: [], shouldOpenLabelingPage: true }));
+  };
 
   if (camera === undefined) return <Spinner label="Loading" />;
 
@@ -100,16 +101,11 @@ export const CameraDetails: React.FC = () => {
           <Breadcrumb items={breadCrumbItems} />
           <Stack tokens={{ childrenGap: 20 }} horizontal grow>
             <CameraInfo rtsp={camera.rtsp} location={locationName} />
-            <CameraLiveFeed rtsp={camera.rtsp} onBtnClick={openDialog} />
+            <CameraLiveFeed rtsp={camera.rtsp} onBtnClick={onCaptureBtnClick} />
           </Stack>
         </Stack>
       </Stack>
-      <CaptureDialog
-        isOpen={captureDialogOpen}
-        onDismiss={closeDialog}
-        captureLabelMode={1}
-        defaultSelectedCameraId={cameraId}
-      />
+      <LabelingPage isRelabel={false} />
       <AddEditCameraPanel
         isOpen={editPanelOpen}
         onDissmiss={closePanel}
@@ -161,7 +157,14 @@ const CameraInfo: React.FC<{ rtsp: string; location: string }> = ({ rtsp, locati
   </Stack>
 );
 
-const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: () => void }> = ({ rtsp, onBtnClick }) => {
+const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: (streamId) => void }> = ({
+  rtsp,
+  onBtnClick: btnClickCb,
+}) => {
+  const streamIdRef = useRef('');
+
+  const onBtnClick = () => btnClickCb(streamIdRef.current);
+
   return (
     <Stack style={{ width: '80%' }}>
       <Text styles={titleStyles}>Live feed</Text>
@@ -170,7 +173,12 @@ const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: () => void }> = ({ rt
       </ActionButton>
       <Stack.Item grow>
         <div style={{ height: '90%' }}>
-          <RTSPVideo rtsp={rtsp} canCapture autoPlay onCapturePhoto={() => {}} />
+          <RTSPVideo
+            rtsp={rtsp}
+            onStreamCreated={(streamId) => {
+              streamIdRef.current = streamId;
+            }}
+          />
         </div>
       </Stack.Item>
     </Stack>

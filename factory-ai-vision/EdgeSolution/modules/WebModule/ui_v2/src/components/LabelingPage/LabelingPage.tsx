@@ -73,7 +73,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
   };
 
   const onBoxCreated = (): void => {
-    if (index === imageIds.length - 1) onSaveBtnClick();
+    // TODO Check if we need to trigger save and click for last image
+    // if (index === imageIds.length - 1) onSaveBtnClick();
   };
 
   const onDeleteImage = async () => {
