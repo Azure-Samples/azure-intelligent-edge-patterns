@@ -7,6 +7,7 @@ import { PartDetails } from '../pages/PartDetails';
 import { Parts } from '../pages/Parts';
 import { Setting } from '../pages/Setting';
 import { PrivateRoute } from './PrivateRoute';
+import { Images } from '../pages/Images';
 
 export const RootRouter: FC = () => {
   return (
@@ -15,6 +16,7 @@ export const RootRouter: FC = () => {
       <PrivateRoute path="/cameras" component={Cameras} />
       <PrivateRoute path="/parts/detail" component={PartDetails} />
       <PrivateRoute path="/parts" component={Parts} />
+      <PrivateRoute path="/images" component={Images} />
       <Route path="/setting" component={Setting} />
       <PrivateRoute path="/" component={Home} />
     </Switch>
