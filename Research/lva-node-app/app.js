@@ -30,7 +30,7 @@ const { request, response } = require('express');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static('public'))
-
+app.use(express.static('public/pages'))
 
 
 // render the html pages. the '/<name>' is what the url extension will look like in the browser

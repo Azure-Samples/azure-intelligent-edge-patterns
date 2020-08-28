@@ -5,17 +5,15 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
 
     <title>Azure Live Video Analytics</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="./vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="./css/simple-sidebar.css" rel="stylesheet">
-    <link href="./css/mystyle.css" rel="stylesheet">
+    <link href="../css/simple-sidebar.css" rel="stylesheet">
+    <link href="../css/mystyle.css" rel="stylesheet">
 
 </head>
 
@@ -90,36 +88,35 @@
         <!-- /#page-content-wrapper -->
     </div>
 
-    <!-- /#wrapper -->
     <!-- my scripts -->
-    <script src="js/main.js"></script>
+    <script src="../js/main.js"></script>
     <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-
+    <!-- template for each camera displayed -->
     <script id="created-camera-template" type="text/template">
-    <li class="camera camera-list-item list-node-item list-group-item badge">
-        <table>
-            <tr id="camera-labels" class=" row row-odd">
-                <td>Name </td>
-                <td>URL </td>
-                <td>Username </td>
-                <td>Password </td>
-            </tr>
-            <tr id="camera-values" class=" row row-even">
-                <td placeholder="uniqueName"> </td>
-                <td placeholder="rtsp://..."> </td>
-                <td placeholder="dummyUsername"> </td>
-                <td placeholder="dummyPassword"></td>
-            </tr>
-            <tr class=" row row-odd">
-                <td colspan="4">
-                    <button type="button" style="float:left;" class = "btn btn-secondary" onclick="deleteCamera(this)">Delete </button>
-                </td>
-            </tr>
-        </table>
-    </li>
+        <li class="camera camera-list-item list-node-item list-group-item badge">
+            <table>
+                <tr id="camera-labels" class=" row row-odd">
+                    <td>Name </td>
+                    <td>URL </td>
+                    <td>Username </td>
+                    <td>Password </td>
+                </tr>
+                <tr id="camera-values" class=" row row-even">
+                    <td placeholder="uniqueName"> </td>
+                    <td placeholder="rtsp://..."> </td>
+                    <td placeholder="dummyUsername"> </td>
+                    <td placeholder="dummyPassword"></td>
+                </tr>
+                <tr class=" row row-odd">
+                    <td colspan="4">
+                        <button type="button" style="float:left;" class = "btn btn-secondary" onclick="deleteCamera(this)">Delete </button>
+                    </td>
+                </tr>
+            </table>
+        </li>
     </script>
 
     <!-- Menu Toggle Script + before unload function -->
@@ -138,5 +135,4 @@
     </script>
 
 </body>
-
 </html>

@@ -5,27 +5,18 @@
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
 
   <title>Azure Live Video Analytics</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="./vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- Custom styles for this template -->
-  <link href="./css/simple-sidebar.css" rel="stylesheet">
-  <link href="./css/mystyle.css" rel="stylesheet">
+  <link href="../css/simple-sidebar.css" rel="stylesheet">
+  <link href="../css/mystyle.css" rel="stylesheet">
 
 </head>
-<!-- my scripts -->
-<script src="js/main.js"></script>
-<script src="js/cookie.js"></script>
-<script src="js/mediaGraphBuilder.js"></script>
-<!-- Bootstrap core JavaScript -->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="./js/hubdata.js"></script>
+
 
 <body onload="loadInstancesAndTopologies()">
 
@@ -253,55 +244,59 @@
     </div>
 
   </div>
-  </div>
-  <!-- /#page-content-wrapper -->
 
-  </div>
-  <!-- /#wrapper -->
+  <!-- my scripts -->
+  <script src="../js/main.js"></script>
+  <script src="../js/mediaGraphBuilder.js"></script>
 
-
-  <!-- Menu Toggle Script -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="../vendor/jquery/jquery.min.js"></script>
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Menu Toggle Script + unload function-->
   <script>
-    $("#menu-toggle").click(function (e) {
+    $("#menu-toggle").click(function (e) 
+    {
       e.preventDefault();
       $("#wrapper").toggleClass("toggled");
     });
 
-    window.onbeforeunload = function(){
+    window.onbeforeunload = function()
+    {
       sendGlobals();
       return;
     }
   </script>
 
+  <!-- receive incoming messages from IoT Hub -->
   <script>
-    /**
- * receive incoming messages from IoT Hub
- */ 
-$(document).ready(() => 
-{
-    // if deployed to a site supporting SSL, use wss://
-    const protocol = document.location.protocol.startsWith('https') ? 'wss://' : 'ws://';
-    const webSocket = new WebSocket(protocol + location.host);
+    $(document).ready(() => 
+      {
+        // if deployed to a site supporting SSL, use wss://
+        const protocol = document.location.protocol.startsWith('https') ? 'wss://' : 'ws://';
+        const webSocket = new WebSocket(protocol + location.host);
 
-    // when socket receives message, try to display to user
-    webSocket.onmessage = function onMessage(message) 
-    {
-        try 
+        // when socket receives message, try to display to user
+        webSocket.onmessage = function onMessage(message) 
         {
-            const messageData = message.data;
-            //separate data fields by two spaces.
-            document.getElementById("iothub-message-output-box").innerText = JSON.stringify(JSON.parse(messageData), null, 2);
-        }
+            try 
+            {
+                const messageData = message.data;
+                //separate data fields by two spaces.
+                document.getElementById("iothub-message-output-box").innerText = JSON.stringify(JSON.parse(messageData), null, 2);
+            }
 
-        catch (err) {
-            console.error(err);
-        }
-    };
-});
+            catch (err) {
+                console.error(err);
+            }
+        };
+      });
   </script>
+
+<!-- template for parameters in setGraphInstance popup -->
   <script id="parameter-template" type="text/template">
     <li class="parameter">
-        <table class="myTable" border="2">
+        <table class="myTable">
           <th class="information">Name and Description: </th>
             <tr class="parameter-value row row-even">
                 <td style="border: none;">
@@ -310,49 +305,57 @@ $(document).ready(() =>
             </tr>
         </table>
     </li>
-</script>
+  </script>
 
+  <!-- keep dropdowns open onclick -->
   <script>
-    $("#graphinstancetester").click(function (e) {
+    $("#graphinstancetester").click(function (e) 
+    {
       e.preventDefault();
     });
 
-    $("#instanceset-topology").click(function (e) {
+    $("#instanceset-topology").click(function (e) 
+    {
       e.preventDefault();
     });
 
-    $(document).on('click', '.allow-focus', function (e) {
+    $(document).on('click', '.allow-focus', function (e) 
+    {
       e.stopPropagation();
     });
   </script>
 
-
+  <!-- modal behavior -->
   <script>
     // Get the modal
-    var modal = document.getElementById("myModal");
+    let modal = document.getElementById("myModal");
 
     // Get the button that opens the modal
-    var btn = document.getElementById("openModal");
+    let openModalBtn = document.getElementById("openModal");
 
     // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("closeMe")[0];
-    var span2 = document.getElementsByClassName("closeOnSubmit")[0];
+    let span = document.getElementsByClassName("closeMe")[0];
+    let submitBtn = document.getElementsByClassName("closeOnSubmit")[0];
 
     // When the user clicks the button, open the modal 
-    btn.onclick = function () {
+    openModalBtn.onclick = function () {
       modal.style.display = "block";
     }
 
     // When the user clicks on <span> (x), close the modal
-    span.onclick = function () {
+    span.onclick = function () 
+    {
       modal.style.display = "none";
     }
-    span2.onclick = function () {
+    submitBtn.onclick = function () 
+    {
       modal.style.display = "none";
     }
     // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function (event) {
-      if (event.target == modal) {
+    window.onclick = function (event) 
+    {
+      if (event.target == modal) 
+      {
         modal.style.display = "none";
       }
     }

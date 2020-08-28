@@ -9,11 +9,11 @@
   <title>Azure Live Video Analytics</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="./vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- Custom styles for this template -->
-  <link href="./css/simple-sidebar.css" rel="stylesheet">
-  <link href="./css/mystyle.css" rel="stylesheet">
+  <link href="../css/simple-sidebar.css" rel="stylesheet">
+  <link href="../css/mystyle.css" rel="stylesheet">
 
 </head>
 
@@ -227,13 +227,12 @@
   <!-- /#wrapper -->
 
   <!-- Bootstrap core JavaScript -->
-  <script src="./vendor/jquery/jquery.min.js"></script>
-  <script src="./vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../vendor/jquery/jquery.min.js"></script>
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <!-- My Javascript -->
-  <script src="./js/main.js"></script>
-  <script src="./js/cookie.js"></script>
-  <script src="./js/mediaGraphBuilder.js"></script>
+  <!-- My scripts -->
+  <script src="../js/main.js"></script>
+  <script src="../js/mediaGraphBuilder.js"></script>
 
   <!-- Menu Toggle Script and unload function-->
   <script>
@@ -260,24 +259,26 @@
           </li>
         </script>
 
-  <!--  -->
+  <!-- template for adding a source node to graph builder -->
   <script id="hidden-template-sourcenode" type="text/x-custom-template">
-          <li class="list-node-item list-group-item badge graphnode">
-            <div>
-                <button type="button" id="forlabel" class="btn btn-primary"  aria-label="Close">  
-                </button>
-                <ul class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left" aria-labelledby="forlabel"></ul>
-            </div>
-            <br>
-          </li>
+    <li class="list-node-item list-group-item badge graphnode">
+      <div>
+          <button type="button" id="forlabel" class="btn btn-primary"  aria-label="Close">  
+          </button>
+          <ul class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left" aria-labelledby="forlabel"></ul>
+      </div>
+      <br>
+    </li>      
   </script>
   
   <!-- keep checkbox dropdowns open until user decides to close -->
   <script>
-    $(document).on('click', '.allow-focus', function (e) {
+    $(document).on('click', '.allow-focus', function (e) 
+    {
       e.stopPropagation();
     });
-    $(".checkbox-menu").on("change", "input[type='checkbox']", function () {
+    $(".checkbox-menu").on("change", "input[type='checkbox']", function () 
+    {
       $(this).closest("li").toggleClass("active", this.checked);
     });
   </script>

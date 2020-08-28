@@ -500,7 +500,8 @@ function setGraphInstance()
     for(let param of parameters) 
     {
         if(param.value=="") param.value=param.getAttribute("placeholder");
-        parametersObject.push({
+        parametersObject.push(
+        {
             "name": param.getAttribute('id'),
             "value": param.value
         });
@@ -534,9 +535,9 @@ function setGraphInstance()
 function populateModalTemplate()
 {
   //find the currently set graph topology
-  let template=document.getElementById("myModal"); //shouldn't be called template anymore, change this ************************
-  let modalObjects=template.getElementsByClassName("modal-item");
-  let content=template.getElementsByClassName("all-set-instance-content");
+  let modal=document.getElementById("myModal");
+  let modalObjects=modal.getElementsByClassName("modal-item");
+  let content=modal.getElementsByClassName("all-set-instance-content");
   let currentSelect=modalObjects[0]
 
   content[0].style.visibility = "visible";

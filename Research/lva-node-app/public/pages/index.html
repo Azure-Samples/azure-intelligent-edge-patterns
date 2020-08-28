@@ -11,11 +11,12 @@
   <title>Azure Live Video Analytics</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="./vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- ../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
 
   <!-- Custom styles for this template -->
-  <link href="./css/simple-sidebar.css" rel="stylesheet">
-  <link href="./css/mystyle.css" rel="stylesheet">
+  <link href="../css/simple-sidebar.css" rel="stylesheet">
+  <link href="../css/mystyle.css" rel="stylesheet">
 
 </head>
 
@@ -81,9 +82,11 @@
   <!-- /#wrapper -->
 
   <!-- Bootstrap core JavaScript -->
-  <script src="./vendor/jquery/jquery.min.js"></script>
-  <script src="./vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
+  <script src="../vendor/jquery/jquery.min.js"></script>
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- My scripts -->
+  <script src="../js/main.js"></script>
   <!-- Menu Toggle Script -->
   <script>
     $("#menu-toggle").click(function(e) {
@@ -92,49 +95,7 @@
     });
   </script>
 
-<!-- <script>
-// const fs = require('fs');
- function addToGraph(elem, listID){
-    var ul = document.getElementById(listID);
-    var li = document.createElement("li");
-    var closebutton= document.createElement("button");
-    closebutton.setAttribute('type', 'button');
-    closebutton.innerHTML="X";
-    closebutton.setAttribute('onclick', "deleteFromGraph(this)");
-    li.setAttribute('id', makeUniqueId(elem));
-    li.setAttribute('name', elem.name.replace(/_/g, " "));
-    li.appendChild(closebutton);
-    li.appendChild(document.createTextNode(elem.name.replace(/_/g, " ")));
-    ul.appendChild(li);
-  }
 
-  function deleteFromGraph(elem)
-  {
-    console.log(elem.parentElement.id);
-    var item = document.getElementById(elem.parentElement.id);
-    while (item.lastElementChild)
-    {
-      item.removeChild(item.lastElementChild);
-    }
-    item.parentElement.removeChild(item);
-  }
-
-  function makeUniqueId(elem)
-  {
-    return (elem.name+CreateUUID());
-  }
-
-  function CreateUUID() 
-  {
-    return 'yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) 
-      {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-      });
-  } -->
-
-</script>
-<script src="./js/main.js"></script>
 </body>
 
 </html>

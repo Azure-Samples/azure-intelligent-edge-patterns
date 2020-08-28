@@ -110,15 +110,15 @@ function getValidInputs(schema)
 }
 
 /**
-* get schema for a give node type using the limitations schema at the bottom of this document
+* get schema for a give node type using the graphNodeLimitations schema at the bottom of this document
 */
 function getNodeSchema(type)
 {
-    for(var i=0; i<limitations.length; i++)
+    for(var i=0; i<graphNodeLimitations.length; i++)
     {
-        if(limitations[i].name===type)
+        if(graphNodeLimitations[i].name===type)
         {
-            return limitations[i];
+            return graphNodeLimitations[i];
         }
     }
     return undefined;
@@ -542,7 +542,7 @@ function deleteGraph(htmlElement)
 /** 
 * Custom JSON schema of graph node limitations. If anything changes, modify this! 
 */
-var limitations =
+const graphNodeLimitations =
 [
         {
             "name": "rtspSource",
