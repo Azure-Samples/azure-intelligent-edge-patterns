@@ -32,9 +32,10 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { selectAll: selectAllTrainingProjects } = entityAdapter.getSelectors(
-  (state: State) => state.trainingProject,
-);
+export const {
+  selectAll: selectAllTrainingProjects,
+  selectById: selectTrainingProjectById,
+} = entityAdapter.getSelectors((state: State) => state.trainingProject);
 export const trainingProjectOptionsSelector = createSelector(selectAllTrainingProjects, (trainingProjects) =>
   trainingProjects.map((e) => ({
     key: e.id,

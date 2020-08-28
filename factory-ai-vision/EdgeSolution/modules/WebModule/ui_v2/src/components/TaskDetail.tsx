@@ -13,17 +13,22 @@ import {
   thunkGetTrainingMetrics,
   thunkGetProject,
 } from '../store/project/projectActions';
+import { LiveViewInfo } from './LiveviewInfo/LiveviewInfo';
+import { selectCameraById } from '../store/cameraSlice';
+import { selectTrainingProjectById } from '../store/trainingProjectSlice';
+import { selectPartNamesById } from '../store/partSlice';
 
 export const TaskDetail: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
-    error,
-    trainingLogs,
     status,
-    trainingMetrics,
-    data: { id: projectId, camera: projectCameraId, trainingProject },
-    progress,
-    inferenceMetrics: { partCount },
+    data: { id: projectId, camera: projectCameraId, trainingProject, parts },
+    inferenceMetrics: { successRate, successfulInferences, unIdetifiedItems },
   } = useSelector<State, Project>((state) => state.project);
+  const cameraName = useSelector((state: State) => selectCameraById(state, projectCameraId)?.name);
+  const trainingProjectName = useSelector(
+    (state: State) => selectTrainingProjectById(state, trainingProject)?.name,
+  );
+  const partNames = useSelector(selectPartNamesById(parts));
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -67,7 +72,16 @@ export const TaskDetail: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
 
   return (
     <Stack horizontal styles={{ root: { height: '100%' } }}>
-      <div style={{ width: '30%' }}></div>
+      <div style={{ width: '30%' }}>
+        <LiveViewInfo
+          taskName={trainingProjectName}
+          cameraName={cameraName}
+          partNames={partNames}
+          successRate={successRate}
+          successfulInference={successfulInferences}
+          unidentifiedImages={unIdetifiedItems}
+        />
+      </div>
       <div style={{ height: '90%', width: '70%' }}>
         <LiveViewContainer showVideo={true} cameraId={projectCameraId} onDeleteProject={onDeleteProject} />
       </div>

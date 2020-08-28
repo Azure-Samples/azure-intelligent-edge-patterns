@@ -79,3 +79,6 @@ export const {
 export const partOptionsSelector = createSelector(selectAllParts, (parts) =>
   parts.map((p) => ({ key: p.id, text: p.name })),
 );
+
+export const selectPartNamesById = (ids) =>
+  createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i].name));
