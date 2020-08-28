@@ -1,20 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Axios from 'axios';
 
-import { RTSPVideoProps, CaptureLabelMode } from './RTSPVideo.type';
 import { useInterval } from '../../hooks/useInterval';
-import { Stack } from '@fluentui/react';
 
-// TODO Check if we need two mode for capturing & the capturing UX
-export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
-  rtsp = null,
-  partId = null,
-  canCapture,
-  onCapturePhoto,
-  autoPlay,
-}) => {
+type RTSPVideoProps = {
+  rtsp: string;
+  onStreamCreated?: (streamId: string) => void;
+  partId?: number;
+};
+
+export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCreated, partId = null }) => {
   const [streamId, setStreamId] = useState<string>('');
-  const [captureLabelMode, setCaptureLabelMode] = useState<CaptureLabelMode>(CaptureLabelMode.PerImage);
 
   const onCreateStream = useCallback((): void => {
     const url =
@@ -26,6 +22,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
       .then((data) => {
         if (data?.status === 'ok') {
           setStreamId(data.stream_id);
+          onStreamCreated(data.stream_id);
         }
         return null;
       })
@@ -62,8 +59,8 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   });
 
   useEffect(() => {
-    if (autoPlay) onCreateStream();
-  }, [autoPlay, onCreateStream]);
+    onCreateStream();
+  }, [onCreateStream]);
 
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 

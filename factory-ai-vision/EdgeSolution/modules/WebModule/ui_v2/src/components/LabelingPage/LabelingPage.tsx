@@ -73,7 +73,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
   };
 
   const onBoxCreated = (): void => {
-    if (index === imageIds.length - 1) onSaveBtnClick();
+    // TODO Check if we need to trigger save and click for last image
+    // if (index === imageIds.length - 1) onSaveBtnClick();
   };
 
   const onDeleteImage = async () => {
@@ -113,7 +114,6 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
           />
         </div>
         <div style={{ width: '30%' }}>
-          <TextField label="Part" placeholder="Add a part" />
           <PartPicker selectedPart={imgPart?.id} />
           {isRelabel && (
             <Stack tokens={{ childrenGap: 10 }} styles={{ root: { paddingTop: '30px' } }}>
