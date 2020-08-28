@@ -81,17 +81,7 @@ const initialState: Project = {
   progress: null,
 };
 
-/**
- * Share this reducer between project and demoProject
- * Check the `isDemo` property in action to check if it is right reducer
- * @param isDemo
- */
-const createProjectReducerByIsDemo = (isDemo: boolean) => (
-  state = initialState,
-  action: ProjectActionTypes,
-): Project => {
-  if (isDemo !== action.isDemo) return state;
-
+const projectReducer = (state = initialState, action: ProjectActionTypes): Project => {
   switch (action.type) {
     case GET_PROJECT_REQUEST:
       return { ...state, isLoading: true, error: null };
@@ -229,4 +219,4 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
   }
 };
 
-export default createProjectReducerByIsDemo;
+export default projectReducer;

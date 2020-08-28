@@ -75,7 +75,7 @@ export const CameraDetails: React.FC = () => {
 
   useEffect(() => {
     dispatch(getCameras(false));
-    dispatch(thunkGetProject(false));
+    dispatch(thunkGetProject());
   }, [dispatch]);
 
   const onCaptureBtnClick = (streamId) => {
