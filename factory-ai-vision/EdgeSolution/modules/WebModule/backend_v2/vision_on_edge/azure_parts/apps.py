@@ -63,11 +63,11 @@ class AzurePartsConfig(AppConfig):
                         'train',
                         'tvmonitor',
                 ]:
-
-                    Part.objects.update_or_create(
-                        project=project_obj,
-                        name=partname,
-                        defaults={'description': "Demo"})
+                    if not Part.objects.filter(project=project_obj,
+                                               name=partname).exists():
+                        Part.objects.create(project=project_obj,
+                                            name=partname,
+                                            description="Demo")
                 logger.info("Creating demo parts finished.")
 
             logger.info("Part App Config end while running server")

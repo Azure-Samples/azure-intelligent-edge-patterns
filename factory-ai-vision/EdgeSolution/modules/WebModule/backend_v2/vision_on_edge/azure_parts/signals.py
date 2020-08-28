@@ -53,7 +53,8 @@ def azure_project_post_save_handler(**kwargs):
                   ) or not instance.customvision_project_id_changed:
         logger.info("Custom Vision project id not changed. Pass")
         return
-    logger.info("Custom Vision project id changed. Deleting all image of this project")
+    logger.info(
+        "Custom Vision project id changed. Deleting all image of this project")
     Part.objects.filter(project=instance).delete()
 
 

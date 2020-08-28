@@ -15,6 +15,7 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 
 from ..azure_settings.models import Setting
+from .exceptions import CannotChangeDemoProjectError
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,8 @@ class Project(models.Model):
             kwargs:
         """
         instance = kwargs["instance"]
+        if instance.is_demo and instance.id:
+            raise CannotChangeDemoProjectError
         try:
             logger.info("Project pre_save start")
             logger.info("Project id given: %s", instance.id)
@@ -59,8 +62,7 @@ class Project(models.Model):
                         instance.customvision_id)
             logger.info("Project name given: %s", instance.name)
             logger.info("Checking...")
-
-            if instance.is_demo or not instance.setting:
+            if not instance.setting:
                 logger.info("Project instance is demo. Pass pre_save")
                 return
             if not instance.setting or not instance.setting.is_trainer_valid:

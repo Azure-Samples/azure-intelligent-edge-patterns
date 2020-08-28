@@ -9,10 +9,9 @@ import requests
 from django.db import models
 from django.db.models.signals import post_save
 
+from ..azure_parts.models import Part
 from ..azure_projects.models import Project
 from ..cameras.models import Camera
-from ..locations.models import Location
-from ..azure_parts.models import Part
 from ..inference_modules.models import InferenceModule
 
 logger = logging.getLogger(__name__)
@@ -24,11 +23,10 @@ class PartDetection(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
     inference_module = models.ForeignKey(InferenceModule,
                                          on_delete=models.CASCADE,
                                          null=True)
-    part = models.ManyToManyField(Part)
+    parts = models.ManyToManyField(Part)
     needRetraining = models.BooleanField(default=True)
     deployed = models.BooleanField(default=False)
     has_configured = models.BooleanField(default=False)

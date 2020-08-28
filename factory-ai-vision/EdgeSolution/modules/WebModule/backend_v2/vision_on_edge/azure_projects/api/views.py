@@ -1,37 +1,33 @@
 # -*- coding: utf-8 -*-
-"""App views"""
+"""App views
+"""
 
 from __future__ import absolute_import, unicode_literals
 
 import datetime
 import logging
-import traceback
 from distutils.util import strtobool
 
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from ...azure_parts.models import Part
-#from ...azure_parts.utils import batch_upload_parts_to_customvision
-#from ...azure_training_status import constants as progress_constants
-#from ...azure_training_status.models import TrainingStatus
-#from ...azure_training_status.utils import upcreate_training_status
-#from ...cameras.models import Camera
-from ...exceptions import api_exceptions as error_messages
-#from ...general.utils import normalize_rtsp
+from ...exceptions.api_exceptions import CustomVisionAccessFailed
 from ...images.models import Image
-#from ...images.utils import upload_images_to_customvision_helper
 from ..models import Project, Task
-from ..utils import pull_cv_project_helper, train_project_helper, update_train_status_helper  #, update_app_insight_counter
-from .serializers import ProjectSerializer, TaskSerializer, IterationPerformanceSerializer, ProjectPerformanesSerializer
+from ..utils import (pull_cv_project_helper, train_project_helper,
+                     update_train_status_helper)
+from .serializers import (IterationPerformanceSerializer,
+                          ProjectPerformanesSerializer, ProjectSerializer,
+                          TaskSerializer)
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +73,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         trainer = project_obj.setting.revalidate_and_get_trainer_obj()
         customvision_project_id = project_obj.customvision_id
 
-        res_data = {"iterations": []}
+        res_data: dict = {"iterations": []}
 
         def _parse(iteration, iteration_name: str):
             """_parse.
@@ -143,7 +139,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                              openapi.Parameter('project_name',
                                                openapi.IN_QUERY,
                                                type=openapi.TYPE_STRING,
-                                               description='Project name'),
+                                               description='Project name',
+                                               required=True),
                          ])
     @action(detail=True, methods=["get"])
     def reset_project(self, request, pk=None) -> Response:
@@ -162,8 +159,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            Part.objects.filter(project=project_obj).delete()
-            Image.objects.all().delete()
+
             project_obj.customvision_id = ""
             project_obj.name = project_name
             project_obj.download_uri = ""
@@ -174,41 +170,11 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             project_obj.deployed = False
             project_obj.save()
             project_obj.create_project()
+
+            # Let Signals to handle if we need to delete Part/Image
             return Response({"status": "ok"})
-        except KeyError as key_err:
-            if str(key_err) in ["Endpoint", "'Endpoint'"]:
-                # Probably reseting without training key and endpoint. When user
-                # click configure, project will check customvision_id. If empty
-                # than create project, Thus we can pass for now. Wait for
-                # configure/training to create project...
-                return Response({"status": "ok"})
-            logger.exception("Reset project unexpected key error")
-            return Response(
-                {
-                    "status": "failed",
-                    "log": str(key_err)
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-        except CustomVisionErrorException as err:
-            logger.exception("Error from Custom Vision")
-            if (err.message ==
-                    "Operation returned an invalid status code 'Access Denied'"
-               ):
-                return Response(
-                    {
-                        "status": "failed",
-                        "log": error_messages.CUSTOM_VISION_ACCESS_ERROR
-                    },
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
-            return Response(
-                {
-                    "status": "failed",
-                    "log": err.message
-                },
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
+        except CustomVisionErrorException:
+            raise CustomVisionAccessFailed
 
     @swagger_auto_schema(
         operation_summary='Pull a Custom Vision project',
@@ -226,8 +192,6 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     def pull_cv_project(self, request, pk=None) -> Response:
         """pull_cv_project.
         """
-        logger.info("Pulling CustomVision Project")
-
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
 
@@ -235,33 +199,20 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         customvision_project_id = request.query_params.get(
             "customvision_project_id")
         logger.info("Project customvision_id: %s", {customvision_project_id})
-        project_obj.customvision_id = customvision_project_id
-        project_obj.save()
+
         # Check Partial
         try:
             is_partial = bool(strtobool(request.query_params.get("partial")))
         except Exception:
             is_partial = True
-        logger.info("Loading Project in Partial Mode: %s", is_partial)
 
-        try:
-            pull_cv_project_helper(
-                project_id=project_obj.id,
-                customvision_project_id=customvision_project_id,
-                is_partial=is_partial)
-            return Response({"status": "ok"}, status=status.HTTP_200_OK)
-        except Exception:
-            err_msg = traceback.format_exc()
-            logger.exception("Pull Custom Vision Project error")
-            return Response(
-                {
-                    "status": "failed",
-                    "log":
-                        str(err_msg)  # Change line plz...
-                },
-                status=status.HTTP_400_BAD_REQUEST)
+        # Pull Custom Vision Project
+        pull_cv_project_helper(project_id=project_obj.id,
+                               customvision_project_id=customvision_project_id,
+                               is_partial=is_partial)
+        return Response({"status": "ok"})
 
-    @swagger_auto_schema(operation_summary='Train project')
+    @swagger_auto_schema(operation_summary='Train project in background.')
     @action(detail=True, methods=["get"])
     def train(self, request, pk=None) -> Response:
         """train.
@@ -272,150 +223,9 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         update_train_status_helper(project_id=project_obj.id)
         return Response({'status': 'ok'})
 
-        # is_demo = request.query_params.get("demo")
-        # project_obj = Project.objects.get(pk=project_id)
-        # parts = Part.objects.filter(project_id=project_obj.id)
-        # rtsp = project_obj.camera.rtsp
-        # download_uri = project_obj.download_uri
-
-        # if is_demo and (is_demo.lower() == "true") or project_obj.is_demo:
-        # logger.info("demo... bypass training process")
-
-        # cam_is_demo = project_obj.camera.is_demo
-        # # Camera FIXME peter, check here
-        # if cam_is_demo:
-        # rtsp = project_obj.camera.rtsp
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_cam",
-        # params={
-        # "cam_type": "rtsp",
-        # "cam_source": normalize_rtsp(rtsp)
-        # },
-        # )
-        # else:
-        # rtsp = project_obj.camera.rtsp
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_cam",
-        # params={
-        # "cam_type": "rtsp",
-        # "cam_source": normalize_rtsp(rtsp)
-        # },
-        # )
-
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_model",
-        # params={"model_dir": "default_model"},
-        # )
-        # # '/update_model', params={'model_dir': 'default_model_6parts'})
-
-        # logger.info("Update parts %s", parts)
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_parts",
-        # params={"parts": parts},
-        # )
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_retrain_parameters",
-        # params={
-        # "confidence_min": 30,
-        # "confidence_max": 30,
-        # "max_images": 10
-        # },
-        # )
-
-        # upcreate_training_status(project_id=project_obj.id,
-        # status="ok",
-        # log="demo ok")
-        # project_obj.has_configured = True
-        # project_obj.save()
-        # # pass the new model info to inference server in post_save()
-        # return Response({"status": "ok"})
-
-        # upcreate_training_status(project_id=project_obj.id,
-        # status="preparing",
-        # log="preparing data (images and annotations)")
-        # logger.info("sleeping")
-
-        # def _send(rtsp, parts, download_uri):
-        # logger.info("**** updating cam to %s", rtsp)
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_cam",
-        # params={
-        # "cam_type": "rtsp",
-        # "cam_source": normalize_rtsp(rtsp)
-        # },
-        # )
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_model",
-        # params={"model_uri": download_uri},
-        # )
-        # requests.get(
-        # "http://" + inference_module_url() + "/update_parts",
-        # params={"parts": parts},
-        # )
-
-        # threading.Thread(target=_send, args=(rtsp, parts, download_uri)).start()
-        # return upload_and_train(project_id)
-        # A Thread/Task to keep updating the status
-        # update_train_status(project_id)
-        # return Response({"status": "ok"})
-
-
-# def upload_and_train(project_id):
-# """upload_and_train.
-
-# Args:
-# project_id:
-# """
-
-# except CustomVisionErrorException as customvision_err:
-# logger.error("CustomVisionErrorException: %s", customvision_err)
-# if customvision_err.message == \
-# "Operation returned an invalid status code 'Access Denied'":
-# upcreate_training_status(
-# project_id=project_obj.id,
-# status="failed",
-# log=
-# "Training key or Endpoint is invalid. Please change the settings",
-# need_to_send_notification=True,
-# )
-# return Response(
-# {
-# "status":
-# "failed",
-# "log":
-# "Training key or Endpoint is invalid. Please change the settings",
-# },
-# status=status.HTTP_503_SERVICE_UNAVAILABLE,
-# )
-
-# upcreate_training_status(project_id=project_obj.id,
-# status="failed",
-# log=customvision_err.message,
-# need_to_send_notification=True)
-# return Response(
-# {
-# "status": "failed",
-# "log": customvision_err.message
-# },
-# status=status.HTTP_400_BAD_REQUEST,
-# )
-
-# except Exception:
-# # TODO: Remove in production
-# err_msg = traceback.format_exc()
-# logger.exception("Exception: %s", err_msg)
-# upcreate_training_status(project_id=project_obj.id,
-# status="failed",
-# log=f"failed {str(err_msg)}",
-# need_to_send_notification=True)
-# return Response({"status": "failed", "log": f"failed {str(err_msg)}"})
-
 
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
     """Task ModelViewSet
-
-    Available filters:
-    @project
     """
 
     queryset = Task.objects.all()

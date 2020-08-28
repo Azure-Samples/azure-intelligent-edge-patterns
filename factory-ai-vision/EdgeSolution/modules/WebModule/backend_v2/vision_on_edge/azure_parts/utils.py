@@ -43,19 +43,17 @@ def upload_part_to_customvision_helper(project_id,
         # Probably uploaded. Sync
         logger.info("updating tag: %s. Description: %s", part_obj.name,
                     part_obj.description)
-        tag = trainer.update_tag(
-            project_id=project_obj.customvision_id,
-            tag_id=part_obj.customvision_id,
-            updated_tag=az_tag_obj)
+        tag = trainer.update_tag(project_id=project_obj.customvision_id,
+                                 tag_id=part_obj.customvision_id,
+                                 updated_tag=az_tag_obj)
 
     else:
         # Create
         try:
             logger.info("creating tag: %s. Description: %s", part_obj.name,
                         part_obj.description)
-            tag = trainer.create_tag(
-                project_id=project_obj.customvision_id,
-                **az_tag_obj.as_dict())
+            tag = trainer.create_tag(project_id=project_obj.customvision_id,
+                                     **az_tag_obj.as_dict())
             part_obj.customvision_id = tag.id
             logger.info("creating tag: %s. Description: %s. Get tag.id %s",
                         part_obj.name, part_obj.description, tag.id)
@@ -71,10 +69,9 @@ def upload_part_to_customvision_helper(project_id,
                             project_id=project_obj.customvision_id)
                     }
                 customvision_tag_id = tags_dict[part_obj.name]
-                trainer.update_tag(
-                    project_id=project_obj.customvision_id,
-                    tag_id=customvision_tag_id,
-                    updated_tag=az_tag_obj)
+                trainer.update_tag(project_id=project_obj.customvision_id,
+                                   tag_id=customvision_tag_id,
+                                   updated_tag=az_tag_obj)
                 part_obj.customvision_id = customvision_tag_id
                 part_obj.save()
             else:

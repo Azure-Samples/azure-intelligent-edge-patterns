@@ -8,8 +8,8 @@ import logging
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_parts.utils import (
     batch_upload_parts_to_customvision, upload_part_to_customvision_helper)
-from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.azure_projects.models import Project
+from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 
 logger = logging.getLogger(__name__)

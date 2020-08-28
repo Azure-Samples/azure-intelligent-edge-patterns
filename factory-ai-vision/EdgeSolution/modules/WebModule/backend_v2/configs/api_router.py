@@ -9,26 +9,27 @@ from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
 from vision_on_edge.azure_app_insight.api import views as app_insight_views
-
-from vision_on_edge.azure_settings.api import views as azure_setting_views
+from vision_on_edge.azure_part_detections.api import \
+    views as part_detection_views
+from vision_on_edge.azure_parts.api import views as azure_part_views
 from vision_on_edge.azure_projects.api import views as azure_projects_views
-from vision_on_edge.notifications.api import views as notifications_views
+from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training_status.api import \
     views as azure_training_status_views
-from vision_on_edge.azure_parts.api import views as azure_part_views
-
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views as camera_views
 from vision_on_edge.images.api import views as image_views
+from vision_on_edge.inference_modules.api import \
+    views as inference_module_views
 from vision_on_edge.locations.api import views as location_views
-from vision_on_edge.inference_modules.api import views as inference_module_views
-from vision_on_edge.azure_part_detections.api import views as part_detection_views
+from vision_on_edge.notifications.api import views as notifications_views
+# from vision_on_edge.relabeling.api import views as relabel_views
+from vision_on_edge.streams.api import views as stream_views
+
 # from vision_on_edge.feedback.api import views as feedback_views
 # from vision_on_edge.image_predictions.api import \
 # views as image_prediction_views
 
-# from vision_on_edge.relabeling.api import views as relabel_views
-from vision_on_edge.streams.api import views as stream_views
 # from vision_on_edge.video_feed.api import views as videofeed_views
 
 router = DefaultRouter()
@@ -46,8 +47,7 @@ router.register('images', image_views.ImageViewSet)
 router.register('locations', location_views.LocationViewSet)
 router.register('inference_modules',
                 inference_module_views.InferenceModuleViewSet)
-router.register('part_detections',
-                part_detection_views.PartDetectionViewSet)
+router.register('part_detections', part_detection_views.PartDetectionViewSet)
 # router.register('image_predictions',
 # image_prediction_views.ImagePredictionViewSet)
 
@@ -64,8 +64,8 @@ SchemaView = get_schema_view(
         title="Factory AI API",
         default_version='v1',
         description="Factory AI",
-#        terms_of_service="https://www.google.com/policies/terms/",
-#        contact=openapi.Contact(email="contact@snippets.local"),
+        #        terms_of_service="https://www.google.com/policies/terms/",
+        #        contact=openapi.Contact(email="contact@snippets.local"),
         license=openapi.License(name="MIT License"),
     ),
     public=True,

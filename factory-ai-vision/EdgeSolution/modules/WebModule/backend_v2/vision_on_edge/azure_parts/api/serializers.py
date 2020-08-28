@@ -45,12 +45,6 @@ class PartSerializer(serializers.ModelSerializer):
                     "log": ("dataset with same name exists," +
                             "please change another name"),
                 })
-        except:
-            logger.exception("Part update occur uncaught error")
-            raise serializers.ValidationError(detail={
-                "status": "failed",
-                "log": "Unexpected Error"
-            })
 
     def update(self, instance, validated_data):
         """update.
@@ -71,9 +65,3 @@ class PartSerializer(serializers.ModelSerializer):
                     "log": ("dataset with same name exists, " +
                             "please change another name"),
                 })
-        except:
-            logger.exception("Part update occur uncaught error")
-            raise serializers.ValidationError(detail={
-                "status": "failed",
-                "log": "Unexpected Error"
-            })

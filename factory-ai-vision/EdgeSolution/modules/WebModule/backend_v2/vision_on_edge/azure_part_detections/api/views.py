@@ -14,27 +14,24 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from ...azure_projects.utils import (train_project_helper,
+                                     update_train_status_helper)
 from ...azure_training_status.models import TrainingStatus
 from ..models import PartDetection
-from .serializers import PartDetectionSerializer, ExportSerializer
-from ...azure_projects.utils import train_project_helper
 from ..utils import if_trained_then_deploy_helper
+from .serializers import ExportSerializer, PartDetectionSerializer
 
 logger = logging.getLogger(__name__)
 
 
 class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     """Project ModelViewSet
-
-    Filters:
-        is_demo
     """
 
     queryset = PartDetection.objects.all()
     serializer_class = PartDetectionSerializer
     filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
-        "is_demo": "is_demo",
         "inference_module": "inference_module",
         "camera": "camera",
         "project": "project"
@@ -76,9 +73,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(
-        operation_summary='Export Part Detection status',
-        responses={'200': ExportSerializer})
+    @swagger_auto_schema(operation_summary='Export Part Detection status',
+                         responses={'200': ExportSerializer})
     @action(detail=True, methods=["get"])
     def export(self, request, pk=None) -> Response:
         """get the status of train job sent to custom vision
@@ -107,7 +103,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         except requests.exceptions.ConnectionError:
             logger.error(
                 "Export failed. Inference module url: %s unreachable",
-                part_detection_obj.inference_module_url.url,
+                part_detection_obj.inference_module.url,
             )
             return Response(
                 {
@@ -141,6 +137,17 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         instance = get_object_or_404(queryset, pk=pk)
         # is_demo = request.query_params.get("demo")
         # if project is demo, let training status go to ok and should go on.
+        for attr in ["inference_module", "camera", "project"]:
+            if not hasattr(instance, attr) or getattr(instance, attr) is None:
+                return Response(
+                    {
+                        "status": "failed",
+                        "log": f"Part Detection must given a {attr} to configure."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
+        instance.has_configured = True
+        instance.save()
         train_project_helper(project_id=instance.project.id)
+        update_train_status_helper(project_id=instance.project.id)
         if_trained_then_deploy_helper(part_detection_id=instance.id)
         return Response({'status': 'ok'})

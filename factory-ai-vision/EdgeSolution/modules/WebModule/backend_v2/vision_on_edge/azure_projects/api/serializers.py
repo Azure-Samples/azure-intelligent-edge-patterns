@@ -34,12 +34,13 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
 
+
 # pylint: disable=abstract-method
 class IterationPerformanceSerializer(serializers.Serializer):
     """TrainPerformanceSerializer.
     """
-    iteration_name = serializers.ChoiceField(choices=[
-        "new", "previous", "demo"])
+    iteration_name = serializers.ChoiceField(
+        choices=["new", "previous", "demo"])
     iteration_id = serializers.CharField(max_length=200)
     status = serializers.CharField(max_length=100)
     precision = serializers.FloatField(default=0.0)

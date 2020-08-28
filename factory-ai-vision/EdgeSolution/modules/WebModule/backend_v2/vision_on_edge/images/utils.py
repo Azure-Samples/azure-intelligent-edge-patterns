@@ -91,8 +91,7 @@ def upload_images_to_customvision_helper(project_id,
         if len(img_entries) >= batch_size:
             logger.info("Uploading %s images", len(img_entries))
             upload_result = trainer.create_images_from_files(
-                project_id=project_obj.customvision_id,
-                images=img_entries)
+                project_id=project_obj.customvision_id, images=img_entries)
             logger.info(
                 "Uploading images... Is batch success: %s",
                 upload_result.is_batch_successful,
