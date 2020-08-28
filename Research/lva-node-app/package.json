@@ -1,0 +1,53 @@
+{
+    "title": "Simple Sidebar",
+    "name": "startbootstrap-simple-sidebar",
+    "version": "5.1.2",
+    "scripts": {
+        "start": "node myscripts/app.js"
+    },
+    "description": "A simple sidebar navigation HTMl template built with Bootstrap",
+    "keywords": [
+        "css",
+        "sass",
+        "html",
+        "responsive",
+        "theme",
+        "template"
+    ],
+    "homepage": "https://startbootstrap.com/templates/simple-sidebar",
+    "bugs": {
+        "url": "https://github.com/StartBootstrap/startbootstrap-simple-sidebar/issues",
+        "email": "feedback@startbootstrap.com"
+    },
+    "license": "MIT",
+    "author": "Start Bootstrap",
+    "contributors": [
+        "David Miller (http://davidmiller.io/)"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/StartBootstrap/startbootstrap-simple-sidebar.git"
+    },
+    "dependencies": {
+        "@azure/event-hubs": "^5.2.2",
+        "@azure/eventhubs-checkpointstore-blob": "^1.0.1",
+        "@azure/storage-blob": "^12.2.0-preview.1",
+        "angular-cookies": "^1.8.0",
+        "azure-iot-device": "^1.17.0",
+        "azure-iot-device-amqp": "^1.13.0",
+        "azure-iothub": "^1.12.4",
+        "body-parser": "^1.19.0",
+        "bootstrap": "4.5.0",
+        "bootstrap-icons": "^1.0.0-alpha5",
+        "buffer": "^5.6.0",
+        "dotenv": "^8.2.0",
+        "express": "^4.17.1",
+        "jquery": "3.5.1",
+        "nodemon": "^2.0.4",
+        "ws": "^7.3.1",
+        "xmlhttprequest": "^1.8.0"
+    },
+    "devDependencies": {
+        "browser-sync": "2.26.7"
+    }
+}

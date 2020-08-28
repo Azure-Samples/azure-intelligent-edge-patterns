@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Azure Live Video Analytics</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="./css/simple-sidebar.css" rel="stylesheet">
+    <link href="./css/mystyle.css" rel="stylesheet">
+
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-cookies.js"></script>
+
+<script src="js/cameraAngular.js"></script>
+
+<body onload="displayCameras();" ng-app="myApp2">
+
+    <div class="d-flex" id="wrapper">
+        <div class="border-right bg-middle" id="sidebar-wrapper">
+            <div class="sidebar-heading">Azure Live Video Analytics </div>
+            <div class="list-group list-group-flush">
+              <a href="index.html" class="list-group-item list-group-item-action bg-middle">Welcome</a>
+              <a href="configuration.html" class="list-group-item list-group-item-action bg-middle">1: Configuration
+                  parameters</a>
+              <a href="#" class="list-group-item list-group-item-action bg-middle">2: Cameras</a>
+              <a href="mediagraph.html" class="list-group-item list-group-item-action bg-middle">3: Media Graph</a>
+              <a href="output.html" class="list-group-item list-group-item-action bg-middle">4: Invoke Methods ~ View Output</a>
+            </div>
+          </div>
+          <!-- /#sidebar-wrapper -->
+      
+          <!-- Page Content -->
+          <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-middle border-bottom">
+              <button class="menu-toggler" type="button" data-toggle="collapse" id="menu-toggle">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <span class="navbar-text">Cameras</span>
+              <a href="./mediagraph.html"><button type="button" class="btn btn-outline-success bg-middle">Next step</button></a>
+            </nav>
+
+            <div class="container-fluid">
+                <h2 class="my-header">Set up your cameras here</h2>
+
+                <div ng-controller="cameraController" ng-init="init()">
+                    <ul id="camera-config" class="camera list-group">
+                        <li ng-repeat="camera in cameras">
+                            <table class="cameratable" border="1">
+                                <tr class="row row-odd">
+                                    <td class="camera-table-data">
+                                        <label for="rtspName" class="col">Unique Camera Name:</label>
+                                        <input type="text" ng-model="camera.name" aria-labelledby="select_{{$index}}" />
+                                    </td>
+                                </tr>
+                                <tr class="row row-even">
+                                    <td class="camera-table-data">
+                                        <label for="rtspUrl" class="col">RTSP Url:</label>
+                                        <input type="text" ng-model="camera.url"
+                                            aria-labelledby="select_{{$index}}" />
+                                    </td>
+                                </tr>
+                                <tr class=" row row-odd">
+                                    <td class="camera-table-data">
+                                        <label for="rtspUsername" class="col">RTSP Username:</label>
+                                        <input type="text" placeholder="dummyUsername" ng-model="camera.username"
+                                            aria-labelledby="select_{{$index}}" />
+                                    </td>
+                                </tr>
+                                <tr class=" row row-even">
+                                    <td class="camera-table-data">
+                                        <label for="rtspPassword" class="col">RTSP password:</label>
+                                        <input type="password" ng-model="camera.password"
+                                            aria-labelledby="select_{{$index}}" />
+                                    </td>
+                                </tr>
+                                <tr class=" row row-even">
+                                    <td class="camera-table-data">
+                                        <button ng-click="removecamera(camera)" class="btn btn-primary">X</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </li>
+                    </ul>
+                    <br>
+                    <button ng-click="addcamera()" class="btn btn-primary">Add new camera</button>
+                    <button onclick="submitCameras()" ng-click="submitNewCamera('document.cookie')" class="btn btn-primary">Submit</button>
+                    <br><br>
+                    <h3 class="my-header">My Cameras:</h3>
+                    <ul id="existing-cameras" class="camera list-group"></ul>
+               </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+    </div>
+
+    <!-- /#wrapper -->
+    <!-- my scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/cookie.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+
+    <script id="created-camera-template" type="text/template">
+    <li class="camera camera-list-item list-node-item list-group-item badge">
+        <table border="1">
+            <tr id="camera-labels" class=" row row-odd">
+                <td>Name </td>
+                <td>URL </td>
+                <td>Username </td>
+                <td>Password </td>
+            </tr>
+            <tr id="camera-values" class=" row row-even">
+                <td placeholder="uniqueName"> </td>
+                <td placeholder="rtsp://..."> </td>
+                <td placeholder="dummyUsername"> </td>
+                <td placeholder="dummyPassword"></td>
+            </tr>
+            <tr class=" row row-odd">
+                <td colspan="4">
+                    <button type="button" style="float:left;" class = "btn btn-secondary" onclick="deleteCamera(this)">Delete </button>
+                </td>
+            </tr>
+        </table>
+    </li>
+    </script>
+
+    <!-- Menu Toggle Script -->
+    <script>
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+        });
+    </script>
+
+</body>
+
+</html>

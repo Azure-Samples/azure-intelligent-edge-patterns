@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Azure Live Video Analytics</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="./vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="./css/simple-sidebar.css" rel="stylesheet">
+  <link href="./css/mystyle.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <div class="d-flex" id="wrapper">
+
+    <!-- Sidebar -->
+    <div class="border-right bg-middle" id="sidebar-wrapper">
+      <div class="sidebar-heading">Azure Live Video Analytics </div>
+      <div class="list-group list-group-flush">
+        <a href="index.html" class="list-group-item list-group-item-action bg-middle">Welcome</a>
+        <a href="#" class="list-group-item list-group-item-action bg-middle">1: Configuration
+            parameters</a>
+        <a href="cameras.html" class="list-group-item list-group-item-action bg-middle">2: Cameras</a>
+        <a href="mediagraph.html" class="list-group-item list-group-item-action bg-middle">3: Media Graph</a>
+        <a href="output.html" class="list-group-item list-group-item-action bg-middle">4: Invoke Methods ~ View Output</a>
+      </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+      <nav class="navbar navbar-expand-lg navbar-light bg-middle border-bottom">
+        <button class="menu-toggler" type="button" data-toggle="collapse" id="menu-toggle">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="navbar-text">Configuration Parameters</span>
+        <a href="./cameras.html"><button type="button" class="btn btn-outline-success bg-middle">Next step</button></a>
+      </nav>
+
+      <div class="container-fluid">
+        <div class="grid grid3">
+          <div style="grid-column: 1/2; grid-row: 2/3;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+            <div class="hide info" style="font-size: smaller;">Find your device ID in your local UI here:
+              <img src="assets/deviceID.PNG" width="800" height="auto">
+            </div>
+          </div>
+          <div style="grid-column: 1/2; grid-row: 3/4;">
+              <a href="https://devblogs.microsoft.com/iotdev/understand-different-connection-strings-in-azure-iot-hub/" class="hoverinfo">
+                <img src="assets/info-circle.svg" width="22" height="22">
+              </a>
+              <div class="hide info" style="font-size: smaller;">
+                Find your Iot Hub Connection String here. It must have registry read and service connect permissions
+                <img display="block" src="assets/hubstring.PNG" width="800" height="auto">
+              </div>
+          </div>
+
+        <div style="grid-column: 2/2; grid-row: 1/2;">
+          <h1>Set up your configuration parameters here</h1>
+        </div>
+        <div style="grid-column: 2/2; grid-row: 2/3;">
+            <h4><label> Device ID: (if using an Azure Stack Edge named my-ase, pass in my-ase-edge)</label></h4><br>
+            <input type ="text" class="config-input" id = "device-id"/>
+        </div><br>
+        <div style="grid-column: 2/2; grid-row: 3/4;"> 
+            <h4><label> IoT Hub Connection String: </label></h4><br>
+            <input type ="text" class="config-input" id = "iothub-connection-string"/>
+        </div>
+          <div style="grid-column: 2/2; grid-row: 4/5;">
+            <button type="button" style="width: 200px; height: fit-content; margin-top: 30px;" class="btn btn-primary" onclick="setConfigCookies()">Submit</button>
+          </div>
+          <div class="output-box" style="grid-column: 2/2; grid-row: 5/6;">
+            <h3 class="my-header">Connection status</h3>
+            <ul id="configuration-output-box"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /#page-content-wrapper -->
+  </div>
+  <!-- /#wrapper -->
+  <!-- my scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/cookie.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Menu Toggle Script -->
+  <script>
+    $("#menu-toggle").click(function(e) {
+      e.preventDefault();
+      $("#wrapper").toggleClass("toggled");
+    });
+  </script>
+
+</body>
+
+</html>

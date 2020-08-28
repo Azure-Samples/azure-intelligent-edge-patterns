@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Azure Live Video Analytics</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="./vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="./css/simple-sidebar.css" rel="stylesheet">
+  <link href="./css/mystyle.css" rel="stylesheet">
+
+</head>
+
+<body onload="displayMediaGraphsOnLoad()">
+  <!--#wrapper -->
+  <div class="d-flex" id="wrapper">
+    <div class="border-right bg-middle" id="sidebar-wrapper">
+      <div class="sidebar-heading">Azure Live Video Analytics </div>
+      <div class="list-group list-group-flush">
+        <a href="index.html" class="list-group-item list-group-item-action bg-middle">Welcome</a>
+        <a href="configuration.html" class="list-group-item list-group-item-action bg-middle">1: Configuration
+          parameters</a>
+        <a href="cameras.html" class="list-group-item list-group-item-action bg-middle">2: Cameras</a>
+        <a href="#" class="list-group-item list-group-item-action bg-middle">3: Media Graph</a>
+        <a href="output.html" class="list-group-item list-group-item-action bg-middle">4: Invoke Methods ~ View
+          Output</a>
+      </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+      <nav class="navbar navbar-expand-lg navbar-light bg-middle border-bottom">
+        <button class="menu-toggler" type="button" data-toggle="collapse" id="menu-toggle">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="navbar-text">Media Graph</span>
+        <a href="./output.html"><button type="button" class="btn btn-outline-success bg-middle">Next step</button></a>
+      </nav>
+
+      <div class="container-fluid">
+        <!-- start grid here -->
+        <div class="grid grid2">
+          <div style="grid-column: 1/1; grid-row: 1/2">
+            <a class="hoverinfo"
+              href="https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/media-graph-concept">
+              <img src="assets/info-circle.svg" width="22" height="22">
+            </a>
+            <div class="hide info" style="font-size: smaller;">What is a media graph?</div>
+          </div>
+
+          <div style="grid-column: 1/1; grid-row: 3/4">
+              <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+            </a>
+            <div class="hide info" style="font-size: smaller;">Source nodes enable capturing of media into the media graph. Media in this context, conceptually, could be an audio stream, a video stream, a data stream, or a stream that has audio, video, and/or data combined together in a single stream.</div>
+          </div>
+
+          <div style="grid-column: 1/1; grid-row: 4/5">
+              <img class="hoverinfo" src="assets/info-circle.svg" width="22" height="22">
+            </a>
+            <div class="hide info" style="font-size: smaller;">Processor nodes enable processing of media within the media graph.</div>
+          </div>
+          <div style="grid-column: 1/1; grid-row: 5/6">
+            <img class="hoverinfo" src="assets/info-circle.svg" width="22" height="22">
+          </a>
+          <div class="hide info" style="font-size: smaller;">Sink nodes enable delivering the processing results to services and apps outside the media
+            graph.</div>
+        </div>
+          <div style="grid-column: 2/span 2; grid-row: 1/2">
+            <h1 style="margin-top: 10px;">Build Your Media Graph
+            </h1>
+            <p>
+              Use the dropdown menus to choose source, processor, and sink nodes for your media graph. After choosing your nodes, use each node's
+              unique dropdown to choose its inputs. You will not be allowed to add an invalid input! 
+              Hover over the information icons for and idea of what different types of nodes are. You can find more detailed information
+              <a href="https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/media-graph-concept#sources-processors-and-sinks">here</a>
+            </p>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Load Media Graph Template
+              </a>
+              <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
+
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="cvr-asset" onclick="setMediaGraphFromTemplate(this)">Continuous Video Recording - Asset</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="cvr-with-grpcExtension" onclick="setMediaGraphFromTemplate(this)">Continuous Video Recording - gRPC Extension</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="cvr-with-httpExtension" onclick="setMediaGraphFromTemplate(this)">Continuous Video Recording - http Extension</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="cvr-with-motion" onclick="setMediaGraphFromTemplate(this)">Continuous Video Recording - Motion Detection</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-grpcExtension-assets" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - gRPC - Asset</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-httpExtension-assets" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - http - Asset</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-hubMessage-assets" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - http - Asset - Specific Object</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-hubMessage-files" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - http - Files - Specific Object</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-motion-assets-files" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - Asset and Files</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-motion-assets" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - Motion - Asset</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-motion-files" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - Motion - Files</button>
+              </div>
+
+              <!--  grpcExtension -->
+
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="grpcExtension" onclick="setMediaGraphFromTemplate(this)">Event-based Video Recording - gRPC - Asset</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="motion-detection" onclick="setMediaGraphFromTemplate(this)">Motion Detection</button>
+              </div>
+              <div class="dropdown-item" aria-labelledby="navbarDropdown">
+                <button class="dropdown-item" href="#" name="evr-motion-files" onclick="setMediaGraphFromTemplate(this)">Motion Detection to Assets</button>
+              </div>
+            </div>
+            </div>
+          </div>
+          <div style="grid-column: 2/3; grid-row: 2/3;">
+            <div>
+              <label>Name your Media Graph: </label><br>
+              <input type="text" id="graphname" placeholder="Sample-Graph-1" />
+            </div>
+          </div>
+          <div style="grid-column: 3/3; grid-row: 2/3;">
+            <div>
+              <label>Provide a description for your Media Graph: </label><br>
+              <input type="text" id="graph-description" placeholder=""/>
+            </div>
+          </div>
+          <div class="nav-item dropdown" style="grid-row: 3/4; grid-column: 2/3;">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Add Source
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
+              <button class="dropdown-item" href="#" nodetype="rtspSource" name="RTSP_Source" id="rtspSource-dropdown"
+                onclick="addToGraph(this, 'dynamic-source');">RTSP</button>
+              <button class="dropdown-item" href="#" nodetype="iotMessageSource" name="IoTHub_Source"
+                id="iotMessageHub-dropdown" onclick="addToGraph(this, 'dynamic-source');">IoT Hub
+                Message</button>
+            </div>
+          </div>
+          <div class="nav-item dropdown" style="grid-row: 4/5; grid-column: 2/3; ">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Add processor
+            </a>
+            <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
+              <button class="dropdown-item" href="#" nodetype="motionDetection" name="Motion_Detection"
+                id="motionDetection-dropdown" onclick="addToGraph(this, 'dynamic-processor');">Motion detection</button>
+              <button class="dropdown-item" href="#" nodetype="frameRateFilter" name="Frame_Rate_Filter"
+                id="frameRateFilter-dropdown" onclick="addToGraph(this, 'dynamic-processor');">Frame rate
+                filter</button>
+              <button class="dropdown-item" href="#" nodetype="httpExtension" name="HTTP_Extension"
+                id="httpExtension-dropdown" onclick="addToGraph(this, 'dynamic-processor');">HTTP Extension</button>
+                <button class="dropdown-item" href="#" nodetype="grpcExtension" name="grpc_Extension"
+                id="grpcExtension-dropdown" onclick="addToGraph(this, 'dynamic-processor');">gRPC Extension</button>
+              <button class="dropdown-item" href="#" nodetype="signalGateProcessor" name="Signal_Gate"
+                id="signalGateProcessor-dropdown" onclick="addToGraph(this, 'dynamic-processor');">Signal Gate</button>
+            </div>
+          </div>
+          <div class="nav-item dropdown" style="grid-row: 5/6; grid-column: 2/3; ">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Add Sink
+            </a>
+            <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
+              <button class="dropdown-item" href="#" nodetype="fileSink" name="File_Sink" id="fileSink-dropdown"
+                onclick="addToGraph(this, 'dynamic-sink');">File</button>
+              <button class="dropdown-item" href="#" nodetype="assetSink" name="Asset_Sink" id="assetSink-dropdown"
+                onclick="addToGraph(this, 'dynamic-sink');">Asset</button>
+              <button class="dropdown-item" href="#" nodetype="hubSink" name="IotHub_Message_Sink" id="hubSink-dropdown"
+                onclick="addToGraph(this, 'dynamic-sink');">IoT Hub Message</button>
+            </div>
+            <br>
+          </div>
+          <div id="mediagraph-header" style="grid-row: 3/6; grid-column: 3/3;">
+            <ul id="dynamic-source" class="dynamic node-listhead" style="grid-row: 1/2;">Sources: </ul>
+            <ul id="dynamic-processor" class="dynamic node-listhead" style="grid-row: 2/3;">Processors: </ul>
+            <ul id="dynamic-sink" class="dynamic node-listhead" style="grid-row: 3/4;">Sinks: </ul>
+          </div>
+          <div style="grid-row: 6/7; grid-column: 2/3; ">
+            <button class="btn btn-primary" style="width: 200px;" onclick="createMediaGraph()">Create Media
+            Graph!</button>
+
+            <div id="mygraphs">
+              <table style="border: 1px solid black;">
+                <thead>
+                  <tr>
+                    <th>Current Graphs</th>
+                  </tr>
+                </thead>
+                <tbody id="existing-media-graphs">
+                  <!-- append existing graphs here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+   <!-- /#page-content-wrapper -->
+
+  </div>
+  <!-- /#wrapper -->
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="./vendor/jquery/jquery.min.js"></script>
+  <script src="./vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- My Javascript -->
+  <script src="./js/main.js"></script>
+  <script src="./js/cookie.js"></script>
+  <script src="./js/mediagraphCustomize.js"></script>
+
+  <!-- Menu Toggle Script and unload function-->
+  <script>
+    $("#menu-toggle").click(function (e) {
+      e.preventDefault();
+      $("#wrapper").toggleClass("toggled");
+    });
+    window.onbeforeunload = function(){
+      sendGlobals();
+      return;
+    }
+  </script>
+
+  <script id="hidden-template" type="text/x-custom-template">
+          <li class="list-node-item list-group-item badge graphnode">
+            <div>
+              <button type="button" class="btn btn-primary"  aria-label="Close">  
+              </button>
+                <button type="button" id="dropdownMGNode" data-toggle="dropdown" class="btn btn-primary dropdown-toggle" aria-haspopup="true" aria-expanded="true" aria-label="Close" onclick="updateCustomizedInputs(this)">  
+                </button>
+                <ul class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left" aria-labelledby="dropdownMGNode"></ul>
+            </div>
+            <br>
+          </li>
+        </script>
+
+  <!--  -->
+  <script id="hidden-template-sourcenode" type="text/x-custom-template">
+          <li class="list-node-item list-group-item badge graphnode">
+            <div>
+                <button type="button" id="forlabel" class="btn btn-primary"  aria-label="Close">  
+                </button>
+                <ul class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left" aria-labelledby="forlabel"></ul>
+            </div>
+            <br>
+          </li>
+  </script>
+  
+  <!-- keep checkbox dropdowns open until user decides to close -->
+  <script>
+    $(document).on('click', '.allow-focus', function (e) {
+      e.stopPropagation();
+    });
+    $(".checkbox-menu").on("change", "input[type='checkbox']", function () {
+      $(this).closest("li").toggleClass("active", this.checked);
+    });
+  </script>
+
+  <!-- template for created graphs, to show name and provide delete button -->
+  <script id="created-graph-template" type="text/template">
+    <tr class="form-group row">
+      <td id="named-graph"></td>
+      <td id="deletebutton">
+        <button type="button" style="float:left;" class = "btn btn-secondary" onclick="deleteGraph(this)">Delete </button>
+      </td>
+    </tr>  
+  </script>
+</body>
+
+</html>
