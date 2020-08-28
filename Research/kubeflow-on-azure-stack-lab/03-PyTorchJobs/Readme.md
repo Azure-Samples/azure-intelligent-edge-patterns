@@ -409,4 +409,4 @@ For more information:
 
 ---
 
-[Back to Lab::02](../02-TFJobs/Readme.md) | [Back to main page](../Readme.md) | [Next to Lab::04](../04-KFServing/Readme.md)
+[Back to 02-TFJobs](../02-TFJobs/Readme.md) | [Back to main page](../Readme.md) | [Next to 04-KFServing](../04-KFServing/Readme.md)

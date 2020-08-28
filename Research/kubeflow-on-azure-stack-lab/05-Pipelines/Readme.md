@@ -186,4 +186,4 @@ In our case, if you built the image from MLFlow section and pushed it to your ac
 
 ---
 
-[Back to Lab::04](../04-KFServing/Readme.md) | [Back to main page](../Readme.md) | [Next to Lab::06](../06-Katib/Readme.md)
+[Back to 04-KFServing](../04-KFServing/Readme.md) | [Back to main page](../Readme.md) | [Next to 06-Katib](../06-Katib/Readme.md)

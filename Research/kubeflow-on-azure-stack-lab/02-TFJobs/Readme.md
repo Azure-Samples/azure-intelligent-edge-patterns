@@ -363,4 +363,4 @@ Events:
 
 ---
 
-[Back to Lab::01](../01-Jupyter/Readme.md) | [Back to main page](../Readme.md) | [Next to Lab::03](../03-PyTorchJobs/Readme.md)
+[Back to 01-Jupyter](../01-Jupyter/Readme.md) | [Back to main page](../Readme.md) | [Next to 03-PyTorchJobs](../03-PyTorchJobs/Readme.md)

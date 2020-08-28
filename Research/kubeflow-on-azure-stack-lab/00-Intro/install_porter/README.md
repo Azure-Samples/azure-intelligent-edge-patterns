@@ -1,3 +1,5 @@
+# THIS SECTION IS DEPRECATED, SEE THE OTHER 'PORTER' folder.
+
 # Installing Kubeflow as Porter Bundle
 
 This Readme file demonstrates how to build and use [Porter](https://porter.sh) bundle that

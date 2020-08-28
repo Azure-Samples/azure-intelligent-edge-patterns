@@ -325,4 +325,44 @@ something like the following:
     k8s-linuxpool-27515788-2   Ready    agent    22m   v1.15.5
     k8s-master-27515788-0      Ready    master   22m   v1.15.5
 
+## Post-installation configuration
+
+Make sure you have the right firewall rules and other settings before you start using your cluser.
+
+## Persistence on Azure Stack
+
+Most real-life applications need data storage. Azure Stack team actively works on making
+available the options available on the public cloud, however, there are nuances in a detauched
+environment.
+
+For this demo we will substitute `azurefile` with our own locally-mounted network storage.
+
+Follow the steps in [Installing Storage](../01-Jupyter/installing_storage.md) to create a Persistent Volume Claim
+that you could use in your Kubernetes deployments.
+
+For simplicity, we create a Samba server, but you are welcome to use nfs
+version of your choice. You will only update the firewall rules for your
+solution, Samba server requires inbound port range `"137-139,445"`
+
+If you done everything right, you should be able to see this `pvc` in your environment:
+
+    $ kubectl get pvc
+    NAME                STATUS   VOLUME               CAPACITY   ACCESS MODES   STORAGECLASS    AGE
+    ...
+    samba-share-claim   Bound    samba-share-volume   20Gi       RWX            local-storage   23h
+    ...
+
+And you should see the Persisted Volume itself:
+
+    $ kubeclt get pv
+    NAME               CAPACITY ACCESS MODES   RECLAIM POLICY STATUS CLAIM                       STORAGECLASS    REASON   AGE
+    ...
+    samba-share-volume 20Gi     RWX            Retain         Bound  default/samba-share-claim   local-storage            23h
+    ...
+
+Consult your cloud system administrator if you have any problems, there could be many other
+options sutable to particular scenarios and development lifecycle.
+
+---
+
 [Back](Readme.md)

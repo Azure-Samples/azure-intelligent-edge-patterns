@@ -100,4 +100,4 @@ The simplier PyTorch example we run will log data that looks something like this
 
 ---
 
-[Back to Lab::00](../00-Intro/Readme.md) | [Back to main page](../Readme.md) | [Next to Lab::02](../02-TFJobs/Readme.md)
+[Back to 00-Intro](../00-Intro/Readme.md) | [Back to main page](../Readme.md) | [Next to 02-TFJobs](../02-TFJobs/Readme.md)
