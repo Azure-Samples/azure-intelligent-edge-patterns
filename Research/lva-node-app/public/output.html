@@ -85,38 +85,38 @@
               </div>
           </div>
 
-          <!-- graph topo set info -->
-          <div class="schmuck" style="grid-column: 1/2; grid-row: 4/5;">
+          <!-- graph topo set info not needed anymore, keeping in code in case relevant later-->
+          <!-- <div class="schmuck" style="grid-column: 1/2; grid-row: 4/5;">
             <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
               <div class="hide info">Creates a single topology if there is no existing one with the given name or updates
                 and existing one with the same name.
               </div>
-          </div>
+          </div> -->
 
-          <div class="schmuck" style="grid-column: 1/2; grid-row: 5/6;">
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 4/5;">
             <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
             <div class="hide info">Creates a single Graph Instance if there is no existing one
               with the given name or updates and existing one with the same name.
             </div>
           </div>
 
-          <div class="schmuck" style="grid-column: 1/2; grid-row: 6/7;">
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 5/6;">
             <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
             <div class="hide info">Activates a single graph instance.
             </div>
           </div>
 
-          <div class="schmuck" style="grid-column: 1/2; grid-row: 7/8;">
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 6/7;">
             <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
             <div class="hide info">Deactivates a single graph instance.
             </div>
           </div>
-          <div class="schmuck" style="grid-column: 1/2; grid-row: 8/9;">
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 7/8;">
             <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
             <div class="hide info">Deletes a single graph instance.
             </div>
           </div>
-          <div class="schmuck" style="grid-column: 1/2; grid-row: 9/10;">
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 8/9;">
             <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
             <div class="hide info">Deletes a single graph topology.
             </div>
@@ -132,7 +132,8 @@
                   onclick="graphEntityList(this)">List Graph Topologies</button>
               </div>
 
-              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 4/5">
+              <!-- useful for users later on, unneeded for now
+                <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 4/5">
                 <button type="button" name="GraphTopologySet" id="dropdownOutput" data-toggle="dropdown"
                   class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
                   aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Set Graph Topology
@@ -140,9 +141,9 @@
                 <ul id="topology-set" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
                   aria-labelledby="dropdownOutput">
                 </ul>
-              </div>
+              </div> -->
 
-              <div class="list-group-item schmuck"style="grid-column: 2/3; grid-row: 5/6">
+              <div class="list-group-item schmuck"style="grid-column: 2/3; grid-row: 4/5">
                   <button type="button" name="GraphInstanceSet" id="openModal"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
                     aria-expanded="true" aria-label="Close">Set Graph Instance
@@ -151,7 +152,7 @@
                   </div>
               </div>
 
-              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 6/7">
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 5/6">
                   <button type="button" name="GraphInstanceActivate" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
                     aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Activate Graph
@@ -161,7 +162,7 @@
                     aria-labelledby="dropdownOutput">
                   </ul>
               </div>
-              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 7/8">
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 6/7">
                   <button type="button" name="GraphInstanceDeactivate" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
                     aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Deactivate Graph
@@ -171,7 +172,7 @@
                     aria-labelledby="dropdownOutput">
                   </ul>
               </div>
-              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 8/9">
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 7/8">
                   <button type="button" name="GraphInstanceDelete" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
                     aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Delete Graph
@@ -182,7 +183,7 @@
                   </ul>
               </div>
 
-              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 9/10">
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 8/9">
                   <button type="button" name="GraphTopologyDelete" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
                     aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Delete Graph
@@ -193,16 +194,16 @@
                   </ul>
               </div>
 
-          <div class="output-box dynamic schmuck" style="padding-bottom: 0rem; margin-bottom: 0px;  grid-column: 3/3; grid-row: 2/10">
+          <div class="output-box dynamic schmuck" style="padding-bottom: 0rem; margin-bottom: 0px;  grid-column: 3/3; grid-row: 2/9">
             <div style="border:1px solid black;" id="method-output-box"></div>
             <br>
             <br>
           </div>
-          <div style="grid-column: 1/3; grid-row: 10/11;" class="schmuck">
+          <div style="grid-column: 1/3; grid-row: 9/10;" class="schmuck">
             <button type="button" class="btn btn-primary" style="margin-bottom:5px; margin-left:7px;" onclick="emitdata()">Show Iot Hub
               output</button><br>
           </div>
-          <div class="output-box dynamic" style="grid-column: 1/ span 3; grid-row: 11/12;">
+          <div class="output-box dynamic" style="grid-column: 1/ span 3; grid-row: 10/11;">
 
             <span
               style="border:1px solid black; height:fit-content; min-height:200px; width: -webkit-fill-available; display: inline-block;"
@@ -244,7 +245,7 @@
             </ul>
           </div>
           <div class="modal-group">
-            <button type="button" onclick="setInstance()" class="modal-item btn btn-primary"><span class="closeOnSubmit">Submit!</span></button>
+            <button type="button" onclick="setGraphInstance()" class="modal-item btn btn-primary"><span class="closeOnSubmit">Submit!</span></button>
           </div>
           </div>
       </div>
@@ -270,9 +271,34 @@
       sendGlobals();
       return;
     }
-
   </script>
 
+  <script>
+    /**
+ * receive incoming messages from IoT Hub
+ */ 
+$(document).ready(() => 
+{
+    // if deployed to a site supporting SSL, use wss://
+    const protocol = document.location.protocol.startsWith('https') ? 'wss://' : 'ws://';
+    const webSocket = new WebSocket(protocol + location.host);
+
+    // when socket receives message, try to display to user
+    webSocket.onmessage = function onMessage(message) 
+    {
+        try 
+        {
+            const messageData = message.data;
+            //separate data fields by two spaces.
+            document.getElementById("iothub-message-output-box").innerText = JSON.stringify(JSON.parse(messageData), null, 2);
+        }
+
+        catch (err) {
+            console.error(err);
+        }
+    };
+});
+  </script>
   <script id="parameter-template" type="text/template">
     <li class="parameter">
         <table class="myTable" border="2">

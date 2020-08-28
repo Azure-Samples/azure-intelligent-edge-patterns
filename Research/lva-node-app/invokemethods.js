@@ -1,14 +1,13 @@
 /**
- * this function invokes an
+ * this function invokes a direct method on the lvaedge module. returns a promise
  */
 
-//use strict means you cannot use undeclared variables
 module.exports.invokeLVAMethod = (req, res, next) => 
 {
     var Client = require('azure-iothub').Client;
     var client = Client.fromConnectionString(IOTHUB_CONNECTION_STRING);
 
-    return client.invokeDeviceMethod(req.body.deviceId, req.body.moduleId,
+    return client.invokeDeviceMethod(DEVICE_ID, MODULE_ID,
         {
             methodName: req.body.methodName,
             payload: req.body.Payload,

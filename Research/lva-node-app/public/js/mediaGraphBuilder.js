@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //media graph building related functions
-var GITHUBTOPOLOGIES = 'https://raw.githubusercontent.com/Azure/live-video-analytics/master/MediaGraph/topologies/';
+const GITHUBTOPOLOGIES = 'https://raw.githubusercontent.com/Azure/live-video-analytics/master/MediaGraph/topologies/';
 var sourceNames = [];
 var processorNames = [];
 var sinkNames = [];
@@ -162,7 +162,8 @@ function setCustomInputs(hoverList, myName, listID)
 }
 
 /** update the list of possible inputs on a given node */
-function updateCustomizedInputs(htmlElement) {
+function updateCustomizedInputs(htmlElement) 
+{
     var hoverList = htmlElement.parentElement.getElementsByTagName("ul")[0];
     hoverList.innerHTML = "";
     var listID = htmlElement.closest(".node-listhead").id;
@@ -176,7 +177,6 @@ function updateCustomizedInputs(htmlElement) {
  */
 function canAddToGraph(type)
 {
-
     var neededInputs=getValidInputs(getNodeSchema(type));
     for (var i=0; i<neededInputs.length; i++)
     {
@@ -391,9 +391,10 @@ function getGraphNodesAndInputs()
 function validateGraph(nodesAndInputsList)
 {
     //all processors and sources must have at least one input
-    if(nodesAndInputsList[0].length==0 || nodesAndInputsList[2].length==0)
+    //TODO make sure all nodes are referenced by another
+    if(nodesAndInputsList[2].length==0)
     {
-        alert("You must have at least one source and one sink node!");
+        alert("You must have at leastone sink node!");
         return false;
     }
     for(i=1; i<3; i++) //check processors and sinks for inputs
@@ -467,7 +468,8 @@ function createMediaGraph() {
   {
       button.disabled = false;
   }
-
+  graphname.value="";
+  graphDescription.value="";
   return true;
 }
 

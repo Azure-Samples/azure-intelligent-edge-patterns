@@ -18,13 +18,8 @@
     <link href="./css/mystyle.css" rel="stylesheet">
 
 </head>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-cookies.js"></script>
 
-<script src="js/cameraAngular.js"></script>
-
-<body onload="camerasOnLoad();" ng-app="cameraAngularApp">
+<body onload="camerasOnLoad();">
 
     <div class="d-flex" id="wrapper">
         <div class="border-right bg-middle" id="sidebar-wrapper">
@@ -37,11 +32,11 @@
               <a href="mediagraph.html" class="list-group-item list-group-item-action bg-middle">3: Media Graph</a>
               <a href="output.html" class="list-group-item list-group-item-action bg-middle">4: Invoke Methods ~ View Output</a>
             </div>
-          </div>
+        </div>
           <!-- /#sidebar-wrapper -->
       
           <!-- Page Content -->
-          <div id="page-content-wrapper">
+        <div id="page-content-wrapper">
             <nav class="navbar navbar-expand-lg navbar-light bg-middle border-bottom">
               <button class="menu-toggler" type="button" data-toggle="collapse" id="menu-toggle">
                 <span class="navbar-toggler-icon"></span>
@@ -52,53 +47,44 @@
 
             <div class="container-fluid">
                 <h2 class="my-header">Set up your cameras here</h2>
-
-                <div ng-controller="cameraController" ng-init="init()">
+                <div>
                     <ul id="camera-config" class="camera list-group">
-                        <li ng-repeat="camera in cameras">
-                            <table class="cameratable" border="1">
+                        <li>
+                            <table class="cameratable" style="border-collapse: collapse !important;">
                                 <tr class="row row-odd">
                                     <td class="camera-table-data">
                                         <label for="rtspName" class="col">Unique Camera Name:</label>
-                                        <input type="text" ng-model="camera.name" aria-labelledby="select_{{$index}}" />
+                                        <input type="text" class="camera-input"/>
                                     </td>
                                 </tr>
                                 <tr class="row row-even">
                                     <td class="camera-table-data">
                                         <label for="rtspUrl" class="col">RTSP Url:</label>
-                                        <input type="text" ng-model="camera.url"
-                                            aria-labelledby="select_{{$index}}" />
+                                        <input class="camera-input" type="text"/>
                                     </td>
                                 </tr>
                                 <tr class=" row row-odd">
                                     <td class="camera-table-data">
                                         <label for="rtspUsername" class="col">RTSP Username:</label>
-                                        <input type="text" placeholder="dummyUsername" ng-model="camera.username"
-                                            aria-labelledby="select_{{$index}}" />
+                                        <input type="text" class="camera-input" placeholder="dummyUsername"/>
                                     </td>
                                 </tr>
                                 <tr class=" row row-even">
                                     <td class="camera-table-data">
                                         <label for="rtspPassword" class="col">RTSP password:</label>
-                                        <input type="password" ng-model="camera.password"
-                                            aria-labelledby="select_{{$index}}" />
-                                    </td>
-                                </tr>
-                                <tr class=" row row-even">
-                                    <td class="camera-table-data">
-                                        <button ng-click="removeCamera(camera)" class="btn btn-primary">X</button>
+                                        <input type="password" class="camera-input"/>
                                     </td>
                                 </tr>
                             </table>
                         </li>
                     </ul>
                     <br>
-                    <button ng-click="addCamera()" class="btn btn-primary">Add new camera</button>
-                    <button onclick="submitCameras()" ng-click="submitNewCamera()" class="btn btn-primary">Submit</button>
+                    <button onclick="submitCameras()" class="btn btn-primary">Submit</button>
                     <br><br>
                     <h3 class="my-header">My Cameras:</h3>
                     <ul id="existing-cameras" class="camera list-group"></ul>
                </div>
+
             </div>
         </div>
         <!-- /#page-content-wrapper -->
@@ -138,12 +124,14 @@
 
     <!-- Menu Toggle Script + before unload function -->
     <script>
-        $("#menu-toggle").click(function (e) {
+        $("#menu-toggle").click(function (e) 
+        {
             e.preventDefault();
             $("#wrapper").toggleClass("toggled");
         });
 
-        window.onbeforeunload = function(){
+        window.onbeforeunload = function()
+        {
             sendGlobals();
             return;
         }

@@ -7,7 +7,6 @@
 
 
 //immutable global variables are written in all caps
-const MODULE_ID="lvaEdge";
 const PORT = 5000;
 
 //global variables. Mutable global variables in javascript are typically named in camelCase
@@ -48,7 +47,6 @@ function getGlobals()
               break;
           }
         }
-        console.log(`resolving response!${response}`);
         resolve(response);
       }
     }
@@ -130,6 +128,29 @@ function CreateUUID()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//configuration page functions
+/** 
+ * grab inputs from configuration. Currently set expiration to 1 day. Calls to connect to device and IotHub to make sure your credentials are valid!
+*/
+function sendConfigData() 
+{
+    let payload =
+    {
+        "device-id": document.getElementById("device-id").value,
+        "iothub-connection-string": document.getElementById("iothub-connection-string").value
+    };
+
+    var request = sendRequest(payload, `http://localhost:${PORT}/connectToIotHub`);
+    request.onreadystatechange = function () 
+    {
+        if (request.readyState == 4 && request.status == 200) 
+        {
+            document.getElementById("configuration-output-box").innerHTML = request.response;
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //invoking methods/output related methods
 
 /** 
@@ -170,8 +191,6 @@ function createFullPayload(methodNameParam, methodPayload)
 {
   let values = 
   {
-    deviceId: getCookie("device-id"),
-    moduleId: MODULE_ID,
     methodName: methodNameParam,
     responseTimeoutInSeconds: 200,
     Payload: methodPayload  
@@ -205,7 +224,8 @@ function graphEntityList(htmlElement, nameIsPassed=false)
   return new Promise((resolve, reject) =>
   {
     var methodName = nameIsPassed ? htmlElement : htmlElement.getAttribute('name');
-    let payload = {
+    let payload = 
+    {
       "@apiVersion": "1.0"
     }
     invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
@@ -238,8 +258,10 @@ function graphEntityModify(htmlElement, method="", elementNamePassed=false, meth
 async function loadInstancesAndTopologies()
 {
   getGlobals();
-  graphEntityList("GraphInstanceList", true);
-  graphEntityList("GraphTopologyList", true);
+  graphEntityList("GraphInstanceList", true).then(() =>
+  {
+    graphEntityList("GraphTopologyList", true);
+  });
 }
 
 /**
@@ -249,10 +271,7 @@ async function loadInstancesAndTopologies()
 */
 function updateGraphsandInstances(methodName, response) 
 {
-  if (methodName == "GraphInstanceList") instanceNames = [];
-  if (methodName == "GraphTopologyList") topologyNames = [];
   let namesArray = response.payload.value;
-
   if (namesArray.length != 0)
   {
     namesArray.forEach((item) => 
@@ -354,10 +373,14 @@ async function invokeLVAMethod(values)
         }
         resolve(result);
       }
+      else if (request.readyState == 4 && request.status == 404)
+      {
+        alert(request.response);
+      }
       else
       {
         console.log("invokeLVAMethod request response is: "+ request.response+ "request status is: "+request.status);
-        if(request.response != "" && JSON.parse(request.response)[1] != undefined)
+        if(request.response != "" && request.status != 404 && JSON.parse(request.response)[1] != undefined)
         {
           displayMethodOutput(JSON.stringify(JSON.parse(request.response)[1]));
         }
@@ -409,7 +432,7 @@ function camerasOnLoad()
 }
 
 /**
-* display all current user set cameras on page load ./cameras
+* display all current user set cameras
 */
 function displayCameras()
 {
@@ -433,17 +456,19 @@ function displayCameras()
 */
 function submitCameras() 
 {
-  let camerasHtml = document.getElementById("camera-config");
-  for (let i = 0; i < camerasHtml.children.length; i++) 
+  let entries = document.getElementsByTagName("input");
+  cameras[entries[0].value]=
   {
-    let entries = camerasHtml.children[i].getElementsByTagName("input");
-    cameras[entries[0].value]=
-    {
-        "url": entries[1].value,
-        "username": entries[2].value,
-        "password": entries[3].value
-    }
+      "url": entries[1].value,
+      "username": entries[2].value,
+      "password": entries[3].value
   }
+
+  for (inputBox of entries)
+  {
+    inputBox.value="";
+  }
+
   displayCameras();
 }
 
@@ -467,7 +492,7 @@ function deleteCamera(htmlElement)
 * set a graph instance
 * asks user for lots of parameters
 */
-function setInstance()
+function setGraphInstance()
 {
   //get each of the parameters and their values
     let parametersObject=[];
@@ -509,7 +534,7 @@ function setInstance()
 function populateModalTemplate()
 {
   //find the currently set graph topology
-  let template=document.getElementById("myModal");
+  let template=document.getElementById("myModal"); //shouldn't be called template anymore, change this ************************
   let modalObjects=template.getElementsByClassName("modal-item");
   let content=template.getElementsByClassName("all-set-instance-content");
   let currentSelect=modalObjects[0]

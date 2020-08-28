@@ -10,13 +10,16 @@ const iothub = require('./iothub.js');
 const invokeMethods = require('./invokemethods.js'); 
 const { convertIotHubToEventHubsConnectionString } = require('./iot-hub-connection-string.js');
 
-
+//TODO stop receiving hub messages. stop reading messages...
 
 // Global Variables!
+// maybe change the mutables to not being global?
 global.graphInstances={};
 global.graphTopologies={};
 global.cameras={};
+
 global.DEVICE_ID="";
+global.MODULE_ID="lvaEdge";
 global.IOTHUB_CONNECTION_STRING="";
 global.IOTHUB_ENDPOINT="";
 
@@ -143,11 +146,11 @@ app.post('/globals', function (req, res)
 })
 
 /**start sending live stream hub messages to client via websocket */
-app.get('/hubMessages', function()
+app.get('/hubMessages', function(req, res)
 {
-  if(DEVICE_ID == "" || IOTHUB_CONNECTION_STRING == "")
+  if (!validCredentialsAreSet(res))
   {
-    console.error("User hasn't set device or iot hub connection string. Cannot connect to hub yet");
+    return;
   }
   else
   {
@@ -169,7 +172,7 @@ wss.broadcast = (data) => {
         }
       }
     });
-  };
+};
 
 /**
 * function that actually broadcasts hub messages to websocket
@@ -199,12 +202,26 @@ async function receiveHubMessages()
             }
           });
       })().catch();
-  }
+}
 
+/**
+ * checks that the iothub_connection_string and device ID are set. If not, responds to client wth 404 and error message
+ * @param {request response object} res 
+ */
+function validCredentialsAreSet(res)
+{
+  if (IOTHUB_CONNECTION_STRING == "" || DEVICE_ID == "")
+  {
+    res.status(404).send("Please set your IoT Hub Connection String and Device ID!");
+    return false;
+  }
+  return true;
+}
 
 //invoke LVA methods handler
 app.post('/runmethod', function (req, res) 
 { 
+    if (!validCredentialsAreSet(res)) return;
     var methodName=req.body.methodName;
     invokeMethods.invokeLVAMethod(req, res).then(response => 
     {
