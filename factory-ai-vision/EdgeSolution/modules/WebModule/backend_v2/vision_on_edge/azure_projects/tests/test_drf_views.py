@@ -10,8 +10,8 @@ from rest_framework.test import APIRequestFactory
 
 from vision_on_edge.azure_projects.api.serializers import ProjectSerializer
 from vision_on_edge.azure_projects.api.views import ProjectViewSet
-from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.azure_projects.models import Project
+from vision_on_edge.azure_settings.models import Setting
 
 pytestmark = pytest.mark.django_db
 

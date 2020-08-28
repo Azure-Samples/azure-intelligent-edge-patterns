@@ -27,6 +27,5 @@ class AzurePartDetectionConfig(AppConfig):
             from . import signals
             from ..azure_projects.models import Project
             from ..cameras.models import Camera
-            from ..locations.models import Location
             from ..inference_modules.models import InferenceModule
             # pylint: enable=unused-import, import-outside-toplevel

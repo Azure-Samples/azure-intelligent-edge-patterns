@@ -47,7 +47,7 @@ class AzureProjectsConfig(AppConfig):
                 if default_settings.count() <= 0:
                     logger.info("Cannot find default settings....")
                     return
-                if Project.objects.filter(is_demo=True).count() <= 1:
+                if not Project.objects.filter(is_demo=True).exists():
                     logger.info("Creating demo project")
                     Project.objects.update_or_create(
                         setting=default_settings.first(),

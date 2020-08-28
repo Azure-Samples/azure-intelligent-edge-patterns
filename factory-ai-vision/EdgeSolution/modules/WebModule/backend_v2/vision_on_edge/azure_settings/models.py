@@ -182,4 +182,5 @@ class Setting(models.Model):
     def __str__(self):
         return self.name
 
+
 pre_save.connect(Setting.pre_save, Setting, dispatch_uid="Setting_pre")

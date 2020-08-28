@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 STREAM_GC_TIME_THRESHOLD = 5  # Seconds
 PRINT_STREAMS = False
 
+
 class StreamManager():
     """StreamManager
     """

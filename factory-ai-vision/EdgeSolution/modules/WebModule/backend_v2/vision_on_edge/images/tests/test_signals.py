@@ -5,8 +5,8 @@
 import logging
 
 from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.azure_projects.models import Project
+from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.general.tests.azure_testcase import CustomVisionTestCase
 
 from ..models import Image

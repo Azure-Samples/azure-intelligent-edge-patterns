@@ -2,20 +2,21 @@
 """App Utilities
 """
 
-import logging
 import json
-import time
+import logging
 import threading
+import time
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
-from ..exceptions import api_exceptions as error_messages
-from vision_on_edge.images.models import Image
 from vision_on_edge.azure_training_status.utils import upcreate_training_status
+from vision_on_edge.exceptions.api_exceptions import CustomVisionAccessFailed
+from vision_on_edge.images.models import Image
+
 from ..azure_parts.utils import batch_upload_parts_to_customvision
+from ..azure_training_status import constants as progress_constants
 from ..images.utils import upload_images_to_customvision_helper
 from .models import Project, Task
-from ..azure_training_status import constants as progress_constants
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +50,7 @@ def update_app_insight_counter(
             trainer = project_obj.setting.get_trainer_obj()
             images_now = trainer.get_tagged_image_count(
                 project_obj.customvision_id)
-            parts_now = len(
-                trainer.get_tags(project_obj.customvision_id))
+            parts_now = len(trainer.get_tags(project_obj.customvision_id))
             # Traces
             az_logger = get_app_insight_logger()
             az_logger.warning(
@@ -87,13 +87,9 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     # Get project objects
     project_obj = Project.objects.get(pk=project_id)
 
-    # Check Project
-    if project_obj.is_demo:
-        raise AttributeError("Demo project should not change")
-
     # Check Training_Key, Endpoint
     if not project_obj.setting.is_trainer_valid:
-        raise AttributeError(error_messages.CUSTOM_VISION_ACCESS_ERROR)
+        raise CustomVisionAccessFailed
 
     trainer = project_obj.setting.get_trainer_obj()
 
@@ -236,7 +232,7 @@ def train_project_worker(project_id):
     if (not project_obj.setting or not project_obj.setting.is_trainer_valid):
         upcreate_training_status(project_id=project_obj.id,
                                  status="failed",
-                                 log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
+                                 log="Custom Vision Access Error")
         return
     if project_obj.is_demo:
         logger.info("Demo project is already trained")
@@ -388,8 +384,7 @@ def update_train_status_worker(project_id):
         project_obj.download_uri = exports[0].download_uri
         project_obj.save(update_fields=["download_uri"])
 
-        logger.info("Successfully export model: %s",
-                    project_obj.download_uri)
+        logger.info("Successfully export model: %s", project_obj.download_uri)
 
         logger.info("Training Status: Completed")
         train_performance_list = []
@@ -411,7 +406,7 @@ def update_train_status_worker(project_id):
 def train_project_helper(project_id):
     """train_project_helper.
 
-    Open a thread to update the training status object.
+    Open a thread to upload the items.
 
     Args:
         project_id: Django ORM project id.

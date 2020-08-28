@@ -55,10 +55,10 @@ INSTALLED_APPS = [
     'vision_on_edge.cameras',
     'vision_on_edge.inference_modules',
     'vision_on_edge.azure_part_detections',
-#    'vision_on_edge.feedback',
-#    'vision_on_edge.video_feed',
+    #    'vision_on_edge.feedback',
+    #    'vision_on_edge.video_feed',
     'vision_on_edge.locations',
-#    'vision_on_edge.image_predictions',
+    #    'vision_on_edge.image_predictions',
     'rest_framework',
     'drf_yasg',
 ]

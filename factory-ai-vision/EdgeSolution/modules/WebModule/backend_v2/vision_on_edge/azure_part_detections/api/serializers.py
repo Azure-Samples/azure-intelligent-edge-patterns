@@ -19,6 +19,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {"prob_threshold": {"required": False}}
 
+
 # pylint: disable=abstract-method
 class ExportSerializer(serializers.Serializer):
     """ExportSerializer.

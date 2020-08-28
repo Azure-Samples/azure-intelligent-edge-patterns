@@ -1,14 +1,15 @@
-"""Azure Setting Factories
+# -*- coding: utf-8 -*-
+"""App Model Factories
 """
 
-from typing import Any, Sequence
-
-from factory import DjangoModelFactory, Faker, post_generation
+from factory import DjangoModelFactory, Faker
 
 from vision_on_edge.azure_settings.models import Setting
 
 
 class SettingFactory(DjangoModelFactory):
+    """SettingFactory.
+    """
 
     name = Faker("city")
     endpoint = Faker("url")

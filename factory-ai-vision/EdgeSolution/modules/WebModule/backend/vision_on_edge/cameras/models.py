@@ -14,8 +14,6 @@ from ..locations.models import Location
 
 logger = logging.getLogger(__name__)
 
-# Create your models here.
-
 
 class Camera(models.Model):
     """Camera Model"""
@@ -24,7 +22,9 @@ class Camera(models.Model):
     rtsp = models.CharField(max_length=1000)
     area = models.CharField(max_length=1000, blank=True)
     is_demo = models.BooleanField(default=False)
-    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    location = models.ForeignKey(Location,
+                                 on_delete=models.SET_NULL,
+                                 null=True)
 
     def __str__(self):
         return self.name
