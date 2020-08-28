@@ -31,6 +31,8 @@ const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
 const infoBlockTokens: IStackTokens = { childrenGap: 10 };
 
+const maskRtsp = (rtsp) => rtsp.replace(/(rtsp:\/\/[\w]+)\.([\s\S])+/, '$1.**********');
+
 export const CameraDetails: React.FC = () => {
   const cameraId = parseInt(useQuery().get('cameraId'), 10);
   const camera = useSelector((state: State) => selectCameraById(state, cameraId));
@@ -100,7 +102,7 @@ export const CameraDetails: React.FC = () => {
         <Stack tokens={{ childrenGap: 30 }} styles={{ root: { padding: '15px' } }} grow>
           <Breadcrumb items={breadCrumbItems} />
           <Stack tokens={{ childrenGap: 20 }} horizontal grow>
-            <CameraInfo rtsp={camera.rtsp} location={locationName} />
+            <CameraInfo rtsp={maskRtsp(camera.rtsp)} location={locationName} />
             <CameraLiveFeed rtsp={camera.rtsp} onBtnClick={onCaptureBtnClick} />
           </Stack>
         </Stack>
