@@ -31,9 +31,9 @@ export const CameraDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAd
     <>
       {cameras.length === 0 ? (
         <EmptyAddIcon
-          text="Add and configure the cameras in the factory"
-          btnTxt="Add a camera"
-          onAddBtnClick={onAddBtnClick}
+          title="Connect cameras"
+          subTitle="Add and configure the cameras in the factory"
+          primary={{ text: 'Add a camera', onClick: onAddBtnClick }}
         />
       ) : (
         <DetailsList
