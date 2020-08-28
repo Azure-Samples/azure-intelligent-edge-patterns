@@ -38,9 +38,16 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
     });
 };
 
-export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void }> = ({
+type ConfigTaskPanelProps = {
+  isOpen: boolean;
+  onDismiss: () => void;
+  projectData: ProjectData;
+};
+
+export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
+  projectData: initialProjectData,
 }) => {
   const cameraOptions = useSelector(cameraOptionsSelector);
   const partOptions = useSelector(partOptionsSelector);
@@ -48,7 +55,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const [projectData, setProjectData] = useState<Partial<ProjectData>>({ camera: null, parts: [] });
+  const [projectData, setProjectData] = useState(initialProjectData);
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
     setProjectData(R.assoc(key, value));
@@ -67,6 +74,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
       thunkPostProject(projectData.id, projectData.parts, projectData.camera, projectData.trainingProject),
     );
 
+    onDismiss();
     history.push('/task');
   };
 
