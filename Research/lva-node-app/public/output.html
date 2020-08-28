@@ -21,7 +21,7 @@
 <!-- my scripts -->
 <script src="js/main.js"></script>
 <script src="js/cookie.js"></script>
-<script src="js/mediagraphCustomize.js"></script>
+<script src="js/mediaGraphBuilder.js"></script>
 <!-- Bootstrap core JavaScript -->
 <script src="vendor/jquery/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -200,6 +200,10 @@
           </div>
           <div style="grid-column: 1/3; grid-row: 10/11;" class="schmuck">
             <button type="button" class="btn btn-primary" style="margin-bottom:5px; margin-left:7px;" onclick="emitdata()">Show Iot Hub
+              output</button><br>
+          </div>
+          <div style="grid-column: 3/3; grid-row: 10/11;" class="schmuck">
+            <button type="button" class="btn btn-primary" style="margin-bottom:5px; margin-left:7px;" onclick="stopReceivingHubMessages()">Stop receiving Iot Hub
               output</button><br>
           </div>
           <div class="output-box dynamic" style="grid-column: 1/ span 3; grid-row: 11/12;">

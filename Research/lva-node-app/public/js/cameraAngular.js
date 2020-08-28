@@ -1,48 +1,36 @@
-    angular.module('myApp2', [])
+    //create angular module and assign controller + scope
+    angular.module('cameraAngularApp', [])
     .controller('cameraController', ['$scope', cameraController]);
 
-  function cameraController($scope) {
-    $scope.name = 'Julia';
+  /**
+   * cameraController is used to allow user to add new cameras. All functions on scope variable declared within larger body function
+   * @param {scope param} $scope 
+   */
+  function cameraController($scope) 
+  {
+    //Only scope variable
     $scope.cameras = [
     ];
-    $scope.existingCameras=[];
-    $scope.greet = function() {
-      alert($scope.name);
-    };
-  
-    $scope.addcamera = function() {
+
+    $scope.addCamera = function() {
       $scope.cameras.push({name:'', url:'', username:'', password:''});
     };
 
-
-    $scope.submitNewCamera = function(cookies) 
+    /**
+     * after user has entered camera values, get rid of form
+     */
+    $scope.submitNewCamera = function() 
     {
-      $scope.cameras.forEach((cam) => 
-      {                
-        //remove semicolon characters
-        $.each(cam, function(k, v){
-          v=v.replace(/;/g, "");
-      });
-        $scope.existingCameras.push({name: cam.name, url: cam.url, username: cam.username, password: cam.password});
-      });
       $scope.cameras=[];
     };
 
-    $scope.removecamera = function(cameraToRemove) {
+    /**
+     * delete camera user is building
+     * @param {camera user clicked on to remove} cameraToRemove 
+     */
+    $scope.removeCamera = function(cameraToRemove) {
       var index = $scope.cameras.indexOf(cameraToRemove);
-      if(index==-1)
-      {
-        index = $scope.existingCameras.indexOf(cameraToRemove);
-        $scope.existingCameras.splice(index, 1);
-      }
-      else $scope.cameras.splice(index, 1);
-    };
-  
-    $scope.clearcamera = function(camera) {
-      camera.name = '';
-      camera.url = '';
-      camera.username = '';
-      camera.password = '';
+      $scope.cameras.splice(index, 1);
     };
   }
   

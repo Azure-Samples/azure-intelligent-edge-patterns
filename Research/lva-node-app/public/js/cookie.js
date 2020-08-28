@@ -1,16 +1,13 @@
 /**
- * set new web cookie. Encode values in case of special characters (IotHub connection strings always have semicolons, the typical cookie delimiter)
+* set new web cookie. Encode values in case of special characters (IotHub connection strings always have semicolons, the typical cookie delimiter)
+* this is ONLY used for the device ID.
 */
 function setCookie(cookieName, cookieValue, daysToLive=1) 
 {
     //create time for cookie expiration
-    var date = new Date();
+    let date = new Date();
     date.setTime(date.getTime() + (daysToLive * 24 * 60 * 60 * 1000));
-    var expires = "expires=" + date.toGMTString();
-
-    //if cookie contains a semicolon encode it so it doesn't break the cookie format
-    if(cookieValue.includes(';')) cookieValue= encodeURIComponent(cookieValue);
-
+    let expires = "expires=" + date.toGMTString();
     document.cookie = cookieName + "=" + cookieValue + ";" + expires + ";path=/";
 }
 
@@ -19,11 +16,11 @@ function setCookie(cookieName, cookieValue, daysToLive=1)
 */
 function getCookie(cookieName) 
 {
-    var name = cookieName + "=";
-    var cookieArray = document.cookie.split(';');
-    for (var i = 0; i < cookieArray.length; i++) 
+    let name = cookieName + "=";
+    let cookieArray = document.cookie.split(';');
+    for (let i = 0; i < cookieArray.length; i++) 
     {
-        var cookie = decodeURIComponent(cookieArray[i]);
+        let cookie = decodeURIComponent(cookieArray[i]);
         while (cookie.charAt(0) == ' ') 
         {
             cookie = cookie.substring(1);
@@ -41,17 +38,15 @@ function getCookie(cookieName)
 */
 function setConfigCookies() 
 {
-    var payload =
+    let payload =
     {
         "device-id": document.getElementById("device-id").value,
         "iothub-connection-string": document.getElementById("iothub-connection-string").value
     };
 
     setCookie("device-id", document.getElementById("device-id").value, 1);
-    setCookie("iothub-connection-string", document.getElementById("iothub-connection-string").value, 1);
 
-    var request = sendRequest(payload, "http://localhost:5000/hello");
-  // event listener. Takes callback with an = or +=
+    var request = sendRequest(payload, `http://localhost:${PORT}/connectToIotHub`);
     request.onreadystatechange = function () 
     {
         if (request.readyState == 4 && request.status == 200) 

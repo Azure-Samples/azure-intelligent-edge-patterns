@@ -24,7 +24,7 @@
 
 <script src="js/cameraAngular.js"></script>
 
-<body onload="displayCameras();" ng-app="myApp2">
+<body onload="camerasOnLoad();" ng-app="cameraAngularApp">
 
     <div class="d-flex" id="wrapper">
         <div class="border-right bg-middle" id="sidebar-wrapper">
@@ -86,15 +86,15 @@
                                 </tr>
                                 <tr class=" row row-even">
                                     <td class="camera-table-data">
-                                        <button ng-click="removecamera(camera)" class="btn btn-primary">X</button>
+                                        <button ng-click="removeCamera(camera)" class="btn btn-primary">X</button>
                                     </td>
                                 </tr>
                             </table>
                         </li>
                     </ul>
                     <br>
-                    <button ng-click="addcamera()" class="btn btn-primary">Add new camera</button>
-                    <button onclick="submitCameras()" ng-click="submitNewCamera('document.cookie')" class="btn btn-primary">Submit</button>
+                    <button ng-click="addCamera()" class="btn btn-primary">Add new camera</button>
+                    <button onclick="submitCameras()" ng-click="submitNewCamera()" class="btn btn-primary">Submit</button>
                     <br><br>
                     <h3 class="my-header">My Cameras:</h3>
                     <ul id="existing-cameras" class="camera list-group"></ul>
@@ -107,7 +107,6 @@
     <!-- /#wrapper -->
     <!-- my scripts -->
     <script src="js/main.js"></script>
-    <script src="js/cookie.js"></script>
     <!-- Bootstrap core JavaScript -->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -115,7 +114,7 @@
 
     <script id="created-camera-template" type="text/template">
     <li class="camera camera-list-item list-node-item list-group-item badge">
-        <table border="1">
+        <table>
             <tr id="camera-labels" class=" row row-odd">
                 <td>Name </td>
                 <td>URL </td>
@@ -137,12 +136,17 @@
     </li>
     </script>
 
-    <!-- Menu Toggle Script -->
+    <!-- Menu Toggle Script + before unload function -->
     <script>
         $("#menu-toggle").click(function (e) {
             e.preventDefault();
             $("#wrapper").toggleClass("toggled");
         });
+
+        window.onbeforeunload = function(){
+            sendGlobals();
+            return;
+        }
     </script>
 
 </body>

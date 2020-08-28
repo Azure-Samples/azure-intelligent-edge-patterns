@@ -1,32 +1,28 @@
 {
-    "title": "Simple Sidebar",
-    "name": "startbootstrap-simple-sidebar",
+    "title": "LVA Node App",
+    "name": "lvanodeapp",
     "version": "5.1.2",
     "scripts": {
-        "start": "node myscripts/app.js"
+        "start": "node app.js"
     },
-    "description": "A simple sidebar navigation HTMl template built with Bootstrap",
+    "description": "UI for running specific LVA scenarios",
     "keywords": [
         "css",
+        "lva",
+        "ase",
+        "azure stack edge",
         "sass",
         "html",
         "responsive",
         "theme",
         "template"
     ],
-    "homepage": "https://startbootstrap.com/templates/simple-sidebar",
-    "bugs": {
-        "url": "https://github.com/StartBootstrap/startbootstrap-simple-sidebar/issues",
-        "email": "feedback@startbootstrap.com"
-    },
+    "homepage": "https://localhost:5000",
     "license": "MIT",
-    "author": "Start Bootstrap",
-    "contributors": [
-        "David Miller (http://davidmiller.io/)"
-    ],
+    "author": "Julia Lieberman",
     "repository": {
         "type": "git",
-        "url": "https://github.com/StartBootstrap/startbootstrap-simple-sidebar.git"
+        "url": "https://github.com/julialieberman/azure-intelligent-edge-patterns/tree/lva-node-app"
     },
     "dependencies": {
         "@azure/event-hubs": "^5.2.2",
