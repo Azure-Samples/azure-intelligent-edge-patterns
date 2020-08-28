@@ -263,26 +263,22 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
 
 export const thunkPostProject = (
   projectId,
-  selectedLocations,
   selectedParts,
   selectedCamera,
   selectedTrainingProject,
-  isDemo,
 ): ProjectThunk => (dispatch, getState): Promise<number> => {
-  const isProjectEmpty = projectId === null;
+  const isProjectEmpty = projectId === null || projectId === undefined;
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
 
-  dispatch(postProjectRequest(isDemo));
+  dispatch(postProjectRequest(false));
 
   const projectData = getProjectData(getState());
 
   return Axios(url, {
     data: {
-      location: selectedLocations.id,
-      parts: selectedParts.map((e) => e.id),
-      camera: selectedCamera.id,
+      part: selectedParts,
+      camera: selectedCamera,
       project: selectedTrainingProject,
-      download_uri: projectData.modelUrl,
       needRetraining: projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
@@ -297,12 +293,12 @@ export const thunkPostProject = (
     },
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data, isDemo));
-      getTrain(data.id, isDemo);
+      dispatch(postProjectSuccess(data, false));
+      getTrain(data.id, false);
       return data.id;
     })
     .catch((err) => {
-      dispatch(postProjectFail(err, isDemo));
+      dispatch(postProjectFail(err, false));
     }) as Promise<number>;
 };
 const getTrain = (traininProjectId, isTestModel: boolean): void => {

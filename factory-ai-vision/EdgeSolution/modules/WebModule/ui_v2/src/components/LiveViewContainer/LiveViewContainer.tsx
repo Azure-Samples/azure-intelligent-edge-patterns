@@ -26,7 +26,7 @@ export const LiveViewContainer: React.FC<{
   cameraId: number;
   onDeleteProject: () => void;
 }> = ({ showVideo, cameraId, onDeleteProject }) => {
-  const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId).useAOI);
+  const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
   const AOIs = useSelector(selectAOIsByCamera(cameraId));
   const originAOIs = useSelector(selectOriginAOIsByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);

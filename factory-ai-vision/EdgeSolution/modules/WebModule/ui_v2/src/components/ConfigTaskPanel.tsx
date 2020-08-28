@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import * as R from 'ramda';
 import {
   Panel,
@@ -11,11 +12,31 @@ import {
   TextField,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import Axios from 'axios';
 
 import { cameraOptionsSelector, getCameras } from '../store/cameraSlice';
 import { partOptionsSelector, getParts } from '../store/partSlice';
 import { ProjectData } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
+import { getAppInsights } from '../TelemetryService';
+import { thunkPostProject } from '../store/project/projectActions';
+
+const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
+  const { data: images } = await Axios.get('/api/images/');
+
+  const selectedPartIds = selectedParts.map((e) => e.id);
+  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(e.part)).length;
+  const appInsight = getAppInsights();
+  if (appInsight)
+    appInsight.trackEvent({
+      name: 'train',
+      properties: {
+        images: interestedImagesLength,
+        parts: selectedParts.length,
+        source: '',
+      },
+    });
+};
 
 export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void }> = ({
   isOpen,
@@ -25,6 +46,7 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
   const partOptions = useSelector(partOptionsSelector);
   const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const [projectData, setProjectData] = useState<Partial<ProjectData>>({ camera: null, parts: [] });
 
@@ -38,8 +60,14 @@ export const ConfigTaskPanel: React.FC<{ isOpen: boolean; onDismiss: () => void 
     dispatch(getTrainingProject());
   }, [dispatch]);
 
-  const onStart = () => {
-    console.log(projectData);
+  const onStart = async () => {
+    sendTrainInfoToAppInsight(projectData.parts);
+
+    await dispatch(
+      thunkPostProject(projectData.id, projectData.parts, projectData.camera, projectData.trainingProject),
+    );
+
+    history.push('/task');
   };
 
   const onRenderFooterContent = () => {
