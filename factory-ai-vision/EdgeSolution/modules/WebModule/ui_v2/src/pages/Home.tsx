@@ -80,10 +80,10 @@ export const Home: React.FC = () => {
             <PivotItem itemKey="task" headerText="Task" />
           </Pivot>
           <Stack.Item grow>
-            {location.pathname.split('/')[1] === 'getStarted' ? (
-              <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
-            ) : (
+            {location.pathname.split('/')[1] === 'task' ? (
               <TaskDetail isDemo={false} />
+            ) : (
+              <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
             )}
           </Stack.Item>
         </Stack>
