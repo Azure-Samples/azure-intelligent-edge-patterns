@@ -363,6 +363,41 @@ And you should see the Persisted Volume itself:
 Consult your cloud system administrator if you have any problems, there could be many other
 options sutable to particular scenarios and development lifecycle.
 
+
+## (Optional) Check that you can see Kubernetes Dashboard
+
+You are welcome to check if you can see the Kubernetes board from your
+machine. You can get your Kubernetes Dashboard's address from `cluster-info`:
+
+    $ kubectl cluster-info
+    ...
+    kubernetes-dashboard is running at https://kube-rgkf-5.demoe2.cloudapp.stackpoc.com/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
+    ...
+
+You might need to contact your cloud administrator to retrieve the certificates from your cluster, here
+is the link with instructions how to do it: [Access the Kubernetes Dashboard in Azure Stack Hub](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-solution-template-kubernetes-dashboard?view=azs-2002#import-the-certificate).
+
+We provided a script to retrieve a login token(which is a time-sensitive operation, talk to your
+cloud administrator to use the imported `kubeconfig` instead):
+
+    $ sbin/get_token.sh
+    Name:         namespace-controller-token-masdg
+    Type:  kubernetes.io/service-account-token
+    token:      12345678904DETcwwkZAyHfzD1Wp8_58eVbzthMmsh1P4ca9mXCB12wEhwS_J0VCsN4ektqjYmoTiXOuc2TGz7XlFys2BBhZLINMH3WYexaHPXovGGtRRg_D8rd_WA-T03SKZwpuPGljb-dYi_NyxqTtwufz7duBRX_1f3Ga4_3f8zEx5wqUCHL4vD2xyaG_EMxhmOpqPBPvlhk3s_dj0_ZGdsLvJZE4cWI1LHGFEuwghc5vPhnJb9QZvsdfgRzbPwUZT4IOsS_tS65Wk
+
+Cut/paste that token into the Sign In screen:
+
+![pics/kubernetes_dashboard_login.png](pics/kubernetes_dashboard_login.png)
+
+Again, you might need to contact your cloud administrator to retrieve the certificates from your cluster
+to access these links, you should be able to see the Kubernetes Dashboard in a browser:
+
+![pics/kubernetes_dashboard_intro.png](pics/kubernetes_dashboard_intro.png)
+
+## (Optional) Check your DockerHub login
+
+If you do not know what Docker is, review our [Introduction to Docker](introduction_to_docker.md) as a refresher.
+
 ---
 
 [Back](Readme.md)
