@@ -57,7 +57,7 @@ sed -i "s/\$APPDATA_FOLDER_ON_DEVICE/$APPDATA_WITH_SLASHES/" $DEPLOYMENT_MANIFES
 
 
 # deploy!!!
-az iot edge set-modules --hub-name $IOTHUB --device-id $DEVICE_ID --content $DEPLOYMENT_MANIFEST_FILE
+az iot edge set-modules --hub-name $IOTHUB --device-id $EDGE_DEVICE --content $DEPLOYMENT_MANIFEST_FILE
 
 echo -e "Now you will need to wait for the deployment to finish successfully. This can take up to 30 minutes, so check the status of your module in the Azure Portal.
 Once it is ready, go ahead and run the command ./invokeMethodsHelper.sh to finish up!"
