@@ -28,7 +28,6 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static('public'))
 
-var socketSend=false;
 
 
 // render the html pages. the '/<name>' is what the url extension will look like in the browser
@@ -152,33 +151,25 @@ app.get('/hubMessages', function()
   }
   else
   {
-    socketSend=true;
     receiveHubMessages();
   }  
 })
 
-app.get('/closeSocket')
-{
-  socketSend=false;
-}
 /** 
 * broadcast used for sending IoT Hub message data in a live stream 
 */
 wss.broadcast = (data) => {
-  while(socketSend)
-  {  
     wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          try {
-            console.log(`Broadcasting data ${data}`);
-            client.send(data);
-          } catch (e) {
-            console.error(e);
-          }
+      if (client.readyState === WebSocket.OPEN) {
+        try {
+          console.log(`Broadcasting data ${data}`);
+          client.send(data);
+        } catch (e) {
+          console.error(e);
         }
-      });
-  }
-};
+      }
+    });
+  };
 
 /**
 * function that actually broadcasts hub messages to websocket

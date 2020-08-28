@@ -374,10 +374,6 @@ function emitdata()
   sendRequest("", `http://localhost:${PORT}/hubmessages`, "GET");
 }
 
-function stopReceivingHubMessages()
-{
-  sendRequest("", `http://localhost:${PORT}/closeSocket`, "GET");
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // camera-related methods
