@@ -82,8 +82,12 @@ class Project(models.Model):
 
         instance = kwargs["instance"]
         logger.info("Saving instance: %s", instance)
-    
-        if instanc.setting
+   
+        if not instance.setting:
+            return
+        if instance.setting.is_trainer_valid:
+            return
+        
         trainer = instance.setting.revalidate_and_get_trainer_obj()
         if instance.is_demo:
             logger.info("Project instance.is_demo: %s", instance.is_demo)
