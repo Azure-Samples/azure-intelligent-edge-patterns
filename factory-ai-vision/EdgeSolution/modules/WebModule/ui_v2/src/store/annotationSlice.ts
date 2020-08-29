@@ -80,7 +80,10 @@ const entityAdapter = createEntityAdapter<Annotation>();
 
 const slice = createSlice({
   name: 'label',
-  initialState: entityAdapter.getInitialState(),
+  initialState: {
+    ...entityAdapter.getInitialState(),
+    originEntities: entityAdapter.getInitialState().entities,
+  },
   reducers: {
     createAnnotation: {
       prepare: (point: Position2D, imageId: number) => ({

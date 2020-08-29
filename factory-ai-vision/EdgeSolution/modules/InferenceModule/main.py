@@ -18,8 +18,6 @@ from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 from utility import get_file_zip, normalize_rtsp
 
-from config import IOT_HUB_CONNECTION_STRING
-
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec
 
@@ -804,19 +802,21 @@ def twin_update_listener(client):
         print("[INFO] Twin desired properties patch received:", flush=True)
         print("[INFO]", patch, flush=True)
 
-        if model_uri not in patch:
-            print('[WARNING] missing model_uri')
+        if 'model_uri' not in patch:
+            print('[WARNING] missing model_uri', flush=True)
+            continue
 
-        print('[INFO] Got Model URI', path['model_uri'])
+        model_uri = patch['model_uri']
+        print('[INFO] Got Model URI', model_uri, flush=True)
 
         if model_uri == onnx.model_uri:
-            print('[INFO] Model Uri unchanged')
+            print('[INFO] Model Uri unchanged', flush=True)
         else:
             get_file_zip(model_uri, MODEL_DIR)
             onnx.model_uri = model_uri
 
         onnx.update_model('model')
-        print('[INFO] Update Finished ...')
+        print('[INFO] Update Finished ...', flush=True)
 
 def iothub_client_run():
     try:

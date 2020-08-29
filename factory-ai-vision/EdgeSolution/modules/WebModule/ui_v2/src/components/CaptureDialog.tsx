@@ -15,7 +15,6 @@ import { createSelector } from '@reduxjs/toolkit';
 
 import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
-import { CaptureLabelMode } from './RTSPVideo/RTSPVideo.type';
 import { selectAllCameras, selectCameraById } from '../store/cameraSlice';
 
 const { palette } = getTheme();
@@ -31,6 +30,11 @@ const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
     text: e.name,
   })),
 );
+
+enum CaptureLabelMode {
+  PerImage,
+  AllLater,
+}
 
 type CaptureDialogProps = {
   captureLabelMode: CaptureLabelMode;
@@ -77,7 +81,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
           />
           <Stack horizontal tokens={{ childrenGap: 30 }}>
             <Stack styles={{ root: { width: '75%' } }}>
-              <RTSPVideo rtsp={rtsp} autoPlay canCapture />
+              <RTSPVideo rtsp={rtsp} />
             </Stack>
             <Stack verticalAlign="center" tokens={{ childrenGap: 10 }} styles={{ root: { width: '25%' } }}>
               <DefaultButton
