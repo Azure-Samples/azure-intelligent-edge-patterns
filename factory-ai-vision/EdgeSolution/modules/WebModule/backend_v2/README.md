@@ -1,5 +1,7 @@
 # Vision On Edge - Web Module
 
+[![Code style: yapf](https://img.shields.io/badge/code%20style-yapf-blue)](https://github.com/google/yapf)
+
 ## How to run
 
 ### Migrate

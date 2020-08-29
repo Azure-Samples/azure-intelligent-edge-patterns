@@ -45,7 +45,7 @@ class Project(models.Model):
 
     def __repr__(self):
         return self.name.__repr__()
-    
+
     def __str__(self):
         return self.name.__str__()
 
@@ -84,8 +84,7 @@ class Project(models.Model):
                 return
 
             # Setting is valid, no customvision_id
-            instance.name = (instance.name or
-                             "VisionOnEdge-" +
+            instance.name = (instance.name or "VisionOnEdge-" +
                              datetime.datetime.utcnow().isoformat())
         except:
             logger.exception("Project pre_save Exception")

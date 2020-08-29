@@ -25,7 +25,15 @@ class TrainingStatus(models.Model):
     project = models.OneToOneField(Project, on_delete=models.CASCADE)
 
     def __repr__(self):
-        return str({"project": self.project, "status": self.status, "log": self.log})
-    
+        return str({
+            "project": self.project,
+            "status": self.status,
+            "log": self.log
+        })
+
     def __str__(self):
-        return str({"project": str(self.project), "status": self.status, "log": self.log})
+        return str({
+            "project": str(self.project),
+            "status": self.status,
+            "log": self.log
+        })

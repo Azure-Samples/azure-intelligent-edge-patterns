@@ -49,6 +49,3 @@ def azure_setting_change_handler(**kwargs):
                               is_demo=False).count() < 1:
         Project.objects.update_or_create(setting=kwargs['instance'],
                                          is_demo=False)
-
-
-

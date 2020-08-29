@@ -257,10 +257,9 @@ def train_project_worker(project_id):
         )
     except Exception:
         project_obj.create_project()
-        upcreate_training_status(
-            project_id=project_obj.id,
-            need_to_send_notification=True,
-            **progress.PROGRESS_2_PROJECT_CREATED)
+        upcreate_training_status(project_id=project_obj.id,
+                                 need_to_send_notification=True,
+                                 **progress.PROGRESS_2_PROJECT_CREATED)
 
     project_obj = Project.objects.get(pk=project_id)
     logger.info("Project created on CustomVision.")

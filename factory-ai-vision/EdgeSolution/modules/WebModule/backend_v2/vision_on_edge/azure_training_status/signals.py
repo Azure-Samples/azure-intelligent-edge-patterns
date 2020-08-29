@@ -12,6 +12,7 @@ from ..azure_projects.models import Project
 
 logger = logging.getLogger(__name__)
 
+
 @receiver(signal=post_save,
           sender=Project,
           dispatch_uid="training_status_project_created_listener")
