@@ -11,6 +11,7 @@ from ..models import Camera
 
 pytestmark = pytest.mark.django_db
 
+
 def test_create_camera():
     with patch('requests.get') as mock_request:
         mock_request.return_value.status_code = 200
@@ -31,4 +32,4 @@ def test_create_camera():
                               rtsp="0",
                               area="QQ",
                               is_demo=True)
-    assert Camera.objects.count() == 4  
+    assert Camera.objects.count() == 4

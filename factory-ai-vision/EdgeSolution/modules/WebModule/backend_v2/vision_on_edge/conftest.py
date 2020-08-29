@@ -61,6 +61,7 @@ def part() -> Part:
 def image() -> Image:
     return ImageFactory()
 
+
 @pytest.fixture
 def camera() -> Camera:
     return CameraFactory()

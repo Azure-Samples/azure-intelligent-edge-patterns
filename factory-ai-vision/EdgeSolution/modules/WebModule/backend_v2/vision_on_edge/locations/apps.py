@@ -9,8 +9,8 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
-
 # pylint: disable=C0415
+
 
 class LocationsConfig(AppConfig):
     """App Config
