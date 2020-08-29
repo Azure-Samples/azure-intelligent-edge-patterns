@@ -17,7 +17,7 @@ const { convertIotHubToEventHubsConnectionString } = require('./iot-hub-connecti
 global.graphInstances={};
 global.graphTopologies={};
 global.cameras={};
-
+var eventHubReader;
 global.DEVICE_ID="";
 global.MODULE_ID="lvaEdge";
 global.IOTHUB_CONNECTION_STRING="";
@@ -155,19 +155,31 @@ app.get('/hubMessages', function(req, res)
   else
   {
     receiveHubMessages();
+    //always close requests
+    res.send();
   }  
 })
 
+app.get('/stopMessages', function(req, res)
+{
+  eventHubReader.stopReadMessage();
+  res.send();
+})
 /** 
 * broadcast used for sending IoT Hub message data in a live stream 
 */
-wss.broadcast = (data) => {
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        try {
-          console.log(`Broadcasting data ${data}`);
+wss.broadcast = (data) => 
+{
+    wss.clients.forEach((client) => 
+    {
+      if (client.readyState === WebSocket.OPEN) 
+      {
+        try 
+        {
+          //console.log(`Broadcasting data ${data}`);
           client.send(data);
-        } catch (e) {
+        } catch (e) 
+        {
           console.error(e);
         }
       }
@@ -180,7 +192,7 @@ wss.broadcast = (data) => {
 async function receiveHubMessages() 
   {
       const consumerGroup = "$Default"; // name of the default consumer group
-      const eventHubReader = new EventHubReader(IOTHUB_CONNECTION_STRING, consumerGroup);
+      eventHubReader = new EventHubReader(IOTHUB_CONNECTION_STRING, consumerGroup);
       (async () => 
       {
           await eventHubReader.startReadMessage((message, date, deviceId) => 
@@ -200,8 +212,10 @@ async function receiveHubMessages()
             {
               console.error('Error broadcasting: [%s] from [%s].', err, message);
             }
+
           });
       })().catch();
+      console.log("done receive hub message func");
 }
 
 /**

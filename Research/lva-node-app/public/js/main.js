@@ -14,6 +14,7 @@ var graphTopologies={};
 var graphInstances={};
 var cameras={};
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // universal functions
 
@@ -395,8 +396,19 @@ async function invokeLVAMethod(values)
 function emitdata()
 { 
   sendRequest("", `http://localhost:${PORT}/hubmessages`, "GET");
+  document.getElementById('stop-messages').disabled=false;
+  document.getElementById('start-messages').disabled=true;
 }
 
+/**
+ * stop receiving device-cloud IoT Hub messages
+ */
+function stopMessages()
+{
+  sendRequest("", `http://localhost:${PORT}/stopMessages`, "GET");
+  document.getElementById('stop-messages').disabled=true;
+  document.getElementById('start-messages').disabled=false;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // camera-related methods

@@ -191,8 +191,11 @@
             <br>
           </div>
           <div style="grid-column: 1/3; grid-row: 9/10;" class="schmuck">
-            <button type="button" class="btn btn-primary" style="margin-bottom:5px; margin-left:7px;" onclick="emitdata()">Show Iot Hub
+            <button type="button" id="start-messages" class="btn btn-primary" style="margin-bottom:5px; margin-left:7px;" onclick="emitdata()">Show Iot Hub
               output</button><br>
+          </div>
+          <div style="grid-column: 3/3; grid-row: 9/10;" class="schmuck">
+            <button type="button" class="btn btn-primary" id="stop-messages" onclick="stopMessages()" disabled="true">Stop showing Iot Hub Output</button>
           </div>
           <div class="output-box dynamic" style="grid-column: 1/ span 3; grid-row: 10/11;">
 
@@ -270,27 +273,29 @@
 
   <!-- receive incoming messages from IoT Hub -->
   <script>
-    $(document).ready(() => 
+    // if deployed to a site supporting SSL, use wss://
+    $(document).ready(() =>
+    {
+      const protocol = document.location.protocol.startsWith('https') ? 'wss://' : 'ws://';
+      const webSocket = new WebSocket(protocol + location.host);
+
+      // when socket receives message, try to display to user
+      webSocket.onmessage = function onMessage(message) 
       {
-        // if deployed to a site supporting SSL, use wss://
-        const protocol = document.location.protocol.startsWith('https') ? 'wss://' : 'ws://';
-        const webSocket = new WebSocket(protocol + location.host);
+          try 
+          {
+              const messageData = message.data;
+              //separate data fields by two spaces.
+              document.getElementById("iothub-message-output-box").innerText = JSON.stringify(JSON.parse(messageData), null, 2);
+          }
 
-        // when socket receives message, try to display to user
-        webSocket.onmessage = function onMessage(message) 
-        {
-            try 
-            {
-                const messageData = message.data;
-                //separate data fields by two spaces.
-                document.getElementById("iothub-message-output-box").innerText = JSON.stringify(JSON.parse(messageData), null, 2);
-            }
+          catch (err) {
+              console.error(err);
+          }
+      };
 
-            catch (err) {
-                console.error(err);
-            }
-        };
-      });
+    })
+
   </script>
 
 <!-- template for parameters in setGraphInstance popup -->

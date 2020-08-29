@@ -10,6 +10,7 @@ class EventHubReader
   {
     this.iotHubConnectionString = iotHubConnectionString;
     this.consumerGroup = consumerGroup;
+
   }
 
   async startReadMessage(startReadMessageCallback) 
@@ -17,10 +18,10 @@ class EventHubReader
     try 
     {
       const eventHubConnectionString = await convertIotHubToEventHubsConnectionString(this.iotHubConnectionString);
-      const consumerClient = new EventHubConsumerClient(this.consumerGroup, eventHubConnectionString);
+      this.consumerClient = new EventHubConsumerClient(this.consumerGroup, eventHubConnectionString);
       console.log('Successfully created the EventHubConsumerClient from IoT Hub event hub-compatible connection string.');
 
-      consumerClient.subscribe(
+      this.subs = this.consumerClient.subscribe(
       {
         processEvents: (events, context) => 
         {
@@ -37,7 +38,9 @@ class EventHubReader
           console.error(err.message || err);
         }
       });
+      
       console.log("success");
+
     } catch (ex) 
     {
       console.error(ex.message || ex);
@@ -47,13 +50,9 @@ class EventHubReader
   // Close connection to Event Hub.
   async stopReadMessage() 
   {
-    const disposeHandlers = [];
-    this.receiveHandlers.forEach((receiveHandler) =>
-    {
-      disposeHandlers.push(receiveHandler.stop());
-    });
-    await Promise.all(disposeHandlers);
-    this.consumerClient.close();
+    await this.subs.close();
+    await this.consumerClient.close();
+    console.log("exiting recieve hub messages");
   }
 }
 
