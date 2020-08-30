@@ -95,3 +95,6 @@ You can see the images with bounding boxes and license plate strings in your loc
 Go ahead and hit enter in the terminal when prompted until the program ends. If you wait a few minutes and run the program again, new images will be generated. 
 
 Congratulations, you now have LPR and LVA running on the ASE!
+
+## Next Steps
+Refer [here](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/readme.md#next-steps) for possible next steps!
