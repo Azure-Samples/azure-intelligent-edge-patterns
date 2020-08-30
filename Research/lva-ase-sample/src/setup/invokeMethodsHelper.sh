@@ -1,4 +1,4 @@
-# Bash script to simplify LVA process. Last Updated August 2020
+# Bash script to simplify LVA process. Last Updated August 30 2020
 # this will invoke direct methods on the lvaEdge module
 # this script enables running the sample entirely in the Azure Cloud Shell
 
@@ -51,7 +51,7 @@ starters=("topologyList" "instanceList" "topologySet" "instanceSet")
 activators=("instanceActivate" "instanceList")
 cleanup=("instanceDeactivate" "instanceDelete" "instanceList" "topologyDelete" "topologyList")
 
-# run all the desired methods
+# run all the start up methods. It is best to run this script when there are no other instances/topologies present to make it easy for the user to read output
 waitToHitEnter "Hit enter to list your current graph instances"
 for i in "${starters[@]}"
 do
@@ -64,12 +64,14 @@ ${YELLOW}az iot hub monitor-events -n ${IOTHUB} --login \"${IOTHUB_CONNECTION_ST
 Once you have that window open, continue this script and you can view output! Close that window whenever you would like, but we recommend you keep it open for a few minutes
 so you can see the real-time inferences!"
 
+# run activation methods
 waitToHitEnter "Hit enter to continue to activate your graph instance"
 for i in "${activators[@]}"
 do
     sendQuery $MODULE_URL $i
 done
 
+# run deactivation/delete methods
 waitToHitEnter "Hit enter to continue to deactivate and delete your graph instance"
 for i in "${cleanup[@]}"
 do

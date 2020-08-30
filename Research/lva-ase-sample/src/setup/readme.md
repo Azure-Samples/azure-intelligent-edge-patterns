@@ -5,7 +5,8 @@ This folder contains a bash script and other files listed below, which can be us
 - [setup.sh](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/setup.sh) is bash script intended to be use in [Azure Cloud Shell](http://shell.azure.com/). This script makes use of the other files in the folder, creates all the necessary resources to run LVA, and run the entire sample in the Azure Cloud Shell
 - [LVAEdgeUserRoleDefinition.json] defines a [custom role](https://docs.microsoft.com/azure/role-based-access-control/custom-roles) so that the Live Video Analytics on Edge module can use a service principal with minimal privileges when making calls to Azure Media Services
 - [invokeMethodsHelper.sh](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/invokeMethodsHelper.sh) Helper methods for the setup.sh script
-- jsonfiles folder with the json objects that will be used when invoking direct methods on the Live Video Analytics module
+- jsonFiles folder with the json objects that will be used when invoking direct methods on the Live Video Analytics module
+- assets folder with pictures used in readme files
 
 ## Prerequisites
 * Azure subscription with __owner__ level privileges
@@ -47,33 +48,33 @@ It will also deploy the modules to your ASE device, and run the sample. Then you
 
 ## Run again! ##
 The setup.sh script should print out the exact command you must use to run the sample again without redoing all the setup. You will run the command from the Azure Cloud Shell:
-./invokeMethodsHelper.sh IOTHUBNAME EDGE_DEVICE-edge
+./invokeMethodsHelper.sh
 
 ## Add multiple cameras by creating multiple graph instances ##
-* Go to the jsonfiles/ folder and create duplicate files of instanceset.json, instanceactivate.json, instancedeactivate.json, and instancedelete.json, let's say you call them instanceset2.json, instancedelete2.json, etc.
+* Go to the jsonfiles/ folder and create duplicate files of instanceSet.json, instanceActivate.json, instanceDeactivate.json, and instanceDelete.json, let's say you call them instanceSet2.json, instanceDelete2.json, etc.
 * You will need a new name for this graph instance. In each new file, provide this new value for the "name" field
 * In instanceset2.json provide the second camera's RTSP URL, and username/password (if needed) where indicated ![topology set image](https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/src/setup/assets/instanceset.PNG)
 * In invokeMethodsHelper.sh change the current lines:
 ```
-starters=("topologylist" "instancelist" "topologyset" "instanceset")
-activators=("instanceactivate" "instancelist")
-cleanup=("instancedeactivate" "instancedelete" "instancelist" "topologydelete" "topologylist")
+starters=("topologyList" "instanceList" "topologySet" "instanceSet")
+activators=("instanceActivate" "instanceList")
+cleanup=("instanceDeactivate" "instanceDelete" "instanceList" "topologyDelete" "topologyList")
 ```
 to include your new files. For example:
 
 ```
-starters=("topologylist" "instancelist" "topologyset" "instanceset" "instanceset2" )
-activators=("instanceactivate" "instanceactivate2" "instancelist")
-cleanup=("instancedeactivate" "instancedeactivate2" "instancedelete" "instancedelete2" "instancelist" "topologydelete" "topologylist")
+starters=("topologyList" "instanceList" "topologySet" "instanceSet" "instanceSet2")
+activators=("instanceActivate" "instanceActivate2" "instanceList")
+cleanup=("instanceDeactivate" "instanceDeactivate2" "instanceDelete" "instanceDelete2" "instanceList" "topologyDelete" "topologyList")
+
 ```
 * Then, from the Azure Cloud Shell, assuming you are still in the the same directory (lva-sample-on-ase) run the following command:
 ```
-./invokeMethodsHelper.sh IOTHUB-NAME EDGE-DEVICE-NAME
+./invokeMethodsHelper.sh
 ```
-The IOTHUB-NAME and EDGE-DEVICE-NAME should be your values. When you finished running the setup.sh script it would have told you the exact command to run to do this, feel free to copy from there!
 
 ## Change from using local shares to running this in the cloud, and view output in Media Services Account ##
-* Change your topologyset.json file (jsonfiles/topologyset.json), replacing lines 146-157 that contain the File Sink, to the following:
+* Change your topologySet.json file (jsonFiles/topologySet.json), replacing lines 146-157 that contain the File Sink, to the following:
     ```
     {
         "@type": "#Microsoft.Media.MediaGraphAssetSink",
@@ -114,7 +115,7 @@ The IOTHUB-NAME and EDGE-DEVICE-NAME should be your values. When you finished ru
     * If using an Azure Container Registry, your server address would look like __ContainerRegistryName.azurecr.io__
 * Scroll down to ~line 48 where it says "yolov3" : {...}
 * Change the "image" value from "mcr.microsoft.com/lva-utilities/yolov3-onnyx:1.0" to your desired image
-* Save your file
+* Save your file (Ctrl+s)
 * Using your IoTHub and Edge Device names, run the following command:
 ```
 az iot edge set-modules --hub-name IOTHUB --device-id EDGE_DEVICE-edge --content 'edge-deployment/deployment.yolov3.template.json'

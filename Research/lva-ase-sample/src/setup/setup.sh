@@ -217,7 +217,7 @@ then
     ${YELLOW}Found existing container registry called: ${CONTAINER_REGISTRY}. This will be used by default unless otherwise specified"
 else
     UUID=$(cat /proc/sys/kernel/random/uuid)
-    CONTAINER_REGISTRY="teamlvacontainerregistry-"$UUID
+    CONTAINER_REGISTRY="lvacontainerregistry-"${UUID:0:12}
 fi
 
 echo -e "
@@ -258,9 +258,11 @@ then
     echo -e "
     ${YELLOW}Found existing Media Services Account called: ${AMS_ACCOUNT}. This will be used by default unless otherwise specified"
 else
+    # AMS account name must be composed of lowercase letters only
     UUID=$(cat /proc/sys/kernel/random/uuid | tr -dc '[:alnum:]\n\r' | tr '[:upper:]' '[:lower:]' | sed 's/[0-9]*//g')
-    AMS_ACCOUNT="teamlvamediaservices"-$UUID
+    AMS_ACCOUNT="lvamediaservices"-${UUID:0:6}
 fi
+
 echo -e "
 ${YELLOW}What is the name of the media services account to use?${NC}
 This will create a new one if one doesn't exist. Make sure the name is composed of all lowercase letters.
