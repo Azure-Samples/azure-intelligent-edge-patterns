@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -63,23 +57,33 @@
             "status": "running",
             "restartPolicy": "always",
             "env": {
-              "TRAINING_KEY": { "value": "<CUSTOM-VISION-TRAINING-KEY>" },
-              "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" },
-              "DBNAME": { "value": "vision_on_edge" },
-              "DBHOST": { "value": "172.18.0.1" },
-              "DBUSER": { "value": "vision_on_edge" },
-              "DBPASS": { "value": "vision_on_edge" }
+              "TRAINING_KEY": {
+                "value": "<CUSTOM-VISION-TRAINING-KEY>"
+              },
+              "ENDPOINT": {
+                "value": "<CUSTOM-VISION-ENDPOINT>"
+              },
+              "DBNAME": {
+                "value": "vision_on_edge"
+              },
+              "DBHOST": {
+                "value": "172.18.0.1"
+              },
+              "DBUSER": {
+                "value": "vision_on_edge"
+              },
+              "DBPASS": {
+                "value": "vision_on_edge"
+              }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8000/tcp": [
-                      {
-                        "HostPort": "8080"
-                      }
-                    ]
+                    "8000/tcp": [{
+                      "HostPort": "8080"
+                    }]
                   }
                 }
               }
@@ -91,20 +95,24 @@
             "status": "running",
             "restartPolicy": "always",
             "env": {
-              "POSTGRES_PASSWORD": { "value": "vision_on_edge" },
-              "POSTGRES_USER": { "value": "vision_on_edge" },
-              "POSTGRES_DB": { "value": "vision_on_edge" }
+              "POSTGRES_PASSWORD": {
+                "value": "vision_on_edge"
+              },
+              "POSTGRES_USER": {
+                "value": "vision_on_edge"
+              },
+              "POSTGRES_DB": {
+                "value": "vision_on_edge"
+              }
             },
             "settings": {
               "image": "${MODULES.WebDBModule}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5432/tcp": [
-                      {
-                        "HostPort": "5432"
-                      }
-                    ]
+                    "5432/tcp": [{
+                      "HostPort": "5432"
+                    }]
                   }
                 }
               }
@@ -120,18 +128,65 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ]
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }],
+                    "5558/tcp": [{
+                      "HostPort": "5558"
+                    }]
                   },
                   "runtime": "runc"
+                }
+              }
+            }
+          },
+          "lvaEdge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/media/live-video-analytics:1",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "Binds": ["/home/willy/media/:/var/media/", "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"],
+                  "IpcMode": "shareable"
+                }
+              }
+            }
+          },
+          "lvaextension": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/lva-utilities/lvaextension:grpc-yolov3-onnx-v1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "IpcMode": "container:lvaEdge"
+                }
+              }
+            }
+          },
+
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
+              "createOptions": {
+                "HostConfig": {
+                  "Binds": ["/home/willy/media/input:/live/mediaServer/media"]
                 }
               }
             }
