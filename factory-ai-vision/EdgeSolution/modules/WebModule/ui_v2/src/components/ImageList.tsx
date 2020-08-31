@@ -43,7 +43,9 @@ export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ i
           imgId={item.id}
           imgUrl={item.image}
           pointerCursor
-          onClick={() => dispatch(openLabelingPage({ selectedImageId: item.id, imageIds: [item.id] }))}
+          onClick={() =>
+            dispatch(openLabelingPage({ selectedImageId: item.id, imageIds: images.map((e) => e.id) }))
+          }
         />
       </div>
     );

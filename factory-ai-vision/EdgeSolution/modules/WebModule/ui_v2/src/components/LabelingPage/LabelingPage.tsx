@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import {
   Dialog,
-  Button,
   DialogFooter,
   Stack,
   Text,
@@ -11,6 +10,8 @@ import {
   mergeStyleSets,
   IDialogContentProps,
   IModalProps,
+  DefaultButton,
+  PrimaryButton,
 } from '@fluentui/react';
 import * as R from 'ramda';
 
@@ -99,10 +100,15 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
     setLoading(false);
   };
 
-  const onSaveBtnClick = async () => {
+  const onNext = async () => {
     await onSave(false);
     dispatch(goNextImage());
     if (index === imageIds.length - 1) closeDialog();
+  };
+
+  const onPrevious = async () => {
+    await onSave(false);
+    dispatch(goPrevImage());
   };
 
   const onDoneBtnClick = (): void => {
@@ -163,6 +169,31 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
     </>
   );
 
+  const onRenderFooter = (): JSX.Element => {
+    const isLastImg = index === imageIds.length - 1;
+    const noPart = imgPart === null || imgPart === undefined;
+    const noAnno = annotations.length === 0;
+    const deleteDisabled = loading;
+    const previousDisabled = index === 0 || workState === WorkState.Creating || isOnePointBox || loading;
+    const nextDisabled =
+      isLastImg || noPart || noAnno || workState === WorkState.Creating || isOnePointBox || loading;
+
+    return (
+      <Stack horizontal tokens={{ childrenGap: 10 }}>
+        <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
+        <DefaultButton
+          text="Previous"
+          style={{ marginLeft: 'auto' }}
+          onClick={onPrevious}
+          disabled={previousDisabled}
+        />
+        <PrimaryButton text="Next" disabled={nextDisabled} onClick={onNext} />
+        <Separator vertical />
+        <DefaultButton text="Done" primary={isLastImg} />
+      </Stack>
+    );
+  };
+
   return (
     <Dialog
       dialogContentProps={dialogContentProps}
@@ -180,26 +211,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
           {onRenderInfoOnRight()}
         </Stack>
       </Stack>
-      <DialogFooter>
-        <Button
-          primary
-          text={index === imageIds.length - 1 ? 'Save and Done' : 'Save and Next'}
-          disabled={isOnePointBox || workState === WorkState.Creating || loading || noChanged}
-          onClick={onSaveBtnClick}
-        />
-        <Button text="Delete Image" onClick={onDeleteImage} disabled={loading} />
-        {isRelabel ? (
-          <Button text="Done" onClick={onDoneBtnClick} disabled={loading} />
-        ) : (
-          <Button
-            text="Close"
-            onClick={(): void => {
-              closeDialog();
-            }}
-            disabled={loading}
-          />
-        )}
-      </DialogFooter>
+      <DialogFooter>{onRenderFooter()}</DialogFooter>
     </Dialog>
   );
 };
