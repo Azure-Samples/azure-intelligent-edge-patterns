@@ -347,17 +347,17 @@ export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boole
 
       const curConsequence: Consequence = newIteration
         ? {
-            precision: data.new.precision,
-            recall: data.new.recall,
-            mAP: data.new.map,
+            precision: newIteration.precision,
+            recall: newIteration.recall,
+            mAP: newIteration.map,
           }
         : null;
 
       const prevConsequence: Consequence = prevIteration
         ? {
-            precision: data.previous.precision,
-            recall: data.previous.recall,
-            mAP: data.previous.map,
+            precision: prevIteration.precision,
+            recall: prevIteration.recall,
+            mAP: prevIteration.map,
           }
         : null;
 
