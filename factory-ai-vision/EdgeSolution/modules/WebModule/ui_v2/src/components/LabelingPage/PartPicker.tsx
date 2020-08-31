@@ -37,10 +37,10 @@ export const PartPicker: React.FC<{ selectedPart: number }> = ({ selectedPart })
           }}
         >
           <Text styles={{ root: { fontWeight: 'bold' } }} variant="large">
-            No tags have been found
+            No objects have been added
           </Text>
           <Text styles={{ root: { textAlign: 'center', width: '60%' } }} variant="medium">
-            Enter a part above and press enter to create a tag
+            Enter an object above and press enter to create the tag
           </Text>
         </div>
       );
@@ -68,15 +68,15 @@ export const PartPicker: React.FC<{ selectedPart: number }> = ({ selectedPart })
   };
 
   return (
-    <>
+    <div>
       <TextField
-        label="Part"
-        placeholder="Add a part"
+        label="What is this?"
+        placeholder="Enter an object name"
         value={newPartName}
         onChange={onTextFieldChange}
         onKeyDown={onTextFieldEnter}
       />
       {renderPartList()}
-    </>
+    </div>
   );
 };

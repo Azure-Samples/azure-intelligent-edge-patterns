@@ -1,7 +1,17 @@
 import React, { FC, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
-import { Dialog, Button, DialogFooter, Stack, TextField, Text } from '@fluentui/react';
+import {
+  Dialog,
+  Button,
+  DialogFooter,
+  Stack,
+  Text,
+  Separator,
+  mergeStyleSets,
+  IDialogContentProps,
+  IModalProps,
+} from '@fluentui/react';
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
@@ -25,6 +35,39 @@ const imagePartSelector = createSelector([imageSelector, selectPartEntities], (i
   return { id: null, name: '', description: '' };
 });
 
+const selectImageTimeStamp = (state: State) => {
+  const timeStampString = imageSelector(state)?.timestamp || '';
+  // Format example: AUG 31, 2020, 1:54 PM
+  return new Date(Date.parse(timeStampString))
+    .toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour12: true,
+      hour: 'numeric',
+      minute: 'numeric',
+    })
+    .toUpperCase();
+};
+
+const dialogContentProps: IDialogContentProps = {
+  title: 'Image detail',
+  subText: 'Drag a box around the object you want to tag',
+  styles: { content: { width: '1080px' } },
+};
+
+const modalProps: IModalProps = {
+  isBlocking: true,
+  layerProps: {
+    eventBubblingEnabled: true,
+  },
+};
+
+const labelingPageStyle = mergeStyleSets({
+  imgContainer: { position: 'relative', width: '70%', height: '540px', backgroundColor: '#F3F2F1' },
+  imgInfoContainer: { width: '30%' },
+});
+
 interface LabelingPageProps {
   labelingType?: LabelingType;
   isRelabel: boolean;
@@ -37,10 +80,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
   const index = imageIds.findIndex((e) => e === selectedImageId);
   const imageUrl = useSelector<State, string>((state) => imageSelector(state)?.image || '');
   const imageConfidenceLevel = useSelector<State, number>((state) => imageSelector(state)?.confidence || 0);
-  const imageTimeStamp = useSelector<State, Date>((state) => {
-    const timeStampString = imageSelector(state)?.timestamp || '';
-    return new Date(Date.parse(timeStampString));
-  });
+  const imageTimeStamp = useSelector<State, string>(selectImageTimeStamp);
   const imgPart = useSelector<State, Part>(imagePartSelector);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -83,49 +123,62 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
     setLoading(false);
   };
 
+  const onRenderImage = (): JSX.Element => (
+    <>
+      <Scene
+        url={imageUrl}
+        annotations={annotations}
+        workState={workState}
+        setWorkState={setWorkState}
+        labelingType={labelingType}
+        onBoxCreated={onBoxCreated}
+        imgPart={imgPart}
+      />
+      <Text variant="small" styles={{ root: { position: 'absolute', right: 5, bottom: 5 } }}>
+        {imageTimeStamp}
+      </Text>
+    </>
+  );
+
+  const onRenderPrediction = (): JSX.Element => {
+    if (!isRelabel) return null;
+    return (
+      <>
+        <Stack>
+          <Text styles={{ root: { fontWeight: 'bold' } }}>Predictions</Text>
+          <Text>
+            This object was identified as a <b>{imgPart?.name}</b> with{' '}
+            <b>{(imageConfidenceLevel * 100).toFixed(2)}% confidence</b>.
+          </Text>
+        </Stack>
+        <Separator styles={{ root: { width: 70, alignSelf: 'center' } }} />
+      </>
+    );
+  };
+
+  const onRenderInfoOnRight = (): JSX.Element => (
+    <>
+      {onRenderPrediction()}
+      <PartPicker selectedPart={imgPart?.id} />
+    </>
+  );
+
   return (
     <Dialog
-      dialogContentProps={{
-        title: 'Image Detail',
-        subText: 'Drag a box around object to tag a part',
-        styles: { content: { width: '1080px' } },
-      }}
+      dialogContentProps={dialogContentProps}
       hidden={selectedImageId === null}
       onDismiss={closeDialog}
-      modalProps={{
-        isBlocking: true,
-        layerProps: {
-          eventBubblingEnabled: true,
-        },
-      }}
+      modalProps={modalProps}
       // Remove the default max-width
       maxWidth={9999}
     >
-      <Stack horizontal tokens={{ childrenGap: '10px' }}>
-        <div style={{ width: '70%' }}>
-          <Scene
-            url={imageUrl}
-            annotations={annotations}
-            workState={workState}
-            setWorkState={setWorkState}
-            labelingType={labelingType}
-            onBoxCreated={onBoxCreated}
-            imgPart={imgPart}
-          />
-        </div>
-        <div style={{ width: '30%' }}>
-          <PartPicker selectedPart={imgPart?.id} />
-          {isRelabel && (
-            <Stack tokens={{ childrenGap: 10 }} styles={{ root: { paddingTop: '30px' } }}>
-              <Text styles={{ root: { fontWeight: 'bold' } }}>Predictions</Text>
-              <Text variant="smallPlus">{`This image was collected on ${imageTimeStamp.toLocaleString()} `}</Text>
-              <Stack horizontal tokens={{ childrenGap: 30 }}>
-                <Text>{imgPart?.name}</Text>
-                <Text>{(imageConfidenceLevel * 100).toFixed(2)}%</Text>
-              </Stack>
-            </Stack>
-          )}
-        </div>
+      <Stack horizontal tokens={{ childrenGap: '24px' }}>
+        <Stack verticalAlign="center" className={labelingPageStyle.imgContainer}>
+          {onRenderImage()}
+        </Stack>
+        <Stack tokens={{ childrenGap: 20 }} className={labelingPageStyle.imgInfoContainer}>
+          {onRenderInfoOnRight()}
+        </Stack>
       </Stack>
       <DialogFooter>
         <Button
