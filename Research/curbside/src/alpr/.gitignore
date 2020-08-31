@@ -1,4 +1,3 @@
-*.pth
 *Deployment.json
 *.yml
 *.so
