@@ -1,11 +1,9 @@
 import React from 'react';
-import { FocusZone } from 'office-ui-fabric-react/lib/FocusZone';
-import { List } from 'office-ui-fabric-react/lib/List';
-import { IRectangle } from 'office-ui-fabric-react/lib/Utilities';
-import { mergeStyleSets } from 'office-ui-fabric-react/lib/Styling';
+import { FocusZone, List, IRectangle, mergeStyleSets } from '@fluentui/react';
 import { useConstCallback } from '@uifabric/react-hooks';
-import { Image } from '../store/type';
 import { useDispatch } from 'react-redux';
+
+import { Image } from '../store/type';
 import LabelDisplayImage from './LabelDisplayImage';
 import LabelingPage from './LabelingPage/LabelingPage';
 import { openLabelingPage } from '../store/labelingPageSlice';
@@ -38,7 +36,7 @@ export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ i
         className={classNames.listGridExampleTile}
         data-is-focusable
         style={{
-          width: 100 / columnCount.current + '%',
+          width: `${100 / columnCount.current}%`,
         }}
       >
         <LabelDisplayImage
