@@ -4,7 +4,7 @@
 FROM node:12 as builder
 
 WORKDIR /
-COPY ui_v2 app
+COPY ui app
 WORKDIR /app
 RUN rm -rf node_modules/
 RUN rm -rf build/

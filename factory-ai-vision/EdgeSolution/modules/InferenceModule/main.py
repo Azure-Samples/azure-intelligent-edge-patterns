@@ -229,6 +229,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.cam.release()
         self.cam = cam
         self.lock.release()
+        update_instance(normalize_rtsp(cam_source))
 
     def load_model(self, model_dir, is_default_model):
         if is_default_model:
@@ -973,6 +974,46 @@ def post_run():
 
     onnx.lock.release()
     # print(detection)
+
+
+def update_instance(rtspUrl):
+    payload = {
+        "@apiVersion": "1.0",
+        "name": "http1"
+    }
+    payload_set = {
+        "@apiVersion": "1.0",
+        "name": "http1",
+        "properties": {
+            "topologyName": "InferencingWithHttpExtension5",
+            "description": "Sample graph description",
+            "parameters": [
+                {"name": "rtspUrl", "value": rtspUrl},
+                {"name": "inferencingUrl",
+                    "value": "http://InferenceModule:5000/predict"}
+            ]
+        }
+    }
+    GraphInstanceMethod("GraphInstanceDeactivate", payload)
+    GraphInstanceMethod("GraphInstanceSet", payload_set)
+    GraphInstanceMethod("GraphInstanceActivate", payload)
+    print("instance updated")
+
+
+def GraphInstanceMethod(method, payload):
+
+    body = {"methodName": method, "responseTimeoutInSeconds": 10,
+            "connectTimeoutInSeconds": 10, "payload": payload}
+
+    url = 'https://main.iothub.ext.azure.com/api/dataPlane/post'
+    data = {"apiVersion": "2018-06-30", "authorizationPolicyKey": "rDav1fU61BRTezz8NewMe/UNasZob1rQ8FowPqrbD28=", "authorizationPolicyName": "service", "hostName": "customvision.azure-devices.net",
+            "requestPath": "/twins/testcam/modules/lvaEdge/methods", "requestBody": str(body)}
+
+    header = {
+        "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imh1Tjk1SXZQZmVocTM0R3pCRFoxR1hHaXJuTSIsImtpZCI6Imh1Tjk1SXZQZmVocTM0R3pCRFoxR1hHaXJuTSJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yY2Y0MjQ4ZS00ODM2LTQyMDItYjc5Ni05YTE1ODlmZjQ2MTMvIiwiaWF0IjoxNTk3NjQzNDAyLCJuYmYiOjE1OTc2NDM0MDIsImV4cCI6MTU5NzY0NzMwMiwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhRQUFBQS9ZbnFvb28rb0FBZTNIS3c3VE11aHlrNCtUczVxOG5XaFJMUEJYM1BqMWxFekRFUHU4UkJMQk81U2g4eW1jdkkiLCJhbXIiOlsicHdkIl0sImFwcGlkIjoiYzQ0YjQwODMtM2JiMC00OWMxLWI0N2QtOTc0ZTUzY2JkZjNjIiwiYXBwaWRhY3IiOiIyIiwiZmFtaWx5X25hbWUiOiJQYWkiLCJnaXZlbl9uYW1lIjoiUm9uIiwiZ3JvdXBzIjpbIjBkNzEyYWUxLTc3ZDktNGM5NS05NTFmLTk0MDIwOTM3NjczZCJdLCJpcGFkZHIiOiIxMjIuMTE2LjE4NS4yMDMiLCJuYW1lIjoiUm9uIFBhaSIsIm9pZCI6IjAyNDIyOWI3LTk5NGMtNDRjZC05MjFiLTU2M2Q1YWIxY2IwNSIsInB1aWQiOiIxMDAzMjAwMEM1RTA3M0UwIiwic2NwIjoidXNlcl9pbXBlcnNvbmF0aW9uIiwic3ViIjoiYXhsLWN1S28wR1VfOWd5UVJFQnhCREhReWRLQndOalFmRGNBdFRlLVZRbyIsInRpZCI6IjJjZjQyNDhlLTQ4MzYtNDIwMi1iNzk2LTlhMTU4OWZmNDYxMyIsInVuaXF1ZV9uYW1lIjoicm9ucGFpQGxpbmtlcm5ldHdvcmtzLmNvbSIsInVwbiI6InJvbnBhaUBsaW5rZXJuZXR3b3Jrcy5jb20iLCJ1dGkiOiI4aE1GbUtuZDJFUzdrYUtDWmJlVkFBIiwidmVyIjoiMS4wIiwieG1zX3RjZHQiOjE1MDgyMTE3NjB9.GQj59K9o0Ke8ZzXZHrXP6IEQvy3RuYzlV3S4jhtsN3V1QBMBkbcI47Ix3vi5OQw5k5StESaQmaiVwL-2KJ1GGVgUhI0vh5JnuOGZAybZthWQgGz8YgixVnXbzFrcb3u-OeSmCDTg350wmmaA3-rmw5S6BjHIHx0t1mbWOM5oU1y4OY-R92cbkn4lOx50NS73Lmxt8BDYT1xWJEUeXL097ekeG1HmHbAMgNENryOYJq2v6RM2VpLnQNoEpPqzQjw9BLDVE33NwoRCs50S68tO4k2diYXXZeeC6W_MYm9O_h9fTSKmUqjYc05OXyG9GnSGwzne5DaBjeVovthpho7xEA"
+    }
+    res = requests.post(url, headers=header, data=data)
+    print(res.json())
 
 
 def gen_edge():
