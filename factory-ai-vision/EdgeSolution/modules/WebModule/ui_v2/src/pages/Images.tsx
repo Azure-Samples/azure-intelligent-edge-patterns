@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ICommandBarItemProps, Stack, CommandBar, getTheme, Breadcrumb } from '@fluentui/react';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
-import { CaptureDialog } from '../components/CaptureDialog';
-import { CaptureLabelMode } from '../components/RTSPVideo/RTSPVideo.type';
+import { CaptureDialog, CaptureLabelMode } from '../components/CaptureDialog';
 
 const theme = getTheme();
 
