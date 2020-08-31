@@ -1,12 +1,27 @@
 /**
  * This file contains methods to convert a generic hub string into an Event Hubs Connection string, by generating a SAS token for authentication purposes.
  * Using this enables the user to only pass in their iot hub connection string, so they don't need to hunt down an event hub string / figure out anything else
+ * @fileoverview
+ * @requires module:crypto
+ * @requires module:buffer/Buffer
+ * @requires module:rhea-promise
  */
 const crypto = require("crypto");
 const Buffer = require("buffer").Buffer;
 const { Connection, ReceiverEvents, isAmqpError, parseConnectionString } = require("rhea-promise");
 
-// This code is modified from https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens.
+/**
+ * This function generates a SAS token to be used for authenticate purposes
+ * Parameters taken after being parsed from an iot hub connection string of form:
+ * "HostName=<your-iot-hub>.azure-devices.net;SharedAccessKeyName=<KeyName>;SharedAccessKey=<Key>"
+ * @param {string} resourceUri - `${HostName}/messages/events`
+ * @param {string} signingKey - SharedAccessKey=<Key>
+ * @param {string} policyName - SharedAccessKeyName=<KeyName>;
+ * @param {number} expiresInMins - number of minutes until SAS token expires
+ * @returns {string} - generated SharedAccessSignature token
+ * 
+ * This code is modified from @link https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens.
+ */
 function generateSasToken(resourceUri, signingKey, policyName, expiresInMins) 
 {
     resourceUri = encodeURIComponent(resourceUri);
@@ -25,6 +40,7 @@ function generateSasToken(resourceUri, signingKey, policyName, expiresInMins)
 
 /**
  * Converts an IotHub Connection string into an Event Hubs-compatible connection string.
+ * @async
  * @param {string} connectionString An IotHub connection string in the format:
  * `"HostName=<your-iot-hub>.azure-devices.net;SharedAccessKeyName=<KeyName>;SharedAccessKey=<Key>"`
  * @returns {Promise<string>} An Event Hubs-compatible connection string in the format:
@@ -32,9 +48,7 @@ function generateSasToken(resourceUri, signingKey, policyName, expiresInMins)
  */
 async function convertIotHubToEventHubsConnectionString(connectionString) 
 {
-    const { HostName, SharedAccessKeyName, SharedAccessKey } = parseConnectionString(
-        connectionString
-    );
+    const { HostName, SharedAccessKeyName, SharedAccessKey } = parseConnectionString(connectionString);
 
     // Verify that the required info is in the connection string.
     if (!HostName || !SharedAccessKey || !SharedAccessKeyName) 

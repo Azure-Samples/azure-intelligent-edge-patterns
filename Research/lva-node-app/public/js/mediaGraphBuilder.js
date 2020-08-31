@@ -1,5 +1,14 @@
+/**
+ * @fileoverview 
+ * This file contains methods used when building a Media Graph (used only on page mediagraph.html)
+ * includes GraphNode and MediaGraph classes, 
+ */
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //media graph building related functions
+/**
+ * @const GITHUB_TOPOLOGY_SAMPLES - link to raw github where media graph samples exist
+ */
 const GITHUB_TOPOLOGY_SAMPLES = 'https://raw.githubusercontent.com/Azure/live-video-analytics/master/MediaGraph/topologies/';
 var sourceNames = [];
 var processorNames = [];
@@ -8,8 +17,15 @@ var sinkNames = [];
 /**
 * class for a graph node. Dynamically built upon media graph creation, based off the node type and the 
 * inputs. 
+@class
 */
 class GraphNode {
+
+    /**
+     * @constructor
+     * @param {string} type - The type of node to create
+     * @param {list of strings} userSelectedInputs - The list of inputs the user selected for this graph node
+     */
     constructor(type, userSelectedInputs)
     {
         //ensure node type exists
@@ -58,9 +74,19 @@ class GraphNode {
 
 /**
  * MediaGraph class, contains name, desciption, sources, processors, sinks, and parameters. Creates a nice jsonObject to be used as a payload later. 
+ * @class
  */
 class MediaGraph
 {
+    /**
+     * @constructor
+     * @param {string} graphname 
+     * @param {string} description 
+     * @param {list of GraphNodes} sources 
+     * @param {list of GraphNodes} processors 
+     * @param {list of GraphNodes} sinks 
+     * @param {list of Objects containing parameter info} parameters 
+     */
     constructor(graphname, description="no description set", sources, processors, sinks, parameters)
     {
         this.graphname=graphname;
@@ -79,16 +105,15 @@ class MediaGraph
               "sinks": sinks
             }
           };
-
-        console.log(this.jsonObject);
     }
 }
 
 /**
  * find item in list by key (for searching JSON objects)
- * @param {array to search} array 
- * @param {key to search by} key 
- * @param {value to look for} value 
+ * @param {Array} array - array to look through
+ * @param {string} key - key to search by
+ * @param {string} value - value to look for
+ * @returns {any[]} returns found array item if found, otherwise returns undefined
  */
 function findObjectByKey(array, key, value)
 {
@@ -104,6 +129,8 @@ function findObjectByKey(array, key, value)
 
 /** 
 * get all the valid inputs for a given node type (does this by checking the type's schema)
+* @param {jsonObject} schema - the schema object for a given graph node
+* @returns {string[]} - array of valid inputs for a node type
 */
 function getValidInputs(schema)
 {
@@ -117,6 +144,8 @@ function getValidInputs(schema)
 
 /**
 * get schema for a give node type using the graphNodeLimitations schema at the bottom of this document
+* @param {string} type - the graph node type
+* @returns {jsonObject} - schema for given node type
 */
 function getNodeSchema(type)
 {
@@ -132,9 +161,10 @@ function getNodeSchema(type)
 
 /**
  * show checkbox options of possible node inputs. Used when building media graph. Doesn't modify globals or cookies
- * @param {dropdown menu item} hoverList 
- * @param {node name} myName 
- * @param {source, processor, or sink list id} listID 
+ * @param {HTMLUListElement} hoverList - list to add to
+ * @param {string} myName - node name 
+ * @param {string} listID - source, processor, or sink list id
+ * @returns {void}
  */
 function setCustomInputs(hoverList, myName, listID) 
 {
@@ -167,7 +197,10 @@ function setCustomInputs(hoverList, myName, listID)
     return;
 }
 
-/** update the list of possible inputs on a given node */
+/** 
+ * update the list of possible inputs on a given node 
+ * @param {HTMLButtonElement} htmlElement - dropdown button clicked on by user
+ */
 function updateCustomizedInputs(htmlElement) 
 {
     const hoverList = htmlElement.parentElement.getElementsByTagName("ul")[0];
@@ -179,7 +212,8 @@ function updateCustomizedInputs(htmlElement)
 
 /**
  * returns true if you can add the node type to the graph. 
- * @param {type of node to add to graph} type 
+ * @param {string} type - type of node to add
+ * @returns {boolean} - true if node can be added to graph
  */
 function canAddToGraph(type)
 {
@@ -197,8 +231,9 @@ function canAddToGraph(type)
 
 /**
 * if node in list nodeNames doesn't have any valid inputs apart from type, returns false
-* @param {list of nodes to check} nodeNames 
-* @param {node to delete} type 
+* @param {string[]} nodeNames - list of existing nodes
+* @param {string} type - node to delete
+* @returns {boolean} - true if can delete node type from graph builder
 */
 function canDeleteHelper(nodeNames, type)
 {
@@ -238,7 +273,8 @@ function canDeleteHelper(nodeNames, type)
 
 /**
  * this method will return false if the node is required as an input for another node
- * @param {check if can delete type} type 
+ * @param {string} type - node type to try and delete
+ * @returns {boolean} - true if can delete node type from graph builder and type is not rtspSource
  */
 function canDeleteFromGraph(type)
 {
@@ -260,8 +296,9 @@ function canDeleteFromGraph(type)
 
 /**
  * adds a node to the Media Graph in creation
- * @param {current htmlElementent to add to graph} htmlElement 
- * @param {source, processor, or sink} listID 
+ * @param {HTMLButtonElement} htmlElement - current htmlElement to add to graph 
+ * @param {string} listID - source, processor, or sink 
+ * @returns {void}
  */
 function addToGraph(htmlElement, listID) 
 {
@@ -309,7 +346,8 @@ function addToGraph(htmlElement, listID)
 
 /**
  * returns if the graph being built contains a node of type type
- * @param {type of node to look for, i.e. rtspSource, fileSink} type  
+ * @param {string} type - type of node to look for, i.e. rtspSource, fileSink
+ * @returns {boolean} - true if graph builder contains node type
  */
 function graphBuilderContains(type)
 {
@@ -325,13 +363,17 @@ function graphBuilderContains(type)
 
 /**
  * Delete a graph node from builder as the media graph is being created.
- * @param {this is the span containing the 'X' on the item to delete} htmlElement 
+ * @param {HTMLSpanElement} htmlElement - this is the span containing the 'X' on the item to delete
+ * @returns {boolean} - returns true if successfully deleted
  */
 function deleteGraphNode(htmlElement) 
 {
     const nodetype = $(htmlElement).closest('li').attr('nodetype');
 
-    if(!canDeleteFromGraph(nodetype)) return false;
+    if(!canDeleteFromGraph(nodetype))
+    {
+        return false;
+    }
 
     // re-enable user to add this type of node again
     document.getElementById((nodetype+"-dropdown")).disabled = false;
@@ -365,8 +407,8 @@ function deleteGraphNode(htmlElement)
 
 /**
  * basic helper function, adds a name to a given list
- * @param {node name} name 
- * @param {list of nodes} listID 
+ * @param {string} name - node type to push
+ * @param {string} listID - refers to list ID in html to add a node to
  */
 function pushNodeName(name, listID) 
 {
@@ -378,7 +420,8 @@ function pushNodeName(name, listID)
 /**
  * returns all nodes and inputs from a given list, so if nodeList="dynamic-sink" this would return all of the 
  * sink nodes and the user-checked inputs from the graph builder
- * @param {list to fetch nodes and inputs from} nodeList 
+ * @param {HTMLUListElement} nodeList - list to fetch nodes and inputs from
+ * @returns {jsonObject} - nodes and their inputs from a given list
  */
 function getListNodesAndInputs(nodeList)
 {
@@ -403,7 +446,7 @@ function getListNodesAndInputs(nodeList)
 }
 
 /**
- * returns an array of all the sources, processors, sinks, and their inputs built by the user
+ * @returns {any[]} - all the sources, processors, sinks, and their inputs built by the user
  */
 function getGraphNodesAndInputs()
 {
@@ -417,7 +460,8 @@ function getGraphNodesAndInputs()
 
 /**
  * validates that the graph built by the user doesn't break any rules
- * @param {all nodes and inputs in graph builder} nodesAndInputsList 
+ * @param {any[]} nodesAndInputsList - all nodes and inputs in graph builder
+ * @returns {boolean} if graph is valid or not
  */
 function validateGraph(nodesAndInputsList)
 {
@@ -463,6 +507,7 @@ function validateGraph(nodesAndInputsList)
 
 /** 
 * create a media graph based off of what the user-built 
+* @returns {boolean} - true if successfully created
 */
 function createMediaGraph() 
 {
@@ -527,6 +572,20 @@ function createMediaGraph()
 }
 
 /**
+ * This function sets a media graph that is imported from existing github samples
+ * @param {HTMLButtonElement} htmlElement - dropdown user clicks containing media graph name
+ */
+function setMediaGraphFromTemplate(htmlElement)
+{
+    const jsonLocation = GITHUB_TOPOLOGY_SAMPLES+htmlElement.name+"/topology.json";
+    $.getJSON(jsonLocation, function(response) 
+    {
+        graphTopologies[response.name]=response;
+        graphSetTopology(response.name, true);
+    })
+}
+
+/**
  * Display media graphs on page
  */
 function displayMediaGraphs()
@@ -545,20 +604,6 @@ function displayMediaGraphs()
       values_column.innerHTML=graph;
       mediaGraphTBody.append(template);
     }); 
-}
-
-/**
- * This function sets a media graph that is imported from existing github samples
- * @param {dropdown user clicks containing media graph name} htmlElement 
- */
-function setMediaGraphFromTemplate(htmlElement)
-{
-    const jsonLocation = GITHUB_TOPOLOGY_SAMPLES+htmlElement.name+"/topology.json";
-    $.getJSON(jsonLocation, function(response) 
-    {
-        graphTopologies[response.name]=response;
-        graphSetTopology(response.name, true);
-    })
 }
 
 /**
@@ -584,7 +629,7 @@ function displayMediaGraphsOnLoad()
 
 /**
  * delete's a graph if user clicks delete on a current graph in the Media Graph page
- * @param {item clicked on to delete} htmlElement 
+ * @param {HTMLSpanElement} htmlElement - x span user clicked on to delete graph topology
  */
 function deleteGraph(htmlElement)
 {
@@ -595,8 +640,8 @@ function deleteGraph(htmlElement)
     tableItem.parentElement.removeChild(tableItem);
 }
 
-
 /** 
+* @constant
 * Custom JSON schema of graph node limitations. If anything changes, modify this! 
 */
 const graphNodeLimitations =
@@ -877,6 +922,10 @@ const graphNodeLimitations =
                 },
                 {
                     "name": "frameRateFilter",
+                    "required": false
+                },
+                {
+                    "name": "motionDetection",
                     "required": false
                 }
             ],

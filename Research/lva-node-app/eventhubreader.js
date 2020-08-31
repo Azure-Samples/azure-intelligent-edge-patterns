@@ -1,18 +1,36 @@
+/**
+ * This file contains the class used to get and process iot hub messages via Event Hub
+ * @fileoverview
+ * @requires module:event-hubs 
+ * @requires module:iot-hub-connection-string
+ */
+
 const { EventHubConsumerClient } = require('@azure/event-hubs');
 const { convertIotHubToEventHubsConnectionString } = require('./iot-hub-connection-string.js');
 
 /**
 * get messages coming from IoT Hub
+* @class
 */
 class EventHubReader 
 {
+
+  /**
+   * @constructor
+   * @param {string} iotHubConnectionString - iot hub connection string in standard format
+   * @param {string} consumerGroup - consumer group, typically Default
+   */
   constructor(iotHubConnectionString, consumerGroup) 
   {
     this.iotHubConnectionString = iotHubConnectionString;
     this.consumerGroup = consumerGroup;
-
   }
 
+  /**
+   * starts the process of reading messages from Iot Hub by creating an Event Hubs connection string
+   * @async
+   * @param {any} startReadMessageCallback - callback function
+   */
   async startReadMessage(startReadMessageCallback) 
   {
     try 
@@ -47,12 +65,15 @@ class EventHubReader
     }
   }
 
-  // Close connection to Event Hub.
+  /**
+   * closes connection to Event Hub
+   * @async
+   */
   async stopReadMessage() 
   {
     await this.subs.close();
     await this.consumerClient.close();
-    console.log("exiting recieve hub messages");
+    console.log("Closing Event Hub connection");
   }
 }
 

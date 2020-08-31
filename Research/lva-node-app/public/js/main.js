@@ -1,4 +1,5 @@
 /**
+ * @fileoverview
  * This file contains the majority of the functionality used across the various web pages, in the following order
  * 1: universal functions
  * 2: functions related to invoking methods
@@ -9,7 +10,9 @@
 //immutable global variables are written in all caps
 const PORT = 5000;
 
-//global variables. Mutable global variables in javascript are typically named in camelCase
+/**
+ * @global variables. Mutable global variables in javascript are typically named in camelCase
+ */
 var graphTopologies={};
 var graphInstances={};
 var cameras={};
@@ -20,6 +23,7 @@ var cameras={};
 
 /**
 * get global variables from server, Returns a promise so that functions that depend on these variables can wait
+* @returns {Promise<any>}
 */
 function getGlobals()
 {
@@ -79,8 +83,12 @@ function sendGlobals()
 
 /**
 *  send request with given parameters to a defined url in server. default method is POST
+* @param {jsonObject} payload - json object to be sent in request to server
+* @param {string} url - @link to communicate on
+* @param {string} requestType - POST or GET request 
+* @returns {XMLHttpRequest} - generated request
 */ 
-function sendRequest(parameters, url, requestType="POST") 
+function sendRequest(payload, url, requestType="POST") 
 {
   let request = new XMLHttpRequest();
   request.open(requestType, url, true);
@@ -91,14 +99,14 @@ function sendRequest(parameters, url, requestType="POST")
   }
   else
   {
-    request.send(JSON.stringify(parameters));
+    request.send(JSON.stringify(payload));
   }  
   return request;
 }
 
 /**
 * delete all htmlElementents nested within the nearest parent li item
-* @param {onclick htmlElementent} htmlElement 
+* @param {HTMLButtonElement} htmlElement - what user clicked on
 */
 function deleteFromParentListItem(htmlElement) 
 {
@@ -109,15 +117,17 @@ function deleteFromParentListItem(htmlElement)
 
 /**
 * create unique ID for an item
-* @param {optional name to include in unique id} htmlElement 
+* @param {string} nameToInclude - optional name to include in unique id
+* @returns {string} - unique ID
 */
-function makeUniqueId(htmlElement = "") 
+function makeUniqueId(nameToInclude = "") 
 {
-  return (htmlElement + CreateUUID());
+  return (nameToInclude + CreateUUID());
 }
 
 /**
 * Creates a UUID 
+* @returns {UUID} - unique identifier
 */
 function CreateUUID() 
 {
@@ -131,7 +141,7 @@ function CreateUUID()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //configuration page functions
 /** 
- * grab inputs from configuration. Currently set expiration to 1 day. Calls to connect to device and IotHub to make sure your credentials are valid!
+* grab inputs from configuration. Currently set expiration to 1 day. Calls to connect to device and IotHub to make sure your credentials are valid!
 */
 function sendConfigData() 
 {
@@ -156,6 +166,7 @@ function sendConfigData()
 
 /** 
 * show current graph instances in dropdown. Used in output.html when invoking methods 
+* @param {HTMLButtonElement} htmlElement - button user clicks on
 */
 function instanceMethodDropdowns(htmlElement) 
 {
@@ -185,27 +196,30 @@ function instanceMethodDropdowns(htmlElement)
 
 /**
 * Create the larger payload object to be sent to the server to invoke a direct method on the lvaEdge module
-* @param {name of method to invoke} methodNameParam 
-* @param {payload for method} methodPayload 
+* @param {string} methodNameParam - name of method to invoke
+* @param {jsonObject} methodPayload - payload for method
+* @returns {jsonObject} full payload for request
 */
 function createFullPayload(methodNameParam, methodPayload)
 {
-  let values = 
+  let fullPayload = 
   {
     methodName: methodNameParam,
     responseTimeoutInSeconds: 200,
     Payload: methodPayload  
   }
-  return values;
+  return fullPayload;
 }
 
 /**
 * see sample graph topologies here: https://github.com/Azure/live-video-analytics/tree/master/MediaGraph/topologies
-* @param {either the graph name or the HTML htmlElementent containing the name of the graph} htmlElement 
+* @param {string | HTMLButtonElement} htmlElement - either a string graph name or the HTML button containing the name of the graph
+* @param {boolean} - if name is passed = true
+* @returns {void}
 */
 function graphSetTopology(htmlElement, nameIsPassed=false)
 {
-  let topologyName= nameIsPassed ? htmlElement : htmlElement.innerText;
+  let topologyName = nameIsPassed ? htmlElement : htmlElement.innerText;
 
   let topology = graphTopologies[topologyName];
   if(topology == undefined)
@@ -218,7 +232,9 @@ function graphSetTopology(htmlElement, nameIsPassed=false)
 
 /**
 * invoke a list method on lvaEdge module (either list topology or list instances. payload is the same)
-* @param {button clicked to invoke method} htmlElement 
+* @param {HTMLButtonElement} htmlElement - either a string of method name, or the HTML button clicked to invoke method
+* @param {boolean} - if name is passed = true
+* @returns {Promise<any>}
 */
 function graphEntityList(htmlElement, nameIsPassed=false) 
 {
@@ -238,7 +254,9 @@ function graphEntityList(htmlElement, nameIsPassed=false)
 
 /**
 * this payload is used for GraphInstanceDelete, GraphTopologyDelete, GraphInstanceActivate, GraphInstanceDeactivate
-* @param {element clicked on to invoke method} htmlElement 
+* @param {string | HTMLButtonElement} htmlElement - button clicked on to invoke method on given element or string of element name (i.e. "Graph-Instance-1")
+* @param {string} method - method name
+* @param {boolean} elementNamePassed - true if function caller passed in the 
 */
 function graphEntityModify(htmlElement, method="", elementNamePassed=false, methodNameIsPassed=false) 
 {
@@ -255,6 +273,8 @@ function graphEntityModify(htmlElement, method="", elementNamePassed=false, meth
 
 /**
 * calls GraphInstanceList and GraphTopologyList. Runs on load of output.html
+* @async
+* @returns {Promise<void>}
 */
 async function loadInstancesAndTopologies()
 {
@@ -267,8 +287,9 @@ async function loadInstancesAndTopologies()
 
 /**
 * Update instance names/topology names when invoking list method on LVA
-* @param {Name of method invoked} methodName 
-* @param {JSON response object from request} response 
+* @param {string} methodName - Name of method invoked
+* @param {XMLHttpRequestResponseType} response - JSON response object from request
+* @returns {void}
 */
 function updateGraphsandInstances(methodName, response) 
 {
@@ -310,7 +331,8 @@ function updateGraphsandInstances(methodName, response)
 /**
 * displays method invocation output when on output.html page
 * returns true if on output.html page, false otherwise
-* @param {resulting JSON to display to user} result 
+* @param {jsonObject} result - resulting JSON to display to user
+* @returns {boolean} - true if able to display result in method-output-box (will be true when on output.html page)
 */
 function displayMethodOutput(result)
 {
@@ -325,13 +347,15 @@ function displayMethodOutput(result)
 
 /**
 * send method to invoke on LVA module
-* @param {*} values 
+* @async
+* @param {jsonObject} fullPayload - payload to be sent in request to server
+* @returns {Promise<any>}
 */
-async function invokeLVAMethod(values) 
+async function invokeLVAMethod(fullPayload) 
 {
   return new Promise((resolve, reject) => 
   {
-    var request = sendRequest(values, `http://localhost:${PORT}/runmethod`);
+    var request = sendRequest(fullPayload, `http://localhost:${PORT}/runmethod`);
     // event listener. When request readyState changes, place response in the output box. If response is done (readyState=4) then update global vars accordingly
     request.onreadystatechange = function () 
     {
@@ -345,10 +369,10 @@ async function invokeLVAMethod(values)
         switch(methodName)
         {
           case 'GraphTopologyDelete':
-            delete graphTopologies[values.Payload.name];
+            delete graphTopologies[fullPayload.Payload.name];
             break;
           case 'GraphInstanceDelete':
-            delete graphInstances[values.Payload.name];
+            delete graphInstances[fullPayload.Payload.name];
             break;
           case 'GraphInstanceList':
             updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
@@ -359,7 +383,7 @@ async function invokeLVAMethod(values)
             console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
             break;
           case 'GraphInstanceSet':
-            graphInstances[values.Payload.name]=values;
+            graphInstances[fullPayload.Payload.name]=values;
             break;
           case 'GraphTopologySet':
             // only alert and run display media graphs if request is coming from mediagraphs.html page
@@ -415,7 +439,8 @@ function stopMessages()
 
 /**
 * creates template object of camera values to display to user
-* @param {name of camera to create template for} cameraName 
+* @param {string} cameraName - name of camera to create template for
+* @returns {HTMLTemplateElement}
 */
 function createCameraTableFromTemplate(cameraName)
 {
@@ -486,7 +511,7 @@ function submitCameras()
 
 /** 
 * delete camera
-* htmlElement - the delete button, gets passed in on click
+* @param {HTMLSpanElement} htmlElement - the delete button, gets passed in on click
 */
 function deleteCamera(htmlElement) 
 {
@@ -572,7 +597,7 @@ function populateModalTemplate()
 
 /**
 * Populates instance template with camera parameters based on user selection.
-* @param {camera name to load} htmlElement 
+* @param {HTMLOptionElement} htmlElement - user selected option from camera drop down
 */
 function loadCameraParams(htmlElement)
 {
@@ -584,7 +609,7 @@ function loadCameraParams(htmlElement)
 
 /**
 * adds all the parameters and default values to the modal template after user selects a topology, while running set graph instance
-* @param {a graph topology} htmlElement 
+* @param {HTMLOptionElement} htmlElement - graph topology clicked on by user
 */
 function loadTopologyParams(htmlElement)
 {
