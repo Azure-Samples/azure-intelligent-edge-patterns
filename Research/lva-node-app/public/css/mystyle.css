@@ -217,7 +217,7 @@ tr {
 }
 table, td {
     border: 1px solid grey;
-    border-collapse: unset !important;
+    /* border-collapse: unset !important; */
     padding: 5px;
 }
 .row-odd{

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //media graph building related functions
-const GITHUBTOPOLOGIES = 'https://raw.githubusercontent.com/Azure/live-video-analytics/master/MediaGraph/topologies/';
+const GITHUB_TOPOLOGY_SAMPLES = 'https://raw.githubusercontent.com/Azure/live-video-analytics/master/MediaGraph/topologies/';
 var sourceNames = [];
 var processorNames = [];
 var sinkNames = [];
@@ -14,17 +14,23 @@ class GraphNode {
     {
         //ensure node type exists
         this.nodeSchema=getNodeSchema(type);
-        if (this.nodeSchema==undefined) throw ("Node type: "+type+" not found");
+        if (this.nodeSchema==undefined)
+        {
+            throw ("Node type: "+type+" not found");
+        } 
 
         //set inputs
         this.inputs=[];
-        for(var i=0; i<userSelectedInputs.length; i++)
+        for(let i=0; i<userSelectedInputs.length; i++)
         {
             if (findObjectByKey(this.nodeSchema.inputs, "name", userSelectedInputs[i]))
             {
                 this.inputs.push({"nodeName": userSelectedInputs[i]});
             }
-            else throw ("Input "+userSelectedInputs[i]+" is not accepted by node type "+type);
+            else
+            {
+                throw ("Input "+userSelectedInputs[i]+" is not accepted by node type "+type);
+            } 
         }
 
         this.jsonObj = 
@@ -39,9 +45,9 @@ class GraphNode {
             this.jsonObj["inputs"]=this.inputs;
         }
 
-        for(var i=0; i<this.nodeSchema.extraValues.length; i++)
+        for(let i=0; i<this.nodeSchema.extraValues.length; i++)
         {
-            var item=this.nodeSchema.extraValues[i];
+            const item=this.nodeSchema.extraValues[i];
             this.jsonObj[item.name]=item.value;
         }
         //we have now constructed the full json object!
@@ -86,7 +92,7 @@ class MediaGraph
  */
 function findObjectByKey(array, key, value)
 {
-    for (var i=0; i<array.length; i++)
+    for (let i=0; i<array.length; i++)
     {
         if (array[i][key]===value)
         {
@@ -101,8 +107,8 @@ function findObjectByKey(array, key, value)
 */
 function getValidInputs(schema)
 {
-    var validInputs=[];
-    for (var i=0; i<schema.inputs.length; i++)
+    let validInputs=[];
+    for (let i=0; i<schema.inputs.length; i++)
     {
         validInputs.push(schema.inputs[i].name);
     }
@@ -114,7 +120,7 @@ function getValidInputs(schema)
 */
 function getNodeSchema(type)
 {
-    for(var i=0; i<graphNodeLimitations.length; i++)
+    for(let i=0; i<graphNodeLimitations.length; i++)
     {
         if(graphNodeLimitations[i].name===type)
         {
@@ -132,9 +138,9 @@ function getNodeSchema(type)
  */
 function setCustomInputs(hoverList, myName, listID) 
 {
-    var allowedInputs=getValidInputs(getNodeSchema(myName));
+    const allowedInputs=getValidInputs(getNodeSchema(myName));
     if (allowedInputs.length==0) return;
-    var checkBoxNameList = [];
+    let checkBoxNameList = [];
     if (listID == "dynamic-processor" || listID == "dynamic-sink") 
     {
         for (index in sourceNames) 
@@ -164,10 +170,10 @@ function setCustomInputs(hoverList, myName, listID)
 /** update the list of possible inputs on a given node */
 function updateCustomizedInputs(htmlElement) 
 {
-    var hoverList = htmlElement.parentElement.getElementsByTagName("ul")[0];
+    const hoverList = htmlElement.parentElement.getElementsByTagName("ul")[0];
     hoverList.innerHTML = "";
-    var listID = htmlElement.closest(".node-listhead").id;
-    var myName = htmlElement.parentElement.parentElement.getAttribute('nodetype');
+    const listID = htmlElement.closest(".node-listhead").id;
+    const myName = htmlElement.parentElement.parentElement.getAttribute('nodetype');
     setCustomInputs(hoverList, myName, listID);
 }
 
@@ -177,10 +183,13 @@ function updateCustomizedInputs(htmlElement)
  */
 function canAddToGraph(type)
 {
-    var neededInputs=getValidInputs(getNodeSchema(type));
-    for (var i=0; i<neededInputs.length; i++)
+    const neededInputs=getValidInputs(getNodeSchema(type));
+    for (let i=0; i<neededInputs.length; i++)
     {
-        if(graphBuilderContains(neededInputs[i])) return true;
+        if(graphBuilderContains(neededInputs[i]))
+        {
+            return true;
+        }
     }
     alert("You must have at least one of the following node types present before you can add this node: "+neededInputs);
     return false;
@@ -193,12 +202,16 @@ function canAddToGraph(type)
 */
 function canDeleteHelper(nodeNames, type)
 {
-    var currentCheck=false;
-    var ind=nodeNames.indexOf(type);
-    if(ind!=-1) nodeNames.splice(ind, 1);
-    for(var i=0; i<nodeNames.length; i++)
+    let currentCheck=false;
+    const ind=nodeNames.indexOf(type);
+    if(ind !=- 1)
     {
-        var neededInputs=getValidInputs(getNodeSchema(nodeNames[i])); //get valid inputs for each node we're looking at
+        nodeNames.splice(ind, 1);
+    }
+
+    for(let i = 0; i < nodeNames.length; i++)
+    {
+        const neededInputs=getValidInputs(getNodeSchema(nodeNames[i])); //get valid inputs for each node we're looking at
         if(!neededInputs.includes(type)) //if type we want to delete isn't an input for this node, move on
         {
             currentCheck=true;
@@ -206,7 +219,7 @@ function canDeleteHelper(nodeNames, type)
         else
         {
             neededInputs.splice(neededInputs.indexOf(type), 1); //get rid of node to delete, check if graph contains any other required node
-            for (var j=0; j<neededInputs.length; j++)
+            for (let j=0; j<neededInputs.length; j++)
             {
                 if(graphBuilderContains(neededInputs[j])) currentCheck=true;
                 break;
@@ -235,8 +248,14 @@ function canDeleteFromGraph(type)
         return false;
     }
     
-    if(canDeleteHelper(processorNames, type) && canDeleteHelper(sinkNames, type)) return true;
-    else return false;
+    if(canDeleteHelper(processorNames, type) && canDeleteHelper(sinkNames, type))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /**
@@ -244,12 +263,16 @@ function canDeleteFromGraph(type)
  * @param {current htmlElementent to add to graph} htmlElement 
  * @param {source, processor, or sink} listID 
  */
-function addToGraph(htmlElement, listID) {
-    var nodetype = htmlElement.getAttribute('nodetype');
-    var template = (listID=='dynamic-source') ? $('#hidden-template-sourcenode').html() : $('#hidden-template').html();
+function addToGraph(htmlElement, listID) 
+{
+    const nodetype = htmlElement.getAttribute('nodetype');
+    let template = (listID=='dynamic-source') ? $('#hidden-template-sourcenode').html() : $('#hidden-template').html();
     template = $(template).clone();
 
-    if(listID != 'dynamic-source' && !canAddToGraph(nodetype)) return;
+    if(listID != 'dynamic-source' && !canAddToGraph(nodetype))
+    {
+        return;
+    }
 
     //disable addition of another identical node
     $(htmlElement).attr({"disabled": true});
@@ -261,10 +284,10 @@ function addToGraph(htmlElement, listID) {
         $('#httpExtension-dropdown').attr({'disabled': true});
     }
 
-    var newName = htmlElement.name.replace(/_/g, " ");
+    const newName = htmlElement.name.replace(/_/g, " ");
 
-    var li = template[0];
-    var deleteButton = template[0].children[0].children[0];
+    let li = template[0];
+    let deleteButton = template[0].children[0].children[0];
 
     //add unique IDs onto htmlElementents. Set close aspect of button
     $(li).closest('label').attr({ 'id': makeUniqueId() });
@@ -275,7 +298,7 @@ function addToGraph(htmlElement, listID) {
 
     if(!listID == 'dynamic-source')
     {
-        var hoverList = template[0].getElementsByClassName("dropdown-menu-left")[0];
+        const hoverList = template[0].getElementsByClassName("dropdown-menu-left")[0];
         setCustomInputs(hoverList, nodetype, listID);
     }
 
@@ -290,8 +313,14 @@ function addToGraph(htmlElement, listID) {
  */
 function graphBuilderContains(type)
 {
-    if (sourceNames.includes(type) || processorNames.includes(type) || sinkNames.includes(type)) return true;
-    else return false;        
+    if (sourceNames.includes(type) || processorNames.includes(type) || sinkNames.includes(type))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }      
 }
 
 /**
@@ -300,7 +329,7 @@ function graphBuilderContains(type)
  */
 function deleteGraphNode(htmlElement) 
 {
-    var nodetype = $(htmlElement).closest('li').attr('nodetype');
+    const nodetype = $(htmlElement).closest('li').attr('nodetype');
 
     if(!canDeleteFromGraph(nodetype)) return false;
 
@@ -314,7 +343,7 @@ function deleteGraphNode(htmlElement)
         $('#httpExtension-dropdown').attr({'disabled': false});
     }
 
-    var listID = $(htmlElement).closest('ul').attr('id');
+    const listID = $(htmlElement).closest('ul').attr('id');
 
     //delete node from list that builds it!
     switch(listID)
@@ -353,18 +382,20 @@ function pushNodeName(name, listID)
  */
 function getListNodesAndInputs(nodeList)
 {
-    var nodesAndInputs=[];
-    for (var procs of nodeList.getElementsByClassName('graphnode'))
+    let nodesAndInputs=[];
+    for (let procs of nodeList.getElementsByClassName('graphnode'))
     {
-        var name=procs.getAttribute('nodetype');
-        var checkedInputs=[];
-        var checkBoxes = procs.getElementsByTagName('input');
+        const name=procs.getAttribute('nodetype');
+        let checkedInputs=[];
+        const checkBoxes = procs.getElementsByTagName('input');
 
-        for (var box of checkBoxes)
+        for (let box of checkBoxes)
         {
-            if(box.checked) checkedInputs.push((box.parentElement.innerText).replace(/ /g,''));
+            if(box.checked)
+            {
+                checkedInputs.push((box.parentElement.innerText).replace(/ /g,''));
+            } 
         }
-
         nodesAndInputs.push({name: name, value: checkedInputs});
     }
     console.log(nodesAndInputs);
@@ -376,7 +407,7 @@ function getListNodesAndInputs(nodeList)
  */
 function getGraphNodesAndInputs()
 {
-    var allNodeInfo=[];
+    let allNodeInfo=[];
     allNodeInfo.push(getListNodesAndInputs(document.getElementById('dynamic-source')));
     allNodeInfo.push(getListNodesAndInputs(document.getElementById('dynamic-processor')));
     allNodeInfo.push(getListNodesAndInputs(document.getElementById('dynamic-sink')));
@@ -391,22 +422,41 @@ function getGraphNodesAndInputs()
 function validateGraph(nodesAndInputsList)
 {
     //all processors and sources must have at least one input
-    //TODO make sure all nodes are referenced by another
+    let referenced=[];
+    referenced=referenced.concat(sourceNames);
+    referenced=referenced.concat(processorNames);
     if(nodesAndInputsList[2].length==0)
     {
         alert("You must have at leastone sink node!");
         return false;
     }
-    for(i=1; i<3; i++) //check processors and sinks for inputs
+    for(let i=1; i<3; i++) //check processors and sinks for inputs
     {
-        for(var cur=0; cur<nodesAndInputsList[i].length; cur++)
+        for(let cur=0; cur<nodesAndInputsList[i].length; cur++)
         {
             if(nodesAndInputsList[i][cur].value.length==0)
             {
                 alert("All processors and sinks must have at least one input. This node has none: " + nodesAndInputsList[i][cur].name);
                 return false;
             }
+            else
+            {
+                //mark node as having been referenced
+                nodesAndInputsList[i][cur].value.forEach((inputName) => 
+                {
+                    let referencedIndex = referenced.indexOf(inputName);
+                    if(referencedIndex != -1)
+                    {
+                        referenced.splice(referencedIndex, 1);
+                    }
+                })
+            }
         }
+    }
+    if (referenced.length > 0)
+    {
+        alert("Each node must be referenced by at least one other node. At least this node isn't referenced: "+referenced[0]);
+        return false;
     }
     return true;
 }
@@ -414,63 +464,66 @@ function validateGraph(nodesAndInputsList)
 /** 
 * create a media graph based off of what the user-built 
 */
-function createMediaGraph() {
-  var graphname = document.getElementById("graphname").value;
-  var graphDescription = document.getElementById("graph-description").value;
-  if (graphname=="") 
-  {
-      alert("Your graph name cannot be empty!");
-      return;
-  }
-  var sources=[];
-  var processors=[];
-  var sinks=[];
-  var parameters=[]
-  var nodesAndInputs=getGraphNodesAndInputs();
+function createMediaGraph() 
+{
+    const graphname = document.getElementById("graphname").value;
+    const graphDescription = document.getElementById("graph-description").value;
+    if (graphname=="") 
+    {
+        alert("Your graph name cannot be empty!");
+        return;
+    }
+    let sources=[];
+    let processors=[];
+    let sinks=[];
+    let parameters=[]
+    const nodesAndInputs=getGraphNodesAndInputs();
 
-  if(!validateGraph(nodesAndInputs))
-  {
-      return false;
-  }
+    if(!validateGraph(nodesAndInputs))
+    {
+        return false;
+    }
+    
+    for (let i = 0; i < nodesAndInputs.length; i++) 
+    {
+        for (let node = 0; node < nodesAndInputs[i].length; node++) 
+        {
+            let tempNode = new GraphNode(nodesAndInputs[i][node].name, nodesAndInputs[i][node].value);
+            parameters = parameters.concat(tempNode.nodeParameters);
+            switch (i) 
+            {
+                case 0:
+                    sources.push(tempNode.jsonObj);
+                    break;
+                case 1:
+                    processors.push(tempNode.jsonObj);
+                    break;
+                case 2:
+                    sinks.push(tempNode.jsonObj);
+                    break;
+            }
+        }
+    }
 
-  for (var s=0; s< nodesAndInputs[0].length; s++)
-  {
-      tempSourceNode = new GraphNode(nodesAndInputs[0][s].name, nodesAndInputs[0][s].value);
-      sources.push(tempSourceNode.jsonObj);
-      parameters=parameters.concat(tempSourceNode.nodeParameters);
-  }
+        
+    const createdGraph = new MediaGraph(graphname, graphDescription, sources, processors, sinks, parameters);
+    
+    graphTopologies[graphname] = createdGraph.jsonObject;
 
-  for (var p=0; p< nodesAndInputs[1].length; p++)
-  {
-      tempProcessorNode = new GraphNode(nodesAndInputs[1][p].name, nodesAndInputs[1][p].value);
-      processors.push(tempProcessorNode.jsonObj);
-      parameters=parameters.concat(tempProcessorNode.nodeParameters);
-  }
-  for (var sink=0; sink< nodesAndInputs[2].length; sink++)
-  {
-      tempSinkNode = new GraphNode(nodesAndInputs[2][sink].name, nodesAndInputs[2][sink].value);
-      sinks.push(tempSinkNode.jsonObj);
-      parameters=parameters.concat(tempSinkNode.nodeParameters);
-  }
+    graphSetTopology(graphname, true);
+    document.getElementById("dynamic-source").innerHTML="Sources: ";
+    document.getElementById("dynamic-processor").innerHTML="Processors: ";
+    document.getElementById("dynamic-sink").innerHTML="Sinks: ";
 
-  var createdGraph = new MediaGraph(graphname, graphDescription, sources, processors, sinks, parameters);
-  
-  graphTopologies[graphname] = createdGraph.jsonObject;
-
-  graphSetTopology(graphname, true);
-  document.getElementById("dynamic-source").innerHTML="Sources: ";
-  document.getElementById("dynamic-processor").innerHTML="Processors: ";
-  document.getElementById("dynamic-sink").innerHTML="Sinks: ";
-
-  //re-enable all buttons
-  var resetButtons=document.getElementsByClassName("dropdown-item");
-  for (button in resetButtons)
-  {
-      button.disabled = false;
-  }
-  graphname.value="";
-  graphDescription.value="";
-  return true;
+    //re-enable all buttons
+    const resetButtons=document.getElementsByClassName("dropdown-item");
+    for (button in resetButtons)
+    {
+        button.disabled = false;
+    }
+    graphname.value="";
+    graphDescription.value="";
+    return true;
 }
 
 /**
@@ -478,27 +531,31 @@ function createMediaGraph() {
  */
 function displayMediaGraphs()
 {
-    var mediaGraphs=Object.keys(graphTopologies);
-    var mediaGraphTBody = $('#existing-media-graphs');
+    const mediaGraphs=Object.keys(graphTopologies);
+    let mediaGraphTBody = $('#existing-media-graphs');
     $(mediaGraphTBody)[0].innerHTML="";
 
     // for each graph we have show. Ugly element finding, but it does the trick
     mediaGraphs.forEach((graph) => 
     {
-      var template = $('#created-graph-template').html();
+      let template = $('#created-graph-template').html();
       template = $(template).clone();
       $(template)[0].setAttribute('id', makeUniqueId());
-      var values_column=$(template)[0].getElementsByTagName('td')[0];
+      let values_column=$(template)[0].getElementsByTagName('td')[0];
       values_column.innerHTML=graph;
       mediaGraphTBody.append(template);
     }); 
 }
 
+/**
+ * This function sets a media graph that is imported from existing github samples
+ * @param {dropdown user clicks containing media graph name} htmlElement 
+ */
 function setMediaGraphFromTemplate(htmlElement)
 {
-    var jsonLocation = GITHUBTOPOLOGIES+htmlElement.name+"/topology.json";
-    $.getJSON(jsonLocation, function(response) {
-        console.log(response);
+    const jsonLocation = GITHUB_TOPOLOGY_SAMPLES+htmlElement.name+"/topology.json";
+    $.getJSON(jsonLocation, function(response) 
+    {
         graphTopologies[response.name]=response;
         graphSetTopology(response.name, true);
     })
@@ -531,10 +588,10 @@ function displayMediaGraphsOnLoad()
  */
 function deleteGraph(htmlElement)
 {
-    var graphToDelete=htmlElement.parentElement.previousElementSibling.innerText;
+    const graphToDelete=htmlElement.parentElement.previousElementSibling.innerText;
     graphEntityModify(graphToDelete, "GraphTopologyDelete", true, true);
-    var id = $(htmlElement).closest('tr').attr('id');
-    var tableItem = document.getElementById(id);
+    const id = $(htmlElement).closest('tr').attr('id');
+    let tableItem = document.getElementById(id);
     tableItem.parentElement.removeChild(tableItem);
 }
 
@@ -772,11 +829,19 @@ const graphNodeLimitations =
                     "required": true
                 },
                 {
+                    "name": "iotMessageSource",
+                    "required": false
+                },
+                {
                     "name": "motionDetection",
-                    "required": false //??
+                    "required": false
                 },
                 {
                     "name": "grpcExtension",
+                    "required": false
+                },
+                {
+                    "name": "httpExtension",
                     "required": false
                 }
             ],

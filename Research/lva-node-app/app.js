@@ -4,24 +4,21 @@ const app = express();
 const server= require('http').createServer(app);
 const wss = new WebSocket.Server({server});
 const EventHubReader = require('./eventhubreader.js');
-const iothub = require('./iothub.js'); 
 
 //invoke direct methods on lvaEdge module
-const invokeMethods = require('./invokemethods.js'); 
 const { convertIotHubToEventHubsConnectionString } = require('./iot-hub-connection-string.js');
 
-//TODO stop receiving hub messages. stop reading messages...
-
 // Global Variables!
-// maybe change the mutables to not being global?
 global.graphInstances={};
 global.graphTopologies={};
 global.cameras={};
-var eventHubReader;
+
 global.DEVICE_ID="";
 global.MODULE_ID="lvaEdge";
 global.IOTHUB_CONNECTION_STRING="";
 global.IOTHUB_ENDPOINT="";
+
+var eventHubReader;
 
 const PORT=5000;
 const bodyParser = require('body-parser');
@@ -34,28 +31,38 @@ app.use(express.static('public/pages'))
 
 
 // render the html pages. the '/<name>' is what the url extension will look like in the browser
-app.get('/', function (req, res) {
+app.get('/', function (req, res) 
+{
     res.render('index.html')
 })
-app.get('/mediagraph', function (req, res) {
+app.get('/mediagraph', function (req, res) 
+{
     res.render('mediagraph.html')
 })
-app.get('/configuration', function (req, res) {
+app.get('/configuration', function (req, res) 
+{
     res.render('configuration.html')
 })
-app.get('/cameras', function (req, res) {
+app.get('/cameras', function (req, res) 
+{
     res.render('cameras.html')
 })
-app.get('/output', function (req, res) {
+app.get('/output', function (req, res) 
+{
     res.render('output.html')
 })
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+// handle GET requests
 
 /**
 * send client global variables upon request 
 */
-app.get('/getglobals', function (req, res) {
+app.get('/getglobals', function (req, res) 
+{
   console.log("get globals get function!");
-  var globals = [
+  let globals = 
+  [
     {
       "name": "graphInstances",
       "value": graphInstances
@@ -71,6 +78,84 @@ app.get('/getglobals', function (req, res) {
   ];
   res.send(JSON.stringify(globals));
 })
+
+/**
+* start sending live stream hub messages to client via websocket 
+*/
+app.get('/hubMessages', function(req, res)
+{
+  if (!validCredentialsAreSet(res))
+  {
+    return;
+  }
+  else
+  {
+    receiveHubMessages();
+    //always close requests
+    res.send();
+  }  
+})
+
+app.get('/stopMessages', function(req, res)
+{
+  eventHubReader.stopReadMessage();
+  res.send();
+})
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// handle POST requests
+
+//invoke LVA methods handler
+app.post('/runmethod', function (req, res) 
+{ 
+    if (!validCredentialsAreSet(res)) return;
+    let methodName=req.body.methodName;
+    invokeLVAMethod(req, res).then(response => 
+    {
+      let obj=[{method: methodName}, response.result];
+      //send results of invoking the method back to the client
+      res.send(obj); 
+    }).catch(error =>
+    {
+      console.error(error.message);
+      res.status(400).send(error.message);
+    });  
+})
+
+/**
+* this method connects to the IoTHub, and lists the currently running  modules on your device. Ensures connection works properly!
+* Here be dragons :) I double-promise
+*/
+app.post('/connectToIotHub', function (req, res) 
+{
+    setConfigs(req, res);
+    iotHubConnection(req, res).then(response => { //.then is promise resolved callback. must do here because invokeLVAMethod is async
+      let modules="";
+        for(let i=0; i<response.responseBody.length; i++)
+        {
+          modules+=response.responseBody[i].moduleId+" ";
+          console.log(response.responseBody[i].moduleId);
+        }
+        res.send("Successfully connected to your IoTHub. Found the following modules on your device: "+modules);
+    }, reason =>  //on error send error response
+    {
+      console.log(reason);
+      res.send("Unable to connect to device. Error response: "+ JSON.parse(reason.responseBody).Message);
+    });          
+}) 
+
+
+/**
+* update global variables when sent by user
+*/
+app.post('/globals', function (req, res)
+{
+  setGlobals(req, res);
+  res.send();
+})
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// defined functions
 
 /**
 * set global variables when passed by user 
@@ -116,55 +201,7 @@ function setConfigs(req, res)
   });
 }
 
-/**
- * this method connects to the IoTHub, and lists the currently running  modules on your device. Ensures connection works properly!
- * Here be dragons :) I double-promise I won't eat all the cookies
- */
-app.post('/connectToIotHub', function (req, res) 
-{
-    setConfigs(req, res);
-    iothub.iothubconnection(req, res).then(response => { //.then is promise resolved callback. must do here because invokeLVAMethod is async
-      var modules="";
-        for(var i=0; i<response.responseBody.length; i++)
-        {
-          modules+=response.responseBody[i].moduleId+" ";
-          console.log(response.responseBody[i].moduleId);
-        }
-        res.send("Successfully connected to your IoTHub. Found the following modules on your device: "+modules);
-    }, reason =>  //on error send error response
-    {
-      console.log(reason);
-      res.send("Unable to connect to device. Error response: "+ JSON.parse(reason.responseBody).Message);
-    });          
-}) 
 
-/**update global variables when sent by user*/
-app.post('/globals', function (req, res)
-{
-  setGlobals(req, res);
-  res.send();
-})
-
-/**start sending live stream hub messages to client via websocket */
-app.get('/hubMessages', function(req, res)
-{
-  if (!validCredentialsAreSet(res))
-  {
-    return;
-  }
-  else
-  {
-    receiveHubMessages();
-    //always close requests
-    res.send();
-  }  
-})
-
-app.get('/stopMessages', function(req, res)
-{
-  eventHubReader.stopReadMessage();
-  res.send();
-})
 /** 
 * broadcast used for sending IoT Hub message data in a live stream 
 */
@@ -219,9 +256,22 @@ async function receiveHubMessages()
 }
 
 /**
- * checks that the iothub_connection_string and device ID are set. If not, responds to client wth 404 and error message
- * @param {request response object} res 
+ * Connects to IoT Hub and returns a list of currently running modules
+ * @param {request} req 
+ * @param {response object} res 
+ * @param {optional callback} next 
  */
+function iotHubConnection(req, res, next)
+{
+    let iothub = require('azure-iothub');
+    let registry = iothub.Registry.fromConnectionString(IOTHUB_CONNECTION_STRING);
+    return registry.getModulesOnDevice(DEVICE_ID);
+};
+
+/**
+* checks that the iothub_connection_string and device ID are set. If not, responds to client wth 404 and error message
+* @param {request response object} res 
+*/
 function validCredentialsAreSet(res)
 {
   if (IOTHUB_CONNECTION_STRING == "" || DEVICE_ID == "")
@@ -232,24 +282,26 @@ function validCredentialsAreSet(res)
   return true;
 }
 
-//invoke LVA methods handler
-app.post('/runmethod', function (req, res) 
-{ 
-    if (!validCredentialsAreSet(res)) return;
-    var methodName=req.body.methodName;
-    invokeMethods.invokeLVAMethod(req, res).then(response => 
-    {
-      var obj=[{method: methodName}, response.result];
-      //send results of invoking the method back to the client
-      res.send(obj); 
-    }).catch(error =>
-    {
-      console.error(error.message);
-      res.status(400).send(error.message);
-    });  
-})
+/**
+* this function invokes a direct method on the lvaedge module. returns a promise
+*/
+function invokeLVAMethod(req, res, next)
+{
+    let Client = require('azure-iothub').Client;
+    let client = Client.fromConnectionString(IOTHUB_CONNECTION_STRING);
 
-/** on page error */
+    return client.invokeDeviceMethod(DEVICE_ID, MODULE_ID,
+        {
+            methodName: req.body.methodName,
+            payload: req.body.Payload,
+            responseTimeoutInSeconds: 200,
+            connectTimeoutInSeconds: 2
+        });
+};
+
+/** 
+* on page error 
+*/
 app.use(function (req, res, next) 
 {
     res.status(404).send("404 not found. :(");
