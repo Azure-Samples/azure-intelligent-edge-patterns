@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { ICommandBarItemProps, Stack, CommandBar, getTheme, Breadcrumb } from '@fluentui/react';
+import { useDispatch } from 'react-redux';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog, CaptureLabelMode } from '../components/CaptureDialog';
+import { postImages } from '../store/imageSlice';
 
 const theme = getTheme();
 
@@ -9,6 +11,20 @@ export const Images: React.FC = () => {
   const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
   const openCaptureDialog = () => setCaptureDialogOpen(true);
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
+  const fileInputRef = useRef(null);
+  const dispatch = useDispatch();
+
+  const onUpload = () => {
+    fileInputRef.current.click();
+  };
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>): void {
+    for (let i = 0; i < e.target.files.length; i++) {
+      const formData = new FormData();
+      formData.append('image', e.target.files[i]);
+      dispatch(postImages(formData));
+    }
+  }
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -18,7 +34,7 @@ export const Images: React.FC = () => {
         iconProps: {
           iconName: 'Upload',
         },
-        onClick: () => {},
+        onClick: onUpload,
       },
       {
         key: 'captureFromCamera',
@@ -45,7 +61,7 @@ export const Images: React.FC = () => {
             title="Add images"
             subTitle="Capture images from your video streams and tag parts"
             primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
-            secondary={{ text: 'Upload images', onClick: () => {} }}
+            secondary={{ text: 'Upload images', onClick: onUpload }}
           />
         </Stack>
       </Stack>
@@ -53,6 +69,14 @@ export const Images: React.FC = () => {
         captureLabelMode={CaptureLabelMode.PerImage}
         isOpen={isCaptureDialgOpen}
         onDismiss={closeCaptureDialog}
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleUpload}
+        accept="image/*"
+        multiple
+        style={{ display: 'none' }}
       />
     </>
   );
