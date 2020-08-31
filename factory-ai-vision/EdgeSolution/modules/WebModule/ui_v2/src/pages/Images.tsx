@@ -1,9 +1,19 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { ICommandBarItemProps, Stack, CommandBar, getTheme, Breadcrumb } from '@fluentui/react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import {
+  ICommandBarItemProps,
+  Stack,
+  CommandBar,
+  getTheme,
+  Breadcrumb,
+  Pivot,
+  PivotItem,
+} from '@fluentui/react';
+import { useDispatch, useSelector } from 'react-redux';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog, CaptureLabelMode } from '../components/CaptureDialog';
-import { postImages } from '../store/imageSlice';
+import { postImages, getImages } from '../store/imageSlice';
+import { ImageList } from '../components/ImageList';
+import { createSelectorByLabel } from '../store/selectors';
 
 const theme = getTheme();
 
@@ -13,6 +23,8 @@ export const Images: React.FC = () => {
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
+  const labeledImages = useSelector(createSelectorByLabel(true));
+  const unlabeledImages = useSelector(createSelectorByLabel(false));
 
   const onUpload = () => {
     fileInputRef.current.click();
@@ -48,6 +60,10 @@ export const Images: React.FC = () => {
     [],
   );
 
+  useEffect(() => {
+    dispatch(getImages());
+  }, [dispatch]);
+
   return (
     <>
       <Stack styles={{ root: { height: '100%' } }}>
@@ -57,12 +73,23 @@ export const Images: React.FC = () => {
         />
         <Stack styles={{ root: { padding: '15px' } }} grow>
           <Breadcrumb items={[{ key: 'images', text: 'Images' }]} />
-          <EmptyAddIcon
-            title="Add images"
-            subTitle="Capture images from your video streams and tag parts"
-            primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
-            secondary={{ text: 'Upload images', onClick: onUpload }}
-          />
+          {labeledImages.length ? (
+            <Pivot>
+              <PivotItem headerText="Untagged">
+                <ImageList isRelabel={false} images={unlabeledImages} />
+              </PivotItem>
+              <PivotItem headerText="Tagged">
+                <ImageList isRelabel={false} images={labeledImages} />
+              </PivotItem>
+            </Pivot>
+          ) : (
+            <EmptyAddIcon
+              title="Add images"
+              subTitle="Capture images from your video streams and tag parts"
+              primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
+              secondary={{ text: 'Upload images', onClick: onUpload }}
+            />
+          )}
         </Stack>
       </Stack>
       <CaptureDialog
