@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   Dropdown,
@@ -10,11 +10,11 @@ import {
   mergeStyleSets,
   IDropdownOption,
 } from '@fluentui/react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
-import { cameraOptionsSelector, selectCameraById } from '../store/cameraSlice';
+import { cameraOptionsSelector, selectCameraById, getCameras } from '../store/cameraSlice';
 
 const { palette } = getTheme();
 
@@ -44,10 +44,15 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   const [selectedCameraId, setSelectedCameraId] = useState(defaultSelectedCameraId);
   const cameraOptions = useSelector(cameraOptionsSelector);
   const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
+  const dispatch = useDispatch();
 
   const onDropdownChange = (_, opt: IDropdownOption) => {
     setSelectedCameraId(opt.key as number);
   };
+
+  useEffect(() => {
+    dispatch(getCameras(false));
+  }, [dispatch]);
 
   return (
     <Dialog
@@ -72,7 +77,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
             styles={{ dropdown: { width: '300px' } }}
           />
           <Stack horizontal tokens={{ childrenGap: 30 }}>
-            <Stack styles={{ root: { width: '75%' } }}>
+            <Stack styles={{ root: { width: '75%', height: '500px' } }}>
               <RTSPVideo rtsp={rtsp} />
             </Stack>
             <Stack verticalAlign="center" tokens={{ childrenGap: 10 }} styles={{ root: { width: '25%' } }}>
