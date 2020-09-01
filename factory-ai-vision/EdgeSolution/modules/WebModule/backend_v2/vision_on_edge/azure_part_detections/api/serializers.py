@@ -4,6 +4,7 @@
 
 import logging
 
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from ..models import PartDetection
@@ -34,3 +35,14 @@ class ExportSerializer(serializers.Serializer):
     gpu = serializers.BooleanField(default=False)
     average_time = serializers.FloatField(default=0.0)
     count = serializers.IntegerField(default=0)
+
+
+class UploadRelabelSerializer(serializers.Serializer):
+    """UploadRelabelSerializer.
+    """
+
+    part_name = serializers.CharField()
+    labels = serializers.CharField()
+    img = Base64ImageField(required=True)
+    confidence = serializers.FloatField()
+    is_relabel = serializers.BooleanField()

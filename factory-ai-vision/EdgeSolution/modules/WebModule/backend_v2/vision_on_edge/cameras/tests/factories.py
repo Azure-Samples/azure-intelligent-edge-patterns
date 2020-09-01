@@ -5,8 +5,8 @@
 import factory
 from factory import DjangoModelFactory, Faker
 
-from ..models import Camera
 from ...locations.tests.factories import LocationFactory
+from ..models import Camera
 
 
 class CameraFactory(DjangoModelFactory):

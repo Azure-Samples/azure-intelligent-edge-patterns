@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""Inference App
+"""
+
 import sys
 import json
 import time
@@ -152,6 +156,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.last_prediction = []
         self.last_prediction_count = {}
 
+        self.part_detection_id = None
         self.confidence_min = 30 * 0.01
         self.confidence_max = 30 * 0.01
         self.max_images = 10
@@ -246,7 +251,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                 return model
 
         else:
-            print('[INFO] Loading Default Model ...')
+            print('[INFO] Loading Downloaded Model ...')
             with open('model/labels.txt', 'r') as f:
                 labels = [l.strip() for l in f.readlines()]
             model = ONNXRuntimeObjectDetection('model/model.onnx', labels)
@@ -300,6 +305,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         return prediction
 
+<<<<<<< HEAD
     # def start_session(self):
     #     def run(self):
     #         send_counter = 0
@@ -486,6 +492,17 @@ onnx = ONNXRuntimeModelDeploy(model_dir)
 # onnx.start_session()
 
 app = Flask(__name__)
+
+
+@app.route('/update_part_detection_id', methods=['GET'])
+def update_part_detection_id():
+    part_detection_id = request.args.get("part_detection_id")
+    if not part_detection_id:
+        return 'missing part_detection_id'
+    onnx.part_detection_id = part_detection_id
+    print("[INFO] updating onnx.part_detection_id:", onnx.part_detection_id)
+    return "OK"
+
 @app.route('/prediction', methods=['GET'])
 def prediction():
     # print(onnx.last_prediction)

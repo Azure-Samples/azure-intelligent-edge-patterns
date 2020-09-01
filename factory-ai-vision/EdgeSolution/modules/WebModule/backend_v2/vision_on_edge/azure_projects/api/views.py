@@ -19,9 +19,7 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ...azure_parts.models import Part
 from ...exceptions.api_exceptions import CustomVisionAccessFailed
-from ...images.models import Image
 from ..models import Project, Task
 from ..utils import (pull_cv_project_helper, train_project_helper,
                      update_train_status_helper)
