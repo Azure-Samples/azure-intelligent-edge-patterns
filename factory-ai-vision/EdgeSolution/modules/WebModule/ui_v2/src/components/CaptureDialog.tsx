@@ -23,7 +23,7 @@ const functionBtnStyleSets = mergeStyleSets({
   icon: { color: palette.themePrimary },
 });
 
-enum CaptureLabelMode {
+export enum CaptureLabelMode {
   PerImage,
   AllLater,
 }
