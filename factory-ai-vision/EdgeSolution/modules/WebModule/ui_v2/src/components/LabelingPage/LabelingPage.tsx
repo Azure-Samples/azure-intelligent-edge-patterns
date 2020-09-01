@@ -69,12 +69,19 @@ const labelingPageStyle = mergeStyleSets({
   imgInfoContainer: { width: '30%' },
 });
 
+export enum LabelPageMode {
+  // Label a single image and closed. Used after capturing in camera details.
+  SinglePage,
+  // Able to label multi images. Used in image page and part page.
+  MultiPage,
+}
+
 interface LabelingPageProps {
-  labelingType?: LabelingType;
+  mode: LabelPageMode;
   isRelabel: boolean;
 }
 
-const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.SingleAnnotation, isRelabel }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotation, isRelabel }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
@@ -136,7 +143,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
         annotations={annotations}
         workState={workState}
         setWorkState={setWorkState}
-        labelingType={labelingType}
+        labelingType={LabelingType.SingleAnnotation}
         onBoxCreated={onBoxCreated}
         imgPart={imgPart}
       />
@@ -170,14 +177,29 @@ const LabelingPage: FC<LabelingPageProps> = ({ labelingType = LabelingType.Singl
   );
 
   const onRenderFooter = (): JSX.Element => {
-    const isLastImg = index === imageIds.length - 1;
     const noPart = imgPart === null || imgPart === undefined;
     const noAnno = annotations.length === 0;
     const deleteDisabled = loading;
+    const saveDisabled = noPart || noAnno;
+
+    if (mode === LabelPageMode.SinglePage)
+      return (
+        <Stack horizontal tokens={{ childrenGap: 10 }}>
+          <PrimaryButton
+            text="Save and close"
+            style={{ marginLeft: 'auto' }}
+            onClick={onNext}
+            disabled={saveDisabled}
+          />
+          <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
+          <DefaultButton text="Close" onClick={closeDialog} />
+        </Stack>
+      );
+
+    const isLastImg = index === imageIds.length - 1;
     const previousDisabled = index === 0 || workState === WorkState.Creating || isOnePointBox || loading;
     const nextDisabled =
       isLastImg || noPart || noAnno || workState === WorkState.Creating || isOnePointBox || loading;
-
     return (
       <Stack horizontal tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
