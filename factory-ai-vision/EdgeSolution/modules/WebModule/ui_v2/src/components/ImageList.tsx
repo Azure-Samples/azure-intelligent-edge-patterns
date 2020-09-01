@@ -66,7 +66,7 @@ export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ i
           onRenderCell={onRenderCell}
         />
       </FocusZone>
-      <LabelingPage isRelabel={isRelabel} mode={LabelPageMode.SinglePage} />
+      <LabelingPage isRelabel={isRelabel} mode={LabelPageMode.MultiPage} />
     </>
   );
 };

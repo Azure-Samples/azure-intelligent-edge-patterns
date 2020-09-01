@@ -13,7 +13,6 @@ import {
   DefaultButton,
   PrimaryButton,
 } from '@fluentui/react';
-import * as R from 'ramda';
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
@@ -95,39 +94,25 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
   const [loading, setLoading] = useState(false);
 
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
-  const noChanged = useSelector<State, boolean>((state) =>
-    R.equals(state.annotations.entities, state.annotations.originEntities),
-  );
 
   const isOnePointBox = checkOnePointBox(annotations);
 
-  const onSave = async (isRelabelDone: boolean) => {
+  const saveAnno = async () => {
     setLoading(true);
-    await dispatch(saveLabelImageAnnotation({ isRelabel, isRelabelDone }));
+    await dispatch(saveLabelImageAnnotation());
     setLoading(false);
   };
-
-  const onNext = async () => {
-    await onSave(false);
+  const saveAndNext = async () => {
+    await saveAnno();
     dispatch(goNextImage());
-    if (index === imageIds.length - 1) closeDialog();
   };
-
-  const onPrevious = async () => {
-    await onSave(false);
+  const saveAndPrev = async () => {
+    await saveAnno();
     dispatch(goPrevImage());
   };
-
-  const onDoneBtnClick = (): void => {
-    // eslint-disable-next-line no-restricted-globals
-    const isRelabelDone = confirm('The Rest of the image will be removed');
-    onSave(isRelabelDone);
-    if (isRelabelDone) closeDialog();
-  };
-
-  const onBoxCreated = (): void => {
-    // TODO Check if we need to trigger save and click for last image
-    // if (index === imageIds.length - 1) onSaveBtnClick();
+  const saveAndDone = async () => {
+    await saveAnno();
+    closeDialog();
   };
 
   const onDeleteImage = async () => {
@@ -144,7 +129,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
         workState={workState}
         setWorkState={setWorkState}
         labelingType={LabelingType.SingleAnnotation}
-        onBoxCreated={onBoxCreated}
+        onBoxCreated={() => {}}
         imgPart={imgPart}
       />
       <Text variant="small" styles={{ root: { position: 'absolute', right: 5, bottom: 5 } }}>
@@ -188,7 +173,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
           <PrimaryButton
             text="Save and close"
             style={{ marginLeft: 'auto' }}
-            onClick={onNext}
+            onClick={saveAndDone}
             disabled={saveDisabled}
           />
           <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
@@ -206,12 +191,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
         <DefaultButton
           text="Previous"
           style={{ marginLeft: 'auto' }}
-          onClick={onPrevious}
+          onClick={saveAndPrev}
           disabled={previousDisabled}
         />
-        <PrimaryButton text="Next" disabled={nextDisabled} onClick={onNext} />
+        <PrimaryButton text="Next" disabled={nextDisabled} onClick={saveAndNext} />
         <Separator vertical />
-        <DefaultButton text="Done" primary={isLastImg} />
+        <DefaultButton text="Done" primary={isLastImg} onClick={saveAndDone} />
       </Stack>
     );
   };
