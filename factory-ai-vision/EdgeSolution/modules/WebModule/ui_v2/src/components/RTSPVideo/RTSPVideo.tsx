@@ -13,6 +13,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCre
   const [streamId, setStreamId] = useState<string>('');
 
   const onCreateStream = useCallback((): void => {
+    if (!rtsp) return;
     const url =
       partId === null
         ? `/api/streams/connect/?rtsp=${rtsp}`
@@ -65,8 +66,26 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCre
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
   return (
-    <div style={{ width: '100%', height: '100%', backgroundColor: '#F3F2F1' }}>
-      {src ? <img src={src} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
+    <div style={{ width: '100%', height: '100%', backgroundColor: '#F3F2F1', position: 'relative' }}>
+      {src ? (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              left: 20,
+              top: 20,
+              background: '#E00B1C',
+              borderRadius: '4px',
+              color: 'white',
+              padding: '5px 8px',
+              fontWeight: 'bold',
+            }}
+          >
+            • LIVE
+          </div>
+          <img src={src} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        </>
+      ) : null}
     </div>
   );
 };
