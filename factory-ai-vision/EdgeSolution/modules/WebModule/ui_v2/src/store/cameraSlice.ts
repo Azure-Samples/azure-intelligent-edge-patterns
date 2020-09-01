@@ -157,3 +157,10 @@ export const selectAllCamerasWithLocation = createSelector(
     }));
   },
 );
+
+export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
+  cameras.map((e) => ({
+    key: e.id,
+    text: e.name,
+  })),
+);

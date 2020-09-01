@@ -110,6 +110,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     camera: data?.camera ?? null,
     location: data?.location ?? null,
     parts: data?.parts ?? [],
+    trainingProject: data?.project ?? null,
     modelUrl: data?.download_uri ?? '',
     needRetraining: data?.needRetraining ?? true,
     accuracyRangeMin: data?.accuracyRangeMin ?? 60,
@@ -226,15 +227,12 @@ const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThr
   isDemo,
 });
 
-const getProjectDataByDemo = (isDemo: boolean, state: State): ProjectData => {
-  if (isDemo) return state.demoProject.data;
-  return state.project.data;
-};
+const getProjectData = (state: State): ProjectData => state.project.data;
 
-export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Promise<void> => {
-  dispatch(getProjectRequest(isDemo));
+export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
+  dispatch(getProjectRequest(false));
 
-  const url = isDemo === undefined ? '/api/projects/' : `/api/projects/?is_demo=${Number(isDemo)}`;
+  const url = '/api/part_detections/';
 
   return Axios.get(url)
     .then(({ data }) => {
@@ -253,35 +251,34 @@ export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Pr
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         cvProjectId: data[0]?.customvision_project_id,
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
+        trainingProject: data[0]?.project ?? null,
       };
-      dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
+      dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
       return void 0;
     })
     .catch((err) => {
-      dispatch(getProjectFailed(err, isDemo));
+      dispatch(getProjectFailed(err, false));
     });
 };
 
 export const thunkPostProject = (
   projectId,
-  selectedLocations,
   selectedParts,
   selectedCamera,
-  isDemo,
+  selectedTrainingProject,
 ): ProjectThunk => (dispatch, getState): Promise<number> => {
-  const isProjectEmpty = projectId === null;
-  const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
+  const isProjectEmpty = projectId === null || projectId === undefined;
+  const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
 
-  dispatch(postProjectRequest(isDemo));
+  dispatch(postProjectRequest(false));
 
-  const projectData = getProjectDataByDemo(isDemo, getState());
+  const projectData = getProjectData(getState());
 
   return Axios(url, {
     data: {
-      location: selectedLocations.id,
-      parts: selectedParts.map((e) => e.id),
-      camera: selectedCamera.id,
-      download_uri: projectData.modelUrl,
+      parts: selectedParts,
+      camera: selectedCamera,
+      project: selectedTrainingProject,
       needRetraining: projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
@@ -296,21 +293,23 @@ export const thunkPostProject = (
     },
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data, isDemo));
-      getTrain(data.id, isDemo);
+      dispatch(postProjectSuccess(data, false));
+      getTrain(data.id);
       return data.id;
     })
     .catch((err) => {
-      dispatch(postProjectFail(err, isDemo));
+      dispatch(postProjectFail(err, false));
     }) as Promise<number>;
 };
-const getTrain = (projectId, isTestModel: boolean): void => {
-  const url = isTestModel ? `/api/projects/${projectId}/train?demo=True` : `/api/projects/${projectId}/train`;
-  Axios.get(url).catch((err) => console.error(err));
+const getTrain = (projectId): void => {
+  Axios.get(`/api/part_detections/${projectId}/configure`).catch((err) => console.error(err));
 };
 
+/**
+ * @deprecated
+ */
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
-  const projectId = getProjectDataByDemo(isDemo, getState()).id;
+  const projectId = getProjectData(getState()).id;
   return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
       return dispatch(deleteProjectSuccess(isDemo));
@@ -324,7 +323,7 @@ export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState)
 export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
   dispatch(getTrainingLogRequest(isDemo));
 
-  return Axios.get(`/api/projects/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
@@ -336,24 +335,29 @@ export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (disp
     .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
 };
 
-export const thunkGetTrainingMetrics = (projectId: number, isDemo: boolean) => (dispacth): Promise<any> => {
+export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boolean) => (
+  dispacth,
+): Promise<any> => {
   dispacth(getTrainingMetricsRequest(isDemo));
 
-  return Axios.get(`/api/projects/${projectId}/train_performance`)
+  return Axios.get(`/api/projects/${trainingProjectId}/train_performance`)
     .then(({ data }) => {
-      const curConsequence: Consequence = data.new
+      const newIteration = data.iterations.find((e) => e.iteration_name === 'new');
+      const prevIteration = data.iterations.find((e) => e.iteration_name === 'previous');
+
+      const curConsequence: Consequence = newIteration
         ? {
-            precision: data.new.precision,
-            recall: data.new.recall,
-            mAP: data.new.map,
+            precision: newIteration.precision,
+            recall: newIteration.recall,
+            mAP: newIteration.map,
           }
         : null;
 
-      const prevConsequence: Consequence = data.previous
+      const prevConsequence: Consequence = prevIteration
         ? {
-            precision: data.previous.precision,
-            recall: data.previous.recall,
-            mAP: data.previous.map,
+            precision: prevIteration.precision,
+            recall: prevIteration.recall,
+            mAP: prevIteration.map,
           }
         : null;
 
@@ -365,7 +369,7 @@ export const thunkGetTrainingMetrics = (projectId: number, isDemo: boolean) => (
 export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
   dispatch(getInferenceMetricsRequest(isDemo));
 
-  return Axios.get(`/api/projects/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export`)
     .then(({ data }) => {
       return dispatch(
         getInferenceMetricsSuccess(
@@ -387,9 +391,9 @@ export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(updateProbThresholdRequest(isDemo));
-  const { id: projectId, probThreshold } = getProjectDataByDemo(isDemo, getState());
+  const { id: projectId, probThreshold } = getProjectData(getState());
 
-  return Axios.get(`/api/projects/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
+  return Axios.get(`/api/part_detections/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
     .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
     .catch((e) => {
       if (e.response) {
@@ -410,9 +414,9 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(postProjectRequest(isDemo));
-  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectDataByDemo(isDemo, getState());
+  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectData(getState());
 
-  return Axios.patch(`/api/projects/${projectId}/`, {
+  return Axios.patch(`/api/part_detections/${projectId}/`, {
     accuracyRangeMin,
     accuracyRangeMax,
   })
