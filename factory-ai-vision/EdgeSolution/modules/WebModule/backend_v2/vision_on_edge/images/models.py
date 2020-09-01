@@ -12,9 +12,9 @@ from django.db.models.signals import pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
-from vision_on_edge.azure_projects.models import Project
-
 from ..azure_parts.models import Part
+from ..azure_projects.models import Project
+from ..cameras.models import Camera
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,7 @@ class Image(models.Model):
     """
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     part = models.ForeignKey(Part, on_delete=models.CASCADE)
+    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
     image = models.ImageField(upload_to="images/")
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)

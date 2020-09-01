@@ -79,7 +79,7 @@ def delete_img_on_customvision(**kwargs):
     Args:
         kwargs:
     """
-    logger.exception("Deleting a image................................")
+    logger.info("Deleting an image.")
     instance = kwargs['instance']
     if not instance.project or \
             not instance.project.setting or \
@@ -102,4 +102,4 @@ def delete_img_on_customvision(**kwargs):
             image_ids=[instance.customvision_id])
         logger.info("Delete success")
     except Exception:
-        logger.exception("delete_tag unexpected_error")
+        logger.exception("Delete Image unexpected_error")

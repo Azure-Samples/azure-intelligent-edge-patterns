@@ -8,9 +8,9 @@ import time
 
 import requests
 
-from ..azure_training_status.models import TrainingStatus
-from ..azure_pd_deploy_status.utils import upcreate_deploy_status
 from ..azure_pd_deploy_status import progress as deploy_progress
+from ..azure_pd_deploy_status.utils import upcreate_deploy_status
+from ..azure_training_status.models import TrainingStatus
 from ..general.utils import normalize_rtsp
 from .models import PartDetection
 
@@ -48,6 +48,13 @@ def if_trained_then_deploy_worker(part_detection_id):
         if not part_detection_obj.deployed:
 
             def _send(download_uri, rtsp, parts):
+                requests.get(
+                    "http://" + str(part_detection_obj.inference_module.url) +
+                    "/update_part_detection_id",
+                    params={
+                        "part_detection_id": part_detection_obj.id,
+                    },
+                )
                 requests.get(
                     "http://" + str(part_detection_obj.inference_module.url) +
                     "/update_cam",

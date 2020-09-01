@@ -9,9 +9,9 @@ from channels.layers import get_channel_layer
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Notification
-from ..azure_training_status.models import TrainingStatus
 from ..azure_pd_deploy_status.models import DeployStatus
+from ..azure_training_status.models import TrainingStatus
+from .models import Notification
 
 logger = logging.getLogger(__name__)
 
