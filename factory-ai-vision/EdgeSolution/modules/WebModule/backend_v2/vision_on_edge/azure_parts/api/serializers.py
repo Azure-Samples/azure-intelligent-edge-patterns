@@ -1,5 +1,5 @@
-"""
-App serializers
+# -*- coding: utf-8 -*-
+"""App serializers.
 """
 
 import logging
@@ -17,9 +17,6 @@ class PartSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        """Meta.
-        """
-
         model = Part
         fields = '__all__'
         extra_kwargs = {

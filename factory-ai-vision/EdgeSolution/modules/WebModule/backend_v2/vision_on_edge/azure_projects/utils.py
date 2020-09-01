@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Utilities
+"""App utilities.
 """
 
 import json

@@ -1,5 +1,5 @@
-"""
-Stream views
+# -*- coding: utf-8 -*-
+"""App API views.
 """
 
 import datetime

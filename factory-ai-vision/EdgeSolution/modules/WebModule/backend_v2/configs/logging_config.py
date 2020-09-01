@@ -1,8 +1,10 @@
-"""Project Logging configs
+# -*- coding: utf-8 -*-
+"""Project logging configs.
 
 This module export logging dictionary for project.
 Dictionary is read by configs/setting.py.
 """
+
 LOGGING_CONFIG_PRODUCTION = {
     'version': 1,
     'disable_existing_loggers': False,

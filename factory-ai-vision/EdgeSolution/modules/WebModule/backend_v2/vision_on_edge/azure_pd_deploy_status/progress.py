@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App constants
+"""App constants.
 """
 
 PROGRESS_1_WATINING_PROJECT_TRAINED: dict = {

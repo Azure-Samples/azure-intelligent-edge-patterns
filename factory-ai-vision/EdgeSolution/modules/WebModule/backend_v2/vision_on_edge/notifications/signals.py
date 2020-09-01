@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Signals
+"""App signals.
 """
 
 import logging
@@ -62,9 +62,6 @@ def notification_post_save_dequeue_handler(**kwargs):
     """
 
     logger.info("dequeue notification...")
-    if "instance" not in kwargs:
-        return
-
     instance = kwargs['instance']
     if Notification.objects.filter(sender=instance.sender).count() >= 10:
         Notification.objects.filter(

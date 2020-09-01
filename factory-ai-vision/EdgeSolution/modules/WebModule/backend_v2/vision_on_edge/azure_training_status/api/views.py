@@ -1,4 +1,5 @@
-"""App views
+# -*- coding: utf-8 -*-
+"""App API views.
 """
 
 from __future__ import absolute_import, unicode_literals

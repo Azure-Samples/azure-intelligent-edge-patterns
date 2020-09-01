@@ -1,4 +1,5 @@
-"""Stream models
+# -*- coding: utf-8 -*-
+"""App models.
 """
 
 import logging

@@ -1,4 +1,6 @@
-"""App"""
+# -*- coding: utf-8 -*-
+"""App.
+"""
 
 import logging
 import sys
@@ -10,21 +12,20 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=C0415
 class CamerasConfig(AppConfig):
-    """App Config"""
+    """App Config.
+    """
 
     name = 'vision_on_edge.cameras'
 
     def ready(self):
-        """ready
+        """ready.
         """
 
         if 'runserver' in sys.argv:
-
             from .models import Camera
             from ..locations.models import Location
 
             logger.info("App ready ready while running server")
-
             create_demo = True
             if create_demo:
                 logger.info("Creating a demo camera object.")

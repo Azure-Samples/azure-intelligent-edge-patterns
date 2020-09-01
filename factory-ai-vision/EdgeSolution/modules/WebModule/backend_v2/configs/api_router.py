@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""API router
+"""API router.
 """
 
 from django.conf.urls import url

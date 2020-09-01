@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Exceptions
+"""App exceptions.
 """
 
 from rest_framework.exceptions import APIException

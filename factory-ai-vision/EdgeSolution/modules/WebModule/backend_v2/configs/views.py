@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 """Project Static Views.
 
 This view host static file generate from WebModule/ui
 """
+
 import logging
 import os
 

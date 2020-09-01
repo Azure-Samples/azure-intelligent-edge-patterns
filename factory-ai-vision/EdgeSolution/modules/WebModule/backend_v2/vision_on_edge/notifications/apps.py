@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Notifications App
+"""App.
 """
 
 import logging

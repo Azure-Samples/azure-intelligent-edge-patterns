@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App models
+"""App models.
 """
 
 import logging
@@ -33,7 +33,8 @@ class Part(models.Model):
 
     @staticmethod
     def pre_save(update_fields, **kwargs):
-        """Part pre_save"""
+        """pre_save.
+        """
         instance = kwargs['instance']
         try:
             update_fields = []

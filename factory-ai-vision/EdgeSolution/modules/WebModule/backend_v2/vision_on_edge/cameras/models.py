@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class Camera(models.Model):
-    """Camera.
+    """Camera Model.
     """
 
     name = models.CharField(max_length=200)
@@ -65,10 +65,8 @@ class Camera(models.Model):
 
     @staticmethod
     def pre_save(**kwargs):
-        """Camera pre_save"""
-
-        if 'instance' not in kwargs:
-            return
+        """pre_save.
+        """
         instance = kwargs['instance']
         if instance.is_demo:
             return
@@ -80,7 +78,7 @@ class Camera(models.Model):
 
     @staticmethod
     def post_save(**kwargs):
-        """Camera post_save
+        """post_save.
         """
         # TODO: Move this to part_detection
         instance = kwargs['instance']

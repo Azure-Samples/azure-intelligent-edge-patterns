@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 """Project Protocol router.
 
 Place websocket endpoint here.
 """
+
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from django.conf.urls import url

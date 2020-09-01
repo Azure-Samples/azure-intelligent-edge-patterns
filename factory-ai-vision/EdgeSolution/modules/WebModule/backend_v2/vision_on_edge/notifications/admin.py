@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App admin
+"""App admin.
 """
 
 from django.contrib import admin
