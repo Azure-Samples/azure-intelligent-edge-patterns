@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 
 import { Image } from '../store/type';
 import LabelDisplayImage from './LabelDisplayImage';
-import LabelingPage from './LabelingPage/LabelingPage';
+import LabelingPage, { LabelPageMode } from './LabelingPage/LabelingPage';
 import { openLabelingPage } from '../store/labelingPageSlice';
 
 const ROWS_PER_PAGE = 3;
@@ -66,7 +66,7 @@ export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ i
           onRenderCell={onRenderCell}
         />
       </FocusZone>
-      <LabelingPage isRelabel={isRelabel} />
+      <LabelingPage isRelabel={isRelabel} mode={LabelPageMode.SinglePage} />
     </>
   );
 };
