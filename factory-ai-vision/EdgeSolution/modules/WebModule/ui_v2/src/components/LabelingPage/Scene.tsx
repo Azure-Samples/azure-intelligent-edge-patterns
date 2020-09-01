@@ -4,7 +4,7 @@ import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
-import getResizeImageFunction from './util/resizeImage';
+import getResizeImageFunction, { CanvasFit } from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
@@ -40,7 +40,7 @@ const Scene: FC<SceneProps> = ({
   imgPart,
 }) => {
   const dispatch = useDispatch();
-  const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
+  const resizeImage = useCallback(getResizeImageFunction(defaultSize, CanvasFit.Contain), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
   const noMoreCreate = useMemo(
     () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
