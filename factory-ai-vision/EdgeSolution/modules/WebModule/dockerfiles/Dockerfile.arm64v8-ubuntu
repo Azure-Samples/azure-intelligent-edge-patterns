@@ -41,13 +41,13 @@ FROM backend-base as backend-production
 
 WORKDIR /app
 
-COPY backend/requirements requirements
+COPY backend_v2/requirements requirements
 RUN pip3 install -r ./requirements/production-arm.txt
 
-COPY backend/manage.py .
-COPY backend/config.py .
-COPY backend/vision_on_edge vision_on_edge
-COPY backend/configs configs
+COPY backend_v2/manage.py .
+COPY backend_v2/config.py .
+COPY backend_v2/vision_on_edge vision_on_edge
+COPY backend_v2/configs configs
 RUN python3 manage.py makemigrations
 RUN python3 manage.py migrate
 
