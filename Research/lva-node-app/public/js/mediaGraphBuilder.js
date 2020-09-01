@@ -555,7 +555,7 @@ function createMediaGraph()
     
     graphTopologies[graphname] = createdGraph.jsonObject;
 
-    graphSetTopology(graphname, true);
+    graphSetTopology(graphname);
     document.getElementById("dynamic-source").innerHTML="Sources: ";
     document.getElementById("dynamic-processor").innerHTML="Processors: ";
     document.getElementById("dynamic-sink").innerHTML="Sinks: ";
@@ -581,7 +581,7 @@ function setMediaGraphFromTemplate(htmlElement)
     $.getJSON(jsonLocation, function(response) 
     {
         graphTopologies[response.name]=response;
-        graphSetTopology(response.name, true);
+        graphSetTopology(response.name);
     })
 }
 

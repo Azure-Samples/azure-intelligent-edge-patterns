@@ -29,29 +29,16 @@ function getGlobals()
 {
   return new Promise((resolve, reject) => 
   {
-    var request = sendRequest("", `http://localhost:${PORT}/getglobals`, "GET");
+    var request = sendRequest("", `http://localhost:${PORT}/globals`, "GET");
     request.onreadystatechange = function () 
     {
       if(request.readyState == 4 && request.status == 200)
       {
         let response= JSON.parse(request.response);
         console.log(response);
-        for (var list in response)
-        {
-          let temp=response[list].name;
-          switch(temp)
-          {
-            case 'graphInstances':
-              graphInstances=response[list].value;
-              break;
-            case 'graphTopologies':
-              graphTopologies=response[list].value;
-              break;
-            case 'cameras':
-              cameras=response[list].value;
-              break;
-          }
-        }
+        graphInstances=response[0].graphInstances;
+        graphTopologies=response[0].graphTopologies;
+        cameras=response[0].cameras;
         resolve(response);
       }
     }
@@ -66,19 +53,12 @@ function sendGlobals()
   let globals = 
   [
     {
-      "name": "graphInstances",
-    "value": graphInstances
-    },
-    {
-      "name": "graphTopologies",
-      "value": graphTopologies
-    },
-    {
-      "name": "cameras",
-      "value": cameras
+      "graphInstances": graphInstances,
+      "graphTopologies": graphTopologies,
+      "cameras": cameras
     }
-  ]
-  sendRequest(globals, `http://localhost:${PORT}/globals`);
+  ];
+  sendRequest(globals, `http://localhost:${PORT}/globals`, "PUT");
 }
 
 /**
@@ -122,21 +102,13 @@ function deleteFromParentListItem(htmlElement)
 */
 function makeUniqueId(nameToInclude = "") 
 {
-  return (nameToInclude + CreateUUID());
-}
-
-/**
-* Creates a UUID 
-* @returns {UUID} - unique identifier
-*/
-function CreateUUID() 
-{
-  return 'xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function (char) 
+  return (nameToInclude + 'xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function (char) 
   {
     let rand = Math.random() * 16 | 0, v = char == 'x' ? rand : (rand & 0x3 | 0x8);
     return v.toString(16);
-  });
+  }));
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //configuration page functions
@@ -184,7 +156,7 @@ function instanceMethodDropdowns(htmlElement)
       break;
     case 'topology-set':
       checkBoxNameList=Object.keys(graphTopologies);
-      onclickMethod='graphSetTopology(this)';
+      onclickMethod='graphSetTopology(this.innerText)';
       break;
   }
 
@@ -213,14 +185,11 @@ function createFullPayload(methodNameParam, methodPayload)
 
 /**
 * see sample graph topologies here: https://github.com/Azure/live-video-analytics/tree/master/MediaGraph/topologies
-* @param {string | HTMLButtonElement} htmlElement - either a string graph name or the HTML button containing the name of the graph
-* @param {boolean} - if name is passed = true
+* @param {string} topologyName - graph topology name
 * @returns {void}
 */
-function graphSetTopology(htmlElement, nameIsPassed=false)
+function graphSetTopology(topologyName)
 {
-  let topologyName = nameIsPassed ? htmlElement : htmlElement.innerText;
-
   let topology = graphTopologies[topologyName];
   if(topology == undefined)
   {
@@ -419,9 +388,21 @@ async function invokeLVAMethod(fullPayload)
 */
 function emitdata()
 { 
-  sendRequest("", `http://localhost:${PORT}/hubmessages`, "GET");
-  document.getElementById('stop-messages').disabled=false;
-  document.getElementById('start-messages').disabled=true;
+  let request = sendRequest("", `http://localhost:${PORT}/hubmessages`, "GET");
+  request.onreadystatechange = function () 
+    {
+      //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
+      if (request.readyState == 4 && request.status == 200) 
+      {
+        document.getElementById('stop-messages').disabled=false;
+        document.getElementById('start-messages').disabled=true;
+      }
+      else if (request.readyState == 4 && request.status == 404)
+      {
+        alert(request.response);
+      }
+    }
+
 }
 
 /**

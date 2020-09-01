@@ -81,43 +81,40 @@ app.get('/output', function (req, res)
 * send client global variables upon request 
 * @returns {void}
 */
-app.get('/getglobals', function (req, res) 
+app.get('/globals', function (req, res) 
 {
   console.log("get globals get function!");
-  let globals = 
-  [
-    {
-      "name": "graphInstances",
-      "value": graphInstances
-    },
-    {
-      "name": "graphTopologies",
-      "value": graphTopologies
-    },
-    {
-      "name": "cameras",
-      "value": cameras
-    }
-  ];
+  let globals=[{
+    "graphInstances": graphInstances,
+    "graphTopologies": graphTopologies,
+    "cameras": cameras
+  }];
   res.send(JSON.stringify(globals));
 })
 
+/**
+* update global variables when sent by user (user called setGlobals)
+*/
+app.put('/globals', function (req, res)
+{
+  console.log("set globals");
+  console.log(req.body);
+  graphInstances=req.body[0].graphInstances;
+  graphTopologies=req.body[0].graphTopologies;
+  cameras=req.body[0].cameras;
+  res.end();
+})
 /**
 * start sending live stream hub messages to client via websocket 
 * @returns {void}
 */
 app.get('/hubMessages', function(req, res)
 {
-  if (!validCredentialsAreSet(res))
-  {
-    return;
-  }
-  else
+  if (validCredentialsAreSet(res))
   {
     receiveHubMessages();
-    //always close requests
-    res.send();
-  }  
+    res.end();
+  } 
 })
 
 /**
@@ -127,7 +124,7 @@ app.get('/hubMessages', function(req, res)
 app.get('/stopMessages', function(req, res)
 {
   eventHubReader.stopReadMessage();
-  res.send();
+  res.end();
 })
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +146,7 @@ app.post('/runmethod', function (req, res)
       let obj=[{method: methodName}, response.result];
       //send results of invoking the method back to the client
       res.send(obj); 
-    }).catch(error =>
+    }).catch((error) =>
     {
       console.error(error.message);
       res.status(400).send(error.message);
@@ -179,40 +176,10 @@ app.post('/connectToIotHub', function (req, res)
 }) 
 
 
-/**
-* update global variables when sent by user
-*/
-app.post('/globals', function (req, res)
-{
-  setGlobals(req, res);
-  res.send();
-})
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // defined functions
 
-/**
-* set global variables when passed by user 
-*/
-function setGlobals(req, res)
-{
-  for (let i in req.body)
-  {
-    let name=req.body[i].name;
-    switch(name)
-    {
-      case 'graphInstances':
-        graphInstances=req.body[i].value;
-        break;
-      case 'graphTopologies':
-        graphTopologies=req.body[i].value;
-        break;
-      case 'cameras':
-        cameras=req.body[i].value;
-        break;
-    }
-  }
-}
 
 /**
 * set device ID and IoTHub connection string
@@ -246,9 +213,9 @@ wss.broadcast = (data) =>
         try 
         {
           client.send(data);
-        } catch (er) 
+        } catch (error) 
         {
-          console.error(er);
+          console.error(error);
         }
       }
     });
@@ -275,13 +242,16 @@ async function receiveHubMessages()
               };
 
               wss.broadcast(JSON.stringify(payload));
-            } catch (err) 
+            } catch (error) 
             {
-              console.error('Error broadcasting: [%s] from [%s].', err, message);
+              console.error('Error broadcasting: [%s] from [%s].', error, message);
             }
 
           });
-      })().catch();
+      })().catch((error) =>
+        {
+          console.error('Error in receiveHubMessages: ', error);
+        });
 }
 
 /**
@@ -321,7 +291,7 @@ function invokeLVAMethod(req, res)
         {
             methodName: req.body.methodName,
             payload: req.body.Payload,
-            responseTimeoutInSeconds: 200,
+            //responseTimeoutInSeconds: 200,
             connectTimeoutInSeconds: 2
         });
 };
