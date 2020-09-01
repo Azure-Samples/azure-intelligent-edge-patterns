@@ -65,6 +65,13 @@ class PartDetection(models.Model):
         def _r(confidence_min, confidence_max, max_images):
             requests.get(
                 "http://" + instance.inference_module.url +
+                "/update_part_detection_id",
+                params={
+                    "part_detection_id": instance.id,
+                },
+            )
+            requests.get(
+                "http://" + instance.inference_module.url +
                 "/update_retrain_parameters",
                 params={
                     "confidence_min": confidence_min,
