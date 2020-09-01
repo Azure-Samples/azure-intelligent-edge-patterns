@@ -6,6 +6,7 @@ import logging
 import threading
 import time
 
+from django.utils import timezone
 import requests
 
 from ..azure_training_status.models import TrainingStatus
@@ -72,6 +73,7 @@ def if_trained_then_deploy_worker(part_detection_id):
                                    parts)).start()
 
             part_detection_obj.deployed = True
+            part_detection_obj.deploy_timestamp = timezone.now()
             part_detection_obj.save()
             upcreate_deploy_status(part_detection_id=part_detection_id,
                                    **deploy_progress.PROGRESS_0_OK)
