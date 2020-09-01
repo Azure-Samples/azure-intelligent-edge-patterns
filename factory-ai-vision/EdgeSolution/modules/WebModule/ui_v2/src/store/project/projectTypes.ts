@@ -54,9 +54,10 @@ export type Consequence = {
 
 export type ProjectData = {
   id: number;
-  camera: any;
-  location: any;
-  parts: any[];
+  camera: number;
+  location: number;
+  parts: number[];
+  trainingProject: number;
   needRetraining: boolean;
   accuracyRangeMin: number;
   accuracyRangeMax: number;

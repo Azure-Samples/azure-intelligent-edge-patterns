@@ -95,7 +95,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             kwargs:
 
         Returns:
-            Response:
+            Response: Return project with updated timestamp
         """
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, pk=pk)
@@ -275,7 +275,7 @@ def train(request, project_id):
     """
     is_demo = request.query_params.get("demo")
     project_obj = Project.objects.get(pk=project_id)
-    parts = [p.name for p in project_obj.parts.all()]
+    parts = Part.objects.filter(project_id=project_obj.id)
     rtsp = project_obj.camera.rtsp
     download_uri = project_obj.download_uri
 
@@ -688,6 +688,7 @@ def pull_cv_project(request, project_id):
         return Response({"status": "ok"}, status=status.HTTP_200_OK)
     except Exception:
         err_msg = traceback.format_exc()
+        logger.exception("Pull Custom Vision Project error")
         return Response(
             {
                 "status": "failed",

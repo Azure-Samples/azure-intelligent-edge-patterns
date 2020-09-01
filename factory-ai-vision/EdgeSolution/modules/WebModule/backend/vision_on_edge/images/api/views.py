@@ -1,22 +1,38 @@
+# -*- coding: utf-8 -*-
+"""App views
 """
-Azure training views
-"""
+
 from __future__ import absolute_import, unicode_literals
 
-import logging
-
-from rest_framework import viewsets
+from filters.mixins import FiltersMixin
+from rest_framework import filters, status, viewsets
+from rest_framework.response import Response
 
 from ..models import Image
 from .serializers import ImageSerializer
 
-logger = logging.getLogger(__name__)
 
-
-class ImageViewSet(viewsets.ModelViewSet):  # pylint: disable=R0901
-    """
-    Image ModelViewSet
+# pylint: disable=too-many-ancestors
+class ImageViewSet(FiltersMixin, viewsets.ModelViewSet):
+    """Image ModelViewSet
     """
 
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        "is_demo": "is_demo",
+        "project_id": "project_id",
+    }
+
+    def destroy(self, request, **kwargs):
+        """destroy.
+
+        only delete image on customvision when api_call
+        """
+        if Image.objects.filter(pk=kwargs['pk']).exists():
+            img_obj = Image.objects.get(pk=kwargs['pk'])
+            img_obj.delete_on_customvision = True
+            img_obj.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

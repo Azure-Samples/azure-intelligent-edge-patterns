@@ -11,11 +11,10 @@ import {
   IDropdownOption,
 } from '@fluentui/react';
 import { useSelector } from 'react-redux';
-import { createSelector } from '@reduxjs/toolkit';
 
 import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
-import { selectAllCameras, selectCameraById } from '../store/cameraSlice';
+import { cameraOptionsSelector, selectCameraById } from '../store/cameraSlice';
 
 const { palette } = getTheme();
 
@@ -23,13 +22,6 @@ const functionBtnStyleSets = mergeStyleSets({
   button: { width: '90%' },
   icon: { color: palette.themePrimary },
 });
-
-const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
-  cameras.map((e) => ({
-    key: e.id,
-    text: e.name,
-  })),
-);
 
 enum CaptureLabelMode {
   PerImage,
