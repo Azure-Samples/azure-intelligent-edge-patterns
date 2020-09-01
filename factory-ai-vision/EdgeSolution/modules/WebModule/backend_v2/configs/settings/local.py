@@ -16,5 +16,3 @@ from .base import *
 DEBUG = True
 
 LOGGING = logging_config.LOGGING_CONFIG_DEV
-
-# pylint: enable = wildcard-import, unused-wildcard-import

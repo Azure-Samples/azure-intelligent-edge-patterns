@@ -1,5 +1,5 @@
-"""
-Azure Training Status Serializers
+# -*- coding: utf-8 -*-
+"""App API serializers.
 """
 
 import logging
@@ -16,8 +16,5 @@ class TrainingStatusSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        """Meta.
-        """
-
         model = TrainingStatus
         fields = '__all__'

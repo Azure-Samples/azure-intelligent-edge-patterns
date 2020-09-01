@@ -1,6 +1,5 @@
-"""Utilities
-
-App Insight Utilities.
+# -*- coding: utf-8 -*-
+"""App utilities.
 """
 
 import logging
@@ -14,8 +13,6 @@ def get_app_insight_logger() -> logging.Logger:
     """get_app_insight_logger.
 
     Return a logger with AzureLogHandler added.
-
-    Args:
 
     Returns:
         logging.Logger:

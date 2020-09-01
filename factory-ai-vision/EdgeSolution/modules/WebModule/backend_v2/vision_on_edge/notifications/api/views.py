@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App API Views
+"""App API views.
 """
 
 import logging

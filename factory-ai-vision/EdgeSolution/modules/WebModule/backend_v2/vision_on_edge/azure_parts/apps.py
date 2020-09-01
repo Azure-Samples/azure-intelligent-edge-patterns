@@ -1,4 +1,6 @@
-"""App"""
+# -*- coding: utf-8 -*-
+"""App.
+"""
 
 import logging
 import sys
@@ -9,15 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class AzurePartsConfig(AppConfig):
-    """App Config
-
-    Import models and signals and create some demo objects
+    """App Config.
     """
+
     name = 'vision_on_edge.azure_parts'
 
     def ready(self):
-        """
-        Azure Parts App ready
+        """ready.
         """
         if 'runserver' in sys.argv:
             # Import models in migrate/makemigration will occurs error.

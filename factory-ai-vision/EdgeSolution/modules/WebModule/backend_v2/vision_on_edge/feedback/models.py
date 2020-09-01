@@ -1,5 +1,5 @@
-"""
-Models
+# -*- coding: utf-8 -*-
+"""App models.
 """
 
 import logging
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class Feedback(models.Model):
-    """Feedback.
+    """Feedback Model.
     """
 
     VERYBAD = 'VB'
@@ -42,8 +42,6 @@ class Feedback(models.Model):
         Args:
             kwargs:
         """
-        if 'instance' not in kwargs:
-            return
         instance = kwargs['instance']
         logger.warning('Satisfaction: %s', instance.satisfaction)
 

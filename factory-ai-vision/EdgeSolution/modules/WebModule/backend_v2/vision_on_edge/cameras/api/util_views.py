@@ -1,5 +1,5 @@
-"""
-Camera utils views
+# -*- coding: utf-8 -*-
+"""App utils views.
 """
 
 import logging
@@ -15,7 +15,11 @@ logger = logging.getLogger(__name__)
 
 @api_view()
 def verify_rtsp(request):
-    """test if a rtsp is valid"""
+    """verify_rtsp.
+
+    Args:
+        request:
+    """
     logger.info("Verifying rtsp")
     rtsp = request.query_params.get('rtsp')
     logger.info("rtsp %s", rtsp)

@@ -1,4 +1,6 @@
-"""App"""
+# -*- coding: utf-8 -*-
+"""App.
+"""
 
 import logging
 import sys
@@ -14,20 +16,17 @@ DEFAULT_SETTING_NAME = 'DEFAULT_SETTING'
 
 
 class AzureSettingsConfig(AppConfig):
-    """AppConfig"""
+    """App Config"""
 
     name = 'vision_on_edge.azure_settings'
 
     def ready(self):
-        """App ready.
-
-        Import models and signals, create some demo objects.
+        """ready.
         """
 
         if 'runserver' in sys.argv:
             # pylint: disable=C0415
             from .models import Setting
-            # pylint: enable=C0415
 
             logger.info("Azure Settings AppConfig ready while running server")
             logger.info(ENDPOINT)
@@ -42,7 +41,7 @@ class AzureSettingsConfig(AppConfig):
                 default_setting = existing_settings.get()
                 default_setting.save()
 
-            elif len(Setting.objects.filter(name=DEFAULT_SETTING_NAME)) > 0:
+            elif Setting.objects.filter(name=DEFAULT_SETTING_NAME).count() > 0:
                 logger.info("Found existing %s with different (Endpoint, key)",
                             DEFAULT_SETTING_NAME)
                 logger.info("User may already changed the key ")
@@ -51,16 +50,13 @@ class AzureSettingsConfig(AppConfig):
                     name=DEFAULT_SETTING_NAME)[0]
                 default_setting.save()
 
-            elif len(
-                    Setting.objects.filter(endpoint=ENDPOINT,
-                                           training_key=TRAINING_KEY)) > 0:
+            elif Setting.objects.filter(endpoint=ENDPOINT,
+                                        training_key=TRAINING_KEY).count() > 0:
                 logger.info(
-                    "Found existing (Endpoint, key) with different setting name"
+                    "Found existing Endpoint+Key with different name"
                 )
-                logger.info("Pass...")
-
                 default_setting = Setting.objects.filter(
-                    endpoint=ENDPOINT, training_key=TRAINING_KEY)[0]
+                    endpoint=ENDPOINT, training_key=TRAINING_KEY).first()
                 default_setting.save()
             else:
                 logger.info("Creating new %s", DEFAULT_SETTING_NAME)

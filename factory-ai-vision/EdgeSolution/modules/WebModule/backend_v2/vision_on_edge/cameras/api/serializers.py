@@ -1,5 +1,5 @@
-"""
-Camera api Serializers
+# -*- coding: utf-8 -*-
+"""App API serializers.
 """
 
 import logging
@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class CameraSerializer(serializers.ModelSerializer):
-    """CameraSerializer"""
+    """CameraSerializer.
+    """
 
     class Meta:
         model = Camera

@@ -1,6 +1,5 @@
-"""App Models.
-
-Include TrainingStatus.
+# -*- coding: utf-8 -*-
+"""App models.
 """
 
 import logging

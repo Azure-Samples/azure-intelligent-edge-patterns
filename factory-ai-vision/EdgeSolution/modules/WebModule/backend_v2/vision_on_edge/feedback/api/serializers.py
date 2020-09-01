@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""App API serializers.
+"""
+
 import logging
 
 from django.contrib.auth.models import User

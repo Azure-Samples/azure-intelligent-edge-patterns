@@ -1,5 +1,4 @@
-"""
-vision_on_edge.azure_parts.
-Application for azure training part.
+# -*- coding: utf-8 -*-
+"""Azure Part App.
 """
 default_app_config = 'vision_on_edge.azure_parts.apps.AzurePartsConfig'

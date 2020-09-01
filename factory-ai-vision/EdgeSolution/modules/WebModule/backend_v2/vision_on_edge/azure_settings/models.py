@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Models
+"""App models.
 """
 
 import logging
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Setting(models.Model):
-    """A wrapper model of CustomVisionTraingClient.
+    """Setting Model.
     """
 
     name = models.CharField(max_length=100,
@@ -102,7 +102,7 @@ class Setting(models.Model):
             self: Setting instance
 
         Returns:
-            <CustomVisionTrainingClient> or None
+            CustomVisionTrainingClient or None
         """
         is_trainer_valid, trainer = Setting._validate_static(
             self.endpoint, self.training_key)

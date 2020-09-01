@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Serializers
+"""App API serializers.
 """
 
 import logging
@@ -16,9 +16,6 @@ class SettingSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        """Meta.
-        """
-
         model = Setting
         fields = '__all__'
 

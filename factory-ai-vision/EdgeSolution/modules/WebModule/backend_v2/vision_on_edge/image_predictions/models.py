@@ -1,5 +1,5 @@
-"""
-Models for azure prediction
+# -*- coding: utf-8 -*-
+"""App models.
 """
 
 import logging
@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class ImagePrediction(models.Model):
-    """Image Prediction"""
+    """Image Prediction model.
+    """
     image = models.ImageField(upload_to="predictions/")
     predicted = models.BooleanField(default=False)
 
@@ -22,11 +23,6 @@ class ImagePrediction(models.Model):
         Args:
             kwargs:
         """
-
-        if 'instance' not in kwargs:
-            logger.info("no instance given")
-            return
-
         instance = kwargs['instacne']
         logger.info("Image Prediction Presave")
         if not instance.predicted:

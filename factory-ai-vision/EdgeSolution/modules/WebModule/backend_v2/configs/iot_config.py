@@ -1,9 +1,11 @@
-"""Azure IOT Settings
+# -*- coding: utf-8 -*-
+"""Azure IoT Edge Settings.
 
 Get custom vision related config from following order
 1. Environment variables
 2. config.py
 """
+
 import os
 
 from config import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
