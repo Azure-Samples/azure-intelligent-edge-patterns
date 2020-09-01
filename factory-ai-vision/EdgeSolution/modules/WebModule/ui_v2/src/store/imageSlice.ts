@@ -3,7 +3,6 @@ import {
   createAsyncThunk,
   nanoid,
   createEntityAdapter,
-  PayloadAction,
   ThunkAction,
   Action,
 } from '@reduxjs/toolkit';
@@ -110,20 +109,19 @@ export const captureImage = createAsyncThunk<
   return normalizeImages([response.data.image]).entities;
 });
 
-export const saveLabelImageAnnotation = createAsyncThunk<
-  any,
-  { isRelabel: boolean; isRelabelDone: boolean },
-  { state: State }
->('image/saveAnno', async ({ isRelabel, isRelabelDone }, { getState }) => {
-  const imageId = getState().labelingPage.selectedImageId;
-  const annoEntities = getState().annotations.entities;
-  const labels = Object.values(annoEntities)
-    .filter((e: Annotation) => e.image === imageId)
-    .map((e: Annotation) => e.label);
+export const saveLabelImageAnnotation = createAsyncThunk<any, undefined, { state: State }>(
+  'image/saveAnno',
+  async (_, { getState }) => {
+    const imageId = getState().labelingPage.selectedImageId;
+    const annoEntities = getState().annotations.entities;
+    const labels = Object.values(annoEntities)
+      .filter((e: Annotation) => e.image === imageId)
+      .map((e: Annotation) => e.label);
 
-  await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels) });
-  return { isRelabel, imageId, isRelabelDone };
-});
+    await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels), is_relabel: true });
+    return { imageId };
+  },
+);
 
 const imageAdapter = createEntityAdapter<Image>();
 
@@ -141,18 +139,9 @@ const slice = createSlice({
       .addCase(captureImage.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
       })
-      .addCase(
-        saveLabelImageAnnotation.fulfilled,
-        (state, action: PayloadAction<{ isRelabel: boolean; imageId: number; isRelabelDone: boolean }>) => {
-          if (action.payload.isRelabel)
-            imageAdapter.updateOne(state, { id: action.payload.imageId, changes: { hasRelabeled: true } });
-          if (action.payload.isRelabelDone)
-            state.ids.forEach((id) => {
-              const { hasRelabeled } = state.entities[id];
-              if (!hasRelabeled) state.entities[id].part = null;
-            });
-        },
-      )
+      .addCase(saveLabelImageAnnotation.fulfilled, (state, action) => {
+        imageAdapter.updateOne(state, { id: action.payload.imageId, changes: { hasRelabeled: true } });
+      })
       .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
       .addCase(postImages.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
