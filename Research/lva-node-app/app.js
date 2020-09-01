@@ -84,12 +84,12 @@ app.get('/output', function (req, res)
 app.get('/globals', function (req, res) 
 {
   console.log("get globals get function!");
-  let globals=[{
-    "graphInstances": graphInstances,
-    "graphTopologies": graphTopologies,
-    "cameras": cameras
-  }];
-  res.send(JSON.stringify(globals));
+  let globals={
+    graphInstances: graphInstances,
+    graphTopologies: graphTopologies,
+    cameras: cameras
+  };
+  res.json(globals);
 })
 
 /**
@@ -98,10 +98,9 @@ app.get('/globals', function (req, res)
 app.put('/globals', function (req, res)
 {
   console.log("set globals");
-  console.log(req.body);
-  graphInstances=req.body[0].graphInstances;
-  graphTopologies=req.body[0].graphTopologies;
-  cameras=req.body[0].cameras;
+  graphInstances=req.body.graphInstances;
+  graphTopologies=req.body.graphTopologies;
+  cameras=req.body.cameras;
   res.end();
 })
 /**
@@ -145,7 +144,7 @@ app.post('/runmethod', function (req, res)
     {
       let obj=[{method: methodName}, response.result];
       //send results of invoking the method back to the client
-      res.send(obj); 
+      res.json(obj); 
     }).catch((error) =>
     {
       console.error(error.message);
@@ -160,7 +159,7 @@ app.post('/runmethod', function (req, res)
 app.post('/connectToIotHub', function (req, res) 
 {
     setConfigs(req, res);
-    iotHubConnection(req, res).then(response => { //.then is promise resolved callback. must do here because invokeLVAMethod is async
+    iotHubConnection(req, res).then(response => {
       let modules="";
         for(let i=0; i<response.responseBody.length; i++)
         {
@@ -194,7 +193,10 @@ function setConfigs(req, res)
     IOTHUB_ENDPOINT = eventhubString;
   }).catch((error) =>
   {
+    //reset values on failure
     console.error(error);
+    DEVICE_ID="";
+    IOTHUB_CONNECTION_STRING="";
     res.send(error.message);
   });
 }
@@ -248,7 +250,10 @@ async function receiveHubMessages()
             }
 
           });
-      })().catch((error) =>
+      }).then((response) =>
+      {
+        //do nothing, already handled
+      }).catch((error) =>
         {
           console.error('Error in receiveHubMessages: ', error);
         });
@@ -291,7 +296,6 @@ function invokeLVAMethod(req, res)
         {
             methodName: req.body.methodName,
             payload: req.body.Payload,
-            //responseTimeoutInSeconds: 200,
             connectTimeoutInSeconds: 2
         });
 };

@@ -24,7 +24,7 @@ class GraphNode {
     /**
      * @constructor
      * @param {string} type - The type of node to create
-     * @param {list of strings} userSelectedInputs - The list of inputs the user selected for this graph node
+     * @param {string[]} userSelectedInputs - The list of inputs the user selected for this graph node
      */
     constructor(type, userSelectedInputs)
     {
@@ -73,39 +73,27 @@ class GraphNode {
 }
 
 /**
- * MediaGraph class, contains name, desciption, sources, processors, sinks, and parameters. Creates a nice jsonObject to be used as a payload later. 
- * @class
- */
-class MediaGraph
+* @param {string} graphname 
+* @param {string} description 
+* @param {GraphNode[]} sources 
+* @param {GraphNode[]} processors 
+* @param {GraphNode[]} sinks 
+* @param {Object[]} parameters
+*/
+function constructMediaGraphJSON(graphname, description="no description set", sources, processors, sinks, parameters)
 {
-    /**
-     * @constructor
-     * @param {string} graphname 
-     * @param {string} description 
-     * @param {list of GraphNodes} sources 
-     * @param {list of GraphNodes} processors 
-     * @param {list of GraphNodes} sinks 
-     * @param {list of Objects containing parameter info} parameters 
-     */
-    constructor(graphname, description="no description set", sources, processors, sinks, parameters)
-    {
-        this.graphname=graphname;
-        this.sources=sources;
-        this.processors=processors;
-        this.sinks=sinks;
-        this.parameters=parameters;
-        this.jsonObject = {
-            "name": graphname,
-            "@apiVersion": "1.0",
-            "properties": {
-              "description": description,
-              "parameters": parameters,
-              "sources": sources,
-              "processors": processors,
-              "sinks": sinks
-            }
-          };
-    }
+    let jsonObject = {
+        "name": graphname,
+        "@apiVersion": "1.0",
+        "properties": {
+          "description": description,
+          "parameters": parameters,
+          "sources": sources,
+          "processors": processors,
+          "sinks": sinks
+        }
+      };
+    return jsonObject;
 }
 
 /**
@@ -511,9 +499,9 @@ function validateGraph(nodesAndInputsList)
 */
 function createMediaGraph() 
 {
-    const graphname = document.getElementById("graphname").value;
-    const graphDescription = document.getElementById("graph-description").value;
-    if (graphname=="") 
+    const graphname = document.getElementById("graphname");
+    const graphDescription = document.getElementById("graph-description");
+    if (graphname.value=="") 
     {
         alert("Your graph name cannot be empty!");
         return;
@@ -551,18 +539,18 @@ function createMediaGraph()
     }
 
         
-    const createdGraph = new MediaGraph(graphname, graphDescription, sources, processors, sinks, parameters);
+    const createdGraph = constructMediaGraphJSON(graphname.value, graphDescription.value, sources, processors, sinks, parameters);
     
-    graphTopologies[graphname] = createdGraph.jsonObject;
+    graphTopologies[graphname.value] = createdGraph;
 
-    graphSetTopology(graphname);
+    graphSetTopology(graphname.value);
     document.getElementById("dynamic-source").innerHTML="Sources: ";
     document.getElementById("dynamic-processor").innerHTML="Processors: ";
     document.getElementById("dynamic-sink").innerHTML="Sinks: ";
 
     //re-enable all buttons
     const resetButtons=document.getElementsByClassName("dropdown-item");
-    for (button in resetButtons)
+    for (button of resetButtons)
     {
         button.disabled = false;
     }
@@ -612,18 +600,18 @@ function displayMediaGraphs()
  */
 function displayMediaGraphsOnLoad()
 {
-    getGlobals().then((fulfilled)=>
+    getGlobals().then((response)=>
     {
         graphEntityList("GraphTopologyList", true).then((response) => 
         {
             displayMediaGraphs();
-        }).catch(reason => 
+        }).catch(error => 
             { 
-                console.log(reason);
+                console.log(error);
             });
-    }).catch(reason => 
+    }).catch((error) => 
         {
-            console.log(reason);
+            console.log(error);
         });
 }
 

@@ -32,14 +32,21 @@ function getGlobals()
     var request = sendRequest("", `http://localhost:${PORT}/globals`, "GET");
     request.onreadystatechange = function () 
     {
-      if(request.readyState == 4 && request.status == 200)
+      if(request.readyState == 4)
       {
-        let response= JSON.parse(request.response);
-        console.log(response);
-        graphInstances=response[0].graphInstances;
-        graphTopologies=response[0].graphTopologies;
-        cameras=response[0].cameras;
-        resolve(response);
+        if(request.status == 200)
+        {
+          let response=JSON.parse(request.response);
+          console.log(response);
+          graphInstances=response.graphInstances;
+          graphTopologies=response.graphTopologies;
+          cameras=response.cameras;
+          resolve(response);
+        }
+        else
+        {
+          reject("Get Globals rejection");
+        }
       }
     }
   });
@@ -51,13 +58,11 @@ function getGlobals()
 function sendGlobals()
 {
   let globals = 
-  [
     {
-      "graphInstances": graphInstances,
-      "graphTopologies": graphTopologies,
-      "cameras": cameras
-    }
-  ];
+      graphInstances: graphInstances,
+      graphTopologies: graphTopologies,
+      cameras: cameras
+    };
   sendRequest(globals, `http://localhost:${PORT}/globals`, "PUT");
 }
 
@@ -177,7 +182,6 @@ function createFullPayload(methodNameParam, methodPayload)
   let fullPayload = 
   {
     methodName: methodNameParam,
-    responseTimeoutInSeconds: 200,
     Payload: methodPayload  
   }
   return fullPayload;
@@ -196,7 +200,13 @@ function graphSetTopology(topologyName)
     alert("Topology "+topologyName+" not found.");
     return;
   }
-  invokeLVAMethod(createFullPayload("GraphTopologySet", topology));
+  invokeLVAMethod(createFullPayload("GraphTopologySet", topology)).then((response) =>
+  {
+    // do nothing, invokeLVAMethod handles
+  }).catch((error) =>
+  {
+    console.error(error);
+  });
 }
 
 /**
@@ -217,6 +227,9 @@ function graphEntityList(htmlElement, nameIsPassed=false)
     invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
     {
       resolve(response);
+    }).catch((error) =>
+    {
+      reject(error);
     });
   });
 }
@@ -236,7 +249,13 @@ function graphEntityModify(htmlElement, method="", elementNamePassed=false, meth
     "@apiVersion": "1.0",
     name: elementName
   }
-  invokeLVAMethod(createFullPayload(methodName, payload));
+  invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
+  {
+    // do nothing, invokeLVAMethod handles
+  }).catch((error) =>
+  {
+    console.error(error);
+  });;
 }
 
 
@@ -247,10 +266,18 @@ function graphEntityModify(htmlElement, method="", elementNamePassed=false, meth
 */
 async function loadInstancesAndTopologies()
 {
-  getGlobals();
-  graphEntityList("GraphInstanceList", true).then(() =>
+  getGlobals().then((response) =>
   {
-    graphEntityList("GraphTopologyList", true);
+    graphEntityList("GraphInstanceList", true).then(() =>
+    {
+      graphEntityList("GraphTopologyList", true);
+    }).catch((error) =>
+    {
+      console.error(error);
+    });
+  }).catch((error) => 
+  {
+    console.error(error);
   });
 }
 
@@ -287,8 +314,8 @@ function updateGraphsandInstances(methodName, response)
         case "GraphTopologyList":
           if (graphTopologies[item.name] == undefined )
           {
-            let newGraph = new MediaGraph(item.name, item.description, item.properties.sources, item.properties.processors, item.properties.sinks, item.properties.parameters);
-            graphTopologies[item.name] = newGraph.jsonObject;
+            let newGraph = constructMediaGraphJSON(item.name, item.description, item.properties.sources, item.properties.processors, item.properties.sinks, item.properties.parameters);
+            graphTopologies[item.name] = newGraph;
           }
           break;
       }
@@ -335,45 +362,54 @@ async function invokeLVAMethod(fullPayload)
         var result=JSON.stringify(JSON.parse(request.response)[1]);
         var isFromOutputPage=displayMethodOutput(result);
 
-        switch(methodName)
+        if(JSON.parse(result).status < 250)
         {
-          case 'GraphTopologyDelete':
-            delete graphTopologies[fullPayload.Payload.name];
-            break;
-          case 'GraphInstanceDelete':
-            delete graphInstances[fullPayload.Payload.name];
-            break;
-          case 'GraphInstanceList':
-            updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-            console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
-            break;
-          case 'GraphTopologyList':
-            updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-            console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
-            break;
-          case 'GraphInstanceSet':
-            graphInstances[fullPayload.Payload.name]=values;
-            break;
-          case 'GraphTopologySet':
-            // only alert and run display media graphs if request is coming from mediagraphs.html page
-            if(!isFromOutputPage && JSON.parse(result).status < 250)
-            {
-              alert("Success!");
-              displayMediaGraphs();
-            }
-            break;
-          default:
-            break;
+          switch(methodName)
+          {
+            case 'GraphTopologyDelete':
+              delete graphTopologies[fullPayload.Payload.name];
+              break;
+            case 'GraphInstanceDelete':
+              delete graphInstances[fullPayload.Payload.name];
+              break;
+            case 'GraphInstanceList':
+              updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
+              console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
+              break;
+            case 'GraphTopologyList':
+              updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
+              console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
+              break;
+            case 'GraphInstanceSet':
+              graphInstances[fullPayload.Payload.name]=fullPayload;
+              break;
+            case 'GraphTopologySet':
+              // only alert and run display media graphs if request is coming from mediagraphs.html page
+              graphTopologies[fullPayload.Payload.name]=fullPayload;
+              if(!isFromOutputPage)
+              {
+                alert("Success!");
+                displayMediaGraphs();
+              }
+              break;
+            default:
+              break;
+          }
+          resolve(result);
         }
-        resolve(result);
+        else
+        {
+          reject(result);
+        }
       }
-      else if (request.readyState == 4 && request.status == 404)
+      else if (request.readyState == 4)
       {
         alert(request.response);
+        reject(request.response);
       }
       else
       {
-        console.log("invokeLVAMethod request response is: "+ request.response+ "request status is: "+request.status);
+        //console.log("invokeLVAMethod request response is: "+ request.response+ "request status is: "+request.status);
         if(request.response != "" && request.status != 404 && JSON.parse(request.response)[1] != undefined)
         {
           displayMethodOutput(JSON.stringify(JSON.parse(request.response)[1]));
@@ -541,10 +577,18 @@ function setGraphInstance()
         }
     }  
 
-    invokeLVAMethod(createFullPayload("GraphInstanceSet", payload));
+    invokeLVAMethod(createFullPayload("GraphInstanceSet", payload)).then((response) =>
+    {
+      // do nothing, already handled by LVA method
+    }).catch((error) =>
+    {
+      console.error(error);
+    });
 
     //reset the Set Graph Instance modal
     $('#parameter-list')[0].innerHTML="";
+    $('#instanceset-topology').innerHTML="";
+    $('#instanceset-camera').innerHTML="";
 }
 
 /** 
