@@ -1,23 +1,24 @@
 import React from 'react';
-import { Stack, PrimaryButton, Text } from '@fluentui/react';
+import { Stack, PrimaryButton, Text, DefaultButton } from '@fluentui/react';
 
-type EmptyAddIconProps = {
-  onAddBtnClick: () => void;
-  btnTxt: string;
+type ButtonProps = {
   text: string;
+  onClick: () => void;
 };
 
-export const EmptyAddIcon: React.FC<EmptyAddIconProps> = ({ onAddBtnClick, btnTxt, text }) => (
-  <Stack tokens={{ childrenGap: 10 }} verticalAlign="center" grow>
-    <Stack.Item align="center">
-      <img src="/icons/emptyIcon.png" />
-    </Stack.Item>
-    <Stack.Item align="center">
-      <Text>{text}</Text>
-    </Stack.Item>
+type EmptyAddIconProps = {
+  title: string;
+  subTitle: string;
+  primary: ButtonProps;
+  secondary?: ButtonProps;
+};
 
-    <Stack.Item align="center">
-      <PrimaryButton text={btnTxt} onClick={onAddBtnClick} />
-    </Stack.Item>
+export const EmptyAddIcon: React.FC<EmptyAddIconProps> = ({ title, subTitle, primary, secondary }) => (
+  <Stack tokens={{ childrenGap: 10 }} verticalAlign="center" grow horizontalAlign="center">
+    <img src="/icons/emptyIcon.png" />
+    <Text variant="xLarge">{title}</Text>
+    <Text>{subTitle}</Text>
+    <PrimaryButton text={primary.text} onClick={primary.onClick} />
+    {secondary && <DefaultButton text={secondary.text} onClick={secondary.onClick} />}
   </Stack>
 );

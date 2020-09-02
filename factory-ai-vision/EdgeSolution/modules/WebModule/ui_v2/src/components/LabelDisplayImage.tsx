@@ -1,24 +1,28 @@
 import React, { useEffect, useCallback, useLayoutEffect, memo, MouseEvent, FC, useRef } from 'react';
 import Konva from 'konva';
-import { Text } from '@fluentui/react';
+import { useSelector } from 'react-redux';
 
 import useImage from './LabelingPage/util/useImage';
-import getResizeImageFunction from './LabelingPage/util/resizeImage';
+import getResizeImageFunction, { CanvasFit } from './LabelingPage/util/resizeImage';
 import { Annotation, Size2D } from '../store/type';
-import { useSelector } from 'react-redux';
 import { selectAnnoByImgId } from '../store/annotationSlice';
+import { LabelingDisplayImageCard } from './LabelingDisplayImageCard';
 
 interface LabelDisplayImageProps {
   imgId: number;
   imgUrl: string;
-  labelText?: string;
+  imgTimeStamp: string;
+  partName: string;
+  isRelabel: boolean;
   pointerCursor?: boolean;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
 const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   imgId,
   imgUrl,
-  labelText = '',
+  imgTimeStamp,
+  partName,
+  isRelabel,
   pointerCursor = false,
   onClick,
 }) => {
@@ -30,7 +34,9 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   const imgScale = useRef<number>(1);
   const shapes = useRef<BoxShape[]>([]);
   const [image, , size] = useImage(imgUrl, 'anonymous');
-  const resizeImage = useCallback(getResizeImageFunction(imgSize.current), [imgSize.current]);
+  const resizeImage = useCallback(getResizeImageFunction(imgSize.current, CanvasFit.Cover), [
+    imgSize.current,
+  ]);
   const annotations = useSelector(selectAnnoByImgId(imgId));
 
   useLayoutEffect(() => {
@@ -81,22 +87,24 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   }, [size, image, resizeImage, imgId, annotations]);
 
   return (
-    <div
-      onClick={onClick}
-      id="container"
-      style={{
-        cursor: pointerCursor ? 'pointer' : 'default',
-        display: 'flex',
-        flexFlow: 'column',
-        height: '100%',
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
+    <LabelingDisplayImageCard
+      isRelabel={isRelabel}
+      cameraName=""
+      imgTimeStamp={imgTimeStamp}
+      partName={partName}
     >
-      <div id={`display-${imgId}`} />
-      <Text styles={{ root: { textAlign: 'center' } }}>{labelText}</Text>
-    </div>
+      <div
+        onClick={onClick}
+        id="container"
+        style={{
+          cursor: pointerCursor ? 'pointer' : 'default',
+          height: '200px',
+          width: '300px',
+        }}
+      >
+        <div id={`display-${imgId}`} />
+      </div>
+    </LabelingDisplayImageCard>
   );
 };
 

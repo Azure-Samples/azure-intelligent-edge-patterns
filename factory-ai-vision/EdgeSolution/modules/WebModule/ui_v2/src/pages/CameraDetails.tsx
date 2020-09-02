@@ -24,7 +24,7 @@ import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
 import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
 import { selectLocationById } from '../store/locationSlice';
-import LabelingPage from '../components/LabelingPage/LabelingPage';
+import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
 import { captureImage } from '../store/imageSlice';
 
 const theme = getTheme();
@@ -107,7 +107,7 @@ export const CameraDetails: React.FC = () => {
           </Stack>
         </Stack>
       </Stack>
-      <LabelingPage isRelabel={false} />
+      <LabelingPage mode={LabelPageMode.SinglePage} />
       <AddEditCameraPanel
         isOpen={editPanelOpen}
         onDissmiss={closePanel}

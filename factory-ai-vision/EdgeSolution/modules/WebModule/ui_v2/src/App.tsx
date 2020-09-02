@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { initializeIcons } from '@fluentui/react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { MainLayout } from './components/MainLayout';
 import { RootRouter } from './routes/RootRouter';
 import TelemetryProvider from './components/TelemetryProvider';
 import { useWebSocket } from './hooks/useWebSocket';
-import { useDispatch, useSelector } from 'react-redux';
-import { State } from 'RootStateType';
 import { thunkGetSettingAndAppInsightKey } from './store/setting/settingAction';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { thunkGetProject } from './store/project/projectActions';
 
 function App() {
   // Listen for the notification boardcast.
@@ -21,6 +22,7 @@ function App() {
 
   useEffect(() => {
     dispatch(thunkGetSettingAndAppInsightKey());
+    dispatch(thunkGetProject());
   }, [dispatch]);
 
   useEffect(() => {

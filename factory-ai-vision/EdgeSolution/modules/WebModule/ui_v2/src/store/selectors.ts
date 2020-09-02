@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { selectAllImages } from './imageSlice';
-import { selectPartEntities } from './partSlice';
 import { selectAllAnno } from './annotationSlice';
-import { LabelImage } from './type';
+import { selectPartEntities } from './partSlice';
+import { Item as ImageListItem } from '../components/ImageList';
 
 const selectImagesByRelabel = (isRelabel) =>
   createSelector(selectAllImages, (images) =>
@@ -12,24 +12,23 @@ const selectImagesByRelabel = (isRelabel) =>
 const selectImagesByPart = (partId) =>
   createSelector(selectImagesByRelabel(false), (images) => images.filter((img) => img.part === partId));
 
-const mapImageToLabelImage = (images, partEntities, allAnno): LabelImage[] =>
-  images.map((img) => ({
-    id: img.id,
-    image: img.image,
-    labels: allAnno.filter((e) => e.image === img.id),
-    part: {
-      id: img.part,
-      name: partEntities[img.part]?.name,
-    },
-    is_relabel: img.isRelabel,
-    confidence: img.confidence,
-    hasRelabeled: img.hasRelabeled,
-  }));
-
-export const makeLabelImageSelector = (partId) =>
-  createSelector([selectImagesByPart(partId), selectPartEntities, selectAllAnno], mapImageToLabelImage);
-
-export const selectRelabelImages = createSelector(
-  [selectImagesByRelabel(true), selectPartEntities, selectAllAnno],
-  mapImageToLabelImage,
-);
+export const selectImageItemByUntagged = (unTagged: boolean) =>
+  createSelector([selectAllImages, selectAllAnno, selectPartEntities], (images, annos, partEntities) =>
+    images
+      .filter((img) => {
+        const hasAnno = !!annos.find((anno) => img.id === anno.image);
+        if (unTagged) return img.isRelabel || !hasAnno;
+        return hasAnno && !img.isRelabel;
+      })
+      .map(
+        (img): ImageListItem => {
+          return {
+            id: img.id,
+            image: img.image,
+            timestamp: img.timestamp,
+            isRelabel: img.isRelabel,
+            partName: partEntities[img.part]?.name || '',
+          };
+        },
+      ),
+  );
