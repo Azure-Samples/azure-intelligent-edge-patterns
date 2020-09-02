@@ -1,4 +1,4 @@
-## Welcome to GitHub Pages
+## Getting Started labs for machine learning
 
 You can use the [editor on GitHub](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/edit/master/docs/index.md) to maintain and preview the content for your website in Markdown files.
 
