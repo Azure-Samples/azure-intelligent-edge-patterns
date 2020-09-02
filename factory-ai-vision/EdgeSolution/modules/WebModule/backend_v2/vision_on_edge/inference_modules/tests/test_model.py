@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Model Testcase
+"""App model tests.
 """
 
 from rest_framework.test import APITransactionTestCase
