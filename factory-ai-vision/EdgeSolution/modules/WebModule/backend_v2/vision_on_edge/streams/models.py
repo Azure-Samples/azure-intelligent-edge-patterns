@@ -15,19 +15,20 @@ from ..azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
 
-KEEP_ALIVE_THRESHOLD = 10
+KEEP_ALIVE_THRESHOLD = 1000 # Seconds
 
 
 class Stream():
     """Stream Class"""
 
-    def __init__(self, rtsp, part_id=None, inference=False):
+    def __init__(self, rtsp, camera_id, part_id=None, inference=False):
         if rtsp == "0":
             self.rtsp = 0
         elif rtsp == "1":
             self.rtsp = 1
         else:
             self.rtsp = rtsp
+        self.camera_id = camera_id
         self.part_id = part_id
 
         self.last_active = time.time()
@@ -192,6 +193,4 @@ class Stream():
         logger.info("release %s", self)
 
     def __repr__(self):
-        """__repr__.
-        """
         return f"<{self.id}: {self.rtsp}>"
