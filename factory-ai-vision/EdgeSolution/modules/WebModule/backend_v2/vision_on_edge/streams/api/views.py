@@ -18,7 +18,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from ...general.api.serializers import SimpleErrorSerializer
+from ...general.api.serializers import SimpleErrorSerializer, MSStyleErrorResponseSerializer
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...cameras.models import Camera
@@ -103,24 +103,23 @@ if 'runserver' in sys.argv:
     stream_manager = StreamManager()
 
 
-@swagger_auto_schema(
-    method='get',
-    operation_summary='Get training performace from Custom Vision.',
-    manual_parameters=[
-        openapi.Parameter('rtsp',
-                          openapi.IN_QUERY,
-                          type=openapi.TYPE_STRING,
-                          description='RTSP'),
-        openapi.Parameter('part_id',
-                          openapi.IN_QUERY,
-                          type=openapi.TYPE_STRING,
-                          description='Part ID',
-                          required=False)
-    ],
-    responses={
-        '200': ConnectStreamResponseSerializer,
-        '400': SimpleErrorSerializer
-    })
+@swagger_auto_schema(method='get',
+                     operation_summary='Create a rtsp stream.',
+                     manual_parameters=[
+                         openapi.Parameter('rtsp',
+                                           openapi.IN_QUERY,
+                                           type=openapi.TYPE_STRING,
+                                           description='RTSP'),
+                         openapi.Parameter('part_id',
+                                           openapi.IN_QUERY,
+                                           type=openapi.TYPE_STRING,
+                                           description='Part ID',
+                                           required=False)
+                     ],
+                     responses={
+                         '200': ConnectStreamResponseSerializer,
+                         '400': MSStyleErrorResponseSerializer
+                     })
 @api_view(['GET'])
 def connect_stream(request):
     """connect_stream.
@@ -191,13 +190,13 @@ def video_feed(request, stream_id):
 
 @swagger_auto_schema(
     method='get',
-    operation_summary='Get training performace from Custom Vision.',
+    operation_summary='Capture Streams and save as image.',
     manual_parameters=[
         openapi.Parameter('stream_id',
                           openapi.IN_PATH,
                           type=openapi.TYPE_INTEGER,
                           description='Stream ID'),
-        openapi.Parameter('stream_id',
+        openapi.Parameter('part_id',
                           openapi.IN_QUERY,
                           type=openapi.TYPE_INTEGER,
                           description='Part ID',
@@ -207,9 +206,9 @@ def video_feed(request, stream_id):
         '200': CaptureStreamResponseSerializer,
         '400': SimpleErrorSerializer
     })
-@api_view()
+@api_view(['GET'])
 def capture(request, stream_id):
-    """Capture image
+    """Capture image.
     """
     stream = stream_manager.get_stream_by_id(stream_id)
     if stream:
