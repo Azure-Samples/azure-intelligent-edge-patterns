@@ -21,21 +21,22 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
 }) => {
   const partTagStatus = isRelabel ? Status.Inactive : Status.Active;
   return (
-    <Card>
+    <Card tokens={{ childrenGap: 0 }}>
       <Card.Section fill styles={{ root: { overflow: 'hidden' } }}>
         {children}
       </Card.Section>
-      <Card.Item styles={{ root: { padding: '3px 10px', paddingBottom: '0px' } }}>
+      <Card.Section styles={{ root: { padding: '12px 16px 14px 16px' } }}>
         <Stack horizontal horizontalAlign="space-between">
           <Text variant="small" styles={{ root: { color: palette.neutralSecondary } }}>
             {cameraName}
           </Text>
           <Text variant="small">{imgTimeStamp}</Text>
         </Stack>
-      </Card.Item>
-      <Card.Item styles={{ root: { padding: '3px 10px', paddingTop: '0px' } }}>
-        <PartTag status={partTagStatus} text={partName} />
-      </Card.Item>
+        {/* Wrap with stack item or the card section will add 'flex-shrink' automatically to the children which is not stack */}
+        <Stack.Item>
+          <PartTag status={partTagStatus} text={partName} />
+        </Stack.Item>
+      </Card.Section>
     </Card>
   );
 };
