@@ -107,7 +107,7 @@ export const CameraDetails: React.FC = () => {
           </Stack>
         </Stack>
       </Stack>
-      <LabelingPage isRelabel={false} mode={LabelPageMode.SinglePage} />
+      <LabelingPage mode={LabelPageMode.SinglePage} />
       <AddEditCameraPanel
         isOpen={editPanelOpen}
         onDissmiss={closePanel}
