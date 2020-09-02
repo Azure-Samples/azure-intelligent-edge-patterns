@@ -10,6 +10,7 @@ import {
   IDropdownOption,
   Separator,
   Text,
+  Toggle,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { AcceptMediumIcon } from '@fluentui/react-icons';
@@ -47,11 +48,14 @@ type CaptureDialogProps = {
 };
 
 export const CaptureDialog: React.FC<CaptureDialogProps> = ({
-  captureLabelMode,
+  // captureLabelMode,
   isOpen,
   onDismiss,
   defaultSelectedCameraId,
 }) => {
+  // TODO Check this UX
+  const [toggle, setToggle] = useState(true);
+  const captureLabelMode = toggle ? CaptureLabelMode.PerImage : CaptureLabelMode.AllLater;
   const [selectedCameraId, setSelectedCameraId] = useState(defaultSelectedCameraId);
   const cameraOptions = useSelector(cameraOptionsSelector);
   const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
@@ -175,6 +179,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
             onChange={onDropdownChange}
             styles={{ dropdown: { width: '300px' } }}
           />
+          <Toggle label={toggle ? 'One by One' : 'All later'} onClick={() => setToggle((prev) => !prev)} />
           <Stack horizontal tokens={{ childrenGap: 30 }}>
             <Stack styles={{ root: { width: '75%', height: '500px' } }}>{onRenderMedia()}</Stack>
             <Stack verticalAlign="center" tokens={{ childrenGap: 10 }} styles={{ root: { width: '25%' } }}>
