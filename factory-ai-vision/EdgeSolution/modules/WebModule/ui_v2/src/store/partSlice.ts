@@ -24,8 +24,11 @@ export const getParts = createAsyncThunk<any, boolean, { state: State }>(
 
 export const postPart = createAsyncThunk<any, Omit<Part, 'id'>, { state: State }>(
   'parts/post',
-  async (data) => {
-    const response = await Axios.post(`/api/parts/`, data);
+  async (data, { getState }) => {
+    const {
+      data: { trainingProject },
+    } = getState().project;
+    const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
     return response.data;
   },
 );
