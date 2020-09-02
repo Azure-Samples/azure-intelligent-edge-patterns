@@ -96,7 +96,7 @@ export const Images: React.FC = () => {
         </Stack>
       </Stack>
       <CaptureDialog
-        captureLabelMode={CaptureLabelMode.PerImage}
+        captureLabelMode={CaptureLabelMode.AllLater}
         isOpen={isCaptureDialgOpen}
         onDismiss={closeCaptureDialog}
       />
