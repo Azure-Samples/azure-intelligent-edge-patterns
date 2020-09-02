@@ -1,36 +1,34 @@
-## Gettign started lab for machine learning
-You can use the [editor on GitHub](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/edit/master/docs/index.md) to maintain and preview the content for your website in Markdown files.
+---
+title: How to run Jupyter Notebooks in your workspace to deploy on edge
+titleSuffix: Azure Machine Learning on Edge
+description: Learn how run a Jupyter Notebook without leaving your workspace in Azure Machine Learning studio.
+services: machine-learning
+author: mahesh yadav(yadavm)
+ms.author: mahesh yadav(yadavm)
+ms.reviewer: kundana
+ms.service: machine-learning, Azure Edge
+ms.subservice: core
+ms.topic: conceptual
+ms.custom: how-to
+ms.date: 09/02/2020
+# As a data scientist, I want to run Jupyter notebooks in my workspace in Azure Machine Learning studio and deploy to my AS edge device with accleration
+---
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+# How to run Jupyter Notebooks in your workspace
+[!INCLUDE [applies-to-skus](../../includes/aml-applies-to-basic-enterprise-sku.md)]
 
-### Markdown
+Learn how to run your Jupyter Notebooks directly in your workspace in Azure Machine Learning studio. While you can launch [Jupyter](https://jupyter.org/) or [JupyterLab](https://jupyterlab.readthedocs.io), you can also edit and run your notebooks without leaving the workspace.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+See how you can:
 
-```markdown
-Syntax highlighted code block
+* Create Jupyter Notebooks in your workspace
+* Run an experiment from a notebook
+* Change the notebook environment
+* Find details of the compute instances used to run your notebooks
 
-# Header 1
-## Header 2
-### Header 3
+## Prerequisites
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+* An Azure subscription. If you don't have an Azure subscription, create a [free account](https://aka.ms/AMLFree) before you begin.
+* A Machine Learning workspace. See [Create an Azure Machine Learning workspace](how-to-manage-workspace.md).
+* A Azure Stack Edge device ready with compute deployed Getting [started on AS Edge ](https://databoxupdatepackages.blob.core.windows.net/documentation/Microsoft-Azure-Stack-Edge-GPU-IoT-K8-20200615.pdf)
+* Create a VM with GPU and Iot Edge install follow instruction here to create VM with GPU, driver, nvidia docker 
