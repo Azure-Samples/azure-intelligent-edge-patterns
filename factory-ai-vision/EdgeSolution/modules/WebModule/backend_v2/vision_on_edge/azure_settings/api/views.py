@@ -16,7 +16,7 @@ from rest_framework.response import Response
 
 from ...exceptions import api_exceptions as error_messages
 from ..models import Setting
-from .serializers import SettingSerializer
+from .serializers import SettingSerializer, ListProjectSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,8 @@ class SettingViewSet(viewsets.ModelViewSet):
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
 
-    @swagger_auto_schema(operation_summary='List all Custom Vision projects.')
+    @swagger_auto_schema(operation_summary='List all Custom Vision projects.',
+                         responses={'200': ListProjectSerializer})
     @action(detail=True, methods=["get"])
     def list_projects(self, request, pk=None) -> Response:
         """list_projects.
@@ -43,11 +44,16 @@ class SettingViewSet(viewsets.ModelViewSet):
             if not setting_obj.endpoint:
                 raise ValueError("Endpoint")
             trainer = setting_obj.get_trainer_obj()
-            result = {}
+            result = {'projects': []}
             project_list = trainer.get_projects()
             for project in project_list:
-                result[project.id] = project.name
-            return Response(result)
+                result["projects"].append({
+                    "id": project.id,
+                    "name": project.name
+                })
+            serializer = ListProjectSerializer(data=result)
+            if serializer.is_valid(raise_exception=True):
+                return Response(serializer.validated_data)
         except ValueError:
             return Response(
                 {

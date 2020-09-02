@@ -43,3 +43,12 @@ class SettingSerializer(serializers.ModelSerializer):
             },
         )
         return obj
+
+
+class ListProjectProjectSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+
+
+class ListProjectSerializer(serializers.Serializer):
+    projects = ListProjectProjectSerializer(many=True)
