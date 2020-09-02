@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Azure Live Video Analytics</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="../css/simple-sidebar.css" rel="stylesheet">
+  <link href="../css/mystyle.css" rel="stylesheet">
+
+</head>
+
+
+<body onload="loadInstancesAndTopologies()">
+
+  <div class="d-flex" id="wrapper">
+    <div class="border-right bg-middle" id="sidebar-wrapper">
+      <div class="sidebar-heading">Azure Live Video Analytics </div>
+      <div class="list-group list-group-flush">
+        <a href="index.html" class="list-group-item list-group-item-action bg-middle">Welcome</a>
+        <a href="configuration.html" class="list-group-item list-group-item-action bg-middle">1: Configuration
+          parameters</a>
+        <a href="cameras.html" class="list-group-item list-group-item-action bg-middle">2: Cameras</a>
+        <a href="mediagraph.html" class="list-group-item list-group-item-action bg-middle">3: Media Graph</a>
+        <a href="#" class="list-group-item list-group-item-action bg-middle">4: Invoke Methods ~ View Output</a>
+      </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+      <nav class="navbar navbar-expand-lg navbar-light bg-middle border-bottom">
+        <button class="menu-toggler" type="button" data-toggle="collapse" id="menu-toggle">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="navbar-text">Invoke Methods ~ View Output</span>
+      </nav>
+
+      <div class="container-fluid">
+        <h2 class="my-header">Invoke methods on your LVA Module</h2>
+        <br>
+        <p class="directions">
+          Here you can deploy your media graph. A graph topology is a framework for you to create instances off of. The result of each method will show up in the Invoke Methods - Output box. Take the following steps to be successful:
+          <ul class="directions">
+            <li>Set your desired graph topology using the dropdown menu. </li>
+            <li>Set a graph instance. Here you will provide values for each parameter that your specific graph requires. The default parameter values will be used unless you change them. This is also the spot where you choose which camera you want to use!
+            </li>
+            <li>After you set your graph instance, you should activate it.</li>
+            <li>Once your instance is activated, click on show IoT Hub output. Here you will see the real-time inferences being sent from the lvaEdge module, to your IoT Hub!</li>
+        </ul>
+        </p>
+        <br>
+        <!--  -->
+        <div class="grid">
+          <h3 class="schmuck" style="grid-column: 2/3; grid-row: 1/2;">Method Name</h3>
+
+          <h3 class="schmuck" style="grid-column: 3/3; grid-row: 1/2;" class="my-header">Invoke Methods - Output</h3>
+          
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 2/3;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+              <div class="hide info">This is similar to GraphTopologyList. It enables use to enumerate the graph instances.
+                Retrieves a list of all the graphs instances that matches the filter criteria.
+              </div>
+          </div>
+<!-- graph topo list info -->
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 3/4;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+              <div class="hide info">Retrieves a list of all the graph topologies that matches the filter criteria.
+              </div>
+          </div>
+
+          <!-- graph topo set info not needed anymore, keeping in code in case relevant later-->
+          <!-- <div class="schmuck" style="grid-column: 1/2; grid-row: 4/5;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+              <div class="hide info">Creates a single topology if there is no existing one with the given name or updates
+                and existing one with the same name.
+              </div>
+          </div> -->
+
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 4/5;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+            <div class="hide info">Creates a single Graph Instance if there is no existing one
+              with the given name or updates and existing one with the same name.
+            </div>
+          </div>
+
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 5/6;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+            <div class="hide info">Activates a single graph instance.
+            </div>
+          </div>
+
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 6/7;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+            <div class="hide info">Deactivates a single graph instance.
+            </div>
+          </div>
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 7/8;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+            <div class="hide info">Deletes a single graph instance.
+            </div>
+          </div>
+          <div class="schmuck" style="grid-column: 1/2; grid-row: 8/9;">
+            <img src="assets/info-circle.svg" width="22" class="hoverinfo" height="22">
+            <div class="hide info">Deletes a single graph topology.
+            </div>
+          </div>
+
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 2/3">
+                <button type="button" name="GraphInstanceList" class="method-button btn btn-primary"
+                  onclick="graphEntityList(this.name)">List Graph Instances</button>
+              </div>
+
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 3/4">
+                <button type="button" name="GraphTopologyList" class="method-button btn btn-primary"
+                  onclick="graphEntityList(this.name)">List Graph Topologies</button>
+              </div>
+
+              <!-- useful for users later on, unneeded for now
+                <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 4/5">
+                <button type="button" name="GraphTopologySet" id="dropdownOutput" data-toggle="dropdown"
+                  class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
+                  aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Set Graph Topology
+                </button>
+                <ul id="topology-set" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                  aria-labelledby="dropdownOutput">
+                </ul>
+              </div> -->
+
+              <div class="list-group-item schmuck"style="grid-column: 2/3; grid-row: 4/5">
+                  <button type="button" name="GraphInstanceSet" id="openModal"
+                    class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
+                    aria-expanded="true" aria-label="Close">Set Graph Instance
+                  </button>
+                  <div class="allow-focus dropdown-menu-left" aria-labelledby="dropdownOutput" id="graphinstancetester">
+                  </div>
+              </div>
+
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 5/6">
+                  <button type="button" name="GraphInstanceActivate" id="dropdownOutput" data-toggle="dropdown"
+                    class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Activate Graph
+                    Instance
+                  </button>
+                  <ul id="GraphInstanceActivate-dropdown" typeoflist="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                    aria-labelledby="dropdownOutput">
+                  </ul>
+              </div>
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 6/7">
+                  <button type="button" name="GraphInstanceDeactivate" id="dropdownOutput" data-toggle="dropdown"
+                    class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Deactivate Graph
+                    Instance
+                  </button>
+                  <ul id="GraphInstanceDeactivate-dropdown" typeoflist="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                    aria-labelledby="dropdownOutput">
+                  </ul>
+              </div>
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 7/8">
+                  <button type="button" name="GraphInstanceDelete" id="dropdownOutput" data-toggle="dropdown"
+                    class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Delete Graph
+                    Instance
+                  </button>
+                  <ul id="GraphInstanceDelete-dropdown" typeoflist="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                    aria-labelledby="dropdownOutput">
+                  </ul>
+              </div>
+
+              <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 8/9">
+                  <button type="button" name="GraphTopologyDelete" id="dropdownOutput" data-toggle="dropdown"
+                    class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Delete Graph
+                    Topology
+                  </button>
+                  <ul id="GraphTopologyDelete-list" typeoflist="topology-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                    aria-labelledby="dropdownOutput">
+                  </ul>
+              </div>
+
+          <div class="output-box dynamic schmuck" style="padding-bottom: 0rem; margin-bottom: 0px;  grid-column: 3/3; grid-row: 2/9">
+            <div style="border:1px solid black;" id="method-output-box"></div>
+            <br>
+            <br>
+          </div>
+          <div style="grid-column: 1/3; grid-row: 9/10;" class="schmuck">
+            <button type="button" id="start-messages" class="btn btn-primary" style="margin-bottom:5px; margin-left:7px;" onclick="emitdata()">Show Iot Hub
+              output</button><br>
+          </div>
+          <div style="grid-column: 3/3; grid-row: 9/10;" class="schmuck">
+            <button type="button" class="btn btn-primary" id="stop-messages" onclick="stopMessages()" disabled="true">Stop showing Iot Hub Output</button>
+          </div>
+          <div class="output-box dynamic" style="grid-column: 1/ span 3; grid-row: 10/11;">
+
+            <span
+              style="border:1px solid black; height:fit-content; min-height:200px; width: -webkit-fill-available; display: inline-block;"
+              id="iothub-message-output-box"></span>
+          </div>
+
+        </div>
+      </div>
+
+
+
+      <div id="myModal" class="modal">
+        <div class="modal-content">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span class="closeMe">&times;</span>
+          </button>
+          <button type="button" class="btn btn-primary" style="width: 80%; background-color: azure; font-style: italic; color: black; margin-bottom: 10px; align-self: center;" onclick="populateModalTemplate()">Set Graph Instance
+            Parameters here! Click me to get started</button>
+
+          <div class="all-set-instance-content" style="visibility: hidden;">
+              <div class="modal-group">
+                  <label for="instanceset-topology">Choose a Topology</label>
+                  <select id="instanceset-topology" class="modal-item" onclick="loadTopologyParams(this)">
+                  </select>
+              </div>
+          <div class="modal-group">
+            <label for="instance-name-input">Enter an Instance Name</label>
+            <input type="text" id="instance-name-input" class="modal-item" />
+          </div>
+          <div class="modal-group">
+            <label for="instance-description-input">Enter a description for your instance</label>
+            <input type="text" id="instance-description-input" class="modal-item" />
+          </div>
+          <div class="modal-group">
+            <label for="instanceset-camera">Choose a Camera</label>
+            <select id="instanceset-camera" class="modal-item" onclick="loadCameraParams(this)">
+            </select>
+          </div>
+          <div class="modal-group">
+            <label for="set-parameters">Provide the following values</label>
+            <ul id="parameter-list" style="margin-left: -15px;" class="modal-item">
+
+            </ul>
+          </div>
+          <div class="modal-group">
+            <button type="button" onclick="setGraphInstance()" class="modal-item btn btn-primary"><span class="closeOnSubmit">Submit!</span></button>
+          </div>
+          </div>
+      </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- my scripts -->
+  <script src="../js/main.js"></script>
+  <script src="../js/mediaGraphBuilder.js"></script>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="../vendor/jquery/jquery.min.js"></script>
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Menu Toggle Script + unload function-->
+  <script>
+    $("#menu-toggle").click(function (e) 
+    {
+      e.preventDefault();
+      $("#wrapper").toggleClass("toggled");
+    });
+    window.onbeforeunload = function()
+    {
+        if (!document.getElementById("stop-messages").disabled)
+        {
+            stopMessages();
+        }
+        return;
+    }
+  </script>
+
+  <!-- receive incoming messages from IoT Hub -->
+  <script>
+    // if deployed to a site supporting SSL, use wss://
+    $(document).ready(() =>
+    {
+      const protocol = document.location.protocol.startsWith('https') ? 'wss://' : 'ws://';
+      const webSocket = new WebSocket(protocol + location.host);
+
+      // when socket receives message, try to display to user
+      webSocket.onmessage = function onMessage(message) 
+      {
+          try 
+          {
+              const messageData = message.data;
+              //separate data fields by two spaces.
+              document.getElementById("iothub-message-output-box").innerText = JSON.stringify(JSON.parse(messageData), null, 2);
+          }
+
+          catch (err) {
+              console.error(err);
+          }
+      };
+
+    })
+
+  </script>
+
+<!-- template for parameters in setGraphInstance popup -->
+  <script id="parameter-template" type="text/template">
+    <li class="parameter">
+        <table class="myTable">
+          <th class="information">Name and Description: </th>
+            <tr class="parameter-value row row-even">
+                <td style="border: none;">
+                  <input class="parameter-input" type="text">
+                </td>
+            </tr>
+        </table>
+    </li>
+  </script>
+
+  <!-- keep dropdowns open onclick -->
+  <script>
+    $("#graphinstancetester").click(function (e) 
+    {
+      e.preventDefault();
+    });
+
+    $("#instanceset-topology").click(function (e) 
+    {
+      e.preventDefault();
+    });
+
+    $(document).on('click', '.allow-focus', function (e) 
+    {
+      e.stopPropagation();
+    });
+  </script>
+
+  <!-- modal behavior -->
+  <script>
+    // Get the modal
+    let modal = document.getElementById("myModal");
+
+    // Get the button that opens the modal
+    let openModalBtn = document.getElementById("openModal");
+
+    // Get the <span> element that closes the modal
+    let span = document.getElementsByClassName("closeMe")[0];
+    let submitBtn = document.getElementsByClassName("closeOnSubmit")[0];
+
+    // When the user clicks the button, open the modal 
+    openModalBtn.onclick = function () {
+      modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () 
+    {
+      modal.style.display = "none";
+    }
+    submitBtn.onclick = function () 
+    {
+      modal.style.display = "none";
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) 
+    {
+      if (event.target == modal) 
+      {
+        modal.style.display = "none";
+      }
+    }
+  </script>
+</body>
+
+</html>

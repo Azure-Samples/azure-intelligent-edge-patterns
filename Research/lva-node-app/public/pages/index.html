@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Azure Live Video Analytics</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- ../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+
+  <!-- Custom styles for this template -->
+  <link href="../css/simple-sidebar.css" rel="stylesheet">
+  <link href="../css/mystyle.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <div class="d-flex" id="wrapper">
+    <!-- sidebar -->
+    <div class="border-right bg-middle" id="sidebar-wrapper">
+      <div class="sidebar-heading">Azure Live Video Analytics </div>
+      <div class="list-group list-group-flush">
+        <a href="#" class="list-group-item list-group-item-action bg-middle">Welcome</a>
+        <a href="configuration.html" class="list-group-item list-group-item-action bg-middle">1: Configuration
+            parameters</a>
+        <a href="cameras.html" class="list-group-item list-group-item-action bg-middle">2: Cameras</a>
+        <a href="mediagraph.html" class="list-group-item list-group-item-action bg-middle">3: Media Graph</a>
+        <a href="output.html" class="list-group-item list-group-item-action bg-middle">4: Invoke Methods ~ View Output</a>
+      </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+      <nav class="navbar navbar-expand-lg navbar-light bg-middle border-bottom">
+        <button class="menu-toggler" type="button" data-toggle="collapse" id="menu-toggle">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="navbar-text">Welcome!</span>
+        <a href="./configuration.html"><button type="button" class="btn btn-outline-success bg-middle">Next step</button></a>
+      </nav>
+
+      <div class="container-fluid">
+        <h2 class="my-header" style="width:80%;">Here you will set up your Media Graph, run methods, and view output from your runtime of Live Video Analytics!</h2>
+        <br>
+        <h4 class="my-header">Prerequisites</h4>
+        <ol>
+          <li>
+            You have set up your device and it is connected
+          </li>
+          <li>
+            You have deployed the LVA edge and RTSP modules
+          </li>
+        </ol>
+        <h4 class="my-header">Follow these steps to get started</h4>
+        <ol> 
+          <li>
+            <a href="configuration.html">1: Set up your configuration parameters</a> 
+          </li>
+          <li>
+            <a href="cameras.html">2: Set up your cameras</a> 
+          </li>
+          <li>
+            <a href="mediagraph.html">3: Create a media graph</a> 
+          </li>
+          <li>
+            <a href="output.html">4: Invoke Direct Methods, and view output!</a> 
+          </li>
+        </ol>
+      </div>
+    </div>
+    <!-- /#page-content-wrapper -->
+
+  </div>
+  <!-- /#wrapper -->
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="../vendor/jquery/jquery.min.js"></script>
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- My scripts -->
+  <script src="../js/main.js"></script>
+  <!-- Menu Toggle Script -->
+  <script>
+    $("#menu-toggle").click(function(e) {
+      e.preventDefault();
+      $("#wrapper").toggleClass("toggled");
+    });
+  </script>
+
+
+</body>
+
+</html>
