@@ -22,7 +22,7 @@ export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'isRelabel'> & {
   partName: string;
 };
 
-export const ImageList: React.FC<{ isRelabel: boolean; images: Item[] }> = ({ isRelabel, images }) => {
+export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
   const columnCount = React.useRef(0);
   const rowHeight = React.useRef(0);
   const dispatch = useDispatch();

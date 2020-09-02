@@ -79,10 +79,10 @@ export const Images: React.FC = () => {
           {labeledImages.length + unlabeledImages.length ? (
             <Pivot>
               <PivotItem headerText="Untagged">
-                <ImageList isRelabel={false} images={unlabeledImages} />
+                <ImageList images={unlabeledImages} />
               </PivotItem>
               <PivotItem headerText="Tagged">
-                <ImageList isRelabel={false} images={labeledImages} />
+                <ImageList images={labeledImages} />
               </PivotItem>
             </Pivot>
           ) : (
