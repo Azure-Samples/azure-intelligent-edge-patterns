@@ -13,9 +13,9 @@ const PORT = 5000;
 /**
  * @global variables. Mutable global variables in javascript are typically named in camelCase
  */
-var graphTopologies={};
-var graphInstances={};
-var cameras={};
+var graphTopologies = {};
+var graphInstances = {};
+var cameras = {};
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,16 +32,14 @@ function getGlobals()
     let request = prepareRequest(`http://localhost:${PORT}/globals`, "GET");
     request.onreadystatechange = function () 
     {
-      console.log("REady state = "+request.readyState+" status = "+request.status);
       if(request.readyState == 4)
       {
         if(request.status == 200)
         {
-          let response=JSON.parse(request.response);
-          console.log(response);
-          graphInstances=response.graphInstances;
-          graphTopologies=response.graphTopologies;
-          cameras=response.cameras;
+          let response = JSON.parse(request.response);
+          graphInstances = response.graphInstances;
+          graphTopologies = response.graphTopologies;
+          cameras = response.cameras;
           resolve(response);
         }
         else
@@ -64,11 +62,11 @@ function getGlobals()
 function sendGlobals()
 {
   let globals = 
-    {
-      graphInstances: graphInstances,
-      graphTopologies: graphTopologies,
-      cameras: cameras
-    };
+  {
+    graphInstances: graphInstances,
+    graphTopologies: graphTopologies,
+    cameras: cameras
+  };
   let request = prepareRequest(`http://localhost:${PORT}/globals`, "PUT");
   request.send(JSON.stringify(globals));
 }
@@ -117,30 +115,30 @@ function makeUniqueId(nameToInclude = "")
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //configuration page functions
 /** 
-* grab inputs from configuration. Currently set expiration to 1 day. Calls to connect to device and IotHub to make sure your credentials are valid!
+* grab inputs from configuration. Calls to connect to device and IotHub to make sure your credentials are valid!
 */
 function sendConfigData() 
 {
-    let payload =
-    {
-        "device-id": document.getElementById("device-id").value,
-        "iothub-connection-string": document.getElementById("iothub-connection-string").value
-    };
+  let payload =
+  {
+    "device-id": document.getElementById("device-id").value,
+    "iothub-connection-string": document.getElementById("iothub-connection-string").value
+  };
 
-    let request = prepareRequest(`http://localhost:${PORT}/connectToIotHub`);
-    request.onreadystatechange = function () 
+  let request = prepareRequest(`http://localhost:${PORT}/connectToIotHub`);
+  request.onreadystatechange = function () 
+  {
+    if (request.readyState == 4) 
     {
-        if (request.readyState == 4) 
-        {
-            document.getElementById("configuration-output-box").innerHTML = request.response;
-        }
-        else if(request.status != 200)
-        {
-          console.error("Bad server response");
-        }
-
+      document.getElementById("configuration-output-box").innerHTML = request.response;
     }
-    request.send(JSON.stringify(payload));
+    else if(request.status != 200)
+    {
+      console.error("Bad response connecting to IoT Hub, ready state: " + request.readyState + " and request status: " +request.status);
+      console.error("Request response: " + request.response);
+    }
+  }
+  request.send(JSON.stringify(payload));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,20 +157,20 @@ function instanceMethodDropdowns(methodName)
   switch(hoverList.getAttribute("typeoflist"))
   {
     case 'instance-list':
-      checkBoxNameList=Object.keys(graphInstances);
+      checkBoxNameList = Object.keys(graphInstances);
       break;
     case 'topology-list':
-      checkBoxNameList=Object.keys(graphTopologies);
+      checkBoxNameList = Object.keys(graphTopologies);
       break;
     case 'topology-set':
-      checkBoxNameList=Object.keys(graphTopologies);
-      onclickMethod='graphSetTopology(this.innerText)';
+      checkBoxNameList = Object.keys(graphTopologies);
+      onclickMethod = 'graphSetTopology(this.innerText)';
       break;
   }
 
   checkBoxNameList.forEach((item) => 
   {
-    hoverList.innerHTML += "<li> <button class='btn btn-outline-secondary' onclick='"+onclickMethod+"' name='" + methodName +"'>" + item + "</button> </li>";
+    hoverList.innerHTML += "<li> <button class='btn btn-outline-secondary' onclick='" + onclickMethod + "' name='" + methodName + "'>" + item + "</button> </li>";
   });
 }
 
@@ -195,19 +193,15 @@ function createFullPayload(methodNameParam, methodPayload)
 * @param {string} topologyName - graph topology name
 * @returns {void}
 */
-function graphSetTopology(topologyName)
+function graphSetTopology(topologyName, topology)
 {
-  let topology = graphTopologies[topologyName];
-  if(topology == undefined)
-  {
-    alert("Topology "+topologyName+" not found.");
-    return;
-  }
-  invokeLVAMethod(createFullPayload("GraphTopologySet", topology)).then((response) =>
+
+  invokeLVAMethod(createFullPayload("GraphTopologySet", topology)).then(() =>
   {
     // do nothing, invokeLVAMethod handles
   }).catch((error) =>
   {
+    alert(JSON.parse(error).payload.error || JSON.parse(error));
     console.error(error);
   });
 }
@@ -224,8 +218,8 @@ function graphEntityList(methodName)
     let payload = 
     {
       "@apiVersion": "1.0"
-    }
-    
+    };
+
     invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
     {
       resolve(response);
@@ -249,14 +243,14 @@ function graphEntityModify(htmlElement, methodName, elementNamePassed=false)
   {
     "@apiVersion": "1.0",
     name: elementName
-  }
-  invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
+  };
+  invokeLVAMethod(createFullPayload(methodName, payload)).then(() =>
   {
     // do nothing, invokeLVAMethod handles
   }).catch((error) =>
   {
     console.error(error);
-  });;
+  });
 }
 
 
@@ -267,7 +261,7 @@ function graphEntityModify(htmlElement, methodName, elementNamePassed=false)
 */
 async function loadInstancesAndTopologies()
 {
-  getGlobals().then((response) =>
+  getGlobals().then(() =>
   {
     graphEntityList("GraphInstanceList").then(() =>
     {
@@ -333,7 +327,7 @@ function updateGraphsandInstances(methodName, response)
 */
 function displayMethodOutput(result)
 {
-  let htmlElement=document.getElementById("method-output-box");
+  let htmlElement = document.getElementById("method-output-box");
   if (htmlElement != null)
   {
     htmlElement.innerText = result;
@@ -344,11 +338,10 @@ function displayMethodOutput(result)
 
 /**
 * send method to invoke on LVA module
-* @async
 * @param {jsonObject} fullPayload - payload to be sent in request to server
 * @returns {Promise<any>}
 */
-async function invokeLVAMethod(fullPayload) 
+function invokeLVAMethod(fullPayload) 
 {
   return new Promise((resolve, reject) => 
   {
@@ -359,9 +352,9 @@ async function invokeLVAMethod(fullPayload)
       //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
       if (request.readyState == 4 && request.status == 200) 
       {
-        var methodName=JSON.parse(request.response)[0].method;
-        var result=JSON.stringify(JSON.parse(request.response)[1]);
-        var isFromOutputPage=displayMethodOutput(result);
+        var methodName = JSON.parse(request.response)[0].method;
+        var result = JSON.stringify(JSON.parse(request.response)[1]);
+        var isFromOutputPage = displayMethodOutput(result);
 
         if(JSON.parse(result).status < 250)
         {
@@ -375,18 +368,16 @@ async function invokeLVAMethod(fullPayload)
               break;
             case 'GraphInstanceList':
               updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-              //console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
               break;
             case 'GraphTopologyList':
               updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-              //console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
               break;
             case 'GraphInstanceSet':
-              graphInstances[fullPayload.Payload.name]=fullPayload;
+              graphInstances[fullPayload.Payload.name] = fullPayload;
               break;
             case 'GraphTopologySet':
               // only alert and run display media graphs if request is coming from mediagraphs.html page
-              graphTopologies[fullPayload.Payload.name]=fullPayload;
+              graphTopologies[fullPayload.Payload.name] = fullPayload;
               if(!isFromOutputPage)
               {
                 alert("Success!");
@@ -448,7 +439,7 @@ function emitdata()
  */
 function stopMessages()
 {
-  let request = prepareRequest(`http://localhost:${PORT}/stopMessages`, "GET");
+  let request = prepareRequest(`http://localhost:${PORT}/stopMessages`);
   request.send();
   document.getElementById('stop-messages').disabled=true;
   document.getElementById('start-messages').disabled=false;
@@ -469,11 +460,11 @@ function createCameraTableFromTemplate(cameraName)
   let listItem = template[0];
   $(listItem).attr({ 'id': makeUniqueId() });
 
-  let values_column=$(template)[0].getElementsByTagName('tr')[1];
-  values_column.children[0].innerHTML=cameraName;
-  values_column.children[1].innerHTML=cameras[cameraName].url;
-  values_column.children[2].innerHTML=cameras[cameraName].username;
-  values_column.children[3].innerHTML="******";
+  let values_column = $(template)[0].getElementsByTagName('tr')[1];
+  values_column.children[0].innerHTML = cameraName;
+  values_column.children[1].innerHTML = cameras[cameraName].url;
+  values_column.children[2].innerHTML = cameras[cameraName].username;
+  values_column.children[3].innerHTML = "******";
   return template;
 }
 
@@ -485,6 +476,9 @@ function camerasOnLoad()
   getGlobals().then(() =>
   {
     displayCameras();
+  }).catch((error) =>
+  {
+    alert(error);
   })
 }
 
@@ -501,9 +495,9 @@ function displayCameras()
     camerasList.append(createCameraTableFromTemplate(cam));
   });
 
-  if ($(camerasList)[0].innerHTML=="")
+  if ($(camerasList)[0].innerHTML == "")
   {
-    $(camerasList)[0].innerHTML="You currently have no cameras set up";
+    $(camerasList)[0].innerHTML = "You currently have no cameras set up";
   }
 }
 
@@ -514,7 +508,7 @@ function displayCameras()
 function submitCameras() 
 {
   let entries = document.getElementsByTagName("input");
-  cameras[entries[0].value]=
+  cameras[entries[0].value] =
   {
       "url": entries[1].value,
       "username": entries[2].value,
@@ -552,11 +546,11 @@ function deleteCamera(htmlElement)
 function setGraphInstance()
 {
   //get each of the parameters and their values
-    let parametersObject=[];
-    let parameters=document.getElementsByClassName("parameter-input");
+    let parametersObject = [];
+    let parameters = document.getElementsByClassName("parameter-input");
     for(let param of parameters) 
     {
-        if(param.value=="") param.value=param.getAttribute("placeholder");
+        if(param.value == "") param.value=param.getAttribute("placeholder");
         parametersObject.push(
         {
             "name": param.getAttribute('id'),
@@ -564,9 +558,9 @@ function setGraphInstance()
         });
     };
 
-    let instanceName=document.getElementById("instance-name-input").value;
-    let topologyName=document.getElementById("instanceset-topology").getAttribute("name");
-    let instanceDescription=document.getElementById("instance-description-input").value;
+    let instanceName = document.getElementById("instance-name-input").value;
+    let topologyName = document.getElementById("instanceset-topology").getAttribute("name");
+    let instanceDescription = document.getElementById("instance-description-input").value;
     //create the request object
     let payload = 
     {
@@ -589,10 +583,10 @@ function setGraphInstance()
     });
 
     //reset the Set Graph Instance modal
-    $('#parameter-list')[0].innerHTML="";
-    $('#instanceset-topology').innerHTML="";
-    $('#instanceset-camera').innerHTML="";
-    $('#instance-description-input').value="";
+    $('#parameter-list')[0].innerHTML = "";
+    $('#instanceset-topology').innerHTML = "";
+    $('#instanceset-camera').innerHTML = "";
+    $('#instance-description-input').innerHTML = "";
 }
 
 /** 
@@ -601,26 +595,26 @@ function setGraphInstance()
 function populateModalTemplate()
 {
   //find the currently set graph topology
-  let modal=document.getElementById("myModal");
-  let modalObjects=modal.getElementsByClassName("modal-item");
-  let content=modal.getElementsByClassName("all-set-instance-content");
-  let currentSelect=modalObjects[0]
+  let modal = document.getElementById("myModal");
+  let modalObjects = modal.getElementsByClassName("modal-item");
+  let content = modal.getElementsByClassName("all-set-instance-content");
+  let currentSelect = modalObjects[0]
 
   content[0].style.visibility = "visible";
 
   //for each topology display the name as option for user to set instance on
   Object.keys(graphTopologies).forEach((graphName) => 
   {
-    currentSelect.innerHTML+="<option value="+graphName+">"+graphName+"</option>";
+    currentSelect.innerHTML += "<option value="+graphName+">"+graphName+"</option>";
   })
 
   //add select menu for user to choose one of the current cameras
-  currentSelect=modalObjects[3];
+  currentSelect = modalObjects[3];
  
   //for each camera display the name as option for user to use in instance
   Object.keys(cameras).forEach((cam) =>
   {
-    currentSelect.innerHTML+="<option value="+cam+">"+cam+"</option>";
+    currentSelect.innerHTML += "<option value="+cam+">"+cam+"</option>";
   });
 }
 
@@ -630,7 +624,7 @@ function populateModalTemplate()
 */
 function loadCameraParams(htmlElement)
 {
-  let theChosenCamera=cameras[htmlElement.value];
+  let theChosenCamera = cameras[htmlElement.value];
   document.getElementById("rtspUrl").value=theChosenCamera.url;
   document.getElementById("rtspUserName").value=theChosenCamera.username;
   document.getElementById("rtspPassword").value=theChosenCamera.password;    
@@ -644,16 +638,16 @@ function loadTopologyParams(htmlElement)
 {
   let mediaGraph = graphTopologies[htmlElement.value];
   document.getElementById("instanceset-topology").name=htmlElement.value;
-  let obj=$('#parameter-list');
+  let obj = $('#parameter-list');
 
   //can't do get htmlElementent by id on a template
-  obj[0].innerHTML="";
+  obj[0].innerHTML = "";
 
   //create new parameter template and add the default values in for each one
   mediaGraph.properties.parameters.forEach((parameter) => 
   {
     let parameterTemplate = $('#parameter-template').html();
-    parameterTemplate= $(parameterTemplate).clone();
+    parameterTemplate = $(parameterTemplate).clone();
     parameterTemplate[0].getElementsByClassName("information")[0].innerHTML=parameter.name+": "+parameter.description;
     
     if(parameter.hasOwnProperty("default"))

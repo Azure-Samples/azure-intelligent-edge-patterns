@@ -14,7 +14,6 @@ const { convertIotHubToEventHubsConnectionString } = require('./iot-hub-connecti
 */
 class EventHubReader 
 {
-
   /**
    * @constructor
    * @param {string} iotHubConnectionString - iot hub connection string in standard format
@@ -41,7 +40,7 @@ class EventHubReader
 
       this.subs = this.consumerClient.subscribe(
       {
-        processEvents: (events, context) => 
+        processEvents: (events) => 
         {
           for (let i = 0; i < events.length; ++i) 
           {
@@ -51,17 +50,14 @@ class EventHubReader
               events[i].systemProperties["iothub-connection-device-id"]);
           }
         },
-        processError: (err, context) => 
+        processError: (error) => 
         {
-          console.error(err.message || err);
+          console.error(error.message || error);
         }
       });
-      
-      console.log("success");
-
-    } catch (ex) 
+    } catch (error) 
     {
-      console.error(ex.message || ex);
+      console.error(error.message || error);
     }
   }
 
