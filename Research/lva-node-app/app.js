@@ -22,10 +22,10 @@ const { convertIotHubToEventHubsConnectionString } = require('./iot-hub-connecti
 
 const app = express();
 const server = require('http').createServer(app);
-const wss = new WebSocket.Server({server});
+const wss = new WebSocket.Server({ server });
 const Client = iothub.Client;
 
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static('public'))
 app.use(express.static('public/pages'))
@@ -38,10 +38,8 @@ global.MODULE_ID = "lvaEdge";
 global.IOTHUB_CONNECTION_STRING = "";
 global.IOTHUB_ENDPOINT = "";
 
-var graphInstances = {};
-var graphTopologies = {};
 var cameras = {};
-var eventHubReader;
+var eventHubReader=undefined;
 
 const PORT = 5000;
 
@@ -52,23 +50,23 @@ const PORT = 5000;
  */
 
 // render the html pages. the '/<name>' is what the url extension will look like in the browser
-app.get('/', function (req, res) 
+app.get('/', function (req, res)
 {
     res.render('index.html')
 })
-app.get('/mediagraph', function (req, res) 
+app.get('/mediagraph', function (req, res)
 {
     res.render('mediagraph.html')
 })
-app.get('/configuration', function (req, res) 
+app.get('/configuration', function (req, res)
 {
     res.render('configuration.html')
 })
-app.get('/cameras', function (req, res) 
+app.get('/cameras', function (req, res)
 {
     res.render('cameras.html')
 })
-app.get('/output', function (req, res) 
+app.get('/output', function (req, res)
 {
     res.render('output.html')
 })
@@ -79,16 +77,14 @@ app.get('/output', function (req, res)
 /**
 * send client global variables upon request 
 */
-app.get('/globals', function (req, res) 
+app.get('/globals', function (req, res)
 {
-  console.log("User requested globals from server");
-  let globals =
-  {
-    graphInstances: graphInstances,
-    graphTopologies: graphTopologies,
-    cameras: cameras
-  };
-  res.json(globals);
+    console.log("User requested cameras from server");
+    let globals =
+    {
+        cameras: cameras
+    };
+    res.json(globals);
 })
 
 /**
@@ -97,32 +93,38 @@ app.get('/globals', function (req, res)
 */
 app.put('/globals', function (req, res)
 {
-  graphInstances = req.body.graphInstances;
-  graphTopologies = req.body.graphTopologies;
-  cameras = req.body.cameras;
-  res.end();
+    cameras = req.body.cameras;
+    res.end();
 })
 
 /**
 * start sending live stream hub messages to client via websocket 
 * @returns {void}
 */
-app.get('/hubMessages', function(req, res)
+app.get('/hubMessages', function (req, res)
 {
-  if (validCredentialsAreSet(res))
-  {
-    receiveHubMessages();
-  } 
-  res.end();
+    if (validCredentialsAreSet(res))
+    {
+        receiveHubMessages();
+    }
+    res.end();
 })
 
 /**
  * stop receiving messages from iot hub
  */
-app.post('/stopMessages', function(req, res)
+app.post('/stopMessages', function (req, res)
 {
-  eventHubReader.stopReadMessage();
-  res.end();
+    if(eventHubReader == undefined)
+    {
+        res.status(400).send("No connection open");   
+    }
+    else
+    {
+        eventHubReader.stopReadMessage();
+        res.end();
+        eventHubReader = undefined;
+    }
 })
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,55 +133,55 @@ app.post('/stopMessages', function(req, res)
 /**
  * invoke LVA methods handler
  */
-app.post('/runMethod', function (req, res) 
-{ 
-  //only run if credentials are set, otherwise validCredentialsAreSet method will send res.send(error message)
-  if (validCredentialsAreSet(res))
-  {
-    let methodName = req.body.methodName;
-    invokeLVAMethod(req, res).then(response => 
+app.post('/runMethod', function (req, res)
+{
+    //only run if credentials are set, otherwise validCredentialsAreSet method will send res.send(error message)
+    if (validCredentialsAreSet(res))
     {
-      let obj = [{method: methodName}, response.result];
-      //send results of invoking the method back to the client
-      res.json(obj); 
-    }).catch((error) =>
-    {
-      console.error(error.message);
-      res.status(400).send(error.message);
-    });  
-  }
+        let methodName = req.body.methodName;
+        invokeLVAMethod(req, res).then(response =>
+        {
+            let obj = [{ method: methodName }, response.result];
+            //send results of invoking the method back to the client
+            res.json(obj);
+        }).catch((error) =>
+        {
+            console.error(error.message);
+            res.status(400).send(error.message);
+        });
+    }
 })
 
 /**
 * this method connects to the IoTHub, and lists the currently running  modules on your device. Ensures connection works properly!
 */
-app.post('/connectToIotHub', function (req, res) 
+app.post('/connectToIotHub', function (req, res)
 {
-  setConfigs(req, res).then(() =>
-  {
-    let registry = iothub.Registry.fromConnectionString(IOTHUB_CONNECTION_STRING);
-    registry.getModulesOnDevice(DEVICE_ID).then((response) => 
+    setConfigs(req, res).then(() =>
     {
-      let modules = "";
-      //get modules on device
-      for(let i = 0; i < response.responseBody.length; i++)
-      {
-        modules += response.responseBody[i].moduleId + " ";
-        console.log(response.responseBody[i].moduleId);
-      }
-      //on success
-      res.send("Successfully connected to your IoTHub. Found the following modules on your device: " + modules);
-    }).catch((reason) =>
+        let registry = iothub.Registry.fromConnectionString(IOTHUB_CONNECTION_STRING);
+        registry.getModulesOnDevice(DEVICE_ID).then((response) =>
+        {
+            let modules = "";
+            //get modules on device
+            for (let i = 0; i < response.responseBody.length; i++)
+            {
+                modules += response.responseBody[i].moduleId + " ";
+                console.log(response.responseBody[i].moduleId);
+            }
+            //on success
+            res.send("Successfully connected to your IoTHub. Found the following modules on your device: " + modules);
+        }).catch((reason) =>
+        {
+            console.error(reason);
+            res.status(400).send("Unable to connect to device. Error response: " + JSON.parse(reason.responseBody).Message);
+        });
+    }).catch((error) =>
     {
-      console.error(reason);
-      res.status(400).send("Unable to connect to device. Error response: " + JSON.parse(reason.responseBody).Message);
-    });    
-  }).catch((error) =>
-  {
-    console.error(error);
-    res.status(400).send("Error: " + error);
-  })
-}) 
+        console.error(error);
+        res.status(400).send("Error: " + error);
+    })
+})
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,29 +194,29 @@ app.post('/connectToIotHub', function (req, res)
 */
 function setConfigs(req)
 {
-  return new Promise((resolve, reject) =>
-  {
-    DEVICE_ID = req.body["device-id"];
-    IOTHUB_CONNECTION_STRING = req.body["iothub-connection-string"];
-    if (DEVICE_ID == "" || IOTHUB_CONNECTION_STRING == "")
+    return new Promise((resolve, reject) =>
     {
-      DEVICE_ID = "";
-      IOTHUB_CONNECTION_STRING = "";
-      reject("You must provide both your device ID and your Iot Hub Connection String");
-    }
-    convertIotHubToEventHubsConnectionString(IOTHUB_CONNECTION_STRING).then((eventhubString) =>
-    {
-      IOTHUB_ENDPOINT = eventhubString;
-      resolve();
-    }).catch((error) =>
-    {
-      //reset values on failure
-      console.error(error);
-      DEVICE_ID = "";
-      IOTHUB_CONNECTION_STRING = "";
-      reject(error.message);
-    });
-  })
+        DEVICE_ID = req.body["device-id"];
+        IOTHUB_CONNECTION_STRING = req.body["iothub-connection-string"];
+        if (DEVICE_ID == "" || IOTHUB_CONNECTION_STRING == "")
+        {
+            DEVICE_ID = "";
+            IOTHUB_CONNECTION_STRING = "";
+            reject("You must provide both your device ID and your Iot Hub Connection String");
+        }
+        convertIotHubToEventHubsConnectionString(IOTHUB_CONNECTION_STRING).then((eventhubString) =>
+        {
+            IOTHUB_ENDPOINT = eventhubString;
+            resolve();
+        }).catch((error) =>
+        {
+            //reset values on failure
+            console.error(error);
+            DEVICE_ID = "";
+            IOTHUB_CONNECTION_STRING = "";
+            reject(error.message);
+        });
+    })
 }
 
 
@@ -222,47 +224,51 @@ function setConfigs(req)
 * broadcast used for sending IoT Hub message data in a live stream 
 * @param {any} data - data to send through websocket
 */
-wss.broadcast = (data) => 
+wss.broadcast = (data) =>
 {
-  wss.clients.forEach((client) => 
-  {
-    if (client.readyState === WebSocket.OPEN) 
+    wss.clients.forEach((client) =>
     {
-      try 
-      {
-        client.send(data);
-      } catch (error) 
-      {
-        console.error(error);
-      }
-    }
-  });
+        if (client.readyState === WebSocket.OPEN)
+        {
+            try
+            {
+                client.send(data);
+            } catch (error)
+            {
+                console.error(error);
+            }
+        }
+    });
 };
 
 /**
 * function that actually broadcasts hub messages to websocket
+// stop old one start new or just check if it's already running
 */
-function receiveHubMessages() 
+function receiveHubMessages()
 {
-  const consumerGroup = "$Default"; // name of the default consumer group
-  eventHubReader = new EventHubReader(IOTHUB_CONNECTION_STRING, consumerGroup);
-  eventHubReader.startReadMessage((message, date, deviceId) => 
-  {
-    try 
+    const consumerGroup = "$Default"; // name of the default consumer group
+    if (eventHubReader == undefined)
     {
-      const payload = 
-      {
-        IotData: message,
-        MessageDate: date || Date.now().toISOString(),
-        DeviceId: deviceId,
-      };
-
-      wss.broadcast(JSON.stringify(payload));
-    } catch (error) 
-    {
-      console.error('Error broadcasting: [%s] from [%s].', error, message);
+        eventHubReader = new EventHubReader(IOTHUB_CONNECTION_STRING, consumerGroup);
     }
-  });
+    eventHubReader.startReadMessage((message, date, deviceId) =>
+    {
+        try
+        {
+            const payload =
+            {
+                IotData: message,
+                MessageDate: date || Date.now().toISOString(),
+                DeviceId: deviceId,
+            };
+
+            wss.broadcast(JSON.stringify(payload));
+        } catch (error)
+        {
+            console.error('Error broadcasting: [%s] from [%s].', error, message);
+        }
+    });
 }
 
 /**
@@ -272,12 +278,12 @@ function receiveHubMessages()
 */
 function validCredentialsAreSet(res)
 {
-  if (IOTHUB_CONNECTION_STRING == "" || DEVICE_ID == "")
-  {
-    res.status(404).send("Please set your IoT Hub Connection String and Device ID!");
-    return false;
-  }
-  return true;
+    if (IOTHUB_CONNECTION_STRING == "" || DEVICE_ID == "")
+    {
+        res.status(404).send("Please set your IoT Hub Connection String and Device ID!");
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -286,21 +292,21 @@ function validCredentialsAreSet(res)
 */
 function invokeLVAMethod(req)
 {
-  let client = Client.fromConnectionString(IOTHUB_CONNECTION_STRING);
-  return client.invokeDeviceMethod(DEVICE_ID, MODULE_ID,
-  {
-    methodName: req.body.methodName,
-    payload: req.body.Payload,
-    connectTimeoutInSeconds: 2
-  });
+    let client = Client.fromConnectionString(IOTHUB_CONNECTION_STRING);
+    return client.invokeDeviceMethod(DEVICE_ID, MODULE_ID,
+        {
+            methodName: req.body.methodName,
+            payload: req.body.Payload,
+            connectTimeoutInSeconds: 2
+        });
 };
 
 /** 
 * on page error 
 */
-app.use(function (req, res) 
+app.use(function (req, res)
 {
-  res.status(404).send("404 not found. :(");
+    res.status(404).send("404 not found. :(");
 })
 
 server.listen(PORT, () => console.log(`App listening on http://localhost:${PORT}`));

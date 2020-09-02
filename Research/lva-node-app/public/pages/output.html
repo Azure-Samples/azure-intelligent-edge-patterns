@@ -267,11 +267,13 @@
       e.preventDefault();
       $("#wrapper").toggleClass("toggled");
     });
-
     window.onbeforeunload = function()
     {
-      sendGlobals();
-      return;
+        if (!document.getElementById("stop-messages").disabled)
+        {
+            stopMessages();
+        }
+        return;
     }
   </script>
 

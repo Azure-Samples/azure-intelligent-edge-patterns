@@ -14,85 +14,81 @@ var sourceNames = [];
 var processorNames = [];
 var sinkNames = [];
 
+
 /**
-* class for a graph node. Dynamically built upon media graph creation, based off the node type and the 
-* inputs. 
-@class
+* creates the JSON object for a graph node and its parameters
+* @param {string} type - The type of node to create
+* @param {string[]} userSelectedInputs - The list of inputs the user selected for this graph node
+* @return {Object} - the json object and parameters for the graph node
 */
-class GraphNode {
-
-    /**
-     * @constructor
-     * @param {string} type - The type of node to create
-     * @param {string[]} userSelectedInputs - The list of inputs the user selected for this graph node
-     */
-    constructor(type, userSelectedInputs)
+function makeGraphNode(type, userSelectedInputs)
+{
+    //ensure node type exists
+    let nodeSchema = getNodeSchema(type);
+    if (nodeSchema == undefined)
     {
-        //ensure node type exists
-        this.nodeSchema=getNodeSchema(type);
-        if (this.nodeSchema==undefined)
+        throw ("Node type: " + type + " not found");
+    }
+    let jsonObj =
+    {
+        "name": type,
+        "@type": nodeSchema.type,
+    }
+    //set inputs
+    if (!type.toLowerCase().includes("source"))
+    {
+        let inputs = [];
+        for (let i = 0; i < userSelectedInputs.length; i++)
         {
-            throw ("Node type: "+type+" not found");
-        } 
-
-        //set inputs
-        this.inputs=[];
-        for(let i=0; i<userSelectedInputs.length; i++)
-        {
-            if (findObjectByKey(this.nodeSchema.inputs, "name", userSelectedInputs[i]))
+            if (findObjectByKey(nodeSchema.inputs, "name", userSelectedInputs[i]))
             {
-                this.inputs.push({"nodeName": userSelectedInputs[i]});
+                inputs.push({ "nodeName": userSelectedInputs[i] });
             }
             else
             {
-                throw ("Input "+userSelectedInputs[i]+" is not accepted by node type "+type);
-            } 
+                throw ("Input " + userSelectedInputs[i] + " is not accepted by node type " + type);
+            }
         }
+        jsonObj["inputs"] = inputs;
+    }
 
-        this.jsonObj = 
-        {
-            "name": type,
-            "@type": this.nodeSchema.type,
-        }
+    //add all extra values (including the variable placeholders like ${rtspUrl})
+    for (let i = 0; i < nodeSchema.extraValues.length; i++)
+    {
+        const item = nodeSchema.extraValues[i];
+        jsonObj[item.name] = item.value;
+    }
 
-        // must check that not a source node. Otherwise, will break media graph
-        if (!type.toLowerCase().includes("source"))
-        {
-            this.jsonObj["inputs"]=this.inputs;
-        }
-
-        for(let i=0; i<this.nodeSchema.extraValues.length; i++)
-        {
-            const item=this.nodeSchema.extraValues[i];
-            this.jsonObj[item.name]=item.value;
-        }
-        //we have now constructed the full json object!
-
-        this.nodeParameters=this.nodeSchema.extraParameters;
+    //we have now constructed the full json object!
+    let nodeParameters = nodeSchema.extraParameters;
+    return {
+        jsonObject: jsonObj,
+        nodeParameters: nodeParameters
     }
 }
+
 
 /**
 * @param {string} graphname 
 * @param {string} description 
-* @param {GraphNode[]} sources 
-* @param {GraphNode[]} processors 
-* @param {GraphNode[]} sinks 
+* @param {Object[]} sources 
+* @param {Object[]} processors 
+* @param {Object[]} sinks 
 * @param {Object[]} parameters
 */
-function constructMediaGraphJSON(graphname, description="no description set", sources, processors, sinks, parameters)
+function constructMediaGraphJSON(graphname, description = "no description set", sources, processors, sinks, parameters)
 {
     let jsonObject = {
         "name": graphname,
         "@apiVersion": "1.0",
         "properties": {
-          "description": description,
-          "parameters": parameters,
-          "sources": sources,
-          "processors": processors,
-          "sinks": sinks
+            "description": description,
+            "parameters": parameters,
+            "sources": sources,
+            "processors": processors,
+            "sinks": sinks
         }
-      };
+    };
     return jsonObject;
 }
 
@@ -105,9 +101,9 @@ function constructMediaGraphJSON(graphname, description="no description set", so
  */
 function findObjectByKey(array, key, value)
 {
-    for (let i=0; i<array.length; i++)
+    for (let i = 0; i < array.length; i++)
     {
-        if (array[i][key]===value)
+        if (array[i][key] === value)
         {
             return array[i];
         }
@@ -122,8 +118,8 @@ function findObjectByKey(array, key, value)
 */
 function getValidInputs(schema)
 {
-    let validInputs=[];
-    for (let i=0; i<schema.inputs.length; i++)
+    let validInputs = [];
+    for (let i = 0; i < schema.inputs.length; i++)
     {
         validInputs.push(schema.inputs[i].name);
     }
@@ -137,9 +133,9 @@ function getValidInputs(schema)
 */
 function getNodeSchema(type)
 {
-    for(let i=0; i<graphNodeLimitations.length; i++)
+    for (let i = 0; i < graphNodeLimitations.length; i++)
     {
-        if(graphNodeLimitations[i].name===type)
+        if (graphNodeLimitations[i].name === type)
         {
             return graphNodeLimitations[i];
         }
@@ -154,30 +150,30 @@ function getNodeSchema(type)
  * @param {string} listID - source, processor, or sink list id
  * @returns {void}
  */
-function setCustomInputs(hoverList, myName, listID) 
+function setCustomInputs(hoverList, myName, listID)
 {
-    const allowedInputs=getValidInputs(getNodeSchema(myName));
-    if (allowedInputs.length==0) return;
+    const allowedInputs = getValidInputs(getNodeSchema(myName));
+    if (allowedInputs.length == 0) return;
     let checkBoxNameList = [];
-    if (listID == "dynamic-processor" || listID == "dynamic-sink") 
+    if (listID == "dynamic-processor" || listID == "dynamic-sink")
     {
-        for (index in sourceNames) 
+        for (index in sourceNames)
         {
-            if (allowedInputs.includes(sourceNames[index])) 
+            if (allowedInputs.includes(sourceNames[index]))
             {
                 checkBoxNameList.push(sourceNames[index]);
             }
         }
-        for (index in processorNames) 
+        for (index in processorNames)
         {
-            if (allowedInputs.includes(processorNames[index])) 
+            if (allowedInputs.includes(processorNames[index]))
             {
                 checkBoxNameList.push(processorNames[index]);
             }
         }
     }
 
-    checkBoxNameList.forEach((item) => 
+    checkBoxNameList.forEach((item) =>
     {
         hoverList.innerHTML += "<li> <input type='checkbox'>" + item + "</li>";
     });
@@ -189,7 +185,7 @@ function setCustomInputs(hoverList, myName, listID)
  * update the list of possible inputs on a given node 
  * @param {HTMLButtonElement} htmlElement - dropdown button clicked on by user
  */
-function updateCustomizedInputs(htmlElement) 
+function updateCustomizedInputs(htmlElement)
 {
     const hoverList = htmlElement.parentElement.getElementsByTagName("ul")[0];
     hoverList.innerHTML = "";
@@ -205,15 +201,15 @@ function updateCustomizedInputs(htmlElement)
  */
 function canAddToGraph(type)
 {
-    const neededInputs=getValidInputs(getNodeSchema(type));
-    for (let i=0; i<neededInputs.length; i++)
+    const neededInputs = getValidInputs(getNodeSchema(type));
+    for (let i = 0; i < neededInputs.length; i++)
     {
-        if(graphBuilderContains(neededInputs[i]))
+        if (graphBuilderContains(neededInputs[i]))
         {
             return true;
         }
     }
-    alert("You must have at least one of the following node types present before you can add this node: "+neededInputs);
+    alert("You must have at least one of the following node types present before you can add this node: " + neededInputs);
     return false;
 }
 
@@ -226,16 +222,10 @@ function canAddToGraph(type)
 function canDeleteHelper(nodeNames, type)
 {
     let currentCheck = false;
-    const ind = nodeNames.indexOf(type);
-    if(ind != - 1)
-    {
-        nodeNames.splice(ind, 1);
-    }
-
-    for(let i = 0; i < nodeNames.length; i++)
+    for (let i = 0; i < nodeNames.length; i++)
     {
         const neededInputs = getValidInputs(getNodeSchema(nodeNames[i])); //get valid inputs for each node we're looking at
-        if(!neededInputs.includes(type)) //if type we want to delete isn't an input for this node, move on
+        if (!neededInputs.includes(type)) //if type we want to delete isn't an input for this node, move on
         {
             currentCheck = true;
         }
@@ -244,15 +234,15 @@ function canDeleteHelper(nodeNames, type)
             neededInputs.splice(neededInputs.indexOf(type), 1); //get rid of node to delete, check if graph contains any other required node
             for (let j = 0; j < neededInputs.length; j++)
             {
-                if(graphBuilderContains(neededInputs[j]))
+                if (graphBuilderContains(neededInputs[j]))
                 {
                     currentCheck = true;
                     break;
                 }
             }
         }
-            
-        if(!currentCheck)
+
+        if (!currentCheck)
         {
             alert("You cannot delete this node. It is needed for node " + nodeNames[i]);
             return false;
@@ -269,13 +259,25 @@ function canDeleteHelper(nodeNames, type)
  */
 function canDeleteFromGraph(type)
 {
-    if(type == "rtspSource")
+    if (type == "rtspSource")
     {
         alert("You cannot build a graph without an RTSP Source node!");
         return false;
     }
-    
-    if(canDeleteHelper(processorNames, type) && canDeleteHelper(sinkNames, type))
+    let tempProcessorNames = [...processorNames];
+    let ind = tempProcessorNames.indexOf(type);
+    if (ind != -1)
+    {
+        tempProcessorNames.splice(ind, 1);
+    }
+
+    let tempSinkNames = [...sinkNames];
+    ind = tempSinkNames.indexOf(type);
+    if (ind != -1)
+    {
+        tempSinkNames.splice(ind, 1);
+    }
+    if (canDeleteHelper(tempProcessorNames, type) && canDeleteHelper(tempSinkNames, type))
     {
         return true;
     }
@@ -288,25 +290,25 @@ function canDeleteFromGraph(type)
  * @param {string} listID - source, processor, or sink 
  * @returns {void}
  */
-function addToGraph(htmlElement, listID) 
+function addToGraph(htmlElement, listID)
 {
     const nodetype = htmlElement.getAttribute('nodetype');
     let template = (listID == 'dynamic-source') ? $('#hidden-template-sourcenode').html() : $('#hidden-template').html();
     template = $(template).clone();
 
-    if(listID != 'dynamic-source' && !canAddToGraph(nodetype))
+    if (listID != 'dynamic-source' && !canAddToGraph(nodetype))
     {
         return;
     }
 
     //disable addition of another identical node
-    $(htmlElement).attr({"disabled": true});
+    $(htmlElement).attr({ "disabled": true });
 
     //can only have one or the other, not both
     if (nodetype == "grpcExtension" || nodetype == "httpExtension")
     {
-        $('#grpcExtension-dropdown').attr({'disabled': true});
-        $('#httpExtension-dropdown').attr({'disabled': true});
+        $('#grpcExtension-dropdown').attr({ 'disabled': true });
+        $('#httpExtension-dropdown').attr({ 'disabled': true });
     }
 
     const newName = htmlElement.name.replace(/_/g, " ");
@@ -321,18 +323,18 @@ function addToGraph(htmlElement, listID)
 
     if (listID == "dynamic-source")
     {
-      sourceNames.push(nodetype);
-    } 
-    else if(listID == "dynamic-processor")
+        sourceNames.push(nodetype);
+    }
+    else if (listID == "dynamic-processor")
     {
         processorNames.push(nodetype);
-    } 
+    }
     else
     {
         sinkNames.push(nodetype);
     }
 
-    if(!listID == 'dynamic-source')
+    if (!listID == 'dynamic-source')
     {
         const hoverList = template[0].getElementsByClassName("dropdown-menu-left")[0];
         setCustomInputs(hoverList, nodetype, listID);
@@ -348,9 +350,9 @@ function addToGraph(htmlElement, listID)
  * @param {string} type - type of node to look for, i.e. rtspSource, fileSink
  * @returns {boolean} - true if graph builder contains node type
  */
-function graphBuilderContains(type) 
+function graphBuilderContains(type)
 {
-    if (sourceNames.includes(type) || processorNames.includes(type) || sinkNames.includes(type)) 
+    if (sourceNames.includes(type) || processorNames.includes(type) || sinkNames.includes(type))
     {
         return true;
     }
@@ -362,11 +364,11 @@ function graphBuilderContains(type)
  * @param {HTMLSpanElement} htmlElement - this is the span containing the 'X' on the item to delete
  * @returns {boolean} - returns true if successfully deleted
  */
-function deleteGraphNode(htmlElement) 
+function deleteGraphNode(htmlElement)
 {
     const nodetype = $(htmlElement).closest('li').attr('nodetype');
 
-    if (!canDeleteFromGraph(nodetype)) 
+    if (!canDeleteFromGraph(nodetype))
     {
         return false;
     }
@@ -375,7 +377,7 @@ function deleteGraphNode(htmlElement)
     document.getElementById((nodetype + "-dropdown")).disabled = false;
 
     //re-enable addition of an external AI module node
-    if (nodetype == "grpcExtension" || nodetype == "httpExtension") 
+    if (nodetype == "grpcExtension" || nodetype == "httpExtension")
     {
         $('#grpcExtension-dropdown').attr({ 'disabled': false });
         $('#httpExtension-dropdown').attr({ 'disabled': false });
@@ -384,7 +386,7 @@ function deleteGraphNode(htmlElement)
     const listID = $(htmlElement).closest('ul').attr('id');
 
     //delete node from list that builds it!
-    switch (listID) 
+    switch (listID)
     {
         case 'dynamic-source':
             sourceNames.splice(sourceNames.indexOf(nodetype), 1);
@@ -421,12 +423,12 @@ function getListNodesAndInputs(nodeList)
 
         for (let box of checkBoxes)
         {
-            if(box.checked)
+            if (box.checked)
             {
-                checkedInputs.push((box.parentElement.innerText).replace(/ /g,''));
-            } 
+                checkedInputs.push((box.parentElement.innerText).replace(/ /g, ''));
+            }
         }
-        nodesAndInputs.push({name: name, value: checkedInputs});
+        nodesAndInputs.push({ name: name, value: checkedInputs });
     }
     return nodesAndInputs;
 }
@@ -436,11 +438,10 @@ function getListNodesAndInputs(nodeList)
  */
 function getGraphNodesAndInputs()
 {
-    let allNodeInfo={};
+    let allNodeInfo = {};
     allNodeInfo['sourceNodes'] = (getListNodesAndInputs(document.getElementById('dynamic-source')));
     allNodeInfo['processorNodes'] = (getListNodesAndInputs(document.getElementById('dynamic-processor')));
     allNodeInfo['sinkNodes'] = (getListNodesAndInputs(document.getElementById('dynamic-sink')));
-    console.log(allNodeInfo);
     return allNodeInfo;
 }
 
@@ -455,16 +456,16 @@ function validateGraph(nodesAndInputsList)
     let referenced = [];
     referenced = referenced.concat(sourceNames);
     referenced = referenced.concat(processorNames);
-    if(nodesAndInputsList['sinkNodes'].length == 0)
+    if (nodesAndInputsList['sinkNodes'].length == 0)
     {
         alert("You must have at leastone sink node!");
         return false;
     }
-    for(nodeCategory in nodesAndInputsList) //check processors and sinks for inputs
+    for (nodeCategory in nodesAndInputsList) //check processors and sinks for inputs
     {
-        for(let cur = 0; cur < nodesAndInputsList[nodeCategory].length; cur++)
+        for (let cur = 0; cur < nodesAndInputsList[nodeCategory].length; cur++)
         {
-            if(nodeCategory != 'sourceNodes' && nodesAndInputsList[nodeCategory][cur].value.length == 0)
+            if (nodeCategory != 'sourceNodes' && nodesAndInputsList[nodeCategory][cur].value.length == 0)
             {
                 alert("All processors and sinks must have at least one input. This node has none: " + nodesAndInputsList[nodeCategory][cur].name);
                 return false;
@@ -472,10 +473,10 @@ function validateGraph(nodesAndInputsList)
             else
             {
                 //mark node as having been referenced
-                nodesAndInputsList[nodeCategory][cur].value.forEach((inputName) => 
+                nodesAndInputsList[nodeCategory][cur].value.forEach((inputName) =>
                 {
                     let referencedIndex = referenced.indexOf(inputName);
-                    if(referencedIndex != -1)
+                    if (referencedIndex != -1)
                     {
                         referenced.splice(referencedIndex, 1);
                     }
@@ -495,11 +496,11 @@ function validateGraph(nodesAndInputsList)
 * create a media graph based off of what the user-built 
 * @returns {boolean} - true if successfully created
 */
-function createMediaGraph() 
+function createMediaGraph()
 {
     const graphname = document.getElementById("graphname");
     const graphDescription = document.getElementById("graph-description");
-    if (graphname.value == "") 
+    if (graphname.value == "")
     {
         alert("Your graph name cannot be empty!");
         return;
@@ -510,35 +511,35 @@ function createMediaGraph()
     let parameters = []
     const nodesAndInputs = getGraphNodesAndInputs();
 
-    if(!validateGraph(nodesAndInputs))
+    if (!validateGraph(nodesAndInputs))
     {
         return false;
     }
-    
-    for (nodeCategory in nodesAndInputs) 
+
+    for (nodeCategory in nodesAndInputs)
     {
-        for (let node = 0; node < nodesAndInputs[nodeCategory].length; node++) 
+        for (let node = 0; node < nodesAndInputs[nodeCategory].length; node++)
         {
-            let tempNode = new GraphNode(nodesAndInputs[nodeCategory][node].name, nodesAndInputs[nodeCategory][node].value);
-            parameters = parameters.concat(tempNode.nodeParameters);
-            switch (nodeCategory) 
+            let tempNode = makeGraphNode(nodesAndInputs[nodeCategory][node].name, nodesAndInputs[nodeCategory][node].value);
+            parameters = parameters.concat(tempNode["nodeParameters"]);
+            switch (nodeCategory)
             {
                 case 'sourceNodes':
-                    sources.push(tempNode.jsonObj);
+                    sources.push(tempNode["jsonObject"]);
                     break;
                 case 'processorNodes':
-                    processors.push(tempNode.jsonObj);
+                    processors.push(tempNode["jsonObject"]);
                     break;
                 case 'sinkNodes':
-                    sinks.push(tempNode.jsonObj);
+                    sinks.push(tempNode["jsonObject"]);
                     break;
             }
         }
     }
-        
+
     const createdGraph = constructMediaGraphJSON(graphname.value, graphDescription.value, sources, processors, sinks, parameters);
-    
-    graphSetTopology(graphname, createdGraph);
+
+    graphSetTopology(createdGraph);
     document.getElementById("dynamic-source").innerHTML = "Sources: ";
     document.getElementById("dynamic-processor").innerHTML = "Processors: ";
     document.getElementById("dynamic-sink").innerHTML = "Sinks: ";
@@ -561,9 +562,9 @@ function createMediaGraph()
 function setMediaGraphFromTemplate(htmlElement)
 {
     const jsonLocation = GITHUB_TOPOLOGY_SAMPLES + htmlElement.name + "/topology.json";
-    $.getJSON(jsonLocation, function(response) 
+    $.getJSON(jsonLocation, function (response)
     {
-        graphSetTopology(response.name, response);
+        graphSetTopology(response);
     })
 }
 
@@ -577,15 +578,15 @@ function displayMediaGraphs()
     $(mediaGraphTBody)[0].innerHTML = "";
 
     // for each graph we have show. Ugly element finding, but it does the trick
-    mediaGraphs.forEach((graph) => 
+    mediaGraphs.forEach((graph) =>
     {
-      let template = $('#created-graph-template').html();
-      template = $(template).clone();
-      $(template)[0].setAttribute('id', makeUniqueId());
-      let values_column = $(template)[0].getElementsByTagName('td')[0];
-      values_column.innerHTML = graph;
-      mediaGraphTBody.append(template);
-    }); 
+        let template = $('#created-graph-template').html();
+        template = $(template).clone();
+        $(template)[0].setAttribute('id', makeUniqueId());
+        let values_column = $(template)[0].getElementsByTagName('td')[0];
+        values_column.innerHTML = graph;
+        mediaGraphTBody.append(template);
+    });
 }
 
 /**
@@ -594,18 +595,12 @@ function displayMediaGraphs()
  */
 function displayMediaGraphsOnLoad()
 {
-    getGlobals().then(() =>
+    graphEntityList("GraphTopologyList").then(() =>
     {
-        graphEntityList("GraphTopologyList").then(() => 
-        {
-            displayMediaGraphs();
-        }).catch((error) => 
-        { 
-            console.log(error);
-        });
-    }).catch((error) => 
+        displayMediaGraphs();
+    }).catch((error) =>
     {
-        console.log(error);
+        console.error(error);
     });
 }
 
@@ -627,68 +622,68 @@ function deleteGraph(htmlElement)
 * Custom JSON schema of graph node limitations. If anything changes, modify this! 
 */
 const graphNodeLimitations =
-[
+    [
         {
             "name": "rtspSource",
             "type": "#Microsoft.Media.MediaGraphRtspSource",
             "inputs": [],
             "extraParameters":
-            [
-                {
-                    "name": "rtspUserName",
-                    "type": "String",
-                    "description": "rtsp source user name.",
-                    "default": "dummyUserName"
-                  },
-                  {
-                    "name": "rtspPassword",
-                    "type": "String",
-                    "description": "rtsp source password.",
-                    "default": "dummyPassword"
-                  },
-                  {
-                    "name": "rtspUrl",
-                    "type": "String",
-                    "description": "rtsp Url"
-                  }
-            ],
-            "extraValues":
-            [
-                {
-                    "name": "endpoint",
-                    "value":
+                [
                     {
-                        "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
-                        "url": "${rtspUrl}",
-                        "credentials": {
-                          "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
-                          "username": "${rtspUserName}",
-                          "password": "${rtspPassword}"
+                        "name": "rtspUserName",
+                        "type": "String",
+                        "description": "rtsp source user name.",
+                        "default": "dummyUserName"
+                    },
+                    {
+                        "name": "rtspPassword",
+                        "type": "String",
+                        "description": "rtsp source password.",
+                        "default": "dummyPassword"
+                    },
+                    {
+                        "name": "rtspUrl",
+                        "type": "String",
+                        "description": "rtsp Url"
+                    }
+                ],
+            "extraValues":
+                [
+                    {
+                        "name": "endpoint",
+                        "value":
+                        {
+                            "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                            "url": "${rtspUrl}",
+                            "credentials": {
+                                "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                                "username": "${rtspUserName}",
+                                "password": "${rtspPassword}"
+                            }
                         }
                     }
-                }
-            ]
+                ]
         },
         {
             "name": "iotMessageSource",
             "type": "#Microsoft.Media.MediaGraphIoTHubMessageSource",
             "inputs": [],
-            "extraParameters": 
-            [
-                {
-                    "name": "hubSourceInput",
-                    "type": "String",
-                    "description": "input name for hub source",
-                    "default": "recordingTrigger"
-                  }
-            ],
-            "extraValues": 
-            [
-                {
-                    "name": "hubInputName",
-                    "value": "${hubSourceInput}"
-                }
-            ]
+            "extraParameters":
+                [
+                    {
+                        "name": "hubSourceInput",
+                        "type": "String",
+                        "description": "input name for hub source",
+                        "default": "recordingTrigger"
+                    }
+                ],
+            "extraValues":
+                [
+                    {
+                        "name": "hubInputName",
+                        "value": "${hubSourceInput}"
+                    }
+                ]
         },
         {
             "name": "motionDetection",
@@ -707,13 +702,13 @@ const graphNodeLimitations =
                     "default": "medium"
                 }
             ],
-            "extraValues": 
-            [
-                {
-                    "name": "sensitivity",
-                    "value": "${motionSensitivity}"
-                }
-            ]
+            "extraValues":
+                [
+                    {
+                        "name": "sensitivity",
+                        "value": "${motionSensitivity}"
+                    }
+                ]
         },
         {
             "name": "grpcExtension",
@@ -740,23 +735,23 @@ const graphNodeLimitations =
                     "default": "tcp://lvaextension:44000"
                 },
                 {
-                   "name": "grpcExtensionUserName",
-                   "type": "String",
-                   "description": "inferencing endpoint user name.",
-                   "default": "dummyUserName"
+                    "name": "grpcExtensionUserName",
+                    "type": "String",
+                    "description": "inferencing endpoint user name.",
+                    "default": "dummyUserName"
                 },
                 {
-                   "name": "grpcExtensionPassword",
-                   "type": "String",
-                   "description": "inferencing endpoint password.",
-                   "default": "dummyPassword"
-                },                    
+                    "name": "grpcExtensionPassword",
+                    "type": "String",
+                    "description": "inferencing endpoint password.",
+                    "default": "dummyPassword"
+                },
                 {
                     "name": "imageEncoding",
                     "type": "String",
                     "description": "image encoding for frames",
                     "default": "jpeg"
-                },      
+                },
                 {
                     "name": "imageQuality",
                     "type": "String",
@@ -782,48 +777,48 @@ const graphNodeLimitations =
                     "default": "416"
                 }
             ],
-            "extraValues": 
-            [
-                {
-                    "name": "endpoint",
-                    "value": 
+            "extraValues":
+                [
                     {
-                        "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
-                        "url": "${grpcExtensionAddress}",
-                        "credentials": 
+                        "name": "endpoint",
+                        "value":
                         {
-                            "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
-                            "username": "${grpcExtensionUserName}",
-                            "password": "${grpcExtensionPassword}"
+                            "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                            "url": "${grpcExtensionAddress}",
+                            "credentials":
+                            {
+                                "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                                "username": "${grpcExtensionUserName}",
+                                "password": "${grpcExtensionPassword}"
+                            }
+                        }
+
+                    },
+                    {
+                        "name": "image",
+                        "value":
+                        {
+                            "scale": {
+                                "mode": "${imageScaleMode}",
+                                "width": "${frameWidth}",
+                                "height": "${frameHeight}"
+                            },
+                            "format": {
+                                "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
+                                "encoding": "${imageEncoding}",
+                                "quality": "${imageQuality}"
+                            }
+                        }
+                    },
+                    {
+                        "name": "format",
+                        "value":
+                        {
+                            "mode": "sharedMemory",
+                            "SharedMemorySizeMiB": "5"
                         }
                     }
-                    
-                },
-                {
-                    "name": "image",
-                    "value": 
-                    {
-                        "scale": {
-                            "mode": "${imageScaleMode}",
-                            "width": "${frameWidth}",
-                            "height": "${frameHeight}"
-                          },
-                          "format": {
-                            "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
-                            "encoding": "${imageEncoding}",
-                            "quality": "${imageQuality}"
-                          }
-                    }
-                },
-                {
-                    "name": "format",
-                    "value":
-                    {
-                        "mode": "sharedMemory",
-                        "SharedMemorySizeMiB": "5"
-                    }
-                }
-            ]
+                ]
         },
         {
             "name": "frameRateFilter",
@@ -839,13 +834,13 @@ const graphNodeLimitations =
                 }
             ],
             "extraParameters": [],
-            "extraValues": 
-            [
-                {
-                    "name": "maximumFps",
-                    "value": "2"
-                }
-            ]
+            "extraValues":
+                [
+                    {
+                        "name": "maximumFps",
+                        "value": "2"
+                    }
+                ]
         },
         {
             "name": "signalGateProcessor",
@@ -874,223 +869,223 @@ const graphNodeLimitations =
             ],
             "extraParameters": [],
             "extraValues":
-            [
-                {
-                    "name": "activationEvaluationWindow",
-                    "value": "PT1S"
-                },
-                {
-                    "name": "activationSignalOffset",
-                    "value": "PT0S"
-                },
-                {
-                    "name": "minimumActivationTime",
-                    "value": "PT30S"
-                },
-                {
-                    "name": "maximumActivationTime",
-                    "value": "PT30S"
-                }  
-            ]
+                [
+                    {
+                        "name": "activationEvaluationWindow",
+                        "value": "PT1S"
+                    },
+                    {
+                        "name": "activationSignalOffset",
+                        "value": "PT0S"
+                    },
+                    {
+                        "name": "minimumActivationTime",
+                        "value": "PT30S"
+                    },
+                    {
+                        "name": "maximumActivationTime",
+                        "value": "PT30S"
+                    }
+                ]
         },
         {
             "name": "httpExtension",
             "type": "#Microsoft.Media.MediaGraphHttpExtension",
-            "inputs": 
-            [
-                {
-                    "name": "rtspSource",
-                    "required": false
-                },
-                {
-                    "name": "frameRateFilter",
-                    "required": false
-                },
-                {
-                    "name": "motionDetection",
-                    "required": false
-                }
-            ],
-            "extraParameters":
-            [
-                {
-                    "name": "inferencingUrl",
-                    "type": "String",
-                    "description": "inferencing Url",
-                    "default": "http://yolov3/score"
-                  },
-                  {
-                    "name": "inferencingUserName",
-                    "type": "String",
-                    "description": "inferencing endpoint user name.",
-                    "default": "dummyUserName"
-                  },
-                  {
-                    "name": "inferencingPassword",
-                    "type": "String",
-                    "description": "inferencing endpoint password.",
-                    "default": "dummyPassword"
-                  },
-                  {
-                    "name": "imageEncoding",
-                    "type": "String",
-                    "description": "image encoding for frames",
-                    "default": "bmp"
-                  },
-                  {
-                    "name": "imageScaleMode",
-                    "type": "String",
-                    "description": "image scaling mode",
-                    "default": "preserveAspectRatio"
-                  },
-                  {
-                    "name": "frameWidth",
-                    "type": "String",
-                    "description": "Width of the video frame to be received from LVA.",
-                    "default": "416"
-                  },
-                  {
-                    "name": "frameHeight",
-                    "type": "String",
-                    "description": "Height of the video frame to be received from LVA.",
-                    "default": "416"
-                  },
-                  {
-                    "name": "frameRate",
-                    "type": "String",
-                    "description": "Rate of the frames per second to be received from LVA.",
-                    "default": "2"
-                  }
-            ],
-            "extraValues":
-            [
-                {
-                    "name": "endpoint",
-                    "value": 
+            "inputs":
+                [
                     {
-                        "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
-                        "url": "${inferencingUrl}",
-                        "credentials": 
+                        "name": "rtspSource",
+                        "required": false
+                    },
+                    {
+                        "name": "frameRateFilter",
+                        "required": false
+                    },
+                    {
+                        "name": "motionDetection",
+                        "required": false
+                    }
+                ],
+            "extraParameters":
+                [
+                    {
+                        "name": "inferencingUrl",
+                        "type": "String",
+                        "description": "inferencing Url",
+                        "default": "http://yolov3/score"
+                    },
+                    {
+                        "name": "inferencingUserName",
+                        "type": "String",
+                        "description": "inferencing endpoint user name.",
+                        "default": "dummyUserName"
+                    },
+                    {
+                        "name": "inferencingPassword",
+                        "type": "String",
+                        "description": "inferencing endpoint password.",
+                        "default": "dummyPassword"
+                    },
+                    {
+                        "name": "imageEncoding",
+                        "type": "String",
+                        "description": "image encoding for frames",
+                        "default": "bmp"
+                    },
+                    {
+                        "name": "imageScaleMode",
+                        "type": "String",
+                        "description": "image scaling mode",
+                        "default": "preserveAspectRatio"
+                    },
+                    {
+                        "name": "frameWidth",
+                        "type": "String",
+                        "description": "Width of the video frame to be received from LVA.",
+                        "default": "416"
+                    },
+                    {
+                        "name": "frameHeight",
+                        "type": "String",
+                        "description": "Height of the video frame to be received from LVA.",
+                        "default": "416"
+                    },
+                    {
+                        "name": "frameRate",
+                        "type": "String",
+                        "description": "Rate of the frames per second to be received from LVA.",
+                        "default": "2"
+                    }
+                ],
+            "extraValues":
+                [
+                    {
+                        "name": "endpoint",
+                        "value":
                         {
-                            "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
-                            "username": "${inferencingUserName}",
-                            "password": "${inferencingPassword}"
+                            "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                            "url": "${inferencingUrl}",
+                            "credentials":
+                            {
+                                "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                                "username": "${inferencingUserName}",
+                                "password": "${inferencingPassword}"
+                            }
+                        }
+
+                    },
+                    {
+                        "name": "image",
+                        "value":
+                        {
+                            "scale": {
+                                "mode": "${imageScaleMode}",
+                                "width": "${frameWidth}",
+                                "height": "${frameHeight}"
+                            },
+                            "format": {
+                                "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
+                                "encoding": "${imageEncoding}"
+                            }
                         }
                     }
-                    
-                },
-                {
-                    "name": "image",
-                    "value": 
-                    {
-                        "scale": {
-                            "mode": "${imageScaleMode}",
-                            "width": "${frameWidth}",
-                            "height": "${frameHeight}"
-                          },
-                          "format": {
-                            "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
-                            "encoding": "${imageEncoding}"
-                          }
-                    }
-                }
-            ]
+                ]
         },
         {
             "name": "fileSink",
             "type": "#Microsoft.Media.MediaGraphFileSink",
             "inputs":
-            [
-               {
-                   "name": "signalGateProcessor",
-                   "required": true
-               } 
-            ],
+                [
+                    {
+                        "name": "signalGateProcessor",
+                        "required": true
+                    }
+                ],
             "extraParameters": [],
             "extraValues":
-            [
-                {
-                    "name": "filePathPattern",
-                    "value": "/var/media/sampleFilesFromGraph-${System.DateTime}"
-                }
-            ]
+                [
+                    {
+                        "name": "filePathPattern",
+                        "value": "/var/media/sampleFilesFromGraph-${System.DateTime}"
+                    }
+                ]
         },
         {
             "name": "hubSink",
             "type": "#Microsoft.Media.MediaGraphIoTHubMessageSink",
             "inputs":
-            [
-               {
-                   "name": "httpExtension",
-                   "required": false
-               },
-               {
-                   "name": "grpcExtension",
-                   "required": false
-               },
-               {
-                   "name": "motionDetection",
-                   "required": false
-               } 
-            ],
-            "extraParameters": 
-            [
-                {
-                    "name": "hubSinkOutputName",
-                    "type": "String",
-                    "description": "hub sink output name",
-                    "default": "inferenceOutput"
-                }
-            ],
+                [
+                    {
+                        "name": "httpExtension",
+                        "required": false
+                    },
+                    {
+                        "name": "grpcExtension",
+                        "required": false
+                    },
+                    {
+                        "name": "motionDetection",
+                        "required": false
+                    }
+                ],
+            "extraParameters":
+                [
+                    {
+                        "name": "hubSinkOutputName",
+                        "type": "String",
+                        "description": "hub sink output name",
+                        "default": "inferenceOutput"
+                    }
+                ],
             "extraValues":
-            [
-                {
-                    "name": "hubOutputName",
-                    "value": "${hubSinkOutputName}"
-                }
-            ]
+                [
+                    {
+                        "name": "hubOutputName",
+                        "value": "${hubSinkOutputName}"
+                    }
+                ]
         },
         {
             "name": "assetSink",
             "type": "#Microsoft.Media.MediaGraphAssetSink",
             "inputs":
-            [
-               {
-                   "name": "rtspSource",
-                   "required": false
-               },
-               {
-                   "name": "signalGateProcessor",
-                   "required": false
-               } 
-            ],
-            "extraParameters": 
-            [
-                {
-                    "name": "hubSinkOutputName",
-                    "type": "String",
-                    "description": "hub sink output name",
-                    "default": "inferenceOutput"
-                }
-            ],
+                [
+                    {
+                        "name": "rtspSource",
+                        "required": false
+                    },
+                    {
+                        "name": "signalGateProcessor",
+                        "required": false
+                    }
+                ],
+            "extraParameters":
+                [
+                    {
+                        "name": "hubSinkOutputName",
+                        "type": "String",
+                        "description": "hub sink output name",
+                        "default": "inferenceOutput"
+                    }
+                ],
             "extraValues":
-            [
-                {
-                    "name": "assetNamePattern",
-                    "value": "sampleAssetFromLVAEdge-${System.DateTime}"
-                },
-                {
-                    "name": "segmentLength",
-                    "value": "PT30S"
-                },
-                {
-                    "name": "LocalMediaCacheMaximumSizeMiB",
-                    "value": "2048"
-                },
-                {
-                    "name": "localMediaCachePath",
-                    "value": "/var/lib/azuremediaservices/tmp"
-                }
-            ]
+                [
+                    {
+                        "name": "assetNamePattern",
+                        "value": "sampleAssetFromLVAEdge-${System.DateTime}"
+                    },
+                    {
+                        "name": "segmentLength",
+                        "value": "PT30S"
+                    },
+                    {
+                        "name": "LocalMediaCacheMaximumSizeMiB",
+                        "value": "2048"
+                    },
+                    {
+                        "name": "localMediaCachePath",
+                        "value": "/var/lib/azuremediaservices/tmp"
+                    }
+                ]
         }
-]
+    ]

@@ -25,50 +25,46 @@ var cameras = {};
 * get global variables from server, Returns a promise so that functions that depend on these variables can wait
 * @returns {Promise<any>}
 */
-function getGlobals()
+function getCamerasFromServer()
 {
-  return new Promise((resolve, reject) => 
-  {
-    let request = prepareRequest(`http://localhost:${PORT}/globals`, "GET");
-    request.onreadystatechange = function () 
+    return new Promise((resolve, reject) =>
     {
-      if(request.readyState == 4)
-      {
-        if(request.status == 200)
+        let request = prepareRequest(`http://localhost:${PORT}/globals`, "GET");
+        request.onreadystatechange = function ()
         {
-          let response = JSON.parse(request.response);
-          graphInstances = response.graphInstances;
-          graphTopologies = response.graphTopologies;
-          cameras = response.cameras;
-          resolve(response);
+            if (request.readyState == 4)
+            {
+                if (request.status == 200)
+                {
+                    let response = JSON.parse(request.response);
+                    cameras = response.cameras;
+                    resolve(response);
+                }
+                else
+                {
+                    reject("Get Globals rejection");
+                }
+            }
+            else if (request.status != 200)
+            {
+                reject("Server not responding");
+            }
         }
-        else
-        {
-          reject("Get Globals rejection");
-        }
-      }
-      else if(request.status != 200)
-      {
-        reject("Server not responding");
-      }
-    }
-    request.send();
-  });
+        request.send();
+    });
 }
 
 /**
 * send current values to the server to be stored for later 
 */
-function sendGlobals()
+function sendCamerasToServer()
 {
-  let globals = 
-  {
-    graphInstances: graphInstances,
-    graphTopologies: graphTopologies,
-    cameras: cameras
-  };
-  let request = prepareRequest(`http://localhost:${PORT}/globals`, "PUT");
-  request.send(JSON.stringify(globals));
+    let globals =
+    {
+        cameras: cameras
+    };
+    let request = prepareRequest(`http://localhost:${PORT}/globals`, "PUT");
+    request.send(JSON.stringify(globals));
 }
 
 /**
@@ -76,24 +72,30 @@ function sendGlobals()
 * @param {string} url - @link to communicate on
 * @param {string} requestType - POST or GET request 
 * @returns {XMLHttpRequest} - generated, unsent request
-*/ 
-function prepareRequest(url, requestType="POST") 
+*/
+function prepareRequest(url, requestType = "POST")
 {
-  let request = new XMLHttpRequest();
-  request.open(requestType, url, true);
-  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-  return request;
+    let request = new XMLHttpRequest();
+    request.open(requestType, url, true);
+    // I would prefer the timeout to be shorter, for security purposes, however when we invoke LVA methods on the device the default max response time in seconds = 200
+    request.timeout = 200000;
+    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    request.ontimeout = function ()
+    {
+        console.error("Request timed out");
+    }
+    return request;
 }
 
 /**
 * delete all htmlElementents nested within the nearest parent li item
 * @param {HTMLButtonElement} htmlElement - what user clicked on
 */
-function deleteFromParentListItem(htmlElement) 
+function deleteFromParentListItem(htmlElement)
 {
-  let id = $(htmlElement).closest('li').attr('id');
-  let item = document.getElementById(id);
-  item.parentElement.removeChild(item);
+    let id = $(htmlElement).closest('li').attr('id');
+    let item = document.getElementById(id);
+    item.parentElement.removeChild(item);
 }
 
 /**
@@ -101,14 +103,14 @@ function deleteFromParentListItem(htmlElement)
 * @param {string} nameToInclude - optional name to include in unique id
 * @returns {string} - unique ID
 */
-function makeUniqueId(nameToInclude = "") 
+function makeUniqueId(nameToInclude = "")
 {
-  //return nameToInclude + a UUID
-  return (nameToInclude + 'xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function (char) 
-  {
-    let rand = Math.random() * 16 | 0, v = char == 'x' ? rand : (rand & 0x3 | 0x8);
-    return v.toString(16);
-  }));
+    //return nameToInclude + a UUID
+    return (nameToInclude + 'xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function (char)
+    {
+        let rand = Math.random() * 16 | 0, v = char == 'x' ? rand : (rand & 0x3 | 0x8);
+        return v.toString(16);
+    }));
 }
 
 
@@ -117,28 +119,23 @@ function makeUniqueId(nameToInclude = "")
 /** 
 * grab inputs from configuration. Calls to connect to device and IotHub to make sure your credentials are valid!
 */
-function sendConfigData() 
+function sendConfigData()
 {
-  let payload =
-  {
-    "device-id": document.getElementById("device-id").value,
-    "iothub-connection-string": document.getElementById("iothub-connection-string").value
-  };
+    let payload =
+    {
+        "device-id": document.getElementById("device-id").value,
+        "iothub-connection-string": document.getElementById("iothub-connection-string").value
+    };
 
-  let request = prepareRequest(`http://localhost:${PORT}/connectToIotHub`);
-  request.onreadystatechange = function () 
-  {
-    if (request.readyState == 4) 
+    let request = prepareRequest(`http://localhost:${PORT}/connectToIotHub`);
+    request.onreadystatechange = function ()
     {
-      document.getElementById("configuration-output-box").innerHTML = request.response;
+        if (request.readyState == 4)
+        {
+            document.getElementById("configuration-output-box").innerHTML = request.response;
+        }
     }
-    else if(request.status != 200)
-    {
-      console.error("Bad response connecting to IoT Hub, ready state: " + request.readyState + " and request status: " +request.status);
-      console.error("Request response: " + request.response);
-    }
-  }
-  request.send(JSON.stringify(payload));
+    request.send(JSON.stringify(payload));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,30 +145,28 @@ function sendConfigData()
 * show current graph instances in dropdown. Used in output.html when invoking methods 
 * @param {string} methodName - name of method on dropdown button
 */
-function instanceMethodDropdowns(methodName) 
+function instanceMethodDropdowns(methodName)
 {
-  let hoverList = document.getElementById(methodName+"-dropdown");
-  let onclickMethod = `graphEntityModify(this, "${methodName}", false)`;
-  hoverList.innerHTML = "";
-  let checkBoxNameList = [];
-  switch(hoverList.getAttribute("typeoflist"))
-  {
-    case 'instance-list':
-      checkBoxNameList = Object.keys(graphInstances);
-      break;
-    case 'topology-list':
-      checkBoxNameList = Object.keys(graphTopologies);
-      break;
-    case 'topology-set':
-      checkBoxNameList = Object.keys(graphTopologies);
-      onclickMethod = 'graphSetTopology(this.innerText)';
-      break;
-  }
+    let hoverList = document.getElementById(methodName + "-dropdown");
+    let onclickMethod = `graphEntityModify(this, "${methodName}", false)`;
+    hoverList.innerHTML = "";
+    let checkBoxNameList = [];
+    switch (hoverList.getAttribute("typeoflist"))
+    {
+        case 'instance-list':
+            checkBoxNameList = Object.keys(graphInstances);
+            break;
+        case 'topology-list':
+            checkBoxNameList = Object.keys(graphTopologies);
+            break;
+        default:
+            break;
+    }
 
-  checkBoxNameList.forEach((item) => 
-  {
-    hoverList.innerHTML += "<li> <button class='btn btn-outline-secondary' onclick='" + onclickMethod + "' name='" + methodName + "'>" + item + "</button> </li>";
-  });
+    checkBoxNameList.forEach((item) =>
+    {
+        hoverList.innerHTML += "<li> <button class='btn btn-outline-secondary' onclick='" + onclickMethod + "' name='" + methodName + "'>" + item + "</button> </li>";
+    });
 }
 
 /**
@@ -182,52 +177,53 @@ function instanceMethodDropdowns(methodName)
 */
 function createFullPayload(methodNameParam, methodPayload)
 {
-  return {
-    methodName: methodNameParam,
-    Payload: methodPayload  
-  }
+    return {
+        methodName: methodNameParam,
+        Payload: methodPayload
+    }
 }
 
 /**
 * see sample graph topologies here: https://github.com/Azure/live-video-analytics/tree/master/MediaGraph/topologies
-* @param {string} topologyName - graph topology name
+* @param {Object} topology - graph topology JSON object
 * @returns {void}
 */
-function graphSetTopology(topologyName, topology)
+function graphSetTopology(topology)
 {
 
-  invokeLVAMethod(createFullPayload("GraphTopologySet", topology)).then(() =>
-  {
-    // do nothing, invokeLVAMethod handles
-  }).catch((error) =>
-  {
-    alert(JSON.parse(error).payload.error || JSON.parse(error));
-    console.error(error);
-  });
+    invokeLVAMethod(createFullPayload("GraphTopologySet", topology)).then(() =>
+    {
+        // do nothing, invokeLVAMethod handles
+    }).catch((error) =>
+    {
+        alert(JSON.parse(error).payload.error || JSON.parse(error));
+        console.error(error);
+    });
 }
+
 
 /**
 * invoke a list method on lvaEdge module (either list topology or list instances. payload is the same)
 * @param {string} methodName - method name (either GraphTopologyList or GraphInstanceList)
 * @returns {Promise<any>}
 */
-function graphEntityList(methodName) 
+function graphEntityList(methodName)
 {
-  return new Promise((resolve, reject) =>
-  {
-    let payload = 
+    return new Promise((resolve, reject) =>
     {
-      "@apiVersion": "1.0"
-    };
+        let payload =
+        {
+            "@apiVersion": "1.0"
+        };
 
-    invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
-    {
-      resolve(response);
-    }).catch((error) =>
-    {
-      reject(error);
+        invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
+        {
+            resolve(response);
+        }).catch((error) =>
+        {
+            reject(error);
+        });
     });
-  });
 }
 
 /**
@@ -236,21 +232,21 @@ function graphEntityList(methodName)
 * @param {string} methodName - method name
 * @param {boolean} elementNamePassed - true if function caller passed in the 
 */
-function graphEntityModify(htmlElement, methodName, elementNamePassed=false) 
+function graphEntityModify(htmlElement, methodName, elementNamePassed = false)
 {
-  let elementName = elementNamePassed ? htmlElement : htmlElement.innerText;
-  let payload = 
-  {
-    "@apiVersion": "1.0",
-    name: elementName
-  };
-  invokeLVAMethod(createFullPayload(methodName, payload)).then(() =>
-  {
-    // do nothing, invokeLVAMethod handles
-  }).catch((error) =>
-  {
-    console.error(error);
-  });
+    let elementName = elementNamePassed ? htmlElement : htmlElement.innerText;
+    let payload =
+    {
+        "@apiVersion": "1.0",
+        name: elementName
+    };
+    invokeLVAMethod(createFullPayload(methodName, payload)).then(() =>
+    {
+        // do nothing, invokeLVAMethod handles
+    }).catch((error) =>
+    {
+        console.error(error);
+    });
 }
 
 
@@ -261,19 +257,19 @@ function graphEntityModify(htmlElement, methodName, elementNamePassed=false)
 */
 async function loadInstancesAndTopologies()
 {
-  getGlobals().then(() =>
-  {
-    graphEntityList("GraphInstanceList").then(() =>
+    getCamerasFromServer().then(() =>
     {
-      graphEntityList("GraphTopologyList");
+        graphEntityList("GraphInstanceList").then(() =>
+        {
+            graphEntityList("GraphTopologyList");
+        }).catch((error) =>
+        {
+            console.error(error);
+        });
     }).catch((error) =>
     {
-      console.error(error);
+        console.error(error);
     });
-  }).catch((error) => 
-  {
-    console.error(error);
-  });
 }
 
 /**
@@ -282,41 +278,41 @@ async function loadInstancesAndTopologies()
 * @param {XMLHttpRequestResponseType} response - JSON response object from request
 * @returns {void}
 */
-function updateGraphsandInstances(methodName, response) 
+function updateGraphsandInstances(methodName, response)
 {
-  let namesArray = response.payload.value;
-  if (namesArray.length != 0)
-  {
-    namesArray.forEach((item) => 
+    let namesArray = response.payload.value;
+    if (namesArray.length != 0)
     {
-      switch(methodName)
-      {
-        case "GraphInstanceList":
-          let instancePayload = 
-          {
-            "@apiVersion": "1.0",
-            "name": item.name,
-            "properties":
+        namesArray.forEach((item) =>
+        {
+            switch (methodName)
             {
-              "topologyName": item.properties.topologyName,
-              "description": item.properties.description,
-              "parameters": item.properties.parameters
+                case "GraphInstanceList":
+                    let instancePayload =
+                    {
+                        "@apiVersion": "1.0",
+                        "name": item.name,
+                        "properties":
+                        {
+                            "topologyName": item.properties.topologyName,
+                            "description": item.properties.description,
+                            "parameters": item.properties.parameters
+                        }
+                    }
+                    graphInstances[item.name] = instancePayload;
+                    break;
+
+                case "GraphTopologyList":
+                    if (graphTopologies[item.name] == undefined)
+                    {
+                        let newGraph = constructMediaGraphJSON(item.name, item.description, item.properties.sources, item.properties.processors, item.properties.sinks, item.properties.parameters);
+                        graphTopologies[item.name] = newGraph;
+                    }
+                    break;
             }
-          }
-          graphInstances[item.name] = instancePayload;
-          break;
-        
-        case "GraphTopologyList":
-          if (graphTopologies[item.name] == undefined )
-          {
-            let newGraph = constructMediaGraphJSON(item.name, item.description, item.properties.sources, item.properties.processors, item.properties.sinks, item.properties.parameters);
-            graphTopologies[item.name] = newGraph;
-          }
-          break;
-      }
-    });
-  }
-  return;
+        });
+    }
+    return;
 }
 
 /**
@@ -327,13 +323,13 @@ function updateGraphsandInstances(methodName, response)
 */
 function displayMethodOutput(result)
 {
-  let htmlElement = document.getElementById("method-output-box");
-  if (htmlElement != null)
-  {
-    htmlElement.innerText = result;
-    return true;
-  }
-  return false;
+    let htmlElement = document.getElementById("method-output-box");
+    if (htmlElement != null)
+    {
+        htmlElement.innerText = result;
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -341,97 +337,95 @@ function displayMethodOutput(result)
 * @param {jsonObject} fullPayload - payload to be sent in request to server
 * @returns {Promise<any>}
 */
-function invokeLVAMethod(fullPayload) 
+function invokeLVAMethod(fullPayload)
 {
-  return new Promise((resolve, reject) => 
-  {
-    let request = prepareRequest(`http://localhost:${PORT}/runMethod`);
-    // event listener. When request readyState changes, place response in the output box. If response is done (readyState=4) then update global vars accordingly
-    request.onreadystatechange = function () 
+    return new Promise((resolve, reject) =>
     {
-      //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
-      if (request.readyState == 4 && request.status == 200) 
-      {
-        var methodName = JSON.parse(request.response)[0].method;
-        var result = JSON.stringify(JSON.parse(request.response)[1]);
-        var isFromOutputPage = displayMethodOutput(result);
+        let request = prepareRequest(`http://localhost:${PORT}/runMethod`);
+        // event listener. When request readyState changes, place response in the output box. If response is done (readyState=4) then update global vars accordingly
+        request.onreadystatechange = function ()
+        {
+            //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
+            if (request.readyState == 4)
+            {
+                if (request.status == 200)
+                {
+                    var methodName = JSON.parse(request.response)[0].method;
+                    var result = JSON.stringify(JSON.parse(request.response)[1]);
+                    var isFromOutputPage = displayMethodOutput(result);
 
-        if(JSON.parse(result).status < 250)
-        {
-          switch(methodName)
-          {
-            case 'GraphTopologyDelete':
-              delete graphTopologies[fullPayload.Payload.name];
-              break;
-            case 'GraphInstanceDelete':
-              delete graphInstances[fullPayload.Payload.name];
-              break;
-            case 'GraphInstanceList':
-              updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-              break;
-            case 'GraphTopologyList':
-              updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-              break;
-            case 'GraphInstanceSet':
-              graphInstances[fullPayload.Payload.name] = fullPayload;
-              break;
-            case 'GraphTopologySet':
-              // only alert and run display media graphs if request is coming from mediagraphs.html page
-              graphTopologies[fullPayload.Payload.name] = fullPayload;
-              if(!isFromOutputPage)
-              {
-                alert("Success!");
-                displayMediaGraphs();
-              }
-              break;
-            default:
-              break;
-          }
-          resolve(result);
+                    if (JSON.parse(result).status < 250)
+                    {
+                        switch (methodName)
+                        {
+                            case 'GraphTopologyDelete':
+                                delete graphTopologies[fullPayload.Payload.name];
+                                break;
+                            case 'GraphInstanceDelete':
+                                delete graphInstances[fullPayload.Payload.name];
+                                break;
+                            case 'GraphInstanceList':
+                                updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
+                                break;
+                            case 'GraphTopologyList':
+                                updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
+                                break;
+                            case 'GraphInstanceSet':
+                                graphInstances[fullPayload.Payload.name] = fullPayload;
+                                break;
+                            case 'GraphTopologySet':
+                                // only alert and run display media graphs if request is coming from mediagraphs.html page
+                                graphTopologies[fullPayload.Payload.name] = fullPayload;
+                                if (!isFromOutputPage)
+                                {
+                                    alert("Success!");
+                                    displayMediaGraphs();
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        resolve(result);
+                    }
+                }
+                else
+                {
+                    if(request.response != "") alert(request.response);
+                    reject(request.response);
+                }
+            }
+            else
+            {
+                if (request.response != "" && request.status != 404 && JSON.parse(request.response)[1] != undefined)
+                {
+                    displayMethodOutput(JSON.stringify(JSON.parse(request.response)[1]));
+                }
+            }
         }
-        else
-        {
-          reject(result);
-        }
-      }
-      else if (request.readyState == 4)
-      {
-        alert(request.response);
-        reject(request.response);
-      }
-      else
-      {
-        //console.log("invokeLVAMethod request response is: "+ request.response+ "request status is: "+request.status);
-        if(request.response != "" && request.status != 404 && JSON.parse(request.response)[1] != undefined)
-        {
-          displayMethodOutput(JSON.stringify(JSON.parse(request.response)[1]));
-        }
-      }
-    }
-    request.send(JSON.stringify(fullPayload));
-  });
+        request.send(JSON.stringify(fullPayload));
+    });
 }
 
 /**
 * stream device to cloud messages from IoT Hub via websocket, opened server side
 */
 function emitdata()
-{ 
-  let request = prepareRequest(`http://localhost:${PORT}/hubmessages`, "GET");
-  request.onreadystatechange = function () 
+{
+    let request = prepareRequest(`http://localhost:${PORT}/hubmessages`, "GET");
+    request.onreadystatechange = function ()
     {
-      //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
-      if (request.readyState == 4 && request.status == 200) 
-      {
-        document.getElementById('stop-messages').disabled=false;
-        document.getElementById('start-messages').disabled=true;
-      }
-      else if (request.readyState == 4 && request.status == 404)
-      {
-        alert(request.response);
-      }
+        //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
+        if (request.readyState == 4 && request.status == 200)
+        {
+            document.getElementById('stop-messages').disabled = false;
+            document.getElementById('start-messages').disabled = true;
+        }
+        else if (request.readyState == 4 && request.status == 404)
+        {
+            alert(request.response);
+        }
     }
-  request.send();
+    request.send();
 }
 
 /**
@@ -439,10 +433,11 @@ function emitdata()
  */
 function stopMessages()
 {
-  let request = prepareRequest(`http://localhost:${PORT}/stopMessages`);
-  request.send();
-  document.getElementById('stop-messages').disabled=true;
-  document.getElementById('start-messages').disabled=false;
+    let request = prepareRequest(`http://localhost:${PORT}/stopMessages`);
+    request.send();
+    document.getElementById('stop-messages').disabled = true;
+    document.getElementById('start-messages').disabled = false;
+    document.getElementById("iothub-message-output-box").innerHTML="";
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -455,17 +450,17 @@ function stopMessages()
 */
 function createCameraTableFromTemplate(cameraName)
 {
-  let template = $('#created-camera-template').html();
-  template = $(template).clone();
-  let listItem = template[0];
-  $(listItem).attr({ 'id': makeUniqueId() });
+    let template = $('#created-camera-template').html();
+    template = $(template).clone();
+    let listItem = template[0];
+    $(listItem).attr({ 'id': makeUniqueId() });
 
-  let values_column = $(template)[0].getElementsByTagName('tr')[1];
-  values_column.children[0].innerHTML = cameraName;
-  values_column.children[1].innerHTML = cameras[cameraName].url;
-  values_column.children[2].innerHTML = cameras[cameraName].username;
-  values_column.children[3].innerHTML = "******";
-  return template;
+    let values_column = $(template)[0].getElementsByTagName('tr')[1];
+    values_column.children[0].innerHTML = cameraName;
+    values_column.children[1].innerHTML = cameras[cameraName].url;
+    values_column.children[2].innerHTML = cameras[cameraName].username;
+    values_column.children[3].innerHTML = "******";
+    return template;
 }
 
 /**
@@ -473,13 +468,13 @@ function createCameraTableFromTemplate(cameraName)
 */
 function camerasOnLoad()
 {
-  getGlobals().then(() =>
-  {
-    displayCameras();
-  }).catch((error) =>
-  {
-    alert(error);
-  })
+    getCamerasFromServer().then(() =>
+    {
+        displayCameras();
+    }).catch((error) =>
+    {
+        alert(error);
+    })
 }
 
 /**
@@ -487,52 +482,52 @@ function camerasOnLoad()
 */
 function displayCameras()
 {
-  let camerasList = $('#existing-cameras');
-  $(camerasList)[0].innerHTML="";
+    let camerasList = $('#existing-cameras');
+    $(camerasList)[0].innerHTML = "";
 
-  Object.keys(cameras).forEach((cam) => 
-  {
-    camerasList.append(createCameraTableFromTemplate(cam));
-  });
+    Object.keys(cameras).forEach((cam) =>
+    {
+        camerasList.append(createCameraTableFromTemplate(cam));
+    });
 
-  if ($(camerasList)[0].innerHTML == "")
-  {
-    $(camerasList)[0].innerHTML = "You currently have no cameras set up";
-  }
+    if ($(camerasList)[0].innerHTML == "")
+    {
+        $(camerasList)[0].innerHTML = "You currently have no cameras set up";
+    }
 }
 
 
 /**
 * add user-input camera values to global cameras list. User can add multiple cameras at once
 */
-function submitCameras() 
+function submitCameras()
 {
-  let entries = document.getElementsByTagName("input");
-  cameras[entries[0].value] =
-  {
-      "url": entries[1].value,
-      "username": entries[2].value,
-      "password": entries[3].value
-  }
+    let entries = document.getElementsByTagName("input");
+    cameras[entries[0].value] =
+    {
+        "url": entries[1].value,
+        "username": entries[2].value,
+        "password": entries[3].value
+    }
 
-  for (inputBox of entries)
-  {
-    inputBox.value="";
-  }
+    for (inputBox of entries)
+    {
+        inputBox.value = "";
+    }
 
-  displayCameras();
+    displayCameras();
 }
 
 /** 
 * delete camera
 * @param {HTMLSpanElement} htmlElement - the delete button, gets passed in on click
 */
-function deleteCamera(htmlElement) 
+function deleteCamera(htmlElement)
 {
-  let name = $(htmlElement).closest('table')[0].getElementsByTagName('tr')[1].children[0].innerText;
-  delete cameras[name];
-  deleteFromParentListItem(htmlElement);
-  displayCameras();
+    let name = $(htmlElement).closest('table')[0].getElementsByTagName('tr')[1].children[0].innerText;
+    delete cameras[name];
+    deleteFromParentListItem(htmlElement);
+    displayCameras();
 }
 
 
@@ -545,41 +540,41 @@ function deleteCamera(htmlElement)
 */
 function setGraphInstance()
 {
-  //get each of the parameters and their values
+    //get each of the parameters and their values
     let parametersObject = [];
     let parameters = document.getElementsByClassName("parameter-input");
-    for(let param of parameters) 
+    for (let param of parameters)
     {
-        if(param.value == "") param.value=param.getAttribute("placeholder");
+        if (param.value == "") param.value = param.getAttribute("placeholder");
         parametersObject.push(
-        {
-            "name": param.getAttribute('id'),
-            "value": param.value
-        });
+            {
+                "name": param.getAttribute('id'),
+                "value": param.value
+            });
     };
 
     let instanceName = document.getElementById("instance-name-input").value;
     let topologyName = document.getElementById("instanceset-topology").getAttribute("name");
     let instanceDescription = document.getElementById("instance-description-input").value;
     //create the request object
-    let payload = 
+    let payload =
     {
         "@apiVersion": "1.0",
         "name": instanceName,
-        "properties": 
+        "properties":
         {
-          "topologyName": topologyName,
-          "description": instanceDescription,
-          "parameters": parametersObject
+            "topologyName": topologyName,
+            "description": instanceDescription,
+            "parameters": parametersObject
         }
-    }  
+    }
 
     invokeLVAMethod(createFullPayload("GraphInstanceSet", payload)).then((response) =>
     {
-      // do nothing, already handled by LVA method
+        // do nothing, already handled by LVA method
     }).catch((error) =>
     {
-      console.error(error);
+        console.error(error);
     });
 
     //reset the Set Graph Instance modal
@@ -591,31 +586,31 @@ function setGraphInstance()
 
 /** 
 * GraphInstanceSet: set up parameters! 
-*/  
+*/
 function populateModalTemplate()
 {
-  //find the currently set graph topology
-  let modal = document.getElementById("myModal");
-  let modalObjects = modal.getElementsByClassName("modal-item");
-  let content = modal.getElementsByClassName("all-set-instance-content");
-  let currentSelect = modalObjects[0]
+    //find the currently set graph topology
+    let modal = document.getElementById("myModal");
+    let modalObjects = modal.getElementsByClassName("modal-item");
+    let content = modal.getElementsByClassName("all-set-instance-content");
+    let currentSelect = modalObjects[0]
 
-  content[0].style.visibility = "visible";
+    content[0].style.visibility = "visible";
 
-  //for each topology display the name as option for user to set instance on
-  Object.keys(graphTopologies).forEach((graphName) => 
-  {
-    currentSelect.innerHTML += "<option value="+graphName+">"+graphName+"</option>";
-  })
+    //for each topology display the name as option for user to set instance on
+    Object.keys(graphTopologies).forEach((graphName) =>
+    {
+        currentSelect.innerHTML += "<option value=" + graphName + ">" + graphName + "</option>";
+    })
 
-  //add select menu for user to choose one of the current cameras
-  currentSelect = modalObjects[3];
- 
-  //for each camera display the name as option for user to use in instance
-  Object.keys(cameras).forEach((cam) =>
-  {
-    currentSelect.innerHTML += "<option value="+cam+">"+cam+"</option>";
-  });
+    //add select menu for user to choose one of the current cameras
+    currentSelect = modalObjects[3];
+
+    //for each camera display the name as option for user to use in instance
+    Object.keys(cameras).forEach((cam) =>
+    {
+        currentSelect.innerHTML += "<option value=" + cam + ">" + cam + "</option>";
+    });
 }
 
 /**
@@ -624,10 +619,10 @@ function populateModalTemplate()
 */
 function loadCameraParams(htmlElement)
 {
-  let theChosenCamera = cameras[htmlElement.value];
-  document.getElementById("rtspUrl").value=theChosenCamera.url;
-  document.getElementById("rtspUserName").value=theChosenCamera.username;
-  document.getElementById("rtspPassword").value=theChosenCamera.password;    
+    let theChosenCamera = cameras[htmlElement.value];
+    document.getElementById("rtspUrl").value = theChosenCamera.url;
+    document.getElementById("rtspUserName").value = theChosenCamera.username;
+    document.getElementById("rtspPassword").value = theChosenCamera.password;
 }
 
 /**
@@ -636,26 +631,26 @@ function loadCameraParams(htmlElement)
 */
 function loadTopologyParams(htmlElement)
 {
-  let mediaGraph = graphTopologies[htmlElement.value];
-  document.getElementById("instanceset-topology").name=htmlElement.value;
-  let obj = $('#parameter-list');
+    let mediaGraph = graphTopologies[htmlElement.value];
+    document.getElementById("instanceset-topology").name = htmlElement.value;
+    let obj = $('#parameter-list');
 
-  //can't do get htmlElementent by id on a template
-  obj[0].innerHTML = "";
+    //can't do get htmlElementent by id on a template
+    obj[0].innerHTML = "";
 
-  //create new parameter template and add the default values in for each one
-  mediaGraph.properties.parameters.forEach((parameter) => 
-  {
-    let parameterTemplate = $('#parameter-template').html();
-    parameterTemplate = $(parameterTemplate).clone();
-    parameterTemplate[0].getElementsByClassName("information")[0].innerHTML=parameter.name+": "+parameter.description;
-    
-    if(parameter.hasOwnProperty("default"))
+    //create new parameter template and add the default values in for each one
+    mediaGraph.properties.parameters.forEach((parameter) =>
     {
-      parameterTemplate[0].getElementsByClassName("parameter-input")[0].setAttribute("placeholder", parameter.default);
-    }
+        let parameterTemplate = $('#parameter-template').html();
+        parameterTemplate = $(parameterTemplate).clone();
+        parameterTemplate[0].getElementsByClassName("information")[0].innerHTML = parameter.name + ": " + parameter.description;
 
-    parameterTemplate[0].getElementsByClassName("parameter-input")[0].setAttribute("id", parameter.name);
-    obj[0].appendChild(parameterTemplate[0]);
-  });
+        if (parameter.hasOwnProperty("default"))
+        {
+            parameterTemplate[0].getElementsByClassName("parameter-input")[0].setAttribute("placeholder", parameter.default);
+        }
+
+        parameterTemplate[0].getElementsByClassName("parameter-input")[0].setAttribute("id", parameter.name);
+        obj[0].appendChild(parameterTemplate[0]);
+    });
 }

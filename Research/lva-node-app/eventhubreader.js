@@ -12,65 +12,65 @@ const { convertIotHubToEventHubsConnectionString } = require('./iot-hub-connecti
 * get messages coming from IoT Hub
 * @class
 */
-class EventHubReader 
+class EventHubReader
 {
-  /**
-   * @constructor
-   * @param {string} iotHubConnectionString - iot hub connection string in standard format
-   * @param {string} consumerGroup - consumer group, typically Default
-   */
-  constructor(iotHubConnectionString, consumerGroup) 
-  {
-    this.iotHubConnectionString = iotHubConnectionString;
-    this.consumerGroup = consumerGroup;
-  }
-
-  /**
-   * starts the process of reading messages from Iot Hub by creating an Event Hubs connection string
-   * @async
-   * @param {any} startReadMessageCallback - callback function
-   */
-  async startReadMessage(startReadMessageCallback) 
-  {
-    try 
+    /**
+     * @constructor
+     * @param {string} iotHubConnectionString - iot hub connection string in standard format
+     * @param {string} consumerGroup - consumer group, typically Default
+     */
+    constructor(iotHubConnectionString, consumerGroup)
     {
-      const eventHubConnectionString = await convertIotHubToEventHubsConnectionString(this.iotHubConnectionString);
-      this.consumerClient = new EventHubConsumerClient(this.consumerGroup, eventHubConnectionString);
-      console.log('Successfully created the EventHubConsumerClient from IoT Hub event hub-compatible connection string.');
-
-      this.subs = this.consumerClient.subscribe(
-      {
-        processEvents: (events) => 
-        {
-          for (let i = 0; i < events.length; ++i) 
-          {
-            startReadMessageCallback(
-              events[i].body,
-              events[i].enqueuedTimeUtc,
-              events[i].systemProperties["iothub-connection-device-id"]);
-          }
-        },
-        processError: (error) => 
-        {
-          console.error(error.message || error);
-        }
-      });
-    } catch (error) 
-    {
-      console.error(error.message || error);
+        this.iotHubConnectionString = iotHubConnectionString;
+        this.consumerGroup = consumerGroup;
     }
-  }
 
-  /**
-   * closes connection to Event Hub
-   * @async
-   */
-  async stopReadMessage() 
-  {
-    await this.subs.close();
-    await this.consumerClient.close();
-    console.log("Closing Event Hub connection");
-  }
+    /**
+     * starts the process of reading messages from Iot Hub by creating an Event Hubs connection string
+     * @async
+     * @param {any} startReadMessageCallback - callback function
+     */
+    async startReadMessage(startReadMessageCallback)
+    {
+        try
+        {
+            const eventHubConnectionString = await convertIotHubToEventHubsConnectionString(this.iotHubConnectionString);
+            this.consumerClient = new EventHubConsumerClient(this.consumerGroup, eventHubConnectionString);
+            console.log('Successfully created the EventHubConsumerClient from IoT Hub event hub-compatible connection string.');
+
+            this.subs = this.consumerClient.subscribe(
+                {
+                    processEvents: (events) =>
+                    {
+                        for (let i = 0; i < events.length; ++i)
+                        {
+                            startReadMessageCallback(
+                                events[i].body,
+                                events[i].enqueuedTimeUtc,
+                                events[i].systemProperties["iothub-connection-device-id"]);
+                        }
+                    },
+                    processError: (error) =>
+                    {
+                        console.error(error.message || error);
+                    }
+                });
+        } catch (error)
+        {
+            console.error(error.message || error);
+        }
+    }
+
+    /**
+     * closes connection to Event Hub
+     * @async
+     */
+    async stopReadMessage()
+    {
+        await this.subs.close();
+        await this.consumerClient.close();
+        console.log("Closing Event Hub connection");
+    }
 }
 
 module.exports = EventHubReader;

@@ -234,16 +234,12 @@
   <script src="../js/main.js"></script>
   <script src="../js/mediaGraphBuilder.js"></script>
 
-  <!-- Menu Toggle Script and unload function-->
+  <!-- Menu Toggle Script-->
   <script>
     $("#menu-toggle").click(function (e) {
       e.preventDefault();
       $("#wrapper").toggleClass("toggled");
     });
-    window.onbeforeunload = function(){
-      sendGlobals();
-      return;
-    }
   </script>
 
   <script id="hidden-template" type="text/x-custom-template">
