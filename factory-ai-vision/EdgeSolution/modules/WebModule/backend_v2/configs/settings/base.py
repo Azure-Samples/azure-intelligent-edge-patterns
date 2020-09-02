@@ -164,6 +164,11 @@ CHANNEL_LAYERS = {
     }
 }
 
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER':
+        'vision_on_edge.general.api.exception_handlers.ms_style_exception_handler'
+}
+
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING
 DEVICE_ID = config.DEVICE_ID
 MODULE_ID = config.MODULE_ID
