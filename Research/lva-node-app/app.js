@@ -32,8 +32,8 @@ app.use(express.static('public'))
 app.use(express.static('public/pages'))
 
 /**
- * @global
- */
+* @global
+*/
 global.DEVICE_ID="";
 global.MODULE_ID="lvaEdge";
 global.IOTHUB_CONNECTION_STRING="";
@@ -79,12 +79,12 @@ app.get('/output', function (req, res)
 
 /**
 * send client global variables upon request 
-* @returns {void}
 */
 app.get('/globals', function (req, res) 
 {
-  console.log("get globals get function!");
-  let globals={
+  console.log("User requested globals from server");
+  let globals =
+  {
     graphInstances: graphInstances,
     graphTopologies: graphTopologies,
     cameras: cameras
@@ -94,15 +94,17 @@ app.get('/globals', function (req, res)
 
 /**
 * update global variables when sent by user (user called setGlobals)
+* modifying existing variables, thus using a PUT request
 */
 app.put('/globals', function (req, res)
 {
-  console.log("set globals");
+  console.log("User setting server's globals");
   graphInstances=req.body.graphInstances;
   graphTopologies=req.body.graphTopologies;
   cameras=req.body.cameras;
   res.end();
 })
+
 /**
 * start sending live stream hub messages to client via websocket 
 * @returns {void}
@@ -112,8 +114,8 @@ app.get('/hubMessages', function(req, res)
   if (validCredentialsAreSet(res))
   {
     receiveHubMessages();
-    res.end();
   } 
+  res.end();
 })
 
 /**
@@ -131,14 +133,12 @@ app.get('/stopMessages', function(req, res)
 
 /**
  * invoke LVA methods handler
- * @returns {void}
  */
-app.post('/runmethod', function (req, res) 
+app.post('/runMethod', function (req, res) 
 { 
-    if (!validCredentialsAreSet(res))
-    {
-      return;
-    }
+  //only run if credentials are set, otherwise validCredentialsAreSet method will send res.send(error message)
+  if (validCredentialsAreSet(res))
+  {
     let methodName=req.body.methodName;
     invokeLVAMethod(req, res).then(response => 
     {
@@ -150,55 +150,74 @@ app.post('/runmethod', function (req, res)
       console.error(error.message);
       res.status(400).send(error.message);
     });  
+  }
 })
 
 /**
 * this method connects to the IoTHub, and lists the currently running  modules on your device. Ensures connection works properly!
-* Here be dragons :) I double-promise
+* Here be dragons :) I double-promise it works as it should!
 */
 app.post('/connectToIotHub', function (req, res) 
 {
-    setConfigs(req, res);
-    iotHubConnection(req, res).then(response => {
-      let modules="";
-        for(let i=0; i<response.responseBody.length; i++)
-        {
-          modules+=response.responseBody[i].moduleId+" ";
-          console.log(response.responseBody[i].moduleId);
-        }
-        res.send("Successfully connected to your IoTHub. Found the following modules on your device: "+modules);
-    }, reason =>  //on error send error response
+  setConfigs(req, res).then(() =>
+  {
+    iotHubConnection(req, res).then((response) => 
     {
-      console.log(reason);
+      let modules="";
+      //get modules on device
+      for(let i=0; i<response.responseBody.length; i++)
+      {
+        modules+=response.responseBody[i].moduleId+" ";
+        console.log(response.responseBody[i].moduleId);
+      }
+      //on success
+      res.send("Successfully connected to your IoTHub. Found the following modules on your device: "+modules);
+    }).catch((reason) =>
+    {
+      console.error(reason);
       res.send("Unable to connect to device. Error response: "+ JSON.parse(reason.responseBody).Message);
-    });          
+    });    
+  }).catch((error) =>
+  {
+    console.error(error);
+    res.send("Error: "+error);
+  })
 }) 
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // defined functions
 
-
 /**
 * set device ID and IoTHub connection string
 * try to connect to the iot hub to make sure that the passed in values are valid!
+* @returns {Promise<any>} - Promise to resolve/reject based on validity of Device ID and Iot Hub Connection String
 */
 function setConfigs(req, res)
 {
-  DEVICE_ID=req.body["device-id"];
-  IOTHUB_CONNECTION_STRING=req.body["iothub-connection-string"];
-  convertIotHubToEventHubsConnectionString(IOTHUB_CONNECTION_STRING).then((eventhubString) =>
+  return new Promise((resolve, reject) =>
   {
-    IOTHUB_ENDPOINT = eventhubString;
-  }).catch((error) =>
-  {
-    //reset values on failure
-    console.error(error);
-    DEVICE_ID="";
-    IOTHUB_CONNECTION_STRING="";
-    res.send(error.message);
-  });
+    DEVICE_ID=req.body["device-id"];
+    IOTHUB_CONNECTION_STRING=req.body["iothub-connection-string"];
+    if (DEVICE_ID == "" || IOTHUB_CONNECTION_STRING == "")
+    {
+      DEVICE_ID="";
+      IOTHUB_CONNECTION_STRING="";
+      reject("You must provide both your device ID and your Iot Hub Connection String");
+    }
+    convertIotHubToEventHubsConnectionString(IOTHUB_CONNECTION_STRING).then((eventhubString) =>
+    {
+      IOTHUB_ENDPOINT = eventhubString;
+      resolve();
+    }).catch((error) =>
+    {
+      //reset values on failure
+      console.error(error);
+      DEVICE_ID="";
+      IOTHUB_CONNECTION_STRING="";
+      reject(error.message);
+    });
+  })
 }
 
 
@@ -225,6 +244,7 @@ wss.broadcast = (data) =>
 
 /**
 * function that actually broadcasts hub messages to websocket
+* @async
 */
 async function receiveHubMessages() 
   {

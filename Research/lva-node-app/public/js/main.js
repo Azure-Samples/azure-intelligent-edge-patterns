@@ -29,7 +29,7 @@ function getGlobals()
 {
   return new Promise((resolve, reject) => 
   {
-    var request = sendRequest("", `http://localhost:${PORT}/globals`, "GET");
+    let request = prepareRequest(`http://localhost:${PORT}/globals`, "GET");
     request.onreadystatechange = function () 
     {
       if(request.readyState == 4)
@@ -49,6 +49,7 @@ function getGlobals()
         }
       }
     }
+    request.send();
   });
 }
 
@@ -63,29 +64,29 @@ function sendGlobals()
       graphTopologies: graphTopologies,
       cameras: cameras
     };
-  sendRequest(globals, `http://localhost:${PORT}/globals`, "PUT");
+  let request = prepareRequest(`http://localhost:${PORT}/globals`, "PUT");
+  request.send(JSON.stringify(globals));
 }
 
 /**
 *  send request with given parameters to a defined url in server. default method is POST
-* @param {jsonObject} payload - json object to be sent in request to server
 * @param {string} url - @link to communicate on
 * @param {string} requestType - POST or GET request 
 * @returns {XMLHttpRequest} - generated request
 */ 
-function sendRequest(payload, url, requestType="POST") 
+function prepareRequest(url, requestType="POST") 
 {
   let request = new XMLHttpRequest();
   request.open(requestType, url, true);
   request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-  if(requestType=="GET")
-  {
-    request.send();
-  }
-  else
-  {
-    request.send(JSON.stringify(payload));
-  }  
+  // if(requestType=="GET")
+  // {
+  //   request.send();
+  // }
+  // else
+  // {
+  //   request.send(JSON.stringify(payload));
+  // }  
   return request;
 }
 
@@ -128,14 +129,16 @@ function sendConfigData()
         "iothub-connection-string": document.getElementById("iothub-connection-string").value
     };
 
-    var request = sendRequest(payload, `http://localhost:${PORT}/connectToIotHub`);
+    var request = prepareRequest(`http://localhost:${PORT}/connectToIotHub`);
     request.onreadystatechange = function () 
     {
-        if (request.readyState == 4 && request.status == 200) 
+        if (request.readyState == 4) 
         {
             document.getElementById("configuration-output-box").innerHTML = request.response;
         }
+
     }
+    request.send(JSON.stringify(payload));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +354,7 @@ async function invokeLVAMethod(fullPayload)
 {
   return new Promise((resolve, reject) => 
   {
-    var request = sendRequest(fullPayload, `http://localhost:${PORT}/runmethod`);
+    let request = prepareRequest(`http://localhost:${PORT}/runMethod`);
     // event listener. When request readyState changes, place response in the output box. If response is done (readyState=4) then update global vars accordingly
     request.onreadystatechange = function () 
     {
@@ -416,6 +419,7 @@ async function invokeLVAMethod(fullPayload)
         }
       }
     }
+    request.send(JSON.stringify(fullPayload));
   });
 }
 
@@ -424,7 +428,7 @@ async function invokeLVAMethod(fullPayload)
 */
 function emitdata()
 { 
-  let request = sendRequest("", `http://localhost:${PORT}/hubmessages`, "GET");
+  let request = prepareRequest(`http://localhost:${PORT}/hubmessages`, "GET");
   request.onreadystatechange = function () 
     {
       //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
@@ -438,7 +442,7 @@ function emitdata()
         alert(request.response);
       }
     }
-
+  request.send();
 }
 
 /**
@@ -446,7 +450,8 @@ function emitdata()
  */
 function stopMessages()
 {
-  sendRequest("", `http://localhost:${PORT}/stopMessages`, "GET");
+  let request = prepareRequest(`http://localhost:${PORT}/stopMessages`, "GET");
+  request.send();
   document.getElementById('stop-messages').disabled=true;
   document.getElementById('start-messages').disabled=false;
 }
