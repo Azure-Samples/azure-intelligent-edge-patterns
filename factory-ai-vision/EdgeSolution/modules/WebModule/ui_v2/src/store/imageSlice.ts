@@ -117,8 +117,13 @@ export const saveLabelImageAnnotation = createAsyncThunk<any, undefined, { state
     const labels = Object.values(annoEntities)
       .filter((e: Annotation) => e.image === imageId)
       .map((e: Annotation) => e.label);
+    const imgPart = getState().labelImages.entities[imageId].part;
 
-    await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels), is_relabel: true });
+    await Axios.patch(`/api/images/${imageId}/`, {
+      labels: JSON.stringify(labels),
+      is_relabel: false,
+      part: imgPart,
+    });
     return { imageId };
   },
 );
@@ -140,7 +145,7 @@ const slice = createSlice({
         imageAdapter.upsertMany(state, action.payload.images);
       })
       .addCase(saveLabelImageAnnotation.fulfilled, (state, action) => {
-        imageAdapter.updateOne(state, { id: action.payload.imageId, changes: { hasRelabeled: true } });
+        imageAdapter.updateOne(state, { id: action.payload.imageId, changes: { isRelabel: false } });
       })
       .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
       .addCase(postImages.fulfilled, (state, action) => {

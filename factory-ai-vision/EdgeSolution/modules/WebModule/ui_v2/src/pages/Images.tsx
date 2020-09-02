@@ -14,6 +14,7 @@ import { CaptureDialog, CaptureLabelMode } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
 import { selectImageItemByUntagged } from '../store/selectors';
+import { getParts } from '../store/partSlice';
 
 const theme = getTheme();
 
@@ -62,6 +63,8 @@ export const Images: React.FC = () => {
 
   useEffect(() => {
     dispatch(getImages());
+    // For image list items
+    dispatch(getParts(false));
   }, [dispatch]);
 
   return (
