@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Axios from 'axios';
 
 import { useInterval } from '../../hooks/useInterval';
+import { handleAxiosError } from '../../utils/handleAxiosError';
 
 type RTSPVideoProps = {
   rtsp: string;
@@ -18,15 +19,13 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCre
       partId === null
         ? `/api/streams/connect/?rtsp=${rtsp}`
         : `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data?.status === 'ok') {
-          setStreamId(data.stream_id);
-          onStreamCreated(data.stream_id);
-        }
-        return null;
+    Axios.get(url)
+      .then(({ data }) => {
+        setStreamId(data.stream_id);
+        onStreamCreated(data.stream_id);
+        return void 0;
       })
+      .catch(handleAxiosError)
       .catch((err) => {
         console.error(err);
       });
