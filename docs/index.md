@@ -14,17 +14,7 @@ ms.date: 09/02/2020
 # As a data scientist, I want to run Jupyter notebooks in my workspace in Azure Machine Learning studio and deploy to my AS edge device with accleration
 ---
 
-# How to run Jupyter Notebooks in your workspace
-[!INCLUDE [applies-to-skus](../../includes/aml-applies-to-basic-enterprise-sku.md)]
 
-Learn how to run your Jupyter Notebooks directly in your workspace in Azure Machine Learning studio. While you can launch [Jupyter](https://jupyter.org/) or [JupyterLab](https://jupyterlab.readthedocs.io), you can also edit and run your notebooks without leaving the workspace.
-
-See how you can:
-
-* Create Jupyter Notebooks in your workspace
-* Run an experiment from a notebook
-* Change the notebook environment
-* Find details of the compute instances used to run your notebooks
 
 ## Prerequisites
 
@@ -36,3 +26,15 @@ See how you can:
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMSKeith%2Fiotedge-vm-deploy%2Fmaster%2FedgeDeploy.json" target="_blank">
     <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.png" />
 </a>
+
+# How to run Jupyter Notebooks in your workspace
+[!INCLUDE [applies-to-skus](../../includes/aml-applies-to-basic-enterprise-sku.md)]
+
+Learn how to run your Jupyter Notebooks directly in your workspace in Azure Machine Learning studio. While you can launch [Jupyter](https://jupyter.org/) or [JupyterLab](https://jupyterlab.readthedocs.io), you can also edit and run your notebooks without leaving the workspace.
+
+See how you can:
+
+* Create Jupyter Notebooks in your workspace
+* Run an experiment from a notebook
+* Change the notebook environment
+* Find details of the compute instances used to run your notebooks
