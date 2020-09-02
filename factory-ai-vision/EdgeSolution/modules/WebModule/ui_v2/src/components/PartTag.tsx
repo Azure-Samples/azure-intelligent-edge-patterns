@@ -38,9 +38,6 @@ const tagStyles = mergeStyleSets({
     borderColor: palette.neutralSecondary,
     borderStyle: 'dashed',
   },
-  empty: {
-    visibility: 'hidden',
-  },
 });
 
 const getTagStyles = (status: Status): string => {
@@ -50,7 +47,5 @@ const getTagStyles = (status: Status): string => {
 };
 
 export const PartTag: React.FC<PartTagProps> = ({ text, status }) => {
-  return (
-    <div className={`${tagStyles.basic} ${getTagStyles(status)} ${!text && tagStyles.empty}`}>{text}</div>
-  );
+  return <div className={`${tagStyles.basic} ${getTagStyles(status)}`}>{text}</div>;
 };
