@@ -32,6 +32,7 @@ function getGlobals()
     let request = prepareRequest(`http://localhost:${PORT}/globals`, "GET");
     request.onreadystatechange = function () 
     {
+      console.log("REady state = "+request.readyState+" status = "+request.status);
       if(request.readyState == 4)
       {
         if(request.status == 200)
@@ -47,6 +48,10 @@ function getGlobals()
         {
           reject("Get Globals rejection");
         }
+      }
+      else if(request.status != 200)
+      {
+        reject("Server not responding");
       }
     }
     request.send();
@@ -69,24 +74,16 @@ function sendGlobals()
 }
 
 /**
-*  send request with given parameters to a defined url in server. default method is POST
+*  generate request with given parameters to a defined url in server. default method is POST
 * @param {string} url - @link to communicate on
 * @param {string} requestType - POST or GET request 
-* @returns {XMLHttpRequest} - generated request
+* @returns {XMLHttpRequest} - generated, unsent request
 */ 
 function prepareRequest(url, requestType="POST") 
 {
   let request = new XMLHttpRequest();
   request.open(requestType, url, true);
   request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-  // if(requestType=="GET")
-  // {
-  //   request.send();
-  // }
-  // else
-  // {
-  //   request.send(JSON.stringify(payload));
-  // }  
   return request;
 }
 
@@ -108,6 +105,7 @@ function deleteFromParentListItem(htmlElement)
 */
 function makeUniqueId(nameToInclude = "") 
 {
+  //return nameToInclude + a UUID
   return (nameToInclude + 'xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function (char) 
   {
     let rand = Math.random() * 16 | 0, v = char == 'x' ? rand : (rand & 0x3 | 0x8);
@@ -129,12 +127,16 @@ function sendConfigData()
         "iothub-connection-string": document.getElementById("iothub-connection-string").value
     };
 
-    var request = prepareRequest(`http://localhost:${PORT}/connectToIotHub`);
+    let request = prepareRequest(`http://localhost:${PORT}/connectToIotHub`);
     request.onreadystatechange = function () 
     {
         if (request.readyState == 4) 
         {
             document.getElementById("configuration-output-box").innerHTML = request.response;
+        }
+        else if(request.status != 200)
+        {
+          console.error("Bad server response");
         }
 
     }
@@ -146,15 +148,15 @@ function sendConfigData()
 
 /** 
 * show current graph instances in dropdown. Used in output.html when invoking methods 
-* @param {HTMLButtonElement} htmlElement - button user clicks on
+* @param {string} methodName - name of method on dropdown button
 */
-function instanceMethodDropdowns(htmlElement) 
+function instanceMethodDropdowns(methodName) 
 {
-  let hoverList = htmlElement.parentElement.getElementsByTagName("ul")[0];
-  let onclickMethod = 'graphEntityModify(this, "", false, false)';
+  let hoverList = document.getElementById(methodName+"-dropdown");
+  let onclickMethod = `graphEntityModify(this, "${methodName}", false)`;
   hoverList.innerHTML = "";
   let checkBoxNameList = [];
-  switch(hoverList.id)
+  switch(hoverList.getAttribute("typeoflist"))
   {
     case 'instance-list':
       checkBoxNameList=Object.keys(graphInstances);
@@ -170,7 +172,7 @@ function instanceMethodDropdowns(htmlElement)
 
   checkBoxNameList.forEach((item) => 
   {
-    hoverList.innerHTML += "<li> <button class='btn btn-outline-secondary' data-toggle='dropdown' onclick='"+onclickMethod+"' name='" + htmlElement.getAttribute('name') + "'type='checkbox'>" + item + "</button> </li>";
+    hoverList.innerHTML += "<li> <button class='btn btn-outline-secondary' onclick='"+onclickMethod+"' name='" + methodName +"'>" + item + "</button> </li>";
   });
 }
 
@@ -182,12 +184,10 @@ function instanceMethodDropdowns(htmlElement)
 */
 function createFullPayload(methodNameParam, methodPayload)
 {
-  let fullPayload = 
-  {
+  return {
     methodName: methodNameParam,
     Payload: methodPayload  
   }
-  return fullPayload;
 }
 
 /**
@@ -214,19 +214,18 @@ function graphSetTopology(topologyName)
 
 /**
 * invoke a list method on lvaEdge module (either list topology or list instances. payload is the same)
-* @param {HTMLButtonElement} htmlElement - either a string of method name, or the HTML button clicked to invoke method
-* @param {boolean} - if name is passed = true
+* @param {string} methodName - method name (either GraphTopologyList or GraphInstanceList)
 * @returns {Promise<any>}
 */
-function graphEntityList(htmlElement, nameIsPassed=false) 
+function graphEntityList(methodName) 
 {
   return new Promise((resolve, reject) =>
   {
-    var methodName = nameIsPassed ? htmlElement : htmlElement.getAttribute('name');
     let payload = 
     {
       "@apiVersion": "1.0"
     }
+    
     invokeLVAMethod(createFullPayload(methodName, payload)).then((response) =>
     {
       resolve(response);
@@ -240,13 +239,12 @@ function graphEntityList(htmlElement, nameIsPassed=false)
 /**
 * this payload is used for GraphInstanceDelete, GraphTopologyDelete, GraphInstanceActivate, GraphInstanceDeactivate
 * @param {string | HTMLButtonElement} htmlElement - button clicked on to invoke method on given element or string of element name (i.e. "Graph-Instance-1")
-* @param {string} method - method name
+* @param {string} methodName - method name
 * @param {boolean} elementNamePassed - true if function caller passed in the 
 */
-function graphEntityModify(htmlElement, method="", elementNamePassed=false, methodNameIsPassed=false) 
+function graphEntityModify(htmlElement, methodName, elementNamePassed=false) 
 {
   let elementName = elementNamePassed ? htmlElement : htmlElement.innerText;
-  let methodName = methodNameIsPassed ? method : htmlElement.name;
   let payload = 
   {
     "@apiVersion": "1.0",
@@ -271,9 +269,9 @@ async function loadInstancesAndTopologies()
 {
   getGlobals().then((response) =>
   {
-    graphEntityList("GraphInstanceList", true).then(() =>
+    graphEntityList("GraphInstanceList").then(() =>
     {
-      graphEntityList("GraphTopologyList", true);
+      graphEntityList("GraphTopologyList");
     }).catch((error) =>
     {
       console.error(error);
@@ -377,11 +375,11 @@ async function invokeLVAMethod(fullPayload)
               break;
             case 'GraphInstanceList':
               updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-              console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
+              //console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
               break;
             case 'GraphTopologyList':
               updateGraphsandInstances(methodName, JSON.parse(request.response)[1]);
-              console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
+              //console.log("updating graphs and instances, method name: "+methodName+" and response: "+result);
               break;
             case 'GraphInstanceSet':
               graphInstances[fullPayload.Payload.name]=fullPayload;
@@ -568,7 +566,7 @@ function setGraphInstance()
 
     let instanceName=document.getElementById("instance-name-input").value;
     let topologyName=document.getElementById("instanceset-topology").getAttribute("name");
-
+    let instanceDescription=document.getElementById("instance-description-input").value;
     //create the request object
     let payload = 
     {
@@ -577,7 +575,7 @@ function setGraphInstance()
         "properties": 
         {
           "topologyName": topologyName,
-          "description": "no description yet!",
+          "description": instanceDescription,
           "parameters": parametersObject
         }
     }  
@@ -594,6 +592,7 @@ function setGraphInstance()
     $('#parameter-list')[0].innerHTML="";
     $('#instanceset-topology').innerHTML="";
     $('#instanceset-camera').innerHTML="";
+    $('#instance-description-input').value="";
 }
 
 /** 
@@ -616,7 +615,7 @@ function populateModalTemplate()
   })
 
   //add select menu for user to choose one of the current cameras
-  currentSelect=modalObjects[2];
+  currentSelect=modalObjects[3];
  
   //for each camera display the name as option for user to use in instance
   Object.keys(cameras).forEach((cam) =>

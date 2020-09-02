@@ -115,12 +115,12 @@
 
               <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 2/3">
                 <button type="button" name="GraphInstanceList" class="method-button btn btn-primary"
-                  onclick="graphEntityList(this)">List Graph Instances</button>
+                  onclick="graphEntityList(this.name)">List Graph Instances</button>
               </div>
 
               <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 3/4">
                 <button type="button" name="GraphTopologyList" class="method-button btn btn-primary"
-                  onclick="graphEntityList(this)">List Graph Topologies</button>
+                  onclick="graphEntityList(this.name)">List Graph Topologies</button>
               </div>
 
               <!-- useful for users later on, unneeded for now
@@ -146,30 +146,30 @@
               <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 5/6">
                   <button type="button" name="GraphInstanceActivate" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
-                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Activate Graph
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Activate Graph
                     Instance
                   </button>
-                  <ul id="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                  <ul id="GraphInstanceActivate-dropdown" typeoflist="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
                     aria-labelledby="dropdownOutput">
                   </ul>
               </div>
               <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 6/7">
                   <button type="button" name="GraphInstanceDeactivate" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
-                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Deactivate Graph
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Deactivate Graph
                     Instance
                   </button>
-                  <ul id="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                  <ul id="GraphInstanceDeactivate-dropdown" typeoflist="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
                     aria-labelledby="dropdownOutput">
                   </ul>
               </div>
               <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 7/8">
                   <button type="button" name="GraphInstanceDelete" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
-                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Delete Graph
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Delete Graph
                     Instance
                   </button>
-                  <ul id="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                  <ul id="GraphInstanceDelete-dropdown" typeoflist="instance-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
                     aria-labelledby="dropdownOutput">
                   </ul>
               </div>
@@ -177,10 +177,10 @@
               <div class="list-group-item schmuck" style="grid-column: 2/3; grid-row: 8/9">
                   <button type="button" name="GraphTopologyDelete" id="dropdownOutput" data-toggle="dropdown"
                     class="method-button btn btn-primary dropdown-toggle" aria-haspopup="true"
-                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this)">Delete Graph
+                    aria-expanded="true" aria-label="Close" onclick="instanceMethodDropdowns(this.name)">Delete Graph
                     Topology
                   </button>
-                  <ul id="topology-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
+                  <ul id="GraphTopologyDelete-list" typeoflist="topology-list" class="dropdown-menu checkbox-menu allow-focus dropdown-menu-left"
                     aria-labelledby="dropdownOutput">
                   </ul>
               </div>
@@ -226,6 +226,10 @@
           <div class="modal-group">
             <label for="instance-name-input">Enter an Instance Name</label>
             <input type="text" id="instance-name-input" class="modal-item" />
+          </div>
+          <div class="modal-group">
+            <label for="instance-description-input">Enter a description for your instance</label>
+            <input type="text" id="instance-description-input" class="modal-item" />
           </div>
           <div class="modal-group">
             <label for="instanceset-camera">Choose a Camera</label>

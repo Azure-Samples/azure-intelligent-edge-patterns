@@ -602,7 +602,7 @@ function displayMediaGraphsOnLoad()
 {
     getGlobals().then((response)=>
     {
-        graphEntityList("GraphTopologyList", true).then((response) => 
+        graphEntityList("GraphTopologyList").then((response) => 
         {
             displayMediaGraphs();
         }).catch(error => 
@@ -622,7 +622,7 @@ function displayMediaGraphsOnLoad()
 function deleteGraph(htmlElement)
 {
     const graphToDelete=htmlElement.parentElement.previousElementSibling.innerText;
-    graphEntityModify(graphToDelete, "GraphTopologyDelete", true, true);
+    graphEntityModify(graphToDelete, "GraphTopologyDelete", true);
     const id = $(htmlElement).closest('tr').attr('id');
     let tableItem = document.getElementById(id);
     tableItem.parentElement.removeChild(tableItem);
