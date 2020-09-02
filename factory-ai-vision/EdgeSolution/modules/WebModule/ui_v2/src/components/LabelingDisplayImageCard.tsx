@@ -33,9 +33,7 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
           <Text variant="small">{imgTimeStamp}</Text>
         </Stack>
         {/* Wrap with stack item or the card section will add 'flex-shrink' automatically to the children which is not stack */}
-        <Stack.Item>
-          <PartTag status={partTagStatus} text={partName} />
-        </Stack.Item>
+        <Stack.Item>{partName && <PartTag status={partTagStatus} text={partName} />}</Stack.Item>
       </Card.Section>
     </Card>
   );
