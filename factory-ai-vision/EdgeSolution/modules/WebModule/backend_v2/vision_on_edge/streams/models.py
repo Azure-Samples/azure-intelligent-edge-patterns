@@ -11,6 +11,7 @@ import cv2
 import requests
 from azure.iot.device import IoTHubModuleClient
 
+from .exceptions import StreamOpenRTSPError
 from ..azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
@@ -55,6 +56,11 @@ class Stream():
 
         logger.info("inference %s", self.inference)
         logger.info("iot %s", self.iot)
+
+        # test rtsp
+        self.cap = cv2.VideoCapture(self.rtsp)
+        if not self.cap.isOpened():
+            raise StreamOpenRTSPError
 
         def _listener(self):
             if not self.inference:
@@ -113,7 +119,7 @@ class Stream():
         while self.status == "running" and (
                 self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
             if not self.cap.isOpened():
-                raise ValueError("Cannot connect to rtsp")
+                raise StreamOpenRTSPError
             t, img = self.cap.read()
             # Need to add the video flag FIXME
             if t == False:
