@@ -79,7 +79,16 @@ export const Images: React.FC = () => {
           {labeledImages.length + unlabeledImages.length ? (
             <Pivot>
               <PivotItem headerText="Untagged">
-                <ImageList images={unlabeledImages} />
+                {unlabeledImages.length === 0 ? (
+                  <EmptyAddIcon
+                    title="Looks like you don’t have any untagged images"
+                    subTitle="Continue adding and tagging more images from your video streams to improve your model"
+                    primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
+                    secondary={{ text: 'Upload images', onClick: onUpload }}
+                  />
+                ) : (
+                  <ImageList images={unlabeledImages} />
+                )}
               </PivotItem>
               <PivotItem headerText="Tagged">
                 <ImageList images={labeledImages} />
