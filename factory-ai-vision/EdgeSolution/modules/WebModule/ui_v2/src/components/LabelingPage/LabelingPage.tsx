@@ -24,6 +24,7 @@ import { selectPartEntities, Part } from '../../store/partSlice';
 import { deleteImage } from '../../store/actions';
 import Scene from './Scene';
 import { PartPicker } from './PartPicker';
+import { timeStampConverter } from '../../utils/timeStampConverter';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -37,17 +38,7 @@ const imagePartSelector = createSelector([imageSelector, selectPartEntities], (i
 
 const selectImageTimeStamp = (state: State) => {
   const timeStampString = imageSelector(state)?.timestamp || '';
-  // Format example: AUG 31, 2020, 1:54 PM
-  return new Date(Date.parse(timeStampString))
-    .toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour12: true,
-      hour: 'numeric',
-      minute: 'numeric',
-    })
-    .toUpperCase();
+  return timeStampConverter(timeStampString);
 };
 
 const dialogContentProps: IDialogContentProps = {

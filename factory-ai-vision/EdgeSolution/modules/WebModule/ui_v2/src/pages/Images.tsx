@@ -13,7 +13,7 @@ import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog, CaptureLabelMode } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
-import { createSelectorByLabel } from '../store/selectors';
+import { selectImageItemByUntagged } from '../store/selectors';
 
 const theme = getTheme();
 
@@ -23,8 +23,8 @@ export const Images: React.FC = () => {
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
-  const labeledImages = useSelector(createSelectorByLabel(true));
-  const unlabeledImages = useSelector(createSelectorByLabel(false));
+  const labeledImages = useSelector(selectImageItemByUntagged(false));
+  const unlabeledImages = useSelector(selectImageItemByUntagged(true));
 
   const onUpload = () => {
     fileInputRef.current.click();
@@ -73,7 +73,7 @@ export const Images: React.FC = () => {
         />
         <Stack styles={{ root: { padding: '15px' } }} grow>
           <Breadcrumb items={[{ key: 'images', text: 'Images' }]} />
-          {labeledImages.length ? (
+          {labeledImages.length + unlabeledImages.length ? (
             <Pivot>
               <PivotItem headerText="Untagged">
                 <ImageList isRelabel={false} images={unlabeledImages} />
