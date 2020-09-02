@@ -42,7 +42,7 @@ class PartDetection(models.Model):
 
     @staticmethod
     def post_save(**kwargs):
-        """PartDetection post_save
+        """post_save.
         """
         logger.info("PartDetection post_save")
         instance = kwargs["instance"]
