@@ -68,15 +68,15 @@ export enum LabelPageMode {
 
 interface LabelingPageProps {
   mode: LabelPageMode;
-  isRelabel: boolean;
 }
 
-const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotation, isRelabel }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotation }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const index = imageIds.findIndex((e) => e === selectedImageId);
   const imageUrl = useSelector<State, string>((state) => imageSelector(state)?.image || '');
+  const imgIsRelabel = useSelector<State, boolean>((state) => !!imageSelector(state)?.isRelabel);
   const imageConfidenceLevel = useSelector<State, number>((state) => imageSelector(state)?.confidence || 0);
   const imageTimeStamp = useSelector<State, string>(selectImageTimeStamp);
   const imgPart = useSelector<State, Part>(imagePartSelector);
@@ -130,7 +130,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
   );
 
   const onRenderPrediction = (): JSX.Element => {
-    if (!isRelabel) return null;
+    if (!imgIsRelabel) return null;
     return (
       <>
         <Stack>
