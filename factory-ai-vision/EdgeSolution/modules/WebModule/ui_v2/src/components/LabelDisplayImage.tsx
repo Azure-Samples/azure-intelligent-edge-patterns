@@ -11,10 +11,21 @@ import { LabelingDisplayImageCard } from './LabelingDisplayImageCard';
 interface LabelDisplayImageProps {
   imgId: number;
   imgUrl: string;
+  imgTimeStamp: string;
+  partName: string;
+  isRelabel: boolean;
   pointerCursor?: boolean;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
-const LabelDisplayImage: FC<LabelDisplayImageProps> = ({ imgId, imgUrl, pointerCursor = false, onClick }) => {
+const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
+  imgId,
+  imgUrl,
+  imgTimeStamp,
+  partName,
+  isRelabel,
+  pointerCursor = false,
+  onClick,
+}) => {
   const stage = useRef<Konva.Stage>(null);
   const layer = useRef<Konva.FastLayer>(null);
   const img = useRef<Konva.Image>(null);
@@ -76,7 +87,12 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({ imgId, imgUrl, pointerC
   }, [size, image, resizeImage, imgId, annotations]);
 
   return (
-    <LabelingDisplayImageCard cameraName="camera" imgTimeStamp="time" partName="part">
+    <LabelingDisplayImageCard
+      isRelabel={isRelabel}
+      cameraName=""
+      imgTimeStamp={imgTimeStamp}
+      partName={partName}
+    >
       <div
         onClick={onClick}
         id="container"
