@@ -5,13 +5,18 @@ import { State } from 'RootStateType';
 type TrainingProject = {
   id: number;
   name: string;
+  customVisionId: string;
 };
 
 export const getTrainingProject = createAsyncThunk<any, undefined, { state: State }>(
   'trainingSlice/get',
   async () => {
     const response = await Axios.get(`/api/projects/`);
-    return response.data;
+    return response.data.map((e) => ({
+      id: e.id,
+      name: e.name,
+      customVisionId: e.customvision_id,
+    }));
   },
   {
     condition: (_, { getState }) => getState().trainingProject.ids.length === 0,

@@ -66,7 +66,6 @@ export type ProjectData = {
   framesPerMin: number;
   accuracyThreshold: number;
   modelUrl: string;
-  cvProjectId?: string;
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
 };

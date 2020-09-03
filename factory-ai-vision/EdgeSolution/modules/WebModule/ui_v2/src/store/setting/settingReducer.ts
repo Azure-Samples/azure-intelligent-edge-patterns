@@ -1,6 +1,6 @@
 import { SettingActionType, Setting } from './settingType';
 
-const initialState = {
+const initialState: Setting = {
   loading: false,
   error: null,
   current: {
@@ -17,6 +17,7 @@ const initialState = {
   appInsightHasInit: true,
   isCollectData: false,
   appInsightKey: '',
+  cvProjects: [],
 };
 
 const settingReducer = (state = initialState, action: SettingActionType): Setting => {
