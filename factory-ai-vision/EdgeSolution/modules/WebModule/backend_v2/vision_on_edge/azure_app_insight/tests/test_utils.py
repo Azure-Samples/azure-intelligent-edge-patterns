@@ -1,9 +1,9 @@
-"""Test Azure App Insight utilites
+# -*- coding: utf-8 -*-
+"""Test App utilites.
 """
 
 import logging
 
-import pytest
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
