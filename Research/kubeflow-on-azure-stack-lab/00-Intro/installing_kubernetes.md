@@ -39,6 +39,13 @@ you will need to ask your cloud administrator. You need the following:
 
 Make sure you have all this information before proceeding further.
 
+You can chose to create a Kubernetes object from your Portal, keeping
+in mind the settings and adjustments we discuss below.
+
+![pics/creating_k8s_marketplace.png](pics/creating_k8s_marketplace.png)
+
+# Installing Kubernetes using AKS-e (Skip the rest of the page if you did it using Portal)
+
 ## Login to the desired cloud
 
 We recommend you run the following commands(up to the creation of the Kubernetes cluster) from an Ubuntu vm inside of your Azure Stack.
