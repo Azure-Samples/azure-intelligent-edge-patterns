@@ -22,4 +22,6 @@ def test_can_get_key():
     request = factory.get("5566")
     response = key_view(request)
     assert response.status_code == status.HTTP_200_OK
-    assert InstrumentKeyResponseSerializer(data=response.data).is_valid()
+    serializer = InstrumentKeyResponseSerializer(data=response.data)
+    assert serializer.is_valid()
+    assert serializer.validated_data["key"] == APP_INSIGHT_INST_KEY

@@ -30,5 +30,5 @@ def key_view(request) -> Response:
     """
     res_data = {"status": "ok", "key": APP_INSIGHT_INST_KEY}
     serializers = InstrumentKeyResponseSerializer(data=res_data)
-    if serializers.is_valid(raise_exception=True):
-        return Response(data=serializers.validated_data)
+    serializers.is_valid(raise_exception=True)
+    return Response(data=serializers.validated_data)
