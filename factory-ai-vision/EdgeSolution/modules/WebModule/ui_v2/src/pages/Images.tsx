@@ -10,7 +10,7 @@ import {
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
-import { CaptureDialog, CaptureLabelMode } from '../components/CaptureDialog';
+import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
 import { selectImageItemByUntagged } from '../store/selectors';
@@ -105,11 +105,7 @@ export const Images: React.FC = () => {
           )}
         </Stack>
       </Stack>
-      <CaptureDialog
-        captureLabelMode={CaptureLabelMode.AllLater}
-        isOpen={isCaptureDialgOpen}
-        onDismiss={closeCaptureDialog}
-      />
+      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} />
       <LabelingPage mode={LabelPageMode.MultiPage} />
       <input
         ref={fileInputRef}
