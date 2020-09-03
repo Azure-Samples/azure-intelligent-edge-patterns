@@ -16,19 +16,19 @@ from ..azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
 
-KEEP_ALIVE_THRESHOLD = 1000 # Seconds
+KEEP_ALIVE_THRESHOLD = 10  # Seconds
 
 
 class Stream():
     """Stream Class"""
 
     def __init__(self, rtsp, camera_id, part_id=None, inference=False):
-        if rtsp == "0":
+        if rtsp == '0':
             self.rtsp = 0
         elif rtsp == "1":
             self.rtsp = 1
-        else:
-            self.rtsp = rtsp
+        elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
+            self.rtsp = "rtsp" + rtsp[4:]
         self.camera_id = camera_id
         self.part_id = part_id
 
@@ -109,13 +109,8 @@ class Stream():
         """generator for stream.
         """
         self.status = "running"
-        if self.rtsp == '0':
-            self.rtsp = 0
-        elif isinstance(self.rtsp,
-                        str) and self.rtsp.lower().find("rtsp") == 0:
-            self.rtsp = "rtsp" + self.rtsp[4:]
+
         logger.info("start streaming with %s", self.rtsp)
-        self.cap = cv2.VideoCapture(self.rtsp)
         while self.status == "running" and (
                 self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
             if not self.cap.isOpened():
