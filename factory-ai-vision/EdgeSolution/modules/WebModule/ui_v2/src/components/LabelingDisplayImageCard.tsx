@@ -21,7 +21,11 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
 }) => {
   const partTagStatus = isRelabel ? Status.Inactive : Status.Active;
   return (
-    <Card tokens={{ childrenGap: 0 }}>
+    <Card
+      tokens={{ childrenGap: 0 }}
+      // Set height to auto to override the origin 'inherit'
+      styles={{ root: { height: 'auto' } }}
+    >
       <Card.Section fill styles={{ root: { overflow: 'hidden' } }}>
         {children}
       </Card.Section>

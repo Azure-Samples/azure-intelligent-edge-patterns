@@ -15,6 +15,7 @@ import { postImages, getImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
 import { selectImageItemByUntagged } from '../store/selectors';
 import { getParts } from '../store/partSlice';
+import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
 
 const theme = getTheme();
 
@@ -109,6 +110,7 @@ export const Images: React.FC = () => {
         isOpen={isCaptureDialgOpen}
         onDismiss={closeCaptureDialog}
       />
+      <LabelingPage mode={LabelPageMode.MultiPage} />
       <input
         ref={fileInputRef}
         type="file"
