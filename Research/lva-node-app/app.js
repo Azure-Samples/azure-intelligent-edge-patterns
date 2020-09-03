@@ -75,23 +75,23 @@ app.get('/output', function (req, res)
 // handle GET requests
 
 /**
-* send client global variables upon request 
+* send client camera variable upon request 
 */
-app.get('/globals', function (req, res)
+app.get('/cameraVariable', function (req, res)
 {
     console.log("User requested cameras from server");
-    let globals =
+    let cameraVar =
     {
         cameras: cameras
     };
-    res.json(globals);
+    res.json(cameraVar);
 })
 
 /**
-* update global variables when sent by user (user called setGlobals)
-* modifying existing variables, thus using a PUT request
+* update cameras when sent by user
+* modifying existing variable, thus using a PUT request
 */
-app.put('/globals', function (req, res)
+app.put('/cameraVariable', function (req, res)
 {
     cameras = req.body.cameras;
     res.end();
@@ -99,13 +99,16 @@ app.put('/globals', function (req, res)
 
 /**
 * start sending live stream hub messages to client via websocket 
-* @returns {void}
 */
 app.get('/hubMessages', function (req, res)
 {
-    if (validCredentialsAreSet(res))
+    if (validCredentialsAreSet(res) && eventHubReader == undefined)
     {
         receiveHubMessages();
+    }
+    else
+    {
+        res.status(400).send("There is already a connection open to the IoT Hub!");
     }
     res.end();
 })
@@ -243,15 +246,11 @@ wss.broadcast = (data) =>
 
 /**
 * function that actually broadcasts hub messages to websocket
-// stop old one start new or just check if it's already running
 */
 function receiveHubMessages()
 {
-    const consumerGroup = "$Default"; // name of the default consumer group
-    if (eventHubReader == undefined)
-    {
-        eventHubReader = new EventHubReader(IOTHUB_CONNECTION_STRING, consumerGroup);
-    }
+    const consumerGroup = "$Default";
+    eventHubReader = new EventHubReader(IOTHUB_ENDPOINT, consumerGroup);
     eventHubReader.startReadMessage((message, date, deviceId) =>
     {
         try
@@ -278,7 +277,7 @@ function receiveHubMessages()
 */
 function validCredentialsAreSet(res)
 {
-    if (IOTHUB_CONNECTION_STRING == "" || DEVICE_ID == "")
+    if (IOTHUB_CONNECTION_STRING == "" || DEVICE_ID == "" || IOTHUB_ENDPOINT == "")
     {
         res.status(404).send("Please set your IoT Hub Connection String and Device ID!");
         return false;
@@ -288,7 +287,8 @@ function validCredentialsAreSet(res)
 
 /**
 * this function invokes a direct method on the lvaEdge module.
- * @returns {Promise<ResultWithHttpResponse<any>>}
+* @param {XMLHttpRequest} req - request option
+* @returns {Promise<ResultWithHttpResponse<any>>}
 */
 function invokeLVAMethod(req)
 {

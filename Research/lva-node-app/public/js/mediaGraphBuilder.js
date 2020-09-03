@@ -1,7 +1,6 @@
 /**
  * @fileoverview 
  * This file contains methods used when building a Media Graph (used only on page mediagraph.html)
- * includes GraphNode and MediaGraph classes, 
  */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17,25 +16,25 @@ var sinkNames = [];
 
 /**
 * creates the JSON object for a graph node and its parameters
-* @param {string} type - The type of node to create
+* @param {string} nodeType - The type of node to create
 * @param {string[]} userSelectedInputs - The list of inputs the user selected for this graph node
 * @return {Object} - the json object and parameters for the graph node
 */
-function makeGraphNode(type, userSelectedInputs)
+function makeGraphNode(nodeType, userSelectedInputs)
 {
     //ensure node type exists
-    let nodeSchema = getNodeSchema(type);
+    let nodeSchema = getNodeSchema(nodeType);
     if (nodeSchema == undefined)
     {
-        throw ("Node type: " + type + " not found");
+        throw ("Node type: " + nodeType + " not found");
     }
     let jsonObj =
     {
-        "name": type,
+        "name": nodeType,
         "@type": nodeSchema.type,
     }
     //set inputs
-    if (!type.toLowerCase().includes("source"))
+    if (!nodeType.toLowerCase().includes("source"))
     {
         let inputs = [];
         for (let i = 0; i < userSelectedInputs.length; i++)
@@ -44,9 +43,10 @@ function makeGraphNode(type, userSelectedInputs)
             {
                 inputs.push({ "nodeName": userSelectedInputs[i] });
             }
+            //redundancy of error checking
             else
             {
-                throw ("Input " + userSelectedInputs[i] + " is not accepted by node type " + type);
+                throw ("Input " + userSelectedInputs[i] + " is not accepted by node type " + nodeType);
             }
         }
         jsonObj["inputs"] = inputs;
@@ -69,16 +69,18 @@ function makeGraphNode(type, userSelectedInputs)
 
 
 /**
-* @param {string} graphname 
-* @param {string} description 
-* @param {Object[]} sources 
-* @param {Object[]} processors 
-* @param {Object[]} sinks 
-* @param {Object[]} parameters
+* @param {string} graphname - name of media graph
+* @param {string} description - description of media graph
+* @param {Object[]} sources - list of source node json objects
+* @param {Object[]} processors - list of processor node json objects
+* @param {Object[]} sinks - list of sink node json objects
+* @param {Object[]} parameters -list of media graph parameters (based on all nodes)
+* @return {Object} the json Object representing the Media Graph
 */
+
 function constructMediaGraphJSON(graphname, description = "no description set", sources, processors, sinks, parameters)
 {
-    let jsonObject = {
+    return {
         "name": graphname,
         "@apiVersion": "1.0",
         "properties": {
@@ -89,7 +91,6 @@ function constructMediaGraphJSON(graphname, description = "no description set", 
             "sinks": sinks
         }
     };
-    return jsonObject;
 }
 
 /**
@@ -128,14 +129,14 @@ function getValidInputs(schema)
 
 /**
 * get schema for a give node type using the graphNodeLimitations schema at the bottom of this document
-* @param {string} type - the graph node type
+* @param {string} nodeType - the graph node type
 * @returns {jsonObject} - schema for given node type
 */
-function getNodeSchema(type)
+function getNodeSchema(nodeType)
 {
     for (let i = 0; i < graphNodeLimitations.length; i++)
     {
-        if (graphNodeLimitations[i].name === type)
+        if (graphNodeLimitations[i].name === nodeType)
         {
             return graphNodeLimitations[i];
         }
@@ -144,7 +145,7 @@ function getNodeSchema(type)
 }
 
 /**
- * show checkbox options of possible node inputs. Used when building media graph. Doesn't modify globals or cookies
+ * show checkbox options of possible node inputs. Used when building media graph.
  * @param {HTMLUListElement} hoverList - list to add to
  * @param {string} myName - node name 
  * @param {string} listID - source, processor, or sink list id
@@ -196,12 +197,12 @@ function updateCustomizedInputs(htmlElement)
 
 /**
  * returns true if you can add the node type to the graph. 
- * @param {string} type - type of node to add
+ * @param {string} nodeType - type of node to add
  * @returns {boolean} - true if node can be added to graph
  */
-function canAddToGraph(type)
+function canAddToGraph(nodeType)
 {
-    const neededInputs = getValidInputs(getNodeSchema(type));
+    const neededInputs = getValidInputs(getNodeSchema(nodeType));
     for (let i = 0; i < neededInputs.length; i++)
     {
         if (graphBuilderContains(neededInputs[i]))
@@ -264,6 +265,7 @@ function canDeleteFromGraph(type)
         alert("You cannot build a graph without an RTSP Source node!");
         return false;
     }
+    // [..array] is a fancy syntax for making a copy of another array but does not reference the same object
     let tempProcessorNames = [...processorNames];
     let ind = tempProcessorNames.indexOf(type);
     if (ind != -1)

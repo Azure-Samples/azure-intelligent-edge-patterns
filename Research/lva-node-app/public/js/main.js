@@ -22,14 +22,14 @@ var cameras = {};
 // universal functions
 
 /**
-* get global variables from server, Returns a promise so that functions that depend on these variables can wait
+* get setup cameras from server, Returns a promise so that functions that depend on this can wait
 * @returns {Promise<any>}
 */
 function getCamerasFromServer()
 {
     return new Promise((resolve, reject) =>
     {
-        let request = prepareRequest(`http://localhost:${PORT}/globals`, "GET");
+        let request = prepareRequest(`http://localhost:${PORT}/cameraVariable`, "GET");
         request.onreadystatechange = function ()
         {
             if (request.readyState == 4)
@@ -42,12 +42,8 @@ function getCamerasFromServer()
                 }
                 else
                 {
-                    reject("Get Globals rejection");
+                    reject("Get Cameras rejection");
                 }
-            }
-            else if (request.status != 200)
-            {
-                reject("Server not responding");
             }
         }
         request.send();
@@ -59,12 +55,32 @@ function getCamerasFromServer()
 */
 function sendCamerasToServer()
 {
-    let globals =
+    new Promise((resolve, reject) =>
     {
-        cameras: cameras
-    };
-    let request = prepareRequest(`http://localhost:${PORT}/globals`, "PUT");
-    request.send(JSON.stringify(globals));
+        let cameraPayload =
+        {
+            cameras: cameras
+        };
+        let request = prepareRequest(`http://localhost:${PORT}/cameraVariable`, "PUT");
+        request.onreadystatechange = function()
+        {
+            if (request.readyState==4)
+            {
+                if (request.status != 200)
+                {
+                    reject("Failed to send camera variables to server");
+                }
+                else
+                {
+                    resolve();
+                }
+            }
+        }
+        request.send(JSON.stringify(cameraPayload));
+    }).then().catch((error) =>
+    {
+        alert(error);
+    })
 }
 
 /**
@@ -186,15 +202,10 @@ function createFullPayload(methodNameParam, methodPayload)
 /**
 * see sample graph topologies here: https://github.com/Azure/live-video-analytics/tree/master/MediaGraph/topologies
 * @param {Object} topology - graph topology JSON object
-* @returns {void}
 */
 function graphSetTopology(topology)
 {
-
-    invokeLVAMethod(createFullPayload("GraphTopologySet", topology)).then(() =>
-    {
-        // do nothing, invokeLVAMethod handles
-    }).catch((error) =>
+    invokeLVAMethod(createFullPayload("GraphTopologySet", topology)).then().catch((error) =>
     {
         alert(JSON.parse(error).payload.error || JSON.parse(error));
         console.error(error);
@@ -240,10 +251,8 @@ function graphEntityModify(htmlElement, methodName, elementNamePassed = false)
         "@apiVersion": "1.0",
         name: elementName
     };
-    invokeLVAMethod(createFullPayload(methodName, payload)).then(() =>
-    {
-        // do nothing, invokeLVAMethod handles
-    }).catch((error) =>
+
+    invokeLVAMethod(createFullPayload(methodName, payload)).then().catch((error) =>
     {
         console.error(error);
     });
@@ -252,21 +261,20 @@ function graphEntityModify(htmlElement, methodName, elementNamePassed = false)
 
 /**
 * calls GraphInstanceList and GraphTopologyList. Runs on load of output.html
-* @async
 * @returns {Promise<void>}
 */
-async function loadInstancesAndTopologies()
+function loadInstancesAndTopologies()
 {
-    getCamerasFromServer().then(() =>
-    {
-        graphEntityList("GraphInstanceList").then(() =>
+    graphEntityList("GraphInstanceList").then(() =>
         {
             graphEntityList("GraphTopologyList");
         }).catch((error) =>
         {
             console.error(error);
         });
-    }).catch((error) =>
+    
+    //not needed for graphEntityList so can be a separate promise resolution
+    getCamerasFromServer().then().catch((error) =>
     {
         console.error(error);
     });
@@ -353,7 +361,6 @@ function invokeLVAMethod(fullPayload)
                     var methodName = JSON.parse(request.response)[0].method;
                     var result = JSON.stringify(JSON.parse(request.response)[1]);
                     var isFromOutputPage = displayMethodOutput(result);
-
                     if (JSON.parse(result).status < 250)
                     {
                         switch (methodName)
@@ -394,13 +401,7 @@ function invokeLVAMethod(fullPayload)
                     reject(request.response);
                 }
             }
-            else
-            {
-                if (request.response != "" && request.status != 404 && JSON.parse(request.response)[1] != undefined)
-                {
-                    displayMethodOutput(JSON.stringify(JSON.parse(request.response)[1]));
-                }
-            }
+
         }
         request.send(JSON.stringify(fullPayload));
     });
@@ -415,14 +416,17 @@ function emitdata()
     request.onreadystatechange = function ()
     {
         //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
-        if (request.readyState == 4 && request.status == 200)
+        if (request.readyState == 4)
         {
-            document.getElementById('stop-messages').disabled = false;
-            document.getElementById('start-messages').disabled = true;
-        }
-        else if (request.readyState == 4 && request.status == 404)
-        {
-            alert(request.response);
+            if(request.status == 200)
+            {
+                document.getElementById('stop-messages').disabled = false;
+                document.getElementById('start-messages').disabled = true;
+            }
+            else
+            {
+                alert(request.response);
+            }
         }
     }
     request.send();
@@ -569,10 +573,7 @@ function setGraphInstance()
         }
     }
 
-    invokeLVAMethod(createFullPayload("GraphInstanceSet", payload)).then((response) =>
-    {
-        // do nothing, already handled by LVA method
-    }).catch((error) =>
+    invokeLVAMethod(createFullPayload("GraphInstanceSet", payload)).then().catch((error) =>
     {
         console.error(error);
     });
