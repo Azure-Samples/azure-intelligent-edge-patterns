@@ -19,7 +19,7 @@ from ...general.api.serializers import MSStyleErrorResponseSerializer
         '400': MSStyleErrorResponseSerializer
     })
 @api_view(['GET'])
-def instrumentation_key(request) -> Response:
+def key_view(request) -> Response:
     """instrumentation_key.
 
     Args:
@@ -32,4 +32,3 @@ def instrumentation_key(request) -> Response:
     serializers = InstrumentKeyResponseSerializer(data=res_data)
     if serializers.is_valid(raise_exception=True):
         return Response(data=serializers.validated_data)
-    return Response({"status": "ok", "key": APP_INSIGHT_INST_KEY})

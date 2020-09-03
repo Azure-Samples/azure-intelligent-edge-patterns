@@ -3,13 +3,12 @@
 """
 
 from django.conf.urls import url
-from django.urls import path
+from django.urls import path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
-from vision_on_edge.azure_app_insight.api import views as app_insight_views
 from vision_on_edge.azure_part_detections.api import \
     views as part_detection_views
 from vision_on_edge.azure_parts.api import views as azure_part_views
@@ -105,6 +104,6 @@ urlpatterns += [
     # path('projects/<int:project_id>/inference_video_feed',
     # stream_views.inference_video_feed),
     # path('relabel/update', relabel_views.relabel_update),
-    path('appinsight/key', app_insight_views.instrumentation_key),
+    path('appinsight/', include('vision_on_edge.azure_app_insight.urls')),
     # path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp),
 ]
