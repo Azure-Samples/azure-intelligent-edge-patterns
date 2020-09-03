@@ -93,8 +93,8 @@ function prepareRequest(url, requestType = "POST")
 {
     let request = new XMLHttpRequest();
     request.open(requestType, url, true);
-    // I would prefer the timeout to be shorter, for security purposes, however when we invoke LVA methods on the device the default max response time in seconds = 200
-    request.timeout = 200000;
+    // I would prefer the timeout to be shorter, for security purposes, however when we invoke LVA methods on the device the default max response time in seconds = 200. I've set it to 80
+    request.timeout = 110000;
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.ontimeout = function ()
     {
@@ -195,6 +195,7 @@ function createFullPayload(methodNameParam, methodPayload)
 {
     return {
         methodName: methodNameParam,
+        responseTimeoutInSeconds: 80,
         Payload: methodPayload
     }
 }
