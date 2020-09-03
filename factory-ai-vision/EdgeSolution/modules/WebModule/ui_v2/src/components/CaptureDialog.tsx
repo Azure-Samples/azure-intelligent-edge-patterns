@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   Dropdown,
   Stack,
   DialogFooter,
-  PrimaryButton,
   DefaultButton,
   getTheme,
   mergeStyleSets,
   IDropdownOption,
+  Separator,
+  Text,
+  Spinner,
 } from '@fluentui/react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { AcceptMediumIcon } from '@fluentui/react-icons';
+import { useHistory } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
-import { cameraOptionsSelector, selectCameraById } from '../store/cameraSlice';
+import { cameraOptionsSelector, selectCameraById, getCameras } from '../store/cameraSlice';
+import { captureImage } from '../store/imageSlice';
 
 const { palette } = getTheme();
 
@@ -23,20 +28,19 @@ const functionBtnStyleSets = mergeStyleSets({
   icon: { color: palette.themePrimary },
 });
 
-enum CaptureLabelMode {
-  PerImage,
-  AllLater,
+enum Status {
+  Waiting,
+  Capturing,
+  Success,
 }
 
 type CaptureDialogProps = {
-  captureLabelMode: CaptureLabelMode;
   isOpen: boolean;
   onDismiss: () => void;
   defaultSelectedCameraId?: number;
 };
 
 export const CaptureDialog: React.FC<CaptureDialogProps> = ({
-  captureLabelMode,
   isOpen,
   onDismiss,
   defaultSelectedCameraId,
@@ -44,16 +48,37 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   const [selectedCameraId, setSelectedCameraId] = useState(defaultSelectedCameraId);
   const cameraOptions = useSelector(cameraOptionsSelector);
   const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
+  const dispatch = useDispatch();
+  const [status, setStatus] = useState<Status>(Status.Waiting);
+  const streamIdRef = useRef('');
+  const history = useHistory();
+
+  const closeDialog = () => {
+    setStatus(Status.Waiting);
+    onDismiss();
+  };
 
   const onDropdownChange = (_, opt: IDropdownOption) => {
     setSelectedCameraId(opt.key as number);
   };
 
+  const onCaptureClick = async () => {
+    setStatus(Status.Capturing);
+    await dispatch(
+      captureImage({ streamId: streamIdRef.current, imageIds: [], shouldOpenLabelingPage: false }),
+    );
+    setStatus(Status.Success);
+  };
+
+  useEffect(() => {
+    dispatch(getCameras(false));
+  }, [dispatch]);
+
   return (
     <Dialog
       dialogContentProps={{ title: 'Capture', styles: { content: { width: '1080px' } } }}
       hidden={!isOpen}
-      onDismiss={onDismiss}
+      onDismiss={closeDialog}
       modalProps={{
         isBlocking: true,
         layerProps: {
@@ -72,35 +97,60 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
             styles={{ dropdown: { width: '300px' } }}
           />
           <Stack horizontal tokens={{ childrenGap: 30 }}>
-            <Stack styles={{ root: { width: '75%' } }}>
-              <RTSPVideo rtsp={rtsp} />
+            <Stack styles={{ root: { width: '75%', height: '500px' } }}>
+              <RTSPVideo
+                rtsp={rtsp}
+                onStreamCreated={(streamId) => {
+                  streamIdRef.current = streamId;
+                }}
+              />
             </Stack>
             <Stack verticalAlign="center" tokens={{ childrenGap: 10 }} styles={{ root: { width: '25%' } }}>
+              {status === Status.Success && <CaptureSuccessIcon />}
+              {status === Status.Capturing && <Spinner />}
+              {status !== Status.Waiting && <Separator />}
               <DefaultButton
-                text="Capture"
+                text={status === Status.Waiting ? 'Capture image' : 'Capture another image'}
                 iconProps={{ iconName: 'Camera', className: functionBtnStyleSets.icon }}
                 className={functionBtnStyleSets.button}
+                onClick={onCaptureClick}
               />
-              {captureLabelMode === CaptureLabelMode.AllLater && (
+              {status !== Status.Waiting && (
                 <DefaultButton
-                  text="Save capture"
-                  iconProps={{ iconName: 'Save', className: functionBtnStyleSets.icon }}
+                  text="Tag images"
+                  iconProps={{ iconName: 'Tag', className: functionBtnStyleSets.icon }}
                   className={functionBtnStyleSets.button}
+                  onClick={() => {
+                    closeDialog();
+                    history.push('/images');
+                  }}
                 />
               )}
-              <DefaultButton
-                text="Try again"
-                iconProps={{ iconName: 'Refresh', className: functionBtnStyleSets.icon }}
-                className={functionBtnStyleSets.button}
-              />
             </Stack>
           </Stack>
         </Stack>
         <DialogFooter>
-          {captureLabelMode === CaptureLabelMode.PerImage && <PrimaryButton text="Next" />}
-          <DefaultButton text="Cancel" onClick={onDismiss} />
+          <DefaultButton text="Done" onClick={closeDialog} />
         </DialogFooter>
       </>
     </Dialog>
+  );
+};
+
+const CaptureSuccessIcon: React.FC = () => {
+  return (
+    <Stack tokens={{ childrenGap: 10 }} horizontalAlign="center">
+      <AcceptMediumIcon
+        style={{
+          borderRadius: '100%',
+          backgroundColor: '#57A300',
+          color: 'white',
+          padding: '5px',
+          fontSize: '8px',
+          textAlign: 'center',
+        }}
+      />
+      <Text>Image saved!</Text>
+    </Stack>
   );
 };
