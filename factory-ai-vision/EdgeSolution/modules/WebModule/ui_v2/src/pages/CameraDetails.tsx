@@ -114,7 +114,7 @@ export const CameraDetails: React.FC = () => {
         initialValue={{
           name: { value: camera.name, errMsg: '' },
           rtsp: { value: camera.rtsp, errMsg: '' },
-          location: { value: null, errMsg: '' },
+          location: { value: camera.location, errMsg: '' },
         }}
         cameraId={cameraId}
       />
