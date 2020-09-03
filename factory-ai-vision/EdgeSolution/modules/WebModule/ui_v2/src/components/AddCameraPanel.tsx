@@ -31,17 +31,21 @@ type AddEditCameraPanelProps = {
   cameraId?: number;
 };
 
-type FormData = {
-  value: string;
+type FormData<V> = {
+  value: V;
   errMsg: string;
 };
 
-type Form = Record<string, FormData>;
+type Form = {
+  name: FormData<string>;
+  rtsp: FormData<string>;
+  location: FormData<number>;
+};
 
 const initialForm: Form = {
   name: { value: '', errMsg: '' },
   rtsp: { value: '', errMsg: '' },
-  location: { value: '', errMsg: '' },
+  location: { value: null, errMsg: '' },
 };
 
 const selectLocationOptions = createSelector(selectAllLocations, (locations) =>
@@ -85,7 +89,7 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
         postCamera({
           name: formData.name.value,
           rtsp: formData.rtsp.value,
-          location: parseInt(formData.location.value, 10),
+          location: formData.location.value,
         }),
       );
       setFormData(initialForm);
@@ -95,7 +99,7 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
           id: cameraId,
           name: formData.name.value,
           rtsp: formData.rtsp.value,
-          location: parseInt(formData.location.value, 10),
+          location: formData.location.value,
         }),
       );
     }
