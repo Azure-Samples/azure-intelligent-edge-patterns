@@ -124,9 +124,15 @@ app.post('/stopMessages', function (req, res)
     }
     else
     {
-        eventHubReader.stopReadMessage();
-        res.end();
-        eventHubReader = undefined;
+        eventHubReader.stopReadMessage().then(() =>
+        {
+            res.end();
+            eventHubReader = undefined;
+        }).catch((error) =>
+        {
+            console.error(error);
+            res.status(400).send(error);
+        });
     }
 })
 

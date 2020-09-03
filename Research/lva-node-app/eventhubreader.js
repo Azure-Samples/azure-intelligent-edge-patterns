@@ -26,10 +26,9 @@ class EventHubReader
 
     /**
      * starts the process of reading messages from Iot Hub by creating an Event Hubs connection string
-     * @async
      * @param {any} startReadMessageCallback - callback function
      */
-    async startReadMessage(startReadMessageCallback)
+    startReadMessage(startReadMessageCallback)
     {
         try
         {
@@ -60,13 +59,28 @@ class EventHubReader
 
     /**
      * closes connection to Event Hub
-     * @async
+     * @returns {Promise<any>} - resolve if successfully closed consumer client and subscriber
      */
-    async stopReadMessage()
+    stopReadMessage()
     {
-        await this.subs.close();
-        await this.consumerClient.close();
-        console.log("Closing Event Hub connection");
+        return new Promise((resolve, reject) =>
+        {
+            this.subs.close().then(() =>
+            {
+                this.consumerClient.close().then(()=>
+                {
+                    console.log("Closing event hub connection");
+                    resolve();
+                }).catch(() =>
+                {
+                    reject("Could not close EventHubReader consumer client");
+                })
+            }).catch(() =>
+            {
+                reject("Could not close EventHubReader subscriber");
+            })
+        })
+
     }
 }
 

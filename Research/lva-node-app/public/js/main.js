@@ -62,9 +62,9 @@ function sendCamerasToServer()
             cameras: cameras
         };
         let request = prepareRequest(`http://localhost:${PORT}/cameraVariable`, "PUT");
-        request.onreadystatechange = function()
+        request.onreadystatechange = function ()
         {
-            if (request.readyState==4)
+            if (request.readyState == 4)
             {
                 if (request.status != 200)
                 {
@@ -267,13 +267,13 @@ function graphEntityModify(htmlElement, methodName, elementNamePassed = false)
 function loadInstancesAndTopologies()
 {
     graphEntityList("GraphInstanceList").then(() =>
-        {
-            graphEntityList("GraphTopologyList");
-        }).catch((error) =>
-        {
-            console.error(error);
-        });
-    
+    {
+        graphEntityList("GraphTopologyList");
+    }).catch((error) =>
+    {
+        console.error(error);
+    });
+
     //not needed for graphEntityList so can be a separate promise resolution
     getCamerasFromServer().then().catch((error) =>
     {
@@ -398,7 +398,7 @@ function invokeLVAMethod(fullPayload)
                 }
                 else
                 {
-                    if(request.response != "") alert(request.response);
+                    if (request.response != "") alert(request.response);
                     reject(request.response);
                 }
             }
@@ -419,7 +419,7 @@ function emitdata()
         //on successful response. Result is object like [{methodName: 'GraphTopologyList'}, {value: 'long JSON object....'}]
         if (request.readyState == 4)
         {
-            if(request.status == 200)
+            if (request.status == 200)
             {
                 document.getElementById('stop-messages').disabled = false;
                 document.getElementById('start-messages').disabled = true;
@@ -439,10 +439,24 @@ function emitdata()
 function stopMessages()
 {
     let request = prepareRequest(`http://localhost:${PORT}/stopMessages`);
+    request.onreadystatechange = function ()
+    {
+        if (request.readyState == 4)
+        {
+            if (request.status == 200)
+            {
+                document.getElementById('stop-messages').disabled = true;
+                document.getElementById('start-messages').disabled = false;
+                document.getElementById("iothub-message-output-box").innerHTML = "";
+            }
+            else
+            {
+                alert(request.response);
+            }
+        }
+    }
     request.send();
-    document.getElementById('stop-messages').disabled = true;
-    document.getElementById('start-messages').disabled = false;
-    document.getElementById("iothub-message-output-box").innerHTML="";
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
