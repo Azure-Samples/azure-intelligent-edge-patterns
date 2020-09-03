@@ -131,7 +131,45 @@
                       }
                     ]
                   },
+                  "IpcMode": "container:lvaEdge",
                   "runtime": "nvidia"
+                }
+              }
+            }
+          },
+          "lvaEdge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/media/live-video-analytics:1",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "Binds": ["/home/willy/media/:/var/media/", "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"],
+                  "IpcMode": "shareable"
+                }
+              }
+            }
+          },
+
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
+              "createOptions": {
+                "HostConfig": {
+                  "Binds": ["/home/willy/media/input:/live/mediaServer/media"]
                 }
               }
             }
@@ -155,6 +193,24 @@
     },
     "VisionSampleModule": {
       "properties.desired": {}
+    },
+    "lvaEdge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/media",
+        "azureMediaServicesArmId": "/subscriptions/<SUBSCRIPTION_ID>/resourcegroups/<RESOURCE_GROUP>/providers/microsoft.media/mediaservices/<SERVICE_NAME>",
+        "aadTenantId": "<TENANT_ID>",
+        "aadServicePrincipalAppId": "<SERVICE_PRINCIPAL_APP_ID>",
+        "aadServicePrincipalSecret": "<SERVICE_PRINCIPAL_SECRET>",
+        "aadEndpoint": "https://login.microsoftonline.com",
+        "aadResourceId": "https://management.core.windows.net/",
+        "armEndpoint": "https://management.azure.com/",
+        "diagnosticsEventsOutputName": "AmsDiagnostics",
+        "operationalEventsOutputName": "AmsOperational",
+        "logLevel": "Information",
+        "logCategories": "Application,Events",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
     }
   }
 }

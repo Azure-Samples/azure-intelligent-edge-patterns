@@ -201,10 +201,10 @@
     "lvaEdge": {
       "properties.desired": {
         "applicationDataDirectory": "/var/media",
-        "azureMediaServicesArmId": "/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourcegroups/ronpai_rg_Linux_westus2/providers/microsoft.media/mediaservices/ronmedia",
-        "aadTenantId": "2cf4248e-4836-4202-b796-9a1589ff4613",
-        "aadServicePrincipalAppId": "80cb4c37-88c2-4b41-a1cc-2b04a3b8b203",
-        "aadServicePrincipalSecret": "s.TUWseDmf2FzU_n33m.keRN~oV8Q4J0kO",
+        "azureMediaServicesArmId": "/subscriptions/<SUBSCRIPTION_ID>/resourcegroups/<RESOURCE_GROUP>/providers/microsoft.media/mediaservices/<SERVICE_NAME>",
+        "aadTenantId": "<TENANT_ID>",
+        "aadServicePrincipalAppId": "<SERVICE_PRINCIPAL_APP_ID>",
+        "aadServicePrincipalSecret": "<SERVICE_PRINCIPAL_SECRET>",
         "aadEndpoint": "https://login.microsoftonline.com",
         "aadResourceId": "https://management.core.windows.net/",
         "armEndpoint": "https://management.azure.com/",

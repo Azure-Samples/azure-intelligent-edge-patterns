@@ -39,11 +39,21 @@ COPY default_model/cvexport.manifest default_model/
 COPY default_model default_model/
 COPY default_model_6parts default_model_6parts/
 COPY sample_video sample_video/
+COPY arguments.py ./
+COPY exception_handler.py ./
+COPY extension_pb2.py ./
+COPY extension_pb2_grpc.py ./
+COPY inference_engine.py ./
+COPY inferencing_pb2.py ./
+COPY media_pb2.py ./
+COPY model_wrapper.py ./
+COPY shared_memory.py ./
+COPY server.py ./
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "python3", "main.py" ]
+CMD [ "python3", "-u", "main.py" ]
 
