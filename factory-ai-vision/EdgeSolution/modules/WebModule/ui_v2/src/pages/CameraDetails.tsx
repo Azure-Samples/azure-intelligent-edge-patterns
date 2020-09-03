@@ -26,12 +26,11 @@ import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
 import { selectLocationById } from '../store/locationSlice';
 import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
 import { captureImage } from '../store/imageSlice';
+import { maskRtsp } from '../utils/maskRTSP';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
 const infoBlockTokens: IStackTokens = { childrenGap: 10 };
-
-const maskRtsp = (rtsp) => rtsp.replace(/(rtsp:\/\/[\w]+)\.([\s\S])+/, '$1.**********');
 
 export const CameraDetails: React.FC = () => {
   const cameraId = parseInt(useQuery().get('cameraId'), 10);

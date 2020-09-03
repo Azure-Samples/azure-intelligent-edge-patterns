@@ -2,13 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui/react';
+import { createSelector } from '@reduxjs/toolkit';
 
-import { getCameras, Camera, selectAllCamerasWithLocation } from '../store/cameraSlice';
+import { getCameras, Camera, selectAllCameras } from '../store/cameraSlice';
 import { EmptyAddIcon } from './EmptyAddIcon';
+import { selectLocationEntities } from '../store/locationSlice';
+import { maskRtsp } from '../utils/maskRTSP';
+
+const selectDetailListItems = createSelector(
+  [selectAllCameras, selectLocationEntities],
+  (cameras, locations) => {
+    return cameras.map((c) => ({
+      ...c,
+      location: locations[c.location]?.name ?? '',
+      rtsp: maskRtsp(c.rtsp),
+    }));
+  },
+);
 
 export const CameraDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddBtnClick }) => {
   const [loading, setLoading] = useState(false);
-  const cameras = useSelector(selectAllCamerasWithLocation);
+  const cameras = useSelector(selectDetailListItems);
 
   const dispatch = useDispatch();
   const history = useHistory();
