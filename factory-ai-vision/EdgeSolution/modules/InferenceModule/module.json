@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/inferencemodule",
     "tag": {
-      "version": "0.1.142",
+      "version": "0.1.143",
       "platforms": {
         "cpuamd64": "./dockerfiles/Dockerfile.cpuamd64",
         "gpuamd64": "./dockerfiles/Dockerfile.gpuamd64",

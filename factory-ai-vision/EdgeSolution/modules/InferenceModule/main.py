@@ -695,7 +695,7 @@ def update_parts():
         print('----Upadate parts----')
         parts = request.args.getlist('parts')
         print('[INFO] Updating parts', parts)
-        self.parts = parts
+        onnx.parts = parts
         print('[INFO] Updated parts', parts)
     except:
         print('[ERROR] Unknown format', parts)

@@ -135,6 +135,7 @@
                       "HostPort": "5558"
                     }]
                   },
+                  "IpcMode": "container:lvaEdge",
                   "runtime": "runc"
                 }
               }
@@ -158,20 +159,6 @@
                   },
                   "Binds": ["/home/willy/media/:/var/media/", "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"],
                   "IpcMode": "shareable"
-                }
-              }
-            }
-          },
-          "lvaextension": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "mcr.microsoft.com/lva-utilities/lvaextension:grpc-yolov3-onnx-v1.0",
-              "createOptions": {
-                "HostConfig": {
-                  "IpcMode": "container:lvaEdge"
                 }
               }
             }
@@ -210,6 +197,24 @@
     },
     "VisionSampleModule": {
       "properties.desired": {}
+    },
+    "lvaEdge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/media",
+        "azureMediaServicesArmId": "/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourcegroups/ronpai_rg_Linux_westus2/providers/microsoft.media/mediaservices/ronmedia",
+        "aadTenantId": "2cf4248e-4836-4202-b796-9a1589ff4613",
+        "aadServicePrincipalAppId": "80cb4c37-88c2-4b41-a1cc-2b04a3b8b203",
+        "aadServicePrincipalSecret": "s.TUWseDmf2FzU_n33m.keRN~oV8Q4J0kO",
+        "aadEndpoint": "https://login.microsoftonline.com",
+        "aadResourceId": "https://management.core.windows.net/",
+        "armEndpoint": "https://management.azure.com/",
+        "diagnosticsEventsOutputName": "AmsDiagnostics",
+        "operationalEventsOutputName": "AmsOperational",
+        "logLevel": "Information",
+        "logCategories": "Application,Events",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
     }
   }
 }
