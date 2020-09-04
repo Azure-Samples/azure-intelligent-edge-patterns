@@ -142,18 +142,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-UI_DIR = PROJECT_ROOT/'ui_production'
+UI_DIR = PROJECT_ROOT / 'ui_production'
 STATICFILES_DIRS = [
-    UI_DIR/'static',
+    UI_DIR / 'static',
 ]
 
 STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = PROJECT_ROOT/'media'
+MEDIA_ROOT = PROJECT_ROOT / 'media'
 
 ICON_URL = '/icons/'
-ICON_ROOT = UI_DIR/'icons'
+ICON_ROOT = UI_DIR / 'icons'
 
 CHANNEL_LAYERS = {
     "default": {

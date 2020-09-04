@@ -90,8 +90,7 @@ def video_feed(request):
     stream_manager.add(s)
 
     return StreamingHttpResponse(
-        s.gen(),
-        content_type="multipart/x-mixed-replace;boundary=frame")
+        s.gen(), content_type="multipart/x-mixed-replace;boundary=frame")
 
 
 @api_view()
@@ -102,4 +101,7 @@ def keep_alive(request):
     logger.info("Keeping streams alive")
 
     cnt = stream_manager.keep_alive_()
-    return Response({'status': 'ok', 'detail': 'keep %s stream(s) alive' % cnt})
+    return Response({
+        'status': 'ok',
+        'detail': 'keep %s stream(s) alive' % cnt
+    })

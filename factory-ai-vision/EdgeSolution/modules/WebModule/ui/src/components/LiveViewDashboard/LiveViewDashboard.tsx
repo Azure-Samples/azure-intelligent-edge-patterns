@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Flex, Text, Alert } from '@fluentui/react-northstar';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { useInterval } from '../../hooks/useInterval';
 import {
   thunkGetTrainingLog,
@@ -10,26 +11,12 @@ import {
   thunkDeleteProject,
 } from '../../store/project/projectActions';
 import { Project, Status as CameraConfigStatus } from '../../store/project/projectTypes';
-import { State } from '../../store/State';
 import { LiveViewContainer } from '../LiveViewContainer';
 import { InferenceMetricDashboard } from './InferenceMetricDashboard';
 import { Button } from '../Button';
 import { ConsequenceDashboard } from './ConsequenceDashboard';
-import { AOIData } from '../../type';
-import { Camera } from '../../store/camera/cameraTypes';
 import { ProgressBar } from '../ProgressBar';
 import { highLightTextStyles } from './style';
-
-const getAOIData = (cameraArea: string): AOIData => {
-  try {
-    return JSON.parse(cameraArea);
-  } catch (e) {
-    return {
-      useAOI: false,
-      AOIs: [],
-    };
-  }
-};
 
 export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
@@ -69,13 +56,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
     dispatch(thunkDeleteProject(isDemo));
   };
 
-  // FIXME Integrate this with Redux
-  const cameras = useSelector<State, Camera[]>((state) => state.cameras);
-  const selectedCamera = cameras.find((cam) => cam.id === projectCameraId);
-
   if (status === CameraConfigStatus.None) return null;
-
-  const aoiData = getAOIData(selectedCamera?.area);
 
   if (status === CameraConfigStatus.WaitTraining)
     return (
@@ -90,12 +71,7 @@ export const LiveViewDashboard: React.FC<{ isDemo: boolean }> = ({ isDemo }) => 
       <Flex column style={{ height: '100%' }} gap="gap.small">
         {error && <Alert danger header={error.name} content={`${error.message}`} />}
         <div style={{ flexGrow: 2 }}>
-          <LiveViewContainer
-            showVideo={true}
-            initialAOIData={aoiData}
-            cameraId={projectCameraId}
-            onDeleteProject={onDeleteProject}
-          />
+          <LiveViewContainer showVideo={true} cameraId={projectCameraId} onDeleteProject={onDeleteProject} />
         </div>
         <InferenceMetricDashboard isDemo={isDemo} />
       </Flex>

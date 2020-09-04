@@ -3,10 +3,10 @@
 
 from django.conf.urls import url
 from django.urls import path
-from rest_framework.routers import DefaultRouter
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from rest_framework.routers import DefaultRouter
 
 from vision_on_edge.azure_app_insight.api import views as app_insight_views
 from vision_on_edge.azure_parts.api import views as azure_part_views
@@ -17,7 +17,6 @@ from vision_on_edge.azure_training_status.api import \
 from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views
 from vision_on_edge.feedback.api import views as feedback_views
-from vision_on_edge.video_feed.api import views as videofeed_views
 from vision_on_edge.image_predictions.api import \
     views as image_prediction_views
 from vision_on_edge.images.api import views as image_views
@@ -25,6 +24,7 @@ from vision_on_edge.locations.api import views as location_views
 from vision_on_edge.notifications.api import views as notifications_views
 from vision_on_edge.relabeling.api import views as relabel_views
 from vision_on_edge.streams.api import views as stream_views
+from vision_on_edge.video_feed.api import views as videofeed_views
 
 router = DefaultRouter()
 router.trailing_slash = '/?'
@@ -64,9 +64,15 @@ urlpatterns += [
     url(r'^swagger(?P<format>\.json|\.yaml)$',
         SchemaView.without_ui(cache_timeout=0),
         name='schema-json'),
+    url(r'^swagger',
+        SchemaView.with_ui('swagger', cache_timeout=0),
+        name='schema-swagger-ui'),
     url(r'^swagger/$',
         SchemaView.with_ui('swagger', cache_timeout=0),
         name='schema-swagger-ui'),
+    url(r'^redoc',
+        SchemaView.with_ui('redoc', cache_timeout=0),
+        name='schema-redoc'),
     url(r'^redoc/$',
         SchemaView.with_ui('redoc', cache_timeout=0),
         name='schema-redoc'),

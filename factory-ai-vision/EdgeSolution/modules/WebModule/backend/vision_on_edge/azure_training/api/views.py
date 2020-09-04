@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import datetime
 import json
 import logging
 import threading
@@ -13,6 +14,8 @@ from distutils.util import strtobool
 import requests
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
@@ -21,12 +24,12 @@ from rest_framework.response import Response
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...azure_parts.utils import batch_upload_parts_to_customvision
+from ...azure_training_status import constants as progress_constants
 from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
-from ...azure_training_status import constants as progress_constants
 from ...cameras.models import Camera
-from ...general.utils import normalize_rtsp
 from ...general import error_messages
+from ...general.utils import normalize_rtsp
 from ...images.models import Image
 from ...images.utils import upload_images_to_customvision_helper
 from ..models import Project, Task
@@ -34,6 +37,8 @@ from ..utils import pull_cv_project_helper, update_app_insight_counter
 from .serializers import ProjectSerializer, TaskSerializer
 
 logger = logging.getLogger(__name__)
+
+PROJECT_RELABEL_TIME_THRESHOLD = 30  # Seconds
 
 
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
@@ -81,6 +86,25 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
+    @action(detail=True, methods=["post"])
+    def relabel_keep_alive(self, request, pk=None) -> Response:
+        """relabel_keep_alive.
+
+        Args:
+            request:
+            kwargs:
+
+        Returns:
+            Response:
+        """
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, pk=pk)
+        obj.relabel_expired_time = timezone.now() + datetime.timedelta(
+            seconds=PROJECT_RELABEL_TIME_THRESHOLD)
+        obj.save()
+        serializer = ProjectSerializer(obj)
+        return Response(serializer.data)
+
 
 @api_view()
 def export(request, project_id):
@@ -104,7 +128,7 @@ def export(request, project_id):
         unidentified_num = data["unidentified_num"]
         is_gpu = data["is_gpu"]
         average_inference_time = data["average_inference_time"]
-        last_prediction_count = data["last_prediction_count"] 
+        last_prediction_count = data["last_prediction_count"]
         logger.info("success_rate: %s. inference_num: %s", success_rate,
                     inference_num)
     except requests.exceptions.ConnectionError:
@@ -413,7 +437,7 @@ def upload_and_train(project_id):
             project_id=project_id, part_ids=part_ids, tags_dict=tags_dict)
         if has_new_parts:
             project_changed = True
-        
+
         upcreate_training_status(
             project_id=project_obj.id,
             need_to_send_notification=True,
@@ -687,7 +711,8 @@ def project_reset_camera(request, project_id):
         if len(Project.objects.filter(is_demo=False)) > 0:
             project_obj = Project.objects.filter(is_demo=False)[0]
     project_obj.camera = Camera.objects.filter(is_demo=True).first()
-    project_obj.save(update_fields=["camera"])
+    project_obj.has_configured = False
+    project_obj.save(update_fields=["camera", "has_configured"])
     return Response({"status": "ok"})
 
 
