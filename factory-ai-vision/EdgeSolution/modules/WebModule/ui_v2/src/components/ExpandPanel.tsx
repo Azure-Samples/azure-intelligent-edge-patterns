@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
-import { ActionButton, getTheme } from '@fluentui/react';
+import { ActionButton, getTheme, Separator } from '@fluentui/react';
 
 const { palette } = getTheme();
 
-export const ExpandPanel: React.FC<{ title: string }> = ({ title, children }) => {
+export const ExpandPanel: React.FC<{ titleHidden: string; titleVisible: string }> = ({
+  titleHidden,
+  titleVisible,
+  children,
+}) => {
   const [showChildren, setShowChildren] = useState(false);
 
   const toggleShowChildren = () => setShowChildren((prev) => !prev);
 
   return (
-    <>
+    <div>
+      {showChildren && children}
       <ActionButton
         iconProps={{ iconName: 'Chevrondown' }}
         styles={{
           rootHovered: {
             color: palette.black,
+          },
+          flexContainer: {
+            flexDirection: 'row-reverse',
           },
           iconHovered: {
             color: palette.black,
@@ -28,11 +36,21 @@ export const ExpandPanel: React.FC<{ title: string }> = ({ title, children }) =>
             transitionDuration: '0.3s',
           },
         }}
-        text={title}
+        text={showChildren ? titleVisible : titleHidden}
         onClick={toggleShowChildren}
         checked={showChildren}
       />
-      {showChildren && children}
-    </>
+      <Separator
+        styles={{
+          root: {
+            selectors: {
+              '::before': {
+                background: palette.neutralQuaternary,
+              },
+            },
+          },
+        }}
+      />
+    </div>
   );
 };

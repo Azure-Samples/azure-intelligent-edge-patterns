@@ -9,7 +9,7 @@ import { selectAllCameras, getCameras } from '../store/cameraSlice';
 import { selectAllImages, getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
-import { TaskDetail } from '../components/TaskDetail';
+import { Deployment } from '../components/Deployment';
 
 export const Home: React.FC = () => {
   const location = useLocation();
@@ -40,7 +40,7 @@ export const Home: React.FC = () => {
 
     const route = location.pathname.split('/')[1];
     if (route === 'getStarted') return <h1>Get started</h1>;
-    if (route === 'deployment') return <TaskDetail isDemo={false} />;
+    if (route === 'deployment') return <Deployment isDemo={false} />;
     if (route === 'customize')
       return <Customize hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />;
   };

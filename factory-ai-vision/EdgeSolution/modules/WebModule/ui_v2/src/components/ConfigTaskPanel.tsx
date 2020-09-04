@@ -10,6 +10,10 @@ import {
   Text,
   TextField,
   Toggle,
+  PanelType,
+  getTheme,
+  Label,
+  mergeStyleSets,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -37,6 +41,25 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
         source: '',
       },
     });
+};
+
+const { palette } = getTheme();
+const classNames = mergeStyleSets({
+  textWrapper: {
+    paddingBottom: '16px',
+  },
+});
+const panelStyles = {
+  root: {
+    height: 'calc(100% - 48px)',
+    top: '46px',
+  },
+  main: {
+    backgroundColor: palette.neutralLighter,
+  },
+  footerInner: {
+    backgroundColor: palette.neutralLighter,
+  },
 };
 
 type ConfigTaskPanelProps = {
@@ -76,13 +99,13 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     );
 
     onDismiss();
-    history.push('/task');
+    history.push('/deployment');
   };
 
   const onRenderFooterContent = () => {
     return (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton text="Start" onClick={onStart} />
+        <PrimaryButton text="Deploy" onClick={onStart} />
         <DefaultButton text="Cancel" onClick={onDismiss} />
       </Stack>
     );
@@ -93,13 +116,15 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       isOpen={isOpen}
       onDismiss={onDismiss}
       hasCloseButton
-      headerText="Start a task"
+      headerText="Deploy task"
       onRenderFooterContent={onRenderFooterContent}
       isFooterAtBottom={true}
+      type={PanelType.smallFluid}
+      styles={panelStyles}
     >
-      <Stack tokens={{ childrenGap: 10 }}>
+      <Stack tokens={{ childrenGap: 10 }} styles={{ root: { width: '300px' } }}>
         <Dropdown
-          label="Task"
+          label="Model"
           options={trainingProjectOptions}
           required
           selectedKey={projectData.trainingProject}
@@ -117,7 +142,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           }}
         />
         <Dropdown
-          label="Part"
+          label="Objects"
           multiSelect
           options={partOptions}
           required
@@ -133,71 +158,99 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             }
           }}
         />
-        <ExpandPanel title="Advanced settings">
-          <Toggle
-            label="Enable retraining"
-            checked={projectData.needRetraining}
-            onChange={(_, checked) => {
-              onChange('needRetraining', checked);
-            }}
-          />
-          <Text styles={{ root: { fontWeight: 'bold' } }}>Accuracy for capture images</Text>
-          <TextField
-            label="Minimum"
-            type="number"
-            value={projectData.accuracyRangeMin?.toString()}
-            onChange={(_, newValue) => {
-              onChange('accuracyRangeMin', parseInt(newValue, 10));
-            }}
-            suffix="%"
-            disabled={!projectData.needRetraining}
-          />
-          <TextField
-            label="Maximum"
-            type="number"
-            value={projectData.accuracyRangeMax?.toString()}
-            onChange={(_, newValue) => {
-              onChange('accuracyRangeMax', parseInt(newValue, 10));
-            }}
-            suffix="%"
-            disabled={!projectData.needRetraining}
-          />
-          <TextField
-            label="Minimum Images to store"
-            type="number"
-            value={projectData.maxImages?.toString()}
-            onChange={(_, newValue) => {
-              onChange('maxImages', parseInt(newValue, 10));
-            }}
-            disabled={!projectData.needRetraining}
-          />
-          <Toggle
-            label="Send message to Azure"
-            checked={projectData.sendMessageToCloud}
-            onChange={(_, checked) => {
-              onChange('sendMessageToCloud', checked);
-            }}
-          />
-          <TextField
-            label="Frame per minutes"
-            type="number"
-            value={projectData.framesPerMin?.toString()}
-            onChange={(_, newValue) => {
-              onChange('framesPerMin', parseInt(newValue, 10));
-            }}
-            disabled={!projectData.sendMessageToCloud}
-          />
-          <TextField
-            label="Accuracy threshold"
-            type="number"
-            value={projectData.accuracyThreshold?.toString()}
-            onChange={(_, newValue) => {
-              onChange('accuracyThreshold', parseInt(newValue, 10));
-            }}
-            disabled={!projectData.sendMessageToCloud}
-          />
-        </ExpandPanel>
       </Stack>
+      <ExpandPanel titleHidden="Advanced options" titleVisible="Fewer options">
+        <Stack horizontal tokens={{ childrenGap: 50 }} styles={{ root: { paddingTop: '30px' } }}>
+          <Stack.Item>
+            <div className={classNames.textWrapper}>
+              <Label>Cloud messaging</Label>
+              <Text>Send successful inferences to the cloud</Text>
+            </div>
+            <Toggle
+              label="Enable cloud messages"
+              checked={projectData.sendMessageToCloud}
+              onChange={(_, checked) => {
+                onChange('sendMessageToCloud', checked);
+              }}
+              inlineLabel
+            />
+            {projectData.sendMessageToCloud && (
+              <>
+                <TextField
+                  label="Frames per minute"
+                  type="number"
+                  value={projectData.framesPerMin?.toString()}
+                  onChange={(_, newValue) => {
+                    onChange('framesPerMin', parseInt(newValue, 10));
+                  }}
+                  disabled={!projectData.sendMessageToCloud}
+                  required
+                />
+                <TextField
+                  label="Accuracy threshold"
+                  type="number"
+                  value={projectData.accuracyThreshold?.toString()}
+                  onChange={(_, newValue) => {
+                    onChange('accuracyThreshold', parseInt(newValue, 10));
+                  }}
+                  disabled={!projectData.sendMessageToCloud}
+                  suffix="%"
+                  required
+                />
+              </>
+            )}
+          </Stack.Item>
+          <Stack.Item>
+            <div className={classNames.textWrapper}>
+              <Label>Retraining image</Label>
+              <Text>Save images to tag and improve training model</Text>
+            </div>
+            <Toggle
+              inlineLabel
+              label="Enable capturing images"
+              checked={projectData.needRetraining}
+              onChange={(_, checked) => {
+                onChange('needRetraining', checked);
+              }}
+            />
+            {projectData.needRetraining && (
+              <>
+                <Stack horizontal tokens={{ childrenGap: 24 }}>
+                  <TextField
+                    label="Min"
+                    type="number"
+                    value={projectData.accuracyRangeMin?.toString()}
+                    onChange={(_, newValue) => {
+                      onChange('accuracyRangeMin', parseInt(newValue, 10));
+                    }}
+                    suffix="%"
+                    disabled={!projectData.needRetraining}
+                  />
+                  <TextField
+                    label="Max"
+                    type="number"
+                    value={projectData.accuracyRangeMax?.toString()}
+                    onChange={(_, newValue) => {
+                      onChange('accuracyRangeMax', parseInt(newValue, 10));
+                    }}
+                    suffix="%"
+                    disabled={!projectData.needRetraining}
+                  />
+                </Stack>
+                <TextField
+                  label="Minimum Images to store"
+                  type="number"
+                  value={projectData.maxImages?.toString()}
+                  onChange={(_, newValue) => {
+                    onChange('maxImages', parseInt(newValue, 10));
+                  }}
+                  disabled={!projectData.needRetraining}
+                />
+              </>
+            )}
+          </Stack.Item>
+        </Stack>
+      </ExpandPanel>
     </Panel>
   );
 };
