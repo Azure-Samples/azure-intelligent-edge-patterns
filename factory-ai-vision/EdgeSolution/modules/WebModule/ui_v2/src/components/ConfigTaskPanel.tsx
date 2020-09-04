@@ -94,9 +94,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);
 
-    await dispatch(
-      thunkPostProject(projectData.id, projectData.parts, projectData.camera, projectData.trainingProject),
-    );
+    await dispatch(thunkPostProject(projectData));
 
     onDismiss();
     history.push('/deployment');

@@ -259,24 +259,18 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
     });
 };
 
-export const thunkPostProject = (
-  projectId,
-  selectedParts,
-  selectedCamera,
-  selectedTrainingProject,
-): ProjectThunk => (dispatch, getState): Promise<number> => {
+export const thunkPostProject = (projectData: ProjectData): ProjectThunk => (dispatch): Promise<number> => {
+  const projectId = projectData.id;
   const isProjectEmpty = projectId === null || projectId === undefined;
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
 
   dispatch(postProjectRequest(false));
 
-  const projectData = getProjectData(getState());
-
   return Axios(url, {
     data: {
-      parts: selectedParts,
-      camera: selectedCamera,
-      project: selectedTrainingProject,
+      parts: projectData.parts,
+      camera: projectData.camera,
+      project: projectData.trainingProject,
       needRetraining: projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
