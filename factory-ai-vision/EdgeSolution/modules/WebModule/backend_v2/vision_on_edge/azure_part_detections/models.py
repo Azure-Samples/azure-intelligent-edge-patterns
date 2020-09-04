@@ -22,7 +22,7 @@ class PartDetection(models.Model):
     """
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
+    cameras = models.ManyToManyField(Camera, blank=True)
     inference_module = models.ForeignKey(InferenceModule,
                                          on_delete=models.CASCADE,
                                          null=True)
