@@ -1,0 +1,89 @@
+{
+    "modulesContent": {
+        "$edgeAgent": {
+            "properties.desired": {
+                "runtime": {
+                    "settings": {
+                        "minDockerVersion": "v1.25",
+                        "registryCredentials": {
+                            "AIX_CONTAINER_REGISTRY_NAME": {
+                                "username": "AIX_CONTAINER_REGISTRY_USER_NAME",
+                                "password":"AIX_CONTAINER_REGISTRY_PASSWORD",
+                                "address":"AIX_CONTAINER_REGISTRY_FULL_NAME"
+                            }                            
+                        }
+                    },
+                    "type": "docker"
+                },
+                "schemaVersion": "1.0",
+                "systemModules": {
+                    "edgeAgent": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+                            "createOptions": ""
+                        },
+                        "type": "docker"
+                    },
+                    "edgeHub": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+                            "createOptions": "{\"User\":\"root\",\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+                        },
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always"
+                    }
+                },
+                "modules": {
+                    "mediaEdge": {
+                        "version": "1.0",
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "AIX_LVA_MODULE_ADDRESS",
+                            "createOptions": "{\"HostConfig\": {\"LogConfig\":{\"Config\": {\"max-size\": \"10m\",\"max-file\": \"10\"}}}}"
+                        },
+                        "env": {
+                            "EnableDiagnosticLogging": {
+                                "value": "True"
+                            },
+                            "IotEdgeArchiverSegmentManifestSeconds": {
+                                "value": "30"
+                            }
+                        }
+                    },
+                    "AIX_CONTAINER_MODULE_NAME": {
+                        "version": "1.0",
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "AIX_CONTAINER_REGISTRY_FULL_NAME/AIX_CONTAINER_MODULE_NAME:AIX_CONTAINER_MODULE_TAG",
+                            "createOptions": "{\"HostConfig\":{\"runtime\": \"nvidia\", \"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}], \"5001/tcp\":[{\"HostPort\":\"5001\"}]}, \"DeviceCgroupRules\":[\"c 189:* rwm\"],\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\",  \"/home/athena/lva_output/:/var/media/\", \"AIX_HOST_DEBUG_FOLDER:/debug_path\"],\"Privileged\":true, \"LogConfig\":{\"Config\": {\"max-size\": \"100m\",\"max-file\": \"10\"}}}}"
+                        }
+                    }
+                }
+            }
+        },
+        "$edgeHub": {
+            "properties.desired": {
+                "routes": {
+                    "route": "FROM /messages/* INTO $upstream"
+                },
+                "schemaVersion": "1.0",
+                "storeAndForwardConfiguration": {
+                    "timeToLiveSecs": 7200
+                }
+            }
+        },
+        "mediaEdge": {
+            "properties.desired": {
+                "mediaGraph": "{  \"sources\": [    {      \"$type\": \"Microsoft.Media.MediaGraphRtspSource\",      \"name\": \"rtspSource\",      \"url\": \"AIX_IP_CAM_ADDRESS\",      \"credentials\": {        \"username\": \"AIX_IP_CAM_USER_NAME\",        \"password\": \"AIX_IP_CAM_PASSWORD\"      }    }  ],  \"processors\": [    {\"$type\": \"Microsoft.Media.MediaGraphMotionDetector\",\"name\": \"motionDetector\",\"inputs\": [\"rtspSource\"],\"sensitivity\": \"AIX_MOTION_SENSITIVITY\"},{      \"$type\": \"Microsoft.Media.MediaGraphFrameRateFilterProcessor\",      \"name\": \"frameRateFilter\",      \"inputs\": [        \"motionDetector\"      ],      \"maximumFps\": AIX_IP_CAM_FPS_FILTER    },    {      \"$type\": \"Microsoft.Media.MediaGraphFrameInferenceHttpProxyProcessor\",      \"name\": \"frameInferenceProcessor\",      \"inputs\": [        \"frameRateFilter\"      ],      \"image\": {        \"format\": \"jpeg\"      },      \"endPoint\": {        \"$type\": \"Microsoft.Media.Endpoint\",        \"url\": \"AIX_CONTAINER_SCORING_URI\",        \"validationOptions\": {          \"IgnoreHostname\": false,          \"IgnoreSignature\": false        },        \"trustedCertificates\": {          \"$type\": \"Microsoft.Media.MediaGraphPemCertificateList\",          \"certificates\": [            \"cert1\",            \"cert2\"          ]        },        \"credentials\": {          \"$type\": \"Microsoft.Media.MediaGraphCredentialsCustomHttpHeader\",          \"headerName\": \"Authorization\",          \"headerValue\": \"Bearer...\"        }      }    }  ],  \"sinks\": [    {      \"$type\": \"Microsoft.Media.MediaGraphIoTHubSink\",      \"name\": \"iotHubSink\",      \"inputs\": [        \"frameInferenceProcessor\"      ],      \"queueName\": \"$iotSinkQueueName$\"    } ]}"
+            }
+          },
+        "AIX_CONTAINER_MODULE_NAME": {
+            "properties.desired": {}
+        }
+    }
+}

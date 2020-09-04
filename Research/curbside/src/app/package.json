@@ -1,0 +1,39 @@
+{
+  "name": "curbside",
+  "version": "0.0.1",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "autocompile": "nodemon --ext scss,js --watch styles --watch public/js build/index.js",
+    "server": "node app.js",
+    "simulator": "node simulator/index.js",
+    "run-local": "live-server --port=3000 public",
+    "local": "npm-run-all --parallel autocompile run-local",
+    "start": "npm-run-all --parallel server simulator"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michhar/curbside.git"
+  },
+  "author": "Jayne",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/michhar/curbside/issues"
+  },
+  "homepage": "https://github.com/michhar/curbside#readme",
+  "dependencies": {
+    "@azure/event-hubs": "^5.1.0",
+    "azure-iot-device": "^1.13.0",
+    "azure-iot-device-amqp": "^1.12.0",
+    "azure-iothub": "^1.12.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.1",
+    "node-sass": "^4.14.0",
+    "nodemon": "^2.0.3",
+    "npm-run-all": "^4.1.5"
+  }
+}
