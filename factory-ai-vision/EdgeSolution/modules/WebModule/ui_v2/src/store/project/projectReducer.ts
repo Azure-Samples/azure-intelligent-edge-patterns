@@ -174,7 +174,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
     case GET_TRAINING_LOG_SUCCESS: {
       let trainingLog;
       if (action.payload.newStatus === Status.FinishTraining) trainingLog = '';
-      else trainingLog = state.trainingLog;
+      else trainingLog = action.payload.trainingLog;
 
       return {
         ...state,
