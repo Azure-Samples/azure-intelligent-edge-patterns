@@ -75,7 +75,7 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
 
             while 'flags' not in dir(self._tYoloV3.last_drawn_img):
                 logging.info('not sending last_drawn_img')
-                time.sleep(1)
+                time.sleep(2)
             cnt = 0
             while True:
                 cnt += 1

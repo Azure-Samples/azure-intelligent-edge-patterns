@@ -7,7 +7,7 @@ RUN apt-get update && \
     libgtk2.0-dev \
     libssl-dev \
     libffi-dev \
-    python3-pip
+    python3-pip 
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
@@ -23,11 +23,28 @@ RUN apt-get install -y libgl1-mesa-glx
 
 
 COPY requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt --ignore-installed && \
-    pip install flask opencv-python onnx onnxruntime
+ENV CONDA_ENV_NAME python38
+RUN conda create --name python38 python=3.8.5 -y &&\
+    . activate python38
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip && pip install -r requirements.txt --ignore-installed && pip install flask opencv-python onnxruntime" ]
+# RUN pip install --upgrade pip &&\
+#     pip install -r requirements.txt --ignore-installed && \
+#     pip install flask opencv-python onnx onnxruntime
 
 ARG DEVICE
+
+
+COPY arguments.py ./
+COPY coco_classes.txt ./
+COPY exception_handler.py ./
+COPY extension_pb2.py ./
+COPY extension_pb2_grpc.py ./
+COPY inference_engine.py ./
+COPY inferencing_pb2.py ./
+COPY media_pb2.py ./
+COPY model_wrapper.py ./
+COPY server.py ./
+COPY shared_memory.py ./
 
 COPY main.py ./
 COPY config.py ./
@@ -55,5 +72,6 @@ RUN chmod 777 default_model
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "python3", "-u", "main.py" ]
+CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
+# CMD [ "python3", "server.py", "-p", "44000" ]
 

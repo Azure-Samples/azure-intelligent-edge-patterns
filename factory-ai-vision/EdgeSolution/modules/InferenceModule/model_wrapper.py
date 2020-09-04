@@ -173,7 +173,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
 
-    def __init__(self, cam_type="video_file", model_dir='./default_model'):
+    def __init__(self, cam_type="video_file", model_dir='./default_model', cam_source='./sample_video/video.mp4'):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./mov_bbb.mp4"):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
         # def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
@@ -417,18 +417,20 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 def update_instance(rtspUrl):
     payload = {
         "@apiVersion": "1.0",
-        "name": "http1"
+        "name": "rpc"
     }
     payload_set = {
         "@apiVersion": "1.0",
-        "name": "http1",
+        "name": "rpc",
         "properties": {
-            "topologyName": "InferencingWithHttpExtension5",
+            "topologyName": "InferencingWithGrpcExtension",
             "description": "Sample graph description",
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
-                {"name": "inferencingUrl",
-                    "value": "http://InferenceModule:5000/predict"}
+                {"name": "grpcExtensionAddress",
+                    "value": "tcp://InferenceModule:44000"},
+                {"name": "frameHeight", "value": "540"},
+                {"name": "frameWidth", "value": "960"},
             ]
         }
     }

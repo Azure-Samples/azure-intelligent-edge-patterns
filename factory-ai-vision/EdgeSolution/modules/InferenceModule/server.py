@@ -12,10 +12,22 @@ from exception_handler import PrintGetExceptionDetails
 from inference_engine import InferenceEngine
 from model_wrapper import ONNXRuntimeModelDeploy
 from flask import Flask, request, Response
+from utility import get_file_zip, normalize_rtsp
 
 import grpc
 import extension_pb2_grpc
 from concurrent import futures
+
+MODEL_DIR = 'model'
+UPLOAD_INTERVAL = 1  # sec
+
+DETECTION_TYPE_NOTHING = 'nothing'
+DETECTION_TYPE_SUCCESS = 'success'
+DETECTION_TYPE_UNIDENTIFIED = 'unidentified'
+DETECTION_BUFFER_SIZE = 10000
+
+IMG_WIDTH = 960
+IMG_HEIGHT = 540
 
 # Main thread
 
@@ -257,7 +269,8 @@ def Main():
             InferenceEngine(onnx), server)
         server.add_insecure_port(f'[::]:{grpcServerPort}')
         server.start()
-        server.wait_for_termination()
+        app.run(host='0.0.0.0', debug=False)
+        # server.wait_for_termination()
 
     except:
         PrintGetExceptionDetails()
