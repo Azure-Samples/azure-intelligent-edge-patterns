@@ -4,7 +4,7 @@ import { State } from 'RootStateType';
 
 export type Project = {
   isLoading: boolean;
-  trainingLogs: string[];
+  trainingLog: string;
   data: ProjectData;
   originData: ProjectData;
   inferenceMetrics: {

@@ -25,7 +25,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
     status,
     progress,
-    trainingLogs,
+    trainingLog,
     data: projectData,
     inferenceMetrics: { successRate, successfulInferences, unIdetifiedItems },
   } = useSelector<State, Project>((state) => state.project);
@@ -78,7 +78,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
             {progress !== null && (
               <>
                 <Text variant="xxLarge">{`${progress}%`}</Text>
-                <Text></Text>
+                <Text>{trainingLog}</Text>
               </>
             )}
           </Stack>

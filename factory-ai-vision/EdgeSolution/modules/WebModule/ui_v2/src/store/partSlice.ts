@@ -84,4 +84,4 @@ export const partOptionsSelector = createSelector(selectAllParts, (parts) =>
 );
 
 export const selectPartNamesById = (ids) =>
-  createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i].name));
+  createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i]?.name));
