@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Stack, PrimaryButton } from '@fluentui/react';
+import { Stack, PrimaryButton, ProgressIndicator, Text, getTheme } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from 'RootStateType';
@@ -19,9 +19,13 @@ import { selectTrainingProjectById } from '../store/trainingProjectSlice';
 import { selectPartNamesById } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
 
+const { palette } = getTheme();
+
 export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const {
     status,
+    progress,
+    trainingLogs,
     data: projectData,
     inferenceMetrics: { successRate, successfulInferences, unIdetifiedItems },
   } = useSelector<State, Project>((state) => state.project);
@@ -69,11 +73,21 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     if (status === Status.None) return <PrimaryButton onClick={openPanel}>Config Task</PrimaryButton>;
     if (status === Status.WaitTraining)
       return (
-        // <div style={{ width: '600px' }}>
-        //   {progress !== null && <ProgressBar percentage={progress} />}
-        //   <pre>{trainingLogs.join('\n')}</pre>
-        // </div>
-        <h1>Training</h1>
+        <Stack horizontalAlign="center" verticalAlign="center" grow tokens={{ childrenGap: 24 }}>
+          <Stack horizontalAlign="center" tokens={{ childrenGap: 5 }}>
+            {progress !== null && (
+              <>
+                <Text variant="xxLarge">{`${progress}%`}</Text>
+                <Text></Text>
+              </>
+            )}
+          </Stack>
+          <ProgressIndicator
+            barHeight={4}
+            styles={{ root: { width: '600px' }, progressBar: { backgroundColor: palette.tealLight } }}
+            percentComplete={progress !== null ? progress / 100 : null}
+          />
+        </Stack>
       );
 
     return (
@@ -88,6 +102,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
             unidentifiedImages={unIdetifiedItems}
           />
         </div>
+        <PrimaryButton onClick={openPanel}>Config Task</PrimaryButton>
         <div style={{ height: '90%', width: '70%' }}>
           <LiveViewContainer showVideo={true} cameraId={projectCameraId} onDeleteProject={onDeleteProject} />
         </div>
