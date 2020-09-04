@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR ${WORK_DIR}
 
-RUN wget --quiet https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O ${WORK_DIR}/miniconda.sh && \
+RUN wget --quiet https://repo.continuum.io/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh -O ${WORK_DIR}/miniconda.sh && \
     /bin/bash ${WORK_DIR}/miniconda.sh -b -p /opt/conda && \
     rm ${WORK_DIR}/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \

@@ -1,4 +1,3 @@
-
 from flask import Flask, request, Response
 from PIL import Image
 import logging

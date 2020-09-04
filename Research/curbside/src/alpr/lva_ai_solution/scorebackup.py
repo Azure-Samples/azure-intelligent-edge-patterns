@@ -1,3 +1,4 @@
+
 import torch
 from PIL import Image
 import numpy as np
@@ -10,15 +11,11 @@ import json
 import logging
 import threading
 from collections import OrderedDict
-from datetime import timedelta
 import cv2
 import copy
 from dotenv import load_dotenv
 
-from collections import MutableMapping
-from collections import defaultdict
-from contextlib import suppress
-#from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 from lpdet.apis import det_and_recognize
 from lpdet.utils import Config, load_checkpoint, ProgressBar
@@ -33,8 +30,8 @@ class AnalyticsAPI:
     INF_STAT_EXCEPTION = 2      # Exception occured whiled inferencing
 
     def __init__(self, 
-                     detModelFileName="models/detector.pth", # .pth are data files for PyTorch machine learning
-                 recModelFileName="models/recognizer.pth", # these files are the actual models. Where does the data actually come from?
+                 detModelFileName="models/detector.pth",
+                 recModelFileName="models/recognizer.pth",
                  detCfgFileName="configs/detector.py",
                  recCfgFileName="configs/recognizer.py",
                  workDir = ".",
@@ -49,19 +46,17 @@ class AnalyticsAPI:
             self.rec_cfg = Config.fromfile(self.recCfgFileName)
             self.workDir = workDir
             self.probThreshold = probThreshold
-            self.volume = "/var/media/" # where images write out to in container. currently a share
+            self.volume = "/var/media/" # where images write out to in container
             self.logID = "AnalyticsAPILogger"
-
-            # Keep track of plates, coming and going of car
-            self.cache = AnalyticsCache()
             
+            self.cache = AnalyticsCache()
             # Load local .env file
             load_dotenv()
             
-            self.storageConnStr = os.getenv("storageConnStr", "")
-            self.containerName = 'juliacomputeshare4'
-            # this is used to visualize
-            #self.blob_service_client = BlobServiceClient(account_url=self.storageConnStr) 
+            #self.storageConnStr = os.getenv("storageConnStr", "")
+            #self.containerName = 'alprlva'
+            #self.blob_service_client = BlobServiceClient(account_url=self.storageConnStr)
+            
             
             self.logger = logging.getLogger(self.logID)
             self._lock = threading.Lock()
@@ -76,7 +71,7 @@ class AnalyticsAPI:
         try:
             with self._lock:
                 self.initialized = False
-                self.logger.info("[AI EXT] AnalyticsAPI init start.")
+                self.logger.info("[AI EXT] AnalyticsAPI init start.") #messages like this go to module logs
 
                 start = t.default_timer()
                 
@@ -97,10 +92,6 @@ class AnalyticsAPI:
 
                 self.logger.info("[AI EXT] AnalyticsAPI init time: {0} ms".format(round((end - start) * 1000, 2)))
 
-                # For saving to file
-                self.filename = ""
-                self.blobfolder = ""
-
         except Exception as e:
             self.logger.info("[AI EXT] Exception (ScoringAPI/initModel): {0}".format(str(e)))
             return None
@@ -112,35 +103,23 @@ class AnalyticsAPI:
     def getProbabilityThreshold(self):
         return self.probThreshold
 
-        #this function takes the bounding boxes, associated scores, and plate numbers found. It will then either
-        #return an empty object if nothing found or low confidence, or it will return the object that will be sent to iothub later, containing the bounding box info as well as the plate #s minor change
     def postprocess(self, boxes, scores, plates):
         resDict = OrderedDict()
-
-        line_pairs = [(0, 1, 2, 3),
-                        (2, 3, 4, 5),
-                        (4, 5, 6, 7),
-                        (6, 7, 0, 1)]
 
         objectId = 0
         numObjectsIdentified = len(boxes)
         if numObjectsIdentified > 0:
             for i in range(len(boxes)):
                 if scores[i] > self.probThreshold:
-                    # The box is length 8 array representing a square (4 points)
-                    # [0,1] is xmin, ymin
-                    # [4,5] is xmax, ymax
                     box = boxes[i]
-
-                    r = np.round(box).astype(int)
 
                     xmin = int(box[0])
                     ymin = int(box[1])
-                    xmax = int(box[4])
-                    ymax = int(box[5])
+                    xmax = int(box[2])
+                    ymax = int(box[3])
 
                     resDict[objectId] = {   "plate": plates[i], 
-                                            "confidence": float(scores[i]), 
+                                            "confidence": round(float(scores[i])), 
                                             "xmin": xmin, 
                                             "ymin": ymin, 
                                             "xmax": xmax, 
@@ -149,7 +128,6 @@ class AnalyticsAPI:
 
         return resDict
     
-    #This function takes the image, draws a bounding box, and writes the inferred LP# on top of it
     def visualize_result(self, img, reslist):
 
         img = img.copy()
@@ -164,7 +142,7 @@ class AnalyticsAPI:
             for lp in line_pairs:
                 cv2.line(img, (r[lp[0]], r[lp[1]]), (r[lp[2]], r[lp[3]]), (0, 255, 0), thickness=2)
             x1, y1 = np.min(r[0:8:2]), np.min(r[1:8:2])
-            cv2.putText(img, res['string'], (x1, y1-20), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), thickness=2)
+            cv2.putText(img, res['string'], (x1, y1-20), cv2.FONT_HERSHEY_COMPLEX, 3, (0, 255, 0), thickness=2)
 
         return img
 
@@ -177,7 +155,7 @@ class AnalyticsAPI:
                     imgData = np.asarray(pilImage)
                     # RGB to BGR (numpy to opencv)
                     imgData = imgData[:, :, ::-1]
-                    imgSize = np.array([pilImage.size[1], pilImage.size[0]], dtype=np.float32).reshape(1, 2) #size[1]=height size[0]=width
+                    imgSize = np.array([pilImage.size[1], pilImage.size[0]], dtype=np.float32).reshape(1, 2)
                 
                     now = datetime.datetime.now()
 
@@ -194,7 +172,26 @@ class AnalyticsAPI:
                         boxes.append(res['corners'])
                         scores.append(res['score'])
                         plates.append(res['string'])
-                    
+                        
+                    today = datetime.date.today()
+                    #blobfolder = today.strftime("%Y-%m-%d")
+                    filename = str(now).replace(' ','_').replace(':','-')+'.jpg'
+                    # Save images locally and to Blob Storage
+                    if len(reslist) > 0:
+                        imgMarked = self.visualize_result(imgData, reslist)
+
+                        # Write locally
+                        cv2.imwrite(os.path.join(self.volume, filename), 
+                                    imgMarked)
+                        
+                        # To upload to Blob
+                       # blob_client = self.blob_service_client.get_blob_client(container=self.containerName, 
+     #                                                                     blob=blobfolder+'/'+filename)
+                        # Upload the local image file to Blob Storage
+                     #   with open(os.path.join(self.volume, filename), "rb") as data:
+                   #         blob_client.upload_blob(data)
+                        
+
                     end = t.default_timer()
                     infTime = round((end - start) * 1000, 2)
 
@@ -202,57 +199,11 @@ class AnalyticsAPI:
                                                scores,
                                                plates)
 
-                    for i in range(len(resDict)):
-                        # Checking my cache - ASSUMPTION is only one plate at a time (TODO: take most conf plate if more than 1)
-                        try:
-                            plateAlreadyInCache = (resDict[i]["plate"] in self.cache.arrivedCache)
-                            xmin = resDict[i]["xmin"]
-                            ymin = resDict[i]["ymin"]
-                            xmax = resDict[i]["xmax"]
-                            ymax = resDict[i]["ymax"]
-                            state = self.cache.checkCache(resDict[i]["plate"], resDict[i]["confidence"], (xmax-xmin), (ymax-ymin))
-
-                        except Exception as e:
-                            self.logger.info("[AI EXT] Exception warning (ScoringAPI - Score): {0}".format(str(e)))
-                            state = "no_detection"
-                        resDict[i]["vehicle_state"] = state
-                            
-                        if state == "arrived" and not plateAlreadyInCache:
-                            # Update blobfolder and filename
-                            self.logger.info("[AI EXT] current cache looks like: {0}".format(self.cache.arrivedCache))
-                            today = datetime.date.today()
-                            self.blobfolder = today.strftime("%Y-%m-%d")
-                            self.filename = str(now).replace(' ','_').replace(':','-')+'.jpg'
-                            # Save images on first detection
-                            imgMarked = self.visualize_result(imgData, reslist)
-
-                            height, width = imgMarked.shape[:2]
-                            maxDim = max(height, width)
-                            scale = 400/maxDim # 200 pixels max side size
-                            imgThumb = cv2.resize(imgMarked, (int(scale*width), int(scale*height)),
-                                                  interpolation=cv2.INTER_AREA)
-                            # Write locally
-                            cv2.imwrite(os.path.join(self.volume, self.filename), 
-                                        imgThumb)
-                            
-                            # To upload to Blob. need container connection string
-                            #try:
-                            #    blob_client = self.blob_service_client.get_blob_client(container=self.containerName, 
-                            #                                             blob=self.blobfolder+'/'+self.filename)
-                            #except Exception as e:
-                            #    self.logger.info("[AI EXT] AHAHHAHAHHAHAHAHA DUMMY 2 it don't work, why? your container name is %s your blobfolder is %s and your filename is %s", self.containerName, self.blobfolder, self.filename)
-                                
-                            # Upload the local image file to Blob Storage
-                            #with open(os.path.join(self.volume, self.filename), "rb") as data:
-                            #    blob_client.upload_blob(data)
-
-                    result = {  "app_status": self.INF_STAT_OK, # want it to be 0
-                                "time_for_inference_ms" : infTime,
+                    result = {  "status": self.INF_STAT_OK,
+                                "time" : infTime,
                                 "object_count" : len(resDict),
                                 "result": resDict
                              }
-                                #"blobframe": self.blobfolder+'/'+self.filename
-                            #}
 
                     result = json.dumps(result)
                 else:
@@ -274,60 +225,34 @@ class AnalyticsAPI:
 
     def about(self):
         aboutString = "Engine initialized: {0}<br>ProbThreshold: {1}".format(self.initialized, self.probThreshold)
-        return aboutString
-
+        return aboutString        
+    
 class AnalyticsCache:
-
     def __init__(self):
         self.arrivedCache = defaultdict()
-        self.timeCache = defaultdict()
         self.notCloseCache = defaultdict()
         self.trackingCache = defaultdict()
-        self.threshold = 10e2 # based on the test video. Hard coded value. Changed based on country and size of lp in image
-        self.confidenceThreshold = .9 #Hard coded value. Could change based on user preference
-        self.delta = timedelta(minutes = 2)
-        self.logger = logging.getLogger()
-        self.lastEntry = datetime.datetime.now()
+        self.threshold = 10e3 # based on Micheleen's driveway and cars
 
-    def checkCache(self, plate, confidence, width, height):
-        """Update and check cache""" #cache is infinite (relatively) how long does it stick around?
+    def checkCache(self, plate, width, height):
+        """Update and check cache"""
         boxarea = width*height
-        tempTime=datetime.datetime.now()
-        
-        #clear cache if first time checking in a while
-        if self.delta<= self.lastEntry-tempTime:
-            self.timeCache.clear()
-            self.arrivedCache.clear()
-            self.notCloseCache.clear()
-       
         # Arrived = plate is big enough, over threshold
-        if boxarea >= self.threshold and confidence >= self.confidenceThreshold:
-            if (plate in self.arrivedCache and self.delta < (tempTime-self.timeCache[plate])):
-                    self.arrivedCache[plate] = boxarea
-                    self.logger.info("[AI EXT] updating box for existing LP")
-            else:
-                self.logger.info("[AI EXT] adding new LP to arrived cache")
-                self.arrivedCache[plate] = boxarea
-            self.timeCache[plate] = tempTime
+        if boxarea >= self.threshold:
             with suppress(KeyError):
                 del self.notCloseCache[plate]
-                
+            self.arrivedCache[plate] = boxarea
         else:
-            if (plate in self.arrivedCache):
-                if (self.delta < (tempTime - self.timeCache[plate])):
-                    del self.arrivedCache[plate]
-                    del self.timeCache[plate]
-                    self.notCloseCache[plate] = boxarea
-            else:
-                self.notCloseCache[plate] = boxarea
+            with suppress(KeyError):
+                del self.arrivedCache[plate]
+            self.notCloseCache[plate] = boxarea
         
         # Keep record of all plates and area of plate (even mislabeled ones)
         self.trackingCache[plate] = boxarea
-        self.lastEntry=tempTime
+
         if plate in self.arrivedCache:
             return "arrived"
         elif plate in self.notCloseCache:
             return "not_arrived"
         else:
             return "other"
-
