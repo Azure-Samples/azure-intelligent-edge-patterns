@@ -36,15 +36,9 @@ class Part(models.Model):
         """pre_save.
         """
         instance = kwargs['instance']
-        try:
-            update_fields = []
-            instance.name_lower = str(instance.name).lower()
-            update_fields.append("name_lower")
-        except IntegrityError as integrity_error:
-            logger.error(integrity_error)
-            raise integrity_error
-        except:
-            logger.exception("Unexpected Error in Part Presave")
+        update_fields = []
+        instance.name_lower = str(instance.name).lower()
+        update_fields.append("name_lower")
 
 
 pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")

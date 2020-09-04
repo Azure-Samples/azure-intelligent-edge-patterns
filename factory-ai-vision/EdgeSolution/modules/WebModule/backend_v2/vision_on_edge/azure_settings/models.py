@@ -14,6 +14,8 @@ from django.db.models.signals import pre_save
 # pylint: enable=line-too-long
 from msrest.exceptions import ClientRequestError as MSClientRequestError
 
+from .exceptions import SettingCustomVisionAccessFailed
+
 logger = logging.getLogger(__name__)
 
 # Create your models here.
@@ -178,6 +180,15 @@ class Setting(models.Model):
             logger.exception("Create project occur unexpected error...")
             raise
         return None
+
+    def get_projects(self):
+        """get_projects.
+
+        List all projects.
+        """
+        if not self.is_trainer_valid:
+            raise SettingCustomVisionAccessFailed
+        return self.get_trainer_obj().get_projects()
 
     def __str__(self):
         return self.name

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Model Factories
+"""App model factories.
 """
 
 from factory import DjangoModelFactory, Faker

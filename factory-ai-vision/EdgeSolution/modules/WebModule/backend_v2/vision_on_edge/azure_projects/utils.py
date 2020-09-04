@@ -10,7 +10,7 @@ import time
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_training_status.utils import upcreate_training_status
-from vision_on_edge.exceptions.api_exceptions import CustomVisionAccessFailed
+from vision_on_edge.azure_settings.exceptions import SettingCustomVisionAccessFailed
 from vision_on_edge.images.models import Image
 
 from ..azure_parts.utils import batch_upload_parts_to_customvision
@@ -89,7 +89,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
 
     # Check Training_Key, Endpoint
     if not project_obj.setting.is_trainer_valid:
-        raise CustomVisionAccessFailed
+        raise SettingCustomVisionAccessFailed
 
     trainer = project_obj.setting.get_trainer_obj()
 
