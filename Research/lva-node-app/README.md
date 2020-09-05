@@ -154,7 +154,7 @@ You could create a file in VS Code called deployment.template.json and paste the
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "your docker image here",
+              "image": "containerregistry12345.azurecr.io/nodewebmodule:v1",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":5000}]}}}"
             }
           }
