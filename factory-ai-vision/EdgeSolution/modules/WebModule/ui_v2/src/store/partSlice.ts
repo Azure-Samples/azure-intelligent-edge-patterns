@@ -47,7 +47,8 @@ export const deletePart = createAsyncThunk<any, number, { state: State }>(
   async (id, { getState }) => {
     const projectId = getState().project.data.id;
     const partName = selectPartById(getState(), id).name;
-    await Axios.get(`/api/projects/${projectId}/delete_tag?part_name=${partName}`);
+    // FIXME andrew please check this
+    //await Axios.get(`/api/projects/${projectId}/delete_tag?part_name=${partName}`);
     await Axios.delete(`/api/parts/${id}/`);
     return id;
   },

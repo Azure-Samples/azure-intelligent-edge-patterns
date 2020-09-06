@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
 import { useConstCallback } from '@uifabric/react-hooks';
 import { PartDetailList } from '../components/PartDetailList';
+import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
 
 const theme = getTheme();
 
@@ -34,6 +35,7 @@ export const Parts: React.FC = () => {
         <Breadcrumb items={[{ key: 'parts', text: 'Parts' }]} />
         <PartDetailList onAddBtnClick={openPanel} />
       </Stack>
+      <AddEditPartPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
     </Stack>
   );
 };

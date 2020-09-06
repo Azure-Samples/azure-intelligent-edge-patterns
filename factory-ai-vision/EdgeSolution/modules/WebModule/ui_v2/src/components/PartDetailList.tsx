@@ -30,7 +30,11 @@ export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddB
   return (
     <>
       {parts.length === 0 ? (
-        <EmptyAddIcon text="Add a part to tag your photo" btnTxt="Add a part" onAddBtnClick={onAddBtnClick} />
+        <EmptyAddIcon
+          subTitle="Add a part to tag your photo"
+          title="Add a tag"
+          primary={{ text: 'Add a part', onClick: onAddBtnClick }}
+        />
       ) : (
         <DetailsList
           columns={[
