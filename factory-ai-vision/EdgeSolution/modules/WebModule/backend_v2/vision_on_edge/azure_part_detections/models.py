@@ -23,10 +23,11 @@ class PartDetection(models.Model):
     """PartDetection Model
     """
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
+    name = models.CharField(blank=True, max_length=200)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
+    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
     inference_module = models.ForeignKey(InferenceModule,
-                                         on_delete=models.CASCADE,
+                                         on_delete=models.SET_NULL,
                                          null=True)
     inference_mode = models.CharField(max_length=40,
                                       choices=INFERENCE_MODE_CHOICES,
