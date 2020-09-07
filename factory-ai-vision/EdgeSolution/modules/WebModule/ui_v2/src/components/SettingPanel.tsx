@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import * as R from 'ramda';
 import {
   Panel,
   PanelType,
@@ -18,6 +19,7 @@ import {
   Label,
   Dialog,
   DialogFooter,
+  Text,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -32,6 +34,7 @@ import {
 } from '../store/setting/settingAction';
 import { updateOriginProjectData } from '../store/project/projectActions';
 import { clearParts } from '../store/partSlice';
+import { WarningDialog } from './WarningDialog';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -65,7 +68,9 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
   const projectData = useSelector((state: State) => {
     return state.project.data;
   });
+  const originSettingData = useSelector((state: State) => state.setting.origin);
   const [loading, setloading] = useState(false);
+  const cannotUpdateOrSave = R.equals(settingData, originSettingData);
 
   const dispatch = useDispatch();
 
@@ -150,7 +155,16 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
               }}
             />
             <Stack.Item>
-              <PrimaryButton onClick={onSave} text="Save" />
+              <WarningDialog
+                contentText={
+                  <Text variant="large">
+                    Update Key / Namespace will remove all the parts, sure you want to update?
+                  </Text>
+                }
+                confirmButton="Yes"
+                onConfirm={onSave}
+                trigger={<PrimaryButton text="Save" disabled={cannotUpdateOrSave} />}
+              />
             </Stack.Item>
             <Dropdown
               className={textFieldClass}
