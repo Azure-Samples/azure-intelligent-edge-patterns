@@ -12,7 +12,6 @@ import {
   Stack,
   Dropdown,
   IDropdownOption,
-  DefaultButton,
   Spinner,
   ITextFieldProps,
   IconButton,
@@ -20,6 +19,7 @@ import {
   Dialog,
   DialogFooter,
   Text,
+  Checkbox,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -35,6 +35,7 @@ import {
 import { updateOriginProjectData } from '../store/project/projectActions';
 import { clearParts } from '../store/partSlice';
 import { WarningDialog } from './WarningDialog';
+import { getTrainingProject, selectAllTrainingProjects } from '../store/trainingProjectSlice';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -71,6 +72,9 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
   const originSettingData = useSelector((state: State) => state.setting.origin);
   const [loading, setloading] = useState(false);
   const cannotUpdateOrSave = R.equals(settingData, originSettingData);
+  const [loadFullImages, setLoadFullImages] = useState(false);
+  const [loadImgWarning, setloadImgWarning] = useState(false);
+  const traininProject = useSelector((state: State) => selectAllTrainingProjects(state)[0]);
 
   const dispatch = useDispatch();
 
@@ -87,11 +91,11 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
     setselectedCustomvisionId(option.key);
   };
 
-  const onLoad = (loadFullImages): void => {
+  const onLoad = (): void => {
     setloading(true);
     Axios.get(
       `/api/projects/${
-        projectData.trainingProject
+        traininProject.id
       }/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(!loadFullImages)}`,
     )
       .then(() => {
@@ -104,8 +108,14 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
       .finally(() => setloading(false));
   };
 
+  const onLoadFullImgChange = (_, checked: boolean) => {
+    if (checked) setloadImgWarning(true);
+    else setLoadFullImages(checked);
+  };
+
   useEffect(() => {
     dispatch(checkSettingStatus());
+    dispatch(getTrainingProject({ isDemo: false }));
   }, [dispatch]);
 
   useEffect(() => {
@@ -166,19 +176,44 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
                 trigger={<PrimaryButton text="Save" disabled={cannotUpdateOrSave} />}
               />
             </Stack.Item>
-            <Dropdown
-              className={textFieldClass}
-              label="Project"
-              required
-              options={cvProjectOptions}
-              onChange={onDropdownChange}
-              selectedKey={selectedCustomvisionId}
-            />
-            <Stack horizontal tokens={{ childrenGap: 10 }}>
-              <DefaultButton text="Load" onClick={() => onLoad(true)} />
-              <DefaultButton text="Load Partial" onClick={() => onLoad(false)} />
-              {loading && <Spinner />}
-            </Stack>
+            {isTrainerValid && (
+              <>
+                <Dropdown
+                  className={textFieldClass}
+                  label="Project"
+                  required
+                  options={cvProjectOptions}
+                  onChange={onDropdownChange}
+                  selectedKey={selectedCustomvisionId}
+                />
+                <Checkbox checked={loadFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
+                <WarningDialog
+                  open={loadImgWarning}
+                  contentText={
+                    <Text variant="large">
+                      Depends on the number of images, loading full images takes time
+                    </Text>
+                  }
+                  onConfirm={() => {
+                    setLoadFullImages(true);
+                    setloadImgWarning(false);
+                  }}
+                  onCancel={() => setloadImgWarning(false)}
+                />
+                <Stack horizontal tokens={{ childrenGap: 10 }}>
+                  <WarningDialog
+                    contentText={
+                      <Text variant="large">
+                        Load Project will remove all the parts, sure you want to do that?
+                      </Text>
+                    }
+                    trigger={<PrimaryButton text="Load" />}
+                    onConfirm={onLoad}
+                  />
+                  {loading && <Spinner label="loading" />}
+                </Stack>
+              </>
+            )}
             <Toggle label="Allow sending usage data" styles={{ root: { paddingTop: 50 } }} />
           </Stack>
         </Panel>

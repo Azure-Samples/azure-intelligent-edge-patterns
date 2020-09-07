@@ -88,7 +88,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   useEffect(() => {
     dispatch(getParts(false));
     dispatch(getCameras(false));
-    dispatch(getTrainingProject());
+    dispatch(getTrainingProject({}));
   }, [dispatch]);
 
   const onStart = async () => {

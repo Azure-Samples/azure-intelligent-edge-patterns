@@ -4,7 +4,7 @@ import { InfoIcon } from '@fluentui/react-icons';
 
 type WarningDialogProps = {
   contentText: JSX.Element;
-  trigger: JSX.Element;
+  trigger?: JSX.Element;
   open?: boolean;
   confirmButton?: string;
   cancelButton?: string;

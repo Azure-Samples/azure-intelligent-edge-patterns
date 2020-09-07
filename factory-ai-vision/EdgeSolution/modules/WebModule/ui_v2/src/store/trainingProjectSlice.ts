@@ -8,10 +8,11 @@ type TrainingProject = {
   customVisionId: string;
 };
 
-export const getTrainingProject = createAsyncThunk<any, undefined, { state: State }>(
+export const getTrainingProject = createAsyncThunk<any, { isDemo?: boolean }, { state: State }>(
   'trainingSlice/get',
-  async () => {
-    const response = await Axios.get(`/api/projects/`);
+  async ({ isDemo }) => {
+    const url = isDemo === undefined ? `/api/projects/` : `/api/projects?is_demo=${Number(isDemo)}`;
+    const response = await Axios.get(url);
     return response.data.map((e) => ({
       id: e.id,
       name: e.name,
