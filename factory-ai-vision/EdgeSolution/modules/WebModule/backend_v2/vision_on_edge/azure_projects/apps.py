@@ -41,12 +41,21 @@ class AzureProjectsConfig(AppConfig):
                 if not default_settings.exists():
                     logger.info("Cannot find default settings....")
                     return
-                if not Project.objects.filter(is_demo=True).exists():
-                    logger.info("Creating demo project.")
-                    Project.objects.update_or_create(
-                        setting=default_settings.first(),
-                        is_demo=True,
-                    )
+                if Project.objects.filter(is_demo=True).exists():
+                    Project.objects.filter(is_demo=True).delete()
+                Project.objects.update_or_create(
+                    name="Demo Part Detection Project",
+                    setting=default_settings.first(),
+                    download_uri="default_model_6parts",
+                    is_demo=True,
+                )
+                Project.objects.update_or_create(
+                    name="Demo Part Counting Project",
+                    setting=default_settings.first(),
+                    download_uri="default_model_pc",
+                    is_demo=True,
+                )
+
                 logger.info("Create demo project end.")
 
             logger.info("Azure Training AppConfig End while running server")

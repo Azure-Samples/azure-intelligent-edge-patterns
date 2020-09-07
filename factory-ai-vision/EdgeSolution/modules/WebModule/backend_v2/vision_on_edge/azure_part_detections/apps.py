@@ -26,7 +26,7 @@ class AzurePartDetectionConfig(AppConfig):
             logger.info("Importing Signals")
             from . import signals
             from ..azure_projects.models import Project
-            from ..azure_part_detections.models import PartDetection
+            from ..azure_part_detections.models import PartDetection, PDScenario
             from ..cameras.models import Camera
             from ..inference_modules.models import InferenceModule
             # pylint: enable=unused-import, import-outside-toplevel
@@ -36,8 +36,22 @@ class AzurePartDetectionConfig(AppConfig):
                 inference_obj = InferenceModule.objects.first()
             else:
                 project_obj = inference_obj = None
-            if not PartDetection.objects.all().exists():
-                PartDetection.objects.create(
-                    project=project_obj,
-                    inference_module=inference_obj,
-                )
+            PDScenario.objects.all().delete()
+            pd_scenario = PDScenario.objects.create(
+                name="Simple Part Detection",
+                inference_mode="PD",
+                project=Project.objects.get(
+                    name="Demo Part Detection Project"))
+            pd_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True,
+                    name="Demo Part Detection Project").part_set.all())
+            pc_scenario = PDScenario.objects.create(
+                name="Simple Part Counting",
+                inference_mode="PC",
+                project=Project.objects.get(name="Demo Part Counting Project"),
+            )
+            pc_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True,
+                    name="Demo Part Counting Project").part_set.all())
