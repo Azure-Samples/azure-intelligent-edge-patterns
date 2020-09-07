@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Test App utilites.
+"""App utility tests.
 """
 
 from unittest import mock

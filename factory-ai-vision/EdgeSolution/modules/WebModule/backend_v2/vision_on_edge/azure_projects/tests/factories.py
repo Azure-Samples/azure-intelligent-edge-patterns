@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Model Factories
+"""App model factories.
 """
 
 import factory
@@ -14,8 +14,8 @@ class ProjectFactory(DjangoModelFactory):
     """
 
     setting = factory.SubFactory(SettingFactory)
-    customvision_project_name = Faker("sentence")
+    name = Faker("sentence")
 
     class Meta:
         model = Project
-        django_get_or_create = ["customvision_project_name"]
+        django_get_or_create = ["name"]

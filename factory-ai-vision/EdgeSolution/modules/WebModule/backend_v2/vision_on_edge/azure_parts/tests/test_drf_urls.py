@@ -1,4 +1,5 @@
-"""DRF url tests
+# -*- coding: utf-8 -*-
+"""App drf url tests.
 """
 
 import pytest

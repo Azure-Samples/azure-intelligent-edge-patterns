@@ -19,7 +19,7 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ...exceptions.api_exceptions import CustomVisionAccessFailed
+from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..models import Project, Task
 from ..utils import (pull_cv_project_helper, train_project_helper,
                      update_train_status_helper)
@@ -172,7 +172,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             # Let Signals to handle if we need to delete Part/Image
             return Response({"status": "ok"})
         except CustomVisionErrorException:
-            raise CustomVisionAccessFailed
+            raise SettingCustomVisionAccessFailed
 
     @swagger_auto_schema(
         operation_summary='Pull a Custom Vision project',

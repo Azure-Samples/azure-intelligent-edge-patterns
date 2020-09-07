@@ -38,12 +38,12 @@ def test_get_filter():
         notification (Notification): notification
         rf (APIRequestFactory): rf
     """
-    rf = APIRequestFactory()
+    factory = APIRequestFactory()
     real_project = Project.objects.create(is_demo=False)
     demo_project = Project.objects.create(is_demo=True)
 
     project_list_view = ProjectViewSet.as_view({'get': 'list'})
-    request = rf.get("/fake-url/", {'is_demo': False})
+    request = factory.get("/fake-url/", {'is_demo': 1})
 
     response = project_list_view(request).render().content.decode('utf-8')
 
