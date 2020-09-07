@@ -13,6 +13,11 @@ import {
   IDropdownOption,
   DefaultButton,
   Spinner,
+  ITextFieldProps,
+  IconButton,
+  Label,
+  Dialog,
+  DialogFooter,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -133,6 +138,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
               onChange={(_, value): void => {
                 dispatch(updateNamespace(value));
               }}
+              onRenderLabel={(props) => <CustomLabel {...props} />}
             />
             <TextField
               className={textFieldClass}
@@ -163,6 +169,44 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
           </Stack>
         </Panel>
       </Customizer>
+    </>
+  );
+};
+
+export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
+  const [isModalOpen, setisModalOpen] = useState(false);
+
+  return (
+    <>
+      <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
+        <Label required={props.required}>{props.label}</Label>
+        <IconButton iconProps={{ iconName: 'Info' }} onClick={() => setisModalOpen(true)} />
+      </Stack>
+      <Dialog
+        title="Get Endpoint and Key"
+        isOpen={isModalOpen}
+        modalProps={{ layerProps: { hostId: null } }}
+        maxWidth={800}
+      >
+        <Stack>
+          <p>
+            Step 1: Login Custom vision,{' '}
+            <a href="https://www.customvision.ai/" target="_blank" rel="noopener noreferrer">
+              https://www.customvision.ai/
+            </a>
+          </p>
+          <p>Step 2: Click on the setting icon on the top</p>
+          <img src="/icons/guide_step_2.png" style={{ width: '100%' }} />
+          <p>
+            Step 3: Choose the resources under the account, you will see information of &quot;Key&quot; and
+            &quot;Endpoint&quot;
+          </p>
+          <img src="/icons/guide_step_3.png" style={{ width: '100%' }} />
+        </Stack>
+        <DialogFooter>
+          <PrimaryButton text="Close" onClick={() => setisModalOpen(false)} />
+        </DialogFooter>
+      </Dialog>
     </>
   );
 };
