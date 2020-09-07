@@ -6,6 +6,7 @@ import logging
 
 from azure.cognitiveservices.vision.customvision.training import \
     CustomVisionTrainingClient
+from azure.cognitiveservices.vision.customvision.training.models import Project
 # pylint: disable=line-too-long
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
@@ -14,7 +15,7 @@ from django.db.models.signals import pre_save
 # pylint: enable=line-too-long
 from msrest.exceptions import ClientRequestError as MSClientRequestError
 
-from .exceptions import SettingCustomVisionAccessFailed
+from .exceptions import SettingCustomVisionAccessFailed, SettingCustomVisionCannotCreateProject
 
 logger = logging.getLogger(__name__)
 
@@ -46,21 +47,28 @@ class Setting(models.Model):
     class Meta:
         unique_together = ("endpoint", "training_key")
 
-    @staticmethod
-    def _get_trainer_obj_static(endpoint: str, training_key: str
-                               ) -> CustomVisionTrainingClient:
-        """_get_trainer_obj_static.
+    def validate(self) -> bool:
+        """validate.
 
         Args:
-            endpoint (str): endpoint
-            training_key (str): training_key
 
         Returns:
-            CustomVisionTrainingClient:
+            bool:
         """
-        trainer = CustomVisionTrainingClient(api_key=training_key,
-                                             endpoint=endpoint)
-        return trainer
+        logger.info("Validating %s", self.name)
+        is_trainer_valid = False
+        if not self.training_key or not self.endpoint:
+            return is_trainer_valid
+        trainer = CustomVisionTrainingClient(self.training_key, self.endpoint)
+        try:
+            trainer.get_domains()
+            logger.info("Validate success.")
+            is_trainer_valid = True
+        except CustomVisionErrorException:
+            logger.exception("Validate occur CustomVisionError.")
+        except MSClientRequestError:
+            logger.exception("Validate occur MSClientRequestError.")
+        return is_trainer_valid
 
     def get_trainer_obj(self) -> CustomVisionTrainingClient:
         """get_trainer_obj.
@@ -68,49 +76,30 @@ class Setting(models.Model):
         Returns:
             CustomVisionTrainingClient:
         """
-        return Setting._get_trainer_obj_static(endpoint=self.endpoint,
-                                               training_key=self.training_key)
+        return CustomVisionTrainingClient(
+            api_key=self.training_key,
+            endpoint=self.endpoint,
+        )
 
-    @staticmethod
-    def _validate_static(endpoint: str, training_key: str):
-        """Validate an endpoint, training_key pair.
-
-        Args:
-            endpoint (str)
-            training_key (str)
-
-        Returns:
-            (is_trainer_valid, trainer)
-        """
-        logger.info("Validatiing %s %s", endpoint, training_key)
-        trainer = Setting._get_trainer_obj_static(endpoint=endpoint,
-                                                  training_key=training_key)
-        is_trainer_valid = False
-        try:
-            trainer.get_domains()
-            is_trainer_valid = True
-        except CustomVisionErrorException:
-            trainer = None
-        except MSClientRequestError:
-            trainer = None
-        except Exception:
-            trainer = None
-        return is_trainer_valid, trainer
-
-    def revalidate_and_get_trainer_obj(self):
-        """Revalidate training_key, endpoint. Update all the relevent fields.
+    def get_domain_id(self,
+                      domain_type: str = "ObjectDetection",
+                      domain_name: str = "General (compact)") -> str:
+        """get_domain_id.
 
         Args:
-            self: Setting instance
+            domain_type (str): domain_type
+            domain_name (str): domain_name
 
         Returns:
-            CustomVisionTrainingClient or None
+            str: domain_id or ""
         """
-        is_trainer_valid, trainer = Setting._validate_static(
-            self.endpoint, self.training_key)
-        if is_trainer_valid:
-            return trainer
-        return None
+        if self.validate():
+            trainer = self.get_trainer_obj()
+            domain = next(
+                domain for domain in trainer.get_domains()
+                if domain.type == domain_type and domain.name == domain_name)
+            return domain.id
+        return ""
 
     @staticmethod
     def pre_save(**kwargs):
@@ -118,42 +107,15 @@ class Setting(models.Model):
 
         Validate training_key + endpoint. Update related
         fields.
-
-        Args:
-            kwargs:
         """
-
-        logger.info("Setting Presave")
-        if 'instance' not in kwargs:
-            return
+        logger.info("Setting pre_save")
         instance = kwargs['instance']
-        try:
-            logger.info("Validating CustomVisionClient %s", instance.name)
-            trainer = Setting._get_trainer_obj_static(
-                training_key=instance.training_key, endpoint=instance.endpoint)
-            obj_detection_domain = next(
-                domain for domain in trainer.get_domains()
-                if domain.type == "ObjectDetection" and
-                domain.name == "General (compact)")
+        instance.is_trainer_valid = instance.validate()
+        instance.obj_detection_domain_id = instance.get_domain_id(
+        ) if instance.is_trainer_valid else ""
 
-            logger.info("Setting %s is valid", instance.name)
-            instance.is_trainer_valid = True
-            instance.obj_detection_domain_id = obj_detection_domain.id
-            return
-        except CustomVisionErrorException:
-            logger.info("Setting Presave occur CustomVisionError")
-        except KeyError:
-            logger.info("Setting pre_save occur KeyError")
-        except MSClientRequestError:
-            logger.info("Setting pre_save occur MSClientRequestError...")
-        except Exception:
-            logger.info("Setting pre_save occur unexpected Error...")
-        logger.info("Setting.is_trainer_valid = False")
-        logger.info("Setting.obj_detection_domain = ''")
-        instance.is_trainer_valid = False
-        instance.obj_detection_domain_id = ""
-
-    def create_project(self, project_name: str):
+    def create_project(self, project_name: str,
+                       domain_id: str = None) -> Project:
         """Create Project on Custom Vision
 
         Args:
@@ -162,36 +124,33 @@ class Setting(models.Model):
         Returns:
             project object
         """
-        trainer = self.revalidate_and_get_trainer_obj()
-        logger.info("Creating obj detection project")
-        logger.info("Trainer: %s", trainer)
-        if not trainer:
-            logger.info("Trainer is invalid thus cannot create project")
-            return None
+        if not self.validate():
+            raise SettingCustomVisionAccessFailed
+        trainer = self.get_trainer_obj()
+        domain_id = (self.obj_detection_domain_id
+                     if domain_id is None else domain_id)
+        logger.info("Creating object detection project.")
         try:
-            project = trainer.create_project(
-                name=project_name, domain_id=self.obj_detection_domain_id)
+            project = trainer.create_project(name=project_name,
+                                             domain_id=domain_id)
             return project
         except CustomVisionErrorException:
-            logger.error("Create project occur CustomVisionErrorException")
-        except MSClientRequestError:
-            logger.exception("Create project occur MSClientRequestError")
-        except Exception:
-            logger.exception("Create project occur unexpected error...")
-            raise
-        return None
+            raise SettingCustomVisionCannotCreateProject
 
     def get_projects(self):
         """get_projects.
 
         List all projects.
         """
-        if not self.is_trainer_valid:
+        if not self.validate():
             raise SettingCustomVisionAccessFailed
         return self.get_trainer_obj().get_projects()
 
     def __str__(self):
-        return self.name
+        return self.name.__str__()
+
+    def __repr__(self):
+        return self.name.__repr__()
 
 
 pre_save.connect(Setting.pre_save, Setting, dispatch_uid="Setting_pre")
