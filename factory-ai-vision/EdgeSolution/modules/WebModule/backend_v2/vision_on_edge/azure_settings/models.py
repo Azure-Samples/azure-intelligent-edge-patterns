@@ -68,6 +68,8 @@ class Setting(models.Model):
             logger.exception("Validate occur CustomVisionError.")
         except MSClientRequestError:
             logger.exception("Validate occur MSClientRequestError.")
+        except Exception:
+            logger.exception("Unknown error")
         return is_trainer_valid
 
     def get_trainer_obj(self) -> CustomVisionTrainingClient:
