@@ -52,3 +52,11 @@ class UploadRelabelSerializer(serializers.Serializer):
     img = Base64ImageField(required=True)
     confidence = serializers.FloatField()
     is_relabel = serializers.BooleanField()
+
+class UpdateCamBodySerializer(serializers.Serializer):
+    """UploadRelabelSerializer.
+    """
+    class CameraItem(serializers.Serializer):
+        camera_id = serializers.CharField()
+        rtsp = serializers.CharField()
+    cameras = CameraItem(many=True)

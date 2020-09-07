@@ -55,14 +55,15 @@ def if_trained_then_deploy_worker(part_detection_id):
                         "part_detection_id": part_detection_obj.id,
                     },
                 )
-                requests.get(
-                    "http://" + str(part_detection_obj.inference_module.url) +
-                    "/update_cam",
-                    params={
-                        "cam_type": "rtsp",
-                        "cam_source": normalize_rtsp(rtsp)
-                    },
-                )
+                # TODO: Fix when multi camers
+                # requests.get(
+                    # "http://" + str(part_detection_obj.inference_module.url) +
+                    # "/update_cam",
+                    # params={
+                        # "cam_type": "rtsp",
+                        # "cam_source": normalize_rtsp(rtsp)
+                    # },
+                # )
                 requests.get(
                     "http://" + str(part_detection_obj.inference_module.url) +
                     "/update_model",
@@ -75,7 +76,7 @@ def if_trained_then_deploy_worker(part_detection_id):
                 )
 
             threading.Thread(target=_send,
-                             args=(model_uri, part_detection_obj.camera.rtsp,
+                             args=(model_uri, part_detection_obj.cameras,
                                    parts)).start()
 
             part_detection_obj.deployed = True

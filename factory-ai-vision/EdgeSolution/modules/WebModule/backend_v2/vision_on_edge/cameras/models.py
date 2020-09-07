@@ -76,26 +76,4 @@ class Camera(models.Model):
         if not rtsp_ok:
             raise ValueError('rtsp is not valid')
 
-    @staticmethod
-    def post_save(**kwargs):
-        """post_save.
-        """
-        # TODO: Move this to part_detection
-        instance = kwargs['instance']
-        if len(instance.area) > 1:
-            logger.info("Sending new AOI to Inference Module...")
-            try:
-                requests.get(
-                    url="http://" + inference_module_url() + "/update_cam",
-                    params={
-                        "cam_type": "rtsp",
-                        "cam_source": normalize_rtsp(instance.rtsp),
-                        "aoi": instance.area,
-                    },
-                )
-            except:
-                logger.error("Request failed")
-
-
 pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")
-post_save.connect(Camera.post_save, Camera, dispatch_uid="Camera_post")
