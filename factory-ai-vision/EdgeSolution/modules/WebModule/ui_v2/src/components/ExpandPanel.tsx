@@ -3,9 +3,18 @@ import { ActionButton, getTheme, Separator } from '@fluentui/react';
 
 const { palette } = getTheme();
 
-export const ExpandPanel: React.FC<{ titleHidden: string; titleVisible: string }> = ({
+type ExpandPanelProps = {
+  titleHidden: string;
+  titleVisible?: string;
+  iconPosition?: 'start' | 'end';
+  bottomBorder?: boolean;
+};
+
+export const ExpandPanel: React.FC<ExpandPanelProps> = ({
   titleHidden,
-  titleVisible,
+  titleVisible = titleHidden,
+  iconPosition = 'start',
+  bottomBorder = false,
   children,
 }) => {
   const [showChildren, setShowChildren] = useState(false);
@@ -22,7 +31,7 @@ export const ExpandPanel: React.FC<{ titleHidden: string; titleVisible: string }
             color: palette.black,
           },
           flexContainer: {
-            flexDirection: 'row-reverse',
+            flexDirection: iconPosition === 'end' ? 'row-reverse' : 'row',
           },
           iconHovered: {
             color: palette.black,
@@ -40,17 +49,19 @@ export const ExpandPanel: React.FC<{ titleHidden: string; titleVisible: string }
         onClick={toggleShowChildren}
         checked={showChildren}
       />
-      <Separator
-        styles={{
-          root: {
-            selectors: {
-              '::before': {
-                background: palette.neutralQuaternary,
+      {bottomBorder && (
+        <Separator
+          styles={{
+            root: {
+              selectors: {
+                '::before': {
+                  background: palette.neutralQuaternary,
+                },
               },
             },
-          },
-        }}
-      />
+          }}
+        />
+      )}
     </div>
   );
 };

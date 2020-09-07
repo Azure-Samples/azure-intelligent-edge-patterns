@@ -157,7 +157,12 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           }}
         />
       </Stack>
-      <ExpandPanel titleHidden="Advanced options" titleVisible="Fewer options">
+      <ExpandPanel
+        titleHidden="Advanced options"
+        titleVisible="Fewer options"
+        iconPosition="end"
+        bottomBorder
+      >
         <Stack horizontal tokens={{ childrenGap: 50 }} styles={{ root: { paddingTop: '30px' } }}>
           <Stack.Item>
             <div className={classNames.textWrapper}>
