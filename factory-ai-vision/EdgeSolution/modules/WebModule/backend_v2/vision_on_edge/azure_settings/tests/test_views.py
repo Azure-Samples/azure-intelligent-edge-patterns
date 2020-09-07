@@ -57,8 +57,8 @@ def test_empty_setting_list_project_1(setting: Setting):
     try:
         response = SettingViewSet().list_projects(request, pk=setting.id)
         assert False
-    except Exception as exc:
+    except Exception as error:
         exception_handler = SettingViewSet().get_exception_handler()
-        response = exception_handler(exc=exc, context=None)
+        response = exception_handler(exc=error, context=None)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert MSStyleErrorResponseSerializer(data=response.data).is_valid()
