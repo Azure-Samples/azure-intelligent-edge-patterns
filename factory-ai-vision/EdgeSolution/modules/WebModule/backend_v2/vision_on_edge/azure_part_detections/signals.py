@@ -51,6 +51,6 @@ def azure_part_detection_camera_rtsp_change(**kwargs):
         kwargs:
     """
     instance = kwargs["instance"]
-    part_detection_objs = PartDetection.objects.filter(cameras=instance)
-    for part_detection_obj in part_detection_objs:
-        part_detection_objs.update_cam()
+    # part_detection_objs = PartDetection.objects.filter(cameras=instance)
+    # for part_detection_obj in part_detection_objs:
+        # part_detection_objs.update_cam()
