@@ -5,6 +5,7 @@
 import logging
 import threading
 import time
+import json
 
 import requests
 
@@ -138,7 +139,7 @@ def update_cam_worker(part_detection_id):
     serializer.is_valid(raise_exception=True)
     requests.post(
         url="http://" + inference_module_url + "/update_cam",
-        data=serializer.validated_data,
+        json=json.loads(json.dumps(serializer.validated_data)),
     )
 
 

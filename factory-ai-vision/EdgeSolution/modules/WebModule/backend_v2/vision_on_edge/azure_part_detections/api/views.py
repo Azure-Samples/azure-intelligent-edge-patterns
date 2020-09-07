@@ -278,7 +278,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(operation_summary='test api to update cam',
-                         responses=SimpleStatusSerializer)
+                         responses={200: SimpleStatusSerializer})
     @action(detail=True, methods=["get"])
     def update_cam(self, request, pk=None) -> Response:
         queryset = self.get_queryset()
