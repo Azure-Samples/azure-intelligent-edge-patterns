@@ -46,6 +46,7 @@ const initialState: Project = {
     framesPerMin: 6,
     accuracyThreshold: 50,
     probThreshold: '10',
+    name: '',
   },
   originData: {
     id: null,
@@ -62,6 +63,7 @@ const initialState: Project = {
     framesPerMin: 6,
     accuracyThreshold: 50,
     probThreshold: '10',
+    name: '',
   },
   trainingMetrics: {
     prevConsequence: null,
@@ -128,6 +130,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
           framesPerMin: 6,
           accuracyThreshold: 50,
           probThreshold: '10',
+          name: '',
         },
         originData: {
           id: null,
@@ -144,6 +147,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
           framesPerMin: 6,
           accuracyThreshold: 50,
           probThreshold: '10',
+          name: '',
         },
         inferenceMetrics: {
           successRate: 0,

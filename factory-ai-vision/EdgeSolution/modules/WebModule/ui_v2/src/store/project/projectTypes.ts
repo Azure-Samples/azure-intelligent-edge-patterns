@@ -68,6 +68,7 @@ export type ProjectData = {
   modelUrl: string;
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
+  name: string;
 };
 
 // Describing the different ACTION NAMES available

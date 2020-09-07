@@ -120,6 +120,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     framesPerMin: data?.metrics_frame_per_minutes,
     accuracyThreshold: data?.metrics_accuracy_threshold,
     probThreshold: data?.prob_threshold.toString() ?? '10',
+    name: data?.name ?? '',
   },
   isDemo,
 });
@@ -250,6 +251,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
         trainingProject: data[0]?.project ?? null,
+        name: data[0]?.name ?? '',
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
       return void 0;
@@ -278,6 +280,7 @@ export const thunkPostProject = (projectData: ProjectData): ProjectThunk => (dis
       metrics_is_send_iothub: projectData.sendMessageToCloud,
       metrics_frame_per_minutes: projectData.framesPerMin,
       metrics_accuracy_threshold: projectData.accuracyThreshold,
+      name: projectData.name,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

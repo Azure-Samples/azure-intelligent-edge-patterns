@@ -121,6 +121,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       styles={panelStyles}
     >
       <Stack tokens={{ childrenGap: 10 }} styles={{ root: { width: '300px' } }}>
+        <TextField required value={projectData.name} onChange={(_, newValue) => onChange('name', newValue)} />
         <Dropdown
           label="Model"
           options={trainingProjectOptions}

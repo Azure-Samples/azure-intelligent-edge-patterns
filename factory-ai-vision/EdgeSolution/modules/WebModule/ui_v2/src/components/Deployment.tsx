@@ -51,6 +51,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     accuracyRangeMin,
     accuracyRangeMax,
     maxImages,
+    name,
   } = projectData;
   const cameraName = useSelector((state: State) => selectCameraById(state, projectCameraId)?.name);
   const trainingProjectName = useSelector(
@@ -143,11 +144,11 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
               <LiveViewContainer showVideo={true} cameraId={projectData.camera} onDeleteProject={() => {}} />
             </Stack>
             <Stack tokens={{ childrenGap: 10 }} styles={{ root: { height: '100px' } }}>
-              <Text variant="xLarge">{/* TODO */}</Text>
+              <Text variant="xLarge">{name}</Text>
               <Text styles={{ root: { color: palette.neutralSecondary } }}>
                 Started running <b>{/* TODO */} ago</b>
               </Text>
-              <CommandBar items={commandBarItems} />
+              <CommandBar items={commandBarItems} styles={{ root: { padding: 0 } }} />
             </Stack>
           </Stack>
           <Separator styles={{ root: { padding: 0 } }} />
