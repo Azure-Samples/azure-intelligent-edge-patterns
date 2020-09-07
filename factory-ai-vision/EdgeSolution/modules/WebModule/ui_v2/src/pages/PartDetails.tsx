@@ -11,6 +11,8 @@ import {
   IStackTokens,
   ITextStyles,
   Spinner,
+  Pivot,
+  PivotItem,
   MessageBar,
   MessageBarButton,
   ActionButton,
@@ -26,7 +28,11 @@ import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
 import { selectLocationById } from '../store/locationSlice';
 import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
 import { captureImage } from '../store/imageSlice';
-import { Images } from '../pages/Images';
+import { EmptyAddIcon } from '../components/EmptyAddIcon';
+import { CaptureDialog } from '../components/CaptureDialog';
+import { postImages, getImages } from '../store/imageSlice';
+import { ImageList, Item as ImageListItem } from '../components/ImageList';
+import { selectImageItemByTaggedPart } from '../store/selectors';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
@@ -43,6 +49,8 @@ export const PartDetails: React.FC = () => {
   const [editPanelOpen, setEditPanelOpen] = useState(false);
   const openPanel = () => setEditPanelOpen(true);
   const closePanel = () => setEditPanelOpen(false);
+
+  const labeledImages = useSelector(selectImageItemByTaggedPart(partId));
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
@@ -88,8 +96,7 @@ export const PartDetails: React.FC = () => {
     { key: part.name, text: part.name },
   ];
 
-  // FIXME andrew help!
-  const numImages = 1;
+  const numImages = labeledImages.length;
 
   return (
     <>
@@ -104,7 +111,7 @@ export const PartDetails: React.FC = () => {
             <PartInfo description={part.description} numImages={numImages} />
           </Stack>
         </Stack>
-        <Images></Images>
+        <Images labeledImages={labeledImages}></Images>
         <AddEditPartPanel
           isOpen={editPanelOpen}
           onDissmiss={closePanel}
@@ -136,3 +143,88 @@ const PartInfo: React.FC<{ description: string; numImages: number }> = ({ descri
     </Stack>
   </Stack>
 );
+
+export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
+  const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
+  const openCaptureDialog = () => setCaptureDialogOpen(true);
+  const closeCaptureDialog = () => setCaptureDialogOpen(false);
+  const fileInputRef = useRef(null);
+  const dispatch = useDispatch();
+  //const labeledImages = useSelector(selectImageItemByUntagged(false));
+  //const unlabeledImages = useSelector(selectImageItemByUntagged(true));
+  const partId = parseInt(useQuery().get('partId'), 10);
+  //const labeledImages = useSelector(selectImageItemByTaggedPart(partId));
+
+  const onUpload = () => {
+    fileInputRef.current.click();
+  };
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>): void {
+    for (let i = 0; i < e.target.files.length; i++) {
+      const formData = new FormData();
+      formData.append('image', e.target.files[i]);
+      dispatch(postImages(formData));
+    }
+  }
+
+  const commandBarItems: ICommandBarItemProps[] = useMemo(
+    () => [
+      {
+        key: 'uploadImages',
+        text: 'Upload images',
+        iconProps: {
+          iconName: 'Upload',
+        },
+        onClick: onUpload,
+      },
+      {
+        key: 'captureFromCamera',
+        text: 'Capture from camera',
+        iconProps: {
+          iconName: 'Camera',
+        },
+        onClick: openCaptureDialog,
+      },
+    ],
+    [],
+  );
+
+  useEffect(() => {
+    dispatch(getImages());
+    // For image list items
+    dispatch(getParts(false));
+  }, [dispatch]);
+
+  return (
+    <>
+      <Stack styles={{ root: { height: '100%' } }}>
+        <CommandBar
+          items={commandBarItems}
+          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+        />
+        <Stack styles={{ root: { padding: '15px' } }} grow>
+          {labeledImages.length ? (
+            <ImageList images={labeledImages} />
+          ) : (
+            <EmptyAddIcon
+              title="Add images"
+              subTitle="Capture images from your video streams and tag parts"
+              primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
+              secondary={{ text: 'Upload images', onClick: onUpload }}
+            />
+          )}
+        </Stack>
+      </Stack>
+      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} />
+      <LabelingPage mode={LabelPageMode.MultiPage} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleUpload}
+        accept="image/*"
+        multiple
+        style={{ display: 'none' }}
+      />
+    </>
+  );
+};

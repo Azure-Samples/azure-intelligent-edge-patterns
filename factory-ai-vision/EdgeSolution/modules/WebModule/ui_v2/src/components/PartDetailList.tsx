@@ -37,16 +37,7 @@ export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddB
         />
       ) : (
         <DetailsList
-          columns={[
-            { key: 'name', minWidth: 0, name: 'Part name *', fieldName: 'name' },
-            {
-              key: 'description',
-              minWidth: 200,
-              maxWidth: 200,
-              name: 'Description',
-              fieldName: 'description',
-            },
-          ]}
+          columns={[{ key: 'name', minWidth: 0, name: 'Name', fieldName: 'name' }]}
           items={parts}
           checkboxVisibility={CheckboxVisibility.hidden}
           onActiveItemChanged={onRowClick}
