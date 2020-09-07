@@ -36,6 +36,7 @@ import { updateOriginProjectData } from '../store/project/projectActions';
 import { clearParts } from '../store/partSlice';
 import { WarningDialog } from './WarningDialog';
 import { getTrainingProject, selectAllTrainingProjects } from '../store/trainingProjectSlice';
+import { getAppInsights } from '../TelemetryService';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -75,6 +76,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
   const [loadFullImages, setLoadFullImages] = useState(false);
   const [loadImgWarning, setloadImgWarning] = useState(false);
   const traininProject = useSelector((state: State) => selectAllTrainingProjects(state)[0]);
+  const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
 
   const dispatch = useDispatch();
 
@@ -111,6 +113,24 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
   const onLoadFullImgChange = (_, checked: boolean) => {
     if (checked) setloadImgWarning(true);
     else setLoadFullImages(checked);
+  };
+
+  const updateIsCollectData = (isCollectData, hasInit?): void => {
+    Axios.patch(`/api/settings/${settingData.id}`, {
+      is_collect_data: isCollectData,
+      ...(hasInit && { app_insight_has_init: hasInit }),
+    })
+      .then(() => {
+        const appInsight = getAppInsights();
+        if (!appInsight) throw Error('App Insight hasnot been initialize');
+        appInsight.config.disableTelemetry = !isCollectData;
+        // FIXME
+        window.location.reload();
+        return void 0;
+      })
+      .catch((err) => {
+        alert(err);
+      });
   };
 
   useEffect(() => {
@@ -214,7 +234,35 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
                 </Stack>
               </>
             )}
-            <Toggle label="Allow sending usage data" styles={{ root: { paddingTop: 50 } }} />
+            <Toggle
+              label="Allow sending usage data"
+              styles={{ root: { paddingTop: 50 } }}
+              checked={isCollectingData}
+              onChange={(_, checked) => updateIsCollectData(checked, true)}
+            />
+            <WarningDialog
+              contentText={
+                <>
+                  <h1 style={{ textAlign: 'center' }}>Data Collection Policy</h1>
+                  <p>
+                    The software may collect information about your use of the software and send it to
+                    Microsoft. Microsoft may use this information to provide services and improve our products
+                    and services. You may turn off the telemetry as described in the repository or clicking
+                    settings on top right corner. Our privacy statement is located at{' '}
+                    <a href="https://go.microsoft.com/fwlink/?LinkID=824704">
+                      https://go.microsoft.com/fwlink/?LinkID=824704
+                    </a>
+                    . You can learn more about data collection and use in the help documentation and our
+                    privacy statement. Your use of the software operates as your consent to these practices.
+                  </p>
+                </>
+              }
+              open={!appInsightHasInit}
+              confirmButton="I agree"
+              cancelButton="I don't agree"
+              onConfirm={(): void => updateIsCollectData(true, true)}
+              onCancel={(): void => updateIsCollectData(false, true)}
+            />
           </Stack>
         </Panel>
       </Customizer>
