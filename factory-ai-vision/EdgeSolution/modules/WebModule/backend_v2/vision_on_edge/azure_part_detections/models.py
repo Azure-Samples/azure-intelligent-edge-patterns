@@ -21,10 +21,10 @@ class PartDetection(models.Model):
     """PartDetection Model
     """
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
+    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
     inference_module = models.ForeignKey(InferenceModule,
-                                         on_delete=models.CASCADE,
+                                         on_delete=models.SET_NULL,
                                          null=True)
     parts = models.ManyToManyField(Part)
     needRetraining = models.BooleanField(default=True)
