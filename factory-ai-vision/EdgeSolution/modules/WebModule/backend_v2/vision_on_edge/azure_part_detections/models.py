@@ -16,6 +16,8 @@ from ..inference_modules.models import InferenceModule
 
 logger = logging.getLogger(__name__)
 
+INFERENCE_MODE_CHOICES = [("PD", "part_detection"), ("PC", "part_counting")]
+
 
 class PartDetection(models.Model):
     """PartDetection Model
@@ -26,6 +28,9 @@ class PartDetection(models.Model):
     inference_module = models.ForeignKey(InferenceModule,
                                          on_delete=models.SET_NULL,
                                          null=True)
+    inference_mode = models.CharField(max_length=40,
+                                      choices=INFERENCE_MODE_CHOICES,
+                                      default="PD")
     parts = models.ManyToManyField(Part)
     needRetraining = models.BooleanField(default=True)
     deployed = models.BooleanField(default=False)
