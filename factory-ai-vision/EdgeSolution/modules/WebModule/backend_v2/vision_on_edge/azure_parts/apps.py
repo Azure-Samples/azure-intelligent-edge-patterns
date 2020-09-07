@@ -35,10 +35,11 @@ class AzurePartsConfig(AppConfig):
                 logger.info("Creating demo parts...")
 
                 # TODO: change this if multi demo projects
-                if Project.objects.filter(is_demo=True).count() != 1:
+                if Project.objects.filter(is_demo=True, name="Demo Part Detection Project").count() != 1:
                     return
 
-                project_obj = Project.objects.get(is_demo=True)
+                project_obj = Project.objects.get(
+                    is_demo=True, name="Demo Part Detection Project")
                 # for partname in ['Box', 'Barrel', 'Hammer',
                 #   'Screwdriver', 'Bottle', 'Plastic bag']:
                 for partname in [

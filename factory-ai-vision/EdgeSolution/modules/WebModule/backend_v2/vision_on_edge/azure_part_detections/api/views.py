@@ -4,7 +4,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import io
 import logging
 
 import requests
@@ -24,10 +23,10 @@ from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import SimpleStatusSerializer
 from ...images.models import Image
-from ..models import PartDetection
+from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
-                          UploadRelabelSerializer)
+                          UploadRelabelSerializer, PDScenarioSerializer)
 
 logger = logging.getLogger(__name__)
 
@@ -278,3 +277,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 'log': 'Already reach project maxImages limit while labeling'
             },
             status=status.HTTP_400_BAD_REQUEST)
+
+class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
+    """Project ModelViewSet
+    """
+
+    queryset = PDScenario.objects.all()
+    serializer_class = PDScenarioSerializer

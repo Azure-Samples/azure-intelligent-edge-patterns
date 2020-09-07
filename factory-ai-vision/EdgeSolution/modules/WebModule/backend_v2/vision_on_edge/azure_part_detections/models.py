@@ -118,6 +118,16 @@ class PartDetection(models.Model):
         )
         self.save(update_fields=["prob_threshold"])
 
+class PDScenario(models.Model):
+    """PartDetection Model
+    """
+    name = models.CharField(blank=True, max_length=200)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
+    inference_mode = models.CharField(max_length=40,
+                                      choices=INFERENCE_MODE_CHOICES,
+                                      default="PD")
+    parts = models.ManyToManyField(Part)
 
 post_save.connect(PartDetection.post_save,
                   PartDetection,

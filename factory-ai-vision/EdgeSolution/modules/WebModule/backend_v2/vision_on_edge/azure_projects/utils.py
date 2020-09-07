@@ -265,7 +265,6 @@ def train_project_worker(project_id):
     logger.info("Project created on CustomVision.")
     logger.info("Project Id: %s", project_obj.customvision_id)
     logger.info("Project Name: %s", project_obj.name)
-    customvision_id = project_obj.customvision_id
 
     upcreate_training_status(project_id=project_obj.id,
                              need_to_send_notification=True,
