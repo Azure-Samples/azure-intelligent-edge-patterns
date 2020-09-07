@@ -57,6 +57,10 @@ class UpdateCamBodySerializer(serializers.Serializer):
     """UploadRelabelSerializer.
     """
     class CameraItem(serializers.Serializer):
-        camera_id = serializers.CharField()
-        rtsp = serializers.CharField()
+        """CameraItem.
+        """
+        id = serializers.CharField()
+        type = serializers.CharField()
+        source = serializers.CharField()
+        aoi = serializers.CharField(required=False)
     cameras = CameraItem(many=True)

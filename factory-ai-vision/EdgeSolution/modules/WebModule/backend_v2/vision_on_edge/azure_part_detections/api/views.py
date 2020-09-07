@@ -24,11 +24,9 @@ from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import SimpleStatusSerializer
 from ...images.models import Image
 from ..models import PartDetection, PDScenario
-from ..utils import if_trained_then_deploy_helper
+from ..utils import if_trained_then_deploy_helper, update_cam_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
-                          UploadRelabelSerializer, PDScenarioSerializer,
-                          UpdateCamBodySerializer)
-
+                          UploadRelabelSerializer, PDScenarioSerializer)
 logger = logging.getLogger(__name__)
 
 
@@ -279,19 +277,14 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             },
             status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(operation_summary='test api to update cam')
+    @swagger_auto_schema(operation_summary='test api to update cam',
+                         responses=SimpleStatusSerializer)
     @action(detail=True, methods=["get"])
     def update_cam(self, request, pk=None) -> Response:
         queryset = self.get_queryset()
         instance = get_object_or_404(queryset, pk=pk)
-        cameras = instance.cameras
-        res_data = {"cameras": []}
-        
-        for cam in cameras.all():
-            res_data["cameras"].append({"camera_id": cam.id, "rtsp": cam.rtsp})
-        serializer = UpdateCamBodySerializer(data=res_data)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.validated_data)
+        update_cam_helper(part_detection_id=pk)
+        return Response({"status": "ok"})
 
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):

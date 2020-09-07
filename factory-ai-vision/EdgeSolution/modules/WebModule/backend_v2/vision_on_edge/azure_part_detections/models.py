@@ -117,6 +117,7 @@ class PartDetection(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
+    
 
 class PDScenario(models.Model):
     """PartDetection Model
