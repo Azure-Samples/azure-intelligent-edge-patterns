@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link as RRDLink } from 'react-router-dom';
 import {
   Stack,
   PrimaryButton,
@@ -8,6 +9,9 @@ import {
   Separator,
   CommandBar,
   ICommandBarItemProps,
+  Pivot,
+  PivotItem,
+  Link,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -27,11 +31,12 @@ import { selectCameraById } from '../store/cameraSlice';
 import { selectTrainingProjectById } from '../store/trainingProjectSlice';
 import { selectPartNamesById } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
+import { ExpandPanel } from './ExpandPanel';
 
 const { palette } = getTheme();
 
 export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
-  const { status, progress, trainingLog, data: projectData } = useSelector<State, Project>(
+  const { status, progress, trainingLog, data: projectData, inferenceMetrics } = useSelector<State, Project>(
     (state) => state.project,
   );
   const {
@@ -138,8 +143,10 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
               <LiveViewContainer showVideo={true} cameraId={projectData.camera} onDeleteProject={() => {}} />
             </Stack>
             <Stack tokens={{ childrenGap: 10 }} styles={{ root: { height: '100px' } }}>
-              <Text variant="xLarge">Part Identification</Text>
-              <Text>Started running 15 minutes ago</Text>
+              <Text variant="xLarge">{/* TODO */}</Text>
+              <Text styles={{ root: { color: palette.neutralSecondary } }}>
+                Started running <b>{/* TODO */} ago</b>
+              </Text>
               <CommandBar items={commandBarItems} />
             </Stack>
           </Stack>
@@ -159,7 +166,18 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
           </Stack>
         </Stack>
         <Separator vertical />
-        <Stack styles={{ root: { width: '435px' } }}>info</Stack>
+        <Stack styles={{ root: { width: '435px' } }}>
+          <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}` } }}>
+            <PivotItem headerText="Insights">
+              <Insights
+                successRate={inferenceMetrics.successRate}
+                successfulInferences={inferenceMetrics.successfulInferences}
+                unIdetifiedItems={inferenceMetrics.unIdetifiedItems}
+              />
+            </PivotItem>
+            <PivotItem headerText="Areas of interest"></PivotItem>
+          </Pivot>
+        </Stack>
       </Stack>
     );
   };
@@ -170,6 +188,54 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         {onRenderMain()}
       </Stack>
       <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closePanel} projectData={projectData} />
+    </>
+  );
+};
+
+type InsightsProps = {
+  successRate: number;
+  successfulInferences: number;
+  unIdetifiedItems: number;
+};
+
+export const Insights: React.FC<InsightsProps> = ({
+  successRate,
+  successfulInferences,
+  unIdetifiedItems,
+}) => {
+  return (
+    <>
+      <Stack
+        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
+        tokens={{ childrenGap: '8px' }}
+      >
+        <Text styles={{ root: { fontWeight: 'bold' } }}>Success rate</Text>
+        <Text styles={{ root: { fontWeight: 'bold', color: palette.greenLight } }}>{successRate}%</Text>
+      </Stack>
+      <Stack
+        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
+        tokens={{ childrenGap: '8px' }}
+      >
+        <Text styles={{ root: { fontWeight: 'bold' } }}>Successful inferences</Text>
+        <Text styles={{ root: { color: palette.neutralSecondary } }}>{successfulInferences}</Text>
+        <ExpandPanel titleHidden="Object" suffix={'' /* TODO */} />
+        <ExpandPanel titleHidden="Area of interest" suffix={'' /* TODO */} />
+      </Stack>
+      <Stack
+        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
+        tokens={{ childrenGap: '8px' }}
+      >
+        <ExpandPanel titleHidden="Unidentified images" suffix={unIdetifiedItems?.toString()}>
+          <Stack horizontal tokens={{ childrenGap: 25 }}>
+            <Text variant="mediumPlus" styles={{ root: { color: palette.neutralPrimary } }}>
+              {unIdetifiedItems} images
+            </Text>
+            <RRDLink to="/images" style={{ textDecoration: 'none' }}>
+              <Link styles={{ root: { textDecoration: 'none' } }}>View in images</Link>
+            </RRDLink>
+          </Stack>
+        </ExpandPanel>
+      </Stack>
     </>
   );
 };

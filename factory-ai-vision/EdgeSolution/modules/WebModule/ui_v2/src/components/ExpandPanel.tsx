@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActionButton, getTheme, Separator } from '@fluentui/react';
+import { ActionButton, getTheme, Separator, Stack, Text } from '@fluentui/react';
 
 const { palette } = getTheme();
 
@@ -8,6 +8,7 @@ type ExpandPanelProps = {
   titleVisible?: string;
   iconPosition?: 'start' | 'end';
   bottomBorder?: boolean;
+  suffix?: string;
 };
 
 export const ExpandPanel: React.FC<ExpandPanelProps> = ({
@@ -15,6 +16,7 @@ export const ExpandPanel: React.FC<ExpandPanelProps> = ({
   titleVisible = titleHidden,
   iconPosition = 'start',
   bottomBorder = false,
+  suffix = '',
   children,
 }) => {
   const [showChildren, setShowChildren] = useState(false);
@@ -23,32 +25,39 @@ export const ExpandPanel: React.FC<ExpandPanelProps> = ({
 
   return (
     <div>
-      {showChildren && children}
-      <ActionButton
-        iconProps={{ iconName: 'Chevrondown' }}
-        styles={{
-          rootHovered: {
-            color: palette.black,
-          },
-          flexContainer: {
-            flexDirection: iconPosition === 'end' ? 'row-reverse' : 'row',
-          },
-          iconHovered: {
-            color: palette.black,
-          },
-          icon: {
-            color: palette.black,
-            transitionDuration: '0.3s',
-          },
-          iconChecked: {
-            transform: 'rotate(180deg)',
-            transitionDuration: '0.3s',
-          },
-        }}
-        text={showChildren ? titleVisible : titleHidden}
-        onClick={toggleShowChildren}
-        checked={showChildren}
-      />
+      {showChildren && iconPosition === 'end' && children}
+      <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
+        <ActionButton
+          iconProps={{ iconName: 'Chevrondown' }}
+          styles={{
+            rootHovered: {
+              color: palette.black,
+            },
+            flexContainer: {
+              flexDirection: iconPosition === 'end' ? 'row-reverse' : 'row',
+            },
+            iconHovered: {
+              color: palette.black,
+            },
+            icon: {
+              fontSize: '12px',
+              color: palette.black,
+              transitionDuration: '0.3s',
+            },
+            iconChecked: {
+              transform: 'rotate(180deg)',
+              transitionDuration: '0.3s',
+            },
+          }}
+          text={showChildren ? titleVisible : titleHidden}
+          onClick={toggleShowChildren}
+          checked={showChildren}
+        />
+        <Text variant="small" styles={{ root: { color: palette.neutralPrimaryAlt } }}>
+          {suffix}
+        </Text>
+      </Stack>
+      {showChildren && iconPosition === 'start' && children}
       {bottomBorder && (
         <Separator
           styles={{

@@ -36,44 +36,47 @@ const getRetrainingTxt = (
 
 export const ConfigurationInfo: React.FC<LiveViewInfoProps> = (props) => {
   return (
-    <Stack horizontal>
-      <table>
-        <tbody>
-          <tr>
-            <td>Camera</td>
-            <td>{props.cameraName}</td>
-          </tr>
-          <tr>
-            <td>Objects</td>
-            <td>
-              {props.partNames.map((e) => (
-                <PartTag key={e} text={e} status={PartTagStatus.Default} />
-              ))}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>Cloud message</td>
-            <td>
-              {getCloudMessageTxt(props.sendMessageToCloud, props.framesPerMin, props.accuracyThreshold)}
-            </td>
-          </tr>
-          <tr>
-            <td>Capture retraining images</td>
-            <td>
-              {getRetrainingTxt(
-                props.needRetraining,
-                props.accuracyRangeMin,
-                props.accuracyRangeMax,
-                props.maxImages,
-              )}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </Stack>
+    <>
+      <h4 style={{ margin: 5 }}>Configuration</h4>
+      <Stack horizontal>
+        <table>
+          <tbody>
+            <tr>
+              <td>Camera</td>
+              <td>{props.cameraName}</td>
+            </tr>
+            <tr>
+              <td>Objects</td>
+              <td>
+                {props.partNames.map((e) => (
+                  <PartTag key={e} text={e} status={PartTagStatus.Default} />
+                ))}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table>
+          <tbody>
+            <tr>
+              <td>Cloud message</td>
+              <td>
+                {getCloudMessageTxt(props.sendMessageToCloud, props.framesPerMin, props.accuracyThreshold)}
+              </td>
+            </tr>
+            <tr>
+              <td>Capture retraining images</td>
+              <td>
+                {getRetrainingTxt(
+                  props.needRetraining,
+                  props.accuracyRangeMin,
+                  props.accuracyRangeMax,
+                  props.maxImages,
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </Stack>
+    </>
   );
 };
