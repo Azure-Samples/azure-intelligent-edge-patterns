@@ -12,16 +12,12 @@ export type Part = {
 
 const entityAdapter = createEntityAdapter<Part>();
 
-export const getParts = createAsyncThunk<any, boolean, { state: State }>(
-  'parts/get',
-  async (isDemo) => {
-    const response = await Axios.get(`/api/parts?is_demo=${Number(isDemo)}`);
-    return response.data;
-  },
-  {
-    condition: (_, { getState }) => getState().parts.ids.length === 0,
-  },
-);
+export const getParts = createAsyncThunk<any, boolean, { state: State }>('parts/get', async (isDemo) => {
+  let response;
+  if (isDemo) response = await Axios.get(`/api/parts`);
+  response = await Axios.get(`/api/parts?is_demo=${Number(isDemo)}`);
+  return response.data;
+});
 
 export const postPart = createAsyncThunk<any, Omit<Part, 'id'>, { state: State }>(
   'parts/post',

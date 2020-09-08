@@ -27,7 +27,7 @@ function App() {
       await Promise.all([
         dispatch(thunkGetSettingAndAppInsightKey()),
         dispatch(thunkGetProject()),
-        dispatch(getTrainingProject({ isDemo: false })),
+        dispatch(getTrainingProject(false)),
       ]);
       setloading(false);
     })();

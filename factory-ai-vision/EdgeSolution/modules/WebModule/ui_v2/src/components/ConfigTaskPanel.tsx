@@ -66,12 +66,14 @@ type ConfigTaskPanelProps = {
   isOpen: boolean;
   onDismiss: () => void;
   projectData: ProjectData;
+  isDemo?: boolean;
 };
 
 export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
   projectData: initialProjectData,
+  isDemo = false,
 }) => {
   const cameraOptions = useSelector(cameraOptionsSelector);
   const partOptions = useSelector(partOptionsSelector);
@@ -80,15 +82,19 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const history = useHistory();
 
   const [projectData, setProjectData] = useState(initialProjectData);
+  useEffect(() => {
+    setProjectData(initialProjectData);
+  }, [initialProjectData]);
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
     setProjectData(R.assoc(key, value));
   }
 
   useEffect(() => {
-    dispatch(getParts(false));
-    dispatch(getCameras(false));
-  }, [dispatch]);
+    dispatch(getParts(isDemo));
+    dispatch(getCameras(isDemo));
+    if (isDemo) dispatch(getTrainingProject(true));
+  }, [dispatch, isDemo]);
 
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);

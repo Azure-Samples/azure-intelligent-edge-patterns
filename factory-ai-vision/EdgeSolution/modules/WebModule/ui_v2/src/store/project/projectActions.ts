@@ -121,6 +121,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     accuracyThreshold: data?.metrics_accuracy_threshold,
     probThreshold: data?.prob_threshold.toString() ?? '10',
     name: data?.name ?? '',
+    inferenceMode: data?.inference_mode ?? '',
   },
   isDemo,
 });
@@ -252,6 +253,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
         trainingProject: data[0]?.project ?? null,
         name: data[0]?.name ?? '',
+        inferenceMode: data[0]?.inference_mode ?? '',
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
       return void 0;

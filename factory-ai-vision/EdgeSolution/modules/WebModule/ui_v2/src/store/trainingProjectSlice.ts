@@ -9,10 +9,10 @@ type TrainingProject = {
   isDemo: boolean;
 };
 
-export const getTrainingProject = createAsyncThunk<any, { isDemo?: boolean }, { state: State }>(
+export const getTrainingProject = createAsyncThunk<any, boolean, { state: State }>(
   'trainingSlice/get',
-  async ({ isDemo }): Promise<TrainingProject[]> => {
-    const url = isDemo === undefined ? `/api/projects/` : `/api/projects?is_demo=${Number(isDemo)}`;
+  async (isDemo): Promise<TrainingProject[]> => {
+    const url = isDemo ? `/api/projects` : `/api/projects/?is_demo=${Number(isDemo)}`;
     const response = await Axios.get(url);
     return response.data.map((e) => ({
       id: e.id,
@@ -20,9 +20,6 @@ export const getTrainingProject = createAsyncThunk<any, { isDemo?: boolean }, { 
       customVisionId: e.customvision_id,
       isDemo: e.is_demo,
     }));
-  },
-  {
-    condition: (_, { getState }) => getState().trainingProject.ids.length === 0,
   },
 );
 
