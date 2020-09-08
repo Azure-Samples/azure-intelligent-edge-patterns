@@ -12,10 +12,22 @@ from exception_handler import PrintGetExceptionDetails
 from inference_engine import InferenceEngine
 from model_wrapper import ONNXRuntimeModelDeploy
 from flask import Flask, request, Response
+from utility import get_file_zip, normalize_rtsp
 
 import grpc
 import extension_pb2_grpc
 from concurrent import futures
+
+MODEL_DIR = 'model'
+UPLOAD_INTERVAL = 1  # sec
+
+DETECTION_TYPE_NOTHING = 'nothing'
+DETECTION_TYPE_SUCCESS = 'success'
+DETECTION_TYPE_UNIDENTIFIED = 'unidentified'
+DETECTION_BUFFER_SIZE = 10000
+
+IMG_WIDTH = 960
+IMG_HEIGHT = 540
 
 # Main thread
 
@@ -142,20 +154,31 @@ def update_model():
         return 'ok'
 
 
-@app.route('/update_cam')
+@app.route('/update_cam', methods=['POST'])
 def update_cam():
 
-    cam_type = request.args.get('cam_type')
-    cam_source = request.args.get('cam_source')
+    data = request.get_json()
+    logging.info(data["cameras"])
+    for cam in data["cameras"][:1]:
+        cam_type = cam['type']
+        cam_source = cam['source']
+        cam_id = cam['id']
+
+    # cam_type = request.args.get('cam_type')
+    # cam_source = request.args.get('cam_source')
+    # cam_id = request.args.get('cam_id')
 
     if not cam_type:
         return 'missing cam_type'
     if not cam_source:
         return 'missing cam_source'
+    if not cam_id:
+        return 'missing cam_id'
 
     print('updating cam ...')
     print('  cam_type', cam_type)
     print('  cam_source', cam_source)
+    print('  cam_id', cam_id)
 
     aoi = request.args.get('aoi')
     try:
@@ -169,7 +192,7 @@ def update_cam():
     print('  has_aoi', has_aoi)
     print('  aoi_info', aoi_info)
 
-    onnx.update_cam(cam_type, cam_source, has_aoi, aoi_info)
+    onnx.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info)
 
     return 'ok'
 
@@ -257,7 +280,8 @@ def Main():
             InferenceEngine(onnx), server)
         server.add_insecure_port(f'[::]:{grpcServerPort}')
         server.start()
-        server.wait_for_termination()
+        app.run(host='0.0.0.0', debug=False)
+        # server.wait_for_termination()
 
     except:
         PrintGetExceptionDetails()

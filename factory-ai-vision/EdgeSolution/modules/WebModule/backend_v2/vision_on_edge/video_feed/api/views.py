@@ -88,7 +88,8 @@ def video_feed(request):
     """videofeed return
     """
 
-    s = VideoFeed()
+    camera_id = request.query_params.get("camera_id")
+    s = VideoFeed(camera_id)
     stream_manager.add(s)
 
     return StreamingHttpResponse(

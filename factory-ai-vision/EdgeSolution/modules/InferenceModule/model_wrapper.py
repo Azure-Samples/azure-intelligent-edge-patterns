@@ -173,7 +173,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
 
-    def __init__(self, cam_type="video_file", model_dir='./default_model'):
+    def __init__(self, cam_type="video_file", model_dir='./default_model', cam_source='./sample_video/video.mp4'):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./mov_bbb.mp4"):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
         # def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
@@ -200,6 +200,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.image_shape = [540, 960]
 
         self.last_img = None
+        self.last_instance = None
         self.last_edge_img = None
         self.last_drawn_img = None
         self.last_prediction = []
@@ -255,7 +256,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         print('[INFO] Updating Parts ...', parts)
         self.parts = parts
 
-    def update_cam(self, cam_type, cam_source, has_aoi, aoi_info):
+    def update_cam(self, cam_type, cam_source, cam_id, has_aoi, aoi_info):
         print('[INFO] Updating Cam ...')
         #print('  cam_type', cam_type)
         #print('  cam_source', cam_source)
@@ -279,10 +280,11 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         # Protected by Mutex
         self.lock.acquire()
+        self.last_instance = cam_id[0]
         self.cam.release()
         self.cam = cam
         self.lock.release()
-        update_instance(normalize_rtsp(cam_source))
+        update_instance(normalize_rtsp(cam_source), self.last_instance)
 
     def load_model(self, model_dir, is_default_model):
         if is_default_model:
@@ -342,7 +344,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         else:
             self.iothub_interval = 60 / fpm  # seconds
 
-    def Score(self, image):
+    def Score(self, image, instance_id):
         # predict
         logging.info('model.Score')
 
@@ -366,6 +368,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         # boxes, scores, indices = self.model.predict_image(image)
         self.lock.release()
         self.last_img = image
+        self.last_instance = instance_id
         self.last_prediction = predictions
 
         self.draw_img()
@@ -414,21 +417,23 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         logging.info('set last_drawn_img')
 
 
-def update_instance(rtspUrl):
+def update_instance(rtspUrl, instance_id):
     payload = {
         "@apiVersion": "1.0",
-        "name": "http1"
+        "name": instance_id
     }
     payload_set = {
         "@apiVersion": "1.0",
-        "name": "http1",
+        "name": instance_id,
         "properties": {
-            "topologyName": "InferencingWithHttpExtension5",
+            "topologyName": "InferencingWithGrpcExtension",
             "description": "Sample graph description",
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
-                {"name": "inferencingUrl",
-                    "value": "http://InferenceModule:5000/predict"}
+                {"name": "grpcExtensionAddress",
+                    "value": "tcp://InferenceModule:44000"},
+                {"name": "frameHeight", "value": "540"},
+                {"name": "frameWidth", "value": "960"},
             ]
         }
     }

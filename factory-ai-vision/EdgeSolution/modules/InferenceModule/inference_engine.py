@@ -69,18 +69,22 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
         def run(self):
             logging.info('running zmq')
             context = zmq.Context()
-            sender = context.socket(zmq.PUSH)
+            sender = context.socket(zmq.PUB)
             # sender.connect("tcp://localhost:5558")
             sender.bind("tcp://*:5558")
 
             while 'flags' not in dir(self._tYoloV3.last_drawn_img):
                 logging.info('not sending last_drawn_img')
-                time.sleep(1)
+                time.sleep(2)
             cnt = 0
             while True:
                 cnt += 1
-                sender.send_pyobj(
-                    {"data": cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
+                logging.info('send through channel {0}'.format(
+                    bytes(self._tYoloV3.last_instance, 'utf-8')))
+                sender.send_multipart([bytes(
+                    self._tYoloV3.last_instance, 'utf-8'), cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes()])
+                # sender.send_pyobj(
+                #     {"data": cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
                 # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
                 # time.sleep(2)
                 time.sleep(0.04)
@@ -212,6 +216,7 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
 
         logging.info('Connection created with peer {0}.\nMediaStreamDescriptor:\n{1}'.format(
             context.peer(), clientState._mediaStreamDescriptor))
+        instance_id = clientState._mediaStreamDescriptor.graph_identifier.graph_instance_name
         logging.debug('[Received] SeqNum: {0:07d} | AckNum: {1}'.format(
             requestSeqNum, requestAckSeqNum))
 
@@ -258,11 +263,14 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                     return
 
+                # instance_name = mediaStreamMessageRequest.graph_identifier.graph_instance_name
+                logging.info('req: {0}'.format(mediaStreamMessageRequest))
+
                 # run inference
                 logging.info(self._tYoloV3)
                 # out = self._tYoloV3.Score(cvImage)
                 # logging.info(out)
-                predictions = self._tYoloV3.Score(cvImage)
+                predictions = self._tYoloV3.Score(cvImage, instance_id)
 
                 logging.debug(
                     'Detected {0} inferences'.format(len(predictions)))

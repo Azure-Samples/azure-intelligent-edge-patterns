@@ -26,7 +26,7 @@ class PartDetection(models.Model):
 
     name = models.CharField(blank=True, max_length=200)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
-    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
+    cameras = models.ManyToManyField(Camera, blank=True)
     inference_module = models.ForeignKey(InferenceModule,
                                          on_delete=models.SET_NULL,
                                          null=True)
@@ -118,6 +118,7 @@ class PartDetection(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
+    
 
 
 class PDScenario(models.Model):

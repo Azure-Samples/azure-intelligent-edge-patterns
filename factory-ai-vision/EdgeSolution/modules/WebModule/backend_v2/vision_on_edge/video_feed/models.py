@@ -29,13 +29,15 @@ class VideoFeed():
     """VideoFeed.
     """
 
-    def __init__(self):
+    def __init__(self, camera_id):
         self.keep_alive = time.time()
         self.last_active = time.time()
         self.context = zmq.Context()
         self.mutex = threading.Lock()
+        self.camera_id = camera_id
         self.is_opened = True
-        self.receiver = self.context.socket(zmq.PULL)
+        self.receiver = self.context.socket(zmq.SUB)
+        self.receiver.setsockopt(zmq.SUBSCRIBE, bytes(self.camera_id, 'utf-8'))
 
     def gen(self):
         """gen
@@ -48,9 +50,9 @@ class VideoFeed():
         self.receiver.connect(inference_url())
 
         while self.is_opened:
-            ret = self.receiver.recv_pyobj()
-
-            nparr = np.frombuffer(np.array(ret['data']), np.uint8)
+            ret = self.receiver.recv_multipart()
+            nparr = np.frombuffer(np.array(ret[1]), np.uint8)
+            logging.info('recv from instance rpc')
 
             # logger.warning('Receive: %s', ret['ts'])
             # logger.warning('Time elapsed: %s', (time.time()-self.keep_alive))

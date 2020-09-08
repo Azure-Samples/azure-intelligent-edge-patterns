@@ -36,6 +36,10 @@ class AzurePartDetectionConfig(AppConfig):
                 inference_obj = InferenceModule.objects.first()
             else:
                 project_obj = inference_obj = None
+            if PartDetection.objects.count() == 0:
+                PartDetection.objects.create(name="Part Detection",
+                        project=project_obj,
+                        inference_module=inference_obj)
             PDScenario.objects.all().delete()
             pd_scenario = PDScenario.objects.create(
                 name="Simple Part Detection",
