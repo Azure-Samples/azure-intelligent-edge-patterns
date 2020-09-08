@@ -55,16 +55,16 @@ export type GetSettingFailedAction = {
 };
 
 export type GetAllCvProjectsRequestAction = {
-  type: 'GET_ALL_CV_PROJECTS_REQUEST';
+  type: 'settings/listAllProjects/pending';
 };
 
 export type GetAllCvProjectsSuccessAction = {
-  type: 'GET_ALL_CV_PROJECTS_SUCCESS';
+  type: 'settings/listAllProjects/fulfilled';
   pyload: CVProject[];
 };
 
 export type GetAllCvProjectsErrorAction = {
-  type: 'GET_ALL_CV_PROJECTS_ERROR';
+  type: 'settings/listAllProjects/rejected';
   error: Error;
 };
 

@@ -48,16 +48,16 @@ export const settingFailed = (error: Error): GetSettingFailedAction => ({
 });
 
 const getAllCvProjectsRequest = (): GetAllCvProjectsRequestAction => ({
-  type: 'GET_ALL_CV_PROJECTS_REQUEST',
+  type: 'settings/listAllProjects/pending',
 });
 
 const getAllCvProjectsSuccess = (cvProjects: CVProject[]): GetAllCvProjectsSuccessAction => ({
-  type: 'GET_ALL_CV_PROJECTS_SUCCESS',
+  type: 'settings/listAllProjects/fulfilled',
   pyload: cvProjects,
 });
 
 const getAllCvProjectError = (error: Error): GetAllCvProjectsErrorAction => ({
-  type: 'GET_ALL_CV_PROJECTS_ERROR',
+  type: 'settings/listAllProjects/rejected',
   error,
 });
 
@@ -189,6 +189,7 @@ export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promis
           cvProjects: [],
         }),
       );
+      dispatch(thunkGetAllCvProjects());
       return void 0;
     })
     .catch((err) => {

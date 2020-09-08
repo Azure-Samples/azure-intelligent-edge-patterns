@@ -83,7 +83,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
   const onSave = async () => {
     try {
       await dispatch(thunkPostSetting());
-      onDismiss();
     } catch (e) {
       alert(e);
     }
@@ -227,7 +226,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
                         Load Project will remove all the parts, sure you want to do that?
                       </Text>
                     }
-                    trigger={<PrimaryButton text="Load" />}
+                    trigger={<PrimaryButton text="Load" disabled={loading} />}
                     onConfirm={onLoad}
                   />
                   {loading && <Spinner label="loading" />}
