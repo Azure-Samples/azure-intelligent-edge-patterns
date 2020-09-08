@@ -10,6 +10,7 @@ import { selectAllImages, getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
 import { Deployment } from '../components/Deployment';
+import { GetStarted } from '../components/GetStarted';
 
 export const Home: React.FC = () => {
   const location = useLocation();
@@ -32,17 +33,17 @@ export const Home: React.FC = () => {
   }, [dispatch]);
 
   const onPivotChange = (item: PivotItem) => {
-    history.push(`/${item.props.itemKey}`);
+    history.push(`/home/${item.props.itemKey}`);
   };
 
   const onRenderMain = () => {
     if (loading) return <Spinner label="Loading" />;
 
-    const route = location.pathname.split('/')[1];
-    if (route === 'getStarted') return <h1>Get started</h1>;
+    const route = location.pathname.split('/')[2];
     if (route === 'deployment') return <Deployment isDemo={false} />;
     if (route === 'customize')
       return <Customize hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />;
+    return <GetStarted />;
   };
 
   return (

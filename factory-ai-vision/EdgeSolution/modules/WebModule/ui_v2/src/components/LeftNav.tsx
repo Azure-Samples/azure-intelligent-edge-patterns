@@ -5,7 +5,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 const navLinks: INavLink[] = [
   {
     name: 'Home',
-    url: '/',
+    url: '/home',
     iconProps: {
       imageProps: {
         src: '/icons/home.png',
@@ -53,7 +53,7 @@ export const LeftNav: React.FC = () => {
           // Set url to empty string to avoid defautl redirect behaviour
           url: '',
           // For selection
-          key: link.url,
+          key: link.url.replace('/', ''),
           onClick: () => {
             history.push(link.url);
           },
@@ -64,7 +64,7 @@ export const LeftNav: React.FC = () => {
 
   return (
     <div style={{ width: '206px', height: '100%', borderRight: '1px solid #eee' }}>
-      <Nav groups={navLinksGroup} selectedKey={location.pathname} />
+      <Nav groups={navLinksGroup} selectedKey={location.pathname.split('/')[1]} />
     </div>
   );
 };
