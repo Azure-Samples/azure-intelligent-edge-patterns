@@ -7,6 +7,7 @@ import logging
 from django.db import models
 from django.db.models.signals import pre_save
 from django.db.utils import IntegrityError
+
 from vision_on_edge.azure_projects.models import Project
 
 logger = logging.getLogger(__name__)

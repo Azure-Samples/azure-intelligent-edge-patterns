@@ -8,9 +8,9 @@ import logging
 
 from azure.cognitiveservices.vision.customvision.training import \
     CustomVisionTrainingClient
+from rest_framework.test import APITransactionTestCase
 
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
-from rest_framework.test import APITransactionTestCase
 
 logger = logging.getLogger(__name__)
 

@@ -22,3 +22,10 @@ class AzurePDDeployStatusConfig(AppConfig):
         """
         if 'runserver' in sys.argv:
             from . import signals
+            from ..azure_part_detections.models import PartDetection
+            from .models import DeployStatus
+            for pd in PartDetection.objects.all():
+                try:
+                    pd.deploystatus
+                except PartDetection.deploystatus.RelatedObjectDoesNotExist:
+                    DeployStatus.objects.create(part_detection=pd)

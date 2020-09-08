@@ -6,6 +6,7 @@ import logging
 import sys
 
 from django.apps import AppConfig
+
 from vision_on_edge.azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)

@@ -2,8 +2,8 @@
 """
 
 import pytest
-
 from django.urls import resolve, reverse
+
 from vision_on_edge.locations.models import Location
 
 pytestmark = pytest.mark.django_db

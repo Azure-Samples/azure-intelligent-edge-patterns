@@ -15,7 +15,7 @@ from .serializers import TrainingStatusSerializer
 logger = logging.getLogger(__name__)
 
 
-class TrainingStatusViewSet(FiltersMixin, viewsets.ModelViewSet):
+class TrainingStatusViewSet(FiltersMixin, viewsets.ReadOnlyModelViewSet):
     """TrainingStatusViewSet.
 
     Filters:
