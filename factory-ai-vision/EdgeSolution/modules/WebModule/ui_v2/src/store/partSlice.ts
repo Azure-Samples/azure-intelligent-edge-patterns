@@ -2,6 +2,7 @@ import { createEntityAdapter, createAsyncThunk, createSlice, createSelector } fr
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
+import { selectNonDemoProject } from './trainingProjectSlice';
 
 export type Part = {
   id: number;
@@ -25,9 +26,7 @@ export const getParts = createAsyncThunk<any, boolean, { state: State }>(
 export const postPart = createAsyncThunk<any, Omit<Part, 'id'>, { state: State }>(
   'parts/post',
   async (data, { getState }) => {
-    const {
-      data: { trainingProject },
-    } = getState().project;
+    const { id: trainingProject } = selectNonDemoProject(getState());
     const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
     return response.data;
   },
@@ -47,7 +46,8 @@ export const deletePart = createAsyncThunk<any, number, { state: State }>(
   async (id, { getState }) => {
     const projectId = getState().project.data.id;
     const partName = selectPartById(getState(), id).name;
-    await Axios.get(`/api/projects/${projectId}/delete_tag?part_name=${partName}`);
+    // FIXME andrew please check this
+    //await Axios.get(`/api/projects/${projectId}/delete_tag?part_name=${partName}`);
     await Axios.delete(`/api/parts/${id}/`);
     return id;
   },
@@ -84,4 +84,4 @@ export const partOptionsSelector = createSelector(selectAllParts, (parts) =>
 );
 
 export const selectPartNamesById = (ids) =>
-  createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i].name));
+  createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i]?.name));

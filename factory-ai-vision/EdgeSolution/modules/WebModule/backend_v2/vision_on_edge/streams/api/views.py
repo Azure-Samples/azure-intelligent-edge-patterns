@@ -186,10 +186,7 @@ def disconnect_stream(request, stream_id):
                                            type=openapi.TYPE_INTEGER,
                                            description='Stream ID'),
                      ],
-                     responses={
-                         '200': CaptureStreamResponseSerializer,
-                         '400': SimpleErrorSerializer
-                     })
+                     responses={'400': SimpleErrorSerializer})
 @api_view(['GET'])
 def video_feed(request, stream_id):
     """video feed

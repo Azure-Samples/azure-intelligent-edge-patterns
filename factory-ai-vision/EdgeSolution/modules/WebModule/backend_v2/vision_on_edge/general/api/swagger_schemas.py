@@ -12,7 +12,7 @@ class StreamAutoSchema(SwaggerAutoSchema):
     def get_produces(self):
         """get_produces.
         """
-        return ["multipart/x-mixed-replace;boundary=frame"]
+        return ["application/json"]
 
     def get_consumes(self):
         """get_consumes.

@@ -119,8 +119,8 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     sendMessageToCloud: data?.metrics_is_send_iothub,
     framesPerMin: data?.metrics_frame_per_minutes,
     accuracyThreshold: data?.metrics_accuracy_threshold,
-    cvProjectId: data?.customvision_project_id,
     probThreshold: data?.prob_threshold.toString() ?? '10',
+    name: data?.name ?? '',
   },
   isDemo,
 });
@@ -249,9 +249,9 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         sendMessageToCloud: data[0]?.metrics_is_send_iothub,
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
-        cvProjectId: data[0]?.customvision_project_id,
         probThreshold: data[0]?.prob_threshold.toString() ?? '10',
         trainingProject: data[0]?.project ?? null,
+        name: data[0]?.name ?? '',
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
       return void 0;
@@ -261,24 +261,18 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
     });
 };
 
-export const thunkPostProject = (
-  projectId,
-  selectedParts,
-  selectedCamera,
-  selectedTrainingProject,
-): ProjectThunk => (dispatch, getState): Promise<number> => {
+export const thunkPostProject = (projectData: ProjectData): ProjectThunk => (dispatch): Promise<number> => {
+  const projectId = projectData.id;
   const isProjectEmpty = projectId === null || projectId === undefined;
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
 
   dispatch(postProjectRequest(false));
 
-  const projectData = getProjectData(getState());
-
   return Axios(url, {
     data: {
-      parts: selectedParts,
-      camera: selectedCamera,
-      project: selectedTrainingProject,
+      parts: projectData.parts,
+      camera: projectData.camera,
+      project: projectData.trainingProject,
       needRetraining: projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
@@ -286,6 +280,7 @@ export const thunkPostProject = (
       metrics_is_send_iothub: projectData.sendMessageToCloud,
       metrics_frame_per_minutes: projectData.framesPerMin,
       metrics_accuracy_threshold: projectData.accuracyThreshold,
+      name: projectData.name,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

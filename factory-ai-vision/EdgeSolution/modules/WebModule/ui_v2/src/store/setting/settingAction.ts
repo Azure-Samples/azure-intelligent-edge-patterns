@@ -12,6 +12,7 @@ import {
   GetAllCvProjectsSuccessAction,
   GetAllCvProjectsErrorAction,
   OnSettingStatusCheckAction,
+  CVProject,
 } from './settingType';
 
 export const updateKey = (key: string): UpdateKeyAction => ({ type: 'UPDATE_KEY', payload: key });
@@ -47,16 +48,16 @@ export const settingFailed = (error: Error): GetSettingFailedAction => ({
 });
 
 const getAllCvProjectsRequest = (): GetAllCvProjectsRequestAction => ({
-  type: 'GET_ALL_CV_PROJECTS_REQUEST',
+  type: 'settings/listAllProjects/pending',
 });
 
-const getAllCvProjectsSuccess = (cvProjects: Record<string, string>): GetAllCvProjectsSuccessAction => ({
-  type: 'GET_ALL_CV_PROJECTS_SUCCESS',
+const getAllCvProjectsSuccess = (cvProjects: CVProject[]): GetAllCvProjectsSuccessAction => ({
+  type: 'settings/listAllProjects/fulfilled',
   pyload: cvProjects,
 });
 
 const getAllCvProjectError = (error: Error): GetAllCvProjectsErrorAction => ({
-  type: 'GET_ALL_CV_PROJECTS_ERROR',
+  type: 'settings/listAllProjects/rejected',
   error,
 });
 
@@ -83,6 +84,7 @@ export const thunkGetSetting = () => (dispatch): Promise<any> => {
             isTrainerValid: data[0].is_trainer_valid,
             appInsightHasInit: data[0].app_insight_has_init,
             isCollectData: data[0].is_collect_data,
+            cvProjects: [],
           }),
         );
       }
@@ -129,6 +131,7 @@ export const thunkGetSettingAndAppInsightKey = (): SettingThunk => (dispatch): P
               appInsightHasInit: settingsData[0].app_insight_has_init,
               isCollectData: settingsData[0].is_collect_data,
               appInsightKey: appInsightKeyData.key,
+              cvProjects: [],
             }),
           );
         }
@@ -183,8 +186,10 @@ export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promis
           isTrainerValid: data.is_trainer_valid,
           appInsightHasInit: data.app_insight_has_init,
           isCollectData: data.is_collect_data,
+          cvProjects: [],
         }),
       );
+      dispatch(thunkGetAllCvProjects());
       return void 0;
     })
     .catch((err) => {
@@ -198,7 +203,7 @@ export const thunkGetAllCvProjects = (): SettingThunk => (dispatch, getState) =>
   const settingId = getState().setting.current.id;
   return Axios.get(`/api/settings/${settingId}/list_projects`)
     .then(({ data }) => {
-      dispatch(getAllCvProjectsSuccess(data));
+      dispatch(getAllCvProjectsSuccess(data?.projects || []));
       return void 0;
     })
     .catch((e) => {

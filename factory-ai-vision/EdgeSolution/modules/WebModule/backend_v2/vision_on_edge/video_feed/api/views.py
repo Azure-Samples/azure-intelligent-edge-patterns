@@ -10,8 +10,10 @@ from django.http import StreamingHttpResponse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from ...cameras.models import Camera
 from ...general.api.swagger_schemas import StreamAutoSchema
 from ..models import VideoFeed
 
@@ -97,10 +99,14 @@ if 'runserver' in sys.argv:
                      ])
 @api_view(['GET'])
 def video_feed(request):
-    """videofeed return
+    """videofeed.
     """
 
-    camera_id = request.query_params.get("camera_id")
+    camera_id = request.query_params.get("camera_id") or None
+    try:
+        Camera.objects.get(pk=camera_id)
+    except Exception:
+        raise NotFound(detail=f"camera_id: {camera_id} not found")
     stream = VideoFeed(camera_id)
     stream_manager.add(stream)
 

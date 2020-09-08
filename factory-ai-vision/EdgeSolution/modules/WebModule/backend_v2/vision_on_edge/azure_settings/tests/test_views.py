@@ -7,13 +7,11 @@ from unittest import mock
 
 import pytest
 from rest_framework import status
-from rest_framework.exceptions import APIException
 from rest_framework.test import APIRequestFactory
 
 from ...general.api.serializers import MSStyleErrorResponseSerializer
 from ..api.serializers import ListProjectSerializer
 from ..api.views import SettingViewSet
-from ..exceptions import SettingCustomVisionAccessFailed
 from ..models import Setting
 
 logger = logging.getLogger(__name__)

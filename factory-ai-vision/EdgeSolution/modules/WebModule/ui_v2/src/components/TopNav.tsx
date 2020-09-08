@@ -39,15 +39,6 @@ const commandBarItems: ICommandBarItemProps[] = [
   },
 ];
 
-const commandBarFarItems: ICommandBarItemProps[] = [
-  {
-    key: 'setting',
-    iconOnly: true,
-    onRenderIcon: () => <SettingsIcon />,
-    buttonStyles: commandBarBtnStyles,
-  },
-];
-
 const commandBarStyles: ICommandBarStyles = {
   root: {
     backgroundColor: theme.palette.themePrimary,
@@ -55,6 +46,15 @@ const commandBarStyles: ICommandBarStyles = {
   },
 };
 
-export const TopNav: React.FC = () => {
+export const TopNav: React.FC<{ onSettingClick: () => void }> = ({ onSettingClick }) => {
+  const commandBarFarItems: ICommandBarItemProps[] = [
+    {
+      key: 'setting',
+      iconOnly: true,
+      onRenderIcon: () => <SettingsIcon />,
+      buttonStyles: commandBarBtnStyles,
+      onClick: onSettingClick,
+    },
+  ];
   return <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />;
 };
