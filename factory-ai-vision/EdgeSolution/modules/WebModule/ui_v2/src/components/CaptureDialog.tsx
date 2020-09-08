@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, ReactText } from 'react';
 import {
   Dialog,
   Dropdown,
@@ -8,7 +8,6 @@ import {
   getTheme,
   mergeStyleSets,
   IDropdownOption,
-  Separator,
   Text,
   Spinner,
 } from '@fluentui/react';
@@ -29,6 +28,7 @@ const functionBtnStyleSets = mergeStyleSets({
 });
 
 enum Status {
+  Empty,
   Waiting,
   Capturing,
   Success,
@@ -49,7 +49,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   const cameraOptions = useSelector(cameraOptionsSelector);
   const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
   const dispatch = useDispatch();
-  const [status, setStatus] = useState<Status>(Status.Waiting);
+  const [status, setStatus] = useState<Status>(Status.Empty);
   const streamIdRef = useRef('');
   const history = useHistory();
 
@@ -74,6 +74,15 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
     dispatch(getCameras(false));
   }, [dispatch]);
 
+  useEffect(() => {
+    if (status === Status.Success) {
+      const resetSuccess = setTimeout(() => setStatus(Status.Waiting), 3000);
+      return () => {
+        clearTimeout(resetSuccess);
+      };
+    }
+  }, [status]);
+
   return (
     <Dialog
       dialogContentProps={{ title: 'Capture', styles: { content: { width: '1080px' } } }}
@@ -97,27 +106,25 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
             styles={{ dropdown: { width: '300px' } }}
           />
           <Stack horizontal tokens={{ childrenGap: 30 }}>
-            <Stack styles={{ root: { width: '75%', height: '500px' } }}>
+            <Stack styles={{ root: { width: '75%', height: '500px', position: 'relative' } }}>
               <RTSPVideo
                 rtsp={rtsp}
                 onStreamCreated={(streamId) => {
                   streamIdRef.current = streamId;
                 }}
               />
+              <CaptureBanner top="80%" left="50%" status={status} />
             </Stack>
             <Stack verticalAlign="center" tokens={{ childrenGap: 10 }} styles={{ root: { width: '25%' } }}>
-              {status === Status.Success && <CaptureSuccessIcon />}
-              {status === Status.Capturing && <Spinner />}
-              {status !== Status.Waiting && <Separator />}
               <DefaultButton
-                text={status === Status.Waiting ? 'Capture image' : 'Capture another image'}
+                text="Capture image"
                 iconProps={{ iconName: 'Camera', className: functionBtnStyleSets.icon }}
                 className={functionBtnStyleSets.button}
                 onClick={onCaptureClick}
               />
-              {status !== Status.Waiting && (
+              {status !== Status.Empty && (
                 <DefaultButton
-                  text="Tag images"
+                  text="Go to tagging"
                   iconProps={{ iconName: 'Tag', className: functionBtnStyleSets.icon }}
                   className={functionBtnStyleSets.button}
                   onClick={() => {
@@ -137,20 +144,50 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   );
 };
 
-const CaptureSuccessIcon: React.FC = () => {
+const CaptureBanner: React.FC<{ top: ReactText; left: ReactText; status: Status }> = ({
+  top,
+  left,
+  status,
+}) => {
+  if (status === Status.Empty || status === Status.Waiting) return null;
+
   return (
-    <Stack tokens={{ childrenGap: 10 }} horizontalAlign="center">
-      <AcceptMediumIcon
-        style={{
-          borderRadius: '100%',
-          backgroundColor: '#57A300',
-          color: 'white',
-          padding: '5px',
-          fontSize: '8px',
-          textAlign: 'center',
-        }}
-      />
-      <Text>Image saved!</Text>
+    <Stack
+      tokens={{ childrenGap: 10 }}
+      horizontal
+      horizontalAlign="center"
+      verticalAlign="center"
+      styles={{
+        root: {
+          position: 'absolute',
+          width: '160px',
+          height: '40px',
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(4px)',
+          borderRadius: '2px',
+          transform: 'translateX(-50%)',
+          top,
+          left,
+        },
+      }}
+    >
+      {status === Status.Capturing ? (
+        <Spinner />
+      ) : (
+        <>
+          <AcceptMediumIcon
+            style={{
+              borderRadius: '100%',
+              backgroundColor: '#57A300',
+              color: 'white',
+              padding: '5px',
+              fontSize: '8px',
+              textAlign: 'center',
+            }}
+          />
+          <Text>Image saved!</Text>
+        </>
+      )}
     </Stack>
   );
 };
