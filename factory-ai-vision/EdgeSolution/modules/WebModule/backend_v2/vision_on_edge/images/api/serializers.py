@@ -1,5 +1,5 @@
-"""
-Azure Training Serializers
+# -*- coding: utf-8 -*-
+"""App API serializers.
 """
 
 import logging
@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class ImageSerializer(serializers.ModelSerializer):
-    """ImageSerializer"""
+    """ImageSerializer.
+    """
 
     class Meta:
         model = Image

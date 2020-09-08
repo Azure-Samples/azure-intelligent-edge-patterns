@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Models.
+"""App models.
 """
 
 import logging
@@ -13,7 +13,7 @@ NOTIFICATION_TYPE_CHOICES = [(i, i) for i in NOTIFICATION_TYPES]
 
 
 class Notification(models.Model):
-    """Notification Model
+    """Notification Model.
     """
 
     notification_type = models.CharField(max_length=20,

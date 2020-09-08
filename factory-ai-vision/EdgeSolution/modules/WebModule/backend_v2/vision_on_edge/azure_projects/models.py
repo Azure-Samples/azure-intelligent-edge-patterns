@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Models.
+"""App models.
 """
 
 import datetime
@@ -10,6 +10,7 @@ import time
 import requests
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
+
 from django.db import models
 from django.db.models.signals import pre_save
 from django.utils import timezone
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class Project(models.Model):
-    """Azure Custom Vision Project Model
+    """Project Model.
     """
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, null=True)
@@ -37,7 +38,6 @@ class Project(models.Model):
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
 
-    # e.g. relabel
     retraining_counter = models.IntegerField(default=0)
     maxImages = models.IntegerField(default=20)
     needRetraining = models.BooleanField(default=True)
@@ -120,7 +120,9 @@ class Project(models.Model):
             raise
 
     def create_project(self):
-        """Create a project on CustomVision
+        """create_project.
+
+        Create a project on CustomVision.
         """
         logger.info("Creating obj detection project")
 
@@ -145,7 +147,13 @@ class Project(models.Model):
             raise
 
     def delete_tag_by_name(self, tag_name):
-        """delete tag on custom vision"""
+        """delete_tag_by_name.
+        
+        Delete tag on Custom Vision.
+
+        Args:
+            tag_name:
+        """
         logger.info("deleting tag: %s", tag_name)
         if not self.setting.is_trainer_valid:
             return
@@ -161,7 +169,13 @@ class Project(models.Model):
                 return
 
     def delete_tag_by_id(self, tag_id):
-        """delete tag on custom vision"""
+        """delete_tag_by_id.
+        
+        Delete tag on Custom Vision.
+
+        Args:
+            tag_id:
+        """
         logger.info("deleting tag: %s", tag_id)
         if not self.setting.is_trainer_valid:
             return
@@ -169,10 +183,10 @@ class Project(models.Model):
             return
         trainer = self.setting.get_trainer_obj()
         trainer.delete_tag(project_id=self.customvision_id, tag_id=tag_id)
-        return
 
     def train_project(self):
-        """
+        """train_project.
+
         Submit training task to CustomVision.
         Return training task submit result (boolean)
         : Success: return True
@@ -203,8 +217,9 @@ class Project(models.Model):
             self.save(update_fields=update_fields)
 
     def export_iterationv3_2(self, iteration_id):
-        """
-        CustomVisionTrainingClient SDK may have some issues exporting
+        """export_iterationv3_2.
+
+        CustomVisionTrainingClient SDK may have some issues exporting.
         Use the REST API
         """
         # trainer.export_iteration(customvision_id,
@@ -229,7 +244,8 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     def start_exporting(self):
-        """Start Exporting"""
+        """start_exporting.
+        """
 
         def _export_worker(self):
             """Export Model Worker"""

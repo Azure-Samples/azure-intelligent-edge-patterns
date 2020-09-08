@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Azure Custom Vision Settings
 
 This module finds Custom Vision related configs with following order:

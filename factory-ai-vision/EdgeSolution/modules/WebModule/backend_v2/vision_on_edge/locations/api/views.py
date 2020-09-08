@@ -1,8 +1,7 @@
-"""
-Location Views
+# -*- coding: utf-8 -*-
+"""App API views.
 """
 
-# from rest_framework.response import Response
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 

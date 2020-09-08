@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Location models
+"""App models.
 """
 
 from django.db import models

@@ -24,14 +24,13 @@ import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
 import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
 import { selectLocationById } from '../store/locationSlice';
-import LabelingPage from '../components/LabelingPage/LabelingPage';
+import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
 import { captureImage } from '../store/imageSlice';
+import { maskRtsp } from '../utils/maskRTSP';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
 const infoBlockTokens: IStackTokens = { childrenGap: 10 };
-
-const maskRtsp = (rtsp) => rtsp.replace(/(rtsp:\/\/[\w]+)\.([\s\S])+/, '$1.**********');
 
 export const CameraDetails: React.FC = () => {
   const cameraId = parseInt(useQuery().get('cameraId'), 10);
@@ -107,7 +106,7 @@ export const CameraDetails: React.FC = () => {
           </Stack>
         </Stack>
       </Stack>
-      <LabelingPage isRelabel={false} />
+      <LabelingPage mode={LabelPageMode.SinglePage} />
       <AddEditCameraPanel
         isOpen={editPanelOpen}
         onDissmiss={closePanel}
@@ -115,7 +114,7 @@ export const CameraDetails: React.FC = () => {
         initialValue={{
           name: { value: camera.name, errMsg: '' },
           rtsp: { value: camera.rtsp, errMsg: '' },
-          location: { value: null, errMsg: '' },
+          location: { value: camera.location, errMsg: '' },
         }}
         cameraId={cameraId}
       />

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App
+"""App.
 """
 
 import logging
@@ -9,11 +9,9 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=C0415
-
 
 class LocationsConfig(AppConfig):
-    """App Config
+    """App Config.
     """
     name = 'vision_on_edge.locations'
 

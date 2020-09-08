@@ -1,32 +1,28 @@
 # -*- coding: utf-8 -*-
-"""App
+"""App.
 """
 
 import logging
 import sys
 
 from django.apps import AppConfig
-
 from vision_on_edge.azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
 
 
 class InferenceModulesConfig(AppConfig):
-    """App Config"""
+    """App Config.
+    """
 
     name = 'vision_on_edge.inference_modules'
 
     def ready(self):
-        """App ready
-
-        Import signals and create some demo objects.
+        """ready.
         """
 
         if 'runserver' in sys.argv:
-            # pylint: disable=C0415
             from .models import InferenceModule
-            # pylint: enable=C0415
 
             logger.info("App ready ready while running server")
             InferenceModule.objects.update_or_create(

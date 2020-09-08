@@ -1,23 +1,32 @@
 # -*- coding: utf-8 -*-
-"""App Serializers
+"""App API serializers.
 """
 
 import logging
 
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from ..models import PartDetection
+from ..models import PartDetection, PDScenario
 
 logger = logging.getLogger(__name__)
 
 
 class PartDetectionSerializer(serializers.ModelSerializer):
-    """Project Serializer"""
+    """Part Detection Serializer"""
 
     class Meta:
         model = PartDetection
         fields = '__all__'
         extra_kwargs = {"prob_threshold": {"required": False}}
+
+
+class PDScenarioSerializer(serializers.ModelSerializer):
+    """Project Serializer"""
+
+    class Meta:
+        model = PDScenario
+        fields = '__all__'
 
 
 # pylint: disable=abstract-method
@@ -34,3 +43,26 @@ class ExportSerializer(serializers.Serializer):
     gpu = serializers.BooleanField(default=False)
     average_time = serializers.FloatField(default=0.0)
     count = serializers.IntegerField(default=0)
+
+
+class UploadRelabelSerializer(serializers.Serializer):
+    """UploadRelabelSerializer.
+    """
+
+    part_name = serializers.CharField()
+    labels = serializers.CharField()
+    img = Base64ImageField(required=True)
+    confidence = serializers.FloatField()
+    is_relabel = serializers.BooleanField()
+
+class UpdateCamBodySerializer(serializers.Serializer):
+    """UploadRelabelSerializer.
+    """
+    class CameraItem(serializers.Serializer):
+        """CameraItem.
+        """
+        id = serializers.CharField()
+        type = serializers.CharField()
+        source = serializers.CharField()
+        aoi = serializers.CharField(required=False)
+    cameras = CameraItem(many=True)

@@ -1,4 +1,6 @@
-"""App"""
+# -*- coding: utf-8 -*-
+"""App.
+"""
 
 import logging
 import sys
@@ -10,15 +12,12 @@ logger = logging.getLogger(__name__)
 
 class AzureTrainingStatusConfig(AppConfig):
     """App Config
-
-    Import signals and create demo objects.
     """
 
     name = 'vision_on_edge.azure_training_status'
 
     def ready(self):
-        """
-        Azure Training Status App Ready
+        """ready.
         """
         if 'runserver' in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel

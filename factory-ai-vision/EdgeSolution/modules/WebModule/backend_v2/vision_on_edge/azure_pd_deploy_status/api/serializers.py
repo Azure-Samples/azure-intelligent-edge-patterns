@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App API Serializers
+"""App API serializers.
 """
 
 import logging

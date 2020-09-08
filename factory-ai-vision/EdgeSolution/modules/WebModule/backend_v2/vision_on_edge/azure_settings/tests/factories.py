@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""App Model Factories
+"""App model factories.
 """
 
 from factory import DjangoModelFactory, Faker
-
 from vision_on_edge.azure_settings.models import Setting
 
 

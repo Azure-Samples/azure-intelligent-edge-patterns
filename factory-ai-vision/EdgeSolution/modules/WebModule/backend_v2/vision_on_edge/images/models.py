@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
-"""Models for Azure CustomVision images"""
+"""App models.
+"""
 
 import json
 import logging
 from io import BytesIO
 
 import requests
+from PIL import Image as PILImage
+
 from django.core import files
 from django.db import models
 from django.db.models.signals import pre_save
-from PIL import Image as PILImage
 from rest_framework import status
 
-from vision_on_edge.azure_projects.models import Project
-
 from ..azure_parts.models import Part
+from ..azure_projects.models import Project
+from ..cameras.models import Camera
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +24,11 @@ logger = logging.getLogger(__name__)
 
 
 class Image(models.Model):
-    """Image.
-
-    models.Model
+    """Image model.
     """
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    part = models.ForeignKey(Part, on_delete=models.CASCADE)
+    part = models.ForeignKey(Part, on_delete=models.SET_NULL, null=True)
+    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
     image = models.ImageField(upload_to="images/")
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
@@ -139,17 +140,16 @@ class Image(models.Model):
             raise value_err
 
     @staticmethod
-    def pre_save(instance, **kwargs):
+    def pre_save(**kwargs):
         """pre_save.
 
         Args:
             instance:
             kwargs:
         """
-
-        if 'instance' not in kwargs:
-            return
         instance = kwargs['instance']
+        if instance.project is None and instance.part is not None:
+            instance.project = instance.part.project
         if not instance.customvision_id:
             return
 

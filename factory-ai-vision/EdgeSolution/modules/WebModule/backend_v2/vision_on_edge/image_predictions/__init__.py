@@ -1,5 +1,5 @@
-"""
-Image Prediction apps
+# -*- coding: utf-8 -*-
+"""Image Prediction apps.
 """
 
 default_app_config = \

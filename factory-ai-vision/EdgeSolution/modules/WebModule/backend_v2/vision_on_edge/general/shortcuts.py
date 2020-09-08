@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""General shortcuts.
+"""
 
 from django.shortcuts import Http404, get_object_or_404
 from rest_framework.exceptions import APIException

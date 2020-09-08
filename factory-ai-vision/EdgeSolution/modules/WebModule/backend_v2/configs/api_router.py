@@ -1,39 +1,36 @@
 # -*- coding: utf-8 -*-
-"""API router
+"""API router.
 """
 
 from django.conf.urls import url
-from django.urls import path
+from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
-
-from vision_on_edge.azure_app_insight.api import views as app_insight_views
 from vision_on_edge.azure_part_detections.api import \
     views as part_detection_views
 from vision_on_edge.azure_parts.api import views as azure_part_views
+from vision_on_edge.azure_pd_deploy_status.api import \
+    views as azure_deploy_status_views
 from vision_on_edge.azure_projects.api import views as azure_projects_views
 from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training_status.api import \
     views as azure_training_status_views
-from vision_on_edge.azure_pd_deploy_status.api import \
-    views as azure_deploy_status_views
-from vision_on_edge.cameras.api import util_views as camera_util_views
+# from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views as camera_views
 from vision_on_edge.images.api import views as image_views
 from vision_on_edge.inference_modules.api import \
     views as inference_module_views
 from vision_on_edge.locations.api import views as location_views
 from vision_on_edge.notifications.api import views as notifications_views
-from vision_on_edge.relabeling.api import views as relabel_views
+# from vision_on_edge.relabeling.api import views as relabel_views
 from vision_on_edge.streams.api import views as stream_views
+from vision_on_edge.video_feed.api import views as videofeed_views
 
 # from vision_on_edge.feedback.api import views as feedback_views
 # from vision_on_edge.image_predictions.api import \
 # views as image_prediction_views
-
-from vision_on_edge.video_feed.api import views as videofeed_views
 
 router = DefaultRouter()
 router.trailing_slash = '/?'
@@ -51,6 +48,8 @@ router.register('locations', location_views.LocationViewSet)
 router.register('inference_modules',
                 inference_module_views.InferenceModuleViewSet)
 router.register('part_detections', part_detection_views.PartDetectionViewSet)
+router.register('part_detection_scenarios',
+                part_detection_views.PDScenarioViewSet)
 router.register('deploy_status', azure_deploy_status_views.DeployStatusViewSet)
 # router.register('image_predictions',
 # image_prediction_views.ImagePredictionViewSet)
@@ -104,8 +103,7 @@ urlpatterns += [
     path('inference/video_feed/keep_alive', videofeed_views.keep_alive),
     # path('projects/<int:project_id>/inference_video_feed',
     # stream_views.inference_video_feed),
-    path('relabel', relabel_views.upload_relabel_image),
-    path('relabel/update', relabel_views.relabel_update),
-    path('appinsight/key', app_insight_views.instrumentation_key),
+    # path('relabel/update', relabel_views.relabel_update),
+    path('appinsight/', include('vision_on_edge.azure_app_insight.urls')),
     # path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp),
 ]

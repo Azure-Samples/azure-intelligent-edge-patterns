@@ -1,14 +1,12 @@
-import React from 'react';
-import { FocusZone } from 'office-ui-fabric-react/lib/FocusZone';
-import { List } from 'office-ui-fabric-react/lib/List';
-import { IRectangle } from 'office-ui-fabric-react/lib/Utilities';
-import { mergeStyleSets } from 'office-ui-fabric-react/lib/Styling';
+import React, { useCallback } from 'react';
+import { FocusZone, List, IRectangle, mergeStyleSets } from '@fluentui/react';
 import { useConstCallback } from '@uifabric/react-hooks';
-import { Image } from '../store/type';
 import { useDispatch } from 'react-redux';
+
+import { Image } from '../store/type';
 import LabelDisplayImage from './LabelDisplayImage';
-import LabelingPage from './LabelingPage/LabelingPage';
 import { openLabelingPage } from '../store/labelingPageSlice';
+import { timeStampConverter } from '../utils/timeStampConverter';
 
 const ROWS_PER_PAGE = 3;
 const MAX_ROW_HEIGHT = 300;
@@ -19,7 +17,11 @@ const classNames = mergeStyleSets({
   },
 });
 
-export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ isRelabel, images }) => {
+export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'isRelabel'> & {
+  partName: string;
+};
+
+export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
   const columnCount = React.useRef(0);
   const rowHeight = React.useRef(0);
   const dispatch = useDispatch();
@@ -32,24 +34,34 @@ export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ i
     return columnCount.current * ROWS_PER_PAGE;
   });
 
-  const onRenderCell = useConstCallback((item: Image) => {
-    return (
-      <div
-        className={classNames.listGridExampleTile}
-        data-is-focusable
-        style={{
-          width: 100 / columnCount.current + '%',
-        }}
-      >
-        <LabelDisplayImage
-          imgId={item.id}
-          imgUrl={item.image}
-          pointerCursor
-          onClick={() => dispatch(openLabelingPage({ selectedImageId: item.id, imageIds: [item.id] }))}
-        />
-      </div>
-    );
-  });
+  const onRenderCell = useCallback(
+    (item: Item) => {
+      return (
+        <div
+          key={item.id}
+          className={classNames.listGridExampleTile}
+          data-is-focusable
+          style={{
+            width: `${100 / columnCount.current}%`,
+            height: MAX_ROW_HEIGHT,
+          }}
+        >
+          <LabelDisplayImage
+            imgId={item.id}
+            imgUrl={item.image}
+            imgTimeStamp={timeStampConverter(item.timestamp)}
+            partName={item.partName}
+            isRelabel={item.isRelabel}
+            pointerCursor
+            onClick={() =>
+              dispatch(openLabelingPage({ selectedImageId: item.id, imageIds: images.map((e) => e.id) }))
+            }
+          />
+        </div>
+      );
+    },
+    [dispatch, images],
+  );
 
   const getPageHeight = useConstCallback((): number => {
     return rowHeight.current * ROWS_PER_PAGE;
@@ -66,7 +78,6 @@ export const ImageList: React.FC<{ isRelabel: boolean; images: Image[] }> = ({ i
           onRenderCell={onRenderCell}
         />
       </FocusZone>
-      <LabelingPage isRelabel={isRelabel} />
     </>
   );
 };

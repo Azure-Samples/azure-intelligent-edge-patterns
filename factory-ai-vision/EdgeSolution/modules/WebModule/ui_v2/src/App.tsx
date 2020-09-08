@@ -1,14 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { initializeIcons } from '@fluentui/react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { MainLayout } from './components/MainLayout';
 import { RootRouter } from './routes/RootRouter';
 import TelemetryProvider from './components/TelemetryProvider';
 import { useWebSocket } from './hooks/useWebSocket';
-import { useDispatch, useSelector } from 'react-redux';
-import { State } from 'RootStateType';
 import { thunkGetSettingAndAppInsightKey } from './store/setting/settingAction';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { thunkGetProject } from './store/project/projectActions';
+import { getTrainingProject } from './store/trainingProjectSlice';
 
 function App() {
   // Listen for the notification boardcast.
@@ -18,9 +20,17 @@ function App() {
   const appInsightKey = useSelector<State, string>((state) => state.setting.appInsightKey);
   const isAppInsightOn = useSelector<State, boolean>((state) => state.setting.isCollectData);
   const rejectMsg = useSelector((state: State) => state.rejectMsg);
+  const [loading, setloading] = useState(true);
 
   useEffect(() => {
-    dispatch(thunkGetSettingAndAppInsightKey());
+    (async () => {
+      await Promise.all([
+        dispatch(thunkGetSettingAndAppInsightKey()),
+        dispatch(thunkGetProject()),
+        dispatch(getTrainingProject({ isDemo: false })),
+      ]);
+      setloading(false);
+    })();
   }, [dispatch]);
 
   useEffect(() => {
@@ -30,6 +40,8 @@ function App() {
   useEffect(() => {
     if (rejectMsg) alert(rejectMsg);
   }, [rejectMsg]);
+
+  if (loading) return <h1>Loading...</h1>;
 
   return (
     <BrowserRouter>

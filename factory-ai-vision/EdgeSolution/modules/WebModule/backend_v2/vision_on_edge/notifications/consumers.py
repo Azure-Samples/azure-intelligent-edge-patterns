@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Notification Consumer
+"""App Consumers.
 """
 
 # pylint: disable=unused-import

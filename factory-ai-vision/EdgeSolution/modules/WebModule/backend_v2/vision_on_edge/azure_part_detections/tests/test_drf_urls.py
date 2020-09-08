@@ -1,29 +1,32 @@
-"""DRF url tests
+# -*- coding: utf-8 -*-
+"""App drf url tests.
 """
 
 import pytest
+
 from django.urls import resolve, reverse
 
-from vision_on_edge.azure_projects.models import Project
+from ..models import PartDetection
 
 pytestmark = pytest.mark.django_db
 
 
-def test_project_detail(project: Project):
-    """test_project_detail.
+def test_part_detection_detail(part_detection: PartDetection):
+    """test_part_detection_detail.
 
     Args:
-        project (Project): project
+        part_detection (PartDetection): part_detection
     """
-    assert (reverse("api:project-detail",
-                    kwargs={"pk": project.id
-                           }) == f"/api/projects/{project.id}")
+    assert (reverse("api:partdetection-detail",
+                    kwargs={"pk": part_detection.id
+                           }) == f"/api/part_detections/{part_detection.id}")
+    assert resolve(f"/api/partdetections/{part_detection.id}"
+                  ).view_name == "api:partdetection-detail"
+
+
+def test_part_detection_list():
+    """test_part_detection_list.
+    """
+    assert reverse("api:partdetection-list") == "/api/part_detections"
     assert resolve(
-        f"/api/projects/{project.id}").view_name == "api:project-detail"
-
-
-def test_project_list():
-    """test_project_list.
-    """
-    assert reverse("api:project-list") == "/api/projects"
-    assert resolve("/api/projects").view_name == "api:project-list"
+        "/api/part_detections").view_name == "api:partdetection-list"

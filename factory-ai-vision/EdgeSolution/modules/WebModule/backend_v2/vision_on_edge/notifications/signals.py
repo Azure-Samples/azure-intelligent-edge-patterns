@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Signals
+"""App signals.
 """
 
 import logging
@@ -9,9 +9,9 @@ from channels.layers import get_channel_layer
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Notification
-from ..azure_training_status.models import TrainingStatus
 from ..azure_pd_deploy_status.models import DeployStatus
+from ..azure_training_status.models import TrainingStatus
+from .models import Notification
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +62,6 @@ def notification_post_save_dequeue_handler(**kwargs):
     """
 
     logger.info("dequeue notification...")
-    if "instance" not in kwargs:
-        return
-
     instance = kwargs['instance']
     if Notification.objects.filter(sender=instance.sender).count() >= 10:
         Notification.objects.filter(

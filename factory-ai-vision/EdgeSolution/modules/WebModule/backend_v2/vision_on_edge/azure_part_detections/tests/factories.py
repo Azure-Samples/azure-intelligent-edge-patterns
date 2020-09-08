@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Azure Project Factories
 """
 
@@ -6,15 +7,16 @@ from typing import Any, Sequence
 import factory
 from factory import DjangoModelFactory, Faker, post_generation
 
-from vision_on_edge.azure_projects.models import Project
-from vision_on_edge.azure_settings.tests.factories import SettingFactory
+from ...azure_projects.tests.factories import ProjectFactory
+from ...cameras.tests.factories import CameraFactory
 
 
-class ProjectFactory(DjangoModelFactory):
-    """ProjectFactory.
+class PartDetectionFactory(DjangoModelFactory):
+    """PartDetectionFactory.
     """
 
     setting = factory.SubFactory(SettingFactory)
+
     customvision_project_name = Faker("sentence")
 
     class Meta:

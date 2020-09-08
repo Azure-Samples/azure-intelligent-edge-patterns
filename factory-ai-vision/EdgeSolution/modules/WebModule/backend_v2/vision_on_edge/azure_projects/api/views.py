@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App views
+"""App API views.
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -10,6 +10,7 @@ from distutils.util import strtobool
 
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg import openapi
@@ -19,9 +20,7 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ...azure_parts.models import Part
-from ...exceptions.api_exceptions import CustomVisionAccessFailed
-from ...images.models import Image
+from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..models import Project, Task
 from ..utils import (pull_cv_project_helper, train_project_helper,
                      update_train_status_helper)
@@ -174,7 +173,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             # Let Signals to handle if we need to delete Part/Image
             return Response({"status": "ok"})
         except CustomVisionErrorException:
-            raise CustomVisionAccessFailed
+            raise SettingCustomVisionAccessFailed
 
     @swagger_auto_schema(
         operation_summary='Pull a Custom Vision project',

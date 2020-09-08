@@ -1,4 +1,6 @@
-"""App Signals"""
+# -*- coding: utf-8 -*-
+"""App signals.
+"""
 
 import logging
 
@@ -69,7 +71,7 @@ def delete_part_on_customvision_handler(**kwargs):
     Args:
         kwargs:
     """
-    logger.info("Deleting a part................................")
+    logger.info("Deleting a part.")
 
     # Dummy Check
     instance = kwargs['instance']

@@ -148,16 +148,6 @@ export const { selectAll: selectAllCameras, selectById: selectCameraById } = ent
   (state: State) => state.camera,
 );
 
-export const selectAllCamerasWithLocation = createSelector(
-  [selectAllCameras, selectLocationEntities],
-  (cameras, locations) => {
-    return cameras.map((c) => ({
-      ...c,
-      location: locations[c.location]?.name ?? '',
-    }));
-  },
-);
-
 export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
   cameras.map((e) => ({
     key: e.id,

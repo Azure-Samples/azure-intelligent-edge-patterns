@@ -1,10 +1,5 @@
-"""Utilities
-
-Azure IoT Edge utilities.
-
-functions:
-    is_edge: depends is edge or not
-    inference_module_url: get inference_module_url
+# -*- coding: utf-8 -*-
+"""App utilities.
 """
 
 import logging
@@ -17,10 +12,8 @@ logger = logging.getLogger(__name__)
 def is_edge() -> bool:
     """is_edge.
 
-    Args:
-
     Returns:
-        is_edge -> bool
+        bool: is_edge
     """
     try:
         IoTHubModuleClient.create_from_edge_environment()
@@ -31,8 +24,6 @@ def is_edge() -> bool:
 
 def inference_module_url() -> str:
     """inference_module_url.
-
-    Args:
 
     Returns:
         str: inference_module_url

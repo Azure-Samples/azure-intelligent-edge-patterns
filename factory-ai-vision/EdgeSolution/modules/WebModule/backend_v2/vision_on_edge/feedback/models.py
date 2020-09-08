@@ -1,12 +1,11 @@
-"""
-Models
+# -*- coding: utf-8 -*-
+"""App models.
 """
 
 import logging
 
 from django.db import models
 from django.db.models.signals import post_save
-
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_settings.models import Setting
 
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Feedback(models.Model):
-    """Feedback.
+    """Feedback Model.
     """
 
     VERYBAD = 'VB'
@@ -42,8 +41,6 @@ class Feedback(models.Model):
         Args:
             kwargs:
         """
-        if 'instance' not in kwargs:
-            return
         instance = kwargs['instance']
         logger.warning('Satisfaction: %s', instance.satisfaction)
 

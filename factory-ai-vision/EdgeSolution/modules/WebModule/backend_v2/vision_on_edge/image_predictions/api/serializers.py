@@ -1,5 +1,5 @@
-"""
-Image Prediction Serializer
+# -*- coding: utf-8 -*-
+"""App API serializers.
 """
 
 import logging
@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class ImagePredictionSerializer(serializers.ModelSerializer):
-    """Image Prediction Serializer"""
+    """ImagePredictionSerializer.
+    """
 
     class Meta:
         model = ImagePrediction

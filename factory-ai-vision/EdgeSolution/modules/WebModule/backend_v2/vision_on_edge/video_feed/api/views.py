@@ -15,6 +15,7 @@ from ..models import VideoFeed
 logger = logging.getLogger(__name__)
 
 STREAM_GC_TIME_THRESHOLD = 5  # Seconds
+PRINT_STREAMS = False
 
 
 class StreamManager():
@@ -43,7 +44,8 @@ class StreamManager():
         def _gc(self):
             while True:
                 self.mutex.acquire()
-                logger.info("streams: %s", self.streams)
+                if PRINT_STREAMS:
+                    logger.info("streams: %s", self.streams)
                 to_delete = []
                 for index, stream in enumerate(self.streams):
                     logger.info('Stream %s elapse time: %s, Currnet time: %s',
@@ -86,7 +88,8 @@ def video_feed(request):
     """videofeed return
     """
 
-    s = VideoFeed()
+    camera_id = request.query_params.get("camera_id")
+    s = VideoFeed(camera_id)
     stream_manager.add(s)
 
     return StreamingHttpResponse(

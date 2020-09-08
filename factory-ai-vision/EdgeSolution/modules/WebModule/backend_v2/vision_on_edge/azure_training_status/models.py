@@ -1,12 +1,10 @@
-"""App Models.
-
-Include TrainingStatus.
+# -*- coding: utf-8 -*-
+"""App models.
 """
 
 import logging
 
 from django.db import models
-
 from vision_on_edge.azure_projects.models import Project
 
 logger = logging.getLogger(__name__)

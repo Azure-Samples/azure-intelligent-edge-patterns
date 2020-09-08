@@ -23,4 +23,3 @@ DATABASES = {
         }
     },
 }
-# pylint: enable = wildcard-import, unused-wildcard-import

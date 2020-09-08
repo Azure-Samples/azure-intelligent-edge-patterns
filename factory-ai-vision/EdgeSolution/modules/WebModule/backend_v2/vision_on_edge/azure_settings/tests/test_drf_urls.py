@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""DRF url tests
+"""App drf url tests.
 """
 
 import pytest
+
 from django.urls import resolve, reverse
 
-from vision_on_edge.azure_settings.models import Setting
+from ..models import Setting
 
 pytestmark = pytest.mark.django_db
 

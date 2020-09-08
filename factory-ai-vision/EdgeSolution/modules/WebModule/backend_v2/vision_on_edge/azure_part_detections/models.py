@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""App Models.
+"""App models.
 """
 
 import logging
 import threading
 
 import requests
+
 from django.db import models
 from django.utils import timezone
 from django.db.models.signals import post_save
@@ -17,16 +18,22 @@ from ..inference_modules.models import InferenceModule
 
 logger = logging.getLogger(__name__)
 
+INFERENCE_MODE_CHOICES = [("PD", "part_detection"), ("PC", "part_counting")]
+
 
 class PartDetection(models.Model):
     """PartDetection Model
     """
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
+    name = models.CharField(blank=True, max_length=200)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
+    cameras = models.ManyToManyField(Camera, blank=True)
     inference_module = models.ForeignKey(InferenceModule,
-                                         on_delete=models.CASCADE,
+                                         on_delete=models.SET_NULL,
                                          null=True)
+    inference_mode = models.CharField(max_length=40,
+                                      choices=INFERENCE_MODE_CHOICES,
+                                      default="PD")
     parts = models.ManyToManyField(Part)
     needRetraining = models.BooleanField(default=True)
     deployed = models.BooleanField(default=False)
@@ -44,7 +51,7 @@ class PartDetection(models.Model):
 
     @staticmethod
     def post_save(**kwargs):
-        """PartDetection post_save
+        """post_save.
         """
         logger.info("PartDetection post_save")
         instance = kwargs["instance"]
@@ -65,6 +72,13 @@ class PartDetection(models.Model):
                                             'metrics_frame_per_minutes', 6)
 
         def _r(confidence_min, confidence_max, max_images):
+            requests.get(
+                "http://" + instance.inference_module.url +
+                "/update_part_detection_id",
+                params={
+                    "part_detection_id": instance.id,
+                },
+            )
             requests.get(
                 "http://" + instance.inference_module.url +
                 "/update_retrain_parameters",
@@ -106,6 +120,19 @@ class PartDetection(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
+    
+
+
+class PDScenario(models.Model):
+    """PartDetection Model
+    """
+    name = models.CharField(blank=True, max_length=200)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
+    inference_mode = models.CharField(max_length=40,
+                                      choices=INFERENCE_MODE_CHOICES,
+                                      default="PD")
+    parts = models.ManyToManyField(Part)
 
 
 post_save.connect(PartDetection.post_save,

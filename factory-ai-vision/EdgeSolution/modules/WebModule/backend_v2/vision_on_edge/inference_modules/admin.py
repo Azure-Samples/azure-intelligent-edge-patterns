@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""InferenceModule admin
+"""App admin.
 """
+
 from django.contrib import admin
 
 from .models import InferenceModule

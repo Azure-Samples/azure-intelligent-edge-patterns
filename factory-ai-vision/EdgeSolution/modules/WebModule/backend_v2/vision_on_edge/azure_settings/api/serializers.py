@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Serializers
+"""App API serializers.
 """
 
 import logging
@@ -16,9 +16,6 @@ class SettingSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        """Meta.
-        """
-
         model = Setting
         fields = '__all__'
 
@@ -46,3 +43,12 @@ class SettingSerializer(serializers.ModelSerializer):
             },
         )
         return obj
+
+
+class ListProjectProjectSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+
+
+class ListProjectSerializer(serializers.Serializer):
+    projects = ListProjectProjectSerializer(many=True)

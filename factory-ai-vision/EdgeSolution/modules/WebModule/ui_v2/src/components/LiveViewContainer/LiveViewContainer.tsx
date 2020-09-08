@@ -76,7 +76,7 @@ export const LiveViewContainer: React.FC<{
 
   return (
     <Stack tokens={{ childrenGap: 10 }} style={{ height: '100%' }}>
-      <Stack horizontal tokens={{ childrenGap: 10 }}>
+      {/* <Stack horizontal tokens={{ childrenGap: 10 }}>
         <Toggle label="Enable area of interest" checked={showAOI} onClick={onCheckboxClick} inlineLabel />
         <Button
           text="Create Box"
@@ -98,7 +98,7 @@ export const LiveViewContainer: React.FC<{
         />
         <Button text="Update" primary disabled={updateBtnDisabled || loading} onClick={onUpdate} />
         <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
-        {/* <Provider theme={errorTheme}>
+        {<Provider theme={errorTheme}>
           <WarningDialog
             contentText={<p>Sure you want to delete the configuration?</p>}
             trigger={
@@ -106,8 +106,8 @@ export const LiveViewContainer: React.FC<{
             }
             onConfirm={onDeleteProject}
           />
-        </Provider> */}
-      </Stack>
+        </Provider>}
+      </Stack> */}
       <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
         {showVideo ? (
           <LiveViewScene

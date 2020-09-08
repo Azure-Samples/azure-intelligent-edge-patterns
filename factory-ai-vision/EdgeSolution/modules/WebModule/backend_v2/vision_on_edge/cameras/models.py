@@ -6,9 +6,9 @@ import logging
 
 import cv2
 import requests
+
 from django.db import models
 from django.db.models.signals import post_save, pre_save
-
 from vision_on_edge.general.utils import normalize_rtsp
 
 from ..azure_iot.utils import inference_module_url
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class Camera(models.Model):
-    """Camera.
+    """Camera Model.
     """
 
     name = models.CharField(max_length=200)
@@ -65,10 +65,8 @@ class Camera(models.Model):
 
     @staticmethod
     def pre_save(**kwargs):
-        """Camera pre_save"""
-
-        if 'instance' not in kwargs:
-            return
+        """pre_save.
+        """
         instance = kwargs['instance']
         if instance.is_demo:
             return
@@ -78,26 +76,4 @@ class Camera(models.Model):
         if not rtsp_ok:
             raise ValueError('rtsp is not valid')
 
-    @staticmethod
-    def post_save(**kwargs):
-        """Camera post_save
-        """
-        # TODO: Move this to part_detection
-        instance = kwargs['instance']
-        if len(instance.area) > 1:
-            logger.info("Sending new AOI to Inference Module...")
-            try:
-                requests.get(
-                    url="http://" + inference_module_url() + "/update_cam",
-                    params={
-                        "cam_type": "rtsp",
-                        "cam_source": normalize_rtsp(instance.rtsp),
-                        "aoi": instance.area,
-                    },
-                )
-            except:
-                logger.error("Request failed")
-
-
 pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")
-post_save.connect(Camera.post_save, Camera, dispatch_uid="Camera_post")

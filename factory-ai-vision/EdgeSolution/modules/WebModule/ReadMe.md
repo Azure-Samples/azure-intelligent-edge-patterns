@@ -1,5 +1,7 @@
 ## Backend
 
+[![Build Status](https://dev.azure.com/FactoryAI-CICD/FactoryAI-CICD/_apis/build/status/Build%20module%20images%20(cpuamd64)?branchName=develop)](https://dev.azure.com/FactoryAI-CICD/FactoryAI-CICD/_build/latest?definitionId=1&branchName=develop)
+
 #### Install
 
     pip install -r requirements.txt

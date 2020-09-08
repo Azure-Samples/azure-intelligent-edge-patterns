@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App
+"""App.
 """
 
 import logging
@@ -13,26 +13,20 @@ DEFAULT_SETTING_NAME = 'DEFAULT_SETTING'
 
 
 class AzureProjectsConfig(AppConfig):
-    """App Config
-
-    Import signals and create demo objects.
+    """App Config.
     """
 
     name = 'vision_on_edge.azure_projects'
 
     def ready(self):
-        """
-        Azure Training App Ready
+        """ready.
         """
         if 'runserver' in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
-            logger.info("ready while running server")
-            logger.info("Importing Signals")
             from . import signals
             from .models import Project
             from ..azure_settings.models import Setting
 
-            logger.info("ready while running server")
             logger.info("Create/update a none-demo project...")
             setting_obj = Setting.objects.first()
             if (not Project.objects.filter(setting=setting_obj,
@@ -44,17 +38,24 @@ class AzureProjectsConfig(AppConfig):
                 # Default Settings should be created already
                 default_settings = Setting.objects.filter(
                     name=DEFAULT_SETTING_NAME)
-                if default_settings.count() <= 0:
+                if not default_settings.exists():
                     logger.info("Cannot find default settings....")
                     return
-                if not Project.objects.filter(is_demo=True).exists():
-                    logger.info("Creating demo project")
-                    Project.objects.update_or_create(
-                        setting=default_settings.first(),
-                        is_demo=True,
-                    )
-                # Train is created by signals
-                logger.info("Creating demo objects end.")
+                if Project.objects.filter(is_demo=True).exists():
+                    Project.objects.filter(is_demo=True).delete()
+                Project.objects.update_or_create(
+                    name="Demo Part Detection Project",
+                    setting=default_settings.first(),
+                    download_uri="default_model_6parts",
+                    is_demo=True,
+                )
+                Project.objects.update_or_create(
+                    name="Demo Part Counting Project",
+                    setting=default_settings.first(),
+                    download_uri="default_model_pc",
+                    is_demo=True,
+                )
+
+                logger.info("Create demo project end.")
 
             logger.info("Azure Training AppConfig End while running server")
-            # pylint: enable=unused-import, import-outside-toplevel

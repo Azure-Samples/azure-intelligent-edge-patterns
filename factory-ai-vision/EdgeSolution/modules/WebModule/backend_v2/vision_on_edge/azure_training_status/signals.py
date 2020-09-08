@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""App Signals
+"""App signals.
 """
 
 import logging
@@ -7,8 +7,8 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from .models import TrainingStatus
 from ..azure_projects.models import Project
+from .models import TrainingStatus
 
 logger = logging.getLogger(__name__)
 
