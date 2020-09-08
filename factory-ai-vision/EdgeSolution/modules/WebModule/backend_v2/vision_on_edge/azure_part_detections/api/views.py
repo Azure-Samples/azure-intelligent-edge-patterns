@@ -16,13 +16,21 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from ...azure_pd_deploy_status.models import DeployStatus
 from ...azure_projects.utils import (train_project_helper,
                                      update_train_status_helper)
 from ...azure_training_status import progress
 from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
-from ...general.api.serializers import SimpleStatusSerializer
+from ...general.api.serializers import (MSStyleErrorResponseSerializer,
+                                        SimpleStatusSerializer)
 from ...images.models import Image
+from ..exceptions import (PdConfigureWithoutCameras,
+                          PdConfigureWithoutInferenceModule,
+                          PdConfigureWithoutProject,
+                          PdInferenceModuleUnreachable,
+                          PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
+                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
 from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper, update_cam_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
@@ -44,6 +52,11 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         "project": "project"
     }
 
+    @swagger_auto_schema(operation_summary='Export Part Detection status',
+                         responses={
+                             '200': SimpleStatusSerializer,
+                             '400': MSStyleErrorResponseSerializer
+                         })
     @action(detail=True, methods=["get"])
     def update_prob_threshold(self, request, pk=None) -> Response:
         """update inference bounding box threshold"""
@@ -51,37 +64,23 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         part_detection_obj = get_object_or_404(queryset, pk=pk)
         prob_threshold = request.query_params.get("prob_threshold")
 
-        if prob_threshold is None:
-            return Response(
-                {
-                    'status': 'failed',
-                    'log': 'prob_threshold must be given as Integer'
-                },
-                status=status.HTTP_400_BAD_REQUEST)
-
         try:
             prob_threshold = int(prob_threshold)
-            if prob_threshold > 100 or prob_threshold < 0:
-                return Response(
-                    {
-                        'status': 'failed',
-                        'log': 'prob_threshold out of range'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST)
-            # Real function call
-            part_detection_obj.update_prob_threshold(
-                prob_threshold=prob_threshold)
-            return Response({'status': 'ok'})
-        except ValueError:
-            return Response(
-                {
-                    'status': 'failed',
-                    'log': 'prob_threshold must be given as Integer'
-                },
-                status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            raise PdProbThresholdNotInteger
+
+        if prob_threshold > 100 or prob_threshold < 0:
+            raise PdProbThresholdOutOfRange
+
+        part_detection_obj.update_prob_threshold(prob_threshold=prob_threshold)
+        return Response({'status': 'ok'})
 
     @swagger_auto_schema(operation_summary='Export Part Detection status',
-                         responses={'200': ExportSerializer})
+                         responses={
+                             '200': ExportSerializer,
+                             '400': MSStyleErrorResponseSerializer,
+                             '503': MSStyleErrorResponseSerializer
+                         })
     @action(detail=True, methods=["get"])
     def export(self, request, pk=None) -> Response:
         """get the status of train job sent to custom vision
@@ -89,14 +88,15 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         part_detection_obj = get_object_or_404(queryset, pk=pk)
         project_obj = part_detection_obj.project
-        training_status_obj = TrainingStatus.objects.get(project=project_obj)
+        deploy_status_obj = DeployStatus.objects.get(
+            part_detection=part_detection_obj)
+        inference_module_obj = part_detection_obj.inference_module
 
         success_rate = 0.0
         inference_num = 0
         unidentified_num = 0
         try:
-            res = requests.get("http://" +
-                               part_detection_obj.inference_module.url +
+            res = requests.get("http://" + inference_module_obj.url +
                                "/metrics")
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
@@ -108,24 +108,12 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             logger.info("success_rate: %s. inference_num: %s", success_rate,
                         inference_num)
         except requests.exceptions.ConnectionError:
-            logger.error(
-                "Export failed. Inference module url: %s unreachable",
-                part_detection_obj.inference_module.url,
-            )
-            return Response(
-                {
-                    "status":
-                        "failed",
-                    "log":
-                        "Export failed. Inference module url: " +
-                        part_detection_obj.inference_module.url +
-                        " unreachable",
-                },
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
+            raise PdInferenceModuleUnreachable(
+                detail=("Inference_module.url" + inference_module_obj.url +
+                        "unreachable."))
         return Response({
-            "status": training_status_obj.status,
-            "log": "Status: " + training_status_obj.log,
+            "status": deploy_status_obj.status,
+            "log": "Status: " + deploy_status_obj.log,
             "download_uri": project_obj.download_uri,
             "success_rate": success_rate,
             "inference_num": inference_num,
@@ -137,36 +125,38 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary='Train the project then deploy to Inference',
-        responses={'200': SimpleStatusSerializer})
+        responses={
+            '200': SimpleStatusSerializer,
+            '400': MSStyleErrorResponseSerializer
+        })
     @action(detail=True, methods=["get"])
     def configure(self, request, pk=None) -> Response:
         """configure.
+
         Train/Export/Deploy a part_detection_obj.
         """
         queryset = self.get_queryset()
         instance = get_object_or_404(queryset, pk=pk)
-        # is_demo = request.query_params.get("demo")
         # if project is demo, let training status go to ok and should go on.
-        for attr in ["inference_module", "camera", "project"]:
-            if not hasattr(instance, attr) or getattr(instance, attr) is None:
-                return Response(
-                    {
-                        "status":
-                            "failed",
-                        "log":
-                            f"Part Detection must given a {attr} to configure."
-                    },
-                    status=status.HTTP_400_BAD_REQUEST)
+        if not hasattr(instance, "inference_module") or getattr(
+                instance, "inference_module") is None:
+            raise PdConfigureWithoutInferenceModule
+        if not hasattr(instance,
+                       'project') or getattr(instance, 'project') is None:
+            raise PdConfigureWithoutProject
+        if not hasattr(instance,
+                       'cameras') or getattr(instance, 'cameras') is None:
+            raise PdConfigureWithoutInferenceModule
         upcreate_training_status(project_id=instance.project.id,
                                  **progress.PROGRESS_1_FINDING_PROJECT)
         instance.has_configured = True
         instance.save()
+
         train_project_helper(project_id=instance.project.id)
-        update_train_status_helper(project_id=instance.project.id)
         if_trained_then_deploy_helper(part_detection_id=instance.id)
         return Response({'status': 'ok'})
 
-    @swagger_auto_schema(operation_summary='Upload a relabel image',
+    @swagger_auto_schema(operation_summary='Upload a relabel image.',
                          request_body=UploadRelabelSerializer())
     @action(detail=True, methods=["post"])
     def upload_relabel_image(self, request, pk=None) -> Response:
@@ -188,12 +178,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         project_obj = instance.project
         if project_obj is None:
             logger.error("Cannot found project objects")
-            return Response(
-                {
-                    "status": "failed",
-                    "log": "Cannot found project objects"
-                },
-                status=status.HTTP_400_BAD_REQUEST)
+            raise PdConfigureWithoutProject
 
         # Relabel images count does not exceed project.maxImages
         # Handled by signals
@@ -204,15 +189,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
              confidence_float > instance.accuracyRangeMax):
             logger.error("Inferenece confidence %s out of range",
                          confidence_float)
-            logger.error("range %s ~ %s", instance.accuracyRangeMin,
-                         instance.accuracyRangeMax)
-
-            return Response(
-                {
-                    "status": "failed",
-                    'log': 'Confidence out of range',  # yapf...
-                },
-                status=status.HTTP_400_BAD_REQUEST)
+            raise PdRelabelConfidenceOutOfRange
 
         # Relabel images count does not exceed project.maxImages
         if project_obj.maxImages > Image.objects.filter(
@@ -270,13 +247,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             Image.objects.filter(
                 project=project_obj, part=part,
                 is_relabel=True).order_by("timestamp").last().delete()
-
-        return Response(
-            {
-                "status": "failed",
-                'log': 'Already reach project maxImages limit while labeling'
-            },
-            status=status.HTTP_400_BAD_REQUEST)
+        raise PdRelabelImageFull
 
     @swagger_auto_schema(operation_summary='Update camera manually.',
                          responses={200: SimpleStatusSerializer})

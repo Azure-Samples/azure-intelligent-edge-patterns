@@ -22,3 +22,10 @@ class AzureTrainingStatusConfig(AppConfig):
         if 'runserver' in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
             from . import signals
+            from ..azure_projects.models import Project
+            from .models import TrainingStatus
+            for project in Project.objects.all():
+                try:
+                    project.trainingstatus
+                except Project.trainingstatus.RelatedObjectDoesNotExist:
+                    TrainingStatus.objects.create(project=project)

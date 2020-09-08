@@ -34,7 +34,6 @@ class AzurePartsConfig(AppConfig):
             if create_demo:
                 logger.info("Creating demo parts...")
 
-                # TODO: change this if multi demo projects
                 if Project.objects.filter(
                         is_demo=True,
                         name="Demo Part Detection Project").count() != 1:
@@ -42,8 +41,6 @@ class AzurePartsConfig(AppConfig):
 
                 project_obj = Project.objects.get(
                     is_demo=True, name="Demo Part Detection Project")
-                # for partname in ['Box', 'Barrel', 'Hammer',
-                #   'Screwdriver', 'Bottle', 'Plastic bag']:
                 for partname in [
                         'aeroplane',
                         'bicycle',
@@ -65,6 +62,22 @@ class AzurePartsConfig(AppConfig):
                         'sofa',
                         'train',
                         'tvmonitor',
+                ]:
+                    if not Part.objects.filter(project=project_obj,
+                                               name=partname).exists():
+                        Part.objects.create(project=project_obj,
+                                            name=partname,
+                                            description="Demo")
+                if Project.objects.filter(
+                        is_demo=True,
+                        name="Demo Part Counting Project").count() != 1:
+                    return
+
+                # Object Counting
+                project_obj = Project.objects.get(
+                    is_demo=True, name="Demo Part Counting Project")
+                for partname in [
+                        'box',
                 ]:
                     if not Part.objects.filter(project=project_obj,
                                                name=partname).exists():

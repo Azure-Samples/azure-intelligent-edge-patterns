@@ -48,6 +48,18 @@ class Project(models.Model):
     def __str__(self):
         return self.name.__str__()
 
+    def validate(self):
+        is_project_valid = False
+        if self.setting and self.setting.is_trainer_valid and self.customvision_id:
+            try:
+                trainer = self.setting.get_trainer_obj()
+                trainer.get_project(self.customvision_id)
+                logger.info("Project customvision_id pass.")
+                is_project_valid = True
+            except Exception:
+                logger.info("Project customvision_id failed.")
+        return is_project_valid
+
     @staticmethod
     def pre_save(**kwargs):
         """pre_save.
@@ -102,7 +114,7 @@ class Project(models.Model):
             max_iterations (int): max_iterations
         """
         try:
-            trainer = self.setting.revalidate_and_get_trainer_obj()
+            trainer = self.setting.get_trainer_obj()
             if not trainer:
                 return
             if not self.customvision_id:
@@ -194,7 +206,7 @@ class Project(models.Model):
         is_task_success = False
         update_fields = []
         try:
-            trainer = self.setting.revalidate_and_get_trainer_obj()
+            trainer = self.setting.get_trainer_obj()
             if not trainer:
                 logger.error("Trainer is invalid. Not going to train...")
 
@@ -249,7 +261,7 @@ class Task(models.Model):
         def _export_worker(self):
             """Export Model Worker"""
             project_obj = self.project
-            trainer = project_obj.setting.revalidate_and_get_trainer_obj()
+            trainer = project_obj.setting.get_trainer_obj()
             customvision_id = project_obj.customvision_id
             while True:
                 time.sleep(1)

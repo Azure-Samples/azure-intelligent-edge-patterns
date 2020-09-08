@@ -218,7 +218,6 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
         train_project_helper(project_id=project_obj.id)
-        update_train_status_helper(project_id=project_obj.id)
         return Response({'status': 'ok'})
 
 
