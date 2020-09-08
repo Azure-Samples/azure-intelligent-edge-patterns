@@ -2,10 +2,10 @@
 """App utilities.
 """
 
+import json
 import logging
 import threading
 import time
-import json
 
 import requests
 
@@ -13,8 +13,8 @@ from ..azure_pd_deploy_status import progress as deploy_progress
 from ..azure_pd_deploy_status.utils import upcreate_deploy_status
 from ..azure_training_status.models import TrainingStatus
 from ..general.utils import normalize_rtsp
-from .models import PartDetection
 from .api.serializers import UpdateCamBodySerializer
+from .models import PartDetection
 
 logger = logging.getLogger(__name__)
 

@@ -10,6 +10,7 @@ from factory import DjangoModelFactory, Faker, post_generation
 from ...azure_projects.tests.factories import ProjectFactory
 from ...cameras.tests.factories import CameraFactory
 
+
 class PartDetectionFactory(DjangoModelFactory):
     """PartDetectionFactory.
     """

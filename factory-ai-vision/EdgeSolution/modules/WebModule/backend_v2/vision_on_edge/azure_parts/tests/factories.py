@@ -6,7 +6,9 @@ import factory
 from factory import DjangoModelFactory, Faker
 
 from vision_on_edge.azure_parts.models import Part
+
 from ...azure_projects.tests.factories import ProjectFactory
+
 
 class PartFactory(DjangoModelFactory):
     """PartFactory.

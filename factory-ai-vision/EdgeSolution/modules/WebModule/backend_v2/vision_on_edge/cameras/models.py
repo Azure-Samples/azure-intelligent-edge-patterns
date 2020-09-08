@@ -76,4 +76,5 @@ class Camera(models.Model):
         if not rtsp_ok:
             raise ValueError('rtsp is not valid')
 
+
 pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")

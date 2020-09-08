@@ -20,12 +20,14 @@ class PartDetectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {"prob_threshold": {"required": False}}
 
+
 class PDScenarioSerializer(serializers.ModelSerializer):
     """Project Serializer"""
 
     class Meta:
         model = PDScenario
         fields = '__all__'
+
 
 # pylint: disable=abstract-method
 class ExportSerializer(serializers.Serializer):
@@ -53,9 +55,11 @@ class UploadRelabelSerializer(serializers.Serializer):
     confidence = serializers.FloatField()
     is_relabel = serializers.BooleanField()
 
+
 class UpdateCamBodySerializer(serializers.Serializer):
     """UploadRelabelSerializer.
     """
+
     class CameraItem(serializers.Serializer):
         """CameraItem.
         """
@@ -63,4 +67,5 @@ class UpdateCamBodySerializer(serializers.Serializer):
         type = serializers.CharField()
         source = serializers.CharField()
         aoi = serializers.CharField(required=False)
+
     cameras = CameraItem(many=True)

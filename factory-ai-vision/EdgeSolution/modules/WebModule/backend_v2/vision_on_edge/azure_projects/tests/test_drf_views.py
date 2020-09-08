@@ -52,4 +52,3 @@ def test_get_filter():
         response.render().content.decode('utf-8'))
     assert ProjectSerializer(real_project).data in json.loads(
         response.render().content.decode('utf-8'))
-

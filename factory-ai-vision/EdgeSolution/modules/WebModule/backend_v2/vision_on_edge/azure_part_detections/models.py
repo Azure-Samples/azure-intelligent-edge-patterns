@@ -117,7 +117,7 @@ class PartDetection(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
-    
+
 
 class PDScenario(models.Model):
     """PartDetection Model
@@ -129,6 +129,7 @@ class PDScenario(models.Model):
                                       choices=INFERENCE_MODE_CHOICES,
                                       default="PD")
     parts = models.ManyToManyField(Part)
+
 
 post_save.connect(PartDetection.post_save,
                   PartDetection,

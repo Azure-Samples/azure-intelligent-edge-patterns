@@ -15,7 +15,8 @@ from django.db.models.signals import pre_save
 # pylint: enable=line-too-long
 from msrest.exceptions import ClientRequestError as MSClientRequestError
 
-from .exceptions import SettingCustomVisionAccessFailed, SettingCustomVisionCannotCreateProject
+from .exceptions import (SettingCustomVisionAccessFailed,
+                         SettingCustomVisionCannotCreateProject)
 
 logger = logging.getLogger(__name__)
 

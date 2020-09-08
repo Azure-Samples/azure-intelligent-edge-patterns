@@ -10,10 +10,12 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
 from configs.app_insight import APP_INSIGHT_INST_KEY
+
 from ..api.serializers import InstrumentKeyResponseSerializer
 from ..api.views import key_view
 
 logger = logging.getLogger(__name__)
+
 
 def test_can_get_key():
     """test_can_get_key.

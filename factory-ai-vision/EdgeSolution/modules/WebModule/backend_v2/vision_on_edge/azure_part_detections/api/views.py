@@ -26,7 +26,8 @@ from ...images.models import Image
 from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper, update_cam_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
-                          UploadRelabelSerializer, PDScenarioSerializer)
+                          PDScenarioSerializer, UploadRelabelSerializer)
+
 logger = logging.getLogger(__name__)
 
 

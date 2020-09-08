@@ -7,8 +7,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from configs.app_insight import APP_INSIGHT_INST_KEY
-from .serializers import InstrumentKeyResponseSerializer
+
 from ...general.api.serializers import MSStyleErrorResponseSerializer
+from .serializers import InstrumentKeyResponseSerializer
 
 
 @swagger_auto_schema(

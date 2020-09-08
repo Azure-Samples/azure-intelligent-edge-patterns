@@ -4,6 +4,7 @@
 
 from rest_framework.exceptions import APIException
 
+
 # pylint: disable=line-too-long
 class SettingEmptyKeyError(APIException):
     """SettingEmptyKeyError.

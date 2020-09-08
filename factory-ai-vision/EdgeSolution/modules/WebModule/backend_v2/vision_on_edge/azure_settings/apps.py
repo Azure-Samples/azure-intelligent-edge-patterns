@@ -52,9 +52,7 @@ class AzureSettingsConfig(AppConfig):
 
             elif Setting.objects.filter(endpoint=ENDPOINT,
                                         training_key=TRAINING_KEY).count() > 0:
-                logger.info(
-                    "Found existing Endpoint+Key with different name"
-                )
+                logger.info("Found existing Endpoint+Key with different name")
                 default_setting = Setting.objects.filter(
                     endpoint=ENDPOINT, training_key=TRAINING_KEY).first()
                 default_setting.save()

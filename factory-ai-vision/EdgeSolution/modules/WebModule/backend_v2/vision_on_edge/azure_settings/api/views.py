@@ -14,9 +14,10 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..exceptions import SettingEmptyEndpointError, SettingEmptyKeyError, SettingCustomVisionAccessFailed
+from ..exceptions import (SettingCustomVisionAccessFailed,
+                          SettingEmptyEndpointError, SettingEmptyKeyError)
 from ..models import Setting
-from .serializers import SettingSerializer, ListProjectSerializer
+from .serializers import ListProjectSerializer, SettingSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -55,5 +56,6 @@ class SettingViewSet(viewsets.ModelViewSet):
             return Response(serializer.validated_data)
         except CustomVisionErrorException:
             raise SettingCustomVisionAccessFailed
+
 
 # pylint: enable=too-many-ancestors
