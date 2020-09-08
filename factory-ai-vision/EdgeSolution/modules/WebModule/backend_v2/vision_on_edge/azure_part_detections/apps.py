@@ -51,7 +51,7 @@ class AzurePartDetectionConfig(AppConfig):
                     is_demo=True,
                     name="Demo Part Detection Project").part_set.all())
             pc_scenario = PDScenario.objects.create(
-                name="Simple Part Counting",
+                name="Counting objects",
                 inference_mode="PC",
                 project=Project.objects.get(name="Demo Part Counting Project"),
             )
