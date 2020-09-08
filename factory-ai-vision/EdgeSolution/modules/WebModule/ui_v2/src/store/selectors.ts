@@ -15,11 +15,7 @@ const selectImagesByPart = (partId) =>
 export const selectImageItemByTaggedPart = (partId) =>
   createSelector([selectAllImages, selectPartEntities], (images, partEntities) =>
     images
-      .filter((img) => img.part === partId)
-      .filter((img) => {
-        // TODO Check if we need to filter relabel images
-        return !img.isRelabel;
-      })
+      .filter((img) => img.part === partId && !img.isRelabel)
       .map(
         (img): ImageListItem => {
           return {
