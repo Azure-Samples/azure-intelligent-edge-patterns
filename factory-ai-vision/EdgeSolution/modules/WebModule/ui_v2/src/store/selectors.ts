@@ -13,12 +13,12 @@ const selectImagesByPart = (partId) =>
   createSelector(selectImagesByRelabel(false), (images) => images.filter((img) => img.part === partId));
 
 export const selectImageItemByTaggedPart = (partId) =>
-  createSelector([selectAllImages, selectAllAnno, selectPartEntities], (images, annos, partEntities) =>
+  createSelector([selectAllImages, selectPartEntities], (images, partEntities) =>
     images
       .filter((img) => img.part === partId)
       .filter((img) => {
-        const hasAnno = !!annos.find((anno) => img.id === anno.image);
-        return hasAnno && !img.isRelabel;
+        // TODO Check if we need to filter relabel images
+        return !img.isRelabel;
       })
       .map(
         (img): ImageListItem => {
