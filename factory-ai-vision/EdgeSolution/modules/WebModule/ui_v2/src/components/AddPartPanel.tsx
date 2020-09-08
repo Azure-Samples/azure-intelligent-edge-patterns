@@ -1,22 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import {
-  Panel,
-  TextField,
-  Stack,
-  PrimaryButton,
-  DefaultButton,
-  ProgressIndicator,
-  Dropdown,
-  IDropdownOption,
-  Link,
-} from '@fluentui/react';
+import React, { useState, useCallback } from 'react';
+import { Panel, TextField, Stack, PrimaryButton, DefaultButton, ProgressIndicator } from '@fluentui/react';
 import * as R from 'ramda';
-import { useDispatch, useSelector } from 'react-redux';
-import { createSelector } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
 
 import { postPart, patchPart } from '../store/partSlice';
-import { selectAllLocations, getLocations } from '../store/locationSlice';
-import { CreateLocationDialog } from './CreateLocationDialog';
 
 export enum PanelMode {
   Create,
@@ -82,7 +69,6 @@ export const AddEditPartPanel: React.FC<AddEditPartPanelProps> = ({
       );
       setFormData(initialForm);
     } else {
-      // FIXME HELP!!! andrew please verify this
       await dispatch(
         patchPart({
           data: {
