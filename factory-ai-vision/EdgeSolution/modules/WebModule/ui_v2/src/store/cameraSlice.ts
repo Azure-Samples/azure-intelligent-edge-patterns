@@ -144,9 +144,11 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { selectAll: selectAllCameras, selectById: selectCameraById } = entityAdapter.getSelectors(
-  (state: State) => state.camera,
-);
+export const {
+  selectAll: selectAllCameras,
+  selectById: selectCameraById,
+  selectEntities: selectCameraEntities,
+} = entityAdapter.getSelectors((state: State) => state.camera);
 
 export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
   cameras.map((e) => ({
@@ -154,3 +156,6 @@ export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) 
     text: e.name,
   })),
 );
+
+export const selectCamerasByIds = (ids) =>
+  createSelector(selectCameraEntities, (entities) => ids.map((id) => entities[id]));

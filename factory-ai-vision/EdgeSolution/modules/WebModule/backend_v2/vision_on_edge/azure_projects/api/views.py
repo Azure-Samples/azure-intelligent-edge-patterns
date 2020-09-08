@@ -175,7 +175,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise SettingCustomVisionAccessFailed
 
     @swagger_auto_schema(
-        operation_summary='Pull a Custom Vision project',
+        operation_summary='Pull a Custom Vision project.',
         manual_parameters=[
             openapi.Parameter('customvision_project_id',
                               openapi.IN_QUERY,
