@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, ReactText } from 'react';
 import {
   Dialog,
   Dropdown,
@@ -8,18 +8,17 @@ import {
   getTheme,
   mergeStyleSets,
   IDropdownOption,
-  Separator,
   Text,
   Spinner,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { AcceptMediumIcon } from '@fluentui/react-icons';
-import { useHistory } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
 import { cameraOptionsSelector, selectCameraById, getCameras } from '../store/cameraSlice';
 import { captureImage } from '../store/imageSlice';
+import { openLabelingPage } from '../store/labelingPageSlice';
 
 const { palette } = getTheme();
 
@@ -51,10 +50,11 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   const dispatch = useDispatch();
   const [status, setStatus] = useState<Status>(Status.Waiting);
   const streamIdRef = useRef('');
-  const history = useHistory();
+  const capturedImgs = useRef([]);
 
   const closeDialog = () => {
     setStatus(Status.Waiting);
+    capturedImgs.current = [];
     onDismiss();
   };
 
@@ -64,15 +64,31 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
 
   const onCaptureClick = async () => {
     setStatus(Status.Capturing);
-    await dispatch(
+    const action = await dispatch(
       captureImage({ streamId: streamIdRef.current, imageIds: [], shouldOpenLabelingPage: false }),
     );
+    const { payload } = action as any;
+    if (payload) capturedImgs.current.push(Object.keys(payload.images)[0]);
     setStatus(Status.Success);
+  };
+
+  const onGoTaggingClick = () => {
+    onDismiss();
+    dispatch(openLabelingPage({ imageIds: capturedImgs.current, selectedImageId: capturedImgs.current[0] }));
   };
 
   useEffect(() => {
     dispatch(getCameras(false));
   }, [dispatch]);
+
+  useEffect(() => {
+    if (status === Status.Success) {
+      const resetSuccess = setTimeout(() => setStatus(Status.Waiting), 3000);
+      return () => {
+        clearTimeout(resetSuccess);
+      };
+    }
+  }, [status]);
 
   return (
     <Dialog
@@ -97,33 +113,28 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
             styles={{ dropdown: { width: '300px' } }}
           />
           <Stack horizontal tokens={{ childrenGap: 30 }}>
-            <Stack styles={{ root: { width: '75%', height: '500px' } }}>
+            <Stack styles={{ root: { width: '75%', height: '500px', position: 'relative' } }}>
               <RTSPVideo
                 rtsp={rtsp}
                 onStreamCreated={(streamId) => {
                   streamIdRef.current = streamId;
                 }}
               />
+              <CaptureBanner top="80%" left="50%" status={status} />
             </Stack>
             <Stack verticalAlign="center" tokens={{ childrenGap: 10 }} styles={{ root: { width: '25%' } }}>
-              {status === Status.Success && <CaptureSuccessIcon />}
-              {status === Status.Capturing && <Spinner />}
-              {status !== Status.Waiting && <Separator />}
               <DefaultButton
-                text={status === Status.Waiting ? 'Capture image' : 'Capture another image'}
+                text="Capture image"
                 iconProps={{ iconName: 'Camera', className: functionBtnStyleSets.icon }}
                 className={functionBtnStyleSets.button}
                 onClick={onCaptureClick}
               />
-              {status !== Status.Waiting && (
+              {capturedImgs.current.length > 0 && (
                 <DefaultButton
-                  text="Tag images"
+                  text="Go to tagging"
                   iconProps={{ iconName: 'Tag', className: functionBtnStyleSets.icon }}
                   className={functionBtnStyleSets.button}
-                  onClick={() => {
-                    closeDialog();
-                    history.push('/images');
-                  }}
+                  onClick={onGoTaggingClick}
                 />
               )}
             </Stack>
@@ -137,20 +148,50 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   );
 };
 
-const CaptureSuccessIcon: React.FC = () => {
+const CaptureBanner: React.FC<{ top: ReactText; left: ReactText; status: Status }> = ({
+  top,
+  left,
+  status,
+}) => {
+  if (status === Status.Waiting) return null;
+
   return (
-    <Stack tokens={{ childrenGap: 10 }} horizontalAlign="center">
-      <AcceptMediumIcon
-        style={{
-          borderRadius: '100%',
-          backgroundColor: '#57A300',
-          color: 'white',
-          padding: '5px',
-          fontSize: '8px',
-          textAlign: 'center',
-        }}
-      />
-      <Text>Image saved!</Text>
+    <Stack
+      tokens={{ childrenGap: 10 }}
+      horizontal
+      horizontalAlign="center"
+      verticalAlign="center"
+      styles={{
+        root: {
+          position: 'absolute',
+          width: '160px',
+          height: '40px',
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(4px)',
+          borderRadius: '2px',
+          transform: 'translateX(-50%)',
+          top,
+          left,
+        },
+      }}
+    >
+      {status === Status.Capturing ? (
+        <Spinner />
+      ) : (
+        <>
+          <AcceptMediumIcon
+            style={{
+              borderRadius: '100%',
+              backgroundColor: '#57A300',
+              color: 'white',
+              padding: '5px',
+              fontSize: '8px',
+              textAlign: 'center',
+            }}
+          />
+          <Text>Image saved!</Text>
+        </>
+      )}
     </Stack>
   );
 };
