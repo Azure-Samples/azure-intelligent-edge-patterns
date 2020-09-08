@@ -33,7 +33,7 @@ const initialState: Project = {
   isLoading: false,
   data: {
     id: null,
-    camera: null,
+    cameras: [],
     location: null,
     parts: [],
     trainingProject: null,
@@ -50,7 +50,7 @@ const initialState: Project = {
   },
   originData: {
     id: null,
-    camera: null,
+    cameras: [],
     location: null,
     parts: [],
     trainingProject: null,
@@ -117,7 +117,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         isLoading: false,
         data: {
           id: null,
-          camera: null,
+          cameras: [],
           location: null,
           parts: [],
           trainingProject: null,
@@ -134,7 +134,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         },
         originData: {
           id: null,
-          camera: null,
+          cameras: [],
           location: null,
           parts: [],
           trainingProject: null,

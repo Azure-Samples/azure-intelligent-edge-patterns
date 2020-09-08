@@ -36,7 +36,7 @@ export const CameraDetails: React.FC = () => {
   const cameraId = parseInt(useQuery().get('cameraId'), 10);
   const camera = useSelector((state: State) => selectCameraById(state, cameraId));
   const locationName = useSelector((state: State) => selectLocationById(state, camera?.location)?.name);
-  const projectCameraId = useSelector((state: State) => state.project.data.camera);
+  const projectCameraId = useSelector((state: State) => state.project.data.cameras);
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -88,7 +88,7 @@ export const CameraDetails: React.FC = () => {
     { key: camera.name, text: camera.name },
   ];
 
-  const isCameraInUsed = projectCameraId === cameraId;
+  const isCameraInUsed = projectCameraId.includes(cameraId);
 
   return (
     <>

@@ -27,7 +27,7 @@ import {
   thunkGetProject,
 } from '../store/project/projectActions';
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
-import { selectCameraById } from '../store/cameraSlice';
+import { selectCamerasByIds } from '../store/cameraSlice';
 import { selectTrainingProjectById } from '../store/trainingProjectSlice';
 import { selectPartNamesById } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
@@ -41,7 +41,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   );
   const {
     id: projectId,
-    camera: projectCameraId,
+    cameras: projectCameraIds,
     trainingProject,
     parts,
     sendMessageToCloud,
@@ -53,7 +53,9 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     maxImages,
     name,
   } = projectData;
-  const cameraName = useSelector((state: State) => selectCameraById(state, projectCameraId)?.name);
+  const cameraNames = useSelector((state: State) =>
+    selectCamerasByIds(projectCameraIds)(state).map((e) => e.name),
+  );
   const trainingProjectName = useSelector(
     (state: State) => selectTrainingProjectById(state, trainingProject)?.name,
   );
@@ -141,7 +143,11 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         <Stack grow>
           <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
             <Stack grow>
-              <LiveViewContainer showVideo={true} cameraId={projectData.camera} onDeleteProject={() => {}} />
+              <LiveViewContainer
+                showVideo={true}
+                cameraId={projectData.cameras[0]}
+                onDeleteProject={() => {}}
+              />
             </Stack>
             <Stack tokens={{ childrenGap: 10 }} styles={{ root: { height: '100px' } }}>
               <Text variant="xLarge">{name}</Text>
@@ -154,7 +160,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
           <Separator styles={{ root: { padding: 0 } }} />
           <Stack tokens={{ childrenGap: 17, padding: 25 }}>
             <ConfigurationInfo
-              cameraName={cameraName}
+              cameraName={cameraNames.join(', ')}
               partNames={partNames}
               sendMessageToCloud={sendMessageToCloud}
               framesPerMin={framesPerMin}
