@@ -10,7 +10,6 @@ from azure.cognitiveservices.vision.customvision.training.models import Project
 # pylint: disable=line-too-long
 from azure.cognitiveservices.vision.customvision.training.models.custom_vision_error_py3 import \
     CustomVisionErrorException
-
 from django.db import models
 from django.db.models.signals import pre_save
 # pylint: enable=line-too-long

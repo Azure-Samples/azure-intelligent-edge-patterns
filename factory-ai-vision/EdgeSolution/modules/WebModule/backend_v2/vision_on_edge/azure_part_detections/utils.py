@@ -2,10 +2,10 @@
 """App utilities.
 """
 
+import json
 import logging
 import threading
 import time
-import json
 
 import requests
 
@@ -13,8 +13,8 @@ from ..azure_pd_deploy_status import progress as deploy_progress
 from ..azure_pd_deploy_status.utils import upcreate_deploy_status
 from ..azure_training_status.models import TrainingStatus
 from ..general.utils import normalize_rtsp
-from .models import PartDetection
 from .api.serializers import UpdateCamBodySerializer
+from .models import PartDetection
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +35,20 @@ def if_trained_then_deploy_worker(part_detection_id):
         # Training Status Listener
         logger.info("Listening on Training Status: %s", training_status_obj)
         if training_status_obj.status not in ["ok", "failed"]:
+            upcreate_deploy_status(part_detection_id=part_detection_id,
+                                   status=training_status_obj.status,
+                                   log=training_status_obj.log)
             continue
 
-        upcreate_deploy_status(
-            part_detection_id=part_detection_id,
-            **deploy_progress.PROGRESS_1_WATINING_PROJECT_TRAINED)
+        if training_status_obj.status == "failed":
+            logger.info("Project train/export failed.")
+            upcreate_deploy_status(part_detection_id=part_detection_id,
+                                   status=training_status_obj.status,
+                                   log=training_status_obj.log)
+            return
+
+        logger.info("Deploying model.")
+
         model_uri = project_obj.download_uri
         parts = [p.name for p in part_detection_obj.parts.all()]
 
@@ -57,7 +66,8 @@ def if_trained_then_deploy_worker(part_detection_id):
                     params={
                         "part_detection_id": part_detection_obj.id,
                     },
-                )  # TODO: Fix when multi camers
+                )
+                # TODO: Fix when multi camers
                 # requests.get(
                 # "http://" + str(part_detection_obj.inference_module.url) +
                 # "/update_cam",

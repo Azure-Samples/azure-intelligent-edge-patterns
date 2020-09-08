@@ -6,7 +6,6 @@ import logging
 import threading
 
 import requests
-
 from django.db import models
 from django.db.models.signals import post_save
 
@@ -118,7 +117,6 @@ class PartDetection(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
-    
 
 
 class PDScenario(models.Model):

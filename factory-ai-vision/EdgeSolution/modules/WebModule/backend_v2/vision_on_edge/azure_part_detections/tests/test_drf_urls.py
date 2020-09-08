@@ -3,7 +3,6 @@
 """
 
 import pytest
-
 from django.urls import resolve, reverse
 
 from ..models import PartDetection
