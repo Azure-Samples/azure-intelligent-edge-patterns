@@ -12,6 +12,8 @@ import {
   Pivot,
   PivotItem,
   Link,
+  IDropdownOption,
+  Dropdown,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -53,9 +55,14 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     maxImages,
     name,
   } = projectData;
-  const cameraNames = useSelector((state: State) =>
-    selectCamerasByIds(projectCameraIds)(state).map((e) => e.name),
+  const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
+    selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
   );
+  const [selectedCamera, setselectedCamera] = useState(null);
+  useEffect(() => {
+    if (projectCameraIds.length) setselectedCamera(projectCameraIds[0]);
+  }, [projectCameraIds]);
+
   const trainingProjectName = useSelector(
     (state: State) => selectTrainingProjectById(state, trainingProject)?.name,
   );
@@ -143,24 +150,32 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         <Stack grow>
           <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
             <Stack grow>
-              <LiveViewContainer
-                showVideo={true}
-                cameraId={projectData.cameras[0]}
-                onDeleteProject={() => {}}
-              />
+              <LiveViewContainer showVideo={true} cameraId={selectedCamera} onDeleteProject={() => {}} />
             </Stack>
-            <Stack tokens={{ childrenGap: 10 }} styles={{ root: { height: '100px' } }}>
-              <Text variant="xLarge">{name}</Text>
-              <Text styles={{ root: { color: palette.neutralSecondary } }}>
-                Started running <b>{/* TODO */} ago</b>
-              </Text>
-              <CommandBar items={commandBarItems} styles={{ root: { padding: 0 } }} />
+            <Stack horizontal horizontalAlign="space-between">
+              <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
+                <Text variant="xLarge">{name}</Text>
+                <Text styles={{ root: { color: palette.neutralSecondary } }}>
+                  Started running <b>{/* TODO */} ago</b>
+                </Text>
+                <CommandBar items={commandBarItems} styles={{ root: { padding: 0 } }} />
+              </Stack>
+              <Dropdown
+                options={cameraOptions}
+                label="Select Camera"
+                styles={{
+                  root: { display: 'flex', alignItems: 'flex-start' },
+                  dropdown: { width: '180px', marginLeft: '24px' },
+                }}
+                selectedKey={selectedCamera}
+                onChange={(_, option) => setselectedCamera(option.key)}
+              />
             </Stack>
           </Stack>
           <Separator styles={{ root: { padding: 0 } }} />
           <Stack tokens={{ childrenGap: 17, padding: 25 }}>
             <ConfigurationInfo
-              cameraName={cameraNames.join(', ')}
+              cameraName={cameraOptions.map((e) => e.text).join(', ')}
               partNames={partNames}
               sendMessageToCloud={sendMessageToCloud}
               framesPerMin={framesPerMin}
