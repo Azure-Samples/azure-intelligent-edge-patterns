@@ -4,9 +4,8 @@
 
 import logging
 
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-
 from configs.app_insight import APP_INSIGHT_CONN_STR
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 
 def get_app_insight_logger() -> logging.Logger:

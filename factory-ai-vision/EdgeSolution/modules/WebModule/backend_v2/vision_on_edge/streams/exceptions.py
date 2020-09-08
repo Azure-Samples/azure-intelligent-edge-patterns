@@ -4,6 +4,7 @@
 
 from rest_framework.exceptions import APIException
 
+
 class StreamOpenRTSPError(APIException):
     """StreamOpenRTSPError.
     """

@@ -3,12 +3,11 @@
 """
 
 from django.conf.urls import url
-from django.urls import path, include
+from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
-
 from vision_on_edge.azure_part_detections.api import \
     views as part_detection_views
 from vision_on_edge.azure_parts.api import views as azure_part_views
@@ -33,7 +32,6 @@ from vision_on_edge.video_feed.api import views as videofeed_views
 # from vision_on_edge.image_predictions.api import \
 # views as image_prediction_views
 
-
 router = DefaultRouter()
 router.trailing_slash = '/?'
 app_name = "api"
@@ -50,7 +48,8 @@ router.register('locations', location_views.LocationViewSet)
 router.register('inference_modules',
                 inference_module_views.InferenceModuleViewSet)
 router.register('part_detections', part_detection_views.PartDetectionViewSet)
-router.register('part_detection_scenarios', part_detection_views.PDScenarioViewSet)
+router.register('part_detection_scenarios',
+                part_detection_views.PDScenarioViewSet)
 router.register('deploy_status', azure_deploy_status_views.DeployStatusViewSet)
 # router.register('image_predictions',
 # image_prediction_views.ImagePredictionViewSet)

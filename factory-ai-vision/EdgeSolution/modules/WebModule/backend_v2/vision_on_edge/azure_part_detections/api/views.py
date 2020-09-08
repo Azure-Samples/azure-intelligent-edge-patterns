@@ -7,6 +7,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import requests
+
 from django.core.files.images import ImageFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -26,7 +27,7 @@ from ...images.models import Image
 from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
-                          UploadRelabelSerializer, PDScenarioSerializer)
+                          PDScenarioSerializer, UploadRelabelSerializer)
 
 logger = logging.getLogger(__name__)
 
@@ -277,6 +278,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 'log': 'Already reach project maxImages limit while labeling'
             },
             status=status.HTTP_400_BAD_REQUEST)
+
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
     """Project ModelViewSet

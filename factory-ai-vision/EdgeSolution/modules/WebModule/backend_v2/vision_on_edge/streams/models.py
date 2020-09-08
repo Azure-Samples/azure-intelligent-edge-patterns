@@ -11,8 +11,8 @@ import cv2
 import requests
 from azure.iot.device import IoTHubModuleClient
 
-from .exceptions import StreamOpenRTSPError
 from ..azure_iot.utils import inference_module_url
+from .exceptions import StreamOpenRTSPError
 
 logger = logging.getLogger(__name__)
 

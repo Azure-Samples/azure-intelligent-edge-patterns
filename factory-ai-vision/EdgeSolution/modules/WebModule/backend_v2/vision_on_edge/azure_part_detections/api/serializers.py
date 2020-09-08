@@ -20,12 +20,14 @@ class PartDetectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {"prob_threshold": {"required": False}}
 
+
 class PDScenarioSerializer(serializers.ModelSerializer):
     """Project Serializer"""
 
     class Meta:
         model = PDScenario
         fields = '__all__'
+
 
 # pylint: disable=abstract-method
 class ExportSerializer(serializers.Serializer):
