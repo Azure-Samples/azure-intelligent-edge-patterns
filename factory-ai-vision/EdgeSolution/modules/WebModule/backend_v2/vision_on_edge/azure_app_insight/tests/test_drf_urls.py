@@ -4,6 +4,7 @@
 
 from django.urls import resolve, reverse
 
+
 def test_key_view():
     """test_key_view.
     """

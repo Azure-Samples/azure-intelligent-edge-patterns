@@ -16,10 +16,12 @@ class NoNoneDemoProjectExistsError(APIException):
     default_detail = "part.project is empty and no none-demo project"
     default_code = "no_none_demo_project_exists_error"
 
+
 class MultiNoneDemoProjectExistsError(APIException):
     status_code = 400
     default_detail = "part.project is empty and multi none-demo project"
     default_code = "multi_none_demo_project_exists_error"
+
 
 class SamePartExistError(APIException):
     status_code = 400

@@ -7,6 +7,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import requests
+
 from django.core.files.images import ImageFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -27,6 +28,7 @@ from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper, update_cam_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
                           UploadRelabelSerializer, PDScenarioSerializer)
+
 logger = logging.getLogger(__name__)
 
 
@@ -277,7 +279,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             },
             status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(operation_summary='test api to update cam',
+    @swagger_auto_schema(operation_summary='Update camera manually.',
                          responses={200: SimpleStatusSerializer})
     @action(detail=True, methods=["get"])
     def update_cam(self, request, pk=None) -> Response:

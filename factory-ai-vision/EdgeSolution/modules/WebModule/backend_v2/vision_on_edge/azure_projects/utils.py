@@ -9,8 +9,9 @@ import time
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
+from vision_on_edge.azure_settings.exceptions import \
+    SettingCustomVisionAccessFailed
 from vision_on_edge.azure_training_status.utils import upcreate_training_status
-from vision_on_edge.azure_settings.exceptions import SettingCustomVisionAccessFailed
 from vision_on_edge.images.models import Image
 
 from ..azure_parts.utils import batch_upload_parts_to_customvision

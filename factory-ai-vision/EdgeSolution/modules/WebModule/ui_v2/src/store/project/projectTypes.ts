@@ -4,7 +4,7 @@ import { State } from 'RootStateType';
 
 export type Project = {
   isLoading: boolean;
-  trainingLogs: string[];
+  trainingLog: string;
   data: ProjectData;
   originData: ProjectData;
   inferenceMetrics: {
@@ -66,9 +66,9 @@ export type ProjectData = {
   framesPerMin: number;
   accuracyThreshold: number;
   modelUrl: string;
-  cvProjectId?: string;
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
+  name: string;
 };
 
 // Describing the different ACTION NAMES available

@@ -14,18 +14,20 @@ from django.core.files.images import ImageFile
 from django.http import HttpResponse, StreamingHttpResponse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
 
-from ...general.api.serializers import SimpleErrorSerializer, MSStyleErrorResponseSerializer
 from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...cameras.models import Camera
+from ...general.api.serializers import (MSStyleErrorResponseSerializer,
+                                        SimpleErrorSerializer)
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
 from ..models import Stream
-from .serializers import ConnectStreamResponseSerializer, CaptureStreamResponseSerializer
+from .serializers import (CaptureStreamResponseSerializer,
+                          ConnectStreamResponseSerializer)
 
 logger = logging.getLogger(__name__)
 
@@ -188,24 +190,23 @@ def video_feed(request, stream_id):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-@swagger_auto_schema(
-    method='get',
-    operation_summary='Capture Streams and save as image.',
-    manual_parameters=[
-        openapi.Parameter('stream_id',
-                          openapi.IN_PATH,
-                          type=openapi.TYPE_INTEGER,
-                          description='Stream ID'),
-        openapi.Parameter('part_id',
-                          openapi.IN_QUERY,
-                          type=openapi.TYPE_INTEGER,
-                          description='Part ID',
-                          required=False),
-    ],
-    responses={
-        '200': CaptureStreamResponseSerializer,
-        '400': SimpleErrorSerializer
-    })
+@swagger_auto_schema(method='get',
+                     operation_summary='Capture Streams and save as image.',
+                     manual_parameters=[
+                         openapi.Parameter('stream_id',
+                                           openapi.IN_PATH,
+                                           type=openapi.TYPE_INTEGER,
+                                           description='Stream ID'),
+                         openapi.Parameter('part_id',
+                                           openapi.IN_QUERY,
+                                           type=openapi.TYPE_INTEGER,
+                                           description='Part ID',
+                                           required=False),
+                     ],
+                     responses={
+                         '200': CaptureStreamResponseSerializer,
+                         '400': SimpleErrorSerializer
+                     })
 @api_view(['GET'])
 def capture(request, stream_id):
     """Capture image.

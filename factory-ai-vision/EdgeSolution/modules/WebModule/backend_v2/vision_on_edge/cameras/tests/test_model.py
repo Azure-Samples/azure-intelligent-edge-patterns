@@ -5,6 +5,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from rest_framework.test import APITransactionTestCase
 
 from ..models import Camera

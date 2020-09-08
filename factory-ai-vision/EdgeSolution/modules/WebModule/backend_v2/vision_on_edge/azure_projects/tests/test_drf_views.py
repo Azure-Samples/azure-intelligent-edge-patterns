@@ -5,9 +5,9 @@
 import json
 
 import pytest
+
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
-
 from vision_on_edge.azure_projects.api.serializers import ProjectSerializer
 from vision_on_edge.azure_projects.api.views import ProjectViewSet
 from vision_on_edge.azure_projects.models import Project
@@ -52,4 +52,3 @@ def test_get_filter():
         response.render().content.decode('utf-8'))
     assert ProjectSerializer(real_project).data in json.loads(
         response.render().content.decode('utf-8'))
-

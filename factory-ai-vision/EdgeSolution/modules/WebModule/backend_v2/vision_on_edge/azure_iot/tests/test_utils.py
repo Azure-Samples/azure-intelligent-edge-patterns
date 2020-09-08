@@ -4,7 +4,7 @@
 
 from unittest import mock
 
-from ..utils import is_edge, inference_module_url
+from ..utils import inference_module_url, is_edge
 
 
 @mock.patch("vision_on_edge.azure_iot.utils.IoTHubModuleClient",
