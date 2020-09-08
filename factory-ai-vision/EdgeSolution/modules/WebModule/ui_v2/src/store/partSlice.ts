@@ -2,6 +2,7 @@ import { createEntityAdapter, createAsyncThunk, createSlice, createSelector } fr
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
+import { selectNonDemoProject } from './trainingProjectSlice';
 
 export type Part = {
   id: number;
@@ -25,9 +26,7 @@ export const getParts = createAsyncThunk<any, boolean, { state: State }>(
 export const postPart = createAsyncThunk<any, Omit<Part, 'id'>, { state: State }>(
   'parts/post',
   async (data, { getState }) => {
-    const {
-      data: { trainingProject },
-    } = getState().project;
+    const { id: trainingProject } = selectNonDemoProject(getState());
     const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
     return response.data;
   },

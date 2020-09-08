@@ -35,7 +35,7 @@ import {
 import { updateOriginProjectData } from '../store/project/projectActions';
 import { clearParts } from '../store/partSlice';
 import { WarningDialog } from './WarningDialog';
-import { getTrainingProject, selectAllTrainingProjects } from '../store/trainingProjectSlice';
+import { selectAllTrainingProjects } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
 
 type SettingPanelProps = {
@@ -67,9 +67,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
     return state.trainingProject.entities[trainingProject]?.customVisionId;
   });
   const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
-  const projectData = useSelector((state: State) => {
-    return state.project.data;
-  });
   const originSettingData = useSelector((state: State) => state.setting.origin);
   const [loading, setloading] = useState(false);
   const cannotUpdateOrSave = R.equals(settingData, originSettingData);
@@ -134,7 +131,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
 
   useEffect(() => {
     dispatch(checkSettingStatus());
-    dispatch(getTrainingProject({ isDemo: false }));
   }, [dispatch]);
 
   useEffect(() => {
