@@ -215,7 +215,7 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
           )}
         </Stack>
       </Stack>
-      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} />
+      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
       <LabelingPage mode={LabelPageMode.MultiPage} />
       <input
         ref={fileInputRef}

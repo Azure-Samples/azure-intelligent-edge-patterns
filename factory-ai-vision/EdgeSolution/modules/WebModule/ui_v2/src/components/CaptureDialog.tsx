@@ -37,12 +37,14 @@ type CaptureDialogProps = {
   isOpen: boolean;
   onDismiss: () => void;
   defaultSelectedCameraId?: number;
+  partId?: number;
 };
 
 export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   isOpen,
   onDismiss,
   defaultSelectedCameraId,
+  partId = null,
 }) => {
   const [selectedCameraId, setSelectedCameraId] = useState(defaultSelectedCameraId);
   const cameraOptions = useSelector(cameraOptionsSelector);
@@ -119,6 +121,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
                 onStreamCreated={(streamId) => {
                   streamIdRef.current = streamId;
                 }}
+                partId={partId}
               />
               <CaptureBanner top="80%" left="50%" status={status} />
             </Stack>
