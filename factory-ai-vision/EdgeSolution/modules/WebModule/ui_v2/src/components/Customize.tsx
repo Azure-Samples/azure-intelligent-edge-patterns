@@ -36,23 +36,21 @@ const cardStyleSets = mergeStyleSets({
   mainSectionAction: { gridColumn: '2 / span 1', gridRow: '3 / span 1', fontSize: '13px' },
 });
 
-type GetStartedType = {
+type CustomizeType = {
   hasCamera: boolean;
   hasImages: boolean;
   hasTask: boolean;
 };
 
-export const GetStarted: React.FC<GetStartedType> = ({ hasCamera, hasImages, hasTask }) => {
+export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTask }) => {
   return (
     <Stack horizontalAlign="center">
-      <Text variant="xLarge" styles={{ root: { margin: '4px' } }}>
-        Get started
-      </Text>
-      <Text>Follow these steps to start using machine learning in your factory</Text>
-      <Text styles={{ root: { paddingBottom: '24px' } }}>
-        To configure the <Link href="https://www.customvision.ai/">Custom Vision project</Link> go to
-        Settings.
-      </Text>
+      <Stack horizontalAlign="center" styles={{ root: { paddingTop: 60, paddingBottom: 40 } }}>
+        <Text variant="xLarge" styles={{ root: { margin: '4px' } }}>
+          Customize to use your own videos and images
+        </Text>
+        <Text>Follow these steps to start using machine learning in your factory</Text>
+      </Stack>
       <Stack horizontal tokens={{ childrenGap: 20 }}>
         <GetStartedCard
           no={1}

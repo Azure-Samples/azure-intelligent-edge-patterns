@@ -46,6 +46,7 @@ const initialState: Project = {
     framesPerMin: 6,
     accuracyThreshold: 50,
     probThreshold: '10',
+    name: '',
   },
   originData: {
     id: null,
@@ -62,6 +63,7 @@ const initialState: Project = {
     framesPerMin: 6,
     accuracyThreshold: 50,
     probThreshold: '10',
+    name: '',
   },
   trainingMetrics: {
     prevConsequence: null,
@@ -77,7 +79,7 @@ const initialState: Project = {
   },
   status: Status.None,
   error: null,
-  trainingLogs: [],
+  trainingLog: '',
   progress: null,
 };
 
@@ -100,7 +102,13 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
     case POST_PROJECT_REQUEST:
       return { ...state, isLoading: true };
     case POST_PROJECT_SUCCESS:
-      return { ...state, isLoading: false, data: action.data, originData: action.data };
+      return {
+        ...state,
+        isLoading: false,
+        data: action.data,
+        originData: action.data,
+        status: Status.WaitTraining,
+      };
     case POST_PROJECT_FALIED:
       return { ...state, isLoading: false, error: action.error };
     case DELETE_PROJECT_SUCCESS:
@@ -122,6 +130,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
           framesPerMin: 6,
           accuracyThreshold: 50,
           probThreshold: '10',
+          name: '',
         },
         originData: {
           id: null,
@@ -138,6 +147,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
           framesPerMin: 6,
           accuracyThreshold: 50,
           probThreshold: '10',
+          name: '',
         },
         inferenceMetrics: {
           successRate: 0,
@@ -151,7 +161,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
           curConsequence: null,
           prevConsequence: null,
         },
-        trainingLogs: [],
+        trainingLog: '',
         status: Status.None,
         error: null,
       };
@@ -166,15 +176,13 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         ...state,
       };
     case GET_TRAINING_LOG_SUCCESS: {
-      let trainingLogs;
-      if (action.payload.newStatus === Status.FinishTraining) trainingLogs = [];
-      else if (state.trainingLogs[state.trainingLogs.length - 1] !== action.payload.trainingLog)
-        trainingLogs = [...state.trainingLogs, action.payload.trainingLog];
-      else trainingLogs = state.trainingLogs;
+      let trainingLog;
+      if (action.payload.newStatus === Status.FinishTraining) trainingLog = '';
+      else trainingLog = action.payload.trainingLog;
 
       return {
         ...state,
-        trainingLogs,
+        trainingLog,
         progress: action.payload.progress ?? state.progress,
         status: action.payload.newStatus,
       };
@@ -182,7 +190,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
     case GET_TRAINING_LOG_FAILED:
       return {
         ...state,
-        trainingLogs: [],
+        trainingLog: '',
         data: { ...state.data },
         status: Status.TrainingFailed,
         error: action.error,

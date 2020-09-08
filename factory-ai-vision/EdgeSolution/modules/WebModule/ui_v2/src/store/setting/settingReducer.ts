@@ -1,6 +1,6 @@
 import { SettingActionType, Setting } from './settingType';
 
-const initialState = {
+const initialState: Setting = {
   loading: false,
   error: null,
   current: {
@@ -17,6 +17,7 @@ const initialState = {
   appInsightHasInit: true,
   isCollectData: false,
   appInsightKey: '',
+  cvProjects: [],
 };
 
 const settingReducer = (state = initialState, action: SettingActionType): Setting => {
@@ -31,11 +32,11 @@ const settingReducer = (state = initialState, action: SettingActionType): Settin
       return action.payload;
     case 'REQUEST_FAIL':
       return { ...state, error: action.error };
-    case 'GET_ALL_CV_PROJECTS_REQUEST':
+    case 'settings/listAllProjects/pending':
       return { ...state, loading: true };
-    case 'GET_ALL_CV_PROJECTS_SUCCESS':
+    case 'settings/listAllProjects/fulfilled':
       return { ...state, loading: false, cvProjects: action.pyload };
-    case 'GET_ALL_CV_PROJECTS_ERROR':
+    case 'settings/listAllProjects/rejected':
       return { ...state, loading: false, error: action.error };
     default:
       return state;

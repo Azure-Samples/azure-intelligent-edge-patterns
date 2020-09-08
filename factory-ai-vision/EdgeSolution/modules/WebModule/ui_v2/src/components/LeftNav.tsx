@@ -1,53 +1,70 @@
-import { INavLinkGroup, Nav } from '@fluentui/react';
-import React from 'react';
+import { INavLinkGroup, Nav, INavLink } from '@fluentui/react';
+import React, { useMemo } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 
-const navLinksGroup: INavLinkGroup[] = [
+const navLinks: INavLink[] = [
   {
-    links: [
-      {
-        name: 'Home',
-        url: '/',
-        iconProps: {
-          imageProps: {
-            src: '/icons/home.png',
-          },
-        },
+    name: 'Home',
+    url: '/',
+    iconProps: {
+      imageProps: {
+        src: '/icons/home.png',
       },
-      {
-        name: 'Cameras',
-        url: '/cameras',
-        iconProps: {
-          imageProps: {
-            src: '/icons/cameras.png',
-          },
-        },
+    },
+  },
+  {
+    name: 'Cameras',
+    url: '/cameras',
+    iconProps: {
+      imageProps: {
+        src: '/icons/cameras.png',
       },
-      {
-        name: 'Images',
-        url: '/images',
-        iconProps: {
-          imageProps: {
-            src: '/icons/images.png',
-          },
-        },
+    },
+  },
+  {
+    name: 'Images',
+    url: '/images',
+    iconProps: {
+      imageProps: {
+        src: '/icons/images.png',
       },
-      {
-        name: 'Parts',
-        url: '/parts',
-        iconProps: {
-          imageProps: {
-            src: '/icons/parts.png',
-          },
-        },
+    },
+  },
+  {
+    name: 'Parts',
+    url: '/parts',
+    iconProps: {
+      imageProps: {
+        src: '/icons/parts.png',
       },
-    ],
+    },
   },
 ];
 
 export const LeftNav: React.FC = () => {
+  const history = useHistory();
+  const location = useLocation();
+
+  const navLinksGroup: INavLinkGroup[] = useMemo(() => {
+    return [
+      {
+        links: navLinks.map((link) => ({
+          ...link,
+          // Set url to empty string to avoid defautl redirect behaviour
+          url: '',
+          // For selection
+          key: link.url,
+          onClick: () => {
+            history.push(link.url);
+          },
+        })),
+      },
+    ];
+  }, [history]);
+
   return (
     <div style={{ width: '206px', height: '100%', borderRight: '1px solid #eee' }}>
-      <Nav groups={navLinksGroup} />
+      <Nav groups={navLinksGroup} selectedKey={location.pathname} />
     </div>
   );
 };
