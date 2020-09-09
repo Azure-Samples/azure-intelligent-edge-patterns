@@ -66,6 +66,9 @@ COPY media_pb2.py ./
 COPY model_wrapper.py ./
 COPY shared_memory.py ./
 COPY server.py ./
+COPY invoke.py ./
+COPY stream_manager.py ./
+COPY streams.py ./
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 
