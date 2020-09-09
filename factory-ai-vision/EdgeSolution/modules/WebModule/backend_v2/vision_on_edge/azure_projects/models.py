@@ -13,9 +13,14 @@ from azure.cognitiveservices.vision.customvision.training.models import \
 from django.db import models
 from django.db.models.signals import pre_save
 from django.utils import timezone
+from msrest.exceptions import DeserializationError as MSDeserializationError
 
 from ..azure_settings.models import Setting
-from .exceptions import CannotChangeDemoProjectError
+from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
+from .exceptions import (ProjectCannotChangeDemoError,
+                         ProjectCustomVisionError,
+                         ProjectResetWithoutNameError,
+                         ProjectWithoutSettingError)
 
 logger = logging.getLogger(__name__)
 
@@ -48,16 +53,48 @@ class Project(models.Model):
     def __str__(self):
         return self.name.__str__()
 
-    def validate(self):
+    def reset(self, name: str = None):
+        """reset.
+
+        Args:
+            name (str): name
+        """
+        if name is None:
+            raise ProjectResetWithoutNameError
+        self.customvision_id = ""
+        self.name = name
+        self.download_uri = ""
+        self.needRetraining = Project._meta.get_field(
+            "needRetraining").get_default()
+        self.maxImages = Project._meta.get_field("maxImages").get_default()
+        self.create_project()
+
+    def validate(self) -> bool:
+        """validate.
+
+        Returns:
+            bool: if project customvision_id valid
+        """
         is_project_valid = False
-        if self.setting and self.setting.is_trainer_valid and self.customvision_id:
+        if (self.setting and self.setting.is_trainer_valid and
+                self.customvision_id):
             try:
                 trainer = self.setting.get_trainer_obj()
                 trainer.get_project(self.customvision_id)
                 logger.info("Project customvision_id pass.")
                 is_project_valid = True
+                logger.info("Project %s validate pass.")
+            except CustomVisionErrorException:
+                logger.error(
+                    "Project %s is invalid (CustomVisionErrorException).",
+                    self.name)
+            except MSDeserializationError:
+                logger.error("Project %s is invalid (MSDeserializationError).",
+                             self.name)
+            except TypeError:
+                logger.error("Project %s is invalid (TypeError).", self.name)
             except Exception:
-                logger.info("Project customvision_id failed.")
+                logger.exception("Uncaught exception")
         return is_project_valid
 
     @staticmethod
@@ -69,43 +106,34 @@ class Project(models.Model):
         """
         instance = kwargs["instance"]
         if instance.is_demo and instance.id:
-            raise CannotChangeDemoProjectError
-        try:
-            logger.info("Project pre_save start")
-            logger.info("Project id given: %s", instance.id)
-            logger.info("Project customvision_id given: %s",
-                        instance.customvision_id)
-            logger.info("Project name given: %s", instance.name)
-            logger.info("Checking...")
-            if not instance.setting:
-                logger.info("Project instance is demo. Pass pre_save")
-                return
-            if not instance.setting or not instance.setting.is_trainer_valid:
-                instance.customvision_id = ""
-                logger.info("Invalid setting. Set customvision id to ''")
-                return
-            trainer = instance.setting.get_trainer_obj()
-            if instance.customvision_id:
-                # Endpoint and Training_key is valid, and trying to save with
-                # customvision_id...
-                project = trainer.get_project(instance.customvision_id)
-                instance.name = project.name
-                logger.info("Project Found. Set instance.name to %s",
-                            instance.name)
-                return
+            raise ProjectCannotChangeDemoError
+        logger.info("Project pre_save start")
+        logger.info("Project id given: %s", instance.id)
+        logger.info("Project customvision_id given: %s",
+                    instance.customvision_id)
+        logger.info("Project name given: %s", instance.name)
+        if not instance.validate():
+            instance.customvision_id = ""
+            logger.info("Invalid setting. Set customvision id to ''")
+            return
+        trainer = instance.setting.get_trainer_obj()
+        if instance.customvision_id:
+            # Endpoint and Training_key is valid, and trying to save with
+            # customvision_id...
+            project = trainer.get_project(instance.customvision_id)
+            instance.name = project.name
+            logger.info("Project Found. Set instance.name to %s",
+                        instance.name)
+            return
 
             # Setting is valid, no customvision_id
             instance.name = (instance.name or "VisionOnEdge-" +
                              datetime.datetime.utcnow().isoformat())
-        except:
-            logger.exception("Project pre_save Exception")
-            instance.customvision_id = ""
-        finally:
-            logger.info("Project id set: %s", instance.id)
-            logger.info("Project customvision_id set: %s",
-                        instance.customvision_id)
-            logger.info("Project name set: %s", instance.name)
-            logger.info("Project pre_save end")
+        logger.info("Project id set: %s", instance.id)
+        logger.info("Project customvision_id set: %s",
+                    instance.customvision_id)
+        logger.info("Project name set: %s", instance.name)
+        logger.info("Project pre_save end")
 
     def dequeue_iterations(self, max_iterations: int = 2):
         """dequeue_iterations.
@@ -157,7 +185,7 @@ class Project(models.Model):
             logger.exception("Project create_project: Unexpected Error")
             raise
 
-    def delete_tag_by_name(self, tag_name):
+    def delete_tag_by_name(self, tag_name) -> None:
         """delete_tag_by_name.
         
         Delete tag on Custom Vision.
@@ -204,28 +232,19 @@ class Project(models.Model):
         : Failed : return False
         """
         is_task_success = False
-        update_fields = []
-        try:
-            trainer = self.setting.get_trainer_obj()
-            if not trainer:
-                logger.error("Trainer is invalid. Not going to train...")
+        if not self.setting:
+            raise ProjectWithoutSettingError
+        if not self.setting.validate():
+            raise SettingCustomVisionAccessFailed
+        trainer = self.setting.get_trainer_obj()
+        # Submit training task to CustomVision
+        logger.info("%s %s submit training task to CustomVision",
+                    self.customvision_id, self.name)
+        trainer.train_project(self.customvision_id)
 
-            # Submit training task to CustomVision
-            logger.info("%s %s submit training task to CustomVision",
-                        self.customvision_id, self.name)
-            trainer.train_project(self.customvision_id)
-
-            # If all above is success
-            is_task_success = True
-            return is_task_success
-        except CustomVisionErrorException as customvision_err:
-            logger.error("From Custom Vision: %s", customvision_err.message)
-            raise
-        except Exception:
-            logger.exception("Unexpected error while Project.train_project")
-            raise
-        finally:
-            self.save(update_fields=update_fields)
+        # If all above is success
+        is_task_success = True
+        return is_task_success
 
     def export_iterationv3_2(self, iteration_id):
         """export_iterationv3_2.

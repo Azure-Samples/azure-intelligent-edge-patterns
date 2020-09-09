@@ -35,4 +35,5 @@ def upcreate_deploy_status(part_detection_id,
             "need_to_send_notification": need_to_send_notification,
         },
     )
+    obj.save()
     return obj, created

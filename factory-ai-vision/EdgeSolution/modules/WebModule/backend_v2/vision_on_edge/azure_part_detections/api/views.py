@@ -12,15 +12,13 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_pd_deploy_status.models import DeployStatus
-from ...azure_projects.utils import (train_project_helper,
-                                     update_train_status_helper)
+from ...azure_projects.utils import train_project_helper
 from ...azure_training_status import progress
-from ...azure_training_status.models import TrainingStatus
 from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleStatusSerializer)
@@ -111,6 +109,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise PdInferenceModuleUnreachable(
                 detail=("Inference_module.url" + inference_module_obj.url +
                         "unreachable."))
+        deploy_status_obj.save()
         return Response({
             "status": deploy_status_obj.status,
             "log": "Status: " + deploy_status_obj.log,
@@ -146,7 +145,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise PdConfigureWithoutProject
         if not hasattr(instance,
                        'cameras') or getattr(instance, 'cameras') is None:
-            raise PdConfigureWithoutInferenceModule
+            raise PdConfigureWithoutCameras
         upcreate_training_status(project_id=instance.project.id,
                                  **progress.PROGRESS_1_FINDING_PROJECT)
         instance.has_configured = True
@@ -254,7 +253,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def update_cam(self, request, pk=None) -> Response:
         queryset = self.get_queryset()
-        instance = get_object_or_404(queryset, pk=pk)
+        get_object_or_404(queryset, pk=pk)
         update_cam_helper(part_detection_id=pk)
         return Response({"status": "ok"})
 
