@@ -102,7 +102,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     await dispatch(thunkPostProject(projectData));
 
     onDismiss();
-    history.push('/deployment');
+    history.push('/home/deployment');
   };
 
   const onRenderFooterContent = () => {

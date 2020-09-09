@@ -263,8 +263,11 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
     });
 };
 
-export const thunkPostProject = (projectData: ProjectData): ProjectThunk => (dispatch): Promise<number> => {
-  const projectId = projectData.id;
+export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectThunk => (
+  dispatch,
+  getState,
+): Promise<number> => {
+  const projectId = getState().project.data.id;
   const isProjectEmpty = projectId === null || projectId === undefined;
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
 

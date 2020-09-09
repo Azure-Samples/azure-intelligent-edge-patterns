@@ -48,7 +48,7 @@ export const Home: React.FC = () => {
 
   return (
     <Stack styles={{ root: { height: '100%' } }}>
-      <Pivot selectedKey={location.pathname.split('/')[1]} onLinkClick={onPivotChange}>
+      <Pivot selectedKey={location.pathname.split('/')[2]} onLinkClick={onPivotChange}>
         <PivotItem itemKey="getStarted" headerText="Get started" />
         <PivotItem itemKey="customize" headerText="Customize" />
         <PivotItem itemKey="deployment" headerText="Deployment" />

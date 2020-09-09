@@ -9,7 +9,7 @@ import { initialProjectData } from '../store/project/projectReducer';
 
 type DemoProject = Pick<
   ProjectData,
-  'id' | 'name' | 'inferenceMode' | 'trainingProject' | 'camera' | 'parts'
+  'id' | 'name' | 'inferenceMode' | 'trainingProject' | 'cameras' | 'parts'
 >;
 
 const classes = mergeStyleSets({
