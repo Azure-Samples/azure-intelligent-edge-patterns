@@ -65,7 +65,7 @@ export const Images: React.FC = () => {
   useEffect(() => {
     dispatch(getImages());
     // For image list items
-    dispatch(getParts(false));
+    dispatch(getParts());
   }, [dispatch]);
 
   return (

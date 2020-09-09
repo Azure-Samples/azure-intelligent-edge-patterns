@@ -3,20 +3,12 @@ import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { selectNonDemoProject } from './trainingProjectSlice';
-import {
-  getInitialDemoState,
-  getSliceApiByDemo,
-  getConditionBySlice,
-  isCRDAction,
-  insertDemoFields,
-  getNonDemoSelector,
-} from './shared/DemoSliceUtils';
 
 export type Part = {
   id: number;
   name: string;
   description: string;
-  isDemo: boolean;
+  trainingProject: number;
 };
 
 const normalizePart = (data): Part[] => {
@@ -24,24 +16,24 @@ const normalizePart = (data): Part[] => {
     id: d.id,
     name: d.name,
     description: d.description,
-    isDemo: d.is_demo,
+    trainingProject: d.project,
   }));
 };
 
 const entityAdapter = createEntityAdapter<Part>();
 
-export const getParts = createAsyncThunk<any, boolean, { state: State }>(
+export const getParts = createAsyncThunk<any, undefined, { state: State }>(
   'parts/get',
-  async (isDemo) => {
-    const response = await getSliceApiByDemo('parts', isDemo);
+  async () => {
+    const response = await Axios.get('/api/parts/');
     return normalizePart(response.data);
   },
   {
-    condition: (isDemo, { getState }) => getConditionBySlice('parts', getState(), isDemo),
+    condition: (_, { getState }) => !getState().parts.ids.length,
   },
 );
 
-export const postPart = createAsyncThunk<any, Omit<Part, 'id' | 'isDemo'>, { state: State }>(
+export const postPart = createAsyncThunk<any, Omit<Part, 'id' | 'trainingProject'>, { state: State }>(
   'parts/post',
   async (data, { getState }) => {
     const { id: trainingProject } = selectNonDemoProject(getState())[0];
@@ -66,17 +58,16 @@ export const deletePart = createAsyncThunk<any, number, { state: State }>('parts
 
 const slice = createSlice({
   name: 'parts',
-  initialState: getInitialDemoState(entityAdapter.getInitialState()),
+  initialState: entityAdapter.getInitialState(),
   reducers: {
-    clearParts: () => getInitialDemoState(entityAdapter.getInitialState()),
+    clearParts: () => entityAdapter.getInitialState(),
   },
   extraReducers: (builder) => {
     builder
       .addCase(getParts.fulfilled, entityAdapter.setAll)
       .addCase(postPart.fulfilled, entityAdapter.upsertOne)
       .addCase(patchPart.fulfilled, entityAdapter.updateOne)
-      .addCase(deletePart.fulfilled, entityAdapter.removeOne)
-      .addMatcher(isCRDAction, insertDemoFields);
+      .addCase(deletePart.fulfilled, entityAdapter.removeOne);
   },
 });
 
@@ -98,4 +89,7 @@ export const partOptionsSelector = createSelector(selectAllParts, (parts) =>
 export const selectPartNamesById = (ids) =>
   createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i]?.name));
 
-export const selectNonDemoPart = getNonDemoSelector('parts', selectPartEntities);
+export const selectNonDemoPart = createSelector(
+  [selectAllParts, selectNonDemoProject],
+  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
+);

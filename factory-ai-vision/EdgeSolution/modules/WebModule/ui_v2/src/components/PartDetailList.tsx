@@ -20,7 +20,7 @@ export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddB
   useEffect(() => {
     (async () => {
       setLoading(true);
-      await dispatch(getParts(false));
+      await dispatch(getParts());
       setLoading(false);
     })();
   }, [dispatch]);
