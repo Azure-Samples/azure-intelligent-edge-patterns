@@ -29,52 +29,6 @@ IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
 
-class YoloV3Model:
-    def __init__(self):
-        try:
-            self._lock = threading.Lock()
-            self._modelFileName = 'yolov3-10.onnx'
-            self._modelLabelFileName = 'coco_classes.txt'
-            self._labelList = None
-
-            with open(self._modelLabelFileName, "r") as f:
-                self._labelList = [l.rstrip() for l in f]
-
-            self._onnxSession = onnxruntime.InferenceSession(
-                self._modelFileName)
-            self.image_shape = [416, 416]
-
-        except:
-            PrintGetExceptionDetails()
-            raise
-
-    def Preprocess(self, cvImage):
-        try:
-            imageBlob = cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB)
-            imageBlob = np.array(imageBlob, dtype='float32')
-            imageBlob /= 255.
-            imageBlob = np.transpose(imageBlob, [2, 0, 1])
-            imageBlob = np.expand_dims(imageBlob, 0)
-
-            return imageBlob
-        except:
-            PrintGetExceptionDetails()
-            raise
-
-    def Score(self, cvImage):
-        try:
-            with self._lock:
-                imageBlob = self.Preprocess(cvImage)
-                boxes, scores, indices = self._onnxSession.run(
-                    None, {"input_1": imageBlob, "image_shape": np.array([self.image_shape], dtype=np.float32)})
-
-            return boxes, scores, indices
-
-        except:
-            PrintGetExceptionDetails()
-            raise
-
-
 def is_edge():
     try:
         IoTHubModuleClient.create_from_edge_environment()
@@ -313,7 +267,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
     def update_retrain_parameters(self, confidence_min, confidence_max, max_images):
         self.confidence_min = confidence_min * 0.01
         self.confidence_max = confidence_max * 0.01
-        self.max_images = max_imagese
+        self.max_images = max_images
         self.threshold = self.confidence_max
 
     def update_model(self, model_dir):
@@ -344,36 +298,38 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         else:
             self.iothub_interval = 60 / fpm  # seconds
 
-    def Score(self, image, instance_id):
+    def Score(self, image):
         # predict
         # logging.info('model.Score')
 
-        width = self.IMG_WIDTH
-        ratio = self.IMG_WIDTH / image.shape[1]
-        height = int(image.shape[0] * ratio + 0.000001)
-        if height >= self.IMG_HEIGHT:
-            height = self.IMG_HEIGHT
-            ratio = self.IMG_HEIGHT / image.shape[0]
-            width = int(image.shape[1] * ratio + 0.000001)
+        # move to stream
+        # width = self.IMG_WIDTH
+        # ratio = self.IMG_WIDTH / image.shape[1]
+        # height = int(image.shape[0] * ratio + 0.000001)
+        # if height >= self.IMG_HEIGHT:
+        #     height = self.IMG_HEIGHT
+        #     ratio = self.IMG_HEIGHT / image.shape[0]
+        #     width = int(image.shape[1] * ratio + 0.000001)
 
-        image = cv2.resize(image, (width, height))
+        # image = cv2.resize(image, (width, height))
 
         self.lock.acquire()
         predictions, inf_time = self.model.predict_image(
             image)
         # boxes, scores, indices = self.model.predict_image(image)
         self.lock.release()
-        self.last_img = image
-        self.last_instance = instance_id
-        self.last_prediction = predictions
 
-        self.draw_img()
+        # self.last_img = image
+        # self.last_instance = instance_id
+        # self.last_prediction = predictions
+
+        # self.draw_img()
 
         # todo
         # self.gen_edge()
-        inf_time_ms = inf_time * 1000
-        self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
-        return predictions
+        # inf_time_ms = inf_time * 1000
+        # self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
+        return predictions, inf_time
 
     def draw_img(self):
         # logging.info('draw_img')
