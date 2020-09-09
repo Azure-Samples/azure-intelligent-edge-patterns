@@ -26,6 +26,6 @@ class AzureTrainingStatusConfig(AppConfig):
             from .models import TrainingStatus
             for project in Project.objects.all():
                 try:
-                    project.trainingstatus
+                    ts_obj = project.trainingstatus
                 except Project.trainingstatus.RelatedObjectDoesNotExist:
                     TrainingStatus.objects.create(project=project)

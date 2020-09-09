@@ -342,15 +342,17 @@ def train_project_worker(project_id):
     customvision_id = project_obj.customvision_id
     wait_prepare = 0
     max_wait_prepare = 60
-    iteration_create_init = False  # Send notification only when init
+    status_init = False
     while True:
         time.sleep(1)
         wait_prepare += 1
         iterations = trainer.get_iterations(customvision_id)
-        if not iteration_create_init:
+        if not status_init:
             upcreate_training_status(
                 project_id=project_obj.id,
+                need_to_send_notification=True,
                 **progress.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
+            status_init = True
         if len(iterations) > 0:
             logger.info("Iteration Found %s", iterations[0])
             break
@@ -368,33 +370,35 @@ def train_project_worker(project_id):
     # 6. Training (Waiting)                             ===
     # =====================================================
     logger.info("Training")
-    training_init = False
+    status_init = False
     while True:
         time.sleep(1)
         iterations = trainer.get_iterations(customvision_id)
         iteration = iterations[0]
-        if not training_init:
+        if not status_init:
             upcreate_training_status(
                 project_id=project_obj.id,
-                need_to_send_notification=(not training_init),
+                need_to_send_notification=True,
                 **progress.PROGRESS_7_TRAINING)
-            training_init = True
+            status_init = True
         if iteration.exportable and iteration.status == "Completed":
             break
 
     # =====================================================
     # 7. Exporting                                      ===
     # =====================================================
-    export_init = False
+    status_init = False
     while True:
         time.sleep(1)
         exports = trainer.get_exports(customvision_id, iteration.id)
-        if len(exports) == 0 or not exports[0].download_uri:
+        if not status_init:
             upcreate_training_status(
                 project_id=project_obj.id,
-                need_to_send_notification=(not export_init),
+                need_to_send_notification=True,
                 **progress.PROGRESS_8_EXPORTING)
-            export_init = True
+            status_init = True
+        if len(exports) == 0 or not exports[0].download_uri:
+
             res = project_obj.export_iterationv3_2(iteration.id)
             logger.info("Export Response: %s", res.json())
             continue
@@ -403,23 +407,27 @@ def train_project_worker(project_id):
     # =====================================================
     # 8. Saving model and performance                   ===
     # =====================================================
+    logger.info("Successfully export model: %s", project_obj.download_uri)
+    logger.info("Training Status: Completed")
+
     exports = trainer.get_exports(customvision_id, iteration.id)
     project_obj.download_uri = exports[0].download_uri
-
-    logger.info("Successfully export model: %s", project_obj.download_uri)
-
-    logger.info("Training Status: Completed")
     train_performance_list = []
+
     for iteration in iterations[:2]:
         train_performance_list.append(
             trainer.get_iteration_performance(customvision_id,
                                               iteration.id).as_dict())
 
-        logger.info("Training Performance: %s", train_performance_list)
     upcreate_training_status(project_id=project_obj.id,
                              performance=json.dumps(train_performance_list),
                              need_to_send_notification=True,
                              **progress.PROGRESS_0_OK)
+    logger.info("Training Performance: %s", train_performance_list)
+
+    # =====================================================
+    # 0. End                                            ===
+    # =====================================================
     if has_new_parts:
         logger.info("This is a training job")
         project_obj.training_counter += 1

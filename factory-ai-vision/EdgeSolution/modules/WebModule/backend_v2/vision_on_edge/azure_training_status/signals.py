@@ -28,7 +28,7 @@ def training_status_project_created_listener(**kwargs):
             defaults={
                 "status": "ok",
                 "log": "Status : Has not configured",
-                "performance": ""
+                "performance": "{}"
             },
         )
     else:

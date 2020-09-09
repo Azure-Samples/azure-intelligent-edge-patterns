@@ -27,23 +27,23 @@ def if_trained_then_deploy_worker(part_detection_id):
     """
 
     # =====================================================
-    # 1. Prepare Custom Vision Client                   ===
+    # 1. Wait for project to be trained                 ===
     # =====================================================
     logger.info("Wait for project to be trained")
     part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
     project_obj = part_detection_obj.project
-    status_init = False
+    last_log = None
     while True:
         time.sleep(1)
         training_status_obj = TrainingStatus.objects.get(project=project_obj)
         logger.info("Listening on Training Status: %s", training_status_obj)
-        if not status_init:
+        if training_status_obj.status in ["ok", "failed"]:
+            break
+        if training_status_obj.log != last_log:
             upcreate_deploy_status(part_detection_id=part_detection_id,
                                    status=training_status_obj.status,
                                    log=training_status_obj.log)
-        if training_status_obj.status not in ["ok", "failed"]:
-            continue
-        break
+            last_log = training_status_obj.log
 
     # =====================================================
     # 2. Project training failed                        ===
@@ -74,23 +74,26 @@ def if_trained_then_deploy_worker(part_detection_id):
     logger.info("PartDetection is deployed before: %s",
                 part_detection_obj.deployed)
 
-    requests.get(
-        "http://" + str(part_detection_obj.inference_module.url) +
-        "/update_part_detection_id",
-        params={
-            "part_detection_id": part_detection_obj.id,
-        },
-    )
-    requests.get(
-        "http://" + str(part_detection_obj.inference_module.url) +
-        "/update_model",
-        params={"model_uri": model_uri},
-    )
-    requests.get(
-        "http://" + str(part_detection_obj.inference_module.url) +
-        "/update_parts",
-        params={"parts": parts},
-    )
+    def deploy():
+        requests.get(
+            "http://" + str(part_detection_obj.inference_module.url) +
+            "/update_part_detection_id",
+            params={
+                "part_detection_id": part_detection_obj.id,
+            },
+        )
+        requests.get(
+            "http://" + str(part_detection_obj.inference_module.url) +
+            "/update_model",
+            params={"model_uri": model_uri},
+        )
+        requests.get(
+            "http://" + str(part_detection_obj.inference_module.url) +
+            "/update_parts",
+            params={"parts": parts},
+        )
+
+    threading.Thread(target=deploy).start()
 
     # =====================================================
     # 4. Deployed! Saving                               ===
@@ -99,6 +102,11 @@ def if_trained_then_deploy_worker(part_detection_id):
     part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.has_configured = True
     part_detection_obj.save()
+    logger.info("Project model Deployed !!!!!!")
+    logger.info("Project model exported: %s", model_uri)
+    logger.info("Preparing to deploy to inference module")
+    logger.info("PartDetection is deployed before: %s",
+                part_detection_obj.deployed)
     upcreate_deploy_status(part_detection_id=part_detection_id,
                            **deploy_progress.PROGRESS_0_OK)
 
