@@ -52,3 +52,9 @@ class PdRelabelImageFull(APIException):
     status_code = 400
     default_detail = "Relabel Image reach limit."
     default_code = "pd_relabel_image_full"
+
+
+class PdDeployToInfereceError(APIException):
+    status_code = 503
+    default_detail = "Part Detection deploy failed cause Inference Module does not response."
+    fault_code = "pd_deploy_to_inferece_error"

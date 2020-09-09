@@ -110,6 +110,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 detail=("Inference_module.url" + inference_module_obj.url +
                         "unreachable."))
         deploy_status_obj.save()
+        logger.info("Deploy status: %s, %s", deploy_status_obj.status,
+                    deploy_status_obj.log)
         return Response({
             "status": deploy_status_obj.status,
             "log": "Status: " + deploy_status_obj.log,
