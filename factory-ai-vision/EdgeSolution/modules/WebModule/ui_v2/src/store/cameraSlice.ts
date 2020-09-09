@@ -164,11 +164,12 @@ export const {
   selectEntities: selectCameraEntities,
 } = entityAdapter.getSelectors((state: State) => state.camera);
 
-export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
-  cameras.map((e) => ({
-    key: e.id,
-    text: e.name,
-  })),
-);
-
 export const selectNonDemoCameras = getNonDemoSelector('camera', selectCameraEntities);
+
+export const cameraOptionsSelector = (isDemo: boolean) =>
+  createSelector(isDemo ? selectAllCameras : selectNonDemoCameras, (cameras) =>
+    cameras.map((e) => ({
+      key: e.id,
+      text: e.name,
+    })),
+  );

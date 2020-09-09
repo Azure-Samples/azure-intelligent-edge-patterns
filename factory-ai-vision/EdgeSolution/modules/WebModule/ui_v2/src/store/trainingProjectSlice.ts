@@ -50,11 +50,12 @@ export const {
   selectEntities: selectTrainingProjectEntities,
 } = entityAdapter.getSelectors((state: State) => state.trainingProject);
 
-export const trainingProjectOptionsSelector = createSelector(selectAllTrainingProjects, (trainingProjects) =>
-  trainingProjects.map((e) => ({
-    key: e.id,
-    text: e.name,
-  })),
-);
-
 export const selectNonDemoProject = getNonDemoSelector('trainingProject', selectTrainingProjectEntities);
+
+export const trainingProjectOptionsSelector = (isDemo: boolean) =>
+  createSelector(isDemo ? selectAllTrainingProjects : selectNonDemoProject, (trainingProjects) =>
+    trainingProjects.map((e) => ({
+      key: e.id,
+      text: e.name,
+    })),
+  );

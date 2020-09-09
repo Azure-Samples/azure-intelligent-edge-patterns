@@ -75,18 +75,18 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   projectData: initialProjectData,
   isDemo = false,
 }) => {
-  const cameraOptions = useSelector(cameraOptionsSelector);
-  const partOptions = useSelector(partOptionsSelector);
-  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
-  const dispatch = useDispatch();
-  const history = useHistory();
-
   const [projectData, setProjectData] = useState(initialProjectData);
   useEffect(() => {
     setProjectData(initialProjectData);
   }, [initialProjectData]);
+  const cameraOptions = useSelector(cameraOptionsSelector(isDemo));
+  const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
+  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(isDemo));
+  const dispatch = useDispatch();
+  const history = useHistory();
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
+    if (key === 'trainingProject') setProjectData(R.assoc('parts', []));
     setProjectData(R.assoc(key, value));
   }
 

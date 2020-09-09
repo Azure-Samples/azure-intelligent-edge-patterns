@@ -82,10 +82,6 @@ export const {
   selectEntities: selectPartEntities,
 } = entityAdapter.getSelectors<State>((state) => state.parts);
 
-export const partOptionsSelector = createSelector(selectAllParts, (parts) =>
-  parts.map((p) => ({ key: p.id, text: p.name })),
-);
-
 export const selectPartNamesById = (ids) =>
   createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i]?.name));
 
@@ -93,3 +89,11 @@ export const selectNonDemoPart = createSelector(
   [selectAllParts, selectNonDemoProject],
   (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
 );
+
+export const selectPartsByTrainProject = (trainProject: number) =>
+  createSelector(selectAllParts, (parts) => parts.filter((p) => p.trainingProject === trainProject));
+
+export const partOptionsSelector = (trainProject: number) =>
+  createSelector(selectPartsByTrainProject(trainProject), (parts) =>
+    parts.map((p) => ({ key: p.id, text: p.name })),
+  );
