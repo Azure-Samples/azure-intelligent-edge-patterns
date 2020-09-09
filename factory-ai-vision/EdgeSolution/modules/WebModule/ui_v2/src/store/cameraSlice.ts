@@ -5,7 +5,14 @@ import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
 import { BoxLabel, PolygonLabel } from './type';
 import { toggleShowAOI } from './actions';
-import { insertDemoFields, isCRDAction } from './shared/InsertDemoField';
+import {
+  insertDemoFields,
+  isCRDAction,
+  getInitialDemoState,
+  getSliceApiByDemo,
+  getConditionBySlice,
+  getNonDemoSelector,
+} from './shared/DemoSliceUtils';
 
 type CameraFromServer = {
   id: number;
@@ -95,17 +102,11 @@ const entityAdapter = createEntityAdapter<Camera>();
 export const getCameras = createAsyncThunk<any, boolean, { state: State }>(
   'cameras/get',
   async (isDemo) => {
-    const url = isDemo ? `/api/cameras/` : `/api/cameras?is_demo=0`;
-    const response = await Axios(url);
+    const response = await getSliceApiByDemo('cameras', isDemo);
     return normalizeCameras(response.data);
   },
   {
-    condition: (isDemo, { getState }) => {
-      if (isDemo) {
-        return !getState().camera.ids.length;
-      }
-      return !getState().camera.nonDemo.length;
-    },
+    condition: (isDemo, { getState }) => getConditionBySlice('camera', getState(), isDemo),
   },
 );
 
@@ -132,7 +133,7 @@ export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number
 
 const slice = createSlice({
   name: 'cameras',
-  initialState: { ...entityAdapter.getInitialState(), nonDemo: [], isDemo: [] },
+  initialState: getInitialDemoState(entityAdapter.getInitialState()),
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -150,7 +151,7 @@ const slice = createSlice({
         const { showAOI, cameraId } = action.meta.arg;
         state.entities[cameraId].useAOI = !showAOI;
       })
-      .addMatcher(isCRDAction, (state) => insertDemoFields(state));
+      .addMatcher(isCRDAction, insertDemoFields);
   },
 });
 
@@ -170,10 +171,4 @@ export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) 
   })),
 );
 
-const selectNonDemoCameraIds = (state: State) => state.camera.nonDemo;
-export const selectNonDemoCameras = createSelector(
-  [selectNonDemoCameraIds, selectCameraEntities],
-  (ids, entities) => {
-    return ids.map((id) => entities[id]);
-  },
-);
+export const selectNonDemoCameras = getNonDemoSelector('camera', selectCameraEntities);
