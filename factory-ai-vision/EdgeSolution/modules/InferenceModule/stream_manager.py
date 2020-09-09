@@ -1,0 +1,118 @@
+import threading
+import logging
+
+# FIXME RON
+# from stream import Stream
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+class StreamManager(object):
+
+    def __init__(self, model):
+        self.streams = {}
+        self.mutex = threading.Lock()
+        self.model = model
+        self.zmq = self._init_zmq()
+
+    def _init_zmq(self):
+        ##FIXME RON
+        class ZMQ():
+            def __init__(self):
+                pass
+            def sender(self):
+                print('sending...')
+        return ZMQ()
+
+    def set_model(self, model):
+        logger.info('Set Model: %s', model)
+        self.model = model
+
+    def _add_new_stream(self, stream_id):
+        """ internal function, no thread protect """
+        logger.info('Add new stream: %s', stream_id)
+
+        if stream_id in self.streams:
+            logger.warning('Stream %s already existed', stream_id)
+            return False
+
+        # FIXME RON check this
+        stream = Stream(self.model, self.zmq.sender)
+        self.streams[stream_id] = stream
+
+    def update_streams(self, stream_ids):
+        self.mutex.acquire()
+
+        origin_stream_ids = list([stream_id for stream_id in self.streams])
+
+        logger.info('==== Update Streams ====')
+        logger.info('origin: %s', origin_stream_ids)
+        logger.info('new   : %s', stream_ids)
+
+        to_delete = []
+        for stream_id in origin_stream_ids:
+            if stream_id not in stream_ids:
+                to_delete.append(stream_id)
+
+        to_add = []
+        for stream_id in stream_ids:
+            if (stream_id in stream_ids) and (stream_id not in origin_stream_ids):
+                to_add.append(stream_id)
+
+        logger.info('To Delete : %s', to_delete)
+        logger.info('To Add    : %s', to_add)
+
+        for stream_id in to_delete:
+            #FIXME
+            # Need to be deleted elegantly
+            self._delete_stream_by_id(stream_id)
+
+        for stream_id in to_add:
+            self._add_new_stream(stream_id)
+
+
+        self.mutex.release()
+
+
+    def get_stream_by_id(self, stream_id):
+        if stream_id not in self.streams:
+            self.mutex.release()
+            logger.warning('Cannot find stream: %s', stream_id)
+            return None
+        stream = self.streams[stream_id]
+        logger.info('Got stream: %s', stream_id)
+        return stream
+
+
+    def _delete_stream_by_id(self, stream_id):
+        """ internal function, no thread protect """
+        logger.info('Deleting stream: %s', stream_id)
+        if stream_id not in self.streams:
+            logger.warning('Cannot find stream: %s', stream_id)
+            return False
+        ##FIXME need to fix this
+        ##FIXME  RON
+        del self.streams[stream_id]
+        logger.info('Deleted stream: %s', stream_id)
+        return True
+
+
+    def summary(self):
+        self.mutex.acquire()
+        logger.info('==== Stream Manager Summary ====')
+        for stream_id, stream in self.streams.items():
+            logger.info('Stream: %s', stream_id)
+        self.mutex.release()
+
+if __name__ == '__main__':
+
+    class Stream():
+        def __init__(self, model, sender):
+            self.model = model
+            self.sender = sender
+
+    sm = StreamManager('model')
+    sm.update_streams([1, 2])
+    sm.update_streams([2, 3])
+    sm.update_streams([1, 3])
+    sm.update_streams([1, 3])
