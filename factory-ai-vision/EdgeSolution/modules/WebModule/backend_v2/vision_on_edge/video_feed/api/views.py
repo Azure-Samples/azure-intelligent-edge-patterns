@@ -7,9 +7,14 @@ import threading
 import time
 
 from django.http import StreamingHttpResponse
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from ...cameras.models import Camera
+from ...general.api.swagger_schemas import StreamAutoSchema
 from ..models import VideoFeed
 
 logger = logging.getLogger(__name__)
@@ -83,20 +88,34 @@ if 'runserver' in sys.argv:
     stream_manager = StreamManager()
 
 
-@api_view()
+@swagger_auto_schema(auto_schema=StreamAutoSchema,
+                     method='get',
+                     operation_summary='Open a videofeed.',
+                     manual_parameters=[
+                         openapi.Parameter('camera_id',
+                                           openapi.IN_QUERY,
+                                           type=openapi.TYPE_STRING,
+                                           description='camera_id'),
+                     ])
+@api_view(['GET'])
 def video_feed(request):
-    """videofeed return
+    """videofeed.
     """
 
-    camera_id = request.query_params.get("camera_id")
-    s = VideoFeed(camera_id)
-    stream_manager.add(s)
+    camera_id = request.query_params.get("camera_id") or None
+    try:
+        Camera.objects.get(pk=camera_id)
+    except Exception:
+        raise NotFound(detail=f"camera_id: {camera_id} not found")
+    stream = VideoFeed(camera_id)
+    stream_manager.add(stream)
 
     return StreamingHttpResponse(
-        s.gen(), content_type="multipart/x-mixed-replace;boundary=frame")
+        stream.gen(), content_type="multipart/x-mixed-replace;boundary=frame")
 
 
-@api_view()
+@swagger_auto_schema(operation_summary='Keep a videofeed alive.', method='get')
+@api_view(['GET'])
 def keep_alive(request):
     """keep stream alive
     """

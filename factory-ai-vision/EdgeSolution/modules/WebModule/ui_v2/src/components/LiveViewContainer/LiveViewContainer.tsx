@@ -31,7 +31,7 @@ export const LiveViewContainer: React.FC<{
   const originAOIs = useSelector(selectOriginAOIsByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const [loading, setLoading] = useState(false);
-  const imageInfo = useImage('/api/inference/video_feed', '', true, true);
+  const imageInfo = useImage(`/api/inference/video_feed?camera_id=${cameraId}`, '', true, true);
   const creatingAOI = useSelector((state: State) => state.AOIs.creatingState);
   const AOIShape = useSelector((state: State) => state.AOIs.shape);
   const dispatch = useDispatch();

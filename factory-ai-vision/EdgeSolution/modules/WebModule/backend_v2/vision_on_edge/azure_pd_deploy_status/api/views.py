@@ -15,7 +15,7 @@ from .serializers import DeployStatusSerializer
 logger = logging.getLogger(__name__)
 
 
-class DeployStatusViewSet(FiltersMixin, viewsets.ModelViewSet):
+class DeployStatusViewSet(FiltersMixin, viewsets.ReadOnlyModelViewSet):
     """TrainingStatusViewSet.
 
     Filters:

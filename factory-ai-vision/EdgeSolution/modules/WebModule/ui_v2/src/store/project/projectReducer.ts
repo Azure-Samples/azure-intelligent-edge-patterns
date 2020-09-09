@@ -32,7 +32,7 @@ const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Statu
 
 export const initialProjectData: ProjectData = {
   id: null,
-  camera: null,
+  cameras: [],
   location: null,
   parts: [],
   trainingProject: null,

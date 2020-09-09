@@ -10,7 +10,6 @@ from distutils.util import strtobool
 
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
-
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg import openapi
@@ -176,7 +175,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise SettingCustomVisionAccessFailed
 
     @swagger_auto_schema(
-        operation_summary='Pull a Custom Vision project',
+        operation_summary='Pull a Custom Vision project.',
         manual_parameters=[
             openapi.Parameter('customvision_project_id',
                               openapi.IN_QUERY,
@@ -219,7 +218,6 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
         train_project_helper(project_id=project_obj.id)
-        update_train_status_helper(project_id=project_obj.id)
         return Response({'status': 'ok'})
 
 

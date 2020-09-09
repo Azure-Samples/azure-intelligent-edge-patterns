@@ -7,11 +7,10 @@ import logging
 from io import BytesIO
 
 import requests
-from PIL import Image as PILImage
-
 from django.core import files
 from django.db import models
 from django.db.models.signals import pre_save
+from PIL import Image as PILImage
 from rest_framework import status
 
 from ..azure_parts.models import Part

@@ -6,9 +6,9 @@ import logging
 
 import cv2
 import requests
-
 from django.db import models
 from django.db.models.signals import post_save, pre_save
+
 from vision_on_edge.general.utils import normalize_rtsp
 
 from ..azure_iot.utils import inference_module_url
@@ -75,5 +75,6 @@ class Camera(models.Model):
         rtsp_ok = Camera.verify_rtsp(rtsp=instance.rtsp)
         if not rtsp_ok:
             raise ValueError('rtsp is not valid')
+
 
 pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")

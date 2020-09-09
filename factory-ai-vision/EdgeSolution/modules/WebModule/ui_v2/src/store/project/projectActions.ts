@@ -107,7 +107,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
   type: POST_PROJECT_SUCCESS,
   data: {
     id: data?.id ?? null,
-    camera: data?.camera ?? null,
+    cameras: data?.cameras ?? [],
     location: data?.location ?? null,
     parts: data?.parts ?? [],
     trainingProject: data?.project ?? null,
@@ -239,7 +239,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
     .then(({ data }) => {
       const project: ProjectData = {
         id: data[0]?.id ?? null,
-        camera: data[0]?.camera ?? null,
+        cameras: data[0]?.cameras ?? [],
         location: data[0]?.location ?? null,
         parts: data[0]?.parts ?? [],
         modelUrl: data[0]?.download_uri ?? '',
@@ -273,7 +273,7 @@ export const thunkPostProject = (projectData: ProjectData): ProjectThunk => (dis
   return Axios(url, {
     data: {
       parts: projectData.parts,
-      camera: projectData.camera,
+      cameras: projectData.cameras,
       project: projectData.trainingProject,
       needRetraining: projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,

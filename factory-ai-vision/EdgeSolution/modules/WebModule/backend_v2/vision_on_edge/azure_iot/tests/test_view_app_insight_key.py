@@ -5,9 +5,10 @@ App Insight API_VIEW key test
 import json
 import logging
 
-from configs.app_insight import APP_INSIGHT_INST_KEY
 from rest_framework import status
 from rest_framework.test import APITransactionTestCase
+
+from configs.app_insight import APP_INSIGHT_INST_KEY
 
 logger = logging.getLogger(__name__)
 

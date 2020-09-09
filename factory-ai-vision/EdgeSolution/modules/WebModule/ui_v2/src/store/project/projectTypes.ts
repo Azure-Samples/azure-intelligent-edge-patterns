@@ -54,7 +54,7 @@ export type Consequence = {
 
 export type ProjectData = {
   id: number;
-  camera: number;
+  cameras: number[];
   location: number;
   parts: number[];
   trainingProject: number;

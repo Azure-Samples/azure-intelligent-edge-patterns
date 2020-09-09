@@ -2,10 +2,11 @@
 """App API views.
 """
 
-from configs.app_insight import APP_INSIGHT_INST_KEY
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+from configs.app_insight import APP_INSIGHT_INST_KEY
 
 from ...general.api.serializers import MSStyleErrorResponseSerializer
 from .serializers import InstrumentKeyResponseSerializer

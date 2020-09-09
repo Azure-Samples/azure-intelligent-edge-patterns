@@ -6,8 +6,8 @@ import logging
 import threading
 
 import requests
-
 from django.db import models
+from django.utils import timezone
 from django.db.models.signals import post_save
 
 from ..azure_parts.models import Part
@@ -36,6 +36,7 @@ class PartDetection(models.Model):
     parts = models.ManyToManyField(Part)
     needRetraining = models.BooleanField(default=True)
     deployed = models.BooleanField(default=False)
+    deploy_timestamp = models.DateTimeField(default=timezone.now)
     has_configured = models.BooleanField(default=False)
 
     accuracyRangeMin = models.IntegerField(default=30)
@@ -118,7 +119,6 @@ class PartDetection(models.Model):
             },
         )
         self.save(update_fields=["prob_threshold"])
-    
 
 
 class PDScenario(models.Model):

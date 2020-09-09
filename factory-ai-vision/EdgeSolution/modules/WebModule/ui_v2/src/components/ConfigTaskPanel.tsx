@@ -138,11 +138,17 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
         />
         <Dropdown
           label="Camera"
+          multiSelect
           options={cameraOptions}
           required
-          selectedKey={projectData.camera}
-          onChange={(_, options) => {
-            onChange('camera', options.key as number);
+          selectedKeys={projectData.cameras}
+          onChange={(_, option) => {
+            onChange(
+              'cameras',
+              option.selected
+                ? [...projectData.cameras, option.key as number]
+                : projectData.cameras.filter((key) => key !== option.key),
+            );
           }}
         />
         <Dropdown

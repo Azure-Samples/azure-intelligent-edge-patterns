@@ -173,3 +173,6 @@ export const cameraOptionsSelector = (isDemo: boolean) =>
       text: e.name,
     })),
   );
+
+export const selectCamerasByIds = (ids) =>
+  createSelector(selectCameraEntities, (entities) => ids.map((id) => entities[id]));

@@ -23,6 +23,7 @@ from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleErrorSerializer)
+from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
 from ..models import Stream
@@ -105,8 +106,8 @@ if 'runserver' in sys.argv:
     stream_manager = StreamManager()
 
 
-@swagger_auto_schema(method='get',
-                     operation_summary='Create a rtsp stream.',
+@swagger_auto_schema(operation_summary='Create a rtsp stream.',
+                     method='get',
                      manual_parameters=[
                          openapi.Parameter('rtsp',
                                            openapi.IN_QUERY,
@@ -176,6 +177,17 @@ def disconnect_stream(request, stream_id):
         status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(auto_schema=StreamAutoSchema,
+                     method='get',
+                     operation_summary='Open a video stream.',
+                     manual_parameters=[
+                         openapi.Parameter('stream_id',
+                                           openapi.IN_PATH,
+                                           type=openapi.TYPE_INTEGER,
+                                           description='Stream ID'),
+                     ],
+                     responses={'400': SimpleErrorSerializer})
+@api_view(['GET'])
 def video_feed(request, stream_id):
     """video feed
     """
@@ -190,23 +202,21 @@ def video_feed(request, stream_id):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-@swagger_auto_schema(method='get',
-                     operation_summary='Capture Streams and save as image.',
-                     manual_parameters=[
-                         openapi.Parameter('stream_id',
-                                           openapi.IN_PATH,
-                                           type=openapi.TYPE_INTEGER,
-                                           description='Stream ID'),
-                         openapi.Parameter('part_id',
-                                           openapi.IN_QUERY,
-                                           type=openapi.TYPE_INTEGER,
-                                           description='Part ID',
-                                           required=False),
-                     ],
-                     responses={
-                         '200': CaptureStreamResponseSerializer,
-                         '400': SimpleErrorSerializer
-                     })
+@swagger_auto_schema(
+    operation_summary='Capture an image from stream.',
+    method='get',
+    manual_parameters=[
+        openapi.Parameter('stream_id',
+                          openapi.IN_PATH,
+                          type=openapi.TYPE_STRING,
+                          description='Stream Id'),
+        openapi.Parameter('part_id',
+                          openapi.IN_QUERY,
+                          type=openapi.TYPE_STRING,
+                          description='Part Id',
+                          required=False),
+    ],
+)
 @api_view(['GET'])
 def capture(request, stream_id):
     """Capture image.

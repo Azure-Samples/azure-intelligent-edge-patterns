@@ -304,7 +304,7 @@ def train_project_worker(project_id):
 
     # Submit training task to Custom Vision
     if not project_changed:
-        logger.info("Project not changed. Not Training!!!")
+        logger.info("Project not changed. Not Training!")
         upcreate_training_status(project_id=project_obj.id,
                                  need_to_send_notification=True,
                                  **progress.PROGRESS_0_OK)
@@ -322,7 +322,7 @@ def train_project_worker(project_id):
                 parts_last_train=parts_last_train,
                 images_last_train=images_last_train,
             )
-        update_train_status_helper(project_id=project_obj.id)
+        update_train_status_worker(project_id=project_obj.id)
 
 
 def update_train_status_worker(project_id):
@@ -332,7 +332,28 @@ def update_train_status_worker(project_id):
         project_id:
     """
     project_obj = Project.objects.get(pk=project_id)
-    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
+    setting_obj = project_obj.setting
+    if setting_obj is None or not setting_obj.is_trainer_valid:
+        upcreate_training_status(
+            project_id=project_obj.id,
+            status="failed",
+            log="Invalid setting (training key or endpoint error).",
+            need_to_send_notification=True,
+        )
+        return
+
+    project_found = False
+    if not project_found and not project_obj.validate():
+        upcreate_training_status(
+            project_id=project_obj.id,
+            status="failed",
+            log="Invalid project customvision_id.",
+            need_to_send_notification=True,
+        )
+        return
+    project_found = True
+
+    trainer = setting_obj.get_trainer_obj()
     customvision_id = project_obj.customvision_id
     wait_prepare = 0
     # If exceed, this project probably not going to be trained
@@ -352,6 +373,7 @@ def update_train_status_worker(project_id):
                 **progress.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
             wait_prepare += 1
             if wait_prepare > max_wait_prepare:
+                logger.info("Something went wrong...")
                 upcreate_training_status(
                     project_id=project_obj.id,
                     status="failed",
@@ -378,7 +400,7 @@ def update_train_status_worker(project_id):
                 **progress.PROGRESS_8_EXPORTING)
             export_init = True
             res = project_obj.export_iterationv3_2(iteration.id)
-            logger.info(res.json())
+            logger.info("Export Response: %s", res.json())
             continue
 
         project_obj.download_uri = exports[0].download_uri
