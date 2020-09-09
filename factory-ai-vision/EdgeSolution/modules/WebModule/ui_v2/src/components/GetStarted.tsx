@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Stack, Text, Link } from '@fluentui/react';
+import { Stack, Text, Link, mergeStyleSets } from '@fluentui/react';
 import { Card } from '@uifabric/react-cards';
 import Axios from 'axios';
 
@@ -7,14 +7,48 @@ import { ConfigTaskPanel } from './ConfigTaskPanel';
 import { ProjectData } from '../store/project/projectTypes';
 import { initialProjectData } from '../store/project/projectReducer';
 
-type GetStartedProps = {};
-
 type DemoProject = Pick<
   ProjectData,
   'id' | 'name' | 'inferenceMode' | 'trainingProject' | 'camera' | 'parts'
 >;
 
-export const GetStarted: React.FC<GetStartedProps> = () => {
+const classes = mergeStyleSets({
+  gridContainer: {
+    display: 'grid',
+    gridTemplate: 'repeat(3, 1fr) / repeat(3, 1fr)',
+    gridGap: '12px',
+    marginTop: '24px',
+  },
+});
+
+const demoProjectsInfo = [
+  {
+    title: 'Counting objects',
+    subTitle: 'Identify and count the number of objects in the factory',
+  },
+  {
+    title: 'Employee safety',
+    subTitle: 'Detect if person is standing too close to a machine',
+  },
+  {
+    title: 'Defect detection',
+    subTitle: 'Detect products with defects',
+  },
+  {
+    title: 'Machine misalignment',
+    subTitle: 'Detect if a machine is now aligned or working correctly',
+  },
+  {
+    title: 'Tool detection',
+    subTitle: 'Detect when an employee is using the wrong tool',
+  },
+  {
+    title: 'Part confirmation',
+    subTitle: 'Detect if the correct part is being used',
+  },
+];
+
+export const GetStarted: React.FC = () => {
   const [demoProjectData, setdemoProjectData] = useState<DemoProject[]>([]);
   useEffect(() => {
     (async () => {
@@ -32,10 +66,10 @@ export const GetStarted: React.FC<GetStartedProps> = () => {
     })();
   }, []);
 
-  const [selectedDemo, setselectedDemo] = useState(-1);
+  const [selectedDemoIdx, setselectedDemoIdx] = useState(-1);
   const openPanel = (name: string) => () =>
-    setselectedDemo(demoProjectData.findIndex((e) => e.name === name));
-  const closePanel = () => setselectedDemo(-1);
+    setselectedDemoIdx(demoProjectData.findIndex((e) => e.name === name));
+  const closePanel = () => setselectedDemoIdx(-1);
 
   return (
     <>
@@ -45,56 +79,22 @@ export const GetStarted: React.FC<GetStartedProps> = () => {
           Choose one of the following pre-trained templates to start running inferences on demo or custom
           cameras
         </Text>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplate: 'repeat(3, 1fr) / repeat(3, 1fr)',
-            gridGap: '12px',
-            marginTop: '24px',
-          }}
-        >
-          <DemoCard
-            title="Counting objects"
-            subTitle="Identify and count the number of objects in the factory"
-            onClick={openPanel('Counting objects')}
-            available={!!demoProjectData.find((e) => e.name === 'Counting objects')}
-          />
-          <DemoCard
-            title="Employee safety"
-            subTitle="Detect if person is standing too close to a machine"
-            onClick={openPanel('Employee safety')}
-            available={!!demoProjectData.find((e) => e.name === 'Employee safety')}
-          />
-          <DemoCard
-            title="Defect detection"
-            subTitle="Detect products with defects"
-            onClick={openPanel('Defect detection')}
-            available={!!demoProjectData.find((e) => e.name === 'Defect detection')}
-          />
-          <DemoCard
-            title="Machine misalignment"
-            subTitle="Detect if a machine is now aligned or working correctly"
-            onClick={openPanel('Machine misalignment')}
-            available={!!demoProjectData.find((e) => e.name === 'Machine misalignment')}
-          />
-          <DemoCard
-            title="Tool detection"
-            subTitle="Detect when an employee is using the wrong tool"
-            onClick={openPanel('Tool detection')}
-            available={!!demoProjectData.find((e) => e.name === 'Tool detection')}
-          />
-          <DemoCard
-            title="Part confirmation"
-            subTitle="Detect if the correct part is being used"
-            onClick={openPanel('Tool detection')}
-            available={!!demoProjectData.find((e) => e.name === 'Part confirmation')}
-          />
+        <div className={classes.gridContainer}>
+          {demoProjectsInfo.map((info) => (
+            <DemoCard
+              key={info.title}
+              title={info.title}
+              subTitle={info.subTitle}
+              onClick={openPanel(info.title)}
+              available={!!demoProjectData.find((e) => e.name === info.title)}
+            />
+          ))}
         </div>
       </Stack>
       <ConfigTaskPanel
-        isOpen={selectedDemo > -1}
+        isOpen={selectedDemoIdx > -1}
         onDismiss={closePanel}
-        projectData={{ ...initialProjectData, ...demoProjectData[selectedDemo] }}
+        projectData={{ ...initialProjectData, ...demoProjectData[selectedDemoIdx] }}
         isDemo
       />
     </>
@@ -104,7 +104,7 @@ export const GetStarted: React.FC<GetStartedProps> = () => {
 type DemoCardProps = {
   title: string;
   subTitle: string;
-  onClick?: () => void;
+  onClick: () => void;
   available: boolean;
 };
 
