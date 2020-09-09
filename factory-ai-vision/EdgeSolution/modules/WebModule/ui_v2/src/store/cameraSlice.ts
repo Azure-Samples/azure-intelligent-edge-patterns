@@ -5,7 +5,7 @@ import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
 import { BoxLabel, PolygonLabel } from './type';
 import { toggleShowAOI } from './actions';
-import { selectLocationEntities } from './locationSlice';
+import { insertDemoFields, isCRDAction } from './shared/InsertDemoField';
 
 type CameraFromServer = {
   id: number;
@@ -34,6 +34,7 @@ export type Camera = {
   area: string;
   useAOI: boolean;
   location: number;
+  isDemo: boolean;
 };
 
 const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
@@ -44,6 +45,7 @@ const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
     useAOI: response.area.useAOI,
     AOIs: response.area.AOIs,
     location: response.location,
+    isDemo: response.is_demo,
   };
 };
 
@@ -90,12 +92,22 @@ const normalizeCameras = R.compose(normalizeCamerasAndAOIsByNormalizr, serialize
 
 const entityAdapter = createEntityAdapter<Camera>();
 
-export const getCameras = createAsyncThunk<any, boolean, { state: State }>('cameras/get', async (isDemo) => {
-  let response;
-  if (isDemo) response = await Axios(`/api/cameras/`);
-  else response = await Axios(`/api/cameras?is_demo=${Number(isDemo)}`);
-  return normalizeCameras(response.data);
-});
+export const getCameras = createAsyncThunk<any, boolean, { state: State }>(
+  'cameras/get',
+  async (isDemo) => {
+    const url = isDemo ? `/api/cameras/` : `/api/cameras?is_demo=0`;
+    const response = await Axios(url);
+    return normalizeCameras(response.data);
+  },
+  {
+    condition: (isDemo, { getState }) => {
+      if (isDemo) {
+        return !getState().camera.ids.length;
+      }
+      return !getState().camera.nonDemo.length;
+    },
+  },
+);
 
 export const postCamera = createAsyncThunk(
   'cameras/post',
@@ -120,7 +132,7 @@ export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number
 
 const slice = createSlice({
   name: 'cameras',
-  initialState: entityAdapter.getInitialState(),
+  initialState: { ...entityAdapter.getInitialState(), nonDemo: [], isDemo: [] },
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -137,20 +149,31 @@ const slice = createSlice({
       .addCase(toggleShowAOI.rejected, (state, action) => {
         const { showAOI, cameraId } = action.meta.arg;
         state.entities[cameraId].useAOI = !showAOI;
-      });
+      })
+      .addMatcher(isCRDAction, (state) => insertDemoFields(state));
   },
 });
 
 const { reducer } = slice;
 export default reducer;
 
-export const { selectAll: selectAllCameras, selectById: selectCameraById } = entityAdapter.getSelectors(
-  (state: State) => state.camera,
-);
+export const {
+  selectAll: selectAllCameras,
+  selectById: selectCameraById,
+  selectEntities: selectCameraEntities,
+} = entityAdapter.getSelectors((state: State) => state.camera);
 
 export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
   cameras.map((e) => ({
     key: e.id,
     text: e.name,
   })),
+);
+
+const selectNonDemoCameraIds = (state: State) => state.camera.nonDemo;
+export const selectNonDemoCameras = createSelector(
+  [selectNonDemoCameraIds, selectCameraEntities],
+  (ids, entities) => {
+    return ids.map((id) => entities[id]);
+  },
 );
