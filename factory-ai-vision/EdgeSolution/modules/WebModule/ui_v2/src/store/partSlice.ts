@@ -59,17 +59,10 @@ export const patchPart = createAsyncThunk<
   return { id: response.data.id, changes: response.data };
 });
 
-export const deletePart = createAsyncThunk<any, number, { state: State }>(
-  'parts/delete',
-  async (id, { getState }) => {
-    const projectId = getState().project.data.id;
-    const partName = selectPartById(getState(), id).name;
-    // TODO check with peter
-    // await Axios.get(`/api/projects/${projectId}/delete_tag?part_name=${partName}`);
-    await Axios.delete(`/api/parts/${id}/`);
-    return id;
-  },
-);
+export const deletePart = createAsyncThunk<any, number, { state: State }>('parts/delete', async (id) => {
+  await Axios.delete(`/api/parts/${id}/`);
+  return id;
+});
 
 const slice = createSlice({
   name: 'parts',
