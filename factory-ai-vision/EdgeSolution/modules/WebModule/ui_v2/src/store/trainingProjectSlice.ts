@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
-import Axios from 'axios';
 import { State } from 'RootStateType';
+import {
+  getInitialDemoState,
+  isCRDAction,
+  insertDemoFields,
+  getSliceApiByDemo,
+  getNonDemoSelector,
+} from './shared/DemoSliceUtils';
 
 type TrainingProject = {
   id: number;
@@ -12,8 +18,7 @@ type TrainingProject = {
 export const getTrainingProject = createAsyncThunk<any, boolean, { state: State }>(
   'trainingSlice/get',
   async (isDemo): Promise<TrainingProject[]> => {
-    const url = isDemo ? `/api/projects` : `/api/projects/?is_demo=${Number(isDemo)}`;
-    const response = await Axios.get(url);
+    const response = await getSliceApiByDemo('projects', isDemo);
     return response.data.map((e) => ({
       id: e.id,
       name: e.name,
@@ -27,10 +32,12 @@ const entityAdapter = createEntityAdapter<TrainingProject>();
 
 const slice = createSlice({
   name: 'trainingSlice',
-  initialState: entityAdapter.getInitialState(),
+  initialState: getInitialDemoState(entityAdapter.getInitialState()),
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(getTrainingProject.fulfilled, entityAdapter.setAll);
+    builder
+      .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
+      .addMatcher(isCRDAction, insertDemoFields);
   },
 });
 
@@ -40,6 +47,7 @@ export default reducer;
 export const {
   selectAll: selectAllTrainingProjects,
   selectById: selectTrainingProjectById,
+  selectEntities: selectTrainingProjectEntities,
 } = entityAdapter.getSelectors((state: State) => state.trainingProject);
 
 export const trainingProjectOptionsSelector = createSelector(selectAllTrainingProjects, (trainingProjects) =>
@@ -49,6 +57,4 @@ export const trainingProjectOptionsSelector = createSelector(selectAllTrainingPr
   })),
 );
 
-export const selectNonDemoProject = createSelector(selectAllTrainingProjects, (projects) =>
-  projects.find((p) => !p.isDemo),
-);
+export const selectNonDemoProject = getNonDemoSelector('trainingProject', selectTrainingProjectEntities);

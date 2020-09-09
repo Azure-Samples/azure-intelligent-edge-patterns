@@ -18,7 +18,7 @@ export function getInitialDemoState<T>(initialState: EntityState<T>): DemoEntity
   return { ...initialState, isDemo: [], nonDemo: [] };
 }
 
-type DemoSliceKey = keyof Pick<State, 'camera' | 'parts'>;
+type DemoSliceKey = keyof Pick<State, 'camera' | 'parts' | 'trainingProject'>;
 
 /**
  * Insert isDemo, noDemo fields to entity state
