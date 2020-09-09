@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 pytestmark = pytest.mark.django_db
 
 
+@mock.patch("vision_on_edge.azure_settings.api.views.Setting.validate",
+            mock.MagicMock(return_value=True))
 @mock.patch("vision_on_edge.azure_settings.api.views.Setting.get_projects",
             mock.MagicMock(return_value={}))
 def test_valid_setting_list_project(setting: Setting):

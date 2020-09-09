@@ -15,14 +15,16 @@ from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ...general.api.serializers import (MSStyleErrorResponseSerializer,
+                                        SimpleStatusSerializer)
 from ..models import Project, Task
-from ..utils import (pull_cv_project_helper, train_project_helper,
-                     update_train_status_helper)
+from ..utils import (pull_cv_project_helper, train_project_helper)
+from ..exceptions import ProjectWithoutSettingError
 from .serializers import (IterationPerformanceSerializer,
                           ProjectPerformanesSerializer, ProjectSerializer,
                           TaskSerializer)
@@ -61,14 +63,22 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary='Get training performace from Custom Vision.',
-        responses={'200': ProjectPerformanesSerializer})
+        responses={
+            '200': ProjectPerformanesSerializer,
+            '400': MSStyleErrorResponseSerializer
+        })
     @action(detail=True, methods=["get"])
     def train_performance(self, request, pk=None) -> Response:
         """train_performance.
         """
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
-        trainer = project_obj.setting.revalidate_and_get_trainer_obj()
+        if project_obj.setting is None:
+            raise ProjectWithoutSettingError
+        if not project_obj.setting.is_trainer_valid:
+            raise SettingCustomVisionAccessFailed
+
+        trainer = project_obj.setting.get_trainer_obj()
         customvision_project_id = project_obj.customvision_id
 
         res_data: dict = {"iterations": []}
@@ -139,7 +149,11 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                                                type=openapi.TYPE_STRING,
                                                description='Project name',
                                                required=True),
-                         ])
+                         ],
+                         responses={
+                             '200': SimpleStatusSerializer,
+                             '400': MSStyleErrorResponseSerializer
+                         })
     @action(detail=True, methods=["get"])
     def reset_project(self, request, pk=None) -> Response:
         """reset_project.
@@ -147,28 +161,10 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
-        project_name = request.query_params.get("project_name")
-        if not project_name:
-            return Response(
-                {
-                    "status": "failed",
-                    "log": "project_name required"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        project_name = request.query_params.get("project_name") or None
         try:
-
-            project_obj.customvision_id = ""
-            project_obj.name = project_name
-            project_obj.download_uri = ""
-            project_obj.needRetraining = Project._meta.get_field(
-                "needRetraining").get_default()
-            project_obj.maxImages = Project._meta.get_field(
-                "maxImages").get_default()
-            project_obj.deployed = False
+            project_obj.reset(name=project_name)
             project_obj.save()
-            project_obj.create_project()
-
             # Let Signals to handle if we need to delete Part/Image
             return Response({"status": "ok"})
         except CustomVisionErrorException:
@@ -185,7 +181,11 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                               openapi.IN_QUERY,
                               type=openapi.TYPE_BOOLEAN,
                               description='partial download or not')
-        ])
+        ],
+        responses={
+            '200': SimpleStatusSerializer,
+            '400': MSStyleErrorResponseSerializer
+        })
     @action(detail=True, methods=["get"])
     def pull_cv_project(self, request, pk=None) -> Response:
         """pull_cv_project.

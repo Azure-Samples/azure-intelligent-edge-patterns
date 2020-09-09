@@ -34,13 +34,9 @@ def update_app_insight_counter(
         retrain = train = 0
         if has_new_parts:
             logger.info("This is a training job")
-            project_obj.training_counter += 1
-            project_obj.save(update_fields=["training_counter"])
             train = 1
         elif has_new_images:
             logger.info("This is a re-training job")
-            project_obj.retraining_counter += 1
-            project_obj.save(update_fields=["retraining_counter"])
             retrain = 1
         else:
             logger.info("Project not changed")
@@ -227,7 +223,9 @@ def train_project_worker(project_id):
     Args:
         project_id:
     """
-    # Get Project
+    # =====================================================
+    # 0. Get Project in Django                          ===
+    # =====================================================
     project_obj = Project.objects.get(pk=project_id)
     logger.info("Project id: %s", project_obj.id)
     if (not project_obj.setting or not project_obj.setting.is_trainer_valid):
@@ -241,6 +239,10 @@ def train_project_worker(project_id):
                                  need_to_send_notification=True,
                                  **progress.PROGRESS_0_OK)
         return
+
+    # =====================================================
+    # 1. Prepare Custom Vision Client                   ===
+    # =====================================================
     trainer = project_obj.setting.get_trainer_obj()
     customvision_project_id = project_obj.customvision_id
     project_obj.dequeue_iterations()
@@ -248,7 +250,9 @@ def train_project_worker(project_id):
     part_ids = [part.id for part in Part.objects.filter(project=project_obj)]
     logger.info("Part ids: %s", part_ids)
 
-    # Get/Create Project on Custom Vision
+    # =====================================================
+    # 2. Get/Create Project on Custom Vision            ===
+    # =====================================================
     try:
         trainer.get_project(customvision_project_id)
         upcreate_training_status(
@@ -267,6 +271,9 @@ def train_project_worker(project_id):
     logger.info("Project Id: %s", project_obj.customvision_id)
     logger.info("Project Name: %s", project_obj.name)
 
+    # =====================================================
+    # 3. Upload parts                                   ===
+    # =====================================================
     upcreate_training_status(project_id=project_obj.id,
                              need_to_send_notification=True,
                              **progress.PROGRESS_3_UPLOADING_PARTS)
@@ -283,7 +290,7 @@ def train_project_worker(project_id):
     images_last_train = trainer.get_tagged_image_count(
         project_obj.customvision_id)
 
-    # Create/update tags on CustomVisioin Project
+    # Create/update tags on CustomVision Project
     has_new_parts = batch_upload_parts_to_customvision(project_id=project_id,
                                                        part_ids=part_ids,
                                                        tags_dict=tags_dict)
@@ -294,7 +301,9 @@ def train_project_worker(project_id):
                              need_to_send_notification=True,
                              **progress.PROGRESS_4_UPLOADING_IMAGES)
 
-    # Upload images to CustomVisioin Project
+    # =====================================================
+    # 4. Upload images to CustomVision Project          ===
+    # =====================================================
     for part_id in part_ids:
         logger.info("Uploading images with part_id %s", part_id)
         has_new_images = upload_images_to_customvision_helper(
@@ -302,96 +311,83 @@ def train_project_worker(project_id):
         if has_new_images:
             project_changed = True
 
-    # Submit training task to Custom Vision
+    # =====================================================
+    # 5. Submit Training Task to Custom Vision          ===
+    # =====================================================
+    logger.info("Submit Training Task")
     if not project_changed:
         logger.info("Project not changed. Not Training!")
         upcreate_training_status(project_id=project_obj.id,
                                  need_to_send_notification=True,
                                  **progress.PROGRESS_0_OK)
-    else:
-        upcreate_training_status(
-            project_id=project_obj.id,
-            need_to_send_notification=True,
-            **progress.PROGRESS_5_SUBMITTING_TRAINING_TASK)
-        training_task_submit_success = project_obj.train_project()
-        if training_task_submit_success:
-            update_app_insight_counter(
-                project_obj=project_obj,
-                has_new_parts=has_new_parts,
-                has_new_images=has_new_images,
-                parts_last_train=parts_last_train,
-                images_last_train=images_last_train,
-            )
-        update_train_status_worker(project_id=project_obj.id)
-
-
-def update_train_status_worker(project_id):
-    """update_train_status_worker.
-
-    Args:
-        project_id:
-    """
-    project_obj = Project.objects.get(pk=project_id)
-    setting_obj = project_obj.setting
-    if setting_obj is None or not setting_obj.is_trainer_valid:
-        upcreate_training_status(
-            project_id=project_obj.id,
-            status="failed",
-            log="Invalid setting (training key or endpoint error).",
-            need_to_send_notification=True,
-        )
         return
-
-    project_found = False
-    if not project_found and not project_obj.validate():
-        upcreate_training_status(
-            project_id=project_obj.id,
-            status="failed",
-            log="Invalid project customvision_id.",
-            need_to_send_notification=True,
+    upcreate_training_status(project_id=project_obj.id,
+                             need_to_send_notification=True,
+                             **progress.PROGRESS_5_SUBMITTING_TRAINING_TASK)
+    training_task_submit_success = project_obj.train_project()
+    # App Insight
+    if training_task_submit_success:
+        update_app_insight_counter(
+            project_obj=project_obj,
+            has_new_parts=has_new_parts,
+            has_new_images=has_new_images,
+            parts_last_train=parts_last_train,
+            images_last_train=images_last_train,
         )
-        return
-    project_found = True
 
-    trainer = setting_obj.get_trainer_obj()
+    # =====================================================
+    # 6. Training (Finding Iteration)                   ===
+    # =====================================================
+    logger.info("Finding Iteration")
     customvision_id = project_obj.customvision_id
     wait_prepare = 0
-    # If exceed, this project probably not going to be trained
     max_wait_prepare = 60
-
-    # Send notification only when init
-    training_init = False
-    export_init = False
-
+    iteration_create_init = False  # Send notification only when init
     while True:
         time.sleep(1)
-
+        wait_prepare += 1
         iterations = trainer.get_iterations(customvision_id)
-        if len(iterations) == 0:
+        if not iteration_create_init:
             upcreate_training_status(
                 project_id=project_obj.id,
                 **progress.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
-            wait_prepare += 1
-            if wait_prepare > max_wait_prepare:
-                logger.info("Something went wrong...")
-                upcreate_training_status(
-                    project_id=project_obj.id,
-                    status="failed",
-                    log="Get iteration from Custom Vision occurs error.",
-                    need_to_send_notification=True,
-                )
-                break
-            continue
+        if len(iterations) > 0:
+            logger.info("Iteration Found %s", iterations[0])
+            break
+        if wait_prepare > max_wait_prepare:
+            logger.info("Something went wrong...")
+            upcreate_training_status(
+                project_id=project_obj.id,
+                status="failed",
+                log="Get iteration from Custom Vision occurs error.",
+                need_to_send_notification=True,
+            )
+            break
 
+    # =====================================================
+    # 6. Training (Waiting)                             ===
+    # =====================================================
+    logger.info("Training")
+    training_init = False
+    while True:
+        time.sleep(1)
+        iterations = trainer.get_iterations(customvision_id)
         iteration = iterations[0]
-        if not iteration.exportable or iteration.status != "Completed":
+        if not training_init:
             upcreate_training_status(
                 project_id=project_obj.id,
                 need_to_send_notification=(not training_init),
                 **progress.PROGRESS_7_TRAINING)
             training_init = True
-            continue
+        if iteration.exportable and iteration.status == "Completed":
+            break
 
+    # =====================================================
+    # 7. Exporting                                      ===
+    # =====================================================
+    export_init = False
+    while True:
+        time.sleep(1)
         exports = trainer.get_exports(customvision_id, iteration.id)
         if len(exports) == 0 or not exports[0].download_uri:
             upcreate_training_status(
@@ -402,27 +398,35 @@ def update_train_status_worker(project_id):
             res = project_obj.export_iterationv3_2(iteration.id)
             logger.info("Export Response: %s", res.json())
             continue
-
-        project_obj.download_uri = exports[0].download_uri
-        project_obj.save(update_fields=["download_uri"])
-
-        logger.info("Successfully export model: %s", project_obj.download_uri)
-
-        logger.info("Training Status: Completed")
-        train_performance_list = []
-        for iteration in iterations[:2]:
-            train_performance_list.append(
-                trainer.get_iteration_performance(customvision_id,
-                                                  iteration.id).as_dict())
-
-            logger.info("Training Performance: %s", train_performance_list)
-        upcreate_training_status(
-            project_id=project_obj.id,
-            performance=json.dumps(train_performance_list),
-            need_to_send_notification=True,
-            **progress.PROGRESS_0_OK)
-        project_obj.save()
         break
+
+    # =====================================================
+    # 8. Saving model and performance                   ===
+    # =====================================================
+    exports = trainer.get_exports(customvision_id, iteration.id)
+    project_obj.download_uri = exports[0].download_uri
+
+    logger.info("Successfully export model: %s", project_obj.download_uri)
+
+    logger.info("Training Status: Completed")
+    train_performance_list = []
+    for iteration in iterations[:2]:
+        train_performance_list.append(
+            trainer.get_iteration_performance(customvision_id,
+                                              iteration.id).as_dict())
+
+        logger.info("Training Performance: %s", train_performance_list)
+    upcreate_training_status(project_id=project_obj.id,
+                             performance=json.dumps(train_performance_list),
+                             need_to_send_notification=True,
+                             **progress.PROGRESS_0_OK)
+    if has_new_parts:
+        logger.info("This is a training job")
+        project_obj.training_counter += 1
+    elif has_new_images:
+        logger.info("This is a re-training job")
+        project_obj.retraining_counter += 1
+    project_obj.save()
 
 
 def train_project_helper(project_id):
@@ -434,15 +438,3 @@ def train_project_helper(project_id):
         project_id: Django ORM project id.
     """
     threading.Thread(target=train_project_worker, args=(project_id,)).start()
-
-
-def update_train_status_helper(project_id):
-    """update_train_status.
-
-    Open a thread to update the training status object.
-
-    Args:
-        project_id: Django ORM project id
-    """
-    threading.Thread(target=update_train_status_worker,
-                     args=(project_id,)).start()

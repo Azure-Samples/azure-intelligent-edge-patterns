@@ -51,26 +51,28 @@ class Setting(models.Model):
     def validate(self) -> bool:
         """validate.
 
-        Args:
-
         Returns:
-            bool:
+            bool: is_trainer_valid
         """
-        logger.info("Validating %s", self.name)
+        logger.info("Setting validating (%s)", self.name)
         is_trainer_valid = False
         if not self.training_key or not self.endpoint:
             return is_trainer_valid
         trainer = CustomVisionTrainingClient(self.training_key, self.endpoint)
         try:
             trainer.get_domains()
-            logger.info("Validate success.")
+            logger.info("Setting validate success.")
             is_trainer_valid = True
         except CustomVisionErrorException:
-            logger.exception("Validate occur CustomVisionError.")
+            logger.info("Setting validate occur CustomVisionError.")
         except MSClientRequestError:
-            logger.exception("Validate occur MSClientRequestError.")
+            logger.info("Setting validate occur MSClientRequestError.")
+        except (KeyError, ValueError, IndexError):
+            logger.info(
+                "Setting validate occur (KeyError, ValueError, IndexError).")
         except Exception:
-            logger.exception("Validate occur Unknown error.")
+            logger.exception("Setting validate occur Unknown error.")
+            raise
         return is_trainer_valid
 
     def get_trainer_obj(self) -> CustomVisionTrainingClient:

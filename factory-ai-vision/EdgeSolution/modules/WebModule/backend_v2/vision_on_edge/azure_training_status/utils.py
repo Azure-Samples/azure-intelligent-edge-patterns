@@ -42,4 +42,24 @@ def upcreate_training_status(project_id,
             "need_to_send_notification": need_to_send_notification,
         },
     )
+    obj.save()
     return obj, created
+
+
+# def training_status_failed(project_id,
+                           # log,
+                           # need_to_send_notification: bool = True):
+    # logger.info("Training Failed")
+    # logger.info("Updating Training Log      :%s", log)
+    # logger.info("need_to_send_notification  :%s", need_to_send_notification)
+
+    # obj, created = TrainingStatus.objects.update_or_create(
+        # project_id=project_id,
+        # defaults={
+            # "status": status,
+            # "log": log.capitalize(),
+            # "performance": performance,
+            # "need_to_send_notification": need_to_send_notification,
+        # },
+    # )
+    # return obj, created

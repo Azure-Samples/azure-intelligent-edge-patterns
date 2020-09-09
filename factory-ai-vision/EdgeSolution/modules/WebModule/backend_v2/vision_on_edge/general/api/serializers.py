@@ -23,19 +23,17 @@ class SimpleErrorSerializer(serializers.Serializer):
     log = serializers.CharField()
 
 
-class MSStyleErrorSerializer(serializers.Serializer):
-    """MSStyleErrorSerializer.
-
-    MicroSoft Style Error Response Serializer.
-    """
-    status_code = serializers.IntegerField()
-    code = serializers.CharField()
-    message = serializers.CharField()
-
-
 class MSStyleErrorResponseSerializer(serializers.Serializer):
     """MSStyleErrorResponseSerializer.
 
     MicroSoft Style Inner Error Serializer.
     """
+    class MSStyleErrorSerializer(serializers.Serializer):
+        """MSStyleErrorSerializer.
+
+        MicroSoft Style Error Response Serializer.
+        """
+        status_code = serializers.IntegerField()
+        code = serializers.CharField()
+        message = serializers.CharField()
     error = MSStyleErrorSerializer()

@@ -37,9 +37,9 @@ def setting() -> Setting:
     return SettingFactory()
 
 
-@pytest.fixture
-def project() -> Project:
-    return ProjectFactory()
+#@pytest.fixture
+#def project() -> Project:
+#    return ProjectFactory()
 
 
 @pytest.fixture
