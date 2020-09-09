@@ -75,8 +75,8 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   };
 
   const onGoTaggingClick = () => {
-    onDismiss();
     dispatch(openLabelingPage({ imageIds: capturedImgs.current, selectedImageId: capturedImgs.current[0] }));
+    closeDialog();
   };
 
   useEffect(() => {
