@@ -8,25 +8,35 @@ export type Part = {
   id: number;
   name: string;
   description: string;
+  trainingProject: number;
+};
+
+const normalizePart = (data): Part[] => {
+  return data.map((d) => ({
+    id: d.id,
+    name: d.name,
+    description: d.description,
+    trainingProject: d.project,
+  }));
 };
 
 const entityAdapter = createEntityAdapter<Part>();
 
-export const getParts = createAsyncThunk<any, boolean, { state: State }>(
+export const getParts = createAsyncThunk<any, undefined, { state: State }>(
   'parts/get',
-  async (isDemo) => {
-    const response = await Axios.get(`/api/parts?is_demo=${Number(isDemo)}`);
-    return response.data;
+  async () => {
+    const response = await Axios.get('/api/parts/');
+    return normalizePart(response.data);
   },
   {
-    condition: (_, { getState }) => getState().parts.ids.length === 0,
+    condition: (_, { getState }) => !getState().parts.ids.length,
   },
 );
 
-export const postPart = createAsyncThunk<any, Omit<Part, 'id'>, { state: State }>(
+export const postPart = createAsyncThunk<any, Omit<Part, 'id' | 'trainingProject'>, { state: State }>(
   'parts/post',
   async (data, { getState }) => {
-    const { id: trainingProject } = selectNonDemoProject(getState());
+    const { id: trainingProject } = selectNonDemoProject(getState())[0];
     const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
     return response.data;
   },
@@ -41,17 +51,10 @@ export const patchPart = createAsyncThunk<
   return { id: response.data.id, changes: response.data };
 });
 
-export const deletePart = createAsyncThunk<any, number, { state: State }>(
-  'parts/delete',
-  async (id, { getState }) => {
-    const projectId = getState().project.data.id;
-    const partName = selectPartById(getState(), id).name;
-    // TODO check with peter
-    // await Axios.get(`/api/projects/${projectId}/delete_tag?part_name=${partName}`);
-    await Axios.delete(`/api/parts/${id}/`);
-    return id;
-  },
-);
+export const deletePart = createAsyncThunk<any, number, { state: State }>('parts/delete', async (id) => {
+  await Axios.delete(`/api/parts/${id}/`);
+  return id;
+});
 
 const slice = createSlice({
   name: 'parts',
@@ -79,9 +82,18 @@ export const {
   selectEntities: selectPartEntities,
 } = entityAdapter.getSelectors<State>((state) => state.parts);
 
-export const partOptionsSelector = createSelector(selectAllParts, (parts) =>
-  parts.map((p) => ({ key: p.id, text: p.name })),
-);
-
 export const selectPartNamesById = (ids) =>
   createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i]?.name));
+
+export const selectNonDemoPart = createSelector(
+  [selectAllParts, selectNonDemoProject],
+  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
+);
+
+export const selectPartsByTrainProject = (trainProject: number) =>
+  createSelector(selectAllParts, (parts) => parts.filter((p) => p.trainingProject === trainProject));
+
+export const partOptionsSelector = (trainProject: number) =>
+  createSelector(selectPartsByTrainProject(trainProject), (parts) =>
+    parts.map((p) => ({ key: p.id, text: p.name })),
+  );

@@ -3,12 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui/react';
 
-import { getParts, Part, selectAllParts } from '../store/partSlice';
+import { getParts, Part, selectNonDemoPart } from '../store/partSlice';
 import { EmptyAddIcon } from './EmptyAddIcon';
 
 export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddBtnClick }) => {
   const [loading, setLoading] = useState(false);
-  const parts = useSelector(selectAllParts);
+  const parts = useSelector(selectNonDemoPart);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -20,7 +20,7 @@ export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddB
   useEffect(() => {
     (async () => {
       setLoading(true);
-      await dispatch(getParts(false));
+      await dispatch(getParts());
       setLoading(false);
     })();
   }, [dispatch]);

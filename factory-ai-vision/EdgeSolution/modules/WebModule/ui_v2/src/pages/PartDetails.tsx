@@ -81,7 +81,7 @@ export const PartDetails: React.FC = () => {
   ];
 
   useEffect(() => {
-    dispatch(getParts(false));
+    dispatch(getParts());
     dispatch(thunkGetProject());
   }, [dispatch]);
 
@@ -192,7 +192,7 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
   useEffect(() => {
     dispatch(getImages());
     // For image list items
-    dispatch(getParts(false));
+    dispatch(getParts());
   }, [dispatch]);
 
   return (

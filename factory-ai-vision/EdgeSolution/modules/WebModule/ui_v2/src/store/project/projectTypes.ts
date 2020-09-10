@@ -69,6 +69,7 @@ export type ProjectData = {
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
   name: string;
+  inferenceMode: string;
 };
 
 // Describing the different ACTION NAMES available

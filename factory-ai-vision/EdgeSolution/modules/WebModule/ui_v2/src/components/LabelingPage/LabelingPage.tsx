@@ -33,7 +33,7 @@ export const imageSelector = createSelector(
 );
 const imagePartSelector = createSelector([imageSelector, selectPartEntities], (img, partEntities) => {
   if (img) return partEntities[img.part];
-  return { id: null, name: '', description: '' };
+  return { id: null, name: '', description: '', trainingProject: null };
 });
 
 const selectImageTimeStamp = (state: State) => {

@@ -21,7 +21,7 @@ export const PartPicker: React.FC<{ selectedPart: number }> = ({ selectedPart })
   };
 
   useEffect(() => {
-    dispatch(getParts(false));
+    dispatch(getParts());
   }, [dispatch]);
 
   const renderPartList = () => {

@@ -4,13 +4,13 @@ import { useHistory } from 'react-router-dom';
 import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui/react';
 import { createSelector } from '@reduxjs/toolkit';
 
-import { getCameras, Camera, selectAllCameras } from '../store/cameraSlice';
+import { getCameras, Camera, selectNonDemoCameras } from '../store/cameraSlice';
 import { EmptyAddIcon } from './EmptyAddIcon';
 import { selectLocationEntities } from '../store/locationSlice';
 import { maskRtsp } from '../utils/maskRTSP';
 
 const selectDetailListItems = createSelector(
-  [selectAllCameras, selectLocationEntities],
+  [selectNonDemoCameras, selectLocationEntities],
   (cameras, locations) => {
     return cameras.map((c) => ({
       ...c,
