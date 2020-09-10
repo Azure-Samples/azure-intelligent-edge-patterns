@@ -244,9 +244,9 @@ def capture(request, stream_id):
         img_obj.save()
         img_serializer = ImageSerializer(img_obj, context={"request": request})
         response_data = {"status": "ok", "image": img_serializer.data}
-        serializer = StreamCaptureResponseSerializer(data=response_data)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.validated_data)
+        # serializer = StreamCaptureResponseSerializer(data=response_data)
+        # serializer.is_valid(raise_exception=True)
+        return Response(response_data)
     raise StreamNotFoundError
 
 
