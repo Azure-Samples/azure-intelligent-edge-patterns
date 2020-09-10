@@ -14,6 +14,7 @@ import {
   OnSettingStatusCheckAction,
   CVProject,
 } from './settingType';
+import { getTrainingProject } from '../trainingProjectSlice';
 
 export const updateKey = (key: string): UpdateKeyAction => ({ type: 'UPDATE_KEY', payload: key });
 
@@ -190,6 +191,7 @@ export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promis
         }),
       );
       dispatch(thunkGetAllCvProjects());
+      dispatch(getTrainingProject(false));
       return void 0;
     })
     .catch((err) => {
