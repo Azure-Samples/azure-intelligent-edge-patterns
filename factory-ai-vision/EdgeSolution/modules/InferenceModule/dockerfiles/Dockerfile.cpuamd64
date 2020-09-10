@@ -73,6 +73,11 @@ COPY config.py ./
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 
+RUN [ "/bin/bash", "-c", "source activate python38 && pip uninstall azure-iot-hub -y"]
+RUN [ "/bin/bash", "-c", "git clone https://github.com/Azure/azure-iot-sdk-python.git"]
+RUN [ "/bin/bash", "-c", "cd azure-iot-sdk-python/azure-iot-hub && source activate python38 && python3 setup.py install" ]
+
+
 EXPOSE 5558
 EXPOSE 5000
 
