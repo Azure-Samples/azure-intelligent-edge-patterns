@@ -1,16 +1,16 @@
 import * as R from 'ramda';
 
-import { BaseShape, Shape, AOI } from './BaseShape';
+import { BaseShape, Shape, VideoAnno } from './BaseShape';
 import { Position2D, LineLabel } from '../type';
 // TODO Share this with annoSlice
 
-export type LineAOI = AOI & {
+export type LineType = VideoAnno & {
   type: Shape.Line;
   vertices: LineLabel;
 };
 
 export class Line extends BaseShape {
-  static init(p: Position2D, id: string, camera: number): LineAOI {
+  static init(p: Position2D, id: string, camera: number): LineType {
     return Line.setVerticesToValidValue({
       id,
       camera,
@@ -19,20 +19,20 @@ export class Line extends BaseShape {
     });
   }
 
-  static add(p: Position2D, obj: LineAOI): LineAOI {
+  static add(p: Position2D, obj: LineType): LineType {
     const updateLast = R.evolve({
       vertices: R.update(-1, p),
     });
 
-    return R.compose(Line.setVerticesToValidValue, updateLast)(obj) as LineAOI;
+    return R.compose(Line.setVerticesToValidValue, updateLast)(obj) as LineType;
   }
 
-  static update(idx: number, p: Position2D, obj: LineAOI): LineAOI {
+  static update(idx: number, p: Position2D, obj: LineType): LineType {
     const update = R.evolve({ vertices: R.update(idx, p) });
     return R.compose(Line.setVerticesToValidValue, update)(obj);
   }
 
-  static setVerticesToInt(obj: LineAOI): LineAOI {
+  static setVerticesToInt(obj: LineType): LineType {
     const newObj = { ...obj };
     newObj.vertices = newObj.vertices.map((e) => ({
       x: Math.round(e.x),
@@ -41,11 +41,11 @@ export class Line extends BaseShape {
     return newObj;
   }
 
-  static setVerticesToValidValue(obj: LineAOI): LineAOI {
+  static setVerticesToValidValue(obj: LineType): LineType {
     return Line.setVerticesToInt(obj);
   }
 }
 
-export const isLine = (input: AOI): input is LineAOI => {
+export const isLine = (input: VideoAnno): input is LineType => {
   return input.type === Shape.Line;
 };

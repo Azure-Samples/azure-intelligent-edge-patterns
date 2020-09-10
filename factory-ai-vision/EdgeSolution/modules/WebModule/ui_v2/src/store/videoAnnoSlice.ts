@@ -13,10 +13,10 @@ import { State } from 'RootStateType';
 import { BoxLabel, Position2D, PolygonLabel } from './type';
 import { getCameras } from './cameraSlice';
 import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from './actions';
-import { Shape, AOI } from './shared/BaseShape';
-import { BBox, BBoxAOI, isBBox } from './shared/Box2d';
-import { Polygon, PolygonAOI, isPolygon } from './shared/Polygon';
-import { Line, LineAOI, isLine } from './shared/Line';
+import { Shape, VideoAnno } from './shared/BaseShape';
+import { BBox, BBoxType, isBBox } from './shared/Box2d';
+import { Polygon, PolygonType, isPolygon } from './shared/Polygon';
+import { Line, LineType, isLine } from './shared/Line';
 
 // Use enum string to make debugginh easier.
 export enum CreatingState {
@@ -25,17 +25,17 @@ export enum CreatingState {
   Creating = 'Creating',
 }
 
-const entityAdapter = createEntityAdapter<AOI>();
+const entityAdapter = createEntityAdapter<VideoAnno>();
 
 const slice = createSlice({
-  name: 'AOI',
+  name: 'videoAnno',
   initialState: {
     ...entityAdapter.getInitialState(),
     creatingState: CreatingState.Disabled,
     shape: Shape.None,
   },
   reducers: {
-    createDefaultAOI: (state, action: PayloadAction<BBoxAOI>) => {
+    createDefaultVideoAnno: (state, action: PayloadAction<BBoxType>) => {
       entityAdapter.upsertOne(state, action.payload);
     },
     onCreatingPoint: (
@@ -55,23 +55,23 @@ const slice = createSlice({
         const id = state.ids[state.ids.length - 1];
 
         if (state.shape === Shape.BBox) {
-          entityAdapter.updateOne(state, { id, changes: BBox.add(point, state.entities[id] as BBoxAOI) });
+          entityAdapter.updateOne(state, { id, changes: BBox.add(point, state.entities[id] as BBoxType) });
           state.creatingState = CreatingState.Disabled;
           state.shape = Shape.None;
         } else if (state.shape === Shape.Polygon) {
           entityAdapter.updateOne(state, {
             id,
-            changes: Polygon.add(point, state.entities[id] as PolygonAOI),
+            changes: Polygon.add(point, state.entities[id] as PolygonType),
           });
         } else if (state.shape === Shape.Line) {
-          entityAdapter.updateOne(state, { id, changes: Line.add(point, state.entities[id] as LineAOI) });
+          entityAdapter.updateOne(state, { id, changes: Line.add(point, state.entities[id] as LineType) });
           state.creatingState = CreatingState.Disabled;
           state.shape = Shape.None;
         }
       }
     },
-    removeAOI: entityAdapter.removeOne,
-    updateAOI: (
+    removeVideoAnno: entityAdapter.removeOne,
+    updateVideoAnno: (
       state,
       action: PayloadAction<Update<BoxLabel> | Update<{ idx: number; vertex: Position2D }>>,
     ) => {
@@ -80,23 +80,23 @@ const slice = createSlice({
         const { changes } = action.payload as Update<BoxLabel>;
         entityAdapter.updateOne(state, {
           id,
-          changes: BBox.update(changes as Partial<BoxLabel>, state.entities[id] as BBoxAOI),
+          changes: BBox.update(changes as Partial<BoxLabel>, state.entities[id] as BBoxType),
         });
       } else if (isPolygon(state.entities[id])) {
         const { changes } = action.payload as Update<{ idx: number; vertex: Position2D }>;
         entityAdapter.updateOne(state, {
           id,
-          changes: Polygon.update(changes.idx, changes.vertex, state.entities[id] as PolygonAOI),
+          changes: Polygon.update(changes.idx, changes.vertex, state.entities[id] as PolygonType),
         });
       } else if (isLine(state.entities[id])) {
         const { changes } = action.payload as Update<{ idx: number; vertex: Position2D }>;
         entityAdapter.updateOne(state, {
           id,
-          changes: Line.update(changes.idx, changes.vertex, state.entities[id] as LineAOI),
+          changes: Line.update(changes.idx, changes.vertex, state.entities[id] as LineType),
         });
       }
     },
-    onCreateAOIBtnClick: (state, action: PayloadAction<Shape>) => {
+    onCreateVideoAnnoBtnClick: (state, action: PayloadAction<Shape>) => {
       if (state.creatingState === CreatingState.Disabled) {
         state.creatingState = CreatingState.Waiting;
         state.shape = action.payload;
@@ -130,7 +130,7 @@ const { reducer } = slice;
  * A reducer enhancer to add a field `originEntities` to store the data from server. No user edit
  */
 const addOriginEntitiesReducer: Reducer<
-  ReturnType<typeof reducer> & { originEntities: Record<string, AOI> }
+  ReturnType<typeof reducer> & { originEntities: Record<string, VideoAnno> }
 > = (state, action) => {
   if (getCameras.fulfilled.match(action)) {
     return { ...reducer(state, action), originEntities: R.clone(action.payload.entities.AOIs) || {} };
@@ -153,21 +153,23 @@ const addOriginEntitiesReducer: Reducer<
 export default addOriginEntitiesReducer;
 
 export const {
-  updateAOI,
+  updateVideoAnno,
   onCreatingPoint,
-  removeAOI,
-  createDefaultAOI,
-  onCreateAOIBtnClick,
+  removeVideoAnno,
+  createDefaultVideoAnno,
+  onCreateVideoAnnoBtnClick,
   finishLabel,
 } = slice.actions;
 
-export const { selectAll: selectAllAOIs } = entityAdapter.getSelectors<State>((state) => state.AOIs);
+export const { selectAll: selectAllVideoAnnos } = entityAdapter.getSelectors<State>(
+  (state) => state.videoAnnos,
+);
 
-export const selectAOIsByCamera = (cameraId: number) =>
-  createSelector(selectAllAOIs, (aois) => aois.filter((e) => e.camera === cameraId));
+export const selectVideoAnnosByCamera = (cameraId: number) =>
+  createSelector(selectAllVideoAnnos, (annos) => annos.filter((e) => e.camera === cameraId));
 
-export const selectOriginAOIsByCamera = (cameraId: number) =>
+export const selectOriginVideoAnnosByCamera = (cameraId: number) =>
   createSelector(
-    (state: State) => Object.values(state.AOIs.originEntities || {}),
-    (originAOIs: AOI[]) => originAOIs.filter((e) => e.camera === cameraId),
+    (state: State) => Object.values(state.videoAnnos.originEntities || {}),
+    (originAnnos: VideoAnno[]) => originAnnos.filter((e) => e.camera === cameraId),
   );

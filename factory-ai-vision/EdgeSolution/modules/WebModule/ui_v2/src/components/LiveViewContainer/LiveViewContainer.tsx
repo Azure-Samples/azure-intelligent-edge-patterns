@@ -7,7 +7,13 @@ import { LiveViewScene } from './LiveViewScene';
 import useImage from '../LabelingPage/util/useImage';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
-import { selectAOIsByCamera, updateAOI, onCreatingPoint, removeAOI, finishLabel } from '../../store/AOISlice';
+import {
+  selectVideoAnnosByCamera,
+  updateVideoAnno,
+  onCreatingPoint,
+  removeVideoAnno,
+  finishLabel,
+} from '../../store/videoAnnoSlice';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -17,11 +23,11 @@ export const LiveViewContainer: React.FC<{
   const showCountingLine = useSelector<State, boolean>(
     (state) => selectCameraById(state, cameraId)?.useCountingLine,
   );
-  const AOIs = useSelector(selectAOIsByCamera(cameraId));
+  const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const imageInfo = useImage(`/api/inference/video_feed?camera_id=${cameraId}`, '', true, true);
-  const creatingAOI = useSelector((state: State) => state.AOIs.creatingState);
-  const AOIShape = useSelector((state: State) => state.AOIs.shape);
+  const creatingVideoAnno = useSelector((state: State) => state.videoAnnos.creatingState);
+  const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -41,16 +47,16 @@ export const LiveViewContainer: React.FC<{
     <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
       {showVideo ? (
         <LiveViewScene
-          AOIs={AOIs}
-          creatingShape={AOIShape}
+          videoAnnos={videoAnnos}
+          creatingShape={videoAnnoShape}
           onCreatingPoint={(point) => dispatch(onCreatingPoint({ point, cameraId }))}
-          updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
-          removeAOI={(AOIId) => dispatch(removeAOI(AOIId))}
+          updateVideoAnno={(id, changes) => dispatch(updateVideoAnno({ id, changes }))}
+          removeVideoAnno={(annoId) => dispatch(removeVideoAnno(annoId))}
           finishLabel={() => dispatch(finishLabel())}
           AOIVisible={showAOI}
           countingLineVisible={showCountingLine}
           imageInfo={imageInfo}
-          creatingState={creatingAOI}
+          creatingState={creatingVideoAnno}
         />
       ) : null}
     </div>

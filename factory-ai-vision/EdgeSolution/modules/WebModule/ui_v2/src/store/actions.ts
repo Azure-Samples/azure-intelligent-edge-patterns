@@ -26,9 +26,9 @@ type toggleCameraLabelPayload = { cameraId: number; checked: boolean };
 export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowAOI',
   async ({ cameraId, checked }, { getState }) => {
-    const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities)
-      .filter((e) => e.camera === cameraId)
+    const videoAnnoEntities = getState().videoAnnos.entities;
+    const AOIs = Object.values(videoAnnoEntities)
+      .filter((e) => e.camera === cameraId && [Shape.BBox, Shape.Line].includes(e.type))
       .map((e) => {
         if (e.type === Shape.BBox)
           return {
@@ -58,9 +58,9 @@ export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   'cameras/updateArea',
   async (cameraId, { getState }) => {
     const { useAOI } = getState().camera.entities[cameraId];
-    const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities)
-      .filter((e) => e.camera === cameraId)
+    const videoAnnoEntities = getState().videoAnnos.entities;
+    const AOIs = Object.values(videoAnnoEntities)
+      .filter((e) => e.camera === cameraId && [Shape.BBox, Shape.Line].includes(e.type))
       .map((e) => {
         if (e.type === Shape.BBox)
           return {

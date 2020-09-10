@@ -9,7 +9,7 @@ import imagesReducer from './imageSlice';
 import annotationReducer from './annotationSlice';
 import labelingPageReducer from './labelingPageSlice';
 import cameraReducer from './cameraSlice';
-import AOIsReducer from './AOISlice';
+import videoAnnosReducer from './videoAnnoSlice';
 import rejectMsgReducer from './rejectedReducer';
 import trainingProjectReducer from './trainingProjectSlice';
 
@@ -25,7 +25,7 @@ export const rootReducer = combineReducers({
   labelImages: imagesReducer,
   annotations: annotationReducer,
   labelingPage: labelingPageReducer,
-  AOIs: AOIsReducer,
+  videoAnnos: videoAnnosReducer,
   rejectMsg: rejectMsgReducer,
   trainingProject: trainingProjectReducer,
 });
