@@ -20,9 +20,9 @@ import {
   GET_INFERENCE_METRICS_REQUEST,
   GET_INFERENCE_METRICS_SUCCESS,
   GET_INFERENCE_METRICS_FAILED,
-  UPDATE_ORIGIN_PROJECT_DATA,
   ProjectData,
 } from './projectTypes';
+import { pullCVProjects } from '../actions';
 
 const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Status => {
   if (hasConfigured && status === Status.None) return Status.WaitTraining;
@@ -125,7 +125,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
       return { ...state };
     case UPDATE_PROJECT_DATA:
       return { ...state, data: { ...state.data, ...action.payload } };
-    case UPDATE_ORIGIN_PROJECT_DATA:
+    case pullCVProjects.fulfilled.toString():
       return { ...state, originData: state.data };
     case GET_TRAINING_LOG_REQUEST:
       return {

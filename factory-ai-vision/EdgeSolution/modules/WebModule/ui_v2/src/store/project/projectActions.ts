@@ -46,8 +46,6 @@ import {
   START_INFERENCE,
   STOP_INFERENCE,
   StopInferenceAction,
-  UPDATE_ORIGIN_PROJECT_DATA,
-  UpdateOriginProjectDataAction,
   ChangeStatusAction,
   UpdateProbThresholdRequestAction,
   UpdateProbThresholdSuccessAction,
@@ -198,11 +196,6 @@ export const updateProjectData = (
 ): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
   payload: partialProjectData,
-  isDemo,
-});
-
-export const updateOriginProjectData = (isDemo: boolean): UpdateOriginProjectDataAction => ({
-  type: UPDATE_ORIGIN_PROJECT_DATA,
   isDemo,
 });
 

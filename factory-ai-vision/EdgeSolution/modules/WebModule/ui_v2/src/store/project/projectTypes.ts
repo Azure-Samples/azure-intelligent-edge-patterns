@@ -195,11 +195,6 @@ export type UpdateProjectDataAction = ProjectAction & {
   payload: Partial<ProjectData>;
 };
 
-export const UPDATE_ORIGIN_PROJECT_DATA = 'UPDATE_ORIGIN_PROJECT_DATA';
-export type UpdateOriginProjectDataAction = ProjectAction & {
-  type: typeof UPDATE_ORIGIN_PROJECT_DATA;
-};
-
 export const START_INFERENCE = 'START_INFERENCE';
 export type StartInferenceAction = ProjectAction & {
   type: typeof START_INFERENCE;
@@ -241,7 +236,6 @@ export type ProjectActionTypes =
   | DeleteProjectSuccessAction
   | DeleteProjectFaliedAction
   | UpdateProjectDataAction
-  | UpdateOriginProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
   | GetTrainingMetricsFailedAction

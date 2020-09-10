@@ -3,6 +3,7 @@ import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { selectNonDemoProject } from './trainingProjectSlice';
+import { pullCVProjects } from './actions';
 
 export type Part = {
   id: number;
@@ -59,22 +60,19 @@ export const deletePart = createAsyncThunk<any, number, { state: State }>('parts
 const slice = createSlice({
   name: 'parts',
   initialState: entityAdapter.getInitialState(),
-  reducers: {
-    clearParts: () => entityAdapter.getInitialState(),
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getParts.fulfilled, entityAdapter.setAll)
       .addCase(postPart.fulfilled, entityAdapter.upsertOne)
       .addCase(patchPart.fulfilled, entityAdapter.updateOne)
-      .addCase(deletePart.fulfilled, entityAdapter.removeOne);
+      .addCase(deletePart.fulfilled, entityAdapter.removeOne)
+      .addCase(pullCVProjects.fulfilled, () => entityAdapter.getInitialState());
   },
 });
 
 const { reducer } = slice;
 export default reducer;
-
-export const { clearParts } = slice.actions;
 
 export const {
   selectAll: selectAllParts,

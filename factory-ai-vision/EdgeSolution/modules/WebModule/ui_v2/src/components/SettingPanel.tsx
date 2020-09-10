@@ -32,11 +32,9 @@ import {
   thunkPostSetting,
   thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
-import { updateOriginProjectData } from '../store/project/projectActions';
-import { clearParts } from '../store/partSlice';
 import { WarningDialog } from './WarningDialog';
-import { selectAllTrainingProjects } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
+import { pullCVProjects } from '../store/actions';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -72,7 +70,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
   const cannotUpdateOrSave = R.equals(settingData, originSettingData);
   const [loadFullImages, setLoadFullImages] = useState(false);
   const [loadImgWarning, setloadImgWarning] = useState(false);
-  const traininProject = useSelector((state: State) => selectAllTrainingProjects(state)[0]);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
 
   const dispatch = useDispatch();
@@ -89,21 +86,10 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
     setselectedCustomvisionId(option.key);
   };
 
-  const onLoad = (): void => {
+  const onLoad = async () => {
     setloading(true);
-    Axios.get(
-      `/api/projects/${
-        traininProject.id
-      }/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(!loadFullImages)}`,
-    )
-      .then(() => {
-        // FIXME Migrate the two to one actions
-        dispatch(updateOriginProjectData(false));
-        dispatch(clearParts());
-        return void 0;
-      })
-      .catch(alert)
-      .finally(() => setloading(false));
+    await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
+    setloading(false);
   };
 
   const onLoadFullImgChange = (_, checked: boolean) => {

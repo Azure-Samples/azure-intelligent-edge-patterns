@@ -3,6 +3,7 @@ import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { Shape } from './shared/BaseShape';
+import { selectNonDemoProject } from './trainingProjectSlice';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -68,3 +69,16 @@ export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
   },
 );
+
+export const pullCVProjects = createAsyncThunk<
+  any,
+  { selectedCustomvisionId: string; loadFullImages: boolean },
+  { state: State }
+>('trainingProject/pullCVProjects', async ({ selectedCustomvisionId, loadFullImages }, { getState }) => {
+  const trainingProjectId = selectNonDemoProject(getState())[0].id;
+  await Axios.get(
+    `/api/projects/${trainingProjectId}/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
+      !loadFullImages,
+    )}`,
+  );
+});
