@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 # Stream Views
 #
-STREAM_GC_TIME_THRESHOLD = 5000  # Seconds
+STREAM_GC_TIME_THRESHOLD = 5  # Seconds
 PRINT_STREAMS = False
 
 
