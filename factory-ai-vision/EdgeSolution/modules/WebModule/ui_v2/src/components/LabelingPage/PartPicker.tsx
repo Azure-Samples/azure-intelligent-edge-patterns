@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { DetailsList, SelectionMode, CheckboxVisibility, Text, TextField } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectAllParts, Part, getParts, postPart } from '../../store/partSlice';
+import { Part, getParts, postPart, selectNonDemoPart } from '../../store/partSlice';
 import { thunkChangeImgPart } from '../../store/imageSlice';
 
 export const PartPicker: React.FC<{ selectedPart: number }> = ({ selectedPart }) => {
-  const parts = useSelector(selectAllParts);
+  const parts = useSelector(selectNonDemoPart);
   const dispatch = useDispatch();
 
   const [newPartName, setNewPartName] = useState('');
