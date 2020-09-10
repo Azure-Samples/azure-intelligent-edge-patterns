@@ -1,6 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
-import type { State } from '../State';
+import type { State } from 'RootStateType';
 
 type SettingData = {
   id: number;
@@ -16,6 +16,8 @@ export type Setting = {
   isTrainerValid: boolean;
   cvProjects?: Record<string, string>;
   appInsightHasInit: boolean;
+  isCollectData: boolean;
+  appInsightKey?: string;
 };
 
 export type UpdateKeyAction = {
@@ -26,6 +28,14 @@ export type UpdateKeyAction = {
 export type UpdateNamespaceAction = {
   type: 'UPDATE_NAMESPACE';
   payload: string;
+};
+
+export type OnSettingStatusCheckAction = {
+  type: 'ON_SETTING_STATUS_CHECK';
+  payload: {
+    appInsightHasInit: boolean;
+    isTrainerValid: boolean;
+  };
 };
 
 export type GetSettingRequestAction = {
@@ -64,6 +74,7 @@ export type SettingActionType =
   | GetSettingFailedAction
   | GetAllCvProjectsRequestAction
   | GetAllCvProjectsSuccessAction
-  | GetAllCvProjectsErrorAction;
+  | GetAllCvProjectsErrorAction
+  | OnSettingStatusCheckAction;
 
 export type SettingThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

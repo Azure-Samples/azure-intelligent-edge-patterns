@@ -1,4 +1,3 @@
-import { initialState } from '../State';
 import {
   Project,
   ProjectActionTypes,
@@ -30,13 +29,63 @@ const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Statu
   return Status.None;
 };
 
+const initialState: Project = {
+  isLoading: false,
+  data: {
+    id: null,
+    camera: null,
+    location: null,
+    parts: [],
+    needRetraining: true,
+    accuracyRangeMin: 60,
+    accuracyRangeMax: 80,
+    maxImages: 20,
+    modelUrl: '',
+    sendMessageToCloud: false,
+    framesPerMin: 6,
+    accuracyThreshold: 50,
+    probThreshold: '10',
+  },
+  originData: {
+    id: null,
+    camera: null,
+    location: null,
+    parts: [],
+    needRetraining: true,
+    accuracyRangeMin: 60,
+    accuracyRangeMax: 80,
+    maxImages: 50,
+    modelUrl: '',
+    sendMessageToCloud: false,
+    framesPerMin: 6,
+    accuracyThreshold: 50,
+    probThreshold: '10',
+  },
+  trainingMetrics: {
+    prevConsequence: null,
+    curConsequence: null,
+  },
+  inferenceMetrics: {
+    successRate: null,
+    successfulInferences: null,
+    unIdetifiedItems: null,
+    isGpu: false,
+    averageTime: null,
+    partCount: {},
+  },
+  status: Status.None,
+  error: null,
+  trainingLogs: [],
+  progress: null,
+};
+
 /**
  * Share this reducer between project and demoProject
  * Check the `isDemo` property in action to check if it is right reducer
  * @param isDemo
  */
 const createProjectReducerByIsDemo = (isDemo: boolean) => (
-  state = initialState.project,
+  state = initialState,
   action: ProjectActionTypes,
 ): Project => {
   if (isDemo !== action.isDemo) return state;
@@ -102,12 +151,13 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
           unIdetifiedItems: 0,
           isGpu: false,
           averageTime: 0,
+          partCount: {},
         },
         trainingMetrics: {
           curConsequence: null,
           prevConsequence: null,
         },
-        trainingLog: '',
+        trainingLogs: [],
         status: Status.None,
         error: null,
       };
@@ -121,16 +171,24 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
       return {
         ...state,
       };
-    case GET_TRAINING_LOG_SUCCESS:
+    case GET_TRAINING_LOG_SUCCESS: {
+      let trainingLogs;
+      if (action.payload.newStatus === Status.FinishTraining) trainingLogs = [];
+      else if (state.trainingLogs[state.trainingLogs.length - 1] !== action.payload.trainingLog)
+        trainingLogs = [...state.trainingLogs, action.payload.trainingLog];
+      else trainingLogs = state.trainingLogs;
+
       return {
         ...state,
-        trainingLog: action.payload.trainingLog,
+        trainingLogs,
+        progress: action.payload.progress ?? state.progress,
         status: action.payload.newStatus,
       };
+    }
     case GET_TRAINING_LOG_FAILED:
       return {
         ...state,
-        trainingLog: '',
+        trainingLogs: [],
         data: { ...state.data },
         status: Status.TrainingFailed,
         error: action.error,

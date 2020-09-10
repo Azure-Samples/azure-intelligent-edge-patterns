@@ -6,6 +6,7 @@
     "@fluentui/react-northstar": "0.48.0",
     "@microsoft/applicationinsights-react-js": "^2.5.4",
     "@microsoft/applicationinsights-web": "^2.5.4",
+    "@reduxjs/toolkit": "^1.4.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -17,6 +18,7 @@
     "@types/react-router-dom": "^5.1.5",
     "axios": "^0.19.2",
     "konva": "^6.0.0",
+    "normalizr": "^3.6.0",
     "ramda": "^0.27.0",
     "rc-slider": "^9.2.4",
     "rc-tooltip": "^4.0.3",
@@ -28,7 +30,6 @@
     "react-scripts": "3.4.1",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",
-    "redux-persist": "^6.0.0",
     "redux-thunk": "^2.3.0",
     "typescript": "^3.9.3",
     "uniqid": "^5.2.0"

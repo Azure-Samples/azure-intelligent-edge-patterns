@@ -1,6 +1,5 @@
-"""
-Azure Setting Model
-"""
+"""App Models."""
+
 import logging
 
 from azure.cognitiveservices.vision.customvision.training import \
@@ -51,26 +50,43 @@ class Setting(models.Model):
 
     @staticmethod
     def _get_trainer_obj_static(endpoint: str, training_key: str):
-        """
-        return <CustomVisionTrainingClient>.
-        : Success: return CustomVisionTrainingClient object
+        """Get a trainer objects.
+
+        Args:
+            endpoint (str): Custom Vision Endpoint
+            training_key (str): Custom Vision Trainig Key
+
+        Returns:
+            <CustomVisionTrainingClient>
         """
         trainer = CustomVisionTrainingClient(api_key=training_key,
                                              endpoint=endpoint)
         return trainer
 
     def get_trainer_obj(self):
+        """Get a trainer objects.
+
+        Args:
+            self (object):  Setting object.
+
+        Returns:
+            <CustomVisionTrainingClient>: The trainer created from Endpoint
+            and Training Key stored in Setting.
         """
-        return CustomVisionTrainingClient(self.training_key, self.endpoint)
-        : Success: return the CustomVisionTrainingClient object
-        """
+
         return Setting._get_trainer_obj_static(endpoint=self.endpoint,
                                                training_key=self.training_key)
 
     @staticmethod
     def _validate_static(endpoint: str, training_key: str):
-        """
-        return tuple (is_trainer_valid, trainer)
+        """Validate an endpoint, training_key pair.
+
+        Args:
+            endpoint (str)
+            training_key (str)
+
+        Returns:
+            (is_trainer_valid, trainer)
         """
         logger.info("Validatiing %s %s", endpoint, training_key)
         trainer = Setting._get_trainer_obj_static(endpoint=endpoint,
@@ -88,10 +104,13 @@ class Setting(models.Model):
         return is_trainer_valid, trainer
 
     def revalidate_and_get_trainer_obj(self):
-        """
-        Update all the relevent fields and return the CustimVisionClient obj.
-        : Success: return CustimVisionClient object
-        : Failed:  return None
+        """Revalidate training_key, endpoint. Update all the relevent fields.
+
+        Args:
+            self: Setting instance
+
+        Returns:
+            <CustomVisionTrainingClient> or None
         """
         is_trainer_valid, trainer = Setting._validate_static(
             self.endpoint, self.training_key)
@@ -101,9 +120,15 @@ class Setting(models.Model):
 
     @staticmethod
     def pre_save(**kwargs):
+        """pre_save.
+
+        Validate training_key + endpoint. Update related
+        fields.
+
+        Args:
+            kwargs:
         """
-        Setting pre_save
-        """
+
         logger.info("Setting Presave")
         if 'instance' not in kwargs:
             return
@@ -122,22 +147,26 @@ class Setting(models.Model):
             instance.obj_detection_domain_id = obj_detection_domain.id
             return
         except CustomVisionErrorException:
-            logger.exception("Setting Presave occur CustomVisionError")
+            logger.info("Setting Presave occur CustomVisionError")
         except KeyError:
-            logger.exception("Setting pre_save occur KeyError")
+            logger.info("Setting pre_save occur KeyError")
         except MSClientRequestError:
-            logger.exception("Setting pre_save occur MSClientRequestError...")
+            logger.info("Setting pre_save occur MSClientRequestError...")
         except Exception:
-            logger.exception("Setting pre_save occur unexpected Error...")
+            logger.info("Setting pre_save occur unexpected Error...")
         logger.info("Setting.is_trainer_valid = False")
         logger.info("Setting.obj_detection_domain = ''")
         instance.is_trainer_valid = False
         instance.obj_detection_domain_id = ""
 
     def create_project(self, project_name: str):
-        """
-        : Success: return project
-        : Failed:  return None
+        """Create Project on Custom Vision
+
+        Args:
+            name (str): Project name that will be created on customvision.
+
+        Returns:
+            project object
         """
         trainer = self.revalidate_and_get_trainer_obj()
         logger.info("Creating obj detection project")
@@ -157,12 +186,6 @@ class Setting(models.Model):
             logger.exception("Create project occur unexpected error...")
             raise
         return None
-
-    def delete_project(self, project_id: str):
-        """
-        : Success: return project
-        : Failed:  return None
-        """
 
     def __str__(self):
         return self.name

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RadioGroup, Button, CloseIcon } from '@fluentui/react-northstar';
 import { useParts } from '../../hooks/useParts';
 import { useProject } from '../../hooks/useProject';
@@ -8,7 +8,7 @@ type PartFormProps = {
   left: number;
   open: boolean;
   selectedPart: { id: number; name: string };
-  setSelectedPart: (part: { id: number; name: string }) => void;
+  setSelectedPart: (newPart: number) => void;
   onDismiss: () => void;
 };
 
@@ -23,15 +23,19 @@ export const PartForm: React.FC<PartFormProps> = ({
   const parts = useParts(false);
   const project = useProject(false);
 
-  const items = project.data.parts
-    .map((e) => parts.find((part) => part.id === e))
-    .filter((e) => e !== undefined)
-    .map((e) => ({
-      name: e.name,
-      key: e.id,
-      label: e.name,
-      value: e.id,
-    }));
+  const items = useMemo(
+    () =>
+      project.data.parts
+        .map((e) => parts.find((part) => part.id === e))
+        .filter((e) => e !== undefined)
+        .map((e) => ({
+          name: e.name,
+          key: e.id,
+          label: e.name,
+          value: e.id,
+        })),
+    [parts, project.data.parts],
+  );
 
   if (!open) return null;
 
@@ -53,9 +57,7 @@ export const PartForm: React.FC<PartFormProps> = ({
       <RadioGroup
         vertical
         items={items}
-        onCheckedValueChange={(_, newProps): void =>
-          setSelectedPart({ id: newProps.value as number, name: newProps.name })
-        }
+        onCheckedValueChange={(_, newProps): void => setSelectedPart(newProps.value as number)}
         checkedValue={selectedPart.id}
       />
       <Button

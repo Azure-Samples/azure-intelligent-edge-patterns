@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 
+import { State } from 'RootStateType';
 import {
   thunkGetProject,
   thunkPostProject,
@@ -22,7 +23,6 @@ import {
   thunkCheckAndSetAccuracyRange,
 } from '../../store/project/projectActions';
 import { Project, ProjectData, Status } from '../../store/project/projectTypes';
-import { State } from '../../store/State';
 import { formatDropdownValue, Value } from '../../util/formatDropdownValue';
 import { getAppInsights } from '../../TelemetryService';
 import { AddCameraLink } from '../AddModuleDialog/AddCameraLink';
@@ -31,6 +31,7 @@ import { AddPartLink } from '../AddModuleDialog/AddPartLink';
 import { Button } from '../Button';
 import { useQuery } from '../../hooks/useQuery';
 import { WarningDialog } from '../WarningDialog';
+import { getCameras } from '../../store/cameraSlice';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -51,7 +52,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
 
 export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const dispatch = useDispatch();
-  const cameraId = useQuery().get('cameraId');
+  const defaultCameraIdFromQuery = useQuery().get('cameraId');
   const { isLoading, error, data, status } = useSelector<State, Project>((state) =>
     isDemo ? state.demoProject : state.project,
   );
@@ -72,7 +73,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     'cameras',
     isDemo,
     false,
-    cameraId === null ? undefined : parseInt(cameraId, 10),
+    defaultCameraIdFromQuery === null ? undefined : parseInt(defaultCameraIdFromQuery, 10),
   );
   const [partLoading, dropDownParts, selectedParts, setSelectedPartsById] = useDropdownItems<any>(
     'parts',
@@ -86,6 +87,10 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const hasUserUpdateAccuracyRange = useRef(false);
 
   useEffect(() => {
+    dispatch(getCameras(isDemo));
+  }, [dispatch, isDemo]);
+
+  useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
       dispatch(thunkGetProject(isDemo));
     }
@@ -95,7 +100,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     if (!isDemo) {
       if (location) setSelectedLocationById(location);
       if (parts.length) setSelectedPartsById(parts);
-      if (camera && cameraId !== null) setSelectedCameraById(camera);
+      if (camera && defaultCameraIdFromQuery === null) setSelectedCameraById(camera);
     }
   }, [
     camera,
@@ -105,7 +110,7 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     setSelectedCameraById,
     setSelectedLocationById,
     setSelectedPartsById,
-    cameraId,
+    defaultCameraIdFromQuery,
   ]);
 
   const handleSubmitConfigure = async (): Promise<void> => {
@@ -148,11 +153,15 @@ export const ProjectConfig: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
           <ModuleSelector
             moduleName="model"
             setSelectedModuleItem={() => {}}
+            value={{
+              id: 0,
+              name: 'yolov3_PascalVoc',
+            }}
             items={[
               {
                 header: `yolov3_PascalVoc`,
                 content: {
-                  key: 'demo1',
+                  key: 0,
                 },
               },
             ]}

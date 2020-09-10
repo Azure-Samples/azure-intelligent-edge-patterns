@@ -17,10 +17,10 @@ import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { useProject } from '../hooks/useProject';
 import { getAppInsights } from '../TelemetryService';
 import { WarningDialog } from '../components/WarningDialog';
-import { State } from '../store/State';
 import { Setting as SettingType } from '../store/setting/settingType';
 import {
   updateNamespace,
@@ -31,6 +31,7 @@ import {
 } from '../store/setting/settingAction';
 import { updateProjectData, updateOriginProjectData, thunkGetProject } from '../store/project/projectActions';
 import { Dialog } from '../components/Dialog';
+import { clearParts } from '../store/partSlice';
 
 export const Setting = (): JSX.Element => {
   const {
@@ -254,7 +255,9 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
       }&partial=${Number(!loadFullImages)}`,
     )
       .then(() => {
+        // FIXME Migrate the two to one actions
         dispatch(updateOriginProjectData(false));
+        dispatch(clearParts());
         setSuccessDialog('Load Project Success');
         return void 0;
       })
@@ -267,8 +270,10 @@ const PreviousProjectPanel: React.FC<{ cvProjects: Record<string, string> }> = (
     try {
       await Axios.get(`/api/projects/${projectData.id}/reset_project?project_name=${projectName}`);
       // Update cvProject when create success
+      // FIXME Migrate the actions
       dispatch(thunkGetProject(false));
       dispatch(thunkGetAllCvProjects());
+      dispatch(clearParts());
       setSuccessDialog('Create Project Success');
     } catch (err) {
       setOtherError(err);

@@ -1,5 +1,6 @@
 import Axios from 'axios';
 import * as R from 'ramda';
+import { State } from 'RootStateType';
 import {
   ProjectThunk,
   GetProjectSuccessAction,
@@ -51,7 +52,9 @@ import {
   UpdateProbThresholdRequestAction,
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
+  TrainingStatus,
 } from './projectTypes';
+import { selectAllImages } from '../imageSlice';
 
 const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -80,11 +83,13 @@ const getTrainingLogSuccess = (
   trainingLog: string,
   newStatus: Status,
   isDemo: boolean,
+  progress: number,
 ): GetTrainingLogSuccessAction => ({
   type: GET_TRAINING_LOG_SUCCESS,
   payload: {
     trainingLog,
     newStatus,
+    progress,
   },
   isDemo,
 });
@@ -114,7 +119,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     framesPerMin: data?.metrics_frame_per_minutes,
     accuracyThreshold: data?.metrics_accuracy_threshold,
     cvProjectId: data?.customvision_project_id,
-    probThreshold: data?.prob_threshold.toString() ?? '10',
+    probThreshold: data?.prob_threshold?.toString() ?? '10',
   },
   isDemo,
 });
@@ -162,10 +167,11 @@ const getInferenceMetricsSuccess = (
   unIdetifiedItems: number,
   isGpu: boolean,
   averageTime: number,
+  partCount: Record<string, number>,
   isDemo: boolean,
 ): GetInferenceMetricsSuccessAction => ({
   type: GET_INFERENCE_METRICS_SUCCESS,
-  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime },
+  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime, partCount },
   isDemo,
 });
 const getInferenceMetricsFailed = (error: Error, isDemo: boolean): GetInferenceMetricsFailedAction => ({
@@ -220,6 +226,11 @@ const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThr
   isDemo,
 });
 
+const getProjectDataByDemo = (isDemo: boolean, state: State): ProjectData => {
+  if (isDemo) return state.demoProject.data;
+  return state.project.data;
+};
+
 export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Promise<void> => {
   dispatch(getProjectRequest(isDemo));
 
@@ -241,7 +252,7 @@ export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Pr
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         cvProjectId: data[0]?.customvision_project_id,
-        probThreshold: data[0]?.prob_threshold.toString() ?? '10',
+        probThreshold: data[0]?.prob_threshold?.toString() ?? '10',
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
       return void 0;
@@ -263,7 +274,7 @@ export const thunkPostProject = (
 
   dispatch(postProjectRequest(isDemo));
 
-  const projectData = getState().project.data;
+  const projectData = getProjectDataByDemo(isDemo, getState());
 
   return Axios(url, {
     data: {
@@ -299,7 +310,7 @@ const getTrain = (projectId, isTestModel: boolean): void => {
 };
 
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
-  const projectId = getState().project.data.id;
+  const projectId = getProjectDataByDemo(isDemo, getState()).id;
   return Axios.get(`/api/projects/${projectId}/reset_camera`)
     .then(() => {
       return dispatch(deleteProjectSuccess(isDemo));
@@ -317,8 +328,9 @@ export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (disp
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo));
-      else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo));
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo, 0));
+      else
+        dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo, TrainingStatus[data.status]));
       return void 0;
     })
     .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
@@ -362,6 +374,7 @@ export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => 
           data.unidentified_num,
           data.gpu,
           data.average_time,
+          data.count,
           isDemo,
         ),
       );
@@ -374,9 +387,7 @@ export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(updateProbThresholdRequest(isDemo));
-
-  const projectId = getState().project.data.id;
-  const { probThreshold } = getState().project.data;
+  const { id: projectId, probThreshold } = getProjectDataByDemo(isDemo, getState());
 
   return Axios.get(`/api/projects/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
     .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
@@ -399,9 +410,7 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
   getState,
 ): Promise<any> => {
   dispatch(postProjectRequest(isDemo));
-
-  const projectId = getState().project.data.id;
-  const { accuracyRangeMin, accuracyRangeMax } = getState().project.data;
+  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectDataByDemo(isDemo, getState());
 
   return Axios.patch(`/api/projects/${projectId}/`, {
     accuracyRangeMin,
@@ -425,14 +434,14 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
     });
 };
 
-export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean) => (
+export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean): ProjectThunk => (
   dispatch,
   getState,
 ): void => {
-  const images = getState().images.filter((e) => !e.is_relabel);
+  const images = selectAllImages(getState()).filter((e) => !e.isRelabel);
 
   const partsWithImageLength = images.reduce((acc, cur) => {
-    const { id } = cur.part;
+    const id = cur.part;
     const relatedPartIdx = acc.findIndex((e) => e.id === id);
     if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
     return acc;

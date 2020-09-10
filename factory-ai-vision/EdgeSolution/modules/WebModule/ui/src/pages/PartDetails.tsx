@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/react-northstar';
-import { Link, useLocation, Switch, Route, useHistory } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useLocation, Switch, Route, useHistory, Redirect } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { CapturePhotos } from '../components/CapturePhoto';
 import { UploadPhotos } from '../components/UploadPhotos';
 import { useQuery } from '../hooks/useQuery';
@@ -10,67 +11,87 @@ import { WarningDialog } from '../components/WarningDialog';
 import { errorTheme } from '../themes/errorTheme';
 import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
 import { useProject } from '../hooks/useProject';
+import { getParts, patchPart, deletePart, selectPartById, Part } from '../store/partSlice';
+import { getImages } from '../store/imageSlice';
 
 export const PartDetails = (): JSX.Element => {
-  const partId = useQuery().get('partId');
-  const [goLabelImageIdx, setGoLabelImageIdx] = useState<number>(null);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [error, setError] = useState('');
-  const history = useHistory();
+  const partId = parseInt(useQuery().get('partId'), 10);
+
+  const part = useSelector<State, Part>(
+    (state) => selectPartById(state, partId) || { id: null, name: '', description: '' },
+  );
+  const dispatch = useDispatch();
+  // Because we need project ID for delete part
+  useProject(false);
+
+  const [name, setName] = useState(part?.name);
+  const [description, setDescription] = useState(part?.description);
+
+  // Describe if parts and images is getting
+  const [loading, setLoading] = useState(true);
+  // Describe if parts is patching or deleting
   const [status, setStatus] = useState<Status>(Status.None);
-  const project = useProject(false);
+  const [error, setError] = useState('');
 
-  const onSave = (): void => {
-    axios({
-      method: 'PUT',
-      url: `/api/parts/${partId}/`,
-      data: {
-        name,
-        description,
-      },
-    })
-      .then(() => {
-        history.push(`/parts/`);
-        return void 0;
-      })
-      .catch((err) => {
-        setError(JSON.stringify(err.response.data));
-      });
-  };
+  const history = useHistory();
 
-  const onDelete = async (): Promise<void> => {
+  useEffect(() => {
+    const loadData = async (): Promise<void> => {
+      try {
+        await Promise.all([dispatch(getParts(false)), dispatch(getImages())]);
+      } catch (e) {
+        setError(e);
+      }
+      setLoading(false);
+    };
+
+    loadData();
+  }, [dispatch]);
+
+  useEffect(() => {
+    setName(part.name);
+    setDescription(part.description);
+  }, [part.name, part.description]);
+
+  const onSave = async (): Promise<void> => {
     setStatus(Status.Loading);
-
     try {
-      await axios.get(`/api/projects/${project.data.id}/delete_tag?part_name=${name}`);
-      await axios.delete(`/api/parts/${partId}/`);
+      await dispatch(patchPart({ data: { name, description }, id: partId }));
       setStatus(Status.Success);
     } catch (e) {
       setError(e);
     }
   };
 
+  const onDelete = async (): Promise<void> => {
+    setStatus(Status.Loading);
+
+    try {
+      await dispatch(deletePart(partId));
+    } catch (e) {
+      setError(e);
+    }
+  };
+
+  if (loading) return <h1>Loading...</h1>;
+
+  if (!part.id) return <Redirect to="/parts" />;
+
+  const saveBtnDisabled = !name || (name === part.name && description === part.description);
+
   return (
     <Grid columns={'68% 30%'} rows={'80px auto 30px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
       {partId ? <Tab partId={partId} /> : null}
-      <PartInfoForm
-        partId={partId}
-        name={name}
-        setName={setName}
-        description={description}
-        setDescription={setDescription}
-      />
-      <Flex column gap="gap.small" styles={{ gridColumn: '1 / span 2' }}>
-        <CaptureImagePanel
-          partId={partId}
-          partName={name}
-          goLabelImageIdx={goLabelImageIdx}
-          setGoLabelImageIdx={setGoLabelImageIdx}
-        />
+      <PartInfoForm name={name} setName={setName} description={description} setDescription={setDescription} />
+      <Flex
+        column
+        gap="gap.small"
+        styles={{ gridColumn: '1 / span 2', gridRow: '2 / span 1', height: '100%' }}
+      >
+        <CaptureImagePanel partId={partId} partName={name} />
       </Flex>
       <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" gap="gap.small">
-        <Button content="Save" primary onClick={onSave} disabled={!name} />
+        <Button content="Save" primary onClick={onSave} disabled={saveBtnDisabled} />
         <Provider theme={errorTheme}>
           <WarningDialog
             contentText={
@@ -94,22 +115,7 @@ export const PartDetails = (): JSX.Element => {
   );
 };
 
-const PartInfoForm = ({ partId, name, setName, description, setDescription }): JSX.Element => {
-  useEffect(() => {
-    if (partId) {
-      axios
-        .get(`/api/parts/${partId}/`)
-        .then(({ data }) => {
-          setName(data.name);
-          setDescription(data.description);
-          return void 0;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-  }, [partId, setDescription, setName]);
-
+const PartInfoForm = ({ name, setName, description, setDescription }): JSX.Element => {
   return (
     <div
       style={{
@@ -138,16 +144,11 @@ const PartInfoForm = ({ partId, name, setName, description, setDescription }): J
   );
 };
 
-const CaptureImagePanel = ({ partId, partName, goLabelImageIdx, setGoLabelImageIdx }): JSX.Element => {
+const CaptureImagePanel = ({ partId, partName }): JSX.Element => {
   return (
     <Switch>
       <Route path={`/parts/detail/capturePhotos`}>
-        <CapturePhotos
-          partId={parseInt(partId, 10)}
-          partName={partName}
-          goLabelImageIdx={goLabelImageIdx}
-          setGoLabelImageIdx={setGoLabelImageIdx}
-        />
+        <CapturePhotos partId={parseInt(partId, 10)} partName={partName} />
       </Route>
       <Route path={`/parts/detail/uploadPhotos`}>
         <UploadPhotos partId={parseInt(partId, 10)} />

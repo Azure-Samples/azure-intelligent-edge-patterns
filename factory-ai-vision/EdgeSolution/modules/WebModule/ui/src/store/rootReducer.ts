@@ -1,33 +1,29 @@
-import { combineReducers } from 'redux';
-import storage from 'redux-persist/lib/storage';
-import { persistReducer } from 'redux-persist';
+import { combineReducers } from '@reduxjs/toolkit';
 
-import camerasReducer from './camera/cameraReducer';
-import partReducer from './part/partReducer';
-import labelingPageStateReducer from './labelingPage/labelingPageReducer';
-import locationsReducer from './location/locationReducer';
-import dialogIsOpenReducer from './dialog/dialogIsOpenReducer';
+import partsReducer from './partSlice';
+import locationsReducer from './locationSlice';
 import createProjectReducerByIsDemo from './project/projectReducer';
-import labelImagesReducer from './image/imageReducer';
 import settingReducer from './setting/settingReducer';
-import notificationReducer from './notification/notificationReducer';
+import notificationReducer from '../reducers/notificationReducer';
+import imagesReducer from './imageSlice';
+import annotationReducer from './annotationSlice';
+import labelingPageReducer from './labelingPageSlice';
+import cameraReducer from './cameraSlice';
+import AOIsReducer from './AOISlice';
+import rejectMsgReducer from './rejectedReducer';
 
-const rootReducer = combineReducers({
-  cameras: camerasReducer,
-  locations: locationsReducer,
-  part: partReducer,
-  labelingPageState: labelingPageStateReducer,
-  dialogIsOpen: dialogIsOpenReducer,
+export const rootReducer = combineReducers({
   project: createProjectReducerByIsDemo(false),
   demoProject: createProjectReducerByIsDemo(true),
-  images: labelImagesReducer,
   setting: settingReducer,
+  // The Below state has been refactor
+  camera: cameraReducer,
+  locations: locationsReducer,
   notifications: notificationReducer,
+  parts: partsReducer,
+  labelImages: imagesReducer,
+  annotations: annotationReducer,
+  labelingPage: labelingPageReducer,
+  AOIs: AOIsReducer,
+  rejectMsg: rejectMsgReducer,
 });
-
-const persistConfig = {
-  key: 'root',
-  storage,
-};
-
-export const persistedReducer = persistReducer(persistConfig, rootReducer);

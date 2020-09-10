@@ -1,34 +1,18 @@
-"""
-Camera models
-"""
+"""App models."""
+
 import logging
 
 import cv2
 import requests
-from azure.iot.device import IoTHubModuleClient
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
+from vision_on_edge.general.utils import normalize_rtsp
+
+from ..azure_iot.utils import inference_module_url
+from ..locations.models import Location
+
 logger = logging.getLogger(__name__)
-
-
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
-
-
-# Create your models here.
 
 
 class Camera(models.Model):
@@ -38,17 +22,30 @@ class Camera(models.Model):
     rtsp = models.CharField(max_length=1000)
     area = models.CharField(max_length=1000, blank=True)
     is_demo = models.BooleanField(default=False)
+    location = models.ForeignKey(Location,
+                                 on_delete=models.SET_NULL,
+                                 null=True)
 
     def __str__(self):
         return self.name
 
     @staticmethod
     def verify_rtsp(rtsp):
-        """ Return True if the rtsp is ok, otherwise return False """
+        """Validate a rtsp.
+        Args:
+            rtsp (str)
+
+        Returns:
+            is_rtsp_valid (bool)
+        """
+
         logger.info("Camera static method: verify_rtsp")
         logger.info(rtsp)
         if rtsp == '0':
             rtsp = 0
+        elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
+            logger.error("This is a rtsp")
+            rtsp = "rtsp" + rtsp[4:]
         cap = cv2.VideoCapture(rtsp)
         if not cap.isOpened():
             cap.release()
@@ -63,6 +60,7 @@ class Camera(models.Model):
     @staticmethod
     def pre_save(**kwargs):
         """Camera pre_save"""
+
         if 'instance' not in kwargs:
             return
         instance = kwargs['instance']
@@ -77,6 +75,7 @@ class Camera(models.Model):
     @staticmethod
     def post_save(**kwargs):
         """Camera post_save"""
+
         if 'instance' not in kwargs:
             return
         instance = kwargs['instance']
@@ -87,7 +86,7 @@ class Camera(models.Model):
                     url="http://" + inference_module_url() + "/update_cam",
                     params={
                         "cam_type": "rtsp",
-                        "cam_source": instance.rtsp,
+                        "cam_source": normalize_rtsp(instance.rtsp),
                         "aoi": instance.area,
                     },
                 )

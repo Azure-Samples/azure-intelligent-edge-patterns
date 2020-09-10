@@ -1,6 +1,4 @@
-"""
-Part models
-"""
+"""App models"""
 
 import logging
 
@@ -8,19 +6,25 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.db.utils import IntegrityError
 
+from vision_on_edge.azure_training.models import Project
+
 logger = logging.getLogger(__name__)
 
 
 class Part(models.Model):
     """Part Model"""
 
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1000, blank=True, default="")
-    is_demo = models.BooleanField(default=False)
     name_lower = models.CharField(max_length=200, default=str(name).lower())
+    customvision_id = models.CharField(max_length=200, blank=True, default="")
+    customvision_type = models.CharField(max_length=20,
+                                         blank=True,
+                                         default="Regular")
 
     class Meta:
-        unique_together = ("name_lower", "is_demo")
+        unique_together = ("name_lower", "project_id")
 
     def __str__(self):
         return self.name

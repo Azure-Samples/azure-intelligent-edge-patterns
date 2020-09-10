@@ -11,6 +11,7 @@ import {
   GetAllCvProjectsRequestAction,
   GetAllCvProjectsSuccessAction,
   GetAllCvProjectsErrorAction,
+  OnSettingStatusCheckAction,
 } from './settingType';
 
 export const updateKey = (key: string): UpdateKeyAction => ({ type: 'UPDATE_KEY', payload: key });
@@ -18,6 +19,17 @@ export const updateKey = (key: string): UpdateKeyAction => ({ type: 'UPDATE_KEY'
 export const updateNamespace = (namespace: string): UpdateNamespaceAction => ({
   type: 'UPDATE_NAMESPACE',
   payload: namespace,
+});
+
+export const onSettingStatusCheck = (
+  isTrainerValid: boolean,
+  appInsightHasInit: boolean,
+): OnSettingStatusCheckAction => ({
+  type: 'ON_SETTING_STATUS_CHECK',
+  payload: {
+    isTrainerValid,
+    appInsightHasInit,
+  },
 });
 
 export const settingRequest = (): GetSettingRequestAction => ({
@@ -70,14 +82,60 @@ export const thunkGetSetting = () => (dispatch): Promise<any> => {
             },
             isTrainerValid: data[0].is_trainer_valid,
             appInsightHasInit: data[0].app_insight_has_init,
+            isCollectData: data[0].is_collect_data,
           }),
         );
       }
+
+      // Set the state to localstorage so next time don't need to get them from server
+      window.localStorage.setItem('isTrainerValid', JSON.stringify(data[0].is_trainer_valid));
+      window.localStorage.setItem('appInsightHasInit', JSON.stringify(data[0].app_insight_has_init));
+
       return data[0].is_collect_data;
     })
     .catch((err) => {
       dispatch(settingFailed(err));
     });
+};
+
+export const thunkGetSettingAndAppInsightKey = (): SettingThunk => (dispatch): Promise<void> => {
+  dispatch(settingRequest());
+
+  const appInsightKey = Axios.get('/api/appinsight/key');
+  const settings = Axios.get('/api/settings/');
+
+  return Axios.all([appInsightKey, settings])
+    .then(
+      Axios.spread((...responses) => {
+        const { data: appInsightKeyData } = responses[0];
+        const { data: settingsData } = responses[1];
+
+        if (appInsightKeyData.key) {
+          dispatch(
+            settingSuccess({
+              loading: false,
+              error: null,
+              current: {
+                id: settingsData[0].id,
+                key: settingsData[0].training_key,
+                namespace: settingsData[0].endpoint,
+              },
+              origin: {
+                id: settingsData[0].id,
+                key: settingsData[0].training_key,
+                namespace: settingsData[0].endpoint,
+              },
+              isTrainerValid: settingsData[0].is_trainer_valid,
+              appInsightHasInit: settingsData[0].app_insight_has_init,
+              isCollectData: settingsData[0].is_collect_data,
+              appInsightKey: appInsightKeyData.key,
+            }),
+          );
+        }
+        throw new Error('No API Key');
+      }),
+    )
+    .catch((e) => console.error(e));
 };
 
 export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promise<any> => {
@@ -124,6 +182,7 @@ export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promis
           },
           isTrainerValid: data.is_trainer_valid,
           appInsightHasInit: data.app_insight_has_init,
+          isCollectData: data.is_collect_data,
         }),
       );
       return void 0;
@@ -154,4 +213,12 @@ export const thunkGetAllCvProjects = (): SettingThunk => (dispatch, getState) =>
     .catch((e) => {
       dispatch(getAllCvProjectError(e));
     });
+};
+
+export const checkSettingStatus = (): SettingThunk => async (dispatch): Promise<void> => {
+  const isTrainerValidStr = await window.localStorage.getItem('isTrainerValid');
+  const isTrainerValid = isTrainerValidStr ? JSON.parse(isTrainerValidStr) : false;
+  const appInsightHasInitStr = await window.localStorage.getItem('isTrainerValid');
+  const appInsightHasInit = appInsightHasInitStr ? JSON.parse(appInsightHasInitStr) : false;
+  dispatch(onSettingStatusCheck(isTrainerValid, appInsightHasInit));
 };

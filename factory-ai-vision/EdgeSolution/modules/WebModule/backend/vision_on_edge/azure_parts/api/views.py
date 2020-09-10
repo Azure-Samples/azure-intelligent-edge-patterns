@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
+"""App views.
 """
-Azure Parts views
-"""
+
 from __future__ import absolute_import, unicode_literals
 
 from filters.mixins import FiltersMixin
-from rest_framework import filters, viewsets
+from rest_framework import filters, status, viewsets
+from rest_framework.response import Response
 
 from ..models import Part
 from .serializers import PartSerializer
@@ -12,19 +14,31 @@ from .serializers import PartSerializer
 
 # pylint: disable=too-many-ancestors
 class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """
-    Part ModelViewSet.Partname should be unique.
+    """PartViewSet.
 
-    Available filters:
-    @is_demo
+    Args:
+        partname (str): unique
+
+    Filters:
+        is_demo (bool)
     """
 
     queryset = Part.objects.all()
     serializer_class = PartSerializer
     filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
-        "is_demo": "is_demo",
+        "is_demo": "project__is_demo",
+        "project_id": "project_id",
     }
 
+    def destroy(self, request, **kwargs):
+        """destroy.
 
-# pylint: enable=too-many-ancestors
+        only delete image on customvision when api_call
+        """
+        if Part.objects.filter(pk=kwargs['pk']).exists():
+            part_obj = Part.objects.get(pk=kwargs['pk'])
+            part_obj.delete_on_customvision = True
+            part_obj.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

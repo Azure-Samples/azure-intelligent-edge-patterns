@@ -1,6 +1,7 @@
 """
-Part api Serializers
+App serializers
 """
+
 import logging
 
 from django.db.utils import IntegrityError
@@ -12,9 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class PartSerializer(serializers.ModelSerializer):
-    """PartSerializer"""
+    """PartSerializer.
+    """
 
     class Meta:
+        """Meta.
+        """
+
         model = Part
         fields = "__all__"
         extra_kwargs = {
@@ -24,6 +29,12 @@ class PartSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        """create.
+
+        Args:
+            validated_data:
+        """
+
         try:
             return Part.objects.create(**validated_data)
         except IntegrityError:
@@ -42,6 +53,13 @@ class PartSerializer(serializers.ModelSerializer):
             })
 
     def update(self, instance, validated_data):
+        """update.
+
+        Args:
+            instance:
+            validated_data:
+        """
+
         try:
             result = super().update(instance, validated_data)
             return result

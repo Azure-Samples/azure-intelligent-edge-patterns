@@ -1,6 +1,5 @@
-"""
-Cameras App
-"""
+"""App"""
+
 import logging
 import sys
 
@@ -10,35 +9,41 @@ logger = logging.getLogger(__name__)
 
 
 class CamerasConfig(AppConfig):
-    """
-    Cameras App Config
-    """
+    """App Config"""
+
     name = 'vision_on_edge.cameras'
 
     def ready(self):
+        """App ready
+
+        Import signals and create some demo objects.
         """
-        Cameras App ready
-        """
-        # FIXME test may use this as well
+
         if 'runserver' in sys.argv:
-            # Import models in migrate/makemigration will occurs error.
             # pylint: disable=C0415
-            from vision_on_edge.cameras.models import Camera
+            from .models import Camera
+            from ..locations.models import Location
             # pylint: enable=C0415
 
-            logger.info("Camera App Config ready while running server")
+            logger.info("App ready ready while running server")
 
             create_demo = True
+
             if create_demo:
-                logger.info("Creating Demo Camera")
+                logger.info("Creating a demo camera object.")
+                # Demo Location should be created already
+                demo_locations = Location.objects.filter(is_demo=True)
+                if not demo_locations.exists():
+                    return
                 Camera.objects.update_or_create(
                     name="Demo Video",
                     is_demo=True,
                     defaults={
                         'rtsp': 'sample_video/video.mp4',
-                        'area': ""
+                        'area': "",
+                        'location': demo_locations.first()
                     })
 
-                logger.info("Creating Demo... End")
+                logger.info("Creating demo objects... end")
 
-            logger.info("Cameras AppConfig end while running server")
+            logger.info("App ready end while running server")

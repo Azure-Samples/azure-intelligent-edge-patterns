@@ -8,6 +8,7 @@ import io
 import logging
 
 from django.core.files.images import ImageFile
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -21,7 +22,12 @@ logger = logging.getLogger(__name__)
 
 @api_view(["POST"])
 def upload_relabel_image(request):
-    """upload relable image"""
+    """upload_relabel_image.
+
+    Args:
+        request:
+    """
+
     part_name = request.data["part_name"]
     labels = request.data["labels"]
     img_data = base64.b64decode(request.data["img"])
@@ -35,6 +41,7 @@ def upload_relabel_image(request):
         return Response({"status": "failed"})
 
     part = parts[0]
+
     # FIXME: use part foreign key to get project
     project_objs = Project.objects.filter(is_demo=part.is_demo)
     if len(project_objs) <= 0:
@@ -48,55 +55,97 @@ def upload_relabel_image(request):
 
     project_obj = project_objs[0]
 
-    # Relabel images count exceed project.maxImages
-    if project_obj.maxImages <= len(
-            Image.objects.filter(
-                project=project_obj, part=part, is_relabel=True)):
-        logger.info("Already reach project maxImages limit")
+    # Relabel images count does not exceed project.maxImages
+    # Handled by signals
 
-        # Delete some images if already exceed maxImages
-        for i in range(
-                len(
-                    Image.objects.filter(
-                        project=project_obj, part=part, is_relabel=True)) -
-                project_obj.maxImages):
-            Image.objects.filter(project=project_obj,
-                                 part=part,
-                                 is_relabel=True).last().delete()
+    confidence_float = float(confidence) * 100
+    # Confidence check
+    if (confidence_float < project_obj.accuracyRangeMin or \
+         confidence_float > project_obj.accuracyRangeMax):
+        logger.error("Inferenece confidence %s out of range", confidence_float)
+        logger.error("range %s ~ %s", project_obj.accuracyRangeMin,
+                     project_obj.accuracyRangeMax)
+
         return Response(
             {
                 "status": "failed",
-                'log': 'Already reach project maxImages limit'
+                'log': 'Confidence out of range',  # yapf...
             },
             status=status.HTTP_400_BAD_REQUEST)
 
     # Relabel images count does not exceed project.maxImages
-    img_io = io.BytesIO(img_data)
+    if project_obj.maxImages > Image.objects.filter(
+            project=project_obj, part=part, is_relabel=True).count():
 
-    img = ImageFile(img_io)
-    img.name = datetime.datetime.utcnow().isoformat() + ".jpg"
-    img_obj = Image(
-        image=img,
-        part_id=part.id,
-        labels=labels,
-        confidence=confidence,
-        project=project_obj,
-        is_relabel=True,
-    )
-    img_obj.save()
+        img_io = io.BytesIO(img_data)
+        img = ImageFile(img_io)
+        img.name = datetime.datetime.utcnow().isoformat() + ".jpg"
+        img_obj = Image(
+            image=img,
+            part_id=part.id,
+            labels=labels,
+            confidence=confidence,
+            project=project_obj,
+            is_relabel=True,
+        )
+        img_obj.save()
+        return Response({"status": "ok"})
 
-    return Response({"status": "ok"})
+    # User is not relabling and exceed maxImages
+    # queue...
+    logger.info(project_obj.relabel_expired_time)
+    logger.info(timezone.now())
+    if project_obj.relabel_expired_time < timezone.now():
+
+        logger.info("Queuing relabel images...")
+        img_io = io.BytesIO(img_data)
+        img = ImageFile(img_io)
+        img.name = datetime.datetime.utcnow().isoformat() + ".jpg"
+        img_obj = Image(
+            image=img,
+            part_id=part.id,
+            labels=labels,
+            confidence=confidence,
+            project=project_obj,
+            is_relabel=True,
+        )
+        img_obj.save()
+        # pop
+        Image.objects.filter(
+            project=project_obj, part=part,
+            is_relabel=True).order_by("timestamp").first().delete()
+        return Response({"status": "ok"})
+        # return ok
+        # pop image
+
+    # User is relabeling and exceed maxImages
+    for _ in range(
+            Image.objects.filter(
+                project=project_obj, part=part, is_relabel=True).count() -
+            project_obj.maxImages):
+        Image.objects.filter(
+            project=project_obj, part=part,
+            is_relabel=True).order_by("timestamp").last().delete()
+    return Response(
+        {
+            "status": "failed",
+            'log': 'Already reach project maxImages limit while labeling'
+        },
+        status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
 def relabel_update(request):
+    """relabel_update.
+
+    Args:
+        request:
     """
-    Update relabel image
-    """
+
     logger.info("update relabeling")
     data = request.data
-    if type(data) is not type([]):
-        logger.info("data should be array of object {}")
+    if not isinstance(data, list):
+        logger.info("data should be list of object {}")
         return Response({"status": "failed"})
 
     for item in data:

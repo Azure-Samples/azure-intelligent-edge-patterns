@@ -1,22 +1,17 @@
-import React, { SetStateAction, Dispatch, FC, memo } from 'react';
+import React, { FC, memo } from 'react';
 import { Text } from '@fluentui/react-northstar';
 import LabelDisplayImage from '../LabelDisplayImage';
-import LabelingPageDialog from '../LabelingPageDialog';
-import { JudgedImageList, RelabelImage } from './types';
+import { LabelImage } from '../../store/type';
 
 interface ImageIdentificationItemProps {
   confidenceLevel: number;
-  relabelImages: RelabelImage[];
-  imageIndex: number;
-  setJudgedImageList: Dispatch<SetStateAction<JudgedImageList>>;
-  partId: number;
-  isPartCorrect: number;
+  relabelImage: LabelImage;
+  onDisplayImageClick: (imgId: number) => void;
 }
 const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
   confidenceLevel,
-  relabelImages,
-  imageIndex,
-  setJudgedImageList,
+  relabelImage,
+  onDisplayImageClick,
 }) => {
   return (
     <div
@@ -27,23 +22,19 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         alignItems: 'center',
       }}
     >
-      <LabelingPageDialog
-        imageIndex={imageIndex}
-        images={relabelImages}
-        isRelabel={true}
-        setJudgedImageList={setJudgedImageList}
-        trigger={
-          <div
-            style={{
-              padding: '0.5em',
-              height: '96%',
-              flex: '1 0 0',
-            }}
-          >
-            <LabelDisplayImage pointerCursor labelImage={relabelImages[imageIndex]} />
-          </div>
-        }
-      />
+      <div
+        style={{
+          padding: '0.5em',
+          height: '96%',
+          flex: '1 0 0',
+        }}
+      >
+        <LabelDisplayImage
+          pointerCursor
+          labelImage={relabelImage}
+          onClick={() => onDisplayImageClick(relabelImage.id)}
+        />
+      </div>
       <div
         style={{
           height: '96%',
@@ -55,7 +46,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
         }}
       >
         <Text truncated>
-          Confidence Level: <b>{confidenceLevel}%</b>
+          Confidence Level: <b>{((confidenceLevel * 1000) | 0) / 10}%</b>
         </Text>
         <div
           style={{
@@ -67,7 +58,7 @@ const ImageIdentificationItem: FC<ImageIdentificationItemProps> = ({
           }}
         >
           <Text truncated>
-            Part Name: <b>{relabelImages[imageIndex].part.name}</b>
+            Part Name: <b>{relabelImage.part.name}</b>
           </Text>
         </div>
       </div>

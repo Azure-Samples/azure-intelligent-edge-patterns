@@ -1,6 +1,6 @@
-"""
-Azure training views
-"""
+# -*- coding: utf-8 -*-
+"""App views"""
+
 from __future__ import absolute_import, unicode_literals
 
 import datetime
@@ -12,73 +12,40 @@ import traceback
 from distutils.util import strtobool
 
 import requests
-from azure.cognitiveservices.vision.customvision.training.models import (
-    CustomVisionErrorException, ImageFileCreateEntry, Region)
-from azure.iot.device import IoTHubModuleClient
-from azure.iot.hub import IoTHubRegistryManager
-from azure.iot.hub.models import Twin, TwinProperties
-from django.http import JsonResponse
+from azure.cognitiveservices.vision.customvision.training.models import \
+    CustomVisionErrorException
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from filters.mixins import FiltersMixin
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 
-from configs.settings import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
-
+from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
+from ...azure_parts.utils import batch_upload_parts_to_customvision
+from ...azure_training_status import constants as progress_constants
+from ...azure_training_status.models import TrainingStatus
+from ...azure_training_status.utils import upcreate_training_status
 from ...cameras.models import Camera
 from ...general import error_messages
+from ...general.utils import normalize_rtsp
 from ...images.models import Image
-from ...notifications.models import Notification
-from ..models import Project, Task, Train
-from .serializers import ProjectSerializer, TaskSerializer, TrainSerializer
-
-try:
-    iot = IoTHubRegistryManager(IOT_HUB_CONNECTION_STRING)
-except:
-    iot = None
+from ...images.utils import upload_images_to_customvision_helper
+from ..models import Project, Task
+from ..utils import pull_cv_project_helper, update_app_insight_counter
+from .serializers import ProjectSerializer, TaskSerializer
 
 logger = logging.getLogger(__name__)
 
-
-def is_edge():
-    """Determine is edge or not. Return bool"""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
-
-def inference_module_url():
-    """Return Inference URL"""
-    if is_edge():
-        return "172.18.0.1:5000"
-    return "localhost:5000"
-
-
-class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """
-    Task ModelViewSet
-
-    Available filters:
-    @project
-    """
-
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-    filter_backends = (filters.OrderingFilter,)
-    filter_mappings = {
-        "project": "project",
-    }
+PROJECT_RELABEL_TIME_THRESHOLD = 30  # Seconds
 
 
 class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """
-    Project ModelViewSet
+    """Project ModelViewSet
 
-    Available filters
-    @is_demo
+    Filters:
+        is_demo
     """
 
     queryset = Project.objects.all()
@@ -90,9 +57,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def delete_tag(self, request, pk=None):
-        """
-        List Project under Training Key + Endpoint
-        """
+        """delete tag"""
         try:
             project_obj = self.get_object()
             part_id = request.query_params.get("part_id") or None
@@ -121,14 +86,24 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
+    @action(detail=True, methods=["post"])
+    def relabel_keep_alive(self, request, pk=None) -> Response:
+        """relabel_keep_alive.
 
-class TrainViewSet(viewsets.ModelViewSet):
-    """
-    Train ModelViewSet
-    """
+        Args:
+            request:
+            kwargs:
 
-    queryset = Train.objects.all()
-    serializer_class = TrainSerializer
+        Returns:
+            Response: Return project with updated timestamp
+        """
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, pk=pk)
+        obj.relabel_expired_time = timezone.now() + datetime.timedelta(
+            seconds=PROJECT_RELABEL_TIME_THRESHOLD)
+        obj.save()
+        serializer = ProjectSerializer(obj)
+        return Response(serializer.data)
 
 
 @api_view()
@@ -140,7 +115,7 @@ def export(request, project_id):
     """
     logger.info("exporting project. Project Id: %s", {project_id})
     project_obj = Project.objects.get(pk=project_id)
-    train_obj = Train.objects.get(project_id=project_id)
+    train_obj = TrainingStatus.objects.get(project_id=project_id)
 
     success_rate = 0.0
     inference_num = 0
@@ -153,22 +128,15 @@ def export(request, project_id):
         unidentified_num = data["unidentified_num"]
         is_gpu = data["is_gpu"]
         average_inference_time = data["average_inference_time"]
+        last_prediction_count = data["last_prediction_count"]
         logger.info("success_rate: %s. inference_num: %s", success_rate,
                     inference_num)
-    #         return JsonResponse({
-    #             'status': train_obj.status,
-    #             'log': train_obj.log,
-    #             'download_uri': project_obj.download_uri,
-    #             'success_rate': success_rate,
-    #             'inference_num': inference_num,
-    #             'unidentified_num': unidentified_num,
-    #         })
     except requests.exceptions.ConnectionError:
         logger.error(
             "Export failed. Inference module url: %s unreachable",
             inference_module_url(),
         )
-        return JsonResponse(
+        return Response(
             {
                 "status":
                     "failed",
@@ -178,9 +146,9 @@ def export(request, project_id):
             },
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
-    except:
+    except Exception:
         logger.exception("unexpected error while exporting project")
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": "unexpected error",
@@ -188,21 +156,23 @@ def export(request, project_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    return JsonResponse({
+    return Response({
         "status": train_obj.status,
-        "log": train_obj.log,
+        "log": "Status: " + train_obj.log,
         "download_uri": project_obj.download_uri,
         "success_rate": success_rate,
         "inference_num": inference_num,
         "unidentified_num": unidentified_num,
         "gpu": is_gpu,
         "average_time": average_inference_time,
+        "count": last_prediction_count
     })
 
 
 @api_view()
 def export_null(request):
     """FIXME tmp workaround"""
+
     project_obj = Project.objects.all()[0]
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
 
@@ -210,46 +180,47 @@ def export_null(request):
 
     if trainer is None:
         logger.error("trainer obj is invalid")
-        return JsonResponse({"status": "trainer invalid"})
+        return Response({"status": "trainer invalid"})
     iterations = trainer.get_iterations(customvision_project_id)
     if len(iterations) == 0:
         logger.info("not yet training ...")
-        return JsonResponse({"status": "waiting training"})
+        return Response({"status": "waiting training"})
 
     iteration = iterations[0]
 
     if not iteration.exportable or iteration.status != "Completed":
         logger.info("waiting training ...")
-        return JsonResponse({"status": "waiting training"})
+        return Response({"status": "waiting training"})
 
     exports = trainer.get_exports(customvision_project_id, iteration.id)
     if len(exports) == 0:
         logger.info("exporting ...")
         res = project_obj.export_iterationv3_2(iteration.id)
         logger.info(res.json())
-        return JsonResponse({"status": "exporting"})
+        return Response({"status": "exporting"})
 
     project_obj.download_uri = exports[0].download_uri
     project_obj.save(update_fields=["download_uri"])
 
-    # if exports[0].download_uri != None and len(exports[0].download_uri) > 0:
-    # update_twin(iteration.id, exports[0].download_uri, camera.rtsp)
-
-    return JsonResponse({
-        "status": "ok",
-        "download_uri": exports[-1].download_uri
-    })
+    return Response({"status": "ok", "download_uri": exports[-1].download_uri})
 
 
 @api_view()
 def train_performance(request, project_id):
-    """Get train performace of this iter and previous iter"""
+    """train_performance.
+
+    Get train performace of this iter and previous iter
+
+    Args:
+        request:
+        project_id:
+    """
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
     if project_obj.is_demo:
-        return JsonResponse({
+        return Response({
             "status": "ok",
             "precision": 1,
             "recall": "demo_recall",
@@ -260,6 +231,11 @@ def train_performance(request, project_id):
     iterations = trainer.get_iterations(customvision_project_id)
 
     def _parse(iteration):
+        """_parse.
+
+        Args:
+            iteration:
+        """
         iteration = iteration.as_dict()
         iteration_status = iteration["status"]
         if iteration_status == "Completed":
@@ -284,17 +260,22 @@ def train_performance(request, project_id):
     if len(iterations) >= 2:
         ret["previous"] = _parse(iterations[1])
 
-    return JsonResponse(ret)
+    return Response(ret)
 
 
 @api_view()
 def train(request, project_id):
-    """
-    Train a project
+    """train.
+
+    Configure button. Train/Export/Deploy a project.
+
+    Args:
+        request:
+        project_id:
     """
     is_demo = request.query_params.get("demo")
     project_obj = Project.objects.get(pk=project_id)
-    parts = [p.name for p in project_obj.parts.all()]
+    parts = Part.objects.filter(project_id=project_obj.id)
     rtsp = project_obj.camera.rtsp
     download_uri = project_obj.download_uri
 
@@ -309,7 +290,7 @@ def train(request, project_id):
                 "http://" + inference_module_url() + "/update_cam",
                 params={
                     "cam_type": "rtsp",
-                    "cam_source": rtsp
+                    "cam_source": normalize_rtsp(rtsp)
                 },
             )
         else:
@@ -318,7 +299,7 @@ def train(request, project_id):
                 "http://" + inference_module_url() + "/update_cam",
                 params={
                     "cam_type": "rtsp",
-                    "cam_source": rtsp
+                    "cam_source": normalize_rtsp(rtsp)
                 },
             )
 
@@ -342,14 +323,17 @@ def train(request, project_id):
             },
         )
 
-        project_obj.upcreate_training_status(status="ok", log="demo ok")
+        upcreate_training_status(project_id=project_obj.id,
+                                 status="ok",
+                                 log="demo ok")
         project_obj.has_configured = True
         project_obj.save()
-        # FIXME pass the new model info to inference server (willy implement)
-        return JsonResponse({"status": "ok"})
+        # pass the new model info to inference server in post_save()
+        return Response({"status": "ok"})
 
-    project_obj.upcreate_training_status(
-        status="preparing", log="preparing data (images and annotations)")
+    upcreate_training_status(project_id=project_obj.id,
+                             status="preparing",
+                             log="preparing data (images and annotations)")
     logger.info("sleeping")
 
     def _send(rtsp, parts, download_uri):
@@ -358,7 +342,7 @@ def train(request, project_id):
             "http://" + inference_module_url() + "/update_cam",
             params={
                 "cam_type": "rtsp",
-                "cam_source": rtsp
+                "cam_source": normalize_rtsp(rtsp)
             },
         )
         requests.get(
@@ -375,16 +359,24 @@ def train(request, project_id):
 
 
 def upload_and_train(project_id):
-    """Actually do uplaod, train and deploy"""
+    """upload_and_train.
+
+    Actually do upload, train and deploy.
+
+    Args:
+        project_id:
+    """
+
     project_obj = Project.objects.get(pk=project_id)
     trainer = project_obj.setting.revalidate_and_get_trainer_obj()
     customvision_project_id = project_obj.customvision_project_id
 
     # Invalid Endpoint + Training Key
     if not trainer:
-        project_obj.upcreate_training_status(
-            status="failed", log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
-        return JsonResponse(
+        upcreate_training_status(project_id=project_obj.id,
+                                 status="failed",
+                                 log=error_messages.CUSTOM_VISION_ACCESS_ERROR)
+        return Response(
             {
                 "status": "failed",
                 "log": error_messages.CUSTOM_VISION_ACCESS_ERROR
@@ -392,37 +384,30 @@ def upload_and_train(project_id):
             status=503,
         )
 
-    project_obj.upcreate_training_status(
-        status="preparing", log="preparing data (images and annotations)")
+    upcreate_training_status(project_id=project_obj.id,
+                             **progress_constants.PROGRESS_1_FINDING_PROJECT)
 
     project_obj.dequeue_iterations()
 
     try:
-        count = 10
-        while count > 0:
-            part_ids = [part.id for part in project_obj.parts.all()]
-            if len(part_ids) > 0:
-                break
-            logging.info("waiting parts...")
-            time.sleep(1)
-            count -= 1
+        part_ids = [part.id for part in project_obj.parts.all()]
 
         logger.info("Project id: %s", project_obj.id)
         logger.info("Part ids: %s", part_ids)
         try:
             trainer.get_project(customvision_project_id)
-            project_obj.upcreate_training_status(
+            upcreate_training_status(
+                project_id=project_obj.id,
                 status="preparing",
-                log=(f"Project {project_obj.customvision_project_name}" +
+                log=(f"Project {project_obj.customvision_project_name} " +
                      "found on Custom Vision"),
             )
-        except:
+        except Exception:
             project_obj.create_project()
-            project_obj.upcreate_training_status(
-                status="preparing",
-                log=("Project created on CustomVision. " +
-                     f"Name: {project_obj.customvision_project_name}"),
-            )
+            upcreate_training_status(
+                project_id=project_obj.id,
+                need_to_send_notification=True,
+                **progress_constants.PROGRESS_2_PROJECT_CREATED)
 
             logger.info("Project created on CustomVision.")
             logger.info("Project Id: %s", project_obj.customvision_project_id)
@@ -430,136 +415,57 @@ def upload_and_train(project_id):
                         project_obj.customvision_project_name)
             customvision_project_id = project_obj.customvision_project_id
 
-        project_obj.upcreate_training_status(
-            status="sending", log="sending data (images and annotations)")
-        tags = trainer.get_tags(customvision_project_id)
-        tag_dict = {}
-        project_partnames = {}
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress_constants.PROGRESS_3_UPLOADING_PARTS)
+
+        # Get tags_dict to avoid getting tags every time
+        tags = trainer.get_tags(project_id=project_obj.customvision_project_id)
+        tags_dict = {tag.name: tag.id for tag in tags}
+
+        # App Insight
         project_changed = False
         has_new_parts = False
         has_new_images = False
-        for tag in tags:
-            tag_dict[tag.name] = tag.id
         parts_last_train = len(tags)
         images_last_train = trainer.get_tagged_image_count(
             project_obj.customvision_project_id)
-        # Update existing tags
-        # TODO: update tags
-        # trainer.update_tags(project_id, tag_id, new_tag)
 
-        # Create tags on CustomVisioin Project
-        # Maybe move to Project Model?
-        logger.info("Creating tags before training...")
-        counter = 0
-        for part_id in part_ids:
-            part_name = Part.objects.get(id=part_id).name
-            part_description = Part.objects.get(id=part_id).description
-            project_partnames[part_name] = "foo"
-            if part_name not in tag_dict:
-                logger.info("Creating tag: %s. Description: %s", part_name,
-                            part_description)
-                tag = trainer.create_tag(
-                    project_id=customvision_project_id,
-                    name=part_name,
-                    description=part_description,
-                )
-                has_new_parts = True
-                tag_dict[tag.name] = tag.id
-                counter += 1
-        project_changed = project_changed or (counter > 0)
-        logger.info("Created %s tags", counter)
-        logger.info("Creating tags... Done")
+        # Create/update tags on CustomVisioin Project
+        has_new_parts = batch_upload_parts_to_customvision(
+            project_id=project_id, part_ids=part_ids, tags_dict=tags_dict)
+        if has_new_parts:
+            project_changed = True
+
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress_constants.PROGRESS_4_UPLOADING_IMAGES)
 
         # Upload images to CustomVisioin Project
-        images = Image.objects.filter(part_id__in=part_ids,
-                                      is_relabel=False,
-                                      uploaded=False).all()
-        logger.info("Uploading images before training...")
-        count = 0
-        img_entries = []
-        img_objs = []
-        logger.info("Image length: %s", len(images))
-
-        for index, image_obj in enumerate(images):
-            logger.info("*** image %s, %s", index + 1, image_obj)
-            has_new_images = True
-            part = image_obj.part
-            part_name = part.name
-            tag_id = tag_dict[part_name]
-            img_name = "img-" + datetime.datetime.utcnow().isoformat()
-
-            regions = []
-            width = image_obj.image.width
-            height = image_obj.image.height
-            try:
-                labels = json.loads(image_obj.labels)
-                if len(labels) == 0:
-                    continue
-                for label in labels:
-                    x = label["x1"] / width
-                    y = label["y1"] / height
-                    w = (label["x2"] - label["x1"]) / width
-                    h = (label["y2"] - label["y1"]) / height
-                    region = Region(tag_id=tag_id,
-                                    left=x,
-                                    top=y,
-                                    width=w,
-                                    height=h)
-                    regions.append(region)
-
-                image = image_obj.image
-                image.open()
-                img_entry = ImageFileCreateEntry(name=img_name,
-                                                 contents=image.read(),
-                                                 regions=regions)
-                img_objs.append(image_obj)
-                img_entries.append(img_entry)
-                project_changed = project_changed or (not image_obj.uploaded)
-                if project_changed:
-                    logger.info("project_changed: %s", project_changed)
-                count += 1
-            except:
-                logger.exception("unexpected error")
-
-            if len(img_entries) >= 5:
-                logger.info("Uploading %s images", len(img_entries))
-                upload_result = trainer.create_images_from_files(
-                    customvision_project_id, images=img_entries)
-                logger.info(
-                    "Uploading images... Is batch success: %s",
-                    upload_result.is_batch_successful,
-                )
-                img_entries = []
-                for img_obj in img_objs:
-                    img_obj.uploaded = True
-                    img_obj.save()
-                img_objs = []
-
-        if len(img_entries) >= 1:
-            logger.info("Uploading %s images", len(img_entries))
-            upload_result = trainer.create_images_from_files(
-                customvision_project_id, images=img_entries)
-            logger.info(
-                "Uploading images... Is batch success: %s",
-                upload_result.is_batch_successful,
-            )
-            for img_obj in img_objs:
-                img_obj.uploaded = True
-                img_obj.save()
-        logger.info("Uploading images... Done")
+        for part_id in part_ids:
+            logger.info("Uploading images with part_id %s", part_id)
+            has_new_images = upload_images_to_customvision_helper(
+                project_id=project_obj.id, part_id=part_id)
+            if has_new_images:
+                project_changed = True
 
         # Submit training task to Custom Vision
         if not project_changed:
-            project_obj.upcreate_training_status(
+            upcreate_training_status(
+                project_id=project_obj.id,
                 status="deploying",
                 log="No new parts or new images to train. Deploying")
         else:
-            project_obj.upcreate_training_status(
-                status="training",
-                log="Project changed. Submitting training task...")
+            upcreate_training_status(
+                project_id=project_obj.id,
+                need_to_send_notification=True,
+                **progress_constants.PROGRESS_5_SUBMITTING_TRAINING_TASK)
             training_task_submit_success = project_obj.train_project()
             if training_task_submit_success:
-                project_obj.update_app_insight_counter(
+                update_app_insight_counter(
+                    project_obj=project_obj,
                     has_new_parts=has_new_parts,
                     has_new_images=has_new_images,
                     parts_last_train=parts_last_train,
@@ -567,18 +473,20 @@ def upload_and_train(project_id):
                 )
         # A Thread/Task to keep updating the status
         update_train_status(project_id)
-        return JsonResponse({"status": "ok"})
+        return Response({"status": "ok"})
 
     except CustomVisionErrorException as customvision_err:
         logger.error("CustomVisionErrorException: %s", customvision_err)
         if customvision_err.message == \
                 "Operation returned an invalid status code 'Access Denied'":
-            project_obj.upcreate_training_status(
+            upcreate_training_status(
+                project_id=project_obj.id,
                 status="failed",
                 log=
                 "Training key or Endpoint is invalid. Please change the settings",
+                need_to_send_notification=True,
             )
-            return JsonResponse(
+            return Response(
                 {
                     "status":
                         "failed",
@@ -588,9 +496,11 @@ def upload_and_train(project_id):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        project_obj.upcreate_training_status(status="failed",
-                                             log=customvision_err.message)
-        return JsonResponse(
+        upcreate_training_status(project_id=project_obj.id,
+                                 status="failed",
+                                 log=customvision_err.message,
+                                 need_to_send_notification=True)
+        return Response(
             {
                 "status": "failed",
                 "log": customvision_err.message
@@ -598,25 +508,33 @@ def upload_and_train(project_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    except Exception as e:
+    except Exception:
         # TODO: Remove in production
         err_msg = traceback.format_exc()
         logger.exception("Exception: %s", err_msg)
-        project_obj.upcreate_training_status(status="failed",
-                                             log=f"failed {str(err_msg)}")
-        return JsonResponse({
-            "status": "failed",
-            "log": f"failed {str(err_msg)}"
-        })
+        upcreate_training_status(project_id=project_obj.id,
+                                 status="failed",
+                                 log=f"failed {str(err_msg)}",
+                                 need_to_send_notification=True)
+        return Response({"status": "failed", "log": f"failed {str(err_msg)}"})
 
 
 def update_train_status(project_id):
-    """
+    """update_train_status.
+
     This function not only update status, but also send request to inference
-    model
+    model.
+
+    Args:
+        project_id:
     """
 
     def _train_status_worker(project_id):
+        """_train_status_worker.
+
+        Args:
+            project_id:
+        """
         project_obj = Project.objects.get(pk=project_id)
         trainer = project_obj.setting.revalidate_and_get_trainer_obj()
         camera_id = project_obj.camera_id
@@ -625,35 +543,49 @@ def update_train_status(project_id):
         wait_prepare = 0
         # If exceed, this project probably not going to be trained
         max_wait_prepare = 60
+
+        # Send notification only when init
+        training_init = False
+        export_init = False
+        deploy_init = False
+
         while True:
             time.sleep(1)
 
             iterations = trainer.get_iterations(customvision_project_id)
             if len(iterations) == 0:
-                project_obj.upcreate_training_status(
-                    status="preparing",
-                    log="preparing custom vision environment",
-                )
+                upcreate_training_status(
+                    project_id=project_obj.id,
+                    **
+                    progress_constants.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
                 wait_prepare += 1
                 if wait_prepare > max_wait_prepare:
+                    upcreate_training_status(
+                        project_id=project_obj.id,
+                        status="failed",
+                        log="Get iteration from Custom Vision occurs error.",
+                        need_to_send_notification=True,
+                    )
                     break
                 continue
 
             iteration = iterations[0]
             if not iteration.exportable or iteration.status != "Completed":
-                project_obj.upcreate_training_status(
-                    status="training",
-                    log=
-                    "training (Training job might take up to 10-15 minutes)",
-                )
-
+                upcreate_training_status(
+                    project_id=project_obj.id,
+                    need_to_send_notification=(not training_init),
+                    **progress_constants.PROGRESS_7_TRAINING)
+                training_init = True
                 continue
 
             exports = trainer.get_exports(customvision_project_id,
                                           iteration.id)
             if len(exports) == 0 or not exports[0].download_uri:
-                project_obj.upcreate_training_status(status="exporting",
-                                                     log="exporting model")
+                upcreate_training_status(
+                    project_id=project_obj.id,
+                    need_to_send_notification=(not export_init),
+                    **progress_constants.PROGRESS_8_EXPORTING)
+                export_init = True
                 res = project_obj.export_iterationv3_2(iteration.id)
                 logger.info(res.json())
                 continue
@@ -668,16 +600,13 @@ def update_train_status(project_id):
             logger.info("Project is deployed before: %s", project_obj.deployed)
             if not project_obj.deployed:
                 if exports[0].download_uri:
-                    # update_twin(iteration.id,
-                    # exports[0].download_uri,
-                    # camera.rtsp)
 
                     def _send(download_uri, rtsp, parts):
                         requests.get(
                             "http://" + inference_module_url() + "/update_cam",
                             params={
                                 "cam_type": "rtsp",
-                                "cam_source": rtsp
+                                "cam_source": normalize_rtsp(rtsp)
                             },
                         )
                         requests.get(
@@ -699,8 +628,11 @@ def update_train_status(project_id):
                     project_obj.save(
                         update_fields=["download_uri", "deployed"])
 
-                project_obj.upcreate_training_status(status="deploying",
-                                                     log="deploying model")
+                upcreate_training_status(
+                    project_id=project_obj.id,
+                    need_to_send_notification=(not deploy_init),
+                    **progress_constants.PROGRESS_9_DEPLOYING)
+                deploy_init = True
                 continue
 
             logger.info("Training Status: Completed")
@@ -711,16 +643,11 @@ def update_train_status(project_id):
                                                       iteration.id).as_dict())
 
             logger.info("Training Performance: %s", train_performance_list)
-            project_obj.upcreate_training_status(
-                status="ok",
-                log="model training completed",
+            upcreate_training_status(
+                project_id=project_obj.id,
                 performance=json.dumps(train_performance_list),
-            )
-            Notification.objects.create(
-                notification_type="project",
-                sender="system",
-                title="Training Complete",
-                details="Project is trained and deployed")
+                need_to_send_notification=True,
+                **progress_constants.PROGRESS_0_OK)
             project_obj.has_configured = True
             project_obj.save()
             break
@@ -728,71 +655,19 @@ def update_train_status(project_id):
     threading.Thread(target=_train_status_worker, args=(project_id,)).start()
 
 
-# FIXME will need to find a better way to deal with this
-iteration_ids = set([])
-
-
-def update_twin(iteration_id, download_uri, rtsp):
-    """Update twin"""
-    if iot is None:
-        return
-
-    if iteration_id in iteration_ids:
-        logger.info("This iteration already deployed on the Edge")
-        return
-
-    try:
-        module = iot.get_module(DEVICE_ID, MODULE_ID)
-    except:
-        logger.error("Module does not exist. Device ID: %s, Module ID: %s",
-                     DEVICE_ID, MODULE_ID)
-        return
-
-    twin = Twin()
-    twin.properties = TwinProperties(
-        desired={
-            "inference_files_zip_url": download_uri,
-            "cam_type": "rtsp_stream",
-            "cam_source": rtsp,
-        })
-
-    iot.update_module_twin(DEVICE_ID, MODULE_ID, twin, module.etag)
-
-    logger.info(
-        "Updated IoT Module Twin with uri and rtsp. Download URI: %s RSTP: %s",
-        download_uri,
-        rtsp,
-    )
-
-    iteration_ids.add(iteration_id)
-
-
 @api_view()
 def pull_cv_project(request, project_id):
+    """pull_cv_project.
+
+    Delete the local project, parts and images. Pull the
+    remote project from Custom Vision.
+
+    Args:
+        request:
+        project_id:
     """
-    Delete the local project, parts and images. Pull the remote project from
-    Custom Vision.
-    TODO: open a Thread/Task
-    """
+    # FIXME: open a Thread/Task
     logger.info("Pulling CustomVision Project")
-    update_fields = []
-    # FIXME: Should send correct id
-    # project_obj = Project.objects.get(pk=project_id)
-    if len(Project.objects.filter(is_demo=False)):
-        project_obj = Project.objects.filter(is_demo=False)[0]
-    # Check Project
-    if project_obj.is_demo:
-        return JsonResponse({
-            "status": "failed",
-            "logs": "Demo project should not change"
-        })
-    # Check Training_Key, Endpoint
-    trainer = project_obj.setting.revalidate_and_get_trainer_obj()
-    if not trainer:
-        return JsonResponse({
-            "status": "failed",
-            "logs": error_messages.CUSTOM_VISION_ACCESS_ERROR
-        })
 
     # Check Customvision Project id
     customvision_project_id = request.query_params.get(
@@ -802,174 +677,60 @@ def pull_cv_project(request, project_id):
     # Check Partial
     try:
         is_partial = bool(strtobool(request.query_params.get("partial")))
-    except:
+    except Exception:
         is_partial = True
     logger.info("Loading Project in Partial Mode: %s", is_partial)
 
     try:
-        # Invalid CustomVision Project ID handled by exception
-        trainer.get_project(project_id=customvision_project_id)
-
-        project_obj.customvision_project_id = customvision_project_id
-        project_obj.deployed = False
-        update_fields.extend(["customvision_project_id", "deployed"])
-
-        logger.info("Deleting all parts and images...")
-        Part.objects.filter(is_demo=False).delete()
-        Image.objects.all().delete()
-
-        logger.info("Pulling Parts...")
-        counter = 0
-        tags = trainer.get_tags(customvision_project_id)
-        for tag in tags:
-            logger.info("Creating Part %s: %s %s", counter, tag.name,
-                        tag.description)
-            part_obj, created = Part.objects.update_or_create(
-                name=tag.name,
-                description=tag.description if tag.description else "")
-            counter += 1
-            if created:
-                project_obj.parts.add(part_obj)
-            else:
-                logging.error("%s not added", tag.name)
-            if is_partial:
-                logger.info("loading one image as icon")
-                try:
-                    img = trainer.get_tagged_images(
-                        project_id=customvision_project_id,
-                        tag_ids=[tag.id],
-                        take=1)[0]
-                    image_uri = img.original_image_uri
-                    img_obj, created = Image.objects.update_or_create(
-                        part=part_obj,
-                        remote_url=image_uri,
-                        customvision_id=img.id,
-                        project=project_obj,
-                        uploaded=True)
-                    logger.info("loading from remote url: %s",
-                                img_obj.remote_url)
-                    img_obj.get_remote_image()
-                    logger.info("Finding tag.id %s", tag.id)
-                    logger.info("Finding tag.name %s", tag.name)
-                    for region in img.regions:
-                        if region.tag_id == tag.id:
-                            logger.info("Region Found")
-                            img_obj.set_labels(
-                                left=region.left,
-                                top=region.top,
-                                width=region.width,
-                                height=region.height,
-                            )
-                            break
-
-                except CustomVisionErrorException:
-                    logger.info("This tag does not have an image")
-        logger.info("Pulled %s Parts", counter)
-        logger.info("Pulling Parts... End")
-
-        # Partial Download
-        if is_partial:
-            exporting_task_obj = Task.objects.create(
-                task_type="export_iteration",
-                status="init",
-                log="Just Started",
-                project=project_obj,
-            )
-            exporting_task_obj.start_exporting()
-            return JsonResponse({
-                "status": "ok",
-                "task.id": exporting_task_obj.id
-            })
-
-        # Full Download
-        logger.info("Pulling Tagged Images...")
-        img_counter = 0
-        imgs_count = trainer.get_tagged_image_count(
-            project_id=customvision_project_id)
-        img_batch_size = 50
-        img_index = 0
-
-        while img_index <= imgs_count:
-            logger.info("Img Index: %s. Img Count: %s", img_index, imgs_count)
-            imgs = trainer.get_tagged_images(
-                project_id=customvision_project_id,
-                take=img_batch_size,
-                skip=img_index)
-            for img in imgs:
-                logger.info("*** img %s", img_counter)
-                for region in img.regions:
-                    part_obj = Part.objects.filter(name=region.tag_name,
-                                                   is_demo=False)[0]
-                    img_obj, created = Image.objects.update_or_create(
-                        part=part_obj,
-                        remote_url=img.original_image_uri,
-                        project=project_obj,
-                        customvision_id=img.id)
-                    if created:
-                        logger.info("Downloading img %s", img.id)
-                        img_obj.get_remote_image()
-                        logger.info("Setting label of %s", img.id)
-                        img_obj.set_labels(
-                            left=region.left,
-                            top=region.top,
-                            width=region.width,
-                            height=region.height,
-                        )
-                        img_counter += 1
-                    else:
-                        # TODO:  Multiple region with same tag
-                        logger.info("Adding label to %s", img.id)
-                        img_obj.add_labels(
-                            left=region.left,
-                            top=region.top,
-                            width=region.width,
-                            height=region.height,
-                        )
-
-            img_index += img_batch_size
-
-        logger.info("Pulled %s images", counter)
-        logger.info("Pulling Tagged Images... End")
-        logger.info("Pulling CustomVision Project... End")
-        return JsonResponse({"status": "ok"})
-    except CustomVisionErrorException as customvision_error:
-        logger.error("CustomVisionErrorException: %s",
-                     customvision_error.message)
-        return JsonResponse({
-            "status": "failed",
-            "log": customvision_error.message
-        })
-    except:
-        # TODO: Remove in production
+        pull_cv_project_helper(project_id=project_id,
+                               customvision_project_id=customvision_project_id,
+                               is_partial=is_partial)
+        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+    except Exception:
         err_msg = traceback.format_exc()
-        logger.exception("Exception: %s", err_msg)
-        return JsonResponse({
-            "status": "failed",
-            "log": f"failed {str(err_msg)}"
-        })
-    finally:
-        project_obj.save(update_fields=update_fields)
+        logger.exception("Pull Custom Vision Project error")
+        return Response(
+            {
+                "status": "failed",
+                "log":
+                    str(err_msg)  # Change line plz...
+            },
+            status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view()
 def project_reset_camera(request, project_id):
-    """Set Project Camera to demo"""
+    """project_reset_camera.
+
+    Args:
+        request:
+        project_id:
+    """
     try:
         project_obj = Project.objects.get(pk=project_id)
-    except:
+    except Exception:
         if len(Project.objects.filter(is_demo=False)) > 0:
             project_obj = Project.objects.filter(is_demo=False)[0]
     project_obj.camera = Camera.objects.filter(is_demo=True).first()
-    project_obj.save(update_fields=["camera"])
-    return JsonResponse({"status": "ok"})
+    project_obj.has_configured = False
+    project_obj.save(update_fields=["camera", "has_configured"])
+    return Response({"status": "ok"})
 
 
 @api_view()
 def reset_project(request, project_id):
-    """Reset the project without deleting it"""
+    """reset_project.
+
+    Reset the project but not deleting.
+
+    Args:
+        request:
+        project_id:
+    """
+
     try:
         project_obj = Project.objects.get(pk=project_id)
-    except:
+    except Exception:
         if len(Project.objects.filter(is_demo=False)) > 0:
             project_obj = Project.objects.filter(is_demo=False)[0]
     try:
@@ -994,16 +755,16 @@ def reset_project(request, project_id):
         project_obj.retraining_counter = 0
         project_obj.save()
         project_obj.create_project()
-        return JsonResponse({"status": "ok"})
+        return Response({"status": "ok"})
     except KeyError as key_err:
         if str(key_err) in ["Endpoint", "'Endpoint'"]:
             # Probably reseting without training key and endpoint. When user
             # click configure, project will check customvision_id. If empty
             # than create project, Thus we can pass for now. Wait for
             # configure/training to create project...
-            return JsonResponse({"status": "ok"})
+            return Response({"status": "ok"})
         logger.exception("Reset project unexpected key error")
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": str(key_err)
@@ -1012,7 +773,7 @@ def reset_project(request, project_id):
         )
     except ValueError as value_err:
         logger.exception("Reset Project Value Error")
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": str(value_err)
@@ -1023,14 +784,14 @@ def reset_project(request, project_id):
         logger.exception("Error from Custom Vision")
         if (customvision_err.message ==
                 "Operation returned an invalid status code 'Access Denied'"):
-            return JsonResponse(
+            return Response(
                 {
                     "status": "failed",
                     "log": error_messages.CUSTOM_VISION_ACCESS_ERROR
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        return JsonResponse(
+        return Response(
             {
                 "status": "failed",
                 "log": customvision_err.message
@@ -1040,6 +801,21 @@ def reset_project(request, project_id):
     except Exception:
         logger.exception("Uncaught Error")
         raise
+
+
+class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
+    """Task ModelViewSet
+
+    Available filters:
+    @project
+    """
+
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    filter_backends = (filters.OrderingFilter,)
+    filter_mappings = {
+        "project": "project",
+    }
 
 
 @api_view()
