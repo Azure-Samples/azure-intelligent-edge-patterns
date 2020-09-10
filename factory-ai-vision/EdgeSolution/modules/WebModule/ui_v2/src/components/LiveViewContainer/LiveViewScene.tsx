@@ -18,6 +18,7 @@ import { isBBox } from '../../store/shared/Box2d';
 import { isPolygon } from '../../store/shared/Polygon';
 import { Shape } from '../../store/shared/BaseShape';
 import { isLine } from '../../store/shared/Line';
+import { isAOIShape, isCountingLine } from '../../store/shared/VideoAnnoUtil';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -107,11 +108,11 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   }, []);
 
   const AOIs = useMemo(() => {
-    return videoAnnos.filter((annos) => [Shape.BBox, Shape.Polygon].includes(annos.type));
+    return videoAnnos.filter(isAOIShape);
   }, [videoAnnos]);
 
-  const Lines = useMemo(() => {
-    return videoAnnos.filter((annos) => annos.type === Shape.Line);
+  const countingLines = useMemo(() => {
+    return videoAnnos.filter(isCountingLine);
   }, [videoAnnos]);
 
   return (
@@ -136,7 +137,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
                 <VideoAnnosGroup
                   imgWidth={imgWidth}
                   imgHeight={imgHeight}
-                  videoAnnos={Lines}
+                  videoAnnos={countingLines}
                   updateVideoAnno={updateVideoAnno}
                   removeVideoAnno={removeVideoAnno}
                   visible={countingLineVisible}

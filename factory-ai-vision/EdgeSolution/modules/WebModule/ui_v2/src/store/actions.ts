@@ -2,8 +2,8 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { Shape } from './shared/BaseShape';
 import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
+import { isAOIShape } from './shared/VideoAnnoUtil';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -23,26 +23,21 @@ export const deleteImage = createAsyncThunk('images/delete', async (id: number) 
 
 type toggleCameraLabelPayload = { cameraId: number; checked: boolean };
 
+const getAOIs = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isAOIShape(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
 export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowAOI',
   async ({ cameraId, checked }, { getState }) => {
-    const videoAnnoEntities = getState().videoAnnos.entities;
-    const AOIs = Object.values(videoAnnoEntities)
-      .filter((e) => e.camera === cameraId && [Shape.BBox, Shape.Line].includes(e.type))
-      .map((e) => {
-        if (e.type === Shape.BBox)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-        if (e.type === Shape.Polygon)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-      });
+    const AOIs = getAOIs(getState(), cameraId);
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: checked, AOIs }) });
   },
 );
@@ -58,23 +53,7 @@ export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   'cameras/updateArea',
   async (cameraId, { getState }) => {
     const { useAOI } = getState().camera.entities[cameraId];
-    const videoAnnoEntities = getState().videoAnnos.entities;
-    const AOIs = Object.values(videoAnnoEntities)
-      .filter((e) => e.camera === cameraId && [Shape.BBox, Shape.Line].includes(e.type))
-      .map((e) => {
-        if (e.type === Shape.BBox)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-        if (e.type === Shape.Polygon)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-      });
+    const AOIs = getAOIs(getState(), cameraId);
     await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
   },
 );
