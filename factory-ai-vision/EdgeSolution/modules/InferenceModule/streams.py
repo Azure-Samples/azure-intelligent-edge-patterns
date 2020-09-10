@@ -223,7 +223,7 @@ class Stream():
         predictions = self.last_prediction
         for prediction in predictions:
             tag = prediction['tagName']
-            if tag not in self.parts:
+            if tag not in self.model.parts:
                 continue
 
             if self.has_aoi:
