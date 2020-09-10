@@ -16,7 +16,7 @@ from enum import Enum
 
 from shared_memory import SharedMemoryManager
 from exception_handler import PrintGetExceptionDetails
-from model_wrapper import YoloV3Model, ONNXRuntimeModelDeploy
+from model_wrapper import ONNXRuntimeModelDeploy
 
 # Get debug flag from env variable (Returns None if not set)
 # Set this environment variables in the IoTEdge Deployment manifest to activate debugging.
@@ -59,15 +59,16 @@ class State:
 
 
 class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
-    def __init__(self, model):
+    def __init__(self, stream_manager):
         # create ONNX model wrapper
         # Thread safe shared resource among all clients
-        self._tYoloV3 = model
-        self.start_zmq()
+        # self._tYoloV3 = model
+        self.stream_manager = stream_manager
+        # self.start_zmq()
 
     def start_zmq(self):
         def run(self):
-            logging.info('running zmq')
+            # logging.info('running zmq')
             context = zmq.Context()
             sender = context.socket(zmq.PUB)
             # sender.connect("tcp://localhost:5558")
@@ -255,25 +256,29 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                     return
 
-                if list(cvImage.shape[:2]) != self._tYoloV3.image_shape:
-                    message = "Received an image of size {0}, but expected one of size {1}".format(
-                        cvImage.shape[:2], self._tYoloV3.image_shape)
-                    context.set_details(message)
-                    logging.info(message)
-                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                    return
+                # if list(cvImage.shape[:2]) != self._tYoloV3.image_shape:
+                #     message = "Received an image of size {0}, but expected one of size {1}".format(
+                #         cvImage.shape[:2], self._tYoloV3.image_shape)
+                #     context.set_details(message)
+                #     logging.info(message)
+                #     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                #     return
 
                 # instance_name = mediaStreamMessageRequest.graph_identifier.graph_instance_name
-                logging.info('req: {0}'.format(mediaStreamMessageRequest))
+                # logging.info('req: {0}'.format(mediaStreamMessageRequest))
 
                 # run inference
-                logging.info(self._tYoloV3)
+                # logging.info(self._tYoloV3)
                 # out = self._tYoloV3.Score(cvImage)
                 # logging.info(out)
-                predictions = self._tYoloV3.Score(cvImage, instance_id)
-
-                logging.debug(
-                    'Detected {0} inferences'.format(len(predictions)))
+                # predictions = self._tYoloV3.Score(cvImage, instance_id)
+                s = self.stream_manager.get_stream_by_id(instance_id)
+                if s:
+                    s.predict(cvImage)
+                    predictions = s.last_prediction
+                # stream_manager.update(cvImage, instance_id)
+                # logging.debug(
+                #     'Detected {0} inferences'.format(len(predictions)))
 
                 # if DEBUG is not None:
                 #     self.CreateDebugOutput(

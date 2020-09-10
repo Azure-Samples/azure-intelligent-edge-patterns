@@ -51,12 +51,12 @@ class VideoFeed():
 
         while self.is_opened:
             ret = self.receiver.recv_multipart()
-            nparr = np.frombuffer(np.array(ret[1]), np.uint8)
-            logging.info('recv from instance rpc')
+            # nparr = np.frombuffer(np.array(ret[1]), np.uint8)
+            # logging.info('recv from instance rpc')
 
             # logger.warning('Receive: %s', ret['ts'])
             # logger.warning('Time elapsed: %s', (time.time()-self.keep_alive))
-            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
             # ret2 = receiver.recv_pyobj()
             # logger.warning(ret2['ts'])
@@ -64,7 +64,7 @@ class VideoFeed():
 
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' +
-                   cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
+                   ret[1] + b'\r\n')
         self.receiver.close()
 
     def update_keep_alive(self):

@@ -13,10 +13,12 @@ from inference_engine import InferenceEngine
 from model_wrapper import ONNXRuntimeModelDeploy
 from flask import Flask, request, Response
 from utility import get_file_zip, normalize_rtsp
+from stream_manager import StreamManager
 
 import grpc
 import extension_pb2_grpc
 from concurrent import futures
+
 
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec
@@ -32,46 +34,51 @@ IMG_HEIGHT = 540
 # Main thread
 
 onnx = ONNXRuntimeModelDeploy()
+stream_manager = StreamManager(onnx)
+
+
 app = Flask(__name__)
 @app.route('/prediction', methods=['GET'])
 def prediction():
     # print(onnx.last_prediction)
     # onnx.last_prediction
-    return json.dumps(onnx.last_prediction)
+    cam_id = request.args.get('cam_id')
+    s = stream_manager.get_stream_by_id(cam_id)
+    return json.dumps(s.last_prediction)
 
 
-@app.route('/open_cam', methods=['GET'])
-def open_cam():
-    def post_img():
-        headers = {'Content-Type': 'image/jpg'}
-        while True:
-            if onnx.cam_is_alive == False:
-                break
-            onnx.lock.acquire()
-            b, img = onnx.cam.read()
-            onnx.lock.release()
-            if b:
-                data = cv2.imencode(".jpg", img)[1].tobytes()
-                r = requests.post('http://127.0.0.1:5000/predict',
-                                  headers=headers, data=data)
-            time.sleep(0.02)
+# @app.route('/open_cam', methods=['GET'])
+# def open_cam():
+#     def post_img():
+#         headers = {'Content-Type': 'image/jpg'}
+#         while True:
+#             if onnx.cam_is_alive == False:
+#                 break
+#             onnx.lock.acquire()
+#             b, img = onnx.cam.read()
+#             onnx.lock.release()
+#             if b:
+#                 data = cv2.imencode(".jpg", img)[1].tobytes()
+#                 r = requests.post('http://127.0.0.1:5000/predict',
+#                                   headers=headers, data=data)
+#             time.sleep(0.02)
 
-    if onnx.cam_is_alive == False:
-        onnx.lock.acquire()
-        onnx.cam_is_alive = True
-        onnx.lock.release()
-        threading.Thread(target=post_img).start()
-        return 'open camera', 200
-    else:
-        return 'camera is already opened', 200
+#     if onnx.cam_is_alive == False:
+#         onnx.lock.acquire()
+#         onnx.cam_is_alive = True
+#         onnx.lock.release()
+#         threading.Thread(target=post_img).start()
+#         return 'open camera', 200
+#     else:
+#         return 'camera is already opened', 200
 
 
-@app.route('/close_cam', methods=['GET'])
-def close_cam():
-    onnx.lock.acquire()
-    onnx.cam_is_alive = False
-    onnx.lock.release()
-    return 'camera closed', 200
+# @app.route('/close_cam', methods=['GET'])
+# def close_cam():
+#     onnx.lock.acquire()
+#     onnx.cam_is_alive = False
+#     onnx.lock.release()
+#     return 'camera closed', 200
 
 
 @app.route('/metrics', methods=['GET'])
@@ -111,9 +118,11 @@ def update_retrain_parameters():
     if not max_images:
         return 'missing max_images'
 
-    onnx.confidence_min = int(confidence_min) * 0.01
-    onnx.confidence_max = int(confidence_max) * 0.01
-    onnx.max_images = int(max_images)
+    cam_id = request.args.get('cam_id')
+    s = stream_manager.get_stream_by_id(cam_id)
+    s.confidence_min = int(confidence_min) * 0.01
+    s.confidence_max = int(confidence_max) * 0.01
+    s.max_images = int(max_images)
 
     print('[INFO] updaing retrain parameters to')
     print('  conficen_min:', confidence_min)
@@ -159,40 +168,30 @@ def update_cam():
 
     data = request.get_json()
     logging.info(data["cameras"])
-    for cam in data["cameras"][:1]:
+    stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
+    for cam in data["cameras"]:
         cam_type = cam['type']
         cam_source = cam['source']
         cam_id = cam['id']
 
-    # cam_type = request.args.get('cam_type')
-    # cam_source = request.args.get('cam_source')
-    # cam_id = request.args.get('cam_id')
+        if not cam_type:
+            return 'missing cam_type'
+        if not cam_source:
+            return 'missing cam_source'
+        if not cam_id:
+            return 'missing cam_id'
 
-    if not cam_type:
-        return 'missing cam_type'
-    if not cam_source:
-        return 'missing cam_source'
-    if not cam_id:
-        return 'missing cam_id'
+        if 'aoi' in cam.keys():
+            aoi = json.loads(aoi)
+            has_aoi = aoi['useAOI']
+            aoi_info = aoi['AOIs']
+        else:
+            has_aoi = False
+            aoi_info = None
 
-    print('updating cam ...')
-    print('  cam_type', cam_type)
-    print('  cam_source', cam_source)
-    print('  cam_id', cam_id)
-
-    aoi = request.args.get('aoi')
-    try:
-        aoi = json.loads(aoi)
-        has_aoi = aoi['useAOI']
-        aoi_info = aoi['AOIs']
-    except:
-        has_aoi = False
-        aoi_info = None
-
-    print('  has_aoi', has_aoi)
-    print('  aoi_info', aoi_info)
-
-    onnx.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info)
+        logging.info('updating camera {0}'.format(cam_id))
+        s = stream_manager.get_stream_by_id(cam_id)
+        s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info)
 
     return 'ok'
 
@@ -241,7 +240,9 @@ def update_iothub_parameters():
     print('  threshold', threshold)
     print('  fpm', fpm)
 
-    onnx.update_iothub_parameters(is_send, threshold, fpm)
+    cam_id = request.args.get('cam_id')
+    s = stream_manager.get_stream_by_id(cam_id)
+    s.update_iothub_parameters(is_send, threshold, fpm)
     return 'ok'
 
 
@@ -255,12 +256,14 @@ def update_prob_threshold():
     print('[INFO] updaing prob_threshold to')
     print('  prob_threshold:', prob_threshold)
 
-    onnx.lock.acquire()
-    onnx.detection_success_num = 0
-    onnx.detection_unidentified_num = 0
-    onnx.detection_total = 0
-    onnx.detections = []
-    onnx.lock.release()
+    cam_id = request.args.get('cam_id')
+    s = stream_manager.get_stream_by_id(cam_id)
+    s.lock.acquire()
+    s.detection_success_num = 0
+    s.detection_unidentified_num = 0
+    s.detection_total = 0
+    s.detections = []
+    s.lock.release()
 
     return 'ok'
 
@@ -277,7 +280,7 @@ def Main():
         # create gRPC server and start running
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
         extension_pb2_grpc.add_MediaGraphExtensionServicer_to_server(
-            InferenceEngine(onnx), server)
+            InferenceEngine(stream_manager), server)
         server.add_insecure_port(f'[::]:{grpcServerPort}')
         server.start()
         app.run(host='0.0.0.0', debug=False)
