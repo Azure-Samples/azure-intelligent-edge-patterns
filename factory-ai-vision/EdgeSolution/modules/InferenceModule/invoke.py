@@ -53,7 +53,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_topology_delete(self, name):
-        method = 'GraphTopologyList'
+        method = 'GraphTopologyDelete'
         payload = {
             '@apiVersion': '1.0',
             'name': name,
@@ -78,7 +78,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_delete(self, name):
-        method = 'GraphInstanceList'
+        method = 'GraphInstanceDelete'
         payload = {
             '@apiVersion': '1.0',
             'name': name,
@@ -98,6 +98,7 @@ class GraphManager:
             '@apiVersion': '1.0',
             'name': name,
         }
+        return self.invoke_method(method, payload)
 
     def invoke_graph_instance_deactivate(self, name):
         method = 'GraphInstanceDeactivate'
@@ -105,3 +106,10 @@ class GraphManager:
             '@apiVersion': '1.0',
             'name': name,
         }
+        return self.invoke_method(method, payload)
+
+    def invoke_graph_grpc_topology_set(self, name):
+        method = 'GraphTopologySet'
+        with open('grpc_topology.json') as f:
+            payload = json.load(f)
+        return self.invoke_method(method, payload)
