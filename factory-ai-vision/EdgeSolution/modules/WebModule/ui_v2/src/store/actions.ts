@@ -3,7 +3,7 @@ import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
-import { isAOIShape } from './shared/VideoAnnoUtil';
+import { isAOIShape, isCountingLine } from './shared/VideoAnnoUtil';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -25,8 +25,19 @@ type toggleCameraLabelPayload = { cameraId: number; checked: boolean };
 
 const getAOIs = (state: State, cameraId) => {
   const videoAnnoEntities = state.videoAnnos.entities;
-  Object.values(videoAnnoEntities)
+  return Object.values(videoAnnoEntities)
     .filter((e) => e.camera === cameraId && isAOIShape(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
+const getCountingLines = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  return Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isCountingLine(e))
     .map((e) => ({
       id: e.id,
       type: e.type,
@@ -44,17 +55,24 @@ export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { s
 
 export const toggleShowCountingLines = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowCountingLines',
-  async () => {
-    /** TODO */
+  async ({ cameraId, checked }, { getState }) => {
+    const countingLines = getCountingLines(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      lines: JSON.stringify({ useCountingLine: checked, countingLines }),
+    });
   },
 );
 
 export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   'cameras/updateArea',
   async (cameraId, { getState }) => {
-    const { useAOI } = getState().camera.entities[cameraId];
+    const { useAOI, useCountingLine } = getState().camera.entities[cameraId];
     const AOIs = getAOIs(getState(), cameraId);
-    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
+    const countingLines = getCountingLines(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      area: JSON.stringify({ useAOI, AOIs }),
+      lines: JSON.stringify({ useCountingLine, countingLines }),
+    });
   },
 );
 
