@@ -334,8 +334,6 @@ const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange,
       cache={[{ drawBorder: true }]}
       ref={groupRef}
     >
-      {/** A bigger region for mouseEnter event */}
-      <Line x={polygon[0].x} y={polygon[0].y - 50} points={borderPoints} closed scale={{ x: 1.2, y: 1.2 }} />
       <Line
         x={polygon[0].x}
         y={polygon[0].y}
@@ -343,6 +341,7 @@ const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange,
         closed
         stroke={COLOR}
         strokeWidth={2 / scale}
+        hitStrokeWidth={50 / scale}
       />
       {polygon.map((e, i) => (
         <Circle
@@ -354,6 +353,7 @@ const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange,
           radius={radius}
           fill={COLOR}
           onDragMove={onDragMove(i)}
+          hitStrokeWidth={50 / scale}
         />
       ))}
       <Path
@@ -435,8 +435,6 @@ const Box: React.FC<BoxProps> = ({ box, onBoxChange, visible, boundary, removeBo
       cache={[{ drawBorder: true }]}
       ref={groupRef}
     >
-      {/** A bigger region for mouseEnter event */}
-      <Line x={x1} y={y1 - 80} points={[0, -80, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, -80]} closed />
       <Line
         x={x1}
         y={y1}
@@ -444,6 +442,7 @@ const Box: React.FC<BoxProps> = ({ box, onBoxChange, visible, boundary, removeBo
         closed
         stroke={COLOR}
         strokeWidth={2 / scale}
+        hitStrokeWidth={50 / scale}
       />
       <Circle draggable name="leftTop" x={x1} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
       <Circle draggable name="rightTop" x={x2} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
