@@ -128,3 +128,6 @@ class GraphManager:
             ]
         }
         return self.invoke_graph_instance_set(name, properties)
+
+
+gm = GraphManager()
