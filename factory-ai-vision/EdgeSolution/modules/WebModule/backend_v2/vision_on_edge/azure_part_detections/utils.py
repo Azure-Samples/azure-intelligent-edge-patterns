@@ -92,6 +92,7 @@ def if_trained_then_deploy_worker(part_detection_id):
             "/update_parts",
             params={"parts": parts},
         )
+        update_cam_worker(part_detection_id=part_detection_obj.id)
 
     threading.Thread(target=deploy).start()
 
