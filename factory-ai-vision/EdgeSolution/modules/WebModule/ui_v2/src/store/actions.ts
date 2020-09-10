@@ -3,7 +3,7 @@ import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { Shape } from './shared/BaseShape';
-import { selectNonDemoProject } from './trainingProjectSlice';
+import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -74,11 +74,16 @@ export const pullCVProjects = createAsyncThunk<
   any,
   { selectedCustomvisionId: string; loadFullImages: boolean },
   { state: State }
->('trainingProject/pullCVProjects', async ({ selectedCustomvisionId, loadFullImages }, { getState }) => {
-  const trainingProjectId = selectNonDemoProject(getState())[0].id;
-  await Axios.get(
-    `/api/projects/${trainingProjectId}/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
-      !loadFullImages,
-    )}`,
-  );
-});
+>(
+  'trainingProject/pullCVProjects',
+  async ({ selectedCustomvisionId, loadFullImages }, { getState, dispatch }) => {
+    const trainingProjectId = selectNonDemoProject(getState())[0].id;
+    await Axios.get(
+      `/api/projects/${trainingProjectId}/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
+        !loadFullImages,
+      )}`,
+    );
+    // Get training project because the origin project name will be mutate
+    dispatch(getTrainingProject(false));
+  },
+);
