@@ -21,7 +21,7 @@ from rest_framework.response import Response
 
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
-                                        SimpleStatusSerializer)
+                                        SimpleOKSerializer)
 from ..exceptions import ProjectWithoutSettingError
 from ..models import Project, Task
 from ..utils import pull_cv_project_helper, train_project_helper
@@ -151,7 +151,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                                                required=True),
                          ],
                          responses={
-                             '200': SimpleStatusSerializer,
+                             '200': SimpleOKSerializer,
                              '400': MSStyleErrorResponseSerializer
                          })
     @action(detail=True, methods=["get"])
@@ -183,7 +183,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                               description='partial download or not')
         ],
         responses={
-            '200': SimpleStatusSerializer,
+            '200': SimpleOKSerializer,
             '400': MSStyleErrorResponseSerializer
         })
     @action(detail=True, methods=["get"])

@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 # pylint: disable=abstract-method
-class SimpleStatusSerializer(serializers.Serializer):
-    """SimpleStatusSerializer.
+class SimpleOKSerializer(serializers.Serializer):
+    """SimpleOKSerializer.
     """
     status = serializers.ChoiceField(choices=["ok"])
 

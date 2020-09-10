@@ -23,7 +23,7 @@ from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleErrorSerializer,
-                                        SimpleStatusSerializer)
+                                        SimpleOKSerializer)
 from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
@@ -170,7 +170,7 @@ def connect_stream(request):
                                            description='Stream Id'),
                      ],
                      responses={
-                         '200': SimpleStatusSerializer,
+                         '200': SimpleOKSerializer,
                          '400': MSStyleErrorResponseSerializer
                      })
 @api_view()
@@ -260,7 +260,7 @@ def capture(request, stream_id):
                                            description='Stream Id'),
                      ],
                      responses={
-                         '200': SimpleStatusSerializer,
+                         '200': SimpleOKSerializer,
                          '400': MSStyleErrorResponseSerializer
                      })
 @api_view()

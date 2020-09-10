@@ -21,7 +21,7 @@ from ...azure_projects.utils import train_project_helper
 from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
-                                        SimpleStatusSerializer)
+                                        SimpleOKSerializer)
 from ...images.models import Image
 from ..exceptions import (PdConfigureWithoutCameras,
                           PdConfigureWithoutInferenceModule,
@@ -52,7 +52,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     @swagger_auto_schema(operation_summary='Export Part Detection status',
                          responses={
-                             '200': SimpleStatusSerializer,
+                             '200': SimpleOKSerializer,
                              '400': MSStyleErrorResponseSerializer
                          })
     @action(detail=True, methods=["get"])
@@ -127,7 +127,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_summary='Train the project then deploy to Inference',
         responses={
-            '200': SimpleStatusSerializer,
+            '200': SimpleOKSerializer,
             '400': MSStyleErrorResponseSerializer
         })
     @action(detail=True, methods=["get"])
@@ -251,7 +251,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         raise PdRelabelImageFull
 
     @swagger_auto_schema(operation_summary='Update camera manually.',
-                         responses={200: SimpleStatusSerializer})
+                         responses={200: SimpleOKSerializer})
     @action(detail=True, methods=["get"])
     def update_cam(self, request, pk=None) -> Response:
         queryset = self.get_queryset()
