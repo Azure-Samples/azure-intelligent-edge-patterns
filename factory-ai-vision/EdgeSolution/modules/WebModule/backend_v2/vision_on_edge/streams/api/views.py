@@ -22,8 +22,7 @@ from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
-                                        SimpleErrorSerializer,
-                                        SimpleStatusSerializer)
+                                        SimpleOKSerializer)
 from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
@@ -170,7 +169,7 @@ def connect_stream(request):
                                            description='Stream Id'),
                      ],
                      responses={
-                         '200': SimpleStatusSerializer,
+                         '200': SimpleOKSerializer,
                          '400': MSStyleErrorResponseSerializer
                      })
 @api_view()
@@ -194,7 +193,7 @@ def disconnect_stream(request, stream_id):
                                            type=openapi.TYPE_INTEGER,
                                            description='Stream ID'),
                      ],
-                     responses={'400': SimpleErrorSerializer})
+                     responses={'400': MSStyleErrorResponseSerializer})
 @api_view(['GET'])
 def video_feed(request, stream_id):
     """video feed
@@ -260,7 +259,7 @@ def capture(request, stream_id):
                                            description='Stream Id'),
                      ],
                      responses={
-                         '200': SimpleStatusSerializer,
+                         '200': SimpleOKSerializer,
                          '400': MSStyleErrorResponseSerializer
                      })
 @api_view()
