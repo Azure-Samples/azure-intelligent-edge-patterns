@@ -20,7 +20,7 @@ from ..models import VideoFeed
 logger = logging.getLogger(__name__)
 
 STREAM_GC_TIME_THRESHOLD = 5  # Seconds
-PRINT_STREAMS = False
+PRINT_STREAMS = True
 
 
 class StreamManager():
@@ -38,6 +38,17 @@ class StreamManager():
         self.mutex.acquire()
         self.streams.append(stream)
         self.mutex.release()
+
+    def get_stream_by_camera_id(self, camera_id):
+        self.mutex.acquire()
+        for stream in self.streams:
+            if stream.camera_id == camera_id:
+                stream.update_keep_alive()
+                self.mutex.release()
+                return stream
+        self.mutex.release()
+        return None
+
 
     def gc(self):
         """Garbage collector
@@ -107,8 +118,10 @@ def video_feed(request):
         Camera.objects.get(pk=camera_id)
     except Exception:
         raise NotFound(detail=f"camera_id: {camera_id} not found")
-    stream = VideoFeed(camera_id)
-    stream_manager.add(stream)
+    stream = stream_manager.get_stream_by_camera_id(camera_id)
+    if stream is None:
+        stream = VideoFeed(camera_id)
+        stream_manager.add(stream)
 
     return StreamingHttpResponse(
         stream.gen(), content_type="multipart/x-mixed-replace;boundary=frame")
