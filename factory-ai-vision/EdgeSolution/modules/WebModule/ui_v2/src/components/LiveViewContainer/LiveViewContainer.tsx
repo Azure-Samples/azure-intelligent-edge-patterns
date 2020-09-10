@@ -14,6 +14,9 @@ export const LiveViewContainer: React.FC<{
   cameraId: number;
 }> = ({ showVideo, cameraId }) => {
   const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
+  const showCountingLine = useSelector<State, boolean>(
+    (state) => selectCameraById(state, cameraId)?.useCountingLine,
+  );
   const AOIs = useSelector(selectAOIsByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const imageInfo = useImage(`/api/inference/video_feed?camera_id=${cameraId}`, '', true, true);
@@ -44,7 +47,8 @@ export const LiveViewContainer: React.FC<{
           updateAOI={(id, changes) => dispatch(updateAOI({ id, changes }))}
           removeAOI={(AOIId) => dispatch(removeAOI(AOIId))}
           finishLabel={() => dispatch(finishLabel())}
-          visible={showAOI}
+          AOIVisible={showAOI}
+          countingLineVisible={showCountingLine}
           imageInfo={imageInfo}
           creatingState={creatingAOI}
         />

@@ -17,7 +17,8 @@ export type LiveViewProps = {
   updateAOI: (id: string, changes) => void;
   removeAOI: (id: string) => void;
   finishLabel: () => void;
-  visible: boolean;
+  AOIVisible: boolean;
+  countingLineVisible: boolean;
   imageInfo: [HTMLImageElement, string, { width: number; height: number }];
   creatingState: CreatingState;
 };
@@ -30,6 +31,7 @@ export type AOILayerProps = {
   removeAOI: (id: string) => void;
   visible: boolean;
   creatingState: CreatingState;
+  needMask: boolean;
 };
 
 export type MaskProps = {

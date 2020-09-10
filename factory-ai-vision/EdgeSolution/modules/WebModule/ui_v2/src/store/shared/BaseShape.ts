@@ -4,6 +4,7 @@ export enum Shape {
   None = 'None',
   BBox = 'BBox',
   Polygon = 'Polygon',
+  Line = 'Line',
 }
 
 export type AOI = {

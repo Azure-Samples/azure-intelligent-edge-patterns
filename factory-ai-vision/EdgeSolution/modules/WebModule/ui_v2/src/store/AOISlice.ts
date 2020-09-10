@@ -12,10 +12,11 @@ import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { BoxLabel, Position2D, PolygonLabel } from './type';
 import { getCameras } from './cameraSlice';
-import { toggleShowAOI, updateCameraArea } from './actions';
+import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from './actions';
 import { Shape, AOI } from './shared/BaseShape';
 import { BBox, BBoxAOI, isBBox } from './shared/Box2d';
 import { Polygon, PolygonAOI, isPolygon } from './shared/Polygon';
+import { Line, LineAOI, isLine } from './shared/Line';
 
 // Use enum string to make debugginh easier.
 export enum CreatingState {
@@ -48,6 +49,8 @@ const slice = createSlice({
         if (state.shape === Shape.BBox) entityAdapter.addOne(state, BBox.init(point, nanoid(), cameraId));
         else if (state.shape === Shape.Polygon)
           entityAdapter.addOne(state, Polygon.init(point, nanoid(), cameraId));
+        else if (state.shape === Shape.Line)
+          entityAdapter.addOne(state, Line.init(point, nanoid(), cameraId));
       } else if (state.creatingState === CreatingState.Creating) {
         const id = state.ids[state.ids.length - 1];
 
@@ -60,6 +63,10 @@ const slice = createSlice({
             id,
             changes: Polygon.add(point, state.entities[id] as PolygonAOI),
           });
+        } else if (state.shape === Shape.Line) {
+          entityAdapter.updateOne(state, { id, changes: Line.add(point, state.entities[id] as LineAOI) });
+          state.creatingState = CreatingState.Disabled;
+          state.shape = Shape.None;
         }
       }
     },
@@ -80,6 +87,12 @@ const slice = createSlice({
         entityAdapter.updateOne(state, {
           id,
           changes: Polygon.update(changes.idx, changes.vertex, state.entities[id] as PolygonAOI),
+        });
+      } else if (isLine(state.entities[id])) {
+        const { changes } = action.payload as Update<{ idx: number; vertex: Position2D }>;
+        entityAdapter.updateOne(state, {
+          id,
+          changes: Line.update(changes.idx, changes.vertex, state.entities[id] as LineAOI),
         });
       }
     },
@@ -122,8 +135,8 @@ const addOriginEntitiesReducer: Reducer<
   if (getCameras.fulfilled.match(action)) {
     return { ...reducer(state, action), originEntities: R.clone(action.payload.entities.AOIs) || {} };
   }
-  if (toggleShowAOI.fulfilled.match(action)) {
-    if (!action.meta.arg.showAOI)
+  if (toggleShowAOI.fulfilled.match(action) || toggleShowCountingLines.fulfilled.match(action)) {
+    if (!action.meta.arg.checked)
       return {
         ...state,
         ...reducer(state, action),

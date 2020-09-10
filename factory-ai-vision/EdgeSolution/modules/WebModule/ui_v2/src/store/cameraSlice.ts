@@ -4,7 +4,7 @@ import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
 import { BoxLabel, PolygonLabel } from './type';
-import { toggleShowAOI } from './actions';
+import { toggleShowAOI, toggleShowCountingLines } from './actions';
 import {
   insertDemoFields,
   isCRDAction,
@@ -41,6 +41,7 @@ export type Camera = {
   area: string;
   useAOI: boolean;
   location: number;
+  useCountingLine: boolean;
   isDemo: boolean;
 };
 
@@ -144,12 +145,20 @@ const slice = createSlice({
       .addCase(putCamera.fulfilled, entityAdapter.upsertOne)
       .addCase(deleteCamera.fulfilled, entityAdapter.removeOne)
       .addCase(toggleShowAOI.pending, (state, action) => {
-        const { showAOI, cameraId } = action.meta.arg;
-        state.entities[cameraId].useAOI = showAOI;
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useAOI = checked;
       })
       .addCase(toggleShowAOI.rejected, (state, action) => {
-        const { showAOI, cameraId } = action.meta.arg;
-        state.entities[cameraId].useAOI = !showAOI;
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useAOI = !checked;
+      })
+      .addCase(toggleShowCountingLines.pending, (state, action) => {
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useCountingLine = checked;
+      })
+      .addCase(toggleShowCountingLines.rejected, (state, action) => {
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useCountingLine = !checked;
       })
       .addMatcher(isCRDAction, insertDemoFields);
   },

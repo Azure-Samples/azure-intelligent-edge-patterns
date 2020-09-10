@@ -21,9 +21,11 @@ export const deleteImage = createAsyncThunk('images/delete', async (id: number) 
   return id;
 });
 
-export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: boolean }, { state: State }>(
+type toggleCameraLabelPayload = { cameraId: number; checked: boolean };
+
+export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowAOI',
-  async ({ cameraId, showAOI }, { getState }) => {
+  async ({ cameraId, checked }, { getState }) => {
     const AOIEntities = getState().AOIs.entities;
     const AOIs = Object.values(AOIEntities)
       .filter((e) => e.camera === cameraId)
@@ -41,7 +43,14 @@ export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: 
             label: e.vertices,
           };
       });
-    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: showAOI, AOIs }) });
+    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: checked, AOIs }) });
+  },
+);
+
+export const toggleShowCountingLines = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
+  'cameras/toggleShowCountingLines',
+  async () => {
+    /** TODO */
   },
 );
 

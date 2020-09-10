@@ -17,6 +17,7 @@ import { CreatingState } from '../../store/AOISlice';
 import { isBBox } from '../../store/shared/Box2d';
 import { isPolygon } from '../../store/shared/Polygon';
 import { Shape } from '../../store/shared/BaseShape';
+import { isLine } from '../../store/shared/Line';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -32,7 +33,8 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   updateAOI,
   removeAOI,
   finishLabel,
-  visible,
+  AOIVisible,
+  countingLineVisible,
   imageInfo,
   creatingState,
 }) => {
@@ -87,7 +89,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
 
     const { x, y } = getRelativePosition(e.target.getLayer());
     if (creatingShape === Shape.BBox) updateAOI(AOIs[AOIs.length - 1].id, { x2: x, y2: y });
-    else if (creatingShape === Shape.Polygon)
+    else if (creatingShape === Shape.Polygon || creatingShape === Shape.Line)
       updateAOI(AOIs[AOIs.length - 1].id, { idx: -1, vertex: { x, y } });
   };
 
@@ -104,6 +106,14 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     };
   }, []);
 
+  const BoxAndPolygons = useMemo(() => {
+    return AOIs.filter((aoi) => [Shape.BBox, Shape.Polygon].includes(aoi.type));
+  }, [AOIs]);
+
+  const Lines = useMemo(() => {
+    return AOIs.filter((aoi) => aoi.type === Shape.Line);
+  }, [AOIs]);
+
   return (
     <div ref={divRef} style={{ width: '100%', height: '100%' }} tabIndex={0}>
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
@@ -112,15 +122,28 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
           {
             /* Render when image is loaded to prevent AOI boxes show in unscale size */
             status === 'loaded' && (
-              <AOILayer
-                imgWidth={imgWidth}
-                imgHeight={imgHeight}
-                AOIs={AOIs}
-                updateAOI={updateAOI}
-                removeAOI={removeAOI}
-                visible={visible}
-                creatingState={creatingState}
-              />
+              <>
+                <AOILayer
+                  imgWidth={imgWidth}
+                  imgHeight={imgHeight}
+                  AOIs={BoxAndPolygons}
+                  updateAOI={updateAOI}
+                  removeAOI={removeAOI}
+                  visible={AOIVisible}
+                  creatingState={creatingState}
+                  needMask={true}
+                />
+                <AOILayer
+                  imgWidth={imgWidth}
+                  imgHeight={imgHeight}
+                  AOIs={Lines}
+                  updateAOI={updateAOI}
+                  removeAOI={removeAOI}
+                  visible={countingLineVisible}
+                  creatingState={creatingState}
+                  needMask={false}
+                />
+              </>
             )
           }
         </Layer>
@@ -137,10 +160,11 @@ const AOILayer: React.FC<AOILayerProps> = ({
   removeAOI,
   visible,
   creatingState,
+  needMask,
 }): JSX.Element => {
   return (
     <>
-      <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
+      {needMask && <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />}
       {AOIs.map((e) => {
         if (isBBox(e)) {
           return (
@@ -171,6 +195,20 @@ const AOILayer: React.FC<AOILayerProps> = ({
             />
           );
         }
+        if (isLine(e)) {
+          return (
+            <AOIPolygon
+              key={e.id}
+              id={e.id}
+              polygon={e.vertices}
+              visible={visible}
+              removeBox={() => removeAOI(e.id)}
+              creatingState={creatingState}
+              handleChange={(idx, vertex) => updateAOI(e.id, { idx, vertex })}
+              boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+            />
+          );
+        }
         return null;
       })}
     </>
@@ -180,7 +218,7 @@ const AOILayer: React.FC<AOILayerProps> = ({
 function polygonArea(vertices) {
   let area = 0;
   for (let i = 0; i < vertices.length; i++) {
-    let j = (i + 1) % vertices.length;
+    const j = (i + 1) % vertices.length;
     area += vertices[i].x * vertices[j].y;
     area -= vertices[j].x * vertices[i].y;
   }

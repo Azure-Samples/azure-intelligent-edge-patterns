@@ -37,7 +37,7 @@ import { selectPartNamesById } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
 import { ExpandPanel } from './ExpandPanel';
 import { selectAOIsByCamera, selectOriginAOIsByCamera, onCreateAOIBtnClick } from '../store/AOISlice';
-import { toggleShowAOI, updateCameraArea } from '../store/actions';
+import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from '../store/actions';
 import { Shape } from '../store/shared/BaseShape';
 
 const { palette } = getTheme();
@@ -273,31 +273,33 @@ type AOIControlsProps = {
 const AOIControls: React.FC<AOIControlsProps> = ({ cameraId }) => {
   const [loading, setLoading] = useState(false);
   const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
+  const showCountingLine = useSelector<State, boolean>(
+    (state) => selectCameraById(state, cameraId)?.useCountingLine,
+  );
   const AOIs = useSelector(selectAOIsByCamera(cameraId));
   const originAOIs = useSelector(selectOriginAOIsByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const AOIShape = useSelector((state: State) => state.AOIs.shape);
   const dispatch = useDispatch();
 
-  const onCheckboxClick = async (): Promise<void> => {
+  const onAOIToggleClick = async (): Promise<void> => {
     setLoading(true);
-    try {
-      await dispatch(toggleShowAOI({ cameraId, showAOI: !showAOI }));
-      setShowUpdateSuccessTxt(true);
-    } catch (e) {
-      alert(e);
-    }
+    await dispatch(toggleShowAOI({ cameraId, checked: !showAOI }));
+    setShowUpdateSuccessTxt(true);
+    setLoading(false);
+  };
+
+  const onCountingLineToggleClick = async () => {
+    setLoading(true);
+    await dispatch(toggleShowCountingLines({ cameraId, checked: !showCountingLine }));
+    setShowUpdateSuccessTxt(true);
     setLoading(false);
   };
 
   const onUpdate = async (): Promise<void> => {
     setLoading(true);
-    try {
-      await dispatch(updateCameraArea(cameraId));
-      setShowUpdateSuccessTxt(true);
-    } catch (e) {
-      alert(e);
-    }
+    await dispatch(updateCameraArea(cameraId));
+    setShowUpdateSuccessTxt(true);
     setLoading(false);
   };
 
@@ -306,7 +308,7 @@ const AOIControls: React.FC<AOIControlsProps> = ({ cameraId }) => {
 
   return (
     <Stack tokens={{ childrenGap: 10 }}>
-      <Toggle label="Enable area of interest" checked={showAOI} onClick={onCheckboxClick} inlineLabel />
+      <Toggle label="Enable area of interest" checked={showAOI} onClick={onAOIToggleClick} inlineLabel />
       <DefaultButton
         text="Create Box"
         primary={AOIShape === Shape.BBox}
@@ -325,8 +327,22 @@ const AOIControls: React.FC<AOIControlsProps> = ({ cameraId }) => {
         }}
         style={{ padding: '0 5px' }}
       />
-      <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
+      <Toggle
+        label="Enable counting lines"
+        checked={showCountingLine}
+        onClick={onCountingLineToggleClick}
+        inlineLabel
+      />
+      <DefaultButton
+        text="Create counting line"
+        primary={AOIShape === Shape.Line}
+        disabled={!showCountingLine}
+        onClick={(): void => {
+          dispatch(onCreateAOIBtnClick(Shape.Line));
+        }}
+      />
       <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
+      <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
     </Stack>
   );
 };
