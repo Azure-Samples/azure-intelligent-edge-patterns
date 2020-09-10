@@ -39,7 +39,7 @@ class GraphManager:
     def invoke_graph_topology_set(self, name, properties):
         method = 'GraphTopologySet'
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             'name': name,
             'properties': properties,
         }
@@ -108,8 +108,23 @@ class GraphManager:
         }
         return self.invoke_method(method, payload)
 
-    def invoke_graph_grpc_topology_set(self, name):
+    # default grpc settings
+    def invoke_graph_grpc_topology_set(self):
         method = 'GraphTopologySet'
         with open('grpc_topology.json') as f:
             payload = json.load(f)
         return self.invoke_method(method, payload)
+
+    def invoke_graph_grpc_instance_set(self, name, rtspUrl):
+        properties = {
+            "topologyName": "InferencingWithGrpcExtension",
+            "description": "Sample graph description",
+            "parameters": [
+                {"name": "rtspUrl", "value": rtspUrl},
+                {"name": "grpcExtensionAddress",
+                    "value": "tcp://InferenceModule:44000"},
+                {"name": "frameHeight", "value": "540"},
+                {"name": "frameWidth", "value": "960"},
+            ]
+        }
+        return self.invoke_graph_instance_set(name, properties)
