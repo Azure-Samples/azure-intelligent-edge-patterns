@@ -173,8 +173,14 @@
               "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
               "createOptions": {
                 "HostConfig": {
-                  "Binds": ["/home/willy/media/input:/live/mediaServer/media"]
+                  "Binds": ["/home/willy/media/input:/live/mediaServer/media"],
+                  "PortBindings": {
+                    "554/tcp": [{
+                      "HostPort": "554"
+                    }]
+                  }
                 }
+
               }
             }
           }
