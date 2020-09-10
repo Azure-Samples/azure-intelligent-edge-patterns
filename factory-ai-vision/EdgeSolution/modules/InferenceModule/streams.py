@@ -15,7 +15,7 @@ import onnxruntime
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 from object_detection import ObjectDetection
 from utility import get_file_zip, normalize_rtsp
-from invoke import GraphManager
+from invoke import gm
 
 import logging
 
@@ -32,7 +32,7 @@ class Stream():
         self.cam_type = cam_type
         self.cam_source = None
         self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
-        self.cam_is_alive = False
+        self.cam_is_alive = True
 
         self.IMG_WIDTH = 960
         self.IMG_HEIGHT = 540
@@ -76,6 +76,15 @@ class Stream():
         self.zmq_sender = sender
         self.start_zmq()
 
+    def _stop(self):
+        gm.invoke_graph_instance_deactivate(self.cam_id)
+
+    def _set(self, rtspUrl):
+        gm.invoke_graph_grpc_instance_set(self.cam_id, rtspUrl)
+
+    def _start(self):
+        gm.invoke_graph_instance_activate(self.cam_id)
+
     def start_zmq(self):
         def run(self):
             # logging.info('running zmq')
@@ -87,7 +96,7 @@ class Stream():
                 logging.info('not sending last_drawn_img')
                 time.sleep(2)
             cnt = 0
-            while True:
+            while self.cam_is_alive:
                 cnt += 1
                 logging.info('send through channel {0}'.format(
                     bytes(self.cam_id, 'utf-8')))
@@ -141,7 +150,15 @@ class Stream():
         self.cam.release()
         self.cam = cam
         self.lock.release()
-        update_instance(normalize_rtsp(cam_source), self.cam_id)
+
+        self._update_instance(normalize_rtsp(cam_source))
+
+    def _update_instance(self, rtspUrl):
+        self._stop()
+        self._set(rtspUrl)
+        self._start()
+        logging.info("Instance {0} updated, rtsp = {1}".format(
+            self.cam_id, rtspUrl))
 
     def update_retrain_parameters(self, confidence_min, confidence_max, max_images):
         self.confidence_min = confidence_min * 0.01
@@ -159,6 +176,14 @@ class Stream():
             self.iothub_interval = 99999999
         else:
             self.iothub_interval = 60 / fpm  # seconds
+
+    def delete(self):
+        self.lock.acquire()
+        self.cam_is_alive = False
+        self.lock.release()
+
+        gm.invoke_graph_instance_deactivate(self.cam_id)
+        logging.info('Deactivate stream {0}'.format(self.cam_id))
 
     def predict(self, image):
 
@@ -312,31 +337,3 @@ def draw_confidence_level(img, prediction):
                       (x1+10, y1+20), font, font_scale, (20, 20, 255), thickness)
 
     return img
-
-
-def update_instance(rtspUrl, instance_id):
-    payload = {
-        "@apiVersion": "1.0",
-        "name": instance_id
-    }
-    payload_set = {
-        "@apiVersion": "1.0",
-        "name": instance_id,
-        "properties": {
-            "topologyName": "InferencingWithGrpcExtension",
-            "description": "Sample graph description",
-            "parameters": [
-                {"name": "rtspUrl", "value": rtspUrl},
-                {"name": "grpcExtensionAddress",
-                    "value": "tcp://InferenceModule:44000"},
-                {"name": "frameHeight", "value": "540"},
-                {"name": "frameWidth", "value": "960"},
-            ]
-        }
-    }
-    manager = GraphManager()
-
-    res_dea = manager.invoke_method("GraphInstanceDeactivate", payload)
-    res_set = manager.invoke_method("GraphInstanceSet", payload_set)
-    res_act = manager.invoke_method("GraphInstanceActivate", payload)
-    print("instance updated")
