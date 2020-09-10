@@ -22,13 +22,15 @@ from ...azure_iot.utils import inference_module_url
 from ...azure_parts.models import Part
 from ...cameras.models import Camera
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
-                                        SimpleErrorSerializer)
+                                        SimpleErrorSerializer,
+                                        SimpleStatusSerializer)
 from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
 from ..models import Stream
-from .serializers import (CaptureStreamResponseSerializer,
-                          ConnectStreamResponseSerializer)
+from ..exceptions import StreamNotFoundError
+from .serializers import (StreamCaptureResponseSerializer,
+                          StreamConnectResponseSerializer)
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +84,8 @@ class StreamManager():
                     logger.info("streams: %s", self.streams)
                 to_delete = []
                 for index, stream in enumerate(self.streams):
-                    if stream.last_active + STREAM_GC_TIME_THRESHOLD < time.time(
-                    ):
+                    if (stream.last_active + STREAM_GC_TIME_THRESHOLD <
+                            time.time()):
 
                         # stop the inactive stream
                         # (the ones users didnt click disconnect)
@@ -120,7 +122,7 @@ if 'runserver' in sys.argv:
                                            required=False)
                      ],
                      responses={
-                         '200': ConnectStreamResponseSerializer,
+                         '200': StreamConnectResponseSerializer,
                          '400': MSStyleErrorResponseSerializer
                      })
 @api_view(['GET'])
@@ -154,11 +156,23 @@ def connect_stream(request):
     stream_obj = Stream(rtsp=rtsp, camera_id=camera_id, part_id=part_id)
     stream_manager.add(stream_obj)
     response_data = {"status": "ok", "stream_id": stream_obj.id}
-    serializer = ConnectStreamResponseSerializer(data=response_data)
-    if serializer.is_valid(raise_exception=True):
-        return Response(serializer.validated_data)
+    serializer = StreamConnectResponseSerializer(data=response_data)
+    serializer.is_valid(raise_exception=True)
+    return Response(serializer.validated_data)
 
 
+@swagger_auto_schema(operation_summary='Disconnect a rtsp stream.',
+                     method='get',
+                     manual_parameters=[
+                         openapi.Parameter('stream_id',
+                                           openapi.IN_PATH,
+                                           type=openapi.TYPE_STRING,
+                                           description='Stream Id'),
+                     ],
+                     responses={
+                         '200': SimpleStatusSerializer,
+                         '400': MSStyleErrorResponseSerializer
+                     })
 @api_view()
 def disconnect_stream(request, stream_id):
     """Disconnect from stream
@@ -168,13 +182,7 @@ def disconnect_stream(request, stream_id):
     if stream:
         stream.close()
         return Response({'status': 'ok'})
-
-    return Response(
-        {
-            "status": "failed",
-            "reason": "cannot find stream_id " + str(stream_id)
-        },
-        status=status.HTTP_400_BAD_REQUEST)
+    raise StreamNotFoundError
 
 
 @swagger_auto_schema(auto_schema=StreamAutoSchema,
@@ -202,21 +210,23 @@ def video_feed(request, stream_id):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-@swagger_auto_schema(
-    operation_summary='Capture an image from stream.',
-    method='get',
-    manual_parameters=[
-        openapi.Parameter('stream_id',
-                          openapi.IN_PATH,
-                          type=openapi.TYPE_STRING,
-                          description='Stream Id'),
-        openapi.Parameter('part_id',
-                          openapi.IN_QUERY,
-                          type=openapi.TYPE_STRING,
-                          description='Part Id',
-                          required=False),
-    ],
-)
+@swagger_auto_schema(operation_summary='Capture an image from stream.',
+                     method='get',
+                     manual_parameters=[
+                         openapi.Parameter('stream_id',
+                                           openapi.IN_PATH,
+                                           type=openapi.TYPE_STRING,
+                                           description='Stream Id'),
+                         openapi.Parameter('part_id',
+                                           openapi.IN_QUERY,
+                                           type=openapi.TYPE_STRING,
+                                           description='Part Id',
+                                           required=False),
+                     ],
+                     responses={
+                         '200': StreamCaptureResponseSerializer,
+                         '400': MSStyleErrorResponseSerializer
+                     })
 @api_view(['GET'])
 def capture(request, stream_id):
     """Capture image.
@@ -235,19 +245,24 @@ def capture(request, stream_id):
         img_obj.save()
         img_serializer = ImageSerializer(img_obj, context={"request": request})
         response_data = {"status": "ok", "image": img_serializer.data}
-        #response_serializer = CaptureStreamResponseSerializer(
-        #    data=response_data)
-        #if response_serializer.is_valid(raise_exception=True):
-        return Response(response_data)
-
-    return Response(
-        {
-            "status": "failed",
-            "log": "cannot find stream_id " + str(stream_id)
-        },
-        status=status.HTTP_400_BAD_REQUEST)
+        serializer = StreamCaptureResponseSerializer(data=response_data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.validated_data)
+    raise StreamNotFoundError
 
 
+@swagger_auto_schema(operation_summary='Keep a stream alive.',
+                     method='get',
+                     manual_parameters=[
+                         openapi.Parameter('stream_id',
+                                           openapi.IN_PATH,
+                                           type=openapi.TYPE_STRING,
+                                           description='Stream Id'),
+                     ],
+                     responses={
+                         '200': SimpleStatusSerializer,
+                         '400': MSStyleErrorResponseSerializer
+                     })
 @api_view()
 def keep_alive(request, stream_id):
     """keep stream alive
@@ -258,14 +273,7 @@ def keep_alive(request, stream_id):
     if stream:
         stream.update_keep_alive()
         return Response({'status': 'ok'})
-
-    return Response(
-        {
-            "status": "failed",
-            "reason": "cannot find stream_id " + str(stream_id)
-        },
-        status=status.HTTP_400_BAD_REQUEST)
-
+    raise StreamNotFoundError
 
 @api_view()
 def inference_video_feed(request, project_id):

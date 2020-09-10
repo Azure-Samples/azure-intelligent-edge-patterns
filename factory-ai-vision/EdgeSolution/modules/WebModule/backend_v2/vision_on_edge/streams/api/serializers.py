@@ -10,14 +10,23 @@ from ...images.api.serializers import ImageSerializer
 
 logger = logging.getLogger(__name__)
 
+# pylint: disable=abstract-method
 
-class ConnectStreamResponseSerializer(serializers.Serializer):
+class StreamConnectResponseSerializer(serializers.Serializer):
     """ProjectPerformanesSerializer.
     """
     status = serializers.ChoiceField(choices=['ok'])
     stream_id = serializers.IntegerField()
 
 
-class CaptureStreamResponseSerializer(serializers.Serializer):
+class StreamCaptureResponseSerializer(serializers.Serializer):
+    """StreamCaptureResponseSerializer.
+    """
+
+    class CapturedImageSerializer(ImageSerializer):
+        """CapturedImageSerializer.
+        """
+        image = serializers.CharField()
+
     status = serializers.ChoiceField(choices=['ok'])
-    image = ImageSerializer()
+    image = CapturedImageSerializer()
