@@ -14,8 +14,11 @@ import {
   Link,
   IDropdownOption,
   Dropdown,
+  Toggle,
+  DefaultButton,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import * as R from 'ramda';
 
 import { State } from 'RootStateType';
 import { LiveViewContainer } from './LiveViewContainer';
@@ -29,11 +32,13 @@ import {
   thunkGetProject,
 } from '../store/project/projectActions';
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
-import { selectCamerasByIds } from '../store/cameraSlice';
-import { selectTrainingProjectById } from '../store/trainingProjectSlice';
+import { selectCamerasByIds, selectCameraById } from '../store/cameraSlice';
 import { selectPartNamesById } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
 import { ExpandPanel } from './ExpandPanel';
+import { selectAOIsByCamera, selectOriginAOIsByCamera, onCreateAOIBtnClick } from '../store/AOISlice';
+import { toggleShowAOI, updateCameraArea } from '../store/actions';
+import { Shape } from '../store/shared/BaseShape';
 
 const { palette } = getTheme();
 
@@ -63,9 +68,6 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
     if (projectCameraIds.length) setselectedCamera(projectCameraIds[0]);
   }, [projectCameraIds]);
 
-  const trainingProjectName = useSelector(
-    (state: State) => selectTrainingProjectById(state, trainingProject)?.name,
-  );
   const partNames = useSelector(selectPartNamesById(parts));
   const dispatch = useDispatch();
 
@@ -150,7 +152,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
         <Stack grow>
           <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
             <Stack grow>
-              <LiveViewContainer showVideo={true} cameraId={selectedCamera} onDeleteProject={() => {}} />
+              <LiveViewContainer showVideo={true} cameraId={selectedCamera} />
             </Stack>
             <Stack horizontal horizontalAlign="space-between">
               <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
@@ -197,7 +199,9 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                 unIdetifiedItems={inferenceMetrics.unIdetifiedItems}
               />
             </PivotItem>
-            <PivotItem headerText="Areas of interest"></PivotItem>
+            <PivotItem headerText="Areas of interest">
+              <AOIControls cameraId={selectedCamera} />
+            </PivotItem>
           </Pivot>
         </Stack>
       </Stack>
@@ -259,5 +263,70 @@ export const Insights: React.FC<InsightsProps> = ({
         </ExpandPanel>
       </Stack>
     </>
+  );
+};
+
+type AOIControlsProps = {
+  cameraId: number;
+};
+
+const AOIControls: React.FC<AOIControlsProps> = ({ cameraId }) => {
+  const [loading, setLoading] = useState(false);
+  const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
+  const AOIs = useSelector(selectAOIsByCamera(cameraId));
+  const originAOIs = useSelector(selectOriginAOIsByCamera(cameraId));
+  const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
+  const AOIShape = useSelector((state: State) => state.AOIs.shape);
+  const dispatch = useDispatch();
+
+  const onCheckboxClick = async (): Promise<void> => {
+    setLoading(true);
+    try {
+      await dispatch(toggleShowAOI({ cameraId, showAOI: !showAOI }));
+      setShowUpdateSuccessTxt(true);
+    } catch (e) {
+      alert(e);
+    }
+    setLoading(false);
+  };
+
+  const onUpdate = async (): Promise<void> => {
+    setLoading(true);
+    try {
+      await dispatch(updateCameraArea(cameraId));
+      setShowUpdateSuccessTxt(true);
+    } catch (e) {
+      alert(e);
+    }
+    setLoading(false);
+  };
+
+  const hasEdit = !R.equals(originAOIs, AOIs);
+  const updateBtnDisabled = !showAOI || !hasEdit;
+
+  return (
+    <Stack tokens={{ childrenGap: 10 }}>
+      <Toggle label="Enable area of interest" checked={showAOI} onClick={onCheckboxClick} inlineLabel />
+      <DefaultButton
+        text="Create Box"
+        primary={AOIShape === Shape.BBox}
+        disabled={!showAOI}
+        onClick={(): void => {
+          dispatch(onCreateAOIBtnClick(Shape.BBox));
+        }}
+        style={{ padding: '0 5px' }}
+      />
+      <DefaultButton
+        text={AOIShape === Shape.Polygon ? 'Click F to Finish' : 'Create Polygon'}
+        primary={AOIShape === Shape.Polygon}
+        disabled={!showAOI}
+        onClick={(): void => {
+          dispatch(onCreateAOIBtnClick(Shape.Polygon));
+        }}
+        style={{ padding: '0 5px' }}
+      />
+      <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
+      <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
+    </Stack>
   );
 };
