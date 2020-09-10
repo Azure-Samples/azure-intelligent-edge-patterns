@@ -92,6 +92,7 @@ class StreamManager(object):
             return False
         # FIXME need to fix this
         # FIXME  RON
+        self.streams[stream_id].delete()
         del self.streams[stream_id]
         logger.info('Deleted stream: %s', stream_id)
         return True

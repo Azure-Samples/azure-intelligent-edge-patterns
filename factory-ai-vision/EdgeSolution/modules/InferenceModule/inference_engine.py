@@ -256,13 +256,13 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                     return
 
-                if list(cvImage.shape[:2]) != self._tYoloV3.image_shape:
-                    message = "Received an image of size {0}, but expected one of size {1}".format(
-                        cvImage.shape[:2], self._tYoloV3.image_shape)
-                    context.set_details(message)
-                    logging.info(message)
-                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                    return
+                # if list(cvImage.shape[:2]) != self._tYoloV3.image_shape:
+                #     message = "Received an image of size {0}, but expected one of size {1}".format(
+                #         cvImage.shape[:2], self._tYoloV3.image_shape)
+                #     context.set_details(message)
+                #     logging.info(message)
+                #     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                #     return
 
                 # instance_name = mediaStreamMessageRequest.graph_identifier.graph_instance_name
                 # logging.info('req: {0}'.format(mediaStreamMessageRequest))
@@ -275,9 +275,10 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                 s = self.stream_manager.get_stream_by_id(instance_id)
                 if s:
                     s.predict(cvImage)
+                    predictions = s.last_prediction
                 # stream_manager.update(cvImage, instance_id)
-                logging.debug(
-                    'Detected {0} inferences'.format(len(predictions)))
+                # logging.debug(
+                #     'Detected {0} inferences'.format(len(predictions)))
 
                 # if DEBUG is not None:
                 #     self.CreateDebugOutput(
