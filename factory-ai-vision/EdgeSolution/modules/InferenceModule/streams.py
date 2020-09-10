@@ -98,17 +98,18 @@ class Stream():
             cnt = 0
             while self.cam_is_alive:
                 cnt += 1
-                logging.info('send through channel {0}'.format(
-                    bytes(self.cam_id, 'utf-8')))
-                self.lock.acquire()
-                self.zmq_sender.send_multipart([bytes(
-                    self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
-                self.lock.release()
-                # sender.send_pyobj(
-                #     {"data": cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
-                # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
-                # time.sleep(2)
-                time.sleep(0.04)
+                if cnt % 30 == 1:
+                    logging.info('send through channel {0}'.format(
+                        bytes(self.cam_id, 'utf-8')))
+                    self.lock.acquire()
+                    self.zmq_sender.send_multipart([bytes(
+                        self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
+                    self.lock.release()
+                    # sender.send_pyobj(
+                    #     {"data": cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
+                    # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
+                    # time.sleep(2)
+                    time.sleep(0.04)
         threading.Thread(target=run, args=(self,)).start()
 
     def restart_cam(self):
