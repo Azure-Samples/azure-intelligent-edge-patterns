@@ -69,6 +69,7 @@ COPY server.py ./
 COPY invoke.py ./
 COPY stream_manager.py ./
 COPY streams.py ./
+COPY config.py ./
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 

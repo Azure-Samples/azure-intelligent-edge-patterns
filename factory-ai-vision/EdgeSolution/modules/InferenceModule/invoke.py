@@ -3,6 +3,7 @@ from os import path
 import pathlib
 import logging
 from builtins import input
+import requests
 import ssl
 import urllib.request
 from azure.iot.hub import IoTHubRegistryManager
@@ -22,6 +23,21 @@ class GraphManager:
         self.module_id = MODULE_ID
 
     def invoke_method(self, method_name, payload):
+
+        body = {"methodName": method_name, "responseTimeoutInSeconds": 10,
+                "connectTimeoutInSeconds": 10, "payload": payload}
+
+        url = 'https://main.iothub.ext.azure.com/api/dataPlane/post'
+        data = {"apiVersion": "2018-06-30", "authorizationPolicyKey": "rDav1fU61BRTezz8NewMe/UNasZob1rQ8FowPqrbD28=", "authorizationPolicyName": "service", "hostName": "customvision.azure-devices.net",
+                "requestPath": "/twins/testcam/modules/lvaEdge/methods", "requestBody": str(body)}
+
+        header = {
+            "Authorization": IOTHUB_CONNECTION_STRING
+        }
+        res = requests.post(url, headers=header, data=data)
+        return res.json()
+
+    def invoke_method2(self, method_name, payload):
         module_method = CloudToDeviceMethod(
             method_name=method_name, payload=payload, response_timeout_in_seconds=30)
         res = self.registry_manager.invoke_device_module_method(
