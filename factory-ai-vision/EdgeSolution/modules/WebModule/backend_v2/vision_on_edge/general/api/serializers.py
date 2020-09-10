@@ -16,13 +16,6 @@ class SimpleOKSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["ok"])
 
 
-class SimpleErrorSerializer(serializers.Serializer):
-    """SimpleErrorSerializer.
-    """
-    status = serializers.ChoiceField(choices=["error"])
-    log = serializers.CharField()
-
-
 class MSStyleErrorResponseSerializer(serializers.Serializer):
     """MSStyleErrorResponseSerializer.
 
