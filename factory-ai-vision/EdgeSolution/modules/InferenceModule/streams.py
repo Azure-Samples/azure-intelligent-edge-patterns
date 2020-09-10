@@ -105,10 +105,6 @@ class Stream():
                     self.zmq_sender.send_multipart([bytes(
                         self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
                     self.lock.release()
-                    # sender.send_pyobj(
-                    #     {"data": cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
-                    # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
-                    # time.sleep(2)
                     time.sleep(0.04)
         threading.Thread(target=run, args=(self,)).start()
 
@@ -206,6 +202,8 @@ class Stream():
         self.last_prediction = predictions
 
         self.draw_img()
+        #FIXME
+        #print('drawing...', flush=True)
 
         inf_time_ms = inf_time * 1000
         self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
@@ -242,6 +240,7 @@ class Stream():
                 img = cv2.rectangle(
                     img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 img = draw_confidence_level(img, prediction)
+        #print('setting last drawn img', flush=True)
         self.last_drawn_img = img
 
 

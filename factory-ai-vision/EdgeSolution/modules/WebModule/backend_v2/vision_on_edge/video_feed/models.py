@@ -38,34 +38,29 @@ class VideoFeed():
         self.is_opened = True
         self.receiver = self.context.socket(zmq.SUB)
         self.receiver.setsockopt(zmq.SUBSCRIBE, bytes(self.camera_id, 'utf-8'))
+        self.receiver.connect(inference_url())
+        self.buf = None
+        self.start()
+
+    def start(self):
+        def _start(self):
+            while self.is_opened:
+                self.buf = self.receiver.recv_multipart()
+            self.receiver.close()
+        threading.Thread(target=_start, args=(self,)).start()
+
 
     def gen(self):
         """gen
 
         video feed genarator
         """
-
-        # context = zmq.Context()
-        # receiver = context.socket(zmq.PULL)
-        self.receiver.connect(inference_url())
-
         while self.is_opened:
-            ret = self.receiver.recv_multipart()
-            # nparr = np.frombuffer(np.array(ret[1]), np.uint8)
-            # logging.info('recv from instance rpc')
-
-            # logger.warning('Receive: %s', ret['ts'])
-            # logger.warning('Time elapsed: %s', (time.time()-self.keep_alive))
-            # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-            # ret2 = receiver.recv_pyobj()
-            # logger.warning(ret2['ts'])
-            # logger.warning(ret2['shape'])
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' +
-                   ret[1] + b'\r\n')
-        self.receiver.close()
+            if self.buf is not None:
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' +
+                       self.buf[1] + b'\r\n')
+            time.sleep(0.04)
 
     def update_keep_alive(self):
         """update_keep_alive.

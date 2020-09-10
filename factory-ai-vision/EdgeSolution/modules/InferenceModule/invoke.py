@@ -22,7 +22,7 @@ class GraphManager:
         self.device_id = DEVICE_ID
         self.module_id = MODULE_ID
 
-    def invoke_method(self, method_name, payload):
+    def invoke_method2(self, method_name, payload):
 
         body = {"methodName": method_name, "responseTimeoutInSeconds": 10,
                 "connectTimeoutInSeconds": 10, "payload": payload}
@@ -37,7 +37,7 @@ class GraphManager:
         res = requests.post(url, headers=header, data=data)
         return res.json()
 
-    def invoke_method2(self, method_name, payload):
+    def invoke_method(self, method_name, payload):
         module_method = CloudToDeviceMethod(
             method_name=method_name, payload=payload, response_timeout_in_seconds=30)
         res = self.registry_manager.invoke_device_module_method(
