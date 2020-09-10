@@ -3,8 +3,8 @@ import Axios from 'axios';
 import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
-import { BoxLabel, PolygonLabel } from './type';
-import { toggleShowAOI } from './actions';
+import { BoxLabel, PolygonLabel, LineLabel } from './type';
+import { toggleShowAOI, toggleShowCountingLines } from './actions';
 import {
   insertDemoFields,
   isCRDAction,
@@ -19,18 +19,31 @@ type CameraFromServer = {
   name: string;
   rtsp: string;
   area: string;
+  lines: string;
   is_demo: boolean;
   location: number;
 };
 
-type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area'> & {
+type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area' | 'line'> & {
   area: {
     useAOI: boolean;
-    AOIs: {
-      id: string;
-      type: string;
-      label: BoxLabel | PolygonLabel;
-    };
+    AOIs: [
+      {
+        id: string;
+        type: string;
+        label: BoxLabel | PolygonLabel;
+      },
+    ];
+  };
+  lines: {
+    useCountingLine: boolean;
+    countingLines: [
+      {
+        id: string;
+        type: string;
+        label: LineLabel;
+      },
+    ];
   };
 };
 
@@ -41,6 +54,7 @@ export type Camera = {
   area: string;
   useAOI: boolean;
   location: number;
+  useCountingLine: boolean;
   isDemo: boolean;
 };
 
@@ -50,7 +64,8 @@ const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
     name: response.name,
     rtsp: response.rtsp,
     useAOI: response.area.useAOI,
-    AOIs: response.area.AOIs,
+    useCountingLine: response.lines.useCountingLine,
+    AOIs: [...response.area.AOIs, ...response.lines.countingLines],
     location: response.location,
     isDemo: response.is_demo,
   };
@@ -79,7 +94,7 @@ const normalizeCamerasAndAOIsByNormalizr = (data: CameraFromServerWithSerializeA
   return normalize(data, [cameras]);
 };
 
-const getAOIData = (cameraArea: string) => {
+const getAreaData = (cameraArea: string) => {
   try {
     return JSON.parse(cameraArea);
   } catch (e) {
@@ -90,12 +105,21 @@ const getAOIData = (cameraArea: string) => {
   }
 };
 
-const serializeAreas = R.map<CameraFromServer, CameraFromServerWithSerializeArea>((e) => ({
+const getLineData = (countingLines: string) => {
+  try {
+    return JSON.parse(countingLines);
+  } catch (e) {
+    return { useCountingLine: false, countingLines: [] };
+  }
+};
+
+const serializeJSONStr = R.map<CameraFromServer, CameraFromServerWithSerializeArea>((e) => ({
   ...e,
-  area: getAOIData(e.area),
+  area: getAreaData(e.area),
+  lines: getLineData(e.lines),
 }));
 
-const normalizeCameras = R.compose(normalizeCamerasAndAOIsByNormalizr, serializeAreas);
+const normalizeCameras = R.compose(normalizeCamerasAndAOIsByNormalizr, serializeJSONStr);
 
 const entityAdapter = createEntityAdapter<Camera>();
 
@@ -144,12 +168,20 @@ const slice = createSlice({
       .addCase(putCamera.fulfilled, entityAdapter.upsertOne)
       .addCase(deleteCamera.fulfilled, entityAdapter.removeOne)
       .addCase(toggleShowAOI.pending, (state, action) => {
-        const { showAOI, cameraId } = action.meta.arg;
-        state.entities[cameraId].useAOI = showAOI;
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useAOI = checked;
       })
       .addCase(toggleShowAOI.rejected, (state, action) => {
-        const { showAOI, cameraId } = action.meta.arg;
-        state.entities[cameraId].useAOI = !showAOI;
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useAOI = !checked;
+      })
+      .addCase(toggleShowCountingLines.pending, (state, action) => {
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useCountingLine = checked;
+      })
+      .addCase(toggleShowCountingLines.rejected, (state, action) => {
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useCountingLine = !checked;
       })
       .addMatcher(isCRDAction, insertDemoFields);
   },

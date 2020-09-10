@@ -1,6 +1,6 @@
 import { Position2D, BoxLabel } from '../../store/type';
-import { CreatingState } from '../../store/AOISlice';
-import { AOI, Shape } from '../../store/shared/BaseShape';
+import { CreatingState } from '../../store/videoAnnoSlice';
+import { VideoAnno, Shape } from '../../store/shared/BaseShape';
 
 export type Box = {
   id: string;
@@ -11,35 +11,37 @@ export type Box = {
 };
 
 export type LiveViewProps = {
-  AOIs: AOI[];
+  videoAnnos: VideoAnno[];
   creatingShape: Shape;
   onCreatingPoint: (point: Position2D) => void;
-  updateAOI: (id: string, changes) => void;
-  removeAOI: (id: string) => void;
+  updateVideoAnno: (id: string, changes) => void;
+  removeVideoAnno: (id: string) => void;
   finishLabel: () => void;
-  visible: boolean;
+  AOIVisible: boolean;
+  countingLineVisible: boolean;
   imageInfo: [HTMLImageElement, string, { width: number; height: number }];
   creatingState: CreatingState;
 };
 
-export type AOILayerProps = {
+export type VideoAnnosGroupProps = {
   imgWidth: number;
   imgHeight: number;
-  AOIs: AOI[];
-  updateAOI: (id: string, changes) => void;
-  removeAOI: (id: string) => void;
+  videoAnnos: VideoAnno[];
+  updateVideoAnno: (id: string, changes) => void;
+  removeVideoAnno: (id: string) => void;
   visible: boolean;
   creatingState: CreatingState;
+  needMask: boolean;
 };
 
 export type MaskProps = {
   width: number;
   height: number;
-  holes: AOI[];
+  holes: VideoAnno[];
   visible: boolean;
 };
 
-export type AOIBoxProps = {
+export type BoxProps = {
   box: Box;
   onBoxChange: (changes: Partial<BoxLabel>) => void;
   boundary: { x1: number; y1: number; x2: number; y2: number };

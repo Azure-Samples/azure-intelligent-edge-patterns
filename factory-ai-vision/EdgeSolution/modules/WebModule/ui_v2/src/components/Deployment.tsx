@@ -36,8 +36,12 @@ import { selectCamerasByIds, selectCameraById } from '../store/cameraSlice';
 import { selectPartNamesById } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
 import { ExpandPanel } from './ExpandPanel';
-import { selectAOIsByCamera, selectOriginAOIsByCamera, onCreateAOIBtnClick } from '../store/AOISlice';
-import { toggleShowAOI, updateCameraArea } from '../store/actions';
+import {
+  selectVideoAnnosByCamera,
+  selectOriginVideoAnnosByCamera,
+  onCreateVideoAnnoBtnClick,
+} from '../store/videoAnnoSlice';
+import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from '../store/actions';
 import { Shape } from '../store/shared/BaseShape';
 
 const { palette } = getTheme();
@@ -200,7 +204,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
               />
             </PivotItem>
             <PivotItem headerText="Areas of interest">
-              <AOIControls cameraId={selectedCamera} />
+              <VideoAnnosControls cameraId={selectedCamera} />
             </PivotItem>
           </Pivot>
         </Stack>
@@ -266,67 +270,83 @@ export const Insights: React.FC<InsightsProps> = ({
   );
 };
 
-type AOIControlsProps = {
+type VideoAnnosControlsProps = {
   cameraId: number;
 };
 
-const AOIControls: React.FC<AOIControlsProps> = ({ cameraId }) => {
+const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => {
   const [loading, setLoading] = useState(false);
   const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
-  const AOIs = useSelector(selectAOIsByCamera(cameraId));
-  const originAOIs = useSelector(selectOriginAOIsByCamera(cameraId));
+  const showCountingLine = useSelector<State, boolean>(
+    (state) => selectCameraById(state, cameraId)?.useCountingLine,
+  );
+  const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
+  const originVideoAnnos = useSelector(selectOriginVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
-  const AOIShape = useSelector((state: State) => state.AOIs.shape);
+  const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
   const dispatch = useDispatch();
 
-  const onCheckboxClick = async (): Promise<void> => {
+  const onAOIToggleClick = async (): Promise<void> => {
     setLoading(true);
-    try {
-      await dispatch(toggleShowAOI({ cameraId, showAOI: !showAOI }));
-      setShowUpdateSuccessTxt(true);
-    } catch (e) {
-      alert(e);
-    }
+    await dispatch(toggleShowAOI({ cameraId, checked: !showAOI }));
+    setShowUpdateSuccessTxt(true);
+    setLoading(false);
+  };
+
+  const onCountingLineToggleClick = async () => {
+    setLoading(true);
+    await dispatch(toggleShowCountingLines({ cameraId, checked: !showCountingLine }));
+    setShowUpdateSuccessTxt(true);
     setLoading(false);
   };
 
   const onUpdate = async (): Promise<void> => {
     setLoading(true);
-    try {
-      await dispatch(updateCameraArea(cameraId));
-      setShowUpdateSuccessTxt(true);
-    } catch (e) {
-      alert(e);
-    }
+    await dispatch(updateCameraArea(cameraId));
+    setShowUpdateSuccessTxt(true);
     setLoading(false);
   };
 
-  const hasEdit = !R.equals(originAOIs, AOIs);
+  const hasEdit = !R.equals(originVideoAnnos, videoAnnos);
   const updateBtnDisabled = !showAOI || !hasEdit;
 
   return (
     <Stack tokens={{ childrenGap: 10 }}>
-      <Toggle label="Enable area of interest" checked={showAOI} onClick={onCheckboxClick} inlineLabel />
+      <Toggle label="Enable area of interest" checked={showAOI} onClick={onAOIToggleClick} inlineLabel />
       <DefaultButton
         text="Create Box"
-        primary={AOIShape === Shape.BBox}
+        primary={videoAnnoShape === Shape.BBox}
         disabled={!showAOI}
         onClick={(): void => {
-          dispatch(onCreateAOIBtnClick(Shape.BBox));
+          dispatch(onCreateVideoAnnoBtnClick(Shape.BBox));
         }}
         style={{ padding: '0 5px' }}
       />
       <DefaultButton
-        text={AOIShape === Shape.Polygon ? 'Click F to Finish' : 'Create Polygon'}
-        primary={AOIShape === Shape.Polygon}
+        text={videoAnnoShape === Shape.Polygon ? 'Click F to Finish' : 'Create Polygon'}
+        primary={videoAnnoShape === Shape.Polygon}
         disabled={!showAOI}
         onClick={(): void => {
-          dispatch(onCreateAOIBtnClick(Shape.Polygon));
+          dispatch(onCreateVideoAnnoBtnClick(Shape.Polygon));
         }}
         style={{ padding: '0 5px' }}
       />
-      <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
+      <Toggle
+        label="Enable counting lines"
+        checked={showCountingLine}
+        onClick={onCountingLineToggleClick}
+        inlineLabel
+      />
+      <DefaultButton
+        text="Create counting line"
+        primary={videoAnnoShape === Shape.Line}
+        disabled={!showCountingLine}
+        onClick={(): void => {
+          dispatch(onCreateVideoAnnoBtnClick(Shape.Line));
+        }}
+      />
       <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
+      <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
     </Stack>
   );
 };

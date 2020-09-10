@@ -1,16 +1,16 @@
 import * as R from 'ramda';
 
-import { BaseShape, Shape, AOI } from './BaseShape';
+import { BaseShape, Shape, VideoAnno } from './BaseShape';
 import { Position2D, PolygonLabel } from '../type';
 // TODO Share this with annoSlice
 
-export type PolygonAOI = AOI & {
+export type PolygonType = VideoAnno & {
   type: Shape.Polygon;
   vertices: PolygonLabel;
 };
 
 export class Polygon extends BaseShape {
-  static init(p: Position2D, id: string, camera: number): PolygonAOI {
+  static init(p: Position2D, id: string, camera: number): PolygonType {
     return Polygon.setVerticesToValidValue({
       id,
       camera,
@@ -19,7 +19,7 @@ export class Polygon extends BaseShape {
     });
   }
 
-  static add(p: Position2D, obj: PolygonAOI): PolygonAOI {
+  static add(p: Position2D, obj: PolygonType): PolygonType {
     const updateLast = R.evolve({
       vertices: R.update(-1, p),
     });
@@ -28,15 +28,15 @@ export class Polygon extends BaseShape {
       vertices: R.concat([p]),
     });
 
-    return R.compose(Polygon.setVerticesToValidValue, concatOne, updateLast)(obj) as PolygonAOI;
+    return R.compose(Polygon.setVerticesToValidValue, concatOne, updateLast)(obj) as PolygonType;
   }
 
-  static update(idx: number, p: Position2D, obj: PolygonAOI): PolygonAOI {
+  static update(idx: number, p: Position2D, obj: PolygonType): PolygonType {
     const update = R.evolve({ vertices: R.update(idx, p) });
     return R.compose(Polygon.setVerticesToValidValue, update)(obj);
   }
 
-  static setVerticesToInt(obj: PolygonAOI): PolygonAOI {
+  static setVerticesToInt(obj: PolygonType): PolygonType {
     const newObj = { ...obj };
     newObj.vertices = newObj.vertices.map((e) => ({
       x: Math.round(e.x),
@@ -45,11 +45,11 @@ export class Polygon extends BaseShape {
     return newObj;
   }
 
-  static setVerticesToValidValue(obj: PolygonAOI): PolygonAOI {
+  static setVerticesToValidValue(obj: PolygonType): PolygonType {
     return Polygon.setVerticesToInt(obj);
   }
 }
 
-export const isPolygon = (input: AOI): input is PolygonAOI => {
+export const isPolygon = (input: VideoAnno): input is PolygonType => {
   return input.type === Shape.Polygon;
 };

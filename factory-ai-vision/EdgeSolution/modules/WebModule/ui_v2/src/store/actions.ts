@@ -2,8 +2,8 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { Shape } from './shared/BaseShape';
 import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
+import { isAOIShape, isCountingLine } from './shared/VideoAnnoUtil';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -21,52 +21,58 @@ export const deleteImage = createAsyncThunk('images/delete', async (id: number) 
   return id;
 });
 
-export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: boolean }, { state: State }>(
+type toggleCameraLabelPayload = { cameraId: number; checked: boolean };
+
+const getAOIs = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  return Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isAOIShape(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
+const getCountingLines = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  return Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isCountingLine(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
+export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowAOI',
-  async ({ cameraId, showAOI }, { getState }) => {
-    const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities)
-      .filter((e) => e.camera === cameraId)
-      .map((e) => {
-        if (e.type === Shape.BBox)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-        if (e.type === Shape.Polygon)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-      });
-    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: showAOI, AOIs }) });
+  async ({ cameraId, checked }, { getState }) => {
+    const AOIs = getAOIs(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: checked, AOIs }) });
+  },
+);
+
+export const toggleShowCountingLines = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
+  'cameras/toggleShowCountingLines',
+  async ({ cameraId, checked }, { getState }) => {
+    const countingLines = getCountingLines(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      lines: JSON.stringify({ useCountingLine: checked, countingLines }),
+    });
   },
 );
 
 export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   'cameras/updateArea',
   async (cameraId, { getState }) => {
-    const { useAOI } = getState().camera.entities[cameraId];
-    const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities)
-      .filter((e) => e.camera === cameraId)
-      .map((e) => {
-        if (e.type === Shape.BBox)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-        if (e.type === Shape.Polygon)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-      });
-    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
+    const { useAOI, useCountingLine } = getState().camera.entities[cameraId];
+    const AOIs = getAOIs(getState(), cameraId);
+    const countingLines = getCountingLines(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      area: JSON.stringify({ useAOI, AOIs }),
+      lines: JSON.stringify({ useCountingLine, countingLines }),
+    });
   },
 );
 
