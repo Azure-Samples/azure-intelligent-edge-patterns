@@ -45,7 +45,7 @@ class VideoFeed():
     def start(self):
         def _start(self):
             while self.is_opened:
-                self.buffer = self.receiver.recv_multipart()
+                self.buf = self.receiver.recv_multipart()
             self.receiver.close()
         threading.Thread(target=_start, args=(self,)).start()
 
@@ -59,7 +59,7 @@ class VideoFeed():
             if self.buf is not None:
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' +
-                       self.buf + b'\r\n')
+                       self.buf[1] + b'\r\n')
             time.sleep(0.04)
 
     def update_keep_alive(self):

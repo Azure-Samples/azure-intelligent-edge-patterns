@@ -274,8 +274,12 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                 # predictions = self._tYoloV3.Score(cvImage, instance_id)
                 s = self.stream_manager.get_stream_by_id(instance_id)
                 if s:
+                    #print('got stream and predicting...', flush=True)
                     s.predict(cvImage)
                     predictions = s.last_prediction
+                else:
+                    #print('got notthing', flush=True)
+                    predictions = []
                 # stream_manager.update(cvImage, instance_id)
                 # logging.debug(
                 #     'Detected {0} inferences'.format(len(predictions)))
