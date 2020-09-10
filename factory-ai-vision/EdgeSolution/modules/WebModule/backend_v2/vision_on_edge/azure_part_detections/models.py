@@ -7,8 +7,8 @@ import threading
 
 import requests
 from django.db import models
-from django.utils import timezone
 from django.db.models.signals import post_save
+from django.utils import timezone
 
 from ..azure_parts.models import Part
 from ..azure_projects.models import Project

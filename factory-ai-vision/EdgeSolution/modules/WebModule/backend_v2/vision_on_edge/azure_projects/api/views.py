@@ -22,9 +22,9 @@ from rest_framework.response import Response
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleStatusSerializer)
-from ..models import Project, Task
-from ..utils import (pull_cv_project_helper, train_project_helper)
 from ..exceptions import ProjectWithoutSettingError
+from ..models import Project, Task
+from ..utils import pull_cv_project_helper, train_project_helper
 from .serializers import (IterationPerformanceSerializer,
                           ProjectPerformanesSerializer, ProjectSerializer,
                           TaskSerializer)

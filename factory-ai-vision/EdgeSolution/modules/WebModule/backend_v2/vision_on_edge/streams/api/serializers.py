@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=abstract-method
 
+
 class StreamConnectResponseSerializer(serializers.Serializer):
     """ProjectPerformanesSerializer.
     """

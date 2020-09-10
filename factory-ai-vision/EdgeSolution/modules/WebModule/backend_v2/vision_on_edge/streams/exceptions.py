@@ -13,6 +13,7 @@ class StreamOpenRTSPError(APIException):
     default_detail = 'RTSP temporarily unavailable, please try again later.'
     default_code = 'stream_open_rtsp_error'
 
+
 class StreamNotFoundError(APIException):
     """StreamNotFoundError.
     """

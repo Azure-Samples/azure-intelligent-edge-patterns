@@ -376,10 +376,9 @@ def train_project_worker(project_id):
         iterations = trainer.get_iterations(customvision_id)
         iteration = iterations[0]
         if not status_init:
-            upcreate_training_status(
-                project_id=project_obj.id,
-                need_to_send_notification=True,
-                **progress.PROGRESS_7_TRAINING)
+            upcreate_training_status(project_id=project_obj.id,
+                                     need_to_send_notification=True,
+                                     **progress.PROGRESS_7_TRAINING)
             status_init = True
         if iteration.exportable and iteration.status == "Completed":
             break
@@ -392,10 +391,9 @@ def train_project_worker(project_id):
         time.sleep(1)
         exports = trainer.get_exports(customvision_id, iteration.id)
         if not status_init:
-            upcreate_training_status(
-                project_id=project_obj.id,
-                need_to_send_notification=True,
-                **progress.PROGRESS_8_EXPORTING)
+            upcreate_training_status(project_id=project_obj.id,
+                                     need_to_send_notification=True,
+                                     **progress.PROGRESS_8_EXPORTING)
             status_init = True
         if len(exports) == 0 or not exports[0].download_uri:
 

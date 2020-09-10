@@ -28,6 +28,7 @@ class MSStyleErrorResponseSerializer(serializers.Serializer):
 
     MicroSoft Style Inner Error Serializer.
     """
+
     class MSStyleErrorSerializer(serializers.Serializer):
         """MSStyleErrorSerializer.
 
@@ -36,4 +37,5 @@ class MSStyleErrorResponseSerializer(serializers.Serializer):
         status_code = serializers.IntegerField()
         code = serializers.CharField()
         message = serializers.CharField()
+
     error = MSStyleErrorSerializer()

@@ -15,8 +15,8 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 from msrest.exceptions import DeserializationError as MSDeserializationError
 
-from ..azure_settings.models import Setting
 from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ..azure_settings.models import Setting
 from .exceptions import (ProjectCannotChangeDemoError,
                          ProjectCustomVisionError,
                          ProjectResetWithoutNameError,

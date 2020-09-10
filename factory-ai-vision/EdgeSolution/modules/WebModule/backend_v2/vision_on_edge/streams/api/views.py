@@ -27,8 +27,8 @@ from ...general.api.serializers import (MSStyleErrorResponseSerializer,
 from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
-from ..models import Stream
 from ..exceptions import StreamNotFoundError
+from ..models import Stream
 from .serializers import (StreamCaptureResponseSerializer,
                           StreamConnectResponseSerializer)
 
@@ -274,6 +274,7 @@ def keep_alive(request, stream_id):
         stream.update_keep_alive()
         return Response({'status': 'ok'})
     raise StreamNotFoundError
+
 
 @api_view()
 def inference_video_feed(request, project_id):
