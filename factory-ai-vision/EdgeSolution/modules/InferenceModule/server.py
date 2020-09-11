@@ -285,6 +285,12 @@ def update_iothub_parameters():
     s.update_iothub_parameters(is_send, threshold, fpm)
     return 'ok'
 
+@app.route('/status')
+def get_scenario():
+    return json.dumps({
+        'streams': len(stream_manager.streams),
+        'scenario': onnx.detection_mode
+    })
 
 @app.route('/update_prob_threshold')
 def update_prob_threshold():
