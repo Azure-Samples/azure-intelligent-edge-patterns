@@ -181,7 +181,7 @@ def update_cams():
         cam_source = cam['source']
         cam_id = cam['id']
         # TODO: IF onnx.part_detection_mode == "PC" (PartCounting), use lines to count
-        # cam_id = cam['lines']
+        cam_lines = cam['lines']
 
         if not cam_type:
             return 'missing cam_type'
@@ -200,7 +200,7 @@ def update_cams():
 
         logger.info('updating camera {0}'.format(cam_id))
         s = stream_manager.get_stream_by_id(cam_id)
-        s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info)
+        s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
 
     return 'ok'
 

@@ -16,6 +16,7 @@ from onnxruntime_predict import ONNXRuntimeObjectDetection
 from object_detection import ObjectDetection
 from utility import get_file_zip, normalize_rtsp
 from invoke import gm
+from tracker import Tracker
 
 import logging
 
@@ -74,6 +75,8 @@ class Stream():
         self.iothub_interval = 99999999
 
         self.zmq_sender = sender
+        self.use_line = False
+        self.tracker = Tracker()
         self.start_zmq()
 
     def _stop(self):
@@ -87,10 +90,6 @@ class Stream():
 
     def start_zmq(self):
         def run(self):
-            # logging.info('running zmq')
-            # context = zmq.Context()
-            # sender = context.socket(zmq.PUB)
-            # sender.bind("tcp://*:5558")
 
             while 'flags' not in dir(self.last_drawn_img):
                 logging.info('not sending last_drawn_img')
@@ -120,7 +119,7 @@ class Stream():
         self.cam = cam
         self.lock.release()
 
-    def update_cam(self, cam_type, cam_source, cam_id, has_aoi, aoi_info):
+    def update_cam(self, cam_type, cam_source, cam_id, has_aoi, aoi_info, line_info):
         print('[INFO] Updating Cam ...')
         #print('  cam_type', cam_type)
         #print('  cam_source', cam_source)
@@ -142,6 +141,25 @@ class Stream():
         self.aoi_info = aoi_info
         cam = cv2.VideoCapture(normalize_rtsp(cam_source))
 
+        try:
+            line_info = json.loads(line_info)
+            use_line = line_info['useCountingLine']
+            lines = line_info['countingLines']
+            if use_line and lines > 0:
+                x1 = int(lines[0]['label']['x'])
+                y1 = int(lines[0]['label']['y'])
+                x2 = int(lines[1]['label']['x'])
+                y2 = int(lines[1]['label']['y'])
+                self.tracker.set_line(x1, y1, x2, y2)
+                self.use_line = True
+                print('Upading Line:', flush=True)
+                print('    use_line:', True, flush=True)
+                print('        line:', x1, y1, x2, y2, flush=True)
+        except:
+            self.use_line = False
+            print('Upading Line:', flush=True)
+            print('    use_line:', False, flush=True)
+
         # Protected by Mutex
         self.lock.acquire()
         self.cam.release()
@@ -149,6 +167,10 @@ class Stream():
         self.lock.release()
 
         self._update_instance(normalize_rtsp(cam_source))
+
+    def get_mode(self):
+        # PD, PC
+        return self.model.detection_mode
 
     def _update_instance(self, rtspUrl):
         self._stop()
@@ -219,16 +241,22 @@ class Stream():
 
         height, width = img.shape[0], img.shape[1]
         predictions = self.last_prediction
+        detections = []
         for prediction in predictions:
             tag = prediction['tagName']
-            if tag not in self.model.parts:
-                continue
+            #FIXME
+            if self.get_mode() != 'PC':
+                if tag not in self.model.parts:
+                    continue
 
             if self.has_aoi:
                 #     # for aoi_area in onnx.aoi_info:
                 #     # img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
                 #     #    aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
                 draw_aoi(img, self.aoi_info)
+
+            if prediction['probability'] > 0.5:
+                detections.append([x1, y1, x2, y2, prediction['probability']])
 
             if prediction['probability'] > self.threshold:
                 (x1, y1), (x2, y2) = parse_bbox(
@@ -241,6 +269,10 @@ class Stream():
                     img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 img = draw_confidence_level(img, prediction)
         #print('setting last drawn img', flush=True)
+        if self.get_mode() == 'PC' and self.use_line:
+            self.tracker.update(detections)
+            img = self.track.draw_line(img)
+            img = self.track.draw_counter(img)
         self.last_drawn_img = img
 
     def post_run(self):

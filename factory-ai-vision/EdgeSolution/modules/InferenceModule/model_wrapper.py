@@ -142,7 +142,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
         self.cam_is_alive = False
 
-        self.model = self.load_model(model_dir, is_default_model=True)
+        self.model = self.load_model(model_dir, is_default_model=True, is_scenario_model=False)
         self.model_uri = None
         self._labelList = None
 
@@ -241,7 +241,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.lock.release()
         update_instance(normalize_rtsp(cam_source), self.last_instance)
 
-    def load_model(self, model_dir, is_default_model):
+    def load_model(self, model_dir, is_default_model, is_scenario_model):
         if is_default_model:
             print('[INFO] Loading Default Model ...')
 
@@ -255,8 +255,17 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                 model = ObjectDetection(data, model_dir, None)
                 return model
 
-        else:
+        elif is_scenario_model:
             print('[INFO] Loading Default Model ...')
+            with open(model_dir + '/labels.txt', 'r') as f:
+                labels = [l.strip() for l in f.readlines()]
+            model = ONNXRuntimeObjectDetection(model_dir + '/model.onnx', labels)
+
+            return model
+
+
+        else:
+            print('[INFO] Loading Model ...')
             with open('model/labels.txt', 'r') as f:
                 labels = [l.strip() for l in f.readlines()]
             model = ONNXRuntimeObjectDetection('model/model.onnx', labels)
@@ -273,7 +282,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def update_model(self, model_dir):
         is_default_model = ('default_model' in model_dir)
-        model = self.load_model(model_dir, is_default_model)
+        is_scenario_model = ('scenario_models' in model_dir)
+        model = self.load_model(model_dir, is_default_model, is_scenario_model)
 
         # Protected by Mutex
         self.lock.acquire()
