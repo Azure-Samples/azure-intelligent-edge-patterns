@@ -20,6 +20,7 @@
     "@uifabric/react-hooks": "^7.9.1",
     "axios": "^0.19.2",
     "konva": "^6.0.0",
+    "moment": "^2.27.0",
     "normalizr": "^3.6.0",
     "ramda": "^0.27.0",
     "react": "^16.13.1",

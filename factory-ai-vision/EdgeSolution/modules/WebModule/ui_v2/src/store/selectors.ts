@@ -34,9 +34,26 @@ export const selectImageItemByUntagged = (unTagged: boolean) =>
     images
       .filter((img) => {
         const hasAnno = !!annos.find((anno) => img.id === anno.image);
-        if (unTagged) return img.isRelabel || !hasAnno;
-        return hasAnno && !img.isRelabel;
+        if (unTagged) return !hasAnno;
+        return hasAnno;
       })
+      .map(
+        (img): ImageListItem => {
+          return {
+            id: img.id,
+            image: img.image,
+            timestamp: img.timestamp,
+            isRelabel: img.isRelabel,
+            partName: partEntities[img.part]?.name || '',
+          };
+        },
+      ),
+  );
+
+export const selectImageItemByRelabel = () =>
+  createSelector([selectAllImages, selectPartEntities], (images, partEntities) =>
+    images
+      .filter((img) => img.isRelabel)
       .map(
         (img): ImageListItem => {
           return {

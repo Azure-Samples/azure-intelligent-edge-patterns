@@ -21,6 +21,7 @@ import {
   GET_INFERENCE_METRICS_SUCCESS,
   GET_INFERENCE_METRICS_FAILED,
   ProjectData,
+  InferenceMode,
 } from './projectTypes';
 import { pullCVProjects } from '../actions';
 
@@ -46,8 +47,9 @@ export const initialProjectData: ProjectData = {
   accuracyThreshold: 50,
   probThreshold: '10',
   name: '',
-  inferenceMode: '',
   sendVideoToCloud: false,
+  inferenceMode: InferenceMode.PD,
+  deployTimeStamp: '',
 };
 
 const initialState: Project = {
