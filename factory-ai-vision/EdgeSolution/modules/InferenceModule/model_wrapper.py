@@ -167,6 +167,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.is_upload_image = False
         self.current_uploaded_images = {}
 
+        self.detection_mode = "PD"
         self.detection_success_num = 0
         self.detection_unidentified_num = 0
         self.detection_total = 0

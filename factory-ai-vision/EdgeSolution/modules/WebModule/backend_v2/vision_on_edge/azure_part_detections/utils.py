@@ -65,34 +65,12 @@ def if_trained_then_deploy_worker(part_detection_id):
     # 3. Deploy Model                                   ===
     # =====================================================
     part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
-    project_obj = part_detection_obj.project
-    model_uri = project_obj.download_uri
-    parts = [p.name for p in part_detection_obj.parts.all()]
+    model_uri = part_detection_obj.project.download_uri
 
     logger.info("Project model exported: %s", model_uri)
     logger.info("Preparing to deploy to inference module")
     logger.info("PartDetection is deployed before: %s",
                 part_detection_obj.deployed)
-
-    def deploy():
-        requests.get(
-            "http://" + str(part_detection_obj.inference_module.url) +
-            "/update_part_detection_id",
-            params={
-                "part_detection_id": part_detection_obj.id,
-            },
-        )
-        requests.get(
-            "http://" + str(part_detection_obj.inference_module.url) +
-            "/update_model",
-            params={"model_uri": model_uri},
-        )
-        requests.get(
-            "http://" + str(part_detection_obj.inference_module.url) +
-            "/update_parts",
-            params={"parts": parts},
-        )
-        update_cam_worker(part_detection_id=part_detection_obj.id)
 
     threading.Thread(target=deploy).start()
 
@@ -103,7 +81,7 @@ def if_trained_then_deploy_worker(part_detection_id):
     part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.has_configured = True
     part_detection_obj.save()
-    logger.info("Project model Deployed !!!!!!")
+    logger.info("Project model Deployed !")
     logger.info("Project model exported: %s", model_uri)
     logger.info("Preparing to deploy to inference module")
     logger.info("PartDetection is deployed before: %s",
@@ -111,6 +89,40 @@ def if_trained_then_deploy_worker(part_detection_id):
     upcreate_deploy_status(part_detection_id=part_detection_id,
                            **deploy_progress.PROGRESS_0_OK)
 
+def deploy(part_detection_obj):
+    """deploy.
+
+    Args:
+        part_detection_obj: Part Detection Objects
+    """
+    parts_to_detect = [p.name for p in part_detection_obj.parts.all()]
+
+    # Part Detecion Mode
+    requests.get(
+        "http://" + str(part_detection_obj.inference_module.url) +
+        "/update_part_detection_mode",
+        params={
+            "part_detection_mode": part_detection_obj.part_detection_mode,
+        },
+    )
+    requests.get(
+        "http://" + str(part_detection_obj.inference_module.url) +
+        "/update_part_detection_id",
+        params={
+            "part_detection_id": part_detection_obj.id,
+        },
+    )
+    requests.get(
+        "http://" + str(part_detection_obj.inference_module.url) +
+        "/update_model",
+        params={"model_uri": part_detection_obj.project.download_uri},
+    )
+    requests.get(
+        "http://" + str(part_detection_obj.inference_module.url) +
+        "/update_parts",
+        params={"parts": parts_to_detect},
+    )
+    update_cam_worker(part_detection_id=part_detection_obj.id)
 
 def if_trained_then_deploy_helper(part_detection_id):
     """update_train_status.
@@ -133,6 +145,7 @@ def if_trained_then_deploy_helper(part_detection_id):
 def update_cam_worker(part_detection_id):
     """update_cam_worker
     """
+    logger.info("Update Cam!!!")
     part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
     cameras = part_detection_obj.cameras.all()
     inference_module = part_detection_obj.inference_module
@@ -147,18 +160,20 @@ def update_cam_worker(part_detection_id):
                 "id": cam.id,
                 "type": "rtsp",
                 "source": cam.rtsp,
-                "aoi": cam.area
+                "aoi": cam.area,
+                "lines": cam.lines
             })
         else:
             res_data["cameras"].append({
                 "id": cam.id,
                 "type": "rtsp",
                 "source": cam.rtsp,
+                "lines": cam.lines
             })
     serializer = UpdateCamBodySerializer(data=res_data)
     serializer.is_valid(raise_exception=True)
     requests.post(
-        url="http://" + inference_module_url + "/update_cam",
+        url="http://" + inference_module_url + "/update_cams",
         json=json.loads(json.dumps(serializer.validated_data)),
     )
 
