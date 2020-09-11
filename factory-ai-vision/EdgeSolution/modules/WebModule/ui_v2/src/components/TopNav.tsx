@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   CommandBar,
   ICommandBarItemProps,
@@ -25,20 +26,6 @@ const commandBarBtnStyles: IButtonStyles = {
   },
 };
 
-const commandBarItems: ICommandBarItemProps[] = [
-  {
-    key: 'btn',
-    iconOnly: true,
-    onRenderIcon: () => <WaffleIcon style={{ fontSize: '20px' }} />,
-    buttonStyles: commandBarBtnStyles,
-  },
-  {
-    key: 'title',
-    text: 'Vision on Edge',
-    buttonStyles: commandBarBtnStyles,
-  },
-];
-
 const commandBarStyles: ICommandBarStyles = {
   root: {
     backgroundColor: theme.palette.themePrimary,
@@ -47,6 +34,8 @@ const commandBarStyles: ICommandBarStyles = {
 };
 
 export const TopNav: React.FC<{ onSettingClick: () => void }> = ({ onSettingClick }) => {
+  const history = useHistory();
+
   const commandBarFarItems: ICommandBarItemProps[] = [
     {
       key: 'setting',
@@ -56,5 +45,22 @@ export const TopNav: React.FC<{ onSettingClick: () => void }> = ({ onSettingClic
       onClick: onSettingClick,
     },
   ];
+
+  const commandBarItems: ICommandBarItemProps[] = [
+    {
+      key: 'btn',
+      iconOnly: true,
+      onRenderIcon: () => <WaffleIcon style={{ fontSize: '20px' }} />,
+      buttonStyles: commandBarBtnStyles,
+      onClick: () => history.push('/home'),
+    },
+    {
+      key: 'title',
+      text: 'Vision on Edge',
+      buttonStyles: commandBarBtnStyles,
+      onClick: () => history.push('/home'),
+    },
+  ];
+
   return <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />;
 };
