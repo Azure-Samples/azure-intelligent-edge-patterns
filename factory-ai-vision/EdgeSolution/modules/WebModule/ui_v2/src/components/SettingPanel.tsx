@@ -35,10 +35,14 @@ import {
 import { WarningDialog } from './WarningDialog';
 import { getAppInsights } from '../TelemetryService';
 import { pullCVProjects } from '../store/actions';
+import { dummyFunction } from '../utils/dummyFunction';
 
 type SettingPanelProps = {
   isOpen: boolean;
   onDismiss: () => void;
+  canBeDismissed: boolean;
+  showProjectDropdown: boolean;
+  openDataPolicyDialog: boolean;
 };
 
 const textFieldClass = mergeStyles({
@@ -53,9 +57,13 @@ const layerHostClass = mergeStyles({
 });
 const MAIN_LAYER_HOST_ID = 'mainLayer';
 
-export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen, onDismiss }) => {
-  const isTrainerValid = useSelector((state: State) => state.setting.isTrainerValid);
-  const appInsightHasInit = useSelector((state: State) => state.setting.appInsightHasInit);
+export const SettingPanel: React.FC<SettingPanelProps> = ({
+  isOpen,
+  onDismiss,
+  canBeDismissed,
+  showProjectDropdown,
+  openDataPolicyDialog,
+}) => {
   const settingData = useSelector((state: State) => state.setting.current);
   const cvProjectOptions = useSelector((state: State) =>
     state.setting.cvProjects.map((e) => ({ key: e.id, text: e.name })),
@@ -129,20 +137,17 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
     setselectedCustomvisionId(defaultCustomvisionId);
   }, [defaultCustomvisionId]);
 
-  const isOpen = !isTrainerValid || !appInsightHasInit || propsIsOpen;
-
   return (
     <>
       {isOpen && <LayerHost id={MAIN_LAYER_HOST_ID} className={layerHostClass} />}
       <Customizer scopedSettings={{ Layer: { hostId: MAIN_LAYER_HOST_ID } }}>
         <Panel
-          hasCloseButton
+          hasCloseButton={canBeDismissed}
           headerText="Settings"
           isOpen={isOpen}
           type={PanelType.smallFluid}
           onDismiss={onDismiss}
-          // override the outer click function to avoid it call onDismiss as default
-          onOuterClick={() => {}}
+          onOuterClick={dummyFunction}
         >
           <Stack tokens={{ childrenGap: 17 }}>
             <h4>Azure Cognitive Services settings</h4>
@@ -177,7 +182,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
                 trigger={<PrimaryButton text="Save" disabled={cannotUpdateOrSave} />}
               />
             </Stack.Item>
-            {isTrainerValid && (
+            {showProjectDropdown && (
               <>
                 <Dropdown
                   className={textFieldClass}
@@ -238,7 +243,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({ isOpen: propsIsOpen,
                   </p>
                 </>
               }
-              open={!appInsightHasInit}
+              open={openDataPolicyDialog}
               confirmButton="I agree"
               cancelButton="I don't agree"
               onConfirm={(): void => updateIsCollectData(true, true)}
