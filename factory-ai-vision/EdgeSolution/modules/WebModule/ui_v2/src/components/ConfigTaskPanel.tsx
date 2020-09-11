@@ -25,6 +25,7 @@ import { getTrainingProject, trainingProjectOptionsSelector } from '../store/tra
 import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
+import { State } from 'RootStateType';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -84,6 +85,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const cameraOptions = useSelector(cameraOptionsSelector(true));
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
   const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(true));
+  const canSelectProjectRetrain = useSelector((state: State) =>
+    state.trainingProject.nonDemo.includes(projectData.trainingProject),
+  );
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -217,55 +221,57 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               </>
             )}
           </Stack.Item>
-          <Stack.Item>
-            <div className={classNames.textWrapper}>
-              <Label>Retraining image</Label>
-              <Text>Save images to tag and improve training model</Text>
-            </div>
-            <Toggle
-              inlineLabel
-              label="Enable capturing images"
-              checked={projectData.needRetraining}
-              onChange={(_, checked) => {
-                onChange('needRetraining', checked);
-              }}
-            />
-            {projectData.needRetraining && (
-              <>
-                <Stack horizontal tokens={{ childrenGap: 24 }}>
+          {canSelectProjectRetrain && (
+            <Stack.Item>
+              <div className={classNames.textWrapper}>
+                <Label>Retraining image</Label>
+                <Text>Save images to tag and improve training model</Text>
+              </div>
+              <Toggle
+                inlineLabel
+                label="Enable capturing images"
+                checked={projectData.needRetraining}
+                onChange={(_, checked) => {
+                  onChange('needRetraining', checked);
+                }}
+              />
+              {projectData.needRetraining && (
+                <>
+                  <Stack horizontal tokens={{ childrenGap: 24 }}>
+                    <TextField
+                      label="Min"
+                      type="number"
+                      value={projectData.accuracyRangeMin?.toString()}
+                      onChange={(_, newValue) => {
+                        onChange('accuracyRangeMin', parseInt(newValue, 10));
+                      }}
+                      suffix="%"
+                      disabled={!projectData.needRetraining}
+                    />
+                    <TextField
+                      label="Max"
+                      type="number"
+                      value={projectData.accuracyRangeMax?.toString()}
+                      onChange={(_, newValue) => {
+                        onChange('accuracyRangeMax', parseInt(newValue, 10));
+                      }}
+                      suffix="%"
+                      disabled={!projectData.needRetraining}
+                    />
+                  </Stack>
                   <TextField
-                    label="Min"
+                    label="Minimum Images to store"
                     type="number"
-                    value={projectData.accuracyRangeMin?.toString()}
+                    value={projectData.maxImages?.toString()}
                     onChange={(_, newValue) => {
-                      onChange('accuracyRangeMin', parseInt(newValue, 10));
+                      onChange('maxImages', parseInt(newValue, 10));
                     }}
-                    suffix="%"
                     disabled={!projectData.needRetraining}
                   />
-                  <TextField
-                    label="Max"
-                    type="number"
-                    value={projectData.accuracyRangeMax?.toString()}
-                    onChange={(_, newValue) => {
-                      onChange('accuracyRangeMax', parseInt(newValue, 10));
-                    }}
-                    suffix="%"
-                    disabled={!projectData.needRetraining}
-                  />
-                </Stack>
-                <TextField
-                  label="Minimum Images to store"
-                  type="number"
-                  value={projectData.maxImages?.toString()}
-                  onChange={(_, newValue) => {
-                    onChange('maxImages', parseInt(newValue, 10));
-                  }}
-                  disabled={!projectData.needRetraining}
-                />
-              </>
-            )}
-          </Stack.Item>
+                </>
+              )}
+            </Stack.Item>
+          )}
           <Stack.Item>
             <div className={classNames.textWrapper}>
               <Label>Send video to cloud</Label>
