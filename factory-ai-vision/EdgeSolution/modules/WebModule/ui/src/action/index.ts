@@ -1,2 +1,2 @@
-export * from './action.type';
+export * from './type';
 export * from './constants';

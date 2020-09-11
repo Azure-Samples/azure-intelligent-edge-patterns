@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type CallAPIAction<S = any, P = any> = {
   types: string[];
-  callAPI: () => Promise<any>;
+  callAPI: (state: S) => Promise<any>;
   shouldCallAPI?: (state: S) => boolean;
   payload?: P;
 };

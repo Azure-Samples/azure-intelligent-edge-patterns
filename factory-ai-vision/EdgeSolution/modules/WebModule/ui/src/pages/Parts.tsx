@@ -1,40 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Flex, Image, Text } from '@fluentui/react-northstar';
 import { Link } from 'react-router-dom';
-import Axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { State } from 'RootStateType';
 import { AddModuleDialog } from '../components/AddModuleDialog';
+import { getImages, selectAllImages } from '../store/imageSlice';
+import { Part, getParts, postPart, selectAllParts } from '../store/partSlice';
+
+const partsWithImgSelector = (state: State): (Part & { image: string })[] => {
+  const parts = selectAllParts(state);
+  const images = selectAllImages(state);
+  return parts.map((p) => {
+    const relatedImage = images.find((i) => i.part === p.id);
+    return { ...p, image: relatedImage?.image || '' };
+  });
+};
 
 export const Parts: React.FC = () => {
-  const [parts, setParts] = useState([]);
+  const partsWithImg = useSelector<State, (Part & { image: string })[]>(partsWithImgSelector);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const partsAPI = Axios.get('/api/parts/');
-    const imagesAPI = Axios.get('/api/images/');
-
-    Axios.all([partsAPI, imagesAPI])
-      .then(
-        Axios.spread((...responses) => {
-          const { data: partsRes } = responses[0];
-          const { data: images } = responses[1];
-          setParts(
-            partsRes.map((e) => ({
-              ...e,
-              images: images.find((img) => img.part === e.id)?.image,
-            })),
-          );
-        }),
-      )
-      .catch((err) => console.error(err));
-  }, []);
+    dispatch(getParts(false));
+    dispatch(getImages());
+  }, [dispatch]);
 
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <Flex gap="gap.large" wrap>
-        {parts
-          .filter((e) => !e.is_demo)
-          .map((ele) => (
-            <Item key={ele.id} src={ele.images} id={ele.id} name={ele.name} />
-          ))}
+        {partsWithImg.map((ele) => (
+          <Item key={ele.id} src={ele.image} id={ele.id} name={ele.name} />
+        ))}
       </Flex>
       <div style={{ position: 'absolute', right: '100px', bottom: '100px' }}>
         <AddModuleDialog
@@ -54,31 +51,7 @@ export const Parts: React.FC = () => {
             },
           ]}
           onConfirm={({ name, description }): void => {
-            // TODO Migrate this to part action
-            Axios({
-              method: 'POST',
-              url: `/api/parts/`,
-              data: {
-                name,
-                description,
-              },
-            })
-              .then(({ data }) => {
-                setParts((prev) => prev.concat(data));
-                return void 0;
-              })
-              .catch((e) => {
-                if (e.response) {
-                  throw new Error(e.response.data.log);
-                } else if (e.request) {
-                  throw new Error(e.request);
-                } else {
-                  throw e;
-                }
-              })
-              .catch((err) => {
-                alert(err);
-              });
+            dispatch(postPart({ name, description }));
           }}
         />
       </div>

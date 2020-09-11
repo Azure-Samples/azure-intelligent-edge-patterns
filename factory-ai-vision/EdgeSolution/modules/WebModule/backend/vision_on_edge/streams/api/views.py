@@ -157,12 +157,10 @@ def capture(request, stream_id):
         logger.info(stream)
         logger.info(stream.part_id)
         part_id = request.query_params.get("part_id") or stream.part_id
-        if not part_id:
-            return JsonResponse({
-                "status": "failed",
-                "reason": "neither Stream and capture request have part_id"
-            })
-        img_obj = Image(image=img, part_id=part_id)
+        if part_id:
+            img_obj = Image(image=img, part_id=part_id)
+        else:
+            img_obj = Image(image=img)
         img_obj.save()
         img_serialized = ImageSerializer(img_obj, context={"request": request})
         logger.info(img_serialized.data)
