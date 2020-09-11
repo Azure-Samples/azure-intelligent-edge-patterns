@@ -224,7 +224,7 @@ const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThr
 
 const getProjectData = (state: State): ProjectData => state.project.data;
 
-export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
+export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> => {
   dispatch(getProjectRequest(false));
 
   const url = '/api/part_detections/';
@@ -251,7 +251,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         sendVideoToCloud: data[0]?.send_video_to_cloud ?? false,
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
-      return void 0;
+      return data[0]?.has_configured;
     })
     .catch((err) => {
       dispatch(getProjectFailed(err, false));

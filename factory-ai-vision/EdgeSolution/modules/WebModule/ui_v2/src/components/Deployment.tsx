@@ -19,6 +19,7 @@ import {
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as R from 'ramda';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import { LiveViewContainer } from './LiveViewContainer';
@@ -43,6 +44,7 @@ import {
 } from '../store/videoAnnoSlice';
 import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from '../store/actions';
 import { Shape } from '../store/shared/BaseShape';
+import { EmptyAddIcon } from './EmptyAddIcon';
 
 const { palette } = getTheme();
 
@@ -75,13 +77,14 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const partNames = useSelector(selectPartNamesById(parts));
   const dispatch = useDispatch();
 
-  const [isEditPanelOpen, setisEditPanelOpen] = useState(false);
-  const openPanel = () => setisEditPanelOpen(true);
-  const closePanel = () => setisEditPanelOpen(false);
+  const [isEditPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
   useEffect(() => {
-    dispatch(thunkGetProject());
-  }, [dispatch]);
+    (async () => {
+      const hasConfigured = await dispatch(thunkGetProject());
+      if (!hasConfigured) openPanel();
+    })();
+  }, [dispatch, openPanel]);
 
   useInterval(
     () => {
@@ -131,7 +134,14 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   ];
 
   const onRenderMain = () => {
-    if (status === Status.None) return <PrimaryButton onClick={openPanel}>Config Task</PrimaryButton>;
+    if (status === Status.None)
+      return (
+        <EmptyAddIcon
+          title="Config a task"
+          subTitle=""
+          primary={{ text: 'Config task', onClick: openPanel }}
+        />
+      );
     if (status === Status.WaitTraining)
       return (
         <Stack horizontalAlign="center" verticalAlign="center" grow tokens={{ childrenGap: 24 }}>
