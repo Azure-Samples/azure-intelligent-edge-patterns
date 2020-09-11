@@ -48,6 +48,7 @@ export const initialProjectData: ProjectData = {
   name: '',
   inferenceMode: '',
   sendVideoToCloud: false,
+  deployTimeStamp: '',
 };
 
 const initialState: Project = {

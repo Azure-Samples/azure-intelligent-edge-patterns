@@ -20,6 +20,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import * as R from 'ramda';
 import { useBoolean } from '@uifabric/react-hooks';
+import moment from 'moment';
 
 import { State } from 'RootStateType';
 import { LiveViewContainer } from './LiveViewContainer';
@@ -79,6 +80,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const objectCounts = useSelector((state: State) =>
     Object.entries(state.project.inferenceMetrics.partCount),
   );
+  const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
 
   const [isEditPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
@@ -175,7 +177,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
               <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
                 <Text variant="xLarge">{name}</Text>
                 <Text styles={{ root: { color: palette.neutralSecondary } }}>
-                  Started running <b>{/* TODO */} ago</b>
+                  Started running <b>{moment(deployTimeStamp).fromNow()}</b>
                 </Text>
                 <CommandBar items={commandBarItems} styles={{ root: { padding: 0 } }} />
               </Stack>

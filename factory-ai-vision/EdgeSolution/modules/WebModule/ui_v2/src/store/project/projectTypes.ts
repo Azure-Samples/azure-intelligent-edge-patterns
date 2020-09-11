@@ -71,6 +71,7 @@ export type ProjectData = {
   name: string;
   inferenceMode: string;
   sendVideoToCloud: boolean;
+  deployTimeStamp: string;
 };
 
 // Describing the different ACTION NAMES available
