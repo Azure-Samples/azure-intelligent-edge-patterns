@@ -52,6 +52,11 @@ export type Consequence = {
   mAP: number;
 };
 
+export enum InferenceMode {
+  PD = 'PD',
+  PC = 'PC',
+}
+
 export type ProjectData = {
   id: number;
   cameras: number[];
@@ -69,8 +74,8 @@ export type ProjectData = {
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
   name: string;
-  inferenceMode: string;
   sendVideoToCloud: boolean;
+  inferenceMode: InferenceMode;
   deployTimeStamp: string;
 };
 

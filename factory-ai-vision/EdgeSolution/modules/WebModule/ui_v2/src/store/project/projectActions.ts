@@ -58,7 +58,7 @@ const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
   isDemo,
 });
-const getProjectSuccess = (
+export const getProjectSuccess = (
   project: ProjectData,
   hasConfigured: boolean,
   isDemo: boolean,
@@ -284,6 +284,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       metrics_accuracy_threshold: projectData.accuracyThreshold,
       name: projectData.name,
       send_video_to_cloud: projectData.sendVideoToCloud,
+      inference_mode: projectData.inferenceMode,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

@@ -20,7 +20,7 @@ import Axios from 'axios';
 
 import { cameraOptionsSelector, getCameras } from '../store/cameraSlice';
 import { partOptionsSelector, getParts } from '../store/partSlice';
-import { ProjectData } from '../store/project/projectTypes';
+import { ProjectData, InferenceMode } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
@@ -99,7 +99,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);
 
-    await dispatch(thunkPostProject(projectData));
+    await dispatch(thunkPostProject({ ...projectData, ...(!isDemo && { inferenceMode: InferenceMode.PD }) }));
 
     onDismiss();
     history.push('/home/deployment');

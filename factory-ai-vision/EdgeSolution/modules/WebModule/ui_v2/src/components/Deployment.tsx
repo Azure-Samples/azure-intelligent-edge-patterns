@@ -24,7 +24,7 @@ import moment from 'moment';
 
 import { State } from 'RootStateType';
 import { LiveViewContainer } from './LiveViewContainer';
-import { Project, Status } from '../store/project/projectTypes';
+import { Project, Status, InferenceMode } from '../store/project/projectTypes';
 import { useInterval } from '../hooks/useInterval';
 import {
   thunkGetTrainingLog,
@@ -307,6 +307,7 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const originVideoAnnos = useSelector(selectOriginVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
+  const inferenceMode = useSelector((state: State) => state.project.data.inferenceMode);
   const dispatch = useDispatch();
 
   const onAOIToggleClick = async (): Promise<void> => {
@@ -354,20 +355,24 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
         }}
         style={{ padding: '0 5px' }}
       />
-      <Toggle
-        label="Enable counting lines"
-        checked={showCountingLine}
-        onClick={onCountingLineToggleClick}
-        inlineLabel
-      />
-      <DefaultButton
-        text="Create counting line"
-        primary={videoAnnoShape === Shape.Line}
-        disabled={!showCountingLine}
-        onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick(Shape.Line));
-        }}
-      />
+      {inferenceMode === InferenceMode.PC && (
+        <>
+          <Toggle
+            label="Enable counting lines"
+            checked={showCountingLine}
+            onClick={onCountingLineToggleClick}
+            inlineLabel
+          />
+          <DefaultButton
+            text="Create counting line"
+            primary={videoAnnoShape === Shape.Line}
+            disabled={!showCountingLine}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick(Shape.Line));
+            }}
+          />
+        </>
+      )}
       <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
     </Stack>
