@@ -46,10 +46,11 @@ import {
 import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from '../store/actions';
 import { Shape } from '../store/shared/BaseShape';
 import { EmptyAddIcon } from './EmptyAddIcon';
+import { getTrainingProject } from '../store/trainingProjectSlice';
 
 const { palette } = getTheme();
 
-export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
+export const Deployment: React.FC = () => {
   const { status, progress, trainingLog, data: projectData, inferenceMetrics } = useSelector<State, Project>(
     (state) => state.project,
   );
@@ -70,6 +71,10 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
   );
+  const isDemo = useSelector((state: State) => {
+    const trainingProjectId = state.project.data.trainingProject;
+    return state.trainingProject.entities[trainingProjectId]?.isDemo;
+  });
   const [selectedCamera, setselectedCamera] = useState(projectCameraIds[0]);
   useEffect(() => {
     if (projectCameraIds.length) setselectedCamera(projectCameraIds[0]);
@@ -90,6 +95,10 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       if (!hasConfigured) openPanel();
     })();
   }, [dispatch, openPanel]);
+
+  useEffect(() => {
+    dispatch(getTrainingProject(true));
+  }, [dispatch]);
 
   useInterval(
     () => {
@@ -233,7 +242,12 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       <Stack horizontal styles={{ root: { height: '100%' } }}>
         {onRenderMain()}
       </Stack>
-      <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closePanel} projectData={projectData} />
+      <ConfigTaskPanel
+        isOpen={isEditPanelOpen}
+        onDismiss={closePanel}
+        projectData={projectData}
+        isDemo={isDemo}
+      />
     </>
   );
 };

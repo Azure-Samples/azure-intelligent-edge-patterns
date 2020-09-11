@@ -40,7 +40,7 @@ export const Home: React.FC = () => {
     if (loading) return <Spinner label="Loading" />;
 
     const route = location.pathname.split('/')[2];
-    if (route === 'deployment') return <Deployment isDemo={false} />;
+    if (route === 'deployment') return <Deployment />;
     if (route === 'customize')
       return <Customize hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />;
     return <GetStarted />;
