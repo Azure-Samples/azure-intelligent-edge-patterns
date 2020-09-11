@@ -101,11 +101,11 @@ class Stream():
                 if cnt % 30 == 1:
                     logging.info('send through channel {0}'.format(
                         bytes(self.cam_id, 'utf-8')))
-                    self.lock.acquire()
-                    self.zmq_sender.send_multipart([bytes(
-                        self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
-                    self.lock.release()
-                    time.sleep(0.04)
+                self.lock.acquire()
+                self.zmq_sender.send_multipart([bytes(
+                    self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
+                self.lock.release()
+                time.sleep(0.1)
         threading.Thread(target=run, args=(self,)).start()
 
     def restart_cam(self):

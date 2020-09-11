@@ -181,7 +181,7 @@ def update_cams():
         cam_source = cam['source']
         cam_id = cam['id']
         # TODO: IF onnx.part_detection_mode == "PC" (PartCounting), use lines to count
-        cam_id = cam['lines']
+        # cam_id = cam['lines']
 
         if not cam_type:
             return 'missing cam_type'
@@ -233,6 +233,7 @@ def update_send_video_to_cloud():
         return 'invalid send_video_to_cloud'
     # TODO: Change something here
     return 'ok'
+
 
 @app.route('/update_parts')
 def update_parts():
@@ -364,8 +365,7 @@ if __name__ == "__main__":
     # Set logging parameters
     logging.basicConfig(
         level=logging_level,
-        format=
-        '[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s',
+        format='[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s',
         handlers=[
             # logging.FileHandler(LOG_FILE_NAME),     # write in a log file
             logging.StreamHandler(sys.stdout)  # write in stdout
