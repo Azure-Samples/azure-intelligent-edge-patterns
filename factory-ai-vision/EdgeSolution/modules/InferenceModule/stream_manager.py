@@ -108,12 +108,15 @@ class StreamManager(object):
 if __name__ == '__main__':
 
     class Stream():
-        def __init__(self, model, sender):
+        def __init__(self, stream_id, model, sender):
             self.model = model
             self.sender = sender
+        def delete(self):
+            pass
 
     sm = StreamManager('model')
     sm.update_streams([1, 2])
     sm.update_streams([2, 3])
     sm.update_streams([1, 3])
     sm.update_streams([1, 3])
+    sm.summary()
