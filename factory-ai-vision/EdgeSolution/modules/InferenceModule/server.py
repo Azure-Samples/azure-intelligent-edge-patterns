@@ -211,7 +211,7 @@ def update_part_detection_mode():
     """update_part_detection_mode.
     """
 
-    part_detection_mode = request.args.get('mode')
+    part_detection_mode = request.args.get('part_detection_mode')
     if not part_detection_mode:
         return 'missing part_detection_mode'
 

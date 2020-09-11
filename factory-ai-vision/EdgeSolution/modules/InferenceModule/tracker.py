@@ -36,6 +36,8 @@ class Tracker():
         self.line_y1 = None
         self.line_x2 = None
         self.line_y2 = None
+        self._m = 0
+        self._b = 0
 
     def set_line(self, line_x1, line_y1, line_x2, line_y2):
         #self._m = (170 - 1487) / (680 - 815)

@@ -140,25 +140,28 @@ class Stream():
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
         cam = cv2.VideoCapture(normalize_rtsp(cam_source))
-
+        print('[INFO] Line INFO', line_info, flush=True)
         try:
             line_info = json.loads(line_info)
-            use_line = line_info['useCountingLine']
+            self.use_line = line_info['useCountingLine']
             lines = line_info['countingLines']
-            if use_line and lines > 0:
-                x1 = int(lines[0]['label']['x'])
-                y1 = int(lines[0]['label']['y'])
-                x2 = int(lines[1]['label']['x'])
-                y2 = int(lines[1]['label']['y'])
+            if len(lines) > 0:
+                x1 = int(lines[0]['label'][0]['x'])
+                y1 = int(lines[0]['label'][0]['y'])
+                x2 = int(lines[0]['label'][1]['x'])
+                y2 = int(lines[0]['label'][1]['y'])
                 self.tracker.set_line(x1, y1, x2, y2)
-                self.use_line = True
                 print('Upading Line:', flush=True)
-                print('    use_line:', True, flush=True)
+                print('    use_line:', self.use_line, flush=True)
                 print('        line:', x1, y1, x2, y2, flush=True)
+            else:
+                print('Upading Line:', flush=True)
+                print('    use_line:', self.use_line, flush=True)
+
         except:
             self.use_line = False
-            print('Upading Line:', flush=True)
-            print('    use_line:', False, flush=True)
+            print('Upading Line[*]:', flush=True)
+            print('    use_line   :', False, flush=True)
 
         # Protected by Mutex
         self.lock.acquire()
@@ -270,10 +273,11 @@ class Stream():
                     img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 img = draw_confidence_level(img, prediction)
         #print('setting last drawn img', flush=True)
-        if self.get_mode() == 'PC' and self.use_line:
-            self.tracker.update(detections)
-            img = self.track.draw_line(img)
-            img = self.track.draw_counter(img)
+        if self.get_mode() == 'PC':
+            if self.use_line:
+                self.tracker.update(detections)
+                img = self.tracker.draw_line(img)
+            img = self.tracker.draw_counter(img)
         self.last_drawn_img = img
 
     def post_run(self):

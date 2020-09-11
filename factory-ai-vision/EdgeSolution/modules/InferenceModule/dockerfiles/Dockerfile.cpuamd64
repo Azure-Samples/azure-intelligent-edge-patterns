@@ -72,7 +72,7 @@ COPY streams.py ./
 COPY config.py ./
 COPY webmodule_utils/*.py ./webmodule_utils/
 COPY grpc_topology.json ./
-COPY scenario_models ./
+COPY scenario_models scenario_models/
 COPY sort.py ./
 COPY tracker.py ./
 RUN chmod 777 sample_video/video.mp4

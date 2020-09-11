@@ -183,7 +183,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
+              "image": "${MODULES.RtspSimModule}",
               "createOptions": {
                 "HostConfig": {}
               }
