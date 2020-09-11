@@ -9,6 +9,7 @@ from django.dispatch import receiver
 
 from ..cameras.models import Camera
 from .models import PartDetection
+from .utils import update_cam_helper
 
 logger = logging.getLogger(__name__)
 
@@ -40,19 +41,22 @@ def azure_part_detection_camera_m2m_change(**kwargs):
     Args:
         kwargs:
     """
+    action = kwargs["action"]
     instance = kwargs["instance"]
+    if action in ["post_add", "post_remove"]:
+        update_cam_helper(part_detection_id=instance.id)
 
 
-@receiver(signal=pre_save,
+@receiver(signal=post_save,
           sender=Camera,
-          dispatch_uid="azure_part_detection_camera_rtsp_change")
-def azure_part_detection_camera_rtsp_change(**kwargs):
-    """azure_part_detection_camera_m2m_change.
+          dispatch_uid="azure_part_detection_camera_config_change_handler")
+def azure_part_detection_camera_config_change_handler(**kwargs):
+    """azure_part_detection_camera_config_change_handler.
 
     Args:
         kwargs:
     """
     instance = kwargs["instance"]
-    # part_detection_objs = PartDetection.objects.filter(cameras=instance)
-    # for part_detection_obj in part_detection_objs:
-    # part_detection_objs.update_cam()
+    part_detection_objs = PartDetection.objects.filter(cameras=instance)
+    for part_detection_obj in part_detection_objs:
+        update_cam_helper(part_detection_id=part_detection_obj.id)

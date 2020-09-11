@@ -1,26 +1,25 @@
-import sys
-import os
-#sys.path.insert(0, '../lib')
-
-import logging
 import json
+import logging
+import os
+import sys
 import threading
-import requests
+from concurrent import futures
 
+import grpc
+import requests
+from flask import Flask, Response, request
+
+import extension_pb2_grpc
 from arguments import ArgumentParser, ArgumentsType
 from exception_handler import PrintGetExceptionDetails
 from inference_engine import InferenceEngine
-from model_wrapper import ONNXRuntimeModelDeploy
-from flask import Flask, request, Response
-from utility import get_file_zip, normalize_rtsp
-from stream_manager import StreamManager
 from invoke import gm
-
-import grpc
-import extension_pb2_grpc
-from concurrent import futures
-
+from model_wrapper import ONNXRuntimeModelDeploy
+from stream_manager import StreamManager
+from utility import get_file_zip, normalize_rtsp
 from webmodule_utils import PART_DETECTION_MODE_CHOICES
+
+#sys.path.insert(0, '../lib')
 
 logger = logging.getLogger(__name__)
 
@@ -167,9 +166,13 @@ def update_model():
         return 'ok'
 
 
-@app.route('/update_cam', methods=['POST'])
-def update_cam():
+@app.route('/update_cams', methods=['POST'])
+def update_cams():
+    """update_cams.
 
+    Update multiple cameras at once.
+    Cameras not in List should not inferecence.
+    """
     data = request.get_json()
     logger.info(data["cameras"])
     stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
@@ -177,6 +180,8 @@ def update_cam():
         cam_type = cam['type']
         cam_source = cam['source']
         cam_id = cam['id']
+        # TODO: IF onnx.part_detection_mode == "PC" (PartCounting), use lines to count
+        cam_id = cam['lines']
 
         if not cam_type:
             return 'missing cam_type'
@@ -202,8 +207,9 @@ def update_cam():
 
 @app.route('/update_part_detection_mode')
 def update_part_detection_mode():
-    """update_part_detection_mode.
+    """update_part_detection_mode.
     """
+
     part_detection_mode = request.args.get('mode')
     if not part_detection_mode:
         return 'missing part_detection_mode'
