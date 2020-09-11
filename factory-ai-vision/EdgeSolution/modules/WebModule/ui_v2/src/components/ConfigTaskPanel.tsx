@@ -264,6 +264,19 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               </>
             )}
           </Stack.Item>
+          <Stack.Item>
+            <div className={classNames.textWrapper}>
+              <Label>Send video to cloud</Label>
+            </div>
+            <Toggle
+              inlineLabel
+              label="Enable sending video"
+              checked={projectData.sendVideoToCloud}
+              onChange={(_, checked) => {
+                onChange('sendVideoToCloud', checked);
+              }}
+            />
+          </Stack.Item>
         </Stack>
       </ExpandPanel>
     </Panel>

@@ -47,6 +47,7 @@ export const initialProjectData: ProjectData = {
   probThreshold: '10',
   name: '',
   inferenceMode: '',
+  sendVideoToCloud: false,
 };
 
 const initialState: Project = {
