@@ -11,6 +11,7 @@ from django.db.models.signals import pre_save
 from vision_on_edge.general.utils import normalize_rtsp
 
 from ..locations.models import Location
+from .exceptions import CameraRtspInvalid
 
 logger = logging.getLogger(__name__)
 
@@ -70,10 +71,10 @@ class Camera(models.Model):
         if instance.is_demo:
             return
         if instance.rtsp is None:
-            raise ValueError('rtsp is none')
+            raise CameraRtspInvalid
         rtsp_ok = Camera.verify_rtsp(rtsp=instance.rtsp)
         if not rtsp_ok:
-            raise ValueError('rtsp is not valid')
+            raise CameraRtspInvalid
 
 
 pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")
