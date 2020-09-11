@@ -27,81 +27,11 @@ from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
 from ..exceptions import StreamNotFoundError
-from ..models import Stream
+from ..models import Stream, StreamManager
 from .serializers import (StreamCaptureResponseSerializer,
                           StreamConnectResponseSerializer)
 
 logger = logging.getLogger(__name__)
-
-# Stream Views
-#
-STREAM_GC_TIME_THRESHOLD = 5  # Seconds
-PRINT_STREAMS = False
-
-
-class StreamManager():
-    """StreamManager
-    """
-
-    def __init__(self):
-        self.streams = []
-        self.mutex = threading.Lock()
-        self.gc()
-
-    def add(self, stream: Stream):
-        """add stream
-        """
-        self.streams.append(stream)
-
-    def get_stream_by_id(self, stream_id):
-        """get_stream_by_id
-        """
-
-        self.mutex.acquire()
-
-        for i in range(len(self.streams)):
-            stream = self.streams[i]
-            if stream.id == stream_id:
-
-                self.mutex.release()
-                return stream
-
-        self.mutex.release()
-        return None
-
-    def gc(self):
-        """Garbage collector
-
-        IMPORTANT, autoreloader will not reload threading,
-        please restart the server if you modify the thread
-        """
-
-        def _gc(self):
-            while True:
-                self.mutex.acquire()
-                if PRINT_STREAMS:
-                    logger.info("streams: %s", self.streams)
-                to_delete = []
-                for index, stream in enumerate(self.streams):
-                    if (stream.last_active + STREAM_GC_TIME_THRESHOLD <
-                            time.time()):
-
-                        # stop the inactive stream
-                        # (the ones users didnt click disconnect)
-                        logger.info('stream %s inactive', stream)
-                        stream.close()
-
-                        # collect the stream, to delete later
-                        to_delete.append(stream)
-
-                for stream in to_delete:
-                    self.streams.remove(stream)
-
-                self.mutex.release()
-                time.sleep(3)
-
-        threading.Thread(target=_gc, args=(self,)).start()
-
 
 if 'runserver' in sys.argv:
     stream_manager = StreamManager()
