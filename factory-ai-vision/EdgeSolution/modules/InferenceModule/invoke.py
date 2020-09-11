@@ -8,9 +8,11 @@ import ssl
 import urllib.request
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
+import os
 
 from config import IOTHUB_CONNECTION_STRING, DEVICE_ID
 
+DEVICE_ID = os.environ.get('IOTEDGE_DEVICEID', 'local')
 MODULE_ID = 'lvaEdge'
 
 default_payload = {"@apiVersion": "1.0"}
