@@ -3,11 +3,9 @@
 """
 
 import logging
-import threading
 
 import requests
 from django.db import models
-from django.db.models.signals import post_save
 from django.utils import timezone
 
 from ..azure_parts.models import Part
@@ -17,7 +15,9 @@ from ..inference_modules.models import InferenceModule
 
 logger = logging.getLogger(__name__)
 
-INFERENCE_MODE_CHOICES = [("PD", "part_detection"), ("PC", "part_counting")]
+INFERENCE_MODE_CHOICES = [("PD", "part_detection"), ("PC", "part_counting"),
+                          ("ES", "employee_safety"),
+                          ("DD", "defect_detection")]
 
 
 class PartDetection(models.Model):
@@ -47,6 +47,7 @@ class PartDetection(models.Model):
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=10)
+
     # send_video_to_cloud = models.BooleanField(default=False)
 
     def update_prob_threshold(self, prob_threshold):
