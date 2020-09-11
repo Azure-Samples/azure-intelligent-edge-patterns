@@ -66,8 +66,13 @@ const useImage = (
     return (): void => {
       img.removeEventListener('load', onload);
       img.removeEventListener('error', onerror);
+      // Cancel loading
+      img.src = '';
+      img.remove();
+      // refresh the uniqid so it won't be cached by browser
+      uniqidRef.current = nanoid();
     };
-  }, [url, crossOrigin, prevUrl]);
+  }, [url, crossOrigin, prevUrl, nocache]);
 
   useEffect(() => {
     let request;
