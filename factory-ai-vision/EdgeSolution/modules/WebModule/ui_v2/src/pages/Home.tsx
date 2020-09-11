@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { Customize } from '../components/Customize';
-import { selectAllCameras, getCameras } from '../store/cameraSlice';
+import { getCameras, selectNonDemoCameras } from '../store/cameraSlice';
 import { selectAllImages, getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
@@ -16,7 +16,7 @@ export const Home: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
-  const hasCamera = useSelector((state: State) => selectAllCameras(state).length > 0);
+  const hasCamera = useSelector((state: State) => selectNonDemoCameras(state).length > 0);
   const hasImages = useSelector((state: State) => selectAllImages(state).length > 0);
   const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
   const [loading, setLoading] = useState(false);
