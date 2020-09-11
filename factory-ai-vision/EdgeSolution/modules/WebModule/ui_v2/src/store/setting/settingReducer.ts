@@ -1,4 +1,5 @@
 import { SettingActionType, Setting } from './settingType';
+import { patchIsCollectData } from './settingAction';
 
 const initialState: Setting = {
   loading: false,
@@ -38,6 +39,10 @@ const settingReducer = (state = initialState, action: SettingActionType): Settin
       return { ...state, loading: false, cvProjects: action.pyload };
     case 'settings/listAllProjects/rejected':
       return { ...state, loading: false, error: action.error };
+    case patchIsCollectData.pending.toString():
+      return { ...state, isCollectData: (action as any).meta.arg.isCollectData };
+    case patchIsCollectData.rejected.toString():
+      return { ...state, isCollectData: !(action as any).meta.arg.isCollectData };
     default:
       return state;
   }

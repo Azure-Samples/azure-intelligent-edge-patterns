@@ -1,4 +1,5 @@
 import Axios, { AxiosRequestConfig } from 'axios';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import {
   UpdateKeyAction,
@@ -15,6 +16,7 @@ import {
   CVProject,
 } from './settingType';
 import { getTrainingProject } from '../trainingProjectSlice';
+import { getAppInsights } from '../../TelemetryService';
 
 export const updateKey = (key: string): UpdateKeyAction => ({ type: 'UPDATE_KEY', payload: key });
 
@@ -229,3 +231,16 @@ export const checkSettingStatus = (): SettingThunk => async (dispatch): Promise<
   const appInsightHasInit = appInsightHasInitStr ? JSON.parse(appInsightHasInitStr) : false;
   dispatch(onSettingStatusCheck(isTrainerValid, appInsightHasInit));
 };
+
+export const patchIsCollectData = createAsyncThunk<
+  any,
+  { id: number; isCollectData: boolean; hasInit: boolean }
+>('settings/updateIsCollectData', async ({ id, isCollectData, hasInit }) => {
+  await Axios.patch(`/api/settings/${id}`, {
+    is_collect_data: isCollectData,
+    ...(hasInit && { app_insight_has_init: hasInit }),
+  });
+  const appInsight = getAppInsights();
+  if (!appInsight) throw Error('App Insight hasnot been initialize');
+  appInsight.config.disableTelemetry = !isCollectData;
+});

@@ -22,7 +22,6 @@ import {
   Checkbox,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
-import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import {
@@ -31,9 +30,9 @@ import {
   updateKey,
   thunkPostSetting,
   thunkGetAllCvProjects,
+  patchIsCollectData,
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
-import { getAppInsights } from '../TelemetryService';
 import { pullCVProjects } from '../store/actions';
 import { dummyFunction } from '../utils/dummyFunction';
 
@@ -106,21 +105,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   };
 
   const updateIsCollectData = (isCollectData, hasInit?): void => {
-    Axios.patch(`/api/settings/${settingData.id}`, {
-      is_collect_data: isCollectData,
-      ...(hasInit && { app_insight_has_init: hasInit }),
-    })
-      .then(() => {
-        const appInsight = getAppInsights();
-        if (!appInsight) throw Error('App Insight hasnot been initialize');
-        appInsight.config.disableTelemetry = !isCollectData;
-        // FIXME
-        window.location.reload();
-        return void 0;
-      })
-      .catch((err) => {
-        alert(err);
-      });
+    dispatch(patchIsCollectData({ id: settingData.id, isCollectData, hasInit }));
   };
 
   useEffect(() => {
