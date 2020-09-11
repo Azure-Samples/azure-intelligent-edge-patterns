@@ -70,6 +70,7 @@ export type ProjectData = {
   probThreshold: string;
   name: string;
   inferenceMode: string;
+  sendVideoToCloud: boolean;
 };
 
 // Describing the different ACTION NAMES available

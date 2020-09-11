@@ -120,6 +120,8 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     probThreshold: data?.prob_threshold.toString() ?? '10',
     name: data?.name ?? '',
     inferenceMode: data?.inference_mode ?? '',
+    // TODO
+    sendVideoToCloud: false,
   },
   isDemo,
 });
@@ -247,6 +249,8 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         trainingProject: data[0]?.project ?? null,
         name: data[0]?.name ?? '',
         inferenceMode: data[0]?.inference_mode ?? '',
+        // TODO
+        sendVideoToCloud: false,
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
       return void 0;
@@ -279,6 +283,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       metrics_frame_per_minutes: projectData.framesPerMin,
       metrics_accuracy_threshold: projectData.accuracyThreshold,
       name: projectData.name,
+      // TODO
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
