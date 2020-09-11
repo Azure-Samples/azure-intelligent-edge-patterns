@@ -14,6 +14,7 @@ from model_wrapper import ONNXRuntimeModelDeploy
 from flask import Flask, request, Response
 from utility import get_file_zip, normalize_rtsp
 from stream_manager import StreamManager
+from invoke import gm
 
 import grpc
 import extension_pb2_grpc
@@ -268,6 +269,31 @@ def update_prob_threshold():
     return 'ok'
 
 
+def init_topology():
+
+    instances = gm.invoke_graph_instance_list()
+    logging.info('========== Deleting {0} instance(s) =========='.format(
+        len(instances['payload']['value'])))
+
+    for i in range(len(instances['payload']['value'])):
+        gm.invoke_graph_instance_deactivate(
+            instances['payload']['value'][i]['name'])
+        gm.invoke_graph_instance_delete(
+            instances['payload']['value'][i]['name'])
+
+    topologies = gm.invoke_graph_topology_list()
+    logging.info('========== Deleting {0} topology =========='.format(
+        len(topologies['payload']['value'])))
+
+    for i in range(len(topologies['payload']['value'])):
+        gm.invoke_graph_topology_delete(
+            topologies['payload']['value'][i]['name'])
+
+    logging.info('========== Setting default grpc topology =========='.format(
+        len(topologies['payload']['value'])))
+    ret = gm.invoke_graph_grpc_topology_set()
+
+
 def Main():
     try:
         # Get application arguments
@@ -276,6 +302,9 @@ def Main():
         # Get port number
         grpcServerPort = ap.GetGrpcServerPort()
         logging.info('gRPC server port: {0}'.format(grpcServerPort))
+
+        # init graph topology & instance
+        init_topology()
 
         # create gRPC server and start running
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
