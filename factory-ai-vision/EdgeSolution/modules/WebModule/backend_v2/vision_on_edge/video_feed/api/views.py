@@ -19,7 +19,7 @@ from ..models import VideoFeed
 
 logger = logging.getLogger(__name__)
 
-STREAM_GC_TIME_THRESHOLD = 5  # Seconds
+STREAM_GC_TIME_THRESHOLD = 15  # Seconds
 PRINT_STREAMS = True
 
 

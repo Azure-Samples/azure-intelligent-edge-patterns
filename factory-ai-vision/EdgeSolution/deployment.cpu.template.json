@@ -35,15 +35,21 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [{
-                      "HostPort": "5671"
-                    }],
-                    "8883/tcp": [{
-                      "HostPort": "8883"
-                    }],
-                    "443/tcp": [{
-                      "HostPort": "443"
-                    }]
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
                   }
                 }
               }
@@ -81,9 +87,11 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8000/tcp": [{
-                      "HostPort": "8080"
-                    }]
+                    "8000/tcp": [
+                      {
+                        "HostPort": "8080"
+                      }
+                    ]
                   }
                 }
               }
@@ -110,9 +118,11 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5432/tcp": [{
-                      "HostPort": "5432"
-                    }]
+                    "5432/tcp": [
+                      {
+                        "HostPort": "5432"
+                      }
+                    ]
                   }
                 }
               }
@@ -128,12 +138,16 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [{
-                      "HostPort": "5000"
-                    }],
-                    "5558/tcp": [{
-                      "HostPort": "5558"
-                    }]
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
                   },
                   "IpcMode": "container:lvaEdge",
                   "runtime": "runc"
@@ -157,7 +171,6 @@
                       "max-file": "10"
                     }
                   },
-                  "Binds": ["/home/willy/media/:/var/media/", "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"],
                   "IpcMode": "shareable"
                 }
               }
@@ -172,15 +185,7 @@
             "settings": {
               "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
               "createOptions": {
-                "HostConfig": {
-                  "Binds": ["/home/willy/media/input:/live/mediaServer/media"],
-                  "PortBindings": {
-                    "554/tcp": [{
-                      "HostPort": "554"
-                    }]
-                  }
-                }
-
+                "HostConfig": {}
               }
             }
           }
@@ -207,10 +212,10 @@
     "lvaEdge": {
       "properties.desired": {
         "applicationDataDirectory": "/var/media",
-        "azureMediaServicesArmId": "/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourcegroups/ronpai_rg_Linux_westus2/providers/microsoft.media/mediaservices/ronmedia",
-        "aadTenantId": "2cf4248e-4836-4202-b796-9a1589ff4613",
-        "aadServicePrincipalAppId": "80cb4c37-88c2-4b41-a1cc-2b04a3b8b203",
-        "aadServicePrincipalSecret": "s.TUWseDmf2FzU_n33m.keRN~oV8Q4J0kO",
+        "azureMediaServicesArmId": "/subscriptions/<SUBSCRIPTION_ID>/resourcegroups/<RESOURCE_GROUP>/providers/microsoft.media/mediaservices/<SERVICE_NAME>",
+        "aadTenantId": "<TENANT_ID>",
+        "aadServicePrincipalAppId": "<SERVICE_PRINCIPAL_APP_ID>",
+        "aadServicePrincipalSecret": "<SERVICE_PRINCIPAL_SECRET>",
         "aadEndpoint": "https://login.microsoftonline.com",
         "aadResourceId": "https://management.core.windows.net/",
         "armEndpoint": "https://management.azure.com/",

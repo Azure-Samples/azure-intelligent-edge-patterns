@@ -10,7 +10,7 @@ from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
 import os
 
-from config import IOTHUB_CONNECTION_STRING, DEVICE_ID
+from config import IOTHUB_CONNECTION_STRING
 
 DEVICE_ID = os.environ.get('IOTEDGE_DEVICEID', 'local')
 MODULE_ID = 'lvaEdge'
@@ -57,7 +57,7 @@ class GraphManager:
     def invoke_graph_topology_set(self, name, properties):
         method = 'GraphTopologySet'
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             'name': name,
             'properties': properties,
         }

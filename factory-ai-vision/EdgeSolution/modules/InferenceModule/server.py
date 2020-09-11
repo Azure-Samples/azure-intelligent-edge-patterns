@@ -22,6 +22,7 @@ from webmodule_utils import PART_DETECTION_MODE_CHOICES
 #sys.path.insert(0, '../lib')
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec

@@ -666,8 +666,7 @@ def video_feed():
                     if onnx.has_aoi:
                         draw_aoi(img, onnx.aoi_info)
 
-                    (x1, y1), (x2, y2) = parse_bbox(
-                        prediction, width, height)
+                    (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
                     if prediction['probability'] > 0.5:
                         detections.append([x1, y1, x2, y2, prediction['probability']])

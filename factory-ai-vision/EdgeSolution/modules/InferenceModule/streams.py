@@ -255,6 +255,7 @@ class Stream():
                 #     #    aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
                 draw_aoi(img, self.aoi_info)
 
+            (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
             if prediction['probability'] > 0.5:
                 detections.append([x1, y1, x2, y2, prediction['probability']])
 
