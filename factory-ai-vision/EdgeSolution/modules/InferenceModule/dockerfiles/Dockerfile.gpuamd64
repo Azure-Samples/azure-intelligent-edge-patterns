@@ -63,6 +63,7 @@ COPY media_pb2.py ./
 COPY model_wrapper.py ./
 COPY shared_memory.py ./
 COPY server.py ./
+COPY webmodule_utils/*.py ./webmodule_utils/
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 

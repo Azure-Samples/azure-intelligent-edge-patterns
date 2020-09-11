@@ -20,6 +20,9 @@ import grpc
 import extension_pb2_grpc
 from concurrent import futures
 
+from webmodule_utils import PART_DETECTION_MODE_CHOICES
+
+logger = logging.getLogger(__name__)
 
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec
@@ -37,8 +40,9 @@ IMG_HEIGHT = 540
 onnx = ONNXRuntimeModelDeploy()
 stream_manager = StreamManager(onnx)
 
-
 app = Flask(__name__)
+
+
 @app.route('/prediction', methods=['GET'])
 def prediction():
     # print(onnx.last_prediction)
@@ -72,7 +76,6 @@ def prediction():
 #         return 'open camera', 200
 #     else:
 #         return 'camera is already opened', 200
-
 
 # @app.route('/close_cam', methods=['GET'])
 # def close_cam():
@@ -168,7 +171,7 @@ def update_model():
 def update_cam():
 
     data = request.get_json()
-    logging.info(data["cameras"])
+    logger.info(data["cameras"])
     stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
     for cam in data["cameras"]:
         cam_type = cam['type']
@@ -190,10 +193,24 @@ def update_cam():
             has_aoi = False
             aoi_info = None
 
-        logging.info('updating camera {0}'.format(cam_id))
+        logger.info('updating camera {0}'.format(cam_id))
         s = stream_manager.get_stream_by_id(cam_id)
         s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info)
 
+    return 'ok'
+
+
+@app.route('/update_part_detection_mode')
+def update_part_detection_mode():
+    """update_part_detection_mode.
+    """
+    part_detection_mode = request.args.get('mode')
+    if not part_detection_mode:
+        return 'missing part_detection_mode'
+
+    if part_detection_mode not in PART_DETECTION_MODE_CHOICES:
+        return 'invalid part_detection_mode'
+    onnx.detection_mode = part_detection_mode
     return 'ok'
 
 
@@ -212,6 +229,7 @@ def update_parts():
     onnx.update_parts(parts)
 
     return 'ok'
+
 
 # @app.route('/update_threshold')
 # def update_threshold():
@@ -272,7 +290,7 @@ def update_prob_threshold():
 def init_topology():
 
     instances = gm.invoke_graph_instance_list()
-    logging.info('========== Deleting {0} instance(s) =========='.format(
+    logger.info('========== Deleting {0} instance(s) =========='.format(
         len(instances['payload']['value'])))
 
     for i in range(len(instances['payload']['value'])):
@@ -282,14 +300,14 @@ def init_topology():
             instances['payload']['value'][i]['name'])
 
     topologies = gm.invoke_graph_topology_list()
-    logging.info('========== Deleting {0} topology =========='.format(
+    logger.info('========== Deleting {0} topology =========='.format(
         len(topologies['payload']['value'])))
 
     for i in range(len(topologies['payload']['value'])):
         gm.invoke_graph_topology_delete(
             topologies['payload']['value'][i]['name'])
 
-    logging.info('========== Setting default grpc topology =========='.format(
+    logger.info('========== Setting default grpc topology =========='.format(
         len(topologies['payload']['value'])))
     ret = gm.invoke_graph_grpc_topology_set()
 
@@ -301,7 +319,7 @@ def Main():
 
         # Get port number
         grpcServerPort = ap.GetGrpcServerPort()
-        logging.info('gRPC server port: {0}'.format(grpcServerPort))
+        logger.info('gRPC server port: {0}'.format(grpcServerPort))
 
         # init graph topology & instance
         init_topology()
@@ -326,12 +344,12 @@ if __name__ == "__main__":
     # Set logging parameters
     logging.basicConfig(
         level=logging_level,
-        format='[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s',
+        format=
+        '[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s',
         handlers=[
             # logging.FileHandler(LOG_FILE_NAME),     # write in a log file
-            logging.StreamHandler(sys.stdout)       # write in stdout
-        ]
-    )
+            logging.StreamHandler(sys.stdout)  # write in stdout
+        ])
 
     # Call Main logic
     Main()
