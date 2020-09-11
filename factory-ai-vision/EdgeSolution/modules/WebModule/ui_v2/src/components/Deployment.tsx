@@ -76,6 +76,9 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
 
   const partNames = useSelector(selectPartNamesById(parts));
   const dispatch = useDispatch();
+  const objectCounts = useSelector((state: State) =>
+    Object.entries(state.project.inferenceMetrics.partCount),
+  );
 
   const [isEditPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
@@ -211,6 +214,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                 successRate={inferenceMetrics.successRate}
                 successfulInferences={inferenceMetrics.successfulInferences}
                 unIdetifiedItems={inferenceMetrics.unIdetifiedItems}
+                objectCounts={objectCounts}
               />
             </PivotItem>
             <PivotItem headerText="Areas of interest">
@@ -236,12 +240,14 @@ type InsightsProps = {
   successRate: number;
   successfulInferences: number;
   unIdetifiedItems: number;
+  objectCounts: [string, number][];
 };
 
 export const Insights: React.FC<InsightsProps> = ({
   successRate,
   successfulInferences,
   unIdetifiedItems,
+  objectCounts,
 }) => {
   return (
     <>
@@ -258,8 +264,13 @@ export const Insights: React.FC<InsightsProps> = ({
       >
         <Text styles={{ root: { fontWeight: 'bold' } }}>Successful inferences</Text>
         <Text styles={{ root: { color: palette.neutralSecondary } }}>{successfulInferences}</Text>
-        <ExpandPanel titleHidden="Object" suffix={'' /* TODO */} />
-        <ExpandPanel titleHidden="Area of interest" suffix={'' /* TODO */} />
+        <ExpandPanel titleHidden="Object" suffix={objectCounts.length.toString()}>
+          <Stack tokens={{ childrenGap: 10 }}>
+            {objectCounts.map((e) => (
+              <Text key={e[0]}>{`${e[0]}: ${e[1]}`}</Text>
+            ))}
+          </Stack>
+        </ExpandPanel>
       </Stack>
       <Stack
         styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
