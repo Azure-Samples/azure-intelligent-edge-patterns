@@ -74,7 +74,7 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
           title="Ready to go!"
           contentTxt="Start identifying parts from your cameras’ live streams"
           actionTxt="Begin a task"
-          actionLink="/task"
+          actionLink="/home/deployment"
         />
       </Stack>
     </Stack>
