@@ -67,6 +67,7 @@ type ConfigTaskPanelProps = {
   onDismiss: () => void;
   projectData: ProjectData;
   isDemo?: boolean;
+  isEdit?: boolean;
 };
 
 export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
@@ -74,6 +75,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   onDismiss,
   projectData: initialProjectData,
   isDemo = false,
+  isEdit = false,
 }) => {
   const [projectData, setProjectData] = useState(initialProjectData);
   useEffect(() => {
@@ -108,7 +110,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const onRenderFooterContent = () => {
     return (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton text="Deploy" onClick={onStart} />
+        <PrimaryButton text={isEdit ? 'Redeploy' : 'Deploy'} onClick={onStart} />
         <DefaultButton text="Cancel" onClick={onDismiss} />
       </Stack>
     );
@@ -119,7 +121,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       isOpen={isOpen}
       onDismiss={onDismiss}
       hasCloseButton
-      headerText="Deploy task"
+      headerText={isEdit ? 'Edit task' : 'Deploy task'}
       onRenderFooterContent={onRenderFooterContent}
       isFooterAtBottom={true}
       type={PanelType.smallFluid}

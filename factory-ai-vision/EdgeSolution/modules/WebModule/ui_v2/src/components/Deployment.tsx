@@ -247,6 +247,7 @@ export const Deployment: React.FC = () => {
         onDismiss={closePanel}
         projectData={projectData}
         isDemo={isDemo}
+        isEdit
       />
     </>
   );
