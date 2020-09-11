@@ -220,6 +220,20 @@ def update_part_detection_mode():
     return 'ok'
 
 
+@app.route('/update_send_video_to_cloud')
+def update_send_video_to_cloud():
+    """update_part_detection_mode.
+    """
+
+    send_video_to_cloud = request.args.get('send_video_to_cloud')
+    if not send_video_to_cloud:
+        return 'missing send_video_to_cloud'
+
+    if send_video_to_cloud not in PART_DETECTION_MODE_CHOICES:
+        return 'invalid send_video_to_cloud'
+    # TODO: Change something here
+    return 'ok'
+
 @app.route('/update_parts')
 def update_parts():
     try:

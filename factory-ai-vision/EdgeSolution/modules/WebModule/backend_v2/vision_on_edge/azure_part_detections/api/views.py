@@ -30,7 +30,7 @@ from ..exceptions import (PdConfigureWithoutCameras,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
                           PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
 from ..models import PartDetection, PDScenario
-from ..utils import if_trained_then_deploy_helper, update_cam_helper
+from ..utils import if_trained_then_deploy_helper, deploy_all_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
                           PDScenarioSerializer, UploadRelabelSerializer)
 

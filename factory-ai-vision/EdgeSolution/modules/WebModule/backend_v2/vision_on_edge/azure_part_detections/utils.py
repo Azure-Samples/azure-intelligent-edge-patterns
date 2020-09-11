@@ -59,20 +59,16 @@ def if_trained_then_deploy_worker(part_detection_id):
     # 2. Project training success                       ===
     # =====================================================
     logger.info("Project train/export success.")
-    logger.info("Deploying model.")
+    logger.info("Deploying...")
 
     # =====================================================
-    # 3. Deploy Model                                   ===
+    # 3. Deploy Model and params                        ===
     # =====================================================
-    part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
-    model_uri = part_detection_obj.project.download_uri
-
-    logger.info("Project model exported: %s", model_uri)
-    logger.info("Preparing to deploy to inference module")
-    logger.info("PartDetection is deployed before: %s",
-                part_detection_obj.deployed)
-
-    threading.Thread(target=deploy).start()
+    try:
+        deploy_worker(part_detection_id=part_detection_obj.id)
+        logger.info("Part Detection successfully deployed to inference_module!")
+    except:
+        logger.info("Part Detection deploy to inference_module failed !")
 
     # =====================================================
     # 4. Deployed! Saving                               ===
@@ -81,70 +77,98 @@ def if_trained_then_deploy_worker(part_detection_id):
     part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.has_configured = True
     part_detection_obj.save()
-    logger.info("Project model Deployed !")
-    logger.info("Project model exported: %s", model_uri)
-    logger.info("Preparing to deploy to inference module")
+
     logger.info("PartDetection is deployed before: %s",
                 part_detection_obj.deployed)
     upcreate_deploy_status(part_detection_id=part_detection_id,
                            **deploy_progress.PROGRESS_0_OK)
 
-def deploy(part_detection_obj):
+
+def deploy_worker(part_detection_id):
     """deploy.
 
     Args:
         part_detection_obj: Part Detection Objects
     """
-    parts_to_detect = [p.name for p in part_detection_obj.parts.all()]
+    instance = PartDetection.objects.get(pk=part_detection_id)
+    if not instance.has_configured:
+        logger.error("This PartDetection is not configured")
+        logger.error("Not sending any request to inference")
+        return
+    parts_to_detect = [p.name for p in instance.parts.all()]
+    confidence_min = getattr(instance, 'accuracyRangeMin', 30)
+    confidence_max = getattr(instance, 'accuracyRangeMax', 80)
+    max_images = getattr(instance, 'maxImages', 10)
+    metrics_is_send_iothub = getattr(instance, 'metrics_is_send_iothub', False)
+    metrics_accuracy_threshold = getattr(instance,
+                                         'metrics_accuracy_threshold', 50)
+    metrics_frame_per_minutes = getattr(instance, 'metrics_frame_per_minutes',
+                                        6)
 
-    # Part Detecion Mode
+    # =====================================================
+    # 1. Update params                                  ===
+    # =====================================================
     requests.get(
-        "http://" + str(part_detection_obj.inference_module.url) +
-        "/update_part_detection_mode",
-        params={
-            "part_detection_mode": part_detection_obj.part_detection_mode,
-        },
-    )
-    requests.get(
-        "http://" + str(part_detection_obj.inference_module.url) +
+        "http://" + str(instance.inference_module.url) +
         "/update_part_detection_id",
         params={
-            "part_detection_id": part_detection_obj.id,
+            "part_detection_id": instance.id,
         },
     )
     requests.get(
-        "http://" + str(part_detection_obj.inference_module.url) +
-        "/update_model",
-        params={"model_uri": part_detection_obj.project.download_uri},
+        "http://" + str(instance.inference_module.url) +
+        "/update_part_detection_mode",
+        params={
+            "part_detection_mode": instance.inference_mode,
+        },
     )
+    # requests.get(
+        # "http://" + str(instance.inference_module.url) +
+        # "/update_send_video_to_cloud",
+        # params={
+            # "send_video_to_cloud": instance.send_video_to_cloud,
+        # },
+    # )
+
+    # =====================================================
+    # 1. Update model                                  ===
+    # =====================================================
+    if not instance.project.is_demo:
+        requests.get(
+            "http://" + str(instance.inference_module.url) + "/update_model",
+            params={"model_uri": instance.project.download_uri},
+        )
+    else:
+        requests.get(
+            "http://" + str(instance.inference_module.url) + "/update_model",
+            params={"model_dir": instance.project.download_uri},
+        ) 
     requests.get(
-        "http://" + str(part_detection_obj.inference_module.url) +
-        "/update_parts",
+        "http://" + str(instance.inference_module.url) + "/update_parts",
         params={"parts": parts_to_detect},
     )
-    update_cam_worker(part_detection_id=part_detection_obj.id)
+    requests.get(
+        "http://" + instance.inference_module.url +
+        "/update_retrain_parameters",
+        params={
+            "confidence_min": confidence_min,
+            "confidence_max": confidence_max,
+            "max_images": max_images,
+        },
+    )
+    requests.get(
+        "http://" + instance.inference_module.url +
+        "/update_iothub_parameters",
+        params={
+            "is_send": metrics_is_send_iothub,
+            "threshold": metrics_accuracy_threshold,
+            "fpm": metrics_frame_per_minutes,
+        },
+    )
 
-def if_trained_then_deploy_helper(part_detection_id):
-    """update_train_status.
-
-    Open a thread to follow training status object.
-
-    Args:
-        project_id:
-    """
-    part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
-    part_detection_obj.deployed = False
-    part_detection_obj.save()
-    upcreate_deploy_status(
-        part_detection_id=part_detection_id,
-        **deploy_progress.PROGRESS_1_WATINING_PROJECT_TRAINED)
-    threading.Thread(target=if_trained_then_deploy_worker,
-                     args=(part_detection_id,)).start()
-
-
-def update_cam_worker(part_detection_id):
-    """update_cam_worker
-    """
+    # =====================================================
+    # 2. Update cam                                     ===
+    # =====================================================
     logger.info("Update Cam!!!")
     part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
     cameras = part_detection_obj.cameras.all()
@@ -178,8 +202,34 @@ def update_cam_worker(part_detection_id):
     )
 
 
-def update_cam_helper(part_detection_id):
-    """update_cam_worker
+# Helper here.
+
+
+def if_trained_then_deploy_helper(part_detection_id):
+    """update_train_status.
+
+    Open a thread to follow training status object.
+
+    Args:
+        project_id:
     """
-    threading.Thread(target=update_cam_worker,
+    part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
+    part_detection_obj.deployed = False
+    part_detection_obj.save()
+    upcreate_deploy_status(
+        part_detection_id=part_detection_id,
+        **deploy_progress.PROGRESS_1_WATINING_PROJECT_TRAINED)
+    threading.Thread(target=if_trained_then_deploy_worker,
                      args=(part_detection_id,)).start()
+
+
+def deploy_all_helper(part_detection_id=None,
+                      instance: PartDetection = None) -> None:
+    """deploy_helper.
+
+    Deploy everything to inference in a thread.
+    """
+    if part_detection_id or instance:
+        threading.Thread(name="deploy_all_helper",
+                         target=deploy_worker,
+                         args=(part_detection_id,)).start()

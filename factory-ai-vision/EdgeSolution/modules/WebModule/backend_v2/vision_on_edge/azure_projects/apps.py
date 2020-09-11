@@ -52,9 +52,10 @@ class AzureProjectsConfig(AppConfig):
                 Project.objects.update_or_create(
                     name="Demo Part Counting Project",
                     setting=default_settings.first(),
-                    download_uri="default_model_pc",
                     is_demo=True,
-                )
+                    defaults={
+                        "download_uri": "scenario_models/1",
+                    })
 
                 logger.info("Create demo project end.")
 

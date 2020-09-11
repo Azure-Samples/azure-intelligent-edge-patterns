@@ -9,7 +9,7 @@ from django.dispatch import receiver
 
 from ..cameras.models import Camera
 from .models import PartDetection
-from .utils import update_cam_helper
+from .utils import deploy_all_helper
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
           sender=PartDetection,
           dispatch_uid="azure_part_detection_has_configured_handler")
 def azure_part_detection_has_configured_handler(**kwargs):
-    """Project is_configured handler
+    """PartDetection is_configured handler
 
     For now, only one project can have is configured = True
     """
@@ -31,6 +31,14 @@ def azure_part_detection_has_configured_handler(**kwargs):
             other_pd.save()
     logger.info("Signal end")
 
+@receiver(signal=post_save,
+          sender=PartDetection,
+          dispatch_uid="azure_part_detection_post_save_deploy_handler")
+def azure_part_detection_post_save_deploy_handler(**kwargs):
+    """Project is_configured handler
+    """
+    instance = kwargs['instance']
+    deploy_all_helper(part_detection_id=instance.id)
 
 @receiver(signal=m2m_changed,
           sender=PartDetection.cameras.through,
@@ -44,7 +52,7 @@ def azure_part_detection_camera_m2m_change(**kwargs):
     action = kwargs["action"]
     instance = kwargs["instance"]
     if action in ["post_add", "post_remove"]:
-        update_cam_helper(part_detection_id=instance.id)
+        deploy_all_helper(part_detection_id=instance.id)
 
 
 @receiver(signal=post_save,
@@ -59,4 +67,4 @@ def azure_part_detection_camera_config_change_handler(**kwargs):
     instance = kwargs["instance"]
     part_detection_objs = PartDetection.objects.filter(cameras=instance)
     for part_detection_obj in part_detection_objs:
-        update_cam_helper(part_detection_id=part_detection_obj.id)
+        deploy_all_helper(part_detection_id=part_detection_obj.id)

@@ -67,5 +67,6 @@ class UpdateCamBodySerializer(serializers.Serializer):
         type = serializers.CharField()
         source = serializers.CharField()
         aoi = serializers.CharField(required=False)
+        lines = serializers.CharField(required=False, allow_blank=True)
 
     cameras = CameraItem(many=True)

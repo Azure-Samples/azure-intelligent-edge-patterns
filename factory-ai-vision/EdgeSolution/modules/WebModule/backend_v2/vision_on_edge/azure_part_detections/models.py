@@ -47,62 +47,7 @@ class PartDetection(models.Model):
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=10)
-
-    @staticmethod
-    def post_save(**kwargs):
-        """post_save.
-        """
-        logger.info("PartDetection post_save")
-        instance = kwargs["instance"]
-
-        if not instance.has_configured:
-            logger.error("This PartDetection is not configured")
-            logger.error("Not sending any request to inference")
-            return
-
-        confidence_min = getattr(instance, 'accuracyRangeMin', 30)
-        confidence_max = getattr(instance, 'accuracyRangeMax', 80)
-        max_images = getattr(instance, 'maxImages', 10)
-        metrics_is_send_iothub = getattr(instance, 'metrics_is_send_iothub',
-                                         False)
-        metrics_accuracy_threshold = getattr(instance,
-                                             'metrics_accuracy_threshold', 50)
-        metrics_frame_per_minutes = getattr(instance,
-                                            'metrics_frame_per_minutes', 6)
-
-        def _r(confidence_min, confidence_max, max_images):
-            requests.get(
-                "http://" + instance.inference_module.url +
-                "/update_part_detection_id",
-                params={
-                    "part_detection_id": instance.id,
-                },
-            )
-            requests.get(
-                "http://" + instance.inference_module.url +
-                "/update_retrain_parameters",
-                params={
-                    "confidence_min": confidence_min,
-                    "confidence_max": confidence_max,
-                    "max_images": max_images,
-                },
-            )
-
-            requests.get(
-                "http://" + instance.inference_module.url +
-                "/update_iothub_parameters",
-                params={
-                    "is_send": metrics_is_send_iothub,
-                    "threshold": metrics_accuracy_threshold,
-                    "fpm": metrics_frame_per_minutes,
-                },
-            )
-
-        threading.Thread(target=_r,
-                         args=(confidence_min, confidence_max,
-                               max_images)).start()
-
-        logger.info("PartDetection post_save... End")
+    # send_video_to_cloud = models.BooleanField(default=False)
 
     def update_prob_threshold(self, prob_threshold):
         """update confidenece threshold of BoundingBox
@@ -131,8 +76,3 @@ class PDScenario(models.Model):
                                       choices=INFERENCE_MODE_CHOICES,
                                       default="PD")
     parts = models.ManyToManyField(Part)
-
-
-post_save.connect(PartDetection.post_save,
-                  PartDetection,
-                  dispatch_uid="PartDetection_post")
