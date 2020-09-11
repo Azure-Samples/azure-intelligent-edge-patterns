@@ -70,7 +70,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
   );
-  const [selectedCamera, setselectedCamera] = useState(null);
+  const [selectedCamera, setselectedCamera] = useState(projectCameraIds[0]);
   useEffect(() => {
     if (projectCameraIds.length) setselectedCamera(projectCameraIds[0]);
   }, [projectCameraIds]);
@@ -93,7 +93,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
 
   useInterval(
     () => {
-      dispatch(thunkGetTrainingLog(projectId, isDemo));
+      dispatch(thunkGetTrainingLog(projectId, isDemo, selectedCamera));
     },
     status === Status.WaitTraining ? 5000 : null,
   );
@@ -106,7 +106,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
 
   useInterval(
     () => {
-      dispatch(thunkGetInferenceMetrics(projectId, isDemo));
+      dispatch(thunkGetInferenceMetrics(projectId, isDemo, selectedCamera));
     },
     status === Status.StartInference ? 5000 : null,
   );
@@ -189,7 +189,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                   dropdown: { width: '180px', marginLeft: '24px' },
                 }}
                 selectedKey={selectedCamera}
-                onChange={(_, option) => setselectedCamera(option.key)}
+                onChange={(_, option) => setselectedCamera(option.key as number)}
               />
             </Stack>
           </Stack>

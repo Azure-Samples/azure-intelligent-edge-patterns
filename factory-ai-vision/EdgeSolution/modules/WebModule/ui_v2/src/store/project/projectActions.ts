@@ -318,10 +318,12 @@ export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState)
     });
 };
 
-export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
+export const thunkGetTrainingLog = (projectId: number, isDemo: boolean, cameraId: number) => (
+  dispatch,
+): Promise<any> => {
   dispatch(getTrainingLogRequest(isDemo));
 
-  return Axios.get(`/api/part_detections/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export?camera_id=${cameraId}`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
@@ -364,10 +366,12 @@ export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boole
     .catch((err) => dispacth(getTrainingMetricsFailed(err, isDemo)));
 };
 
-export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
+export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean, cameraId: number) => (
+  dispatch,
+): Promise<any> => {
   dispatch(getInferenceMetricsRequest(isDemo));
 
-  return Axios.get(`/api/part_detections/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export?camera_id=${cameraId}`)
     .then(({ data }) => {
       return dispatch(
         getInferenceMetricsSuccess(
