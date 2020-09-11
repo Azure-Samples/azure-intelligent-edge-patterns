@@ -81,9 +81,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   useEffect(() => {
     setProjectData(initialProjectData);
   }, [initialProjectData]);
-  const cameraOptions = useSelector(cameraOptionsSelector(isDemo));
+  const cameraOptions = useSelector(cameraOptionsSelector(true));
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
-  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(isDemo));
+  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(true));
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -94,8 +94,8 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
 
   useEffect(() => {
     dispatch(getParts());
-    dispatch(getCameras(isDemo));
-    if (isDemo) dispatch(getTrainingProject(true));
+    dispatch(getCameras(true));
+    dispatch(getTrainingProject(true));
   }, [dispatch, isDemo]);
 
   const onStart = async () => {
