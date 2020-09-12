@@ -39,7 +39,7 @@ class CamerasConfig(AppConfig):
                     name="Demo Video",
                     is_demo=True,
                     defaults={
-                        'rtsp': 'sample_video/video.mp4',
+                        'rtsp': 'rtsp://rtspsim:554/media/video.mkv',
                         'area': "",
                         'location': demo_location_obj
                     })
