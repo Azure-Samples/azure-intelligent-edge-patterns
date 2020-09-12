@@ -104,6 +104,7 @@ def deploy_worker(part_detection_id):
                                          'metrics_accuracy_threshold', 50)
     metrics_frame_per_minutes = getattr(instance, 'metrics_frame_per_minutes',
                                         6)
+    need_retraining = getattr(instance, 'needRetraining', False)
 
     # =====================================================
     # 1. Update params                                  ===
@@ -144,7 +145,7 @@ def deploy_worker(part_detection_id):
         requests.get(
             "http://" + str(instance.inference_module.url) + "/update_model",
             params={"model_dir": instance.project.download_uri},
-        ) 
+        )
     requests.get(
         "http://" + str(instance.inference_module.url) + "/update_parts",
         params={"parts": parts_to_detect},
@@ -153,6 +154,7 @@ def deploy_worker(part_detection_id):
         "http://" + instance.inference_module.url +
         "/update_retrain_parameters",
         params={
+            "is_retrain": need_retraining,
             "confidence_min": confidence_min,
             "confidence_max": confidence_max,
             "max_images": max_images,
