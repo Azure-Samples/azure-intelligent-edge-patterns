@@ -19,10 +19,12 @@ import {
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as R from 'ramda';
+import { useBoolean } from '@uifabric/react-hooks';
+import moment from 'moment';
 
 import { State } from 'RootStateType';
 import { LiveViewContainer } from './LiveViewContainer';
-import { Project, Status } from '../store/project/projectTypes';
+import { Project, Status, InferenceMode } from '../store/project/projectTypes';
 import { useInterval } from '../hooks/useInterval';
 import {
   thunkGetTrainingLog,
@@ -43,10 +45,12 @@ import {
 } from '../store/videoAnnoSlice';
 import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from '../store/actions';
 import { Shape } from '../store/shared/BaseShape';
+import { EmptyAddIcon } from './EmptyAddIcon';
+import { getTrainingProject } from '../store/trainingProjectSlice';
 
 const { palette } = getTheme();
 
-export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
+export const Deployment: React.FC = () => {
   const { status, progress, trainingLog, data: projectData, inferenceMetrics } = useSelector<State, Project>(
     (state) => state.project,
   );
@@ -67,25 +71,38 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
   );
-  const [selectedCamera, setselectedCamera] = useState(null);
+  const isDemo = useSelector((state: State) => {
+    const trainingProjectId = state.project.data.trainingProject;
+    return state.trainingProject.entities[trainingProjectId]?.isDemo;
+  });
+  const [selectedCamera, setselectedCamera] = useState(projectCameraIds[0]);
   useEffect(() => {
     if (projectCameraIds.length) setselectedCamera(projectCameraIds[0]);
   }, [projectCameraIds]);
 
   const partNames = useSelector(selectPartNamesById(parts));
   const dispatch = useDispatch();
+  const objectCounts = useSelector((state: State) =>
+    Object.entries(state.project.inferenceMetrics.partCount),
+  );
+  const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
 
-  const [isEditPanelOpen, setisEditPanelOpen] = useState(false);
-  const openPanel = () => setisEditPanelOpen(true);
-  const closePanel = () => setisEditPanelOpen(false);
+  const [isEditPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
   useEffect(() => {
-    dispatch(thunkGetProject());
+    (async () => {
+      const hasConfigured = await dispatch(thunkGetProject());
+      if (!hasConfigured) openPanel();
+    })();
+  }, [dispatch, openPanel]);
+
+  useEffect(() => {
+    dispatch(getTrainingProject(true));
   }, [dispatch]);
 
   useInterval(
     () => {
-      dispatch(thunkGetTrainingLog(projectId, isDemo));
+      dispatch(thunkGetTrainingLog(projectId, isDemo, selectedCamera));
     },
     status === Status.WaitTraining ? 5000 : null,
   );
@@ -98,7 +115,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
 
   useInterval(
     () => {
-      dispatch(thunkGetInferenceMetrics(projectId, isDemo));
+      dispatch(thunkGetInferenceMetrics(projectId, isDemo, selectedCamera));
     },
     status === Status.StartInference ? 5000 : null,
   );
@@ -131,7 +148,14 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
   ];
 
   const onRenderMain = () => {
-    if (status === Status.None) return <PrimaryButton onClick={openPanel}>Config Task</PrimaryButton>;
+    if (status === Status.None)
+      return (
+        <EmptyAddIcon
+          title="Config a task"
+          subTitle=""
+          primary={{ text: 'Config task', onClick: openPanel }}
+        />
+      );
     if (status === Status.WaitTraining)
       return (
         <Stack horizontalAlign="center" verticalAlign="center" grow tokens={{ childrenGap: 24 }}>
@@ -162,7 +186,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
               <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
                 <Text variant="xLarge">{name}</Text>
                 <Text styles={{ root: { color: palette.neutralSecondary } }}>
-                  Started running <b>{/* TODO */} ago</b>
+                  Started running <b>{moment(deployTimeStamp).fromNow()}</b>
                 </Text>
                 <CommandBar items={commandBarItems} styles={{ root: { padding: 0 } }} />
               </Stack>
@@ -174,7 +198,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                   dropdown: { width: '180px', marginLeft: '24px' },
                 }}
                 selectedKey={selectedCamera}
-                onChange={(_, option) => setselectedCamera(option.key)}
+                onChange={(_, option) => setselectedCamera(option.key as number)}
               />
             </Stack>
           </Stack>
@@ -201,6 +225,7 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
                 successRate={inferenceMetrics.successRate}
                 successfulInferences={inferenceMetrics.successfulInferences}
                 unIdetifiedItems={inferenceMetrics.unIdetifiedItems}
+                objectCounts={objectCounts}
               />
             </PivotItem>
             <PivotItem headerText="Areas of interest">
@@ -217,7 +242,13 @@ export const Deployment: React.FC<{ isDemo: boolean }> = ({ isDemo }) => {
       <Stack horizontal styles={{ root: { height: '100%' } }}>
         {onRenderMain()}
       </Stack>
-      <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closePanel} projectData={projectData} />
+      <ConfigTaskPanel
+        isOpen={isEditPanelOpen}
+        onDismiss={closePanel}
+        projectData={projectData}
+        isDemo={isDemo}
+        isEdit
+      />
     </>
   );
 };
@@ -226,12 +257,14 @@ type InsightsProps = {
   successRate: number;
   successfulInferences: number;
   unIdetifiedItems: number;
+  objectCounts: [string, number][];
 };
 
 export const Insights: React.FC<InsightsProps> = ({
   successRate,
   successfulInferences,
   unIdetifiedItems,
+  objectCounts,
 }) => {
   return (
     <>
@@ -248,8 +281,13 @@ export const Insights: React.FC<InsightsProps> = ({
       >
         <Text styles={{ root: { fontWeight: 'bold' } }}>Successful inferences</Text>
         <Text styles={{ root: { color: palette.neutralSecondary } }}>{successfulInferences}</Text>
-        <ExpandPanel titleHidden="Object" suffix={'' /* TODO */} />
-        <ExpandPanel titleHidden="Area of interest" suffix={'' /* TODO */} />
+        <ExpandPanel titleHidden="Object" suffix={objectCounts.length.toString()}>
+          <Stack tokens={{ childrenGap: 10 }}>
+            {objectCounts.map((e) => (
+              <Text key={e[0]}>{`${e[0]}: ${e[1]}`}</Text>
+            ))}
+          </Stack>
+        </ExpandPanel>
       </Stack>
       <Stack
         styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
@@ -284,6 +322,7 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const originVideoAnnos = useSelector(selectOriginVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
+  const inferenceMode = useSelector((state: State) => state.project.data.inferenceMode);
   const dispatch = useDispatch();
 
   const onAOIToggleClick = async (): Promise<void> => {
@@ -331,20 +370,24 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
         }}
         style={{ padding: '0 5px' }}
       />
-      <Toggle
-        label="Enable counting lines"
-        checked={showCountingLine}
-        onClick={onCountingLineToggleClick}
-        inlineLabel
-      />
-      <DefaultButton
-        text="Create counting line"
-        primary={videoAnnoShape === Shape.Line}
-        disabled={!showCountingLine}
-        onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick(Shape.Line));
-        }}
-      />
+      {inferenceMode === InferenceMode.PC && (
+        <>
+          <Toggle
+            label="Enable counting lines"
+            checked={showCountingLine}
+            onClick={onCountingLineToggleClick}
+            inlineLabel
+          />
+          <DefaultButton
+            text="Create counting line"
+            primary={videoAnnoShape === Shape.Line}
+            disabled={!showCountingLine}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick(Shape.Line));
+            }}
+          />
+        </>
+      )}
       <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
     </Stack>

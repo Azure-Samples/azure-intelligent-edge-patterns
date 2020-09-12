@@ -8,6 +8,7 @@ import time
 import threading
 import base64
 import zmq
+import sys
 
 import cv2
 import numpy as np
@@ -21,6 +22,14 @@ from azure.iot.device import IoTHubModuleClient
 from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 from utility import get_file_zip, normalize_rtsp
+from tracker import Tracker, draw_counter
+tracker = Tracker()
+tracker.set_line(170/2, 680/2, 1487/2, 815/2)
+
+#create instance of SORT
+#mot_tracker = Sort()
+
+
 
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec
@@ -33,6 +42,12 @@ DETECTION_BUFFER_SIZE = 10000
 IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
+if len(sys.argv) > 1:
+    print(sys.argv)
+    DEBUG = sys.argv[1] == 'debug'
+else:
+    DEBUG = False
+DEBUG=True
 
 def is_edge():
     try:
@@ -128,12 +143,29 @@ def draw_confidence_level(img, prediction):
 
     return img
 
+def draw_oid(img, x1, y1, oid):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.7
+    thickness = 2
+    img = cv2.putText(img, str(oid),
+                      (x1+10, y1+20), font, font_scale, (0, 255, 255), thickness)
+    return img
+
+#def draw_counter(img, counter):
+#    font = cv2.FONT_HERSHEY_SIMPLEX
+#    font_scale = 0.7
+#    thickness = 2
+#    img = cv2.putText(img, 'Objects: '+str(counter),
+#                      (img.shape[1]-150, 30), font, font_scale, (0, 255, 255), thickness)
+#    return img
+
 
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
 
-    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
+    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video_scenario/1.mov"):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./mov_bbb.mp4"):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
         # def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
@@ -267,7 +299,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.threshold = self.confidence_max
 
     def update_model(self, model_dir):
-        is_default_model = ('default_model' in model_dir)
+        is_default_model = ('default_model' in model_dir and 'scenario' not in model_dir)
         model = self.load_model(model_dir, is_default_model)
 
         # Protected by Mutex
@@ -305,174 +337,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         return prediction
 
-    # def start_session(self):
-    #     def run(self):
-    #         send_counter = 0
-    #         while True:
-    #             self.lock.acquire()
-    #             b, img = self.cam.read()
-
-    #             if b:
-    #                 width = IMG_WIDTH
-    #                 ratio = IMG_WIDTH / img.shape[1]
-    #                 height = int(img.shape[0] * ratio + 0.000001)
-    #                 if height >= IMG_HEIGHT:
-    #                     height = IMG_HEIGHT
-    #                     ratio = IMG_HEIGHT / img.shape[0]
-    #                     width = int(img.shape[1] * ratio + 0.000001)
-
-    #                 img = cv2.resize(img, (width, height))
-
-    #             self.lock.release()
-
-    #             # if b is false, restart the video if the type is video
-    #             if b:
-    #                 self.last_img = img
-    #                 self.last_prediction = self.predict(img)
-    #                 # print(self.last_prediction)
-    #                 last_prediction_count = {}
-
-    #                 height, width = img.shape[0], img.shape[1]
-
-    #                 detection = DETECTION_TYPE_NOTHING
-    #                 if True:
-    #                     send_counter += 1
-    #                     if self.iothub_is_send:
-    #                         if self.iothub_last_send_time + self.iothub_interval < time.time():
-    #                             predictions_to_send = []
-    #                             for prediction in self.last_prediction:
-    #                                 _tag = prediction['tagName']
-    #                                 _p = prediction['probability']
-    #                                 if _tag not in self.parts:
-    #                                     continue
-    #                                 if _p < self.iothub_threshold:
-    #                                     continue
-    #                                 x1 = int(
-    #                                     prediction['boundingBox']['left'] * width)
-    #                                 y1 = int(
-    #                                     prediction['boundingBox']['top'] * height)
-    #                                 x2 = x1 + \
-    #                                     int(prediction['boundingBox']
-    #                                         ['width'] * width)
-    #                                 y2 = y1 + \
-    #                                     int(prediction['boundingBox']
-    #                                         ['height'] * height)
-    #                                 x1 = min(max(x1, 0), width-1)
-    #                                 x2 = min(max(x2, 0), width-1)
-    #                                 y1 = min(max(y1, 0), height-1)
-    #                                 y2 = min(max(y2, 0), height-1)
-    #                                 if self.has_aoi:
-    #                                     if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info):
-    #                                         continue
-
-    #                                 predictions_to_send.append(prediction)
-    #                             if len(predictions_to_send) > 0:
-    #                                 if iot:
-    #                                     try:
-    #                                         iot.send_message_to_output(
-    #                                             json.dumps(predictions_to_send), 'metrics')
-    #                                     except:
-    #                                         print(
-    #                                             '[ERROR] Failed to send message to iothub', flush=True)
-    #                                     print(
-    #                                         '[INFO] sending metrics to iothub')
-    #                                 else:
-    #                                     #print('[METRICS]', json.dumps(predictions_to_send))
-    #                                     pass
-    #                                 self.iothub_last_send_time = time.time()
-
-    #                     for prediction in self.last_prediction:
-
-    #                         tag = prediction['tagName']
-    #                         if tag not in self.parts:
-    #                             continue
-
-    #                         if prediction['probability'] > self.threshold:
-    #                             if tag not in last_prediction_count:
-    #                                 last_prediction_count[tag] = 1
-    #                             else:
-    #                                 last_prediction_count[tag] += 1
-
-    #                         (x1, y1), (x2, y2) = parse_bbox(
-    #                             prediction, width, height)
-    #                         if self.has_aoi:
-    #                             if not is_inside_aoi(x1, y1, x2, y2, self.aoi_info):
-    #                                 continue
-
-    #                         if detection != DETECTION_TYPE_SUCCESS:
-    #                             if prediction['probability'] >= self.threshold:
-    #                                 detection = DETECTION_TYPE_SUCCESS
-    #                             else:
-    #                                 detection = DETECTION_TYPE_UNIDENTIFIED
-
-    #                         if self.last_upload_time + UPLOAD_INTERVAL < time.time():
-    #                             if self.confidence_min <= prediction['probability'] <= self.confidence_max:
-    #                                 if self.is_upload_image:
-    #                                     # if tag in onnx.current_uploaded_images and self.current_uploaded_images[tag] >= onnx.max_images:
-    #                                     # if tag in onnx.current_uploaded_images:
-    #                                     # No limit for the max_images in inference module now, the logic is moved to webmodule
-    #                                     #    pass
-    #                                     # else:
-    #                                     if True:
-
-    #                                         labels = json.dumps(
-    #                                             [{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
-    #                                         print('[INFO] Sending Image to relabeling', tag, onnx.current_uploaded_images.get(
-    #                                             tag, 0), labels)
-    #                                         #self.current_uploaded_images[tag] = self.current_uploaded_images.get(tag, 0) + 1
-    #                                         self.last_upload_time = time.time()
-
-    #                                         jpg = cv2.imencode('.jpg', img)[
-    #                                             1].tobytes()
-    #                                         try:
-    #                                             requests.post('http://'+web_module_url()+'/api/relabel', data={
-    #                                                 'confidence': prediction['probability'],
-    #                                                 'labels': labels,
-    #                                                 'part_name': tag,
-    #                                                 'is_relabel': True,
-    #                                                 'img': base64.b64encode(jpg)
-    #                                             })
-    #                                         except:
-    #                                             print(
-    #                                                 '[ERROR] Failed to update image for relabeling')
-
-    #                 self.last_prediction_count = last_prediction_count
-
-    #                 self.lock.acquire()
-    #                 if detection == DETECTION_TYPE_NOTHING:
-    #                     pass
-    #                 else:
-    #                     if self.detection_total == DETECTION_BUFFER_SIZE:
-    #                         oldest_detection = self.detections.pop(0)
-    #                         if oldest_detection == DETECTION_TYPE_UNIDENTIFIED:
-    #                             self.detection_unidentified_num -= 1
-    #                         elif oldest_detection == DETECTION_TYPE_SUCCESS:
-    #                             self.detection_success_num -= 1
-
-    #                         self.detections.append(detection)
-    #                         if detection == DETECTION_TYPE_UNIDENTIFIED:
-    #                             self.detection_unidentified_num += 1
-    #                         elif detection == DETECTION_TYPE_SUCCESS:
-    #                             self.detection_success_num += 1
-    #                     else:
-    #                         self.detections.append(detection)
-    #                         if detection == DETECTION_TYPE_UNIDENTIFIED:
-    #                             self.detection_unidentified_num += 1
-    #                         elif detection == DETECTION_TYPE_SUCCESS:
-    #                             self.detection_success_num += 1
-    #                         self.detection_total += 1
-
-    #                 self.lock.release()
-    #                 # print(detection)
-    #             else:
-    #                 if self.cam_type == 'video_file':
-    #                     self.restart_cam()
-    #             # print(self.last_prediction)
-    #             if self.cam_type == 'video_file':
-    #                 time.sleep(0.01)
-
-    #     self.session = threading.Thread(target=run, args=(self,))
-    #     self.session.start()
 
     def local_test(self):
         cap = cv2.VideoCapture(0)
@@ -485,7 +349,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
                 break
 
 
-model_dir = './default_model'
+#model_dir = './default_model'
+model_dir = './default_model_scenario/1'
 #model_dir = './default_model_6parts'
 onnx = ONNXRuntimeModelDeploy(model_dir)
 # onnx.start_session()
@@ -562,12 +427,13 @@ def predict():
         img = cv2.resize(img, (width, height))
 
         predictions = onnx.predict(img)
-        onnx.last_prediction = predictions
+        if DEBUG:
+            onnx.last_prediction = predictions
+        else:
+            onnx.last_prediction = list(prediction for prediction in predictions if prediction['tagName'] in onnx.parts)
         results = []
         for prediction in predictions:
             tag_name = prediction['tagName']
-            if tag_name not in onnx.parts:
-                continue
             confidence = prediction['probability']
             box = {
                 'l': prediction['boundingBox']['left'],
@@ -772,6 +638,13 @@ def update_prob_threshold():
 
     return 'ok'
 
+_m = (170 - 1487) / (680 - 815)
+_b = 680/2 - _m * 170/2
+def compute_direction(x, y):
+    return _m * x + _b - y
+def is_same_direction(x1, y1, x2, y2):
+    return 0.000000001 < (compute_direction(x1, y1) * compute_direction(x2, y2))
+
 
 @app.route('/video_feed')
 def video_feed():
@@ -779,34 +652,44 @@ def video_feed():
     print(inference)
 
     def _gen():
+        detected = {} #FIXME need to gc
+        counter = 0
         while True:
             img = onnx.last_img.copy()
+            detections = []
             if inference:
                 height, width = img.shape[0], img.shape[1]
                 predictions = onnx.last_prediction
                 for prediction in predictions:
                     tag = prediction['tagName']
-                    if tag not in onnx.parts:
-                        continue
 
                     if onnx.has_aoi:
-                        # for aoi_area in onnx.aoi_info:
-                        # img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
-                        #    aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
                         draw_aoi(img, onnx.aoi_info)
 
+                    (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
+
+                    if prediction['probability'] > 0.5:
+                        detections.append([x1, y1, x2, y2, prediction['probability']])
+
                     if prediction['probability'] > onnx.threshold:
-                        (x1, y1), (x2, y2) = parse_bbox(
-                            prediction, width, height)
                         if onnx.has_aoi:
                             if not is_inside_aoi(x1, y1, x2, y2, onnx.aoi_info):
                                 continue
+
 
                         img = cv2.rectangle(
                             img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                         img = draw_confidence_level(img, prediction)
 
+            #objs = mot_tracker.update(np.array(detections))
+            counter, objs, counted = tracker.update(detections)
+
+            #print(objs)
             time.sleep(0.02)
+            #print(img.shape)
+            #img = cv2.line(img, (int(170/2), int(680/2)), (int(1487/2), int(815/2)), (0, 255, 255), 5)
+            img = tracker.draw_counter(img)
+            img = tracker.draw_line(img)
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
     return Response(_gen(),
@@ -828,13 +711,8 @@ def gen():
         predictions = onnx.last_prediction
         for prediction in predictions:
             tag = prediction['tagName']
-            if tag not in onnx.parts:
-                continue
 
             if onnx.has_aoi:
-                # for aoi_area in onnx.aoi_info:
-                # img = cv2.rectangle(img, (int(aoi_area['x1']), int(aoi_area['y1'])), (int(
-                #    aoi_area['x2']), int(aoi_area['y2'])), (0, 255, 255), 2)
                 draw_aoi(img, onnx.aoi_info)
 
             if prediction['probability'] > onnx.threshold:
@@ -843,6 +721,7 @@ def gen():
                 if onnx.has_aoi:
                     if not is_inside_aoi(x1, y1, x2, y2, onnx.aoi_info):
                         continue
+
 
                 img = cv2.rectangle(
                     img, (x1, y1), (x2, y2), (0, 0, 255), 2)
@@ -867,10 +746,7 @@ def post_run():
             if onnx.iothub_last_send_time + onnx.iothub_interval < time.time():
                 predictions_to_send = []
                 for prediction in onnx.last_prediction:
-                    _tag = prediction['tagName']
                     _p = prediction['probability']
-                    if _tag not in onnx.parts:
-                        continue
                     if _p < onnx.iothub_threshold:
                         continue
                     x1 = int(
@@ -910,8 +786,6 @@ def post_run():
         for prediction in onnx.last_prediction:
 
             tag = prediction['tagName']
-            if tag not in onnx.parts:
-                continue
 
             if prediction['probability'] > onnx.threshold:
                 if tag not in last_prediction_count:
@@ -1044,8 +918,6 @@ def gen_edge():
     predictions = onnx.last_prediction
     for prediction in predictions:
         tag = prediction['tagName']
-        if tag not in onnx.parts:
-            continue
 
         if onnx.has_aoi:
             # for aoi_area in onnx.aoi_info:

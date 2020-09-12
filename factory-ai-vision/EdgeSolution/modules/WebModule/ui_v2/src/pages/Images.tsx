@@ -7,13 +7,14 @@ import {
   Breadcrumb,
   Pivot,
   PivotItem,
+  MessageBar,
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
-import { selectImageItemByUntagged } from '../store/selectors';
+import { selectImageItemByUntagged, selectImageItemByRelabel } from '../store/selectors';
 import { getParts } from '../store/partSlice';
 import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
 
@@ -27,6 +28,7 @@ export const Images: React.FC = () => {
   const dispatch = useDispatch();
   const labeledImages = useSelector(selectImageItemByUntagged(false));
   const unlabeledImages = useSelector(selectImageItemByUntagged(true));
+  const relabelImages = useSelector(selectImageItemByRelabel());
 
   const onUpload = () => {
     fileInputRef.current.click();
@@ -88,7 +90,16 @@ export const Images: React.FC = () => {
                     secondary={{ text: 'Upload images', onClick: onUpload }}
                   />
                 ) : (
-                  <ImageList images={unlabeledImages} />
+                  <>
+                    {relabelImages.length > 0 && (
+                      <MessageBar styles={{ root: { margin: '12px 0px' } }}>
+                        Images saved from the current deployment. Confirm or modify the objects identified to
+                        improve your model.
+                      </MessageBar>
+                    )}
+                    <ImageList images={relabelImages} />
+                    <ImageList images={unlabeledImages} />
+                  </>
                 )}
               </PivotItem>
               <PivotItem headerText="Tagged">

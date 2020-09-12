@@ -47,8 +47,8 @@ class PartDetection(models.Model):
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=10)
+    send_video_to_cloud = models.BooleanField(default=False)
 
-    # send_video_to_cloud = models.BooleanField(default=False)
 
     def update_prob_threshold(self, prob_threshold):
         """update confidenece threshold of BoundingBox

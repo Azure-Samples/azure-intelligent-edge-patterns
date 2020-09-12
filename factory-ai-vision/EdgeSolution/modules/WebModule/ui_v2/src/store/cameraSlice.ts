@@ -13,6 +13,7 @@ import {
   getConditionBySlice,
   getNonDemoSelector,
 } from './shared/DemoSliceUtils';
+import { GetProjectSuccessAction, InferenceMode } from './project/projectTypes';
 
 type CameraFromServer = {
   id: number;
@@ -155,6 +156,10 @@ export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number
   return id;
 });
 
+const isGetProjectSuccess = (action): action is GetProjectSuccessAction => {
+  return action.type === isGetProjectSuccess;
+};
+
 const slice = createSlice({
   name: 'cameras',
   initialState: getInitialDemoState(entityAdapter.getInitialState()),
@@ -183,7 +188,13 @@ const slice = createSlice({
         const { checked, cameraId } = action.meta.arg;
         state.entities[cameraId].useCountingLine = !checked;
       })
-      .addMatcher(isCRDAction, insertDemoFields);
+      .addMatcher(isCRDAction, insertDemoFields)
+      .addMatcher(isGetProjectSuccess, (state, action) => {
+        state.ids.forEach((e) => {
+          if (action.payload.project.inferenceMode !== InferenceMode.PC)
+            state.entities[e].useCountingLine = false;
+        });
+      });
   },
 });
 

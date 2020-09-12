@@ -122,18 +122,20 @@ def deploy_worker(part_detection_id):
             "part_detection_mode": instance.inference_mode,
         },
     )
-    # requests.get(
-        # "http://" + str(instance.inference_module.url) +
-        # "/update_send_video_to_cloud",
-        # params={
-            # "send_video_to_cloud": instance.send_video_to_cloud,
-        # },
-    # )
+    requests.get(
+        "http://" + str(instance.inference_module.url) +
+        "/update_send_video_to_cloud",
+        params={
+            "send_video_to_cloud": instance.send_video_to_cloud,
+        },
+    )
 
     # =====================================================
     # 1. Update model                                  ===
     # =====================================================
-    if not instance.project.is_demo:
+    if not instance.project:
+        pass
+    elif not instance.project.is_demo:
         requests.get(
             "http://" + str(instance.inference_module.url) + "/update_model",
             params={"model_uri": instance.project.download_uri},

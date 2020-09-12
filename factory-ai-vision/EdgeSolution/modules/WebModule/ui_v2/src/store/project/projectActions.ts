@@ -58,7 +58,7 @@ const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
   isDemo,
 });
-const getProjectSuccess = (
+export const getProjectSuccess = (
   project: ProjectData,
   hasConfigured: boolean,
   isDemo: boolean,
@@ -120,6 +120,8 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     probThreshold: data?.prob_threshold.toString() ?? '10',
     name: data?.name ?? '',
     inferenceMode: data?.inference_mode ?? '',
+    sendVideoToCloud: data?.send_video_to_cloud ?? false,
+    deployTimeStamp: data?.deploy_timestamp ?? '',
   },
   isDemo,
 });
@@ -223,7 +225,7 @@ const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThr
 
 const getProjectData = (state: State): ProjectData => state.project.data;
 
-export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => {
+export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> => {
   dispatch(getProjectRequest(false));
 
   const url = '/api/part_detections/';
@@ -247,9 +249,11 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<void> => 
         trainingProject: data[0]?.project ?? null,
         name: data[0]?.name ?? '',
         inferenceMode: data[0]?.inference_mode ?? '',
+        sendVideoToCloud: data[0]?.send_video_to_cloud ?? false,
+        deployTimeStamp: data[0]?.deploy_timestamp ?? '',
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
-      return void 0;
+      return data[0]?.has_configured;
     })
     .catch((err) => {
       dispatch(getProjectFailed(err, false));
@@ -279,6 +283,8 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       metrics_frame_per_minutes: projectData.framesPerMin,
       metrics_accuracy_threshold: projectData.accuracyThreshold,
       name: projectData.name,
+      send_video_to_cloud: projectData.sendVideoToCloud,
+      inference_mode: projectData.inferenceMode,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
@@ -313,10 +319,12 @@ export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState)
     });
 };
 
-export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
+export const thunkGetTrainingLog = (projectId: number, isDemo: boolean, cameraId: number) => (
+  dispatch,
+): Promise<any> => {
   dispatch(getTrainingLogRequest(isDemo));
 
-  return Axios.get(`/api/part_detections/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export?camera_id=${cameraId}`)
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
@@ -359,10 +367,12 @@ export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boole
     .catch((err) => dispacth(getTrainingMetricsFailed(err, isDemo)));
 };
 
-export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
+export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean, cameraId: number) => (
+  dispatch,
+): Promise<any> => {
   dispatch(getInferenceMetricsRequest(isDemo));
 
-  return Axios.get(`/api/part_detections/${projectId}/export`)
+  return Axios.get(`/api/part_detections/${projectId}/export?camera_id=${cameraId}`)
     .then(({ data }) => {
       return dispatch(
         getInferenceMetricsSuccess(

@@ -40,7 +40,7 @@ const settingReducer = (state = initialState, action: SettingActionType): Settin
     case 'settings/listAllProjects/rejected':
       return { ...state, loading: false, error: action.error };
     case patchIsCollectData.pending.toString():
-      return { ...state, isCollectData: (action as any).meta.arg.isCollectData };
+      return { ...state, isCollectData: (action as any).meta.arg.isCollectData, appInsightHasInit: true };
     case patchIsCollectData.rejected.toString():
       return { ...state, isCollectData: !(action as any).meta.arg.isCollectData };
     default:

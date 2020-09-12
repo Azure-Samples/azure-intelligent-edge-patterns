@@ -22,6 +22,7 @@ from webmodule_utils import PART_DETECTION_MODE_CHOICES
 #sys.path.insert(0, '../lib')
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec
@@ -181,7 +182,7 @@ def update_cams():
         cam_source = cam['source']
         cam_id = cam['id']
         # TODO: IF onnx.part_detection_mode == "PC" (PartCounting), use lines to count
-        cam_id = cam['lines']
+        cam_lines = cam['lines']
 
         if not cam_type:
             return 'missing cam_type'
@@ -200,7 +201,7 @@ def update_cams():
 
         logger.info('updating camera {0}'.format(cam_id))
         s = stream_manager.get_stream_by_id(cam_id)
-        s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info)
+        s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
 
     return 'ok'
 
@@ -210,7 +211,7 @@ def update_part_detection_mode():
     """update_part_detection_mode.
     """
 
-    part_detection_mode = request.args.get('mode')
+    part_detection_mode = request.args.get('part_detection_mode')
     if not part_detection_mode:
         return 'missing part_detection_mode'
 
@@ -233,6 +234,7 @@ def update_send_video_to_cloud():
         return 'invalid send_video_to_cloud'
     # TODO: Change something here
     return 'ok'
+
 
 @app.route('/update_parts')
 def update_parts():
@@ -284,6 +286,12 @@ def update_iothub_parameters():
     s.update_iothub_parameters(is_send, threshold, fpm)
     return 'ok'
 
+@app.route('/status')
+def get_scenario():
+    return json.dumps({
+        'streams': len(stream_manager.streams),
+        'scenario': onnx.detection_mode
+    })
 
 @app.route('/update_prob_threshold')
 def update_prob_threshold():
@@ -364,8 +372,7 @@ if __name__ == "__main__":
     # Set logging parameters
     logging.basicConfig(
         level=logging_level,
-        format=
-        '[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s',
+        format='[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s',
         handlers=[
             # logging.FileHandler(LOG_FILE_NAME),     # write in a log file
             logging.StreamHandler(sys.stdout)  # write in stdout

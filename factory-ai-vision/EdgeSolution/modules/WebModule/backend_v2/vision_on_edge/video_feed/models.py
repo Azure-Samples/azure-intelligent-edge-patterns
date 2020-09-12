@@ -49,7 +49,6 @@ class VideoFeed():
             self.receiver.close()
         threading.Thread(target=_start, args=(self,)).start()
 
-
     def gen(self):
         """gen
 
@@ -60,7 +59,7 @@ class VideoFeed():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' +
                        self.buf[1] + b'\r\n')
-            time.sleep(0.04)
+            time.sleep(0.1)
 
     def update_keep_alive(self):
         """update_keep_alive.
