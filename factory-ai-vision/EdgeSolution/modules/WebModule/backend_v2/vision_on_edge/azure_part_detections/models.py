@@ -42,7 +42,7 @@ class PartDetection(models.Model):
     accuracyRangeMin = models.IntegerField(default=30)
     accuracyRangeMax = models.IntegerField(default=80)
 
-    maxImage = models.IntegerField(default=10)
+    maxImages = models.IntegerField(default=10)
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
