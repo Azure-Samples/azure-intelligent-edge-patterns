@@ -35,6 +35,7 @@ class AzureProjectsConfig(AppConfig):
 
             create_demo = True
             if create_demo:
+                logger.info("Creating demo projects...")
                 # Default Settings should be created already
                 default_settings = Setting.objects.filter(
                     name=DEFAULT_SETTING_NAME)
@@ -43,12 +44,18 @@ class AzureProjectsConfig(AppConfig):
                     return
                 if Project.objects.filter(is_demo=True).exists():
                     Project.objects.filter(is_demo=True).delete()
+                # =============================================
+                # Simple Part Detection                     ===
+                # =============================================
                 Project.objects.update_or_create(
                     name="Demo Part Detection Project",
                     setting=default_settings.first(),
                     download_uri="default_model_6parts",
                     is_demo=True,
                 )
+                # =============================================
+                # Part Counting                             ===
+                # =============================================
                 Project.objects.update_or_create(
                     name="Demo Part Counting Project",
                     setting=default_settings.first(),
@@ -56,7 +63,24 @@ class AzureProjectsConfig(AppConfig):
                     defaults={
                         "download_uri": "scenario_models/1",
                     })
-
+                # =============================================
+                # Employee safety                           ===
+                # =============================================
+                Project.objects.update_or_create(
+                    name="Demo Employee Safety Project",
+                    setting=default_settings.first(),
+                    is_demo=True,
+                    defaults={
+                        "download_uri": "scenario_models/2",
+                    })
+                # =============================================
+                # Defect Detection                          ===
+                # =============================================
+                Project.objects.update_or_create(
+                    name="Demo Defect Detection Project",
+                    setting=default_settings.first(),
+                    is_demo=True,
+                    defaults={
+                        "download_uri": "scenario_models/3",
+                    })
                 logger.info("Create demo project end.")
-
-            logger.info("Azure Training AppConfig End while running server")

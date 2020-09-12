@@ -3,11 +3,9 @@
 """
 
 import logging
-import threading
 
 import requests
 from django.db import models
-from django.db.models.signals import post_save
 from django.utils import timezone
 
 from ..azure_parts.models import Part
@@ -17,7 +15,9 @@ from ..inference_modules.models import InferenceModule
 
 logger = logging.getLogger(__name__)
 
-INFERENCE_MODE_CHOICES = [("PD", "part_detection"), ("PC", "part_counting")]
+INFERENCE_MODE_CHOICES = [("PD", "part_detection"), ("PC", "part_counting"),
+                          ("ES", "employee_safety"),
+                          ("DD", "defect_detection")]
 
 
 class PartDetection(models.Model):

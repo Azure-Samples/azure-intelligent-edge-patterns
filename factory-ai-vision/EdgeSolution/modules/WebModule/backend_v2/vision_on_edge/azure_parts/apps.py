@@ -34,11 +34,13 @@ class AzurePartsConfig(AppConfig):
             if create_demo:
                 logger.info("Creating demo parts...")
 
+                # =============================================
+                # Simple Part Detection                     ===
+                # =============================================
                 if Project.objects.filter(
                         is_demo=True,
                         name="Demo Part Detection Project").count() != 1:
                     return
-
                 project_obj = Project.objects.get(
                     is_demo=True, name="Demo Part Detection Project")
                 for partname in [
@@ -68,22 +70,43 @@ class AzurePartsConfig(AppConfig):
                         Part.objects.create(project=project_obj,
                                             name=partname,
                                             description="Demo")
-                if Project.objects.filter(
-                        is_demo=True,
-                        name="Demo Part Counting Project").count() != 1:
-                    return
-
-                # Object Counting
-                project_obj = Project.objects.get(
-                    is_demo=True, name="Demo Part Counting Project")
-                for partname in [
-                        'box',
-                ]:
-                    if not Part.objects.filter(project=project_obj,
-                                               name=partname).exists():
-                        Part.objects.create(project=project_obj,
-                                            name=partname,
-                                            description="Demo")
-                logger.info("Creating demo parts finished.")
-
+                # =============================================
+                # Part Counting                             ===
+                # =============================================
+                try:
+                    project_obj = Project.objects.get(
+                        is_demo=True, name="Demo Part Counting Project")
+                    for partname in ['box']:
+                        Part.objects.update_or_create(
+                            project=project_obj,
+                            name=partname,
+                            defaults={"description": "Demo"})
+                except Exception:
+                    logger.error("Create Demo Part Counting Parts error")
+                # =============================================
+                # Employee safety                           ===
+                # =============================================
+                try:
+                    project_obj = Project.objects.get(
+                        is_demo=True, name="Demo Employee Safety Project")
+                    for partname in ['employee']:
+                        Part.objects.update_or_create(
+                            project=project_obj,
+                            name=partname,
+                            defaults={"description": "Demo"})
+                except Exception:
+                    logger.error("Create Demo Employee Safety Parts error")
+                # =============================================
+                # Defect Detection                          ===
+                # =============================================
+                try:
+                    project_obj = Project.objects.get(
+                        is_demo=True, name="Demo Defect Detection Project")
+                    for partname in ['defect']:
+                        Part.objects.update_or_create(
+                            project=project_obj,
+                            name=partname,
+                            defaults={"description": "Demo"})
+                except Exception:
+                    logger.error("Create Demo Defect Defection Parts error")
             logger.info("Part App Config end while running server")
