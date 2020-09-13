@@ -125,7 +125,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
           isOpen={isOpen}
           type={PanelType.smallFluid}
           onDismiss={onDismiss}
-          onOuterClick={dummyFunction}
+          {...(!canBeDismissed && { onOuterClick: dummyFunction })}
         >
           <Stack tokens={{ childrenGap: 17 }}>
             <h4>Azure Cognitive Services settings</h4>
