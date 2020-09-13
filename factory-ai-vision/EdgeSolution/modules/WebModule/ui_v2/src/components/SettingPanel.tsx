@@ -29,7 +29,6 @@ import {
   updateNamespace,
   updateKey,
   thunkPostSetting,
-  thunkGetAllCvProjects,
   patchIsCollectData,
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
@@ -111,12 +110,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   useEffect(() => {
     dispatch(checkSettingStatus());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (settingData.id !== -1) {
-      dispatch(thunkGetAllCvProjects());
-    }
-  }, [dispatch, settingData.id]);
 
   useEffect(() => {
     setselectedCustomvisionId(defaultCustomvisionId);

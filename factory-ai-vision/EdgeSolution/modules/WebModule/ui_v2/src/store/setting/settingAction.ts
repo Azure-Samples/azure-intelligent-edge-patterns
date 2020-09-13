@@ -212,7 +212,7 @@ export const thunkGetAllCvProjects = (): SettingThunk => (dispatch, getState) =>
     })
     .catch((e) => {
       if (e.response) {
-        throw new Error(e.response.data.log);
+        throw new Error(e.response.data.error.message);
       } else if (e.request) {
         throw new Error(e.request);
       } else {
