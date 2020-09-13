@@ -36,12 +36,36 @@ ARG DEVICE
 #RUN sudo apt-get update
 #RUN sudo apt-get -y install cuda
 
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN rm -rf /opt/miniconda
+RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
 COPY requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install -U certifi --ignore-installed
-RUN pip install -r requirements.txt --ignore-installed && \
-    pip install flask opencv-python onnx
-#RUN pip install onnxruntime onnxruntime-gpu
+ENV CONDA_ENV_NAME python38
+RUN conda create --name python38 python=3.8.5 -y &&\
+    . activate python38
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install onnxruntime-gpu"]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements.txt --ignore-installed"]
+
+# RUN pip install --upgrade pip &&\
+#     pip install -r requirements.txt --ignore-installed && \
+#     pip install flask opencv-python onnx onnxruntime
+
+ARG DEVICE
+
+
+COPY arguments.py ./
+COPY coco_classes.txt ./
+COPY exception_handler.py ./
+COPY extension_pb2.py ./
+COPY extension_pb2_grpc.py ./
+COPY inference_engine.py ./
+COPY inferencing_pb2.py ./
+COPY media_pb2.py ./
+COPY model_wrapper.py ./
+COPY server.py ./
+COPY shared_memory.py ./
 
 COPY main.py ./
 COPY config.py ./
@@ -63,12 +87,21 @@ COPY media_pb2.py ./
 COPY model_wrapper.py ./
 COPY shared_memory.py ./
 COPY server.py ./
+COPY invoke.py ./
+COPY stream_manager.py ./
+COPY streams.py ./
+COPY config.py ./
 COPY webmodule_utils/*.py ./webmodule_utils/
+COPY grpc_topology.json ./
+COPY scenario_models scenario_models/
+COPY sort.py ./
+COPY tracker.py ./
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
+
 
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "python3", "main.py" ]
-
+CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
+#CMD [ "python3", "server.py", "-p", "44000" ]
