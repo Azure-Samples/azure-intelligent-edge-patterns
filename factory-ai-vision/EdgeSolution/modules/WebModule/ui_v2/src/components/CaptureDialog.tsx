@@ -52,7 +52,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   const dispatch = useDispatch();
   const [status, setStatus] = useState<Status>(Status.Waiting);
   const streamIdRef = useRef('');
-  const capturedImgs = useRef([]);
+  const capturedImgs = useRef<number[]>([]);
 
   const closeDialog = () => {
     setStatus(Status.Waiting);
@@ -70,7 +70,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
       captureImage({ streamId: streamIdRef.current, imageIds: [], shouldOpenLabelingPage: false }),
     );
     const { payload } = action as any;
-    if (payload) capturedImgs.current.push(Object.keys(payload.images)[0]);
+    if (payload) capturedImgs.current.push(parseInt(Object.keys(payload.images)[0], 10));
     setStatus(Status.Success);
   };
 
