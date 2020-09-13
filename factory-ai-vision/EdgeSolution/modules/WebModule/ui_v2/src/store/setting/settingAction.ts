@@ -137,8 +137,9 @@ export const thunkGetSettingAndAppInsightKey = (): SettingThunk => (dispatch): P
               cvProjects: [],
             }),
           );
+        } else {
+          throw new Error('No API Key');
         }
-        throw new Error('No API Key');
       }),
     )
     .catch((e) => console.error(e));
