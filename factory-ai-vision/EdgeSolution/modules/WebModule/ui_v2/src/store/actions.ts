@@ -1,9 +1,10 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createAction, Update } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
 import { isAOIShape, isCountingLine } from './shared/VideoAnnoUtil';
+import { Image } from './type';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
   'updateRelabel',
@@ -93,3 +94,26 @@ export const pullCVProjects = createAsyncThunk<
     dispatch(getTrainingProject(false));
   },
 );
+
+export const changeImage = createAction<{ offset: 1 | -1; changePart: Update<Image> }>(
+  'labelingPage/goNextImage',
+);
+
+const getChangeImageAction = (rootState, offset: 1 | -1) => {
+  const { entities } = rootState.labelImages;
+  const { imageIds, selectedImageId } = rootState.labelingPage;
+  const newImgId = imageIds[imageIds.indexOf(selectedImageId) + offset];
+
+  const partOfCurrentImg = entities[selectedImageId].part;
+  const partOfNewImg = entities[newImgId].part;
+
+  // If no part defined in the next image, set it same as the current one.
+  const changes = partOfNewImg === null ? { part: partOfCurrentImg } : {};
+  return changeImage({ offset, changePart: { id: newImgId, changes } });
+};
+
+export const thunkGoNextImage = () => (dispatch, getState: () => State) =>
+  dispatch(getChangeImageAction(getState(), 1));
+
+export const thunkGoPrevImage = () => (dispatch, getState: () => State) =>
+  dispatch(getChangeImageAction(getState(), -1));

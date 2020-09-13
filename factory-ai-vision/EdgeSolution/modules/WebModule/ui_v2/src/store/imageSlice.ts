@@ -13,7 +13,7 @@ import { schema, normalize } from 'normalizr';
 import { State } from 'RootStateType';
 import { Annotation, AnnotationState, Image } from './type';
 import { openLabelingPage } from './labelingPageSlice';
-import { deleteImage } from './actions';
+import { deleteImage, changeImage } from './actions';
 
 // Type definition
 type ImageFromServer = {
@@ -150,7 +150,8 @@ const slice = createSlice({
       .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
       .addCase(postImages.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
-      });
+      })
+      .addCase(changeImage, (state, action) => imageAdapter.updateOne(state, action.payload.changePart));
   },
 });
 
