@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { deleteImage } from './actions';
+import { deleteImage, changeImage } from './actions';
 
 export type LabelPageState = {
   imageIds: number[];
@@ -26,19 +26,19 @@ const slice = createSlice({
       imageIds: [],
       selectedImageId: null,
     }),
-    goNextImage: changeSelectedImage(1),
-    goPrevImage: changeSelectedImage(-1),
   },
   extraReducers: (builder) =>
-    builder.addCase(deleteImage.fulfilled, (state, action) => {
-      const removeIdx = state.imageIds.findIndex((id) => id === action.payload);
-      state.imageIds.splice(removeIdx, 1);
-      if (state.imageIds.length === 0) state.selectedImageId = null;
-      else state.selectedImageId = state.imageIds[removeIdx] || state.imageIds[0];
-    }),
+    builder
+      .addCase(deleteImage.fulfilled, (state, action) => {
+        const removeIdx = state.imageIds.findIndex((id) => id === action.payload);
+        state.imageIds.splice(removeIdx, 1);
+        if (state.imageIds.length === 0) state.selectedImageId = null;
+        else state.selectedImageId = state.imageIds[removeIdx] || state.imageIds[0];
+      })
+      .addCase(changeImage, (state, action) => changeSelectedImage(action.payload.offset)(state)),
 });
 
 const { reducer } = slice;
 export default reducer;
 
-export const { openLabelingPage, closeLabelingPage, goNextImage, goPrevImage } = slice.actions;
+export const { openLabelingPage, closeLabelingPage } = slice.actions;

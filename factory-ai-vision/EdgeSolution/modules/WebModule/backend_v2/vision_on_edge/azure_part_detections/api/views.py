@@ -93,9 +93,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         success_rate = 0.0
         inference_num = 0
         unidentified_num = 0
+        cam_id = request.GET['camera_id']
         try:
             res = requests.get("http://" + inference_module_obj.url +
-                               "/metrics")
+                               "/metrics?cam_id="+cam_id)
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
             inference_num = data["inference_num"]
@@ -202,7 +203,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             img_obj = Image(
                 image=img,
                 part_id=part.id,
-                camera=instance.camera,
+                camera=None,
                 labels=serializer.validated_data["labels"],
                 confidence=serializer.validated_data["confidence"],
                 project=instance.project,

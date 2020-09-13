@@ -29,7 +29,6 @@ import {
   updateNamespace,
   updateKey,
   thunkPostSetting,
-  thunkGetAllCvProjects,
   patchIsCollectData,
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
@@ -113,12 +112,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (settingData.id !== -1) {
-      dispatch(thunkGetAllCvProjects());
-    }
-  }, [dispatch, settingData.id]);
-
-  useEffect(() => {
     setselectedCustomvisionId(defaultCustomvisionId);
   }, [defaultCustomvisionId]);
 
@@ -132,7 +125,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
           isOpen={isOpen}
           type={PanelType.smallFluid}
           onDismiss={onDismiss}
-          onOuterClick={dummyFunction}
+          {...(!canBeDismissed && { onOuterClick: dummyFunction })}
         >
           <Stack tokens={{ childrenGap: 17 }}>
             <h4>Azure Cognitive Services settings</h4>

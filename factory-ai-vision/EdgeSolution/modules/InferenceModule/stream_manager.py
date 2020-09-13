@@ -41,8 +41,18 @@ class StreamManager(object):
         stream = Stream(stream_id, self.model, self.sender)
         self.streams[stream_id] = stream
 
+    def get_streams(self):
+        self.mutex.acquire()
+        streams = list(self.streams.values())
+        self.mutex.release()
+        return streams
+
+
     def update_streams(self, stream_ids):
         self.mutex.acquire()
+
+        for stream in self.streams.values():
+            stream.reset_metrics()
 
         origin_stream_ids = list([stream_id for stream_id in self.streams])
 

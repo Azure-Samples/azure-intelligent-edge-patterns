@@ -16,12 +16,12 @@ import {
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
-import { closeLabelingPage, goPrevImage, goNextImage } from '../../store/labelingPageSlice';
+import { closeLabelingPage } from '../../store/labelingPageSlice';
 import { selectImageEntities, saveLabelImageAnnotation } from '../../store/imageSlice';
 import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
 import { selectPartEntities, Part } from '../../store/partSlice';
-import { deleteImage } from '../../store/actions';
+import { deleteImage, thunkGoNextImage, thunkGoPrevImage } from '../../store/actions';
 import Scene from './Scene';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
@@ -95,11 +95,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
   };
   const saveAndNext = async () => {
     await saveAnno();
-    dispatch(goNextImage());
+    dispatch(thunkGoNextImage());
   };
   const saveAndPrev = async () => {
     await saveAnno();
-    dispatch(goPrevImage());
+    dispatch(thunkGoPrevImage());
   };
   const saveAndDone = async () => {
     await saveAnno();

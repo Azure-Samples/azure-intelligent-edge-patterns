@@ -41,6 +41,9 @@ class AzurePartDetectionConfig(AppConfig):
                                              project=project_obj,
                                              inference_module=inference_obj)
             PDScenario.objects.all().delete()
+            # =============================================
+            # Simple Part Detection                     ===
+            # =============================================
             pd_scenario = PDScenario.objects.create(
                 name="Simple Part Detection",
                 inference_mode="PD",
@@ -50,6 +53,9 @@ class AzurePartDetectionConfig(AppConfig):
                 Project.objects.get(
                     is_demo=True,
                     name="Demo Part Detection Project").part_set.all())
+            # =============================================
+            # Part Counting                             ===
+            # =============================================
             pc_scenario = PDScenario.objects.create(
                 name="Counting objects",
                 inference_mode="PC",
@@ -59,3 +65,28 @@ class AzurePartDetectionConfig(AppConfig):
                 Project.objects.get(
                     is_demo=True,
                     name="Demo Part Counting Project").part_set.all())
+            # =============================================
+            # Employee safety                           ===
+            # =============================================
+            pc_scenario = PDScenario.objects.create(
+                name="Employee safety",
+                inference_mode="ES",
+                project=Project.objects.get(
+                    name="Demo Employee Safety Project"),
+            )
+            pc_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True,
+                    name="Demo Employee Safety Project").part_set.all())
+            # =============================================
+            # Defect Detection                          ===
+            # =============================================
+            pc_scenario = PDScenario.objects.create(
+                name="Defect detection",
+                inference_mode="DD",
+                project=Project.objects.get(name="Demo Defect Detection Project"),
+            )
+            pc_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True,
+                    name="Demo Defect Detection Project").part_set.all())

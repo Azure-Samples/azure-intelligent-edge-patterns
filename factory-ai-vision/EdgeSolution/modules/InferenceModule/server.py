@@ -87,16 +87,31 @@ def prediction():
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
-    inference_num = onnx.detection_success_num
-    unidentified_num = onnx.detection_unidentified_num
-    total = onnx.detection_total
+    #FIXME
+    #inference_num = onnx.detection_success_num
+    #unidentified_num = onnx.detection_unidentified_num
+    #total = onnx.detection_total
+    inference_num = 0
+    unidentified_num = 0
+    total = 0
+    success_rate = 0
+    average_inference_time = 0
+    last_prediction_count = {}
     is_gpu = onnx.is_gpu
-    average_inference_time = onnx.average_inference_time
-    last_prediction_count = onnx.last_prediction_count
-    if total == 0:
-        success_rate = 0
-    else:
-        success_rate = inference_num * 100 / total
+
+    stream_id = request.args.get('cam_id')
+    stream = stream_manager.get_stream_by_id(stream_id)
+    if stream:
+        last_prediction_count = {}
+        inference_num = stream.detection_success_num
+        unidentified_num = stream.detection_unidentified_num
+        total = stream.detection_total
+        average_inference_time = stream.average_inference_time
+        last_prediction_count = stream.last_prediction_count
+        if total == 0:
+            success_rate = 0
+        else:
+            success_rate = inference_num * 100 / total
     return json.dumps({
         'success_rate': success_rate,
         'inference_num': inference_num,
@@ -106,9 +121,16 @@ def metrics():
         'last_prediction_count': last_prediction_count
     })
 
+@app.route('/update_part_detection_id')
+def update_part_detection_id():
+    return 'ok'
 
 @app.route('/update_retrain_parameters')
 def update_retrain_parameters():
+
+    is_retrain = request.args.get('is_retrain')
+    if not is_retrain:
+        return 'missing is_retrain'
 
     confidence_min = request.args.get('confidence_min')
     if not confidence_min:
@@ -122,15 +144,20 @@ def update_retrain_parameters():
     if not max_images:
         return 'missing max_images'
 
-    cam_id = request.args.get('cam_id')
-    s = stream_manager.get_stream_by_id(cam_id)
-    s.confidence_min = int(confidence_min) * 0.01
-    s.confidence_max = int(confidence_max) * 0.01
-    s.max_images = int(max_images)
+    # FIXME currently set all streams
+    #cam_id = request.args.get('cam_id')
+    #s = stream_manager.get_stream_by_id(cam_id)
+    is_retrain = (is_retrain == 'True')
+    confidence_min = int(confidence_min) * 0.01
+    confidence_max = int(confidence_max) * 0.01
+    max_images = int(max_images)
+    for s in stream_manager.get_streams():
+        s.update_retrain_parameters(is_retrain, confidence_min, confidence_max, max_images)
 
+    # FIXME will need to show it for different stream
     print('[INFO] updaing retrain parameters to')
-    print('  conficen_min:', confidence_min)
-    print('  conficen_max:', confidence_max)
+    print('  confidecen_min:', confidence_min)
+    print('  confidecen_max:', confidence_max)
     print('  max_images  :', max_images)
 
     return 'ok'
@@ -144,19 +171,19 @@ def update_model():
     if not model_uri and not model_dir:
         return ('missing model_uri or model_dir')
 
-    print('[INFO] Update Model ...')
+    print('[INFO] Update Model ...', flush=True)
     if model_uri:
 
-        print('[INFO] Got Model URI', model_uri)
+        print('[INFO] Got Model URI', model_uri, flush=True)
 
         if model_uri == onnx.model_uri:
-            print('[INFO] Model Uri unchanged')
+            print('[INFO] Model Uri unchanged', flush=True)
         else:
             get_file_zip(model_uri, MODEL_DIR)
             onnx.model_uri = model_uri
 
         onnx.update_model('model')
-        print('[INFO] Update Finished ...')
+        print('[INFO] Update Finished ...', flush=True)
 
         return 'ok'
 
@@ -191,17 +218,18 @@ def update_cams():
         if not cam_id:
             return 'missing cam_id'
 
-        if 'aoi' in cam.keys():
-            aoi = json.loads(aoi)
-            has_aoi = aoi['useAOI']
-            aoi_info = aoi['AOIs']
-        else:
-            has_aoi = False
-            aoi_info = None
+        #if 'aoi' in cam.keys():
+        #    aoi = json.loads(aoi)
+        #    has_aoi = aoi['useAOI']
+        #    aoi_info = aoi['AOIs']
+        #else:
+        #    has_aoi = False
+        #    aoi_info = None
 
         logger.info('updating camera {0}'.format(cam_id))
         s = stream_manager.get_stream_by_id(cam_id)
-        s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
+        #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
+        s.update_cam(cam_type, cam_source, cam_id, False, [], cam_lines)
 
     return 'ok'
 
@@ -239,13 +267,13 @@ def update_send_video_to_cloud():
 @app.route('/update_parts')
 def update_parts():
     try:
-        print('----Upadate parts----')
+        print('----Upadate parts----', flush=True)
         parts = request.args.getlist('parts')
-        print('[INFO] Updating parts', parts)
+        print('[INFO] Updating parts', parts, flush=True)
         onnx.parts = parts
-        print('[INFO] Updated parts', parts)
+        print('[INFO] Updated parts', parts, flush=True)
     except:
-        print('[ERROR] Unknown format', parts)
+        print('[ERROR] Unknown format', parts, flush=True)
         # return 'unknown format'
 
     onnx.update_parts(parts)
@@ -276,20 +304,24 @@ def update_iothub_parameters():
     threshold = int(threshold) * 0.01
     fpm = int(fpm)
 
-    print('updating iothub parameters ...')
-    print('  is_send', is_send)
-    print('  threshold', threshold)
-    print('  fpm', fpm)
+    print('[INFO] updating iothub parameters ...', flush=True)
+    print('[INFO]   is_send', is_send, flush=True)
+    print('[INFO]   threshold', threshold, flush=True)
+    print('[INFO]   fpm', fpm, flush=True)
 
-    cam_id = request.args.get('cam_id')
-    s = stream_manager.get_stream_by_id(cam_id)
-    s.update_iothub_parameters(is_send, threshold, fpm)
+    # FIXME currently set all streams
+    #cam_id = request.args.get('cam_id')
+    #s = stream_manager.get_stream_by_id(cam_id)
+    for s in stream_manager.get_streams():
+        s.update_iothub_parameters(is_send, threshold, fpm)
     return 'ok'
 
 @app.route('/status')
 def get_scenario():
     return json.dumps({
-        'streams': len(stream_manager.streams),
+        'num_streams': len(stream_manager.streams),
+        'stream_ids': list(stream_manager.streams.keys()),
+        'parts': onnx.parts,
         'scenario': onnx.detection_mode
     })
 

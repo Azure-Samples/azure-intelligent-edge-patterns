@@ -1,2 +1,0 @@
-Bottle - OK
-Bottle -NG

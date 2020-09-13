@@ -11,6 +11,7 @@ import { useWebSocket } from './hooks/useWebSocket';
 import { thunkGetSettingAndAppInsightKey } from './store/setting/settingAction';
 import { thunkGetProject } from './store/project/projectActions';
 import { getTrainingProject } from './store/trainingProjectSlice';
+import { clearRejectMsg } from './store/rejectedReducer';
 
 function App() {
   // Listen for the notification boardcast.
@@ -38,8 +39,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (rejectMsg) alert(rejectMsg);
-  }, [rejectMsg]);
+    if (rejectMsg) {
+      alert(rejectMsg);
+      dispatch(clearRejectMsg());
+    }
+  }, [dispatch, rejectMsg]);
 
   if (loading) return <h1>Loading...</h1>;
 
