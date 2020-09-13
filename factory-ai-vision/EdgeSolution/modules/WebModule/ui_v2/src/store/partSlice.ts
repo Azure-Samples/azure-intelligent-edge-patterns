@@ -39,7 +39,7 @@ export const postPart = createAsyncThunk<any, Omit<Part, 'id' | 'trainingProject
   async (data, { getState }) => {
     const { id: trainingProject } = selectNonDemoProject(getState())[0];
     const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
-    return response.data;
+    return { ...response.data, trainingProject: response.data.project };
   },
 );
 
