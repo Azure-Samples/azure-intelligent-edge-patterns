@@ -362,7 +362,7 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
         style={{ padding: '0 5px' }}
       />
       <DefaultButton
-        text={videoAnnoShape === Shape.Polygon ? 'Click F to Finish' : 'Create Polygon'}
+        text={videoAnnoShape === Shape.Polygon ? 'Press F to Finish' : 'Create Polygon'}
         primary={videoAnnoShape === Shape.Polygon}
         disabled={!showAOI}
         onClick={(): void => {
