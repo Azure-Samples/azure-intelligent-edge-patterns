@@ -88,12 +88,18 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
+  const demoProject = useSelector((state: State) => state.trainingProject.isDemo);
   const dispatch = useDispatch();
   const history = useHistory();
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
-    if (key === 'trainingProject') setProjectData(R.assoc('parts', []));
-    setProjectData(R.assoc(key, value));
+    const cloneProject = R.clone(projectData);
+    if (key === 'trainingProject') {
+      if (!demoProject.includes(cloneProject.trainingProject)) cloneProject.needRetraining = false;
+      cloneProject.parts = [];
+    }
+    (cloneProject as any)[key] = value;
+    setProjectData(cloneProject);
   }
 
   useEffect(() => {
