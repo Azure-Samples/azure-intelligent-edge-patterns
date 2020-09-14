@@ -225,6 +225,8 @@ export const Deployment: React.FC = () => {
                 successRate={inferenceMetrics.successRate}
                 successfulInferences={inferenceMetrics.successfulInferences}
                 unIdetifiedItems={inferenceMetrics.unIdetifiedItems}
+                isGpu={inferenceMetrics.isGpu}
+                averageTime={inferenceMetrics.averageTime}
                 objectCounts={objectCounts}
               />
             </PivotItem>
@@ -258,6 +260,8 @@ type InsightsProps = {
   successfulInferences: number;
   unIdetifiedItems: number;
   objectCounts: [string, number][];
+  isGpu: boolean;
+  averageTime: number;
 };
 
 export const Insights: React.FC<InsightsProps> = ({
@@ -265,6 +269,8 @@ export const Insights: React.FC<InsightsProps> = ({
   successfulInferences,
   unIdetifiedItems,
   objectCounts,
+  isGpu,
+  averageTime,
 }) => {
   return (
     <>
@@ -274,6 +280,9 @@ export const Insights: React.FC<InsightsProps> = ({
       >
         <Text styles={{ root: { fontWeight: 'bold' } }}>Success rate</Text>
         <Text styles={{ root: { fontWeight: 'bold', color: palette.greenLight } }}>{successRate}%</Text>
+        <Text>
+          {`Running on ${isGpu ? 'GPU' : 'CPU'} (accelerated) ${Math.round(averageTime * 100) / 100}/ms`}
+        </Text>
       </Stack>
       <Stack
         styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
