@@ -19,13 +19,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { cameraOptionsSelector, getCameras } from '../store/cameraSlice';
+import { getCameras, cameraOptionsSelectorInConfig } from '../store/cameraSlice';
 import { partOptionsSelector, getParts } from '../store/partSlice';
 import { ProjectData, InferenceMode } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
+import { getScenario } from '../store/scenarioSlice';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -68,7 +69,6 @@ type ConfigTaskPanelProps = {
   onDismiss: () => void;
   projectData: ProjectData;
   demoTrainingProject?: number;
-  demoCameras?: number[];
   isDemo?: boolean;
   isEdit?: boolean;
 };
@@ -78,7 +78,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   onDismiss,
   projectData: initialProjectData,
   demoTrainingProject = null,
-  demoCameras = [],
   isDemo = false,
   isEdit = false,
 }) => {
@@ -86,9 +85,14 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   useEffect(() => {
     setProjectData(initialProjectData);
   }, [initialProjectData]);
-  const cameraOptions = useSelector(cameraOptionsSelector(demoCameras));
+
+  const cameraOptions = useSelector(
+    cameraOptionsSelectorInConfig(isEdit ? initialProjectData.trainingProject : demoTrainingProject),
+  );
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
-  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(demoTrainingProject));
+  const trainingProjectOptions = useSelector(
+    trainingProjectOptionsSelector(isEdit ? initialProjectData.trainingProject : demoTrainingProject),
+  );
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
@@ -110,6 +114,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     dispatch(getParts());
     dispatch(getCameras(true));
     dispatch(getTrainingProject(true));
+    dispatch(getScenario());
   }, [dispatch, isDemo]);
 
   const onStart = async () => {

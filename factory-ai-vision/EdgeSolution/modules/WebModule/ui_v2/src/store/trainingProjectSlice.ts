@@ -52,14 +52,16 @@ export const {
 
 export const selectNonDemoProject = getNonDemoSelector('trainingProject', selectTrainingProjectEntities);
 
-export const trainingProjectOptionsSelector = (demoProjectId?: number) =>
+export const trainingProjectOptionsSelector = (trainingProjectId: number) =>
   createSelector(
-    [selectNonDemoProject, (state) => selectTrainingProjectById(state, demoProjectId)],
-    (trainingProjects, demoTrainingProject) => {
-      const projects = demoTrainingProject ? [demoTrainingProject, ...trainingProjects] : trainingProjects;
-      return projects.map((e) => ({
-        key: e.id,
-        text: e.name,
-      }));
+    [selectAllTrainingProjects, (state: State) => state.scenario],
+    (trainingProjects, scenarios) => {
+      const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
+      return trainingProjects
+        .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
+        .map((e) => ({
+          key: e.id,
+          text: e.name,
+        }));
     },
   );

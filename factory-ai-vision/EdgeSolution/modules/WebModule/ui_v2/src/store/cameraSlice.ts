@@ -259,5 +259,16 @@ export const cameraOptionsSelector = (demoCameras?: number[]) =>
       })),
   );
 
+export const cameraOptionsSelectorInConfig = (trainingProjectId: number) =>
+  createSelector([selectAllCameras, (state: State) => state.scenario], (cameras, scenarios) => {
+    const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
+    return cameras
+      .filter((c) => !c.isDemo || relatedScenario?.cameras.includes(c.id))
+      .map((e) => ({
+        key: e.id,
+        text: e.name,
+      }));
+  });
+
 export const selectCamerasByIds = (ids) =>
   createSelector(selectCameraEntities, (entities) => ids.map((id) => entities[id]));

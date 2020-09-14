@@ -12,6 +12,7 @@ import cameraReducer from './cameraSlice';
 import videoAnnosReducer from './videoAnnoSlice';
 import rejectMsgReducer from './rejectedReducer';
 import trainingProjectReducer from './trainingProjectSlice';
+import scenarioReducer from './scenarioSlice';
 
 export const rootReducer = combineReducers({
   project: projectReducer,
@@ -28,4 +29,5 @@ export const rootReducer = combineReducers({
   videoAnnos: videoAnnosReducer,
   rejectMsg: rejectMsgReducer,
   trainingProject: trainingProjectReducer,
+  scenario: scenarioReducer,
 });
