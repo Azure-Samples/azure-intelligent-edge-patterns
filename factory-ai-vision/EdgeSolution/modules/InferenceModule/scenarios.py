@@ -81,6 +81,7 @@ class PartCounter(Scenario):
         thickness = 1
         x = int( max(0, img.shape[1]-150) )
         y = int( min(30, img.shape[0]) )
+        print(x, y, flush=True)
         img = cv2.putText(img, 'Objects: '+str(self.counter), (x, y), font, font_scale, (0, 255, 255), thickness)
         return img
 

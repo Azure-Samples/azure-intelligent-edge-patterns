@@ -118,7 +118,8 @@ class Stream():
         self.detection_unidentified_num = 0
         self.detection_total = 0
         self.detections = []
-        self.tracker.reset_counter()
+        if self.scenario:
+            self.scenario.reset_metrics()
         self.mutex.release()
 
     def start_zmq(self):
@@ -164,13 +165,10 @@ class Stream():
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
-        if self.model.part_detection_mode == 'PC':
+        if self.model.detection_mode == 'PC':
             print('[INFO] Line INFO', line_info, flush=True)
-            self.scenario = DefeatDetection()
-            self.scenario_type = self.model.part_detection_mode
-            # FIXME
-            scenario.set_ok('Bottle - OK')
-            scenario.set_ng('Bottle - NG')
+            self.scenario = PartCounter()
+            self.scenario_type = self.model.detection_mode
             try:
                 line_info = json.loads(line_info)
                 self.use_line = line_info['useCountingLine']
@@ -193,12 +191,12 @@ class Stream():
                 print('Upading Line[*]:', flush=True)
                 print('    use_line   :', False, flush=True)
 
-        elif self.model.part_detection_mode == 'ES':
+        elif self.model.detection_mode == 'ES':
             print('[INFO] Zone INFO', zone_info, flush=True)
             self.scenario = DangerZone()
-            self.scenario_type = self.model.part_detection_mode
+            self.scenario_type = self.model.detection_mode
             #FIXME
-            scenario.set_targets(['person'])
+            self.scenario.set_targets(['person'])
             try:
                 zone_info = json.loads(zone_info)
                 self.use_zone = zone_info['useDangerZone']
@@ -220,10 +218,13 @@ class Stream():
                 print('Upading Zone[*]:', flush=True)
                 print('    use_zone   :', False, flush=True)
 
-        elif self.model.part_detection_mode == 'DD':
+        elif self.model.detection_mode == 'DD':
             print('[INFO] Line INFO', line_info, flush=True)
-            self.scenario = PartCounter()
-            self.scenario_type = self.model.part_detection_mode
+            self.scenario = DefeatDetection()
+            self.scenario_type = self.model.detection_mode
+            # FIXME
+            self.scenario.set_ok('Bottle - OK')
+            self.scenario.set_ng('Bottle - NG')
             try:
                 line_info = json.loads(line_info)
                 self.use_line = line_info['useCountingLine']
@@ -372,10 +373,13 @@ class Stream():
         self.draw_img()
 
         if self.scenario:
-            self.scenario.draw_counter(img)
+            #print('drawing...', flush=True)
+            #print(self.scenario, flush=True)
+            self.scenario.last_draw_img = self.scenario.draw_counter(self.last_drawn_img)
             #FIXME close this
-            self.scenario.draw_constraint(img)
-            self.scenario.draw_objs(img)
+            self.scenario.draw_constraint(self.last_drawn_img)
+            #self.last_drawn_img = self.scenario.draw_objs(self.last_drawn_img)
+            self.scenario.draw_objs(self.last_drawn_img)
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
@@ -434,14 +438,15 @@ class Stream():
             if prediction['probability'] > self.threshold:
 
                 (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
-                img = draw_confidence_level(img, prediction)
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                draw_confidence_level(img, prediction)
 
         #print('setting last drawn img', flush=True)
-        if self.get_mode() == 'PC':
-            if self.use_line:
-                img = self.tracker.draw_line(img)
-            img = self.tracker.draw_counter(img)
+        #if self.get_mode() == 'PC':
+        #if self.scenario:
+        #    print('current img', img)
+        #    self.scenario.draw_constraint(img)
+        #    self.scenario.draw_counter(img)
 
         self.last_drawn_img = img
 

@@ -100,7 +100,7 @@ def metrics():
     is_gpu = onnx.is_gpu
 
     stream_id = request.args.get('cam_id')
-    stream = stream_manager.get_stream_by_id(stream_id)
+    stream = stream_manager.get_stream_by_id_danger(stream_id)
     if stream:
         last_prediction_count = {}
         inference_num = stream.detection_success_num

@@ -96,6 +96,7 @@ COPY grpc_topology.json ./
 COPY scenario_models scenario_models/
 COPY sort.py ./
 COPY tracker.py ./
+COPY scenarios.py ./
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 
