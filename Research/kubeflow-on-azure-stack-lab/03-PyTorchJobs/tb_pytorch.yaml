@@ -29,7 +29,7 @@ spec:
         - /tmp/tensorflow/logs
         volumeMounts:
           - mountPath: /tmp/tensorflow
-            subPath: pytorch-tb
+            # subPath: pytorch-tb
             name: samba-share-volume2
         ports:
         - containerPort: 6006

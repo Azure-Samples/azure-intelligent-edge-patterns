@@ -125,7 +125,7 @@ To keep things simple, let's presume we have a cluster without GPUs. If you do h
 
 To run PyTorch job:
 
-    $ kubectl create -f pytorch_job_mnist_gloo_demo.yaml
+    $ kubectl create -f pytorch-dist-mnist-gloo-demo.yaml
     pytorchjob.kubeflow.org/pytorch-dist-mnist-gloo-demo created
 
 Shortly after, you should see the pods up-and-running:
