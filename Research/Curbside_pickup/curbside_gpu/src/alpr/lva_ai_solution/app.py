@@ -21,6 +21,9 @@ def scoreRRS():
         # get request as byte stream
         reqBody = request.get_data(False)
 
+        # get stream name (optional parameter) for pushing through MJPEG stream.
+        stream = request.args.get('stream')
+
         # convert from byte stream
         inMemFile = io.BytesIO(reqBody)
 
@@ -28,7 +31,7 @@ def scoreRRS():
         pilImage = Image.open(inMemFile)
 
         # call scoring function
-        result = analyticsAPI.score(pilImage)            
+        result = analyticsAPI.score(pilImage, stream)
 
         analyticsAPI.logger.info("[AI EXT] Sending response.")
         return Response(result, status= 200, mimetype ='application/json')
@@ -52,6 +55,16 @@ def version_request():
 def about_request():
     global analyticsAPI
     return analyticsAPI.about()
+
+# Stream MJPEG
+@app.route('/stream/<id>')
+def stream(id):
+    respBody = ("<html>"
+                "<h1>Stream with inferencing overlays</h1>"
+                "<img src=\"/mjpeg/" + id + "\"/>"
+                "</html>")
+
+    return Response(respBody, status= 200)
 
 if __name__ == "__main__":
     while not analyticsAPI.initialized:

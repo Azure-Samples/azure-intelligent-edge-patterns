@@ -5,6 +5,12 @@ apt-get update && apt-get install -y --no-install-recommends \
         nginx \
         supervisor
 
+# Install Nchan module. For details goto http://nchan.io
+apt-get update -y && \
+    apt-get install -y libnginx-mod-nchan
+
+/etc/init.d/nginx restart
+
 rm -rf /var/lib/apt/lists/*
 
 rm /etc/nginx/sites-enabled/default && \

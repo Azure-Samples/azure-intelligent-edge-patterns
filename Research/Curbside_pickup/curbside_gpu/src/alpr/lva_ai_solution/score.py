@@ -24,6 +24,8 @@ from lpdet.apis import det_and_recognize
 from lpdet.utils import Config, load_checkpoint, ProgressBar
 from lpdet.models import build_detector, build_recognizer
 
+import requests
+
 logging.basicConfig(level=logging.DEBUG)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -168,7 +170,7 @@ class AnalyticsAPI:
 
         return img
 
-    def score(self, pilImage):
+    def score(self, pilImage, stream):
         try:
             with self._lock:
                 if self.initialized:
@@ -217,23 +219,43 @@ class AnalyticsAPI:
                             state = "no_detection"
                         resDict[i]["vehicle_state"] = state
                             
-                        if state == "arrived" and not plateAlreadyInCache:
-                            # Update blobfolder and filename
-                            self.logger.info("[AI EXT] current cache looks like: {0}".format(self.cache.arrivedCache))
-                            today = datetime.date.today()
-                            self.blobfolder = today.strftime("%Y-%m-%d")
-                            self.filename = str(now).replace(' ','_').replace(':','-')+'.jpg'
-                            # Save images on first detection
-                            imgMarked = self.visualize_result(imgData, reslist)
+                        # RESTORE: (lines 224 to 269) the following `if` statement must be restored.
+                        #if state == "arrived" and not plateAlreadyInCache:
+                        # Update blobfolder and filename
+                        self.logger.info("[AI EXT] current cache looks like: {0}".format(self.cache.arrivedCache))
+                        today = datetime.date.today()
+                        self.blobfolder = today.strftime("%Y-%m-%d")
+                        self.filename = str(now).replace(' ','_').replace(':','-')+'.jpg'
+                        # Save images on first detection
+                        imgMarked = self.visualize_result(imgData, reslist)
 
-                            height, width = imgMarked.shape[:2]
-                            maxDim = max(height, width)
-                            scale = 400/maxDim # 200 pixels max side size
-                            imgThumb = cv2.resize(imgMarked, (int(scale*width), int(scale*height)),
-                                                  interpolation=cv2.INTER_AREA)
-                            # Write locally
-                            cv2.imwrite(os.path.join(self.volume, self.filename), 
-                                        imgThumb)
+                        height, width = imgMarked.shape[:2]
+                        maxDim = max(height, width)
+                        scale = 400/maxDim # 200 pixels max side size
+                        imgThumb = cv2.resize(imgMarked, (int(scale*width), int(scale*height)),
+                                                interpolation=cv2.INTER_AREA)
+                        # Write locally
+                        cv2.imwrite(os.path.join(self.volume, self.filename), 
+                                    imgThumb)
+
+                        if stream is not None:
+                    
+                            # You may need to convert the color.
+                            self.logger.info("[AI EXT] About to transform a frame from openCV back to pillow")
+                            frame_array = cv2.cvtColor(imgThumb, cv2.COLOR_BGR2RGB)
+                            frame = Image.fromarray(frame_array)
+
+                            image_buffer = io.BytesIO()
+                            # output_image.save(image_buffer, format='JPEG')
+
+                            frame.save(image_buffer, format='JPEG')
+                            
+                            # post the image with bounding boxes so that it can be viewed as an MJPEG stream
+                            postData = b'--boundary\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + image_buffer.getvalue() + b'\r\n'
+                            requests.post('http://127.0.0.1:5001/mjpeg_pub/' + stream, data = postData)
+                            #
+
+                            self.logger.info("[AI EXT] A frame has just been pushed into MJPEG pub endpoint")
                             
                             # To upload to Blob. need container connection string
                             #try:
