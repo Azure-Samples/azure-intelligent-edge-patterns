@@ -32,6 +32,8 @@ import {
   thunkDeleteProject,
   thunkGetTrainingMetrics,
   thunkGetProject,
+  updateProjectData,
+  updateProbThreshold,
 } from '../store/project/projectActions';
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
 import { selectCamerasByIds, selectCameraById } from '../store/cameraSlice';
@@ -51,9 +53,10 @@ import { getTrainingProject } from '../store/trainingProjectSlice';
 const { palette } = getTheme();
 
 export const Deployment: React.FC = () => {
-  const { status, progress, trainingLog, data: projectData, inferenceMetrics } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+  const { status, progress, trainingLog, data: projectData, originData, inferenceMetrics } = useSelector<
+    State,
+    Project
+  >((state) => state.project);
   const {
     id: projectId,
     cameras: projectCameraIds,
@@ -67,6 +70,7 @@ export const Deployment: React.FC = () => {
     accuracyRangeMax,
     maxImages,
     name,
+    probThreshold,
   } = projectData;
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
@@ -119,6 +123,10 @@ export const Deployment: React.FC = () => {
     },
     status === Status.StartInference ? 5000 : null,
   );
+
+  const changeProbThreshold = (newValue: string) =>
+    dispatch(updateProjectData({ probThreshold: newValue }, false));
+  const saveProbThresholde = () => dispatch(updateProbThreshold());
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
@@ -213,6 +221,10 @@ export const Deployment: React.FC = () => {
               needRetraining={needRetraining}
               accuracyRangeMin={accuracyRangeMin}
               accuracyRangeMax={accuracyRangeMax}
+              probThreshold={probThreshold}
+              originProbThreshold={originData.probThreshold}
+              updateProbThreshold={changeProbThreshold}
+              saveProbThreshold={saveProbThresholde}
               maxImages={maxImages}
             />
           </Stack>

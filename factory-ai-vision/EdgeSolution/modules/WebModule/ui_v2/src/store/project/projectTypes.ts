@@ -217,19 +217,6 @@ export type ChangeStatusAction = ProjectAction & {
   status: Status;
 };
 
-export type UpdateProbThresholdRequestAction = ProjectAction & {
-  type: 'UPDATE_PROB_THRESHOLD_REQUEST';
-};
-
-export type UpdateProbThresholdSuccessAction = ProjectAction & {
-  type: 'UPDATE_PROB_THRESHOLD_SUCCESS';
-};
-
-export type UpdateProbThresholdFailedAction = ProjectAction & {
-  type: 'UPDATE_PROB_THRESHOLD_FAILED';
-  error: Error;
-};
-
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
@@ -251,10 +238,7 @@ export type ProjectActionTypes =
   | GetInferenceMetricsFailedAction
   | StartInferenceAction
   | StopInferenceAction
-  | ChangeStatusAction
-  | UpdateProbThresholdRequestAction
-  | UpdateProbThresholdSuccessAction
-  | UpdateProbThresholdFailedAction;
+  | ChangeStatusAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import {
   Project,
   ProjectActionTypes,
@@ -24,6 +25,7 @@ import {
   InferenceMode,
 } from './projectTypes';
 import { pullCVProjects } from '../actions';
+import { updateProbThreshold } from './projectActions';
 
 const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Status => {
   if (hasConfigured && status === Status.None) return Status.WaitTraining;
@@ -175,12 +177,12 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
       return { ...state, error: action.error };
     case 'CHANGE_STATUS':
       return { ...state, status: action.status };
-    case 'UPDATE_PROB_THRESHOLD_REQUEST':
+    case updateProbThreshold.pending.toString():
       return { ...state, isLoading: true, error: null };
-    case 'UPDATE_PROB_THRESHOLD_SUCCESS':
+    case updateProbThreshold.fulfilled.toString():
+      return { ...state, isLoading: false, originData: R.clone(state.data) };
+    case updateProbThreshold.rejected.toString():
       return { ...state, isLoading: false };
-    case 'UPDATE_PROB_THRESHOLD_FAILED':
-      return { ...state, isLoading: false, error: action.error };
     default:
       return { ...state };
   }
