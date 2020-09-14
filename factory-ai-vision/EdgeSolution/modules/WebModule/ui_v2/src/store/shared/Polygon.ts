@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 
-import { BaseShape, Shape, VideoAnno } from './BaseShape';
+import { BaseShape, Shape, VideoAnno, Purpose } from './BaseShape';
 import { Position2D, PolygonLabel } from '../type';
 // TODO Share this with annoSlice
 
@@ -10,10 +10,11 @@ export type PolygonType = VideoAnno & {
 };
 
 export class Polygon extends BaseShape {
-  static init(p: Position2D, id: string, camera: number): PolygonType {
+  static init(p: Position2D, id: string, camera: number, purpose: Purpose): PolygonType {
     return Polygon.setVerticesToValidValue({
       id,
       camera,
+      purpose,
       type: Shape.Polygon,
       vertices: [p, p],
     });

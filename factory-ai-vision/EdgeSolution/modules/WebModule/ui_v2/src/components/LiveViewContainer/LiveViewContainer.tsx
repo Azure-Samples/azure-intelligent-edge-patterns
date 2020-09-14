@@ -23,6 +23,7 @@ export const LiveViewContainer: React.FC<{
   const showCountingLine = useSelector<State, boolean>(
     (state) => selectCameraById(state, cameraId)?.useCountingLine,
   );
+  const showDangerZone = useSelector((state: State) => selectCameraById(state, cameraId)?.useDangerZone);
   const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const imageInfo = useImage(`/api/inference/video_feed?camera_id=${cameraId}`, '', true, true);
@@ -55,6 +56,7 @@ export const LiveViewContainer: React.FC<{
           finishLabel={() => dispatch(finishLabel())}
           AOIVisible={showAOI}
           countingLineVisible={showCountingLine}
+          dangerZoneVisible={showDangerZone}
           imageInfo={imageInfo}
           creatingState={creatingVideoAnno}
         />

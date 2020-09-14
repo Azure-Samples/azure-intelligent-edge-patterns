@@ -20,6 +20,8 @@ import {
   DialogFooter,
   Text,
   Checkbox,
+  MessageBar,
+  MessageBarType,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -79,6 +81,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const [loadFullImages, setLoadFullImages] = useState(false);
   const [loadImgWarning, setloadImgWarning] = useState(false);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
+  const error = useSelector((state: State) => state.setting.error);
 
   const dispatch = useDispatch();
 
@@ -154,6 +157,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                 dispatch(updateKey(value));
               }}
             />
+            {error && <MessageBar messageBarType={MessageBarType.blocked}>{error.message}</MessageBar>}
             <Stack.Item>
               <WarningDialog
                 contentText={

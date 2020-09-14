@@ -19,6 +19,7 @@ export type LiveViewProps = {
   finishLabel: () => void;
   AOIVisible: boolean;
   countingLineVisible: boolean;
+  dangerZoneVisible: boolean;
   imageInfo: [HTMLImageElement, string, { width: number; height: number }];
   creatingState: CreatingState;
 };
@@ -32,6 +33,7 @@ export type VideoAnnosGroupProps = {
   visible: boolean;
   creatingState: CreatingState;
   needMask: boolean;
+  color?: string;
 };
 
 export type MaskProps = {
@@ -48,4 +50,5 @@ export type BoxProps = {
   visible: boolean;
   removeBox: (id: string) => void;
   creatingState: CreatingState;
+  color;
 };

@@ -1,5 +1,12 @@
 import { AnyAction, createSlice } from '@reduxjs/toolkit';
 
+const rejectedActionTypesWhichHasBeenHandled: string[] = ['settings/listAllProjects/rejected'];
+
+const actionNotHandled = (actionType: string) => !rejectedActionTypesWhichHasBeenHandled.includes(actionType);
+
+const isRejectedAction = (action): action is AnyAction =>
+  action.type.endsWith('/rejected') && actionNotHandled(action.type);
+
 const slice = createSlice({
   name: 'rejectMsg',
   initialState: '',
@@ -7,12 +14,9 @@ const slice = createSlice({
     clearRejectMsg: () => '',
   },
   extraReducers: (builder) => {
-    builder.addMatcher(
-      (action): action is AnyAction => action.type.endsWith('/rejected'),
-      (_, action) => {
-        return action.error.message;
-      },
-    );
+    builder.addMatcher(isRejectedAction, (_, action) => {
+      return action.error.message;
+    });
   },
 });
 
