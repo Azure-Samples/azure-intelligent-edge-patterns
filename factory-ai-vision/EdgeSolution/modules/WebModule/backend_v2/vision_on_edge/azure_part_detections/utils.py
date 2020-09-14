@@ -189,14 +189,16 @@ def deploy_worker(part_detection_id):
                 "type": "rtsp",
                 "source": cam.rtsp,
                 "aoi": cam.area,
-                "lines": cam.lines
+                "lines": cam.lines,
+                "danger_zones": cam.danger_zones
             })
         else:
             res_data["cameras"].append({
                 "id": cam.id,
                 "type": "rtsp",
                 "source": cam.rtsp,
-                "lines": cam.lines
+                "lines": cam.lines, 
+                "danger_zones": cam.danger_zones
             })
     serializer = UpdateCamBodySerializer(data=res_data)
     serializer.is_valid(raise_exception=True)
