@@ -1,6 +1,7 @@
 import Axios from 'axios';
 import * as R from 'ramda';
 import { State } from 'RootStateType';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   ProjectThunk,
   GetProjectSuccessAction,
@@ -47,9 +48,6 @@ import {
   STOP_INFERENCE,
   StopInferenceAction,
   ChangeStatusAction,
-  UpdateProbThresholdRequestAction,
-  UpdateProbThresholdSuccessAction,
-  UpdateProbThresholdFailedAction,
   TrainingStatus,
 } from './projectTypes';
 import { selectAllImages } from '../imageSlice';
@@ -204,22 +202,6 @@ export const updateProjectData = (
 export const changeStatus = (status: Status, isDemo: boolean): ChangeStatusAction => ({
   type: 'CHANGE_STATUS',
   status,
-  isDemo,
-});
-
-const updateProbThresholdRequest = (isDemo: boolean): UpdateProbThresholdRequestAction => ({
-  type: 'UPDATE_PROB_THRESHOLD_REQUEST',
-  isDemo,
-});
-
-const updateProbThresholdSuccess = (isDemo: boolean): UpdateProbThresholdSuccessAction => ({
-  type: 'UPDATE_PROB_THRESHOLD_SUCCESS',
-  isDemo,
-});
-
-const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThresholdFailedAction => ({
-  type: 'UPDATE_PROB_THRESHOLD_FAILED',
-  error,
   isDemo,
 });
 
@@ -389,28 +371,17 @@ export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean, cam
     .catch((err) => dispatch(getInferenceMetricsFailed(err, isDemo)));
 };
 
-export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
-  dispatch,
-  getState,
-): Promise<any> => {
-  dispatch(updateProbThresholdRequest(isDemo));
-  const { id: projectId, probThreshold } = getProjectData(getState());
+export const updateProbThreshold = createAsyncThunk<any, undefined, { state: State }>(
+  'project/updateProbThreshold',
+  async (_, { getState }) => {
+    const { id: projectId, probThreshold } = getProjectData(getState());
 
-  return Axios.get(`/api/part_detections/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
-    .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
-    .catch((e) => {
-      if (e.response) {
-        throw new Error(e.response.data.log);
-      } else if (e.request) {
-        throw new Error(e.request);
-      } else {
-        throw e;
-      }
-    })
-    .catch((e) => {
-      dispatch(updateProbThresholdFailed(e, isDemo));
-    });
-};
+    const response = await Axios.get(
+      `/api/part_detections/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`,
+    );
+    return response.data;
+  },
+);
 
 export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
   dispatch,

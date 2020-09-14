@@ -105,7 +105,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);
 
-    await dispatch(thunkPostProject({ ...projectData, ...(!isDemo && { inferenceMode: InferenceMode.PD }) }));
+    await dispatch(
+      thunkPostProject({ ...projectData, ...(!isDemo && { inferenceMode: InferenceMode.PartDetection }) }),
+    );
 
     onDismiss();
     history.push('/home/deployment');

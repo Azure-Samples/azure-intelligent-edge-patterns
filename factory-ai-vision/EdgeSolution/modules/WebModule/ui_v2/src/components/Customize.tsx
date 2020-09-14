@@ -62,7 +62,7 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
         />
         <GetStartedCard
           no={2}
-          checked={hasImages}
+          checked={hasImages && hasCamera}
           title="Add images and tag parts"
           contentTxt="Capture images from your video streams and tag parts"
           actionTxt="Go to Images"
@@ -70,7 +70,7 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
         />
         <GetStartedCard
           no={3}
-          checked={hasTask}
+          checked={hasTask && hasImages && hasCamera}
           title="Ready to go!"
           contentTxt="Start identifying parts from your cameras’ live streams"
           actionTxt="Begin a task"

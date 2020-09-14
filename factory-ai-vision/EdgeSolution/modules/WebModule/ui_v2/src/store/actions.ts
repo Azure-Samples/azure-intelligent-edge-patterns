@@ -3,7 +3,7 @@ import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
-import { isAOIShape, isCountingLine } from './shared/VideoAnnoUtil';
+import { isAOIShape, isCountingLine, isDangerZone } from './shared/VideoAnnoUtil';
 import { Image } from './type';
 
 export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
@@ -46,6 +46,17 @@ const getCountingLines = (state: State, cameraId) => {
     }));
 };
 
+const getDangerZones = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  return Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isDangerZone(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
 export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowAOI',
   async ({ cameraId, checked }, { getState }) => {
@@ -64,15 +75,27 @@ export const toggleShowCountingLines = createAsyncThunk<any, toggleCameraLabelPa
   },
 );
 
+export const toggleShowDangerZones = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
+  'cameras/toggleShowDangerZones',
+  async ({ cameraId, checked }, { getState }) => {
+    const dangerZones = getDangerZones(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      danger_zones: JSON.stringify({ useDangerZone: checked, dangerZones }),
+    });
+  },
+);
+
 export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   'cameras/updateArea',
   async (cameraId, { getState }) => {
-    const { useAOI, useCountingLine } = getState().camera.entities[cameraId];
+    const { useAOI, useCountingLine, useDangerZone } = getState().camera.entities[cameraId];
     const AOIs = getAOIs(getState(), cameraId);
     const countingLines = getCountingLines(getState(), cameraId);
+    const dangerZones = getDangerZones(getState(), cameraId);
     await Axios.patch(`/api/cameras/${cameraId}/`, {
       area: JSON.stringify({ useAOI, AOIs }),
       lines: JSON.stringify({ useCountingLine, countingLines }),
+      danger_zones: JSON.stringify({ useDangerZone, dangerZones }),
     });
   },
 );

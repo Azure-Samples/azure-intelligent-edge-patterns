@@ -4,7 +4,7 @@ import * as R from 'ramda';
 import { State } from 'RootStateType';
 import { schema, normalize } from 'normalizr';
 import { BoxLabel, PolygonLabel, LineLabel } from './type';
-import { toggleShowAOI, toggleShowCountingLines } from './actions';
+import { toggleShowAOI, toggleShowCountingLines, toggleShowDangerZones } from './actions';
 import {
   insertDemoFields,
   isCRDAction,
@@ -14,6 +14,7 @@ import {
   getNonDemoSelector,
 } from './shared/DemoSliceUtils';
 import { GetProjectSuccessAction, InferenceMode } from './project/projectTypes';
+import { Purpose } from './shared/BaseShape';
 
 type CameraFromServer = {
   id: number;
@@ -21,11 +22,12 @@ type CameraFromServer = {
   rtsp: string;
   area: string;
   lines: string;
+  danger_zones: string;
   is_demo: boolean;
   location: number;
 };
 
-type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area' | 'line'> & {
+type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area' | 'line' | 'danger_zones'> & {
   area: {
     useAOI: boolean;
     AOIs: [
@@ -46,6 +48,16 @@ type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area' | 'line'>
       },
     ];
   };
+  danger_zones: {
+    useDangerZone: boolean;
+    dangerZones: [
+      {
+        id: string;
+        type: string;
+        label: BoxLabel;
+      },
+    ];
+  };
 };
 
 export type Camera = {
@@ -56,8 +68,11 @@ export type Camera = {
   useAOI: boolean;
   location: number;
   useCountingLine: boolean;
+  useDangerZone: boolean;
   isDemo: boolean;
 };
+
+const mapPurpose = (purpose: Purpose, annos) => annos.map((a) => ({ ...a, purpose }));
 
 const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
   return {
@@ -66,7 +81,12 @@ const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
     rtsp: response.rtsp,
     useAOI: response.area.useAOI,
     useCountingLine: response.lines.useCountingLine,
-    AOIs: [...response.area.AOIs, ...response.lines.countingLines],
+    useDangerZone: response.danger_zones.useDangerZone,
+    AOIs: [
+      ...mapPurpose(Purpose.AOI, response.area.AOIs),
+      ...mapPurpose(Purpose.Counting, response.lines.countingLines),
+      ...mapPurpose(Purpose.DangerZone, response.danger_zones.dangerZones),
+    ],
     location: response.location,
     isDemo: response.is_demo,
   };
@@ -80,6 +100,7 @@ const normalizeCamerasAndAOIsByNormalizr = (data: CameraFromServerWithSerializeA
         type: value.type,
         vertices: value.label,
         camera: parent.id,
+        purpose: value.purpose,
       };
     },
   });
@@ -114,10 +135,19 @@ const getLineData = (countingLines: string) => {
   }
 };
 
+const getDangerZoneData = (dangerZone: string) => {
+  try {
+    return JSON.parse(dangerZone);
+  } catch (e) {
+    return { useDangerZone: false, dangerZones: [] };
+  }
+};
+
 const serializeJSONStr = R.map<CameraFromServer, CameraFromServerWithSerializeArea>((e) => ({
   ...e,
   area: getAreaData(e.area),
   lines: getLineData(e.lines),
+  danger_zones: getDangerZoneData(e.danger_zones),
 }));
 
 const normalizeCameras = R.compose(normalizeCamerasAndAOIsByNormalizr, serializeJSONStr);
@@ -188,10 +218,18 @@ const slice = createSlice({
         const { checked, cameraId } = action.meta.arg;
         state.entities[cameraId].useCountingLine = !checked;
       })
+      .addCase(toggleShowDangerZones.pending, (state, action) => {
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useDangerZone = checked;
+      })
+      .addCase(toggleShowDangerZones.rejected, (state, action) => {
+        const { checked, cameraId } = action.meta.arg;
+        state.entities[cameraId].useDangerZone = !checked;
+      })
       .addMatcher(isCRDAction, insertDemoFields)
       .addMatcher(isGetProjectSuccess, (state, action) => {
         state.ids.forEach((e) => {
-          if (action.payload.project.inferenceMode !== InferenceMode.PC)
+          if (action.payload.project.inferenceMode !== InferenceMode.PartCounting)
             state.entities[e].useCountingLine = false;
         });
       });
