@@ -3,49 +3,30 @@
 """
 
 import json
+from unittest import mock
 
 import pytest
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
-from vision_on_edge.azure_projects.api.serializers import ProjectSerializer
-from vision_on_edge.azure_projects.api.views import ProjectViewSet
-from vision_on_edge.azure_projects.models import Project
-from vision_on_edge.azure_settings.models import Setting
+from ..api.serializers import CameraSerializer
+from ..api.views import CameraViewSet
+from .factories import CameraFactory
 
 pytestmark = pytest.mark.django_db
 
-
-def test_get(project: Project, rf: APIRequestFactory):
+@pytest.mark.fast
+@mock.patch("vision_on_edge.cameras.models.Camera.verify_rtsp",
+        mock.MagicMock(return_value=True))
+def test_get():
     """test_get_queryset.
-
-    Args:
-        notification (Notification): notification
-        rf (APIRequestFactory): rf
     """
-    project_list_view = ProjectViewSet.as_view({'get': 'list'})
-    request = rf.get("/fake-url/")
+    factory = APIRequestFactory()
+    cam_1 = CameraFactory()
+    camera_list_view = CameraViewSet.as_view({'get': 'list'})
+    request = factory.get("/fake-url/")
 
-    response = project_list_view(request).render().content.decode('utf-8')
-
-    assert ProjectSerializer(project).data in json.loads(response)
-
-
-def test_get_filter():
-    """test_get_queryset.
-
-    Args:
-        notification (Notification): notification
-        rf (APIRequestFactory): rf
-    """
-    rf = APIRequestFactory()
-    real_project = Project.objects.create(is_demo=False)
-    demo_project = Project.objects.create(is_demo=True)
-
-    project_list_view = ProjectViewSet.as_view({'get': 'list'})
-    request = rf.get("/fake-url/", {'is_demo': False})
-
-    response = project_list_view(request).render().content.decode('utf-8')
-
-    assert ProjectSerializer(demo_project).data in json.loads(response)
-    assert ProjectSerializer(real_project).data not in json.loads(response)
+    response = camera_list_view(request).render()
+    assert CameraSerializer(cam_1).data in json.loads(
+        response.content.decode('utf-8'))
+    assert response.status_code == status.HTTP_200_OK

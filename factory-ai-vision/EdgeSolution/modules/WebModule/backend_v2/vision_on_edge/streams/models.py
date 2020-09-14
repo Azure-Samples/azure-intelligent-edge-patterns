@@ -30,6 +30,8 @@ class Stream():
             self.rtsp = 1
         elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
             self.rtsp = "rtsp" + rtsp[4:]
+        else:
+            self.rtsp = rtsp
         self.camera_id = camera_id
         self.part_id = part_id
 
