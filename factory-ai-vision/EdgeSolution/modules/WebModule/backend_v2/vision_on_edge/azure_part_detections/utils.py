@@ -6,6 +6,7 @@ import json
 import logging
 import threading
 import time
+import traceback
 
 import requests
 from django.utils import timezone
@@ -66,7 +67,8 @@ def if_trained_then_deploy_worker(part_detection_id):
     # =====================================================
     try:
         deploy_worker(part_detection_id=part_detection_obj.id)
-        logger.info("Part Detection successfully deployed to inference_module!")
+        logger.info(
+            "Part Detection successfully deployed to inference_module!")
     except:
         logger.info("Part Detection deploy to inference_module failed !")
 
@@ -206,6 +208,16 @@ def deploy_worker(part_detection_id):
     )
 
 
+def if_trained_then_deploy_catcher(part_detection_id):
+    try:
+        if_trained_then_deploy_worker(part_detection_id=part_detection_id)
+    except Exception:
+        upcreate_deploy_status(part_detection_id=part_detection_id,
+                               status="failed",
+                               log=traceback.format_exc(),
+                               need_to_send_notification=True)
+
+
 # Helper here.
 
 
@@ -223,7 +235,8 @@ def if_trained_then_deploy_helper(part_detection_id):
     upcreate_deploy_status(
         part_detection_id=part_detection_id,
         **deploy_progress.PROGRESS_1_WATINING_PROJECT_TRAINED)
-    threading.Thread(target=if_trained_then_deploy_worker,
+    threading.Thread(name="if_trained_then_deploy_catcher",
+                     target=if_trained_then_deploy_catcher,
                      args=(part_detection_id,)).start()
 
 

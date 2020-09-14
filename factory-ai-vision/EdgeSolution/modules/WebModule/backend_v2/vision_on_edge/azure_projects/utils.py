@@ -4,6 +4,7 @@
 
 import json
 import logging
+import sys
 import threading
 import time
 import traceback
@@ -17,10 +18,9 @@ from vision_on_edge.images.models import Image
 
 from ..azure_parts.utils import batch_upload_parts_to_customvision
 from ..azure_training_status import progress
-from ..azure_training_status.models import TrainingStatus
 from ..images.utils import upload_images_to_customvision_helper
-from .models import Project, Task
 from .exceptions import ProjectAlreadyTraining
+from .models import Project, Task
 
 logger = logging.getLogger(__name__)
 
@@ -442,6 +442,13 @@ def train_project_worker(project_id):
 
 
 def train_project_catcher(project_id):
+    """train_project_catcher.
+
+    Dummy exception handler.
+
+    Args:
+        project_id:
+    """
     try:
         train_project_worker(project_id=project_id)
     except Exception:
@@ -449,17 +456,6 @@ def train_project_catcher(project_id):
                                  status="failed",
                                  log=traceback.format_exc(),
                                  need_to_send_notification=True)
-
-
-def train_project_helper(project_id):
-    """train_project_helper.
-
-    Open a thread to upload the items.
-
-    Args:
-        project_id: Django ORM project id.
-    """
-    threading.Thread(target=train_project_catcher, args=(project_id,)).start()
 
 
 class TrainingManager():
@@ -481,6 +477,7 @@ class TrainingManager():
         self.mutex.acquire()
         task = TrainingTask(project_id=project_id)
         self.training_tasks[project_id] = task
+        task.start()
         self.mutex.release()
 
     def get_task_by_id(self, project_id):
@@ -508,18 +505,12 @@ class TrainingManager():
                 to_delete = []
                 for project_id in self.training_tasks:
                     if not self.training_tasks[project_id].worker.is_alive():
-                        logger.info("Project %s Training Task is finished", project_id)
-                        # stop the inactive stream
-                        # (the ones users didnt click disconnect)
-
-                        # collect the stream, to delete later
+                        logger.info("Project %s Training Task is finished",
+                                    project_id)
                         to_delete.append(project_id)
 
                 for project_id in to_delete:
                     del self.training_tasks[project_id]
-
-                for training_status_obj in TrainingStatus.objects.all():
-                    if training_status_obj.get()
 
                 self.mutex.release()
                 time.sleep(3)
@@ -528,21 +519,37 @@ class TrainingManager():
 
 
 class TrainingTask():
+    """TrainingTask.
+    """
 
     def __init__(self, project_id):
+        """__init__.
+
+        Args:
+            project_id:
+        """
         self.project_id = project_id
         self.status = "init"
+        self.worker = None
 
     def start(self):
+        """start.
+        """
         self.status = "running"
         self.worker = threading.Thread(
             target=train_project_catcher,
-            name=f'train_project_worker_{project_id}',
-            kwargs={'project_id': project_id})
+            name=f'train_project_worker_{self.project_id}',
+            kwargs={'project_id': self.project_id})
         self.worker.start()
 
     def __str__(self):
         return "<Training Task " + str(self.project_id) + ">"
-    
+
     def __repr__(self):
         return "<Training Task " + str(self.project_id) + ">"
+
+
+if 'runserver' in sys.argv:
+    TrainingManagerInstance = TrainingManager()
+else:
+    TrainingManagerInstance = None
