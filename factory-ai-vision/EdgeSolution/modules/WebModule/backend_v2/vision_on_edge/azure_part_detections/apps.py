@@ -84,7 +84,8 @@ class AzurePartDetectionConfig(AppConfig):
             pc_scenario = PDScenario.objects.create(
                 name="Defect detection",
                 inference_mode="DD",
-                project=Project.objects.get(name="Demo Defect Detection Project"),
+                project=Project.objects.get(
+                    name="Demo Defect Detection Project"),
             )
             pc_scenario.parts.set(
                 Project.objects.get(

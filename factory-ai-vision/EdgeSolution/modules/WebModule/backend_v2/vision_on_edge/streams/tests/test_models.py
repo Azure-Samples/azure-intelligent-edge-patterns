@@ -6,8 +6,8 @@ from unittest import mock
 
 import pytest
 
-from ..models import Stream
 from ...cameras.tests.factories import CameraFactory
+from ..models import Stream
 
 pytestmark = pytest.mark.django_db
 

@@ -49,7 +49,6 @@ class PartDetection(models.Model):
     prob_threshold = models.IntegerField(default=10)
     send_video_to_cloud = models.BooleanField(default=False)
 
-
     def update_prob_threshold(self, prob_threshold):
         """update confidenece threshold of BoundingBox
         """

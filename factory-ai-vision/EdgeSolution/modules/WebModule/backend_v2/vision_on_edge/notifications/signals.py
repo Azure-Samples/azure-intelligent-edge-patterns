@@ -48,6 +48,27 @@ def notification_post_save_websocket_handler(**kwargs):
     )
 
 
+# @receiver(signal=pre_save,
+# sender=Notification,
+# dispatch_uid="dequeue_notification")
+# def notification_post_save_dequeue_handler(**kwargs):
+# """notification_post_save_dequeue_handler.
+
+# When a new notification been created, delete the
+# earliest notification with same sender.
+
+# Args:
+# kwargs:
+# """
+
+# logger.info("dequeue notification...")
+# instance = kwargs['instance']
+# if Notification.objects.filter(sender=instance.sender).count() >= 10:
+# Notification.objects.filter(
+# sender=instance.sender).order_by('timestamp').first().delete()
+
+
+
 @receiver(signal=post_save,
           sender=TrainingStatus,
           dispatch_uid="training_status_listener")

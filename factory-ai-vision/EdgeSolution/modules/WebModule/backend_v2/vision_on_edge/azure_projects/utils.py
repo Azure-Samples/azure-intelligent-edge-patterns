@@ -4,8 +4,10 @@
 
 import json
 import logging
+import sys
 import threading
 import time
+import traceback
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
@@ -17,9 +19,12 @@ from vision_on_edge.images.models import Image
 from ..azure_parts.utils import batch_upload_parts_to_customvision
 from ..azure_training_status import progress
 from ..images.utils import upload_images_to_customvision_helper
+from .exceptions import ProjectAlreadyTraining
 from .models import Project, Task
 
 logger = logging.getLogger(__name__)
+
+PRINT_TASKS = True
 
 
 def update_app_insight_counter(
@@ -382,6 +387,7 @@ def train_project_worker(project_id):
             status_init = True
         if iteration.exportable and iteration.status == "Completed":
             break
+        logger.info("still training")
 
     # =====================================================
     # 7. Exporting                                      ===
@@ -435,12 +441,115 @@ def train_project_worker(project_id):
     project_obj.save()
 
 
-def train_project_helper(project_id):
-    """train_project_helper.
+def train_project_catcher(project_id):
+    """train_project_catcher.
 
-    Open a thread to upload the items.
+    Dummy exception handler.
 
     Args:
-        project_id: Django ORM project id.
+        project_id:
     """
-    threading.Thread(target=train_project_worker, args=(project_id,)).start()
+    try:
+        train_project_worker(project_id=project_id)
+    except Exception:
+        upcreate_training_status(project_id=project_id,
+                                 status="failed",
+                                 log=traceback.format_exc(),
+                                 need_to_send_notification=True)
+
+
+class TrainingManager():
+    """TrainingManager.
+    """
+
+    def __init__(self):
+        """__init__.
+        """
+        self.training_tasks = {}
+        self.mutex = threading.Lock()
+        self.gc()
+
+    def add(self, project_id):
+        """add stream
+        """
+        if project_id in self.training_tasks:
+            raise ProjectAlreadyTraining
+        self.mutex.acquire()
+        task = TrainingTask(project_id=project_id)
+        self.training_tasks[project_id] = task
+        task.start()
+        self.mutex.release()
+
+    def get_task_by_id(self, project_id):
+        """get_stream_by_id
+        """
+
+        self.mutex.acquire()
+        if project_id in self.training_tasks:
+            return self.training_tasks['project_id']
+        self.mutex.release()
+        return None
+
+    def gc(self):
+        """Garbage collector
+
+        IMPORTANT, autoreloader will not reload threading,
+        please restart the server if you modify the thread
+        """
+
+        def _gc(self):
+            while True:
+                self.mutex.acquire()
+                if PRINT_TASKS:
+                    logger.info("tasks: %s", self.training_tasks)
+                to_delete = []
+                for project_id in self.training_tasks:
+                    if not self.training_tasks[project_id].worker.is_alive():
+                        logger.info("Project %s Training Task is finished",
+                                    project_id)
+                        to_delete.append(project_id)
+
+                for project_id in to_delete:
+                    del self.training_tasks[project_id]
+
+                self.mutex.release()
+                time.sleep(3)
+
+        threading.Thread(target=_gc, args=(self,)).start()
+
+
+class TrainingTask():
+    """TrainingTask.
+    """
+
+    def __init__(self, project_id):
+        """__init__.
+
+        Args:
+            project_id:
+        """
+        self.project_id = project_id
+        self.status = "init"
+        self.worker = None
+
+    def start(self):
+        """start.
+        """
+        self.status = "running"
+        self.worker = threading.Thread(
+            target=train_project_catcher,
+            name=f'train_project_worker_{self.project_id}',
+            kwargs={'project_id': self.project_id})
+        self.worker.start()
+
+    def __str__(self):
+        return "<Training Task " + str(self.project_id) + ">"
+
+    def __repr__(self):
+        return "<Training Task " + str(self.project_id) + ">"
+
+
+if 'runserver' in sys.argv:
+    TrainingManagerInstance = TrainingManager()
+else:
+    TrainingManagerInstance = None

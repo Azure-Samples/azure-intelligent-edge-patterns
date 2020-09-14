@@ -49,7 +49,6 @@ class StreamManager():
         self.mutex.release()
         return None
 
-
     def gc(self):
         """Garbage collector
 

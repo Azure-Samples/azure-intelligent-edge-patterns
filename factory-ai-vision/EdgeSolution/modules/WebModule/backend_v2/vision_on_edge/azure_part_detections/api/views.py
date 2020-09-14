@@ -17,7 +17,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_pd_deploy_status.models import DeployStatus
-from ...azure_projects.utils import train_project_helper
+from ...azure_projects.utils import TrainingManagerInstance
 from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
@@ -30,7 +30,7 @@ from ..exceptions import (PdConfigureWithoutCameras,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
                           PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
 from ..models import PartDetection, PDScenario
-from ..utils import if_trained_then_deploy_helper, deploy_all_helper
+from ..utils import deploy_all_helper, if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
                           PDScenarioSerializer, UploadRelabelSerializer)
 
@@ -96,7 +96,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         cam_id = request.GET['camera_id']
         try:
             res = requests.get("http://" + inference_module_obj.url +
-                               "/metrics?cam_id="+cam_id)
+                               "/metrics?cam_id=" + cam_id)
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
             inference_num = data["inference_num"]
@@ -154,7 +154,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         instance.has_configured = True
         instance.save()
 
-        train_project_helper(project_id=instance.project.id)
+        TrainingManagerInstance.add(project_id=instance.project.id)
         if_trained_then_deploy_helper(part_detection_id=instance.id)
         return Response({'status': 'ok'})
 

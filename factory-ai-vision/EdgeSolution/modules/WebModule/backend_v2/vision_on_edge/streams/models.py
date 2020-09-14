@@ -20,6 +20,7 @@ KEEP_ALIVE_THRESHOLD = 10  # Seconds
 STREAM_GC_TIME_THRESHOLD = 5  # Seconds
 PRINT_STREAMS = False
 
+
 class Stream():
     """Stream Class"""
 
@@ -121,6 +122,7 @@ class Stream():
 
     def __repr__(self):
         return f"<Stream id:{self.id} rtsp:{self.rtsp}>"
+
 
 class StreamManager():
     """StreamManager

@@ -45,7 +45,6 @@ class CamerasConfig(AppConfig):
                     })
                 logger.info("Creating demo objects... end")
 
-
                 # Scenario 1
                 logger.info("Creating a scenario 1 camera object.")
 
@@ -57,12 +56,14 @@ class CamerasConfig(AppConfig):
                     name="Scenario 1 - Counting Objects",
                     is_demo=True,
                     defaults={
-                        'rtsp': 'rtsp://rtspsim:554/media/scenario1-counting-objects.mkv',
-                        'area': "",
-                        'location': demo_location_obj
+                        'rtsp':
+                            'rtsp://rtspsim:554/media/scenario1-counting-objects.mkv',
+                        'area':
+                            "",
+                        'location':
+                            demo_location_obj
                     })
                 logger.info("Creating scenario 3 ... end")
-
 
                 # Scenario 2
                 logger.info("Creating a scenario 2 employ safety.")
@@ -75,12 +76,14 @@ class CamerasConfig(AppConfig):
                     name="Scenario 2 - Employ Safety",
                     is_demo=True,
                     defaults={
-                        'rtsp': 'rtsp://rtspsim:554/media/scenario2-employ-safety.mkv',
-                        'area': "",
-                        'location': demo_location_obj
+                        'rtsp':
+                            'rtsp://rtspsim:554/media/scenario2-employ-safety.mkv',
+                        'area':
+                            "",
+                        'location':
+                            demo_location_obj
                     })
                 logger.info("Creating scenario 2... end")
-
 
                 # Scenario 3
                 logger.info("Creating a scenario 3 defect detection.")
@@ -93,9 +96,12 @@ class CamerasConfig(AppConfig):
                     name="Scenario 3 - Defect Detection",
                     is_demo=True,
                     defaults={
-                        'rtsp': 'rtsp://rtspsim:554/media/scenario3-defect-detection.mkv',
-                        'area': "",
-                        'location': demo_location_obj
+                        'rtsp':
+                            'rtsp://rtspsim:554/media/scenario3-defect-detection.mkv',
+                        'area':
+                            "",
+                        'location':
+                            demo_location_obj
                     })
                 logger.info("Creating scenario 3... end")
 
