@@ -15,6 +15,7 @@ from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from requests.exceptions import ReadTimeout
 
 from ...azure_pd_deploy_status.models import DeployStatus
 from ...azure_projects.utils import TrainingManagerInstance
@@ -28,7 +29,8 @@ from ..exceptions import (PdConfigureWithoutCameras,
                           PdConfigureWithoutProject,
                           PdInferenceModuleUnreachable,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
-                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
+                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull,
+                          PdExportInfereceReadTimeout)
 from ..models import PartDetection, PDScenario
 from ..utils import deploy_all_helper, if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
@@ -95,11 +97,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         unidentified_num = 0
         cam_id = request.query_params.get("camera_id")
         try:
-            res = requests.get(
-                "http://" + inference_module_obj.url + "/metrics",
-                params={"cam_id": cam_id},
-                timeout=3
-            )
+            res = requests.get("http://" + inference_module_obj.url +
+                               "/metrics",
+                               params={"cam_id": cam_id},
+                               timeout=3)
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
             inference_num = data["inference_num"]
@@ -111,8 +112,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                         inference_num)
         except requests.exceptions.ConnectionError:
             raise PdInferenceModuleUnreachable(
-                detail=("Inference_module.url" + inference_module_obj.url +
-                        "unreachable."))
+                detail=("Inference_module.url: " + inference_module_obj.url +
+                        " unreachable."))
+        except ReadTimeout:
+            raise PdExportInfereceReadTimeout
         deploy_status_obj.save()
         logger.info("Deploy status: %s, %s", deploy_status_obj.status,
                     deploy_status_obj.log)
