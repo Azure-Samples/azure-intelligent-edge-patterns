@@ -83,6 +83,10 @@ class StreamManager(object):
 
         self.mutex.release()
 
+    def get_stream_by_id_danger(self, stream_id):
+        stream = self.streams.get(stream_id, None)
+        return stream
+
     def get_stream_by_id(self, stream_id):
         self.mutex.acquire()
         if stream_id not in self.streams:

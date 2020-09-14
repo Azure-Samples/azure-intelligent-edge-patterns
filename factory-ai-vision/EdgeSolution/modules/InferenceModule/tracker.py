@@ -1,3 +1,4 @@
+from collections import namedtuple
 import numpy as np
 import cv2
 from sort import *
@@ -10,13 +11,90 @@ from sort import *
 #    return 0.000000001 < (compute_direction(x1, y1) * compute_direction(x2, y2))
 
 
-def draw_oid(img, x1, y1, oid):
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.7
-    thickness = 2
-    img = cv2.putText(img, str(oid),
-                      (x1+10, y1+20), font, font_scale, (0, 255, 255), thickness)
-    return img
+class Tracker():
+    def __init__(self):
+        self.tracker = Sort()
+        self.objs = []
+
+    def update(self, detections):
+        #_detections = list([d.x1, d.x2, d.y1, d.y2, d.score] for d in detections)
+        if len(detections) > 0:
+            self.objs = self.tracker.update(np.array(detections))
+
+    def get_objs(self):
+        return self.objs
+
+    def draw_obj(self, img, detection, is_id=True, id_rect=True):
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.7
+        thickness = 2
+        detection.y1 + 20
+        x1, y1, x2, y2, oid = detection
+        if is_id:
+            img = cv2.putText(img, str(oid),
+                              (x, y), font, font_scale, (0, 255, 255), thickness)
+        if is_rect:
+            img = cv2.rectangle(
+                img, (x1, y1), (x2, y2), (0, 255, 255), 2)
+        return img
+
+class Line():
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        if y1 == y2:
+            self.m = 99999999
+            self.b = y1
+        else:
+            self.m = (x1 - y1) / (x2 - y2)
+            self.b = y1 - self.m * x1
+
+    def __str__(self):
+        return 'Line: (%d,%d) -> (%d,%d), m: %s, b: %s' % (self.x1, self.y1, self.x2, self.y2, self.m, self.b)
+
+    def compute_side(self, x, y):
+        return self.m * x + self.b - y
+
+    def is_same_side(self, x1, y1, x2, y2):
+        return 0.000000001 < (self.compute_side(x1, y1) * self.compute_side(x2, y2))
+
+def bb_intersection_over_union(boxA, boxB):
+    # determine the (x, y)-coordinates of the intersection rectangle
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+    # compute the area of intersection rectangle
+    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+    boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = interArea / float(boxAArea + boxBArea - interArea)
+    # return the intersection over union value
+    return iou
+
+class Rect():
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+    def is_inside(self, x1, y1, x2, y2):
+        box1 = [self.x1, self.y1, self.x2, self.y2]
+        box2 = [x1, y1, x2, y2]
+        if bb_intersection_over_union(box1, box2) > 0.000001:
+            return True
+        else:
+            return False
+
+
 
 def draw_counter(img, counter):
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -26,7 +104,7 @@ def draw_counter(img, counter):
                       (img.shape[1]-150, 30), font, font_scale, (0, 255, 255), thickness)
     return img
 
-class Tracker():
+class _Tracker():
 
     def __init__(self):
         self.tracker = Sort()

@@ -5,7 +5,6 @@ import numpy as np
 import grpc
 import time
 import threading
-import zmq
 
 import inferencing_pb2
 import media_pb2
@@ -64,32 +63,7 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
         # Thread safe shared resource among all clients
         # self._tYoloV3 = model
         self.stream_manager = stream_manager
-        # self.start_zmq()
 
-    def start_zmq(self):
-        def run(self):
-            # logging.info('running zmq')
-            context = zmq.Context()
-            sender = context.socket(zmq.PUB)
-            # sender.connect("tcp://localhost:5558")
-            sender.bind("tcp://*:5558")
-
-            while 'flags' not in dir(self._tYoloV3.last_drawn_img):
-                logging.info('not sending last_drawn_img')
-                time.sleep(2)
-            cnt = 0
-            while True:
-                cnt += 1
-                logging.info('send through channel {0}'.format(
-                    bytes(self._tYoloV3.last_instance, 'utf-8')))
-                sender.send_multipart([bytes(
-                    self._tYoloV3.last_instance, 'utf-8'), cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes()])
-                # sender.send_pyobj(
-                #     {"data": cv2.imencode(".jpg", self._tYoloV3.last_drawn_img)[1].tobytes(), "ts": str(cnt), "shape": (540, 960, 3)})
-                # sender.send(cv2.imencode(".jpg", onnx.last_img)[1].tostring())
-                # time.sleep(2)
-                time.sleep(0.04)
-        threading.Thread(target=run, args=(self,)).start()
 
     # Debug method for dumping received images with analysis results
     def CreateDebugOutput(self, requestSeqNum, cvImage, boxes, scores, indices, confidenceThreshold=0.1):
@@ -235,7 +209,6 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
 
         # Process rest of the MediaStream message sequence
         for mediaStreamMessageRequest in requestIterator:
-            try:
                 # Increment response counter, will be sent to client
                 responseSeqNum += 1
 
@@ -302,7 +275,5 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                     yield mediaStreamMessage
                 else:
                     break
-            except:
-                PrintGetExceptionDetails()
 
         logging.info('Connection closed with peer {0}.'.format(context.peer()))
