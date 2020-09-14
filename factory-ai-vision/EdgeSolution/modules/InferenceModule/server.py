@@ -119,7 +119,7 @@ def metrics():
         'is_gpu': is_gpu,
         'average_inference_time': average_inference_time,
         'last_prediction_count': last_prediction_count,
-        'scenario_metrics': 1
+        'scenario_metrics': stream.get_metrics()
     })
 
 @app.route('/update_part_detection_id')
