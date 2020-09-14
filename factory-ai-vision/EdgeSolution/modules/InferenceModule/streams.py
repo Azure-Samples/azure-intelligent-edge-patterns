@@ -140,7 +140,7 @@ class Stream():
                     self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
                 self.mutex.release()
                 # FIXME need to fine tune this value
-                time.sleep(0.08)
+                time.sleep(0.03)
         threading.Thread(target=run, args=(self,)).start()
 
     def get_scenario_metrics(self):
@@ -381,9 +381,8 @@ class Stream():
             #print(self.scenario, flush=True)
             self.scenario.last_draw_img = self.scenario.draw_counter(self.last_drawn_img)
             #FIXME close this
-            self.scenario.draw_constraint(self.last_drawn_img)
-            #self.last_drawn_img = self.scenario.draw_objs(self.last_drawn_img)
-            self.scenario.draw_objs(self.last_drawn_img)
+            #self.scenario.draw_constraint(self.last_drawn_img)
+            #self.scenario.draw_objs(self.last_drawn_img)
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000

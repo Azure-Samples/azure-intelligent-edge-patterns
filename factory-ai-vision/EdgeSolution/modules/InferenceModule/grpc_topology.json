@@ -99,9 +99,9 @@
         ],
         "processors": [
             {
-                "@type": "#Microsoft.Media.MediaGraphMotionDetectionProcessor",
-                "name": "motionDetection",
-                "sensitivity": "${motionSensitivity}",
+                "@type": "#Microsoft.Media.MediaGraphFrameRateFilterProcessor",  
+                "name": "frameRateFilter",
+                "maximumFps": "30.0",    
                 "inputs": [
                     {
                         "nodeName": "rtspSource"
@@ -122,7 +122,7 @@
                 },
                 "dataTransfer": {
                     "mode": "sharedMemory",
-                    "SharedMemorySizeMiB": "5"
+                    "SharedMemorySizeMiB": "50"
                 },
                 "image": {
                     "scale": {
@@ -138,7 +138,7 @@
                 },
                 "inputs": [
                     {
-                        "nodeName": "motionDetection"
+                        "nodeName": "frameRateFilter"
                     }
                 ]
             }

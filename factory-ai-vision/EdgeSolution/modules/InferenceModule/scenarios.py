@@ -90,7 +90,7 @@ class PartCounter(Scenario):
 
     def draw_line(self, img):
         thickness = 1
-        if self.line.x1:
+        if self.line:
             img = cv2.line(img, (int(self.line.x1), int(self.line.y1)), (int(self.line.x2), int(self.line.y2)), (0, 255, 255), thickness)
         return img
 
@@ -216,7 +216,7 @@ class DangerZone(Scenario):
         self.tracker = Tracker()
         self.detected = {}
         self.counter = 0
-        self.line = None
+        self.zones = []
         self.targets = []
         self.threshold = threshold
 
