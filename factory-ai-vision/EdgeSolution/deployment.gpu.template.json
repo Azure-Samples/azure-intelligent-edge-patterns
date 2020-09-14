@@ -115,6 +115,11 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              }
+            },
             "settings": {
               "image": "${MODULES.InferenceModule.gpuamd64}",
               "createOptions": {
@@ -153,7 +158,10 @@
                       "max-file": "10"
                     }
                   },
-                  "Binds": ["/home/willy/media/:/var/media/", "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"],
+                  "Binds": [
+                    "/home/willy/media/:/var/media/",
+                    "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"
+                  ],
                   "IpcMode": "shareable"
                 }
               }
@@ -166,11 +174,9 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
+              "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig": {
-                  "Binds": ["/home/willy/media/input:/live/mediaServer/media"]
-                }
+                "HostConfig": {}
               }
             }
           }

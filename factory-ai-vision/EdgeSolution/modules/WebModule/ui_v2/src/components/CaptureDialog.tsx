@@ -47,7 +47,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   partId = null,
 }) => {
   const [selectedCameraId, setSelectedCameraId] = useState(defaultSelectedCameraId);
-  const cameraOptions = useSelector(cameraOptionsSelector(false));
+  const cameraOptions = useSelector(cameraOptionsSelector());
   const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
   const dispatch = useDispatch();
   const [status, setStatus] = useState<Status>(Status.Waiting);

@@ -1,9 +1,9 @@
 import React from 'react';
 import './ConfigurationInfo.style.css';
-import { Stack } from '@fluentui/react';
+import { Stack, TextField, IconButton } from '@fluentui/react';
 import { PartTag, Status as PartTagStatus } from '../PartTag';
 
-type LiveViewInfoProps = {
+type ConfigurationInfoProps = {
   cameraName: string;
   partNames: string[];
   sendMessageToCloud: boolean;
@@ -13,6 +13,10 @@ type LiveViewInfoProps = {
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
+  probThreshold: string;
+  originProbThreshold: string;
+  updateProbThreshold: (string) => void;
+  saveProbThreshold: () => void;
 };
 
 const getCloudMessageTxt = (
@@ -34,7 +38,7 @@ const getRetrainingTxt = (
   return `Yes - ${maxImages} images in the ${accuracyRangeMin}-${accuracyRangeMax}% accuracy range`;
 };
 
-export const ConfigurationInfo: React.FC<LiveViewInfoProps> = (props) => {
+export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
   return (
     <>
       <h4 style={{ margin: 5 }}>Configuration</h4>
@@ -57,6 +61,24 @@ export const ConfigurationInfo: React.FC<LiveViewInfoProps> = (props) => {
         </table>
         <table>
           <tbody>
+            <tr>
+              <td>Confirmation threshold</td>
+              <td>
+                <TextField
+                  type="number"
+                  value={props.probThreshold}
+                  onChange={(_, newValue) => props.updateProbThreshold(newValue)}
+                  underlined
+                  suffix="%"
+                  styles={{ root: { display: 'inline-block' } }}
+                />
+                <IconButton
+                  disabled={props.originProbThreshold === props.probThreshold}
+                  iconProps={{ iconName: 'Save' }}
+                  onClick={props.saveProbThreshold}
+                />
+              </td>
+            </tr>
             <tr>
               <td>Cloud message</td>
               <td>

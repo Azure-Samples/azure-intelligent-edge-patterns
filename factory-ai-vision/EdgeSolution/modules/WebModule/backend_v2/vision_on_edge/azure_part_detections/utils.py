@@ -6,6 +6,7 @@ import json
 import logging
 import threading
 import time
+import traceback
 
 import requests
 from django.utils import timezone
@@ -66,7 +67,8 @@ def if_trained_then_deploy_worker(part_detection_id):
     # =====================================================
     try:
         deploy_worker(part_detection_id=part_detection_obj.id)
-        logger.info("Part Detection successfully deployed to inference_module!")
+        logger.info(
+            "Part Detection successfully deployed to inference_module!")
     except:
         logger.info("Part Detection deploy to inference_module failed !")
 
@@ -109,27 +111,24 @@ def deploy_worker(part_detection_id):
     # =====================================================
     # 1. Update params                                  ===
     # =====================================================
-    requests.get(
-        "http://" + str(instance.inference_module.url) +
-        "/update_part_detection_id",
-        params={
-            "part_detection_id": instance.id,
-        },
-    )
-    requests.get(
-        "http://" + str(instance.inference_module.url) +
-        "/update_part_detection_mode",
-        params={
-            "part_detection_mode": instance.inference_mode,
-        },
-    )
-    requests.get(
-        "http://" + str(instance.inference_module.url) +
-        "/update_send_video_to_cloud",
-        params={
-            "send_video_to_cloud": instance.send_video_to_cloud,
-        },
-    )
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_part_detection_id",
+                 params={
+                     "part_detection_id": instance.id,
+                 },
+                 timeout=3)
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_part_detection_mode",
+                 params={
+                     "part_detection_mode": instance.inference_mode,
+                 },
+                 timeout=3)
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_send_video_to_cloud",
+                 params={
+                     "send_video_to_cloud": instance.send_video_to_cloud,
+                 },
+                 timeout=3)
 
     # =====================================================
     # 1. Update model                                  ===
@@ -137,38 +136,36 @@ def deploy_worker(part_detection_id):
     if not instance.project:
         pass
     elif not instance.project.is_demo:
-        requests.get(
-            "http://" + str(instance.inference_module.url) + "/update_model",
-            params={"model_uri": instance.project.download_uri},
-        )
+        requests.get("http://" + str(instance.inference_module.url) +
+                     "/update_model",
+                     params={"model_uri": instance.project.download_uri},
+                     timeout=3)
     else:
-        requests.get(
-            "http://" + str(instance.inference_module.url) + "/update_model",
-            params={"model_dir": instance.project.download_uri},
-        )
-    requests.get(
-        "http://" + str(instance.inference_module.url) + "/update_parts",
-        params={"parts": parts_to_detect},
-    )
-    requests.get(
-        "http://" + instance.inference_module.url +
-        "/update_retrain_parameters",
-        params={
-            "is_retrain": need_retraining,
-            "confidence_min": confidence_min,
-            "confidence_max": confidence_max,
-            "max_images": max_images,
-        },
-    )
-    requests.get(
-        "http://" + instance.inference_module.url +
-        "/update_iothub_parameters",
-        params={
-            "is_send": metrics_is_send_iothub,
-            "threshold": metrics_accuracy_threshold,
-            "fpm": metrics_frame_per_minutes,
-        },
-    )
+        requests.get("http://" + str(instance.inference_module.url) +
+                     "/update_model",
+                     params={"model_dir": instance.project.download_uri},
+                     timeout=3)
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_parts",
+                 params={"parts": parts_to_detect},
+                 timeout=3)
+    requests.get("http://" + instance.inference_module.url +
+                 "/update_retrain_parameters",
+                 params={
+                     "is_retrain": need_retraining,
+                     "confidence_min": confidence_min,
+                     "confidence_max": confidence_max,
+                     "max_images": max_images,
+                 },
+                 timeout=3)
+    requests.get("http://" + instance.inference_module.url +
+                 "/update_iothub_parameters",
+                 params={
+                     "is_send": metrics_is_send_iothub,
+                     "threshold": metrics_accuracy_threshold,
+                     "fpm": metrics_frame_per_minutes,
+                 },
+                 timeout=3)
 
     # =====================================================
     # 2. Update cam                                     ===
@@ -189,21 +186,34 @@ def deploy_worker(part_detection_id):
                 "type": "rtsp",
                 "source": cam.rtsp,
                 "aoi": cam.area,
-                "lines": cam.lines
+                "lines": cam.lines,
+                "zones": cam.danger_zones
             })
         else:
             res_data["cameras"].append({
                 "id": cam.id,
                 "type": "rtsp",
                 "source": cam.rtsp,
-                "lines": cam.lines
+                "lines": cam.lines,
+                "zones": cam.danger_zones
             })
     serializer = UpdateCamBodySerializer(data=res_data)
     serializer.is_valid(raise_exception=True)
     requests.post(
         url="http://" + inference_module_url + "/update_cams",
         json=json.loads(json.dumps(serializer.validated_data)),
+        timeout=3
     )
+
+
+def if_trained_then_deploy_catcher(part_detection_id):
+    try:
+        if_trained_then_deploy_worker(part_detection_id=part_detection_id)
+    except Exception:
+        upcreate_deploy_status(part_detection_id=part_detection_id,
+                               status="failed",
+                               log=traceback.format_exc(),
+                               need_to_send_notification=True)
 
 
 # Helper here.
@@ -223,7 +233,8 @@ def if_trained_then_deploy_helper(part_detection_id):
     upcreate_deploy_status(
         part_detection_id=part_detection_id,
         **deploy_progress.PROGRESS_1_WATINING_PROJECT_TRAINED)
-    threading.Thread(target=if_trained_then_deploy_worker,
+    threading.Thread(name="if_trained_then_deploy_catcher",
+                     target=if_trained_then_deploy_catcher,
                      args=(part_detection_id,)).start()
 
 

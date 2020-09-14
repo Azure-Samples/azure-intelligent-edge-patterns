@@ -61,6 +61,9 @@ class AzurePartDetectionConfig(AppConfig):
                 inference_mode="PC",
                 project=Project.objects.get(name="Demo Part Counting Project"),
             )
+            pc_scenario.cameras.set(
+                Camera.objects.filter(is_demo=True,
+                                      name="Scenario 1 - Counting Objects"))
             pc_scenario.parts.set(
                 Project.objects.get(
                     is_demo=True,
@@ -68,25 +71,32 @@ class AzurePartDetectionConfig(AppConfig):
             # =============================================
             # Employee safety                           ===
             # =============================================
-            pc_scenario = PDScenario.objects.create(
+            es_scenario = PDScenario.objects.create(
                 name="Employee safety",
                 inference_mode="ES",
                 project=Project.objects.get(
                     name="Demo Employee Safety Project"),
             )
-            pc_scenario.parts.set(
+            es_scenario.cameras.set(
+                Camera.objects.filter(is_demo=True,
+                                      name="Scenario 2 - Employ Safety"))
+            es_scenario.parts.set(
                 Project.objects.get(
                     is_demo=True,
                     name="Demo Employee Safety Project").part_set.all())
             # =============================================
             # Defect Detection                          ===
             # =============================================
-            pc_scenario = PDScenario.objects.create(
+            dd_scenario = PDScenario.objects.create(
                 name="Defect detection",
                 inference_mode="DD",
-                project=Project.objects.get(name="Demo Defect Detection Project"),
+                project=Project.objects.get(
+                    name="Demo Defect Detection Project"),
             )
-            pc_scenario.parts.set(
+            dd_scenario.cameras.set(
+                Camera.objects.filter(is_demo=True,
+                                      name="Scenario 3 - Defect Detection"))
+            dd_scenario.parts.set(
                 Project.objects.get(
                     is_demo=True,
                     name="Demo Defect Detection Project").part_set.all())

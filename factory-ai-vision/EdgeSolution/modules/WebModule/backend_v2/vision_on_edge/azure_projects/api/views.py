@@ -24,7 +24,7 @@ from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleOKSerializer)
 from ..exceptions import ProjectWithoutSettingError
 from ..models import Project, Task
-from ..utils import pull_cv_project_helper, train_project_helper
+from ..utils import TrainingManagerInstance, pull_cv_project_helper
 from .serializers import (IterationPerformanceSerializer,
                           ProjectPerformanesSerializer, ProjectSerializer,
                           TaskSerializer)
@@ -217,7 +217,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         """
         queryset = self.get_queryset()
         project_obj = get_object_or_404(queryset, pk=pk)
-        train_project_helper(project_id=project_obj.id)
+        TrainingManagerInstance.add(project_id=pk)
         return Response({'status': 'ok'})
 
 

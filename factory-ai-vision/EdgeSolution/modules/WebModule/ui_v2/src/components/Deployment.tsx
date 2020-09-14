@@ -32,6 +32,8 @@ import {
   thunkDeleteProject,
   thunkGetTrainingMetrics,
   thunkGetProject,
+  updateProjectData,
+  updateProbThreshold,
 } from '../store/project/projectActions';
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
 import { selectCamerasByIds, selectCameraById } from '../store/cameraSlice';
@@ -43,17 +45,23 @@ import {
   selectOriginVideoAnnosByCamera,
   onCreateVideoAnnoBtnClick,
 } from '../store/videoAnnoSlice';
-import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from '../store/actions';
-import { Shape } from '../store/shared/BaseShape';
+import {
+  toggleShowAOI,
+  updateCameraArea,
+  toggleShowCountingLines,
+  toggleShowDangerZones,
+} from '../store/actions';
+import { Shape, Purpose } from '../store/shared/BaseShape';
 import { EmptyAddIcon } from './EmptyAddIcon';
 import { getTrainingProject } from '../store/trainingProjectSlice';
 
 const { palette } = getTheme();
 
 export const Deployment: React.FC = () => {
-  const { status, progress, trainingLog, data: projectData, inferenceMetrics } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+  const { status, progress, trainingLog, data: projectData, originData, inferenceMetrics } = useSelector<
+    State,
+    Project
+  >((state) => state.project);
   const {
     id: projectId,
     cameras: projectCameraIds,
@@ -67,6 +75,7 @@ export const Deployment: React.FC = () => {
     accuracyRangeMax,
     maxImages,
     name,
+    probThreshold,
   } = projectData;
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
@@ -119,6 +128,10 @@ export const Deployment: React.FC = () => {
     },
     status === Status.StartInference ? 5000 : null,
   );
+
+  const changeProbThreshold = (newValue: string) =>
+    dispatch(updateProjectData({ probThreshold: newValue }, false));
+  const saveProbThresholde = () => dispatch(updateProbThreshold());
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
@@ -213,6 +226,10 @@ export const Deployment: React.FC = () => {
               needRetraining={needRetraining}
               accuracyRangeMin={accuracyRangeMin}
               accuracyRangeMax={accuracyRangeMax}
+              probThreshold={probThreshold}
+              originProbThreshold={originData.probThreshold}
+              updateProbThreshold={changeProbThreshold}
+              saveProbThreshold={saveProbThresholde}
               maxImages={maxImages}
             />
           </Stack>
@@ -225,6 +242,8 @@ export const Deployment: React.FC = () => {
                 successRate={inferenceMetrics.successRate}
                 successfulInferences={inferenceMetrics.successfulInferences}
                 unIdetifiedItems={inferenceMetrics.unIdetifiedItems}
+                isGpu={inferenceMetrics.isGpu}
+                averageTime={inferenceMetrics.averageTime}
                 objectCounts={objectCounts}
               />
             </PivotItem>
@@ -258,6 +277,8 @@ type InsightsProps = {
   successfulInferences: number;
   unIdetifiedItems: number;
   objectCounts: [string, number][];
+  isGpu: boolean;
+  averageTime: number;
 };
 
 export const Insights: React.FC<InsightsProps> = ({
@@ -265,6 +286,8 @@ export const Insights: React.FC<InsightsProps> = ({
   successfulInferences,
   unIdetifiedItems,
   objectCounts,
+  isGpu,
+  averageTime,
 }) => {
   return (
     <>
@@ -274,6 +297,9 @@ export const Insights: React.FC<InsightsProps> = ({
       >
         <Text styles={{ root: { fontWeight: 'bold' } }}>Success rate</Text>
         <Text styles={{ root: { fontWeight: 'bold', color: palette.greenLight } }}>{successRate}%</Text>
+        <Text>
+          {`Running on ${isGpu ? 'GPU' : 'CPU'} (accelerated) ${Math.round(averageTime * 100) / 100}/ms`}
+        </Text>
       </Stack>
       <Stack
         styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
@@ -318,10 +344,14 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const showCountingLine = useSelector<State, boolean>(
     (state) => selectCameraById(state, cameraId)?.useCountingLine,
   );
+  const showDangerZone = useSelector<State, boolean>(
+    (state) => selectCameraById(state, cameraId)?.useDangerZone,
+  );
   const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
   const originVideoAnnos = useSelector(selectOriginVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
+  const videoAnnoPurpose = useSelector((state: State) => state.videoAnnos.purpose);
   const inferenceMode = useSelector((state: State) => state.project.data.inferenceMode);
   const dispatch = useDispatch();
 
@@ -335,6 +365,13 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const onCountingLineToggleClick = async () => {
     setLoading(true);
     await dispatch(toggleShowCountingLines({ cameraId, checked: !showCountingLine }));
+    setShowUpdateSuccessTxt(true);
+    setLoading(false);
+  };
+
+  const onDangerZoneToggleClick = async (): Promise<void> => {
+    setLoading(true);
+    await dispatch(toggleShowDangerZones({ cameraId, checked: !showDangerZone }));
     setShowUpdateSuccessTxt(true);
     setLoading(false);
   };
@@ -354,23 +391,23 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
       <Toggle label="Enable area of interest" checked={showAOI} onClick={onAOIToggleClick} inlineLabel />
       <DefaultButton
         text="Create Box"
-        primary={videoAnnoShape === Shape.BBox}
+        primary={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick(Shape.BBox));
+          dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.AOI }));
         }}
         style={{ padding: '0 5px' }}
       />
       <DefaultButton
-        text={videoAnnoShape === Shape.Polygon ? 'Press F to Finish' : 'Create Polygon'}
-        primary={videoAnnoShape === Shape.Polygon}
+        text={videoAnnoShape === Shape.Polygon ? 'Press D to Finish' : 'Create Polygon'}
+        primary={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick(Shape.Polygon));
+          dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.AOI }));
         }}
         style={{ padding: '0 5px' }}
       />
-      {inferenceMode === InferenceMode.PC && (
+      {[InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(inferenceMode) && (
         <>
           <Toggle
             label="Enable counting lines"
@@ -380,10 +417,28 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
           />
           <DefaultButton
             text="Create counting line"
-            primary={videoAnnoShape === Shape.Line}
+            primary={videoAnnoShape === Shape.Line && videoAnnoPurpose === Purpose.Counting}
             disabled={!showCountingLine}
             onClick={(): void => {
-              dispatch(onCreateVideoAnnoBtnClick(Shape.Line));
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Line, purpose: Purpose.Counting }));
+            }}
+          />
+        </>
+      )}
+      {inferenceMode === InferenceMode.EmployeeSafety && (
+        <>
+          <Toggle
+            label="Enable danger zones"
+            checked={showDangerZone}
+            onClick={onDangerZoneToggleClick}
+            inlineLabel
+          />
+          <DefaultButton
+            text="Create danger zone"
+            primary={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
+            disabled={!showDangerZone}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.DangerZone }));
             }}
           />
         </>

@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Stack, Text, Link, mergeStyleSets } from '@fluentui/react';
 import { Card } from '@uifabric/react-cards';
-import Axios from 'axios';
 
+import { State } from 'RootStateType';
+import { useDispatch, useSelector } from 'react-redux';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
-import { ProjectData } from '../store/project/projectTypes';
 import { initialProjectData } from '../store/project/projectReducer';
-
-type DemoProject = Pick<
-  ProjectData,
-  'id' | 'name' | 'inferenceMode' | 'trainingProject' | 'cameras' | 'parts'
->;
+import { getScenario } from '../store/scenarioSlice';
 
 const classes = mergeStyleSets({
   gridContainer: {
@@ -49,22 +45,13 @@ const demoProjectsInfo = [
 ];
 
 export const GetStarted: React.FC = () => {
-  const [demoProjectData, setdemoProjectData] = useState<DemoProject[]>([]);
+  const demoProjectData = useSelector((state: State) => state.scenario);
+
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    (async () => {
-      const res = await Axios.get('/api/part_detection_scenarios');
-      setdemoProjectData(
-        res.data.map((e) => ({
-          id: e.id,
-          name: e.name,
-          inferenceMode: e.inference_mode,
-          trainingProject: e.project,
-          camera: e.camera,
-          parts: e.parts,
-        })),
-      );
-    })();
-  }, []);
+    dispatch(getScenario());
+  }, [dispatch]);
 
   const [selectedDemoIdx, setselectedDemoIdx] = useState(-1);
   const openPanel = (name: string) => () =>
@@ -96,6 +83,7 @@ export const GetStarted: React.FC = () => {
         onDismiss={closePanel}
         projectData={{ ...initialProjectData, ...demoProjectData[selectedDemoIdx] }}
         isDemo
+        demoTrainingProject={demoProjectData[selectedDemoIdx]?.trainingProject}
       />
     </>
   );

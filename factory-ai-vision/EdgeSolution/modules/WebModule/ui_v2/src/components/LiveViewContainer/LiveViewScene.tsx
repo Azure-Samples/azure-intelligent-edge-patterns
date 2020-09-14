@@ -18,7 +18,7 @@ import { isBBox } from '../../store/shared/Box2d';
 import { isPolygon } from '../../store/shared/Polygon';
 import { Shape } from '../../store/shared/BaseShape';
 import { isLine } from '../../store/shared/Line';
-import { isAOIShape, isCountingLine } from '../../store/shared/VideoAnnoUtil';
+import { isAOIShape, isCountingLine, isDangerZone } from '../../store/shared/VideoAnnoUtil';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -38,6 +38,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   countingLineVisible,
   imageInfo,
   creatingState,
+  dangerZoneVisible,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
@@ -97,7 +98,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   useEffect(() => {
     const div = divRef.current;
     const handleFPress = (e) => {
-      if (e.key === 'f') {
+      if (e.key === 'd') {
         finishLabel();
       }
     };
@@ -115,6 +116,10 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     return videoAnnos.filter(isCountingLine);
   }, [videoAnnos]);
 
+  const dangerZone = useMemo(() => {
+    return videoAnnos.filter(isDangerZone);
+  }, [videoAnnos]);
+
   return (
     <div ref={divRef} style={{ width: '100%', height: '100%' }} tabIndex={0}>
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
@@ -124,6 +129,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
             /* Render when image is loaded to prevent the shapes show in unscale size */
             status === 'loaded' && (
               <>
+                {/** AOIs */}
                 <VideoAnnosGroup
                   imgWidth={imgWidth}
                   imgHeight={imgHeight}
@@ -134,6 +140,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
                   creatingState={creatingState}
                   needMask={true}
                 />
+                {/** Counting Lines */}
                 <VideoAnnosGroup
                   imgWidth={imgWidth}
                   imgHeight={imgHeight}
@@ -143,6 +150,18 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
                   visible={countingLineVisible}
                   creatingState={creatingState}
                   needMask={false}
+                />
+                {/** Danger Zones */}
+                <VideoAnnosGroup
+                  imgWidth={imgWidth}
+                  imgHeight={imgHeight}
+                  videoAnnos={dangerZone}
+                  updateVideoAnno={updateVideoAnno}
+                  removeVideoAnno={removeVideoAnno}
+                  visible={dangerZoneVisible}
+                  creatingState={creatingState}
+                  needMask={false}
+                  color="yellow"
                 />
               </>
             )
@@ -162,6 +181,7 @@ const VideoAnnosGroup: React.FC<VideoAnnosGroupProps> = ({
   visible,
   creatingState,
   needMask,
+  color = 'white',
 }): JSX.Element => {
   return (
     <>
@@ -179,6 +199,7 @@ const VideoAnnosGroup: React.FC<VideoAnnosGroupProps> = ({
               }}
               removeBox={() => removeVideoAnno(e.id)}
               creatingState={creatingState}
+              color={color}
             />
           );
         }
@@ -193,6 +214,7 @@ const VideoAnnosGroup: React.FC<VideoAnnosGroupProps> = ({
               creatingState={creatingState}
               handleChange={(idx, vertex) => updateVideoAnno(e.id, { idx, vertex })}
               boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+              color={color}
             />
           );
         }
@@ -207,6 +229,7 @@ const VideoAnnosGroup: React.FC<VideoAnnosGroupProps> = ({
               creatingState={creatingState}
               handleChange={(idx, vertex) => updateVideoAnno(e.id, { idx, vertex })}
               boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+              color={color}
             />
           );
         }
@@ -272,8 +295,7 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   );
 };
 
-const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange, boundary }) => {
-  const COLOR = 'white';
+const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange, boundary, color }) => {
   const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
 
@@ -339,7 +361,7 @@ const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange,
         y={polygon[0].y}
         points={borderPoints}
         closed
-        stroke={COLOR}
+        stroke={color}
         strokeWidth={2 / scale}
         hitStrokeWidth={50 / scale}
       />
@@ -351,7 +373,7 @@ const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange,
           x={e.x}
           y={e.y}
           radius={radius}
-          fill={COLOR}
+          fill={color}
           onDragMove={onDragMove(i)}
           hitStrokeWidth={50 / scale}
         />
@@ -376,9 +398,16 @@ const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange,
   );
 };
 
-const Box: React.FC<BoxProps> = ({ box, onBoxChange, visible, boundary, removeBox, creatingState }) => {
+const Box: React.FC<BoxProps> = ({
+  box,
+  onBoxChange,
+  visible,
+  boundary,
+  removeBox,
+  creatingState,
+  color,
+}) => {
   const { x1, y1, x2, y2 } = box;
-  const COLOR = 'white';
   const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
 
@@ -440,19 +469,19 @@ const Box: React.FC<BoxProps> = ({ box, onBoxChange, visible, boundary, removeBo
         y={y1}
         points={[0, 0, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, 0]}
         closed
-        stroke={COLOR}
+        stroke={color}
         strokeWidth={2 / scale}
         hitStrokeWidth={50 / scale}
       />
-      <Circle draggable name="leftTop" x={x1} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
-      <Circle draggable name="rightTop" x={x2} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
+      <Circle draggable name="leftTop" x={x1} y={y1} radius={radius} fill={color} onDragMove={handleDrag} />
+      <Circle draggable name="rightTop" x={x2} y={y1} radius={radius} fill={color} onDragMove={handleDrag} />
       <Circle
         draggable
         name="rightBottom"
         x={x2}
         y={y2}
         radius={radius}
-        fill={COLOR}
+        fill={color}
         onDragMove={handleDrag}
       />
       <Circle
@@ -461,7 +490,7 @@ const Box: React.FC<BoxProps> = ({ box, onBoxChange, visible, boundary, removeBo
         x={x1}
         y={y2}
         radius={radius}
-        fill={COLOR}
+        fill={color}
         onDragMove={handleDrag}
       />
       <Path

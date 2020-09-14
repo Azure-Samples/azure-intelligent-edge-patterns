@@ -18,14 +18,15 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
 
-import { cameraOptionsSelector, getCameras } from '../store/cameraSlice';
+import { State } from 'RootStateType';
+import { getCameras, cameraOptionsSelectorInConfig } from '../store/cameraSlice';
 import { partOptionsSelector, getParts } from '../store/partSlice';
 import { ProjectData, InferenceMode } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
-import { State } from 'RootStateType';
+import { getScenario } from '../store/scenarioSlice';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -67,6 +68,7 @@ type ConfigTaskPanelProps = {
   isOpen: boolean;
   onDismiss: () => void;
   projectData: ProjectData;
+  demoTrainingProject?: number;
   isDemo?: boolean;
   isEdit?: boolean;
 };
@@ -75,6 +77,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
   projectData: initialProjectData,
+  demoTrainingProject = null,
   isDemo = false,
   isEdit = false,
 }) => {
@@ -82,30 +85,44 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   useEffect(() => {
     setProjectData(initialProjectData);
   }, [initialProjectData]);
-  const cameraOptions = useSelector(cameraOptionsSelector(true));
+
+  const cameraOptions = useSelector(
+    cameraOptionsSelectorInConfig(isEdit ? initialProjectData.trainingProject : demoTrainingProject),
+  );
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
-  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(true));
+  const trainingProjectOptions = useSelector(
+    trainingProjectOptionsSelector(isEdit ? initialProjectData.trainingProject : demoTrainingProject),
+  );
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
+  const demoProject = useSelector((state: State) => state.trainingProject.isDemo);
   const dispatch = useDispatch();
   const history = useHistory();
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
-    if (key === 'trainingProject') setProjectData(R.assoc('parts', []));
-    setProjectData(R.assoc(key, value));
+    const cloneProject = R.clone(projectData);
+    if (key === 'trainingProject') {
+      if (!demoProject.includes(cloneProject.trainingProject)) cloneProject.needRetraining = false;
+      cloneProject.parts = [];
+    }
+    (cloneProject as any)[key] = value;
+    setProjectData(cloneProject);
   }
 
   useEffect(() => {
     dispatch(getParts());
     dispatch(getCameras(true));
     dispatch(getTrainingProject(true));
+    dispatch(getScenario());
   }, [dispatch, isDemo]);
 
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);
 
-    await dispatch(thunkPostProject({ ...projectData, ...(!isDemo && { inferenceMode: InferenceMode.PD }) }));
+    await dispatch(
+      thunkPostProject({ ...projectData, ...(!isDemo && { inferenceMode: InferenceMode.PartDetection }) }),
+    );
 
     onDismiss();
     history.push('/home/deployment');

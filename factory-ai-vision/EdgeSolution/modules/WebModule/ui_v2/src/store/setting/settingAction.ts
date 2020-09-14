@@ -59,7 +59,7 @@ const getAllCvProjectsSuccess = (cvProjects: CVProject[]): GetAllCvProjectsSucce
   pyload: cvProjects,
 });
 
-const getAllCvProjectError = (error: Error): GetAllCvProjectsErrorAction => ({
+export const getAllCvProjectError = (error: Error): GetAllCvProjectsErrorAction => ({
   type: 'settings/listAllProjects/rejected',
   error,
 });

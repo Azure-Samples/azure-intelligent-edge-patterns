@@ -20,6 +20,7 @@ KEEP_ALIVE_THRESHOLD = 10  # Seconds
 STREAM_GC_TIME_THRESHOLD = 5  # Seconds
 PRINT_STREAMS = False
 
+
 class Stream():
     """Stream Class"""
 
@@ -30,6 +31,8 @@ class Stream():
             self.rtsp = 1
         elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
             self.rtsp = "rtsp" + rtsp[4:]
+        else:
+            self.rtsp = rtsp
         self.camera_id = camera_id
         self.part_id = part_id
 
@@ -119,6 +122,7 @@ class Stream():
 
     def __repr__(self):
         return f"<Stream id:{self.id} rtsp:{self.rtsp}>"
+
 
 class StreamManager():
     """StreamManager

@@ -15,9 +15,10 @@ from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from requests.exceptions import ReadTimeout
 
 from ...azure_pd_deploy_status.models import DeployStatus
-from ...azure_projects.utils import train_project_helper
+from ...azure_projects.utils import TrainingManagerInstance
 from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
@@ -28,9 +29,10 @@ from ..exceptions import (PdConfigureWithoutCameras,
                           PdConfigureWithoutProject,
                           PdInferenceModuleUnreachable,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
-                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
+                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull,
+                          PdExportInfereceReadTimeout)
 from ..models import PartDetection, PDScenario
-from ..utils import if_trained_then_deploy_helper, deploy_all_helper
+from ..utils import deploy_all_helper, if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
                           PDScenarioSerializer, UploadRelabelSerializer)
 
@@ -93,10 +95,24 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         success_rate = 0.0
         inference_num = 0
         unidentified_num = 0
-        cam_id = request.GET['camera_id']
+        cam_id = request.query_params.get("camera_id")
+        if deploy_status_obj != "ok":
+            return Response({
+                "status": deploy_status_obj.status,
+                "log": "Status: " + deploy_status_obj.log,
+                "download_uri": "",
+                "success_rate": "",
+                "inference_num": "",
+                "unidentified_num": "",
+                "gpu": "",
+                "average_time": "",
+                "count": ""
+            })
         try:
             res = requests.get("http://" + inference_module_obj.url +
-                               "/metrics?cam_id="+cam_id)
+                               "/metrics",
+                               params={"cam_id": cam_id},
+                               timeout=3)
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
             inference_num = data["inference_num"]
@@ -108,8 +124,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                         inference_num)
         except requests.exceptions.ConnectionError:
             raise PdInferenceModuleUnreachable(
-                detail=("Inference_module.url" + inference_module_obj.url +
-                        "unreachable."))
+                detail=("Inference_module.url: " + inference_module_obj.url +
+                        " unreachable."))
+        except ReadTimeout:
+            raise PdExportInfereceReadTimeout
         deploy_status_obj.save()
         logger.info("Deploy status: %s, %s", deploy_status_obj.status,
                     deploy_status_obj.log)
@@ -154,7 +172,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         instance.has_configured = True
         instance.save()
 
-        train_project_helper(project_id=instance.project.id)
+        TrainingManagerInstance.add(project_id=instance.project.id)
         if_trained_then_deploy_helper(part_detection_id=instance.id)
         return Response({'status': 'ok'})
 
@@ -250,16 +268,6 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 project=project_obj, part=part,
                 is_relabel=True).order_by("timestamp").last().delete()
         raise PdRelabelImageFull
-
-    @swagger_auto_schema(operation_summary='Update camera manually.',
-                         responses={200: SimpleOKSerializer})
-    @action(detail=True, methods=["get"])
-    def update_cam(self, request, pk=None) -> Response:
-        queryset = self.get_queryset()
-        get_object_or_404(queryset, pk=pk)
-        update_cam_helper(part_detection_id=pk)
-        return Response({"status": "ok"})
-
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
     """Project ModelViewSet

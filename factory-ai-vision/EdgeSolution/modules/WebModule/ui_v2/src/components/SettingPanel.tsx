@@ -20,6 +20,8 @@ import {
   DialogFooter,
   Text,
   Checkbox,
+  MessageBar,
+  MessageBarType,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -30,10 +32,12 @@ import {
   updateKey,
   thunkPostSetting,
   patchIsCollectData,
+  thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
 import { pullCVProjects } from '../store/actions';
 import { dummyFunction } from '../utils/dummyFunction';
+import { selectNonDemoProject } from '../store/trainingProjectSlice';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -67,8 +71,8 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     state.setting.cvProjects.map((e) => ({ key: e.id, text: e.name })),
   );
   const defaultCustomvisionId = useSelector((state: State) => {
-    const { trainingProject } = state.project.originData;
-    return state.trainingProject.entities[trainingProject]?.customVisionId;
+    const [selectedTrainingProject] = selectNonDemoProject(state);
+    return state.trainingProject.entities[selectedTrainingProject.id]?.customVisionId;
   });
   const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
   const originSettingData = useSelector((state: State) => state.setting.origin);
@@ -77,6 +81,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const [loadFullImages, setLoadFullImages] = useState(false);
   const [loadImgWarning, setloadImgWarning] = useState(false);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
+  const error = useSelector((state: State) => state.setting.error);
 
   const dispatch = useDispatch();
 
@@ -115,6 +120,10 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     setselectedCustomvisionId(defaultCustomvisionId);
   }, [defaultCustomvisionId]);
 
+  useEffect(() => {
+    if (showProjectDropdown) dispatch(thunkGetAllCvProjects());
+  }, [dispatch, showProjectDropdown]);
+
   return (
     <>
       {isOpen && <LayerHost id={MAIN_LAYER_HOST_ID} className={layerHostClass} />}
@@ -148,6 +157,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                 dispatch(updateKey(value));
               }}
             />
+            {error && <MessageBar messageBarType={MessageBarType.blocked}>{error.message}</MessageBar>}
             <Stack.Item>
               <WarningDialog
                 contentText={

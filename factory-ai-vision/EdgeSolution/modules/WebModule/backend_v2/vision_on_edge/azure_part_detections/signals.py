@@ -31,6 +31,7 @@ def azure_part_detection_has_configured_handler(**kwargs):
             other_pd.save()
     logger.info("Signal end")
 
+
 @receiver(signal=post_save,
           sender=PartDetection,
           dispatch_uid="azure_part_detection_post_save_deploy_handler")
@@ -39,6 +40,7 @@ def azure_part_detection_post_save_deploy_handler(**kwargs):
     """
     instance = kwargs['instance']
     deploy_all_helper(part_detection_id=instance.id)
+
 
 @receiver(signal=m2m_changed,
           sender=PartDetection.cameras.through,

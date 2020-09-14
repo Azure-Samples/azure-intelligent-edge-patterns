@@ -49,7 +49,6 @@ class PartDetection(models.Model):
     prob_threshold = models.IntegerField(default=10)
     send_video_to_cloud = models.BooleanField(default=False)
 
-
     def update_prob_threshold(self, prob_threshold):
         """update confidenece threshold of BoundingBox
         """
@@ -72,8 +71,8 @@ class PDScenario(models.Model):
     """
     name = models.CharField(blank=True, max_length=200)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
+    cameras = models.ManyToManyField(Camera, blank=True)
     inference_mode = models.CharField(max_length=40,
                                       choices=INFERENCE_MODE_CHOICES,
                                       default="PD")
-    parts = models.ManyToManyField(Part)
+    parts = models.ManyToManyField(Part, blank=True)
