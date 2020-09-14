@@ -15,7 +15,8 @@ from onnxruntime_predict import ONNXRuntimeObjectDetection
 from object_detection import ObjectDetection
 from utility import get_file_zip, normalize_rtsp
 from invoke import gm
-from tracker import Tracker
+#from tracker import Tracker
+from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
 
 import logging
 
@@ -96,7 +97,10 @@ class Stream():
 
         self.zmq_sender = sender
         self.use_line = False
-        self.tracker = Tracker()
+        self.use_zone = False
+        #self.tracker = Tracker()
+        self.scenario = None
+        self.scenario_type = None
         self.start_zmq()
 
     def _stop(self):
@@ -150,20 +154,8 @@ class Stream():
         #self.cam = cam
         #self.mutex.release()
 
-    def update_cam(self, cam_type, cam_source, cam_id, has_aoi, aoi_info, line_info):
+    def update_cam(self, cam_type, cam_source, cam_id, has_aoi, aoi_info, scenario_type=None, line_info=None, zone_info=None):
         print('[INFO] Updating Cam ...', flush=True)
-        #print('  cam_type', cam_type)
-        #print('  cam_source', cam_source)
-
-        # FIXME find a better to deal with local dev
-        #if cam_source == '0':
-        #    cam_source = 0
-        #elif cam_source == '1':
-        #    cam_source = 1
-        #elif cam_source == '2':
-        #    cam_source = 2
-        #elif cam_source == '3':
-        #    cam_source = 3
 
         #if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
@@ -171,28 +163,89 @@ class Stream():
         self.cam_source = cam_source
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
-        print('[INFO] Line INFO', line_info, flush=True)
-        try:
-            line_info = json.loads(line_info)
-            self.use_line = line_info['useCountingLine']
-            lines = line_info['countingLines']
-            if len(lines) > 0:
-                x1 = int(lines[0]['label'][0]['x'])
-                y1 = int(lines[0]['label'][0]['y'])
-                x2 = int(lines[0]['label'][1]['x'])
-                y2 = int(lines[0]['label'][1]['y'])
-                self.tracker.set_line(x1, y1, x2, y2)
-                print('Upading Line:', flush=True)
-                print('    use_line:', self.use_line, flush=True)
-                print('        line:', x1, y1, x2, y2, flush=True)
-            else:
-                print('Upading Line:', flush=True)
-                print('    use_line:', self.use_line, flush=True)
 
-        except:
-            self.use_line = False
-            print('Upading Line[*]:', flush=True)
-            print('    use_line   :', False, flush=True)
+        if self.model.part_detection_mode == 'PC':
+            print('[INFO] Line INFO', line_info, flush=True)
+            self.scenario = DefeatDetection()
+            self.scenario_type = self.model.part_detection_mode
+            # FIXME
+            scenario.set_ok('Bottle - OK')
+            scenario.set_ng('Bottle - NG')
+            try:
+                line_info = json.loads(line_info)
+                self.use_line = line_info['useCountingLine']
+                lines = line_info['countingLines']
+                if len(lines) > 0:
+                    x1 = int(lines[0]['label'][0]['x'])
+                    y1 = int(lines[0]['label'][0]['y'])
+                    x2 = int(lines[0]['label'][1]['x'])
+                    y2 = int(lines[0]['label'][1]['y'])
+                    self.scenario.set_line(x1, y1, x2, y2)
+                    print('Upading Line:', flush=True)
+                    print('    use_line:', self.use_line, flush=True)
+                    print('        line:', x1, y1, x2, y2, flush=True)
+                else:
+                    print('Upading Line:', flush=True)
+                    print('    use_line:', self.use_line, flush=True)
+
+            except:
+                self.use_line = False
+                print('Upading Line[*]:', flush=True)
+                print('    use_line   :', False, flush=True)
+
+        elif self.model.part_detection_mode == 'ES':
+            print('[INFO] Zone INFO', zone_info, flush=True)
+            self.scenario = DangerZone()
+            self.scenario_type = self.model.part_detection_mode
+            #FIXME
+            scenario.set_targets(['person'])
+            try:
+                zone_info = json.loads(zone_info)
+                self.use_zone = zone_info['useDangerZone']
+                zones = zone_info['dangerZones']
+                _zones = []
+                print('Upading Line:', flush=True)
+                print('    use_zone:', self.use_zone, flush=True)
+                for zone in zones:
+                    x1 = int(zones[0]['label'][0]['x'])
+                    y1 = int(zones[0]['label'][0]['y'])
+                    x2 = int(zones[0]['label'][1]['x'])
+                    y2 = int(zones[0]['label'][1]['y'])
+                    _zones.append([x1, y1, x2, y2])
+                    print('     zone:', x1, y1, x2, y2, flush=True)
+                self.scenario.set_zones(_zones)
+
+            except:
+                self.use_zone = False
+                print('Upading Zone[*]:', flush=True)
+                print('    use_zone   :', False, flush=True)
+
+        elif self.model.part_detection_mode == 'DD':
+            print('[INFO] Line INFO', line_info, flush=True)
+            self.scenario = PartCounter()
+            self.scenario_type = self.model.part_detection_mode
+            try:
+                line_info = json.loads(line_info)
+                self.use_line = line_info['useCountingLine']
+                lines = line_info['countingLines']
+                if len(lines) > 0:
+                    x1 = int(lines[0]['label'][0]['x'])
+                    y1 = int(lines[0]['label'][0]['y'])
+                    x2 = int(lines[0]['label'][1]['x'])
+                    y2 = int(lines[0]['label'][1]['y'])
+                    self.scenario.set_line(x1, y1, x2, y2)
+                    print('Upading Line:', flush=True)
+                    print('    use_line:', self.use_line, flush=True)
+                    print('        line:', x1, y1, x2, y2, flush=True)
+                else:
+                    print('Upading Line:', flush=True)
+                    print('    use_line:', self.use_line, flush=True)
+
+            except:
+                self.use_line = False
+                print('Upading Line[*]:', flush=True)
+                print('    use_line   :', False, flush=True)
+
 
         self._update_instance(normalize_rtsp(cam_source))
 
@@ -306,15 +359,23 @@ class Stream():
         # Update Tracker / Scenario
         _detections = []
         for prediction in predictions:
+            tag = prediction['tagName']
             if prediction['probability'] > 0.5:
                 (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                _detections.append([x1, y1, x2, y2, prediction['probability']])
-        self.tracker.update(_detections)
+                _detections.append(Detection(tag, x1, y1, x2, y2, prediction['probability']))
+        if self.scenario:
+            self.scenario.update(_detections)
 
 
         self.update_detection_status()
 
         self.draw_img()
+
+        if self.scenario:
+            self.scenario.draw_counter(img)
+            #FIXME close this
+            self.scenario.draw_constraint(img)
+            self.scenario.draw_objs(img)
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
@@ -373,7 +434,7 @@ class Stream():
             if prediction['probability'] > self.threshold:
 
                 (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
                 img = draw_confidence_level(img, prediction)
 
         #print('setting last drawn img', flush=True)
@@ -453,7 +514,7 @@ def draw_confidence_level(img, prediction):
 
     font = cv2.FONT_HERSHEY_DUPLEX
     font_scale = 0.7
-    thickness = 2
+    thickness = 1
 
     prob_str = str(int(prediction['probability']*1000)/10)
     prob_str = ' (' + prob_str + '%)'
@@ -461,7 +522,7 @@ def draw_confidence_level(img, prediction):
     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
     img = cv2.putText(img, prediction['tagName']+prob_str,
-                      (x1+10, y1-10), font, font_scale, (20, 20, 255), thickness)
+                      (x1+10, y1-5), font, font_scale, (20, 20, 255), thickness)
 
     return img
 

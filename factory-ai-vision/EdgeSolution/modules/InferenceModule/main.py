@@ -23,14 +23,52 @@ from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 from utility import get_file_zip, normalize_rtsp
 from tracker import Tracker, draw_counter
-tracker = Tracker()
-tracker.set_line(170/2, 680/2, 1487/2, 815/2)
+from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
 
-#create instance of SORT
-#mot_tracker = Sort()
+#tracker = Tracker()
+#tracker.set_line(170/2, 680/2, 1487/2, 815/2)
+
+#scenario = PartCounter()
+#scenario.set_line(85, 340, 743, 407)
+
+scenario = DefeatDetection()
+scenario.set_ok('Bottle - OK')
+scenario.set_ng('Bottle - NG')
+scenario.set_line(700, 0, 703, 800)
+
+#scenario= DefeatDetection()
+#scenario.set_ok('Box')
+#scenario.set_line(85, 340, 743, 407)
+
+#scenario = DangerZone()
+#scenario.set_zones([[85, 340, 743, 407]])
+#scenario.set_targets(['person'])
+
+scenario = DangerZone()
+scenario.set_zones([[85, 340, 743, 407]])
+scenario.set_targets(['Box'])
+
+
+SAMPLE_VIDEO    = './sample_video/video.mp4'
+SCENARIO1_VIDEO = '../RtspSimModule/videos/scenario1-counting-objects.mkv'
+SCENARIO2_VIDEO = '../RtspSimModule/videos/scenario2-employ-safety.mkv'
+SCENARIO3_VIDEO = '../RtspSimModule/videos/scenario3-defect-detection.mkv'
+
+DEFAULT_MODEL   = 'default_model'
+SCENARIO1_MODEL = 'scenario_models/1'
+SCENARIO2_MODEL = 'scenario_models/2'
+SCENARIO3_MODEL = 'scenario_models/3'
+DOWNLOADED_MODEL = 'model'
+
+### CONFIGURATION <BEG> ###
+CAM_SOURCE = SCENARIO1_VIDEO
+MODEL      = SCENARIO1_MODEL
+
+### CONFIGURATION <END> ###
 
 
 
+# this is the dir for saving new model
 MODEL_DIR = 'model'
 UPLOAD_INTERVAL = 1  # sec
 
@@ -129,9 +167,9 @@ def parse_bbox(prediction, width, height):
 def draw_confidence_level(img, prediction):
     height, width = img.shape[0], img.shape[1]
 
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.7
-    thickness = 2
+    font = cv2.FONT_HERSHEY_DUPLEX
+    font_scale = 0.5
+    thickness = 1
 
     prob_str = str(int(prediction['probability']*1000)/10)
     prob_str = ' (' + prob_str + '%)'
@@ -139,7 +177,7 @@ def draw_confidence_level(img, prediction):
     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
     img = cv2.putText(img, prediction['tagName']+prob_str,
-                      (x1+10, y1+20), font, font_scale, (20, 20, 255), thickness)
+                      (x1, y1-5), font, font_scale, (20, 20, 255), thickness)
 
     return img
 
@@ -165,7 +203,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
     """
 
     #def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video.mp4"):
-    def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video_scenario/1.mov"):
+    def __init__(self, model_dir, cam_type="video_file", cam_source=CAM_SOURCE):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./mov_bbb.mp4"):
         # def __init__(self, model_dir, cam_type="video_file", cam_source="./sample_video/video_1min.mp4"):
         # def __init__(self, model_dir, cam_type="rtsp", cam_source="rtsp://52.229.36.89:554/media/catvideo.mkv"):
@@ -330,6 +368,9 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.lock.acquire()
         prediction, inf_time = self.model.predict_image(image)
+        #print('prediction')
+        #prediction = []
+        #inf_time = 1
         self.lock.release()
 
         inf_time_ms = inf_time * 1000
@@ -350,7 +391,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
 
 #model_dir = './default_model'
-model_dir = './default_model_scenario/1'
+model_dir = MODEL
 #model_dir = './default_model_6parts'
 onnx = ONNXRuntimeModelDeploy(model_dir)
 # onnx.start_session()
@@ -373,9 +414,11 @@ def prediction():
     # onnx.last_prediction
     return json.dumps(onnx.last_prediction)
 
-
 @app.route('/open_cam', methods=['GET'])
 def open_cam():
+    return _open_cam()
+
+def _open_cam():
     def post_img():
         headers = {'Content-Type': 'image/jpg'}
         while True:
@@ -385,9 +428,11 @@ def open_cam():
             b, img = onnx.cam.read()
             onnx.lock.release()
             if b:
-                data = cv2.imencode(".jpg", img)[1].tobytes()
-                r = requests.post('http://127.0.0.1:5000/predict',
-                                  headers=headers, data=data)
+                #data = cv2.imencode(".jpg", img)[1].tobytes()
+                #r = requests.post('http://127.0.0.1:5000/predict',
+                #                  headers=headers, data=data)
+                _predict(img)
+
             time.sleep(0.02)
 
     if onnx.cam_is_alive == False:
@@ -407,13 +452,17 @@ def close_cam():
     onnx.lock.release()
     return 'camera closed', 200
 
-
 @app.route('/predict', methods=['POST'])
 def predict():
+    nparr = np.frombuffer(request.data, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    return _predict(img)
+
+def _predict(img):
     # print(request.data)
     try:
-        nparr = np.frombuffer(request.data, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        #nparr = np.frombuffer(request.data, np.uint8)
+        #img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         # resize
         width = IMG_WIDTH
@@ -477,7 +526,8 @@ def metrics():
         'unidentified_num': unidentified_num,
         'is_gpu': is_gpu,
         'average_inference_time': average_inference_time,
-        'last_prediction_count': last_prediction_count
+        'last_prediction_count': last_prediction_count,
+        'scenario_metrics': scenario.get_metrics()
     })
 
 
@@ -668,8 +718,7 @@ def video_feed():
 
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
-                    if prediction['probability'] > 0.5:
-                        detections.append([x1, y1, x2, y2, prediction['probability']])
+                    detections.append(Detection(tag, x1, y1, x2, y2, prediction['probability']))
 
                     if prediction['probability'] > onnx.threshold:
                         if onnx.has_aoi:
@@ -678,18 +727,22 @@ def video_feed():
 
 
                         img = cv2.rectangle(
-                            img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                            img, (x1, y1), (x2, y2), (0, 0, 255), 1)
                         img = draw_confidence_level(img, prediction)
 
             #objs = mot_tracker.update(np.array(detections))
-            counter, objs, counted = tracker.update(detections)
+            scenario.update(detections)
+            scenario.draw_counter(img)
+            scenario.draw_constraint(img)
+            scenario.draw_objs(img)
+            #counter, objs, counted = tracker.update(detections)
 
             #print(objs)
             time.sleep(0.02)
             #print(img.shape)
             #img = cv2.line(img, (int(170/2), int(680/2)), (int(1487/2), int(815/2)), (0, 255, 255), 5)
-            img = tracker.draw_counter(img)
-            img = tracker.draw_line(img)
+            #img = tracker.draw_counter(img)
+            #img = tracker.draw_line(img)
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', img)[1].tobytes() + b'\r\n')
     return Response(_gen(),
@@ -1001,6 +1054,7 @@ def main():
     # threading.Thread(target=gen_edge).start()
     iothub_client_run()
     zmq_t = threading.Thread(target=gen_zmq)
+    _open_cam()
     zmq_t.start()
     app.run(host='0.0.0.0', debug=False)
 

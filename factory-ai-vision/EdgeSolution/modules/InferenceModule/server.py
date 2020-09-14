@@ -118,7 +118,8 @@ def metrics():
         'unidentified_num': unidentified_num,
         'is_gpu': is_gpu,
         'average_inference_time': average_inference_time,
-        'last_prediction_count': last_prediction_count
+        'last_prediction_count': last_prediction_count,
+        'scenario_metrics': 1
     })
 
 @app.route('/update_part_detection_id')
@@ -209,7 +210,8 @@ def update_cams():
         cam_source = cam['source']
         cam_id = cam['id']
         # TODO: IF onnx.part_detection_mode == "PC" (PartCounting), use lines to count
-        cam_lines = cam['lines']
+        line_info = cam.get('lines', None)
+        zone_info = cam.get('zones', None)
 
         if not cam_type:
             return 'missing cam_type'
@@ -229,7 +231,8 @@ def update_cams():
         logger.info('updating camera {0}'.format(cam_id))
         s = stream_manager.get_stream_by_id(cam_id)
         #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
-        s.update_cam(cam_type, cam_source, cam_id, False, [], cam_lines)
+        # FIXME has_aoi
+        s.update_cam(cam_type, cam_source, cam_id, False, [], onnx.detection_mode, line_info, zone_info)
 
     return 'ok'
 
