@@ -30,10 +30,12 @@ import {
   updateKey,
   thunkPostSetting,
   patchIsCollectData,
+  thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
 import { pullCVProjects } from '../store/actions';
 import { dummyFunction } from '../utils/dummyFunction';
+import { selectNonDemoProject } from '../store/trainingProjectSlice';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -67,8 +69,8 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     state.setting.cvProjects.map((e) => ({ key: e.id, text: e.name })),
   );
   const defaultCustomvisionId = useSelector((state: State) => {
-    const { trainingProject } = state.project.originData;
-    return state.trainingProject.entities[trainingProject]?.customVisionId;
+    const [selectedTrainingProject] = selectNonDemoProject(state);
+    return state.trainingProject.entities[selectedTrainingProject.id]?.customVisionId;
   });
   const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
   const originSettingData = useSelector((state: State) => state.setting.origin);
@@ -114,6 +116,10 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   useEffect(() => {
     setselectedCustomvisionId(defaultCustomvisionId);
   }, [defaultCustomvisionId]);
+
+  useEffect(() => {
+    if (showProjectDropdown) dispatch(thunkGetAllCvProjects());
+  }, [dispatch, showProjectDropdown]);
 
   return (
     <>
