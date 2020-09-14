@@ -97,7 +97,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   useEffect(() => {
     const div = divRef.current;
     const handleFPress = (e) => {
-      if (e.key === 'f') {
+      if (e.key === 'd') {
         finishLabel();
       }
     };
