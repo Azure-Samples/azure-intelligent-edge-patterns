@@ -33,6 +33,7 @@ export type VideoAnnosGroupProps = {
   visible: boolean;
   creatingState: CreatingState;
   needMask: boolean;
+  color?: string;
 };
 
 export type MaskProps = {
@@ -49,4 +50,5 @@ export type BoxProps = {
   visible: boolean;
   removeBox: (id: string) => void;
   creatingState: CreatingState;
+  color;
 };
