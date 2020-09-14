@@ -407,7 +407,7 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
         }}
         style={{ padding: '0 5px' }}
       />
-      {inferenceMode === InferenceMode.PartCounting && (
+      {[InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(inferenceMode) && (
         <>
           <Toggle
             label="Enable counting lines"
