@@ -247,17 +247,14 @@ export const {
 
 export const selectNonDemoCameras = getNonDemoSelector('camera', selectCameraEntities);
 
-export const cameraOptionsSelector = (demoCameras?: number[]) =>
-  createSelector(selectAllCameras, (cameras) =>
-    cameras
-      .filter((e) => {
-        return !e.isDemo || demoCameras.includes(e.id);
-      })
-      .map((e) => ({
-        key: e.id,
-        text: e.name,
-      })),
-  );
+export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) =>
+  cameras
+    .filter((e) => !e.isDemo)
+    .map((e) => ({
+      key: e.id,
+      text: e.name,
+    })),
+);
 
 export const cameraOptionsSelectorInConfig = (trainingProjectId: number) =>
   createSelector([selectAllCameras, (state: State) => state.scenario], (cameras, scenarios) => {
