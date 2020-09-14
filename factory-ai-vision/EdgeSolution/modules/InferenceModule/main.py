@@ -34,7 +34,7 @@ from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
 scenario = DefeatDetection()
 scenario.set_ok('Bottle - OK')
 scenario.set_ng('Bottle - NG')
-scenario.set_line(700, 0, 703, 800)
+scenario.set_line(450, 0, 450, 800)
 
 #scenario= DefeatDetection()
 #scenario.set_ok('Box')
@@ -44,9 +44,9 @@ scenario.set_line(700, 0, 703, 800)
 #scenario.set_zones([[85, 340, 743, 407]])
 #scenario.set_targets(['person'])
 
-scenario = DangerZone()
-scenario.set_zones([[85, 340, 743, 407]])
-scenario.set_targets(['Box'])
+#scenario = DangerZone()
+#scenario.set_zones([[85, 340, 743, 407]])
+#scenario.set_targets(['Box'])
 
 
 SAMPLE_VIDEO    = './sample_video/video.mp4'
@@ -61,8 +61,8 @@ SCENARIO3_MODEL = 'scenario_models/3'
 DOWNLOADED_MODEL = 'model'
 
 ### CONFIGURATION <BEG> ###
-CAM_SOURCE = SCENARIO1_VIDEO
-MODEL      = SCENARIO1_MODEL
+CAM_SOURCE = SCENARIO3_VIDEO
+MODEL      = SCENARIO3_MODEL
 
 ### CONFIGURATION <END> ###
 
