@@ -93,10 +93,13 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         success_rate = 0.0
         inference_num = 0
         unidentified_num = 0
-        cam_id = request.GET['camera_id']
+        cam_id = request.query_params.get("camera_id")
         try:
-            res = requests.get("http://" + inference_module_obj.url +
-                               "/metrics?cam_id=" + cam_id)
+            res = requests.get(
+                "http://" + inference_module_obj.url + "/metrics",
+                params={"cam_id": cam_id},
+                timeout=3
+            )
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
             inference_num = data["inference_num"]

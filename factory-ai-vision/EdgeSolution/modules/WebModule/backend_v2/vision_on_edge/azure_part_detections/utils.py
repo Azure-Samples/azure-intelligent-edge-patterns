@@ -111,27 +111,24 @@ def deploy_worker(part_detection_id):
     # =====================================================
     # 1. Update params                                  ===
     # =====================================================
-    requests.get(
-        "http://" + str(instance.inference_module.url) +
-        "/update_part_detection_id",
-        params={
-            "part_detection_id": instance.id,
-        },
-    )
-    requests.get(
-        "http://" + str(instance.inference_module.url) +
-        "/update_part_detection_mode",
-        params={
-            "part_detection_mode": instance.inference_mode,
-        },
-    )
-    requests.get(
-        "http://" + str(instance.inference_module.url) +
-        "/update_send_video_to_cloud",
-        params={
-            "send_video_to_cloud": instance.send_video_to_cloud,
-        },
-    )
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_part_detection_id",
+                 params={
+                     "part_detection_id": instance.id,
+                 },
+                 timeout=3)
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_part_detection_mode",
+                 params={
+                     "part_detection_mode": instance.inference_mode,
+                 },
+                 timeout=3)
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_send_video_to_cloud",
+                 params={
+                     "send_video_to_cloud": instance.send_video_to_cloud,
+                 },
+                 timeout=3)
 
     # =====================================================
     # 1. Update model                                  ===
@@ -139,38 +136,36 @@ def deploy_worker(part_detection_id):
     if not instance.project:
         pass
     elif not instance.project.is_demo:
-        requests.get(
-            "http://" + str(instance.inference_module.url) + "/update_model",
-            params={"model_uri": instance.project.download_uri},
-        )
+        requests.get("http://" + str(instance.inference_module.url) +
+                     "/update_model",
+                     params={"model_uri": instance.project.download_uri},
+                     timeout=3)
     else:
-        requests.get(
-            "http://" + str(instance.inference_module.url) + "/update_model",
-            params={"model_dir": instance.project.download_uri},
-        )
-    requests.get(
-        "http://" + str(instance.inference_module.url) + "/update_parts",
-        params={"parts": parts_to_detect},
-    )
-    requests.get(
-        "http://" + instance.inference_module.url +
-        "/update_retrain_parameters",
-        params={
-            "is_retrain": need_retraining,
-            "confidence_min": confidence_min,
-            "confidence_max": confidence_max,
-            "max_images": max_images,
-        },
-    )
-    requests.get(
-        "http://" + instance.inference_module.url +
-        "/update_iothub_parameters",
-        params={
-            "is_send": metrics_is_send_iothub,
-            "threshold": metrics_accuracy_threshold,
-            "fpm": metrics_frame_per_minutes,
-        },
-    )
+        requests.get("http://" + str(instance.inference_module.url) +
+                     "/update_model",
+                     params={"model_dir": instance.project.download_uri},
+                     timeout=3)
+    requests.get("http://" + str(instance.inference_module.url) +
+                 "/update_parts",
+                 params={"parts": parts_to_detect},
+                 timeout=3)
+    requests.get("http://" + instance.inference_module.url +
+                 "/update_retrain_parameters",
+                 params={
+                     "is_retrain": need_retraining,
+                     "confidence_min": confidence_min,
+                     "confidence_max": confidence_max,
+                     "max_images": max_images,
+                 },
+                 timeout=3)
+    requests.get("http://" + instance.inference_module.url +
+                 "/update_iothub_parameters",
+                 params={
+                     "is_send": metrics_is_send_iothub,
+                     "threshold": metrics_accuracy_threshold,
+                     "fpm": metrics_frame_per_minutes,
+                 },
+                 timeout=3)
 
     # =====================================================
     # 2. Update cam                                     ===
@@ -207,6 +202,7 @@ def deploy_worker(part_detection_id):
     requests.post(
         url="http://" + inference_module_url + "/update_cams",
         json=json.loads(json.dumps(serializer.validated_data)),
+        timeout=3
     )
 
 
