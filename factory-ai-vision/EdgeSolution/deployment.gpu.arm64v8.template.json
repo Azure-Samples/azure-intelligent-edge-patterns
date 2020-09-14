@@ -111,6 +111,11 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              }
+            },
             "settings": {
               "image": "${MODULES.InferenceModule.gpuarm64v8}",
               "createOptions": {

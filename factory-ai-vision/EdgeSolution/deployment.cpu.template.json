@@ -133,6 +133,11 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              }
+            },
             "settings": {
               "image": "${MODULES.InferenceModule.cpuamd64}",
               "createOptions": {
