@@ -80,7 +80,7 @@ export const toggleShowDangerZones = createAsyncThunk<any, toggleCameraLabelPayl
   async ({ cameraId, checked }, { getState }) => {
     const dangerZones = getDangerZones(getState(), cameraId);
     await Axios.patch(`/api/cameras/${cameraId}/`, {
-      dangerZone: JSON.stringify({ useDangerZone: checked, dangerZones }),
+      danger_zones: JSON.stringify({ useDangerZone: checked, dangerZones }),
     });
   },
 );
@@ -95,7 +95,7 @@ export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
     await Axios.patch(`/api/cameras/${cameraId}/`, {
       area: JSON.stringify({ useAOI, AOIs }),
       lines: JSON.stringify({ useCountingLine, countingLines }),
-      dangerZone: JSON.stringify({ useDangerZone, dangerZones }),
+      danger_zones: JSON.stringify({ useDangerZone, dangerZones }),
     });
   },
 );

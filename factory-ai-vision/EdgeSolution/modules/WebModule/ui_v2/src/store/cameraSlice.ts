@@ -22,12 +22,12 @@ type CameraFromServer = {
   rtsp: string;
   area: string;
   lines: string;
-  dangerZone: string;
+  danger_zones: string;
   is_demo: boolean;
   location: number;
 };
 
-type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area' | 'line'> & {
+type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area' | 'line' | 'danger_zones'> & {
   area: {
     useAOI: boolean;
     AOIs: [
@@ -48,7 +48,7 @@ type CameraFromServerWithSerializeArea = Omit<CameraFromServer, 'area' | 'line'>
       },
     ];
   };
-  dangerZone: {
+  danger_zones: {
     useDangerZone: boolean;
     dangerZones: [
       {
@@ -81,11 +81,11 @@ const normalizeCameraShape = (response: CameraFromServerWithSerializeArea) => {
     rtsp: response.rtsp,
     useAOI: response.area.useAOI,
     useCountingLine: response.lines.useCountingLine,
-    useDangerZone: response.dangerZone.useDangerZone,
+    useDangerZone: response.danger_zones.useDangerZone,
     AOIs: [
       ...mapPurpose(Purpose.AOI, response.area.AOIs),
       ...mapPurpose(Purpose.Counting, response.lines.countingLines),
-      ...mapPurpose(Purpose.DangerZone, response.dangerZone.dangerZones),
+      ...mapPurpose(Purpose.DangerZone, response.danger_zones.dangerZones),
     ],
     location: response.location,
     isDemo: response.is_demo,
@@ -147,7 +147,7 @@ const serializeJSONStr = R.map<CameraFromServer, CameraFromServerWithSerializeAr
   ...e,
   area: getAreaData(e.area),
   lines: getLineData(e.lines),
-  dangerZone: getDangerZoneData(e.dangerZone),
+  danger_zones: getDangerZoneData(e.danger_zones),
 }));
 
 const normalizeCameras = R.compose(normalizeCamerasAndAOIsByNormalizr, serializeJSONStr);
