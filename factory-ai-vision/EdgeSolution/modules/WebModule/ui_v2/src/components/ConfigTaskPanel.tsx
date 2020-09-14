@@ -18,6 +18,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
 
+import { State } from 'RootStateType';
 import { cameraOptionsSelector, getCameras } from '../store/cameraSlice';
 import { partOptionsSelector, getParts } from '../store/partSlice';
 import { ProjectData, InferenceMode } from '../store/project/projectTypes';
@@ -25,7 +26,6 @@ import { getTrainingProject, trainingProjectOptionsSelector } from '../store/tra
 import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
-import { State } from 'RootStateType';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -67,6 +67,8 @@ type ConfigTaskPanelProps = {
   isOpen: boolean;
   onDismiss: () => void;
   projectData: ProjectData;
+  demoTrainingProject?: number;
+  demoCameras?: number[];
   isDemo?: boolean;
   isEdit?: boolean;
 };
@@ -75,6 +77,8 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
   projectData: initialProjectData,
+  demoTrainingProject = null,
+  demoCameras = [],
   isDemo = false,
   isEdit = false,
 }) => {
@@ -82,9 +86,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   useEffect(() => {
     setProjectData(initialProjectData);
   }, [initialProjectData]);
-  const cameraOptions = useSelector(cameraOptionsSelector(true));
+  const cameraOptions = useSelector(cameraOptionsSelector(demoCameras));
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
-  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(true));
+  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector(demoTrainingProject));
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );

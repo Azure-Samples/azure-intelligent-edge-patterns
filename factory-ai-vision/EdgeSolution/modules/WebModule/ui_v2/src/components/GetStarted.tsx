@@ -4,13 +4,8 @@ import { Card } from '@uifabric/react-cards';
 import Axios from 'axios';
 
 import { ConfigTaskPanel } from './ConfigTaskPanel';
-import { ProjectData } from '../store/project/projectTypes';
 import { initialProjectData } from '../store/project/projectReducer';
-
-type DemoProject = Pick<
-  ProjectData,
-  'id' | 'name' | 'inferenceMode' | 'trainingProject' | 'cameras' | 'parts'
->;
+import { DemoProject } from './type';
 
 const classes = mergeStyleSets({
   gridContainer: {
@@ -59,7 +54,7 @@ export const GetStarted: React.FC = () => {
           name: e.name,
           inferenceMode: e.inference_mode,
           trainingProject: e.project,
-          camera: e.camera,
+          cameras: e.cameras,
           parts: e.parts,
         })),
       );
@@ -96,6 +91,8 @@ export const GetStarted: React.FC = () => {
         onDismiss={closePanel}
         projectData={{ ...initialProjectData, ...demoProjectData[selectedDemoIdx] }}
         isDemo
+        demoTrainingProject={demoProjectData[selectedDemoIdx]?.trainingProject}
+        demoCameras={demoProjectData[selectedDemoIdx]?.cameras}
       />
     </>
   );

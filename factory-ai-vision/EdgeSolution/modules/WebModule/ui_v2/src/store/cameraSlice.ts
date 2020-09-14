@@ -247,12 +247,16 @@ export const {
 
 export const selectNonDemoCameras = getNonDemoSelector('camera', selectCameraEntities);
 
-export const cameraOptionsSelector = (isDemo: boolean) =>
-  createSelector(isDemo ? selectAllCameras : selectNonDemoCameras, (cameras) =>
-    cameras.map((e) => ({
-      key: e.id,
-      text: e.name,
-    })),
+export const cameraOptionsSelector = (demoCameras?: number[]) =>
+  createSelector(selectAllCameras, (cameras) =>
+    cameras
+      .filter((e) => {
+        return !e.isDemo || demoCameras.includes(e.id);
+      })
+      .map((e) => ({
+        key: e.id,
+        text: e.name,
+      })),
   );
 
 export const selectCamerasByIds = (ids) =>

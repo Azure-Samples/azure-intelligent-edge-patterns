@@ -52,10 +52,14 @@ export const {
 
 export const selectNonDemoProject = getNonDemoSelector('trainingProject', selectTrainingProjectEntities);
 
-export const trainingProjectOptionsSelector = (isDemo: boolean) =>
-  createSelector(isDemo ? selectAllTrainingProjects : selectNonDemoProject, (trainingProjects) =>
-    trainingProjects.map((e) => ({
-      key: e.id,
-      text: e.name,
-    })),
+export const trainingProjectOptionsSelector = (demoProjectId?: number) =>
+  createSelector(
+    [selectNonDemoProject, (state) => selectTrainingProjectById(state, demoProjectId)],
+    (trainingProjects, demoTrainingProject) => {
+      const projects = demoTrainingProject ? [demoTrainingProject, ...trainingProjects] : trainingProjects;
+      return projects.map((e) => ({
+        key: e.id,
+        text: e.name,
+      }));
+    },
   );
