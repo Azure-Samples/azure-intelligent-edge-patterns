@@ -199,7 +199,7 @@ def deploy_worker(part_detection_id):
                 "id": cam.id,
                 "type": "rtsp",
                 "source": cam.rtsp,
-                "lines": cam.lines, 
+                "lines": cam.lines,
                 "zones": cam.danger_zones
             })
     serializer = UpdateCamBodySerializer(data=res_data)

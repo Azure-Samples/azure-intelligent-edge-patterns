@@ -68,7 +68,6 @@ def notification_post_save_websocket_handler(**kwargs):
 # sender=instance.sender).order_by('timestamp').first().delete()
 
 
-
 @receiver(signal=post_save,
           sender=TrainingStatus,
           dispatch_uid="training_status_listener")
