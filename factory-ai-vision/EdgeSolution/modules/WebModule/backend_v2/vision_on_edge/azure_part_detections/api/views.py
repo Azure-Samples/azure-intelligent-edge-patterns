@@ -96,6 +96,18 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         inference_num = 0
         unidentified_num = 0
         cam_id = request.query_params.get("camera_id")
+        if deploy_status_obj != "ok":
+            return Response({
+                "status": deploy_status_obj.status,
+                "log": "Status: " + deploy_status_obj.log,
+                "download_uri": "",
+                "success_rate": "",
+                "inference_num": "",
+                "unidentified_num": "",
+                "gpu": "",
+                "average_time": "",
+                "count": ""
+            })
         try:
             res = requests.get("http://" + inference_module_obj.url +
                                "/metrics",
@@ -256,16 +268,6 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 project=project_obj, part=part,
                 is_relabel=True).order_by("timestamp").last().delete()
         raise PdRelabelImageFull
-
-    @swagger_auto_schema(operation_summary='Update camera manually.',
-                         responses={200: SimpleOKSerializer})
-    @action(detail=True, methods=["get"])
-    def update_cam(self, request, pk=None) -> Response:
-        queryset = self.get_queryset()
-        get_object_or_404(queryset, pk=pk)
-        update_cam_helper(part_detection_id=pk)
-        return Response({"status": "ok"})
-
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
     """Project ModelViewSet
