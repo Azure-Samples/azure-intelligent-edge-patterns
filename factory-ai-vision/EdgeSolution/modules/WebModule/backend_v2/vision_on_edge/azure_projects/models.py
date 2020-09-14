@@ -83,7 +83,7 @@ class Project(models.Model):
                 trainer.get_project(self.customvision_id)
                 logger.info("Project customvision_id pass.")
                 is_project_valid = True
-                logger.info("Project %s validate pass.")
+                logger.info("Project %s validate pass.", self.name)
             except CustomVisionErrorException:
                 logger.error(
                     "Project %s is invalid (CustomVisionErrorException).",

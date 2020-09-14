@@ -39,3 +39,11 @@ class ProjectResetWithoutNameError(APIException):
     status_code = 400
     default_detail = "Please provide a name before reset."
     default_code = "project_reset_without_name_error"
+
+class ProjectAlreadyTraining(APIException):
+    """ProjectAlreadyTraining.
+    """
+
+    status_code = 400
+    default_detail = "Project already training."
+    default_code = "project_already_training"
