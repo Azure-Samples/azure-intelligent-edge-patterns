@@ -143,6 +143,10 @@ class Stream():
                 time.sleep(0.08)
         threading.Thread(target=run, args=(self,)).start()
 
+    def get_scenario_metrics(self):
+        if self.scenario:
+            self.scenario.get_metrics()
+
     def restart_cam(self):
 
         print('[INFO] Restarting Cam', flush=True)
