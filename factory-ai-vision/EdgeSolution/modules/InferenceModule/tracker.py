@@ -18,7 +18,8 @@ class Tracker():
 
     def update(self, detections):
         #_detections = list([d.x1, d.x2, d.y1, d.y2, d.score] for d in detections)
-        self.objs = self.tracker.update(np.array(detections))
+        if len(detections) > 0:
+            self.objs = self.tracker.update(np.array(detections))
 
     def get_objs(self):
         return self.objs

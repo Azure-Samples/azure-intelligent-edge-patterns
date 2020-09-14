@@ -170,16 +170,19 @@ class DefeatDetection(Scenario):
         #print('== update begin ==')
         #for d in detections:
         #    print(d)
+        detections = list(d for d in detections if d.score > self.threshold)
         if self.ok:
             ok_detections = list(d for d in detections if d.tag == self.ok_name)
             #print('  == update ok begin==')
-            self.ok.update(ok_detections)
+            if len(ok_detections) > 0:
+                self.ok.update(ok_detections)
             #print('  == update ok finish==')
 
         if self.ng:
             ng_detections = list(d for d in detections if d.tag == self.ng_name)
             #print('  == update ng begin==')
-            self.ng.update(ng_detections)
+            if len(ng_detections) > 0:
+                self.ng.update(ng_detections)
             #print('  == update ng finish==')
         #print('== update end ==')
 
