@@ -45,8 +45,13 @@ import {
   selectOriginVideoAnnosByCamera,
   onCreateVideoAnnoBtnClick,
 } from '../store/videoAnnoSlice';
-import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from '../store/actions';
-import { Shape } from '../store/shared/BaseShape';
+import {
+  toggleShowAOI,
+  updateCameraArea,
+  toggleShowCountingLines,
+  toggleShowDangerZones,
+} from '../store/actions';
+import { Shape, Purpose } from '../store/shared/BaseShape';
 import { EmptyAddIcon } from './EmptyAddIcon';
 import { getTrainingProject } from '../store/trainingProjectSlice';
 
@@ -339,10 +344,14 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const showCountingLine = useSelector<State, boolean>(
     (state) => selectCameraById(state, cameraId)?.useCountingLine,
   );
+  const showDangerZone = useSelector<State, boolean>(
+    (state) => selectCameraById(state, cameraId)?.useDangerZone,
+  );
   const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
   const originVideoAnnos = useSelector(selectOriginVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
+  const videoAnnoPurpose = useSelector((state: State) => state.videoAnnos.purpose);
   const inferenceMode = useSelector((state: State) => state.project.data.inferenceMode);
   const dispatch = useDispatch();
 
@@ -356,6 +365,13 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const onCountingLineToggleClick = async () => {
     setLoading(true);
     await dispatch(toggleShowCountingLines({ cameraId, checked: !showCountingLine }));
+    setShowUpdateSuccessTxt(true);
+    setLoading(false);
+  };
+
+  const onDangerZoneToggleClick = async (): Promise<void> => {
+    setLoading(true);
+    await dispatch(toggleShowDangerZones({ cameraId, checked: !showDangerZone }));
     setShowUpdateSuccessTxt(true);
     setLoading(false);
   };
@@ -375,23 +391,23 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
       <Toggle label="Enable area of interest" checked={showAOI} onClick={onAOIToggleClick} inlineLabel />
       <DefaultButton
         text="Create Box"
-        primary={videoAnnoShape === Shape.BBox}
+        primary={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick(Shape.BBox));
+          dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.AOI }));
         }}
         style={{ padding: '0 5px' }}
       />
       <DefaultButton
         text={videoAnnoShape === Shape.Polygon ? 'Press D to Finish' : 'Create Polygon'}
-        primary={videoAnnoShape === Shape.Polygon}
+        primary={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick(Shape.Polygon));
+          dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.AOI }));
         }}
         style={{ padding: '0 5px' }}
       />
-      {inferenceMode === InferenceMode.PC && (
+      {inferenceMode === InferenceMode.PartCounting && (
         <>
           <Toggle
             label="Enable counting lines"
@@ -401,10 +417,28 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
           />
           <DefaultButton
             text="Create counting line"
-            primary={videoAnnoShape === Shape.Line}
+            primary={videoAnnoShape === Shape.Line && videoAnnoPurpose === Purpose.Counting}
             disabled={!showCountingLine}
             onClick={(): void => {
-              dispatch(onCreateVideoAnnoBtnClick(Shape.Line));
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Line, purpose: Purpose.Counting }));
+            }}
+          />
+        </>
+      )}
+      {inferenceMode === InferenceMode.EmployeeSafety && (
+        <>
+          <Toggle
+            label="Enable danger zones"
+            checked={showDangerZone}
+            onClick={onDangerZoneToggleClick}
+            inlineLabel
+          />
+          <DefaultButton
+            text="Create danger zone"
+            primary={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
+            disabled={!showDangerZone}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.DangerZone }));
             }}
           />
         </>

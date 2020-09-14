@@ -53,8 +53,10 @@ export type Consequence = {
 };
 
 export enum InferenceMode {
-  PD = 'PD',
-  PC = 'PC',
+  PartDetection = 'PD',
+  PartCounting = 'PC',
+  EmployeeSafety = 'ES',
+  DefectDetection = 'DD',
 }
 
 export type ProjectData = {

@@ -19,6 +19,7 @@ export type LiveViewProps = {
   finishLabel: () => void;
   AOIVisible: boolean;
   countingLineVisible: boolean;
+  dangerZoneVisible: boolean;
   imageInfo: [HTMLImageElement, string, { width: number; height: number }];
   creatingState: CreatingState;
 };

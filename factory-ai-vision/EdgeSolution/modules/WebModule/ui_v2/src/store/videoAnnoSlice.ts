@@ -13,7 +13,7 @@ import { State } from 'RootStateType';
 import { BoxLabel, Position2D, PolygonLabel } from './type';
 import { getCameras } from './cameraSlice';
 import { toggleShowAOI, updateCameraArea, toggleShowCountingLines } from './actions';
-import { Shape, VideoAnno } from './shared/BaseShape';
+import { Shape, VideoAnno, Purpose } from './shared/BaseShape';
 import { BBox, BBoxType, isBBox } from './shared/Box2d';
 import { Polygon, PolygonType, isPolygon } from './shared/Polygon';
 import { Line, LineType, isLine } from './shared/Line';
@@ -33,24 +33,24 @@ const slice = createSlice({
     ...entityAdapter.getInitialState(),
     creatingState: CreatingState.Disabled,
     shape: Shape.None,
+    purpose: Purpose.None,
   },
   reducers: {
     createDefaultVideoAnno: (state, action: PayloadAction<BBoxType>) => {
       entityAdapter.upsertOne(state, action.payload);
     },
-    onCreatingPoint: (
-      state,
-      action: PayloadAction<{ point: Position2D; cameraId: number; isDBClick?: boolean }>,
-    ) => {
+    onCreatingPoint: (state, action: PayloadAction<{ point: Position2D; cameraId: number }>) => {
       const { point, cameraId } = action.payload;
+      const { purpose } = state;
 
       if (state.creatingState === CreatingState.Waiting) {
         state.creatingState = CreatingState.Creating;
-        if (state.shape === Shape.BBox) entityAdapter.addOne(state, BBox.init(point, nanoid(), cameraId));
+        if (state.shape === Shape.BBox)
+          entityAdapter.addOne(state, BBox.init(point, nanoid(), cameraId, purpose));
         else if (state.shape === Shape.Polygon)
-          entityAdapter.addOne(state, Polygon.init(point, nanoid(), cameraId));
+          entityAdapter.addOne(state, Polygon.init(point, nanoid(), cameraId, purpose));
         else if (state.shape === Shape.Line)
-          entityAdapter.addOne(state, Line.init(point, nanoid(), cameraId));
+          entityAdapter.addOne(state, Line.init(point, nanoid(), cameraId, purpose));
       } else if (state.creatingState === CreatingState.Creating) {
         const id = state.ids[state.ids.length - 1];
 
@@ -58,6 +58,7 @@ const slice = createSlice({
           entityAdapter.updateOne(state, { id, changes: BBox.add(point, state.entities[id] as BBoxType) });
           state.creatingState = CreatingState.Disabled;
           state.shape = Shape.None;
+          state.purpose = Purpose.None;
         } else if (state.shape === Shape.Polygon) {
           entityAdapter.updateOne(state, {
             id,
@@ -67,6 +68,7 @@ const slice = createSlice({
           entityAdapter.updateOne(state, { id, changes: Line.add(point, state.entities[id] as LineType) });
           state.creatingState = CreatingState.Disabled;
           state.shape = Shape.None;
+          state.purpose = Purpose.None;
         }
       }
     },
@@ -96,15 +98,20 @@ const slice = createSlice({
         });
       }
     },
-    onCreateVideoAnnoBtnClick: (state, action: PayloadAction<Shape>) => {
+    onCreateVideoAnnoBtnClick: (state, action: PayloadAction<{ shape: Shape; purpose: Purpose }>) => {
+      const { shape, purpose } = action.payload;
+
       if (state.creatingState === CreatingState.Disabled) {
         state.creatingState = CreatingState.Waiting;
-        state.shape = action.payload;
-      } else if (state.shape !== action.payload) {
-        state.shape = action.payload;
+        state.shape = shape;
+        state.purpose = purpose;
+      } else if (state.shape !== shape || state.purpose !== purpose) {
+        state.shape = shape;
+        state.purpose = purpose;
       } else {
         state.creatingState = CreatingState.Disabled;
         state.shape = Shape.None;
+        state.purpose = Purpose.None;
       }
     },
     finishLabel: (state) => {
@@ -114,6 +121,7 @@ const slice = createSlice({
           lastPoly.pop();
           state.creatingState = CreatingState.Disabled;
           state.shape = Shape.None;
+          state.purpose = Purpose.None;
         }
       }
     },

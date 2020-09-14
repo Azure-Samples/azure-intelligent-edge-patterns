@@ -18,7 +18,7 @@ import { isBBox } from '../../store/shared/Box2d';
 import { isPolygon } from '../../store/shared/Polygon';
 import { Shape } from '../../store/shared/BaseShape';
 import { isLine } from '../../store/shared/Line';
-import { isAOIShape, isCountingLine } from '../../store/shared/VideoAnnoUtil';
+import { isAOIShape, isCountingLine, isDangerZone } from '../../store/shared/VideoAnnoUtil';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -38,6 +38,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   countingLineVisible,
   imageInfo,
   creatingState,
+  dangerZoneVisible,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
@@ -115,6 +116,10 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     return videoAnnos.filter(isCountingLine);
   }, [videoAnnos]);
 
+  const dangerZone = useMemo(() => {
+    return videoAnnos.filter(isDangerZone);
+  }, [videoAnnos]);
+
   return (
     <div ref={divRef} style={{ width: '100%', height: '100%' }} tabIndex={0}>
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
@@ -124,6 +129,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
             /* Render when image is loaded to prevent the shapes show in unscale size */
             status === 'loaded' && (
               <>
+                {/** AOIs */}
                 <VideoAnnosGroup
                   imgWidth={imgWidth}
                   imgHeight={imgHeight}
@@ -134,6 +140,7 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
                   creatingState={creatingState}
                   needMask={true}
                 />
+                {/** Counting Lines */}
                 <VideoAnnosGroup
                   imgWidth={imgWidth}
                   imgHeight={imgHeight}
@@ -141,6 +148,17 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
                   updateVideoAnno={updateVideoAnno}
                   removeVideoAnno={removeVideoAnno}
                   visible={countingLineVisible}
+                  creatingState={creatingState}
+                  needMask={false}
+                />
+                {/** Danger Zones */}
+                <VideoAnnosGroup
+                  imgWidth={imgWidth}
+                  imgHeight={imgHeight}
+                  videoAnnos={dangerZone}
+                  updateVideoAnno={updateVideoAnno}
+                  removeVideoAnno={removeVideoAnno}
+                  visible={dangerZoneVisible}
                   creatingState={creatingState}
                   needMask={false}
                 />

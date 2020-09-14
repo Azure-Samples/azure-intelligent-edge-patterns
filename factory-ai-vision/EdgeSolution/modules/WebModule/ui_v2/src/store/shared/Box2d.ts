@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 
-import { BaseShape, Shape, VideoAnno } from './BaseShape';
+import { BaseShape, Shape, VideoAnno, Purpose } from './BaseShape';
 import { Position2D, BoxLabel } from '../type';
 // TODO Share this with annoSlice
 
@@ -10,12 +10,13 @@ export type BBoxType = VideoAnno & {
 };
 
 export class BBox extends BaseShape {
-  static init(p: Position2D, id: string, camera: number): BBoxType {
+  static init(p: Position2D, id: string, camera: number, purpose: Purpose): BBoxType {
     const { x, y } = p;
     return BBox.setVerticesToValidValue({
       id,
       camera,
       type: Shape.BBox,
+      purpose,
       vertices: {
         x1: x,
         y1: y,

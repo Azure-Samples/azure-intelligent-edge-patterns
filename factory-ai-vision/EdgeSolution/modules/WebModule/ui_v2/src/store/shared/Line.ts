@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 
-import { BaseShape, Shape, VideoAnno } from './BaseShape';
+import { BaseShape, Shape, VideoAnno, Purpose } from './BaseShape';
 import { Position2D, LineLabel } from '../type';
 // TODO Share this with annoSlice
 
@@ -10,10 +10,11 @@ export type LineType = VideoAnno & {
 };
 
 export class Line extends BaseShape {
-  static init(p: Position2D, id: string, camera: number): LineType {
+  static init(p: Position2D, id: string, camera: number, purpose: Purpose): LineType {
     return Line.setVerticesToValidValue({
       id,
       camera,
+      purpose,
       type: Shape.Line,
       vertices: [p, p],
     });

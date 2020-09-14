@@ -50,7 +50,7 @@ export const initialProjectData: ProjectData = {
   probThreshold: '10',
   name: '',
   sendVideoToCloud: false,
-  inferenceMode: InferenceMode.PD,
+  inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
 };
 
