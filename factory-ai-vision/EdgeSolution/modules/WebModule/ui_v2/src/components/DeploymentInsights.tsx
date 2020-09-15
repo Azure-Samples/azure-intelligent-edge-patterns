@@ -15,6 +15,9 @@ type InsightsProps = {
   cameraId: number;
 };
 
+const normalizeObjectCount = (obj: Record<string, number>): { name: string; value: number }[] =>
+  obj ? Object.entries(obj).map((e) => ({ name: e[0], value: e[1] })) : [];
+
 export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId }) => {
   const [inferenceMetrics, setinferenceMetrics] = useState({
     successRate: 0,
@@ -23,6 +26,9 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
     isGpu: false,
     averageTime: 0,
     objectCounts: [],
+    numAccrossLine: 0,
+    numOfViolation: 0,
+    numOfDefect: [],
   });
 
   useInterval(
@@ -35,9 +41,11 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
             unIdentifiedItems: data.unidentified_num,
             isGpu: data.gpu,
             averageTime: data.average_time,
-            // TODO
-            // partCount: data.count,
-            objectCounts: [],
+            objectCounts: normalizeObjectCount(data.last_prediction_count),
+            numAccrossLine: data.scenario_metrics?.count,
+            numOfViolation: data.scenario_metrics?.violations,
+            // TODO Check the field name with Willy
+            numOfDefect: data.scenario_metrics?.defects,
           });
           return void 0;
         })
@@ -75,6 +83,22 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
             {inferenceMetrics.objectCounts.map((e) => (
               <Text key={e[0]}>{`${e[0]}: ${e[1]}`}</Text>
             ))}
+            {!!inferenceMetrics.numAccrossLine && (
+              <Text>{`Total number of object pass the line: ${inferenceMetrics.numAccrossLine}`}</Text>
+            )}
+            {!!inferenceMetrics.numOfViolation && (
+              <Text>{`Number of violation: ${inferenceMetrics.numOfViolation}`}</Text>
+            )}
+            {!!inferenceMetrics.numOfDefect.length && (
+              <>
+                <Text>{`Number of defect object: `}</Text>
+                {inferenceMetrics.numOfDefect.map((e) => (
+                  <Text key={e.name}>
+                    {e.name}: {e.count}
+                  </Text>
+                ))}
+              </>
+            )}
           </Stack>
         </ExpandPanel>
       </Stack>
