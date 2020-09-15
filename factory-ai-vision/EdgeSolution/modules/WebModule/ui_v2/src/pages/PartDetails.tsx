@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   Breadcrumb,
   Stack,
@@ -11,27 +11,19 @@ import {
   IStackTokens,
   ITextStyles,
   Spinner,
-  Pivot,
-  PivotItem,
-  MessageBar,
-  MessageBarButton,
-  ActionButton,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { useQuery } from '../hooks/useQuery';
 import { selectPartById, getParts, deletePart } from '../store/partSlice';
-import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
 import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
-import { selectLocationById } from '../store/locationSlice';
 import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
-import { captureImage } from '../store/imageSlice';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
-import { ImageList, Item as ImageListItem } from '../components/ImageList';
+import { ImageList } from '../components/ImageList';
 import { selectImageItemByTaggedPart } from '../store/selectors';
 
 const theme = getTheme();
@@ -41,8 +33,6 @@ const infoBlockTokens: IStackTokens = { childrenGap: 10 };
 export const PartDetails: React.FC = () => {
   const partId = parseInt(useQuery().get('partId'), 10);
   const part = useSelector((state: State) => selectPartById(state, partId));
-  //const locationName = useSelector((state: State) => selectLocationById(state, camera?.location)?.name);
-  //const projectCameraId = useSelector((state: State) => state.project.data.camera);
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -84,10 +74,6 @@ export const PartDetails: React.FC = () => {
     dispatch(getParts());
     dispatch(thunkGetProject());
   }, [dispatch]);
-
-  const onCaptureBtnClick = (streamId) => {
-    dispatch(captureImage({ streamId, imageIds: [], shouldOpenLabelingPage: true }));
-  };
 
   if (part === undefined) return <Spinner label="Loading" />;
 
@@ -158,10 +144,7 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
-  //const labeledImages = useSelector(selectImageItemByUntagged(false));
-  //const unlabeledImages = useSelector(selectImageItemByUntagged(true));
   const partId = parseInt(useQuery().get('partId'), 10);
-  //const labeledImages = useSelector(selectImageItemByTaggedPart(partId));
 
   const onUpload = () => {
     fileInputRef.current.click();
