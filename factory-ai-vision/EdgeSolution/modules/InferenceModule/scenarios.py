@@ -205,11 +205,8 @@ class DefeatDetection(Scenario):
             got = False
             for d in detections:
                 box2 = [d.x1, d.y1, d.x2, d.y2]
-                print(box1, box2)
                 iou = compute_iou(box1, box2)
-                print('iou', iou)
                 if iou > 0.3:
-                    print('get u bitch', d.tag)
                     tag = d.tag
                     break
 
