@@ -92,7 +92,15 @@ export const PartDetails: React.FC = () => {
   if (part === undefined) return <Spinner label="Loading" />;
 
   const breadCrumbItems: IBreadcrumbItem[] = [
-    { key: 'parts', text: 'Parts', href: '/parts' },
+    {
+      key: 'parts',
+      text: 'Parts',
+      href: '/parts',
+      onClick: (ev, item) => {
+        ev.preventDefault();
+        history.push(item.href);
+      },
+    },
     { key: part.name, text: part.name },
   ];
 

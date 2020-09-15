@@ -84,7 +84,15 @@ export const CameraDetails: React.FC = () => {
   if (camera === undefined) return <Spinner label="Loading" />;
 
   const breadCrumbItems: IBreadcrumbItem[] = [
-    { key: 'cameras', text: 'Cameras', href: '/cameras' },
+    {
+      key: 'cameras',
+      text: 'Cameras',
+      href: '/cameras',
+      onClick: (ev, item) => {
+        ev.preventDefault();
+        history.push(item.href);
+      },
+    },
     { key: camera.name, text: camera.name },
   ];
 
