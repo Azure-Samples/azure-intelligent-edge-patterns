@@ -3,8 +3,7 @@
     "name": "InferencingWithGrpcExtension",
     "properties": {
         "description": "Record on motion to AMS Asset and record events from external models through gRPC Extension",
-        "parameters": [
-            {
+        "parameters": [{
                 "name": "rtspUrl",
                 "type": "String",
                 "description": "Rtsp source Url address"
@@ -80,10 +79,15 @@
                 "type": "String",
                 "description": "Height of the video frame to be received from LVA.",
                 "default": "540"
+            },
+            {
+                "name": "hubSourceInput",
+                "type": "String",
+                "description": "input name for hub source",
+                "default": "recordingTrigger"
             }
         ],
-        "sources": [
-            {
+        "sources": [{
                 "@type": "#Microsoft.Media.MediaGraphRtspSource",
                 "name": "rtspSource",
                 "endpoint": {
@@ -95,18 +99,35 @@
                         "password": "${rtspPassword}"
                     }
                 }
+            },
+            {
+                "@type": "#Microsoft.Media.MediaGraphIoTHubMessageSource",
+                "name": "iotMessageSource",
+                "hubInputName": "${hubSourceInput}"
             }
         ],
-        "processors": [
-            {
-                "@type": "#Microsoft.Media.MediaGraphFrameRateFilterProcessor",  
-                "name": "frameRateFilter",
-                "maximumFps": "30.0",    
-                "inputs": [
+        "processors": [{
+                "@type": "#Microsoft.Media.MediaGraphSignalGateProcessor",
+                "name": "signalGateProcessor",
+                "inputs": [{
+                        "nodeName": "iotMessageSource"
+                    },
                     {
                         "nodeName": "rtspSource"
                     }
-                ]
+                ],
+                "activationEvaluationWindow": "PT1S",
+                "activationSignalOffset": "-PT5S",
+                "minimumActivationTime": "PT30S",
+                "maximumActivationTime": "PT30S"
+            },
+            {
+                "@type": "#Microsoft.Media.MediaGraphFrameRateFilterProcessor",
+                "name": "frameRateFilter",
+                "maximumFps": "30.0",
+                "inputs": [{
+                    "nodeName": "rtspSource"
+                }]
             },
             {
                 "@type": "#Microsoft.Media.MediaGraphGrpcExtension",
@@ -136,23 +157,29 @@
                         "quality": "${imageQuality}"
                     }
                 },
-                "inputs": [
-                    {
-                        "nodeName": "frameRateFilter"
-                    }
-                ]
+                "inputs": [{
+                    "nodeName": "frameRateFilter"
+                }]
             }
         ],
-        "sinks": [
-            {
+        "sinks": [{
                 "@type": "#Microsoft.Media.MediaGraphIoTHubMessageSink",
                 "name": "hubSink",
                 "hubOutputName": "${hubSinkOutputName}",
-                "inputs": [
-                    {
-                        "nodeName": "grpcExtension"
-                    }
-                ]
+                "inputs": [{
+                    "nodeName": "grpcExtension"
+                }]
+            },
+            {
+                "@type": "#Microsoft.Media.MediaGraphAssetSink",
+                "name": "assetSink",
+                "assetNamePattern": "sampleAssetFromEVR-LVAEdge-${System.DateTime}",
+                "segmentLength": "PT30S",
+                "LocalMediaCacheMaximumSizeMiB": "2048",
+                "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
+                "inputs": [{
+                    "nodeName": "signalGateProcessor"
+                }]
             }
         ]
     }
