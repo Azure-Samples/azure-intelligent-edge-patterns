@@ -18,6 +18,10 @@ type InsightsProps = {
 const normalizeObjectCount = (obj: Record<string, number>): { name: string; value: number }[] =>
   obj ? Object.entries(obj).map((e) => ({ name: e[0], value: e[1] })) : [];
 
+type ScenarioMetrics = { name: string; count: number };
+const getNumOfDefects = (scenarioMetric: ScenarioMetrics[]): ScenarioMetrics[] =>
+  scenarioMetric.filter((e) => /_ok|_ng/.test(e.name));
+
 export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId }) => {
   const [inferenceMetrics, setinferenceMetrics] = useState({
     successRate: 0,
@@ -41,11 +45,10 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
             unIdentifiedItems: data.unidentified_num,
             isGpu: data.gpu,
             averageTime: data.average_time,
-            objectCounts: normalizeObjectCount(data.last_prediction_count),
-            numAccrossLine: data.scenario_metrics?.count,
-            numOfViolation: data.scenario_metrics?.violations,
-            // TODO Check the field name with Willy
-            numOfDefect: data.scenario_metrics?.defects,
+            objectCounts: normalizeObjectCount(data.count),
+            numAccrossLine: data.scenario_metrics?.find((e) => e.name === 'all_objects')?.count,
+            numOfViolation: data.scenario_metrics?.find((e) => e.name === 'violation')?.count,
+            numOfDefect: getNumOfDefects(data.scenario_metrics),
           });
           return void 0;
         })
