@@ -1,12 +1,13 @@
-import { createAsyncThunk, createAction, Update } from '@reduxjs/toolkit';
+import { createAction, Update } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
 import { isAOIShape, isCountingLine, isDangerZone } from './shared/VideoAnnoUtil';
 import { Image } from './type';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
-export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
+export const updateRelabelImages = createWrappedAsync<any, undefined, { state: State }>(
   'updateRelabel',
   async (_, { getState }) => {
     const data: { partId: number; imageId: number }[] = Object.values(getState().labelImages.entities)
@@ -17,7 +18,7 @@ export const updateRelabelImages = createAsyncThunk<any, undefined, { state: Sta
   },
 );
 
-export const deleteImage = createAsyncThunk('images/delete', async (id: number) => {
+export const deleteImage = createWrappedAsync('images/delete', async (id: number) => {
   await Axios.delete(`/api/images/${id}`);
   return id;
 });
@@ -57,7 +58,7 @@ const getDangerZones = (state: State, cameraId) => {
     }));
 };
 
-export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
+export const toggleShowAOI = createWrappedAsync<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowAOI',
   async ({ cameraId, checked }, { getState }) => {
     const AOIs = getAOIs(getState(), cameraId);
@@ -65,7 +66,7 @@ export const toggleShowAOI = createAsyncThunk<any, toggleCameraLabelPayload, { s
   },
 );
 
-export const toggleShowCountingLines = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
+export const toggleShowCountingLines = createWrappedAsync<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowCountingLines',
   async ({ cameraId, checked }, { getState }) => {
     const countingLines = getCountingLines(getState(), cameraId);
@@ -75,7 +76,7 @@ export const toggleShowCountingLines = createAsyncThunk<any, toggleCameraLabelPa
   },
 );
 
-export const toggleShowDangerZones = createAsyncThunk<any, toggleCameraLabelPayload, { state: State }>(
+export const toggleShowDangerZones = createWrappedAsync<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowDangerZones',
   async ({ cameraId, checked }, { getState }) => {
     const dangerZones = getDangerZones(getState(), cameraId);
@@ -85,7 +86,7 @@ export const toggleShowDangerZones = createAsyncThunk<any, toggleCameraLabelPayl
   },
 );
 
-export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
+export const updateCameraArea = createWrappedAsync<any, number, { state: State }>(
   'cameras/updateArea',
   async (cameraId, { getState }) => {
     const { useAOI, useCountingLine, useDangerZone } = getState().camera.entities[cameraId];
@@ -100,7 +101,7 @@ export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
   },
 );
 
-export const pullCVProjects = createAsyncThunk<
+export const pullCVProjects = createWrappedAsync<
   any,
   { selectedCustomvisionId: string; loadFullImages: boolean },
   { state: State }

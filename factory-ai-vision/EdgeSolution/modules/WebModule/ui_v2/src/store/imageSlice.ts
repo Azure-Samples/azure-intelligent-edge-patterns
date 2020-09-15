@@ -1,11 +1,4 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  nanoid,
-  createEntityAdapter,
-  ThunkAction,
-  Action,
-} from '@reduxjs/toolkit';
+import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
@@ -14,6 +7,7 @@ import { State } from 'RootStateType';
 import { Annotation, AnnotationState, Image } from './type';
 import { openLabelingPage } from './labelingPageSlice';
 import { deleteImage, changeImage } from './actions';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 // Type definition
 type ImageFromServer = {
@@ -84,17 +78,17 @@ const serializeLabels = R.map<ImageFromServer, ImageFromServerWithSerializedLabe
 const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeLabels);
 
 // Async Thunk Actions
-export const getImages = createAsyncThunk('images/get', async () => {
+export const getImages = createWrappedAsync('images/get', async () => {
   const response = await Axios.get(`/api/images/`);
   return normalizeImages(response.data).entities;
 });
 
-export const postImages = createAsyncThunk('image/post', async (newImage: FormData) => {
+export const postImages = createWrappedAsync('image/post', async (newImage: FormData) => {
   const response = await Axios.post('/api/images/', newImage);
   return normalizeImages([response.data]).entities;
 });
 
-export const captureImage = createAsyncThunk<
+export const captureImage = createWrappedAsync<
   any,
   { streamId: string; imageIds: number[]; shouldOpenLabelingPage: boolean }
 >('image/capture', async ({ streamId, imageIds, shouldOpenLabelingPage }, { dispatch }) => {
@@ -109,7 +103,7 @@ export const captureImage = createAsyncThunk<
   return normalizeImages([response.data.image]).entities;
 });
 
-export const saveLabelImageAnnotation = createAsyncThunk<any, undefined, { state: State }>(
+export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { state: State }>(
   'image/saveAnno',
   async (_, { getState }) => {
     const imageId = getState().labelingPage.selectedImageId;

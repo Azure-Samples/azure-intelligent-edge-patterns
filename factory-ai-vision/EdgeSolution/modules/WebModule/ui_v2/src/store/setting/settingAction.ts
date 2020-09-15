@@ -1,5 +1,4 @@
 import Axios, { AxiosRequestConfig } from 'axios';
-import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import {
   UpdateKeyAction,
@@ -17,6 +16,7 @@ import {
 } from './settingType';
 import { getTrainingProject } from '../trainingProjectSlice';
 import { getAppInsights } from '../../TelemetryService';
+import { createWrappedAsync } from '../shared/createWrappedAsync';
 
 export const updateKey = (key: string): UpdateKeyAction => ({ type: 'UPDATE_KEY', payload: key });
 
@@ -233,7 +233,7 @@ export const checkSettingStatus = (): SettingThunk => async (dispatch): Promise<
   dispatch(onSettingStatusCheck(isTrainerValid, appInsightHasInit));
 };
 
-export const patchIsCollectData = createAsyncThunk<
+export const patchIsCollectData = createWrappedAsync<
   any,
   { id: number; isCollectData: boolean; hasInit: boolean }
 >('settings/updateIsCollectData', async ({ id, isCollectData, hasInit }) => {
