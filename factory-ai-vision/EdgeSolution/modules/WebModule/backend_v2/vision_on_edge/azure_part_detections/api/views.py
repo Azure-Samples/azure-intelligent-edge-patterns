@@ -101,12 +101,13 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 "status": deploy_status_obj.status,
                 "log": "Status: " + deploy_status_obj.log,
                 "download_uri": "",
-                "success_rate": "",
-                "inference_num": "",
-                "unidentified_num": "",
+                "success_rate": 0.0,
+                "inference_num": 0,
+                "unidentified_num": 0,
                 "gpu": "",
-                "average_time": "",
-                "count": ""
+                "count": 0,
+                "average_time": 0.0,
+                "scenario_metrics": []
             })
         try:
             res = requests.get("http://" + inference_module_obj.url +
@@ -120,12 +121,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             is_gpu = data["is_gpu"]
             average_inference_time = data["average_inference_time"]
             last_prediction_count = data["last_prediction_count"]
-            logger.info("success_rate: %s. inference_num: %s", success_rate,
-                        inference_num)
+            scenario_metrics = data["scenario_metrics"]
         except requests.exceptions.ConnectionError:
-            raise PdInferenceModuleUnreachable(
-                detail=("Inference_module.url: " + inference_module_obj.url +
-                        " unreachable."))
+            raise PdInferenceModuleUnreachable
         except ReadTimeout:
             raise PdExportInfereceReadTimeout
         deploy_status_obj.save()
@@ -139,8 +137,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             "inference_num": inference_num,
             "unidentified_num": unidentified_num,
             "gpu": is_gpu,
+            "count": last_prediction_count,
             "average_time": average_inference_time,
-            "count": last_prediction_count
+            "scenario_metrics": scenario_metrics
         })
 
     @swagger_auto_schema(
