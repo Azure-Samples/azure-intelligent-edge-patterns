@@ -7,15 +7,17 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import requests
+from requests.exceptions import ReadTimeout
+
 from django.core.files.images import ImageFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from requests.exceptions import ReadTimeout
 
 from ...azure_pd_deploy_status.models import DeployStatus
 from ...azure_projects.utils import TrainingManagerInstance
@@ -27,10 +29,10 @@ from ...images.models import Image
 from ..exceptions import (PdConfigureWithoutCameras,
                           PdConfigureWithoutInferenceModule,
                           PdConfigureWithoutProject,
+                          PdExportInfereceReadTimeout,
                           PdInferenceModuleUnreachable,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
-                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull,
-                          PdExportInfereceReadTimeout)
+                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
 from ..models import PartDetection, PDScenario
 from ..utils import deploy_all_helper, if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
@@ -53,13 +55,22 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     }
 
     @swagger_auto_schema(operation_summary='Export Part Detection status',
+                         manual_parameters=[
+                             openapi.Parameter(
+                                 'prob_threshold',
+                                 openapi.IN_QUERY,
+                                 type=openapi.TYPE_INTEGER,
+                                 description='Probability Threshold',
+                                 required=True),
+                         ],
                          responses={
                              '200': SimpleOKSerializer,
                              '400': MSStyleErrorResponseSerializer
                          })
     @action(detail=True, methods=["get"])
     def update_prob_threshold(self, request, pk=None) -> Response:
-        """update inference bounding box threshold"""
+        """update inference bounding box threshold.
+        """
         queryset = self.get_queryset()
         part_detection_obj = get_object_or_404(queryset, pk=pk)
         prob_threshold = request.query_params.get("prob_threshold")
@@ -101,12 +112,13 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 "status": deploy_status_obj.status,
                 "log": "Status: " + deploy_status_obj.log,
                 "download_uri": "",
-                "success_rate": "",
-                "inference_num": "",
-                "unidentified_num": "",
+                "success_rate": 0.0,
+                "inference_num": 0,
+                "unidentified_num": 0,
                 "gpu": "",
-                "average_time": "",
-                "count": ""
+                "count": 0,
+                "average_time": 0.0,
+                "scenario_metrics": []
             })
         try:
             res = requests.get("http://" + inference_module_obj.url +
@@ -120,12 +132,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             is_gpu = data["is_gpu"]
             average_inference_time = data["average_inference_time"]
             last_prediction_count = data["last_prediction_count"]
-            logger.info("success_rate: %s. inference_num: %s", success_rate,
-                        inference_num)
+            scenario_metrics = data["scenario_metrics"]
         except requests.exceptions.ConnectionError:
-            raise PdInferenceModuleUnreachable(
-                detail=("Inference_module.url: " + inference_module_obj.url +
-                        " unreachable."))
+            raise PdInferenceModuleUnreachable
         except ReadTimeout:
             raise PdExportInfereceReadTimeout
         deploy_status_obj.save()
@@ -139,8 +148,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             "inference_num": inference_num,
             "unidentified_num": unidentified_num,
             "gpu": is_gpu,
+            "count": last_prediction_count,
             "average_time": average_inference_time,
-            "count": last_prediction_count
+            "scenario_metrics": scenario_metrics
         })
 
     @swagger_auto_schema(
@@ -268,6 +278,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 project=project_obj, part=part,
                 is_relabel=True).order_by("timestamp").last().delete()
         raise PdRelabelImageFull
+
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
     """Project ModelViewSet

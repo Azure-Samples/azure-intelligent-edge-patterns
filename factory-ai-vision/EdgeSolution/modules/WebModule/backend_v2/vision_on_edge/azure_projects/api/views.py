@@ -10,6 +10,7 @@ from distutils.util import strtobool
 
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg import openapi

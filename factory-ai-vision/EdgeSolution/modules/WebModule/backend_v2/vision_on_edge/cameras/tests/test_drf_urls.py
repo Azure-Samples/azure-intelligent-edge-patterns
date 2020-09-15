@@ -5,6 +5,7 @@
 from unittest import mock
 
 import pytest
+
 from django.urls import resolve, reverse
 
 from .factories import CameraFactory

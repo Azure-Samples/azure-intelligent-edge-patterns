@@ -8,7 +8,6 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
-
 from vision_on_edge.azure_part_detections.api import \
     views as part_detection_views
 from vision_on_edge.azure_parts.api import views as azure_part_views

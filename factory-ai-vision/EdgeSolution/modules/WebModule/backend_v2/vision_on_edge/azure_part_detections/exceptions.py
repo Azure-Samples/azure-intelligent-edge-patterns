@@ -59,6 +59,7 @@ class PdDeployToInfereceError(APIException):
     default_detail = "Part Detection deploy failed cause Inference Module does not response."
     default_code = "pd_deploy_to_inferece_error"
 
+
 class PdExportInfereceReadTimeout(APIException):
     status_code = 503
     default_detail = "Part Detection deploy failed cause Inference Module requests timeout."
