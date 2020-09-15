@@ -149,7 +149,9 @@ class Stream():
 
     def get_scenario_metrics(self):
         if self.scenario:
-            self.scenario.get_metrics()
+            return self.scenario.get_metrics()
+        return []
+
 
     def restart_cam(self):
 
@@ -168,8 +170,10 @@ class Stream():
 
         # if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
+        if self.cam_source != cam_source:
+            self.cam_source = cam_source
+            self._update_instance(normalize_rtsp(cam_source))
 
-        self.cam_source = cam_source
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
@@ -254,8 +258,6 @@ class Stream():
                 self.use_line = False
                 print('Upading Line[*]:', flush=True)
                 print('    use_line   :', False, flush=True)
-
-        self._update_instance(normalize_rtsp(cam_source))
 
     def get_mode(self):
         return self.model.detection_mode
@@ -377,12 +379,13 @@ class Stream():
         self.update_detection_status()
 
         self.draw_img()
-        self.precess_send_signal_to_lva()
+        if self.model.send_video_to_cloud:
+            self.precess_send_signal_to_lva()
 
         if self.scenario:
             #print('drawing...', flush=True)
             #print(self.scenario, flush=True)
-            self.scenario.last_draw_img = self.scenario.draw_counter(
+            self.last_drawn_img = self.scenario.draw_counter(
                 self.last_drawn_img)
             # FIXME close this
             # self.scenario.draw_constraint(self.last_drawn_img)

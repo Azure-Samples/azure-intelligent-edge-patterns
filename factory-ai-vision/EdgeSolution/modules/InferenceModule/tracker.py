@@ -12,8 +12,8 @@ from sort import *
 
 
 class Tracker():
-    def __init__(self):
-        self.tracker = Sort()
+    def __init__(self, max_age=1, min_hits=3, iou_threshold=0.3):
+        self.tracker = Sort(max_age=max_age, min_hits=min_hits, iou_threshold=0.3)
         self.objs = []
 
     def update(self, detections):

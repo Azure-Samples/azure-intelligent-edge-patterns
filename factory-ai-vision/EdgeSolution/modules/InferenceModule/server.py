@@ -267,9 +267,16 @@ def update_send_video_to_cloud():
     if not send_video_to_cloud:
         return 'missing send_video_to_cloud'
 
-    if send_video_to_cloud not in PART_DETECTION_MODE_CHOICES:
-        return 'invalid send_video_to_cloud'
+    if send_video_to_cloud in ['False', 'false']:
+        send_video_to_cloud = False
+    elif send_video_to_cloud in ['True', 'true']:
+        send_video_to_cloud = True
+    else:
+        return 'unknown send_video_to_cloud params'
+
     # TODO: Change something here
+    for s in stream_manager.get_streams():
+        s.model.send_video_to_cloud = send_video_to_cloud
     return 'ok'
 
 

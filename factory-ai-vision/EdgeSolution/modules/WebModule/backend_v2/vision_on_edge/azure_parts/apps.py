@@ -89,7 +89,7 @@ class AzurePartsConfig(AppConfig):
                 try:
                     project_obj = Project.objects.get(
                         is_demo=True, name="Demo Employee Safety Project")
-                    for partname in ['person']:
+                    for partname in ['Person']:
                         Part.objects.update_or_create(
                             project=project_obj,
                             name=partname,
