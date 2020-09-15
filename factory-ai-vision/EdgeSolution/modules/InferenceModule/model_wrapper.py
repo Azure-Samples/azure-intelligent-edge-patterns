@@ -23,14 +23,14 @@ IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
 
-
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
     """
 
     def __init__(self, cam_type="video_file", model_dir='./default_model'):
         self.lock = threading.Lock()
-        self.model = self.load_model(model_dir, is_default_model=True, is_scenario_model=False)
+        self.model = self.load_model(
+            model_dir, is_default_model=True, is_scenario_model=False)
         self.model_uri = None
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
@@ -38,16 +38,16 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.detection_mode = "PD"
         self.threshold = 0.3
 
+        self.send_video_to_cloud = False
+
         # Part that we want to detect
         self.parts = []
 
         self.is_gpu = (onnxruntime.get_device() == 'GPU')
 
-
     def update_parts(self, parts):
         print('[INFO] Updating Parts ...', parts)
         self.parts = parts
-
 
     def load_model(self, model_dir, is_default_model, is_scenario_model):
         if is_default_model:
@@ -67,10 +67,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             print('[INFO] Loading Default Model ...')
             with open(model_dir + '/labels.txt', 'r') as f:
                 labels = [l.strip() for l in f.readlines()]
-            model = ONNXRuntimeObjectDetection(model_dir + '/model.onnx', labels)
+            model = ONNXRuntimeObjectDetection(
+                model_dir + '/model.onnx', labels)
 
             return model
-
 
         else:
             print('[INFO] Loading Model ...')
@@ -92,7 +92,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.model = model
         self.lock.release()
 
-
     def Score(self, image):
 
         self.lock.acquire()
@@ -103,7 +102,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         return predictions, inf_time
 
 
-#def update_instance(rtspUrl, instance_id):
+# def update_instance(rtspUrl, instance_id):
 #    payload = {
 #        "@apiVersion": "1.0",
 #        "name": instance_id
