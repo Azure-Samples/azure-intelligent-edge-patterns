@@ -12,6 +12,7 @@ from ..azure_parts.models import Part
 from ..azure_projects.models import Project
 from ..cameras.models import Camera
 from ..inference_modules.models import InferenceModule
+from .exceptions import PdProbThresholdOutOfRange, PdProbThresholdNotInteger
 
 logger = logging.getLogger(__name__)
 
@@ -54,16 +55,17 @@ class PartDetection(models.Model):
         """
         self.prob_threshold = prob_threshold
 
+        if not isinstance(prob_threshold, int):
+            raise PdProbThresholdNotInteger
         if prob_threshold > 100 or prob_threshold < 0:
-            raise ValueError("prob_threshold out of range")
-
+            raise PdProbThresholdOutOfRange
+        self.save()
         requests.get(
             "http://" + self.inference_module.url + "/update_prob_threshold",
             params={
                 "prob_threshold": prob_threshold,
             },
         )
-        self.save(update_fields=["prob_threshold"])
 
 
 class PDScenario(models.Model):
