@@ -132,7 +132,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             is_gpu = data["is_gpu"]
             average_inference_time = data["average_inference_time"]
             last_prediction_count = data["last_prediction_count"]
-            scenario_metrics = data["scenario_metrics"]
+            scenario_metrics = data["scenario_metrics"] or []
         except requests.exceptions.ConnectionError:
             raise PdInferenceModuleUnreachable
         except ReadTimeout:
