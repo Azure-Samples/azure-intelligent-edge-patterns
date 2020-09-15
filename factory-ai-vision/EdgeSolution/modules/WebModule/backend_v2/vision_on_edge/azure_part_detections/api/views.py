@@ -96,7 +96,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         inference_num = 0
         unidentified_num = 0
         cam_id = request.query_params.get("camera_id")
-        if deploy_status_obj != "ok":
+        if deploy_status_obj.status != "ok":
             return Response({
                 "status": deploy_status_obj.status,
                 "log": "Status: " + deploy_status_obj.log,
