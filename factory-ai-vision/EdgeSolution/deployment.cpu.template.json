@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -87,11 +81,9 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8000/tcp": [
-                      {
-                        "HostPort": "8080"
-                      }
-                    ]
+                    "8000/tcp": [{
+                      "HostPort": "8080"
+                    }]
                   }
                 }
               }
@@ -118,11 +110,9 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5432/tcp": [
-                      {
-                        "HostPort": "5432"
-                      }
-                    ]
+                    "5432/tcp": [{
+                      "HostPort": "5432"
+                    }]
                   }
                 }
               }
@@ -143,16 +133,12 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ]
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }],
+                    "5558/tcp": [{
+                      "HostPort": "5558"
+                    }]
                   },
                   "IpcMode": "container:lvaEdge",
                   "runtime": "runc"
@@ -201,7 +187,8 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream"
+          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream",
+          "InferenceToLVA": "FROM /messages/modules/InferenceModule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200

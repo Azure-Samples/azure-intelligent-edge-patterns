@@ -97,7 +97,7 @@ class Stream():
 
         # lva signal
         self.lva_last_send_time = time.time()
-        self.lva_interval = 60
+        self.lva_interval = 0
 
         self.zmq_sender = sender
         self.use_line = False
@@ -434,10 +434,12 @@ class Stream():
         if self.lva_last_send_time + self.lva_interval < time.time():
             to_send = False
             for p in self.last_prediction:
-                if p['probability'] >= self.iothub_threshold:
+                if p['probability'] >= self.threshold:
                     to_send = True
-            send_message_to_lva()
-            self.lva_last_send_time = time.time()
+            if to_send:
+                send_message_to_lva()
+                self.lva_last_send_time = time.time()
+                self.lva_interval = 60
 
     def draw_img(self):
 
@@ -450,9 +452,7 @@ class Stream():
             draw_aoi(img, self.aoi_info)
 
         for prediction in predictions:
-
             if prediction['probability'] > self.threshold:
-
                 (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
                 draw_confidence_level(img, prediction)
