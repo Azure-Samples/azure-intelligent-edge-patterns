@@ -148,10 +148,10 @@ class DefeatDetection(Scenario):
 
     def get_metrics(self):
         metrics = []
-        if self.ok:
-            metrics.append({'name': self.ok_name, 'count': self.ok.counter})
-        if self.ng:
-            metrics.append({'name': self.ng_name, 'count': self.ng.counter})
+        #if self.ok:
+        metrics.append({'name': self.ok_name, 'count': self.ok_counter})
+        #if self.ng:
+        metrics.append({'name': self.ng_name, 'count': self.ng_counter})
         return metrics
 
     def set_ok(self, name):
