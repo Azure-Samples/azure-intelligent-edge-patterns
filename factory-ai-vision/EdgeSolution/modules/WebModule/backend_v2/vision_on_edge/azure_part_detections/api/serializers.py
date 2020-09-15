@@ -33,11 +33,12 @@ class PDScenarioSerializer(serializers.ModelSerializer):
 class ExportSerializer(serializers.Serializer):
     """ExportSerializer.
     """
+
     class ScenarioMetrics(serializers.Serializer):
         """ScenarioMetrics.
         """
-        name = serializers.CharField(required=False) # DD
-        count = serializers.IntegerField(required=False) # PC, DD
+        name = serializers.CharField(required=False)  # DD
+        count = serializers.IntegerField(required=False)  # PC, DD
 
     status = serializers.CharField(max_length=100)
     log = serializers.CharField(max_length=1000)

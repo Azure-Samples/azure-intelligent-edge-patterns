@@ -5,9 +5,9 @@
 import logging
 
 import cv2
+
 from django.db import models
 from django.db.models.signals import pre_save
-
 from vision_on_edge.general.utils import normalize_rtsp
 
 from ..locations.models import Location

@@ -7,15 +7,17 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import requests
+from requests.exceptions import ReadTimeout
+
 from django.core.files.images import ImageFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from requests.exceptions import ReadTimeout
 
 from ...azure_pd_deploy_status.models import DeployStatus
 from ...azure_projects.utils import TrainingManagerInstance
@@ -27,10 +29,10 @@ from ...images.models import Image
 from ..exceptions import (PdConfigureWithoutCameras,
                           PdConfigureWithoutInferenceModule,
                           PdConfigureWithoutProject,
+                          PdExportInfereceReadTimeout,
                           PdInferenceModuleUnreachable,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
-                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull,
-                          PdExportInfereceReadTimeout)
+                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
 from ..models import PartDetection, PDScenario
 from ..utils import deploy_all_helper, if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
@@ -53,13 +55,22 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     }
 
     @swagger_auto_schema(operation_summary='Export Part Detection status',
+                         manual_parameters=[
+                             openapi.Parameter(
+                                 'prob_threshold',
+                                 openapi.IN_QUERY,
+                                 type=openapi.TYPE_INTEGER,
+                                 description='Probability Threshold',
+                                 required=True),
+                         ],
                          responses={
                              '200': SimpleOKSerializer,
                              '400': MSStyleErrorResponseSerializer
                          })
     @action(detail=True, methods=["get"])
     def update_prob_threshold(self, request, pk=None) -> Response:
-        """update inference bounding box threshold"""
+        """update inference bounding box threshold.
+        """
         queryset = self.get_queryset()
         part_detection_obj = get_object_or_404(queryset, pk=pk)
         prob_threshold = request.query_params.get("prob_threshold")
@@ -267,6 +278,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 project=project_obj, part=part,
                 is_relabel=True).order_by("timestamp").last().delete()
         raise PdRelabelImageFull
+
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
     """Project ModelViewSet

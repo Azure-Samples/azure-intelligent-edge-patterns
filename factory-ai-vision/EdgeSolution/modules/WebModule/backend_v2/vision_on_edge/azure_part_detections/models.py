@@ -5,6 +5,7 @@
 import logging
 
 import requests
+
 from django.db import models
 from django.utils import timezone
 
@@ -12,7 +13,7 @@ from ..azure_parts.models import Part
 from ..azure_projects.models import Project
 from ..cameras.models import Camera
 from ..inference_modules.models import InferenceModule
-from .exceptions import PdProbThresholdOutOfRange, PdProbThresholdNotInteger
+from .exceptions import PdProbThresholdNotInteger, PdProbThresholdOutOfRange
 
 logger = logging.getLogger(__name__)
 

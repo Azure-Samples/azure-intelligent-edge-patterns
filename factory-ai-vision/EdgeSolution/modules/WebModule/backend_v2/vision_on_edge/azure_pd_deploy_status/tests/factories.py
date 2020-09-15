@@ -5,7 +5,6 @@ from typing import Any, Sequence
 
 import factory
 from factory import DjangoModelFactory, Faker, post_generation
-
 from vision_on_edge.azure_projects.tests.factories import ProjectFactory
 from vision_on_edge.azure_training_status.models import TrainingStatus
 

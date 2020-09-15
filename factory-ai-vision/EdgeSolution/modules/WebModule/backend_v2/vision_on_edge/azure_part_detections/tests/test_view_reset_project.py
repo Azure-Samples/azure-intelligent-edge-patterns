@@ -6,7 +6,6 @@ import json
 
 from django.urls import reverse
 from rest_framework import status
-
 from vision_on_edge.azure_parts.models import Part
 from vision_on_edge.azure_projects.models import Project
 from vision_on_edge.azure_settings.models import Setting
