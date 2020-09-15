@@ -1,5 +1,4 @@
-import { ThunkAction } from 'redux-thunk';
-import { Action } from 'redux';
+import { ThunkAction, Action } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 
 export type Project = {
@@ -7,14 +6,6 @@ export type Project = {
   trainingLog: string;
   data: ProjectData;
   originData: ProjectData;
-  inferenceMetrics: {
-    successRate: number;
-    successfulInferences: number;
-    unIdetifiedItems: number;
-    isGpu: boolean;
-    averageTime: number;
-    partCount: Record<string, number>;
-  };
   progress: number;
   trainingMetrics: TrainingMetrics;
   status: Status;
@@ -147,30 +138,6 @@ export type GetTrainingMetricsFailedAction = ProjectAction & {
   error: Error;
 };
 
-export const GET_INFERENCE_METRICS_REQUEST = 'GET_TRAINING_INFERENCE_REQUEST';
-export type GetInferenceMetricsRequestAction = ProjectAction & {
-  type: typeof GET_INFERENCE_METRICS_REQUEST;
-};
-
-export const GET_INFERENCE_METRICS_SUCCESS = 'GET_INFERENCE_METRICS_SUCCESS';
-export type GetInferenceMetricsSuccessAction = ProjectAction & {
-  type: typeof GET_INFERENCE_METRICS_SUCCESS;
-  payload: {
-    successRate: number;
-    successfulInferences: number;
-    unIdetifiedItems: number;
-    isGpu: boolean;
-    averageTime: number;
-    partCount: Record<string, number>;
-  };
-};
-
-export const GET_INFERENCE_METRICS_FAILED = 'GET_INFERENCE_METRICS_FAILED';
-export type GetInferenceMetricsFailedAction = ProjectAction & {
-  type: typeof GET_INFERENCE_METRICS_FAILED;
-  error: Error;
-};
-
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
 export type PostProjectRequestAction = ProjectAction & {
   type: typeof POST_PROJECT_REQUEST;
@@ -235,9 +202,6 @@ export type ProjectActionTypes =
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
   | GetTrainingMetricsFailedAction
-  | GetInferenceMetricsRequestAction
-  | GetInferenceMetricsSuccessAction
-  | GetInferenceMetricsFailedAction
   | StartInferenceAction
   | StopInferenceAction
   | ChangeStatusAction;

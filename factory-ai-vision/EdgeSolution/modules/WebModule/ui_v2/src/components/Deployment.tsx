@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link as RRDLink } from 'react-router-dom';
 import {
   Stack,
   PrimaryButton,
@@ -11,7 +10,6 @@ import {
   ICommandBarItemProps,
   Pivot,
   PivotItem,
-  Link,
   IDropdownOption,
   Dropdown,
   Toggle,
@@ -28,7 +26,6 @@ import { Project, Status, InferenceMode } from '../store/project/projectTypes';
 import { useInterval } from '../hooks/useInterval';
 import {
   thunkGetTrainingLog,
-  thunkGetInferenceMetrics,
   thunkDeleteProject,
   thunkGetTrainingMetrics,
   thunkGetProject,
@@ -39,7 +36,6 @@ import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
 import { selectCamerasByIds, selectCameraById } from '../store/cameraSlice';
 import { selectPartNamesById } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
-import { ExpandPanel } from './ExpandPanel';
 import {
   selectVideoAnnosByCamera,
   selectOriginVideoAnnosByCamera,
@@ -54,14 +50,14 @@ import {
 import { Shape, Purpose } from '../store/shared/BaseShape';
 import { EmptyAddIcon } from './EmptyAddIcon';
 import { getTrainingProject } from '../store/trainingProjectSlice';
+import { Insights } from './DeploymentInsights';
 
 const { palette } = getTheme();
 
 export const Deployment: React.FC = () => {
-  const { status, progress, trainingLog, data: projectData, originData, inferenceMetrics } = useSelector<
-    State,
-    Project
-  >((state) => state.project);
+  const { status, progress, trainingLog, data: projectData, originData } = useSelector<State, Project>(
+    (state) => state.project,
+  );
   const {
     id: projectId,
     cameras: projectCameraIds,
@@ -91,9 +87,6 @@ export const Deployment: React.FC = () => {
 
   const partNames = useSelector(selectPartNamesById(parts));
   const dispatch = useDispatch();
-  const objectCounts = useSelector((state: State) =>
-    Object.entries(state.project.inferenceMetrics.partCount),
-  );
   const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
 
   const [isEditPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
@@ -121,13 +114,6 @@ export const Deployment: React.FC = () => {
       dispatch(thunkGetTrainingMetrics(trainingProject, isDemo));
     }
   }, [dispatch, status, projectId, isDemo, trainingProject]);
-
-  useInterval(
-    () => {
-      dispatch(thunkGetInferenceMetrics(projectId, isDemo, selectedCamera));
-    },
-    status === Status.StartInference ? 5000 : null,
-  );
 
   const changeProbThreshold = (newValue: string) =>
     dispatch(updateProjectData({ probThreshold: newValue }, false));
@@ -238,14 +224,7 @@ export const Deployment: React.FC = () => {
         <Stack styles={{ root: { width: '435px' } }}>
           <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}` } }}>
             <PivotItem headerText="Insights">
-              <Insights
-                successRate={inferenceMetrics.successRate}
-                successfulInferences={inferenceMetrics.successfulInferences}
-                unIdetifiedItems={inferenceMetrics.unIdetifiedItems}
-                isGpu={inferenceMetrics.isGpu}
-                averageTime={inferenceMetrics.averageTime}
-                objectCounts={objectCounts}
-              />
+              <Insights status={status} projectId={projectData.id} cameraId={selectedCamera} />
             </PivotItem>
             <PivotItem headerText="Areas of interest">
               <VideoAnnosControls cameraId={selectedCamera} />
@@ -268,68 +247,6 @@ export const Deployment: React.FC = () => {
         isDemo={isDemo}
         isEdit
       />
-    </>
-  );
-};
-
-type InsightsProps = {
-  successRate: number;
-  successfulInferences: number;
-  unIdetifiedItems: number;
-  objectCounts: [string, number][];
-  isGpu: boolean;
-  averageTime: number;
-};
-
-export const Insights: React.FC<InsightsProps> = ({
-  successRate,
-  successfulInferences,
-  unIdetifiedItems,
-  objectCounts,
-  isGpu,
-  averageTime,
-}) => {
-  return (
-    <>
-      <Stack
-        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
-        tokens={{ childrenGap: '8px' }}
-      >
-        <Text styles={{ root: { fontWeight: 'bold' } }}>Success rate</Text>
-        <Text styles={{ root: { fontWeight: 'bold', color: palette.greenLight } }}>{successRate}%</Text>
-        <Text>
-          {`Running on ${isGpu ? 'GPU' : 'CPU'} (accelerated) ${Math.round(averageTime * 100) / 100}/ms`}
-        </Text>
-      </Stack>
-      <Stack
-        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
-        tokens={{ childrenGap: '8px' }}
-      >
-        <Text styles={{ root: { fontWeight: 'bold' } }}>Successful inferences</Text>
-        <Text styles={{ root: { color: palette.neutralSecondary } }}>{successfulInferences}</Text>
-        <ExpandPanel titleHidden="Object" suffix={objectCounts.length.toString()}>
-          <Stack tokens={{ childrenGap: 10 }}>
-            {objectCounts.map((e) => (
-              <Text key={e[0]}>{`${e[0]}: ${e[1]}`}</Text>
-            ))}
-          </Stack>
-        </ExpandPanel>
-      </Stack>
-      <Stack
-        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
-        tokens={{ childrenGap: '8px' }}
-      >
-        <ExpandPanel titleHidden="Unidentified images" suffix={unIdetifiedItems?.toString()}>
-          <Stack horizontal tokens={{ childrenGap: 25 }}>
-            <Text variant="mediumPlus" styles={{ root: { color: palette.neutralPrimary } }}>
-              {unIdetifiedItems} images
-            </Text>
-            <RRDLink to="/images" style={{ textDecoration: 'none' }}>
-              <Link styles={{ root: { textDecoration: 'none' } }}>View in images</Link>
-            </RRDLink>
-          </Stack>
-        </ExpandPanel>
-      </Stack>
     </>
   );
 };

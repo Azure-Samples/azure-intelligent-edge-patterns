@@ -37,12 +37,6 @@ import {
   GetTrainingMetricsFailedAction,
   GET_TRAINING_METRICS_FAILED,
   Consequence,
-  GetInferenceMetricsRequestAction,
-  GET_INFERENCE_METRICS_REQUEST,
-  GET_INFERENCE_METRICS_SUCCESS,
-  GetInferenceMetricsSuccessAction,
-  GetInferenceMetricsFailedAction,
-  GET_INFERENCE_METRICS_FAILED,
   StartInferenceAction,
   START_INFERENCE,
   STOP_INFERENCE,
@@ -153,29 +147,6 @@ const getTrainingMetricsSuccess = (
 });
 const getTrainingMetricsFailed = (error: Error, isDemo: boolean): GetTrainingMetricsFailedAction => ({
   type: GET_TRAINING_METRICS_FAILED,
-  error,
-  isDemo,
-});
-
-const getInferenceMetricsRequest = (isDemo: boolean): GetInferenceMetricsRequestAction => ({
-  type: GET_INFERENCE_METRICS_REQUEST,
-  isDemo,
-});
-const getInferenceMetricsSuccess = (
-  successRate: number,
-  successfulInferences: number,
-  unIdetifiedItems: number,
-  isGpu: boolean,
-  averageTime: number,
-  partCount: Record<string, number>,
-  isDemo: boolean,
-): GetInferenceMetricsSuccessAction => ({
-  type: GET_INFERENCE_METRICS_SUCCESS,
-  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime, partCount },
-  isDemo,
-});
-const getInferenceMetricsFailed = (error: Error, isDemo: boolean): GetInferenceMetricsFailedAction => ({
-  type: GET_INFERENCE_METRICS_FAILED,
   error,
   isDemo,
 });
@@ -347,28 +318,6 @@ export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boole
       return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence, isDemo));
     })
     .catch((err) => dispacth(getTrainingMetricsFailed(err, isDemo)));
-};
-
-export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean, cameraId: number) => (
-  dispatch,
-): Promise<any> => {
-  dispatch(getInferenceMetricsRequest(isDemo));
-
-  return Axios.get(`/api/part_detections/${projectId}/export?camera_id=${cameraId}`)
-    .then(({ data }) => {
-      return dispatch(
-        getInferenceMetricsSuccess(
-          data.success_rate,
-          data.inference_num,
-          data.unidentified_num,
-          data.gpu,
-          data.average_time,
-          data.count,
-          isDemo,
-        ),
-      );
-    })
-    .catch((err) => dispatch(getInferenceMetricsFailed(err, isDemo)));
 };
 
 export const updateProbThreshold = createAsyncThunk<any, undefined, { state: State }>(
