@@ -45,7 +45,7 @@ export const LiveViewContainer: React.FC<{
   }, 3000);
 
   return (
-    <div style={{ width: '100%', height: '100%', backgroundColor: 'black' }}>
+    <div style={{ width: '100%', height: '100%', backgroundColor: 'black', minHeight: '500px' }}>
       {showVideo ? (
         <LiveViewScene
           videoAnnos={videoAnnos}
