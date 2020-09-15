@@ -9,6 +9,7 @@ import time
 import traceback
 
 import requests
+
 from django.utils import timezone
 
 from ..azure_pd_deploy_status import progress as deploy_progress
@@ -139,12 +140,12 @@ def deploy_worker(part_detection_id):
         requests.get("http://" + str(instance.inference_module.url) +
                      "/update_model",
                      params={"model_uri": instance.project.download_uri},
-                     timeout=3)
+                     timeout=10)
     else:
         requests.get("http://" + str(instance.inference_module.url) +
                      "/update_model",
                      params={"model_dir": instance.project.download_uri},
-                     timeout=3)
+                     timeout=10)
     requests.get("http://" + str(instance.inference_module.url) +
                  "/update_parts",
                  params={"parts": parts_to_detect},
@@ -171,12 +172,7 @@ def deploy_worker(part_detection_id):
     # 2. Update cam                                     ===
     # =====================================================
     logger.info("Update Cam!!!")
-    part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
-    cameras = part_detection_obj.cameras.all()
-    inference_module = part_detection_obj.inference_module
-    if inference_module is None:
-        return
-    inference_module_url = inference_module.url
+    cameras = instance.cameras.all()
     res_data = {"cameras": []}
 
     for cam in cameras.all():
@@ -199,10 +195,18 @@ def deploy_worker(part_detection_id):
             })
     serializer = UpdateCamBodySerializer(data=res_data)
     serializer.is_valid(raise_exception=True)
-    requests.post(
-        url="http://" + inference_module_url + "/update_cams",
-        json=json.loads(json.dumps(serializer.validated_data)),
-        timeout=3
+    requests.post(url="http://" + instance.inference_module.url +
+                  "/update_cams",
+                  json=json.loads(json.dumps(serializer.validated_data)),
+                  timeout=3)
+    # =====================================================
+    # 3. Update prob_threshold                          ===
+    # =====================================================
+    requests.get(
+        "http://" + instance.inference_module.url + "/update_prob_threshold",
+        params={
+            "prob_threshold": instance.prob_threshold,
+        },
     )
 
 

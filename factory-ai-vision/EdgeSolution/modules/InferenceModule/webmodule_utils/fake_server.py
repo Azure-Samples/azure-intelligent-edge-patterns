@@ -30,12 +30,16 @@ app = Flask(__name__)
 @app.route('/metrics', methods=['GET'])
 def metrics():
     return json.dumps({
-        'success_rate': 100,
+        'success_rate': 0.0,
         'inference_num': 100,
         'unidentified_num': 100,
         'is_gpu': True,
         'average_inference_time': 0.1,
-        'last_prediction_count': 10
+        'last_prediction_count': 10,
+        'scenario_metrics': [{
+            'name': '5566',
+            'count': 5566
+        }]
     })
 
 
@@ -91,10 +95,10 @@ def update_model():
 
 @app.route('/update_cams', methods=['POST'])
 def update_cams():
-    """update_cams.
-
-    Update multiple cameras at once.
-    Cameras not in List should not inferecence.
+    """update_cams.
+
+    Update multiple cameras at once.
+    Cameras not in List should not inferecence.
     """
     data = request.get_json()
     logger.info(data["cameras"])
@@ -104,7 +108,7 @@ def update_cams():
 
 @app.route('/update_part_detection_mode')
 def update_part_detection_mode():
-    """update_part_detection_mode.
+    """update_part_detection_mode.
     """
 
     part_detection_mode = request.args.get('mode')
@@ -119,7 +123,7 @@ def update_part_detection_mode():
 
 @app.route('/update_send_video_to_cloud')
 def update_send_video_to_cloud():
-    """update_part_detection_mode.
+    """update_part_detection_mode.
     """
 
     send_video_to_cloud = request.args.get('send_video_to_cloud')
@@ -170,7 +174,6 @@ def update_iothub_parameters():
     print('  fpm', fpm)
 
     cam_id = request.args.get('cam_id')
-    logger.info("stream_manager.get_stream_by_id(%s)", cam_id)
     logger.info("s.update_iothub_parameters(%s, %s, %s)", is_send, threshold,
                 fpm)
     return 'ok'
@@ -184,15 +187,6 @@ def update_prob_threshold():
 
     print('[INFO] updaing prob_threshold to')
     print('  prob_threshold:', prob_threshold)
-
-    cam_id = request.args.get('cam_id')
-    s = stream_manager.get_stream_by_id(cam_id)
-    s.lock.acquire()
-    s.detection_success_num = 0
-    s.detection_unidentified_num = 0
-    s.detection_total = 0
-    s.detections = []
-    s.lock.release()
 
     return 'ok'
 

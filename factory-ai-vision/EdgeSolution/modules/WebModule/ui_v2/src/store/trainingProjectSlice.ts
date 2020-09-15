@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
+import { createSlice, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 import {
   getInitialDemoState,
@@ -7,6 +7,7 @@ import {
   getSliceApiByDemo,
   getNonDemoSelector,
 } from './shared/DemoSliceUtils';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 type TrainingProject = {
   id: number;
@@ -15,7 +16,7 @@ type TrainingProject = {
   isDemo: boolean;
 };
 
-export const getTrainingProject = createAsyncThunk<any, boolean, { state: State }>(
+export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
   'trainingSlice/get',
   async (isDemo): Promise<TrainingProject[]> => {
     const response = await getSliceApiByDemo('projects', isDemo);
@@ -52,6 +53,11 @@ export const {
 
 export const selectNonDemoProject = getNonDemoSelector('trainingProject', selectTrainingProjectEntities);
 
+/**
+ * Return the non demo project in the shape of IDropdownOptions.
+ * If the given training project is in the predefined scenarios, also return the training project of the scenario.
+ * @param trainingProjectId
+ */
 export const trainingProjectOptionsSelector = (trainingProjectId: number) =>
   createSelector(
     [selectAllTrainingProjects, (state: State) => state.scenario],

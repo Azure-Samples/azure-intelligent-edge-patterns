@@ -187,7 +187,8 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream"
+          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream",
+          "InferenceToLVA": "FROM /messages/modules/InferenceModule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200

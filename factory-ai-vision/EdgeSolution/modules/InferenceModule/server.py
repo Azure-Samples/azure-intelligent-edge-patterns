@@ -87,7 +87,7 @@ def prediction():
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
-    #FIXME
+    # FIXME
     #inference_num = onnx.detection_success_num
     #unidentified_num = onnx.detection_unidentified_num
     #total = onnx.detection_total
@@ -98,6 +98,7 @@ def metrics():
     average_inference_time = 0
     last_prediction_count = {}
     is_gpu = onnx.is_gpu
+    scenario_metrics = []
 
     stream_id = request.args.get('cam_id')
     stream = stream_manager.get_stream_by_id_danger(stream_id)
@@ -108,6 +109,7 @@ def metrics():
         total = stream.detection_total
         average_inference_time = stream.average_inference_time
         last_prediction_count = stream.last_prediction_count
+        scenario_metrics = stream.get_scenario_metrics()
         if total == 0:
             success_rate = 0
         else:
@@ -119,12 +121,14 @@ def metrics():
         'is_gpu': is_gpu,
         'average_inference_time': average_inference_time,
         'last_prediction_count': last_prediction_count,
-        'scenario_metrics': stream.get_scenario_metrics()
+        'scenario_metrics': scenario_metrics
     })
+
 
 @app.route('/update_part_detection_id')
 def update_part_detection_id():
     return 'ok'
+
 
 @app.route('/update_retrain_parameters')
 def update_retrain_parameters():
@@ -153,7 +157,8 @@ def update_retrain_parameters():
     confidence_max = int(confidence_max) * 0.01
     max_images = int(max_images)
     for s in stream_manager.get_streams():
-        s.update_retrain_parameters(is_retrain, confidence_min, confidence_max, max_images)
+        s.update_retrain_parameters(
+            is_retrain, confidence_min, confidence_max, max_images)
 
     # FIXME will need to show it for different stream
     print('[INFO] updaing retrain parameters to')
@@ -220,11 +225,11 @@ def update_cams():
         if not cam_id:
             return 'missing cam_id'
 
-        #if 'aoi' in cam.keys():
+        # if 'aoi' in cam.keys():
         #    aoi = json.loads(aoi)
         #    has_aoi = aoi['useAOI']
         #    aoi_info = aoi['AOIs']
-        #else:
+        # else:
         #    has_aoi = False
         #    aoi_info = None
 
@@ -232,7 +237,8 @@ def update_cams():
         s = stream_manager.get_stream_by_id(cam_id)
         #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
-        s.update_cam(cam_type, cam_source, cam_id, False, [], onnx.detection_mode, line_info, zone_info)
+        s.update_cam(cam_type, cam_source, cam_id, False, [],
+                     onnx.detection_mode, line_info, zone_info)
 
     return 'ok'
 
@@ -261,9 +267,16 @@ def update_send_video_to_cloud():
     if not send_video_to_cloud:
         return 'missing send_video_to_cloud'
 
-    if send_video_to_cloud not in PART_DETECTION_MODE_CHOICES:
-        return 'invalid send_video_to_cloud'
+    if send_video_to_cloud in ['False', 'false']:
+        send_video_to_cloud = False
+    elif send_video_to_cloud in ['True', 'true']:
+        send_video_to_cloud = True
+    else:
+        return 'unknown send_video_to_cloud params'
+
     # TODO: Change something here
+    for s in stream_manager.get_streams():
+        s.model.send_video_to_cloud = send_video_to_cloud
     return 'ok'
 
 
@@ -319,6 +332,7 @@ def update_iothub_parameters():
         s.update_iothub_parameters(is_send, threshold, fpm)
     return 'ok'
 
+
 @app.route('/status')
 def get_scenario():
     return json.dumps({
@@ -328,24 +342,22 @@ def get_scenario():
         'scenario': onnx.detection_mode
     })
 
+
 @app.route('/update_prob_threshold')
 def update_prob_threshold():
     prob_threshold = request.args.get('prob_threshold')
     if not prob_threshold:
         return 'missing prob_threshold'
 
-    onnx.threshold = int(prob_threshold) * 0.01
     print('[INFO] updaing prob_threshold to')
     print('  prob_threshold:', prob_threshold)
 
-    cam_id = request.args.get('cam_id')
-    s = stream_manager.get_stream_by_id(cam_id)
-    s.lock.acquire()
-    s.detection_success_num = 0
-    s.detection_unidentified_num = 0
-    s.detection_total = 0
-    s.detections = []
-    s.lock.release()
+    for s in stream_manager.get_streams():
+        s.threshold = int(prob_threshold) * 0.01
+        s.detection_success_num = 0
+        s.detection_unidentified_num = 0
+        s.detection_total = 0
+        s.detections = []
 
     return 'ok'
 

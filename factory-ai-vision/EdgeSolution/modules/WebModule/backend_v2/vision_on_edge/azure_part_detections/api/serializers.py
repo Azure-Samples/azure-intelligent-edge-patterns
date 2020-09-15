@@ -34,6 +34,12 @@ class ExportSerializer(serializers.Serializer):
     """ExportSerializer.
     """
 
+    class ScenarioMetrics(serializers.Serializer):
+        """ScenarioMetrics.
+        """
+        name = serializers.CharField(required=False)  # DD
+        count = serializers.IntegerField(required=False)  # PC, DD
+
     status = serializers.CharField(max_length=100)
     log = serializers.CharField(max_length=1000)
     download_uri = serializers.CharField(max_length=1000)
@@ -42,7 +48,7 @@ class ExportSerializer(serializers.Serializer):
     unidentified_num = serializers.IntegerField(default=0)
     gpu = serializers.BooleanField(default=False)
     average_time = serializers.FloatField(default=0.0)
-    count = serializers.IntegerField(default=0)
+    scenario_metrics = ScenarioMetrics(many=True)
 
 
 class UploadRelabelSerializer(serializers.Serializer):
@@ -68,5 +74,6 @@ class UpdateCamBodySerializer(serializers.Serializer):
         source = serializers.CharField()
         aoi = serializers.CharField(required=False)
         lines = serializers.CharField(required=False, allow_blank=True)
+        zones = serializers.CharField(required=False, allow_blank=True)
 
     cameras = CameraItem(many=True)

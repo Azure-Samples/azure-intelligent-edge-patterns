@@ -68,7 +68,7 @@ type ConfigTaskPanelProps = {
   isOpen: boolean;
   onDismiss: () => void;
   projectData: ProjectData;
-  demoTrainingProject?: number;
+  trainingProjectOfSelectedScenario?: number;
   isDemo?: boolean;
   isEdit?: boolean;
 };
@@ -77,7 +77,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
   projectData: initialProjectData,
-  demoTrainingProject = null,
+  trainingProjectOfSelectedScenario = null,
   isDemo = false,
   isEdit = false,
 }) => {
@@ -87,11 +87,15 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   }, [initialProjectData]);
 
   const cameraOptions = useSelector(
-    cameraOptionsSelectorInConfig(isEdit ? initialProjectData.trainingProject : demoTrainingProject),
+    cameraOptionsSelectorInConfig(
+      isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
+    ),
   );
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
   const trainingProjectOptions = useSelector(
-    trainingProjectOptionsSelector(isEdit ? initialProjectData.trainingProject : demoTrainingProject),
+    trainingProjectOptionsSelector(
+      isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
+    ),
   );
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
@@ -115,7 +119,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     dispatch(getCameras(true));
     dispatch(getTrainingProject(true));
     dispatch(getScenario());
-  }, [dispatch, isDemo]);
+  }, [dispatch]);
 
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);

@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import Axios from 'axios';
 import { InferenceMode } from './project/projectTypes';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 type Scenario = {
   id: number;
@@ -11,7 +12,7 @@ type Scenario = {
   parts: number[];
 };
 
-export const getScenario = createAsyncThunk('scenario/get', async () => {
+export const getScenario = createWrappedAsync('scenario/get', async () => {
   const res = await Axios.get('/api/part_detection_scenarios');
   return res.data.map((e) => ({
     id: e.id,

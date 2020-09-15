@@ -6,7 +6,6 @@ import logging
 
 from django.db import models
 from django.db.models.signals import post_save
-
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_settings.models import Setting
 

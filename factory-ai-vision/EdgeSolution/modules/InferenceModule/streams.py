@@ -95,6 +95,10 @@ class Stream():
         self.iothub_last_send_time = time.time()
         self.iothub_interval = 99999999
 
+        # lva signal
+        self.lva_last_send_time = time.time()
+        self.lva_interval = 0
+
         self.zmq_sender = sender
         self.use_line = False
         self.use_zone = False
@@ -140,12 +144,14 @@ class Stream():
                     self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
                 self.mutex.release()
                 # FIXME need to fine tune this value
-                time.sleep(0.08)
+                time.sleep(0.03)
         threading.Thread(target=run, args=(self,)).start()
 
     def get_scenario_metrics(self):
         if self.scenario:
-            self.scenario.get_metrics()
+            return self.scenario.get_metrics()
+        return []
+
 
     def restart_cam(self):
 
@@ -154,18 +160,20 @@ class Stream():
         #cam = cv2.VideoCapture(normalize_rtsp(self.cam_source))
 
         # Protected by Mutex
-        #self.mutex.acquire()
-        #self.cam.release()
+        # self.mutex.acquire()
+        # self.cam.release()
         #self.cam = cam
-        #self.mutex.release()
+        # self.mutex.release()
 
     def update_cam(self, cam_type, cam_source, cam_id, has_aoi, aoi_info, scenario_type=None, line_info=None, zone_info=None):
         print('[INFO] Updating Cam ...', flush=True)
 
-        #if self.cam_type == cam_type and self.cam_source == cam_source:
+        # if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
+        if self.cam_source != cam_source:
+            self.cam_source = cam_source
+            self._update_instance(normalize_rtsp(cam_source))
 
-        self.cam_source = cam_source
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
@@ -199,8 +207,8 @@ class Stream():
             print('[INFO] Zone INFO', zone_info, flush=True)
             self.scenario = DangerZone()
             self.scenario_type = self.model.detection_mode
-            #FIXME
-            self.scenario.set_targets(['person'])
+            # FIXME
+            self.scenario.set_targets(['Person'])
             try:
                 zone_info = json.loads(zone_info)
                 self.use_zone = zone_info['useDangerZone']
@@ -209,10 +217,10 @@ class Stream():
                 print('Upading Line:', flush=True)
                 print('    use_zone:', self.use_zone, flush=True)
                 for zone in zones:
-                    x1 = int(zones[0]['label'][0]['x'])
-                    y1 = int(zones[0]['label'][0]['y'])
-                    x2 = int(zones[0]['label'][1]['x'])
-                    y2 = int(zones[0]['label'][1]['y'])
+                    x1 = int(zone['label']['x1'])
+                    y1 = int(zone['label']['y1'])
+                    x2 = int(zone['label']['x2'])
+                    y2 = int(zone['label']['y2'])
                     _zones.append([x1, y1, x2, y2])
                     print('     zone:', x1, y1, x2, y2, flush=True)
                 self.scenario.set_zones(_zones)
@@ -251,13 +259,8 @@ class Stream():
                 print('Upading Line[*]:', flush=True)
                 print('    use_line   :', False, flush=True)
 
-
-        self._update_instance(normalize_rtsp(cam_source))
-
-
     def get_mode(self):
         return self.model.detection_mode
-
 
     def update_detection_status(self):
         self.mutex.acquire()
@@ -304,7 +307,7 @@ class Stream():
     def update_retrain_parameters(self, is_retrain, confidence_min, confidence_max, max_images):
         self.is_retrain = is_retrain
         self.max_images = max_images
-        #FIMXE may need to move it to other place
+        # FIMXE may need to move it to other place
         self.threshold = self.confidence_max
 
     def update_iothub_parameters(self, is_send, threshold, fpm):
@@ -344,7 +347,8 @@ class Stream():
         self.mutex.release()
 
         # check whether it's the tag we want
-        predictions = list(p for p in predictions if p['tagName'] in self.model.parts)
+        predictions = list(
+            p for p in predictions if p['tagName'] in self.model.parts)
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -367,23 +371,25 @@ class Stream():
             tag = prediction['tagName']
             if prediction['probability'] > 0.5:
                 (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                _detections.append(Detection(tag, x1, y1, x2, y2, prediction['probability']))
+                _detections.append(
+                    Detection(tag, x1, y1, x2, y2, prediction['probability']))
         if self.scenario:
             self.scenario.update(_detections)
-
 
         self.update_detection_status()
 
         self.draw_img()
+        if self.model.send_video_to_cloud:
+            self.precess_send_signal_to_lva()
 
         if self.scenario:
             #print('drawing...', flush=True)
             #print(self.scenario, flush=True)
-            self.scenario.last_draw_img = self.scenario.draw_counter(self.last_drawn_img)
-            #FIXME close this
-            self.scenario.draw_constraint(self.last_drawn_img)
-            #self.last_drawn_img = self.scenario.draw_objs(self.last_drawn_img)
-            self.scenario.draw_objs(self.last_drawn_img)
+            self.last_drawn_img = self.scenario.draw_counter(
+                self.last_drawn_img)
+            # FIXME close this
+            # self.scenario.draw_constraint(self.last_drawn_img)
+            # self.scenario.draw_objs(self.last_drawn_img)
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
@@ -399,7 +405,8 @@ class Stream():
         for prediction in self.last_prediction:
             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
                 confidence = prediction['probability']
-                print('comparing...', self.confidence_min, confidence, self.confidence_max, flush=True)
+                print('comparing...', self.confidence_min,
+                      confidence, self.confidence_max, flush=True)
                 if self.confidence_min <= confidence <= self.confidence_max:
                     print('preparing...', flush=True)
                     # prepare the data to send
@@ -407,15 +414,15 @@ class Stream():
                     img = self.last_img
                     height, width = img.shape[0], img.shape[1]
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    labels = json.dumps([{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
+                    labels = json.dumps(
+                        [{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
                     jpg = cv2.imencode('.jpg', img)[1].tobytes()
 
-                    send_retrain_image_to_webmodule(jpg, tag, labels, confidence)
+                    send_retrain_image_to_webmodule(
+                        jpg, tag, labels, confidence)
 
                     self.last_upload_time = time.time()
                     break
-
-
 
     def process_send_message_to_iothub(self):
         if self.iothub_last_send_time + self.iothub_interval < time.time():
@@ -426,6 +433,16 @@ class Stream():
             send_message_to_iothub(predictions)
             self.iothub_last_send_time = time.time()
 
+    def precess_send_signal_to_lva(self):
+        if self.lva_last_send_time + self.lva_interval < time.time():
+            to_send = False
+            for p in self.last_prediction:
+                if p['probability'] >= self.threshold:
+                    to_send = True
+            if to_send:
+                send_message_to_lva()
+                self.lva_last_send_time = time.time()
+                self.lva_interval = 60
 
     def draw_img(self):
 
@@ -438,16 +455,14 @@ class Stream():
             draw_aoi(img, self.aoi_info)
 
         for prediction in predictions:
-
             if prediction['probability'] > self.threshold:
-
                 (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
                 draw_confidence_level(img, prediction)
 
         #print('setting last drawn img', flush=True)
-        #if self.get_mode() == 'PC':
-        #if self.scenario:
+        # if self.get_mode() == 'PC':
+        # if self.scenario:
         #    print('current img', img)
         #    self.scenario.draw_constraint(img)
         #    self.scenario.draw_counter(img)
@@ -460,7 +475,6 @@ def web_module_url():
         return 'WebModule:8000'
     else:
         return 'localhost:8000'
-
 
 
 def draw_aoi(img, aoi_info):
@@ -479,7 +493,6 @@ def draw_aoi(img, aoi_info):
                 p1 = (point['x'], point['y'])
                 p2 = (label[(index+1) % l]['x'], label[(index+1) % l]['y'])
                 cv2.line(img, p1, p2, (0, 255, 255), 2)
-
 
 
 def is_inside_aoi(x1, y1, x2, y2, aoi_info):
@@ -535,6 +548,7 @@ def draw_confidence_level(img, prediction):
 
     return img
 
+
 def send_message_to_iothub(predictions):
     if iot:
         try:
@@ -549,10 +563,25 @@ def send_message_to_iothub(predictions):
         #print('[METRICS]', json.dumps(predictions_to_send))
         pass
 
+
+def send_message_to_lva():
+    if iot:
+        try:
+            iot.send_message_to_output('{}', 'InferenceToLVA')
+        except:
+            print(
+                '[ERROR] Failed to send signal to LVA', flush=True)
+        print(
+            '[INFO] sending signal to LVA', flush=True)
+    else:
+        #print('[INFO] Cannot detect IoT module')
+        pass
+
+
 def send_retrain_image_to_webmodule(jpg, tag, labels, confidence):
     print('[INFO] Sending Image to relabeling', tag, flush=True)
     try:
-        #requests.post('http://'+web_module_url()+'/api/relabel', data={
+        # requests.post('http://'+web_module_url()+'/api/relabel', data={
         res = requests.post('http://'+web_module_url()+'/api/part_detections/1/upload_relabel_image/', data={
             'confidence': confidence,
             'labels': labels,

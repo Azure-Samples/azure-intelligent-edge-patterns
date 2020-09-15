@@ -18,9 +18,6 @@ import {
   GET_TRAINING_METRICS_REQUEST,
   GET_TRAINING_METRICS_SUCCESS,
   GET_TRAINING_METRICS_FAILED,
-  GET_INFERENCE_METRICS_REQUEST,
-  GET_INFERENCE_METRICS_SUCCESS,
-  GET_INFERENCE_METRICS_FAILED,
   ProjectData,
   InferenceMode,
 } from './projectTypes';
@@ -62,14 +59,6 @@ const initialState: Project = {
     prevConsequence: null,
     curConsequence: null,
   },
-  inferenceMetrics: {
-    successRate: null,
-    successfulInferences: null,
-    unIdetifiedItems: null,
-    isGpu: false,
-    averageTime: null,
-    partCount: {},
-  },
   status: Status.None,
   error: null,
   trainingLog: '',
@@ -110,14 +99,6 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         isLoading: false,
         data: initialProjectData,
         originData: initialProjectData,
-        inferenceMetrics: {
-          successRate: 0,
-          successfulInferences: 0,
-          unIdetifiedItems: 0,
-          isGpu: false,
-          averageTime: 0,
-          partCount: {},
-        },
         trainingMetrics: {
           curConsequence: null,
           prevConsequence: null,
@@ -169,12 +150,6 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         ...state,
         error: action.error,
       };
-    case GET_INFERENCE_METRICS_REQUEST:
-      return state;
-    case GET_INFERENCE_METRICS_SUCCESS:
-      return { ...state, inferenceMetrics: action.payload };
-    case GET_INFERENCE_METRICS_FAILED:
-      return { ...state, error: action.error };
     case 'CHANGE_STATUS':
       return { ...state, status: action.status };
     case updateProbThreshold.pending.toString():

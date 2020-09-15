@@ -5,6 +5,7 @@ import numpy as np
 import grpc
 import time
 import threading
+import sys
 
 import inferencing_pb2
 import media_pb2
@@ -245,13 +246,17 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                 # out = self._tYoloV3.Score(cvImage)
                 # logging.info(out)
                 # predictions = self._tYoloV3.Score(cvImage, instance_id)
-                s = self.stream_manager.get_stream_by_id(instance_id)
-                if s:
-                    #print('got stream and predicting...', flush=True)
-                    s.predict(cvImage)
-                    predictions = s.last_prediction
-                else:
-                    #print('got notthing', flush=True)
+                try:
+                    s = self.stream_manager.get_stream_by_id(instance_id)
+                    if s:
+                        #print('got stream and predicting...', flush=True)
+                        s.predict(cvImage)
+                        predictions = s.last_prediction
+                    else:
+                        #print('got notthing', flush=True)
+                        predictions = []
+                except:
+                    print("[ERROR] Unexpected error:", sys.exc_info(), flush=True)
                     predictions = []
                 # stream_manager.update(cvImage, instance_id)
                 # logging.debug(

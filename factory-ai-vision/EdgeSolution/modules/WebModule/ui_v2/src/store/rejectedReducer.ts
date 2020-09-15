@@ -15,7 +15,7 @@ const slice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(isRejectedAction, (_, action) => {
-      return action.error.message;
+      return action.payload;
     });
   },
 });

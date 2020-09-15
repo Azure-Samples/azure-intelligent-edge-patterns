@@ -8,9 +8,10 @@ import logging
 
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
+
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
