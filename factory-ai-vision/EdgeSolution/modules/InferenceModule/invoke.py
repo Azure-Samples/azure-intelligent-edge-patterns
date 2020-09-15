@@ -9,6 +9,7 @@ import urllib.request
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
 import os
+import threading
 
 from config import IOTHUB_CONNECTION_STRING
 
@@ -16,6 +17,11 @@ DEVICE_ID = os.environ.get('IOTEDGE_DEVICEID', 'local')
 MODULE_ID = 'lvaEdge'
 
 default_payload = {"@apiVersion": "1.0"}
+
+
+# Known issue from LVA
+# https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/troubleshoot-how-to#multiple-direct-methods-in-parallel--timeout-failure
+mutex = threading.Lock()
 
 
 class GraphManager:
@@ -40,11 +46,18 @@ class GraphManager:
         return res.json()
 
     def invoke_method(self, method_name, payload):
-        module_method = CloudToDeviceMethod(
-            method_name=method_name, payload=payload, response_timeout_in_seconds=30)
-        res = self.registry_manager.invoke_device_module_method(
-            self.device_id, self.module_id, module_method)
-        return res.as_dict()
+        mutex.acquire()
+        try:
+            module_method = CloudToDeviceMethod(
+                method_name=method_name, payload=payload, response_timeout_in_seconds=30)
+            res = self.registry_manager.invoke_device_module_method(
+                self.device_id, self.module_id, module_method)
+            mutex.release()
+            return res.as_dict()
+        except:
+            mutex.release()
+            print("[ERROR] Failed to invoke direct method:", sys.exc_info(), flush=True)
+            return {'error': 'failed to invoke direct method'}
 
     def invoke_graph_topology_get(self, name):
         method = 'GraphTopologyGet'
