@@ -1,7 +1,6 @@
 import Axios from 'axios';
 import * as R from 'ramda';
 import { State } from 'RootStateType';
-import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   ProjectThunk,
   GetProjectSuccessAction,
@@ -45,6 +44,7 @@ import {
   TrainingStatus,
 } from './projectTypes';
 import { selectAllImages } from '../imageSlice';
+import { createWrappedAsync } from '../shared/createWrappedAsync';
 
 const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -320,7 +320,7 @@ export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boole
     .catch((err) => dispacth(getTrainingMetricsFailed(err, isDemo)));
 };
 
-export const updateProbThreshold = createAsyncThunk<any, undefined, { state: State }>(
+export const updateProbThreshold = createWrappedAsync<any, undefined, { state: State }>(
   'project/updateProbThreshold',
   async (_, { getState }) => {
     const { id: projectId, probThreshold } = getProjectData(getState());
