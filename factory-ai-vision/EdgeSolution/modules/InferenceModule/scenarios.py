@@ -60,7 +60,6 @@ class PartCounter(Scenario):
                     if self.line and (not self.line.is_same_side(
                             xc, yc, self.detected[oid]['xc'],
                             self.detected[oid]['yc'])):
-                        print('hhh')
                         self.detected[oid]['expired'] = True
                         print('*** new object counted', flush=True)
                         print('*** id: ', oid, flush=True)
@@ -82,7 +81,7 @@ class PartCounter(Scenario):
         thickness = 1
         x = int(max(0, img.shape[1] - 150))
         y = int(min(30, img.shape[0]))
-        print(x, y, flush=True)
+        #print(x, y, flush=True)
         img = cv2.putText(img, 'Objects: ' + str(self.counter), (x, y), font,
                           font_scale, (0, 255, 255), thickness)
         return img

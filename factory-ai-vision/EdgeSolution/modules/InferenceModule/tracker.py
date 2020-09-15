@@ -13,7 +13,7 @@ from sort import *
 
 class Tracker():
     def __init__(self):
-        self.tracker = Sort()
+        self.tracker = Sort(max_age=3)
         self.objs = []
 
     def update(self, detections):

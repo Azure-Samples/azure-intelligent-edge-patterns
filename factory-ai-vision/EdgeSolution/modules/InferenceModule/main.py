@@ -28,13 +28,13 @@ from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
 #tracker = Tracker()
 #tracker.set_line(170/2, 680/2, 1487/2, 815/2)
 
-#scenario = PartCounter()
-#scenario.set_line(85, 340, 743, 407)
+scenario = PartCounter()
+scenario.set_line(85, 340, 743, 407)
 
-scenario = DefeatDetection()
-scenario.set_ok('Bottle - OK')
-scenario.set_ng('Bottle - NG')
-scenario.set_line(450, 0, 450, 800)
+#scenario = DefeatDetection()
+#scenario.set_ok('Bottle - OK')
+#scenario.set_ng('Bottle - NG')
+#scenario.set_line(450, 0, 450, 800)
 
 #scenario= DefeatDetection()
 #scenario.set_ok('Box')
@@ -61,8 +61,8 @@ SCENARIO3_MODEL = 'scenario_models/3'
 DOWNLOADED_MODEL = 'model'
 
 ### CONFIGURATION <BEG> ###
-CAM_SOURCE = SCENARIO3_VIDEO
-MODEL      = SCENARIO3_MODEL
+CAM_SOURCE = SCENARIO1_VIDEO
+MODEL      = SCENARIO1_MODEL
 
 ### CONFIGURATION <END> ###
 
