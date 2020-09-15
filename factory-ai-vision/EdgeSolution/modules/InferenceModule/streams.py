@@ -208,7 +208,7 @@ class Stream():
             self.scenario = DangerZone()
             self.scenario_type = self.model.detection_mode
             # FIXME
-            self.scenario.set_targets(['person'])
+            self.scenario.set_targets(['Person'])
             try:
                 zone_info = json.loads(zone_info)
                 self.use_zone = zone_info['useDangerZone']
@@ -217,10 +217,10 @@ class Stream():
                 print('Upading Line:', flush=True)
                 print('    use_zone:', self.use_zone, flush=True)
                 for zone in zones:
-                    x1 = int(zones[0]['label'][0]['x'])
-                    y1 = int(zones[0]['label'][0]['y'])
-                    x2 = int(zones[0]['label'][1]['x'])
-                    y2 = int(zones[0]['label'][1]['y'])
+                    x1 = int(zone['label']['x1'])
+                    y1 = int(zone['label']['y1'])
+                    x2 = int(zone['label']['x2'])
+                    y2 = int(zone['label']['y2'])
                     _zones.append([x1, y1, x2, y2])
                     print('     zone:', x1, y1, x2, y2, flush=True)
                 self.scenario.set_zones(_zones)
