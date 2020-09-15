@@ -140,10 +140,14 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         deploy_status_obj.save()
         logger.info("Deploy status: %s, %s", deploy_status_obj.status,
                     deploy_status_obj.log)
+        if project_obj is None:
+            download_uri = ""
+        else:
+            download_uri = project_obj.download_uri
         return Response({
             "status": deploy_status_obj.status,
             "log": "Status: " + deploy_status_obj.log,
-            "download_uri": project_obj.download_uri,
+            "download_uri": download_uri,
             "success_rate": success_rate,
             "inference_num": inference_num,
             "unidentified_num": unidentified_num,
@@ -207,7 +211,6 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         project_obj = instance.project
         if project_obj is None:
-            logger.error("Cannot found project objects")
             raise PdConfigureWithoutProject
 
         # Relabel images count does not exceed project.maxImages
