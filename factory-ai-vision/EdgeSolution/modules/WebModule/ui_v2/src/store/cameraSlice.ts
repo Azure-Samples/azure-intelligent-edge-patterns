@@ -256,6 +256,11 @@ export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) 
     })),
 );
 
+/**
+ * Return the non demo camera in the shape of IDropdownOptions.
+ * If the given training project is in the predefined scenarios, also return the camera of the scenario.
+ * @param trainingProjectId
+ */
 export const cameraOptionsSelectorInConfig = (trainingProjectId: number) =>
   createSelector([selectAllCameras, (state: State) => state.scenario], (cameras, scenarios) => {
     const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);

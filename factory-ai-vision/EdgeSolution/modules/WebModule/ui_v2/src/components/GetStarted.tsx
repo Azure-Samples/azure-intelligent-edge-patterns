@@ -45,7 +45,7 @@ const demoProjectsInfo = [
 ];
 
 export const GetStarted: React.FC = () => {
-  const demoProjectData = useSelector((state: State) => state.scenario);
+  const scenario = useSelector((state: State) => state.scenario);
 
   const dispatch = useDispatch();
 
@@ -53,10 +53,10 @@ export const GetStarted: React.FC = () => {
     dispatch(getScenario());
   }, [dispatch]);
 
-  const [selectedDemoIdx, setselectedDemoIdx] = useState(-1);
+  const [selectedScenarioIdx, setselectedScenarioIdx] = useState(-1);
   const openPanel = (name: string) => () =>
-    setselectedDemoIdx(demoProjectData.findIndex((e) => e.name === name));
-  const closePanel = () => setselectedDemoIdx(-1);
+    setselectedScenarioIdx(scenario.findIndex((e) => e.name === name));
+  const closePanel = () => setselectedScenarioIdx(-1);
 
   return (
     <>
@@ -73,17 +73,17 @@ export const GetStarted: React.FC = () => {
               title={info.title}
               subTitle={info.subTitle}
               onClick={openPanel(info.title)}
-              available={!!demoProjectData.find((e) => e.name === info.title)}
+              available={!!scenario.find((e) => e.name === info.title)}
             />
           ))}
         </div>
       </Stack>
       <ConfigTaskPanel
-        isOpen={selectedDemoIdx > -1}
+        isOpen={selectedScenarioIdx > -1}
         onDismiss={closePanel}
-        projectData={{ ...initialProjectData, ...demoProjectData[selectedDemoIdx] }}
+        projectData={{ ...initialProjectData, ...scenario[selectedScenarioIdx] }}
         isDemo
-        demoTrainingProject={demoProjectData[selectedDemoIdx]?.trainingProject}
+        trainingProjectOfSelectedScenario={scenario[selectedScenarioIdx]?.trainingProject}
       />
     </>
   );

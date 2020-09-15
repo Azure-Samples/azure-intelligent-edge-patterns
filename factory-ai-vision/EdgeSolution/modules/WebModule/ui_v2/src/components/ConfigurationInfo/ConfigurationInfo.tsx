@@ -64,19 +64,21 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
             <tr>
               <td>Confirmation threshold</td>
               <td>
-                <TextField
-                  type="number"
-                  value={props.probThreshold}
-                  onChange={(_, newValue) => props.updateProbThreshold(newValue)}
-                  underlined
-                  suffix="%"
-                  styles={{ root: { display: 'inline-block' } }}
-                />
-                <IconButton
-                  disabled={props.originProbThreshold === props.probThreshold}
-                  iconProps={{ iconName: 'Save' }}
-                  onClick={props.saveProbThreshold}
-                />
+                <Stack horizontal horizontalAlign="center">
+                  <TextField
+                    type="number"
+                    value={props.probThreshold}
+                    onChange={(_, newValue) => props.updateProbThreshold(newValue)}
+                    underlined
+                    suffix="%"
+                    styles={{ root: { display: 'inline-block' } }}
+                  />
+                  <IconButton
+                    disabled={props.originProbThreshold === props.probThreshold}
+                    iconProps={{ iconName: 'Save' }}
+                    onClick={props.saveProbThreshold}
+                  />
+                </Stack>
               </td>
             </tr>
             <tr>
