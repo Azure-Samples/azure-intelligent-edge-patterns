@@ -159,8 +159,6 @@
                     }
                   },
                   "Binds": [
-                    "/home/willy/media/:/var/media/",
-                    "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"
                   ],
                   "IpcMode": "shareable"
                 }
