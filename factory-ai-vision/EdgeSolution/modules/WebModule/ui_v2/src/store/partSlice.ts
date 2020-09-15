@@ -1,9 +1,10 @@
-import { createEntityAdapter, createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit';
+import { createEntityAdapter, createSlice, createSelector } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import { selectNonDemoProject } from './trainingProjectSlice';
 import { pullCVProjects } from './actions';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 export type Part = {
   id: number;
@@ -23,7 +24,7 @@ const normalizePart = (data): Part[] => {
 
 const entityAdapter = createEntityAdapter<Part>();
 
-export const getParts = createAsyncThunk<any, undefined, { state: State }>(
+export const getParts = createWrappedAsync<any, undefined, { state: State }>(
   'parts/get',
   async () => {
     const response = await Axios.get('/api/parts/');
@@ -34,7 +35,7 @@ export const getParts = createAsyncThunk<any, undefined, { state: State }>(
   },
 );
 
-export const postPart = createAsyncThunk<any, Omit<Part, 'id' | 'trainingProject'>, { state: State }>(
+export const postPart = createWrappedAsync<any, Omit<Part, 'id' | 'trainingProject'>, { state: State }>(
   'parts/post',
   async (data, { getState }) => {
     const { id: trainingProject } = selectNonDemoProject(getState())[0];
@@ -43,7 +44,7 @@ export const postPart = createAsyncThunk<any, Omit<Part, 'id' | 'trainingProject
   },
 );
 
-export const patchPart = createAsyncThunk<
+export const patchPart = createWrappedAsync<
   any,
   { data: { name: string; description: string }; id: number },
   { state: State }
@@ -52,7 +53,7 @@ export const patchPart = createAsyncThunk<
   return { id: response.data.id, changes: response.data };
 });
 
-export const deletePart = createAsyncThunk<any, number, { state: State }>('parts/delete', async (id) => {
+export const deletePart = createWrappedAsync<any, number, { state: State }>('parts/delete', async (id) => {
   await Axios.delete(`/api/parts/${id}/`);
   return id;
 });

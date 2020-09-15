@@ -1,4 +1,4 @@
-import { createSlice, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import { createSlice, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
 import Axios from 'axios';
 import * as R from 'ramda';
 import { State } from 'RootStateType';
@@ -15,6 +15,7 @@ import {
 } from './shared/DemoSliceUtils';
 import { GetProjectSuccessAction, InferenceMode } from './project/projectTypes';
 import { Purpose } from './shared/BaseShape';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 type CameraFromServer = {
   id: number;
@@ -154,7 +155,7 @@ const normalizeCameras = R.compose(normalizeCamerasAndAOIsByNormalizr, serialize
 
 const entityAdapter = createEntityAdapter<Camera>();
 
-export const getCameras = createAsyncThunk<any, boolean, { state: State }>(
+export const getCameras = createWrappedAsync<any, boolean, { state: State }>(
   'cameras/get',
   async (isDemo) => {
     const response = await getSliceApiByDemo('cameras', isDemo);
@@ -165,7 +166,7 @@ export const getCameras = createAsyncThunk<any, boolean, { state: State }>(
   },
 );
 
-export const postCamera = createAsyncThunk(
+export const postCamera = createWrappedAsync(
   'cameras/post',
   async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'location'>) => {
     const response = await Axios.post(`/api/cameras/`, newCamera);
@@ -173,7 +174,7 @@ export const postCamera = createAsyncThunk(
   },
 );
 
-export const putCamera = createAsyncThunk(
+export const putCamera = createWrappedAsync(
   'cameras/put',
   async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'id' | 'location'>) => {
     const response = await Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
@@ -181,7 +182,7 @@ export const putCamera = createAsyncThunk(
   },
 );
 
-export const deleteCamera = createAsyncThunk('cameras/delete', async (id: number) => {
+export const deleteCamera = createWrappedAsync('cameras/delete', async (id: number) => {
   await Axios.delete(`/api/cameras/${id}/`);
   return id;
 });
