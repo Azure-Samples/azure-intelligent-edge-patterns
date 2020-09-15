@@ -139,12 +139,12 @@ def deploy_worker(part_detection_id):
         requests.get("http://" + str(instance.inference_module.url) +
                      "/update_model",
                      params={"model_uri": instance.project.download_uri},
-                     timeout=3)
+                     timeout=10)
     else:
         requests.get("http://" + str(instance.inference_module.url) +
                      "/update_model",
                      params={"model_dir": instance.project.download_uri},
-                     timeout=3)
+                     timeout=10)
     requests.get("http://" + str(instance.inference_module.url) +
                  "/update_parts",
                  params={"parts": parts_to_detect},
