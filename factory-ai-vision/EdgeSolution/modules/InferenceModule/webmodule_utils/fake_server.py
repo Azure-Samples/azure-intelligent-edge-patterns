@@ -174,7 +174,6 @@ def update_iothub_parameters():
     print('  fpm', fpm)
 
     cam_id = request.args.get('cam_id')
-    logger.info("stream_manager.get_stream_by_id(%s)", cam_id)
     logger.info("s.update_iothub_parameters(%s, %s, %s)", is_send, threshold,
                 fpm)
     return 'ok'
@@ -188,15 +187,6 @@ def update_prob_threshold():
 
     print('[INFO] updaing prob_threshold to')
     print('  prob_threshold:', prob_threshold)
-
-    cam_id = request.args.get('cam_id')
-    s = stream_manager.get_stream_by_id(cam_id)
-    s.lock.acquire()
-    s.detection_success_num = 0
-    s.detection_unidentified_num = 0
-    s.detection_total = 0
-    s.detections = []
-    s.lock.release()
 
     return 'ok'
 
