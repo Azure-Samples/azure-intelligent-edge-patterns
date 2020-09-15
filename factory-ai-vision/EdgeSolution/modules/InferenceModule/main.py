@@ -29,24 +29,26 @@ from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
 #tracker.set_line(170/2, 680/2, 1487/2, 815/2)
 
 scenario = PartCounter()
-scenario.set_line(85, 340, 743, 407)
+scenario.set_line(185, 290, 793, 327)
 
-#scenario = DefeatDetection()
-#scenario.set_ok('Bottle - OK')
-#scenario.set_ng('Bottle - NG')
-#scenario.set_line(450, 0, 450, 800)
 
-#scenario= DefeatDetection()
-#scenario.set_ok('Box')
-#scenario.set_line(85, 340, 743, 407)
-
-#scenario = DangerZone()
-#scenario.set_zones([[85, 340, 743, 407]])
+scenario = DangerZone()
+scenario.set_zones([[85, 340, 743, 407]])
 #scenario.set_targets(['person'])
+scenario.set_targets(['Person'])
 
 #scenario = DangerZone()
 #scenario.set_zones([[85, 340, 743, 407]])
 #scenario.set_targets(['Box'])
+
+#scenario = DefeatDetection()
+#scenario.set_ok('Bottle - OK')
+#scenario.set_ng('Bottle - NG')
+#scenario.set_line(600, 0, 600, 800)
+
+#scenario= DefeatDetection()
+#scenario.set_ok('Box')
+#scenario.set_line(85, 340, 743, 407)
 
 
 SAMPLE_VIDEO    = './sample_video/video.mp4'
@@ -61,8 +63,8 @@ SCENARIO3_MODEL = 'scenario_models/3'
 DOWNLOADED_MODEL = 'model'
 
 ### CONFIGURATION <BEG> ###
-CAM_SOURCE = SCENARIO1_VIDEO
-MODEL      = SCENARIO1_MODEL
+CAM_SOURCE = SCENARIO2_VIDEO
+MODEL      = SCENARIO2_MODEL
 
 ### CONFIGURATION <END> ###
 
@@ -719,6 +721,7 @@ def video_feed():
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
                     detections.append(Detection(tag, x1, y1, x2, y2, prediction['probability']))
+                    #print(x1, y1, x2, y2)
 
                     if prediction['probability'] > onnx.threshold:
                         if onnx.has_aoi:

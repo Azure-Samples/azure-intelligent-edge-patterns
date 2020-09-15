@@ -61,9 +61,11 @@ class StreamManager(object):
         logger.info('new   : %s', stream_ids)
 
         to_delete = []
+        to_update = []
         for stream_id in origin_stream_ids:
             if stream_id not in stream_ids:
                 to_delete.append(stream_id)
+                to_update.append(stream_id)
 
         to_add = []
         for stream_id in stream_ids:
