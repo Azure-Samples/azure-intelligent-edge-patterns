@@ -149,7 +149,9 @@ class Stream():
 
     def get_scenario_metrics(self):
         if self.scenario:
-            self.scenario.get_metrics()
+            return self.scenario.get_metrics()
+        return []
+
 
     def restart_cam(self):
 
