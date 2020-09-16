@@ -13,7 +13,7 @@ import {
   IDropdownOption,
   Dropdown,
   Toggle,
-  DefaultButton,
+  ActionButton,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as R from 'ramda';
@@ -304,25 +304,26 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const updateBtnDisabled = !hasEdit;
 
   return (
-    <Stack tokens={{ childrenGap: 10 }}>
+    <Stack tokens={{ childrenGap: 10, padding: 20 }}>
+      <Text>Use areas of interest to section parts of the image into separate inference zones</Text>
       <Toggle label="Enable area of interest" checked={showAOI} onClick={onAOIToggleClick} inlineLabel />
-      <DefaultButton
+      <ActionButton
+        iconProps={{ iconName: 'Add' }}
         text="Create Box"
-        primary={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.AOI}
+        checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
           dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.AOI }));
         }}
-        style={{ padding: '0 5px' }}
       />
-      <DefaultButton
+      <ActionButton
+        iconProps={{ iconName: 'Add' }}
         text={videoAnnoShape === Shape.Polygon ? 'Press D to Finish' : 'Create Polygon'}
-        primary={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI}
+        checked={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
           dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.AOI }));
         }}
-        style={{ padding: '0 5px' }}
       />
       {[InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(inferenceMode) && (
         <>
@@ -332,9 +333,10 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
             onClick={onCountingLineToggleClick}
             inlineLabel
           />
-          <DefaultButton
+          <ActionButton
+            iconProps={{ iconName: 'Add' }}
             text="Create counting line"
-            primary={videoAnnoShape === Shape.Line && videoAnnoPurpose === Purpose.Counting}
+            checked={videoAnnoShape === Shape.Line && videoAnnoPurpose === Purpose.Counting}
             disabled={!showCountingLine}
             onClick={(): void => {
               dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Line, purpose: Purpose.Counting }));
@@ -350,9 +352,10 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
             onClick={onDangerZoneToggleClick}
             inlineLabel
           />
-          <DefaultButton
+          <ActionButton
+            iconProps={{ iconName: 'Add' }}
             text="Create danger zone"
-            primary={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
+            checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
             disabled={!showDangerZone}
             onClick={(): void => {
               dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.DangerZone }));
