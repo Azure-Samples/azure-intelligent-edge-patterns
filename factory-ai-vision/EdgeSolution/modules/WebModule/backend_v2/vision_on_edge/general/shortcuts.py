@@ -3,22 +3,15 @@
 """
 
 from django.shortcuts import Http404, get_object_or_404
-from rest_framework.exceptions import APIException
-
-
-class ObjectNotFoundError(APIException):
-    """ObjectNotFoundError.
-    """
-
-    status_code = 404
-    default_detail = {"status": "failed", "log": "Object not found"}
-    default_code = 'object_not_found_error'
-
+from rest_framework.exceptions import NotFound, APIException
 
 def drf_get_object_or_404(klass, *args, **kwargs):
     """drf_get_object_or_404.
     """
     try:
-        get_object_or_404(klass, *args, **kwargs)
+        return get_object_or_404(klass, *args, **kwargs)
     except Http404:
-        raise ObjectNotFoundError
+        raise NotFound(detail=(str(klass) + " args: " + str(args) +
+                               " kwargs: " + str(kwargs)))
+    except Exception as error:
+        raise APIException(detail=str(error))

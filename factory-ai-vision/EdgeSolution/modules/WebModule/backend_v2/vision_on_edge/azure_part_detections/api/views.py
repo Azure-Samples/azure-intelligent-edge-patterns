@@ -10,7 +10,7 @@ import requests
 from requests.exceptions import ReadTimeout
 
 from django.core.files.images import ImageFile
-from django.shortcuts import get_object_or_404
+
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -25,16 +25,17 @@ from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleOKSerializer)
+from ...general.shortcuts import drf_get_object_or_404
 from ...images.models import Image
 from ..exceptions import (PdConfigureWithoutCameras,
                           PdConfigureWithoutInferenceModule,
                           PdConfigureWithoutProject,
                           PdExportInfereceReadTimeout,
-                          PdInferenceModuleUnreachable,
+                          PdInferenceModuleUnreachable, PdObjectNotFound,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
                           PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
 from ..models import PartDetection, PDScenario
-from ..utils import deploy_all_helper, if_trained_then_deploy_helper
+from ..utils import if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
                           PDScenarioSerializer, UploadRelabelSerializer)
 
@@ -50,7 +51,6 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "inference_module": "inference_module",
-        "camera": "camera",
         "project": "project"
     }
 
@@ -72,7 +72,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         """update inference bounding box threshold.
         """
         queryset = self.get_queryset()
-        part_detection_obj = get_object_or_404(queryset, pk=pk)
+        part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
         prob_threshold = request.query_params.get("prob_threshold")
 
         try:
@@ -97,7 +97,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         """get the status of train job sent to custom vision
         """
         queryset = self.get_queryset()
-        part_detection_obj = get_object_or_404(queryset, pk=pk)
+        part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
         project_obj = part_detection_obj.project
         deploy_status_obj = DeployStatus.objects.get(
             part_detection=part_detection_obj)
@@ -170,7 +170,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         Train/Export/Deploy a part_detection_obj.
         """
         queryset = self.get_queryset()
-        instance = get_object_or_404(queryset, pk=pk)
+        instance = drf_get_object_or_404(queryset, pk=pk)
         # if project is demo, let training status go to ok and should go on.
         if not hasattr(instance, "inference_module") or getattr(
                 instance, "inference_module") is None:
@@ -200,13 +200,12 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             request:
         """
         queryset = self.get_queryset()
-        instance = get_object_or_404(queryset, pk=pk)
+        instance = drf_get_object_or_404(queryset, pk=pk)
         serializer = UploadRelabelSerializer(data=request.data)
 
         # FIXME: Inferenece should send part id instead of part_name
-        if serializer.is_valid(raise_exception=True):
-            pass
-        part = get_object_or_404(instance.parts,
+        serializer.is_valid(raise_exception=True)
+        part = drf_get_object_or_404(instance.parts,
                                  name=serializer.validated_data["part_name"])
 
         project_obj = instance.project
@@ -255,7 +254,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             img.name = str(timezone.now()) + ".jpg"
             img_obj = Image(
                 image=img,
-                camera=instance.camera,
+                camera=None,
                 part_id=part.id,
                 labels=serializer.validated_data["labels"],
                 confidence=serializer.validated_data["confidence"],
