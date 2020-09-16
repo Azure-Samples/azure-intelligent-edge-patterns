@@ -210,8 +210,8 @@ def update_cams():
     data = request.get_json()
     logger.info(data["cameras"])
     stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
-    n = stream_manager.get_stream_nums_danger()
-    frame_rate = onnx.get_frame_rate_by_number_of_streams(n)
+    n = stream_manager.get_streams_num_danger()
+    frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
 
     for cam in data["cameras"]:
         cam_type = cam['type']

@@ -65,8 +65,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def get_frame_rate(self):
         return self.frame_rate
-    
-
 
     def update_parts(self, parts):
         print('[INFO] Updating Parts ...', parts)
