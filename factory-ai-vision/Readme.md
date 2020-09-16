@@ -172,7 +172,7 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
     cd azure-intelligent-edge-patterns/factory-ai-vision
     
 - Edit the ```env-template``` file, you should see something like this
-
+```
     # For Azure Container Registry
     CONTAINER_REGISTRY_NAME=""
     CONTAINER_REGISTRY_USERNAME=""
@@ -188,6 +188,7 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
     SERVICE_NAME=""
     SERVICE_PRINCPAL_APP_ID=""
     SERVICE_PRINCIPAL_SECRET=""
+```
 
 - Please fill in your credentials and rename it as ```.env```, vscode will use this file to set the environment variables
 
