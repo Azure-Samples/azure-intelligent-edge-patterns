@@ -23,6 +23,7 @@ from ...azure_pd_deploy_status.models import DeployStatus
 from ...azure_projects.utils import TrainingManagerInstance
 from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
+from ...cameras.models import Camera
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleOKSerializer)
 from ...general.shortcuts import drf_get_object_or_404
@@ -31,7 +32,7 @@ from ..exceptions import (PdConfigureWithoutCameras,
                           PdConfigureWithoutInferenceModule,
                           PdConfigureWithoutProject,
                           PdExportInfereceReadTimeout,
-                          PdInferenceModuleUnreachable, PdObjectNotFound,
+                          PdInferenceModuleUnreachable,
                           PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
                           PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
 from ..models import PartDetection, PDScenario
@@ -205,8 +206,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         # FIXME: Inferenece should send part id instead of part_name
-        part = drf_get_object_or_404(instance.parts,
-                                 name=serializer.validated_data["part_name"])
+        part = drf_get_object_or_404(
+            instance.parts, name=serializer.validated_data["part_name"])
+        drf_get_object_or_404(instance.cameras,
+                              pk=serializer.validated_data["camera_id"])
 
         project_obj = instance.project
         if project_obj is None:
