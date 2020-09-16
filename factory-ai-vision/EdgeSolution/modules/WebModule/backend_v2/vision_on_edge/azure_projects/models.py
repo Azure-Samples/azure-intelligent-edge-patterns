@@ -106,6 +106,10 @@ class Project(models.Model):
             kwargs:
         """
         instance = kwargs["instance"]
+        update_fields = kwargs["update_fields"]
+        if update_fields == frozenset({'relabel_expired_time'}):
+            logger.info("Pass pre_save (relabel_keep_alive)")
+            return
         if instance.is_demo and instance.id:
             raise ProjectCannotChangeDemoError
         logger.info("Project pre_save start")

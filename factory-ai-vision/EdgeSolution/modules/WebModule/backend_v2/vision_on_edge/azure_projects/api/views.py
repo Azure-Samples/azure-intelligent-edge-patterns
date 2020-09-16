@@ -58,7 +58,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         instance = drf_get_object_or_404(queryset, pk=pk)
         instance.relabel_expired_time = timezone.now() + datetime.timedelta(
             seconds=PROJECT_RELABEL_TIME_THRESHOLD)
-        instance.save()
+        instance.save(update_fields=['relabel_expired_time'])
         serializer = ProjectSerializer(instance)
         return Response(serializer.data)
 
