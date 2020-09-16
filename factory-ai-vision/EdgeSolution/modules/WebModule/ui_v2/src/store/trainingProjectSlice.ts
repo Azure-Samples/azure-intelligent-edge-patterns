@@ -1,4 +1,6 @@
 import { createSlice, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
+import Axios from 'axios';
+
 import { State } from 'RootStateType';
 import {
   getInitialDemoState,
@@ -16,16 +18,27 @@ type TrainingProject = {
   isDemo: boolean;
 };
 
+const normalize = (e) => ({
+  id: e.id,
+  name: e.name,
+  customVisionId: e.customvision_id,
+  isDemo: e.is_demo,
+});
+
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
   'trainingSlice/get',
   async (isDemo): Promise<TrainingProject[]> => {
     const response = await getSliceApiByDemo('projects', isDemo);
-    return response.data.map((e) => ({
-      id: e.id,
-      name: e.name,
-      customVisionId: e.customvision_id,
-      isDemo: e.is_demo,
-    }));
+    return response.data.map(normalize);
+  },
+);
+
+export const createNewTrainingProject = createWrappedAsync<any, string, { state: State }>(
+  'trainingSlice/createNew',
+  async (name, { getState }) => {
+    const [nonDemoProject] = getState().trainingProject.nonDemo;
+    const response = await Axios.get(`/api/projects/${nonDemoProject}/reset_project?project_name=${name}`);
+    return normalize(response.data);
   },
 );
 
@@ -38,6 +51,7 @@ const slice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
+      .addCase(createNewTrainingProject.fulfilled, entityAdapter.upsertOne)
       .addMatcher(isCRDAction, insertDemoFields);
   },
 });

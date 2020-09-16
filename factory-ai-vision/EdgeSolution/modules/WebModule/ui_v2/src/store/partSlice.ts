@@ -2,7 +2,7 @@ import { createEntityAdapter, createSlice, createSelector } from '@reduxjs/toolk
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { selectNonDemoProject } from './trainingProjectSlice';
+import { selectNonDemoProject, createNewTrainingProject } from './trainingProjectSlice';
 import { pullCVProjects } from './actions';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
@@ -68,7 +68,8 @@ const slice = createSlice({
       .addCase(postPart.fulfilled, entityAdapter.upsertOne)
       .addCase(patchPart.fulfilled, entityAdapter.updateOne)
       .addCase(deletePart.fulfilled, entityAdapter.removeOne)
-      .addCase(pullCVProjects.fulfilled, () => entityAdapter.getInitialState());
+      .addCase(pullCVProjects.fulfilled, () => entityAdapter.getInitialState())
+      .addCase(createNewTrainingProject.fulfilled, () => entityAdapter.getInitialState());
   },
 });
 
