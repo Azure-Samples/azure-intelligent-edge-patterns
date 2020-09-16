@@ -393,7 +393,8 @@ class Stream():
                 self.last_drawn_img)
             # FIXME close this
             # self.scenario.draw_constraint(self.last_drawn_img)
-            # self.scenario.draw_objs(self.last_drawn_img)
+            if self.get_mode() == 'DD':
+                self.scenario.draw_objs(self.last_drawn_img)
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
@@ -458,18 +459,12 @@ class Stream():
         if self.has_aoi:
             draw_aoi(img, self.aoi_info)
 
-        for prediction in predictions:
-            if prediction['probability'] > self.threshold:
-                (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
-                draw_confidence_level(img, prediction)
-
-        #print('setting last drawn img', flush=True)
-        # if self.get_mode() == 'PC':
-        # if self.scenario:
-        #    print('current img', img)
-        #    self.scenario.draw_constraint(img)
-        #    self.scenario.draw_counter(img)
+        if self.get_mode() != 'DD':
+            for prediction in predictions:
+                if prediction['probability'] > self.threshold:
+                    (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
+                    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                    draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
 

@@ -20,23 +20,12 @@ class Tracker():
         #_detections = list([d.x1, d.x2, d.y1, d.y2, d.score] for d in detections)
         if len(detections) > 0:
             self.objs = self.tracker.update(np.array(detections))
+        else:
+            self.objs = self.tracker.update(np.empty((0, 5)))
 
     def get_objs(self):
         return self.objs
 
-    def draw_obj(self, img, detection, is_id=True, id_rect=True):
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 0.7
-        thickness = 2
-        detection.y1 + 20
-        x1, y1, x2, y2, oid = detection
-        if is_id:
-            img = cv2.putText(img, str(oid),
-                              (x, y), font, font_scale, (0, 255, 255), thickness)
-        if is_rect:
-            img = cv2.rectangle(
-                img, (x1, y1), (x2, y2), (0, 255, 255), 2)
-        return img
 
 class Line():
     def __init__(self, x1, y1, x2, y2):

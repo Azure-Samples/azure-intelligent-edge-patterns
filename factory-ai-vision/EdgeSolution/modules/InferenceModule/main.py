@@ -28,23 +28,22 @@ from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
 #tracker = Tracker()
 #tracker.set_line(170/2, 680/2, 1487/2, 815/2)
 
-scenario = PartCounter()
-scenario.set_line(185, 290, 793, 327)
+#scenario = PartCounter()
+#scenario.set_line(185, 290, 793, 327)
 
 
-scenario = DangerZone()
-scenario.set_zones([[85, 340, 743, 407]])
-#scenario.set_targets(['person'])
-scenario.set_targets(['Person'])
+#scenario = DangerZone()
+#scenario.set_zones([[85, 340, 743, 407]])
+#scenario.set_targets(['Person'])
 
 #scenario = DangerZone()
 #scenario.set_zones([[85, 340, 743, 407]])
 #scenario.set_targets(['Box'])
 
-#scenario = DefeatDetection()
-#scenario.set_ok('Bottle - OK')
-#scenario.set_ng('Bottle - NG')
-#scenario.set_line(600, 0, 600, 800)
+scenario = DefeatDetection()
+scenario.set_ok('Bottle - OK')
+scenario.set_ng('Bottle - NG')
+scenario.set_line(600, 0, 600, 800)
 
 #scenario= DefeatDetection()
 #scenario.set_ok('Box')
@@ -63,8 +62,8 @@ SCENARIO3_MODEL = 'scenario_models/3'
 DOWNLOADED_MODEL = 'model'
 
 ### CONFIGURATION <BEG> ###
-CAM_SOURCE = SCENARIO2_VIDEO
-MODEL      = SCENARIO2_MODEL
+CAM_SOURCE = SCENARIO3_VIDEO
+MODEL      = SCENARIO3_MODEL
 
 ### CONFIGURATION <END> ###
 
@@ -729,9 +728,9 @@ def video_feed():
                                 continue
 
 
-                        img = cv2.rectangle(
-                            img, (x1, y1), (x2, y2), (0, 0, 255), 1)
-                        img = draw_confidence_level(img, prediction)
+                        #img = cv2.rectangle(
+                        #    img, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                        #img = draw_confidence_level(img, prediction)
 
             #objs = mot_tracker.update(np.array(detections))
             scenario.update(detections)

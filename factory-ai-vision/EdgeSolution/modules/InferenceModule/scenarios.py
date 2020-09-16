@@ -101,7 +101,7 @@ class PartCounter(Scenario):
 
     def draw_objs(self, img, is_id=True, is_rect=True):
         for obj in self.tracker.get_objs():
-            font = cv2.FONT_HERSHEY_SIMPLEX
+            font = cv2.FONT_HERSHEY_DUPLEX
             font_scale = 0.7
             thickness = 1
             x1, y1, x2, y2, oid = obj
@@ -124,54 +124,40 @@ class PartCounter(Scenario):
 # support only 1 object with two types (ok/ng) now
 class DefeatDetection(Scenario):
 
-    def __init__(self, threshold=0.3, max_age=20, min_hits=5, iou_threshold=0.3):
+    def __init__(self, threshold=0.35, max_age=5, min_hits=1, iou_threshold=0.2):
         self.ok = None
         self.ok_name = 'ok'
         self.ng = None
-        self.ng_name = 'ok'
+        self.ng_name = 'ng'
         self.line = None
         self.threshold = threshold
-        #self.tracker = Tracker(
         self.tracker = Tracker(max_age=max_age, min_hits=min_hits, iou_threshold=iou_threshold)
         self.detected = {}
         self.ok_counter = 0
         self.ng_counter = 0
+        self.objs_with_labels = []
 
     def set_threshold(self):
         self.threshold = threshold
 
     def reset_metrics(self):
-        if self.ok:
-            self.ok.reset_metrics()
-        if self.ng:
-            self.ng.reset_metrics()
+        self.ok_counter = 0
+        self.ng_counter = 0
 
     def get_metrics(self):
         metrics = []
-        #if self.ok:
         metrics.append({'name': self.ok_name, 'count': self.ok_counter})
-        #if self.ng:
         metrics.append({'name': self.ng_name, 'count': self.ng_counter})
         return metrics
 
     def set_ok(self, name):
-        self.ok = PartCounter(threshold=0.5, max_age=5, min_hits=5, iou_threshold=0.3)
         self.ok_name = name
-        if self.line:
-            self.ok.set_line(self.line.x1, self.line.y1, self.line.x2,
-                             self.line.y2)
 
     def set_ng(self, name):
-        self.ng = PartCounter(threshold=0.5, max_age=5, min_hits=5, iou_threshold=0.3)
         self.ng_name = name
-        if self.line:
-            self.ng.set_line(self.line.x1, self.line.y1, self.line.x2,
-                             self.line.y2)
 
     def set_line(self, x1, y1, x2, y2):
         self.line = Line(x1, y1, x2, y2)
-        if self.ok: self.ok.set_line(x1, y1, x2, y2)
-        if self.ng: self.ng.set_line(x1, y1, x2, y2)
 
     def update(self, detections):
         detections = list(d for d in detections if d.score > self.threshold)
@@ -189,7 +175,7 @@ class DefeatDetection(Scenario):
                     else:
                         del detections[i+1]
                     Found = True
-                    print('delete', i)
+                    print('delete overlayed obj', i)
                     break
 
         _detections = list(
@@ -201,6 +187,7 @@ class DefeatDetection(Scenario):
         for obj in objs:
             x1, y1, x2, y2, oid = obj
             tag = self.ok_name
+            score = 0.0
             box1 = [x1, y1, x2, y2]
             got = False
             for d in detections:
@@ -208,21 +195,19 @@ class DefeatDetection(Scenario):
                 iou = compute_iou(box1, box2)
                 if iou > 0.3:
                     tag = d.tag
+                    score = d.score
                     break
 
             xc, yc = compute_center(x1, y1, x2, y2)
 
             if oid in self.detected:
+                self.detected[oid]['score'] = score
                 if tag == self.ng_name: self.detected[oid]['tag'] = tag
                 if self.detected[oid]['expired'] is False:
                     if self.line and (not self.line.is_same_side(
                             xc, yc, self.detected[oid]['xc'],
                             self.detected[oid]['yc'])):
                         self.detected[oid]['expired'] = True
-                        print('*** new object counted', flush=True)
-                        print('*** id: ', oid, flush=True)
-                        print('***', self.detected[oid], flush=True)
-                        print('*** (x, y)', xc, yc, flush=True)
                         if self.detected[oid]['tag'] == self.ok_name:
                             self.ok_counter += 1
                         elif self.detected[oid]['tag'] == self.ng_name:
@@ -232,54 +217,8 @@ class DefeatDetection(Scenario):
                         self.detected[oid]['xc'] = xc
                         self.detected[oid]['yc'] = yc
             else:
-                self.detected[oid] = {'xc': xc, 'yc': yc, 'expired': False, 'tag': tag}
+                self.detected[oid] = {'xc': xc, 'yc': yc, 'expired': False, 'tag': tag, 'score': score}
 
-
-    def update2(self, detections):
-        #print(detections)
-        #print('== update begin ==')
-        #for d in detections:
-        #    print(d)
-        detections = list(d for d in detections if d.score > self.threshold)
-        #for d in detections:
-        #    print(d)
-        #print(detections)
-        if self.ok and self.ng:
-            found = True
-            while found:
-                found = False
-                if len(detections) < 2: break
-                for i in range(len(detections)-1):
-                    box1 = [detections[i].x1, detections[i].y1, detections[i].x2, detections[i].y2]
-                    box2 = [detections[i+1].x1, detections[i+1].y1, detections[i+1].x2, detections[i+1].y2]
-                    if iou(box1, box2) > 0.1:
-                        if detections[i].score < detections[i+1].score:
-                            del detections[i]
-                        else:
-                            del detections[i+1]
-                        Found = True
-                        print('delete', i)
-                        break
-            #print('aft')
-            #for d in detections:
-            #    print(d)
-
-            ok_detections = list(
-                d for d in detections if d.tag == self.ok_name)
-            ng_detections = list(
-                d for d in detections if d.tag == self.ng_name)
-
-        elif self.ok:
-            ok_detections = list(
-                d for d in detections if d.tag == self.ok_name)
-            if len(ok_detections) > 0:
-                self.ok.update(ok_detections)
-
-        elif self.ng:
-            ng_detections = list(
-                d for d in detections if d.tag == self.ng_name)
-            if len(ng_detections) > 0:
-                self.ng.update(ng_detections)
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
@@ -287,14 +226,7 @@ class DefeatDetection(Scenario):
         thickness = 1
         x = int(max(0, img.shape[1] - 200))
         y = int(min(30, img.shape[0]))
-        #if self.ok:
-        #    img = cv2.putText(img, self.ok_name + ': ' + str(self.ok.counter),
-        #                      (x, y), font, font_scale, (0, 255, 255),
-        #                      thickness)
-        #if self.ng:
-        #    img = cv2.putText(img, self.ng_name + ': ' + str(self.ng.counter),
-        #                      (x, y + 15), font, font_scale, (0, 255, 255),
-        #                      thickness)
+
         img = cv2.putText(img, self.ok_name + ': ' + str(self.ok_counter),
                             (x, y), font, font_scale, (0, 255, 255),
                             thickness)
@@ -314,10 +246,10 @@ class DefeatDetection(Scenario):
                            (int(self.line.x2), int(self.line.y2)),
                            (0, 255, 255), thickness)
 
-    def draw_objs(self, img, is_id=True, is_rect=True, is_tag=True):
+    def draw_objs(self, img, is_id=False, is_rect=True, is_tag=True):
         for obj in self.tracker.get_objs():
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.7
+            font = cv2.FONT_HERSHEY_DUPLEX
+            font_scale = 0.5
             thickness = 1
             x1, y1, x2, y2, oid = obj
             x1 = int(x1)
@@ -328,11 +260,21 @@ class DefeatDetection(Scenario):
             x = x1
             y = y1 - 5
             if is_id:
+                #img = cv2.putText(img, str(oid), (x, y), font, font_scale,
+                #                  (0, 255, 255), thickness)
                 img = cv2.putText(img, str(oid), (x, y), font, font_scale,
-                                  (0, 255, 255), thickness)
+                                  (0, 0, 255), thickness)
+            if is_tag:
+                tag = self.detected[oid]['tag']
+                score = self.detected[oid]['score']
+                text = tag + ' ( ' + str(int(1000*score)/10) + '% )'
+                img = cv2.putText(img, text, (x, y), font, font_scale,
+                                  (0, 0, 255), thickness)
             if is_rect:
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255),
+                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255),
                                     thickness)
+                #img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255),
+                #                    thickness)
         return img
 
 
@@ -374,7 +316,6 @@ class DangerZone(Scenario):
         detections = list([d.x1, d.y1, d.x2, d.y2, d.score]
                           for d in detections
                           if d.tag in self.targets)
-        if len(detections) == 0: return
 
         self.tracker.update(detections)
         objs = self.tracker.get_objs()
@@ -427,7 +368,7 @@ class DangerZone(Scenario):
 
     def draw_objs(self, img, is_id=True, is_rect=True):
         for obj in self.tracker.get_objs():
-            font = cv2.FONT_HERSHEY_SIMPLEX
+            font = cv2.FONT_HERSHEY_DUPLEX
             font_scale = 0.7
             thickness = 1
             x1, y1, x2, y2, oid = obj
