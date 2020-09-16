@@ -29,16 +29,17 @@ const normalize = (e) => ({
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
   'trainingSlice/get',
   async (isDemo): Promise<TrainingProject[]> => {
-    const response = await getSliceApiByDemo('projects', isDemo);
+    // FIXME Make it better!
+    const response = await getSliceApiByDemo('projects', true);
     return response.data.map(normalize);
   },
-  {
-    condition: (isDemo, { getState }) => {
-      if (isDemo && getState().trainingProject.isDemo.length) return false;
-      if (!isDemo && getState().trainingProject.nonDemo.length) return false;
-      return true;
-    },
-  },
+  // {
+  //   condition: (isDemo, { getState }) => {
+  //     if (isDemo && getState().trainingProject.isDemo.length) return false;
+  //     if (!isDemo && getState().trainingProject.nonDemo.length) return false;
+  //     return true;
+  //   },
+  // },
 );
 
 export const refreshTrainingProject = createWrappedAsync(
