@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
           sender=Project,
           dispatch_uid="delete_part_on_project_change")
 def azure_project_change_handler(**kwargs):
-    """azure_setting_change_handler.
+    """azure_project_change_handler.
 
     If project changed, remove all part.
 
