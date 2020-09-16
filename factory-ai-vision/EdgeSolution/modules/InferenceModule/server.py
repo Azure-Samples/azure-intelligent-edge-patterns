@@ -275,8 +275,9 @@ def update_send_video_to_cloud():
         return 'unknown send_video_to_cloud params'
 
     # TODO: Change something here
-    for s in stream_manager.get_streams():
-        s.model.send_video_to_cloud = send_video_to_cloud
+    onnx.send_video_to_cloud = send_video_to_cloud
+    # for s in stream_manager.get_streams():
+    #     s.model.send_video_to_cloud = send_video_to_cloud
     return 'ok'
 
 
