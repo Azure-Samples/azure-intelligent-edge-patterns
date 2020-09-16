@@ -2,7 +2,6 @@ import { createAction, Update } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { selectNonDemoProject, getTrainingProject } from './trainingProjectSlice';
 import { isAOIShape, isCountingLine, isDangerZone } from './shared/VideoAnnoUtil';
 import { Image } from './type';
 import { createWrappedAsync } from './shared/createWrappedAsync';
@@ -98,24 +97,6 @@ export const updateCameraArea = createWrappedAsync<any, number, { state: State }
       lines: JSON.stringify({ useCountingLine, countingLines }),
       danger_zones: JSON.stringify({ useDangerZone, dangerZones }),
     });
-  },
-);
-
-export const pullCVProjects = createWrappedAsync<
-  any,
-  { selectedCustomvisionId: string; loadFullImages: boolean },
-  { state: State }
->(
-  'trainingProject/pullCVProjects',
-  async ({ selectedCustomvisionId, loadFullImages }, { getState, dispatch }) => {
-    const trainingProjectId = selectNonDemoProject(getState())[0].id;
-    await Axios.get(
-      `/api/projects/${trainingProjectId}/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
-        !loadFullImages,
-      )}`,
-    );
-    // Get training project because the origin project name will be mutate
-    dispatch(getTrainingProject(false));
   },
 );
 

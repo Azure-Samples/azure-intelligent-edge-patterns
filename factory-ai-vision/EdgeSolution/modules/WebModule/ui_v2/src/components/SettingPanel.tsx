@@ -37,9 +37,12 @@ import {
   thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
-import { pullCVProjects } from '../store/actions';
 import { dummyFunction } from '../utils/dummyFunction';
-import { selectNonDemoProject, createNewTrainingProject } from '../store/trainingProjectSlice';
+import {
+  selectNonDemoProject,
+  createNewTrainingProject,
+  pullCVProjects,
+} from '../store/trainingProjectSlice';
 import { CreateByNameDialog } from './CreateByNameDialog';
 
 type SettingPanelProps = {

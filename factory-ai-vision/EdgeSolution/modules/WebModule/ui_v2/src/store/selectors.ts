@@ -1,8 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { selectAllImages } from './imageSlice';
 import { selectAllAnno } from './annotationSlice';
-import { selectPartEntities } from './partSlice';
+import { selectPartEntities, selectAllParts } from './partSlice';
 import { Item as ImageListItem } from '../components/ImageList';
+import { selectNonDemoProject } from './trainingProjectSlice';
 
 const selectImagesByRelabel = (isRelabel) =>
   createSelector(selectAllImages, (images) =>
@@ -66,3 +67,8 @@ export const selectImageItemByRelabel = () =>
         },
       ),
   );
+
+export const selectNonDemoPart = createSelector(
+  [selectAllParts, selectNonDemoProject],
+  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
+);
