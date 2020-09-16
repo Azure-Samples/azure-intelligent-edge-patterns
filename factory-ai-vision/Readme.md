@@ -35,7 +35,7 @@ or
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
 
-![Communication patterns between modules](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/azure%20stack%20flow.png)
+![Communication patterns between modules](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/factory%20with%20LVA.png)
 
  
 ## Get Started 
@@ -46,42 +46,8 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
   4.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
 
 # Vision on Edge Installer
-## Option 1: Automated installation with Vision on Edge Installer
 
-### Prerequisites
-To install the solution on a PC running Windows, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.cmd script.
-
-To install the solution on a Mac, or a PC running Linux, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.sh script.
-
-Before installation, please make sure you have the following: 
-   1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
-   2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
-### Get Started:
-Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip) 
-
-For Windows: 
-   1.	Click and download the [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip), and unzip the zipped files. It contains three files:
-   a. deploy-custom-vision-arm.json
-   b. deployment.amd64.json 
-   c. factory-ai-vision-install.cmd
-   2.	Open the factory-ai-vision-install.cmd file and start running the installation. 
-      It will open the terminal windows and ask for your Azure subscription. 
-   3.	Choose your subscription
-   4.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
-   5.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
-   6.   This solution takes 5-10 mins to install based on your internet speed, After 5-10 mins open your browser and connect to ```http://<your-edge-ip:8080>.
-
-For Mac:
-   1.	Open terminal 
-   2.	Locate the file, [unzip bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip)
-   3.	excute ```bash factory-ai-vision-install.sh```
-   4.	It will direct you to azure subscription login page
-   5.	Choose your subscription 
-   6.	Choose whether if you are using existing Custom Vision service or creating a new one. Then input your endpoint and key information. 
-   7.	Choose where is your targeted edge device and confirm whether your device (GPU or CPU) 
-   8.   This solution takes 5-10 mins to install based on your internet speed, After 5-10 mins open your browser and connect to ```http://<your-edge-ip:8080>.
-
-## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
+## Manual installation building a docker container and deploy by Visual Studio Code
 
 ### Prerequisites
 
