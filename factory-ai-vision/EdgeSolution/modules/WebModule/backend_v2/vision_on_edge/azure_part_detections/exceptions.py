@@ -2,10 +2,15 @@
 """App exceptions.
 """
 
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, NotFound
 
 
 # pylint: disable=line-too-long
+class PdObjectNotFound(NotFound):
+    status_code = 404
+    default_detail = "Part Detection object not found."
+    default_code = "pd_object_not_found"
+
 class PdProbThresholdNotInteger(APIException):
     status_code = 400
     default_detail = "Prob_threshold must be given as Integer."

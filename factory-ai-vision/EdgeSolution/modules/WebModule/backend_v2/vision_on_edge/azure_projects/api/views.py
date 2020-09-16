@@ -11,7 +11,6 @@ from distutils.util import strtobool
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -21,6 +20,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ...general.shortcuts import drf_get_object_or_404
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleOKSerializer)
 from ..exceptions import ProjectWithoutSettingError
@@ -55,11 +55,11 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         """relabel_keep_alive.
         """
         queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, pk=pk)
-        obj.relabel_expired_time = timezone.now() + datetime.timedelta(
+        instance = drf_get_object_or_404(queryset, pk=pk)
+        instance.relabel_expired_time = timezone.now() + datetime.timedelta(
             seconds=PROJECT_RELABEL_TIME_THRESHOLD)
-        obj.save()
-        serializer = ProjectSerializer(obj)
+        instance.save()
+        serializer = ProjectSerializer(instance)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -73,7 +73,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         """train_performance.
         """
         queryset = self.get_queryset()
-        project_obj = get_object_or_404(queryset, pk=pk)
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
         if project_obj.setting is None:
             raise ProjectWithoutSettingError
         if not project_obj.setting.is_trainer_valid:
@@ -161,7 +161,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         """
 
         queryset = self.get_queryset()
-        project_obj = get_object_or_404(queryset, pk=pk)
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
         project_name = request.query_params.get("project_name") or None
         try:
             project_obj.reset(name=project_name)
@@ -192,7 +192,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         """pull_cv_project.
         """
         queryset = self.get_queryset()
-        project_obj = get_object_or_404(queryset, pk=pk)
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
 
         # Check Customvision Project id
         customvision_project_id = request.query_params.get(
@@ -211,13 +211,17 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                                is_partial=is_partial)
         return Response({"status": "ok"})
 
-    @swagger_auto_schema(operation_summary='Train project in background.')
+    @swagger_auto_schema(operation_summary='Train project in background.',
+                         responses={
+                             '200': SimpleOKSerializer,
+                             '400': MSStyleErrorResponseSerializer
+                         })
     @action(detail=True, methods=["get"])
     def train(self, request, pk=None) -> Response:
         """train.
         """
         queryset = self.get_queryset()
-        project_obj = get_object_or_404(queryset, pk=pk)
+        drf_get_object_or_404(queryset, pk=pk)
         TrainingManagerInstance.add(project_id=pk)
         return Response({'status': 'ok'})
 
