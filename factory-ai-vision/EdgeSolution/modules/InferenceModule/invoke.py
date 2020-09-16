@@ -10,6 +10,7 @@ from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
 import os
 import threading
+import sys
 
 from config import IOTHUB_CONNECTION_STRING
 

@@ -210,10 +210,8 @@ def update_cams():
     data = request.get_json()
     logger.info(data["cameras"])
     stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
-    if onnx.is_gpu:
-        frameRate = 30
-    else:
-        frameRate = 10
+    n = stream_manager.get_stream_nums_danger()
+    frame_rate = onnx.get_frame_rate_by_number_of_streams(n)
 
     for cam in data["cameras"]:
         cam_type = cam['type']
@@ -242,7 +240,7 @@ def update_cams():
         s = stream_manager.get_stream_by_id(cam_id)
         #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
-        s.update_cam(cam_type, cam_source, frameRate, cam_id, False, [],
+        s.update_cam(cam_type, cam_source, frame_rate, cam_id, False, [],
                      onnx.detection_mode, line_info, zone_info)
 
     return 'ok'

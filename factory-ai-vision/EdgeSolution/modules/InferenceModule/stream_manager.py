@@ -47,6 +47,12 @@ class StreamManager(object):
         self.mutex.release()
         return streams
 
+    def get_streams_num_danger(self):
+        return len(self.streams)
+
+    def get_streams_danger(self):
+        streams = list(self.streams.values())
+        return streams
 
     def update_streams(self, stream_ids):
         self.mutex.acquire()
@@ -127,6 +133,7 @@ if __name__ == '__main__':
         def __init__(self, stream_id, model, sender):
             self.model = model
             self.sender = sender
+
         def delete(self):
             pass
 
