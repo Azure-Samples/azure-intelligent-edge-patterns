@@ -56,7 +56,8 @@ class GraphManager:
             return res.as_dict()
         except:
             mutex.release()
-            print("[ERROR] Failed to invoke direct method:", sys.exc_info(), flush=True)
+            print("[ERROR] Failed to invoke direct method:",
+                  sys.exc_info(), flush=True)
             return {'error': 'failed to invoke direct method'}
 
     def invoke_graph_topology_get(self, name):
@@ -146,12 +147,13 @@ class GraphManager:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
-    def invoke_graph_grpc_instance_set(self, name, rtspUrl):
+    def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate):
         properties = {
             "topologyName": "InferencingWithGrpcExtension",
             "description": "Sample graph description",
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
+                {"name": "frameRate", "value": frameRate},
                 {"name": "grpcExtensionAddress",
                     "value": "tcp://InferenceModule:44000"},
                 {"name": "frameHeight", "value": "540"},

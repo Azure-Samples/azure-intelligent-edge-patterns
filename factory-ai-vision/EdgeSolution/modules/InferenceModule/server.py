@@ -210,6 +210,7 @@ def update_cams():
     data = request.get_json()
     logger.info(data["cameras"])
     stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
+    frameRate = 30
     for cam in data["cameras"]:
         cam_type = cam['type']
         cam_source = cam['source']
@@ -237,7 +238,7 @@ def update_cams():
         s = stream_manager.get_stream_by_id(cam_id)
         #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
-        s.update_cam(cam_type, cam_source, cam_id, False, [],
+        s.update_cam(cam_type, cam_source, frameRate, cam_id, False, [],
                      onnx.detection_mode, line_info, zone_info)
 
     return 'ok'

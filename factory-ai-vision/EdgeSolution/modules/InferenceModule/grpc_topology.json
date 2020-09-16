@@ -85,7 +85,14 @@
                 "type": "String",
                 "description": "input name for hub source",
                 "default": "recordingTrigger"
+            },
+            {
+                "name": "frameRate",
+                "type": "String",
+                "description": "input maximumFPs",
+                "default": "10"
             }
+
         ],
         "sources": [{
                 "@type": "#Microsoft.Media.MediaGraphRtspSource",
@@ -124,7 +131,7 @@
             {
                 "@type": "#Microsoft.Media.MediaGraphFrameRateFilterProcessor",
                 "name": "frameRateFilter",
-                "maximumFps": "30.0",
+                "maximumFps": "${frameRate}",
                 "inputs": [{
                     "nodeName": "rtspSource"
                 }]

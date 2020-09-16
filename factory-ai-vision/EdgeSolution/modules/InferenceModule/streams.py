@@ -52,6 +52,7 @@ class Stream():
 
         self.cam_type = cam_type
         self.cam_source = None
+        self.frameRate = 30
         #self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
         self.cam_is_alive = True
 
@@ -110,8 +111,8 @@ class Stream():
     def _stop(self):
         gm.invoke_graph_instance_deactivate(self.cam_id)
 
-    def _set(self, rtspUrl):
-        gm.invoke_graph_grpc_instance_set(self.cam_id, rtspUrl)
+    def _set(self, rtspUrl, frameRate):
+        gm.invoke_graph_grpc_instance_set(self.cam_id, rtspUrl, frameRate)
 
     def _start(self):
         gm.invoke_graph_instance_activate(self.cam_id)
@@ -152,7 +153,6 @@ class Stream():
             return self.scenario.get_metrics()
         return []
 
-
     def restart_cam(self):
 
         print('[INFO] Restarting Cam', flush=True)
@@ -165,14 +165,15 @@ class Stream():
         #self.cam = cam
         # self.mutex.release()
 
-    def update_cam(self, cam_type, cam_source, cam_id, has_aoi, aoi_info, scenario_type=None, line_info=None, zone_info=None):
+    def update_cam(self, cam_type, cam_source, frameRate, cam_id, has_aoi, aoi_info, scenario_type=None, line_info=None, zone_info=None):
         print('[INFO] Updating Cam ...', flush=True)
 
         # if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
-        if self.cam_source != cam_source:
+        if self.cam_source != cam_source or round(self.frameRate) != round(frameRate):
             self.cam_source = cam_source
-            self._update_instance(normalize_rtsp(cam_source))
+            self.frameRate = frameRate
+            self._update_instance(normalize_rtsp(cam_source), str(frameRate))
 
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
@@ -282,7 +283,7 @@ class Stream():
                 elif oldest_detection == DETECTION_TYPE_SUCCESS:
                     self.detection_success_num -= 1
 
-                self.detections.append(detection)
+                self.detections.append(detection_type)
                 if detection_type == DETECTION_TYPE_UNIDENTIFIED:
                     self.detection_unidentified_num += 1
                 elif detection_type == DETECTION_TYPE_SUCCESS:
@@ -297,12 +298,12 @@ class Stream():
 
         self.mutex.release()
 
-    def _update_instance(self, rtspUrl):
+    def _update_instance(self, rtspUrl, frameRate):
         self._stop()
-        self._set(rtspUrl)
+        self._set(rtspUrl, frameRate)
         self._start()
-        logging.info("Instance {0} updated, rtsp = {1}".format(
-            self.cam_id, rtspUrl))
+        logging.info("Instance {0} updated, rtsp = {1}, frameRate = {2}".format(
+            self.cam_id, rtspUrl, frameRate))
 
     def update_retrain_parameters(self, is_retrain, confidence_min, confidence_max, max_images):
         self.is_retrain = is_retrain
@@ -419,7 +420,7 @@ class Stream():
                     jpg = cv2.imencode('.jpg', img)[1].tobytes()
 
                     send_retrain_image_to_webmodule(
-                        jpg, tag, labels, confidence)
+                        jpg, tag, labels, confidence, self.cam_id)
 
                     self.last_upload_time = time.time()
                     break
@@ -578,7 +579,7 @@ def send_message_to_lva():
         pass
 
 
-def send_retrain_image_to_webmodule(jpg, tag, labels, confidence):
+def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
     print('[INFO] Sending Image to relabeling', tag, flush=True)
     try:
         # requests.post('http://'+web_module_url()+'/api/relabel', data={
@@ -587,7 +588,8 @@ def send_retrain_image_to_webmodule(jpg, tag, labels, confidence):
             'labels': labels,
             'part_name': tag,
             'is_relabel': True,
-            'img': base64.b64encode(jpg)
+            'img': base64.b64encode(jpg),
+            'camera_id': cam_id
         })
     except:
         print(
