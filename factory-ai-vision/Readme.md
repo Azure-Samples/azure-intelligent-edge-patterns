@@ -141,3 +141,72 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
 
+# New Version Build From Source
+
+### Prerequisite
+- An active Azure subscription
+- Azure resources deployed in the Azure subscription
+    
+    a. Azure IoT Hub
+    
+    b. Azure Media Services
+    
+    c. Azure container registry
+
+- A GPU Linux edge device with IoT Edge runtime (with port 8080 and 5000 opened)
+- [Visual Studio](https://code.visualstudio.com/) Code on your development machine with following extensions
+    
+    a. [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools)
+    
+    b. [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+
+- [Docker](https://docs.docker.com/engine/install/) on your development machine
+
+### Get the source code
+- Clone yadavm_factoryai_lpr branch 
+    
+    git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git --single-branch --branch yadavm_factoryai_lpr
+    
+- Go to factoryai directory and open your vscode
+
+    cd azure-intelligent-edge-patterns/factory-ai-vision
+    
+- Edit the ```env-template``` file, you should see something like this
+
+    # For Azure Container Registry
+    CONTAINER_REGISTRY_NAME=""
+    CONTAINER_REGISTRY_USERNAME=""
+    CONTAINER_REGISTRY_PASSWORD=""
+
+    # For Azure IoT Hub
+    IOTHUB_CONNECTION_STRING=""
+
+    # FOR Media Services
+    SUBSCRIPTION_ID=""
+    RESOURCE_GROUP=""
+    TENANT_ID=""
+    SERVICE_NAME=""
+    SERVICE_PRINCPAL_APP_ID=""
+    SERVICE_PRINCIPAL_SECRET=""
+
+- Please fill in your credentials and rename it as ```.env```, vscode will use this file to set the environment variables
+
+- Find ```deployment.gpu.template.json``` under ```EdgeSolution``` direcotyr in vscode, right click on it, choose "Build and Push Iot Edge Solution". It'll start to build the container, you should expect to wait for more than 10 mins if it's the first time you build the container.
+
+- Find  ```deployment.gpu.amd64.json``` under ```EdgeSolution/config``` directory in vscode, right click on it, choose "Create Deployment to Single Device", select your device to deploy, you should expect the edge will pull the container for more than 10 mins if it's the first time.
+
+- Go to your device (via ssh), use `docker ps` to check whether all the modules are pulled and running. You should see 6 modules running including:
+
+    a. visionwebmodule
+    
+    b. inferencemodule
+    
+    c. rtspsimmodule
+    
+    d. webdbmodule
+    
+    e. azureiotedge-hub
+    
+    f. azureiotedge-agent
+    
+- Please wait until all 6 are running. Open your browser and connect http://YOUR_IP:8080
