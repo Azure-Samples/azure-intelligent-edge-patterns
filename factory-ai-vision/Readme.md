@@ -35,7 +35,7 @@ or
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
 
-![Communication patterns between modules](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/factory%20with%20LVA.png)
+![Communication patterns between modules](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
 
  
 ## Get Started 
