@@ -55,7 +55,7 @@ class PdRelabelConfidenceOutOfRange(APIException):
 
 class PdRelabelImageFull(APIException):
     status_code = 400
-    default_detail = "Relabel Image reach limit."
+    default_detail = "Relabel Image reach limit and someone is relabeling."
     default_code = "pd_relabel_image_full"
 
 
