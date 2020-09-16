@@ -61,7 +61,7 @@ class VideoFeed():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + self.buf[1] +
                        b'\r\n')
-            time.sleep(0.1)
+            time.sleep(0.03)
 
     def update_keep_alive(self):
         """update_keep_alive.
