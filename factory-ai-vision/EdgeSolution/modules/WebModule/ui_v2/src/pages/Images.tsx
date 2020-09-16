@@ -10,6 +10,9 @@ import {
   MessageBar,
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
+import Axios from 'axios';
+
+import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
@@ -17,6 +20,7 @@ import { ImageList } from '../components/ImageList';
 import { selectImageItemByUntagged, selectImageItemByRelabel } from '../store/selectors';
 import { getParts } from '../store/partSlice';
 import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
+import { useInterval } from '../hooks/useInterval';
 
 const theme = getTheme();
 
@@ -29,6 +33,7 @@ export const Images: React.FC = () => {
   const labeledImages = useSelector(selectImageItemByUntagged(false));
   const unlabeledImages = useSelector(selectImageItemByUntagged(true));
   const relabelImages = useSelector(selectImageItemByRelabel());
+  const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
 
   const onUpload = () => {
     fileInputRef.current.click();
@@ -69,6 +74,13 @@ export const Images: React.FC = () => {
     // For image list items
     dispatch(getParts());
   }, [dispatch]);
+
+  useInterval(
+    () => {
+      Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
+    },
+    relabelImages.length > 0 ? 3000 : null,
+  );
 
   return (
     <>
