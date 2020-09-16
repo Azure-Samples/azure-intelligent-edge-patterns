@@ -86,11 +86,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     setProjectData(initialProjectData);
   }, [initialProjectData]);
 
-  const cameraOptions = useSelector(
-    cameraOptionsSelectorInConfig(
-      isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
-    ),
-  );
+  const cameraOptions = useSelector(cameraOptionsSelectorInConfig(projectData.trainingProject));
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
   const trainingProjectOptions = useSelector(
     trainingProjectOptionsSelector(
@@ -109,6 +105,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     if (key === 'trainingProject') {
       if (!demoProject.includes(cloneProject.trainingProject)) cloneProject.needRetraining = false;
       cloneProject.parts = [];
+      cloneProject.cameras = [];
     }
     (cloneProject as any)[key] = value;
     setProjectData(cloneProject);
