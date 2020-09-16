@@ -26,37 +26,37 @@ class PdProbThresholdOutOfRange(APIException):
 class PdConfigureWithoutInferenceModule(APIException):
     status_code = 400
     default_detail = "Please set inference module before configure/deploy."
-    dedefault_code = "pd_configure_without_inference_module"
+    default_code = "pd_configure_without_inference_module"
 
 
 class PdConfigureWithoutProject(APIException):
     status_code = 400
     default_detail = "Please set project/model before configure/deploy."
-    dedefault_code = "pd_configure_without_project"
+    default_code = "pd_configure_without_project"
 
 
 class PdConfigureWithoutCameras(APIException):
     status_code = 400
     default_detail = "Please set cameras before configure/deploy."
-    dedefault_code = "pd_configure_without_cameras"
+    default_code = "pd_configure_without_cameras"
 
 
 class PdInferenceModuleUnreachable(APIException):
     status_code = 503
     default_detail = "Inference module url unreachable."
-    dedefault_code = "pd_inference_module_unreachable"
+    default_code = "pd_inference_module_unreachable"
 
 
 class PdRelabelConfidenceOutOfRange(APIException):
     status_code = 400
     default_detail = "Confidence out of range."
-    dedefault_code = "pd_relabel_confidence_out_of_range"
+    default_code = "pd_relabel_confidence_out_of_range"
 
 
 class PdRelabelImageFull(APIException):
     status_code = 400
     default_detail = "Relabel Image reach limit."
-    dedefault_code = "pd_relabel_image_full"
+    default_code = "pd_relabel_image_full"
 
 
 class PdDeployToInfereceError(APIException):
