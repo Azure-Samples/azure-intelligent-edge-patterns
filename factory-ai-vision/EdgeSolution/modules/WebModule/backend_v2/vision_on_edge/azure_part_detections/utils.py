@@ -93,6 +93,7 @@ def deploy_worker(part_detection_id):
     Args:
         part_detection_obj: Part Detection Objects
     """
+    REQUEST_TIMEOUT = 60
     instance = PartDetection.objects.get(pk=part_detection_id)
     if not instance.has_configured:
         logger.error("This PartDetection is not configured")
@@ -117,22 +118,22 @@ def deploy_worker(part_detection_id):
                  params={
                      "part_detection_id": instance.id,
                  },
-                 timeout=3)
+                 timeout=REQUEST_TIMEOUT)
     requests.get("http://" + str(instance.inference_module.url) +
                  "/update_part_detection_mode",
                  params={
                      "part_detection_mode": instance.inference_mode,
                  },
-                 timeout=3)
+                 timeout=REQUEST_TIMEOUT)
     requests.get("http://" + str(instance.inference_module.url) +
                  "/update_send_video_to_cloud",
                  params={
                      "send_video_to_cloud": instance.send_video_to_cloud,
                  },
-                 timeout=3)
+                 timeout=REQUEST_TIMEOUT)
 
     # =====================================================
-    # 1. Update model                                  ===
+    # 2. Update model                                  ===
     # =====================================================
     if not instance.project:
         pass
@@ -140,16 +141,16 @@ def deploy_worker(part_detection_id):
         requests.get("http://" + str(instance.inference_module.url) +
                      "/update_model",
                      params={"model_uri": instance.project.download_uri},
-                     timeout=10)
+                     timeout=REQUEST_TIMEOUT)
     else:
         requests.get("http://" + str(instance.inference_module.url) +
                      "/update_model",
                      params={"model_dir": instance.project.download_uri},
-                     timeout=10)
+                     timeout=REQUEST_TIMEOUT)
     requests.get("http://" + str(instance.inference_module.url) +
                  "/update_parts",
                  params={"parts": parts_to_detect},
-                 timeout=3)
+                 timeout=REQUEST_TIMEOUT)
     requests.get("http://" + instance.inference_module.url +
                  "/update_retrain_parameters",
                  params={
@@ -158,7 +159,7 @@ def deploy_worker(part_detection_id):
                      "confidence_max": confidence_max,
                      "max_images": max_images,
                  },
-                 timeout=3)
+                 timeout=REQUEST_TIMEOUT)
     requests.get("http://" + instance.inference_module.url +
                  "/update_iothub_parameters",
                  params={
@@ -166,10 +167,10 @@ def deploy_worker(part_detection_id):
                      "threshold": metrics_accuracy_threshold,
                      "fpm": metrics_frame_per_minutes,
                  },
-                 timeout=3)
+                 timeout=REQUEST_TIMEOUT)
 
     # =====================================================
-    # 2. Update cam                                     ===
+    # 3. Update cams                                    ===
     # =====================================================
     logger.info("Update Cam!!!")
     cameras = instance.cameras.all()
@@ -198,15 +199,16 @@ def deploy_worker(part_detection_id):
     requests.post(url="http://" + instance.inference_module.url +
                   "/update_cams",
                   json=json.loads(json.dumps(serializer.validated_data)),
-                  timeout=3)
+                  timeout=REQUEST_TIMEOUT)
     # =====================================================
-    # 3. Update prob_threshold                          ===
+    # 4. Update prob_threshold                          ===
     # =====================================================
     requests.get(
         "http://" + instance.inference_module.url + "/update_prob_threshold",
         params={
             "prob_threshold": instance.prob_threshold,
         },
+        timeout=REQUEST_TIMEOUT
     )
 
 
