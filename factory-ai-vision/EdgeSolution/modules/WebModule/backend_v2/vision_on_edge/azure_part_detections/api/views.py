@@ -202,9 +202,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         instance = drf_get_object_or_404(queryset, pk=pk)
         serializer = UploadRelabelSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         # FIXME: Inferenece should send part id instead of part_name
-        serializer.is_valid(raise_exception=True)
         part = drf_get_object_or_404(instance.parts,
                                  name=serializer.validated_data["part_name"])
 
@@ -233,7 +233,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             img_obj = Image(
                 image=img,
                 part_id=part.id,
-                camera=None,
+                camera_id=serializer.validated_data["camera_id"],
                 labels=serializer.validated_data["labels"],
                 confidence=serializer.validated_data["confidence"],
                 project=instance.project,
@@ -247,14 +247,13 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         logger.info(project_obj.relabel_expired_time)
         logger.info(timezone.now())
         if project_obj.relabel_expired_time < timezone.now():
-
             logger.info("Queuing relabel images...")
             img_io = serializer.validated_data["img"].file
             img = ImageFile(img_io)
             img.name = str(timezone.now()) + ".jpg"
             img_obj = Image(
                 image=img,
-                camera=None,
+                camera_id=serializer.validated_data["camera_id"],
                 part_id=part.id,
                 labels=serializer.validated_data["labels"],
                 confidence=serializer.validated_data["confidence"],
