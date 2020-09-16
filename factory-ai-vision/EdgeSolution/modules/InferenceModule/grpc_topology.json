@@ -90,7 +90,7 @@
                 "name": "frameRate",
                 "type": "String",
                 "description": "input maximumFPs",
-                "default": "10"
+                "default": "30"
             }
 
         ],

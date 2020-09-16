@@ -210,7 +210,11 @@ def update_cams():
     data = request.get_json()
     logger.info(data["cameras"])
     stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
-    frameRate = 30
+    if onnx.is_gpu:
+        frameRate = 30
+    else:
+        frameRate = 10
+
     for cam in data["cameras"]:
         cam_type = cam['type']
         cam_source = cam['source']

@@ -52,7 +52,10 @@ class Stream():
 
         self.cam_type = cam_type
         self.cam_source = None
-        self.frameRate = 30
+        if self.model.is_gpu:
+            frameRate = 30
+        else:
+            frameRate = 10
         #self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
         self.cam_is_alive = True
 
