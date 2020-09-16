@@ -152,7 +152,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                                                required=True),
                          ],
                          responses={
-                             '200': SimpleOKSerializer,
+                             '200': ProjectSerializer,
                              '400': MSStyleErrorResponseSerializer
                          })
     @action(detail=True, methods=["get"])
