@@ -15,8 +15,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 
 import { postCamera, putCamera } from '../store/cameraSlice';
-import { selectAllLocations, getLocations } from '../store/locationSlice';
-import { CreateLocationDialog } from './CreateLocationDialog';
+import { selectAllLocations, getLocations, postLocation } from '../store/locationSlice';
+import { CreateByNameDialog } from './CreateByNameDialog';
 
 export enum PanelMode {
   Create,
@@ -136,8 +136,9 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
     setFormData(R.assocPath(['location', 'value'], options.key));
   };
 
-  const onLocationCreateSuccess = (id: number) => {
-    setFormData(R.assocPath(['location', 'value'], id));
+  const onLocationCreate = async (name: string) => {
+    const res = await dispatch(postLocation({ name }));
+    setFormData(R.assocPath(['location', 'value'], (res as any).payload.id));
   };
 
   useEffect(() => {
@@ -177,10 +178,12 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
         required
       />
       <Link onClick={() => setDialogHidden(false)}>Create location</Link>
-      <CreateLocationDialog
+      <CreateByNameDialog
+        title="Create location"
+        subText="Enter the location where this camera is pointed:"
         hidden={dialogHidden}
         onDismiss={() => setDialogHidden(true)}
-        onCreatSuccess={onLocationCreateSuccess}
+        onCreate={onLocationCreate}
       />
     </Panel>
   );
