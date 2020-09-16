@@ -7,28 +7,28 @@ import {
   DefaultButton,
   ProgressIndicator,
 } from '@fluentui/react';
-import { useDispatch } from 'react-redux';
-import { postLocation } from '../store/locationSlice';
 
-type CreateLocationDialogProps = {
+type CreateByNameDialogProps = {
+  title: string;
+  subText: string;
   hidden: boolean;
   onDismiss: () => void;
-  onCreatSuccess: (locationId: number) => void;
+  onCreate: (name: string) => void;
 };
 
-export const CreateLocationDialog: React.FC<CreateLocationDialogProps> = ({
+export const CreateByNameDialog: React.FC<CreateByNameDialogProps> = ({
+  title,
+  subText,
   hidden,
   onDismiss,
-  onCreatSuccess,
+  onCreate,
 }) => {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
-  const dispatch = useDispatch();
 
-  const onCreate = async () => {
+  const onCreateClick = async () => {
     setLoading(true);
-    const res = await dispatch(postLocation({ name }));
-    onCreatSuccess((res as any).payload.id);
+    await onCreate(name);
     setLoading(false);
     onDismiss();
   };
@@ -38,8 +38,8 @@ export const CreateLocationDialog: React.FC<CreateLocationDialogProps> = ({
   return (
     <Dialog
       dialogContentProps={{
-        title: 'Create location',
-        subText: 'Enter the location where this camera is pointed:',
+        title,
+        subText,
       }}
       hidden={hidden}
       onDismiss={onDismiss}
@@ -47,7 +47,7 @@ export const CreateLocationDialog: React.FC<CreateLocationDialogProps> = ({
       <ProgressIndicator barHeight={loading ? 2 : 0} />
       <TextField onChange={onTextChange} disabled={loading} />
       <DialogFooter>
-        <PrimaryButton text="Create" onClick={onCreate} disabled={loading || !name} />
+        <PrimaryButton text="Create" onClick={onCreateClick} disabled={loading || !name} />
         <DefaultButton text="Cancel" onClick={onDismiss} />
       </DialogFooter>
     </Dialog>

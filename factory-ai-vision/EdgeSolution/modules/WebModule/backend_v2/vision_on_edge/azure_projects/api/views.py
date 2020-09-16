@@ -152,7 +152,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                                                required=True),
                          ],
                          responses={
-                             '200': SimpleOKSerializer,
+                             '200': ProjectSerializer,
                              '400': MSStyleErrorResponseSerializer
                          })
     @action(detail=True, methods=["get"])
@@ -167,7 +167,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             project_obj.reset(name=project_name)
             project_obj.save()
             # Let Signals to handle if we need to delete Part/Image
-            return Response({"status": "ok"})
+            serializer = ProjectSerializer(project_obj)
+            return Response(serializer.data)
         except CustomVisionErrorException:
             raise SettingCustomVisionAccessFailed
 

@@ -22,8 +22,10 @@ import {
   Checkbox,
   MessageBar,
   MessageBarType,
+  Link,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import {
@@ -37,7 +39,8 @@ import {
 import { WarningDialog } from './WarningDialog';
 import { pullCVProjects } from '../store/actions';
 import { dummyFunction } from '../utils/dummyFunction';
-import { selectNonDemoProject } from '../store/trainingProjectSlice';
+import { selectNonDemoProject, createNewTrainingProject } from '../store/trainingProjectSlice';
+import { CreateByNameDialog } from './CreateByNameDialog';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -82,6 +85,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const [loadImgWarning, setloadImgWarning] = useState(false);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
   const error = useSelector((state: State) => state.setting.error);
+  const [projectDialogHidden, { setFalse: openDialg, setTrue: closeDialog }] = useBoolean(true);
 
   const dispatch = useDispatch();
 
@@ -106,6 +110,10 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const onLoadFullImgChange = (_, checked: boolean) => {
     if (checked) setloadImgWarning(true);
     else setLoadFullImages(checked);
+  };
+
+  const onCreateProject = async (name: string) => {
+    await dispatch(createNewTrainingProject(name));
   };
 
   const updateIsCollectData = (isCollectData, hasInit?): void => {
@@ -179,6 +187,14 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                   options={cvProjectOptions}
                   onChange={onDropdownChange}
                   selectedKey={selectedCustomvisionId}
+                />
+                <Link onClick={openDialg}>Create new project</Link>
+                <CreateByNameDialog
+                  hidden={projectDialogHidden}
+                  onDismiss={closeDialog}
+                  title="Create new project"
+                  subText="Create a new project will remove all the parts and images"
+                  onCreate={onCreateProject}
                 />
                 <Checkbox checked={loadFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
                 <WarningDialog
