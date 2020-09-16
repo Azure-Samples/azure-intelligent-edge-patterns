@@ -358,7 +358,7 @@ def update_prob_threshold():
     print('[INFO] updaing prob_threshold to')
     print('  prob_threshold:', prob_threshold)
 
-    for s in stream_manager.get_streams():
+    for s in stream_manager.get_streams_danger():
         s.threshold = int(prob_threshold) * 0.01
         s.detection_success_num = 0
         s.detection_unidentified_num = 0
