@@ -47,6 +47,9 @@ class StreamManager(object):
         self.mutex.release()
         return streams
 
+    def get_streams_num_danger(self):
+        return len(self.streams)
+
     def get_streams_danger(self):
         streams = list(self.streams.values())
         return streams
