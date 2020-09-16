@@ -167,7 +167,11 @@ const Scene: FC<SceneProps> = ({
                 />
                 <Text
                   x={annotation.label.x1}
-                  y={annotation.label.y1 - 25 / scale.current}
+                  y={
+                    annotation.label.y1 < 20 / scale.current
+                      ? annotation.label.y1
+                      : annotation.label.y1 - 25 / scale.current
+                  }
                   fontSize={20 / scale.current}
                   fill="red"
                   text={imgPart?.name}
