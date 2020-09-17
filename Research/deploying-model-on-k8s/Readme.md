@@ -163,7 +163,7 @@ We will be deploying a model that we created in Azure ML, using a notebook from 
 If you want to create one yourself, update to your own account and run through
 [machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb](../../machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb).
 
-In the following steps we denote the image as `rollingstone/myinfer:1.0`, you can tag your own image adhering to the naming conventions you like.
+In the following steps we denote the image as `myregistry.azurecr.io/rollingstone/myinfer:1.0`, you can tag your own image adhering to the naming conventions you like.
 
 ## Creating a Deployment
 
@@ -187,7 +187,7 @@ We provide the Deployment file, `deploy_infer.yaml`:
         spec:
         containers:
         - name: my-infer
-            image: rollingstone/myinfer:1.0
+            image: myregistry.azurecr.io/rollingstone/myinfer:1.0
             ports:
             # we use only 5001, but the container exposes  EXPOSE 5001 8883 8888
             - containerPort: 5001

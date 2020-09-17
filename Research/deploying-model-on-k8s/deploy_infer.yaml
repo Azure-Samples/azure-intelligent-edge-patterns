@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: my-infer
-        image: rollingstone/myinfer:1.0
+        image: myregistry.azurecr.io/rollingstone/myinfer:1.0
         ports:
         # we use only 5001, but the container exposes  EXPOSE 5001 8883 8888
         - containerPort: 5001
