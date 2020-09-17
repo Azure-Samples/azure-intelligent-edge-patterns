@@ -6,6 +6,8 @@ import { Box2dComponentProps, WorkState, LabelingCursorStates } from './type';
 import { updateAnnotation } from '../../store/annotationSlice';
 import { BoxLabel } from '../../store/type';
 
+const COLOR = 'white';
+
 export const Box2d: FC<Box2dComponentProps> = ({
   scale,
   workState,
@@ -121,7 +123,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
           vertices.x1,
           vertices.y1,
         ]}
-        stroke="red"
+        stroke={COLOR}
         strokeWidth={strokeWidth}
         closed={true}
         onMouseEnter={(): void => changeCursorState(LabelingCursorStates.pointer)}
@@ -133,7 +135,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x1}
         y={vertices.y1}
         radius={anchorRadius}
-        fill="red"
+        fill={COLOR}
         draggable={true}
         onDragMove={onDragAnchor({ xi: 'x1', yi: 'y1' })}
         onDragEnd={dispatchLabel}
@@ -151,7 +153,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x2}
         y={vertices.y1}
         radius={anchorRadius}
-        fill="red"
+        fill={COLOR}
         draggable={true}
         onDragMove={onDragAnchor({ xi: 'x2', yi: 'y1' })}
         onDragEnd={dispatchLabel}
@@ -169,7 +171,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x2}
         y={vertices.y2}
         radius={anchorRadius}
-        fill="red"
+        fill={COLOR}
         draggable={true}
         onDragMove={onDragAnchor({ xi: 'x2', yi: 'y2' })}
         onDragEnd={dispatchLabel}
@@ -187,7 +189,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x1}
         y={vertices.y2}
         radius={anchorRadius}
-        fill="red"
+        fill={COLOR}
         draggable={true}
         onDragMove={onDragAnchor({ xi: 'x1', yi: 'y2' })}
         onDragEnd={dispatchLabel}
