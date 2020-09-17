@@ -171,7 +171,10 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 
 - Go to factoryai directory and open your vscode
 
+    ```bash
     cd azure-intelligent-edge-patterns/factory-ai-vision
+    code .
+    ````
     
 - Edit the ```env-template``` file, you should see something like this
 
