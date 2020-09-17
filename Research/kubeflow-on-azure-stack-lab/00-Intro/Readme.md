@@ -98,7 +98,7 @@ This step is needed to connect to your Kubernetes cluster
 
     $ porter credentials generate 
 
-Enter path to your kubeconfig file when prompted
+Enter path to your kubeconfig file when prompted eg on master node of my cluster i gave </home/azureuser/.kube/config>
 
 Validate that your credential is present by running the below command. You should see something like the below output.
 
