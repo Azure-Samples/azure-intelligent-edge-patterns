@@ -190,6 +190,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                   options={cvProjectOptions}
                   onChange={onDropdownChange}
                   selectedKey={selectedCustomvisionId}
+                  styles={{ dropdownItemsWrapper: { maxHeight: '80vh' } }}
                 />
                 <Link onClick={openDialg}>Create new project</Link>
                 <CreateByNameDialog
