@@ -164,15 +164,18 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 
 ### Get the source code
 - Clone yadavm_factoryai_lpr branch 
-    
+
+    ```bash
     git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git --single-branch --branch yadavm_factoryai_lpr
-    
+    ```
+
 - Go to factoryai directory and open your vscode
 
     cd azure-intelligent-edge-patterns/factory-ai-vision
     
 - Edit the ```env-template``` file, you should see something like this
-```
+
+    ```bash
     # For Azure Container Registry
     CONTAINER_REGISTRY_NAME=""
     CONTAINER_REGISTRY_USERNAME=""
@@ -188,11 +191,11 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
     SERVICE_NAME=""
     SERVICE_PRINCPAL_APP_ID=""
     SERVICE_PRINCIPAL_SECRET=""
-```
+    ```
 
 - Please fill in your credentials and rename it as ```.env```, vscode will use this file to set the environment variables
 
-- Find ```deployment.gpu.template.json``` under ```EdgeSolution``` direcotyr in vscode, right click on it, choose "Build and Push Iot Edge Solution". It'll start to build the container, you should expect to wait for more than 10 mins if it's the first time you build the container.
+- Find ```deployment.gpu.template.json``` under ```EdgeSolution``` directory in vscode, right click on it, choose "Build and Push Iot Edge Solution". It'll start to build the container, you should expect to wait for more than 10 mins if it's the first time you build the container.
 
 - Find  ```deployment.gpu.amd64.json``` under ```EdgeSolution/config``` directory in vscode, right click on it, choose "Create Deployment to Single Device", select your device to deploy, you should expect the edge will pull the container for more than 10 mins if it's the first time.
 
