@@ -219,3 +219,7 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
     f. azureiotedge-agent
     
 - Please wait until all 6 are running. Open your browser and connect http://YOUR_IP:8080
+
+### Video Tutorial
+
+[https://youtu.be/ORTwMYOxkVs]
