@@ -3,11 +3,13 @@
 # --------------------------------------------------------
 FROM arm64v8/ubuntu as base
 
-RUN apt-get update
-RUN apt-get install -y locales \
+RUN apt-get update \
+    && apt-get install -y locales \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
-    && update-locale LANG=en_US.UTF-8
+    && update-locale LANG=en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV LANG en_US.UTF-8 
 ENV LC_ALL en_US.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -51,8 +53,6 @@ FROM onnxruntime-builder as final
 RUN mkdir /app
 WORKDIR /app
 
-ARG DEVICE
-
 RUN apt-get install -y numpy
 COPY requirements.txt ./
 RUN pip3 install --upgrade pip
@@ -60,21 +60,40 @@ RUN pip3 install -U certifi --ignore-installed
 RUN pip3 install -r requirements.txt --ignore-installed && \
     pip3 install flask 
 
+COPY coco_classes.txt ./
+COPY default_model default_model/
+COPY default_model_6parts default_model_6parts/
+COPY grpc_topology.json ./
+COPY sample_video sample_video/
+COPY scenario_models scenario_models/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+
+COPY arguments.py ./
+COPY config.py ./
+COPY exception_handler.py ./
+COPY extension_pb2.py ./
+COPY extension_pb2_grpc.py ./
+COPY inference_engine.py ./
+COPY inferencing_pb2.py ./
+COPY invoke.py ./
 COPY main.py ./
+COPY media_pb2.py ./
+COPY model_wrapper.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
 COPY onnxruntime_predict.py ./
+COPY scenarios.py ./
+COPY server.py ./
+COPY shared_memory.py ./
+COPY sort.py ./
+COPY stream_manager.py ./
+COPY streams.py ./
+COPY tracker.py ./
 COPY utility.py ./
-COPY default_model/cvexport.manifest default_model/
-COPY default_model default_model/
-COPY default_model_6parts default_model_6parts/
-COPY sample_video sample_video/
 COPY webmodule_utils/*.py ./webmodule_utils/
-RUN chmod 777 sample_video/video.mp4
-RUN chmod 777 default_model
 
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "python3", "main.py" ]
-
+CMD [ "python3 server.py -p 44000" ]
