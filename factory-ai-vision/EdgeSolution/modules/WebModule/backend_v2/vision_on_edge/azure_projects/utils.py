@@ -19,7 +19,7 @@ from vision_on_edge.images.models import Image
 from ..azure_parts.utils import batch_upload_parts_to_customvision
 from ..azure_training_status import progress
 from ..images.utils import upload_images_to_customvision_helper
-from .exceptions import ProjectAlreadyTraining
+from .exceptions import ProjectAlreadyTraining, ProjectRemovedError
 from .models import Project, Task
 
 logger = logging.getLogger(__name__)
@@ -76,9 +76,9 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     """pull_cv_project_helper.
 
     Args:
-        project_id:
-        customvision_project_id (str): customvision_project_id
-        is_partial (bool): is_partial
+        project_id:                     Django ORM project id
+        customvision_project_id (str):  customvision_project_id
+        is_partial (bool):              is_partial
     """
 
     logger.info("pull_cv_project_helper")
@@ -96,13 +96,15 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     trainer = project_obj.setting.get_trainer_obj()
 
     # Check Customvision Project id
-    trainer.get_project(customvision_project_id)
+    try:
+        trainer.get_project(customvision_project_id)
+    except:
+        raise ProjectRemovedError
 
     # Invalid CustomVision Project ID handled by exception
     project_obj.name = trainer.get_project(
         project_id=customvision_project_id).name
     project_obj.customvision_id = customvision_project_id
-    project_obj.deployed = False
     project_obj.save()
 
     # Delete parts and images
@@ -121,44 +123,52 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
             name=tag.name,
             description=tag.description if tag.description else "",
             customvision_id=tag.id)
+
+        # Make sure part is created
+        if not created:
+            logger.exception("%s not created", tag.name)
+            continue
         logger.info("Create Part %s: %s %s Success!", counter, tag.name,
                     tag.description)
         counter += 1
 
-        if not created:
-            logger.error("%s not created", tag.name)
-
+        # Download one image as icon
         if is_partial:
-            logger.info("loading one image as icon")
-            try:
-                img = trainer.get_tagged_images(
-                    project_id=customvision_project_id,
-                    tag_ids=[tag.id],
-                    take=1)[0]
-                image_uri = img.original_image_uri
-                img_obj, created = Image.objects.update_or_create(
-                    part=part_obj,
-                    remote_url=image_uri,
-                    customvision_id=img.id,
-                    project_id=project_id,
-                    uploaded=True)
-                logger.info("loading from remote url: %s", img_obj.remote_url)
-                img_obj.get_remote_image()
-                logger.info("Finding tag.id %s", tag.id)
-                logger.info("Finding tag.name %s", tag.name)
-                for region in img.regions:
-                    if region.tag_id == tag.id:
-                        logger.info("Region Found")
-                        img_obj.set_labels(
-                            left=region.left,
-                            top=region.top,
-                            width=region.width,
-                            height=region.height,
-                        )
-                        break
+            logger.info("Try to download one image as icon.")
 
+            # Image file
+            imgs_with_tag = trainer.get_tagged_images(
+                project_id=customvision_project_id, tag_ids=[tag.id], take=1)
+            if len(imgs_with_tag) < 1:
+                logger.info("This tag does not have an image")
+                continue
+            img = imgs_with_tag[0]
+            img_obj, created = Image.objects.update_or_create(
+                part=part_obj,
+                remote_url=img.original_image_uri,
+                customvision_id=img.id,
+                project_id=project_id,
+                uploaded=True)
+            try:
+                img_obj.get_remote_image()
             except Exception:
-                logger.info("Tag %s have no images on Custom Vision", tag.name)
+                logger.exception("Download remote image error")
+                img_obj.delete()
+                continue
+
+            # Image Labels
+            logger.info("Finding region with tag (%s, %s)", tag.name, tag.id)
+            for region in img.regions:
+                if region.tag_id == tag.id:
+                    logger.info("Region Found")
+                    img_obj.set_labels(
+                        left=region.left,
+                        top=region.top,
+                        width=region.width,
+                        height=region.height,
+                    )
+                    break
+
     logger.info("Pulled %s Parts... End", counter)
 
     # Partial Download
