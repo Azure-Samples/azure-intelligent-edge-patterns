@@ -104,13 +104,13 @@ export const AddEditPartPanel: React.FC<AddEditPartPanelProps> = ({
       isOpen={isOpen}
       onDismiss={onDissmiss}
       hasCloseButton
-      headerText="Add Part"
+      headerText="Add Object"
       onRenderFooterContent={onRenderFooterContent}
       isFooterAtBottom={true}
     >
       <ProgressIndicator progressHidden={!loading} />
       <TextField
-        label="Part name"
+        label="Object name"
         value={formData.name.value}
         errorMessage={formData.name.errMsg}
         onChange={onChange('name')}

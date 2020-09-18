@@ -80,7 +80,7 @@ export const PartDetails: React.FC = () => {
   const breadCrumbItems: IBreadcrumbItem[] = [
     {
       key: 'parts',
-      text: 'Parts',
+      text: 'Objects',
       href: '/parts',
       onClick: (ev, item) => {
         ev.preventDefault();
@@ -132,7 +132,7 @@ const PartInfo: React.FC<{ description: string; numImages: number }> = ({ descri
     <Stack tokens={infoBlockTokens}>
       <Text styles={titleStyles}>Images</Text>
       <Text>
-        <b>{numImages} images</b> have been trained for this part
+        <b>{numImages} images</b> have been trained for this object
       </Text>
     </Stack>
   </Stack>
