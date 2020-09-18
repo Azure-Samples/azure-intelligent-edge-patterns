@@ -168,7 +168,7 @@ export const Deployment: React.FC = () => {
           </Stack>
           <ProgressIndicator
             barHeight={4}
-            styles={{ root: { width: '600px' }, progressBar: { backgroundColor: palette.tealLight } }}
+            styles={{ root: { width: '600px' } }}
             percentComplete={progress !== null ? progress / 100 : null}
           />
         </Stack>
