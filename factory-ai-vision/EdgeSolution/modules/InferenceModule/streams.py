@@ -17,6 +17,7 @@ from utility import get_file_zip, normalize_rtsp
 from invoke import gm
 #from tracker import Tracker
 from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
+from utility
 
 import logging
 
@@ -463,7 +464,7 @@ class Stream():
             for prediction in predictions:
                 if prediction['probability'] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                    cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), 1)
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
@@ -484,14 +485,14 @@ def draw_aoi(img, aoi_info):
         if aoi_type == 'BBox':
             cv2.rectangle(img,
                           (int(label['x1']), int(label['y1'])),
-                          (int(label['x2']), int(label['y2'])), (0, 255, 255), 2)
+                          (int(label['x2']), int(label['y2'])), (255, 255, 255), 2)
 
         elif aoi_area['type'] == 'Polygon':
             l = len(label)
             for index, point in enumerate(label):
                 p1 = (point['x'], point['y'])
                 p2 = (label[(index+1) % l]['x'], label[(index+1) % l]['y'])
-                cv2.line(img, p1, p2, (0, 255, 255), 2)
+                cv2.line(img, p1, p2, (255, 255, 255), 2)
 
 
 def is_inside_aoi(x1, y1, x2, y2, aoi_info):
@@ -542,8 +543,8 @@ def draw_confidence_level(img, prediction):
 
     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
-    img = cv2.putText(img, prediction['tagName']+prob_str,
-                      (x1+10, y1-5), font, font_scale, (20, 20, 255), thickness)
+    text = prediction['tagName'] + prob_str
+    img = draw_label(img, text, (x1, y1))
 
     return img
 

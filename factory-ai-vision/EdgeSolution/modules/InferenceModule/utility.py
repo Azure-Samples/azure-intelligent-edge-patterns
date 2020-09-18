@@ -14,10 +14,14 @@ import urllib.request as urllib2
 from urllib.request import urlopen
 import glob
 import zipfile
+import cv2
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.disabled = False
+
+
 
 
 #this function returns the device ip address if it is apublic ip else 127.0.0.1
@@ -221,4 +225,11 @@ def normalize_rtsp(rtsp: str) -> str:
 
 
 
-
+def draw_label(img, text, pos):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.3
+    thickness = 1
+    x, y = pos
+    img = cv2.rectangle(img, (x, y-15), (x+len(text)*5+10, y), (255, 255, 255), -1)
+    img = cv2.putText(img, text, (x+5, y-5), font, font_scale, (0, 0, 0), thickness)
+    return img
