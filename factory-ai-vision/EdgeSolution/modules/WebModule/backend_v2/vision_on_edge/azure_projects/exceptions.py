@@ -41,6 +41,15 @@ class ProjectResetWithoutNameError(APIException):
     default_code = "project_reset_without_name_error"
 
 
+class ProjectRemovedError(APIException):
+    """ProjectRemovedError.
+    """
+
+    status_code = 503
+    default_detail = "This project has been removed. Please choose another project"
+    default_code = "project_removed_error"
+
+
 class ProjectAlreadyTraining(APIException):
     """ProjectAlreadyTraining.
     """
