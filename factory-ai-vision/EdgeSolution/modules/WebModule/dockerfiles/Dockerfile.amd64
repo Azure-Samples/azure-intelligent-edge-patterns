@@ -16,7 +16,7 @@ RUN yarn build
 # =========================================================
 FROM amd64/python:3.8 as backend-base
 
-RUN apt-get update &&
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
