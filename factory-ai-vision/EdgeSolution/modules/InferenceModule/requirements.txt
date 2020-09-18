@@ -1,6 +1,5 @@
 azure-iot-device==2.0.1
 azure-iot-hub==2.2.2rc0
-certifi==2020.4.5.1
 chardet==3.0.4
 click==7.1.2
 Flask==1.1.2
@@ -28,3 +27,4 @@ grpcio
 utility
 filterpy
 scikit-image
+certifi # certifi should always be latest
