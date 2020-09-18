@@ -5,13 +5,14 @@ import { useHistory } from 'react-router-dom';
 type InstructionProps = {
   title: string;
   subtitle: string;
+  smallIcon?: boolean;
   button?: {
     text: string;
     to: string;
   };
 };
 
-export const Instruction: React.FC<InstructionProps> = ({ title, subtitle, button }) => {
+export const Instruction: React.FC<InstructionProps> = ({ title, subtitle, button, smallIcon }) => {
   const [visible, setvisible] = useState(true);
   const history = useHistory();
 
@@ -26,12 +27,13 @@ export const Instruction: React.FC<InstructionProps> = ({ title, subtitle, butto
           borderRadius: '2px',
           padding: '19px 7px',
           position: 'relative',
+          margin: '24px 0px',
         },
       }}
       horizontal
     >
-      <img src="/icons/instruction_icon.svg" />
-      <Stack>
+      <img src={smallIcon ? '/icons/instruction_icon_sm.svg' : '/icons/instruction_icon.svg'} />
+      <Stack tokens={{ padding: 10 }}>
         <Text style={{ fontWeight: 600 }}>{title}</Text>
         <Text>{subtitle}</Text>
         <Stack.Item>
