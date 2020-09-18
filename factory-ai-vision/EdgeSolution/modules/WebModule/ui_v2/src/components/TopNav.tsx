@@ -7,7 +7,11 @@ import {
   getTheme,
   ICommandBarStyles,
 } from '@fluentui/react';
-import { WaffleIcon, SettingsIcon } from '@fluentui/react-icons';
+import { WaffleIcon, SettingsIcon, FeedbackIcon } from '@fluentui/react-icons';
+import { useBoolean } from '@uifabric/react-hooks';
+
+import { FeedbackDialog } from './FeedbackDialog';
+
 
 const theme = getTheme();
 
@@ -33,10 +37,22 @@ const commandBarStyles: ICommandBarStyles = {
   },
 };
 
-export const TopNav: React.FC<{ onSettingClick: () => void }> = ({ onSettingClick }) => {
+type TopNavProps = {
+  onSettingClick: () => void;
+}
+
+export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
   const history = useHistory();
+  const [feedbackHidden, { setFalse: openFeedback, setTrue: closeFeedback }] = useBoolean(true);
 
   const commandBarFarItems: ICommandBarItemProps[] = [
+    {
+      key: 'feedback',
+      iconOnly: true,
+      onRenderIcon: () => <FeedbackIcon />,
+      buttonStyles: commandBarBtnStyles,
+      onClick: openFeedback
+    },
     {
       key: 'setting',
       iconOnly: true,
@@ -62,5 +78,8 @@ export const TopNav: React.FC<{ onSettingClick: () => void }> = ({ onSettingClic
     },
   ];
 
-  return <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />;
+  return <>
+    <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />
+    <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} />
+  </>;
 };

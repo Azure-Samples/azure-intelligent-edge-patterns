@@ -1,7 +1,7 @@
 import { AsyncThunkPayloadCreator, createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 
-const getErrorLog = (e: AxiosError): string => e?.response?.data?.error?.message || e.message;
+export const getErrorLog = (e: AxiosError): string => e?.response?.data?.error?.message || e.message;
 
 export function createWrappedAsync<Returned, ThunkArg = void, ThunkApiConfig = {}>(
   prefix: string,
