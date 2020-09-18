@@ -6,6 +6,8 @@ import cv2
 from tracker import Tracker, Line, Rect
 from tracker import bb_intersection_over_union as compute_iou
 
+from utility import draw_label
+
 Detection = namedtuple('Detection', ['tag', 'x1', 'y1', 'x2', 'y2', 'score'])
 
 
@@ -85,7 +87,7 @@ class PartCounter(Scenario):
         y = int(min(30, img.shape[0]))
         #print(x, y, flush=True)
         img = cv2.putText(img, 'Objects: ' + str(self.counter), (x, y), font,
-                          font_scale, (0, 255, 255), thickness)
+                          font_scale, (255, 255, 255), thickness)
         return img
 
     def draw_constraint(self, img):
@@ -96,7 +98,7 @@ class PartCounter(Scenario):
         if self.line:
             img = cv2.line(img, (int(self.line.x1), int(self.line.y1)),
                            (int(self.line.x2), int(self.line.y2)),
-                           (0, 255, 255), thickness)
+                           (255, 255, 255), thickness)
         return img
 
     def draw_objs(self, img, is_id=True, is_rect=True):
@@ -113,10 +115,9 @@ class PartCounter(Scenario):
             x = x1
             y = y1 - 5
             if is_id:
-                img = cv2.putText(img, str(oid), (x, y), font, font_scale,
-                                  (0, 255, 255), thickness)
+                img = draw_label(img, str(oid), (x, y))
             if is_rect:
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255),
+                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255),
                                     thickness)
         return img
 
@@ -228,10 +229,10 @@ class DefeatDetection(Scenario):
         y = int(min(30, img.shape[0]))
 
         img = cv2.putText(img, self.ok_name + ': ' + str(self.ok_counter),
-                            (x, y), font, font_scale, (0, 255, 255),
+                            (x, y), font, font_scale, (255, 255, 255),
                             thickness)
         img = cv2.putText(img, self.ng_name + ': ' + str(self.ng_counter),
-                            (x, y + 15), font, font_scale, (0, 255, 255),
+                            (x, y + 15), font, font_scale, (255, 255, 255),
                             thickness)
 
         return img
@@ -244,12 +245,12 @@ class DefeatDetection(Scenario):
         if self.line:
             img = cv2.line(img, (int(self.line.x1), int(self.line.y1)),
                            (int(self.line.x2), int(self.line.y2)),
-                           (0, 255, 255), thickness)
+                           (255, 255, 255), thickness)
 
     def draw_objs(self, img, is_id=False, is_rect=True, is_tag=True):
         for obj in self.tracker.get_objs():
-            font = cv2.FONT_HERSHEY_DUPLEX
-            font_scale = 0.5
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 0.3
             thickness = 1
             x1, y1, x2, y2, oid = obj
             x1 = int(x1)
@@ -257,21 +258,17 @@ class DefeatDetection(Scenario):
             x2 = int(x2)
             y2 = int(y2)
             oid = int(oid)
-            x = x1
-            y = y1 - 5
             if is_id:
                 #img = cv2.putText(img, str(oid), (x, y), font, font_scale,
                 #                  (0, 255, 255), thickness)
-                img = cv2.putText(img, str(oid), (x, y), font, font_scale,
-                                  (0, 0, 255), thickness)
+                img = draw_label(img, str(oid), (x1, y1))
             if is_tag:
                 tag = self.detected[oid]['tag']
                 score = self.detected[oid]['score']
                 text = tag + ' ( ' + str(int(1000*score)/10) + '% )'
-                img = cv2.putText(img, text, (x, y), font, font_scale,
-                                  (0, 0, 255), thickness)
+                img = draw_label(img, text, (x1, y1))
             if is_rect:
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255),
+                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255),
                                     thickness)
                 #img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255),
                 #                    thickness)
@@ -352,7 +349,7 @@ class DangerZone(Scenario):
         x = int(max(0, img.shape[1] - 200))
         y = int(min(30, img.shape[0]))
         img = cv2.putText(img, 'Violations: ' + str(self.counter), (x, y),
-                          font, font_scale, (0, 255, 255), thickness)
+                          font, font_scale, (255, 255, 255), thickness)
         return img
 
     def draw_constraint(self, img):
@@ -362,7 +359,7 @@ class DangerZone(Scenario):
         thickness = 1
         for zone in self.zones:
             img = cv2.rectangle(img, (int(zone.x1), int(zone.y1)),
-                                (int(zone.x2), int(zone.y2)), (0, 255, 255),
+                                (int(zone.x2), int(zone.y2)), (255, 255, 255),
                                 thickness)
         return img
 
@@ -380,10 +377,9 @@ class DangerZone(Scenario):
             x = x1
             y = y1 - 5
             if is_id:
-                img = cv2.putText(img, str(oid), (x, y), font, font_scale,
-                                  (0, 255, 255), thickness)
+                img = draw_label(img, str(oid), (x, y))
             if is_rect:
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255),
+                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255),
                                     thickness)
         return img
 
