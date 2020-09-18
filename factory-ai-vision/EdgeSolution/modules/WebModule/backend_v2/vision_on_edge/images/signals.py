@@ -53,7 +53,7 @@ def azure_project_post_save_handler(**kwargs):
                   ) or not instance.customvision_project_id_changed:
         logger.info("Project customvision_id not changed. Pass")
         return
-    logger.info("Project customvision_project_id changed...")
+    logger.info("Project customvision_id changed...")
     logger.info("Deleting all Images...")
     Image.objects.filter(project=instance).delete()
 
