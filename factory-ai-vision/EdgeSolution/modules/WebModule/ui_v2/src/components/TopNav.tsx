@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -6,12 +7,12 @@ import {
   IButtonStyles,
   getTheme,
   ICommandBarStyles,
+  mergeStyleSets,
 } from '@fluentui/react';
-import { WaffleIcon, SettingsIcon, FeedbackIcon } from '@fluentui/react-icons';
+import { WaffleIcon, SettingsIcon, FeedbackIcon, RingerIcon } from '@fluentui/react-icons';
 import { useBoolean } from '@uifabric/react-hooks';
 
 import { FeedbackDialog } from './FeedbackDialog';
-
 
 const theme = getTheme();
 
@@ -37,9 +38,26 @@ const commandBarStyles: ICommandBarStyles = {
   },
 };
 
+const classes = mergeStyleSets({
+  badage: {
+    position: 'absolute',
+    right: 5,
+    top: 10,
+    background: '#005A9E',
+    color: 'white',
+    borderRadius: '16px',
+    width: '16px',
+    height: '16px',
+    fontSize: '10px',
+  },
+  icon: {
+    fontSize: '16px',
+  },
+});
+
 type TopNavProps = {
   onSettingClick: () => void;
-}
+};
 
 export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
   const history = useHistory();
@@ -49,14 +67,28 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
     {
       key: 'feedback',
       iconOnly: true,
-      onRenderIcon: () => <FeedbackIcon />,
+      onRenderIcon: () => <FeedbackIcon className={classes.icon} />,
       buttonStyles: commandBarBtnStyles,
-      onClick: openFeedback
+      onClick: openFeedback,
+    },
+    {
+      key: 'notification',
+      iconOnly: true,
+      onRenderIcon: () => {
+        return (
+          <div>
+            <div className={classes.badage}>3</div>
+            <RingerIcon className={classes.icon} />
+          </div>
+        );
+      },
+      buttonStyles: commandBarBtnStyles,
+      onClick: openFeedback,
     },
     {
       key: 'setting',
       iconOnly: true,
-      onRenderIcon: () => <SettingsIcon />,
+      onRenderIcon: () => <SettingsIcon className={classes.icon} />,
       buttonStyles: commandBarBtnStyles,
       onClick: onSettingClick,
     },
@@ -78,8 +110,10 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
     },
   ];
 
-  return <>
-    <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />
-    <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} />
-  </>;
+  return (
+    <>
+      <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />
+      <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} />
+    </>
+  );
 };
