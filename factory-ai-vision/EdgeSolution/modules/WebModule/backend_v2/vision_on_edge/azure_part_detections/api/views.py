@@ -23,18 +23,16 @@ from ...azure_pd_deploy_status.models import DeployStatus
 from ...azure_projects.utils import TrainingManagerInstance
 from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
-from ...cameras.models import Camera
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleOKSerializer)
 from ...general.shortcuts import drf_get_object_or_404
 from ...images.models import Image
-from ..exceptions import (PdConfigureWithoutCameras,
-                          PdConfigureWithoutInferenceModule,
-                          PdConfigureWithoutProject,
-                          PdExportInfereceReadTimeout,
-                          PdInferenceModuleUnreachable,
-                          PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
-                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
+from ..exceptions import (
+    PdConfigureWithoutCameras, PdConfigureWithoutInferenceModule,
+    PdConfigureWithoutProject, PdExportInfereceReadTimeout,
+    PdInferenceModuleUnreachable, PdProbThresholdNotInteger,
+    PdProbThresholdOutOfRange, PdRelabelConfidenceOutOfRange,
+    PdRelabelImageFull, PdRelabelDemoProjectError)
 from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
@@ -214,6 +212,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         project_obj = instance.project
         if project_obj is None:
             raise PdConfigureWithoutProject
+
+        if project_obj.is_demo:
+            raise PdRelabelDemoProjectError
 
         # Relabel images count does not exceed project.maxImages
         # Handled by signals
