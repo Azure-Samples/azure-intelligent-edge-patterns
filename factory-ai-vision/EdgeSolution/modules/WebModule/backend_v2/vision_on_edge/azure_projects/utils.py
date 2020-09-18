@@ -229,7 +229,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
         img_index += img_batch_size
     logger.info("Pulled %s images", counter)
     logger.info("Pulling Tagged Images... End")
-    logger.info("Pulling CustomVision Project... End")
+    logger.info("Pulling Custom Vision Project... End")
 
 
 def train_project_worker(project_id):
@@ -282,7 +282,7 @@ def train_project_worker(project_id):
                                  **progress.PROGRESS_2_PROJECT_CREATED)
 
     project_obj = Project.objects.get(pk=project_id)
-    logger.info("Project created on CustomVision.")
+    logger.info("Project created on Custom Vision.")
     logger.info("Project Id: %s", project_obj.customvision_id)
     logger.info("Project Name: %s", project_obj.name)
 
@@ -305,7 +305,7 @@ def train_project_worker(project_id):
     images_last_train = trainer.get_tagged_image_count(
         project_obj.customvision_id)
 
-    # Create/update tags on CustomVision Project
+    # Create/update tags on Custom Vision Project
     has_new_parts = batch_upload_parts_to_customvision(project_id=project_id,
                                                        part_ids=part_ids,
                                                        tags_dict=tags_dict)
@@ -317,7 +317,7 @@ def train_project_worker(project_id):
                              **progress.PROGRESS_4_UPLOADING_IMAGES)
 
     # =====================================================
-    # 4. Upload images to CustomVision Project          ===
+    # 4. Upload images to Custom Vision Project         ===
     # =====================================================
     for part_id in part_ids:
         logger.info("Uploading images with part_id %s", part_id)
@@ -397,7 +397,7 @@ def train_project_worker(project_id):
             status_init = True
         if iteration.exportable and iteration.status == "Completed":
             break
-        logger.info("still training")
+        logger.info("Still training...")
 
     # =====================================================
     # 7. Exporting                                      ===
@@ -414,7 +414,7 @@ def train_project_worker(project_id):
         if len(exports) == 0 or not exports[0].download_uri:
 
             res = project_obj.export_iterationv3_2(iteration.id)
-            logger.info("Export Response: %s", res.json())
+            logger.info("Export response from Custom Vision: %s", res.json())
             continue
         break
 
@@ -422,7 +422,7 @@ def train_project_worker(project_id):
     # 8. Saving model and performance                   ===
     # =====================================================
     logger.info("Successfully export model: %s", project_obj.download_uri)
-    logger.info("Training Status: Completed")
+    logger.info("Training about to completed.")
 
     exports = trainer.get_exports(customvision_id, iteration.id)
     project_obj.download_uri = exports[0].download_uri
