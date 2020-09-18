@@ -69,3 +69,8 @@ class PdExportInfereceReadTimeout(APIException):
     status_code = 503
     default_detail = "Part Detection deploy failed cause Inference Module requests timeout."
     default_code = "pd_export_inference_read_timeout"
+
+class PdRelabelDemoProjectError(APIException):
+    status_code = 400
+    default_detail = "Demo project should not send relabel images."
+    default_code = "pd_relabel_demo_project_error"
