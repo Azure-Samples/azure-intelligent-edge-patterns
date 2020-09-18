@@ -20,17 +20,20 @@ logger = logging.getLogger(__name__)
 def azure_project_change_handler(**kwargs):
     """azure_project_change_handler.
     """
-    logger.info("Part azure_project_change_handler")
+
+    logger.info("Image azure_project_change_handler")
     instance = kwargs['instance']
-    try:
-        old_project = Project.objects.get(pk=instance.id)
-    except:
+    if not Project.objects.filter(pk=instance.id).exists():
         return
+    old_project = Project.objects.get(pk=instance.id)
     if old_project.customvision_id == instance.customvision_id:
         logger.info("Project customvision_id not changed. Pass")
         return
+    if old_project.customvision_id == "":
+        logger.info("Project just created on Custom Vision. Pass")
+        return
     instance.customvision_project_id_changed = True
-    logger.info("Project customvision_project_id changed...")
+    logger.info("Project customvision_id changed...")
     logger.info("Deleting all images....")
 
 
@@ -40,19 +43,18 @@ def azure_project_change_handler(**kwargs):
 def azure_project_post_save_handler(**kwargs):
     """azure_project_post_save_handler.
     """
-    # If project just created, pass.
+
     if kwargs['created']:
         logger.info("Project just created. Pass")
         return
     instance = kwargs['instance']
 
-    # If project customvision_id not change, pass.
     if not hasattr(instance, 'customvision_project_id_changed'
                   ) or not instance.customvision_project_id_changed:
         logger.info("Project customvision_id not changed. Pass")
         return
-
-    logger.info("Project customvision_id change. Delete images")
+    logger.info("Project customvision_id changed...")
+    logger.info("Deleting all Images...")
     Image.objects.filter(project=instance).delete()
 
 

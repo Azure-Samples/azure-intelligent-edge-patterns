@@ -26,16 +26,18 @@ def azure_project_change_handler(**kwargs):
     """
     logger.info("Part azure_project_change_handler")
     instance = kwargs['instance']
-    try:
-        old_project = Project.objects.get(pk=instance.id)
-        if old_project.customvision_id == instance.customvision_id:
-            logger.info("Custom Vision Project Id not changed... Pass")
-            return
-        instance.customvision_project_id_changed = True
-        logger.info("Project customvision_project_id changed...")
-        logger.info("Deleting all parts....")
-    except:
-        logger.info("Probably creating project")
+    if not Project.objects.filter(pk=instance.id).exists():
+        return
+    old_project = Project.objects.get(pk=instance.id)
+    if old_project.customvision_id == instance.customvision_id:
+        logger.info("Custom Vision Project Id not changed... Pass")
+        return
+    if old_project.customvision_id == "":
+        logger.info("Project just created on Custom Vision. Pass")
+        return
+    instance.customvision_project_id_changed = True
+    logger.info("Project customvision_project_id changed...")
+    logger.info("Deleting all parts....")
 
 
 @receiver(signal=post_save,
@@ -43,10 +45,8 @@ def azure_project_change_handler(**kwargs):
           dispatch_uid="delete_part_on_project_change")
 def azure_project_post_save_handler(**kwargs):
     """azure_project_post_save_handler.
-
-    Args:
-        kwargs:
     """
+
     if kwargs['created']:
         logger.info("Project just created. Pass")
         return
@@ -55,8 +55,8 @@ def azure_project_post_save_handler(**kwargs):
                   ) or not instance.customvision_project_id_changed:
         logger.info("Custom Vision project id not changed. Pass")
         return
-    logger.info(
-        "Custom Vision project id changed. Deleting all image of this project")
+    logger.info("Project customvision_project_id changed...")
+    logger.info("Deleting all Parts...")
     Part.objects.filter(project=instance).delete()
 
 
