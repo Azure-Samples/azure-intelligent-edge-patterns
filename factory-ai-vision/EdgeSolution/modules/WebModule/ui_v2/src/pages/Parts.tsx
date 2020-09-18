@@ -32,7 +32,7 @@ export const Parts: React.FC = () => {
         styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
       />
       <Stack styles={{ root: { padding: '15px' } }} grow>
-        <Breadcrumb items={[{ key: 'parts', text: 'Parts' }]} />
+        <Breadcrumb items={[{ key: 'parts', text: 'Objects' }]} />
         <PartDetailList onAddBtnClick={openPanel} />
       </Stack>
       <AddEditPartPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />

@@ -173,7 +173,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
               <WarningDialog
                 contentText={
                   <Text variant="large">
-                    Update Key / Namespace will remove all the parts, sure you want to update?
+                    Update Key / Namespace will remove all the objects, sure you want to update?
                   </Text>
                 }
                 confirmButton="Yes"
@@ -197,7 +197,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                   hidden={projectDialogHidden}
                   onDismiss={closeDialog}
                   title="Create new project"
-                  subText="Create a new project will remove all the parts and images"
+                  subText="Create a new project will remove all the objects and images"
                   onCreate={onCreateProject}
                 />
                 <Checkbox checked={loadFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
@@ -218,7 +218,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                   <WarningDialog
                     contentText={
                       <Text variant="large">
-                        Load Project will remove all the parts, sure you want to do that?
+                        Load Project will remove all the objects, sure you want to do that?
                       </Text>
                     }
                     trigger={<PrimaryButton text="Load" disabled={loading} />}
