@@ -17,7 +17,7 @@ from utility import get_file_zip, normalize_rtsp
 from invoke import gm
 #from tracker import Tracker
 from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
-from utility
+from utility import draw_label
 
 import logging
 

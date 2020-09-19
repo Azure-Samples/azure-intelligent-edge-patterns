@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 import sys
 import threading
 from concurrent import futures
@@ -52,45 +53,9 @@ def prediction():
     return json.dumps(s.last_prediction)
 
 
-# @app.route('/open_cam', methods=['GET'])
-# def open_cam():
-#     def post_img():
-#         headers = {'Content-Type': 'image/jpg'}
-#         while True:
-#             if onnx.cam_is_alive == False:
-#                 break
-#             onnx.lock.acquire()
-#             b, img = onnx.cam.read()
-#             onnx.lock.release()
-#             if b:
-#                 data = cv2.imencode(".jpg", img)[1].tobytes()
-#                 r = requests.post('http://127.0.0.1:5000/predict',
-#                                   headers=headers, data=data)
-#             time.sleep(0.02)
-
-#     if onnx.cam_is_alive == False:
-#         onnx.lock.acquire()
-#         onnx.cam_is_alive = True
-#         onnx.lock.release()
-#         threading.Thread(target=post_img).start()
-#         return 'open camera', 200
-#     else:
-#         return 'camera is already opened', 200
-
-# @app.route('/close_cam', methods=['GET'])
-# def close_cam():
-#     onnx.lock.acquire()
-#     onnx.cam_is_alive = False
-#     onnx.lock.release()
-#     return 'camera closed', 200
-
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
-    # FIXME
-    #inference_num = onnx.detection_success_num
-    #unidentified_num = onnx.detection_unidentified_num
-    #total = onnx.detection_total
     inference_num = 0
     unidentified_num = 0
     total = 0
@@ -369,6 +334,9 @@ def update_prob_threshold():
 def init_topology():
 
     instances = gm.invoke_graph_instance_list()
+    if instances['status'] != 200:
+        logger.warning('Failed to invoker direct method', instances['payload'])
+        return -1
     logger.info('========== Deleting {0} instance(s) =========='.format(
         len(instances['payload']['value'])))
 
@@ -379,6 +347,9 @@ def init_topology():
             instances['payload']['value'][i]['name'])
 
     topologies = gm.invoke_graph_topology_list()
+    if instances['status'] != 200:
+        logger.warning('Failed to invoker direct method', instances['payload'])
+        return -1
     logger.info('========== Deleting {0} topology =========='.format(
         len(topologies['payload']['value'])))
 
@@ -389,6 +360,8 @@ def init_topology():
     logger.info('========== Setting default grpc topology =========='.format(
         len(topologies['payload']['value'])))
     ret = gm.invoke_graph_grpc_topology_set()
+
+    return 1
 
 
 def Main():
@@ -401,7 +374,14 @@ def Main():
         logger.info('gRPC server port: {0}'.format(grpcServerPort))
 
         # init graph topology & instance
-        init_topology()
+        counter = 0
+        while init_topology() == -1:
+            if counter == 100:
+               logger.critical('Failed to init topology, please check whether direct method still works')
+               exit(-1)
+            logger.warning('Failed to init topology, try again 10 secs later')
+            time.sleep(10)
+            counter += 1
 
         # create gRPC server and start running
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
@@ -414,7 +394,8 @@ def Main():
 
     except:
         PrintGetExceptionDetails()
-        exit(-1)
+        raise
+        #exit(-1)
 
 
 if __name__ == "__main__":
