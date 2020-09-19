@@ -182,7 +182,8 @@ class Stream():
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
-        if self.model.detection_mode == 'PC':
+        detection_mode = self.model.get_detection_mode()
+        if detection_mode == 'PC':
             print('[INFO] Line INFO', line_info, flush=True)
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
@@ -208,7 +209,7 @@ class Stream():
                 print('Upading Line[*]:', flush=True)
                 print('    use_line   :', False, flush=True)
 
-        elif self.model.detection_mode == 'ES':
+        elif detection_mode == 'ES':
             print('[INFO] Zone INFO', zone_info, flush=True)
             self.scenario = DangerZone()
             self.scenario_type = self.model.detection_mode
@@ -235,7 +236,7 @@ class Stream():
                 print('Upading Zone[*]:', flush=True)
                 print('    use_zone   :', False, flush=True)
 
-        elif self.model.detection_mode == 'DD':
+        elif detection_mode == 'DD':
             print('[INFO] Line INFO', line_info, flush=True)
             self.scenario = DefeatDetection()
             self.scenario_type = self.model.detection_mode
@@ -263,6 +264,9 @@ class Stream():
                 self.use_line = False
                 print('Upading Line[*]:', flush=True)
                 print('    use_line   :', False, flush=True)
+        else:
+            self.scenario = None
+            self.scenario_type = self.model.detection_mode
 
     def get_mode(self):
         return self.model.detection_mode

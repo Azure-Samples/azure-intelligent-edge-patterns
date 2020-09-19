@@ -37,6 +37,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 
+        self.is_scenario = False
         self.detection_mode = "PD"
         self.threshold = 0.3
 
@@ -54,6 +55,15 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             self.max_frame_rate = CPU_MAX_FRAME_RATE
         self.update_frame_rate_by_number_of_streams(1)
 
+    def set_is_scenario(self, is_scenario):
+        self.is_scenario = is_scenario
+
+    def set_detection_mode(self, mode):
+        self.detection_mode = mode
+
+    def get_detection_mode(self):
+        if self.is_scenario == False: return 'PD'
+        else: return self.detection_mode
 
     def update_frame_rate_by_number_of_streams(self, number_of_streams):
         if number_of_streams > 0:
