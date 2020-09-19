@@ -199,19 +199,20 @@ def update_cams():
         if not cam_id:
             return 'missing cam_id'
 
-        # if 'aoi' in cam.keys():
-        #    aoi = json.loads(aoi)
-        #    has_aoi = aoi['useAOI']
-        #    aoi_info = aoi['AOIs']
-        # else:
-        #    has_aoi = False
-        #    aoi_info = None
+        if 'aoi' in cam.keys():
+            aoi = json.loads(cam['aoi'])
+            has_aoi = aoi['useAOI']
+            aoi_info = aoi['AOIs']
+            print('aoi information', aoi, flush=True)
+        else:
+            has_aoi = False
+            aoi_info = None
 
         logger.info('updating camera {0}'.format(cam_id))
         s = stream_manager.get_stream_by_id(cam_id)
         #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
-        s.update_cam(cam_type, cam_source, frame_rate, cam_id, False, [],
+        s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
                      onnx.detection_mode, line_info, zone_info)
 
     return 'ok'
