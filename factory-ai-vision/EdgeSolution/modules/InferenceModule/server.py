@@ -147,6 +147,11 @@ def update_model():
 
         print('[INFO] Got Model URI', model_uri, flush=True)
 
+        #FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
+        # workaround
+        onnx.set_detection_mode('PD')
+        onnx.set_is_scenario(False)
+
         if model_uri == onnx.model_uri:
             print('[INFO] Model Uri unchanged', flush=True)
         else:
@@ -160,6 +165,7 @@ def update_model():
 
     elif model_dir:
         print('[INFO] Got Model DIR', model_dir)
+        onnx.set_is_scenario(True)
         onnx.update_model(model_dir)
         print('[INFO] Update Finished ...')
         return 'ok'
@@ -222,7 +228,7 @@ def update_part_detection_mode():
 
     if part_detection_mode not in PART_DETECTION_MODE_CHOICES:
         return 'invalid part_detection_mode'
-    onnx.detection_mode = part_detection_mode
+    onnx.set_detection_mode(part_detection_mode)
     return 'ok'
 
 
