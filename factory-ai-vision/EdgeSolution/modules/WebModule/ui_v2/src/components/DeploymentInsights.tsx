@@ -20,7 +20,7 @@ const normalizeObjectCount = (obj: Record<string, number>): { name: string; valu
 
 type ScenarioMetrics = { name: string; count: number };
 const getNumOfDefects = (scenarioMetric: ScenarioMetrics[]): ScenarioMetrics[] =>
-  scenarioMetric.filter((e) => /_ok|_ng/.test(e.name));
+  scenarioMetric.filter((e) => !['all_objects', 'violation'].includes(e.name));
 
 export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId }) => {
   const [inferenceMetrics, setinferenceMetrics] = useState({
@@ -84,7 +84,7 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
         <ExpandPanel titleHidden="Object" suffix={inferenceMetrics.objectCounts.length.toString()}>
           <Stack tokens={{ childrenGap: 10 }}>
             {inferenceMetrics.objectCounts.map((e) => (
-              <Text key={e[0]}>{`${e[0]}: ${e[1]}`}</Text>
+              <Text key={e.name}>{`${e.name}: ${e.value}`}</Text>
             ))}
             {!!inferenceMetrics.numAccrossLine && (
               <Text>{`Total number of object pass the line: ${inferenceMetrics.numAccrossLine}`}</Text>
