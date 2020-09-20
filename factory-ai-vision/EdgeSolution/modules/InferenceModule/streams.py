@@ -127,6 +127,7 @@ class Stream():
         self.detection_unidentified_num = 0
         self.detection_total = 0
         self.detections = []
+        #self.last_prediction_count = {}
         if self.scenario:
             self.scenario.reset_metrics()
         self.mutex.release()
@@ -273,6 +274,8 @@ class Stream():
 
     def update_detection_status(self):
         self.mutex.acquire()
+
+
         detection_type = DETECTION_TYPE_NOTHING
         for prediction in self.last_prediction:
             if detection_type != DETECTION_TYPE_SUCCESS:
@@ -318,6 +321,8 @@ class Stream():
         self.max_images = max_images
         # FIMXE may need to move it to other place
         self.threshold = self.confidence_max
+        self.confidence_min = confidence_min
+        self.confidence_max = confidence_max
 
     def update_iothub_parameters(self, is_send, threshold, fpm):
         self.iothub_is_send = is_send
@@ -353,11 +358,20 @@ class Stream():
         # prediction
         self.mutex.acquire()
         predictions, inf_time = self.model.Score(image)
+        #print('predictions', predictions, flush=True)
         self.mutex.release()
 
         # check whether it's the tag we want
         predictions = list(
             p for p in predictions if p['tagName'] in self.model.parts)
+
+        # check whether it's larger than threshold 
+        predictions = list(
+            p for p in predictions if p['probability'] >= self.threshold)
+        #print('threshold', self.threshold, flush=True)
+        #print('predictions:', flush=True)
+        #for p in predictions:
+        #    print('  ', p, flush=True)
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -367,6 +381,16 @@ class Stream():
                 if is_inside_aoi(x1, y1, x2, y2, self.aoi_info):
                     _predictions.append(p)
             predictions = _predictions
+
+        # update last_prediction_count
+        _last_prediction_count = {}
+        for p in predictions:
+            tag = p['tagName']
+            if tag not in _last_prediction_count:
+                _last_prediction_count[tag] = 1
+            else:
+                _last_prediction_count[tag] += 1
+        self.last_prediction_count = _last_prediction_count
 
         # update the buffer
         # no need to copy since resize already did it
@@ -378,10 +402,10 @@ class Stream():
         _detections = []
         for prediction in predictions:
             tag = prediction['tagName']
-            if prediction['probability'] > 0.5:
-                (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                _detections.append(
-                    Detection(tag, x1, y1, x2, y2, prediction['probability']))
+            #if prediction['probability'] > 0.5:
+            (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
+            _detections.append(
+                Detection(tag, x1, y1, x2, y2, prediction['probability']))
         if self.scenario:
             self.scenario.update(_detections)
 
@@ -468,7 +492,7 @@ class Stream():
             for prediction in predictions:
                 if prediction['probability'] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), 1)
+                    cv2.rectangle(img, (x1, max(y1, 15)), (x2, y2), (255, 255, 255), 1)
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
@@ -548,7 +572,7 @@ def draw_confidence_level(img, prediction):
     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
     text = prediction['tagName'] + prob_str
-    img = draw_label(img, text, (x1, y1))
+    img = draw_label(img, text, (x1, max(y1, 15)))
 
     return img
 

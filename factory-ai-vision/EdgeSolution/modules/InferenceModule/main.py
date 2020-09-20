@@ -29,21 +29,21 @@ from utility import draw_label
 #tracker = Tracker()
 #tracker.set_line(170/2, 680/2, 1487/2, 815/2)
 
-scenario = PartCounter()
-scenario.set_line(185, 290, 793, 327)
+#scenario = PartCounter()
+#scenario.set_line(185, 290, 793, 327)
 
 
-scenario = DangerZone()
-scenario.set_zones([[85, 340, 743, 407]])
-scenario.set_targets(['Person'])
+#scenario = DangerZone()
+#scenario.set_zones([[85, 340, 743, 407]])
+#scenario.set_targets(['Person'])
 
 #scenario = DangerZone()
 #scenario.set_zones([[85, 340, 743, 407]])
 #scenario.set_targets(['Box'])
 
-#scenario = DefeatDetection()
-#scenario.set_ok('Bottle - OK')
-#scenario.set_ng('Bottle - NG')
+scenario = DefeatDetection()
+scenario.set_ok('Bottle - OK')
+scenario.set_ng('Bottle - NG')
 #scenario.set_line(600, 0, 600, 800)
 
 #scenario= DefeatDetection()
@@ -63,8 +63,8 @@ SCENARIO3_MODEL = 'scenario_models/3'
 DOWNLOADED_MODEL = 'model'
 
 ### CONFIGURATION <BEG> ###
-CAM_SOURCE = SCENARIO2_VIDEO
-MODEL      = SCENARIO2_MODEL
+CAM_SOURCE = SCENARIO3_VIDEO
+MODEL      = SCENARIO3_MODEL
 
 ### CONFIGURATION <END> ###
 
@@ -181,7 +181,7 @@ def draw_confidence_level(img, prediction):
     #img = cv2.putText(img, prediction['tagName']+prob_str,
     #                  (x1, y1-5), font, font_scale, (255, 255, 255), thickness)
     text = prediction['tagName'] + prob_str
-    img = draw_label(img, text, (x1, y1))
+    img = draw_label(img, text, (x1, max(y1, 15)))
 
     return img
 

@@ -266,9 +266,9 @@ class DefeatDetection(Scenario):
                 tag = self.detected[oid]['tag']
                 score = self.detected[oid]['score']
                 text = tag + ' ( ' + str(int(1000*score)/10) + '% )'
-                img = draw_label(img, text, (x1, y1))
+                img = draw_label(img, text, (x1, max(y1, 15)))
             if is_rect:
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255),
+                img = cv2.rectangle(img, (x1, max(y1, 15)), (x2, y2), (255, 255, 255),
                                     thickness)
                 #img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255),
                 #                    thickness)

@@ -311,9 +311,24 @@ def update_iothub_parameters():
 
 @app.route('/status')
 def get_scenario():
+    streams_status = []
+    for s in stream_manager.get_streams():
+        streams_status.append({
+            'cam_id': s.cam_id,
+            'stream_id': s.cam_id,
+            'cam_source': s.cam_source,
+            'cam_is_alive': s.cam_is_alive,
+            'confidence_min': s.confidence_min,
+            'confidence_max': s.confidence_max,
+            'max_images': s.max_images,
+            'threshold': s.threshold,
+            'has_aoi': s.has_aoi,
+            'is_retrain': s.is_retrain,
+        })
     return json.dumps({
         'num_streams': len(stream_manager.streams),
         'stream_ids': list(stream_manager.streams.keys()),
+        'streams_status': streams_status,
         'parts': onnx.parts,
         'scenario': onnx.detection_mode
     })
@@ -330,10 +345,12 @@ def update_prob_threshold():
 
     for s in stream_manager.get_streams():
         s.threshold = int(prob_threshold) * 0.01
-        s.detection_success_num = 0
-        s.detection_unidentified_num = 0
-        s.detection_total = 0
-        s.detections = []
+        print('[INFO] Updating', s, 'threshold to', s.threshold, flush=True)
+        #s.detection_success_num = 0
+        #s.detection_unidentified_num = 0
+        #s.detection_total = 0
+        #s.detections = []
+        s.reset_metrics()
 
     return 'ok'
 
