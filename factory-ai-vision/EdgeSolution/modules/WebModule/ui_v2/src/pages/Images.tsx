@@ -132,7 +132,7 @@ export const Images: React.FC = () => {
             <Pivot>
               <PivotItem headerText="Untagged">
                 {onRenderInstructionInsidePivot()}
-                {unlabeledImages.length === 0 ? (
+                {unlabeledImages.length === 0 && relabelImages.length === 0 ? (
                   <EmptyAddIcon
                     title="Looks like you don’t have any untagged images"
                     subTitle="Continue adding and tagging more images from your video streams to improve your model"
