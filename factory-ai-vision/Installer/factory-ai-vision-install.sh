@@ -27,7 +27,7 @@ rgName=visiononedge-rg
 # ############################## Install Prereqs ##############################  
 
 echo Installing / updating the IoT extension
-az extension add --name azure-iot
+az extension update --name azure-iot
 
 if [ ! $? -eq 0 ]; then
   # Azure CLI is not installed.  It has an MSI installer on Windows, or is available over REST.
