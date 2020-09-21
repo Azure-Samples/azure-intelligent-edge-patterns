@@ -9,7 +9,7 @@ products:
 - Onnxruntime
 - azure-iot-edge
 page_type: sample solution
-description: "This is a easy to use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop ."
+description: "This is a easy to use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop."
 urlFragment: custom-vision-azure-iot
 ---
 
@@ -21,9 +21,7 @@ You can define your location, camera and set up objects to detect example: any m
 Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to see brief introduction in action and understand how the value is delievered: 
 [![video](https://mediusprodstatic.studios.ms/video-28874/thumbnail.jpg?sv=2018-03-28&sr=c&sig=svseIEcORPXo2vyKdEbzetamD9qDI3gXgzKhlTbIHUM%3D&se=2025-05-15T13%3A06%3A01Z&sp=r)](https://channel9.msdn.com/Events/Build/2020/BOD131)
 
-# Architecture
 
-![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
 
 
 
@@ -40,7 +38,8 @@ or
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
 
-![Communication patterns between modules](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/azure%20stack%20flow.png)
+# Architecture
+![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
 
  
 ## Get Started 
@@ -96,11 +95,11 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Clone yadavm_factoryai_lpr branch 
     
-    git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git --single-branch --branch yadavm_factoryai_lpr
+    ```git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git --single-branch --branch yadavm_factoryai_lpr```
     
 - Go to factoryai directory and open your vscode
 
-    cd azure-intelligent-edge-patterns/factory-ai-vision
+    ```cd azure-intelligent-edge-patterns/factory-ai-vision```
     
 - Edit the ```env-template``` file, you should see something like this
 ```
@@ -145,12 +144,8 @@ To learn more about this development environment, check out [this tutorial](http
 
 ### Video Tutorial
 
-- [https://youtu.be/ORTwMYOxkVs]
-- Getting started with default model and message to cloud: https://youtu.be/WdNyS0PI6Zo
-- Define area of interest and show message to cloud: https://youtu.be/vN-SSxdKbkI
-- Your own stuff, add camera, location, part train and deploy a model: https://youtu.be/VNfOqP2Ag5U
-- Retrain your model with auto labeling: https://youtu.be/F_E1NxbiQyw
-- Giving feedback and changing projects in setting: https://youtu.be/i92pMdUVrng
+- Getting started with VS code [https://youtu.be/ORTwMYOxkVs]
+
 
 
 
