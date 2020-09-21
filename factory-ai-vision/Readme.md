@@ -67,7 +67,7 @@ Go to factory-ai-vision repo and click on Installers folder, there are two zip f
 
 ### Installer to deploy prebuild docker images (Method1)
 1. Open your browser, connect to https://shell.azure.com/ , switch to Bash
-2. Download acr.zip from github ```wget https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/Installer/acs.zip```
+2. Download acr.zip from github ```wget https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip```
 3. Unzip it ```unzip acs.zip```
 4. Execute the installer ```bash factory-ai-vision-install.sh```
 5. During the, you will enter your customvision credentials (optional), select your Azure Media Service, IoTHub, and Edge device. Note that if it's your first time to deploy, it will create a service principal for Azure Media Service, please backup the ```SERVICE_PRINCIPAL_SECRET``` by your own, which will be shown in the screen while selecing Azure Media Service. It won't be shown again once creating. If it's not the first time doing deployment via Installer, you will be asked to enter that secret
