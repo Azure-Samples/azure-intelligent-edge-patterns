@@ -9,7 +9,7 @@ products:
 - Onnxruntime
 - azure-iot-edge
 page_type: sample solution
-description: "This is a easy to use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop."
+description: "This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop."
 urlFragment: custom-vision-azure-iot
 ---
 
@@ -55,7 +55,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 ### Prerequisites
 
 Before installation, please make sure you have the following: 
-   1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
+   1.	At least one IoT Edge with port 8080 and 5000 opened and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
    2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
    3.   Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal 
 ### Get Started:
