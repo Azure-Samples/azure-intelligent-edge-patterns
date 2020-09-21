@@ -75,7 +75,13 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         <Text variant="mediumPlus" styles={{ root: { fontWeight: 'bold' } }}>
           {notification.title}
         </Text>
-        <IconButton iconProps={{ iconName: 'Cancel' }} onClick={() => onCancelClick(notification.id)} />
+        <IconButton
+          iconProps={{ iconName: 'Cancel' }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCancelClick(notification.id);
+          }}
+        />
       </Stack>
       <Text>{notification.content}</Text>
     </Stack>
