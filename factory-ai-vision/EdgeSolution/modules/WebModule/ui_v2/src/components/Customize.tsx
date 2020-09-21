@@ -29,7 +29,6 @@ const idxIconBase: IStyle = {
 const cardStyleSets = mergeStyleSets({
   container: {
     width: '300px',
-    height: '292px',
     borderRadius: '2px',
   },
   imgSection: {
@@ -38,8 +37,10 @@ const cardStyleSets = mergeStyleSets({
   },
   mainSection: {
     display: 'grid',
-    gridTemplateColumns: '35px auto',
-    gridTemplateRows: '30px auto 20px',
+    gridTemplateColumns: '24px auto',
+    columnGap: '11px',
+    gridTemplateRows: '1fr 1fr 30px',
+    rowGap: '4px',
     padding: '14px',
     paddingTop: 0,
   },
@@ -69,7 +70,7 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
         <GetStartedCard
           no={1}
           checked={hasCamera}
-          title="Connect cameras"
+          title="Connect your own video feed"
           contentTxt="Add and configure the cameras in the factory"
           actionTxt="Go to Cameras"
           actionLink="/cameras"
@@ -78,7 +79,7 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
         <GetStartedCard
           no={2}
           checked={hasImages && hasCamera}
-          title="Add images and tag objects"
+          title="Capture images and tag objects"
           contentTxt="Capture images from your video streams and tag objects"
           actionTxt="Go to Images"
           actionLink="/images"
@@ -88,7 +89,7 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
           no={3}
           checked={hasTask && hasImages && hasCamera}
           title="Ready to go!"
-          contentTxt="Start identifying objects from your cameras’ live streams"
+          contentTxt="Start identifying parts from your cameras’ live streams"
           actionTxt="Begin a task"
           actionLink="/home/deployment"
           src="/icons/customize_3.svg"
