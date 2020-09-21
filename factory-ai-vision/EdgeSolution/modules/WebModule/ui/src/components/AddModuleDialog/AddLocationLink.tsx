@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 
 import { AddModuleDialog } from '.';
-import { postLocation } from '../../store/location/locationActions';
+import { postLocation } from '../../store/locationSlice';
 
 export const AddLocationLink = () => {
   const dispatch = useDispatch();

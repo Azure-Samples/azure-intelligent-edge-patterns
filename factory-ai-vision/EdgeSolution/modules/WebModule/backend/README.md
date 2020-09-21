@@ -1,4 +1,4 @@
-# Vision On Edge Web Module
+# Vision On Edge - Web Module
 
 ## How to run
 

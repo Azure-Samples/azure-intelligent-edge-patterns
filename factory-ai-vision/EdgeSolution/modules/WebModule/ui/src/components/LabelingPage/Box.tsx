@@ -2,13 +2,9 @@ import React, { useState, useRef, useEffect, FC, useCallback } from 'react';
 import { Line, Group, Circle } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import {
-  BoxLabel,
-  Box2dComponentProps,
-  WorkState,
-  LabelingCursorStates,
-} from '../../store/labelingPage/labelingPageTypes';
-import { updateAnnotation } from '../../store/labelingPage/labelingPageActions';
+import { Box2dComponentProps, WorkState, LabelingCursorStates } from './type';
+import { updateAnnotation } from '../../store/annotationSlice';
+import { BoxLabel } from '../../store/type';
 
 export const Box2d: FC<Box2dComponentProps> = ({
   scale,
@@ -32,7 +28,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
     if (!dispatch) return;
     const newAnnotation = { ...annotation };
     newAnnotation.label = vertices;
-    dispatch(updateAnnotation(annotationIndex, newAnnotation));
+    dispatch(updateAnnotation({ id: newAnnotation.id, changes: newAnnotation }));
   };
 
   const mouseMoveListener = useCallback(

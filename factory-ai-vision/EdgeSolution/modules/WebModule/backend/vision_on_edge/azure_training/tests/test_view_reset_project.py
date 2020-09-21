@@ -85,7 +85,7 @@ class ResetProjectTestCase(CustomVisionTestCase):
         valid_project = Project.objects.filter(setting=valid_setting).first()
         url = reverse('api:project-detail', kwargs={'pk': valid_project.id})
         response = self.client.get(
-            path=(url+'/reset_project'),
+            path=(url + '/reset_project'),
             data={'project_name': f'{self.project_prefix}-test-reset-1'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -109,7 +109,7 @@ class ResetProjectTestCase(CustomVisionTestCase):
         valid_project = Project.objects.filter(setting=valid_setting).first()
         url = reverse('api:project-detail', kwargs={'pk': valid_project.id})
         response = self.client.get(
-            path=(url+'/reset_project'),
+            path=(url + '/reset_project'),
             data={'project_name': f'{self.project_prefix}-test-reset-1'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -136,7 +136,7 @@ class ResetProjectTestCase(CustomVisionTestCase):
             setting=invalid_setting).first()
         url = reverse('api:project-detail', kwargs={'pk': invalid_project.id})
         response = self.client.get(
-            path=(url+'/reset_project'),
+            path=(url + '/reset_project'),
             data={'project_name': f'{self.project_prefix}-test-reset-2'})
 
         self.assertNotEqual(response.status_code, status.HTTP_200_OK)

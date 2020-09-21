@@ -1,6 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
-import type { State } from '../State';
+import type { State } from 'RootStateType';
 
 type SettingData = {
   id: number;

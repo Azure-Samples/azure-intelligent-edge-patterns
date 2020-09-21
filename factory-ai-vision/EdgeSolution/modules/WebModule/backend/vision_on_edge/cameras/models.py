@@ -8,11 +8,11 @@ from django.db import models
 from django.db.models.signals import post_save, pre_save
 
 from vision_on_edge.general.utils import normalize_rtsp
+
 from ..azure_iot.utils import inference_module_url
+from ..locations.models import Location
 
 logger = logging.getLogger(__name__)
-
-# Create your models here.
 
 
 class Camera(models.Model):
@@ -22,6 +22,9 @@ class Camera(models.Model):
     rtsp = models.CharField(max_length=1000)
     area = models.CharField(max_length=1000, blank=True)
     is_demo = models.BooleanField(default=False)
+    location = models.ForeignKey(Location,
+                                 on_delete=models.SET_NULL,
+                                 null=True)
 
     def __str__(self):
         return self.name
