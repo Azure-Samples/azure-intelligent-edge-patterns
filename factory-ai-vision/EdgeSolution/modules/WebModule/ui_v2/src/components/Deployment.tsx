@@ -240,13 +240,7 @@ export const Deployment: React.FC = () => {
       <Stack horizontal styles={{ root: { height: '100%' } }}>
         {onRenderMain()}
       </Stack>
-      <ConfigTaskPanel
-        isOpen={isEditPanelOpen}
-        onDismiss={closePanel}
-        projectData={projectData}
-        isDemo={isDemo}
-        isEdit
-      />
+      <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closePanel} projectData={projectData} isEdit />
     </>
   );
 };
