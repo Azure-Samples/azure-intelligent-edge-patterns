@@ -21,6 +21,12 @@ You can define your location, camera and set up objects to detect example: any m
 Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to see brief introduction in action and understand how the value is delievered: 
 [![video](https://mediusprodstatic.studios.ms/video-28874/thumbnail.jpg?sv=2018-03-28&sr=c&sig=svseIEcORPXo2vyKdEbzetamD9qDI3gXgzKhlTbIHUM%3D&se=2025-05-15T13%3A06%3A01Z&sp=r)](https://channel9.msdn.com/Events/Build/2020/BOD131)
 
+# Architecture
+
+![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
+
+
+
 
 # Prerequiste
 ## Hardware
@@ -168,37 +174,5 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
 
-
-# Installation Guide (New Version)
-
-We provide two ways:
-- Installer, a shell script that will deploy the prebuild docker images
-- Build from source, build the docker images by yourself and deploy
-
-### Architecture
-
-![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
-
-
-### Prerequisite
-- An active Azure subscription
-- Azure resources deployed in the Azure subscription
-    
-    a. Azure IoT Hub
-    
-    b. Azure Media Services
-    
-    c. Azure container registry
-
-- A GPU Azure Stack Edge or A GPU Linux edge device with IoT Edge runtime (with port 8080 and 5000 opened)
-- [Visual Studio](https://code.visualstudio.com/) Code on your development machine with following extensions
-    
-    a. [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools)
-    
-    b. [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-
-- [Docker](https://docs.docker.com/engine/install/) on your development machine
-
-- If you don't have previous experience about Azure IoT Hub/Edge and Azure Media Service, please follow [this lab]<https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/deploy-iot-edge-device> which will giva an introduction and launch these services
 
 
