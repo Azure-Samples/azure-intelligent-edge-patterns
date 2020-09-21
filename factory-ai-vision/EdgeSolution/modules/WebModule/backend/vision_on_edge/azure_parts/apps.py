@@ -24,6 +24,7 @@ class AzurePartsConfig(AppConfig):
             # pylint: disable = import-outside-toplevel
             # pylint: disable = unused-import
 
+            from vision_on_edge.azure_training.models import Project
             from vision_on_edge.azure_parts.models import Part
             from vision_on_edge.azure_parts import signals
 
@@ -32,6 +33,12 @@ class AzurePartsConfig(AppConfig):
             create_demo = True
             if create_demo:
                 logger.info("Creating demo parts...")
+
+                # TODO: change this if multi demo projects
+                if Project.objects.filter(is_demo=True).count() != 1:
+                    return
+
+                project_obj = Project.objects.get(is_demo=True)
                 # for partname in ['Box', 'Barrel', 'Hammer',
                 #   'Screwdriver', 'Bottle', 'Plastic bag']:
                 for partname in [
@@ -56,9 +63,10 @@ class AzurePartsConfig(AppConfig):
                         'train',
                         'tvmonitor',
                 ]:
+
                     Part.objects.update_or_create(
+                        project=project_obj,
                         name=partname,
-                        is_demo=True,
                         defaults={'description': "Demo"})
                 logger.info("Creating demo parts finished.")
 

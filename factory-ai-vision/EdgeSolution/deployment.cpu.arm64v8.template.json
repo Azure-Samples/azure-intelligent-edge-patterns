@@ -65,14 +65,13 @@
             "env": {
               "TRAINING_KEY": { "value": "<CUSTOM-VISION-TRAINING-KEY>" },
               "ENDPOINT": { "value": "<CUSTOM-VISION-ENDPOINT>" },
-              "DJANGO_ENV": { "value": "production" },
               "DBNAME": { "value": "vision_on_edge" },
               "DBHOST": { "value": "172.18.0.1" },
               "DBUSER": { "value": "vision_on_edge" },
               "DBPASS": { "value": "vision_on_edge" }
             },
             "settings": {
-              "image": "${MODULES.WebModule}",
+              "image": "${MODULES.WebModule.arm64v8-ubuntu}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
@@ -97,7 +96,7 @@
               "POSTGRES_DB": { "value": "vision_on_edge" }
             },
             "settings": {
-              "image": "${MODULES.WebDBModule}",
+              "image": "${MODULES.WebDBModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
@@ -116,19 +115,29 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              }
+            },
             "settings": {
               "image": "${MODULES.InferenceModule.cpuarm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "NetworkMode": "host",
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
+                  },
                   "runtime": "runc"
-                },
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "Env": ["DISPLAY=:0"]
+                }
               }
             }
           }

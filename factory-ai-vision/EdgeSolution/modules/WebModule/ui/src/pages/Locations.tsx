@@ -2,18 +2,16 @@ import React, { useEffect, FC } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { State } from '../store/State';
-import { Location } from '../store/location/locationTypes';
 import ImageLink from '../components/ImageLink';
-import { getLocations, postLocation } from '../store/location/locationActions';
 import { AddModuleDialog } from '../components/AddModuleDialog';
+import { getLocations, selectAllLocations, postLocation } from '../store/locationSlice';
 
 const Locations: FC = () => {
   const dispatch = useDispatch();
-  const locations = useSelector<State, Location[]>((state) => state.locations.filter((e) => !e.is_demo));
+  const locations = useSelector(selectAllLocations);
 
   useEffect(() => {
-    dispatch(getLocations());
+    dispatch(getLocations(false));
   }, [dispatch]);
   return (
     <div
@@ -29,7 +27,7 @@ const Locations: FC = () => {
         {locations.map((location, i) => (
           <ImageLink
             key={i}
-            to={`/locations/detail?name=${location.name}`}
+            to={`/locations/detail?id=${location.id}`}
             defaultSrc="/icons/defaultLocation.png"
             width="6.25em"
             height="6.25em"
