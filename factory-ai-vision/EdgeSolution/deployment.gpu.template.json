@@ -158,8 +158,7 @@
                       "max-file": "10"
                     }
                   },
-                  "Binds": [
-                  ],
+                  "Binds": [],
                   "IpcMode": "shareable"
                 }
               }

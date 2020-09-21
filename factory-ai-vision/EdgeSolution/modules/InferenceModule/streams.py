@@ -272,15 +272,16 @@ class Stream():
     def get_mode(self):
         return self.model.detection_mode
 
-    def update_detection_status(self):
+    def update_detection_status(self, predictions):
         self.mutex.acquire()
 
 
         detection_type = DETECTION_TYPE_NOTHING
-        for prediction in self.last_prediction:
+        for prediction in predictions:
             if detection_type != DETECTION_TYPE_SUCCESS:
                 if prediction['probability'] >= self.threshold:
                     detection_type = DETECTION_TYPE_SUCCESS
+                    break
                 else:
                     detection_type = DETECTION_TYPE_UNIDENTIFIED
 
@@ -365,13 +366,6 @@ class Stream():
         predictions = list(
             p for p in predictions if p['tagName'] in self.model.parts)
 
-        # check whether it's larger than threshold 
-        predictions = list(
-            p for p in predictions if p['probability'] >= self.threshold)
-        #print('threshold', self.threshold, flush=True)
-        #print('predictions:', flush=True)
-        #for p in predictions:
-        #    print('  ', p, flush=True)
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -381,6 +375,22 @@ class Stream():
                 if is_inside_aoi(x1, y1, x2, y2, self.aoi_info):
                     _predictions.append(p)
             predictions = _predictions
+
+
+        # update detection status before filter out by threshold
+        self.update_detection_status(predictions)
+
+        if self.is_retrain:
+            self.process_retrain_image(predictions, image)
+
+        if self.iothub_is_send:
+            self.process_send_message_to_iothub(predictions)
+
+
+        # check whether it's larger than threshold 
+        predictions = list(
+            p for p in predictions if p['probability'] >= self.threshold)
+
 
         # update last_prediction_count
         _last_prediction_count = {}
@@ -409,7 +419,6 @@ class Stream():
         if self.scenario:
             self.scenario.update(_detections)
 
-        self.update_detection_status()
 
         self.draw_img()
         if self.model.send_video_to_cloud:
@@ -429,14 +438,9 @@ class Stream():
         inf_time_ms = inf_time * 1000
         self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
 
-        if self.is_retrain:
-            self.process_retrain_image()
 
-        if self.iothub_is_send:
-            self.process_send_message_to_iothub()
-
-    def process_retrain_image(self):
-        for prediction in self.last_prediction:
+    def process_retrain_image(self, predictions, img):
+        for prediction in predictions:
             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
                 confidence = prediction['probability']
                 print('comparing...', self.confidence_min,
@@ -445,7 +449,6 @@ class Stream():
                     print('preparing...', flush=True)
                     # prepare the data to send
                     tag = prediction['tagName']
-                    img = self.last_img
                     height, width = img.shape[0], img.shape[1]
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
                     labels = json.dumps(
@@ -458,12 +461,10 @@ class Stream():
                     self.last_upload_time = time.time()
                     break
 
-    def process_send_message_to_iothub(self):
+    def process_send_message_to_iothub(self, predictions):
         if self.iothub_last_send_time + self.iothub_interval < time.time():
-            predictions = []
-            for p in self.last_prediction:
-                if p['probability'] >= self.iothub_threshold:
-                    predictions.append(p)
+            predictions = list(
+                p for p in predictions if p['probability'] >= self.threshold)
             send_message_to_iothub(predictions)
             self.iothub_last_send_time = time.time()
 
