@@ -145,8 +145,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 ### Video Tutorial
 
-[https://youtu.be/ORTwMYOxkVs]
-[![video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/Installer%20instruction.png)](https://youtu.be/NWKLk8ENo-g)
+- [https://youtu.be/ORTwMYOxkVs]
 - Getting started with default model and message to cloud: https://youtu.be/WdNyS0PI6Zo
 - Define area of interest and show message to cloud: https://youtu.be/vN-SSxdKbkI
 - Your own stuff, add camera, location, part train and deploy a model: https://youtu.be/VNfOqP2Ag5U
