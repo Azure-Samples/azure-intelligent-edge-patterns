@@ -8,7 +8,7 @@ const navLinks: INavLink[] = [
     url: '/home',
     iconProps: {
       imageProps: {
-        src: '/icons/home.png',
+        src: '/icons/home.svg',
       },
     },
   },
@@ -17,7 +17,7 @@ const navLinks: INavLink[] = [
     url: '/cameras',
     iconProps: {
       imageProps: {
-        src: '/icons/cameras.png',
+        src: '/icons/cameras.svg',
       },
     },
   },
@@ -26,7 +26,7 @@ const navLinks: INavLink[] = [
     url: '/images',
     iconProps: {
       imageProps: {
-        src: '/icons/images.png',
+        src: '/icons/images.svg',
       },
     },
   },
@@ -35,7 +35,7 @@ const navLinks: INavLink[] = [
     url: '/parts',
     iconProps: {
       imageProps: {
-        src: '/icons/parts.png',
+        src: '/icons/objects.svg',
       },
     },
   },
