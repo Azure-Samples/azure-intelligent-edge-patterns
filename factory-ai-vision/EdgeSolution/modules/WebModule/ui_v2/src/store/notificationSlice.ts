@@ -1,5 +1,6 @@
-import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import { createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import Axios from 'axios';
+import { State } from 'RootStateType';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
 export type Notification = {
@@ -25,8 +26,8 @@ export const deleteNotification = createWrappedAsync<any, number>('notifications
   return id;
 });
 
-export const clearAllNotifications = createWrappedAsync('notifications/clearAll', async (id) => {
-  await Axios.delete(`api/notifications/delete_all/`);
+export const clearAllNotifications = createWrappedAsync('notifications/clearAll', async () => {
+  await Axios.delete(`/api/notifications/delete_all/`);
 });
 
 const getLinkByNotificationType = (notificationType: string): string => {
@@ -48,7 +49,7 @@ const slice = createSlice({
   name: 'notifications',
   initialState: entityAdapter.getInitialState(),
   reducers: {
-    recieveNotification: (state, action) => {
+    receiveNotification: (state, action) => {
       entityAdapter.addOne(state, getNormalizeNotification(action.payload, true));
     },
     openNotificationPanel: (state) => {
@@ -66,9 +67,19 @@ const slice = createSlice({
         );
       })
       .addCase(deleteNotification.fulfilled, entityAdapter.removeOne)
-      .addCase(clearAllNotifications.fulfilled, entityAdapter.getInitialState);
+      .addCase(clearAllNotifications.fulfilled, () => entityAdapter.getInitialState());
   },
 });
 
 const { reducer } = slice;
 export default reducer;
+
+export const { receiveNotification, openNotificationPanel } = slice.actions;
+
+export const { selectAll: selectAllNotifications } = entityAdapter.getSelectors(
+  (state: State) => state.notifications,
+);
+
+export const selectUnreadNotification = createSelector(selectAllNotifications, (notifications) =>
+  notifications.filter((n) => n.unRead),
+);

@@ -11,8 +11,12 @@ import {
 } from '@fluentui/react';
 import { WaffleIcon, SettingsIcon, FeedbackIcon, RingerIcon } from '@fluentui/react-icons';
 import { useBoolean } from '@uifabric/react-hooks';
+import { useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { FeedbackDialog } from './FeedbackDialog';
+import { selectUnreadNotification } from '../store/notificationSlice';
+import { NotificationPanel } from './NotificationPanel';
 
 const theme = getTheme();
 
@@ -62,6 +66,8 @@ type TopNavProps = {
 export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
   const history = useHistory();
   const [feedbackHidden, { setFalse: openFeedback, setTrue: closeFeedback }] = useBoolean(true);
+  const [notificationOpen, { setFalse: closeNotification, setTrue: openNotification }] = useBoolean(false);
+  const notificationCount = useSelector((state: State) => selectUnreadNotification(state).length);
 
   const commandBarFarItems: ICommandBarItemProps[] = [
     {
@@ -77,13 +83,13 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
       onRenderIcon: () => {
         return (
           <div>
-            <div className={classes.badage}>3</div>
+            {!!notificationCount && <div className={classes.badage}>{notificationCount}</div>}
             <RingerIcon className={classes.icon} />
           </div>
         );
       },
       buttonStyles: commandBarBtnStyles,
-      onClick: openFeedback,
+      onClick: openNotification,
     },
     {
       key: 'setting',
@@ -114,6 +120,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
     <>
       <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />
       <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} />
+      <NotificationPanel isOpen={notificationOpen} onDismiss={closeNotification} />
     </>
   );
 };
