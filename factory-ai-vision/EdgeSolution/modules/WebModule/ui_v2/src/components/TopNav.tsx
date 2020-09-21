@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -6,12 +7,16 @@ import {
   IButtonStyles,
   getTheme,
   ICommandBarStyles,
+  mergeStyleSets,
 } from '@fluentui/react';
-import { WaffleIcon, SettingsIcon, FeedbackIcon } from '@fluentui/react-icons';
+import { WaffleIcon, SettingsIcon, FeedbackIcon, RingerIcon } from '@fluentui/react-icons';
 import { useBoolean } from '@uifabric/react-hooks';
+import { useSelector } from 'react-redux';
 
+import { State } from 'RootStateType';
 import { FeedbackDialog } from './FeedbackDialog';
-
+import { selectUnreadNotification } from '../store/notificationSlice';
+import { NotificationPanel } from './NotificationPanel';
 
 const theme = getTheme();
 
@@ -37,26 +42,59 @@ const commandBarStyles: ICommandBarStyles = {
   },
 };
 
+const classes = mergeStyleSets({
+  badage: {
+    position: 'absolute',
+    right: 5,
+    top: 10,
+    background: '#005A9E',
+    color: 'white',
+    borderRadius: '16px',
+    width: '16px',
+    height: '16px',
+    fontSize: '10px',
+  },
+  icon: {
+    fontSize: '16px',
+  },
+});
+
 type TopNavProps = {
   onSettingClick: () => void;
-}
+};
 
 export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
   const history = useHistory();
   const [feedbackHidden, { setFalse: openFeedback, setTrue: closeFeedback }] = useBoolean(true);
+  const [notificationOpen, { setFalse: closeNotification, setTrue: openNotification }] = useBoolean(false);
+  const notificationCount = useSelector((state: State) => selectUnreadNotification(state).length);
 
   const commandBarFarItems: ICommandBarItemProps[] = [
     {
       key: 'feedback',
       iconOnly: true,
-      onRenderIcon: () => <FeedbackIcon />,
+      onRenderIcon: () => <FeedbackIcon className={classes.icon} />,
       buttonStyles: commandBarBtnStyles,
-      onClick: openFeedback
+      onClick: openFeedback,
+    },
+    {
+      key: 'notification',
+      iconOnly: true,
+      onRenderIcon: () => {
+        return (
+          <div>
+            {!!notificationCount && <div className={classes.badage}>{notificationCount}</div>}
+            <RingerIcon className={classes.icon} />
+          </div>
+        );
+      },
+      buttonStyles: commandBarBtnStyles,
+      onClick: openNotification,
     },
     {
       key: 'setting',
       iconOnly: true,
-      onRenderIcon: () => <SettingsIcon />,
+      onRenderIcon: () => <SettingsIcon className={classes.icon} />,
       buttonStyles: commandBarBtnStyles,
       onClick: onSettingClick,
     },
@@ -78,8 +116,11 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
     },
   ];
 
-  return <>
-    <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />
-    <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} />
-  </>;
+  return (
+    <>
+      <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />
+      <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} />
+      <NotificationPanel isOpen={notificationOpen} onDismiss={closeNotification} />
+    </>
+  );
 };
