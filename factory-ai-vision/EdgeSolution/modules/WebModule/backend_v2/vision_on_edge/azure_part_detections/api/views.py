@@ -228,7 +228,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise PdRelabelConfidenceOutOfRange
 
         # Relabel images count does not exceed project.maxImages
-        if project_obj.maxImages > Image.objects.filter(
+        if instance.maxImages > Image.objects.filter(
                 project=project_obj, part=part, is_relabel=True).count():
             img_io = serializer.validated_data["img"].file
 
@@ -278,7 +278,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         for _ in range(
                 Image.objects.filter(
                     project=project_obj, part=part, is_relabel=True).count() -
-                project_obj.maxImages):
+                instance.maxImages):
             Image.objects.filter(
                 project=project_obj, part=part,
                 is_relabel=True).order_by("timestamp").last().delete()
