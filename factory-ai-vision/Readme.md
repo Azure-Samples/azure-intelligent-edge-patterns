@@ -40,7 +40,7 @@ Check out the architecture below to see how Vision on Edge works. You can also g
 
 
 # Architecture
-![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
+![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/factoryaidiagram.png)
 
  
 ## Get Started 
