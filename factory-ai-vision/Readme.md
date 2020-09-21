@@ -141,7 +141,11 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
 
-# New Version 
+# Installation Guide (New Version)
+
+We provide two ways:
+- Installer, a shell script that will deploy the prebuild docker images
+- Build from source, build the docker images by yourself and deploy
 
 ## Prerequisite
 - An active Azure subscription
@@ -163,7 +167,7 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 - (Build from source only)[Docker](https://docs.docker.com/engine/install/) on your development machine
 
 
-### Installer
+### Installer (Method1)
 1. Open your browser, connect to https://shell.azure.com/ , switch to Bash
 2. Download acr.zip from github ```wget https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/Installer/acs.zip```
 3. Unzip it ```unzip acs.zip```
@@ -172,7 +176,7 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 6. If it's the first time deployment, you will be expected to wait around 10-15 minutes
 7. Open your browser, connect to http://YOUR_IP:8080
 
-### Build from source code
+### Build from source code (Method2)
 - Clone yadavm_factoryai_lpr branch 
 
     ```bash
