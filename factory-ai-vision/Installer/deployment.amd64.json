@@ -113,7 +113,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "factoryairegistry.azurecr.io/intelligentedge/rtspsimmodule:0.0.6-amd64",
+              "image": "intelligentedge/rtspsimmodule:0.0.6-amd64",
               "createOptions": "{\"HostConfig\":{}}"
             }
           }
