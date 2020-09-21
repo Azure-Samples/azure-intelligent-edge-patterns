@@ -141,9 +141,9 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
 
-# New Version Build From Source
+# New Version 
 
-### Prerequisite
+## Prerequisite
 - An active Azure subscription
 - Azure resources deployed in the Azure subscription
     
@@ -154,15 +154,25 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
     c. Azure container registry
 
 - A GPU Linux edge device with IoT Edge runtime (with port 8080 and 5000 opened)
-- [Visual Studio](https://code.visualstudio.com/) Code on your development machine with following extensions
+- (Build from source only)[Visual Studio](https://code.visualstudio.com/) Code on your development machine with following extensions
     
     a. [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools)
     
     b. [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 
-- [Docker](https://docs.docker.com/engine/install/) on your development machine
+- (Build from source only)[Docker](https://docs.docker.com/engine/install/) on your development machine
 
-### Get the source code
+
+### Installer
+1. Open your browser, connect to https://shell.azure.com/ , switch to Bash
+2. Download acr.zip from github ```wget https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/Installer/acs.zip```
+3. Unzip it ```unzip acs.zip```
+4. Execute the installer ```bash factory-ai-vision-install.sh```
+5. During the, you will enter your customvision credentials (optional), select your Azure Media Service, IoTHub, and Edge device. Note that if it's your first time to deploy, it will create a service principal for Azure Media Service, please backup the ```SERVICE_PRINCIPAL_SECRET``` by your own, which will be shown in the screen while selecing Azure Media Service. It won't be shown again once creating. If it's not the first time doing deployment via Installer, you will be asked to enter that secret
+6. If it's the first time deployment, you will be expected to wait around 10-15 minutes
+7. Open your browser, connect to http://YOUR_IP:8080
+
+### Build from source code
 - Clone yadavm_factoryai_lpr branch 
 
     ```bash
