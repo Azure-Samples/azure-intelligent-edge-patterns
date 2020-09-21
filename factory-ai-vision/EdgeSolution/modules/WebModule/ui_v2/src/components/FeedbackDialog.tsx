@@ -6,6 +6,8 @@ import {
   ProgressIndicator,
   Rating,
   RatingSize,
+  Stack,
+  Text,
 } from '@fluentui/react';
 import Axios from 'axios';
 import React, { useState } from 'react';
@@ -39,16 +41,24 @@ export const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ hidden, onDismis
     <Dialog
       hidden={hidden}
       onDismiss={onDismiss}
+      minWidth={600}
       dialogContentProps={{
         title: 'Your feedback is greatly appreciated!',
-        subText: 'Rate your experience',
         showCloseButton: true,
         onDismiss,
+        styles: {
+          header: {
+            textAlign: 'center',
+          },
+        },
       }}
     >
       <ProgressIndicator progressHidden={!loading} />
-      <Rating max={5} size={RatingSize.Large} rating={rating} onChange={onRateChange} />
-      <DialogFooter>
+      <Stack horizontalAlign="center">
+        <Text variant="large">Rate your experience</Text>
+        <Rating max={5} size={RatingSize.Large} rating={rating} onChange={onRateChange} />
+      </Stack>
+      <DialogFooter styles={{ actions: { display: 'flex', justifyContent: 'center' } }}>
         <PrimaryButton text="OK" disabled={loading} onClick={onUpdate} />
         <DefaultButton
           text="Give detail feedback"
