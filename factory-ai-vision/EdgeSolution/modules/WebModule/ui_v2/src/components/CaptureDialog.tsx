@@ -36,18 +36,14 @@ enum Status {
 type CaptureDialogProps = {
   isOpen: boolean;
   onDismiss: () => void;
-  defaultSelectedCameraId?: number;
   partId?: number;
 };
 
-export const CaptureDialog: React.FC<CaptureDialogProps> = ({
-  isOpen,
-  onDismiss,
-  defaultSelectedCameraId,
-  partId = null,
-}) => {
-  const [selectedCameraId, setSelectedCameraId] = useState(defaultSelectedCameraId);
+export const CaptureDialog: React.FC<CaptureDialogProps> = ({ isOpen, onDismiss, partId = null }) => {
   const cameraOptions = useSelector(cameraOptionsSelector);
+  const [selectedCameraId, setSelectedCameraId] = useState(
+    cameraOptions.length === 1 ? cameraOptions[0].key : null,
+  );
   const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
   const dispatch = useDispatch();
   const [status, setStatus] = useState<Status>(Status.Waiting);
@@ -80,7 +76,11 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({
   };
 
   useEffect(() => {
-    dispatch(getCameras(false));
+    (async () => {
+      const res = await dispatch(getCameras(false));
+      const { payload } = res as any;
+      if (payload && payload.result.length === 1) setSelectedCameraId(payload.result[0]);
+    })();
   }, [dispatch]);
 
   useEffect(() => {

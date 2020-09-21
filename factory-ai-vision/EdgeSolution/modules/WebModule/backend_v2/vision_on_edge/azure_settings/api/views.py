@@ -9,12 +9,13 @@ import logging
 from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 
-from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from ...general.api.serializers import MSStyleErrorResponseSerializer
+from ...general.shortcuts import drf_get_object_or_404
 from ..exceptions import (SettingCustomVisionAccessFailed,
                           SettingEmptyEndpointError, SettingEmptyKeyError)
 from ..models import Setting
@@ -32,13 +33,16 @@ class SettingViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
 
     @swagger_auto_schema(operation_summary='List all Custom Vision projects.',
-                         responses={'200': ListProjectSerializer})
+                         responses={
+                             '200': ListProjectSerializer,
+                             '400': MSStyleErrorResponseSerializer
+                         })
     @action(detail=True, methods=["get"])
     def list_projects(self, request, pk=None) -> Response:
         """list_projects.
         """
         queryset = self.get_queryset()
-        setting_obj = get_object_or_404(queryset, pk=pk)
+        setting_obj = drf_get_object_or_404(queryset, pk=pk)
 
         try:
             if not setting_obj.training_key:
@@ -57,6 +61,3 @@ class SettingViewSet(viewsets.ModelViewSet):
             return Response(serializer.validated_data)
         except CustomVisionErrorException:
             raise SettingCustomVisionAccessFailed
-
-
-# pylint: enable=too-many-ancestors

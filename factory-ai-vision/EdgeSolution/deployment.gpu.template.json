@@ -158,10 +158,7 @@
                       "max-file": "10"
                     }
                   },
-                  "Binds": [
-                    "/home/willy/media/:/var/media/",
-                    "/home/willy/media/azuremediaservices:/var/lib/azuremediaservices/"
-                  ],
+                  "Binds": [],
                   "IpcMode": "shareable"
                 }
               }
@@ -204,10 +201,10 @@
     "lvaEdge": {
       "properties.desired": {
         "applicationDataDirectory": "/var/media",
-        "azureMediaServicesArmId": "/subscriptions/<SUBSCRIPTION_ID>/resourcegroups/<RESOURCE_GROUP>/providers/microsoft.media/mediaservices/<SERVICE_NAME>",
-        "aadTenantId": "<TENANT_ID>",
-        "aadServicePrincipalAppId": "<SERVICE_PRINCIPAL_APP_ID>",
-        "aadServicePrincipalSecret": "<SERVICE_PRINCIPAL_SECRET>",
+        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourcegroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$SERVICE_NAME",
+        "aadTenantId": "$TENANT_ID",
+        "aadServicePrincipalAppId": "$SERVICE_PRINCIPAL_APP_ID",
+        "aadServicePrincipalSecret": "$SERVICE_PRINCIPAL_SECRET",
         "aadEndpoint": "https://login.microsoftonline.com",
         "aadResourceId": "https://management.core.windows.net/",
         "armEndpoint": "https://management.azure.com/",

@@ -69,7 +69,6 @@ type ConfigTaskPanelProps = {
   onDismiss: () => void;
   projectData: ProjectData;
   trainingProjectOfSelectedScenario?: number;
-  isDemo?: boolean;
   isEdit?: boolean;
 };
 
@@ -78,7 +77,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   onDismiss,
   projectData: initialProjectData,
   trainingProjectOfSelectedScenario = null,
-  isDemo = false,
   isEdit = false,
 }) => {
   const [projectData, setProjectData] = useState(initialProjectData);
@@ -86,11 +84,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     setProjectData(initialProjectData);
   }, [initialProjectData]);
 
-  const cameraOptions = useSelector(
-    cameraOptionsSelectorInConfig(
-      isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
-    ),
-  );
+  const cameraOptions = useSelector(cameraOptionsSelectorInConfig(projectData.trainingProject));
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
   const trainingProjectOptions = useSelector(
     trainingProjectOptionsSelector(
@@ -100,17 +94,23 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
+  const scenarios = useSelector((state: State) => state.scenario);
   const demoProject = useSelector((state: State) => state.trainingProject.isDemo);
   const dispatch = useDispatch();
   const history = useHistory();
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
     const cloneProject = R.clone(projectData);
+    (cloneProject as any)[key] = value;
     if (key === 'trainingProject') {
       if (!demoProject.includes(cloneProject.trainingProject)) cloneProject.needRetraining = false;
       cloneProject.parts = [];
+      cloneProject.cameras = [];
+
+      const relatedScenario = scenarios.find((e) => e.trainingProject === cloneProject.trainingProject);
+      if (relatedScenario !== undefined) cloneProject.inferenceMode = relatedScenario.inferenceMode;
+      else cloneProject.inferenceMode = InferenceMode.PartDetection;
     }
-    (cloneProject as any)[key] = value;
     setProjectData(cloneProject);
   }
 
@@ -124,9 +124,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);
 
-    await dispatch(
-      thunkPostProject({ ...projectData, ...(!isDemo && { inferenceMode: InferenceMode.PartDetection }) }),
-    );
+    await dispatch(thunkPostProject(projectData));
 
     onDismiss();
     history.push('/home/deployment');

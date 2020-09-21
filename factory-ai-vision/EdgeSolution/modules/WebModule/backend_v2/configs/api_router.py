@@ -28,7 +28,7 @@ from vision_on_edge.notifications.api import views as notifications_views
 from vision_on_edge.streams.api import views as stream_views
 from vision_on_edge.video_feed.api import views as videofeed_views
 
-# from vision_on_edge.feedback.api import views as feedback_views
+from vision_on_edge.feedback.api import views as feedback_views
 # from vision_on_edge.image_predictions.api import \
 # views as image_prediction_views
 
@@ -56,7 +56,7 @@ router.register('deploy_status', azure_deploy_status_views.DeployStatusViewSet)
 
 # router.register('tasks', azure_projects_views.TaskViewSet)
 
-# router.register('feedback', feedback_views.FeedbackViewSet)
+router.register('feedback', feedback_views.FeedbackViewSet)
 
 # router.register('images', image_views.ImageViewSet)
 

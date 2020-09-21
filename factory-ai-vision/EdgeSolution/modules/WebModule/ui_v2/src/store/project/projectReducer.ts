@@ -21,8 +21,8 @@ import {
   ProjectData,
   InferenceMode,
 } from './projectTypes';
-import { pullCVProjects } from '../actions';
 import { updateProbThreshold } from './projectActions';
+import { pullCVProjects } from '../trainingProjectSlice';
 
 const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Status => {
   if (hasConfigured && status === Status.None) return Status.WaitTraining;

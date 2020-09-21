@@ -2,8 +2,6 @@ import { createEntityAdapter, createSlice, createSelector } from '@reduxjs/toolk
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { selectNonDemoProject } from './trainingProjectSlice';
-import { pullCVProjects } from './actions';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
 export type Part = {
@@ -24,21 +22,15 @@ const normalizePart = (data): Part[] => {
 
 const entityAdapter = createEntityAdapter<Part>();
 
-export const getParts = createWrappedAsync<any, undefined, { state: State }>(
-  'parts/get',
-  async () => {
-    const response = await Axios.get('/api/parts/');
-    return normalizePart(response.data);
-  },
-  {
-    condition: (_, { getState }) => !getState().parts.ids.length,
-  },
-);
+export const getParts = createWrappedAsync<any, undefined, { state: State }>('parts/get', async () => {
+  const response = await Axios.get('/api/parts/');
+  return normalizePart(response.data);
+});
 
 export const postPart = createWrappedAsync<any, Omit<Part, 'id' | 'trainingProject'>, { state: State }>(
   'parts/post',
   async (data, { getState }) => {
-    const { id: trainingProject } = selectNonDemoProject(getState())[0];
+    const trainingProject = getState().trainingProject.nonDemo[0];
     const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
     return { ...response.data, trainingProject: response.data.project };
   },
@@ -67,8 +59,7 @@ const slice = createSlice({
       .addCase(getParts.fulfilled, entityAdapter.setAll)
       .addCase(postPart.fulfilled, entityAdapter.upsertOne)
       .addCase(patchPart.fulfilled, entityAdapter.updateOne)
-      .addCase(deletePart.fulfilled, entityAdapter.removeOne)
-      .addCase(pullCVProjects.fulfilled, () => entityAdapter.getInitialState());
+      .addCase(deletePart.fulfilled, entityAdapter.removeOne);
   },
 });
 
@@ -83,11 +74,6 @@ export const {
 
 export const selectPartNamesById = (ids) =>
   createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i]?.name));
-
-export const selectNonDemoPart = createSelector(
-  [selectAllParts, selectNonDemoProject],
-  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
-);
 
 export const selectPartsByTrainProject = (trainProject: number) =>
   createSelector(selectAllParts, (parts) => parts.filter((p) => p.trainingProject === trainProject));

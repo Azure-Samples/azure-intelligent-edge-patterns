@@ -82,7 +82,6 @@ export const GetStarted: React.FC = () => {
         isOpen={selectedScenarioIdx > -1}
         onDismiss={closePanel}
         projectData={{ ...initialProjectData, ...scenario[selectedScenarioIdx] }}
-        isDemo
         trainingProjectOfSelectedScenario={scenario[selectedScenarioIdx]?.trainingProject}
       />
     </>

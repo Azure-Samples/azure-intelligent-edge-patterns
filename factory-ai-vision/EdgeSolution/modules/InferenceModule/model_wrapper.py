@@ -22,6 +22,8 @@ import logging
 IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
+GPU_MAX_FRAME_RATE = 30
+CPU_MAX_FRAME_RATE = 15
 
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
@@ -35,6 +37,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 
+        self.is_scenario = False
         self.detection_mode = "PD"
         self.threshold = 0.3
 
@@ -44,6 +47,34 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.parts = []
 
         self.is_gpu = (onnxruntime.get_device() == 'GPU')
+
+
+        if self.is_gpu:
+            self.max_frame_rate = GPU_MAX_FRAME_RATE
+        else:
+            self.max_frame_rate = CPU_MAX_FRAME_RATE
+        self.update_frame_rate_by_number_of_streams(1)
+
+    def set_is_scenario(self, is_scenario):
+        self.is_scenario = is_scenario
+
+    def set_detection_mode(self, mode):
+        self.detection_mode = mode
+
+    def get_detection_mode(self):
+        if self.is_scenario == False: return 'PD'
+        else: return self.detection_mode
+
+    def update_frame_rate_by_number_of_streams(self, number_of_streams):
+        if number_of_streams > 0:
+            self.frame_rate = max(1, int(self.max_frame_rate / number_of_streams))
+            print('[INFO] set frame rate as', self.frame_rate, flush=True)
+        else:
+            print('[INFO] nothing change about frame rate since number of streams is 0', flush=True)
+        return self.frame_rate
+
+    def get_frame_rate(self):
+        return self.frame_rate
 
     def update_parts(self, parts):
         print('[INFO] Updating Parts ...', parts)

@@ -10,7 +10,7 @@ import requests
 from requests.exceptions import ReadTimeout
 
 from django.core.files.images import ImageFile
-from django.shortcuts import get_object_or_404
+
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -25,16 +25,16 @@ from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
 from ...general.api.serializers import (MSStyleErrorResponseSerializer,
                                         SimpleOKSerializer)
+from ...general.shortcuts import drf_get_object_or_404
 from ...images.models import Image
-from ..exceptions import (PdConfigureWithoutCameras,
-                          PdConfigureWithoutInferenceModule,
-                          PdConfigureWithoutProject,
-                          PdExportInfereceReadTimeout,
-                          PdInferenceModuleUnreachable,
-                          PdProbThresholdNotInteger, PdProbThresholdOutOfRange,
-                          PdRelabelConfidenceOutOfRange, PdRelabelImageFull)
+from ..exceptions import (
+    PdConfigureWithoutCameras, PdConfigureWithoutInferenceModule,
+    PdConfigureWithoutProject, PdExportInfereceReadTimeout,
+    PdInferenceModuleUnreachable, PdProbThresholdNotInteger,
+    PdProbThresholdOutOfRange, PdRelabelConfidenceOutOfRange,
+    PdRelabelImageFull, PdRelabelDemoProjectError)
 from ..models import PartDetection, PDScenario
-from ..utils import deploy_all_helper, if_trained_then_deploy_helper
+from ..utils import if_trained_then_deploy_helper
 from .serializers import (ExportSerializer, PartDetectionSerializer,
                           PDScenarioSerializer, UploadRelabelSerializer)
 
@@ -50,7 +50,6 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter,)
     filter_mappings = {
         "inference_module": "inference_module",
-        "camera": "camera",
         "project": "project"
     }
 
@@ -72,7 +71,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         """update inference bounding box threshold.
         """
         queryset = self.get_queryset()
-        part_detection_obj = get_object_or_404(queryset, pk=pk)
+        part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
         prob_threshold = request.query_params.get("prob_threshold")
 
         try:
@@ -97,7 +96,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         """get the status of train job sent to custom vision
         """
         queryset = self.get_queryset()
-        part_detection_obj = get_object_or_404(queryset, pk=pk)
+        part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
         project_obj = part_detection_obj.project
         deploy_status_obj = DeployStatus.objects.get(
             part_detection=part_detection_obj)
@@ -170,7 +169,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         Train/Export/Deploy a part_detection_obj.
         """
         queryset = self.get_queryset()
-        instance = get_object_or_404(queryset, pk=pk)
+        instance = drf_get_object_or_404(queryset, pk=pk)
         # if project is demo, let training status go to ok and should go on.
         if not hasattr(instance, "inference_module") or getattr(
                 instance, "inference_module") is None:
@@ -200,18 +199,22 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             request:
         """
         queryset = self.get_queryset()
-        instance = get_object_or_404(queryset, pk=pk)
+        instance = drf_get_object_or_404(queryset, pk=pk)
         serializer = UploadRelabelSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         # FIXME: Inferenece should send part id instead of part_name
-        if serializer.is_valid(raise_exception=True):
-            pass
-        part = get_object_or_404(instance.parts,
-                                 name=serializer.validated_data["part_name"])
+        part = drf_get_object_or_404(
+            instance.parts, name=serializer.validated_data["part_name"])
+        drf_get_object_or_404(instance.cameras,
+                              pk=serializer.validated_data["camera_id"])
 
         project_obj = instance.project
         if project_obj is None:
             raise PdConfigureWithoutProject
+
+        if project_obj.is_demo:
+            raise PdRelabelDemoProjectError
 
         # Relabel images count does not exceed project.maxImages
         # Handled by signals
@@ -225,7 +228,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise PdRelabelConfidenceOutOfRange
 
         # Relabel images count does not exceed project.maxImages
-        if project_obj.maxImages > Image.objects.filter(
+        if instance.maxImages > Image.objects.filter(
                 project=project_obj, part=part, is_relabel=True).count():
             img_io = serializer.validated_data["img"].file
 
@@ -234,7 +237,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             img_obj = Image(
                 image=img,
                 part_id=part.id,
-                camera=None,
+                camera_id=serializer.validated_data["camera_id"],
                 labels=serializer.validated_data["labels"],
                 confidence=serializer.validated_data["confidence"],
                 project=instance.project,
@@ -248,14 +251,13 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         logger.info(project_obj.relabel_expired_time)
         logger.info(timezone.now())
         if project_obj.relabel_expired_time < timezone.now():
-
             logger.info("Queuing relabel images...")
             img_io = serializer.validated_data["img"].file
             img = ImageFile(img_io)
             img.name = str(timezone.now()) + ".jpg"
             img_obj = Image(
                 image=img,
-                camera=instance.camera,
+                camera_id=serializer.validated_data["camera_id"],
                 part_id=part.id,
                 labels=serializer.validated_data["labels"],
                 confidence=serializer.validated_data["confidence"],
@@ -276,7 +278,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         for _ in range(
                 Image.objects.filter(
                     project=project_obj, part=part, is_relabel=True).count() -
-                project_obj.maxImages):
+                instance.maxImages):
             Image.objects.filter(
                 project=project_obj, part=part,
                 is_relabel=True).order_by("timestamp").last().delete()

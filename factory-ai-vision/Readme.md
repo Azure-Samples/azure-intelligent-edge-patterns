@@ -9,7 +9,7 @@ products:
 - Onnxruntime
 - azure-iot-edge
 page_type: sample solution
-description: "This is a easy to use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop ."
+description: "This is a easy to use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop."
 urlFragment: custom-vision-azure-iot
 ---
 
@@ -20,6 +20,9 @@ You can define your location, camera and set up objects to detect example: any m
 
 Check out [this video](https://channel9.msdn.com/Events/Build/2020/BOD131) to see brief introduction in action and understand how the value is delievered: 
 [![video](https://mediusprodstatic.studios.ms/video-28874/thumbnail.jpg?sv=2018-03-28&sr=c&sig=svseIEcORPXo2vyKdEbzetamD9qDI3gXgzKhlTbIHUM%3D&se=2025-05-15T13%3A06%3A01Z&sp=r)](https://channel9.msdn.com/Events/Build/2020/BOD131)
+
+
+
 
 
 
@@ -35,7 +38,9 @@ or
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
 
-![Communication patterns between modules](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
+
+# Architecture
+![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
 
  
 ## Get Started 
@@ -47,7 +52,30 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 # Vision on Edge Installer
 
-## Manual installation building a docker container and deploy by Visual Studio Code
+
+### Prerequisites
+To install the solution on a PC running Windows, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.cmd script.
+
+To install the solution on a Mac, or a PC running Linux, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.sh script.
+
+Before installation, please make sure you have the following: 
+   1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
+   2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
+   3.   Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal 
+### Get Started:
+Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip) 
+
+### Installer to deploy prebuild docker images (Method1)
+1. Open your browser, connect to https://shell.azure.com/ , switch to Bash
+2. Download acr.zip from github ```wget https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/Installer/acs.zip```
+3. Unzip it ```unzip acs.zip```
+4. Execute the installer ```bash factory-ai-vision-install.sh```
+5. During the, you will enter your customvision credentials (optional), select your Azure Media Service, IoTHub, and Edge device. Note that if it's your first time to deploy, it will create a service principal for Azure Media Service, please backup the ```SERVICE_PRINCIPAL_SECRET``` by your own, which will be shown in the screen while selecing Azure Media Service. It won't be shown again once creating. If it's not the first time doing deployment via Installer, you will be asked to enter that secret
+6. If it's the first time deployment, you will be expected to wait around 10-15 minutes
+7. Open your browser, connect to http://YOUR_IP:8080
+
+## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
+
 
 ### Prerequisites
 
@@ -56,8 +84,9 @@ Before installation, You must have the following services set up to use Vision o
    2.	**IoT Edge Port**: At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information  https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux 
    3.	**Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
    4.	**Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
-   5.	**Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
-   6. **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
+   5.   **Azure Media Service**, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal 
+   6.	**Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
+   7. **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
  
 To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) and [this video](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52):
 
@@ -66,25 +95,59 @@ To learn more about this development environment, check out [this tutorial](http
 
 ### Get Started:
 
-1. create a `.env` file under directory ```factory-ai-vision/EdgeSolution``` and put following Azure Container Registry credential in. Your Visual Studio Code will need these credential to push the container later.
- CONTAINER_REGISTRY_NAME="<YOUR_CONTAINER_REGISTRY_NAME>"
- CONTAINER_REGISTRY_USERNAME="<YOUR_CONTAINER_REGSITRY_USERNAME>"
- CONTAINER_REGISTRY_PASSWORD="<YOUR_CONTAINER_REGISTRY_PASSWORD>"
-2. (optional) Enter your custom vision training key TRAINING_KEY and endpoint ENDPOINT in `factory-ai-vision/EdgeSolution/modules/WebModule/backend/config.py.` Copy the information from your custom vision setting page. If you skip this step here, you are require to input the information later once the deployment are completed.
-3. Open Visual Studio Code, to build the GPU version, right click on ```factory-ai-vision/EdgeSolution/deployment.gpu.template.json``` and choose "Build and Push IoT Edge Solution" it will start building the docker container. For the first time deployment, It takes more than 10 mins to complete. 
-    For CPU version, use the template file ```factory-ai-vision/EdgeSolution/deployment.gpu.template.json``` instead.
-4. In Visual Studio Code, right click on ```factory-ai-vision/EdgeSolution/config/deployment.gpu.amd64.json (or factory-ai-vision/EdgeSolution/config/deployment.cpu.amd64.json```if you built CPU version in the last step) and choose "Create Single Deployment for Single Device" and select the edge device from the list to deploy.
-5. Open your browser and connect to ```http://<your-edge-ip:8080>.``` In this step you will be asked to input your Custom Vision Training Key & Endpoint If you skiped step2 above.
+- Clone yadavm_factoryai_lpr branch 
+    
+    ```git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git --single-branch --branch yadavm_factoryai_lpr```
+    
+- Go to factoryai directory and open your vscode
 
-# Video Tutorial 
+    ```cd azure-intelligent-edge-patterns/factory-ai-vision```
+    
+- Edit the ```env-template``` file, you should see something like this
+```
+    # For Azure Container Registry
+    CONTAINER_REGISTRY_NAME=""
+    CONTAINER_REGISTRY_USERNAME=""
+    CONTAINER_REGISTRY_PASSWORD=""
 
-- Vision on Edge installer: https://youtu.be/NWKLk8ENo-g
-[![video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/Installer%20instruction.png)](https://youtu.be/NWKLk8ENo-g)
-- Getting started with default model and message to cloud: https://youtu.be/WdNyS0PI6Zo
-- Define area of interest and show message to cloud: https://youtu.be/vN-SSxdKbkI
-- Your own stuff, add camera, location, part train and deploy a model: https://youtu.be/VNfOqP2Ag5U
-- Retrain your model with auto labeling: https://youtu.be/F_E1NxbiQyw
-- Giving feedback and changing projects in setting: https://youtu.be/i92pMdUVrng
+    # For Azure IoT Hub
+    IOTHUB_CONNECTION_STRING=""
+
+    # FOR Media Services
+    SUBSCRIPTION_ID=""
+    RESOURCE_GROUP=""
+    TENANT_ID=""
+    SERVICE_NAME=""
+    SERVICE_PRINCPAL_APP_ID=""
+    SERVICE_PRINCIPAL_SECRET=""
+```
+
+- Please fill in your credentials and rename it as ```.env```, vscode will use this file to set the environment variables
+
+- Find ```deployment.gpu.template.json``` under ```EdgeSolution``` direcotyr in vscode, right click on it, choose "Build and Push Iot Edge Solution". It'll start to build the container, you should expect to wait for more than 10 mins if it's the first time you build the container.
+
+- Find  ```deployment.gpu.amd64.json``` under ```EdgeSolution/config``` directory in vscode, right click on it, choose "Create Deployment to Single Device", select your device to deploy, you should expect the edge will pull the container for more than 10 mins if it's the first time.
+
+- Go to your device (via ssh), use `docker ps` to check whether all the modules are pulled and running. You should see 6 modules running including:
+
+    a. visionwebmodule
+    
+    b. inferencemodule
+    
+    c. rtspsimmodule
+    
+    d. webdbmodule
+    
+    e. azureiotedge-hub
+    
+    f. azureiotedge-agent
+    
+- Please wait until all 6 are running. Open your browser and connect http://YOUR_IP:8080
+
+### Video Tutorial
+
+- Getting started with VS code [https://youtu.be/ORTwMYOxkVs]
+
 
 
 # Privacy Notice 
@@ -114,4 +177,6 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
 
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
 4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
+
+
 

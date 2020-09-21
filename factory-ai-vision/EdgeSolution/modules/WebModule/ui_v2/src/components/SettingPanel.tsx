@@ -22,8 +22,10 @@ import {
   Checkbox,
   MessageBar,
   MessageBarType,
+  Link,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import {
@@ -35,9 +37,13 @@ import {
   thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
-import { pullCVProjects } from '../store/actions';
 import { dummyFunction } from '../utils/dummyFunction';
-import { selectNonDemoProject } from '../store/trainingProjectSlice';
+import {
+  selectNonDemoProject,
+  createNewTrainingProject,
+  pullCVProjects,
+} from '../store/trainingProjectSlice';
+import { CreateByNameDialog } from './CreateByNameDialog';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -82,6 +88,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const [loadImgWarning, setloadImgWarning] = useState(false);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
   const error = useSelector((state: State) => state.setting.error);
+  const [projectDialogHidden, { setFalse: openDialg, setTrue: closeDialog }] = useBoolean(true);
 
   const dispatch = useDispatch();
 
@@ -106,6 +113,10 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const onLoadFullImgChange = (_, checked: boolean) => {
     if (checked) setloadImgWarning(true);
     else setLoadFullImages(checked);
+  };
+
+  const onCreateProject = async (name: string) => {
+    await dispatch(createNewTrainingProject(name));
   };
 
   const updateIsCollectData = (isCollectData, hasInit?): void => {
@@ -162,7 +173,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
               <WarningDialog
                 contentText={
                   <Text variant="large">
-                    Update Key / Namespace will remove all the parts, sure you want to update?
+                    Update Key / Namespace will remove all the objects, sure you want to update?
                   </Text>
                 }
                 confirmButton="Yes"
@@ -179,6 +190,15 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                   options={cvProjectOptions}
                   onChange={onDropdownChange}
                   selectedKey={selectedCustomvisionId}
+                  styles={{ dropdownItemsWrapper: { maxHeight: '80vh' } }}
+                />
+                <Link onClick={openDialg}>Create new project</Link>
+                <CreateByNameDialog
+                  hidden={projectDialogHidden}
+                  onDismiss={closeDialog}
+                  title="Create new project"
+                  subText="Create a new project will remove all the objects and images"
+                  onCreate={onCreateProject}
                 />
                 <Checkbox checked={loadFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
                 <WarningDialog
@@ -198,7 +218,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                   <WarningDialog
                     contentText={
                       <Text variant="large">
-                        Load Project will remove all the parts, sure you want to do that?
+                        Load Project will remove all the objects, sure you want to do that?
                       </Text>
                     }
                     trigger={<PrimaryButton text="Load" disabled={loading} />}

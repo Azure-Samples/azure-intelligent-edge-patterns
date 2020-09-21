@@ -16,9 +16,11 @@ RUN yarn build
 # =========================================================
 FROM amd64/python:3.8 as backend-base
 
-RUN apt-get update
-# libgl for opencv
-RUN apt-get install -y libgl1-mesa-glx
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
 
 
 # =========================================================
@@ -38,7 +40,6 @@ COPY backend_v2/configs configs
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-RUN rm -rf ui_production
 COPY --from=builder /app/build vision_on_edge/ui_production
 EXPOSE 8000
 

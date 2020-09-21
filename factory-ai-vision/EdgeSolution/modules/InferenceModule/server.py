@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 import sys
 import threading
 from concurrent import futures
@@ -52,45 +53,9 @@ def prediction():
     return json.dumps(s.last_prediction)
 
 
-# @app.route('/open_cam', methods=['GET'])
-# def open_cam():
-#     def post_img():
-#         headers = {'Content-Type': 'image/jpg'}
-#         while True:
-#             if onnx.cam_is_alive == False:
-#                 break
-#             onnx.lock.acquire()
-#             b, img = onnx.cam.read()
-#             onnx.lock.release()
-#             if b:
-#                 data = cv2.imencode(".jpg", img)[1].tobytes()
-#                 r = requests.post('http://127.0.0.1:5000/predict',
-#                                   headers=headers, data=data)
-#             time.sleep(0.02)
-
-#     if onnx.cam_is_alive == False:
-#         onnx.lock.acquire()
-#         onnx.cam_is_alive = True
-#         onnx.lock.release()
-#         threading.Thread(target=post_img).start()
-#         return 'open camera', 200
-#     else:
-#         return 'camera is already opened', 200
-
-# @app.route('/close_cam', methods=['GET'])
-# def close_cam():
-#     onnx.lock.acquire()
-#     onnx.cam_is_alive = False
-#     onnx.lock.release()
-#     return 'camera closed', 200
-
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
-    # FIXME
-    #inference_num = onnx.detection_success_num
-    #unidentified_num = onnx.detection_unidentified_num
-    #total = onnx.detection_total
     inference_num = 0
     unidentified_num = 0
     total = 0
@@ -182,6 +147,11 @@ def update_model():
 
         print('[INFO] Got Model URI', model_uri, flush=True)
 
+        #FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
+        # workaround
+        onnx.set_detection_mode('PD')
+        onnx.set_is_scenario(False)
+
         if model_uri == onnx.model_uri:
             print('[INFO] Model Uri unchanged', flush=True)
         else:
@@ -195,6 +165,7 @@ def update_model():
 
     elif model_dir:
         print('[INFO] Got Model DIR', model_dir)
+        onnx.set_is_scenario(True)
         onnx.update_model(model_dir)
         print('[INFO] Update Finished ...')
         return 'ok'
@@ -210,6 +181,9 @@ def update_cams():
     data = request.get_json()
     logger.info(data["cameras"])
     stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
+    n = stream_manager.get_streams_num_danger()
+    frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
+
     for cam in data["cameras"]:
         cam_type = cam['type']
         cam_source = cam['source']
@@ -225,19 +199,20 @@ def update_cams():
         if not cam_id:
             return 'missing cam_id'
 
-        # if 'aoi' in cam.keys():
-        #    aoi = json.loads(aoi)
-        #    has_aoi = aoi['useAOI']
-        #    aoi_info = aoi['AOIs']
-        # else:
-        #    has_aoi = False
-        #    aoi_info = None
+        if 'aoi' in cam.keys():
+            aoi = json.loads(cam['aoi'])
+            has_aoi = aoi['useAOI']
+            aoi_info = aoi['AOIs']
+            print('aoi information', aoi, flush=True)
+        else:
+            has_aoi = False
+            aoi_info = None
 
         logger.info('updating camera {0}'.format(cam_id))
         s = stream_manager.get_stream_by_id(cam_id)
         #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
-        s.update_cam(cam_type, cam_source, cam_id, False, [],
+        s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
                      onnx.detection_mode, line_info, zone_info)
 
     return 'ok'
@@ -254,7 +229,7 @@ def update_part_detection_mode():
 
     if part_detection_mode not in PART_DETECTION_MODE_CHOICES:
         return 'invalid part_detection_mode'
-    onnx.detection_mode = part_detection_mode
+    onnx.set_detection_mode(part_detection_mode)
     return 'ok'
 
 
@@ -275,8 +250,9 @@ def update_send_video_to_cloud():
         return 'unknown send_video_to_cloud params'
 
     # TODO: Change something here
-    for s in stream_manager.get_streams():
-        s.model.send_video_to_cloud = send_video_to_cloud
+    onnx.send_video_to_cloud = send_video_to_cloud
+    # for s in stream_manager.get_streams():
+    #     s.model.send_video_to_cloud = send_video_to_cloud
     return 'ok'
 
 
@@ -335,9 +311,24 @@ def update_iothub_parameters():
 
 @app.route('/status')
 def get_scenario():
+    streams_status = []
+    for s in stream_manager.get_streams():
+        streams_status.append({
+            'cam_id': s.cam_id,
+            'stream_id': s.cam_id,
+            'cam_source': s.cam_source,
+            'cam_is_alive': s.cam_is_alive,
+            'confidence_min': s.confidence_min,
+            'confidence_max': s.confidence_max,
+            'max_images': s.max_images,
+            'threshold': s.threshold,
+            'has_aoi': s.has_aoi,
+            'is_retrain': s.is_retrain,
+        })
     return json.dumps({
         'num_streams': len(stream_manager.streams),
         'stream_ids': list(stream_manager.streams.keys()),
+        'streams_status': streams_status,
         'parts': onnx.parts,
         'scenario': onnx.detection_mode
     })
@@ -354,10 +345,12 @@ def update_prob_threshold():
 
     for s in stream_manager.get_streams():
         s.threshold = int(prob_threshold) * 0.01
-        s.detection_success_num = 0
-        s.detection_unidentified_num = 0
-        s.detection_total = 0
-        s.detections = []
+        print('[INFO] Updating', s, 'threshold to', s.threshold, flush=True)
+        #s.detection_success_num = 0
+        #s.detection_unidentified_num = 0
+        #s.detection_total = 0
+        #s.detections = []
+        s.reset_metrics()
 
     return 'ok'
 
@@ -365,6 +358,9 @@ def update_prob_threshold():
 def init_topology():
 
     instances = gm.invoke_graph_instance_list()
+    if instances['status'] != 200:
+        logger.warning('Failed to invoker direct method', instances['payload'])
+        return -1
     logger.info('========== Deleting {0} instance(s) =========='.format(
         len(instances['payload']['value'])))
 
@@ -375,6 +371,9 @@ def init_topology():
             instances['payload']['value'][i]['name'])
 
     topologies = gm.invoke_graph_topology_list()
+    if instances['status'] != 200:
+        logger.warning('Failed to invoker direct method', instances['payload'])
+        return -1
     logger.info('========== Deleting {0} topology =========='.format(
         len(topologies['payload']['value'])))
 
@@ -385,6 +384,8 @@ def init_topology():
     logger.info('========== Setting default grpc topology =========='.format(
         len(topologies['payload']['value'])))
     ret = gm.invoke_graph_grpc_topology_set()
+
+    return 1
 
 
 def Main():
@@ -397,7 +398,14 @@ def Main():
         logger.info('gRPC server port: {0}'.format(grpcServerPort))
 
         # init graph topology & instance
-        init_topology()
+        counter = 0
+        while init_topology() == -1:
+            if counter == 100:
+               logger.critical('Failed to init topology, please check whether direct method still works')
+               exit(-1)
+            logger.warning('Failed to init topology, try again 10 secs later')
+            time.sleep(10)
+            counter += 1
 
         # create gRPC server and start running
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
@@ -410,7 +418,8 @@ def Main():
 
     except:
         PrintGetExceptionDetails()
-        exit(-1)
+        raise
+        #exit(-1)
 
 
 if __name__ == "__main__":

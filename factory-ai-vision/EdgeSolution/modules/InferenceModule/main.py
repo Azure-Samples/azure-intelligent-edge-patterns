@@ -24,26 +24,26 @@ from onnxruntime_predict import ONNXRuntimeObjectDetection
 from utility import get_file_zip, normalize_rtsp
 from tracker import Tracker, draw_counter
 from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
+from utility import draw_label
 
 #tracker = Tracker()
 #tracker.set_line(170/2, 680/2, 1487/2, 815/2)
 
-scenario = PartCounter()
-scenario.set_line(185, 290, 793, 327)
+#scenario = PartCounter()
+#scenario.set_line(185, 290, 793, 327)
 
 
-scenario = DangerZone()
-scenario.set_zones([[85, 340, 743, 407]])
-#scenario.set_targets(['person'])
-scenario.set_targets(['Person'])
+#scenario = DangerZone()
+#scenario.set_zones([[85, 340, 743, 407]])
+#scenario.set_targets(['Person'])
 
 #scenario = DangerZone()
 #scenario.set_zones([[85, 340, 743, 407]])
 #scenario.set_targets(['Box'])
 
-#scenario = DefeatDetection()
-#scenario.set_ok('Bottle - OK')
-#scenario.set_ng('Bottle - NG')
+scenario = DefeatDetection()
+scenario.set_ok('Bottle - OK')
+scenario.set_ng('Bottle - NG')
 #scenario.set_line(600, 0, 600, 800)
 
 #scenario= DefeatDetection()
@@ -63,8 +63,8 @@ SCENARIO3_MODEL = 'scenario_models/3'
 DOWNLOADED_MODEL = 'model'
 
 ### CONFIGURATION <BEG> ###
-CAM_SOURCE = SCENARIO2_VIDEO
-MODEL      = SCENARIO2_MODEL
+CAM_SOURCE = SCENARIO3_VIDEO
+MODEL      = SCENARIO3_MODEL
 
 ### CONFIGURATION <END> ###
 
@@ -118,14 +118,14 @@ def draw_aoi(img, aoi_info):
         if aoi_type == 'BBox':
             cv2.rectangle(img,
                           (int(label['x1']), int(label['y1'])),
-                          (int(label['x2']), int(label['y2'])), (0, 255, 255), 2)
+                          (int(label['x2']), int(label['y2'])), (255, 255, 255), 2)
 
         elif aoi_area['type'] == 'Polygon':
             l = len(label)
             for index, point in enumerate(label):
                 p1 = (point['x'], point['y'])
                 p2 = (label[(index+1) % l]['x'], label[(index+1) % l]['y'])
-                cv2.line(img, p1, p2, (0, 255, 255), 2)
+                cv2.line(img, p1, p2, (255, 255, 255), 2)
 
     return
 
@@ -169,17 +169,19 @@ def parse_bbox(prediction, width, height):
 def draw_confidence_level(img, prediction):
     height, width = img.shape[0], img.shape[1]
 
-    font = cv2.FONT_HERSHEY_DUPLEX
-    font_scale = 0.5
-    thickness = 1
+    #font = cv2.FONT_HERSHEY_DUPLEX
+    #font_scale = 0.5
+    #thickness = 1
 
     prob_str = str(int(prediction['probability']*1000)/10)
     prob_str = ' (' + prob_str + '%)'
 
     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
-    img = cv2.putText(img, prediction['tagName']+prob_str,
-                      (x1, y1-5), font, font_scale, (20, 20, 255), thickness)
+    #img = cv2.putText(img, prediction['tagName']+prob_str,
+    #                  (x1, y1-5), font, font_scale, (255, 255, 255), thickness)
+    text = prediction['tagName'] + prob_str
+    img = draw_label(img, text, (x1, max(y1, 15)))
 
     return img
 
@@ -188,7 +190,7 @@ def draw_oid(img, x1, y1, oid):
     font_scale = 0.7
     thickness = 2
     img = cv2.putText(img, str(oid),
-                      (x1+10, y1+20), font, font_scale, (0, 255, 255), thickness)
+                      (x1+10, y1+20), font, font_scale, (255, 255, 255), thickness)
     return img
 
 #def draw_counter(img, counter):
@@ -730,14 +732,14 @@ def video_feed():
 
 
                         img = cv2.rectangle(
-                            img, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                            img, (x1, y1), (x2, y2), (255, 255, 255), 1)
                         img = draw_confidence_level(img, prediction)
 
             #objs = mot_tracker.update(np.array(detections))
             scenario.update(detections)
             scenario.draw_counter(img)
             scenario.draw_constraint(img)
-            scenario.draw_objs(img)
+            #scenario.draw_objs(img)
             #counter, objs, counted = tracker.update(detections)
 
             #print(objs)
@@ -780,7 +782,7 @@ def gen():
 
 
                 img = cv2.rectangle(
-                    img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    img, (x1, y1), (x2, y2), (255, 255, 255), 2)
                 img = draw_confidence_level(img, prediction)
         onnx.last_drawn_img = img
 
@@ -989,7 +991,7 @@ def gen_edge():
                     continue
 
             img = cv2.rectangle(
-                img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                img, (x1, y1), (x2, y2), (255, 255, 255), 2)
             img = draw_confidence_level(img, prediction)
     onnx.last_drawn_img = img
 

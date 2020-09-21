@@ -2,7 +2,7 @@
     "@apiVersion": "1.0",
     "name": "InferencingWithGrpcExtension",
     "properties": {
-        "description": "Record on motion to AMS Asset and record events from external models through gRPC Extension",
+        "description": "Factory AI Video Pipeline",
         "parameters": [{
                 "name": "rtspUrl",
                 "type": "String",
@@ -19,12 +19,6 @@
                 "type": "String",
                 "description": "Rtsp source password.",
                 "default": "dummyPassword"
-            },
-            {
-                "name": "motionSensitivity",
-                "type": "String",
-                "description": "Motion detection sensitivity",
-                "default": "medium"
             },
             {
                 "name": "grpcExtensionAddress",
@@ -85,7 +79,14 @@
                 "type": "String",
                 "description": "input name for hub source",
                 "default": "recordingTrigger"
+            },
+            {
+                "name": "frameRate",
+                "type": "String",
+                "description": "input maximumFPs",
+                "default": "30"
             }
+
         ],
         "sources": [{
                 "@type": "#Microsoft.Media.MediaGraphRtspSource",
@@ -124,7 +125,7 @@
             {
                 "@type": "#Microsoft.Media.MediaGraphFrameRateFilterProcessor",
                 "name": "frameRateFilter",
-                "maximumFps": "30.0",
+                "maximumFps": "${frameRate}",
                 "inputs": [{
                     "nodeName": "rtspSource"
                 }]

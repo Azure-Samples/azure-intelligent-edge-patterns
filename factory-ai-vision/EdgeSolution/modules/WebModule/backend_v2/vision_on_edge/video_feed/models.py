@@ -56,12 +56,20 @@ class VideoFeed():
 
         video feed genarator
         """
+        print('*****GENERATOR *****', flush=True)
+        count = 0
         while self.is_opened:
             if self.buf is not None:
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + self.buf[1] +
-                       b'\r\n')
-            time.sleep(0.1)
+                if len(self.buf[1]) < 100:
+                    print('[WARNING] channel', self.buf[0], 'frame size only', len(self.buf[1]), flush=True)
+                elif len(self.buf[1]) >= 100:
+                    count += 1
+                    if count % 100 == 0:
+                        print('[INFO] sampling channel', self.buf[0], 'frame size', len(self.buf[1]), flush=True)
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + self.buf[1] +
+                           b'\r\n\r\n')
+            time.sleep(0.03)
 
     def update_keep_alive(self):
         """update_keep_alive.

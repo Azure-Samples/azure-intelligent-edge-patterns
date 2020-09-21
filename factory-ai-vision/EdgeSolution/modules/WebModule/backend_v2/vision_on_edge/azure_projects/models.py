@@ -106,6 +106,12 @@ class Project(models.Model):
             kwargs:
         """
         instance = kwargs["instance"]
+        update_fields = kwargs["update_fields"]
+        if update_fields == frozenset({'relabel_expired_time'}):
+            logger.info("Pass pre_save (relabel_keep_alive)")
+            return
+        instance.name = (instance.name or "VisionOnEdge-" +
+                         datetime.datetime.utcnow().isoformat())
         if instance.is_demo and instance.id:
             raise ProjectCannotChangeDemoError
         logger.info("Project pre_save start")
@@ -126,10 +132,8 @@ class Project(models.Model):
             logger.info("Project Found. Set instance.name to %s",
                         instance.name)
             return
-
             # Setting is valid, no customvision_id
-            instance.name = (instance.name or "VisionOnEdge-" +
-                             datetime.datetime.utcnow().isoformat())
+
         logger.info("Project id set: %s", instance.id)
         logger.info("Project customvision_id set: %s",
                     instance.customvision_id)
