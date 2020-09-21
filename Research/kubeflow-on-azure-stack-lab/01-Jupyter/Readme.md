@@ -27,16 +27,22 @@ ML/NN and AI more broadly, are mathematical concepts and could be implemented in
 and frameworks. In this lab we will use mostly Python, but you are free to pick whatever you are comfortable
 with - many of the deployment options are language-agnostic as long as apis are satisfied. 
 
-#Tensorboard
-
 ## Tensorboard access
 
 There is another useful tool to monitor some ML applications if
 they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
+
+To start Tensorboard running, deploy it using `kubectl`, and theck that the pod is up:
+
+    $ kubectl create -f tensorboard.yaml
+    $ kubectl get po | grep tensorboard
+    tensorboard-d986c8b6c-dpsmq   1/1     Running   0          1m
+
 You might contact your cloud administrator to help you establish network access, or you can
 use ssh port forwarding to see it via your desktop's `localhost` address and port 6006.
 
-This is how it looks like(run it on the machine where your web browser is):
+This is how it looks like(run it on the machine where your web browser is; the ip address is of
+the machine where you ran the kubectl command to start the tensorboard):
 
     $ ssh -NfL 6006:localhost:6006 -i id_rsa_for_kubernetes azureuser@<public_ip_address_or_dns_name>
 

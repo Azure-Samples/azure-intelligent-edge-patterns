@@ -3,8 +3,8 @@
 name: KubeflowInstaller
 version: 1.0
 description: "Installer for ML Services on Azure Stack. Installs Kubeflow and MLflow"
-# TODO: update the registry to your own, e.g. myregistry/porter-mlflow:v1.0
-tag: naedwebs/stack-kubeflow-services:v1.0
+# TODO: As with other tags in this lab, update the registry to your own, e.g. myregistry/porter-mlflow:v1.0
+tag: rollingstone/stack-kubeflow-services:v1.0
 
 # Uncomment the line below to use a template Dockerfile for your invocation image
 dockerfile: Dockerfile.tmpl
