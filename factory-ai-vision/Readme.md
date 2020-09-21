@@ -38,6 +38,7 @@ or
 ## Services
 Check out the architecture below to see how Vision on Edge works. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:  
 
+
 # Architecture
 ![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
 
@@ -50,7 +51,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
   4.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
 
 # Vision on Edge Installer
-## Option 1: Automated installation with Vision on Edge Installer
+
 
 ### Prerequisites
 To install the solution on a PC running Windows, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.cmd script.
@@ -74,6 +75,7 @@ Go to factory-ai-vision repo and click on Installers folder, there are two zip f
 7. Open your browser, connect to http://YOUR_IP:8080
 
 ## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
+
 
 ### Prerequisites
 
@@ -147,6 +149,14 @@ To learn more about this development environment, check out [this tutorial](http
 - Getting started with VS code [https://youtu.be/ORTwMYOxkVs]
 
 
+
+# Privacy Notice 
+The software may collect information about your use of the software and send it to Microsoft.
+              Microsoft may use this information to provide services and improve our products and services.
+              You may turn off the telemetry as described in the repository or clicking settings on top right
+              corner. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704
+              . You can learn more about data collection and use in the help documentation and our privacy
+              statement. Your use of the software operates as your consent to these practices.
 
 
 # Troubleshooting 

@@ -60,23 +60,32 @@ This sample illustrates how to run a FHIR Server instance with SQL Server on Azu
 ### Environment Definition
 - SSH into one of your master nodes
 
-- Clone this repo on the master
+- Clone the FHIR Server repository from [here](https://github.com/microsoft/fhir-server)
 
-- Navigate to this directory in a new Terminal instance (i.e. /samples/k8s)
+- Navigate to helm chart directory of the repo
+    ```sh
+    cd fhir-server/samples/kubernetes
+    ```
 
-- Create .env file to match your environment using the .env.template file included here
-    - These variables will be used to generate a secret to manage your deployment environment variables
-    - Variables to update:
-    
-        |Environment Variable|Description|
-        |--------------------|-----------|
-        |FHIR_VERSION | Version of FHIR Server to Run (ex. R4, R5, STU3)|
-        |FHIRServer__Security__Authentication__Audience| Audience from your service princpal registration in Azure Active Directory|
-        |FHIRServer__Security__Authentication__Authority| Authority from your client app in Azure Active Directory|
-        |SAPASSWORD| Password to use for SQL Server service account
-        |ApplicationInsights__InstrumentationKey| Instrumentation key for Azure Application Insights to send audit logs|
-        |ASPNETCORE_Kestrel__Certificates__Default__Path| Fully qualified path to your certificate|
-        |ASPNETCORE_Kestrel__Certificates__Default__Password| Password required to use your certificate|
+- Run through the deployment steps as specified in the [Readme.md](https://github.com/microsoft/fhir-server/tree/master/samples/kubernetes) file beginning at [Configuring FHIR server with ingress controller](https://github.com/microsoft/fhir-server/tree/master/samples/kubernetes#configuring-fhir-server-with-ingress-controller). Depending on your environment, you can either provide your own certificate or use [Let's Encrypt](https://letsencrypt.org/).
+
+    ```sh
+    helm install myfhirserverrelease helm/fhir-server/ \
+    -f ingress-values.yaml \
+    --set database.dataStore="SqlContainer" \
+    --set database.SqlContainer.acceptEula="Y"
+        
+    ```
+
+
+> **Note:** you may want to enable some optionfal features of the FHIR service like authentication. See the below table for common values to set provide when installing the server on Azure Stack Hub. To set these values, add additional --set flags to the above command to customize your configuration.
+
+|Value to set|Description|
+|------------|-----------|
+|appInsights.secretKey|Instrumentation key to use if Application insights is to be used|
+|security.enabled|Set to true if you would like to enable security features. If set to true, then security.authority and security.audience values are required. For detailed instructions on configuring security, please refer to the [Azure Active Directory Application Registrations Documentation](https://github.com/microsoft/fhir-server/blob/master/docs/PortalAppRegistration.md)|
+|security.authority|Provide the authority created when configuring the AAD Authority. E.g. https://login.microsoftonline.com/your-AAD-tenant-ID |
+|security.audience|The configured audience. This is usually the IP or URL of the FHIR server|
 
 
 ### Authentication Setup
@@ -88,23 +97,7 @@ For authentication to be enabled, the following will need to be setup in you Azu
 - [Register a confidential client application in Azure Active Directory](https://docs.microsoft.com/en-us/azure/healthcare-apis/register-resource-azure-ad-client-app).  You also have the option to register by [Public](https://docs.microsoft.com/en-us/azure/healthcare-apis/register-public-azure-ad-client-app) or [Service](https://docs.microsoft.com/en-us/azure/healthcare-apis/register-service-azure-ad-client-app) client.
 - [Add app roles in your application and receive them in the token](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps)
 
-
-### AKS Engine Helm Chart Deployment
-
-- Run the initialize_namespace.sh file here to create the namespace and populate with secrets
-    ```
-    $ ./initialize_namespace.sh
-    ```
-
-- When prompted, provide the requested information
-    - Desired namespace name
-    - Absolute path to certificate file
-    - Desired name for Helm release
-
-- Wait for the deployment to complete
-    > NOTE: the deployment will take some time as it needs to pull the container images and run the initial configuration.
-
-## Step 3: Deployment Testing
+## Step 3: Testing your FHIR instance
 
 - Get the External IP of your FHIR Server
     ```

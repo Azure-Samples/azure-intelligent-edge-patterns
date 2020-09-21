@@ -4,7 +4,7 @@ This guide demonstrates how to install a remote MLflow Tracking Server & Kubeflo
 
 **Reference Material:**
 - [Manual Installation Instructions for Mlflow](./docs/manual_installation.md)
-- [Manual Installation Instructions for Kubeflow](/Research/kubeflow-on-azure-stack/Readme.md)
+- [Manual Installation Instructions for Kubeflow](/Research/kubeflow-on-azure-stack-lab/Readme.md)
 
 **Prerequisite:**
 - Will need the k8 cluster ".kubeconfig" file on your local machine to execute commands on the k8 cluster 
