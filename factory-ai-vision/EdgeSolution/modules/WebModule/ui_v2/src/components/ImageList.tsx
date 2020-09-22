@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FocusZone, List, IRectangle, mergeStyleSets } from '@fluentui/react';
 import { useConstCallback } from '@uifabric/react-hooks';
 import { useDispatch } from 'react-redux';
+import * as R from 'ramda';
 
 import { Image } from '../store/type';
 import LabelDisplayImage from './LabelDisplayImage';
@@ -25,6 +26,11 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
   const columnCount = React.useRef(0);
   const rowHeight = React.useRef(0);
   const dispatch = useDispatch();
+
+  const sortedImages = useMemo(() => {
+    const timeStampDiff = (a: Item, b: Item) => Date.parse(b.timestamp) - Date.parse(a.timestamp);
+    return R.sort(timeStampDiff, images);
+  }, [images]);
 
   const getItemCountForPage = useConstCallback((itemIndex: number, surfaceRect: IRectangle) => {
     if (itemIndex === 0) {
@@ -54,13 +60,15 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
             isRelabel={item.isRelabel}
             pointerCursor
             onClick={() =>
-              dispatch(openLabelingPage({ selectedImageId: item.id, imageIds: images.map((e) => e.id) }))
+              dispatch(
+                openLabelingPage({ selectedImageId: item.id, imageIds: sortedImages.map((e) => e.id) }),
+              )
             }
           />
         </div>
       );
     },
-    [dispatch, images],
+    [dispatch, sortedImages],
   );
 
   const getPageHeight = useConstCallback((): number => {
@@ -71,7 +79,7 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
     <>
       <FocusZone>
         <List
-          items={images}
+          items={sortedImages}
           getItemCountForPage={getItemCountForPage}
           getPageHeight={getPageHeight}
           renderedWindowsAhead={4}
