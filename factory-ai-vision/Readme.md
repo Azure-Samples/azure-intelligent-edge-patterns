@@ -9,7 +9,7 @@ products:
 - Onnxruntime
 - azure-iot-edge
 page_type: sample solution
-description: "This is a easy to use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop."
+description: "This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop."
 urlFragment: custom-vision-azure-iot
 ---
 
@@ -40,26 +40,22 @@ Check out the architecture below to see how Vision on Edge works. You can also g
 
 
 # Architecture
-![](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/yadavm_factoryai_lpr/factory-ai-vision/assets/factoryai%20with%20LVA.png)
+![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/factoryaidiagram.png)
 
  
 ## Get Started 
 To install the Vision on Edge Solution Accelerator, the following prerequisites are required...
-  1.	You must have the Azure CLI installed on your system. See [this document](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for information on how to install the CLI
-  2.	You must have an Azure subscription
-  3.	That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device), port 5000 and 8080 need to be opened in the IoT Edge device/vm
-  4.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
+  1.	You must have an Azure subscription
+  2.	That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device), port 5000 and 8080 need to be opened in the IoT Edge device/vm
+  3.	If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
 
 # Vision on Edge Installer
 
 
 ### Prerequisites
-To install the solution on a PC running Windows, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.cmd script.
-
-To install the solution on a Mac, or a PC running Linux, unpack the installation zip, navigate to the directory containing the unziped files in a terminal, and run the factory-ai-vision-install.sh script.
 
 Before installation, please make sure you have the following: 
-   1.	At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
+   1.	At least one IoT Edge with port 8080 and 5000 opened and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
    2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
    3.   Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal 
 ### Get Started:
@@ -67,7 +63,7 @@ Go to factory-ai-vision repo and click on Installers folder, there are two zip f
 
 ### Installer to deploy prebuild docker images (Method1)
 1. Open your browser, connect to https://shell.azure.com/ , switch to Bash
-2. Download acr.zip from github ```wget https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/Installer/acs.zip```
+2. Download acr.zip from github ```wget https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip```
 3. Unzip it ```unzip acs.zip```
 4. Execute the installer ```bash factory-ai-vision-install.sh```
 5. During the, you will enter your customvision credentials (optional), select your Azure Media Service, IoTHub, and Edge device. Note that if it's your first time to deploy, it will create a service principal for Azure Media Service, please backup the ```SERVICE_PRINCIPAL_SECRET``` by your own, which will be shown in the screen while selecing Azure Media Service. It won't be shown again once creating. If it's not the first time doing deployment via Installer, you will be asked to enter that secret
