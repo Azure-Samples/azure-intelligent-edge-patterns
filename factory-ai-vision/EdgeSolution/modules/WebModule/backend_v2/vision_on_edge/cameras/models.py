@@ -12,6 +12,7 @@ from vision_on_edge.general.utils import normalize_rtsp
 
 from ..locations.models import Location
 from .exceptions import CameraRtspInvalid
+from .constants import gen_default_lines, gen_default_zones
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +24,12 @@ class Camera(models.Model):
     name = models.CharField(max_length=200)
     rtsp = models.CharField(max_length=1000)
     area = models.CharField(max_length=1000, blank=True)
-    lines = models.CharField(max_length=1000, blank=True)
-    danger_zones = models.CharField(max_length=1000, blank=True)
+    lines = models.CharField(max_length=1000,
+                             blank=True,
+                             default=gen_default_lines)
+    danger_zones = models.CharField(max_length=1000,
+                                    blank=True,
+                                    default=gen_default_zones)
     is_demo = models.BooleanField(default=False)
     location = models.ForeignKey(Location,
                                  on_delete=models.SET_NULL,
