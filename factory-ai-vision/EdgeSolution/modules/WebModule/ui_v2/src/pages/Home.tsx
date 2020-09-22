@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, Switch, Route, Redirect } from 'react-router-dom';
 import { Stack, Pivot, PivotItem, Spinner } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -39,11 +39,22 @@ export const Home: React.FC = () => {
   const onRenderMain = () => {
     if (loading) return <Spinner label="Loading" />;
 
-    const route = location.pathname.split('/')[2];
-    if (route === 'deployment') return <Deployment />;
-    if (route === 'customize')
-      return <Customize hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />;
-    return <GetStarted />;
+    return (
+      <Switch>
+        <Route path="/home/deployment">
+          <Deployment />
+        </Route>
+        <Route path="/home/customize">
+          <Customize hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
+        </Route>
+        <Route path="/home/getStarted">
+          <GetStarted />
+        </Route>
+        <Route>
+          <Redirect to={projectHasConfiged ? '/home/deployment' : '/home/getStarted'} />
+        </Route>
+      </Switch>
+    );
   };
 
   return (
