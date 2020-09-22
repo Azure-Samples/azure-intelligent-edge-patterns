@@ -78,7 +78,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   );
   const defaultCustomvisionId = useSelector((state: State) => {
     const [selectedTrainingProject] = selectNonDemoProject(state);
-    return state.trainingProject.entities[selectedTrainingProject.id]?.customVisionId;
+    return state.trainingProject.entities[selectedTrainingProject?.id]?.customVisionId;
   });
   const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
   const originSettingData = useSelector((state: State) => state.setting.origin);
