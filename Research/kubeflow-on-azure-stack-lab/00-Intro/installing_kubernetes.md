@@ -39,12 +39,12 @@ you will need to ask your cloud administrator. You need the following:
 
 Make sure you have all this information before proceeding further.
 
-You can chose to create a Kubernetes object from your Portal, keeping
-in mind the settings and adjustments we discuss below.
+Even though you can create a Kubernetes object from your Portal, for Kubeflow we need to make a few
+configuration changes, and it is easier to do with AKS-e. ***Please continue to the next chapterm and do not create a Kubernetes cluster using Portal.***
 
 ![pics/creating_k8s_marketplace.png](pics/creating_k8s_marketplace.png)
 
-# Installing Kubernetes using AKS-e (Skip the rest of the page if you did it using Portal)
+# Installing Kubernetes using AKS-e
 
 ## Login to the desired cloud
 
@@ -161,9 +161,27 @@ In our case we updated these fields:
 - "dnsPrefix": "kube-rgDEMO2"
 - "keyData": "\<whatever is in id_rsa_for_demo.pub\>"
 - updated the `"orchestratorReleaseVersion"` with what is among the listed supported versions
+- changed the master count from 3 to 1. And have 4 pool count.
 - added "apiServerConfig" values to resolve istion-system token storage.
 
-Let's also change the master count from 3 to 1. And have 4 pool count. Here is the resulting `kube-rgDEMO2_demoe2.json`:
+***Note that `apiServerConfig` may not be available from the template.*** Please make sure you have this definition in "kuberntetesconfig":
+```
+        "properties": {
+                ...
+            "orchestratorProfile": {
+                ...
+                "kubernetesConfig": {
+                ...
+                    "apiServerConfig": {
+                        "--service-account-api-audiences": "api,istio-ca",
+                        "--service-account-issuer": "kubernetes.default.svc",
+                        "--service-account-signing-key-file": "/etc/kubernetes/certs/apiserver.key"
+                    }
+        ...
+        ...
+```
+
+Here is the resulting `kube-rgDEMO2_demoe2.json`:
 
     {
         "apiVersion": "vlabs",

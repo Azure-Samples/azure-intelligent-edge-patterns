@@ -88,8 +88,15 @@ become `Running` and the list will be empty:
 
 When the pods have been created, you can proceed.
 
-To start using Kubeflow, you may want to make Kubeflow Dashboard be visible, so you will need
-to change the type of the ingress behavior - from `NodePort` to `LoadBalancer`, using this
+**IMPORTANT:**
+To open the dashboard to a public IP address, you should first implement a solution to prevent unauthorized access. You can read more about Azure authentication options from [Access Control for Azure Deployment](https://www.kubeflow.org/docs/azure/authentication/).
+
+For demo use, you can use port-forwarding to visit your cluster, run the following command and visit http://localhost:8080:
+
+    $ kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
+
+Or, again, **for non-production deployment**, you can to make Kubeflow Dashboard be externally visible by
+changing the type of the ingress behavior - from `NodePort` to `LoadBalancer`, using this
 command (default editor is vi, to edit you need to press `i`, and to save and exit, `<esc>:wq`):
 
     $ ./edit_external_access.sh
