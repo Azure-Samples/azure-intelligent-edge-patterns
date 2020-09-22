@@ -17,7 +17,15 @@ the master node of your Kubernetes cluster:
 At your Kubernetes master node:
 
     $ git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
+
+Make sure you cloned from the right repository and you are on the correct branch.
+
     $ cd azure-intelligent-edge-patterns/Research/kubeflow-on-azure-stack/sbin
+
+If for some reasons, the scripts are not executable(happens with cross-platform git commits),
+update the file permissions:
+
+    $ chmod 755 *.sh
 
 **IMPORTANT:**
 

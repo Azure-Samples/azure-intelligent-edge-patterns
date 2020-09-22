@@ -163,7 +163,7 @@ In our case we updated these fields:
 - updated the `"orchestratorReleaseVersion"` with what is among the listed supported versions
 - added "apiServerConfig" values to resolve istion-system token storage.
 
-Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDEMO2_demoe2.json`:
+Let's also change the master count from 3 to 1. And have 4 pool count. Here is the resulting `kube-rgDEMO2_demoe2.json`:
 
     {
         "apiVersion": "vlabs",
@@ -215,7 +215,7 @@ Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDE
             "agentPoolProfiles": [
                 {
                     "name": "linuxpool",
-                    "count": 3,
+                    "count": 4,
                     "vmSize": "Standard_F16",
                     "distro": "aks-ubuntu-16.04",
                     "availabilityProfile": "AvailabilitySet",
@@ -247,7 +247,7 @@ see details in a separate page, [Installing aks-engine](installing_aks-engine.md
 Download `aks-engine` installation script:
 
     $ curl -o get-akse.sh https://raw.githubusercontent.com/Azure/aks-engine/master/scripts/get-akse.sh
-    $ chmod 700 get-akse.sh
+    $ chmod 755 get-akse.sh
 
 Run the installer, specifying its version:
 
