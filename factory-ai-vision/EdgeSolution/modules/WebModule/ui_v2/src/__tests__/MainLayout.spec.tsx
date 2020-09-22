@@ -14,6 +14,8 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+jest.mock('axios');
+
 function render(
   ui,
   {
@@ -37,4 +39,18 @@ test('The setting panel should be open if `isTranerValid` is false.', () => {
   });
 
   expect(getByText(/Settings/)).not.toBeNull();
+});
+
+test("The project dropdown shouldn't be shown when `isTrainerValid` is false", () => {
+  const { queryByText } = render(<MainLayout />, {
+    initialState: { setting: { ...initialSetting, isTrainerValid: false } },
+  });
+  expect(queryByText(/Project/)).toBeNull();
+});
+
+test('The data policy dialog should be shown when the app is initialized', () => {
+  const { getByText } = render(<MainLayout />, {
+    initialState: { setting: { ...initialSetting, isTrainerValid: false, appInsightHasInit: false } },
+  });
+  expect(getByText(/Data Collection Policy/)).not.toBeNull();
 });

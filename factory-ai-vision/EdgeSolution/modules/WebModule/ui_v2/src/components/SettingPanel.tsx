@@ -251,7 +251,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                   </p>
                 </>
               }
-              open={openDataPolicyDialog}
+              open={true}
               confirmButton="I agree"
               cancelButton="I don't agree"
               onConfirm={(): void => updateIsCollectData(true, true)}
