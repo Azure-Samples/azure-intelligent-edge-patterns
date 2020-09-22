@@ -408,7 +408,7 @@ def Main():
             counter += 1
 
         # create gRPC server and start running
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         extension_pb2_grpc.add_MediaGraphExtensionServicer_to_server(
             InferenceEngine(stream_manager), server)
         server.add_insecure_port(f'[::]:{grpcServerPort}')
