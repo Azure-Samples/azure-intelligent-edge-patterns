@@ -13,7 +13,6 @@ import {
   getConditionBySlice,
   getNonDemoSelector,
 } from './shared/DemoSliceUtils';
-import { GetProjectSuccessAction, InferenceMode } from './project/projectTypes';
 import { Purpose } from './shared/BaseShape';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
@@ -187,10 +186,6 @@ export const deleteCamera = createWrappedAsync('cameras/delete', async (id: numb
   return id;
 });
 
-const isGetProjectSuccess = (action): action is GetProjectSuccessAction => {
-  return action.type === isGetProjectSuccess;
-};
-
 const slice = createSlice({
   name: 'cameras',
   initialState: getInitialDemoState(entityAdapter.getInitialState()),
@@ -227,13 +222,7 @@ const slice = createSlice({
         const { checked, cameraId } = action.meta.arg;
         state.entities[cameraId].useDangerZone = !checked;
       })
-      .addMatcher(isCRDAction, insertDemoFields)
-      .addMatcher(isGetProjectSuccess, (state, action) => {
-        state.ids.forEach((e) => {
-          if (action.payload.project.inferenceMode !== InferenceMode.PartCounting)
-            state.entities[e].useCountingLine = false;
-        });
-      });
+      .addMatcher(isCRDAction, insertDemoFields);
   },
 });
 
