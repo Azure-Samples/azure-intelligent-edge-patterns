@@ -94,7 +94,7 @@ def delete_part_on_customvision_handler(**kwargs):
                     instance.customvision_id)
         trainer = instance.project.setting.get_trainer_obj()
         trainer.delete_tag(
-            project_id=instance.project_obj.customvision_project_id,
+            project_id=instance.project.customvision_id,
             tag_id=instance.customvision_id)
         logger.info("Delete success")
     except Exception:
