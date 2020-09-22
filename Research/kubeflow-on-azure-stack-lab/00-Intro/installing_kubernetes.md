@@ -160,7 +160,8 @@ In our case we updated these fields:
 - "portalURL": "https://portal.demo2.stackpoc.com"
 - "dnsPrefix": "kube-rgDEMO2"
 - "keyData": "\<whatever is in id_rsa_for_demo.pub\>"
-- updated the `"orchestratorReleaseVersion"` from 1.15 to 1.15.5(which is among the listed supported versions)
+- updated the `"orchestratorReleaseVersion"` with what is among the listed supported versions
+- added "apiServerConfig" values to resolve istion-system token storage.
 
 Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDEMO2_demoe2.json`:
 
@@ -170,17 +171,17 @@ Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDE
         "properties": {
             "orchestratorProfile": {
                 "orchestratorType": "Kubernetes",
-                "orchestratorRelease": "1.15",
+                "orchestratorRelease": "1.17",
+                "orchestratorVersion": "1.17.11",
                 "kubernetesConfig": {
                     "cloudProviderBackoff": true,
                     "cloudProviderBackoffRetries": 1,
                     "cloudProviderBackoffDuration": 30,
                     "cloudProviderRateLimit": true,
-                    "cloudProviderRateLimitQPS": 3,
-                    "cloudProviderRateLimitBucket": 10,
-                    "cloudProviderRateLimitQPSWrite": 3,
-                    "cloudProviderRateLimitBucketWrite": 10,
-                    "kubernetesImageBase": "mcr.microsoft.com/k8s/azurestack/core/",
+                    "cloudProviderRateLimitQPS": 100,
+                    "cloudProviderRateLimitBucket": 150,
+                    "cloudProviderRateLimitQPSWrite": 25,
+                    "cloudProviderRateLimitBucketWrite": 30,
                     "useInstanceMetadata": false,
                     "networkPlugin": "kubenet",
                     "kubeletConfig": {
@@ -190,6 +191,11 @@ Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDE
                         "--node-monitor-grace-period": "5m",
                         "--pod-eviction-timeout": "5m",
                         "--route-reconciliation-period": "1m"
+                    },
+                    "apiServerConfig": {
+                        "--service-account-api-audiences": "api,istio-ca",
+                        "--service-account-issuer": "kubernetes.default.svc",
+                        "--service-account-signing-key-file": "/etc/kubernetes/certs/apiserver.key"
                     }
                 }
             },
@@ -245,7 +251,7 @@ Download `aks-engine` installation script:
 
 Run the installer, specifying its version:
 
-    $ ./get-akse.sh --version v0.43.0
+    $ ./get-akse.sh --version v0.55.4
 
 If you have problems, please refer to the official page: [Install the AKS engine on Linux in Azure Stack](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux).
 
@@ -257,7 +263,7 @@ does have the connection, and uncompress it on the machine where you plan using 
 Verify `aks-engine` version:
 
     $ aks-engine version
-    Version: v0.43.0
+    Version: v0.55.4
     GitCommit: 8928a4094
     GitTreeState: clean
 
