@@ -464,9 +464,10 @@ class Stream():
     def process_send_message_to_iothub(self, predictions):
         if self.iothub_last_send_time + self.iothub_interval < time.time():
             predictions = list(
-                p for p in predictions if p['probability'] >= self.threshold)
-            send_message_to_iothub(predictions)
-            self.iothub_last_send_time = time.time()
+                p for p in predictions if p['probability'] >= self.iothub_threshold)
+            if len(predictions) > 0:
+                send_message_to_iothub(predictions)
+                self.iothub_last_send_time = time.time()
 
     def precess_send_signal_to_lva(self):
         if self.lva_last_send_time + self.lva_interval < time.time():
