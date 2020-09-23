@@ -1,3 +1,4 @@
+import { initializeIcons } from '@fluentui/react';
 import React from 'react';
 
 import { MainLayout } from '../components/MainLayout';
@@ -12,6 +13,10 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('axios');
+
+beforeAll(() => {
+  initializeIcons();
+});
 
 describe('Setting Panel Behaviour', () => {
   it('The setting panel should be open if `isTranerValid` is false.', () => {
