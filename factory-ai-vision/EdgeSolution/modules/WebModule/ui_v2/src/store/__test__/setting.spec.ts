@@ -4,6 +4,7 @@ import moxios from 'moxios';
 
 import { thunkPostSetting } from '../setting/settingAction';
 import { initialState } from '../setting/settingReducer';
+import { getTrainingProject } from '../trainingProjectSlice';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
@@ -39,5 +40,21 @@ describe('Post setting thunk', () => {
 
     const actions = store.getActions();
     expect(actions).toEqual(expect.arrayContaining([{ type: 'settings/listAllProjects/pending' }]));
+  });
+
+  it('Should dispatch getTrainingProject', async () => {
+    const store = mockStore({ setting: initialState });
+
+    moxios.wait(function () {
+      moxios.requests.mostRecent().respondWith({
+        status: 200,
+        response: mockSettingRes,
+      });
+    });
+    await store.dispatch(thunkPostSetting());
+
+    const actions = store.getActions();
+    const containGetTrainingProjectAction = actions.some((a) => a.type === getTrainingProject.pending.type);
+    expect(containGetTrainingProjectAction).toBeTruthy();
   });
 });
