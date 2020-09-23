@@ -368,7 +368,8 @@ environment.
 
 For this demo we will substitute `azurefile` with our own locally-mounted network storage.
 
-Follow the steps in [Installing Storage](../01-Jupyter/installing_storage.md) to create a Persistent Volume Claim
+Follow the steps in [Installing Storage](../01-Jupyter/installing_storage.md)
+to create a Persistent Volume Claim
 that you could use in your Kubernetes deployments.
 
 For simplicity, we create a Samba server, but you are welcome to use nfs

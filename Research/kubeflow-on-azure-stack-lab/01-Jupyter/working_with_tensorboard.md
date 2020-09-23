@@ -4,6 +4,9 @@ Tensorboard is an application that helps visualizing data. It was built to visua
 TensorFlow, but could be used more broadly. For example, in our tutorial we demo
 how to use it for TensorFlow and Pytorch.
 
+**Pre-requisite**: You need persistent volume. Follow the steps in [Installing Storage](installing_storage.md) to create a Persistent Volume Claim
+that you could use in your Kubernetes deployments.
+
 We could use a generic Tensorboard deplolyment, see `tb_generic.yaml`: 
 
     $ kubectl create -f tb_generic.yaml
