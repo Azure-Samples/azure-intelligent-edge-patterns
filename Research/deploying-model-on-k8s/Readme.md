@@ -170,7 +170,46 @@ We will be deploying a model that we created in Azure ML, using a notebook from 
 If you want to create one yourself, update to your own account and run through
 [machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb](../../machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb).
 
-In the following steps we denote the image as `myregistry.azurecr.io/rollingstone/myinfer:1.0`, you can tag your own image adhering to the naming conventions you like.
+Here is how it would look in Azure ML, you will need to make sure you install `azureml-sdk`:
+
+![JupiterLab](pics/jupiter_lab_azureml-sdk.png) 
+
+If your image is deployed not on a publicly-available image registry, you will need to login with your credentials. You can
+retrieve your credentials from the notebook - through your workspace `ws.subscription_id`, and use 
+`ContainerRegistryManagementClient`, see the similar cells in [machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb](../../machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb):
+
+    ...
+    imagename= "tfgpu"
+    imagelabel="1.0"
+    package = Model.package(ws, [model], inference_config=inference_config,image_name=imagename, image_label=imagelabel)
+    package.wait_for_creation(show_output=True)
+    client = ContainerRegistryManagementClient(ws._auth,subscription_id)
+    result= client.registries.list_credentials(ws.resource_group, reg_name, custom_headers=None, raw=False)
+
+    print("ACR:", package.get_container_registry)
+    print("Image:", package.location)
+    print("using username \"" + result.username + "\"")
+    print("using password \"" + result.passwords[0].value + "\"")
+    ...
+
+It will print out the values(which you could also see at the Portal, in your Azure ML):
+
+    ...
+    ACR: 12345678901234567890.azurecr.io
+    Image: 1234567dedede1234567ceeeee.azurecr.io/tfgpu:1.0
+    using username: "9876543210abcdef"
+    using password: "876543210987654321abcdef"
+    ...
+
+At the Kubernetes cluster where you want this image to be available, you will need to login to your ACR:
+
+    $ az acr login --name 12345678901234567890.azurecr.io
+    $ docker login 12345678901234567890.azurecr.io
+    Username: c6a1e081293c442e9465100e3021da63
+    Password:
+    Login Succeeded
+
+In the following steps we denote the image as `1234567dedede1234567ceeeee.azurecr.io/tfgpu:1.0`, you can tag your own image adhering to the naming conventions you like.
 
 ## Creating a Deployment
 
@@ -194,7 +233,7 @@ We provide the Deployment file, `deploy_infer.yaml`:
         spec:
         containers:
         - name: my-infer
-            image: myregistry.azurecr.io/rollingstone/myinfer:1.0
+            image: 1234567dedede1234567ceeeee.azurecr.io/tfgpu:1.0
             ports:
             # we use only 5001, but the container exposes  EXPOSE 5001 8883 8888
             - containerPort: 5001
