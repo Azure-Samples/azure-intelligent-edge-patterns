@@ -71,18 +71,7 @@
               "DBPASS": { "value": "vision_on_edge" }
             },
             "settings": {
-              "image": "${MODULES.WebModule}",
-              "createOptions": {
-                "HostConfig": {
-                  "PortBindings": {
-                    "8000/tcp": [
-                      {
-                        "HostPort": "8080"
-                      }
-                    ]
-                  }
-                }
-              }
+              "image": "${MODULES.WebModule}"
             }
           },
           "WebDBModule": {
@@ -96,15 +85,25 @@
               "POSTGRES_DB": { "value": "vision_on_edge" }
             },
             "settings": {
-              "image": "${MODULES.WebDBModule}",
+              "image": "${MODULES.WebDBModule}"
+            }
+          },
+          "NginxModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.NginxModule}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5432/tcp": [
-                      {
-                        "HostPort": "5432"
-                      }
-                    ]
+                    "8080/tcp": [{
+                      "HostPort": "8080"
+                    }],
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }]
                   }
                 }
               }
@@ -124,18 +123,6 @@
               "image": "${MODULES.InferenceModule.gpuamd64}",
               "createOptions": {
                 "HostConfig": {
-                  "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ]
-                  },
                   "IpcMode": "container:lvaEdge",
                   "runtime": "nvidia"
                 }
@@ -164,7 +151,6 @@
               }
             }
           },
-
           "rtspsim": {
             "version": "1.0",
             "type": "docker",

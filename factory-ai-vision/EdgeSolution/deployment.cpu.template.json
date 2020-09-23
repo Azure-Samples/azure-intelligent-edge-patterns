@@ -77,16 +77,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.WebModule}",
-              "createOptions": {
-                "HostConfig": {
-                  "PortBindings": {
-                    "8000/tcp": [{
-                      "HostPort": "8080"
-                    }]
-                  }
-                }
-              }
+              "image": "${MODULES.WebModule}"
             }
           },
           "WebDBModule": {
@@ -118,6 +109,27 @@
               }
             }
           },
+          "NginxModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.NginxModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "8080/tcp": [{
+                      "HostPort": "8080"
+                    }],
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }]
+                  }
+                }
+              }
+            }
+          },
           "InferenceModule": {
             "version": "1.0",
             "type": "docker",
@@ -132,14 +144,6 @@
               "image": "${MODULES.InferenceModule.cpuamd64}",
               "createOptions": {
                 "HostConfig": {
-                  "PortBindings": {
-                    "5000/tcp": [{
-                      "HostPort": "5000"
-                    }],
-                    "5558/tcp": [{
-                      "HostPort": "5558"
-                    }]
-                  },
                   "IpcMode": "container:lvaEdge",
                   "runtime": "runc"
                 }
