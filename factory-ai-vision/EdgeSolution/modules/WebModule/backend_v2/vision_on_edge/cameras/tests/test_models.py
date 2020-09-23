@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App model tests.
 """
 
@@ -12,8 +11,10 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.fast
-@mock.patch("vision_on_edge.cameras.models.Camera.verify_rtsp",
-            mock.MagicMock(return_value=True))
+@mock.patch(
+    "vision_on_edge.cameras.models.Camera.verify_rtsp",
+    mock.MagicMock(return_value=True),
+)
 def test_rtsp():
     """test_rtsp.
 

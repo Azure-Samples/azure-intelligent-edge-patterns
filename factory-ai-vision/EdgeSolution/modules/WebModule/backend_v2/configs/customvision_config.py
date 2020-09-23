@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Azure Custom Vision Settings
 
 This module finds Custom Vision related configs with following order:
@@ -9,5 +8,5 @@ import os
 
 from config import ENDPOINT, TRAINING_KEY
 
-TRAINING_KEY = os.environ.get('TRAINING_KEY', TRAINING_KEY)
-ENDPOINT = os.environ.get('ENDPOINT', ENDPOINT)
+TRAINING_KEY = os.environ.get("TRAINING_KEY", TRAINING_KEY)
+ENDPOINT = os.environ.get("ENDPOINT", ENDPOINT)

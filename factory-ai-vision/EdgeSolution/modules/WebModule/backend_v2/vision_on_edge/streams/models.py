@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App models.
 """
 
@@ -21,11 +20,11 @@ STREAM_GC_TIME_THRESHOLD = 5  # Seconds
 PRINT_STREAMS = False
 
 
-class Stream():
+class Stream:
     """Stream Class"""
 
     def __init__(self, rtsp, camera_id, part_id=None):
-        if rtsp == '0':
+        if rtsp == "0":
             self.rtsp = 0
         elif rtsp == "1":
             self.rtsp = 1
@@ -55,18 +54,17 @@ class Stream():
             raise StreamOpenRTSPError
 
     def update_keep_alive(self):
-        """update_keep_alive.
-        """
+        """update_keep_alive."""
         self.keep_alive = time.time()
 
     def gen(self):
-        """generator for stream.
-        """
+        """generator for stream."""
         self.status = "running"
 
         logger.info("start streaming with %s", self.rtsp)
         while self.status == "running" and (
-                self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
+            self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()
+        ):
             if not self.cap.isOpened():
                 raise StreamOpenRTSPError
             has_img, img = self.cap.read()
@@ -80,15 +78,17 @@ class Stream():
             self.last_active = time.time()
             self.last_img = img.copy()
             self.cur_img_index = (self.cur_img_index + 1) % 10000
-            yield (b"--frame\r\n"
-                   b"Content-Type: image/jpeg\r\n\r\n" +
-                   cv2.imencode(".jpg", img)[1].tobytes() + b"\r\n")
-        logger.info('%s releasing self...', self)
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n"
+                + cv2.imencode(".jpg", img)[1].tobytes()
+                + b"\r\n"
+            )
+        logger.info("%s releasing self...", self)
         self.cap.release()
 
     def get_frame(self):
-        """get_frame.
-        """
+        """get_frame."""
         logger.info("get frame %s", self)
         # b, img = self.cap.read()
         time_begin = time.time()
@@ -124,9 +124,8 @@ class Stream():
         return f"<Stream id:{self.id} rtsp:{self.rtsp}>"
 
 
-class StreamManager():
-    """StreamManager
-    """
+class StreamManager:
+    """StreamManager"""
 
     def __init__(self):
         self.streams = []
@@ -134,13 +133,11 @@ class StreamManager():
         self.gc()
 
     def add(self, stream: Stream):
-        """add stream
-        """
+        """add stream"""
         self.streams.append(stream)
 
     def get_stream_by_id(self, stream_id):
-        """get_stream_by_id
-        """
+        """get_stream_by_id"""
 
         self.mutex.acquire()
 
@@ -168,12 +165,11 @@ class StreamManager():
                     logger.info("streams: %s", self.streams)
                 to_delete = []
                 for stream in self.streams:
-                    if (stream.last_active + STREAM_GC_TIME_THRESHOLD <
-                            time.time()):
+                    if stream.last_active + STREAM_GC_TIME_THRESHOLD < time.time():
 
                         # stop the inactive stream
                         # (the ones users didnt click disconnect)
-                        logger.info('stream %s inactive', stream)
+                        logger.info("stream %s inactive", stream)
                         stream.close()
 
                         # collect the stream, to delete later

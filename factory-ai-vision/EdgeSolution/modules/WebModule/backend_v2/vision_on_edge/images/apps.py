@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App.
 """
 
@@ -10,12 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 class ImagesConfig(AppConfig):
-    """App Config.
-    """
-    name = 'vision_on_edge.images'
+    """App Config."""
+
+    name = "vision_on_edge.images"
 
     def ready(self):
-        """ready.
-        """
+        """ready."""
         # pylint: disable = unused-import, import-outside-toplevel
         from . import signals

@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('azure_pd_deploy_status', '0002_auto_20200828_0616'),
-    ]
+    dependencies = [("azure_pd_deploy_status", "0002_auto_20200828_0616")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='deploystatus',
-            name='performance',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="deploystatus", name="performance")]

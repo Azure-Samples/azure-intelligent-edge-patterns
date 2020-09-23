@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('azure_projects', '0001_initial'),
-    ]
+    dependencies = [("azure_projects", "0001_initial")]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='needRetraining',
+            model_name="project",
+            name="needRetraining",
             field=models.BooleanField(default=True),
-        ),
+        )
     ]

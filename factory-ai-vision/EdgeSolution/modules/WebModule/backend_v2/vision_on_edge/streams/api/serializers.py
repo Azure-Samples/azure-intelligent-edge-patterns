@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App serializers.
 """
 
@@ -14,20 +13,19 @@ logger = logging.getLogger(__name__)
 
 
 class StreamConnectResponseSerializer(serializers.Serializer):
-    """ProjectPerformanesSerializer.
-    """
-    status = serializers.ChoiceField(choices=['ok'])
+    """ProjectPerformanesSerializer."""
+
+    status = serializers.ChoiceField(choices=["ok"])
     stream_id = serializers.IntegerField()
 
 
 class StreamCaptureResponseSerializer(serializers.Serializer):
-    """StreamCaptureResponseSerializer.
-    """
+    """StreamCaptureResponseSerializer."""
 
     class CapturedImageSerializer(ImageSerializer):
-        """CapturedImageSerializer.
-        """
+        """CapturedImageSerializer."""
+
         image = serializers.CharField()
 
-    status = serializers.ChoiceField(choices=['ok'])
+    status = serializers.ChoiceField(choices=["ok"])
     image = CapturedImageSerializer()

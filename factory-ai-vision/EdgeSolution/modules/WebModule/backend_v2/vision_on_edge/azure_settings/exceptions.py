@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App exceptions.
 """
 
@@ -7,8 +6,7 @@ from rest_framework.exceptions import APIException
 
 # pylint: disable=line-too-long
 class SettingEmptyKeyError(APIException):
-    """SettingEmptyKeyError.
-    """
+    """SettingEmptyKeyError."""
 
     status_code = 400
     default_detail = "Setting Key is empty."
@@ -16,8 +14,7 @@ class SettingEmptyKeyError(APIException):
 
 
 class SettingEmptyEndpointError(APIException):
-    """SettingEmptyEndpointError.
-    """
+    """SettingEmptyEndpointError."""
 
     status_code = 400
     default_detail = "Setting Endpoint is empty."
@@ -25,18 +22,16 @@ class SettingEmptyEndpointError(APIException):
 
 
 class SettingCustomVisionAccessFailed(APIException):
-    """SettingCustomVisionAccessFailed.
-    """
+    """SettingCustomVisionAccessFailed."""
 
     status_code = 503
-    default_detail = 'Training key or Endpoint is invalid. Please change the settings'
-    default_code = 'setting_custom_vision_access_failed'
+    default_detail = "Training key or Endpoint is invalid. Please change the settings"
+    default_code = "setting_custom_vision_access_failed"
 
 
 class SettingCustomVisionCannotCreateProject(APIException):
-    """SettingCustomVisionCannotCreateProject.
-    """
+    """SettingCustomVisionCannotCreateProject."""
 
     status_code = 503
-    default_detail = 'Custom Vision projects reach limitation. Please delete some project or contact with admin'
-    default_code = 'setting_custom_vision_cannot_create_project'
+    default_detail = "Custom Vision projects reach limitation. Please delete some project or contact with admin"
+    default_code = "setting_custom_vision_cannot_create_project"

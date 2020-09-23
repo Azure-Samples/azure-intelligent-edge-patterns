@@ -1,24 +1,25 @@
-# -*- coding: utf-8 -*-
 """App API views.
 """
 
-from configs.app_insight import APP_INSIGHT_INST_KEY
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+from configs.app_insight import APP_INSIGHT_INST_KEY
 
 from ...general.api.serializers import MSStyleErrorResponseSerializer
 from .serializers import InstrumentKeyResponseSerializer
 
 
 @swagger_auto_schema(
-    method='get',
-    operation_summary='Get Application Insight Instrument Key.',
+    method="get",
+    operation_summary="Get Application Insight Instrument Key.",
     responses={
-        '200': InstrumentKeyResponseSerializer,
-        '400': MSStyleErrorResponseSerializer
-    })
-@api_view(['GET'])
+        "200": InstrumentKeyResponseSerializer,
+        "400": MSStyleErrorResponseSerializer,
+    },
+)
+@api_view(["GET"])
 def key_view(request) -> Response:
     """instrumentation_key.
 

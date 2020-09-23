@@ -3,22 +3,21 @@
 
 import factory
 from factory import DjangoModelFactory, Faker, post_generation
+
 from vision_on_edge.azure_parts.tests.factories import PartFactory
 from vision_on_edge.azure_projects.tests.factories import ProjectFactory
 from vision_on_edge.images.models import Image
 
 
 class ImageFactory(DjangoModelFactory):
-    """ImageFactory.
-    """
+    """ImageFactory."""
 
     project = factory.SubFactory(ProjectFactory)
     part = factory.SubFactory(PartFactory)
     remote_url = Faker("image_url")
 
     class Meta:
-        """Meta.
-        """
+        """Meta."""
 
         model = Image
         django_get_or_create = ["remote_url"]

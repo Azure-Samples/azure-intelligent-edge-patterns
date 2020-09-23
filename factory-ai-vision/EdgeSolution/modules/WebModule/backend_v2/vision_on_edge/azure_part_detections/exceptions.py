@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App exceptions.
 """
 
@@ -10,6 +9,7 @@ class PdObjectNotFound(NotFound):
     status_code = 404
     default_detail = "Part Detection object not found."
     default_code = "pd_object_not_found"
+
 
 class PdProbThresholdNotInteger(APIException):
     status_code = 400
@@ -61,14 +61,19 @@ class PdRelabelImageFull(APIException):
 
 class PdDeployToInfereceError(APIException):
     status_code = 503
-    default_detail = "Part Detection deploy failed cause Inference Module does not response."
+    default_detail = (
+        "Part Detection deploy failed cause Inference Module does not response."
+    )
     default_code = "pd_deploy_to_inferece_error"
 
 
 class PdExportInfereceReadTimeout(APIException):
     status_code = 503
-    default_detail = "Part Detection deploy failed cause Inference Module requests timeout."
+    default_detail = (
+        "Part Detection deploy failed cause Inference Module requests timeout."
+    )
     default_code = "pd_export_inference_read_timeout"
+
 
 class PdRelabelDemoProjectError(APIException):
     status_code = 400

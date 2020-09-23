@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App.
 """
 
@@ -9,36 +8,32 @@ from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SETTING_NAME = 'DEFAULT_SETTING'
+DEFAULT_SETTING_NAME = "DEFAULT_SETTING"
 
 
 class AzureProjectsConfig(AppConfig):
-    """App Config.
-    """
+    """App Config."""
 
-    name = 'vision_on_edge.azure_projects'
+    name = "vision_on_edge.azure_projects"
 
     def ready(self):
-        """ready.
-        """
-        if 'runserver' in sys.argv:
+        """ready."""
+        if "runserver" in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
+            from ..azure_settings.models import Setting
             from . import signals
             from .models import Project
-            from ..azure_settings.models import Setting
 
             logger.info("Create/update a none-demo project...")
             setting_obj = Setting.objects.first()
-            if (not Project.objects.filter(setting=setting_obj,
-                                           is_demo=False).exists()):
+            if not Project.objects.filter(setting=setting_obj, is_demo=False).exists():
                 Project.objects.create(setting=setting_obj, is_demo=False)
 
             create_demo = True
             if create_demo:
                 logger.info("Creating demo projects...")
                 # Default Settings should be created already
-                default_settings = Setting.objects.filter(
-                    name=DEFAULT_SETTING_NAME)
+                default_settings = Setting.objects.filter(name=DEFAULT_SETTING_NAME)
                 if not default_settings.exists():
                     logger.info("Cannot find default settings....")
                     return
@@ -60,9 +55,8 @@ class AzureProjectsConfig(AppConfig):
                     name="Demo Part Counting Project",
                     setting=default_settings.first(),
                     is_demo=True,
-                    defaults={
-                        "download_uri": "scenario_models/1",
-                    })
+                    defaults={"download_uri": "scenario_models/1"},
+                )
                 # =============================================
                 # Employee safety                           ===
                 # =============================================
@@ -70,9 +64,8 @@ class AzureProjectsConfig(AppConfig):
                     name="Demo Employee Safety Project",
                     setting=default_settings.first(),
                     is_demo=True,
-                    defaults={
-                        "download_uri": "scenario_models/2",
-                    })
+                    defaults={"download_uri": "scenario_models/2"},
+                )
                 # =============================================
                 # Defect Detection                          ===
                 # =============================================
@@ -80,7 +73,6 @@ class AzureProjectsConfig(AppConfig):
                     name="Demo Defect Detection Project",
                     setting=default_settings.first(),
                     is_demo=True,
-                    defaults={
-                        "download_uri": "scenario_models/3",
-                    })
+                    defaults={"download_uri": "scenario_models/3"},
+                )
                 logger.info("Create demo project end.")

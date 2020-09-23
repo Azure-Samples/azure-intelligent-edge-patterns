@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App models.
 """
 
@@ -8,38 +7,35 @@ import threading
 import time
 
 import requests
-from azure.cognitiveservices.vision.customvision.training.models import \
-    CustomVisionErrorException
-from msrest.exceptions import DeserializationError as MSDeserializationError
-
+from azure.cognitiveservices.vision.customvision.training.models import (
+    CustomVisionErrorException,
+)
 from django.db import models
 from django.db.models.signals import pre_save
 from django.utils import timezone
+from msrest.exceptions import DeserializationError as MSDeserializationError
 
 from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..azure_settings.models import Setting
-from .exceptions import (ProjectCannotChangeDemoError,
-                         ProjectCustomVisionError,
-                         ProjectResetWithoutNameError,
-                         ProjectWithoutSettingError)
+from .exceptions import (
+    ProjectCannotChangeDemoError,
+    ProjectCustomVisionError,
+    ProjectResetWithoutNameError,
+    ProjectWithoutSettingError,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class Project(models.Model):
-    """Project Model.
-    """
+    """Project Model."""
 
     setting = models.ForeignKey(Setting, on_delete=models.CASCADE, null=True)
-    customvision_id = models.CharField(max_length=200,
-                                       null=True,
-                                       blank=True,
-                                       default="")
+    customvision_id = models.CharField(
+        max_length=200, null=True, blank=True, default=""
+    )
     name = models.CharField(max_length=200, null=True, blank=True, default="")
-    download_uri = models.CharField(max_length=1000,
-                                    null=True,
-                                    blank=True,
-                                    default="")
+    download_uri = models.CharField(max_length=1000, null=True, blank=True, default="")
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
 
@@ -65,10 +61,22 @@ class Project(models.Model):
         self.customvision_id = ""
         self.name = name
         self.download_uri = ""
-        self.needRetraining = Project._meta.get_field(
-            "needRetraining").get_default()
+        self.needRetraining = Project._meta.get_field("needRetraining").get_default()
         self.maxImages = Project._meta.get_field("maxImages").get_default()
         self.create_project()
+
+    def get_trainer_obj(self):
+        """get_trainer_obj."""
+        if not self.setting:
+            raise ProjectWithoutSettingError
+        if not self.setting.is_trainer_valid:
+            raise SettingCustomVisionAccessFailed
+        return self.setting.get_trainer_obj()
+
+    def get_project_obj(self):
+        """get_project_obj."""
+        trainer = self.get_project_obj()
+        return trainer.get_project(self.customvision_id)
 
     def validate(self) -> bool:
         """validate.
@@ -76,27 +84,14 @@ class Project(models.Model):
         Returns:
             bool: if project customvision_id valid
         """
-        is_project_valid = False
-        if (self.setting and self.setting.is_trainer_valid and
-                self.customvision_id):
-            try:
-                trainer = self.setting.get_trainer_obj()
-                trainer.get_project(self.customvision_id)
-                logger.info("Project customvision_id pass.")
-                is_project_valid = True
-                logger.info("Project %s validate pass.", self.name)
-            except CustomVisionErrorException:
-                logger.error(
-                    "Project %s is invalid (CustomVisionErrorException).",
-                    self.name)
-            except MSDeserializationError:
-                logger.error("Project %s is invalid (MSDeserializationError).",
-                             self.name)
-            except TypeError:
-                logger.error("Project %s is invalid (TypeError).", self.name)
-            except Exception:
-                logger.exception("Uncaught exception")
-        return is_project_valid
+        result = False
+        try:
+            self.get_project_obj()
+            result = True
+            logger.info("Project %s validate pass.", self.name)
+        except Exception:
+            logger.info("Project %s validate failed.", self.name)
+        return result
 
     @staticmethod
     def pre_save(**kwargs):
@@ -105,39 +100,42 @@ class Project(models.Model):
         Args:
             kwargs:
         """
+        logger.info("Project pre_save start")
         instance = kwargs["instance"]
         update_fields = kwargs["update_fields"]
-        if update_fields == frozenset({'relabel_expired_time'}):
+
+        # Pass if update relabel_only
+        if update_fields == frozenset({"relabel_expired_time"}):
             logger.info("Pass pre_save (relabel_keep_alive)")
             return
-        instance.name = (instance.name or "VisionOnEdge-" +
-                         datetime.datetime.utcnow().isoformat())
+
+        # Don't change demo project
         if instance.is_demo and instance.id:
             raise ProjectCannotChangeDemoError
-        logger.info("Project pre_save start")
-        logger.info("Project id given: %s", instance.id)
-        logger.info("Project customvision_id given: %s",
-                    instance.customvision_id)
-        logger.info("Project name given: %s", instance.name)
-        if not instance.validate():
-            instance.customvision_id = ""
-            logger.info("Invalid setting. Set customvision id to ''")
-            return
-        trainer = instance.setting.get_trainer_obj()
-        if instance.customvision_id:
-            # Endpoint and Training_key is valid, and trying to save with
-            # customvision_id...
-            project = trainer.get_project(instance.customvision_id)
-            instance.name = project.name
-            logger.info("Project Found. Set instance.name to %s",
-                        instance.name)
-            return
-            # Setting is valid, no customvision_id
 
-        logger.info("Project id set: %s", instance.id)
-        logger.info("Project customvision_id set: %s",
-                    instance.customvision_id)
-        logger.info("Project name set: %s", instance.name)
+        # Set default name
+        instance.name = (
+            instance.name or "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
+        )
+
+        logger.info(
+            "Project (id, customvision_id, name): (%s, %s, %s)",
+            instance.id,
+            instance.customvision_id,
+            instance.name,
+        )
+        try:
+            project = instance.get_project_obj()
+            instance.name = project.name
+            logger.info("Project Found. Set instance.name to %s", instance.name)
+        except Exception:
+            instance.customvision_id = ""
+        logger.info(
+            "Project (id, customvision_id, name): (%s, %s, %s)",
+            instance.id,
+            instance.customvision_id,
+            instance.name,
+        )
         logger.info("Project pre_save end")
 
     def dequeue_iterations(self, max_iterations: int = 2):
@@ -147,16 +145,16 @@ class Project(models.Model):
             max_iterations (int): max_iterations
         """
         try:
-            trainer = self.setting.get_trainer_obj()
-            if not trainer:
+            if not self.setting or not self.setting.validate():
                 return
             if not self.customvision_id:
                 return
+            trainer = self.setting.get_trainer_obj()
             iterations = trainer.get_iterations(self.customvision_id)
             if len(iterations) > max_iterations:
-                # TODO delete train in Train Model
-                trainer.delete_iteration(self.customvision_id,
-                                         iterations[-1].as_dict()["id"])
+                trainer.delete_iteration(
+                    self.customvision_id, iterations[-1].as_dict()["id"]
+                )
         except CustomVisionErrorException as customvision_err:
             logger.error(customvision_err)
         except:
@@ -173,11 +171,9 @@ class Project(models.Model):
         trainer = self.setting.get_trainer_obj()
         try:
             if not self.name:
-                self.name = ("VisionOnEdge-" +
-                             datetime.datetime.utcnow().isoformat())
+                self.name = "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
             project = trainer.create_project(
-                name=self.name,
-                domain_id=self.setting.obj_detection_domain_id,
+                name=self.name, domain_id=self.setting.obj_detection_domain_id
             )
             self.customvision_id = project.id
             self.name = project.name
@@ -192,39 +188,34 @@ class Project(models.Model):
 
     def delete_tag_by_name(self, tag_name) -> None:
         """delete_tag_by_name.
-        
+
         Delete tag on Custom Vision.
 
         Args:
-            tag_name:
+            tag_name: Tag name to search on Custom Vision.
         """
         logger.info("deleting tag: %s", tag_name)
-        if not self.setting.is_trainer_valid:
-            return
-        if not self.customvision_id:
-            return
+        if not self.validate():
+            raise ProjectCustomVisionError
         trainer = self.setting.get_trainer_obj()
         tags = trainer.get_tags(project_id=self.customvision_id)
         for tag in tags:
             if tag.name.lower() == tag_name.lower():
-                trainer.delete_tag(project_id=self.customvision_id,
-                                   tag_id=tag.id)
+                trainer.delete_tag(project_id=self.customvision_id, tag_id=tag.id)
                 logger.info("tag deleted: %s", tag_name)
                 return
 
-    def delete_tag_by_id(self, tag_id):
+    def delete_tag_by_id(self, tag_id) -> None:
         """delete_tag_by_id.
-        
+
         Delete tag on Custom Vision.
 
         Args:
-            tag_id:
+            tag_id: Tag id.
         """
-        logger.info("deleting tag: %s", tag_id)
-        if not self.setting.is_trainer_valid:
-            return
-        if not self.customvision_id:
-            return
+        logger.info("Deleting tag: %s", tag_id)
+        if not self.validate():
+            raise ProjectCustomVisionError
         trainer = self.setting.get_trainer_obj()
         trainer.delete_tag(project_id=self.customvision_id, tag_id=tag_id)
 
@@ -243,8 +234,11 @@ class Project(models.Model):
             raise SettingCustomVisionAccessFailed
         trainer = self.setting.get_trainer_obj()
         # Submit training task to CustomVision
-        logger.info("%s %s submit training task to CustomVision",
-                    self.customvision_id, self.name)
+        logger.info(
+            "%s %s submit training task to CustomVision",
+            self.customvision_id,
+            self.name,
+        )
         trainer.train_project(self.customvision_id)
 
         # If all above is success
@@ -261,12 +255,17 @@ class Project(models.Model):
         # iteration.id,
         # 'ONNX')
         setting_obj = self.setting
-        url = (setting_obj.endpoint + "customvision/v3.2/training/projects/" +
-               self.customvision_id + "/iterations/" + iteration_id +
-               "/export?platform=ONNX")
-        res = requests.post(url,
-                            "{body}",
-                            headers={"Training-key": setting_obj.training_key})
+        url = (
+            setting_obj.endpoint
+            + "customvision/v3.2/training/projects/"
+            + self.customvision_id
+            + "/iterations/"
+            + iteration_id
+            + "/export?platform=ONNX"
+        )
+        res = requests.post(
+            url, "{body}", headers={"Training-key": setting_obj.training_key}
+        )
         return res
 
 
@@ -279,8 +278,7 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     def start_exporting(self):
-        """start_exporting.
-        """
+        """start_exporting."""
 
         def _export_worker(self):
             """Export Model Worker"""

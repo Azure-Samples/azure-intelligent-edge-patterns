@@ -1,30 +1,45 @@
-# -*- coding: utf-8 -*-
 """App drf url tests.
 """
 
-import pytest
+from unittest import mock
 
+import pytest
 from django.urls import resolve, reverse
-from vision_on_edge.azure_projects.models import Project
+
+from .factories import ProjectFactory
 
 pytestmark = pytest.mark.django_db
 
 
-def test_project_detail(project: Project):
+@pytest.mark.fast
+@mock.patch(
+    "vision_on_edge.azure_settings.models.Setting.validate",
+    mock.MagicMock(return_value=True),
+)
+@mock.patch(
+    "vision_on_edge.azure_settings.models.Setting.get_domain_id",
+    mock.MagicMock(return_value="Fake_id"),
+)
+@mock.patch(
+    "vision_on_edge.azure_projects.models.Project.validate",
+    mock.MagicMock(return_value=True),
+)
+def test_project_detail():
     """test_project_detail.
 
     Args:
         project (Project): project
     """
-    assert (reverse("api:project-detail",
-                    kwargs={"pk": project.id
-                           }) == f"/api/projects/{project.id}")
-    assert resolve(
-        f"/api/projects/{project.id}").view_name == "api:project-detail"
+    project = ProjectFactory()
+    assert (
+        reverse("api:project-detail", kwargs={"pk": project.id})
+        == f"/api/projects/{project.id}"
+    )
+    assert resolve(f"/api/projects/{project.id}").view_name == "api:project-detail"
 
 
+@pytest.mark.fast
 def test_project_list():
-    """test_project_list.
-    """
+    """test_project_list."""
     assert reverse("api:project-list") == "/api/projects"
     assert resolve("/api/projects").view_name == "api:project-list"

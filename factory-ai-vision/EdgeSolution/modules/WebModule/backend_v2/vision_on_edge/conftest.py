@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 """Conftest
 """
+
+import json
 
 import pytest
 
@@ -11,8 +12,7 @@ from vision_on_edge.azure_projects.tests.factories import ProjectFactory
 from vision_on_edge.azure_settings.models import Setting
 from vision_on_edge.azure_settings.tests.factories import SettingFactory
 from vision_on_edge.azure_training_status.models import TrainingStatus
-from vision_on_edge.azure_training_status.tests.factories import \
-    TrainingStatusFactory
+from vision_on_edge.azure_training_status.tests.factories import TrainingStatusFactory
 from vision_on_edge.cameras.models import Camera
 from vision_on_edge.cameras.tests.factories import CameraFactory
 from vision_on_edge.images.models import Image
@@ -37,9 +37,9 @@ def setting() -> Setting:
     return SettingFactory()
 
 
-#@pytest.fixture
-#def project() -> Project:
-#    return ProjectFactory()
+@pytest.fixture
+def project() -> Project:
+    return ProjectFactory()
 
 
 @pytest.fixture

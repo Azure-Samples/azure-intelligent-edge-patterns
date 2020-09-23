@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Azure Project Factories
 """
 
@@ -12,16 +11,14 @@ from ...cameras.tests.factories import CameraFactory
 
 
 class PartDetectionFactory(DjangoModelFactory):
-    """PartDetectionFactory.
-    """
+    """PartDetectionFactory."""
 
     setting = factory.SubFactory(SettingFactory)
 
     customvision_project_name = Faker("sentence")
 
     class Meta:
-        """Meta.
-        """
+        """Meta."""
 
         model = Project
         django_get_or_create = ["customvision_project_name"]

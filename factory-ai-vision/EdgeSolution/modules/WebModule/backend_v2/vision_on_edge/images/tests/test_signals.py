@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Testing Camera Signals
 """
 
@@ -21,30 +20,28 @@ class ImageSignalsTestCase(CustomVisionTestCase):
     """
 
     def setUp(self):
-        """setUp.
-        """
-        Setting.objects.create(name="valid_setting",
-                               endpoint=self.endpoint,
-                               training_key=self.training_key)
+        """setUp."""
+        Setting.objects.create(
+            name="valid_setting", endpoint=self.endpoint, training_key=self.training_key
+        )
 
         Setting.objects.create(name="invalid_setting")
         Project.objects.create(
             setting=Setting.objects.get(name="valid_setting"),
-            customvision_project_id='valid_project_id',
-            customvision_project_name=f'{self.project_prefix}-test_create_1',
-            is_demo=False)
+            customvision_project_id="valid_project_id",
+            customvision_project_name=f"{self.project_prefix}-test_create_1",
+            is_demo=False,
+        )
         Project.objects.create(
             setting=Setting.objects.get(name="invalid_setting"),
-            customvision_project_id='invalid_project_id',
-            customvision_project_name=f'{self.project_prefix}-test_create_2',
-            is_demo=False)
-        Part.objects.create(name="part_1",
-                            description="description_1",
-                            is_demo=False)
+            customvision_project_id="invalid_project_id",
+            customvision_project_name=f"{self.project_prefix}-test_create_2",
+            is_demo=False,
+        )
+        Part.objects.create(name="part_1", description="description_1", is_demo=False)
 
     def test_setup_is_valid(self):
-        """test_delete_relable_if_acc_range_change.
-        """
+        """test_delete_relable_if_acc_range_change."""
 
     def test_delete_relable_if_acc_range_change(self):
         """test_delete_relable_if_acc_range_change.
@@ -64,9 +61,9 @@ class ImageSignalsTestCase(CustomVisionTestCase):
             project_obj = Project.objects.get(setting__name=setting_name)
 
             for _ in range(40):
-                Image.objects.create(project=project_obj,
-                                     part=Part.objects.first(),
-                                     is_relabel=True)
+                Image.objects.create(
+                    project=project_obj, part=Part.objects.first(), is_relabel=True
+                )
             self.assertEqual(Image.objects.all().count(), 40)
 
             project_obj.has_configured = True
@@ -92,9 +89,9 @@ class ImageSignalsTestCase(CustomVisionTestCase):
             project_obj = Project.objects.get(setting__name=setting_name)
 
             for _ in range(40):
-                Image.objects.create(project=project_obj,
-                                     part=Part.objects.first(),
-                                     is_relabel=True)
+                Image.objects.create(
+                    project=project_obj, part=Part.objects.first(), is_relabel=True
+                )
             self.assertEqual(Image.objects.all().count(), 40)
 
             project_obj.has_configured = True
@@ -120,9 +117,9 @@ class ImageSignalsTestCase(CustomVisionTestCase):
             project_obj = Project.objects.get(setting__name=setting_name)
 
             for _ in range(40):
-                Image.objects.create(project=project_obj,
-                                     part=Part.objects.first(),
-                                     is_relabel=True)
+                Image.objects.create(
+                    project=project_obj, part=Part.objects.first(), is_relabel=True
+                )
             self.assertEqual(Image.objects.all().count(), 40)
 
             project_obj.has_configured = True
@@ -148,9 +145,9 @@ class ImageSignalsTestCase(CustomVisionTestCase):
             project_obj = Project.objects.get(setting__name=setting_name)
 
             for _ in range(40):
-                Image.objects.create(project=project_obj,
-                                     part=Part.objects.first(),
-                                     is_relabel=True)
+                Image.objects.create(
+                    project=project_obj, part=Part.objects.first(), is_relabel=True
+                )
             self.assertEqual(Image.objects.all().count(), 40)
 
             project_obj.has_configured = True

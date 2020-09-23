@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API views.
 """
 
@@ -7,69 +6,74 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import requests
-from requests.exceptions import ReadTimeout
-
 from django.core.files.images import ImageFile
-
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
+from requests.exceptions import ReadTimeout
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_pd_deploy_status.models import DeployStatus
-from ...azure_projects.utils import TrainingManagerInstance
+from ...azure_projects.utils import TRAINING_MANAGER
 from ...azure_training_status import progress
 from ...azure_training_status.utils import upcreate_training_status
-from ...general.api.serializers import (MSStyleErrorResponseSerializer,
-                                        SimpleOKSerializer)
+from ...general.api.serializers import (
+    MSStyleErrorResponseSerializer,
+    SimpleOKSerializer,
+)
 from ...general.shortcuts import drf_get_object_or_404
 from ...images.models import Image
 from ..exceptions import (
-    PdConfigureWithoutCameras, PdConfigureWithoutInferenceModule,
-    PdConfigureWithoutProject, PdExportInfereceReadTimeout,
-    PdInferenceModuleUnreachable, PdProbThresholdNotInteger,
-    PdProbThresholdOutOfRange, PdRelabelConfidenceOutOfRange,
-    PdRelabelImageFull, PdRelabelDemoProjectError)
+    PdConfigureWithoutCameras,
+    PdConfigureWithoutInferenceModule,
+    PdConfigureWithoutProject,
+    PdExportInfereceReadTimeout,
+    PdInferenceModuleUnreachable,
+    PdProbThresholdNotInteger,
+    PdProbThresholdOutOfRange,
+    PdRelabelConfidenceOutOfRange,
+    PdRelabelDemoProjectError,
+    PdRelabelImageFull,
+)
 from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper
-from .serializers import (ExportSerializer, PartDetectionSerializer,
-                          PDScenarioSerializer, UploadRelabelSerializer)
+from .serializers import (
+    ExportSerializer,
+    PartDetectionSerializer,
+    PDScenarioSerializer,
+    UploadRelabelSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """Project ModelViewSet
-    """
+    """Project ModelViewSet"""
 
     queryset = PartDetection.objects.all()
     serializer_class = PartDetectionSerializer
     filter_backends = (filters.OrderingFilter,)
-    filter_mappings = {
-        "inference_module": "inference_module",
-        "project": "project"
-    }
+    filter_mappings = {"inference_module": "inference_module", "project": "project"}
 
-    @swagger_auto_schema(operation_summary='Export Part Detection status',
-                         manual_parameters=[
-                             openapi.Parameter(
-                                 'prob_threshold',
-                                 openapi.IN_QUERY,
-                                 type=openapi.TYPE_INTEGER,
-                                 description='Probability Threshold',
-                                 required=True),
-                         ],
-                         responses={
-                             '200': SimpleOKSerializer,
-                             '400': MSStyleErrorResponseSerializer
-                         })
+    @swagger_auto_schema(
+        operation_summary="Export Part Detection status",
+        manual_parameters=[
+            openapi.Parameter(
+                "prob_threshold",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description="Probability Threshold",
+                required=True,
+            )
+        ],
+        responses={"200": SimpleOKSerializer, "400": MSStyleErrorResponseSerializer},
+    )
     @action(detail=True, methods=["get"])
     def update_prob_threshold(self, request, pk=None) -> Response:
-        """update inference bounding box threshold.
-        """
+        """update inference bounding box threshold."""
         queryset = self.get_queryset()
         part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
         prob_threshold = request.query_params.get("prob_threshold")
@@ -83,23 +87,23 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise PdProbThresholdOutOfRange
 
         part_detection_obj.update_prob_threshold(prob_threshold=prob_threshold)
-        return Response({'status': 'ok'})
+        return Response({"status": "ok"})
 
-    @swagger_auto_schema(operation_summary='Export Part Detection status',
-                         responses={
-                             '200': ExportSerializer,
-                             '400': MSStyleErrorResponseSerializer,
-                             '503': MSStyleErrorResponseSerializer
-                         })
+    @swagger_auto_schema(
+        operation_summary="Export Part Detection status",
+        responses={
+            "200": ExportSerializer,
+            "400": MSStyleErrorResponseSerializer,
+            "503": MSStyleErrorResponseSerializer,
+        },
+    )
     @action(detail=True, methods=["get"])
     def export(self, request, pk=None) -> Response:
-        """get the status of train job sent to custom vision
-        """
+        """get the status of train job sent to custom vision"""
         queryset = self.get_queryset()
         part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
         project_obj = part_detection_obj.project
-        deploy_status_obj = DeployStatus.objects.get(
-            part_detection=part_detection_obj)
+        deploy_status_obj = DeployStatus.objects.get(part_detection=part_detection_obj)
         inference_module_obj = part_detection_obj.inference_module
 
         success_rate = 0.0
@@ -107,23 +111,26 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         unidentified_num = 0
         cam_id = request.query_params.get("camera_id")
         if deploy_status_obj.status != "ok":
-            return Response({
-                "status": deploy_status_obj.status,
-                "log": "Status: " + deploy_status_obj.log,
-                "download_uri": "",
-                "success_rate": 0.0,
-                "inference_num": 0,
-                "unidentified_num": 0,
-                "gpu": "",
-                "count": 0,
-                "average_time": 0.0,
-                "scenario_metrics": []
-            })
+            return Response(
+                {
+                    "status": deploy_status_obj.status,
+                    "log": "Status: " + deploy_status_obj.log,
+                    "download_uri": "",
+                    "success_rate": 0.0,
+                    "inference_num": 0,
+                    "unidentified_num": 0,
+                    "gpu": "",
+                    "count": 0,
+                    "average_time": 0.0,
+                    "scenario_metrics": [],
+                }
+            )
         try:
-            res = requests.get("http://" + inference_module_obj.url +
-                               "/metrics",
-                               params={"cam_id": cam_id},
-                               timeout=3)
+            res = requests.get(
+                "http://" + inference_module_obj.url + "/metrics",
+                params={"cam_id": cam_id},
+                timeout=3,
+            )
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
             inference_num = data["inference_num"]
@@ -137,31 +144,32 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         except ReadTimeout:
             raise PdExportInfereceReadTimeout
         deploy_status_obj.save()
-        logger.info("Deploy status: %s, %s", deploy_status_obj.status,
-                    deploy_status_obj.log)
+        logger.info(
+            "Deploy status: %s, %s", deploy_status_obj.status, deploy_status_obj.log
+        )
         if project_obj is None:
             download_uri = ""
         else:
             download_uri = project_obj.download_uri
-        return Response({
-            "status": deploy_status_obj.status,
-            "log": "Status: " + deploy_status_obj.log,
-            "download_uri": download_uri,
-            "success_rate": success_rate,
-            "inference_num": inference_num,
-            "unidentified_num": unidentified_num,
-            "gpu": is_gpu,
-            "count": last_prediction_count,
-            "average_time": average_inference_time,
-            "scenario_metrics": scenario_metrics
-        })
+        return Response(
+            {
+                "status": deploy_status_obj.status,
+                "log": "Status: " + deploy_status_obj.log,
+                "download_uri": download_uri,
+                "success_rate": success_rate,
+                "inference_num": inference_num,
+                "unidentified_num": unidentified_num,
+                "gpu": is_gpu,
+                "count": last_prediction_count,
+                "average_time": average_inference_time,
+                "scenario_metrics": scenario_metrics,
+            }
+        )
 
     @swagger_auto_schema(
-        operation_summary='Train the project then deploy to Inference',
-        responses={
-            '200': SimpleOKSerializer,
-            '400': MSStyleErrorResponseSerializer
-        })
+        operation_summary="Train the project then deploy to Inference",
+        responses={"200": SimpleOKSerializer, "400": MSStyleErrorResponseSerializer},
+    )
     @action(detail=True, methods=["get"])
     def configure(self, request, pk=None) -> Response:
         """configure.
@@ -171,26 +179,29 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         instance = drf_get_object_or_404(queryset, pk=pk)
         # if project is demo, let training status go to ok and should go on.
-        if not hasattr(instance, "inference_module") or getattr(
-                instance, "inference_module") is None:
+        if (
+            not hasattr(instance, "inference_module")
+            or getattr(instance, "inference_module") is None
+        ):
             raise PdConfigureWithoutInferenceModule
-        if not hasattr(instance,
-                       'project') or getattr(instance, 'project') is None:
+        if not hasattr(instance, "project") or getattr(instance, "project") is None:
             raise PdConfigureWithoutProject
-        if not hasattr(instance,
-                       'cameras') or getattr(instance, 'cameras') is None:
+        if not hasattr(instance, "cameras") or getattr(instance, "cameras") is None:
             raise PdConfigureWithoutCameras
-        upcreate_training_status(project_id=instance.project.id,
-                                 **progress.PROGRESS_1_FINDING_PROJECT)
+        upcreate_training_status(
+            project_id=instance.project.id, **progress.PROGRESS_1_FINDING_PROJECT
+        )
         instance.has_configured = True
         instance.save()
 
-        TrainingManagerInstance.add(project_id=instance.project.id)
+        TRAINING_MANAGER.add(project_id=instance.project.id)
         if_trained_then_deploy_helper(part_detection_id=instance.id)
-        return Response({'status': 'ok'})
+        return Response({"status": "ok"})
 
-    @swagger_auto_schema(operation_summary='Upload a relabel image.',
-                         request_body=UploadRelabelSerializer())
+    @swagger_auto_schema(
+        operation_summary="Upload a relabel image.",
+        request_body=UploadRelabelSerializer(),
+    )
     @action(detail=True, methods=["post"])
     def upload_relabel_image(self, request, pk=None) -> Response:
         """upload_relabel_image.
@@ -205,9 +216,11 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         # FIXME: Inferenece should send part id instead of part_name
         part = drf_get_object_or_404(
-            instance.parts, name=serializer.validated_data["part_name"])
-        drf_get_object_or_404(instance.cameras,
-                              pk=serializer.validated_data["camera_id"])
+            instance.parts, name=serializer.validated_data["part_name"]
+        )
+        drf_get_object_or_404(
+            instance.cameras, pk=serializer.validated_data["camera_id"]
+        )
 
         project_obj = instance.project
         if project_obj is None:
@@ -221,15 +234,20 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         confidence_float = serializer.validated_data["confidence"] * 100
         # Confidence check
-        if (confidence_float < instance.accuracyRangeMin or \
-             confidence_float > instance.accuracyRangeMax):
-            logger.error("Inferenece confidence %s out of range",
-                         confidence_float)
+        if (
+            confidence_float < instance.accuracyRangeMin
+            or confidence_float > instance.accuracyRangeMax
+        ):
+            logger.error("Inferenece confidence %s out of range", confidence_float)
             raise PdRelabelConfidenceOutOfRange
 
         # Relabel images count does not exceed project.maxImages
-        if instance.maxImages > Image.objects.filter(
-                project=project_obj, part=part, is_relabel=True).count():
+        if (
+            instance.maxImages
+            > Image.objects.filter(
+                project=project_obj, part=part, is_relabel=True
+            ).count()
+        ):
             img_io = serializer.validated_data["img"].file
 
             img = ImageFile(img_io)
@@ -266,9 +284,11 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             )
             img_obj.save()
             # pop
-            earliest_img = Image.objects.filter(
-                project=project_obj, part=part,
-                is_relabel=True).order_by("timestamp").first()
+            earliest_img = (
+                Image.objects.filter(project=project_obj, part=part, is_relabel=True)
+                .order_by("timestamp")
+                .first()
+            )
             if earliest_img is not None:
                 earliest_img.delete()
             return Response({"status": "ok"})
@@ -276,18 +296,19 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         # User is relabeling and exceed maxImages
         for _ in range(
-                Image.objects.filter(
-                    project=project_obj, part=part, is_relabel=True).count() -
-                instance.maxImages):
             Image.objects.filter(
-                project=project_obj, part=part,
-                is_relabel=True).order_by("timestamp").last().delete()
+                project=project_obj, part=part, is_relabel=True
+            ).count()
+            - instance.maxImages
+        ):
+            Image.objects.filter(
+                project=project_obj, part=part, is_relabel=True
+            ).order_by("timestamp").last().delete()
         raise PdRelabelImageFull
 
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
-    """Project ModelViewSet
-    """
+    """Project ModelViewSet"""
 
     queryset = PDScenario.objects.all()
     serializer_class = PDScenarioSerializer

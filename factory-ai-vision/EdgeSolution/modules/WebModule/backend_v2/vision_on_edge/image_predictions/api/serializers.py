@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API serializers.
 """
 
@@ -12,14 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class ImagePredictionSerializer(serializers.ModelSerializer):
-    """ImagePredictionSerializer.
-    """
+    """ImagePredictionSerializer."""
 
     class Meta:
         model = ImagePrediction
         fields = "__all__"
-        extra_kwargs = {
-            "predicted": {
-                "required": False
-            },
-        }
+        extra_kwargs = {"predicted": {"required": False}}

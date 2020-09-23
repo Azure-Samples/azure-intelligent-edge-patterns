@@ -1,4 +1,3 @@
 #/bin/bash
-yapf -ri .
+black .
 isort -rc .
-yapf -ri .

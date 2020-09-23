@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API views.
 """
 
@@ -15,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ImagePredictionViewSet(viewsets.ModelViewSet):
-    """ImagePredictionViewSet.
-    """
+    """ImagePredictionViewSet."""
 
     queryset = ImagePrediction.objects.all()
     serializer_class = ImagePredictionSerializer
