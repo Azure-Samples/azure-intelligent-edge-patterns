@@ -275,7 +275,7 @@ export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
       </Stack>
       <Dialog
         title="Get Endpoint and Key"
-        isOpen={isModalOpen}
+        hidden={!isModalOpen}
         modalProps={{ layerProps: { hostId: null } }}
         maxWidth={800}
       >
