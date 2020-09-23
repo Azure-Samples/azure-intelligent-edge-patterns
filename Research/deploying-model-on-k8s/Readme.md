@@ -86,27 +86,6 @@ Please see [NVIDIA webpage](https://docs.nvidia.com/datacenter/kubernetes/kubern
     |  No running processes found                                                 |
     +-----------------------------------------------------------------------------+
 
-After we install Kubernetes, you should also see NVIDIA's examples,
-https://github.com/NVIDIA/k8s-device-plugin/tree/examples , here is a `gpu-pod` example if ran successfully:
-
-    $ kubectl exec -it gpu-pod nvidia-smi
-    +-----------------------------------------------------------------------------+
-    | NVIDIA-SMI 384.125                Driver Version: 384.125                   |
-    |-------------------------------+----------------------+----------------------+
-    | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
-    | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-    |===============================+======================+======================|
-    |   0  Tesla V100-SXM2...  On   | 00000000:00:1E.0 Off |                    0 |
-    | N/A   34C    P0    20W / 300W |     10MiB / 16152MiB |      0%      Default |
-    +-------------------------------+----------------------+----------------------+
-
-    +-----------------------------------------------------------------------------+
-    | Processes:                                                       GPU Memory |
-    |  GPU       PID   Type   Process name                             Usage      |
-    |=============================================================================|
-    |  No running processes found                                                 |
-    +-----------------------------------------------------------------------------+
-
 ## Creating one-node Kubernetes cluster
 
 To create a simple one-node Kubernetes cluster, you can use `snap` to install `microk8s`:
@@ -153,6 +132,34 @@ And the gpu-support information in the description of the node:
     ...
     nvidia.com/gpu     1           1
     ...
+
+After we installed Kubernetes, you should also be able to run NVIDIA's examples,
+https://github.com/NVIDIA/k8s-device-plugin, here is a [`gpu-pod`](https://github.com/NVIDIA/k8s-device-plugin/blob/examples/workloads/pod.yml)
+example if ran successfully:
+
+    $ git clone -b examples https://github.com/NVIDIA/k8s-device-plugin.git
+    $ cd k8-device-plugin/workloads
+    $ kubectl create -f pod.yml
+
+    $ kubectl exec -it gpu-pod nvidia-smi
+    +-----------------------------------------------------------------------------+
+    | NVIDIA-SMI 384.125                Driver Version: 384.125                   |
+    |-------------------------------+----------------------+----------------------+
+    | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+    | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+    |===============================+======================+======================|
+    |   0  Tesla V100-SXM2...  On   | 00000000:00:1E.0 Off |                    0 |
+    | N/A   34C    P0    20W / 300W |     10MiB / 16152MiB |      0%      Default |
+    +-------------------------------+----------------------+----------------------+
+
+    +-----------------------------------------------------------------------------+
+    | Processes:                                                       GPU Memory |
+    |  GPU       PID   Type   Process name                             Usage      |
+    |=============================================================================|
+    |  No running processes found                                                 |
+    +-----------------------------------------------------------------------------+
+
+If it does not work, please check the instructions at Nvidia's examples page, https://github.com/NVIDIA/k8s-device-plugin/blob/examples/workloads/pod.yml
 
 For generality, we will be using `kubectl` instead of `microk8s.kubectl`, and you are encouraged to alias it to a shortcut.
 
@@ -229,7 +236,9 @@ You should see the Service, and if everything is ok, in a few minutes you will h
 
 The way our inference server setup, we need to make an http POST request to it, to port 5001.
 You are free to use the utility you like(curl, Postman, etc.), we provide a Python script to do it, and to 
-convert the numbers into the labels this model(ResNet50) uses:
+convert the numbers into the labels this model(ResNet50) uses.
+
+**IMPOTANT**: In the script you need to put the address of your own server, for example, the cluster-ip from the server we created earlier:
 
     import requests
     #downloading labels for imagenet that resnet model was trained on
@@ -262,5 +271,6 @@ And, it should identify objects on your image.
 
 ## Links
 
-- https://docs.nvidia.com/datacenter/kubernetes/kubernetes-upstream/index.html#kubernetes-run-a-workload - NVIDIA webpage
-- https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli - ACR information
+- https://docs.nvidia.com/datacenter/kubernetes/kubernetes-upstream/index.html#kubernetes-run-a-workload - NVIDIA webpage.
+- https://github.com/NVIDIA/k8s-device-plugin/blob/examples/workloads/pod.yml - NVIDIA example repository.
+- https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli - ACR information.
