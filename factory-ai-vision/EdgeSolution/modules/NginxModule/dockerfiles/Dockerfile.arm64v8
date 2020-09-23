@@ -1,0 +1,1 @@
+FROM arm64v8/postgres:12.3
