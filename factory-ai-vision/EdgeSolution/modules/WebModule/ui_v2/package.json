@@ -23,6 +23,7 @@
     "axios": "^0.19.2",
     "konva": "^6.0.0",
     "moment": "^2.27.0",
+    "moxios": "^0.4.0",
     "normalizr": "^3.6.0",
     "ramda": "^0.27.0",
     "react": "^16.13.1",
@@ -69,6 +70,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.1",
-    "eslint-plugin-sort-class-members": "^1.6.0"
+    "eslint-plugin-sort-class-members": "^1.6.0",
+    "redux-mock-store": "^1.5.4"
   }
 }
