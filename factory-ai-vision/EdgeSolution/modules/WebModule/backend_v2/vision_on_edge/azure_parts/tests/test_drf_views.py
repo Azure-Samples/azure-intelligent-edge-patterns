@@ -16,8 +16,8 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.fast
-def test_create_part():
-    """test_create_part.
+def test_create_1():
+    """test_create_1.
 
     Ensure APIClient can create a new part.
     """
@@ -43,10 +43,11 @@ def test_create_part():
 
 
 @pytest.mark.fast
-def test_create_dup_parts():
-    """test_create_part.
+def test_create_duplcate_1():
+    """test_create_duplcate_1.
 
-    Ensure APIClient can create a duplicate part get expected error response.
+    Ensure APIClient cannot create duplicate part within same project.
+    Ensure error response has expected format.
     """
     client = APIClient()
     part = PartFactory()
@@ -64,202 +65,57 @@ def test_create_dup_parts():
     assert MSStyleErrorResponseSerializer(data=json.loads(body)).is_valid()
 
 
-# def test_create_dup_parts():
-# """
-# Type:
-# Negative
+def test_put_1():
+    """test_put.
 
-# Description:
-# Ensure create duplicate Part objects will failed.
+    Ensure put will also make name check.
+    """
+    # New description
+    part1 = PartFactory()
+    part2 = PartFactory()
+    part2.project = part1.project
+    part2.save()
 
-# Expected Results:
-# 400 { 'status': 'failed', 'log': 'xxx'}
-# """
-# client = APIClient()
-# url = reverse("api:part-list")
-# part_name = "Part1"
-# part_desb = "Unittest Part1 Description"
+    client = APIClient()
+    url = reverse("api:part-list")
+    url = reverse("api:part-detail", kwargs={"pk": part2.id})
 
-# # Request
-# data = {"name": part_name, "description": part_desb}
-# response = client.post(url, data, format="json")
+    # TODO: Use serializers to generate data
+    data = {
+        "project": part1.project.id,
+        "name": part1.name,
+        "description": part1.description,
+    }
+    response = client.put(url, data, format="json").render()
+    response_body = response.content
 
-# # Check
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-# assert json.loads(response.content)["status"] == "failed"
-# assert json.loads(response.content)["log"] == ""
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert MSStyleErrorResponseSerializer(data=json.loads(response_body)).is_valid()
 
-# def test_create_same_lowercase_parts():
-# """test_create_same_lowercase_parts.
 
-# Type:
-# Negative
+def test_put_2():
+    """test_put.
 
-# Description:
-# Ensure Part name ==  is_demo is unique together.
+    Ensure put will also make name check.
+    """
+    # New description
+    part1 = PartFactory()
+    part2 = PartFactory()
+    part2.project = part1.project
+    part2.save()
 
-# Expected Results
-# 400 { 'status': 'failed', 'log': 'xxx' }
-# """
-# # Random Case
-# client = APIClient()
-# url = reverse("api:part-list")
+    client = APIClient()
+    url = reverse("api:part-list")
+    url = reverse("api:part-detail", kwargs={"pk": part2.id})
 
-# # Request
-# data = {"name": "pArT1", "description": "New Description"}
-# response = client.post(url, data, format="json")
+    # TODO: Use serializers to generate data
+    data = {
+        "project": part1.project.id,
+        "name": str(part1.name).upper(),
+        "description": part1.description,
+    }
+    response = client.put(url, data, format="json").render()
+    response_body = response.content
 
-# # Check
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-# assert json.loads(response.content)["status"] == "failed"
-# assert json.loads(response.content)["log"] == ""
-
-# # All upper case
-# # Request
-# data = {"name": "PART2", "description": "New Description"}
-# response = client.post(url, data, format="json")
-
-# # Check
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-# assert json.loads(response.content)["status"] == "failed"
-# assert json.loads(response.content)["log"] == ""
-
-# # All lowercase
-# # Request
-# data = {"name": "part3", "description": "New Description"}
-# response = client.post(url, data, format="json")
-
-# # Check
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-# assert json.loads(response.content)["status"] == "failed"
-# assert json.loads(response.content)["log"] == ""
-
-# def test_create_no_desb_parts():
-# """test_create_no_desb_parts.
-
-# Type:
-# Positive
-
-# Description:
-# Create a part without description assigned.
-# Description column is not mandatory.
-
-# Expected Results:
-# 201 { 'name': 'part_name', 'description': 'xxx' }
-# """
-# # Var
-# client = APIClient()
-# url = reverse("api:part-list")
-# default_desb = ""
-
-# # Request
-# part_name = "nEw_pArT1"
-# data = {"name": part_name}
-# response = client.post(url, data, format="json")
-
-# # Check
-# assert response.status_code == status.HTTP_201_CREATED
-# assert json.loads(response.content)["name"] == part_name
-# assert json.loads(response.content)["description"] == default_desb
-
-# # Request
-# part_name = "NEW_PART2"
-# data = {"name": part_name}
-# response = client.post(url, data, format="json")
-
-# # Check
-# assert response.status_code == status.HTTP_201_CREATED
-# assert json.loads(response.content)["name"] == part_name
-# assert json.loads(response.content)["description"] == default_desb
-
-# def test_create_demo_parts_with_same_name():
-# """test_create_demo_parts_with_same_name.
-
-# Type:
-# Negative
-
-# Description:
-# Create demo part and none-demo part with same name.
-# Should pass.
-
-# Expected Results:
-# pass
-# """
-# client = APIClient()
-# url = reverse("api:part-list")
-# data = {"name": "Part1", "description": "Desb1", "is_demo": True}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_201_CREATED
-
-# data = {"name": "Part2", "description": "Desb1", "is_demo": True}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_201_CREATED
-
-# data = {"name": "DemoPart1", "description": "Desb1"}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_201_CREATED
-
-# data = {"name": "DemoPart2", "description": "Desb1"}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_201_CREATED
-
-# def test_create_demo_parts_with_same_name_2():
-# """test_create_demo_parts_with_same_name_2.
-
-# Type:
-# Positive
-
-# Description:
-# Create parts with same name.
-
-# Expected Results:
-# Failed.
-# """
-# client = APIClient()
-# url = reverse("api:part-list")
-# data = {"name": "Part1", "description": "Desb1", "is_demo": False}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-# data = {"name": "Part2", "description": "Desb1"}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-# data = {"name": "DemoPart1", "description": "Desb1", "is_demo": True}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-# data = {"name": "DemoPart2", "description": "Desb1", "is_demo": True}
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-# def test_put():
-# """test_put.
-
-# Type:
-# Positive
-
-# Description:
-# Test update is ok.
-
-# Expected Results:
-# 200 OK
-# """
-# # New description
-# client = APIClient()
-# url = reverse("api:part-list")
-# response = client.get(url)
-# for part in response.data:
-# if part["name"] == "Part2":
-# part2_id = part["id"]
-# if part["name"] == "Part1":
-# part1_id = part["id"]
-# data = {"name": "New Part Name", "description": "New Description"}
-# url = reverse("api:part-detail", kwargs={"pk": part1_id})
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_200_OK
-
-# data = {"name": "DemoPart1", "description": "New Description"}
-# url = reverse("api:part-detail", kwargs={"pk": part2_id})
-# response = client.post(url, data, format="json")
-# assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert MSStyleErrorResponseSerializer(data=json.loads(response_body)).is_valid()

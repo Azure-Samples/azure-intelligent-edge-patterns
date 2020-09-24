@@ -3,7 +3,11 @@
 
 from unittest import mock
 
-mock.patch(
-    "vision_on_edge.cameras.models.Camera.verify_rtsp",
-    mock.MagicMock(return_value=True),
-).start()
+import pytest
+
+from ..models import Camera
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_validate(monkeypatch):
+    monkeypatch.setattr(Camera, "verify_rtsp", mock.MagicMock(return_value=True))

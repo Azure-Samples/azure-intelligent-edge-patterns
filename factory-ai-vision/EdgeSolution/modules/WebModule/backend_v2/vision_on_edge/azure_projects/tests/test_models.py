@@ -83,7 +83,7 @@ def test_create_project_with_null_setting():
 
 def test_update_invalid_customvision_id():
     """test_update_invalid_customvision_id.
-    
+
     If project from valid id to invalid id. customvision_id set to ""
     """
     project = ProjectFactory()

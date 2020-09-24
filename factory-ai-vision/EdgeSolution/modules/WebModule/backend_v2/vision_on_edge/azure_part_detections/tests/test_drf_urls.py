@@ -4,23 +4,19 @@
 import pytest
 from django.urls import resolve, reverse
 
-from ..models import PartDetection
+from .factories import PartDetectionFactory
 
 pytestmark = pytest.mark.django_db
 
 
-def test_part_detection_detail(part_detection: PartDetection):
-    """test_part_detection_detail.
-
-    Args:
-        part_detection (PartDetection): part_detection
-    """
+def test_part_detection_detail(part_detection):
+    """test_part_detection_detail."""
     assert (
         reverse("api:partdetection-detail", kwargs={"pk": part_detection.id})
         == f"/api/part_detections/{part_detection.id}"
     )
     assert (
-        resolve(f"/api/partdetections/{part_detection.id}").view_name
+        resolve(f"/api/part_detections/{part_detection.id}").view_name
         == "api:partdetection-detail"
     )
 

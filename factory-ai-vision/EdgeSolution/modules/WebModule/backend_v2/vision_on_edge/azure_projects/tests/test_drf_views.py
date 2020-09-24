@@ -45,7 +45,7 @@ def test_get():
     mock.MagicMock(return_value=True),
 )
 def test_get_filter():
-    """test_get_queryset."""
+    """test_get_filter."""
     factory = APIRequestFactory()
 
     real_project = ProjectFactory()
@@ -60,11 +60,9 @@ def test_get_filter():
     project_list_view = ProjectViewSet.as_view({"get": "list"})
     request = factory.get("/fake-url/", {"is_demo": 0})
 
-    response = project_list_view(request)
+    response = project_list_view(request).render()
+    response_body = response.content.decode("utf-8")
+
     assert response.status_code == status.HTTP_200_OK
-    assert ProjectSerializer(demo_project).data not in json.loads(
-        response.render().content.decode("utf-8")
-    )
-    assert ProjectSerializer(real_project).data in json.loads(
-        response.render().content.decode("utf-8")
-    )
+    assert ProjectSerializer(demo_project).data not in json.loads(response_body)
+    assert ProjectSerializer(real_project).data in json.loads(response_body)

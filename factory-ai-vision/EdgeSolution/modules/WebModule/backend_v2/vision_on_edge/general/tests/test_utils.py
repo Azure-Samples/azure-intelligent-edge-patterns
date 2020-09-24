@@ -1,4 +1,4 @@
-"""Testing general.utils
+"""App utility tests
 """
 
 import pytest

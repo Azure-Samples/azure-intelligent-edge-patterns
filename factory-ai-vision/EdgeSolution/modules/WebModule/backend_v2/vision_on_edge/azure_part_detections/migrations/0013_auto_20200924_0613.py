@@ -6,14 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('azure_parts', '0001_initial'),
-        ('azure_part_detections', '0012_auto_20200914_1137'),
+        ("azure_parts", "0001_initial"),
+        ("azure_part_detections", "0012_auto_20200914_1137"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='partdetection',
-            name='parts',
-            field=models.ManyToManyField(blank=True, to='azure_parts.Part'),
+            model_name="partdetection",
+            name="parts",
+            field=models.ManyToManyField(blank=True, to="azure_parts.Part"),
         ),
     ]
