@@ -35,7 +35,7 @@ class PartDetection(models.Model):
     inference_mode = models.CharField(max_length=40,
                                       choices=INFERENCE_MODE_CHOICES,
                                       default="PD")
-    parts = models.ManyToManyField(Part)
+    parts = models.ManyToManyField(Part, blank=True)
     needRetraining = models.BooleanField(default=True)
     deployed = models.BooleanField(default=False)
     deploy_timestamp = models.DateTimeField(default=timezone.now)
