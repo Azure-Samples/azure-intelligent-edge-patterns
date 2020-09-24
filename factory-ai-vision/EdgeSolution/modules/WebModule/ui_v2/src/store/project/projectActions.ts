@@ -114,6 +114,8 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     inferenceMode: data?.inference_mode ?? '',
     sendVideoToCloud: data?.send_video_to_cloud ?? false,
     deployTimeStamp: data?.deploy_timestamp ?? '',
+    // TODO
+    fps: 10,
   },
   isDemo,
 });
@@ -204,6 +206,8 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         inferenceMode: data[0]?.inference_mode ?? '',
         sendVideoToCloud: data[0]?.send_video_to_cloud ?? false,
         deployTimeStamp: data[0]?.deploy_timestamp ?? '',
+        // TODO
+        fps: 10
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
       return data[0]?.has_configured;

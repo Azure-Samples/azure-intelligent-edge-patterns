@@ -72,6 +72,13 @@ type ConfigTaskPanelProps = {
   isEdit?: boolean;
 };
 
+const getFPSPerCamera = (fps: number, cameraCount: number): number => {
+  const result = Math.round(fps / cameraCount);
+  // eslint-disable-next-line no-restricted-globals
+  if (isNaN(result)) return 0;
+  return result;
+};
+
 export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
@@ -302,6 +309,21 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               onChange={(_, checked) => {
                 onChange('sendVideoToCloud', checked);
               }}
+            />
+          </Stack.Item>
+          <Stack.Item>
+            <div className={classNames.textWrapper}>
+              <Label>Total FPS for cameras</Label>
+            </div>
+            <TextField
+              type="number"
+              value={projectData.fps as any}
+              onChange={(_, val) => onChange('fps', parseInt(val, 10))}
+              suffix="fps"
+              description={`${getFPSPerCamera(
+                projectData.fps,
+                projectData.cameras.length,
+              )} fps for each camera`}
             />
           </Stack.Item>
         </Stack>
