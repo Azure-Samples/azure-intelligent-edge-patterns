@@ -1,17 +1,15 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
+FROM mcr.microsoft.com/azureml/onnxruntime:latest
 
 WORKDIR /app
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    libboost-filesystem-dev \
-    libboost-python-dev \
-    libboost-thread-dev \
     libffi-dev \
     libgl1-mesa-glx \
     libgtk2.0-dev \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
@@ -24,18 +22,14 @@ RUN apt-get update \
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN rm -rf /opt/miniconda
-RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
-
 COPY requirements/base.txt ./requirements/base.txt
 ENV CONDA_ENV_NAME python38
 RUN conda create --name python38 python=3.8.5 -y &&\
     . activate python38
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
+# RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime-gpu" ]
+# RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime" ]
 
 COPY coco_classes.txt ./
 COPY default_model default_model/
@@ -73,4 +67,4 @@ COPY webmodule_utils/*.py ./webmodule_utils/
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
+CMD [ "/bin/bash", "-c", "source activate python38 && python3 webmodule_utils/fake_server.py"]

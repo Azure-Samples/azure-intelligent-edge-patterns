@@ -202,6 +202,17 @@ def update_fps():
     return "ok"
 
 
+@app.route("/video_feed")
+def video_feed():
+    """video_feed.
+    """
+    cam_id = request.args.get("cam_id")
+    if not cam_id:
+        return "missing cam_id"
+    logger.info("Return video_feed with cam_id: %s", cam_id)
+    return "Fake server Video Feed. cam_id: " + str(cam_id)
+
+
 def main():
     app.run(host="0.0.0.0", debug=False)
     # server.wait_for_termination()

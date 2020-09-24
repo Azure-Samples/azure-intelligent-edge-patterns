@@ -15,7 +15,8 @@
         "arm32v7": "./dockerfiles/Dockerfile.arm32v7",
         "arm32v7.debug": "./dockerfiles/Dockerfile.arm32v7.debug",
         "arm64v8": "./dockerfiles/Dockerfile.arm64v8",
-        "arm64v8.debug": "./dockerfiles/Dockerfile.arm64v8.debug"
+        "arm64v8.debug": "./dockerfiles/Dockerfile.arm64v8.debug",
+        "fake": "./dockerfiles/Dockerfile.fake"
       }
     },
     "buildOptions": [],
