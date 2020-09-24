@@ -72,6 +72,7 @@ export const Deployment: React.FC = () => {
     maxImages,
     name,
     probThreshold,
+    fps,
   } = projectData;
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
@@ -204,7 +205,8 @@ export const Deployment: React.FC = () => {
           <Separator styles={{ root: { padding: 0 } }} />
           <Stack tokens={{ childrenGap: 17, padding: 25 }}>
             <ConfigurationInfo
-              cameraName={cameraOptions.map((e) => e.text).join(', ')}
+              cameraNames={cameraOptions.map((e) => e.text)}
+              fps={fps}
               partNames={partNames}
               sendMessageToCloud={sendMessageToCloud}
               framesPerMin={framesPerMin}

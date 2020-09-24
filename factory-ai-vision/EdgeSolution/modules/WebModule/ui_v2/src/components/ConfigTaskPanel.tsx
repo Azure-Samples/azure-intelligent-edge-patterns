@@ -27,6 +27,7 @@ import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
 import { getScenario } from '../store/scenarioSlice';
+import { getFPSPerCamera } from '../utils/getCameraFPS';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -70,13 +71,6 @@ type ConfigTaskPanelProps = {
   projectData: ProjectData;
   trainingProjectOfSelectedScenario?: number;
   isEdit?: boolean;
-};
-
-const getFPSPerCamera = (fps: number, cameraCount: number): number => {
-  const result = Math.round(fps / cameraCount);
-  // eslint-disable-next-line no-restricted-globals
-  if (isNaN(result)) return 0;
-  return result;
 };
 
 export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({

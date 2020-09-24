@@ -2,9 +2,11 @@ import React from 'react';
 import './ConfigurationInfo.style.css';
 import { Stack, TextField, IconButton } from '@fluentui/react';
 import { PartTag, Status as PartTagStatus } from '../PartTag';
+import { getFPSPerCamera } from '../../utils/getCameraFPS';
 
 type ConfigurationInfoProps = {
-  cameraName: string;
+  cameraNames: string[];
+  fps: number;
   partNames: string[];
   sendMessageToCloud: boolean;
   framesPerMin: number;
@@ -47,7 +49,14 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
           <tbody>
             <tr>
               <td>Camera</td>
-              <td>{props.cameraName}</td>
+              <td>
+                {props.cameraNames.join(', ')}
+                <br />
+                <b>
+                  {props.fps} fps in total ({getFPSPerCamera(props.fps, props.cameraNames.length)} fps per
+                  camera)
+                </b>
+              </td>
             </tr>
             <tr>
               <td>Objects</td>
