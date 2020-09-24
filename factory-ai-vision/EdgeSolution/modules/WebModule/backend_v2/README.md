@@ -42,14 +42,13 @@
 1.  Installation
 
     ```bash
-    pip install -r requirements/local.txt
-    pre-commit install
+    make install-dev
     ```
 
 2.  Tests
 
     ```bash
-    pytest
+    make test
     ```
 
 3.  Coverage
@@ -57,7 +56,5 @@
     To run the tests, check your test coverage, and generate an HTML coverage report::
 
     ```bash
-    $ coverage run -m pytest
-    $ coverage html
-    $ open htmlcov/index.html
+    make coverage
     ```
