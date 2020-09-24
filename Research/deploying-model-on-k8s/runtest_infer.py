@@ -15,6 +15,7 @@ print(f"test_sample size is {len(test_sample)}")
 try:
     #eg http://51.141.178.47:5001/score
     scoring_uri = 'http://<replace with yout edge device ip address>:5001/score'
+    print(f"scoring_uri is {scoring_uri}")
 
     # Set the content type
     headers = {'Content-Type': 'application/json'}

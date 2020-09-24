@@ -92,27 +92,36 @@ To create a simple one-node Kubernetes cluster, you can use `snap` to install `m
 
     $ sudo snap install microk8s --edge --classic
 
+Add your current user to microk8s group:
+
+    $ sudo usermod -a -G microk8s $USER
+    $ sudo chown -f -R $USER ~/.kube
+
+You will also need to re-enter the session for the group update to take place:
+
+    $ su - $USER
+
 Then start it:
 
-    $ sudo microk8s.start
+    $ microk8s.start --wait-ready
 
 You need to enable its components depending on the desired configuration, for example, dns and dashboard:
 
-    $ sudo microk8s.enable dns dashboard
+    $ microk8s.enable dns storage dashboard
 
 The most important for us is the access to gpu
 
-    $ sudo microk8s.enable gpu
+    $ microk8s.enable gpu
 
 You will be able to see the nodes:
 
-    $ sudo microk8s.kubectl get nodes
+    $ microk8s.kubectl get nodes
     NAME                STATUS   ROLES    AGE   VERSION
     sandbox-dsvm-tor4   Ready    <none>   14h   v1.19.2-34+88df35f6de9eb1
 
 And the gpu-support information in the description of the node:
 
-    $ sudo microk8s.kubectl describe node sandbox-dsvm-tor4
+    $ microk8s.kubectl describe node sandbox-dsvm-tor4
     Capacity:
     ...
     nvidia.com/gpu:     1
@@ -203,11 +212,20 @@ It will print out the values(which you could also see at the Portal, in your Azu
 
 At the Kubernetes cluster where you want this image to be available, you will need to login to your ACR:
 
-    $ az acr login --name 12345678901234567890.azurecr.io
     $ docker login 12345678901234567890.azurecr.io
     Username: c6a1e081293c442e9465100e3021da63
     Password:
     Login Succeeded
+
+This will record the authentication token in your `~/.docker/config.json`, and you will be able to
+create a Kubernetes secret to use to access your private repository:
+
+    $ kubectl create secret generic secret4acr2infer \
+        --from-file=.dockerconfigjson=/home/azureuser/.docker/config.json \
+        --type=kubernetes.io/dockerconfigjson
+
+For more information, please see [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)  
+
 
 In the following steps we denote the image as `1234567dedede1234567ceeeee.azurecr.io/tfgpu:1.0`, you can tag your own image adhering to the naming conventions you like.
 
@@ -244,6 +262,8 @@ We provide the Deployment file, `deploy_infer.yaml`:
                 memory: "128Mi" #128 MB
                 cpu: "200m" # 200 millicpu (0.2 or 20% of the cpu)
                 nvidia.com/gpu:  1
+        imagePullSecrets:
+        - name: secret4acr2infer
 
 You would need to update the image source, from your own DockerHub accout or ACR you have access to.
 
@@ -313,3 +333,4 @@ And, it should identify objects on your image.
 - https://docs.nvidia.com/datacenter/kubernetes/kubernetes-upstream/index.html#kubernetes-run-a-workload - NVIDIA webpage.
 - https://github.com/NVIDIA/k8s-device-plugin/blob/examples/workloads/pod.yml - NVIDIA example repository.
 - https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli - ACR information.
+- https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ - working with private repositories in Kubernetes
