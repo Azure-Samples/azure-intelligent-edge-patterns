@@ -16,6 +16,8 @@ import glob
 import zipfile
 import cv2
 
+from azure.iot.device import IoTHubModuleClient
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -233,3 +235,19 @@ def draw_label(img, text, pos):
     img = cv2.rectangle(img, (x, y-15), (x+len(text)*5+10, y), (255, 255, 255), -1)
     img = cv2.putText(img, text, (x+5, y-5), font, font_scale, (0, 0, 0), thickness)
     return img
+
+
+
+try:
+    iot = IoTHubModuleClient.create_from_edge_environment()
+except:
+    iot = None
+
+is_edge = False
+
+try:
+    IoTHubModuleClient.create_from_edge_environment()
+    is_edge = True
+except:
+    pass
+

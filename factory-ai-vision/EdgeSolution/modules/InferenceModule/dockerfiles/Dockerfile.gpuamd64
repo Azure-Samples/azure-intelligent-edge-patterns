@@ -67,6 +67,7 @@ COPY stream_manager.py ./
 COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
+COPY img.png ./
 COPY webmodule_utils/*.py ./webmodule_utils/
 
 EXPOSE 5558

@@ -44,7 +44,7 @@ from utility import draw_label
 scenario = DefeatDetection()
 scenario.set_ok('Bottle - OK')
 scenario.set_ng('Bottle - NG')
-#scenario.set_line(600, 0, 600, 800)
+scenario.set_line(600, 0, 600, 800)
 
 #scenario= DefeatDetection()
 #scenario.set_ok('Box')
@@ -425,7 +425,8 @@ def open_cam():
 def _open_cam():
     def post_img():
         headers = {'Content-Type': 'image/jpg'}
-        while True:
+        t0 = time.time()
+        while onnx.cam.isOpened():
             if onnx.cam_is_alive == False:
                 break
             onnx.lock.acquire()
@@ -436,8 +437,13 @@ def _open_cam():
                 #r = requests.post('http://127.0.0.1:5000/predict',
                 #                  headers=headers, data=data)
                 _predict(img)
+            else: 
+                print(b)
+                break
 
-            time.sleep(0.02)
+            #time.sleep(0.02)
+        t1 = time.time()
+        print(t1-t0)
 
     if onnx.cam_is_alive == False:
         onnx.lock.acquire()
@@ -736,9 +742,15 @@ def video_feed():
                         img = draw_confidence_level(img, prediction)
 
             #objs = mot_tracker.update(np.array(detections))
+            t0 = time.time()
             scenario.update(detections)
+            print('update', time.time()-t0)
+            t0 = time.time()
             scenario.draw_counter(img)
+            print('draw', time.time()-t0)
+            t0 = time.time()
             scenario.draw_constraint(img)
+            print('draw c', time.time()-t0)
             #scenario.draw_objs(img)
             #counter, objs, counted = tracker.update(detections)
 

@@ -6,6 +6,8 @@ import grpc
 import time
 import threading
 import sys
+import threading
+import multiprocessing as mp
 
 import inferencing_pb2
 import media_pb2
@@ -264,16 +266,16 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                 print('[INFO] Stream not ready yet', flush=True)
             else:
                 try:
-                    s2 = time.time()
+                    #s2 = time.time()
                     stream.predict(cvImage)
                     predictions = stream.last_prediction
-                    e2 = time.time() - s2
-                    logging.info('Inference time: {0}'.format(e2))
-                    total_time.append(e2)
-                    logging.info(
-                        '***** avg. Inference time *****: {0}'.format(np.mean(total_time)))
-                    logging.info(
-                        '***** std. Inference time *****: {0}'.format(np.std(total_time)))
+                    #e2 = time.time() - s2
+                    #logging.info('Inference time: {0}'.format(e2))
+                    #total_time.append(e2)
+                    #logging.info(
+                    #    '***** avg. Inference time *****: {0}'.format(np.mean(total_time)))
+                    #logging.info(
+                    #    '***** std. Inference time *****: {0}'.format(np.std(total_time)))
                 except:
                     print("[ERROR] Unexpected error:",
                           sys.exc_info(), flush=True)
