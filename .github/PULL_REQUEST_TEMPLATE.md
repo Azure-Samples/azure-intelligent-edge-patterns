@@ -32,12 +32,13 @@ npm install
 
 * Test the code
 <!-- Add steps to run the tests suite and/or manually test -->
-```
+```bash
+npm run test
 ```
 
 ## What to Check
 Verify that the following are valid
-* ...
+* All tests shall pass.
 
 ## Other Information
 <!-- Add any other helpful information that may be needed here. -->
