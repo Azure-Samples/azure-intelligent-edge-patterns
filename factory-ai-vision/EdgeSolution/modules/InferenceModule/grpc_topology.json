@@ -153,9 +153,8 @@
                         "height": "${frameHeight}"
                     },
                     "format": {
-                        "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
-                        "encoding": "${imageEncoding}",
-                        "quality": "${imageQuality}"
+                        "@type": "#Microsoft.Media.MediaGraphImageFormatRaw",
+                        "pixelFormat": "bgr24"
                     }
                 },
                 "inputs": [{

@@ -122,7 +122,7 @@ class Stream():
         gm.invoke_graph_instance_activate(self.cam_id)
 
     def reset_metrics(self):
-        self.mutex.acquire()
+        # self.mutex.acquire()
         self.detection_success_num = 0
         self.detection_unidentified_num = 0
         self.detection_total = 0
@@ -130,7 +130,7 @@ class Stream():
         #self.last_prediction_count = {}
         if self.scenario:
             self.scenario.reset_metrics()
-        self.mutex.release()
+        # self.mutex.release()
 
     def start_zmq(self):
         def run(self):
@@ -144,11 +144,11 @@ class Stream():
                 if cnt % 30 == 1:
                     logging.info('send through channel {0}'.format(
                         bytes(self.cam_id, 'utf-8')))
-                self.mutex.acquire()
+                # self.mutex.acquire()
                 # FIXME may find a better way to deal with encoding
                 self.zmq_sender.send_multipart([bytes(
                     self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
-                self.mutex.release()
+                # self.mutex.release()
                 # FIXME need to fine tune this value
                 time.sleep(0.03)
         threading.Thread(target=run, args=(self,)).start()
@@ -273,8 +273,7 @@ class Stream():
         return self.model.detection_mode
 
     def update_detection_status(self, predictions):
-        self.mutex.acquire()
-
+        # self.mutex.acquire()
 
         detection_type = DETECTION_TYPE_NOTHING
         for prediction in predictions:
@@ -308,7 +307,7 @@ class Stream():
                     self.detection_success_num += 1
                 self.detection_total += 1
 
-        self.mutex.release()
+        # self.mutex.release()
 
     def _update_instance(self, rtspUrl, frameRate):
         self._stop()
@@ -337,9 +336,9 @@ class Stream():
             self.iothub_interval = 60 / fpm  # seconds
 
     def delete(self):
-        self.mutex.acquire()
+        # self.mutex.acquire()
         self.cam_is_alive = False
-        self.mutex.release()
+        # self.mutex.release()
 
         gm.invoke_graph_instance_deactivate(self.cam_id)
         logging.info('Deactivate stream {0}'.format(self.cam_id))
@@ -357,15 +356,14 @@ class Stream():
         image = cv2.resize(image, (width, height))
 
         # prediction
-        self.mutex.acquire()
+        # self.mutex.acquire()
         predictions, inf_time = self.model.Score(image)
         #print('predictions', predictions, flush=True)
-        self.mutex.release()
+        # self.mutex.release()
 
         # check whether it's the tag we want
         predictions = list(
             p for p in predictions if p['tagName'] in self.model.parts)
-
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -376,7 +374,6 @@ class Stream():
                     _predictions.append(p)
             predictions = _predictions
 
-
         # update detection status before filter out by threshold
         self.update_detection_status(predictions)
 
@@ -386,11 +383,9 @@ class Stream():
         if self.iothub_is_send:
             self.process_send_message_to_iothub(predictions)
 
-
-        # check whether it's larger than threshold 
+        # check whether it's larger than threshold
         predictions = list(
             p for p in predictions if p['probability'] >= self.threshold)
-
 
         # update last_prediction_count
         _last_prediction_count = {}
@@ -412,13 +407,12 @@ class Stream():
         _detections = []
         for prediction in predictions:
             tag = prediction['tagName']
-            #if prediction['probability'] > 0.5:
+            # if prediction['probability'] > 0.5:
             (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
             _detections.append(
                 Detection(tag, x1, y1, x2, y2, prediction['probability']))
         if self.scenario:
             self.scenario.update(_detections)
-
 
         self.draw_img()
         if self.model.send_video_to_cloud:
@@ -437,7 +431,6 @@ class Stream():
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
         self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
-
 
     def process_retrain_image(self, predictions, img):
         for prediction in predictions:
@@ -494,7 +487,8 @@ class Stream():
             for prediction in predictions:
                 if prediction['probability'] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    cv2.rectangle(img, (x1, max(y1, 15)), (x2, y2), (255, 255, 255), 1)
+                    cv2.rectangle(img, (x1, max(y1, 15)),
+                                  (x2, y2), (255, 255, 255), 1)
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img

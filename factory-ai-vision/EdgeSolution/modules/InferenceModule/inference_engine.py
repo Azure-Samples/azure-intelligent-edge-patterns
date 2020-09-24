@@ -65,8 +65,8 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
         # self._tYoloV3 = model
         self.stream_manager = stream_manager
 
-
     # Debug method for dumping received images with analysis results
+
     def CreateDebugOutput(self, requestSeqNum, cvImage, boxes, scores, indices, confidenceThreshold=0.1):
         try:
             marked = False
@@ -164,6 +164,14 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                 if pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.RGBA:
                     cvImage = cv2.cvtColor(np.frombuffer(
                         rawBytes, dtype=np.uint8), cv2.COLOR_RGBA2RGB)
+                elif pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.BGR24:
+                    logging.info('&&&&&&&&&& BGR mode &&&&&&&&&&')
+                    cvImage = np.frombuffer(
+                        rawBytes, dtype=np.uint8).reshape(540, 960, 3)
+                elif pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.RGB24:
+                    logging.info('&&&&&&&&&& RGB mode &&&&&&&&&&')
+                    cvImage = np.frombuffer(
+                        rawBytes, dtype=np.uint8).reshape(540, 960, 3)
                 elif pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.YUV420P:
                     cvImage = None
 
@@ -193,6 +201,7 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
         logging.info('Connection created with peer {0}.\nMediaStreamDescriptor:\n{1}'.format(
             context.peer(), clientState._mediaStreamDescriptor))
         instance_id = clientState._mediaStreamDescriptor.graph_identifier.graph_instance_name
+        stream = self.stream_manager.get_stream_by_id(instance_id)
         logging.debug('[Received] SeqNum: {0:07d} | AckNum: {1}'.format(
             requestSeqNum, requestAckSeqNum))
 
@@ -208,77 +217,92 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
         )
         yield mediaStreamMessage
 
+        total_time = []
         # Process rest of the MediaStream message sequence
         for mediaStreamMessageRequest in requestIterator:
-                # Increment response counter, will be sent to client
-                responseSeqNum += 1
+            # Increment response counter, will be sent to client
+            responseSeqNum += 1
 
-                # Read request id, sent by client
-                requestSeqNum = mediaStreamMessageRequest.sequence_number
+            # Read request id, sent by client
+            requestSeqNum = mediaStreamMessageRequest.sequence_number
 
-                logging.debug(
-                    '[Received] SeqNum: {0:07d}'.format(requestSeqNum))
+            logging.debug(
+                '[Received] SeqNum: {0:07d}'.format(requestSeqNum))
+            s1 = time.time()
+            # Get media content bytes. (bytes sent over shared memory buffer, segment or inline to message)
+            cvImage = self.GetCvImageFromRawBytes(
+                clientState, mediaStreamMessageRequest.media_sample)
+            e1 = time.time() - s1
+            logging.info('GetCvImageFromRawBytes time: {0}'.format(e1))
 
-                # Get media content bytes. (bytes sent over shared memory buffer, segment or inline to message)
-                cvImage = self.GetCvImageFromRawBytes(
-                    clientState, mediaStreamMessageRequest.media_sample)
+            if cvImage is None:
+                message = "Can't decode received bytes."
+                logging.info(message)
+                context.set_details(message)
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                return
 
-                if cvImage is None:
-                    message = "Can't decode received bytes."
-                    logging.info(message)
-                    context.set_details(message)
-                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                    return
+            # if list(cvImage.shape[:2]) != self._tYoloV3.image_shape:
+            #     message = "Received an image of size {0}, but expected one of size {1}".format(
+            #         cvImage.shape[:2], self._tYoloV3.image_shape)
+            #     context.set_details(message)
+            #     logging.info(message)
+            #     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            #     return
 
-                # if list(cvImage.shape[:2]) != self._tYoloV3.image_shape:
-                #     message = "Received an image of size {0}, but expected one of size {1}".format(
-                #         cvImage.shape[:2], self._tYoloV3.image_shape)
-                #     context.set_details(message)
-                #     logging.info(message)
-                #     context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                #     return
+            # instance_name = mediaStreamMessageRequest.graph_identifier.graph_instance_name
+            # logging.info('req: {0}'.format(mediaStreamMessageRequest))
 
-                # instance_name = mediaStreamMessageRequest.graph_identifier.graph_instance_name
-                # logging.info('req: {0}'.format(mediaStreamMessageRequest))
-
-                # run inference
-                # logging.info(self._tYoloV3)
-                # out = self._tYoloV3.Score(cvImage)
-                # logging.info(out)
-                # predictions = self._tYoloV3.Score(cvImage, instance_id)
+            # run inference
+            # logging.info(self._tYoloV3)
+            # out = self._tYoloV3.Score(cvImage)
+            # logging.info(out)
+            # predictions = self._tYoloV3.Score(cvImage, instance_id)
+            if not stream:
+                stream = self.stream_manager.get_stream_by_id(instance_id)
+                predicitons = []
+                print('[INFO] Stream not ready yet', flush=True)
+            else:
                 try:
-                    s = self.stream_manager.get_stream_by_id(instance_id)
-                    if s:
-                        #print('got stream and predicting...', flush=True)
-                        s.predict(cvImage)
-                        predictions = s.last_prediction
-                    else:
-                        #print('got notthing', flush=True)
-                        predictions = []
+                    s2 = time.time()
+                    stream.predict(cvImage)
+                    predictions = stream.last_prediction
+                    e2 = time.time() - s2
+                    logging.info('Inference time: {0}'.format(e2))
+                    total_time.append(e2)
+                    logging.info(
+                        '***** avg. Inference time *****: {0}'.format(np.mean(total_time)))
+                    logging.info(
+                        '***** std. Inference time *****: {0}'.format(np.std(total_time)))
                 except:
-                    print("[ERROR] Unexpected error:", sys.exc_info(), flush=True)
+                    print("[ERROR] Unexpected error:",
+                          sys.exc_info(), flush=True)
                     predictions = []
-                # stream_manager.update(cvImage, instance_id)
-                # logging.debug(
-                #     'Detected {0} inferences'.format(len(predictions)))
+            # stream_manager.update(cvImage, instance_id)
+            # logging.debug(
+            #     'Detected {0} inferences'.format(len(predictions)))
 
-                # if DEBUG is not None:
-                #     self.CreateDebugOutput(
-                #         requestSeqNum, cvImage, boxes, scores, indices)
+            # if DEBUG is not None:
+            #     self.CreateDebugOutput(
+            #         requestSeqNum, cvImage, boxes, scores, indices)
 
-                # Check client connection state
-                if context.is_active():
-                    # return inference result as MediaStreamMessage
-                    mediaStreamMessage = self.GetMediaStreamMessageResponse(
-                        predictions, cvImage.shape)
+            # Check client connection state
+            if context.is_active():
+                # return inference result as MediaStreamMessage
+                mediaStreamMessage = self.GetMediaStreamMessageResponse(
+                    predictions, cvImage.shape)
 
-                    mediaStreamMessage.sequence_number = responseSeqNum
-                    mediaStreamMessage.ack_sequence_number = requestSeqNum
-                    mediaStreamMessage.media_sample.timestamp = mediaStreamMessageRequest.media_sample.timestamp
+                mediaStreamMessage.sequence_number = responseSeqNum
+                mediaStreamMessage.ack_sequence_number = requestSeqNum
+                mediaStreamMessage.media_sample.timestamp = mediaStreamMessageRequest.media_sample.timestamp
 
-                    # yield response
-                    yield mediaStreamMessage
-                else:
-                    break
+                # yield response
+                ss = time.time()
+                yield mediaStreamMessage
+                ee = time.time() - ss
+                logging.info(
+                    '^^^^^^^^^^ Yield time: {0} ^^^^^^^^^^'.format(ee))
+            else:
+                break
 
         logging.info('Connection closed with peer {0}.'.format(context.peer()))
