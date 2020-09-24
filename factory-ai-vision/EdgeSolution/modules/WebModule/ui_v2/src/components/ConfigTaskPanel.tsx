@@ -27,6 +27,7 @@ import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
 import { getScenario } from '../store/scenarioSlice';
+import { getFPSPerCamera } from '../utils/getCameraFPS';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -302,6 +303,21 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               onChange={(_, checked) => {
                 onChange('sendVideoToCloud', checked);
               }}
+            />
+          </Stack.Item>
+          <Stack.Item>
+            <div className={classNames.textWrapper}>
+              <Label>Total FPS for cameras</Label>
+            </div>
+            <TextField
+              type="number"
+              value={projectData.fps as any}
+              onChange={(_, val) => onChange('fps', parseInt(val, 10))}
+              suffix="fps"
+              description={`${getFPSPerCamera(
+                projectData.fps,
+                projectData.cameras.length,
+              )} fps for each camera`}
             />
           </Stack.Item>
         </Stack>
