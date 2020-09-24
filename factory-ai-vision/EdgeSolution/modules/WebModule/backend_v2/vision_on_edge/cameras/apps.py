@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App.
 """
 
@@ -12,18 +11,16 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=C0415
 class CamerasConfig(AppConfig):
-    """App Config.
-    """
+    """App Config."""
 
-    name = 'vision_on_edge.cameras'
+    name = "vision_on_edge.cameras"
 
     def ready(self):
-        """ready.
-        """
+        """ready."""
 
-        if 'runserver' in sys.argv:
-            from .models import Camera
+        if "runserver" in sys.argv:
             from ..locations.models import Location
+            from .models import Camera
 
             logger.info("App ready ready while running server")
             create_demo = True
@@ -33,16 +30,16 @@ class CamerasConfig(AppConfig):
 
                 if not Location.objects.filter(is_demo=True).exists():
                     return
-                demo_location_obj = Location.objects.filter(
-                    is_demo=True).first()
+                demo_location_obj = Location.objects.filter(is_demo=True).first()
                 Camera.objects.update_or_create(
                     name="Demo Video",
                     is_demo=True,
                     defaults={
-                        'rtsp': 'rtsp://rtspsim:554/media/video.mkv',
-                        'area': "",
-                        'location': demo_location_obj
-                    })
+                        "rtsp": "rtsp://rtspsim:554/media/video.mkv",
+                        "area": "",
+                        "location": demo_location_obj,
+                    },
+                )
                 logger.info("Creating demo objects... end")
 
                 # Scenario 1
@@ -50,19 +47,16 @@ class CamerasConfig(AppConfig):
 
                 if not Location.objects.filter(is_demo=True).exists():
                     return
-                demo_location_obj = Location.objects.filter(
-                    is_demo=True).first()
+                demo_location_obj = Location.objects.filter(is_demo=True).first()
                 Camera.objects.update_or_create(
                     name="Scenario 1 - Counting Objects",
                     is_demo=True,
                     defaults={
-                        'rtsp':
-                            'rtsp://rtspsim:554/media/scenario1-counting-objects.mkv',
-                        'area':
-                            "",
-                        'location':
-                            demo_location_obj
-                    })
+                        "rtsp": "rtsp://rtspsim:554/media/scenario1-counting-objects.mkv",
+                        "area": "",
+                        "location": demo_location_obj,
+                    },
+                )
                 logger.info("Creating scenario 3 ... end")
 
                 # Scenario 2
@@ -70,19 +64,16 @@ class CamerasConfig(AppConfig):
 
                 if not Location.objects.filter(is_demo=True).exists():
                     return
-                demo_location_obj = Location.objects.filter(
-                    is_demo=True).first()
+                demo_location_obj = Location.objects.filter(is_demo=True).first()
                 Camera.objects.update_or_create(
                     name="Scenario 2 - Employ Safety",
                     is_demo=True,
                     defaults={
-                        'rtsp':
-                            'rtsp://rtspsim:554/media/scenario2-employ-safety.mkv',
-                        'area':
-                            "",
-                        'location':
-                            demo_location_obj
-                    })
+                        "rtsp": "rtsp://rtspsim:554/media/scenario2-employ-safety.mkv",
+                        "area": "",
+                        "location": demo_location_obj,
+                    },
+                )
                 logger.info("Creating scenario 2... end")
 
                 # Scenario 3
@@ -90,19 +81,16 @@ class CamerasConfig(AppConfig):
 
                 if not Location.objects.filter(is_demo=True).exists():
                     return
-                demo_location_obj = Location.objects.filter(
-                    is_demo=True).first()
+                demo_location_obj = Location.objects.filter(is_demo=True).first()
                 Camera.objects.update_or_create(
                     name="Scenario 3 - Defect Detection",
                     is_demo=True,
                     defaults={
-                        'rtsp':
-                            'rtsp://rtspsim:554/media/scenario3-defect-detection.mkv',
-                        'area':
-                            "",
-                        'location':
-                            demo_location_obj
-                    })
+                        "rtsp": "rtsp://rtspsim:554/media/scenario3-defect-detection.mkv",
+                        "area": "",
+                        "location": demo_location_obj,
+                    },
+                )
                 logger.info("Creating scenario 3... end")
 
             logger.info("App ready end while running server")

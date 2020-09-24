@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('azure_part_detections', '0001_initial'),
-    ]
+    dependencies = [("azure_part_detections", "0001_initial")]
 
     operations = [
         migrations.AddField(
-            model_name='partdetection',
-            name='maxImage',
+            model_name="partdetection",
+            name="maxImage",
             field=models.IntegerField(default=10),
-        ),
+        )
     ]

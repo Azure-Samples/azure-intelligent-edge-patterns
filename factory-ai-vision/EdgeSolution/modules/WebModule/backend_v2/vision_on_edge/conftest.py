@@ -1,24 +1,24 @@
-# -*- coding: utf-8 -*-
 """Conftest
 """
 
 import pytest
 
-from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_parts.tests.factories import PartFactory
-from vision_on_edge.azure_projects.models import Project
-from vision_on_edge.azure_projects.tests.factories import ProjectFactory
-from vision_on_edge.azure_settings.models import Setting
-from vision_on_edge.azure_settings.tests.factories import SettingFactory
-from vision_on_edge.azure_training_status.models import TrainingStatus
-from vision_on_edge.azure_training_status.tests.factories import \
-    TrainingStatusFactory
-from vision_on_edge.cameras.models import Camera
-from vision_on_edge.cameras.tests.factories import CameraFactory
-from vision_on_edge.images.models import Image
-from vision_on_edge.images.tests.factories import ImageFactory
-from vision_on_edge.locations.models import Location
-from vision_on_edge.locations.tests.factories import LocationFactory
+from .azure_part_detections.models import PartDetection
+from .azure_part_detections.tests.factories import PartDetectionFactory
+from .azure_parts.models import Part
+from .azure_parts.tests.factories import PartFactory
+from .azure_projects.models import Project
+from .azure_projects.tests.factories import ProjectFactory
+from .azure_settings.models import Setting
+from .azure_settings.tests.factories import SettingFactory
+from .azure_training_status.models import TrainingStatus
+from .azure_training_status.tests.factories import TrainingStatusFactory
+from .cameras.models import Camera
+from .cameras.tests.factories import CameraFactory
+from .images.models import Image
+from .images.tests.factories import ImageFactory
+from .locations.models import Location
+from .locations.tests.factories import LocationFactory
 
 
 @pytest.fixture(autouse=True)
@@ -37,9 +37,9 @@ def setting() -> Setting:
     return SettingFactory()
 
 
-#@pytest.fixture
-#def project() -> Project:
-#    return ProjectFactory()
+@pytest.fixture
+def project() -> Project:
+    return ProjectFactory()
 
 
 @pytest.fixture
@@ -65,3 +65,8 @@ def image() -> Image:
 @pytest.fixture
 def camera() -> Camera:
     return CameraFactory()
+
+
+@pytest.fixture
+def part_detection() -> PartDetection:
+    return PartDetectionFactory()

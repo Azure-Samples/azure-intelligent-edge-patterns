@@ -5,14 +5,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('azure_part_detections', '0002_partdetection_maximage'),
-    ]
+    dependencies = [("azure_part_detections", "0002_partdetection_maximage")]
 
     operations = [
         migrations.RenameField(
-            model_name='partdetection',
-            old_name='part',
-            new_name='parts',
-        ),
+            model_name="partdetection", old_name="part", new_name="parts"
+        )
     ]

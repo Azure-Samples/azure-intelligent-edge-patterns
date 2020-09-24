@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App REST API Test
 """
 
@@ -14,10 +13,8 @@ class InferenceModuleRestTestCases(APITransactionTestCase):
     """
 
     def setUp(self):
-        """setUp.
-        """
-        InferenceModule.objects.create(name="InferenceModule1",
-                                       url="localhost:5000")
+        """setUp."""
+        InferenceModule.objects.create(name="InferenceModule1", url="localhost:5000")
 
     def test_setup_is_valid(self):
         """test_setup_is_valid.

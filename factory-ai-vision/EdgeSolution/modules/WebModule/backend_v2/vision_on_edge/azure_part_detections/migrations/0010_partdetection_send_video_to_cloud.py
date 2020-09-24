@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('azure_part_detections', '0009_partdetection_deploy_timestamp'),
-    ]
+    dependencies = [("azure_part_detections", "0009_partdetection_deploy_timestamp")]
 
     operations = [
         migrations.AddField(
-            model_name='partdetection',
-            name='send_video_to_cloud',
+            model_name="partdetection",
+            name="send_video_to_cloud",
             field=models.BooleanField(default=False),
-        ),
+        )
     ]

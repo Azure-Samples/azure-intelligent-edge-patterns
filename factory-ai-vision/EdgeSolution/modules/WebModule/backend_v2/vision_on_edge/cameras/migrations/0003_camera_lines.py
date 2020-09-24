@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('cameras', '0002_camera_location'),
-    ]
+    dependencies = [("cameras", "0002_camera_location")]
 
     operations = [
         migrations.AddField(
-            model_name='camera',
-            name='lines',
+            model_name="camera",
+            name="lines",
             field=models.CharField(blank=True, max_length=1000),
-        ),
+        )
     ]

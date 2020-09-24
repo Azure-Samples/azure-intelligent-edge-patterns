@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """vision_on_edge URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -23,11 +22,12 @@ from django.urls import path
 
 from . import views as site_views
 
-urlpatterns = \
-    static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
-    static(settings.ICON_URL, document_root=settings.ICON_ROOT) + \
-    [
+urlpatterns = (
+    static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    + static(settings.ICON_URL, document_root=settings.ICON_ROOT)
+    + [
         path("api/", include("configs.api_router")),
-        path('admin/', admin.site.urls),
-        url('^', site_views.UIAppView.as_view())
+        path("admin/", admin.site.urls),
+        url("^", site_views.UIAppView.as_view()),
     ]
+)

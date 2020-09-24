@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App model tests.
 """
 
@@ -14,7 +13,5 @@ class InferenceModuleTestCase(APITransactionTestCase):
     """
 
     def setUp(self):
-        """setUp.
-        """
-        InferenceModule.objects.create(name="InferenceModule1",
-                                       url="localhost:5000")
+        """setUp."""
+        InferenceModule.objects.create(name="InferenceModule1", url="localhost:5000")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App exceptions.
 """
 
@@ -6,8 +5,7 @@ from rest_framework.exceptions import APIException
 
 
 class ProjectCannotChangeDemoError(APIException):
-    """CannotChangeDemoProjectError.
-    """
+    """CannotChangeDemoProjectError."""
 
     status_code = 400
     default_detail = "Demo project should not change."
@@ -15,8 +13,7 @@ class ProjectCannotChangeDemoError(APIException):
 
 
 class ProjectCustomVisionError(APIException):
-    """CannotChangeDemoProjectError.
-    """
+    """CannotChangeDemoProjectError."""
 
     status_code = 400
     default_detail = "This project has invalid setting or customvision_id."
@@ -24,8 +21,7 @@ class ProjectCustomVisionError(APIException):
 
 
 class ProjectWithoutSettingError(APIException):
-    """ProjectWithoutSettingError.
-    """
+    """ProjectWithoutSettingError."""
 
     status_code = 400
     default_detail = "This project does not have a setting."
@@ -33,8 +29,7 @@ class ProjectWithoutSettingError(APIException):
 
 
 class ProjectResetWithoutNameError(APIException):
-    """ProjectWithoutSettingError.
-    """
+    """ProjectWithoutSettingError."""
 
     status_code = 400
     default_detail = "Please provide a name before reset."
@@ -42,8 +37,7 @@ class ProjectResetWithoutNameError(APIException):
 
 
 class ProjectRemovedError(APIException):
-    """ProjectRemovedError.
-    """
+    """ProjectRemovedError."""
 
     status_code = 503
     default_detail = "This project has been removed. Please choose another project"
@@ -51,8 +45,7 @@ class ProjectRemovedError(APIException):
 
 
 class ProjectAlreadyTraining(APIException):
-    """ProjectAlreadyTraining.
-    """
+    """ProjectAlreadyTraining."""
 
     status_code = 400
     default_detail = "Project already training."

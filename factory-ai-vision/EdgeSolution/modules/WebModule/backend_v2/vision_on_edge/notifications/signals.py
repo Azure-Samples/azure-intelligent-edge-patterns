@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App signals.
 """
 
@@ -16,9 +15,7 @@ from .models import Notification
 logger = logging.getLogger(__name__)
 
 
-@receiver(signal=post_save,
-          sender=Notification,
-          dispatch_uid="send_to_websocket")
+@receiver(signal=post_save, sender=Notification, dispatch_uid="send_to_websocket")
 def notification_post_save_websocket_handler(**kwargs):
     """notification_post_save_websocket_handler.
 
@@ -32,7 +29,7 @@ def notification_post_save_websocket_handler(**kwargs):
     logger.info("notification_post_save...")
     logger.info("Sending notifications...")
 
-    instance = kwargs['instance']
+    instance = kwargs["instance"]
     channels_layer = get_channel_layer()
     async_to_sync(channels_layer.group_send)(
         "notification",
@@ -43,7 +40,7 @@ def notification_post_save_websocket_handler(**kwargs):
             "timestamp": str(instance.timestamp),
             "sender": instance.sender,
             "title": instance.title,
-            "details": instance.details
+            "details": instance.details,
         },
     )
 
@@ -68,44 +65,52 @@ def notification_post_save_websocket_handler(**kwargs):
 # sender=instance.sender).order_by('timestamp').first().delete()
 
 
-@receiver(signal=post_save,
-          sender=TrainingStatus,
-          dispatch_uid="training_status_listener")
+@receiver(
+    signal=post_save, sender=TrainingStatus, dispatch_uid="training_status_listener"
+)
 def training_status_listener(**kwargs):
     """training_status_send_notification_handler.
 
     Args:
         kwargs:
     """
-    instance = kwargs['instance']
-    if hasattr(instance, 'need_to_send_notification'
-              ) and instance.need_to_send_notification:
+    instance = kwargs["instance"]
+    if (
+        hasattr(instance, "need_to_send_notification")
+        and instance.need_to_send_notification
+    ):
         logger.info("Azure TrainingStatus changed.")
-        logger.info("instance.need_to_send_notification %s",
-                    instance.need_to_send_notification)
-        Notification.objects.create(notification_type="project",
-                                    sender="system",
-                                    title=instance.status.capitalize(),
-                                    details=instance.log.capitalize())
+        logger.info(
+            "instance.need_to_send_notification %s", instance.need_to_send_notification
+        )
+        Notification.objects.create(
+            notification_type="project",
+            sender="system",
+            title=instance.status.capitalize(),
+            details=instance.log.capitalize(),
+        )
     logger.info("Signal end")
 
 
-@receiver(signal=post_save,
-          sender=DeployStatus,
-          dispatch_uid="deploy_status_listener")
+@receiver(signal=post_save, sender=DeployStatus, dispatch_uid="deploy_status_listener")
 def deploy_status_listener(**kwargs):
     """deploy_status_send_notification_handler.
 
     Args:
         kwargs:
     """
-    instance = kwargs['instance']
-    if hasattr(instance, 'need_to_send_notification'
-              ) and instance.need_to_send_notification:
+    instance = kwargs["instance"]
+    if (
+        hasattr(instance, "need_to_send_notification")
+        and instance.need_to_send_notification
+    ):
         logger.info("Azure TrainingStatus changed.")
-        logger.info("instance.need_to_send_notification %s",
-                    instance.need_to_send_notification)
-        Notification.objects.create(notification_type="part_detection",
-                                    sender="system",
-                                    title=instance.status.capitalize(),
-                                    details=instance.log.capitalize())
+        logger.info(
+            "instance.need_to_send_notification %s", instance.need_to_send_notification
+        )
+        Notification.objects.create(
+            notification_type="part_detection",
+            sender="system",
+            title=instance.status.capitalize(),
+            details=instance.log.capitalize(),
+        )

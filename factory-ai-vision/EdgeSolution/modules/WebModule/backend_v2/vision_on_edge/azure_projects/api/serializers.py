@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App serializers.
 """
 
@@ -16,14 +15,10 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = "__all__"
         extra_kwargs = {
-            "download_uri": {
-                "required": False
-            },
-            "customvision_id": {
-                "required": False
-            },
+            "download_uri": {"required": False},
+            "customvision_id": {"required": False},
         }
 
 
@@ -32,15 +27,14 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = '__all__'
+        fields = "__all__"
 
 
 # pylint: disable=abstract-method
 class IterationPerformanceSerializer(serializers.Serializer):
-    """TrainPerformanceSerializer.
-    """
-    iteration_name = serializers.ChoiceField(
-        choices=["new", "previous", "demo"])
+    """TrainPerformanceSerializer."""
+
+    iteration_name = serializers.ChoiceField(choices=["new", "previous", "demo"])
     iteration_id = serializers.CharField(max_length=200)
     status = serializers.CharField(max_length=100)
     precision = serializers.FloatField(default=0.0)
@@ -49,6 +43,6 @@ class IterationPerformanceSerializer(serializers.Serializer):
 
 
 class ProjectPerformanesSerializer(serializers.Serializer):
-    """ProjectPerformanesSerializer.
-    """
+    """ProjectPerformanesSerializer."""
+
     iterations = IterationPerformanceSerializer(many=True)

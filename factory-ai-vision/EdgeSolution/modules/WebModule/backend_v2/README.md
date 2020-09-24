@@ -1,54 +1,60 @@
 # Vision On Edge - Web Module
 
-[![Code style: yapf](https://img.shields.io/badge/code%20style-yapf-blue)](https://github.com/google/yapf)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=00000)](https://pycqa.github.io/isort/)
 
-## How to run
+## Quick Start
 
-### Migrate
+1. Run Django
 
-```bash
-python manage.py makemigration
-python manage.py migrate
-```
+   ```bash
+   pip install -r requirements/production-x86.txt
+   # Arm: pip install -r requirements/production-arm.txt
+   python manage.py makemigration
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-### Configure
+2. Django REST Framework UI
+   [http://localhost:8000/api/](http://localhost:8000/api/)
+3. Swagger Documents
+   [http://localhost:8000/api/swagger](http://localhost:8000/api/swagger)
 
-```bash
-vim config.py
-vim configs/app_insight.py
-```
+## Production Setup
 
-### Run server
+1. Run Django
 
-```bash
-python manage.py runserver
-```
+   ```bash
+   pip install -r requirements/production-x86.txt
+   # Arm: pip install -r requirements/production-arm.txt
+   export DBNAME="YOUR_DB_NAME"
+   export DBNAME="YOUR_DB_NAME"
+   export DBHOST="YOUR_DB_HOST"
+   export DBUSER="YOUR_DB_USER"
+   export DBPASS="YOUR_DB_PASSWORD"
+   python manage.py makemigration
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-Go to [Web UI](http://localhost:8000)
+## Developers
 
-## Pylint
+1.  Installation
 
-```bash
-pylint
-```
+    ```bash
+    make install-dev
+    ```
 
-## How to test
+2.  Tests
 
-Go to project directory (same level with manage.py)
+    ```bash
+    make test
+    ```
 
-```bash
-export ENDPOINT=${your_endpoint}
-export TRAINING_KEY=${your_key}
-pytest
-```
+3.  Coverage
 
-## Test coverage
+    To run the tests, check your test coverage, and generate an HTML coverage report::
 
-To run the tests, check your test coverage, and generate an HTML coverage report::
-
-```bash
-$ coverage run -m pytest
-$ coverage html
-$ open htmlcov/index.html
-```
-
+    ```bash
+    make coverage
+    ```

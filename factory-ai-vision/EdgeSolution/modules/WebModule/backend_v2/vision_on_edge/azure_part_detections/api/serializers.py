@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API serializers.
 """
 
@@ -17,7 +16,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PartDetection
-        fields = '__all__'
+        fields = "__all__"
         extra_kwargs = {"prob_threshold": {"required": False}}
 
 
@@ -26,17 +25,16 @@ class PDScenarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PDScenario
-        fields = '__all__'
+        fields = "__all__"
 
 
 # pylint: disable=abstract-method
 class ExportSerializer(serializers.Serializer):
-    """ExportSerializer.
-    """
+    """ExportSerializer."""
 
     class ScenarioMetrics(serializers.Serializer):
-        """ScenarioMetrics.
-        """
+        """ScenarioMetrics."""
+
         name = serializers.CharField(required=False)  # DD
         count = serializers.IntegerField(required=False)  # PC, DD
 
@@ -52,8 +50,7 @@ class ExportSerializer(serializers.Serializer):
 
 
 class UploadRelabelSerializer(serializers.Serializer):
-    """UploadRelabelSerializer.
-    """
+    """UploadRelabelSerializer."""
 
     part_name = serializers.CharField()
     labels = serializers.CharField()
@@ -64,12 +61,11 @@ class UploadRelabelSerializer(serializers.Serializer):
 
 
 class UpdateCamBodySerializer(serializers.Serializer):
-    """UploadRelabelSerializer.
-    """
+    """UploadRelabelSerializer."""
 
     class CameraItem(serializers.Serializer):
-        """CameraItem.
-        """
+        """CameraItem."""
+
         id = serializers.CharField()
         type = serializers.CharField()
         source = serializers.CharField()

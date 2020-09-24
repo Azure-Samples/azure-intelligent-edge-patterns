@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API views.
 """
 
@@ -8,9 +7,9 @@ import datetime
 import logging
 from distutils.util import strtobool
 
-from azure.cognitiveservices.vision.customvision.training.models import \
-    CustomVisionErrorException
-
+from azure.cognitiveservices.vision.customvision.training.models import (
+    CustomVisionErrorException,
+)
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -20,15 +19,20 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ...general.api.serializers import (
+    MSStyleErrorResponseSerializer,
+    SimpleOKSerializer,
+)
 from ...general.shortcuts import drf_get_object_or_404
-from ...general.api.serializers import (MSStyleErrorResponseSerializer,
-                                        SimpleOKSerializer)
 from ..exceptions import ProjectWithoutSettingError
 from ..models import Project, Task
-from ..utils import TrainingManagerInstance, pull_cv_project_helper
-from .serializers import (IterationPerformanceSerializer,
-                          ProjectPerformanesSerializer, ProjectSerializer,
-                          TaskSerializer)
+from ..utils import TRAINING_MANAGER, pull_cv_project_helper
+from .serializers import (
+    IterationPerformanceSerializer,
+    ProjectPerformanesSerializer,
+    ProjectSerializer,
+    TaskSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,33 +49,31 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filter_backends = (filters.OrderingFilter,)
-    filter_mappings = {
-        "is_demo": "is_demo",
-    }
+    filter_mappings = {"is_demo": "is_demo"}
 
-    @swagger_auto_schema(operation_summary='Keep relabel alive.')
+    @swagger_auto_schema(operation_summary="Keep relabel alive.")
     @action(detail=True, methods=["post"])
     def relabel_keep_alive(self, request, pk=None) -> Response:
-        """relabel_keep_alive.
-        """
+        """relabel_keep_alive."""
         queryset = self.get_queryset()
         instance = drf_get_object_or_404(queryset, pk=pk)
         instance.relabel_expired_time = timezone.now() + datetime.timedelta(
-            seconds=PROJECT_RELABEL_TIME_THRESHOLD)
-        instance.save(update_fields=['relabel_expired_time'])
+            seconds=PROJECT_RELABEL_TIME_THRESHOLD
+        )
+        instance.save(update_fields=["relabel_expired_time"])
         serializer = ProjectSerializer(instance)
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary='Get training performace from Custom Vision.',
+        operation_summary="Get training performace from Custom Vision.",
         responses={
-            '200': ProjectPerformanesSerializer,
-            '400': MSStyleErrorResponseSerializer
-        })
+            "200": ProjectPerformanesSerializer,
+            "400": MSStyleErrorResponseSerializer,
+        },
+    )
     @action(detail=True, methods=["get"])
     def train_performance(self, request, pk=None) -> Response:
-        """train_performance.
-        """
+        """train_performance."""
         queryset = self.get_queryset()
         project_obj = drf_get_object_or_404(queryset, pk=pk)
         if project_obj.setting is None:
@@ -95,7 +97,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             iteration_status = iteration["status"]
             if iteration_status == "Completed":
                 performance = trainer.get_iteration_performance(
-                    customvision_project_id, iteration["id"]).as_dict()
+                    customvision_project_id, iteration["id"]
+                ).as_dict()
                 precision = performance["precision"]
                 recall = performance["recall"]
                 mAP = performance["average_precision"]
@@ -121,44 +124,42 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 "recall": 0.0,
                 "mAP": 0.0,
             }
-            iteration_serialzer = IterationPerformanceSerializer(
-                data=iteration_data)
+            iteration_serialzer = IterationPerformanceSerializer(data=iteration_data)
             if iteration_serialzer.is_valid(raise_exception=True):
                 res_data["iterations"].append(iteration_serialzer.data)
-            project_performance_serializer = ProjectPerformanesSerializer(
-                data=res_data)
+            project_performance_serializer = ProjectPerformanesSerializer(data=res_data)
         else:
             iterations = trainer.get_iterations(customvision_project_id)
             for i in range(min(2, len(iterations))):
                 iteration_data = _parse(
-                    iterations[i],
-                    iteration_name=("new" if i == 0 else "previous"))
+                    iterations[i], iteration_name=("new" if i == 0 else "previous")
+                )
                 iteration_serialzer = IterationPerformanceSerializer(
-                    data=iteration_data)
+                    data=iteration_data
+                )
                 if iteration_serialzer.is_valid(raise_exception=True):
                     res_data["iterations"].append(iteration_serialzer.data)
 
-        project_performance_serializer = ProjectPerformanesSerializer(
-            data=res_data)
+        project_performance_serializer = ProjectPerformanesSerializer(data=res_data)
         if project_performance_serializer.is_valid(raise_exception=True):
             return Response(data=project_performance_serializer.data)
 
-    @swagger_auto_schema(operation_summary='reset project',
-                         manual_parameters=[
-                             openapi.Parameter('project_name',
-                                               openapi.IN_QUERY,
-                                               type=openapi.TYPE_STRING,
-                                               description='Project name',
-                                               required=True),
-                         ],
-                         responses={
-                             '200': ProjectSerializer,
-                             '400': MSStyleErrorResponseSerializer
-                         })
+    @swagger_auto_schema(
+        operation_summary="reset project",
+        manual_parameters=[
+            openapi.Parameter(
+                "project_name",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="Project name",
+                required=True,
+            )
+        ],
+        responses={"200": ProjectSerializer, "400": MSStyleErrorResponseSerializer},
+    )
     @action(detail=True, methods=["get"])
     def reset_project(self, request, pk=None) -> Response:
-        """reset_project.
-        """
+        """reset_project."""
 
         queryset = self.get_queryset()
         project_obj = drf_get_object_or_404(queryset, pk=pk)
@@ -173,31 +174,31 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             raise SettingCustomVisionAccessFailed
 
     @swagger_auto_schema(
-        operation_summary='Pull a Custom Vision project.',
+        operation_summary="Pull a Custom Vision project.",
         manual_parameters=[
-            openapi.Parameter('customvision_project_id',
-                              openapi.IN_QUERY,
-                              type=openapi.TYPE_STRING,
-                              description='Custom Vision Id to Pull'),
-            openapi.Parameter('partial',
-                              openapi.IN_QUERY,
-                              type=openapi.TYPE_BOOLEAN,
-                              description='partial download or not')
+            openapi.Parameter(
+                "customvision_project_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="Custom Vision Id to Pull",
+            ),
+            openapi.Parameter(
+                "partial",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
+                description="partial download or not",
+            ),
         ],
-        responses={
-            '200': SimpleOKSerializer,
-            '400': MSStyleErrorResponseSerializer
-        })
+        responses={"200": SimpleOKSerializer, "400": MSStyleErrorResponseSerializer},
+    )
     @action(detail=True, methods=["get"])
     def pull_cv_project(self, request, pk=None) -> Response:
-        """pull_cv_project.
-        """
+        """pull_cv_project."""
         queryset = self.get_queryset()
         project_obj = drf_get_object_or_404(queryset, pk=pk)
 
         # Check Customvision Project id
-        customvision_project_id = request.query_params.get(
-            "customvision_project_id")
+        customvision_project_id = request.query_params.get("customvision_project_id")
         logger.info("Project customvision_id: %s", {customvision_project_id})
 
         # Check Partial
@@ -207,33 +208,30 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             is_partial = True
 
         # Pull Custom Vision Project
-        pull_cv_project_helper(project_id=project_obj.id,
-                               customvision_project_id=customvision_project_id,
-                               is_partial=is_partial)
+        pull_cv_project_helper(
+            project_id=project_obj.id,
+            customvision_project_id=customvision_project_id,
+            is_partial=is_partial,
+        )
         return Response({"status": "ok"})
 
-    @swagger_auto_schema(operation_summary='Train project in background.',
-                         responses={
-                             '200': SimpleOKSerializer,
-                             '400': MSStyleErrorResponseSerializer
-                         })
+    @swagger_auto_schema(
+        operation_summary="Train project in background.",
+        responses={"200": SimpleOKSerializer, "400": MSStyleErrorResponseSerializer},
+    )
     @action(detail=True, methods=["get"])
     def train(self, request, pk=None) -> Response:
-        """train.
-        """
+        """train."""
         queryset = self.get_queryset()
         drf_get_object_or_404(queryset, pk=pk)
-        TrainingManagerInstance.add(project_id=pk)
-        return Response({'status': 'ok'})
+        TRAINING_MANAGER.add(project_id=pk)
+        return Response({"status": "ok"})
 
 
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """Task ModelViewSet
-    """
+    """Task ModelViewSet"""
 
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filter_backends = (filters.OrderingFilter,)
-    filter_mappings = {
-        "project": "project",
-    }
+    filter_mappings = {"project": "project"}

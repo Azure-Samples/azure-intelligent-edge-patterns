@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App serializers.
 """
 
@@ -11,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=abstract-method
 class SimpleOKSerializer(serializers.Serializer):
-    """SimpleOKSerializer.
-    """
+    """SimpleOKSerializer."""
+
     status = serializers.ChoiceField(choices=["ok"])
 
 
@@ -27,6 +26,7 @@ class MSStyleErrorResponseSerializer(serializers.Serializer):
 
         MicroSoft Style Error Response Serializer.
         """
+
         status_code = serializers.IntegerField()
         code = serializers.CharField()
         message = serializers.CharField()

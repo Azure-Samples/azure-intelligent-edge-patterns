@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API views.
 """
 
@@ -17,8 +16,7 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=too-many-ancestors
 class InferenceModuleViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """InferenceModuleViewSet.
-    """
+    """InferenceModuleViewSet."""
 
     queryset = InferenceModule.objects.all()
     serializer_class = InferenceModuleSerializer

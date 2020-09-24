@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App.
 """
 
@@ -11,12 +10,10 @@ logger = logging.getLogger(__name__)
 
 # pylint: disable=unused-import
 class NotificationsConfig(AppConfig):
-    """Notifications App Config
-    """
+    """Notifications App Config"""
 
-    name = 'vision_on_edge.notifications'
+    name = "vision_on_edge.notifications"
 
     def ready(self):
-        """ready.
-        """
+        """ready."""
         from . import signals

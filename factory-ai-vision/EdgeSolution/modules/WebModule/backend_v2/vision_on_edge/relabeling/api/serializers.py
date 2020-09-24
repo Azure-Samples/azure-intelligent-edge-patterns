@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App Serializer
 """
 
@@ -6,8 +5,7 @@ from rest_framework import serializers
 
 
 class UploadRelabelSerializer(serializers.Serializer):
-    """UploadRelabelSerializer.
-    """
+    """UploadRelabelSerializer."""
 
     part_name = serializers.CharField()
     labels = serializers.CharField()

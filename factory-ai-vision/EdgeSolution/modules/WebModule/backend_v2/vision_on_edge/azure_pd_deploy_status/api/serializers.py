@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API serializers.
 """
 
@@ -12,9 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class DeployStatusSerializer(serializers.ModelSerializer):
-    """DeployStatusSerializer.
-    """
+    """DeployStatusSerializer."""
 
     class Meta:
         model = DeployStatus
-        fields = '__all__'
+        fields = "__all__"

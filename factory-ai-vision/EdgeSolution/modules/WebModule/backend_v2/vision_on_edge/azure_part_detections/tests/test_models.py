@@ -1,0 +1,2 @@
+"""App model tests.
+"""

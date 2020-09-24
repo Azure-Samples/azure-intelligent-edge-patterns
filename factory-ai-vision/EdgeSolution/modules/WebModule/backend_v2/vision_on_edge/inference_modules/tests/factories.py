@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App model factories.
 """
 
@@ -8,8 +7,7 @@ from ..models import InferenceModule
 
 
 class InferenceModuleFactory(DjangoModelFactory):
-    """InferenceModuleFactory.
-    """
+    """InferenceModuleFactory."""
 
     name = Faker("name")
     url = Faker("url")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App exceptions.
 """
 
@@ -6,18 +5,16 @@ from rest_framework.exceptions import APIException
 
 
 class StreamOpenRTSPError(APIException):
-    """StreamOpenRTSPError.
-    """
+    """StreamOpenRTSPError."""
 
     status_code = 503
-    default_detail = 'RTSP temporarily unavailable, please try again later.'
-    default_code = 'stream_open_rtsp_error'
+    default_detail = "RTSP temporarily unavailable, please try again later."
+    default_code = "stream_open_rtsp_error"
 
 
 class StreamNotFoundError(APIException):
-    """StreamNotFoundError.
-    """
+    """StreamNotFoundError."""
 
     status_code = 400
-    default_detail = 'Stream Id not found.'
-    default_code = 'stream_not_found'
+    default_detail = "Stream Id not found."
+    default_code = "stream_not_found"

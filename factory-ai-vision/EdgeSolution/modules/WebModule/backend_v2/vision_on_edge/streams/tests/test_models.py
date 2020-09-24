@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App model tests.
 """
 
@@ -12,17 +11,20 @@ from ..models import Stream
 pytestmark = pytest.mark.django_db
 
 
-class fake_cap():
-
+class fake_cap:
     def isOpened(self):
         return True
 
 
 @pytest.mark.fast
-@mock.patch("vision_on_edge.cameras.models.Camera.verify_rtsp",
-            mock.MagicMock(return_value=True))
-@mock.patch("vision_on_edge.streams.models.cv2.VideoCapture",
-            mock.MagicMock(return_value=fake_cap()))
+@mock.patch(
+    "vision_on_edge.cameras.models.Camera.verify_rtsp",
+    mock.MagicMock(return_value=True),
+)
+@mock.patch(
+    "vision_on_edge.streams.models.cv2.VideoCapture",
+    mock.MagicMock(return_value=fake_cap()),
+)
 def test_rtsp():
     """test_rtsp.
 
@@ -36,10 +38,14 @@ def test_rtsp():
 
 
 @pytest.mark.fast
-@mock.patch("vision_on_edge.cameras.models.Camera.verify_rtsp",
-            mock.MagicMock(return_value=True))
-@mock.patch("vision_on_edge.streams.models.cv2.VideoCapture",
-            mock.MagicMock(return_value=fake_cap()))
+@mock.patch(
+    "vision_on_edge.cameras.models.Camera.verify_rtsp",
+    mock.MagicMock(return_value=True),
+)
+@mock.patch(
+    "vision_on_edge.streams.models.cv2.VideoCapture",
+    mock.MagicMock(return_value=fake_cap()),
+)
 def test_rtsp_0():
     """test_rtsp.
 
@@ -59,10 +65,14 @@ def test_rtsp_0():
 
 
 @pytest.mark.fast
-@mock.patch("vision_on_edge.cameras.models.Camera.verify_rtsp",
-            mock.MagicMock(return_value=True))
-@mock.patch("vision_on_edge.streams.models.cv2.VideoCapture",
-            mock.MagicMock(return_value=fake_cap()))
+@mock.patch(
+    "vision_on_edge.cameras.models.Camera.verify_rtsp",
+    mock.MagicMock(return_value=True),
+)
+@mock.patch(
+    "vision_on_edge.streams.models.cv2.VideoCapture",
+    mock.MagicMock(return_value=fake_cap()),
+)
 def test_rtsp_1():
     """test_rtsp.
 

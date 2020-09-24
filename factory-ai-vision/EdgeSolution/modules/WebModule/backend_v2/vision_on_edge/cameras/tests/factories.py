@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App Model Factories
 """
 
@@ -10,8 +9,7 @@ from ..models import Camera
 
 
 class CameraFactory(DjangoModelFactory):
-    """CameraFactory.
-    """
+    """CameraFactory."""
 
     name = Faker("name")
     rtsp = Faker("url")
