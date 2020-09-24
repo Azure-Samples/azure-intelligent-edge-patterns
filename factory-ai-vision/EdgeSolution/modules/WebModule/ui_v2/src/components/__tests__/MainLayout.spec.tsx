@@ -1,9 +1,9 @@
 import { initializeIcons } from '@fluentui/react';
 import React from 'react';
 
-import { MainLayout } from '../components/MainLayout';
-import { initialState as initialSetting } from '../store/setting/settingReducer';
-import { render } from '../testUtils/renderWithRedux';
+import { MainLayout } from '../MainLayout';
+import { initialState as initialSetting } from '../../store/setting/settingReducer';
+import { render } from '../../testUtils/renderWithRedux';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
