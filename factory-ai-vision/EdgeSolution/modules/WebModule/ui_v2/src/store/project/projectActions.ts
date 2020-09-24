@@ -240,6 +240,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       name: projectData.name,
       send_video_to_cloud: projectData.sendVideoToCloud,
       inference_mode: projectData.inferenceMode,
+      fps: projectData.fps,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
