@@ -65,12 +65,15 @@
     "eslint-config-prettier": "^6.10.1",
     "eslint-import-resolver-typescript": "^2.0.0",
     "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jest": "^24.0.2",
     "eslint-plugin-json": "^2.1.1",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.1",
     "eslint-plugin-sort-class-members": "^1.6.0",
-    "redux-mock-store": "^1.5.4"
+    "prettier": "^2.1.2",
+    "redux-mock-store": "^1.5.4",
+    "ts-jest": "^26.4.0"
   }
 }
