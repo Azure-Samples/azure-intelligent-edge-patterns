@@ -117,17 +117,17 @@ Download the `kfctl` from [Kubeflow releases](https://github.com/kubeflow/kfctl/
 
     $ mkdir kubeflow
     $ cd kubeflow/
-    $ wget https://github.com/kubeflow/kfctl/releases/download/v1.0.2/kfctl_v1.0.2-0-ga476281_linux.tar.gz
+    $ wget https://github.com/kubeflow/kfctl/releases/download/v1.1.0/kfctl_v1.1.0-0-ga776281_linux.tar.gz
     ...
-    ‘kfctl_v1.0.1-0-gf3edb9b_linux.tar.gz’ saved [31630869/31630869]
+    ‘kfctl_v1.1.0-0-gf9edb9b_linux.tar.gz’ saved [31630869/31630869]
 
-    $ tar -xvf kfctl_v1.0.1-0-gf3edb9b_linux.tar.gz
+    $ tar -xvf kfctl_v1.1.0-0-gf7edb9b_linux.tar.gz
 
     $ export PATH=$PATH:~/kubeflow/
     $ export KF_NAME=sandboxASkf
     $ export BASE_DIR=/opt/
     $ export KF_DIR=${BASE_DIR}/${KF_NAME}
-    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.0-branch/kfdef/kfctl_k8s_istio.v1.0.2.yaml"
+    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.1-branch/kfdef/kfctl_k8s_istio.v1.1.0.yaml"
     
 Generate and deploy Kubeflow:
 

@@ -3,7 +3,7 @@
 If you installed Kubeflow using `kubeflow_install.sh`, you can remove it using `kubeflow_uninstall.sh`:
 
     $ ./kubeflow_uninstall.sh
-    Removing Kubeflow from /opt/sandboxASkf, according to kfctl_k8s_istio.v1.0.2.yaml
+    Removing Kubeflow from /opt/sandboxASkf, according to kfctl_k8s_istio.v1.1.0.yaml
 
 It runs `kfctl delete` on the same .yaml that was used to create the cluster. If you are not
 using `kubeflow_unistall.sh` script, you would need to do it manually(`kfctl delete -f <the sript's name>`).
