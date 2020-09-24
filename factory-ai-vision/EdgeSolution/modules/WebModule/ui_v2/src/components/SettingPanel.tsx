@@ -78,7 +78,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   );
   const defaultCustomvisionId = useSelector((state: State) => {
     const [selectedTrainingProject] = selectNonDemoProject(state);
-    return state.trainingProject.entities[selectedTrainingProject.id]?.customVisionId;
+    return state.trainingProject.entities[selectedTrainingProject?.id]?.customVisionId;
   });
   const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
   const originSettingData = useSelector((state: State) => state.setting.origin);
@@ -275,7 +275,7 @@ export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
       </Stack>
       <Dialog
         title="Get Endpoint and Key"
-        isOpen={isModalOpen}
+        hidden={!isModalOpen}
         modalProps={{ layerProps: { hostId: null } }}
         maxWidth={800}
       >

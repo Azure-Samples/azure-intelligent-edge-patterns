@@ -2,7 +2,7 @@ import { SettingActionType, Setting } from './settingType';
 import { patchIsCollectData } from './settingAction';
 import { createNewTrainingProject } from '../trainingProjectSlice';
 
-const initialState: Setting = {
+export const initialState: Setting = {
   loading: false,
   error: null,
   current: {
