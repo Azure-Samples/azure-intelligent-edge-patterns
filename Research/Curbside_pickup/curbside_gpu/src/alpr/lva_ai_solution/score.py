@@ -170,11 +170,12 @@ class AnalyticsAPI:
 
         return img
 
+    
     def score(self, pilImage, stream):
+        rendered_frame = False
         try:
             with self._lock:
                 if self.initialized:
-                    
                     start = t.default_timer()
                     imgData = np.asarray(pilImage)
                     # RGB to BGR (numpy to opencv)
@@ -219,7 +220,8 @@ class AnalyticsAPI:
                             state = "no_detection"
                         resDict[i]["vehicle_state"] = state
                             
-                        # RESTORE: (lines 224 to 269) the following `if` statement must be restored.
+                        # RESTORE: (lines 225 to 275) the following `if` statement must be restored
+                        #           to regain original functionality.
                         #if state == "arrived" and not plateAlreadyInCache:
                         # Update blobfolder and filename
                         self.logger.info("[AI EXT] current cache looks like: {0}".format(self.cache.arrivedCache))
@@ -229,33 +231,36 @@ class AnalyticsAPI:
                         # Save images on first detection
                         imgMarked = self.visualize_result(imgData, reslist)
 
-                        height, width = imgMarked.shape[:2]
-                        maxDim = max(height, width)
-                        scale = 400/maxDim # 200 pixels max side size
-                        imgThumb = cv2.resize(imgMarked, (int(scale*width), int(scale*height)),
-                                                interpolation=cv2.INTER_AREA)
+                        # height, width = imgMarked.shape[:2]
+                        # maxDim = max(height, width)
+                        # scale = 400/maxDim # 200 pixels max side size
+                        # imgThumb = cv2.resize(imgMarked, (int(scale*width), int(scale*height)),
+                        #                       interpolation=cv2.INTER_AREA)
+                        
                         # Write locally
-                        cv2.imwrite(os.path.join(self.volume, self.filename), 
-                                    imgThumb)
+                        #cv2.imwrite(os.path.join(self.volume, self.filename), 
+                        #            imgThumb)
 
+                        # MJPEG Push (begin)
                         if stream is not None:
                     
                             # You may need to convert the color.
                             self.logger.info("[AI EXT] About to transform a frame from openCV back to pillow")
-                            frame_array = cv2.cvtColor(imgThumb, cv2.COLOR_BGR2RGB)
+                            frame_array = cv2.cvtColor(imgMarked, cv2.COLOR_BGR2RGB)
                             frame = Image.fromarray(frame_array)
 
                             image_buffer = io.BytesIO()
-                            # output_image.save(image_buffer, format='JPEG')
-
+                            
                             frame.save(image_buffer, format='JPEG')
                             
                             # post the image with bounding boxes so that it can be viewed as an MJPEG stream
                             postData = b'--boundary\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + image_buffer.getvalue() + b'\r\n'
                             requests.post('http://127.0.0.1:5001/mjpeg_pub/' + stream, data = postData)
+                            rendered_frame = True
                             #
 
                             self.logger.info("[AI EXT] A frame has just been pushed into MJPEG pub endpoint")
+                            # MJPEG Push (end)
                             
                             # To upload to Blob. need container connection string
                             #try:
@@ -267,6 +272,18 @@ class AnalyticsAPI:
                             # Upload the local image file to Blob Storage
                             #with open(os.path.join(self.volume, self.filename), "rb") as data:
                             #    blob_client.upload_blob(data)
+                    
+                    # No overlay MJPEG Push (begin)
+                    if (stream is not None) and (rendered_frame is False):
+                        image_buffer = io.BytesIO()
+                            
+                        pilImage.save(image_buffer, format='JPEG')
+                        
+                        # post the image with bounding boxes so that it can be viewed as an MJPEG stream
+                        postData = b'--boundary\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + image_buffer.getvalue() + b'\r\n'
+                        requests.post('http://127.0.0.1:5001/mjpeg_pub/' + stream, data = postData)
+                        #
+                        # MJPEG Push (end)
 
                     result = {  "app_status": self.INF_STAT_OK, # want it to be 0
                                 "time_for_inference_ms" : infTime,

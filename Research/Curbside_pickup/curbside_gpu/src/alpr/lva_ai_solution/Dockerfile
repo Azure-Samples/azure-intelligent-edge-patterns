@@ -33,11 +33,16 @@ RUN wget --quiet https://repo.continuum.io/miniconda/Miniconda3-4.5.12-Linux-x86
 
 # This must be done before pip so that requirements.txt is available
 WORKDIR ${WORK_DIR}
-COPY . .
-
+COPY requirements.txt ./requirements.txt
 # Install python requirements for project
 RUN CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
     pip install -r requirements.txt
+
+COPY . .
+
+# Install python requirements for project
+#RUN CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
+  #  pip install -r requirements.txt
 
 # Compile ops
 RUN chmod +x compile_ops.sh && \
