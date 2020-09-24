@@ -145,6 +145,9 @@ def deploy_worker(part_detection_id):
             params={"model_dir": instance.project.download_uri},
             timeout=REQUEST_TIMEOUT,
         )
+    # =====================================================
+    # 3. Update parts                                   ===
+    # =====================================================
     requests.get(
         "http://" + str(instance.inference_module.url) + "/update_parts",
         params={"parts": parts_to_detect},
@@ -171,7 +174,7 @@ def deploy_worker(part_detection_id):
     )
 
     # =====================================================
-    # 3. Update cams                                    ===
+    # 4. Update cams                                    ===
     # =====================================================
     logger.info("Update Cam!!!")
     cameras = instance.cameras.all()
@@ -207,16 +210,28 @@ def deploy_worker(part_detection_id):
         timeout=REQUEST_TIMEOUT,
     )
     # =====================================================
-    # 4. Update prob_threshold                          ===
+    # 5. Update prob_threshold                          ===
     # =====================================================
     requests.get(
         "http://" + instance.inference_module.url + "/update_prob_threshold",
         params={"prob_threshold": instance.prob_threshold},
         timeout=REQUEST_TIMEOUT,
     )
+    # =====================================================
+    # 6. Update fps                                     ===
+    # =====================================================
+    requests.get(
+        "http://" + instance.inference_module.url + "/update_fps",
+        params={"fps": instance.fps,},
+        timeout=REQUEST_TIMEOUT,
+    )
 
 
 def if_trained_then_deploy_catcher(part_detection_id):
+    """if_trained_then_deploy_catcher.
+
+    Catch every exception when deploy.
+    """
     try:
         if_trained_then_deploy_worker(part_detection_id=part_detection_id)
     except Exception:

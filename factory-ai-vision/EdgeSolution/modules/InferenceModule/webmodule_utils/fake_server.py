@@ -4,7 +4,6 @@ import logging
 import os
 import sys
 
-import requests
 from flask import Flask, Response, request
 from part_detections import PART_DETECTION_MODE_CHOICES
 
@@ -22,6 +21,9 @@ DETECTION_BUFFER_SIZE = 10000
 
 IMG_WIDTH = 960
 IMG_HEIGHT = 540
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Main thread
 
@@ -63,11 +65,11 @@ def update_retrain_parameters():
     confidence_max = int(confidence_max) * 0.01
     max_images = int(max_images)
 
-    print("[INFO] updaing retrain parameters to")
-    print("  cam_id:", cam_id)
-    print("  conficen_min:", confidence_min)
-    print("  conficen_max:", confidence_max)
-    print("  max_images  :", max_images)
+    logger.info("Updaing retrain parameters to")
+    logger.info("  cam_id: %s", cam_id)
+    logger.info("  conficen_min: %s", confidence_min)
+    logger.info("  conficen_max: %s", confidence_max)
+    logger.info("  max_images: %s", max_images)
 
     return "ok"
 
@@ -80,16 +82,16 @@ def update_model():
     if not model_uri and not model_dir:
         return "missing model_uri or model_dir"
 
-    print("[INFO] Update Model ...")
+    logger.info("Update Model ...")
     if model_uri:
 
-        print("[INFO] Got Model URI", model_uri)
-        print("[INFO] Update Finished ...")
+        logger.info("Got Model URI %s", model_uri)
+        logger.info("Update Finished ...")
         return "ok"
 
     elif model_dir:
-        print("[INFO] Got Model DIR", model_dir)
-        print("[INFO] Update Finished ...")
+        logger.info("Got Model DIR %s", model_dir)
+        logger.info("Update Finished ...")
         return "ok"
 
 
@@ -132,21 +134,20 @@ def update_send_video_to_cloud():
 
     if send_video_to_cloud not in PART_DETECTION_MODE_CHOICES:
         return "invalid send_video_to_cloud"
-    # TODO: Change something here
     return "ok"
 
 
 @app.route("/update_parts")
 def update_parts():
     try:
-        print("----Upadate parts----")
+        logger.info("----Upadate parts----")
         parts = request.args.getlist("parts")
-        print("[INFO] Updating parts", parts)
-        print("[INFO] Updated parts", parts)
+        logger.info("Updating parts %s", parts)
+        logger.info("Updated parts %s", parts)
     except:
-        print("[ERROR] Unknown format", parts)
+        logger.error("Unknown format %s", parts)
 
-    logger.info("onnx.update_parts(%s)", parts)
+    logger.info("onnx.update_parts %s", parts)
 
     return "ok"
 
@@ -168,10 +169,10 @@ def update_iothub_parameters():
     threshold = int(threshold) * 0.01
     fpm = int(fpm)
 
-    print("updating iothub parameters ...")
-    print("  is_send", is_send)
-    print("  threshold", threshold)
-    print("  fpm", fpm)
+    logger.info("updating iothub parameters ...")
+    logger.info("  is_send %s", is_send)
+    logger.info("  threshold %s", threshold)
+    logger.info("  fpm %s", fpm)
 
     cam_id = request.args.get("cam_id")
     logger.info("s.update_iothub_parameters(%s, %s, %s)", is_send, threshold, fpm)
@@ -184,13 +185,24 @@ def update_prob_threshold():
     if not prob_threshold:
         return "missing prob_threshold"
 
-    print("[INFO] updaing prob_threshold to")
-    print("  prob_threshold:", prob_threshold)
+    logger.info("Updating prob_threshold to")
+    logger.info("  prob_threshold: %s", prob_threshold)
 
     return "ok"
 
 
-def Main():
+@app.route("/update_fps")
+def update_fps():
+    """update_fps.
+    """
+    fps = request.args.get("fps")
+    if not fps:
+        return "missing fps"
+    logger.info("Updating fps to %s", fps)
+    return "ok"
+
+
+def main():
     app.run(host="0.0.0.0", debug=False)
     # server.wait_for_termination()
 
@@ -209,4 +221,4 @@ if __name__ == "__main__":
     )
 
     # Call Main logic
-    Main()
+    main()
