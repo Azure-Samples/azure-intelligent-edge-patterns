@@ -1,8 +1,6 @@
 """App drf url tests.
 """
 
-from unittest import mock
-
 import pytest
 from django.urls import resolve, reverse
 
@@ -11,10 +9,7 @@ from .factories import CameraFactory
 pytestmark = pytest.mark.django_db
 
 
-@mock.patch(
-    "vision_on_edge.cameras.models.Camera.verify_rtsp",
-    mock.MagicMock(return_value=True),
-)
+@pytest.mark.fast
 def test_view_detail():
     """test_view_detail.
 
@@ -30,6 +25,7 @@ def test_view_detail():
     assert resolve(f"/api/cameras/{cam_1.id}").view_name == "api:camera-detail"
 
 
+@pytest.mark.fast
 def test_view_list():
     """test_view_list."""
     assert reverse("api:camera-list") == "/api/cameras"

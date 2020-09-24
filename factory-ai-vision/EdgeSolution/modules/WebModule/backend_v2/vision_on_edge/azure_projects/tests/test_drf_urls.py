@@ -13,14 +13,6 @@ pytestmark = pytest.mark.django_db
 
 @pytest.mark.fast
 @mock.patch(
-    "vision_on_edge.azure_settings.models.Setting.validate",
-    mock.MagicMock(return_value=True),
-)
-@mock.patch(
-    "vision_on_edge.azure_settings.models.Setting.get_domain_id",
-    mock.MagicMock(return_value="Fake_id"),
-)
-@mock.patch(
     "vision_on_edge.azure_projects.models.Project.validate",
     mock.MagicMock(return_value=True),
 )

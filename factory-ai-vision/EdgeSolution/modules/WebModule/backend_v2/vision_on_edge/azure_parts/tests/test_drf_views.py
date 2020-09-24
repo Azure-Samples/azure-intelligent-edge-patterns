@@ -1,4 +1,4 @@
-"""App viewset tests.
+"""App drf view tests.
 """
 
 import json
