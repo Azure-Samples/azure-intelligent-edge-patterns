@@ -35,8 +35,9 @@ export const selectImageItemByUntagged = (unTagged: boolean) =>
     images
       .filter((img) => {
         const hasAnno = !!annos.find((anno) => img.id === anno.image);
+        if (img.isRelabel) return false;
         if (unTagged) return !hasAnno;
-        return hasAnno && !img.isRelabel;
+        return hasAnno;
       })
       .map(
         (img): ImageListItem => {
