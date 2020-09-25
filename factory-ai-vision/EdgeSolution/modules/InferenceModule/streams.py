@@ -43,7 +43,7 @@ except:
 
 
 class Stream():
-    def __init__(self, cam_id, model, sender, cam_type="video_file", cam_source='./sample_video/video.mp4', is_benchmark=False):
+    def __init__(self, cam_id, model, sender, cam_type="video_file", cam_source='./sample_video/video.mp4'):
         self.cam_id = cam_id
         self.model = model
 
@@ -111,6 +111,7 @@ class Stream():
         self.scenario = None
         self.scenario_type = None
         self.start_zmq()
+        self.is_benchmark = False
 
     def set_is_benchmark(self, is_benchmark):
         self.is_benchmark = is_benchmark

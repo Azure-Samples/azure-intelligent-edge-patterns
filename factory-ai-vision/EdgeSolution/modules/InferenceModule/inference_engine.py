@@ -167,11 +167,11 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                     cvImage = cv2.cvtColor(np.frombuffer(
                         rawBytes, dtype=np.uint8), cv2.COLOR_RGBA2RGB)
                 elif pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.BGR24:
-                    logging.info('&&&&&&&&&& BGR mode &&&&&&&&&&')
+                    #logging.info('&&&&&&&&&& BGR mode &&&&&&&&&&')
                     cvImage = np.frombuffer(
                         rawBytes, dtype=np.uint8).reshape(540, 960, 3)
                 elif pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.RGB24:
-                    logging.info('&&&&&&&&&& RGB mode &&&&&&&&&&')
+                    #logging.info('&&&&&&&&&& RGB mode &&&&&&&&&&')
                     cvImage = np.frombuffer(
                         rawBytes, dtype=np.uint8).reshape(540, 960, 3)
                 elif pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.YUV420P:
@@ -228,7 +228,7 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
             # Read request id, sent by client
             requestSeqNum = mediaStreamMessageRequest.sequence_number
 
-            logging.debug(
+            logging.warning(
                 '[Received] SeqNum: {0:07d}'.format(requestSeqNum))
             s1 = time.time()
             # Get media content bytes. (bytes sent over shared memory buffer, segment or inline to message)

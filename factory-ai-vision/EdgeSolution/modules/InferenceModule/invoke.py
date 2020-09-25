@@ -11,7 +11,7 @@ from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
 import os
 import threading
 import sys
-from iotutils import is_edge
+from utility import is_edge
 
 from config import IOTHUB_CONNECTION_STRING
 
