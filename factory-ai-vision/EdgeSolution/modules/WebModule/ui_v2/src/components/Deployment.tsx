@@ -65,7 +65,6 @@ export const Deployment: React.FC = () => {
     parts,
     sendMessageToCloud,
     framesPerMin,
-    accuracyThreshold,
     needRetraining,
     accuracyRangeMin,
     accuracyRangeMax,
@@ -210,7 +209,6 @@ export const Deployment: React.FC = () => {
               partNames={partNames}
               sendMessageToCloud={sendMessageToCloud}
               framesPerMin={framesPerMin}
-              accuracyThreshold={accuracyThreshold}
               needRetraining={needRetraining}
               accuracyRangeMin={accuracyRangeMin}
               accuracyRangeMax={accuracyRangeMax}

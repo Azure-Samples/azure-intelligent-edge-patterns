@@ -227,17 +227,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
                   disabled={!projectData.sendMessageToCloud}
                   required
                 />
-                <TextField
-                  label="Accuracy threshold"
-                  type="number"
-                  value={projectData.accuracyThreshold?.toString()}
-                  onChange={(_, newValue) => {
-                    onChange('accuracyThreshold', parseInt(newValue, 10));
-                  }}
-                  disabled={!projectData.sendMessageToCloud}
-                  suffix="%"
-                  required
-                />
               </>
             )}
           </Stack.Item>
