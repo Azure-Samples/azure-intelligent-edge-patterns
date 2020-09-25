@@ -17,14 +17,6 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.fast
-@mock.patch(
-    "vision_on_edge.azure_settings.models.Setting.get_domain_id",
-    mock.MagicMock(return_value="Fake_id"),
-)
-@mock.patch(
-    "vision_on_edge.azure_settings.models.Setting.validate",
-    mock.MagicMock(return_value=True),
-)
 def test_get():
     """test_get_queryset."""
     setting = SettingFactory()
@@ -33,8 +25,6 @@ def test_get():
     request = factory.get("/fake-url/")
 
     response = project_list_view(request).render()
-
+    response_body = response.content
     assert response.status_code == status.HTTP_200_OK
-    assert SettingSerializer(setting).data in json.loads(
-        response.content.decode("utf-8")
-    )
+    assert SettingSerializer(setting).data in json.loads(response_body)

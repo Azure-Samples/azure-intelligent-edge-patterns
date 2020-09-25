@@ -22,14 +22,6 @@ pytestmark = pytest.mark.django_db
 
 @pytest.mark.fast
 @mock.patch(
-    "vision_on_edge.azure_settings.api.views.Setting.get_domain_id",
-    mock.MagicMock(return_value="Fake_id"),
-)
-@mock.patch(
-    "vision_on_edge.azure_settings.models.Setting.validate",
-    mock.MagicMock(return_value=True),
-)
-@mock.patch(
     "vision_on_edge.azure_settings.models.Setting.get_projects",
     mock.MagicMock(return_value={}),
 )
@@ -52,14 +44,6 @@ def test_valid_setting_list_projects():
 
 
 @pytest.mark.fast
-@mock.patch(
-    "vision_on_edge.azure_settings.models.Setting.get_domain_id",
-    mock.MagicMock(return_value="Fake_id"),
-)
-@mock.patch(
-    "vision_on_edge.azure_settings.models.Setting.validate",
-    mock.MagicMock(return_value=False),
-)
 @mock.patch(
     "vision_on_edge.azure_settings.models.Setting.get_projects",
     mock.MagicMock(side_effect=SettingCustomVisionAccessFailed),

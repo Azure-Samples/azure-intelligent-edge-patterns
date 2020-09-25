@@ -5,26 +5,13 @@ from unittest import mock
 
 import pytest
 
-from ..exceptions import ProjectCustomVisionError
+from ..exceptions import ProjectCustomVisionError, ProjectWithoutSettingError
+from .conftest import MockedProject
 from .factories import ProjectFactory
 
 pytestmark = pytest.mark.django_db
 
 
-class MockedProject:
-    """MockedProject.
-
-    Mocked project object for return value
-    """
-
-    def __init__(self):
-        self.name = "mocked project name"
-
-
-@mock.patch(
-    "vision_on_edge.azure_projects.models.Project.get_project_obj",
-    mock.MagicMock(return_value=MockedProject()),
-)
 def test_create_1():
     """test_create_1.
 
@@ -39,7 +26,7 @@ def test_create_1():
     project.name = "wrong project name"
     project.save()
     assert project.customvision_id == "valid_project_id"
-    assert project.name == "mocked project name"
+    assert project.name == MockedProject().name
 
 
 @mock.patch(
@@ -63,6 +50,10 @@ def test_create_2():
     assert project.name == "Random"
 
 
+@mock.patch(
+    "vision_on_edge.azure_projects.models.Project.get_project_obj",
+    mock.MagicMock(side_effect=ProjectWithoutSettingError),
+)
 def test_create_project_with_null_setting():
     """test_create_1.
 
@@ -87,15 +78,12 @@ def test_update_invalid_customvision_id():
     If project from valid id to invalid id. customvision_id set to ""
     """
     project = ProjectFactory()
-    with mock.patch(
-        "vision_on_edge.azure_projects.models.Project.get_project_obj",
-        mock.MagicMock(return_value=MockedProject()),
-    ):
-        project.customvision_id = "super_valid_project_id"
-        project.name = "Random"
-        project.save()
-        assert project.customvision_id == "super_valid_project_id"
-        assert project.name == "mocked project name"
+    project.customvision_id = "super_valid_project_id"
+    project.name = "Random"
+    project.save()
+    assert project.customvision_id == "super_valid_project_id"
+    assert project.name == MockedProject().name
+
     with mock.patch(
         "vision_on_edge.azure_projects.models.Project.get_project_obj",
         mock.MagicMock(side_effect=ProjectCustomVisionError),
@@ -112,18 +100,25 @@ def test_update_valid_customvision_id():
 
     If project from valid id to invalid id. customvision_id set to ""
     """
-    project = ProjectFactory()
-    project.customvision_id = "super_valid_project_id"
-    project.name = "Random"
-    project.save()
-    assert project.customvision_id == ""
-    assert project.name == "Random"
     with mock.patch(
         "vision_on_edge.azure_projects.models.Project.get_project_obj",
-        mock.MagicMock(return_value=MockedProject()),
+        mock.MagicMock(side_effect=ProjectWithoutSettingError),
     ):
-        project.customvision_id = "new_project_id"
-        project.name = "Name that should be replaced"
+        project = ProjectFactory()
+        project.customvision_id = "super_valid_project_id"
+        project.name = "Random"
         project.save()
+        assert project.customvision_id == ""
+        assert project.name == "Random"
+
+    project.customvision_id = "new_project_id"
+    project.name = "Name that should be replaced"
+    project.save()
     assert project.customvision_id == "new_project_id"
-    assert project.name == "mocked project name"
+    assert project.name == MockedProject().name
+
+
+@pytest.mark.fast
+def test_get_project():
+    project = ProjectFactory()
+    assert project.get_project_obj().name == MockedProject().name

@@ -75,23 +75,30 @@ class Project(models.Model):
 
     def get_project_obj(self):
         """get_project_obj."""
-        trainer = self.get_project_obj()
+        if not self.setting:
+            raise ProjectWithoutSettingError
+        trainer = self.setting.get_trainer_obj()
         return trainer.get_project(self.customvision_id)
 
-    def validate(self) -> bool:
+    def validate(self, raise_exception: bool = False) -> bool:
         """validate.
 
         Returns:
             bool: if project customvision_id valid
         """
-        result = False
+        if not self.setting:
+            if raise_exception:
+                raise ProjectWithoutSettingError
+            return False
         try:
             self.get_project_obj()
-            result = True
             logger.info("Project %s validate pass.", self.name)
+            return True
         except Exception:
             logger.info("Project %s validate failed.", self.name)
-        return result
+            if raise_exception:
+                raise ProjectCustomVisionError
+            return False
 
     @staticmethod
     def pre_save(**kwargs):
