@@ -21,19 +21,20 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # TODO: Consider move env to the end of dockerfile
-ENV LANG en_US.UTF-8 
+ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 RUN rm -rf /opt/miniconda
 RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
-COPY requirements.txt ./
+
+COPY requirements/base.txt ./requirements/base.txt
 ENV CONDA_ENV_NAME python38
 RUN conda create --name python38 python=3.8.5 -y &&\
     . activate python38
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements.txt --ignore-installed"]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime-gpu" ]
 
 COPY coco_classes.txt ./
