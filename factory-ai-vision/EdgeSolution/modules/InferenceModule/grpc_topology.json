@@ -48,7 +48,13 @@
                 "name": "imageEncoding",
                 "type": "String",
                 "description": "image encoding for frames",
-                "default": "bmp"
+                "default": "jpeg"
+            },
+            {
+                "name": "imageQuality",
+                "type": "String",
+                "description": "image encoding quality for frames (valid for JPG encoding)",
+                "default": "90"
             },
             {
                 "name": "imageScaleMode",
@@ -80,7 +86,6 @@
                 "description": "input maximumFPs",
                 "default": "30"
             }
-
         ],
         "sources": [{
                 "@type": "#Microsoft.Media.MediaGraphRtspSource",
@@ -138,7 +143,7 @@
                 },
                 "dataTransfer": {
                     "mode": "sharedMemory",
-                    "SharedMemorySizeMiB": "40"
+                    "SharedMemorySizeMiB": "50"
                 },
                 "image": {
                     "scale": {
@@ -147,8 +152,9 @@
                         "height": "${frameHeight}"
                     },
                     "format": {
-                        "@type": "#Microsoft.Media.MediaGraphImageFormatRaw",
-                        "pixelFormat": "bgr24"
+                        "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
+                        "encoding": "${imageEncoding}",
+                        "quality": "${imageQuality}"
                     }
                 },
                 "inputs": [{
