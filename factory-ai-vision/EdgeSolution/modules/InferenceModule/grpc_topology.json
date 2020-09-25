@@ -48,13 +48,7 @@
                 "name": "imageEncoding",
                 "type": "String",
                 "description": "image encoding for frames",
-                "default": "jpeg"
-            },
-            {
-                "name": "imageQuality",
-                "type": "String",
-                "description": "image encoding quality for frames (valid for JPG encoding)",
-                "default": "90"
+                "default": "bmp"
             },
             {
                 "name": "imageScaleMode",
