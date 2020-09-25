@@ -147,7 +147,7 @@ Ssh into the VM, locate the `input` folder (the specified 'bind' where the simul
 
 > `scp docs/assets/*.mkv user@host:/var/iotedgedata/input`
 
-## Running & testing
+## Preparing the sample application
 
 Now that you have run the deployment manifest for your IoT Edge Device, you're ready to see it in action. You can now set a topology and load and initialize some graph instances, based on your camera set (or test videos you want to try).
 
@@ -547,11 +547,30 @@ Now that you have run the deployment manifest for your IoT Edge Device, you're r
 }
 ```
 
+## Running & testing
+
   * Make sure "Cloud to Device - Console App", is selected in the "Run" window.
   * Follow through the steps described in its documentation (https://github.com/Azure-Samples/live-video-analytics-iot-edge-csharp/blob/master/src/cloud-to-device-console-app/readme.md), before running the application.
 
+### Runing and monitoring
+Once you're starting the "Cloud to Device - Console App" (F5), start monitoring events from the corresponding event hub.
 
-## Troubleshoot
+![starting-the-app](docs/assets/starting-the-app.png)
+
+You can watch the event stream in real time
+
+![monitoring-events](docs/assets/monitoring-events.png)
+
+And you can also view the feeds in real time
+
+![screenshot](docs/assets/real-time-feeds.png)
+
+### Viewing feeds in Real Time
+One of the changes we've done to `operations.json` earlier, was specifying the `?stream=` query parameter for each `inferencingUrl`. With this, we're able to push processed frames into an MJPEG stream we can monitor in real time.
+
+You'll find additional info in https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov3-onnx#view-video-stream-with-inferencing-overlays
+
+## Troubleshooting
 
 * I'm getting a bad performance on the test videos I feed to the simulator.
 
