@@ -14,10 +14,6 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('axios');
 
-beforeAll(() => {
-  initializeIcons();
-});
-
 describe('Setting Panel Behaviour', () => {
   it('The setting panel should be open if `isTranerValid` is false.', () => {
     const { getByText } = render(<MainLayout />, {
