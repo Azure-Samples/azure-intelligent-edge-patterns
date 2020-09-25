@@ -1,24 +1,35 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:latest as base
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    git \
-    libprotobuf-dev \
-    protobuf-compiler \
-    libgl1-mesa-glx \
-    libgtk2.0-dev \
-    cmake \
-    && rm -rf /var/lib/apt/lists/*
-# libgl1-mesa-glx: opencv2 libGL.so error workaround
+FROM mcr.microsoft.com/azureml/onnxruntime:latest
 
 WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libffi-dev \
+    libgl1-mesa-glx \
+    libgtk2.0-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
+    && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales \
+    && update-locale LANG=en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
+# TODO: Consider move env to the end of dockerfile
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
 COPY requirements/base.txt ./requirements/base.txt
 ENV CONDA_ENV_NAME python38
-RUN conda create --name python38 python=3.8.5 -y
+RUN conda create --name python38 python=3.8.5 -y &&\
+    . activate python38
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
+# RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime"]
+# RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime" ]
 
 COPY coco_classes.txt ./
 COPY default_model default_model/
@@ -56,4 +67,4 @@ COPY webmodule_utils/*.py ./webmodule_utils/
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
+CMD [ "/bin/bash", "-c", "source activate python38 && python3 webmodule_utils/fake_server.py"]
