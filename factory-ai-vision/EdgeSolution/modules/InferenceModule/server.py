@@ -1,3 +1,5 @@
+"""Server.
+"""
 import json
 import logging
 import os
@@ -37,6 +39,8 @@ DETECTION_BUFFER_SIZE = 10000
 IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
+LVA_MODE = 'grpc'
+
 # Main thread
 
 onnx = ONNXRuntimeModelDeploy()
@@ -52,7 +56,6 @@ def prediction():
     cam_id = request.args.get('cam_id')
     s = stream_manager.get_stream_by_id(cam_id)
     return json.dumps(s.last_prediction)
-
 
 
 @app.route('/metrics', methods=['GET'])
@@ -148,7 +151,7 @@ def update_model():
 
         print('[INFO] Got Model URI', model_uri, flush=True)
 
-        #FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
+        # FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
         # workaround
         onnx.set_detection_mode('PD')
         onnx.set_is_scenario(False)
@@ -384,9 +387,10 @@ def init_topology():
 
     logger.info('========== Setting default grpc topology =========='.format(
         len(topologies['payload']['value'])))
-    ret = gm.invoke_graph_grpc_topology_set()
+    ret = gm.invoke_topology_set(LVA_MODE)
 
     return 1
+
 
 def Local():
     app.run(host='0.0.0.0', debug=False)
@@ -394,8 +398,8 @@ def Local():
 
 def BenchMark():
     #app.run(host='0.0.0.0', debug=False)
-    #s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
-    SAMPLE_VIDEO    = './sample_video/video.mp4'
+    # s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
+    SAMPLE_VIDEO = './sample_video/video.mp4'
     SCENARIO1_MODEL = 'scenario_models/1'
 
     n_threads = 3
@@ -412,7 +416,7 @@ def BenchMark():
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
         s.update_cam('video', SAMPLE_VIDEO, 30, s.cam_id, False, None,
-                        'PC', [], [])
+                     'PC', [], [])
 
     def _f():
         print('--- Thread', threading.current_thread(), 'started---', flush=True)
@@ -422,7 +426,8 @@ def BenchMark():
             s.predict(img)
         t1_t = time.time()
         print('---- Thread', threading.current_thread(), '----', flush=True)
-        print('Processing', n_images, 'images in', t1_t-t0_t, 'seconds', flush=True)
+        print('Processing', n_images, 'images in',
+              t1_t-t0_t, 'seconds', flush=True)
         print('  Avg:', (t1_t-t0_t)/n_images*1000, 'ms per image', flush=True)
 
     threads = []
@@ -434,10 +439,12 @@ def BenchMark():
     for i in range(n_threads):
         threads[i].join()
     t1 = time.time()
-    #print(t1-t0)
+    # print(t1-t0)
     print('---- Overall ----', flush=True)
-    print('Processing', n_images*n_threads, 'images in', t1-t0, 'seconds', flush=True)
-    print('  Avg:', (t1-t0)/(n_images*n_threads)*1000, 'ms per image', flush=True)
+    print('Processing', n_images*n_threads,
+          'images in', t1-t0, 'seconds', flush=True)
+    print('  Avg:', (t1-t0)/(n_images*n_threads)
+          * 1000, 'ms per image', flush=True)
     print('============= BenchMarking (End) ==================', flush=True)
 
 
@@ -454,8 +461,9 @@ def Main():
         counter = 0
         while init_topology() == -1:
             if counter == 100:
-               logger.critical('Failed to init topology, please check whether direct method still works')
-               exit(-1)
+                logger.critical(
+                    'Failed to init topology, please check whether direct method still works')
+                exit(-1)
             logger.warning('Failed to init topology, try again 10 secs later')
             time.sleep(10)
             counter += 1
@@ -472,7 +480,7 @@ def Main():
     except:
         PrintGetExceptionDetails()
         raise
-        #exit(-1)
+        # exit(-1)
 
 
 if __name__ == "__main__":
@@ -489,5 +497,5 @@ if __name__ == "__main__":
 
     # Call Main logic
     Main()
-    #Local()
-    #BenchMark()
+    # Local()
+    # BenchMark()

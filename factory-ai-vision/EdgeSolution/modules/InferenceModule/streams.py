@@ -29,6 +29,8 @@ DETECTION_BUFFER_SIZE = 10000
 # for Retraining
 UPLOAD_INTERVAL = 5
 
+LVA_MODE = 'grpc'
+
 try:
     iot = IoTHubModuleClient.create_from_edge_environment()
 except:
@@ -120,7 +122,7 @@ class Stream():
         gm.invoke_graph_instance_deactivate(self.cam_id)
 
     def _set(self, rtspUrl, frameRate):
-        gm.invoke_graph_grpc_instance_set(self.cam_id, rtspUrl, frameRate)
+        gm.invoke_instance_set(LVA_MODE, self.cam_id, rtspUrl, frameRate)
 
     def _start(self):
         gm.invoke_graph_instance_activate(self.cam_id)
