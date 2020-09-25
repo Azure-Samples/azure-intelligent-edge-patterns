@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App utilities.
 """
 
@@ -43,5 +42,5 @@ def inference_module_url() -> str:
     """
 
     if is_edge():
-        return "172.18.0.1:5000"
+        return "InferenceModule:5000"
     return "localhost:5000"
