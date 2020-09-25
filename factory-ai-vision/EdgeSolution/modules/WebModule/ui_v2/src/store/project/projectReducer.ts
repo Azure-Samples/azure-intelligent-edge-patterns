@@ -48,6 +48,7 @@ export const initialProjectData: ProjectData = {
   sendVideoToCloud: false,
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
+  setFpsManually: false,
   fps: 10,
 };
 

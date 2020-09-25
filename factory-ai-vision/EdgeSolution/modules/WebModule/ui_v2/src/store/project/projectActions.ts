@@ -113,6 +113,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     inferenceMode: data?.inference_mode ?? '',
     sendVideoToCloud: data?.send_video_to_cloud ?? false,
     deployTimeStamp: data?.deploy_timestamp ?? '',
+    setFpsManually: data?.fps !== 10,
     fps: data?.fps ?? 10,
   },
   isDemo,
@@ -203,6 +204,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         inferenceMode: data[0]?.inference_mode ?? '',
         sendVideoToCloud: data[0]?.send_video_to_cloud ?? false,
         deployTimeStamp: data[0]?.deploy_timestamp ?? '',
+        setFpsManually: data[0]?.fps !== 10,
         fps: data[0]?.fps ?? 10,
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
@@ -237,7 +239,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       name: projectData.name,
       send_video_to_cloud: projectData.sendVideoToCloud,
       inference_mode: projectData.inferenceMode,
-      fps: projectData.fps,
+      fps: projectData.setFpsManually ? projectData.fps : 10,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

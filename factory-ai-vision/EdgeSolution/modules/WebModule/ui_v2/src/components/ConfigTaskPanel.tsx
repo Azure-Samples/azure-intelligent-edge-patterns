@@ -298,10 +298,18 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             <div className={classNames.textWrapper}>
               <Label>Total FPS for cameras</Label>
             </div>
+            <Toggle
+              label="Enable setting FPS manually"
+              checked={projectData.setFpsManually}
+              onChange={(_, checked) => {
+                onChange('setFpsManually', checked);
+              }}
+            />
             <TextField
               type="number"
-              value={projectData.fps as any}
+              value={(projectData.setFpsManually ? projectData.fps : 10) as any}
               onChange={(_, val) => onChange('fps', parseInt(val, 10))}
+              disabled={!projectData.setFpsManually}
               suffix="fps"
               description={`${getFPSPerCamera(
                 projectData.fps,

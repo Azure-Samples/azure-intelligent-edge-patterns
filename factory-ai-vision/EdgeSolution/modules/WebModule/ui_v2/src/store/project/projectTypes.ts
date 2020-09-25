@@ -69,6 +69,7 @@ export type ProjectData = {
   sendVideoToCloud: boolean;
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
+  setFpsManually: boolean;
   fps: number;
 };
 
