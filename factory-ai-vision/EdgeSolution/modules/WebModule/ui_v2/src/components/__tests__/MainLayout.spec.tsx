@@ -1,4 +1,3 @@
-import { initializeIcons } from '@fluentui/react';
 import React from 'react';
 
 import { MainLayout } from '../MainLayout';
