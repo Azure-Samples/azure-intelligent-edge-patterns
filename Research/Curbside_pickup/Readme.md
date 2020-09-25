@@ -1,5 +1,5 @@
 # On Building and Deploying LVA-ALPR
-Repo for curbside pick-up demo using ALPR models in LVA platform.
+Repo for curbside pick-up demo using ALPR models in Live Video Analytics platform.
 
 ## Specification
 
@@ -14,9 +14,27 @@ We are making the following assumptions:
 - car pulls into a specific, monitored parking spot (one of two)
 - the car LP exists in the system and is unique (i.e. state is not identified at this time)
 
+## Prerequisites
+
+* An active Azure subscription with these resources deployed in it:
+  * a. IoT Hub
+  * b. Storage Account
+  * c. Media Services
+  * d. Azure container registry
+* An [Azure Stack Edge](https://azure.microsoft.com/en-us/products/azure-stack/edge/) Device or a Linux VM (with an NVIDIA GPU with CUDA drivers installed).
+* VS Code: https://code.visualstudio.com/Download
+* Docker: https://www.docker.com/get-started
+* Docker for VS Code Extension: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker
+* Azure IoT Tools for VS Code Extension: https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools
+
+
+## Architecture
+
+![architecture diagram](docs/assets/lpraidiagram.png)
+
 ### Design
 
-The solution will ingest video using LVA. It will pass frames to a model running on the same edge device as LVA.
+The solution will ingest video using Live Video Analytics. It will pass frames to a model running on the same edge device.
 When a LP is detected, the detection event flows through the associated IoT Hub and is processed by Stream Analytics.
 
 The event will contain:
@@ -31,15 +49,14 @@ NOTE: We don't really need to store and retrieve orders. This can be faked in th
 
 Instead of Stream Analytics, we could substitue a simple controller app that maintains a dictionary of LPs that it has seen. Every time an event is recive we touch the entry. The entries could time-out when it has received a touch after a certain period (20 seconds?). We should research if Stream Analytics will be a faster approach.
 
-## Prerequisites
+## First steps
 
-> Using VS Code, both with [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) and [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools) extensions, will ease building and deploying, no matter the target device you use.
 
-## First Steps
+- Clone this repo to the development box.
 
-- Clone this repo.
+    `git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git`
 
-- Within `src/alpr/lva_ai_solution/` create a `.env` file with the following properly replaced:
+- Within `src/alpr/` create a `.env` file with the following properly replaced. Please fill in all the variables as vscode will use this file to set them where needed.
 
 ```
 CONTAINER_REGISTRY_USERNAME_myacr="<replace-me>"
@@ -73,6 +90,8 @@ Depending the operations schema, you may end up using an IoT Edge Device, that s
 > Be it a VM or ASE, make sure you're reflecting your newly pushed `image:` under "lpraimodule".
 
 ### VM based IoT Edge Device
+If you're using a [GPU based VM as your IoT Edge Device](docs/runonvm.md), make sure to follow these step.
+
 Template: `src/alpr/deployment.lpr.vm.template.json`
 
 * Make sure folders mapped as Binds, exist on the host VM.
@@ -90,12 +109,16 @@ Template: `src/alpr/deployment.lpr.vm.template.json`
 * To deploy the template into target IoT Edge Device, point your Azure IoT Hub to the one where the IoT Edge Device is configured (here's some [help](https://github.com/Microsoft/vscode-azure-iot-toolkit/wiki). Then, follow these steps.
     
     1. Right click on your template (from VS Code) and select "Generate IoT Edge Deployment Manifest"
-    ![screenshot](assets/generate-deployment-manifest.png)
+
+        ![screenshot](docs/assets/generate-deployment-manifest.png)
     2. If all goes fine, you'll see a notification. Now click on your template (from VS Code) and select "Generate IoT Edge Deployment Manifest"
-    ![screenshot](assets/deploy-for-single-device.png)
+
+        ![screenshot](docs/assets/deploy-for-single-device.png)
 
 
 ### ASE based IoT Edge Device
+If you're using an Azure Stack Edge (ASE) as your IoT Edge Device, please follow these steps instead)
+
 Template: `src/alpr/deployment.lpr.ase.template.json`
 
 * Make sure your shares are in place for `output`, `input` and `appdata`
@@ -104,6 +127,188 @@ Template: `src/alpr/deployment.lpr.ase.template.json`
 * To deploy the template into target IoT Edge Device, point your Azure IoT Hub to the one where the IoT Edge Device is configured (here's some [help](https://github.com/Microsoft/vscode-azure-iot-toolkit/wiki). Then, follow these steps.
     
     1. Right click on your template (from VS Code) and select "Generate IoT Edge Deployment Manifest"
-    ![screenshot](docs/assets/generate-deployment-manifest.png)
+
+        ![screenshot](docs/assets/generate-deployment-manifest.png)
     2. If all goes fine, you'll see a notification. Now click on your template (from VS Code) and select "Generate IoT Edge Deployment Manifest"
-    ![screenshot](docs/assets/deploy-for-single-device.png)
+
+        ![screenshot](docs/assets/deploy-for-single-device.png)
+
+
+## Running & testing
+
+Now that you have run the deployment manifest for your IoT Edge Device, you're ready to see it in action. You can now set a topology and load and initialize some graph instances, based on your camera set (or test videos you want to try).
+
+1. Clone your the Live Video Analytics (LVA) sample app on your preferred stack and open it in Visual Studio Code.
+
+    (Csharp) https://github.com/Azure-Samples/live-video-analytics-iot-edge-csharp
+
+    (Python) https://github.com/Azure-Samples/live-video-analytics-iot-edge-python
+
+2. Navigate to the src/cloud-to-device-app directory and add a file named `lprtopology.json`. Copy this content into it.
+
+```JSON
+{
+    "@apiVersion": "1.0",
+    "name": "InferencingWithHttpExtension",
+    "properties": {
+        "description": "Analyzing live video using HTTP Extension to send images to an external inference engine",
+        "parameters": [
+        {
+            "name": "rtspUserName",
+            "type": "String",
+            "description": "rtsp source user name.",
+            "default": "testuser"
+        },
+        {
+            "name": "rtspPassword",
+            "type": "String",
+            "description": "rtsp source password.",
+            "default": "testpassword"
+        },
+        {
+            "name": "rtspUrl",
+            "type": "String",
+            "description": "rtsp Url"
+        },
+        {
+            "name": "inferencingUrl",
+            "type": "String",
+            "description": "inferencing Url",
+            "default": "http://lpraimodule:5001/score"
+        },
+        {
+            "name": "inferencingUserName",
+            "type": "String",
+            "description": "inferencing endpoint user name.",
+            "default": "dummyUserName"
+        },
+        {
+            "name": "inferencingPassword",
+            "type": "String",
+            "description": "inferencing endpoint password.",
+            "default": "dummyPassword"
+        },
+        {
+            "name": "imageEncoding",
+            "type": "String",
+            "description": "image encoding for frames",
+            "default": "jpeg"
+        }
+        ],
+        "sources": [
+        {
+            "@type": "#Microsoft.Media.MediaGraphRtspSource",
+            "name": "rtspSource",
+            "transport": "tcp",
+            "endpoint": {
+            "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+            "url": "${rtspUrl}",
+            "credentials": {
+                "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                "username": "${rtspUserName}",
+                "password": "${rtspPassword}"
+            }
+            }
+        }
+        ],
+        "processors": [
+        {
+            "@type": "#Microsoft.Media.MediaGraphFrameRateFilterProcessor",
+            "name": "frameRateFilter",
+            "inputs": [
+                {
+                "nodeName": "rtspSource"
+                }
+            ],
+            "maximumFps":6
+        },
+        {
+            "@type": "#Microsoft.Media.MediaGraphHttpExtension",
+            "name": "httpExtension",
+            "endpoint": {
+            "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+            "url": "${inferencingUrl}",
+            "credentials": {
+                "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                "username": "${inferencingUserName}",
+                "password": "${inferencingPassword}"
+            }
+            },
+            "image": {
+            "scale": {
+                "mode": "preserveAspectRatio",
+                "width": "416",
+                "height": "416"
+            },
+            "format": {
+                "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
+                "encoding": "${imageEncoding}"
+            }
+            },
+            "inputs": [
+            {
+                "nodeName": "frameRateFilter"
+            }
+            ]
+        }
+        ],
+        "sinks": [
+        {
+            "@type": "#Microsoft.Media.MediaGraphIoTHubMessageSink",
+            "name": "hubSink",
+            "hubOutputName": "inferenceOutput",
+            "inputs": [
+            {
+                "nodeName": "httpExtension"
+            }
+            ]
+        }
+        ]
+    }
+  }
+
+```
+
+3. In the same directory, look for the `operations.json` file and edit it.
+
+  * Replace line 27 `"topologyUrl": "https://[...]"` for `"topologyFile": "lprtopology.json`
+
+    That block should look like this
+    ```JSON
+        {
+            "opName": "GraphTopologySet",
+            "opParams": {
+                "topologyFile": "lprtopology.json"
+            }
+        },
+    ```
+  * In lines 35 and 95, replace the value of `"topologyName"`, from `"MotionDetection"` to `"InferencingWithHttpExtension"`.
+  * Make sure "Cloud to Device - Console App", is selected in the "Run" window.
+  * Follow through the steps described in its documentation (https://github.com/Azure-Samples/live-video-analytics-iot-edge-csharp/blob/master/src/cloud-to-device-console-app/readme.md), before running the application.
+
+
+## Troubleshoot
+
+* I'm getting a bad performance on the test videos I feed to the simulator.
+
+We've seen cases where high quality videos (like those taken with current smartphones). When converting your videos, consider a maximum width or height, whatever comes first, of 960 pixels.
+
+Please report other scenarios.
+
+* Testing videos are failing after transformation.
+
+When converting files, make sure you're getting **no audio** streams.
+
+* When running the sample app, the VM based IoT Edge Device is failing.
+
+Verify your device has a GPU. Here's a way to get an [Azure GPU VM](docs/runonvm.md) with drivers and stuff to go on. 
+
+* How to use a custom video set for the RTSP Simulator
+
+* Adding additional Graph Instances
+
+---
+
+Please don't hesitate to file an Issue if you are having problems with this sample.
+
+
