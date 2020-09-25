@@ -11,6 +11,7 @@ from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
 import os
 import threading
 import sys
+from iotutils import is_edge
 
 from config import IOTHUB_CONNECTION_STRING
 
@@ -27,26 +28,16 @@ mutex = threading.Lock()
 
 class GraphManager:
     def __init__(self):
-        self.registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
+        if is_edge:
+            self.registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
+        else:
+            self.registry_manager = None
         self.device_id = DEVICE_ID
         self.module_id = MODULE_ID
 
-    def invoke_method2(self, method_name, payload):
-
-        body = {"methodName": method_name, "responseTimeoutInSeconds": 10,
-                "connectTimeoutInSeconds": 10, "payload": payload}
-
-        url = 'https://main.iothub.ext.azure.com/api/dataPlane/post'
-        data = {"apiVersion": "2018-06-30", "authorizationPolicyKey": "rDav1fU61BRTezz8NewMe/UNasZob1rQ8FowPqrbD28=", "authorizationPolicyName": "service", "hostName": "customvision.azure-devices.net",
-                "requestPath": "/twins/testcam/modules/lvaEdge/methods", "requestBody": str(body)}
-
-        header = {
-            "Authorization": IOTHUB_CONNECTION_STRING
-        }
-        res = requests.post(url, headers=header, data=data)
-        return res.json()
-
     def invoke_method(self, method_name, payload):
+        if not self.registry_manager:
+            print('[WARNING] Not int edge evironment, ignore direct message', flush=True)
         mutex.acquire()
         try:
             module_method = CloudToDeviceMethod(

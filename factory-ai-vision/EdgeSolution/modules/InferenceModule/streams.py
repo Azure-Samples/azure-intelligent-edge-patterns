@@ -43,7 +43,7 @@ except:
 
 
 class Stream():
-    def __init__(self, cam_id, model, sender, cam_type="video_file", cam_source='./sample_video/video.mp4'):
+    def __init__(self, cam_id, model, sender, cam_type="video_file", cam_source='./sample_video/video.mp4', is_benchmark=False):
         self.cam_id = cam_id
         self.model = model
 
@@ -111,6 +111,9 @@ class Stream():
         self.scenario = None
         self.scenario_type = None
         self.start_zmq()
+
+    def set_is_benchmark(self, is_benchmark):
+        self.is_benchmark = is_benchmark
 
     def _stop(self):
         gm.invoke_graph_instance_deactivate(self.cam_id)
@@ -310,9 +313,10 @@ class Stream():
         # self.mutex.release()
 
     def _update_instance(self, rtspUrl, frameRate):
-        self._stop()
-        self._set(rtspUrl, frameRate)
-        self._start()
+        if not self.is_benchmark:
+            self._stop()
+            self._set(rtspUrl, frameRate)
+            self._start()
         logging.info("Instance {0} updated, rtsp = {1}, frameRate = {2}".format(
             self.cam_id, rtspUrl, frameRate))
 

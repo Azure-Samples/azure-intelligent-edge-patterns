@@ -154,14 +154,14 @@ class ObjectDetection(object):
         inputs = self.preprocess(image)
         end_pre = time.time() - start
         self.pre.append(end_pre)
-        logging.info('Preprocess time: {0}'.format(end_pre))
+        #logging.info('Preprocess time: {0}'.format(end_pre))
         start2 = time.time()
         prediction_outputs = self.predict(inputs)
 
         end = time.time()
         inference_time = end - start2
         self.inf.append(inference_time)
-        logging.info('Inference time: {0}'.format(inference_time))
+        #logging.info('Inference time: {0}'.format(inference_time))
 
         return self.postprocess(prediction_outputs), inference_time
 
@@ -206,12 +206,12 @@ class ObjectDetection(object):
 
         end_post = time.time() - start
         self.post.append(end_post)
-        logging.info('Postprocess time: {0}'.format(end_post))
+        #logging.info('Postprocess time: {0}'.format(end_post))
 
-        logging.info('***** avg *****')
-        logging.info('[avg] pre: {0}, inf: {1}, post: {2}'.format(
-            np.mean(self.pre), np.mean(self.inf), np.mean(self.post)))
-        logging.info('***** avg *****')
+        #logging.info('***** avg *****')
+        #logging.info('[avg] pre: {0}, inf: {1}, post: {2}'.format(
+        #    np.mean(self.pre), np.mean(self.inf), np.mean(self.post)))
+        #logging.info('***** avg *****')
 
         return [{'probability': round(float(selected_probs[i]), 8),
                  'tagId': int(selected_classes[i]),

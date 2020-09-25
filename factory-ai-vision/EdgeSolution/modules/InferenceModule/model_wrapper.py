@@ -14,7 +14,6 @@ import onnxruntime
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 from object_detection import ObjectDetection
 from utility import get_file_zip, normalize_rtsp
-from invoke import GraphManager
 
 import logging
 
@@ -136,30 +135,3 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         return predictions, inf_time
 
-
-# def update_instance(rtspUrl, instance_id):
-#    payload = {
-#        "@apiVersion": "1.0",
-#        "name": instance_id
-#    }
-#    payload_set = {
-#        "@apiVersion": "1.0",
-#        "name": instance_id,
-#        "properties": {
-#            "topologyName": "InferencingWithGrpcExtension",
-#            "description": "Sample graph description",
-#            "parameters": [
-#                {"name": "rtspUrl", "value": rtspUrl},
-#                {"name": "grpcExtensionAddress",
-#                    "value": "tcp://InferenceModule:44000"},
-#                {"name": "frameHeight", "value": "540"},
-#                {"name": "frameWidth", "value": "960"},
-#            ]
-#        }
-#    }
-#    manager = GraphManager()
-#
-#    res_dea = manager.invoke_method("GraphInstanceDeactivate", payload)
-#    res_set = manager.invoke_method("GraphInstanceSet", payload_set)
-#    res_act = manager.invoke_method("GraphInstanceActivate", payload)
-#    print("instance updated")
