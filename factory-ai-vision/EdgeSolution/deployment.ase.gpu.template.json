@@ -116,6 +116,9 @@
             "status": "running",
             "restartPolicy": "always",
             "env": {
+              "LVA_MODE": {
+                "value": "http"
+              },
               "IOTHUB_CONNECTION_STRING": {
                 "value": "$IOTHUB_CONNECTION_STRING"
               }

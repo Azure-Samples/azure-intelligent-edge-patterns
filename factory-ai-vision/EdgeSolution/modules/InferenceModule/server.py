@@ -41,7 +41,7 @@ DETECTION_BUFFER_SIZE = 10000
 IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
-LVA_MODE = 'grpc'
+LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 
 # Main thread
 
@@ -415,15 +415,20 @@ def init_topology():
     if instances["status"] != 200:
         logger.warning("Failed to invoker direct method", instances["payload"])
         return -1
-    logger.info('========== Deleting {0} topology =========='.format(
-        len(topologies['payload']['value'])))
+    logger.info(
+        "========== Deleting {} topology ==========".format(
+            len(topologies["payload"]["value"])
+        )
+    )
 
-    for i in range(len(topologies['payload']['value'])):
-        gm.invoke_graph_topology_delete(
-            topologies['payload']['value'][i]['name'])
+    for i in range(len(topologies["payload"]["value"])):
+        gm.invoke_graph_topology_delete(topologies["payload"]["value"][i]["name"])
 
-    logger.info('========== Setting default grpc topology =========='.format(
-        len(topologies['payload']['value'])))
+    logger.info(
+        "========== Setting default grpc topology ==========".format(
+            len(topologies["payload"]["value"])
+        )
+    )
     ret = gm.invoke_topology_set(LVA_MODE)
 
     return 1
@@ -434,10 +439,10 @@ def Local():
 
 
 def BenchMark():
-    #app.run(host='0.0.0.0', debug=False)
+    # app.run(host='0.0.0.0', debug=False)
     # s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
-    SAMPLE_VIDEO = './sample_video/video.mp4'
-    SCENARIO1_MODEL = 'scenario_models/1'
+    SAMPLE_VIDEO = "./sample_video/video.mp4"
+    SCENARIO1_MODEL = "scenario_models/1"
 
     n_threads = 3
     n_images = 100
@@ -452,8 +457,7 @@ def BenchMark():
     onnx.update_model(SCENARIO1_MODEL)
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
-        s.update_cam('video', SAMPLE_VIDEO, 30, s.cam_id, False, None,
-                     'PC', [], [])
+        s.update_cam("video", SAMPLE_VIDEO, 30, s.cam_id, False, None, "PC", [], [])
 
     def _f():
         print("--- Thread", threading.current_thread(), "started---", flush=True)
@@ -462,10 +466,9 @@ def BenchMark():
         for i in range(n_images):
             s.predict(img)
         t1_t = time.time()
-        print('---- Thread', threading.current_thread(), '----', flush=True)
-        print('Processing', n_images, 'images in',
-              t1_t-t0_t, 'seconds', flush=True)
-        print('  Avg:', (t1_t-t0_t)/n_images*1000, 'ms per image', flush=True)
+        print("---- Thread", threading.current_thread(), "----", flush=True)
+        print("Processing", n_images, "images in", t1_t - t0_t, "seconds", flush=True)
+        print("  Avg:", (t1_t - t0_t) / n_images * 1000, "ms per image", flush=True)
 
     threads = []
     for i in range(n_threads):
@@ -501,9 +504,10 @@ def Main():
         while init_topology() == -1:
             if counter == 100:
                 logger.critical(
-                    'Failed to init topology, please check whether direct method still works')
+                    "Failed to init topology, please check whether direct method still works"
+                )
                 exit(-1)
-            logger.warning('Failed to init topology, try again 10 secs later')
+            logger.warning("Failed to init topology, try again 10 secs later")
             time.sleep(10)
             counter += 1
 
