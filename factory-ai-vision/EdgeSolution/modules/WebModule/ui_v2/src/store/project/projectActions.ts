@@ -260,12 +260,9 @@ const getTrain = (projectId): void => {
   Axios.get(`/api/part_detections/${projectId}/configure`).catch((err) => console.error(err));
 };
 
-/**
- * @deprecated
- */
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
   const projectId = getProjectData(getState()).id;
-  return Axios.get(`/api/projects/${projectId}/reset_camera`)
+  return Axios.patch(`/api/part_detections/${projectId}/`, { cameras: [], has_configured: false })
     .then(() => {
       return dispatch(deleteProjectSuccess(isDemo));
     })
