@@ -29,8 +29,7 @@ mutex = threading.Lock()
 class GraphManager:
     def __init__(self):
         if is_edge:
-            self.registry_manager = IoTHubRegistryManager(
-                IOTHUB_CONNECTION_STRING)
+            self.registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
         else:
             self.registry_manager = None
         self.device_id = DEVICE_ID
@@ -162,49 +161,41 @@ class GraphManager:
 
     # default http extension settings
     def invoke_graph_http_topology_set(self):
-        method = 'GraphTopologySet'
-        with open('http_topology.json') as f:
+        method = "GraphTopologySet"
+        with open("http_topology.json") as f:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
     def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate):
-        inferencingUrl = 'http://InferenceModule:5000/predict?camera_id=' + \
-            str(name)
+        inferencingUrl = "http://InferenceModule:5000/predict?camera_id=" + str(name)
         properties = {
             "topologyName": "InferencingWithHttpExtension",
             "description": "Sample graph description",
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
                 {"name": "frameRate", "value": frameRate},
-                {"name": "inferencingUrl",
-                    "value": inferencingUrl},
+                {"name": "inferencingUrl", "value": inferencingUrl},
                 {"name": "frameHeight", "value": "540"},
                 {"name": "frameWidth", "value": "960"},
-            ]
+            ],
         }
         return self.invoke_graph_instance_set(name, properties)
 
     def invoke_topology_set(self, mode):
-        if mode == 'grpc':
+        if mode == "grpc":
             return self.invoke_graph_grpc_topology_set()
-        elif mode == 'http':
+        elif mode == "http":
             return self.invoke_graph_http_topology_set()
         else:
-            return 'LVA mode error'
+            return "LVA mode error"
 
-    def invoke_instance_set(self, mode, params):
-        if mode == 'grpc':
-            name = params['name']
-            rtspUrl = params['rtspUrl']
-            frameRate = params['frameRate']
+    def invoke_instance_set(self, mode, name, rtspUrl, frameRate):
+        if mode == "grpc":
             return self.invoke_graph_grpc_instance_set(name, rtspUrl, frameRate)
-        elif mode == 'http':
-            name = params['name']
-            rtspUrl = params['rtspUrl']
-            frameRate = params['frameRate']
+        elif mode == "http":
             return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate)
         else:
-            return 'LVA mode error'
+            return "LVA mode error"
 
 
 gm = GraphManager()
