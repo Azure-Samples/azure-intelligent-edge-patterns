@@ -56,6 +56,8 @@ Instead of Stream Analytics, we could substitue a simple controller app that mai
 
     `git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git`
 
+- `cd` into `Research/Curbside_pickup`
+
 - Within `src/alpr/` create a `.env` file with the following properly replaced. Please fill in all the variables as vscode will use this file to set them where needed.
 
 ```
@@ -72,7 +74,7 @@ OUTPUT_VIDEO_FOLDER_ON_DEVICE="<replace-me>"
 APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 ```
 
-## Building LPR Container
+## Building the LPR Image
 
 - Build from `Dockerfile` with new tag from ML solution (`lva_ai_solution`) directory, e.g.,
 
@@ -122,7 +124,7 @@ If you're using an Azure Stack Edge (ASE) as your IoT Edge Device, please follow
 Template: `src/alpr/deployment.lpr.ase.template.json`
 
 * Make sure your shares are in place for `output`, `input` and `appdata`
-[TODO: more-details-here]
+Follow guidelines specified in here to create them: https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/README.md#step-1-setup-the-azure-stack-edge-ase
 
 * To deploy the template into target IoT Edge Device, point your Azure IoT Hub to the one where the IoT Edge Device is configured (here's some [help](https://github.com/Microsoft/vscode-azure-iot-toolkit/wiki). Then, follow these steps.
     
@@ -133,6 +135,17 @@ Template: `src/alpr/deployment.lpr.ase.template.json`
 
         ![screenshot](docs/assets/deploy-for-single-device.png)
 
+
+## Upload test videos into IoT Edge Device
+
+### ASE
+
+copy the sample videos into the `Mount` used by the rtspsim. To refresh which one is it, please refer to your .env file and look for the value of `$INPUT_VIDEO_FOLDER_ON_DEVICE`.
+
+### VM
+Ssh into the VM, locate the `input` folder (the specified 'bind' where the simulator will search for the videos), and upload in there the 3 .mkv videos you'll find in `docs/assets`.
+
+> `scp docs/assets/*.mkv user@host:/var/iotedgedata/input`
 
 ## Running & testing
 
@@ -274,15 +287,266 @@ Now that you have run the deployment manifest for your IoT Edge Device, you're r
   * Replace line 27 `"topologyUrl": "https://[...]"` for `"topologyFile": "lprtopology.json`
 
     That block should look like this
-    ```JSON
+```JSON
         {
             "opName": "GraphTopologySet",
             "opParams": {
                 "topologyFile": "lprtopology.json"
             }
         },
-    ```
+```
   * In lines 35 and 95, replace the value of `"topologyName"`, from `"MotionDetection"` to `"InferencingWithHttpExtension"`.
+
+4. Getting ready for 3 camera inputs
+
+  * `operations.json` comes with prepared for a single camera, but we'll make it 3. To do that we'll replicate by 3 each of these, renaming where necessary on the graph name.
+    * GraphInstanceSet  
+    * GraphInstanceActivate
+    * GraphInstanceDeactivate
+    * GraphInstanceDelete
+
+  * Add a 4th parameter to the `parameters` array to each of the 3 GraphInstanceSet.
+
+```JSON
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://lpraimodule:5001/score?stream=[graph-name]"
+                        }
+```
+    Notice the value url contains a 'stream' parameter to identify it later (at direct streaming time). Provide a unique value for "stream" on each graph instance.
+
+  * Assign a pre-made video to each rtspUrl (GraphInstanceSet)
+    
+    If you haven't yet, please refer to "Upload test videos into IoT Edge Device", then, come back here.
+
+    Each GraphInstanceSet has a parameter in the parameters array, that defines `"rtspUrl"`. As the sample uses pre-filmed video clips reproduced by the RTSP Simulator, we can instruct each camera to use a different custom video.
+
+```JSON
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://rtspsim:554/media/[replace-file-name].mkv"
+                        },
+```
+
+
+    
+ **After all the adjustments** here's the resulting `operations.json`.
+
+```JSON
+    {
+    "apiVersion": "1.0",
+    "operations": [
+        {
+            "opName": "GraphTopologyList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphInstanceList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphTopologySet",
+            "opParams": {
+                "topologyFile": "lprtopology.json"
+            }
+        },
+        {
+            "opName": "GraphInstanceSet",
+            "opParams": {
+                "name": "Sample-Graph-1",
+                "properties": {
+                    "topologyName": "InferencingWithHttpExtension",
+                    "description": "Sample graph description",
+                    "parameters": [
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://rtspsim:554/media/in-min-loop.mkv"
+                        },
+                        {
+                            "name": "rtspUserName",
+                            "value": "testuser"
+                        },
+                        {
+                            "name": "rtspPassword",
+                            "value": "testpassword"
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://lpraimodule:5001/score?stream=graph1"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "opName": "GraphInstanceSet",
+            "opParams": {
+                "name": "Sample-Graph-2",
+                "properties": {
+                    "topologyName": "InferencingWithHttpExtension",
+                    "description": "Sample graph description",
+                    "parameters": [
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://rtspsim:554/media/park-min-loop.mkv"
+                        },
+                        {
+                            "name": "rtspUserName",
+                            "value": "testuser"
+                        },
+                        {
+                            "name": "rtspPassword",
+                            "value": "testpassword"
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://lpraimodule:5001/score?stream=graph2"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "opName": "GraphInstanceSet",
+            "opParams": {
+                "name": "Sample-Graph-3",
+                "properties": {
+                    "topologyName": "InferencingWithHttpExtension",
+                    "description": "Sample graph description",
+                    "parameters": [
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://rtspsim:554/media/out-min-loop.mkv"
+                        },
+                        {
+                            "name": "rtspUserName",
+                            "value": "testuser"
+                        },
+                        {
+                            "name": "rtspPassword",
+                            "value": "testpassword"
+                        },
+                        {
+                            "name": "inferencingUrl",
+                            "value": "http://lpraimodule:5001/score?stream=graph3"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "opName": "GraphInstanceActivate",
+            "opParams": {
+                "name": "Sample-Graph-1"
+            }
+        },
+        {
+            "opName": "GraphInstanceActivate",
+            "opParams": {
+                "name": "Sample-Graph-2"
+            }
+        },
+        {
+            "opName": "GraphInstanceActivate",
+            "opParams": {
+                "name": "Sample-Graph-3"
+            }
+        },
+        {
+            "opName": "GraphInstanceList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "The graph instance has been activated. Press Enter to continue and deactivate the graph instance."
+            }
+        },
+        {
+            "opName": "GraphInstanceDeactivate",
+            "opParams": {
+                "name": "Sample-Graph-3"
+            }
+        },
+        {
+            "opName": "GraphInstanceDeactivate",
+            "opParams": {
+                "name": "Sample-Graph-2"
+            }
+        },
+        {
+            "opName": "GraphInstanceDeactivate",
+            "opParams": {
+                "name": "Sample-Graph-1"
+            }
+        },
+        {
+            "opName": "GraphInstanceDelete",
+            "opParams": {
+                "name": "Sample-Graph-3"
+            }
+        },
+        {
+            "opName": "GraphInstanceDelete",
+            "opParams": {
+                "name": "Sample-Graph-2"
+            }
+        },
+        {
+            "opName": "GraphInstanceDelete",
+            "opParams": {
+                "name": "Sample-Graph-1"
+            }
+        },
+        {
+            "opName": "GraphInstanceList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphTopologyDelete",
+            "opParams": {
+                "name": "InferencingWithHttpExtension"
+            }
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "GraphTopologyList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        }
+    ]
+}
+```
+
   * Make sure "Cloud to Device - Console App", is selected in the "Run" window.
   * Follow through the steps described in its documentation (https://github.com/Azure-Samples/live-video-analytics-iot-edge-csharp/blob/master/src/cloud-to-device-console-app/readme.md), before running the application.
 

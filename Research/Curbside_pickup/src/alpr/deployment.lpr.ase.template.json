@@ -96,7 +96,24 @@
               "restartPolicy": "always",
               "settings": {
                 "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
-                "createOptions":"{\"HostConfig\":{\"Mounts\":[{\"Source\":\"$INPUT_VIDEO_FOLDER_ON_DEVICE\",\"Target\":\"/live/mediaServer/media\",\"Type\":\"volume\"}],\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
+                "createOptions": {
+                  "HostConfig": {
+                    "Mounts": [
+                      {
+                        "Source": "$INPUT_VIDEO_FOLDER_ON_DEVICE",
+                        "Target": "/live/mediaServer/media",
+                        "Type": "volume"
+                      }
+                    ],
+                    "PortBindings": {
+                      "554/tcp": [
+                        {
+                          "HostPort": "554"
+                        }
+                      ]
+                    }
+                  }
+                }
               }
             },
             "lpraimodule": {
