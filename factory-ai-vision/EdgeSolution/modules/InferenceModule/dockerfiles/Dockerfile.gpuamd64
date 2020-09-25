@@ -41,6 +41,7 @@ COPY coco_classes.txt ./
 COPY default_model default_model/
 COPY default_model_6parts default_model_6parts/
 COPY grpc_topology.json ./
+COPY http_topology.json ./
 COPY sample_video sample_video/
 COPY scenario_models scenario_models/
 RUN chmod 777 sample_video/video.mp4
