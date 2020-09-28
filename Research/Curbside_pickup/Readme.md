@@ -144,6 +144,8 @@ Follow guidelines specified in here to create them: https://github.com/julialieb
 
 copy the sample videos into the `Mount` used by the rtspsim. To refresh which one is it, please refer to your .env file and look for the value of `$INPUT_VIDEO_FOLDER_ON_DEVICE`.
 
+Make sure your ASE is setup with the right Shares, before moving on (https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/README.md#step-1-setup-the-azure-stack-edge-ase).
+
 ### VM
 Ssh into the VM, locate the `input` folder (the specified 'bind' where the simulator will search for the videos), and upload in there the 3 .mkv videos you'll find in `docs/assets`.
 
