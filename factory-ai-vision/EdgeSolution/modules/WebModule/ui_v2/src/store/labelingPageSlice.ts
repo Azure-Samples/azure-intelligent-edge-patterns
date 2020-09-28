@@ -1,9 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { deleteImage, changeImage } from './actions';
 
+export enum OpenFrom {
+  None = 'None',
+  AfterCapture = 'AfterCapture',
+  DisplayImage = 'DisplayImage',
+  CaptureDialog = 'CaptureDialog',
+}
+
 export type LabelPageState = {
   imageIds: number[];
   selectedImageId: number;
+  openFrom: OpenFrom;
 };
 
 const changeSelectedImage = (offset: 1 | -1) => (state: LabelPageState) => {
@@ -16,13 +24,18 @@ const changeSelectedImage = (offset: 1 | -1) => (state: LabelPageState) => {
 
 const slice = createSlice({
   name: 'labelingPage',
-  initialState: { imageIds: [], selectedImageId: null },
+  initialState: { imageIds: [], selectedImageId: null, openFrom: OpenFrom.None },
   reducers: {
-    openLabelingPage: (_, action: PayloadAction<{ imageIds: number[]; selectedImageId: number }>) => ({
+    openLabelingPage: (
+      _,
+      action: PayloadAction<{ imageIds: number[]; selectedImageId: number; openFrom: OpenFrom }>,
+    ) => ({
       imageIds: action.payload.imageIds,
       selectedImageId: action.payload.selectedImageId,
+      openFrom: action.payload.openFrom,
     }),
-    closeLabelingPage: () => ({
+    closeLabelingPage: (state) => ({
+      ...state,
       imageIds: [],
       selectedImageId: null,
     }),

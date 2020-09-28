@@ -5,7 +5,7 @@ import { schema, normalize } from 'normalizr';
 
 import { State } from 'RootStateType';
 import { Annotation, AnnotationState, Image } from './type';
-import { openLabelingPage } from './labelingPageSlice';
+import { OpenFrom, openLabelingPage } from './labelingPageSlice';
 import { deleteImage, changeImage } from './actions';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
@@ -97,7 +97,11 @@ export const captureImage = createWrappedAsync<
 
   if (shouldOpenLabelingPage)
     dispatch(
-      openLabelingPage({ imageIds: [...imageIds, capturedImage.id], selectedImageId: capturedImage.id }),
+      openLabelingPage({
+        imageIds: [...imageIds, capturedImage.id],
+        selectedImageId: capturedImage.id,
+        openFrom: OpenFrom.AfterCapture,
+      }),
     );
 
   return normalizeImages([response.data.image]).entities;

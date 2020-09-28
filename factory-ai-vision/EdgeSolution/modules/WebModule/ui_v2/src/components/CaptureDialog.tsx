@@ -18,7 +18,7 @@ import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
 import { cameraOptionsSelector, selectCameraById, getCameras } from '../store/cameraSlice';
 import { captureImage } from '../store/imageSlice';
-import { openLabelingPage } from '../store/labelingPageSlice';
+import { OpenFrom, openLabelingPage } from '../store/labelingPageSlice';
 
 const { palette } = getTheme();
 
@@ -71,7 +71,13 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({ isOpen, onDismiss,
   };
 
   const onGoTaggingClick = () => {
-    dispatch(openLabelingPage({ imageIds: capturedImgs.current, selectedImageId: capturedImgs.current[0] }));
+    dispatch(
+      openLabelingPage({
+        imageIds: capturedImgs.current,
+        selectedImageId: capturedImgs.current[0],
+        openFrom: OpenFrom.CaptureDialog,
+      }),
+    );
     closeDialog();
   };
 

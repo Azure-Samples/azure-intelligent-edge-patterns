@@ -6,7 +6,7 @@ import * as R from 'ramda';
 
 import { Image } from '../store/type';
 import LabelDisplayImage from './LabelDisplayImage';
-import { openLabelingPage } from '../store/labelingPageSlice';
+import { OpenFrom, openLabelingPage } from '../store/labelingPageSlice';
 import { timeStampConverter } from '../utils/timeStampConverter';
 
 const ROWS_PER_PAGE = 3;
@@ -61,7 +61,11 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
             pointerCursor
             onClick={() =>
               dispatch(
-                openLabelingPage({ selectedImageId: item.id, imageIds: sortedImages.map((e) => e.id) }),
+                openLabelingPage({
+                  selectedImageId: item.id,
+                  imageIds: sortedImages.map((e) => e.id),
+                  openFrom: OpenFrom.DisplayImage,
+                }),
               )
             }
           />
