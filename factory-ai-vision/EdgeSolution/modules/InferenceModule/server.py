@@ -2,6 +2,7 @@
 """
 import json
 import logging
+import logging.config
 import os
 import sys
 import threading
@@ -20,9 +21,10 @@ from exception_handler import PrintGetExceptionDetails
 from http_inference_engine import HttpInferenceEngine
 from inference_engine import InferenceEngine
 from invoke import gm
+from logging_conf import logging_config
 from model_wrapper import ONNXRuntimeModelDeploy
 from stream_manager import StreamManager
-from utility import get_file_zip, normalize_rtsp
+from utility import get_file_zip, is_edge, normalize_rtsp
 from webmodule_utils import PART_DETECTION_MODE_CHOICES
 
 # sys.path.insert(0, '../lib')
@@ -434,11 +436,15 @@ def init_topology():
     return 1
 
 
-def Local():
+def local_main():
+    """local_main.
+
+    For local development.
+    """
     app.run(host="0.0.0.0", debug=False)
 
 
-def BenchMark():
+def benchmark():
     # app.run(host='0.0.0.0', debug=False)
     # s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
     SAMPLE_VIDEO = "./sample_video/video.mp4"
@@ -490,7 +496,7 @@ def BenchMark():
     print("============= BenchMarking (End) ==================", flush=True)
 
 
-def Main():
+def main():
     try:
         # Get application arguments
         ap = ArgumentParser(ArgumentsType.SERVER)
@@ -531,16 +537,14 @@ if __name__ == "__main__":
     logging_level = logging.DEBUG if os.getenv("DEBUG") else logging.INFO
 
     # Set logging parameters
-    logging.basicConfig(
-        level=logging_level,
-        format="[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s",
-        handlers=[
-            # logging.FileHandler(LOG_FILE_NAME),     # write in a log file
-            logging.StreamHandler(sys.stdout)  # write in stdout
-        ],
-    )
+    if os.getenv("DEBUG"):
+        logging.config.dictConfig(logging_config.LOGGING_CONFIG_DEV)
+    else:
+        logging.config.dictConfig(logging_config.LOGGING_CONFIG_PRODUCTION)
 
     # Call Main logic
-    Main()
-    # Local()
-    # BenchMark()
+    if is_edge():
+        main()
+    else:
+        local_main()
+    # benchmark()

@@ -198,4 +198,7 @@ class GraphManager:
             return "LVA mode error"
 
 
-gm = GraphManager()
+if is_edge():
+    gm = GraphManager()
+else:
+    gm = None
