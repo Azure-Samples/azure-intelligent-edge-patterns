@@ -17,16 +17,18 @@ We are making the following assumptions:
 ## Prerequisites
 
 * An active Azure subscription with these resources deployed in it:
-  * a. IoT Hub
-  * b. Storage Account
-  * c. Media Services
-  * d. Azure container registry
+  * a. Resource Group
+  * b. IoT Hub
+  * c. Storage Account
+  * d. Media Services
+  * e. Azure container registry
 * An [Azure Stack Edge](https://azure.microsoft.com/en-us/products/azure-stack/edge/) Device or a Linux VM (with an NVIDIA GPU with CUDA drivers installed).
 * VS Code: https://code.visualstudio.com/Download
 * Docker: https://www.docker.com/get-started
 * Docker for VS Code Extension: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker
 * Azure IoT Tools for VS Code Extension: https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools
 
+You can use the [LVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to deploy the Azure resources mentioned above, along with an Azure Linux VM to serve as your IoT Edge device.
 
 ## Architecture
 
