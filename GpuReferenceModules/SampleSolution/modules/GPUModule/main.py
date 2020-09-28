@@ -11,7 +11,8 @@ import threading
 import random
 from azure.iot.device import Message
 from azure.iot.device.aio import IoTHubModuleClient
-from utility import benchmark_tf,benchmark_pt,benchmark_pt_nv,device_info
+from utility import benchmark_tf,benchmark_pt,benchmark_pt_nv,device_info,hello_world
+from inference_util import inference_benchmark_gpu
 
 import sys
 
@@ -21,6 +22,7 @@ TWIN_CALLBACKS = 0
 RECEIVED_MESSAGES = 0
 SHAPE=500
 WARMUP_ITERATIONS = 3
+INFERENCE = 1
 
 async def main():
     try:
@@ -60,6 +62,7 @@ async def main():
             global RUNEXECUTION_COUNT
             global WARMUP_ITERATIONS
             global SHAPE
+            global INFERENCE
             while True:
                 try:
                     data = await module_client.receive_twin_desired_properties_patch()  # blocking call
@@ -73,11 +76,14 @@ async def main():
                     if "Shape" in data:
                         SHAPE = data["Shape"]
                         print("setting SHAPE to : %d" % SHAPE)
+                    if "Inference" in data:
+                        INFERENCE = data["Inference"]
+                        print("setting INFERENCE to : %d" % INFERENCE)
                     TWIN_CALLBACKS += 1
                     print ( "Total calls confirmed: %d\n" % TWIN_CALLBACKS )
                     while(RUNEXECUTION_COUNT>0):
                         #Calling the Benchmarking script ..
-                        mylisteners = asyncio.gather(ExecuteBenchmark(SHAPE,WARMUP_ITERATIONS))
+                        mylisteners = asyncio.gather(ExecuteBenchmark(INFERENCE, SHAPE, WARMUP_ITERATIONS))
                         RUNEXECUTION_COUNT = RUNEXECUTION_COUNT - 1
 
                 except Exception as ex:
@@ -100,13 +106,14 @@ async def main():
         print ( "The sample is now waiting for messages. ")
 
 
-                # RunExperiments for specified shape and warmup
-        async def ExecuteBenchmark(inshape=5000,inwarmup=3):
+        # RunExperiments for specified shape, warmup and inference
+        async def ExecuteBenchmark(inference=1, inshape=5000, inwarmup=3):
             shape = inshape
             final_cputime = 0
             final_gputime = 0
             warmup = inwarmup
-            iter = warmup + 1 
+            iter = warmup + 1
+            inference_benchmark_res = None
             (gpu,cpu)= device_info()
 
             #Running on pytorch 
@@ -120,6 +127,17 @@ async def main():
             # Schedule task for sending message
             mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud))  
 
+            ## Run and get GPU Inference benchmark results
+            if inference == 1:
+                print("Running Inference Benchmark on Target...")
+                inference_benchmark_res = inference_benchmark_gpu()
+            msg_to_cloud_inference_benchmark = inference_benchmark_res
+            print("Detailed Inference Benchmark results with various batch sizes:")
+            print(msg_to_cloud_inference_benchmark)
+            msg_to_cloud_inference_benchmark_desc = "Detailed Inference Benchmark results with various batch sizes:"
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client, msg_to_cloud_inference_benchmark_desc))
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client, msg_to_cloud_inference_benchmark))
+
             ## Runing on tensorflow 
             # We observved on first iteration GPU does not do very well but after 
             # 3+ iterations it starts working well hence the loop below to run some iteration before we take measurements
@@ -132,10 +150,9 @@ async def main():
             msg_to_cloud_tf = "On Tensor Flow time taken on cpu ::" + cpu +" is ==" + str(final_cputime) + " Time taken on gpu  :: " + gpu + " is " + str(final_gputime)
 
             print(msg_to_cloud_tf)
-        
 
             # Schedule task for sending message
-            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_tf))  
+            mylisteners = asyncio.gather(send_msg_to_cloud(module_client,msg_to_cloud_tf)) 
 
         # Send a custom message to cloud 
         async def send_msg_to_cloud(module_client,input_message):
@@ -149,10 +166,7 @@ async def main():
                 pass
 
         #Calling the Benchmarking script ..
-        mylisteners = asyncio.gather(ExecuteBenchmark(SHAPE,WARMUP_ITERATIONS))
-
-
-
+        mylisteners = asyncio.gather(ExecuteBenchmark(INFERENCE, SHAPE, WARMUP_ITERATIONS))
 
         # Run the stdin listener in the event loop
         loop = asyncio.get_event_loop()

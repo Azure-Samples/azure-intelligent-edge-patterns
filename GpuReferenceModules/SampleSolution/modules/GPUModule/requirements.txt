@@ -1,4 +1,4 @@
-azure-iot-device
+azure-iot-device~=2.0.0
 torch
 torchvision
 #tensorflow==1.15.0

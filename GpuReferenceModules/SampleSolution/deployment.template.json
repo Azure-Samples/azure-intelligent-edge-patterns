@@ -87,9 +87,10 @@
     },
     "GPUModule": {
       "properties.desired": {
-        "RunExecutionCount": 3,
+        "RunExecutionCount": 10,
         "WarmUpCount": 3,
-        "Shape": 5000
+        "Shape": 6000,
+        "Inference": 1
       }
     }
   }
