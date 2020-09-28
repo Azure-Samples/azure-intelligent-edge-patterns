@@ -23,6 +23,7 @@ We are making the following assumptions:
   * d. Media Services
   * e. Azure container registry
 * An [Azure Stack Edge](https://azure.microsoft.com/en-us/products/azure-stack/edge/) Device or a Linux VM (with an NVIDIA GPU with CUDA drivers installed).
+* Git: https://git-scm.com/download
 * VS Code: https://code.visualstudio.com/Download
 * Docker: https://www.docker.com/get-started
 * Docker for VS Code Extension: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker
