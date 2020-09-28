@@ -20,7 +20,7 @@ from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 from scenarios import DangerZone, DefeatDetection, Detection, PartCounter
 from tracker import Tracker, draw_counter
-from utility import draw_label, get_file_zip, normalize_rtsp
+from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
 # tracker = Tracker()
 # tracker.set_line(170/2, 680/2, 1487/2, 815/2)
@@ -83,15 +83,6 @@ if len(sys.argv) > 1:
 else:
     DEBUG = False
 DEBUG = True
-
-
-def is_edge():
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except:
-        return False
-
 
 try:
     iot = IoTHubModuleClient.create_from_edge_environment()

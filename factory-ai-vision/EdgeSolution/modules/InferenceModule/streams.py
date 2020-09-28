@@ -18,7 +18,7 @@ from onnxruntime_predict import ONNXRuntimeObjectDetection
 
 # from tracker import Tracker
 from scenarios import DangerZone, DefeatDetection, Detection, PartCounter
-from utility import draw_label, get_file_zip, normalize_rtsp
+from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
 DETECTION_TYPE_NOTHING = "nothing"
 DETECTION_TYPE_SUCCESS = "success"
@@ -34,13 +34,6 @@ try:
     iot = IoTHubModuleClient.create_from_edge_environment()
 except:
     iot = None
-
-is_edge = False
-try:
-    IoTHubModuleClient.create_from_edge_environment()
-    is_edge = True
-except:
-    pass
 
 
 class Stream:
@@ -535,7 +528,7 @@ class Stream:
 
 
 def web_module_url():
-    if is_edge:
+    if is_edge():
         return "WebModule:8000"
     else:
         return "localhost:8000"

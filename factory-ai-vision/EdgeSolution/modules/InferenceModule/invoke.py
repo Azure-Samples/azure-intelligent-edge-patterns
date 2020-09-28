@@ -28,7 +28,7 @@ mutex = threading.Lock()
 
 class GraphManager:
     def __init__(self):
-        if is_edge:
+        if is_edge():
             self.registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
         else:
             self.registry_manager = None

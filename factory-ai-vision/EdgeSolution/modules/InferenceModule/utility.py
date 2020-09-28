@@ -267,13 +267,15 @@ def draw_label(img, text, pos, rectangle_color=(255, 255, 255), text_color=(0, 0
 
 try:
     iot = IoTHubModuleClient.create_from_edge_environment()
-except:
+except Exception:
     iot = None
 
-is_edge = False
 
-try:
-    IoTHubModuleClient.create_from_edge_environment()
-    is_edge = True
-except:
-    pass
+def is_edge():
+    """is_edge.
+    """
+    try:
+        IoTHubModuleClient.create_from_edge_environment()
+        return True
+    except Exception:
+        return False
