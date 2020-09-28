@@ -1,4 +1,8 @@
 #!/bin/zsh
+
+# =========================================================
+# ===	Setting up					===
+# =========================================================
 if [ ${#@} -ne 0 ] && [ "${@#"--silent"}" = "" ]; then
 	echo 'HERE'
 	stty -echo;
@@ -23,54 +27,42 @@ color_info=${color_green}
 color_warning=${yellow}
 color_error=${color_red}
 
-# Start ===================================================
-next_step
 
 # =========================================================
-# Where is this script...
+# ===	Real script					===
+# =========================================================
+echo "Running"
+next_step
+
+
+# =========================================================
+# === Get path of this script				===
+# =========================================================
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "This script is located at:"
 echo "	${DIR}"
 next_step
 
-# =========================================================
-# checking environment file '.env'"
-if [ -f ${DIR}/.env ]; then
-	echo "Environment file found"
-	echo "	${DIR}/.env"
-	echo "	Loading environment..."
-	. ${DIR}/.env
 
-else
-	echo "env file not found."
-	echo "	${DIR}/.env"
-	echo "	exit 1..."
-	exit 1
-fi
+# =========================================================
+# === Checking environment file '.env'"			===
+# =========================================================
+echo "Let Azure pipelines to handle enviroment variables"
 next_step
 
-# =========================================================
-# Check container registry name
-if [ -z ${CONTAINER_REGISTRY_NAME} ]; then
-	echo "CONTAINER_REGISTRY_NAME not found in .env"
-	echo "	${DIR}/.env"
-	echo "exit 1..."
-	exit 1
-else
-	echo "CONTAINER_REGISTRY_NAME found"
-	echo "	${CONTAINER_REGISTRY_NAME}"
-fi
-next_step
 
 # =========================================================
-# What is this script's name?
+# === get name of this script				===
+# =========================================================
 THIS_SCRIPT_NAME="$(basename $0)"
 echo "This script's name is:"
 echo "	${THIS_SCRIPT_NAME}"
 next_step
 
+
 # =========================================================
-# Get module file
+# === Get Inference module file				===
+# =========================================================
 INFERENCE_MODULE_FILE="${DIR}"/modules/InferenceModule/module.json
 
 if [ ! -f ${INFERENCE_MODULE_FILE} ]; then
@@ -87,6 +79,9 @@ fi
 echo "${color_end}"
 next_step
 
+
+# =========================================================
+# === Get Web module file				===
 # =========================================================
 WEB_MODULE_FILE="${DIR}"/modules/WebModule/module.json
 if [ ! -f ${WEB_MODULE_FILE} ]; then
@@ -103,12 +98,16 @@ fi
 echo ${color_end}
 next_step
 
+
 # =========================================================
-# Check inferencemodule change
+# === Add inference module version			===
+# =========================================================
 echo "Checking inferencemodule change"
 INFERENCE_MODULE_VERSION=$(cat "${INFERENCE_MODULE_FILE}" | jq '.image.tag.version' |  sed -e 's/^"//' -e 's/"$//')
 echo "	Inference Module changed"
 echo "	Updating version"
+# Add version number
+#	0.3.87 -> 0.3.88
 INFERENCE_MODULE_NEW_VERSION=$(echo "${INFERENCE_MODULE_VERSION}" | perl -pe 's/^((\d+\.)*)(\d+)(.*)$/$1.($3+1).$4/e' )
 echo "	Inference Module version: ${INFERENCE_MODULE_VERSION} => ${INFERENCE_MODULE_NEW_VERSION}"
 cat "${INFERENCE_MODULE_FILE}" | jq ".image.tag.version= \"${INFERENCE_MODULE_NEW_VERSION}\"" > ${INFERENCE_MODULE_FILE}.tmp
@@ -116,7 +115,10 @@ mv ${INFERENCE_MODULE_FILE}.tmp ${INFERENCE_MODULE_FILE}
 git add ${INFERENCE_MODULE_FILE} 
 next_step
 
-# Check webmodule change
+
+# =========================================================
+# === Check web module version				===
+# =========================================================
 echo "Checking webmodule change"
 WEB_MODULE_VERSION=$(cat "${WEB_MODULE_FILE}" | jq '.image.tag.version' |sed -e 's/^"//' -e 's/"$//')
 echo "	Web Module change"
@@ -127,45 +129,11 @@ mv ${WEB_MODULE_FILE}.tmp ${WEB_MODULE_FILE}
 git add ${WEB_MODULE_FILE} 
 next_step
 
-echo "Checking if Inference Module need to build new container image..."
-echo "	Yes..."
-echo "	${INFERENCE_MODULE_NEW_VERSION}"
-echo '	Building new container images'
-echo "	Build & push Inference Module version: ${INFERENCE_MODULE_NEW_VERSION}"
-docker build  --rm -f "${DIR}/modules/InferenceModule/Dockerfile.cpuamd64" -t ${CONTAINER_REGISTRY_NAME}/intelligentedge/inferencemodule:${INFERENCE_MODULE_NEW_VERSION}-cpuamd64 "${DIR}/modules/InferenceModule"
-docker push ${CONTAINER_REGISTRY_NAME}/intelligentedge/inferencemodule:${INFERENCE_MODULE_NEW_VERSION}-cpuamd64
-next_step
 
-echo "Checking if Web Module need to build new container image..."
-echo "	Yes..."
-echo '	Building new container images'
-echo "	Build & push Web Module version: ${WEB_MODULE_NEW_VERSION}"
-docker build  --rm -f "${DIR}/modules/WebModule/Dockerfile.amd64" -t ${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule:${WEB_MODULE_NEW_VERSION}-amd64 "${DIR}/modules/WebModule"
-docker push ${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule:${WEB_MODULE_NEW_VERSION}-amd64
-next_step
-
-echo 'Updating deployment file'
-DEPLOY_FILE="${DIR}/config/deployment.cpu.amd64.json"
-
-if [ -f "${DEPLOY_FILE}" ]; then
-	echo '	DEPLOY_FILE found:'
-	echo "		${DEPLOY_FILE}"
-	echo "	Updating to latest version..."
-	if [ ! -z ${INFERENCE_MODULE_NEW_VERSION} ]; then
-		cat ${DEPLOY_FILE} | jq ".modulesContent.\"\$edgeAgent\".\"properties.desired\".modules.InferenceModule.settings.image = \"${CONTAINER_REGISTRY_NAME}/intelligentedge/inferencemodule:${INFERENCE_MODULE_NEW_VERSION}-cpuamd64\"" > ${DEPLOY_FILE}.tmp
-		mv ${DEPLOY_FILE}.tmp ${DEPLOY_FILE}
-	fi
-	if [ ! -z ${WEB_MODULE_NEW_VERSION} ]; then
-		cat ${DEPLOY_FILE} | jq ".modulesContent.\"\$edgeAgent\".\"properties.desired\".modules.WebModule.settings.image = \"${CONTAINER_REGISTRY_NAME}/intelligentedge/visionwebmodule:${WEB_MODULE_NEW_VERSION}-amd64\"" > ${DEPLOY_FILE}.tmp
-		mv ${DEPLOY_FILE}.tmp ${DEPLOY_FILE}
-	fi
-else
-	echo '	DEPLOY_FILE not found'
-	echo '	You have to update the version of deploy yourself...'
-	echo '	Skipping'
-fi
-next_step
-
+# =========================================================
+# === Commit and let Azure pipelines to handle the rest.===
+# =========================================================
 echo 'All done. Commit new version to git'
 echo
 git commit -m "new version by ${THIS_SCRIPT_NAME}"
+git push

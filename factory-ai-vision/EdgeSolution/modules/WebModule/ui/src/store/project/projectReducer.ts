@@ -1,4 +1,3 @@
-import { initialState } from '../State';
 import {
   Project,
   ProjectActionTypes,
@@ -30,13 +29,63 @@ const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Statu
   return Status.None;
 };
 
+const initialState: Project = {
+  isLoading: false,
+  data: {
+    id: null,
+    camera: null,
+    location: null,
+    parts: [],
+    needRetraining: true,
+    accuracyRangeMin: 60,
+    accuracyRangeMax: 80,
+    maxImages: 20,
+    modelUrl: '',
+    sendMessageToCloud: false,
+    framesPerMin: 6,
+    accuracyThreshold: 50,
+    probThreshold: '10',
+  },
+  originData: {
+    id: null,
+    camera: null,
+    location: null,
+    parts: [],
+    needRetraining: true,
+    accuracyRangeMin: 60,
+    accuracyRangeMax: 80,
+    maxImages: 50,
+    modelUrl: '',
+    sendMessageToCloud: false,
+    framesPerMin: 6,
+    accuracyThreshold: 50,
+    probThreshold: '10',
+  },
+  trainingMetrics: {
+    prevConsequence: null,
+    curConsequence: null,
+  },
+  inferenceMetrics: {
+    successRate: null,
+    successfulInferences: null,
+    unIdetifiedItems: null,
+    isGpu: false,
+    averageTime: null,
+    partCount: {},
+  },
+  status: Status.None,
+  error: null,
+  trainingLogs: [],
+  progress: null,
+};
+
 /**
  * Share this reducer between project and demoProject
  * Check the `isDemo` property in action to check if it is right reducer
  * @param isDemo
  */
 const createProjectReducerByIsDemo = (isDemo: boolean) => (
-  state = initialState.project,
+  state = initialState,
   action: ProjectActionTypes,
 ): Project => {
   if (isDemo !== action.isDemo) return state;
@@ -102,6 +151,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
           unIdetifiedItems: 0,
           isGpu: false,
           averageTime: 0,
+          partCount: {},
         },
         trainingMetrics: {
           curConsequence: null,
@@ -131,6 +181,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
       return {
         ...state,
         trainingLogs,
+        progress: action.payload.progress ?? state.progress,
         status: action.payload.newStatus,
       };
     }

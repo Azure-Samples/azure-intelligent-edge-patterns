@@ -14,9 +14,9 @@ from azure.cognitiveservices.vision.customvision.training.models import \
     CustomVisionErrorException
 from django.db import models
 from django.db.models.signals import post_save, pre_save
+from django.utils import timezone
 
 from ..azure_iot.utils import inference_module_url
-from ..azure_parts.models import Part
 from ..azure_settings.models import Setting
 from ..cameras.models import Camera
 from ..locations.models import Location
@@ -28,9 +28,8 @@ class Project(models.Model):
     """Azure Custom Vision Project Model
     """
 
-    setting = models.ForeignKey(Setting, on_delete=models.CASCADE, default=1)
+    setting = models.ForeignKey(Setting, on_delete=models.CASCADE, null=True)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
     parts = models.ManyToManyField(Part, related_name="part")
     customvision_project_id = models.CharField(max_length=200,
                                                null=True,
@@ -61,6 +60,9 @@ class Project(models.Model):
     metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
 
+    # Time to when relable expired, and lock images
+    relabel_expired_time = models.DateTimeField(default=timezone.now)
+
     prob_threshold = models.IntegerField(default=10)
 
     @staticmethod
@@ -70,7 +72,6 @@ class Project(models.Model):
         Args:
             kwargs:
         """
-
         logger.info("Project pre_save")
         if "sender" not in kwargs or kwargs["sender"] is not Project:
             return
@@ -81,7 +82,12 @@ class Project(models.Model):
 
         instance = kwargs["instance"]
         logger.info("Saving instance: %s", instance)
-
+   
+        if not instance.setting:
+            return
+        if instance.setting.is_trainer_valid:
+            return
+        
         trainer = instance.setting.revalidate_and_get_trainer_obj()
         if instance.is_demo:
             logger.info("Project instance.is_demo: %s", instance.is_demo)

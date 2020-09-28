@@ -210,7 +210,13 @@ It will print out the values(which you could also see at the Portal, in your Azu
     using password: "876543210987654321abcdef"
     ...
 
-At the Kubernetes cluster where you want this image to be available, you will need to login to your ACR:
+At the Kubernetes cluster where you want this image to be available, you can create a secret to use later to connect
+to your ACR:
+
+    $ kubectl create secret docker-registry secret4acr2infer --docker-server=<your-registry-server>\
+        --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
+
+Or, you can create the secret by explicitly logging in to your container registry, and then export:
 
     $ docker login 12345678901234567890.azurecr.io
     Username: c6a1e081293c442e9465100e3021da63
@@ -324,6 +330,42 @@ Run it like so:
     Found: snow leopard, ounce, Panthera uncia
 
 And, it should identify objects on your image. 
+
+## (Optional) Running a notebook as a script
+
+To run Jupyter notebooks you need an environment. Often having a simple Python script is simpler, although you
+may use some UI convenience and you need to be aware of the side effects.
+Here is a test run of the demo_notebook.ipynb we used for Jupyter server demo, that we exported into a Pyton file, `demo_notebook.py`:
+ 
+```
+azureuser@k8s-master-45338567-0:~/src/notebook$ python3 demo_notebook.py
+2020-09-28 16:53:26.378225: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudart.so.10.1'; dlerror: libcudart.so.10.1: cannot open shared object file: No such file or directory
+2020-09-28 16:53:26.378266: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
+11493376/11490434 [==============================] - 0s 0us/step
+2020-09-28 16:53:31.831014: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory
+2020-09-28 16:53:31.831054: W tensorflow/stream_executor/cuda/cuda_driver.cc:312] failed call to cuInit: UNKNOWN ERROR (303)
+2020-09-28 16:53:31.831166: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (k8s-master-45338567-0): /proc/driver/nvidia/version does not exist
+2020-09-28 16:53:31.831468: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2020-09-28 16:53:31.852320: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 2593905000 Hz
+2020-09-28 16:53:31.852512: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x487da70 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-09-28 16:53:31.852586: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-09-28 16:53:33.116834: W tensorflow/core/framework/cpu_allocator_impl.cc:81] Allocation of 188160000 exceeds 10% of free system memory.
+Epoch 1/5
+1875/1875 [==============================] - 6s 3ms/step - accuracy: 0.9348 - loss: 0.2199
+Epoch 2/5
+1875/1875 [==============================] - 6s 3ms/step - accuracy: 0.9711 - loss: 0.0959
+Epoch 3/5
+1875/1875 [==============================] - 5s 3ms/step - accuracy: 0.9783 - loss: 0.0695
+Epoch 4/5
+1875/1875 [==============================] - 6s 3ms/step - accuracy: 0.9832 - loss: 0.0532
+Epoch 5/5
+1875/1875 [==============================] - 6s 3ms/step - accuracy: 0.9855 - loss: 0.0443
+313/313 [==============================] - 0s 1ms/step - accuracy: 0.9808 - loss: 0.0674
+```
+
+You can export and run your deployment notebook similarly.
 
 
 ## Links

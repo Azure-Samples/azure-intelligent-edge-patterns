@@ -1,0 +1,59 @@
+FROM mcr.microsoft.com/azureml/onnxruntime:latest as base
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libgl1-mesa-glx \
+    libgtk2.0-dev \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
+
+WORKDIR /app
+
+COPY requirements.txt ./
+ENV CONDA_ENV_NAME python38
+RUN conda create --name python38 python=3.8.5 -y
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements.txt --ignore-installed"]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime"]
+
+COPY coco_classes.txt ./
+COPY default_model default_model/
+COPY default_model_6parts default_model_6parts/
+COPY grpc_topology.json ./
+COPY sample_video sample_video/
+COPY scenario_models scenario_models/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+
+COPY arguments.py ./
+COPY config.py ./
+COPY exception_handler.py ./
+COPY extension_pb2.py ./
+COPY extension_pb2_grpc.py ./
+COPY inference_engine.py ./
+COPY inferencing_pb2.py ./
+COPY invoke.py ./
+COPY main.py ./
+COPY media_pb2.py ./
+COPY model_wrapper.py ./
+COPY object_detection.py ./
+COPY object_detection2.py ./
+COPY onnxruntime_predict.py ./
+COPY scenarios.py ./
+COPY server.py ./
+COPY shared_memory.py ./
+COPY sort.py ./
+COPY stream_manager.py ./
+COPY streams.py ./
+COPY tracker.py ./
+COPY utility.py ./
+COPY webmodule_utils/*.py ./webmodule_utils/
+
+EXPOSE 5558
+EXPOSE 5000
+
+CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]

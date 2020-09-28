@@ -1,13 +1,13 @@
 import React, { FC, memo } from 'react';
 import { Grid } from '@fluentui/react-northstar';
 import ImageIdentificationItem from './ImageItem';
-import { LabelImage } from '../../store/image/imageTypes';
+import { LabelImage } from '../../store/type';
 
 interface ImagesContainerProps {
   images: LabelImage[];
-  selectedPartId: number;
+  onDisplayImageClick: (imgId: number) => void;
 }
-const ImagesContainer: FC<ImagesContainerProps> = ({ images, selectedPartId }) => (
+const ImagesContainer: FC<ImagesContainerProps> = ({ images, onDisplayImageClick }) => (
   <Grid
     columns="2"
     styles={{
@@ -19,13 +19,12 @@ const ImagesContainer: FC<ImagesContainerProps> = ({ images, selectedPartId }) =
       rowGap: '10px',
     }}
   >
-    {images.map((img, i) => (
+    {images.map((img) => (
       <ImageIdentificationItem
         key={img.id}
         confidenceLevel={img.confidence}
-        imageIndex={i}
-        relabelImages={images}
-        partId={selectedPartId}
+        relabelImage={img}
+        onDisplayImageClick={onDisplayImageClick}
       />
     ))}
   </Grid>

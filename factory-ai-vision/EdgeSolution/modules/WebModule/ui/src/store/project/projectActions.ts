@@ -1,5 +1,6 @@
 import Axios from 'axios';
 import * as R from 'ramda';
+import { State } from 'RootStateType';
 import {
   ProjectThunk,
   GetProjectSuccessAction,
@@ -51,8 +52,9 @@ import {
   UpdateProbThresholdRequestAction,
   UpdateProbThresholdSuccessAction,
   UpdateProbThresholdFailedAction,
+  TrainingStatus,
 } from './projectTypes';
-import { State } from '../State';
+import { selectAllImages } from '../imageSlice';
 
 const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -81,11 +83,13 @@ const getTrainingLogSuccess = (
   trainingLog: string,
   newStatus: Status,
   isDemo: boolean,
+  progress: number,
 ): GetTrainingLogSuccessAction => ({
   type: GET_TRAINING_LOG_SUCCESS,
   payload: {
     trainingLog,
     newStatus,
+    progress,
   },
   isDemo,
 });
@@ -115,7 +119,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     framesPerMin: data?.metrics_frame_per_minutes,
     accuracyThreshold: data?.metrics_accuracy_threshold,
     cvProjectId: data?.customvision_project_id,
-    probThreshold: data?.prob_threshold.toString() ?? '10',
+    probThreshold: data?.prob_threshold?.toString() ?? '10',
   },
   isDemo,
 });
@@ -163,10 +167,11 @@ const getInferenceMetricsSuccess = (
   unIdetifiedItems: number,
   isGpu: boolean,
   averageTime: number,
+  partCount: Record<string, number>,
   isDemo: boolean,
 ): GetInferenceMetricsSuccessAction => ({
   type: GET_INFERENCE_METRICS_SUCCESS,
-  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime },
+  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime, partCount },
   isDemo,
 });
 const getInferenceMetricsFailed = (error: Error, isDemo: boolean): GetInferenceMetricsFailedAction => ({
@@ -247,7 +252,7 @@ export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Pr
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         cvProjectId: data[0]?.customvision_project_id,
-        probThreshold: data[0]?.prob_threshold.toString() ?? '10',
+        probThreshold: data[0]?.prob_threshold?.toString() ?? '10',
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
       return void 0;
@@ -323,8 +328,9 @@ export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (disp
     .then(({ data }) => {
       if (data.status === 'failed') throw new Error(data.log);
       else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo));
-      else dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo));
+        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo, 0));
+      else
+        dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo, TrainingStatus[data.status]));
       return void 0;
     })
     .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
@@ -368,6 +374,7 @@ export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => 
           data.unidentified_num,
           data.gpu,
           data.average_time,
+          data.count,
           isDemo,
         ),
       );
@@ -427,14 +434,14 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
     });
 };
 
-export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean) => (
+export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean): ProjectThunk => (
   dispatch,
   getState,
 ): void => {
-  const images = getState().images.filter((e) => !e.is_relabel);
+  const images = selectAllImages(getState()).filter((e) => !e.isRelabel);
 
   const partsWithImageLength = images.reduce((acc, cur) => {
-    const { id } = cur.part;
+    const id = cur.part;
     const relatedPartIdx = acc.findIndex((e) => e.id === id);
     if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
     return acc;

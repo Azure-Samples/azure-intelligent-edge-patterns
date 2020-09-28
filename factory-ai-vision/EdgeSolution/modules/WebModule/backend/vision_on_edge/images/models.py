@@ -1,6 +1,5 @@
-"""
-Models for Azure CustomVision images
-"""
+# -*- coding: utf-8 -*-
+"""Models for Azure CustomVision images"""
 
 import json
 import logging
@@ -29,7 +28,7 @@ class Image(models.Model):
     """
 
     image = models.ImageField(upload_to="images/")
-    part = models.ForeignKey(Part, on_delete=models.CASCADE)
+    part = models.ForeignKey(Part, on_delete=models.CASCADE, null=True)
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)
@@ -37,6 +36,7 @@ class Image(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     customvision_id = models.CharField(max_length=1000, null=True, blank=True)
     remote_url = models.CharField(max_length=1000, null=True)
+    timestamp = models.DateTimeField(auto_now=True)
 
     def get_remote_image(self):
         """get_remote_image.

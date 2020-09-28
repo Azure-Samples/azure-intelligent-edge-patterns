@@ -13,8 +13,8 @@ import {
 } from '@fluentui/react-northstar';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Notification } from '../store/notification/notificationType';
-import { deleteNotification } from '../store/notification/notificationActionCreators';
+import { Notification } from '../reducers/type';
+import { deleteNotification } from '../action/creators/notificationActionCreators';
 import { mainTheme } from '../themes/mainTheme';
 
 export const NotificationCard: React.FC<{ notification: Notification }> = ({ notification }) => {
