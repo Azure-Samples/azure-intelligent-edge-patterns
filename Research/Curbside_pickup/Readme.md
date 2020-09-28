@@ -31,6 +31,16 @@ We are making the following assumptions:
 
 You can use the [LVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to deploy the Azure resources mentioned above.
 
+The script installs a VM acting as an IoT Edge Device. As we're focusing on ASE, we can remove all the extra resources created once the script finishes. **This is an important step to avoid unnecessary costs to apply, so please make sure you do it.** From the resource group, please select all and then delete these types:
+* Virtual Machine
+* Disk
+* Network Securiry Group
+* Network Interface
+* Bastion
+* Public IP Address
+* Virtual Network
+You can delete the IoT Edge Device thats listed under IoT Edge -> IoT Edge devices on the IoT Hub.
+
 ## Architecture
 
 ![architecture diagram](docs/assets/lpraidiagram.png)
@@ -76,6 +86,8 @@ INPUT_VIDEO_FOLDER_ON_DEVICE="<replace-me>"
 OUTPUT_VIDEO_FOLDER_ON_DEVICE="<replace-me>"
 APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 ```
+
+> If you've created Azure Resources based on the script linked in the [Prerequisites](#prerequisites) section, you can directly copy/paste the contents of `clouddrive/lva-sample/edge-deployment/.env` from one place to the other.
 
 ## Building the LPR Image
 
