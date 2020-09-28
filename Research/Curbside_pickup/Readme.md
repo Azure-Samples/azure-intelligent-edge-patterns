@@ -28,7 +28,7 @@ We are making the following assumptions:
 * Docker for VS Code Extension: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker
 * Azure IoT Tools for VS Code Extension: https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools
 
-You can use the [LVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to deploy the Azure resources mentioned above, along with an Azure Linux VM to serve as your IoT Edge device.
+You can use the [LVA resources setup script](https://github.com/Azure/live-video-analytics/tree/master/edge/setup) to deploy the Azure resources mentioned above.
 
 ## Architecture
 
