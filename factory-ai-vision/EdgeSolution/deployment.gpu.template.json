@@ -118,6 +118,9 @@
             "env": {
               "IOTHUB_CONNECTION_STRING": {
                 "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
               }
             },
             "settings": {
