@@ -64,9 +64,11 @@ COPY config.py ./
 COPY exception_handler.py ./
 COPY extension_pb2.py ./
 COPY extension_pb2_grpc.py ./
+COPY http_inference_engine.py ./
 COPY inference_engine.py ./
 COPY inferencing_pb2.py ./
 COPY invoke.py ./
+COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
 COPY main.py ./
 COPY media_pb2.py ./
 COPY model_wrapper.py ./
