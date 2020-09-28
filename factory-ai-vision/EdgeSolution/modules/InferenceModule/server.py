@@ -54,7 +54,7 @@ app = Flask(__name__)
 
 
 ## FIXME ##
-## injest to flask context
+# injest to flask context
 http_inference_engine = HttpInferenceEngine(stream_manager)
 
 
@@ -212,9 +212,17 @@ def update_cams():
     logger.info(data["fps"])
 
     # TODO: FPS
+    fps = int(data['fps'])
     stream_manager.update_streams(list(cam["id"] for cam in data["cameras"]))
     n = stream_manager.get_streams_num_danger()
-    frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
+    # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
+    recommended_fps = onnx.get_recommended_frame_rate(n)
+    if fps > recommended_fps:
+        frame_rate = recommended_fps
+        onnx.set_frame_rate(recommended_fps)
+    else:
+        frame_rate = fps
+        onnx.set_frame_rate(fps)
 
     for cam in data["cameras"]:
         cam_type = cam["type"]
@@ -401,12 +409,12 @@ def update_prob_threshold():
 
 
 # RON FIXME
-@app.route("/update_fps")
-def update_fps():
-    fps = request.args.get("fps")
-    if not fps:
-        return "missing fps"
-    onnx.frame_rate = int(fps)
+# @app.route("/update_fps")
+# def update_fps():
+#     fps = request.args.get("fps")
+#     if not fps:
+#         return "missing fps"
+#     onnx.frame_rate = int(fps)
 
 
 @app.route("/get_recommended_fps")
@@ -417,9 +425,9 @@ def get_recommended_fps():
     return onnx.get_recommended_frame_rate(number_of_cameras)
 
 
-@app.route("/get_current_fps")
-def get_current_fps():
-    return onnx.frame_rate
+# @app.route("/get_current_fps")
+# def get_current_fps():
+#     return onnx.frame_rate
 
 
 def init_topology():
@@ -435,8 +443,10 @@ def init_topology():
     )
 
     for i in range(len(instances["payload"]["value"])):
-        gm.invoke_graph_instance_deactivate(instances["payload"]["value"][i]["name"])
-        gm.invoke_graph_instance_delete(instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_deactivate(
+            instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_delete(
+            instances["payload"]["value"][i]["name"])
 
     topologies = gm.invoke_graph_topology_list()
     if instances["status"] != 200:
@@ -449,7 +459,8 @@ def init_topology():
     )
 
     for i in range(len(topologies["payload"]["value"])):
-        gm.invoke_graph_topology_delete(topologies["payload"]["value"][i]["name"])
+        gm.invoke_graph_topology_delete(
+            topologies["payload"]["value"][i]["name"])
 
     logger.info(
         "========== Setting default grpc topology ==========".format(
@@ -488,7 +499,8 @@ def benchmark():
     onnx.update_model(SCENARIO1_MODEL)
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
-        s.update_cam("video", SAMPLE_VIDEO, 30, s.cam_id, False, None, "PC", [], [])
+        s.update_cam("video", SAMPLE_VIDEO, 30,
+                     s.cam_id, False, None, "PC", [], [])
 
     def _f():
         print("--- Thread", threading.current_thread(), "started---", flush=True)
@@ -498,8 +510,10 @@ def benchmark():
             s.predict(img)
         t1_t = time.time()
         print("---- Thread", threading.current_thread(), "----", flush=True)
-        print("Processing", n_images, "images in", t1_t - t0_t, "seconds", flush=True)
-        print("  Avg:", (t1_t - t0_t) / n_images * 1000, "ms per image", flush=True)
+        print("Processing", n_images, "images in",
+              t1_t - t0_t, "seconds", flush=True)
+        print("  Avg:", (t1_t - t0_t) / n_images *
+              1000, "ms per image", flush=True)
 
     threads = []
     for i in range(n_threads):
