@@ -576,7 +576,7 @@ You'll find additional info in https://github.com/Azure/live-video-analytics/tre
 
 ## Troubleshooting
 
-* I'm getting a bad performance on the test videos I feed to the simulator.
+* I'm getting bad performance on the test videos I feed to the simulator.
 
 We've seen cases where high quality videos (like those taken with current smartphones). When converting your videos, consider a maximum width or height, whatever comes first, of 960 pixels.
 
