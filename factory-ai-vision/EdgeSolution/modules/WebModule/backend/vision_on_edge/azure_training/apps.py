@@ -1,4 +1,6 @@
-"""App"""
+# -*- coding: utf-8 -*-
+"""App
+"""
 
 import logging
 import sys
@@ -29,7 +31,6 @@ class AzureTrainingConfig(AppConfig):
             from . import signals
             from .models import Project
             from ..cameras.models import Camera
-            from ..locations.models import Location
             from ..azure_settings.models import Setting
 
             logger.info("ready while running server")
@@ -42,11 +43,6 @@ class AzureTrainingConfig(AppConfig):
 
             create_demo = True
             if create_demo:
-                # Demo Location should be created already
-                demo_locations = Location.objects.filter(is_demo=True)
-                if len(demo_locations) <= 0:
-                    return
-
                 # Demo Camera should be created already
                 demo_cameras = Camera.objects.filter(is_demo=True)
                 if len(demo_cameras) <= 0:
@@ -57,7 +53,7 @@ class AzureTrainingConfig(AppConfig):
                     name=DEFAULT_SETTING_NAME)
                 if len(default_settings) <= 0:
                     return
-                
+
                 # Projects
                 if Project.objects.filter(is_demo=True).count() <= 1:
                     logger.info("Creating demo project")
@@ -66,7 +62,6 @@ class AzureTrainingConfig(AppConfig):
                         defaults={
                             'setting': default_settings.first(),
                             'camera': demo_cameras.first(),
-                            'location': demo_locations.first(),
                         })
                 # Train is created by signals
                 logger.info("Creating demo objects end.")

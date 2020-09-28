@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 
-import { State } from '../store/State';
+import { State } from 'RootStateType';
 import { Project } from '../store/project/projectTypes';
 import { thunkGetProject } from '../store/project/projectActions';
 

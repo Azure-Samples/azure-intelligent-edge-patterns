@@ -25,5 +25,7 @@ class Notification(models.Model):
     details = models.CharField(max_length=1000, blank=True, default="")
 
     def __str__(self):
-        return " ".join(
-            [self.timestamp, self.notification_type, self.title, self.details])
+        return " ".join([
+            str(self.timestamp), self.notification_type, self.title,
+            self.details
+        ])

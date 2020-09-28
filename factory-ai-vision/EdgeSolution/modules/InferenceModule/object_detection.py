@@ -7,12 +7,14 @@ import math
 import cv2
 import onnxruntime
 import time
+import logging
+
 
 class ObjectDetection(object):
     """Class for Custom Vision's exported object detection model
     """
 
-    def __init__(self, data, model_dir, labels=None, prob_threshold=0.10, max_detections = 20):
+    def __init__(self, data, model_dir, labels=None, prob_threshold=0.10, max_detections=20):
         """Initialize the class
 
         Args:
@@ -26,7 +28,6 @@ class ObjectDetection(object):
         self.labels = labels
         self.prob_threshold = prob_threshold
         self.max_detections = max_detections
-
 
         if "IouThreshold" in data:
             self.iou_threshold = data["IouThreshold"]
@@ -64,7 +65,8 @@ class ObjectDetection(object):
         if "Anchors" in data:
             self.anchors = np.array(data["Anchors"])
         else:
-            self.anchors = np.array([[0.573, 0.677], [1.87, 2.06], [3.34, 5.47], [7.88, 3.53], [9.77, 9.17]])
+            self.anchors = np.array([[0.573, 0.677], [1.87, 2.06], [
+                                    3.34, 5.47], [7.88, 3.53], [9.77, 9.17]])
 
         if "InputFormat" in data:
             self.input_format = str(data["InputFormat"])
@@ -77,7 +79,7 @@ class ObjectDetection(object):
     def onnxruntime_session_init(self, model_dir):
 
         with open(str(str(model_dir) + str('/') + str(self.label_filename)), 'r') as f:
-             labels = [l.strip() for l in f.readlines()]
+            labels = [l.strip() for l in f.readlines()]
 
         assert len(labels) >= 1, "At least 1 label is required"
         self.labels = labels
@@ -85,7 +87,8 @@ class ObjectDetection(object):
         #super(ObjectDetection, self).__init__(labels)
         print("\n Triggering Inference...")
 
-        self.session = onnxruntime.InferenceSession(str(str(model_dir) + str('/') + str(self.model_filename)))
+        self.session = onnxruntime.InferenceSession(
+            str(str(model_dir) + str('/') + str(self.model_filename)))
 
         # Reading input width & height from onnx model file
         self.model_inp_width = self.session.get_inputs()[0].shape[2]
@@ -94,7 +97,7 @@ class ObjectDetection(object):
         print("\n Started Inference...")
         self.input_name = self.session.get_inputs()[0].name
         if self.render == 0:
-           print("Press Ctl+C to exit...")
+            print("Press Ctl+C to exit...")
 
     def _logistic(self, x):
         return np.where(x > 0, 1 / (1 + np.exp(-x)), np.exp(x) / (1 + np.exp(x)))
@@ -126,31 +129,39 @@ class ObjectDetection(object):
             selected_probs.append(max_probs[i])
 
             box = boxes[i]
-            other_indices = np.concatenate((np.arange(i), np.arange(i + 1, len(boxes))))
+            other_indices = np.concatenate(
+                (np.arange(i), np.arange(i + 1, len(boxes))))
             other_boxes = boxes[other_indices]
 
             # Get overlap between the 'box' and 'other_boxes'
             x1 = np.maximum(box[0], other_boxes[:, 0])
             y1 = np.maximum(box[1], other_boxes[:, 1])
-            x2 = np.minimum(box[0] + box[2], other_boxes[:, 0] + other_boxes[:, 2])
-            y2 = np.minimum(box[1] + box[3], other_boxes[:, 1] + other_boxes[:, 3])
+            x2 = np.minimum(box[0] + box[2],
+                            other_boxes[:, 0] + other_boxes[:, 2])
+            y2 = np.minimum(box[1] + box[3],
+                            other_boxes[:, 1] + other_boxes[:, 3])
             w = np.maximum(0, x2 - x1)
             h = np.maximum(0, y2 - y1)
 
             # Calculate Intersection Over Union (IOU)
             overlap_area = w * h
-            iou = overlap_area / (areas[i] + areas[other_indices] - overlap_area)
+            iou = overlap_area / \
+                (areas[i] + areas[other_indices] - overlap_area)
 
             # Find the overlapping predictions
-            overlapping_indices = other_indices[np.where(iou > self.iou_threshold)[0]]
+            overlapping_indices = other_indices[np.where(
+                iou > self.iou_threshold)[0]]
             overlapping_indices = np.append(overlapping_indices, i)
 
             # Set the probability of overlapping predictions to zero, and udpate max_probs and max_classes.
             class_probs[overlapping_indices, max_classes[i]] = 0
-            max_probs[overlapping_indices] = np.amax(class_probs[overlapping_indices], axis=1)
-            max_classes[overlapping_indices] = np.argmax(class_probs[overlapping_indices], axis=1)
+            max_probs[overlapping_indices] = np.amax(
+                class_probs[overlapping_indices], axis=1)
+            max_classes[overlapping_indices] = np.argmax(
+                class_probs[overlapping_indices], axis=1)
 
-        assert len(selected_boxes) == len(selected_classes) and len(selected_boxes) == len(selected_probs)
+        assert len(selected_boxes) == len(selected_classes) and len(
+            selected_boxes) == len(selected_probs)
         return selected_boxes, selected_classes, selected_probs
 
     def _extract_bb(self, prediction_output, anchors):
@@ -165,10 +176,14 @@ class ObjectDetection(object):
         outputs = prediction_output.reshape((height, width, num_anchor, -1))
 
         # Extract bouding box information
-        x = (self._logistic(outputs[..., 0]) + np.arange(width)[np.newaxis, :, np.newaxis]) / width
-        y = (self._logistic(outputs[..., 1]) + np.arange(height)[:, np.newaxis, np.newaxis]) / height
-        w = np.exp(outputs[..., 2]) * anchors[:, 0][np.newaxis, np.newaxis, :] / width
-        h = np.exp(outputs[..., 3]) * anchors[:, 1][np.newaxis, np.newaxis, :] / height
+        x = (self._logistic(outputs[..., 0]) +
+             np.arange(width)[np.newaxis, :, np.newaxis]) / width
+        y = (self._logistic(
+            outputs[..., 1]) + np.arange(height)[:, np.newaxis, np.newaxis]) / height
+        w = np.exp(outputs[..., 2]) * anchors[:,
+                                              0][np.newaxis, np.newaxis, :] / width
+        h = np.exp(outputs[..., 3]) * anchors[:,
+                                              1][np.newaxis, np.newaxis, :] / height
 
         # (x,y) in the network outputs is the center of the bounding box. Convert them to top-left.
         x = x - w / 2
@@ -180,27 +195,37 @@ class ObjectDetection(object):
 
         # Get class probabilities for the bounding boxes.
         class_probs = outputs[..., 5:]
-        class_probs = np.exp(class_probs - np.amax(class_probs, axis=3)[..., np.newaxis])
-        class_probs = class_probs / np.sum(class_probs, axis=3)[..., np.newaxis] * objectness[..., np.newaxis]
+        class_probs = np.exp(
+            class_probs - np.amax(class_probs, axis=3)[..., np.newaxis])
+        class_probs = class_probs / \
+            np.sum(class_probs, axis=3)[...,
+                                        np.newaxis] * objectness[..., np.newaxis]
         class_probs = class_probs.reshape(-1, num_class)
 
         assert len(boxes) == len(class_probs)
         return (boxes, class_probs)
 
     def predict_image(self, image):
+        logging.info('predict_image')
         inputs = self.preprocess(image)
         prediction_outputs, infer_time = self.predict(inputs)
+        # boxes, scores, indices = self.predict(inputs)
         return self.postprocess(prediction_outputs), infer_time
+        # return boxes, scores, indices
 
     def preprocess(self, image):
+        logging.info('pre')
         if self.input_format == "RGB":
-           image = cv2.resize(image, (int(self.model_inp_width), int(self.model_inp_height)))
+            image = cv2.resize(
+                image, (int(self.model_inp_width), int(self.model_inp_height)))
         elif self.input_format == "BGR":
-           image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-           image = cv2.resize(image, (int(self.model_inp_width), int(self.model_inp_height)))
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = cv2.resize(
+                image, (int(self.model_inp_width), int(self.model_inp_height)))
         elif self.input_format == "GRAY":
-           image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-           image = cv2.resize(image, (int(self.model_inp_width), int(self.model_inp_height)))
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+            image = cv2.resize(
+                image, (int(self.model_inp_width), int(self.model_inp_height)))
         return image
 
     def predict(self, preprocessed_inputs):
@@ -208,13 +233,20 @@ class ObjectDetection(object):
 
         Need to be implemented for each platforms. i.e. TensorFlow, CoreML, etc.
         """
-        inputs = np.array(preprocessed_inputs, dtype=np.float32)[np.newaxis,:,:,(2,1,0)] # RGB -> BGR
+        logging.info('predict')
+        inputs = np.array(preprocessed_inputs, dtype=np.float32)[
+            np.newaxis, :, :, (2, 1, 0)]  # RGB -> BGR
         inputs = np.ascontiguousarray(np.rollaxis(inputs, 3, 1))
         start = time.time()
+        # outputs = self.session.run(None, {self.input_name: inputs})
         outputs = self.session.run(None, {self.input_name: inputs})
+        # logging.info(outputs[0])
+        # logging.info(np.squeeze(outputs).transpose((1, 2, 0)))
+
         end = time.time()
         inference_time = end - start
-        return np.squeeze(outputs).transpose((1,2,0)), inference_time
+        return np.squeeze(outputs).transpose((1, 2, 0)), inference_time
+        # return boxes, scores, indices
 
     def postprocess(self, prediction_outputs):
         """ Extract bounding boxes from the model outputs.
@@ -225,6 +257,7 @@ class ObjectDetection(object):
         Returns:
             List of Prediction objects.
         """
+        logging.info('post')
         boxes, class_probs = self._extract_bb(prediction_outputs, self.anchors)
 
         # Remove bounding boxes whose confidence is lower than the threshold.
@@ -245,6 +278,5 @@ class ObjectDetection(object):
                      'top': round(float(selected_boxes[i][1]), 8),
                      'width': round(float(selected_boxes[i][2]), 8),
                      'height': round(float(selected_boxes[i][3]), 8)
-                 }
-                 } for i in range(len(selected_boxes))]
-
+        }
+        } for i in range(len(selected_boxes))]

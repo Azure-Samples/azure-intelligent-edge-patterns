@@ -3,21 +3,16 @@ import React, { useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid } from '@fluentui/react-northstar';
 
-import { postCamera, getCameras } from '../store/camera/cameraActions';
+import { getCameras, postCamera, selectAllCameras } from '../store/cameraSlice';
 import ImageLink from '../components/ImageLink';
-import { State } from '../store/State';
-import { Camera } from '../store/camera/cameraTypes';
 import { AddModuleDialog } from '../components/AddModuleDialog/AddModuleDialog';
 
 const Cameras: FC = (): JSX.Element => {
   const dispatch = useDispatch();
-  const { cameras } = useSelector<State, { dialogIsOpen: boolean; cameras: Camera[] }>((state) => ({
-    dialogIsOpen: state.dialogIsOpen,
-    cameras: state.cameras.filter((e) => !e.is_demo),
-  }));
+  const cameras = useSelector(selectAllCameras);
 
   useEffect(() => {
-    dispatch(getCameras());
+    dispatch(getCameras(false));
   }, [dispatch]);
 
   return (
@@ -65,7 +60,7 @@ const Cameras: FC = (): JSX.Element => {
           },
         ]}
         onConfirm={({ name, rtsp }): void => {
-          dispatch(postCamera({ name, rtsp, is_demo: false }));
+          dispatch(postCamera({ name, rtsp }));
         }}
       />
     </div>

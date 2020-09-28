@@ -1,14 +1,14 @@
-import React, { FC, MouseEvent, useState, Dispatch, SetStateAction } from 'react';
+import React, { FC, MouseEvent, useState, Dispatch, SetStateAction, useEffect } from 'react';
 import { Grid, Segment, Image, Flex, Text, BellIcon } from '@fluentui/react-northstar';
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { State } from 'RootStateType';
 import Breadcrumb from '../Breadcrumb';
 import LeftNav from './LeftNav';
-import { State } from '../../store/State';
 import { Badge } from '../Badge';
 import { NotificationPanel } from '../NotificationPanel';
-import { openNotificationPanel } from '../../store/notification/notificationActionCreators';
+import { openNotificationPanel } from '../../action/creators/notificationActionCreators';
 import FeedbackDialog from '../FeedbackDialog';
 
 const LEFT_NAV_WIDTH = 80;
@@ -19,12 +19,17 @@ export const MainLayout: FC = ({ children }) => {
   const notificationCount = useSelector<State, number>(
     (state) => state.notifications.filter((e) => e.unRead).length,
   );
+  const rejectMsg = useSelector((state: State) => state.rejectMsg);
   const [notificationOpen, setNotificationOpen] = useState(false);
 
   const openNotification = (open: boolean): void => {
     if (open && notificationCount > 0) dispatch(openNotificationPanel());
     setNotificationOpen(open);
   };
+
+  useEffect(() => {
+    if (rejectMsg) alert(rejectMsg);
+  }, [rejectMsg]);
 
   return (
     <Grid
