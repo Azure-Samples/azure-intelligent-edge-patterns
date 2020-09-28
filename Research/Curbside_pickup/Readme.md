@@ -91,7 +91,9 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 
 ## Building the LPR Image
 
-- Build from `Dockerfile` with new tag from ML solution (`lva_ai_solution`) directory, e.g.,
+- Build from `Dockerfile` with new tag from ML solution (`lva_ai_solution`) directory.
+
+> To build the image, use either a Linux box, a Linux container or WSL(2, preferrable).
 
     `docker build -t lpr:v.1.1 -f Dockerfile .` (may require `sudo` upfront depending on your setup)
 
@@ -104,7 +106,7 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 
 Depending the operations schema, you may end up using an IoT Edge Device, that sits on a) a Server (we'll call it VM for short), or into an Azure Stack Edge device (ASE). There're subtle differences into each.
 
-> Be it a VM or ASE, make sure you're reflecting your newly pushed `image:` under "lpraimodule".
+> Be it a VM or ASE, make sure you're reflecting your newly pushed `image:` (under "lpraimodule" in the corresponding Deployment Manifest template).
 
 ### VM based IoT Edge Device
 If you're using a [GPU based VM as your IoT Edge Device](docs/runonvm.md), make sure to follow these step.
