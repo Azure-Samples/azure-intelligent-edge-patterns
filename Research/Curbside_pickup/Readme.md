@@ -590,10 +590,6 @@ When converting files, make sure you're getting **no audio** streams.
 
 Verify your device has a GPU. Here's a way to get an [Azure GPU VM](docs/runonvm.md) with drivers and stuff to go on. 
 
-* How to use a custom video set for the RTSP Simulator
-
-* Adding additional Graph Instances
-
 ---
 
 Please don't hesitate to file an Issue if you are having problems with this sample.
