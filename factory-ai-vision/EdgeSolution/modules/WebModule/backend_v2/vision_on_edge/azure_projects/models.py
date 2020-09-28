@@ -77,6 +77,8 @@ class Project(models.Model):
         """get_project_obj."""
         if not self.setting:
             raise ProjectWithoutSettingError
+        if not self.customvision_id:
+            raise ProjectCustomVisionError
         trainer = self.setting.get_trainer_obj()
         return trainer.get_project(self.customvision_id)
 

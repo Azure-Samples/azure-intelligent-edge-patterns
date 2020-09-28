@@ -19,7 +19,9 @@ class CamerasConfig(AppConfig):
         """ready."""
 
         if "runserver" in sys.argv:
+
             from ..locations.models import Location
+            from .constants import gen_default_lines, gen_default_zones
             from .models import Camera
 
             logger.info("App ready ready while running server")
@@ -30,6 +32,9 @@ class CamerasConfig(AppConfig):
 
                 if not Location.objects.filter(is_demo=True).exists():
                     return
+                # =========================================
+                # Demo: Part Detection                    =
+                # =========================================
                 demo_location_obj = Location.objects.filter(is_demo=True).first()
                 Camera.objects.update_or_create(
                     name="Demo Video",
@@ -42,7 +47,9 @@ class CamerasConfig(AppConfig):
                 )
                 logger.info("Creating demo objects... end")
 
-                # Scenario 1
+                # =========================================
+                # Scenario 1: Counting Objects            =
+                # =========================================
                 logger.info("Creating a scenario 1 camera object.")
 
                 if not Location.objects.filter(is_demo=True).exists():
@@ -54,12 +61,16 @@ class CamerasConfig(AppConfig):
                     defaults={
                         "rtsp": "rtsp://rtspsim:554/media/scenario1-counting-objects.mkv",
                         "area": "",
+                        "lines": gen_default_lines(),
+                        "danger_zones": "",
                         "location": demo_location_obj,
                     },
                 )
                 logger.info("Creating scenario 3 ... end")
 
-                # Scenario 2
+                # =========================================
+                # Scenario 2: Employ Safety               =
+                # =========================================
                 logger.info("Creating a scenario 2 employ safety.")
 
                 if not Location.objects.filter(is_demo=True).exists():
@@ -71,12 +82,16 @@ class CamerasConfig(AppConfig):
                     defaults={
                         "rtsp": "rtsp://rtspsim:554/media/scenario2-employ-safety.mkv",
                         "area": "",
+                        "lines": "",
+                        "danger_zones": gen_default_zones(),
                         "location": demo_location_obj,
                     },
                 )
                 logger.info("Creating scenario 2... end")
 
-                # Scenario 3
+                # =========================================
+                # Scenario 3: Defect Detection            =
+                # =========================================
                 logger.info("Creating a scenario 3 defect detection.")
 
                 if not Location.objects.filter(is_demo=True).exists():
@@ -88,6 +103,8 @@ class CamerasConfig(AppConfig):
                     defaults={
                         "rtsp": "rtsp://rtspsim:554/media/scenario3-defect-detection.mkv",
                         "area": "",
+                        "lines": gen_default_lines(),
+                        "danger_zones": "",
                         "location": demo_location_obj,
                     },
                 )
