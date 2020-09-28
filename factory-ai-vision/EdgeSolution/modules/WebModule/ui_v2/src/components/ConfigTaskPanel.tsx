@@ -27,7 +27,6 @@ import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
 import { getScenario } from '../store/scenarioSlice';
-import { getFPSPerCamera } from '../utils/getCameraFPS';
 
 const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -227,17 +226,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
                   disabled={!projectData.sendMessageToCloud}
                   required
                 />
-                <TextField
-                  label="Accuracy threshold"
-                  type="number"
-                  value={projectData.accuracyThreshold?.toString()}
-                  onChange={(_, newValue) => {
-                    onChange('accuracyThreshold', parseInt(newValue, 10));
-                  }}
-                  disabled={!projectData.sendMessageToCloud}
-                  suffix="%"
-                  required
-                />
               </>
             )}
           </Stack.Item>
@@ -307,17 +295,22 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           </Stack.Item>
           <Stack.Item>
             <div className={classNames.textWrapper}>
-              <Label>Total FPS for cameras</Label>
+              <Label>Camera FPS</Label>
             </div>
+            <Toggle
+              inlineLabel
+              label="Enable setting FPS manually"
+              checked={projectData.setFpsManually}
+              onChange={(_, checked) => {
+                onChange('setFpsManually', checked);
+              }}
+            />
             <TextField
               type="number"
-              value={projectData.fps as any}
+              value={(projectData.setFpsManually ? projectData.fps : 10) as any}
               onChange={(_, val) => onChange('fps', parseInt(val, 10))}
+              disabled={!projectData.setFpsManually}
               suffix="fps"
-              description={`${getFPSPerCamera(
-                projectData.fps,
-                projectData.cameras.length,
-              )} fps for each camera`}
             />
           </Stack.Item>
         </Stack>

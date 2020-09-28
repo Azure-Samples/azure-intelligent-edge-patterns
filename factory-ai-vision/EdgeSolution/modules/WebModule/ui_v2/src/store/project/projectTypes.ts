@@ -62,7 +62,6 @@ export type ProjectData = {
   maxImages: number;
   sendMessageToCloud: boolean;
   framesPerMin: number;
-  accuracyThreshold: number;
   modelUrl: string;
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
@@ -70,6 +69,7 @@ export type ProjectData = {
   sendVideoToCloud: boolean;
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
+  setFpsManually: boolean;
   fps: number;
 };
 

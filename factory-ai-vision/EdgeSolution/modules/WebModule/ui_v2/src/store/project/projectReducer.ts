@@ -43,12 +43,12 @@ export const initialProjectData: ProjectData = {
   modelUrl: '',
   sendMessageToCloud: false,
   framesPerMin: 6,
-  accuracyThreshold: 50,
   probThreshold: '10',
   name: '',
   sendVideoToCloud: false,
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
+  setFpsManually: false,
   fps: 10,
 };
 
