@@ -89,17 +89,18 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 
 > If you've created Azure Resources based on the script linked in the [Prerequisites](#prerequisites) section, you can directly copy/paste the contents of `clouddrive/lva-sample/edge-deployment/.env` from one place to the other.
 
-## Building the LPR Image
+## Building the LPR Image 
 
 - Build from `Dockerfile` with new tag from ML solution (`lva_ai_solution`) directory.
 
-> To build the image, use either a Linux box, a Linux container or WSL(2, preferrable).
+> To build the image, use either a Linux box, a Linux container or WSL2 on Windows with Supporting Docker version (see https://code.visualstudio.com/blogs/2019/09/03/wsl2 and https://code.visualstudio.com/blogs/2020/03/02/docker-in-wsl2). As the Dockerfile contains a couple bash .sh calls, it'll fail on Windows. The recommendation is to use a *nix OS for building the image.
 
     `docker build -t lpr:v.1.1 -f Dockerfile .` (may require `sudo` upfront depending on your setup)
 
 - Tag and Push image to your registry, e.g. (using Azure Container Registry),
 
     `docker tag lpr:v.1.1 <youracrusername>.azurecr.io/lpr:v.1.1`
+    
     `docker push <youracrusername>.azurecr.io/lpr:v1.1`
 
 ## Deploying to IoT Edge Device
