@@ -490,7 +490,7 @@ class Stream:
     def process_send_message_to_iothub(self, predictions):
         if self.iothub_last_send_time + self.iothub_interval < time.time():
             predictions = list(
-                p for p in predictions if p["probability"] >= self.iothub_threshold
+                p for p in predictions if p["probability"] >= self.threshold
             )
             if len(predictions) > 0:
                 send_message_to_iothub(predictions)
