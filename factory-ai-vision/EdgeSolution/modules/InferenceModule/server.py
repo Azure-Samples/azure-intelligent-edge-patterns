@@ -32,7 +32,7 @@ from webmodule_utils import PART_DETECTION_MODE_CHOICES
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-ODEL_DIR = "model"
+MODEL_DIR = "model"
 UPLOAD_INTERVAL = 1  # sec
 
 DETECTION_TYPE_NOTHING = "nothing"
@@ -209,6 +209,9 @@ def update_cams():
     """
     data = request.get_json()
     logger.info(data["cameras"])
+    logger.info(data["fps"])
+
+    # TODO: FPS
     stream_manager.update_streams(list(cam["id"] for cam in data["cameras"]))
     n = stream_manager.get_streams_num_danger()
     frame_rate = onnx.update_frame_rate_by_number_of_streams(n)

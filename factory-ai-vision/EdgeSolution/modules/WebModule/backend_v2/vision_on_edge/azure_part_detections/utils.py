@@ -178,7 +178,7 @@ def deploy_worker(part_detection_id):
     # =====================================================
     logger.info("Update Cam!!!")
     cameras = instance.cameras.all()
-    res_data = {"cameras": []}
+    res_data = {"fps": instance.fps, "cameras": []}
 
     for cam in cameras.all():
         if cam.area:
@@ -215,14 +215,6 @@ def deploy_worker(part_detection_id):
     requests.get(
         "http://" + instance.inference_module.url + "/update_prob_threshold",
         params={"prob_threshold": instance.prob_threshold},
-        timeout=REQUEST_TIMEOUT,
-    )
-    # =====================================================
-    # 6. Update fps                                     ===
-    # =====================================================
-    requests.get(
-        "http://" + instance.inference_module.url + "/update_fps",
-        params={"fps": instance.fps,},
         timeout=REQUEST_TIMEOUT,
     )
 
