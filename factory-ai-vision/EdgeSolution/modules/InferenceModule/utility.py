@@ -251,30 +251,29 @@ def normalize_rtsp(rtsp: str) -> str:
 # get_file_zip("https://yadavsrorageaccount01.blob.core.windows.net/visionstoragecontainer/a5719e7549c044fcaf83381a22e3d0b2.VAIDK.zip","twin_provided_model")
 
 
-def draw_label(img, text, pos):
+def draw_label(img, text, pos, rectangle_color=(255, 255, 255), text_color=(0, 0, 0)):
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.3
     thickness = 1
     x, y = pos
     img = cv2.rectangle(
-        img, (x, y - 15), (x + len(text) * 5 + 10, y), (255, 255, 255), -1
+        img, (x, y - 15), (x + len(text) * 5 + 10, y), rectangle_color, -1
     )
-    img = cv2.putText(img, text, (x + 5, y - 5), font, font_scale, (0, 0, 0), thickness)
+    img = cv2.putText(
+        img, text, (x + 5, y - 5), font, font_scale, text_color, thickness
+    )
     return img
 
 
-def get_iot():
-    try:
-        iot = IoTHubModuleClient.create_from_edge_environment()
-    except Exception:
-        iot = None
-    return iot
+try:
+    iot = IoTHubModuleClient.create_from_edge_environment()
+except:
+    iot = None
 
+is_edge = False
 
-def is_edge() -> bool:
-    """is_edge."""
-    try:
-        IoTHubModuleClient.create_from_edge_environment()
-        return True
-    except Exception:
-        return False
+try:
+    IoTHubModuleClient.create_from_edge_environment()
+    is_edge = True
+except:
+    pass
