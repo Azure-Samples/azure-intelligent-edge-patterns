@@ -24,6 +24,7 @@ From the list below, click the link you want to run.
 | 3 | [Tiny Yolo V3](Yolo/tinyyolov3/tinyyolov3-http-icpu-onnx/readme.md)    | HTTP      | iCPU | LVA module using Tiny YoloV3, a lightweight variant of the Yolo V3 neural network model, that complies with the Open Neural Network Exchange (ONNX). Follow this sample if your solution requires an Intel® CPU accelerated IoT Edge device with connection through HTTP. | |
 | 4 | [Tiny Yolo V3](Yolo/tinyyolov3/tinyyolov3-grpc-icpu-onnx/readme.md)                    | gRPC      | iCPU | LVA module using Tiny YoloV3, a lightweight variant of the Yolo V3 neural network model, that complies with the Open Neural Network Exchange (ONNX). Follow this sample if your solution requires an Intel® CPU accelerated IoT Edge device with connection through gRPC. gRPC is a remote procedure call that efficiently connects services in and across data centers with plugin support for load balancing, tracing, health checking and authentication. | |
 | 5 | [OpenVINO™](OpenVINO/readme.md)             | HTTP      | iCPU, iGPU<sup>*</sup> |  LVA module using OpenVINO™, a comprehensive toolkit for quickly developing applications and solutions that emulate human vision. Based on Convolutional Neural Networks (CNNs), the toolkit extends CV workloads across Intel® hardware, maximizing performance. | 2, 4 |
+| 6 | [Partners](partners/readme.md)             | HTTP      | iCPU, iGPU<sup>*</sup> |  LVA module using UnCanny License Plate Recognition service, available through web API.  |  |
 
 <sup>*</sup>  Accelerators:  
 iGPU: Intel® GPU  
