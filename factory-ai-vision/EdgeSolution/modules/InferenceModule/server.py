@@ -400,6 +400,28 @@ def update_prob_threshold():
     return "ok"
 
 
+# RON FIXME
+@app.route("/update_fps")
+def update_fps():
+    fps = request.args.get("fps")
+    if not fps:
+        return "missing fps"
+    onnx.frame_rate = int(fps)
+
+
+@app.route("/get_recommended_fps")
+def get_recommended_fps():
+    number_of_cameras = request.args.get("number_of_cameras")
+    if not number_of_cameras:
+        return "missing number_of_cameras"
+    return onnx.get_recommended_frame_rate(number_of_cameras)
+
+
+@app.route("/get_current_fps")
+def get_current_fps():
+    return onnx.frame_rate
+
+
 def init_topology():
 
     instances = gm.invoke_graph_instance_list()
