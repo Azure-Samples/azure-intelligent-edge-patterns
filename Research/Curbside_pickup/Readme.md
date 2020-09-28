@@ -312,11 +312,11 @@ Now that you have run the deployment manifest for your IoT Edge Device, you're r
   * Add a 4th parameter to the `parameters` array to each of the 3 GraphInstanceSet.
 
 ```JSON
-                        },
-                        {
-                            "name": "inferencingUrl",
-                            "value": "http://lpraimodule:5001/score?stream=[graph-name]"
-                        }
+},
+{
+    "name": "inferencingUrl",
+    "value": "http://lpraimodule:5001/score?stream=[graph-name]"
+}
 ```
     Notice the value url contains a 'stream' parameter to identify it later (at direct streaming time). Provide a unique value for "stream" on each graph instance.
 
@@ -327,10 +327,10 @@ Now that you have run the deployment manifest for your IoT Edge Device, you're r
     Each GraphInstanceSet has a parameter in the parameters array, that defines `"rtspUrl"`. As the sample uses pre-filmed video clips reproduced by the RTSP Simulator, we can instruct each camera to use a different custom video.
 
 ```JSON
-                        {
-                            "name": "rtspUrl",
-                            "value": "rtsp://rtspsim:554/media/[replace-file-name].mkv"
-                        },
+{
+    "name": "rtspUrl",
+    "value": "rtsp://rtspsim:554/media/[replace-file-name].mkv"
+},
 ```
 
 
