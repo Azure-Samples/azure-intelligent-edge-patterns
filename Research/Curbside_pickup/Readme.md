@@ -567,6 +567,23 @@ Now that you have run the deployment manifest for your IoT Edge Device, you're r
 }
 ```
 
+5. Settings
+
+    In the same folder than `operations.json` and `lprtopology.json` create a new file named `appsettings.json` (if already exists, proceed with whats next). Complete these values with the right ones.
+
+```JSON
+{
+    "IoThubConnectionString" : "<replace-me>",
+    "deviceId" : "<replace-me>",
+    "moduleId" : "lvaEdge"
+}
+```
+  * The `IoThubConnectionString` you'll find it by right clicking the hellipsis (...) in the VS Code AZURE IOT HUB window, then selecting "Copy IoT Hub Connection String". Alternatively, you can find it in your .env file as one of the key/value pairs.
+
+  * The `deviceId`, refers to the name of the configured IoT Edge Device. You'll find it listed under "Devices", in VS Code AZURE IOT HUB.
+
+  ![screenshot](docs/assets/get-iot-hub-connstr.png)
+
 ## Running & testing
 
   * Make sure "Cloud to Device - Console App", is selected in the "Run" window.
