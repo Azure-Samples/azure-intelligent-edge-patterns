@@ -7,6 +7,9 @@ This section guides you through the steps needed to deploy a model for inferenci
 1. Have a valid Microsoft Azure subscription
 2. Be able to provision GPU-enabled VMs
 3. Have access to VM image repository (DockerHub account, or ACR)
+4. Be able to run `kubectl`, configured to your cluster
+5. If you are using Edge device, you should be able to complete this step on AS Edge https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-j-series-deploy-stateless-application-kubernetes
+
 
 Clone this repository somewhere so you can easily access the different source files:
 
@@ -242,7 +245,7 @@ For more information, please see [Pull an Image from a Private Registry](https:/
 
 In the following steps we denote the image as `1234567dedede1234567ceeeee.azurecr.io/tfgpu:1.0`, you can tag your own image adhering to the naming conventions you like.
 
-## Creating a Deployment
+## Creating a Deployment on an Edge Device or another Kubernetes cluster
 
 We provide the Deployment file, `deploy_infer.yaml`:
 
