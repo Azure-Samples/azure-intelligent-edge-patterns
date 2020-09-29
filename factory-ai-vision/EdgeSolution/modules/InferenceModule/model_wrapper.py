@@ -126,6 +126,15 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
         return None
 
+    def download_model(self, model_uri, MODEL_DIR):
+        def run(self, model_uri, MODEL_DIR):
+            self.model_downloaded = False
+            get_file_zip(model_uri, MODEL_DIR)
+            self.model_downloaded = True
+            self.update_model("model")
+        threading.Thread(target=run, args=(
+            self, model_uri, MODEL_DIR, )).start()
+
     def update_model(self, model_dir):
         is_default_model = "default_model" in model_dir
         is_scenario_model = "scenario_models" in model_dir
