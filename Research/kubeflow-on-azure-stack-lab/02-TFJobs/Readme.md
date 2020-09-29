@@ -216,7 +216,7 @@ Your updated .yaml should look something like:
             spec:
               containers:
               - name: tensorflow
-                image: kubeflow/tf-dist-mnist-test:1.0
+                image: rollingstone/tf-dist-mnist-test:1.0
                 volumeMounts:
                 - mountPath: "/tmp/mnist-data"
                   name: samba-share-volume2
@@ -231,7 +231,7 @@ Your updated .yaml should look something like:
             spec:
               containers:
               - name: tensorflow
-                image: kubeflow/tf-dist-mnist-test:1.0
+                image: rollingstone/tf-dist-mnist-test:1.0
                 volumeMounts:
                 - mountPath: "/tmp/mnist-data"
                   name: samba-share-volume2
@@ -258,7 +258,8 @@ For more tutorials and How-Tos, see TensorFlow's [save_and_load.ipynb](https://g
 
 ## Tensorboard
 
-There is another useful tool to monitor some ML applications if they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
+There is another useful tool to monitor some ML applications if they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`. For this exercise we have a separate one.
+**Delete the old tensorboard instance if it is already running.**
 
 A concrete example of a tensorboard-using script is in folder `tf-mnist-w-tb`. You will need your
 github account to build the image(substitute `rollingstone` for yours) and run:

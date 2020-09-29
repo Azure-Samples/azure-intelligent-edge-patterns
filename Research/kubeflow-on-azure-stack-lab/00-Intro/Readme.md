@@ -74,7 +74,12 @@ The simpliest way to istall Kubeflow is to use a CNAP package.
 ## Step 1: Install Porter
 
 Make sure you have Porter installed. You can find the installation instructions for your OS at
-Porter's [Installation Instructions](https://porter.sh/install/)
+Porter's [Installation Instructions](https://porter.sh/install/). Latest version on Linux:
+
+    $ curl https://cdn.porter.sh/latest/install-linux.sh | bash    
+    Installing porter to /home/azureuser/.porter
+    Installed porter v0.29.0 (5e7240cf)
+    ...
 
 **NOTE:** be sure to add porter to your `PATH` variable so it can find the binaries
 
@@ -82,27 +87,53 @@ Porter's [Installation Instructions](https://porter.sh/install/)
 
 First you will need to navigate to porter directory in the repository. For example 
 
+    $ git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
+    $ cd azure-intelligent-edge-patterns/Research/kubeflow-on-azure-stack/00-Intro
     $ cd porter/kubeflow
     
-Change the file permissions
+Change the file permissions if needed:
 
-    $ chmod 777 kubeflow.sh
+    $ chmod 755 kubeflow.sh
 
-Next, you will build the porter CNAB
+Build the porter CNAB like so:
 
     $ porter build
+    Copying porter runtime ===>
+    Copying mixins ===>
+    Copying mixin exec ===>
+    Copying mixin kubernetes ===>
+    Generating Dockerfile =======>
+    Writing Dockerfile =======>
+    Starting Invocation Image Build =======>
+
 
 ## Step 3: Generate Credentials 
 
-This step is needed to connect to your Kubernetes cluster
+This step is needed to connect to your Kubernetes cluster. An easy way to define the connection is to 
+point to the kubeconfig file. It is usually either in `/home/azureuser/.kube/config`, or you can find
+and copy it from `/etc/kubernetes/admin.conf`. Here is the idiomatic way to do it:
+
+    $ mkdir -p $HOME/.kube
+    $ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    $ sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, you could use `KUBECONFIG` environment variable, if you are the root user, you can run:
+
+    $ export KUBECONFIG=/etc/kubernetes/admin.conf
+
+To generate Porter credentials, pick the menu 'from file' and enter your path `/home/azureuser/.kube/config`:
 
     $ porter credentials generate 
-
-Enter path to your kubeconfig file when prompted eg on master node of my cluster i gave </home/azureuser/.kube/config>
+    ? How would you like to set credential "kubeconfig"
+    file path
+    ? Enter the path that will be used to set credential "kubeconfig"
+    /home/azureuser/.kube/config
 
 Validate that your credential is present by running the below command. You should see something like the below output.
 
     $ porter credentials list
+    NAME                MODIFIED
+    KubeflowInstaller   40 seconds ago
 
 ![List Porter Credentials](porter/kubeflow/pics/porter-credentials-validate.png)
 
@@ -113,13 +144,26 @@ Run one of the below commands to interact with the CNAB
 To Install :
 
     $ porter install --cred KubeflowInstaller
+    installing KubeflowInstaller...
+    executing install action from KubeflowInstaller (installation: KubeflowInstaller)
+    Install Kubeflow
+    Installing Kubeflow
+    [INFO] Installing kftctl binary for Kubeflow CLI...
+       ... Creating directory to store download
+       ... Downloading kfctl binary
+    ./kfctl
+       ... Creating Kubeflow directory
+       ... Installing Kubeflow for deployment: sandboxASkf
+    [DEBUG] /root/kubeflow//kfctl apply -V -f https://raw.githubusercontent.com/kubeflow/manifests/v1.1-branch/kfdef/kfctl_k8s_istio.v1.1.0.yaml
+    ...
+    ...
+    execution completed successfully!
 
-To Upgrade :
+The pods will start being created, and it will take several minutes, depending on the performance of your system.
+
+If you watnt to upgrade or uninstall Porter packages, you can use similar commands(do NOT run them right now):
     
     $ porter upgrade --cred KubeflowInstaller
-
-To Uninstall :
-
     $ porter uninstall --cred KubeflowInstaller
 
 ## Step 5: Check for pods and services
@@ -128,6 +172,26 @@ After the installation each of the services gets installed into its own namespac
 
     $ kubectl get pods -n kubeflow
     $ kubectl get svc -n kubeflow
+
+Or, use script we provide in `sbin` folder to check until all pods are in `Running` state(press `Ctrl-C` to stop the script
+if no pods are in `ContainerCreating`/`Init`/`Error` states anymore):
+
+    $ cd azure-intelligent-edge-patterns/Research/kubeflow-on-azure-stack-lab/sbin
+    $ ./check_status.sh
+    NAME                                                     READY   STATUS              RESTARTS   AGE
+    cache-deployer-deployment-b75f5c5f6-97fsb                0/2     Error               0          6m24s
+    cache-server-85bccd99bd-bkvww                            0/2     Init:0/1            0          6m24s
+    kfserving-controller-manager-0                           0/2     ContainerCreating   0          6m8s
+    metadata-db-695fb6f55-l6dgs                              0/1     ContainerCreating   0          6m23s
+    ml-pipeline-persistenceagent-6f99b56974-mnt8l            0/2     PodInitializing     0          6m21s
+    Press Ctrl-C to stop...
+    NAME                                                     READY   STATUS             RESTARTS   AGE
+    cache-server-85bccd99bd-bkvww                            0/2     Init:0/1           0          7m24s
+    metadata-grpc-deployment-9fdb476-kszzl                   0/1     CrashLoopBackOff   5          7m22s
+    Press Ctrl-C to stop...
+    NAME                                                     READY   STATUS             RESTARTS   AGE
+    ^C
+    
 
 ### Step 6: Opening Kubeflow dashboard
 
@@ -162,6 +226,12 @@ let the pods create containers and start.
 ---
 
 In case CNAB package installation does not work, you can do it maually, see [Installing Kubeflow manually](installing_kubeflow_manually.md).
+You would need to run `kubeflow_install` script we provided, and follow the instructions. At your Kubernetes master node:
+
+    $ git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
+    $ cd azure-intelligent-edge-patterns/Research/kubeflow-on-azure-stack/sbin
+    $ chmod 755 *.sh
+    $ ./kubeflow_install.sh
 
 We prepared the instructions to [Uninstalling Kubeflow](uninstalling_kubeflow.md) too in case you need to so so.
 
