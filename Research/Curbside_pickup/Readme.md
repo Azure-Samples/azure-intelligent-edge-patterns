@@ -1,19 +1,6 @@
 # On Building and Deploying LVA-ALPR
 Repo for curbside pick-up demo using ALPR models in Live Video Analytics platform.
 
-## Specification
-
-Using a video from 3 fixed cameras, the solution will:
-- identify a vehicle by its license plate (LP) from a stream of live video
-- use the identity to retrieve an "order" associated with the identity
-- display the order along with supporting information about the vehicle (e.g., the LP, an image of the vehice)
-- the solution should identify a vehicle within 3 seconds
-
-We are making the following assumptions:
-- daytime lighting conditions
-- car pulls into a specific, monitored parking spot (one of two)
-- the car LP exists in the system and is unique (i.e. state is not identified at this time)
-
 ## Prerequisites
 
 * An active Azure subscription with these resources deployed in it:
@@ -48,22 +35,17 @@ You can delete the IoT Edge Device thats listed under IoT Edge -> IoT Edge devic
 ### Design
 
 The solution will ingest video using Live Video Analytics. It will pass frames to a model running on the same edge device.
-When a LP is detected, the detection event flows through the associated IoT Hub and is processed by Stream Analytics.
+When a LP is detected, the detection event flows through the associated IoT Hub and is processed by [Time Series Insights](https://azure.microsoft.com/en-us/services/time-series-insights/).
 
 The event will contain:
 - the licence plates
 - timestamp
 - bounding box
 
-Stream Analytics will aggregate events and update a store when a vehicle is determined to present.
+[Time Series Insights](https://azure.microsoft.com/en-us/services/time-series-insights/) will aggregate events and update a store when a vehicle is determined to present.
 A web app will monitor the store. When a vehicle is present the web app will display an "order" association with the vehicle.
 
-NOTE: We don't really need to store and retrieve orders. This can be faked in the web app.
-
-Instead of Stream Analytics, we could substitue a simple controller app that maintains a dictionary of LPs that it has seen. Every time an event is recive we touch the entry. The entries could time-out when it has received a touch after a certain period (20 seconds?). We should research if Stream Analytics will be a faster approach.
-
 ## First steps
-
 
 - Clone this repo to the development box.
 
@@ -103,6 +85,26 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
     
     `docker push <youracrusername>.azurecr.io/lpr:v1.1`
 
+### Using a prebuilt image
+If you want to go straight into action (and save you some precious time in the process), you can use an existing image.
+
+> To do this, you'll need to change the `lpraimodule`'s `image` to: `[TODO: mcr.tobeprovided.io/lpr:1.0]` for the deployment template of your choice (VM or ASE based). You'll also need to add this set of registry credentials (line 12). It should look like this now:
+
+```
+"registryCredentials": {
+    "$CONTAINER_REGISTRY_USERNAME_myacr": {
+        "username": "$CONTAINER_REGISTRY_USERNAME_myacr",
+        "password": "$CONTAINER_REGISTRY_PASSWORD_myacr",
+        "address": "$CONTAINER_REGISTRY_USERNAME_myacr.azurecr.io"
+    },
+    "mcr":{
+        "username": "mcr",
+        "password": "TODO:to-be-supplied",
+        "address": "mcr.tobeprovided.io"
+    }
+}
+```
+
 ## Deploying to IoT Edge Device
 
 Depending the operations schema, you may end up using an IoT Edge Device, that sits on a) a Server (we'll call it VM for short), or into an Azure Stack Edge device (ASE). There're subtle differences into each.
@@ -124,6 +126,14 @@ Template: `src/alpr/deployment.lpr.vm.template.json`
     `mkdir output`
     `mkdir appdata`
 
+    In your .env file, replace these values with the corresponding ones. For example:
+
+```
+INPUT_VIDEO_FOLDER_ON_DEVICE="/var/iotedgedata/input"
+OUTPUT_VIDEO_FOLDER_ON_DEVICE="/var/iotedgedata/output"
+APPDATA_FOLDER_ON_DEVICE="/var/iotedgedata/appdata"
+```
+
 * Then, assign permissions to it and all the subdirectories created (i.e. `chmod -R ug+rw /var/iotedgedata`)
 
 * To deploy the template into target IoT Edge Device, point your Azure IoT Hub to the one where the IoT Edge Device is configured (here's some [help](https://github.com/Microsoft/vscode-azure-iot-toolkit/wiki). Then, follow these steps.
@@ -142,7 +152,16 @@ If you're using an Azure Stack Edge (ASE) as your IoT Edge Device, please follow
 Template: `src/alpr/deployment.lpr.ase.template.json`
 
 * Make sure your shares are in place for `output`, `input` and `appdata`
-Follow guidelines specified in here to create them: https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/README.md#step-1-setup-the-azure-stack-edge-ase
+
+    In total, 3 shares are required. 1 Local and 2 Edge ones. This tutorial shows how to add an Edge Share (Block Blob) and a Local Share (https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-j-series-manage-shares).
+
+    In your .env file, replace these values with the corresponding ones. For example:
+
+```
+INPUT_VIDEO_FOLDER_ON_DEVICE="inputlocalshare"
+OUTPUT_VIDEO_FOLDER_ON_DEVICE="outputedgeshare"
+APPDATA_FOLDER_ON_DEVICE="appdataedgeshare"
+```
 
 * To deploy the template into target IoT Edge Device, point your Azure IoT Hub to the one where the IoT Edge Device is configured (here's some [help](https://github.com/Microsoft/vscode-azure-iot-toolkit/wiki). Then, follow these steps.
     
@@ -156,16 +175,21 @@ Follow guidelines specified in here to create them: https://github.com/julialieb
 
 ## Upload test videos into IoT Edge Device
 
+The videos provided for testing purposes, are the `.mkv` files located at `docs/assets`. We suggest you have a look at these by using VLC or your player of choice (GIVEN ITS CAPABLE OF VLC playback).
+
 ### ASE
 
 copy the sample videos into the `Mount` used by the rtspsim. To refresh which one is it, please refer to your .env file and look for the value of `$INPUT_VIDEO_FOLDER_ON_DEVICE`.
 
-Make sure your ASE is setup with the right Shares, before moving on (https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-j-series-manage-shares or a more comprehensive guide at https://github.com/julialieberman/azure-intelligent-edge-patterns/blob/t-jull-lvasample/Research/lva-ase-sample/README.md#step-1-setup-the-azure-stack-edge-ase).
+![screenshot](docs/assets/ase-videos.png)
 
 ### VM
 Ssh into the VM, locate the `input` folder (the specified 'bind' where the simulator will search for the videos), and upload in there the 3 .mkv videos you'll find in `docs/assets`.
 
 > `scp docs/assets/*.mkv user@host:/var/iotedgedata/input`
+
+### How to provide with videos my own videos?
+You can supply your own videos. Make sure that when converting, consider a maximum width or height, whatever comes first, of 960 pixels. Also consider that NO AUDIO/CODEC should be selected on your conversion tool of choice. Once cosnverted, you can drop them into your IoT Edge Device input (folder, for a VM. Share, for an ASE). To use them, specify their name into `operations.json` where corresponds (more on this below).
 
 ## Preparing the sample application
 
@@ -621,7 +645,7 @@ When converting files, make sure you're getting **no audio** streams.
 
 * When running the sample app, the VM based IoT Edge Device is failing.
 
-Verify your device has a GPU. Here's a way to get an [Azure GPU VM](docs/runonvm.md) with drivers and stuff to go on. 
+Verify your device has a GPU. Here's a way to get an [Azure GPU VM](docs/runonvm.md) with drivers and ready to go. 
 
 ---
 
