@@ -182,33 +182,39 @@ const getProjectData = (state: State): ProjectData => state.project.data;
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> => {
   dispatch(getProjectRequest(false));
 
-  const url = '/api/part_detections/';
+  const getPartDetection = Axios.get('/api/part_detections/');
+  const getInferenceModule = Axios.get('/api/inference_modules/');
 
-  return Axios.get(url)
-    .then(({ data }) => {
+  return Promise.all([getPartDetection, getInferenceModule])
+    .then((results) => {
+      const partDetection = results[0].data;
+      // TODO
+      const recomendedFps = results[1].data.recomended_fps ?? 20;
+
       const project: ProjectData = {
-        id: data[0]?.id ?? null,
-        cameras: data[0]?.cameras ?? [],
-        location: data[0]?.location ?? null,
-        parts: data[0]?.parts ?? [],
-        modelUrl: data[0]?.download_uri ?? '',
-        needRetraining: data[0]?.needRetraining ?? true,
-        accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
-        accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
-        maxImages: data[0]?.maxImages ?? 20,
-        sendMessageToCloud: data[0]?.metrics_is_send_iothub,
-        framesPerMin: data[0]?.metrics_frame_per_minutes,
-        probThreshold: data[0]?.prob_threshold.toString() ?? '10',
-        trainingProject: data[0]?.project ?? null,
-        name: data[0]?.name ?? '',
-        inferenceMode: data[0]?.inference_mode ?? '',
-        sendVideoToCloud: data[0]?.send_video_to_cloud ?? false,
-        deployTimeStamp: data[0]?.deploy_timestamp ?? '',
-        setFpsManually: data[0]?.fps !== 10,
-        fps: data[0]?.fps ?? 10,
+        id: partDetection[0]?.id ?? null,
+        cameras: partDetection[0]?.cameras ?? [],
+        location: partDetection[0]?.location ?? null,
+        parts: partDetection[0]?.parts ?? [],
+        modelUrl: partDetection[0]?.download_uri ?? '',
+        needRetraining: partDetection[0]?.needRetraining ?? true,
+        accuracyRangeMin: partDetection[0]?.accuracyRangeMin ?? 60,
+        accuracyRangeMax: partDetection[0]?.accuracyRangeMax ?? 80,
+        maxImages: partDetection[0]?.maxImages ?? 20,
+        sendMessageToCloud: partDetection[0]?.metrics_is_send_iothub,
+        framesPerMin: partDetection[0]?.metrics_frame_per_minutes,
+        probThreshold: partDetection[0]?.prob_threshold.toString() ?? '10',
+        trainingProject: partDetection[0]?.project ?? null,
+        name: partDetection[0]?.name ?? '',
+        inferenceMode: partDetection[0]?.inference_mode ?? '',
+        sendVideoToCloud: partDetection[0]?.send_video_to_cloud ?? false,
+        deployTimeStamp: partDetection[0]?.deploy_timestamp ?? '',
+        setFpsManually: partDetection[0]?.fps !== recomendedFps,
+        recomendedFps,
+        fps: partDetection[0]?.fps ?? 10,
       };
-      dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
-      return data[0]?.has_configured;
+      dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
+      return partDetection[0]?.has_configured;
     })
     .catch((err) => {
       dispatch(getProjectFailed(err, false));
@@ -239,7 +245,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       name: projectData.name,
       send_video_to_cloud: projectData.sendVideoToCloud,
       inference_mode: projectData.inferenceMode,
-      fps: projectData.setFpsManually ? projectData.fps : 10,
+      fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

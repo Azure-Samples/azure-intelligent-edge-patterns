@@ -307,7 +307,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             />
             <TextField
               type="number"
-              value={(projectData.setFpsManually ? projectData.fps : 10) as any}
+              value={(projectData.setFpsManually ? projectData.fps : projectData.recomendedFps) as any}
               onChange={(_, val) => onChange('fps', parseInt(val, 10))}
               disabled={!projectData.setFpsManually}
               suffix="fps"
