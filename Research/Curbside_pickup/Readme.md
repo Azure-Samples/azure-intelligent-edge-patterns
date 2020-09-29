@@ -88,22 +88,7 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 ### Using a prebuilt image
 If you want to go straight into action (and save you some precious time in the process), you can use an existing image.
 
-> To do this, you'll need to change the `lpraimodule`'s `image` to: `[TODO: mcr.tobeprovided.io/lpr:1.0]` for the deployment template of your choice (VM or ASE based). You'll also need to add this set of registry credentials (line 12). It should look like this now:
-
-```
-"registryCredentials": {
-    "$CONTAINER_REGISTRY_USERNAME_myacr": {
-        "username": "$CONTAINER_REGISTRY_USERNAME_myacr",
-        "password": "$CONTAINER_REGISTRY_PASSWORD_myacr",
-        "address": "$CONTAINER_REGISTRY_USERNAME_myacr.azurecr.io"
-    },
-    "mcr":{
-        "username": "mcr",
-        "password": "TODO:to-be-supplied",
-        "address": "mcr.tobeprovided.io"
-    }
-}
-```
+> To do this, you'll need to change the `lpraimodule`'s `image` to: `initmahesh/lpr:1.0` for the deployment template of your choice (VM or ASE based).
 
 ## Deploying to IoT Edge Device
 
