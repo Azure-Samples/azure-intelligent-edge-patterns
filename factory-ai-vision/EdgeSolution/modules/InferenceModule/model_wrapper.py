@@ -32,6 +32,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             model_dir, is_default_model=True, is_scenario_model=False
         )
         self.model_uri = None
+        self.model_downloaded = False
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 
@@ -66,7 +67,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def update_frame_rate_by_number_of_streams(self, number_of_streams):
         if number_of_streams > 0:
-            self.frame_rate = max(1, int(self.max_frame_rate / number_of_streams))
+            self.frame_rate = max(
+                1, int(self.max_frame_rate / number_of_streams))
             print("[INFO] set frame rate as", self.frame_rate, flush=True)
         else:
             print(
@@ -109,7 +111,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             print("[INFO] Loading Default Model ...")
             with open(model_dir + "/labels.txt", "r") as f:
                 labels = [l.strip() for l in f.readlines()]
-            model = ONNXRuntimeObjectDetection(model_dir + "/model.onnx", labels)
+            model = ONNXRuntimeObjectDetection(
+                model_dir + "/model.onnx", labels)
 
             return model
 

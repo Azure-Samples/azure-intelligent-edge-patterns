@@ -184,10 +184,14 @@ def update_model():
         if model_uri == onnx.model_uri:
             print("[INFO] Model Uri unchanged", flush=True)
         else:
-            get_file_zip(model_uri, MODEL_DIR)
             onnx.model_uri = model_uri
+            onnx.model_downloaded = False
+            get_file_zip(model_uri, MODEL_DIR)
+            onnx.model_downloaded = True
 
-        onnx.update_model("model")
+        if onnx.model_downloaded:
+            onnx.update_model("model")
+
         print("[INFO] Update Finished ...", flush=True)
 
         return "ok"
@@ -216,13 +220,9 @@ def update_cams():
     stream_manager.update_streams(list(cam["id"] for cam in data["cameras"]))
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
-    recommended_fps = onnx.get_recommended_frame_rate(n)
-    if fps > recommended_fps:
-        frame_rate = recommended_fps
-        onnx.set_frame_rate(recommended_fps)
-    else:
-        frame_rate = fps
-        onnx.set_frame_rate(fps)
+    # recommended_fps = onnx.get_recommended_frame_rate(n)
+    frame_rate = fps
+    onnx.set_frame_rate(fps)
 
     for cam in data["cameras"]:
         cam_type = cam["type"]
