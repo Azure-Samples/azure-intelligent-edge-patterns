@@ -6,7 +6,9 @@ import sys
 
 from django.apps import AppConfig
 
-from vision_on_edge.azure_iot.utils import inference_module_url
+from configs.inference_module import DF_INFERENECE_IS_GPU
+
+from ..azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -20,12 +22,16 @@ class InferenceModulesConfig(AppConfig):
         """ready."""
 
         if "runserver" in sys.argv:
+            # pylint: disable= import-outside-toplevel
             from .models import InferenceModule
 
             logger.info("App ready ready while running server")
             InferenceModule.objects.update_or_create(
                 url=inference_module_url(),
-                defaults={"name": "default_inference_module"},
+                defaults={
+                    "name": "default_inference_module",
+                    "is_gpu": DF_INFERENECE_IS_GPU,
+                },
             )
 
             logger.info("App ready end while running server")

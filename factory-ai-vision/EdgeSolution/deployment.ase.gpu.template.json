@@ -68,7 +68,8 @@
               "DBNAME": { "value": "vision_on_edge" },
               "DBHOST": { "value": "172.18.0.1" },
               "DBUSER": { "value": "vision_on_edge" },
-              "DBPASS": { "value": "vision_on_edge" }
+              "DBPASS": { "value": "vision_on_edge" },
+              "DF_INFERENECE_IS_GPU": { "value": true }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
