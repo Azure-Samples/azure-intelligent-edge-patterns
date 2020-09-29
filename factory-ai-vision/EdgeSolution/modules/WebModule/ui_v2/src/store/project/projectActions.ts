@@ -188,8 +188,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
   return Promise.all([getPartDetection, getInferenceModule])
     .then((results) => {
       const partDetection = results[0].data;
-      // TODO
-      const recomendedFps = results[1].data.recomended_fps ?? 20;
+      const recomendedFps = results[1].data.is_gpu ? 30 : 10;
 
       const project: ProjectData = {
         id: partDetection[0]?.id ?? null,
