@@ -183,6 +183,11 @@ Here is how it would look in Azure ML, you will need to make sure you install `a
 
 ![JupiterLab](pics/jupiter_lab_azureml-sdk.png) 
 
+
+You will need your config file from Azure Machine Learing to be able to create new instances of `workspace`:
+
+![JupiterLab](pics/conf_file_download.jpg)
+
 If your image is deployed not on a publicly-available image registry, you will need to login with your credentials. You can
 retrieve your credentials from the notebook - through your workspace `ws.subscription_id`, and use 
 `ContainerRegistryManagementClient`, see the similar cells in [machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb](../../machine-learning-notebooks/production-deploy-to-ase-gpu.ipyb):
@@ -216,7 +221,8 @@ to your ACR:
     $ kubectl create secret docker-registry secret4acr2infer --docker-server=<your-registry-server>\
         --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
 
-Or, you can create the secret by explicitly logging in to your container registry, and then export:
+Or, alternatively**(do not do this if you already created a secret using kubectl docker-registry secret)**,
+you can create the secret by explicitly logging in to your container registry, and then export:
 
     $ docker login 12345678901234567890.azurecr.io
     Username: c6a1e081293c442e9465100e3021da63
@@ -224,7 +230,8 @@ Or, you can create the secret by explicitly logging in to your container registr
     Login Succeeded
 
 This will record the authentication token in your `~/.docker/config.json`, and you will be able to
-create a Kubernetes secret to use to access your private repository:
+create a Kubernetes secret to use to access your private repository **(You do not need to do this if
+you already created a secret using kubectl docker-registry secret)**:
 
     $ kubectl create secret generic secret4acr2infer \
         --from-file=.dockerconfigjson=/home/azureuser/.docker/config.json \
@@ -366,6 +373,8 @@ Epoch 5/5
 ```
 
 You can export and run your deployment notebook similarly.
+
+Contact your Azure administrator for the credentials and addresses of your ACR and other network information. 
 
 
 ## Links
