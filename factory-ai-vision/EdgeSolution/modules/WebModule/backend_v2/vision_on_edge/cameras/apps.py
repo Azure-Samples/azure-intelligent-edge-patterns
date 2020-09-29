@@ -21,7 +21,11 @@ class CamerasConfig(AppConfig):
         if "runserver" in sys.argv:
 
             from ..locations.models import Location
-            from .constants import gen_default_lines, gen_default_zones
+            from .constants import (
+                gen_default_lines,
+                gen_default_lines_dd,
+                gen_default_zones,
+            )
             from .models import Camera
 
             logger.info("App ready ready while running server")
@@ -103,7 +107,7 @@ class CamerasConfig(AppConfig):
                     defaults={
                         "rtsp": "rtsp://rtspsim:554/media/scenario3-defect-detection.mkv",
                         "area": "",
-                        "lines": gen_default_lines(),
+                        "lines": gen_default_lines_dd(),
                         "danger_zones": "",
                         "location": demo_location_obj,
                     },

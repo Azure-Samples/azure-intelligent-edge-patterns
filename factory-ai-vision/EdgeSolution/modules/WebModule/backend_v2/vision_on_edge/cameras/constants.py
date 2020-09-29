@@ -35,3 +35,22 @@ def gen_default_zones():
     }
     template["dangerZones"][0]["id"] = str(uuid.uuid4())
     return json.dumps(template)
+
+
+def gen_default_lines_dd():
+    """gen_default_lines.
+
+    Default lines for defect detection.
+    """
+    template = {
+        "useCountingLine": True,
+        "countingLines": [
+            {
+                "id": "$UUID_PLACE_HOLDER",
+                "type": "Line",
+                "label": [{"x": 229, "y": 215}, {"x": 916, "y": 255}],
+            }
+        ],
+    }
+    template["countingLines"][0]["id"] = str(uuid.uuid4())
+    return json.dumps(template)
