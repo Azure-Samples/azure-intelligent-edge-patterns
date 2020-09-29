@@ -71,7 +71,7 @@ export type ProjectData = {
   deployTimeStamp: string;
   setFpsManually: boolean;
   fps: number;
-  recomendedFps?: number;
+  recomendedFps: number;
 };
 
 // Describing the different ACTION NAMES available

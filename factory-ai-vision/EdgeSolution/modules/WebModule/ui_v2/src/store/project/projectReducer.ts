@@ -50,6 +50,7 @@ export const initialProjectData: ProjectData = {
   deployTimeStamp: '',
   setFpsManually: false,
   fps: 10,
+  recomendedFps: 10,
 };
 
 const initialState: Project = {

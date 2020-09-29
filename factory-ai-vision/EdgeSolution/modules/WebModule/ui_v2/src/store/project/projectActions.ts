@@ -113,8 +113,9 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     inferenceMode: data?.inference_mode ?? '',
     sendVideoToCloud: data?.send_video_to_cloud ?? false,
     deployTimeStamp: data?.deploy_timestamp ?? '',
-    setFpsManually: data?.fps !== 10,
+    setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
+    recomendedFps: data?.recomendedFps ?? 10,
   },
   isDemo,
 });
@@ -188,7 +189,8 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
   return Promise.all([getPartDetection, getInferenceModule])
     .then((results) => {
       const partDetection = results[0].data;
-      const recomendedFps = results[1].data.is_gpu ? 30 : 10;
+      const infModuleIdx = results[1].data.findIndex((e) => e.id === partDetection[0].inference_module);
+      const recomendedFps = results[1].data[infModuleIdx]?.is_gpu ? 30 : 10;
 
       const project: ProjectData = {
         id: partDetection[0]?.id ?? null,
@@ -252,7 +254,12 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
     },
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data, false));
+      dispatch(
+        postProjectSuccess(
+          { ...data, setFpsManually: projectData.setFpsManually, recomendedFps: projectData.recomendedFps },
+          false,
+        ),
+      );
       getTrain(data.id);
       return data.id;
     })

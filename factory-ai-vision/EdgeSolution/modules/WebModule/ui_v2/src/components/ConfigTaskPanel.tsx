@@ -307,7 +307,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               }}
             />
             <MaskedTextField
-              value={(projectData.setFpsManually ? projectData.fps : projectData.recomendedFps).toString()}
+              value={(projectData.setFpsManually ? projectData.fps : projectData.recomendedFps)?.toString()}
               onChange={(_, val) => onChange('fps', parseInt(val, 10))}
               disabled={!projectData.setFpsManually}
               errorMessage={
