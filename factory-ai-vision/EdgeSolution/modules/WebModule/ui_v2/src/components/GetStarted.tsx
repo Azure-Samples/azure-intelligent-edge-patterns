@@ -46,6 +46,7 @@ const demoProjectsInfo = [
 
 export const GetStarted: React.FC = () => {
   const scenario = useSelector((state: State) => state.scenario);
+  const recomendedFps = useSelector((state: State) => state.project.data.recomendedFps);
 
   const dispatch = useDispatch();
 
@@ -81,7 +82,7 @@ export const GetStarted: React.FC = () => {
       <ConfigTaskPanel
         isOpen={selectedScenarioIdx > -1}
         onDismiss={closePanel}
-        projectData={{ ...initialProjectData, ...scenario[selectedScenarioIdx] }}
+        projectData={{ ...initialProjectData, ...scenario[selectedScenarioIdx], recomendedFps }}
         trainingProjectOfSelectedScenario={scenario[selectedScenarioIdx]?.trainingProject}
       />
     </>

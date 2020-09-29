@@ -14,6 +14,7 @@ import {
   getTheme,
   Label,
   mergeStyleSets,
+  MaskedTextField,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -305,12 +306,18 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
                 onChange('setFpsManually', checked);
               }}
             />
-            <TextField
-              type="number"
-              value={(projectData.setFpsManually ? projectData.fps : 10) as any}
+            <MaskedTextField
+              value={(projectData.setFpsManually ? projectData.fps : projectData.recomendedFps)?.toString()}
               onChange={(_, val) => onChange('fps', parseInt(val, 10))}
               disabled={!projectData.setFpsManually}
-              suffix="fps"
+              errorMessage={
+                projectData.fps > projectData.recomendedFps && projectData.setFpsManually
+                  ? `The recommended value for FPS is '${projectData.recomendedFps}', higher than the recommended value will affect the performance.`
+                  : ''
+              }
+              styles={{ errorMessage: { maxWidth: '200px' } }}
+              mask="999 fps"
+              maskChar=" "
             />
           </Stack.Item>
         </Stack>
