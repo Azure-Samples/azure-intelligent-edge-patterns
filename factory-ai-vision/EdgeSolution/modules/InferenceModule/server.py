@@ -185,9 +185,10 @@ def update_model():
             print("[INFO] Model Uri unchanged", flush=True)
         else:
             onnx.model_uri = model_uri
-            onnx.model_downloaded = False
-            get_file_zip(model_uri, MODEL_DIR)
-            onnx.model_downloaded = True
+            onnx.download_model(model_uri, MODEL_DIR)
+            # onnx.model_downloaded = False
+            # get_file_zip(model_uri, MODEL_DIR)
+            # onnx.model_downloaded = True
 
         if onnx.model_downloaded:
             onnx.update_model("model")
