@@ -275,8 +275,6 @@ We provide the Deployment file, `deploy_infer.yaml`:
             - containerPort: 8888
             resources:
             limits:
-                memory: "128Mi" #128 MB
-                cpu: "200m" # 200 millicpu (0.2 or 20% of the cpu)
                 nvidia.com/gpu:  1
         imagePullSecrets:
         - name: secret4acr2infer

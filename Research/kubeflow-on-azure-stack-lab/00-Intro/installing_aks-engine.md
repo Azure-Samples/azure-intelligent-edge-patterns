@@ -7,7 +7,7 @@ Download `aks-engone` installation script if you do not have it already:
 
 Run the installer, specifying its version:
 
-    $ ./get-akse.sh --version v0.43.0
+    $ ./get-akse.sh --version v0.55.4
 
 If you have problems, please refer to the official page: [Install the AKS engine on Linux in Azure Stack](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux).
 
@@ -18,9 +18,14 @@ In the completely disconnected environment, you need to acquire the archive via 
 Verify `aks-engine` version:
 
     $ aks-engine version
-    Version: v0.43.0
+    Version: v0.55.4
     GitCommit: 8928a4094
     GitTreeState: clean
+
+Copy the certificate file with the following command:
+
+    $ sudo cp /var/lib/waagent/Certificates.pem /usr/local/share/ca-certificates/azurestackca.crt 
+    $ sudo update-ca-certificates    
 
 # Links
 

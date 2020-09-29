@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: pytorch
-              image: kubeflow/pytorch-dist-mnist-test:1.0
+              image: rollingstone/pytorch-dist-mnist-test:1.0
               args: ["--backend", "gloo"]
               # Comment out the below resources to use the CPU.
               resources: 
@@ -31,7 +31,7 @@ spec:
         spec:
           containers: 
             - name: pytorch
-              image: kubeflow/pytorch-dist-mnist-test:1.0
+              image: rollingstone/pytorch-dist-mnist-test:1.0
               args: ["--backend", "gloo"]
               # Comment out the below resources to use the CPU.
               resources: 

@@ -20,6 +20,8 @@ to other available options on the cluster you are using.
 ## Creating smb clients
 
 Each node of our Kubernetes cluster has to have Samba client to access our Samba server.
+Make sure network ports 137-139,445 are accessible on all nodes of your cluster.
+
 You need to repeat the following on every vm in your Kubernetes cluster(you can get their
 local ip from the portal and ssh from the master node):
 
