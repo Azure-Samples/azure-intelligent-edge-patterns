@@ -35,7 +35,7 @@ RUN conda create --name python38 python=3.8.5 -y &&\
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime-gpu" ]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime-gpu==1.4.0" ]
 
 COPY coco_classes.txt ./
 COPY default_model default_model/
