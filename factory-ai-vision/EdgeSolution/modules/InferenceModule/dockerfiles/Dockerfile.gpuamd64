@@ -11,6 +11,7 @@ RUN apt-get update && \
     libgl1-mesa-glx \
     libgtk2.0-dev \
     libssl-dev \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update \

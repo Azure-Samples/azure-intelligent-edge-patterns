@@ -3,6 +3,7 @@ import logging
 import os
 import threading
 import time
+import traceback
 
 import cv2
 import numpy as np
@@ -128,26 +129,30 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         return None
 
     def download_and_update_model(self, model_uri, MODEL_DIR):
-        logger.info("download_and_update_model.")
+        print("download_and_update_model.", flush=True)
         self.model_downloading = True
 
         def run(self, model_uri, MODEL_DIR):
 
             self.lock.acquire()
             try:
-                logger.info("Downloading URL.")
+                print("Downloading URL.", flush=True)
                 get_file_zip(model_uri, MODEL_DIR)
+                print("Downloading URL..., Complete!!!", flush=True)
                 self.lock.release()
                 self.model_downloading = False
+                print("Updating Model...", flush=True)
                 self.update_model("model")
+                print("Updating Model..., Complete!!!", flush=True)
+
             except Exception:
                 self.lock.release()
                 self.model_downloading = False
-                logger.error(
-                    "Download URL failed. Model_URI: %s, MODEL_DIR: %s",
-                    model_uri,
-                    MODEL_DIR,
+                print(
+                    "Download URL failed. Model_URI: %s, MODEL_DIR: %s"
+                    % (model_uri, MODEL_DIR)
                 )
+                traceback.print_exc()
 
         threading.Thread(target=run, args=(self, model_uri, MODEL_DIR,)).start()
 

@@ -8,6 +8,7 @@ RUN apt-get update && \
     libgl1-mesa-glx \
     libgtk2.0-dev \
     cmake \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 # libgl1-mesa-glx: opencv2 libGL.so error workaround
 

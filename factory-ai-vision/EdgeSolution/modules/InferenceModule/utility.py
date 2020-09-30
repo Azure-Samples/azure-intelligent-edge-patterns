@@ -8,6 +8,7 @@ import logging
 import os
 import shutil
 import socket
+import subprocess
 import subprocess as sp
 import sys
 import time
@@ -18,9 +19,7 @@ from urllib.request import urlopen
 import cv2
 from azure.iot.device import IoTHubModuleClient
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logger.disabled = False
 
 
 # this function returns the device ip address if it is apublic ip else 127.0.0.1
@@ -45,9 +44,9 @@ def getWlanIp():
 
 # this function prepare the camera folder clears any previous models that the device may have
 def prepare_folder(folder):
-    logger.info("Preparing: %s", folder)
+    print("Preparing: %s", folder)
     if os.path.isdir(folder):
-        logger.info("Found directory cleaning it before copying new files...")
+        print("Found directory cleaning it before copying new files...")
         # ToDo delete all files in folder
         shutil.rmtree(folder, ignore_errors=True)
         os.makedirs(folder, exist_ok=True)
@@ -65,9 +64,9 @@ def WaitForFileDownload(FileName):
             with open(FileName):
                 valid = 1
         except IOError:
-            logger.info("Still waiting")
+            print("Still downloading...", flush=True)
             time.sleep(1)
-    logger.info("Got it ! File Download Complete !")
+    print("Got it ! File Download Complete !", flush=True)
 
 
 def get_file(url, dst_folder="/app/vam_model_folder"):
@@ -80,23 +79,24 @@ def get_file(url, dst_folder="/app/vam_model_folder"):
         dirpath = os.getcwd()
         # src = os.path.join(dirpath,"model")
         dst = os.path.abspath(dst_folder)
-        logger.info("Downloading File ::" + FileName)
+        logger.info("Downloading File :: %s", FileName)
         urllib2.urlretrieve(url, filename=(os.path.join(dst, FileName)))
         WaitForFileDownload(os.path.join(dst, FileName))
         return True
     else:
-        logger.info("Cannot extract file name from URL")
+        print("Cannot extract file name from URL")
         return False
 
 
 def get_file_zip(url, dst_folder="model"):
     # adding code to fix issue where the file name may not be part of url details here
     #
-    logger.info("Downloading: %s", url)
+    print("Downloading: %s" % url, flush=True)
     remotefile = urlopen(url)
 
     myurl = remotefile.url
     FileName = myurl.split("/")[-1]
+    print(FileName, flush=True)
 
     if FileName:
         # find root folders
@@ -104,27 +104,41 @@ def get_file_zip(url, dst_folder="model"):
         dirpath_file = os.path.join(dirpath, dst_folder)
         src = os.path.abspath(dirpath_file)
         src_file_path = os.path.join(src, FileName)
-        logger.info("Location to download is :: %s", src_file_path)
+        print("Location to download is :: %s" % src_file_path, flush=True)
         prepare_folder(dirpath_file)
-        logger.info("Downloading File :: %s", FileName)
+        print("Downloading File :: %s" % FileName, flush=True)
 
-        urllib2.urlretrieve(url, filename=src_file_path)
-        WaitForFileDownload(src_file_path)
+        # urllib2.urlretrieve(url, filename=src_file_path)
+        subprocess.run(["wget", "-O", src_file_path, url], capture_output=True)
+        print("Downloading File :: %s, complete!" % FileName, flush=True)
+        print("Unzip and move...", flush=True)
+        print(
+            "src_file_path: {}, dst_file_path: {}".format(src_file_path, dst_folder),
+            flush=True,
+        )
         result = unzip_and_move(src_file_path, dst_folder)
+        print("Unzip and move... Complete!", flush=True)
         return result
     else:
-        logger.info("Cannot extract file name from URL")
+        print("Cannot extract file name from URL", flush=True)
         return False
 
 
 def unzip_and_move(file_path=None, dst_folder="model"):
-    zip_ref = zipfile.ZipFile(file_path, "r")
-    dirpath = os.getcwd()
-    dirpath_file = os.path.join(dirpath, dst_folder)
-    zip_ref.extractall(dirpath_file)
-    zip_ref.close()
-    logger.info("files unzipped to : %s", dirpath_file)
+    # print("files unzipped to : %s" % dst_folder, flush=True)
+    # zip_ref = zipfile.ZipFile(file_path, "r")
+    # print("1", flush=True)
+    # dirpath = os.getcwd()
+    # print("2", flush=True)
+    # dirpath_file = os.path.join(dirpath, dst_folder)
+    # print("3", flush=True)
+    # zip_ref.extractall(dirpath_file)
+    # print("4", flush=True)
+    # zip_ref.close()
+    # print("files unzipped to : %s, Complete" % dirpath_file, flush=True)
     # transferdlc(True,"twin_provided_model")
+    subprocess.run(["unzip", file_path, "-d", dst_folder], capture_output=True)
+
     return True
 
 

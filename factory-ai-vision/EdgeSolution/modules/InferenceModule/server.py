@@ -28,9 +28,9 @@ from utility import get_file_zip, is_edge, normalize_rtsp
 from webmodule_utils import PART_DETECTION_MODE_CHOICES
 
 # sys.path.insert(0, '../lib')
+# Set logging parameters
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 MODEL_DIR = "model"
 UPLOAD_INTERVAL = 1  # sec
@@ -163,11 +163,12 @@ def update_retrain_parameters():
     return "ok"
 
 
-@app.route("/update_model")
+@app.route("/update_model", methods=["POST"])
 def update_model():
 
-    model_uri = request.args.get("model_uri")
-    model_dir = request.args.get("model_dir")
+    data = json.loads(request.data)
+    model_uri = data["model_uri"] if "model_uri" in data else None
+    model_dir = data["model_dir"] if "model_dir" in data else None
     if not model_uri and not model_dir:
         return "missing model_uri or model_dir"
 
@@ -566,9 +567,8 @@ def main():
 
 
 if __name__ == "__main__":
-    logging_level = logging.DEBUG if os.getenv("DEBUG") else logging.INFO
+    import logging.config
 
-    # Set logging parameters
     if os.getenv("DEBUG"):
         logging.config.dictConfig(logging_config.LOGGING_CONFIG_DEV)
     else:

@@ -136,13 +136,13 @@ def deploy_worker(part_detection_id):
     elif not instance.project.is_demo:
         requests.get(
             "http://" + str(instance.inference_module.url) + "/update_model",
-            params={"model_uri": instance.project.download_uri},
+            json={"model_uri": instance.project.download_uri},
             timeout=REQUEST_TIMEOUT,
         )
     else:
         requests.get(
             "http://" + str(instance.inference_module.url) + "/update_model",
-            params={"model_dir": instance.project.download_uri},
+            json={"model_dir": instance.project.download_uri},
             timeout=REQUEST_TIMEOUT,
         )
     # =====================================================

@@ -5,6 +5,7 @@ RUN apt-get update && \
     git \
     libprotobuf-dev \
     protobuf-compiler \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 
