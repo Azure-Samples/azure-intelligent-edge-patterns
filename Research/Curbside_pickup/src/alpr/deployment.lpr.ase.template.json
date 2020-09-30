@@ -129,7 +129,7 @@
                             "PortBindings": {
                                 "5001/tcp": [
                                     {
-                                        "HostPort": "5001"
+                                        "HostPort": "8080"
                                     }
                                 ]
                             },
