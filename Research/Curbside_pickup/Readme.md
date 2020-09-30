@@ -594,7 +594,7 @@ Now that you have run the deployment manifest for your IoT Edge Device, you're r
     "moduleId" : "lvaEdge"
 }
 ```
-  * The `IoThubConnectionString` you'll find it by right clicking the hellipsis (...) in the VS Code AZURE IOT HUB window, then selecting "Copy IoT Hub Connection String". Alternatively, you can find it in your .env file as one of the key/value pairs.
+  * The `IoThubConnectionString` you'll find it by right clicking the hellipsis (...) in the VS Code AZURE IOT HUB window, then selecting "Copy IoT Hub Connection String".
 
   * The `deviceId`, refers to the name of the configured IoT Edge Device. You'll find it listed under "Devices", in VS Code AZURE IOT HUB.
 
