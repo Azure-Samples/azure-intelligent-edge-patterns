@@ -179,14 +179,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
     const nextDisabled =
       isLastImg || noPart || noAnno || workState === WorkState.Creating || isOnePointBox || loading;
     return (
-      <Stack horizontal tokens={{ childrenGap: 10 }}>
+      <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
-        <DefaultButton
-          text="Previous"
-          style={{ marginLeft: 'auto' }}
-          onClick={saveAndPrev}
-          disabled={previousDisabled}
-        />
+        <Text style={{ marginLeft: 'auto' }}>
+          Image {index + 1} of {imageIds.length}
+        </Text>
+        <DefaultButton text="Previous" onClick={saveAndPrev} disabled={previousDisabled} />
         <PrimaryButton text="Next" disabled={nextDisabled} onClick={saveAndNext} />
         <Separator vertical />
         {canBackToCapture && (
