@@ -21,6 +21,8 @@ IMG_HEIGHT = 540
 GPU_MAX_FRAME_RATE = 30
 CPU_MAX_FRAME_RATE = 10
 
+logger = logging.getLogger(__name__)
+
 
 class ONNXRuntimeModelDeploy(ObjectDetection):
     """Object Detection class for ONNX Runtime
@@ -32,7 +34,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             model_dir, is_default_model=True, is_scenario_model=False
         )
         self.model_uri = None
-        self.model_downloaded = False
+        self.model_downloading = False
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 
@@ -67,8 +69,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def update_frame_rate_by_number_of_streams(self, number_of_streams):
         if number_of_streams > 0:
-            self.frame_rate = max(
-                1, int(self.max_frame_rate / number_of_streams))
+            self.frame_rate = max(1, int(self.max_frame_rate / number_of_streams))
             print("[INFO] set frame rate as", self.frame_rate, flush=True)
         else:
             print(
@@ -111,29 +112,44 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             print("[INFO] Loading Default Model ...")
             with open(model_dir + "/labels.txt", "r") as f:
                 labels = [l.strip() for l in f.readlines()]
-            model = ONNXRuntimeObjectDetection(
-                model_dir + "/model.onnx", labels)
+            model = ONNXRuntimeObjectDetection(model_dir + "/model.onnx", labels)
 
             return model
 
         else:
-            print("[INFO] Loading Model ...")
+            logger.info("Load Model ...")
             with open("model/labels.txt", "r") as f:
                 labels = [l.strip() for l in f.readlines()]
             model = ONNXRuntimeObjectDetection("model/model.onnx", labels)
+            logger.info("Load Model, success")
 
             return model
 
         return None
 
-    def download_model(self, model_uri, MODEL_DIR):
+    def download_and_update_model(self, model_uri, MODEL_DIR):
+        logger.info("download_and_update_model.")
+        self.model_downloading = True
+
         def run(self, model_uri, MODEL_DIR):
-            self.model_downloaded = False
-            get_file_zip(model_uri, MODEL_DIR)
-            self.model_downloaded = True
-            self.update_model("model")
-        threading.Thread(target=run, args=(
-            self, model_uri, MODEL_DIR, )).start()
+
+            self.lock.acquire()
+            try:
+                logger.info("Downloading URL.")
+                get_file_zip(model_uri, MODEL_DIR)
+                self.lock.release()
+                self.model_downloading = False
+                self.update_model("model")
+            except Exception:
+                self.lock.release()
+                self.model_downloading = False
+                logger.error(
+                    "Download URL failed. Model_URI: %s, MODEL_DIR: %s",
+                    model_uri,
+                    MODEL_DIR,
+                )
+
+        threading.Thread(target=run, args=(self, model_uri, MODEL_DIR,)).start()
 
     def update_model(self, model_dir):
         is_default_model = "default_model" in model_dir

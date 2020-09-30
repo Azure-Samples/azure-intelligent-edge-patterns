@@ -171,10 +171,10 @@ def update_model():
     if not model_uri and not model_dir:
         return "missing model_uri or model_dir"
 
-    print("[INFO] Update Model ...", flush=True)
+    logger.info("Update Model ...")
     if model_uri:
 
-        print("[INFO] Got Model URI", model_uri, flush=True)
+        logger.info("Got Model URI %s", model_uri)
 
         # FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
         # workaround
@@ -182,20 +182,18 @@ def update_model():
         onnx.set_is_scenario(False)
 
         if model_uri == onnx.model_uri:
-            print("[INFO] Model Uri unchanged", flush=True)
-        else:
-            onnx.model_uri = model_uri
-            onnx.download_model(model_uri, MODEL_DIR)
-            # onnx.model_downloaded = False
-            # get_file_zip(model_uri, MODEL_DIR)
-            # onnx.model_downloaded = True
-
-        if onnx.model_downloaded:
-            onnx.update_model("model")
-
-        print("[INFO] Update Finished ...", flush=True)
-
-        return "ok"
+            logger.info("Model Uri unchanged.")
+            return "ok", 200
+        if onnx.model_downloading:
+            logger.info("Already have a thread downloading project.")
+            return "Already downloading model", 400
+        onnx.model_uri = model_uri
+        onnx.download_and_update_model(model_uri, MODEL_DIR)
+        # onnx.model_downloaded = False
+        # get_file_zip(model_uri, MODEL_DIR)
+        # onnx.model_downloaded = True
+        logger.info("Downloading in background ...")
+        return "ok", 200
 
     elif model_dir:
         print("[INFO] Got Model DIR", model_dir)
@@ -217,7 +215,7 @@ def update_cams():
     logger.info(data["fps"])
 
     # TODO: FPS
-    fps = int(data['fps'])
+    fps = int(data["fps"])
     stream_manager.update_streams(list(cam["id"] for cam in data["cameras"]))
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
@@ -444,10 +442,8 @@ def init_topology():
     )
 
     for i in range(len(instances["payload"]["value"])):
-        gm.invoke_graph_instance_deactivate(
-            instances["payload"]["value"][i]["name"])
-        gm.invoke_graph_instance_delete(
-            instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_deactivate(instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_delete(instances["payload"]["value"][i]["name"])
 
     topologies = gm.invoke_graph_topology_list()
     if instances["status"] != 200:
@@ -460,8 +456,7 @@ def init_topology():
     )
 
     for i in range(len(topologies["payload"]["value"])):
-        gm.invoke_graph_topology_delete(
-            topologies["payload"]["value"][i]["name"])
+        gm.invoke_graph_topology_delete(topologies["payload"]["value"][i]["name"])
 
     logger.info(
         "========== Setting default grpc topology ==========".format(
@@ -500,8 +495,7 @@ def benchmark():
     onnx.update_model(SCENARIO1_MODEL)
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
-        s.update_cam("video", SAMPLE_VIDEO, 30,
-                     s.cam_id, False, None, "PC", [], [])
+        s.update_cam("video", SAMPLE_VIDEO, 30, s.cam_id, False, None, "PC", [], [])
 
     def _f():
         print("--- Thread", threading.current_thread(), "started---", flush=True)
@@ -511,10 +505,8 @@ def benchmark():
             s.predict(img)
         t1_t = time.time()
         print("---- Thread", threading.current_thread(), "----", flush=True)
-        print("Processing", n_images, "images in",
-              t1_t - t0_t, "seconds", flush=True)
-        print("  Avg:", (t1_t - t0_t) / n_images *
-              1000, "ms per image", flush=True)
+        print("Processing", n_images, "images in", t1_t - t0_t, "seconds", flush=True)
+        print("  Avg:", (t1_t - t0_t) / n_images * 1000, "ms per image", flush=True)
 
     threads = []
     for i in range(n_threads):

@@ -587,19 +587,19 @@ def update_model():
     if not model_uri and not model_dir:
         return "missing model_uri or model_dir"
 
-    print("[INFO] Update Model ...")
+    logger.info("Update Model ...")
     if model_uri:
 
-        print("[INFO] Got Model URI", model_uri)
+        logger.info("Got Model URI %s", model_uri)
 
         if model_uri == onnx.model_uri:
-            print("[INFO] Model Uri unchanged")
+            logger.info("Model URI unchanged")
         else:
             get_file_zip(model_uri, MODEL_DIR)
             onnx.model_uri = model_uri
 
         onnx.update_model("model")
-        print("[INFO] Update Finished ...")
+        logger.info("Update Finished ...")
 
         return "ok"
 

@@ -45,9 +45,9 @@ def getWlanIp():
 
 # this function prepare the camera folder clears any previous models that the device may have
 def prepare_folder(folder):
-    print("preparing: %s" % folder)
+    logger.info("Preparing: %s", folder)
     if os.path.isdir(folder):
-        print("found directory cleaning it before copying new files...")
+        logger.info("Found directory cleaning it before copying new files...")
         # ToDo delete all files in folder
         shutil.rmtree(folder, ignore_errors=True)
         os.makedirs(folder, exist_ok=True)
@@ -65,8 +65,9 @@ def WaitForFileDownload(FileName):
             with open(FileName):
                 valid = 1
         except IOError:
+            logger.info("Still waiting")
             time.sleep(1)
-    print("Got it ! File Download Complete !")
+    logger.info("Got it ! File Download Complete !")
 
 
 def get_file(url, dst_folder="/app/vam_model_folder"):
@@ -79,19 +80,19 @@ def get_file(url, dst_folder="/app/vam_model_folder"):
         dirpath = os.getcwd()
         # src = os.path.join(dirpath,"model")
         dst = os.path.abspath(dst_folder)
-        print("Downloading File ::" + FileName)
+        logger.info("Downloading File ::" + FileName)
         urllib2.urlretrieve(url, filename=(os.path.join(dst, FileName)))
         WaitForFileDownload(os.path.join(dst, FileName))
         return True
     else:
-        print("Cannot extract file name from URL")
+        logger.info("Cannot extract file name from URL")
         return False
 
 
 def get_file_zip(url, dst_folder="model"):
     # adding code to fix issue where the file name may not be part of url details here
     #
-    print(url)
+    logger.info("Downloading: %s", url)
     remotefile = urlopen(url)
 
     myurl = remotefile.url
@@ -103,16 +104,16 @@ def get_file_zip(url, dst_folder="model"):
         dirpath_file = os.path.join(dirpath, dst_folder)
         src = os.path.abspath(dirpath_file)
         src_file_path = os.path.join(src, FileName)
-        logger.info("location to download is ::" + src_file_path)
+        logger.info("Location to download is :: %s", src_file_path)
         prepare_folder(dirpath_file)
-        print("\n Downloading File ::" + FileName)
+        logger.info("Downloading File :: %s", FileName)
 
         urllib2.urlretrieve(url, filename=src_file_path)
         WaitForFileDownload(src_file_path)
         result = unzip_and_move(src_file_path, dst_folder)
         return result
     else:
-        print("Cannot extract file name from URL")
+        logger.info("Cannot extract file name from URL")
         return False
 
 
@@ -122,7 +123,7 @@ def unzip_and_move(file_path=None, dst_folder="model"):
     dirpath_file = os.path.join(dirpath, dst_folder)
     zip_ref.extractall(dirpath_file)
     zip_ref.close()
-    logger.info("files unzipped to : " + dirpath_file)
+    logger.info("files unzipped to : %s", dirpath_file)
     # transferdlc(True,"twin_provided_model")
     return True
 
