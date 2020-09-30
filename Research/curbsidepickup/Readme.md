@@ -185,6 +185,11 @@ Ssh into the VM, locate the `input` folder (the specified 'bind' where the simul
 ### How to provide with videos my own videos?
 You can supply your own videos. Make sure that when converting, consider a maximum width or height, whatever comes first, of 960 pixels. Also consider that NO AUDIO/CODEC should be selected on your conversion tool of choice. Once cosnverted, you can drop them into your IoT Edge Device input (folder, for a VM. Share, for an ASE). To use them, specify their name into `operations.json` where corresponds (more on this below).
 
+#### To convert your videos before uploading
+The simulator requires .MKV videos without audio. We used https://cloudconvert.com/mov-to-mkv online conversion tool with all defaults but Audio and Height (our videos were shot vertically, otherwise we'd changed Width)
+
+![screenshot](docs/assets/convert.png)
+
 ## Preparing the sample application
 
 Now that you have run the deployment manifest for your IoT Edge Device, you're ready to see it in action. You can now set a topology and load and initialize some graph instances, based on your camera set (or test videos you want to try).
