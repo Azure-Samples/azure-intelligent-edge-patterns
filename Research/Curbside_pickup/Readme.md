@@ -106,7 +106,7 @@ Template: `src/alpr/deployment.lpr.vm.template.json`
     * output
     * appdata
 
-    i.e. create a top folder in `/var/iotedgedata` with `mkdir` command. In there add the 3 folders (assuming `cd /var/iotedgedata`):
+    To set these up create a top folder in `/var/iotedgedata` with `mkdir` command. In there add the 3 folders (assuming `cd /var/iotedgedata`):
     `mkdir input`
     `mkdir output`
     `mkdir appdata`
@@ -138,9 +138,14 @@ Template: `src/alpr/deployment.lpr.ase.template.json`
 
 * Make sure your shares are in place for `output`, `input` and `appdata`
 
-    In total, 3 shares are required. 1 Local and 2 Edge ones. This tutorial shows how to add an Edge Share (Block Blob) and a Local Share (https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-j-series-manage-shares).
+    In total, 3 shares are required. 1 Local and 2 Edge ones.
+    * Name: inputlocalshare (Local share)
+    * Name: outputedgeshare (Edge share)
+    * Name: appdataedgeshare (Edge share)
+    
+    This tutorial shows how to add an Edge Share (Block Blob) and a Local Share (https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-j-series-manage-shares).
 
-    In your .env file, replace these values with the corresponding ones. For example:
+    In your .env file, replace these values with the corresponding ones.
 
 ```
 INPUT_VIDEO_FOLDER_ON_DEVICE="inputlocalshare"
