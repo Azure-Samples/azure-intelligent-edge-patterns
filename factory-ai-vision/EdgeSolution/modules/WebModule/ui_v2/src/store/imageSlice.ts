@@ -22,6 +22,7 @@ type ImageFromServer = {
   part: number;
   project: number;
   timestamp: string;
+  camera: number;
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
@@ -37,6 +38,7 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     confidence: response.confidence,
     hasRelabeled: false,
     timestamp: response.timestamp,
+    camera: response.camera,
   };
 };
 

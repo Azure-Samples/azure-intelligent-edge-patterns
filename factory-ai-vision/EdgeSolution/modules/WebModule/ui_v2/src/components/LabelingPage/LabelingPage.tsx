@@ -64,6 +64,11 @@ type LabelingPageProps = {
   onSaveAndGoCaptured?: () => void;
 };
 
+const cameraNameSelector = (state: State) => {
+  const cameraId = imageSelector(state)?.camera;
+  return state.camera.entities[cameraId]?.name;
+};
+
 const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
@@ -74,6 +79,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const imageConfidenceLevel = useSelector<State, number>((state) => imageSelector(state)?.confidence || 0);
   const imageTimeStamp = useSelector<State, string>(selectImageTimeStamp);
   const imgPart = useSelector<State, Part>(imagePartSelector);
+  const cameraName = useSelector(cameraNameSelector);
   const canBackToCapture = useSelector(
     (state: State) => state.labelingPage.openFrom === OpenFrom.CaptureDialog,
   );
@@ -125,6 +131,9 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
         onBoxCreated={dummyFunction}
         imgPart={imgPart}
       />
+      <Text variant="small" styles={{ root: { position: 'absolute', left: 5, bottom: 5 } }}>
+        {cameraName}
+      </Text>
       <Text variant="small" styles={{ root: { position: 'absolute', right: 5, bottom: 5 } }}>
         {imageTimeStamp}
       </Text>
