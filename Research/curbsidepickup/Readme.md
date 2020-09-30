@@ -625,6 +625,10 @@ One of the changes we've done to `operations.json` earlier, was specifying the `
 
 You'll find additional info in https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov3-onnx#view-video-stream-with-inferencing-overlays
 
+**Pay attention to the streaming endpoint URLs.** For cloud based VM, replce the address with your own, or your public IP (making sure port 8080 is allowed for incoming traffic). For ASE, please involve IT, to get the proper address.
+
+![screenshot](docs/assets/real-time-feeds2.png)
+
 ## Troubleshooting
 
 * I'm getting bad performance on the test videos I feed to the simulator.
