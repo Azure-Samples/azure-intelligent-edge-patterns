@@ -162,7 +162,7 @@
         "properties.desired": {
           "schemaVersion": "1.0",
           "routes": {
-            "LVAToHub": "FROM /messages/modules/lvaEdge/outputs/ INTO $upstream"
+            "LVAToHub": "FROM /messages/modules/lvaEdge/outputs/* INTO $upstream"
           },
           "storeAndForwardConfiguration": {
             "timeToLiveSecs": 7200
@@ -181,7 +181,7 @@
           "armEndpoint": "https://management.azure.com/",
           "diagnosticsEventsOutputName": "AmsDiagnostics",
           "operationalEventsOutputName": "AmsOperational",
-          "logLevel": "Verbose",
+          "logLevel": "Information",
           "logCategories": "Application,Events",
           "allowUnsecuredEndpoints": true,
           "telemetryOptOut": false

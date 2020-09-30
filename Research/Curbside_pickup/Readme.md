@@ -73,6 +73,11 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 
 ## LPR Image
 
+### Use a prebuilt image
+If you want to go straight into action (and save you some precious time in the process), you can use an existing image.
+
+> To do this, you'll need to change the `lpraimodule`'s `image` to: `initmahesh/lpr:1.0` for the deployment template of your choice (VM or ASE based).
+
 ### Build your own from source
 
 - Build from `Dockerfile` with new tag from ML solution (`lva_ai_solution`) directory.
@@ -87,16 +92,11 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
     
     `docker push <youracrusername>.azurecr.io/lpr:v1.1`
 
-### Use a prebuilt image
-If you want to go straight into action (and save you some precious time in the process), you can use an existing image.
-
-> To do this, you'll need to change the `lpraimodule`'s `image` to: `initmahesh/lpr:1.0` for the deployment template of your choice (VM or ASE based).
-
 ## Deploying to IoT Edge Device
 
 Depending the operations schema, you may end up using an IoT Edge Device, that sits on a Server (we'll call it VM for short), or into an Azure Stack Edge device (ASE). There're subtle differences into each.
 
-> Be it a VM or ASE, make sure you're reflecting your newly pushed `image:` (under "lpraimodule" in the corresponding Deployment Manifest template).
+**Be it a VM or ASE, make sure you're reflecting your newly pushed `image:` (under "lpraimodule" in the corresponding Deployment Manifest template).**
 
 ### VM based IoT Edge Device
 If you're using a [GPU based VM as your IoT Edge Device](docs/runonvm.md), make sure to follow these step.
@@ -174,6 +174,8 @@ The videos provided for testing purposes, are the `.mkv` files located at `docs/
 copy the sample videos into the `Mount` used by the rtspsim. To refresh which one is it, please refer to your .env file and look for the value of `$INPUT_VIDEO_FOLDER_ON_DEVICE`.
 
 ![screenshot](docs/assets/ase-videos.png)
+
+To access the shared drive, please follow these steps: https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-j-series-deploy-add-shares
 
 ### VM
 Ssh into the VM, locate the `input` folder (the specified 'bind' where the simulator will search for the videos), and upload in there the 3 .mkv videos you'll find in `docs/assets`.
