@@ -71,7 +71,9 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
 
 > If you've created Azure Resources based on the script linked in the [Prerequisites](#prerequisites) section, you can directly copy/paste the contents of `clouddrive/lva-sample/edge-deployment/.env` from one place to the other.
 
-## Building the LPR Image 
+## LPR Image
+
+### Build your own from source
 
 - Build from `Dockerfile` with new tag from ML solution (`lva_ai_solution`) directory.
 
@@ -85,7 +87,7 @@ APPDATA_FOLDER_ON_DEVICE="<replace-me>"
     
     `docker push <youracrusername>.azurecr.io/lpr:v1.1`
 
-### Using a prebuilt image
+### Use a prebuilt image
 If you want to go straight into action (and save you some precious time in the process), you can use an existing image.
 
 > To do this, you'll need to change the `lpraimodule`'s `image` to: `initmahesh/lpr:1.0` for the deployment template of your choice (VM or ASE based).
