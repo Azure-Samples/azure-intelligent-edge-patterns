@@ -48,7 +48,7 @@ def gen_default_lines_dd():
             {
                 "id": "$UUID_PLACE_HOLDER",
                 "type": "Line",
-                "label": [{"x": 910, "y": 17}, {"x": 910, "y": 504}],
+                "label": [{"x": 611, "y": 17}, {"x": 611, "y": 504}],
             }
         ],
     }
