@@ -94,7 +94,7 @@ If you want to go straight into action (and save you some precious time in the p
 
 ## Deploying to IoT Edge Device
 
-Depending the operations schema, you may end up using an IoT Edge Device, that sits on a) a Server (we'll call it VM for short), or into an Azure Stack Edge device (ASE). There're subtle differences into each.
+Depending the operations schema, you may end up using an IoT Edge Device, that sits on a Server (we'll call it VM for short), or into an Azure Stack Edge device (ASE). There're subtle differences into each.
 
 > Be it a VM or ASE, make sure you're reflecting your newly pushed `image:` (under "lpraimodule" in the corresponding Deployment Manifest template).
 
