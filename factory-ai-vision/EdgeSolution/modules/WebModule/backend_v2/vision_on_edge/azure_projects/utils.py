@@ -197,9 +197,12 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
         for img in imgs:
             logger.info("*** img %s", img_counter)
             for region in img.regions:
-                part_obj = Part.objects.filter(
+                part_objs = Part.objects.filter(
                     name=region.tag_name, project_id=project_id
                 )
+                if not part_objs.exists():
+                    continue
+                part_obj = part_objs.first()
                 img_obj, created = Image.objects.update_or_create(
                     part=part_obj,
                     remote_url=img.original_image_uri,
