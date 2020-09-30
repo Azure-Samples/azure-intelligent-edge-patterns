@@ -19,7 +19,7 @@ import { postImages, getImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
 import { selectImageItemByUntagged, selectImageItemByRelabel } from '../store/selectors';
 import { getParts } from '../store/partSlice';
-import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
+import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { useInterval } from '../hooks/useInterval';
 import { Instruction } from '../components/Instruction';
 import { Status } from '../store/project/projectTypes';
@@ -168,7 +168,7 @@ export const Images: React.FC = () => {
         </Stack>
       </Stack>
       <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} />
-      <LabelingPage mode={LabelPageMode.MultiPage} />
+      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
       <input
         ref={fileInputRef}
         type="file"

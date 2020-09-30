@@ -6,7 +6,7 @@ import * as R from 'ramda';
 
 import { Image } from '../store/type';
 import LabelDisplayImage from './LabelDisplayImage';
-import { openLabelingPage } from '../store/labelingPageSlice';
+import { OpenFrom, openLabelingPage } from '../store/labelingPageSlice';
 import { timeStampConverter } from '../utils/timeStampConverter';
 
 const ROWS_PER_PAGE = 3;
@@ -20,6 +20,7 @@ const classNames = mergeStyleSets({
 
 export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'isRelabel'> & {
   partName: string;
+  cameraName: string;
 };
 
 export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
@@ -56,12 +57,17 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
             imgId={item.id}
             imgUrl={item.image}
             imgTimeStamp={timeStampConverter(item.timestamp)}
+            cameraName={item.cameraName}
             partName={item.partName}
             isRelabel={item.isRelabel}
             pointerCursor
             onClick={() =>
               dispatch(
-                openLabelingPage({ selectedImageId: item.id, imageIds: sortedImages.map((e) => e.id) }),
+                openLabelingPage({
+                  selectedImageId: item.id,
+                  imageIds: sortedImages.map((e) => e.id),
+                  openFrom: OpenFrom.DisplayImage,
+                }),
               )
             }
           />

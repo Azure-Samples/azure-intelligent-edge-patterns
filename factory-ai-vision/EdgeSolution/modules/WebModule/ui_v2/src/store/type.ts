@@ -50,4 +50,5 @@ export type Image = {
   confidence: number;
   hasRelabeled: boolean;
   timestamp: string;
+  camera: number;
 };

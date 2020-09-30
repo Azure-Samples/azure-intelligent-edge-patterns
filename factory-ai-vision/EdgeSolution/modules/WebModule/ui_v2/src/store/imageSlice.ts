@@ -5,7 +5,7 @@ import { schema, normalize } from 'normalizr';
 
 import { State } from 'RootStateType';
 import { Annotation, AnnotationState, Image } from './type';
-import { openLabelingPage } from './labelingPageSlice';
+import { OpenFrom, openLabelingPage } from './labelingPageSlice';
 import { deleteImage, changeImage } from './actions';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
@@ -22,6 +22,7 @@ type ImageFromServer = {
   part: number;
   project: number;
   timestamp: string;
+  camera: number;
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
@@ -37,6 +38,7 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     confidence: response.confidence,
     hasRelabeled: false,
     timestamp: response.timestamp,
+    camera: response.camera,
   };
 };
 
@@ -97,7 +99,11 @@ export const captureImage = createWrappedAsync<
 
   if (shouldOpenLabelingPage)
     dispatch(
-      openLabelingPage({ imageIds: [...imageIds, capturedImage.id], selectedImageId: capturedImage.id }),
+      openLabelingPage({
+        imageIds: [...imageIds, capturedImage.id],
+        selectedImageId: capturedImage.id,
+        openFrom: OpenFrom.AfterCapture,
+      }),
     );
 
   return normalizeImages([response.data.image]).entities;

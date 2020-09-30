@@ -12,6 +12,7 @@ interface LabelDisplayImageProps {
   imgId: number;
   imgUrl: string;
   imgTimeStamp: string;
+  cameraName: string;
   partName: string;
   isRelabel: boolean;
   pointerCursor?: boolean;
@@ -21,6 +22,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   imgId,
   imgUrl,
   imgTimeStamp,
+  cameraName,
   partName,
   isRelabel,
   pointerCursor = false,
@@ -89,7 +91,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   return (
     <LabelingDisplayImageCard
       isRelabel={isRelabel}
-      cameraName=""
+      cameraName={cameraName}
       imgTimeStamp={imgTimeStamp}
       partName={partName}
     >

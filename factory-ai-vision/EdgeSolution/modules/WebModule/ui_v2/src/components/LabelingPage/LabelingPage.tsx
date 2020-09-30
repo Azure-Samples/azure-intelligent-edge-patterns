@@ -16,7 +16,7 @@ import {
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
-import { closeLabelingPage } from '../../store/labelingPageSlice';
+import { closeLabelingPage, OpenFrom } from '../../store/labelingPageSlice';
 import { selectImageEntities, saveLabelImageAnnotation } from '../../store/imageSlice';
 import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
@@ -25,6 +25,7 @@ import { deleteImage, thunkGoNextImage, thunkGoPrevImage } from '../../store/act
 import Scene from './Scene';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
+import { dummyFunction } from '../../utils/dummyFunction';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -59,18 +60,16 @@ const labelingPageStyle = mergeStyleSets({
   imgInfoContainer: { width: '30%' },
 });
 
-export enum LabelPageMode {
-  // Label a single image and closed. Used after capturing in camera details.
-  SinglePage,
-  // Able to label multi images. Used in image page and part page.
-  MultiPage,
-}
+type LabelingPageProps = {
+  onSaveAndGoCaptured?: () => void;
+};
 
-interface LabelingPageProps {
-  mode: LabelPageMode;
-}
+const cameraNameSelector = (state: State) => {
+  const cameraId = imageSelector(state)?.camera;
+  return state.camera.entities[cameraId]?.name;
+};
 
-const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotation }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const dispatch = useDispatch();
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
@@ -80,6 +79,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
   const imageConfidenceLevel = useSelector<State, number>((state) => imageSelector(state)?.confidence || 0);
   const imageTimeStamp = useSelector<State, string>(selectImageTimeStamp);
   const imgPart = useSelector<State, Part>(imagePartSelector);
+  const cameraName = useSelector(cameraNameSelector);
+  const canBackToCapture = useSelector(
+    (state: State) => state.labelingPage.openFrom === OpenFrom.CaptureDialog,
+  );
+  const noPrevAndNext = useSelector((state: State) => state.labelingPage.openFrom === OpenFrom.AfterCapture);
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
@@ -105,6 +109,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
     await saveAnno();
     closeDialog();
   };
+  const saveAndGoCapture = async () => {
+    await saveAndDone();
+    onSaveAndGoCaptured();
+  };
 
   const onDeleteImage = async () => {
     setLoading(true);
@@ -120,9 +128,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
         workState={workState}
         setWorkState={setWorkState}
         labelingType={LabelingType.SingleAnnotation}
-        onBoxCreated={() => {}}
+        onBoxCreated={dummyFunction}
         imgPart={imgPart}
       />
+      <Text variant="small" styles={{ root: { position: 'absolute', left: 5, bottom: 5 } }}>
+        {cameraName}
+      </Text>
       <Text variant="small" styles={{ root: { position: 'absolute', right: 5, bottom: 5 } }}>
         {imageTimeStamp}
       </Text>
@@ -158,7 +169,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
     const deleteDisabled = loading;
     const saveDisabled = noPart || noAnno;
 
-    if (mode === LabelPageMode.SinglePage)
+    if (noPrevAndNext)
       return (
         <Stack horizontal tokens={{ childrenGap: 10 }}>
           <PrimaryButton
@@ -177,16 +188,17 @@ const LabelingPage: FC<LabelingPageProps> = ({ mode = LabelingType.SingleAnnotat
     const nextDisabled =
       isLastImg || noPart || noAnno || workState === WorkState.Creating || isOnePointBox || loading;
     return (
-      <Stack horizontal tokens={{ childrenGap: 10 }}>
+      <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
-        <DefaultButton
-          text="Previous"
-          style={{ marginLeft: 'auto' }}
-          onClick={saveAndPrev}
-          disabled={previousDisabled}
-        />
+        <Text style={{ marginLeft: 'auto' }}>
+          Image {index + 1} of {imageIds.length}
+        </Text>
+        <DefaultButton text="Previous" onClick={saveAndPrev} disabled={previousDisabled} />
         <PrimaryButton text="Next" disabled={nextDisabled} onClick={saveAndNext} />
         <Separator vertical />
+        {canBackToCapture && (
+          <DefaultButton text="Save and capture another image" onClick={saveAndGoCapture} />
+        )}
         <DefaultButton text="Done" primary={isLastImg} onClick={saveAndDone} />
       </Stack>
     );
