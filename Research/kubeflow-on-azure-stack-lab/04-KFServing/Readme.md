@@ -45,6 +45,29 @@ Check KFServing controller works(its pod is in `Running` state):
     NAME                             READY   STATUS    RESTARTS   AGE
     kfserving-controller-manager-0   2/2     Running   2          13m
 
+## KFServing Installation with Kubeflow on Azure Stack
+
+KFServing is installed by default as part of Kubeflow installation. If you did what is described in [00-Intro](../00-Intro/Readme.md), you should see the CRD defined in your system: 
+
+    $ kubectl get crd | grep inference
+    inferenceservices.serving.kubeflow.org                      2020-10-02T19:22:32Z
+
+And you should see the KFServing controller manager in `kubeflow` namespace:
+
+    $ kubectl get pods -A
+    NAMESPACE         NAME                                                              READY   STATUS      RESTARTS   AGE
+    ...
+    kubeflow          kfserving-controller-manager-0                                    2/2     Running     0          137m
+    ...
+
+You would need to manually label your particular namespace with `inferenceservice=enabled`, for example:
+
+    $ kubectl create namespace kfserving-test
+    $ kubectl label namespace kfserving-test serving.kubeflow.org/inferenceservice=enabled
+    namespace/kfserving-test labeled
+
+You might also need to resolve the access issues, see [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) or [KFServing Troubleshooting](https://github.com/kubeflow/kfserving/blob/master/docs/DEVELOPER_GUIDE.md#troubleshooting).
+
 ## Infrerencing using KFServing
 
 To create KFServing inference service, you can try a sample from [kfserving repository](https://github.com/kubeflow/kfserving):
