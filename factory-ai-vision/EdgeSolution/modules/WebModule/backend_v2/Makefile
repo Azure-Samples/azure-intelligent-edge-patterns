@@ -26,9 +26,14 @@ test: ## unit test
 	@pytest
 	@echo "Testing passed\n"
 
-.PHONY: coverage
-coverage: ## integration test
+.PHONY: coverage-html
+coverage-html: ## Dev
 	@echo "Running coverage..."
-	@coverage run -m pytest
-	@coverage html
+	@pytest --cov=vision_on_edge --cov-report=html
+	@echo "Coverage run complete\n"
+
+.PHONY: coverage-xml
+coverage-xml: ## Pipeline publish result
+	@echo "Running coverage..."
+	@pytest --cov=vision_on_edge --junitxml=junit/test-results.xml
 	@echo "Coverage run complete\n"
