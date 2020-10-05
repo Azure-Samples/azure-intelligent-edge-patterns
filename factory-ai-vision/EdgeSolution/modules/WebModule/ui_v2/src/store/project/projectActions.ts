@@ -229,6 +229,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
   const projectId = getState().project.data.id;
   const isProjectEmpty = projectId === null || projectId === undefined;
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
+  const isDemo = getState().trainingProject.isDemo.includes(projectData.trainingProject);
 
   dispatch(postProjectRequest(false));
 
@@ -237,7 +238,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       parts: projectData.parts,
       cameras: projectData.cameras,
       project: projectData.trainingProject,
-      needRetraining: projectData.needRetraining,
+      needRetraining: isDemo ? false : projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
       maxImages: projectData.maxImages,
