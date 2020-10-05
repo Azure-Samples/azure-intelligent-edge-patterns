@@ -40,7 +40,7 @@ class ProjectRemovedError(APIException):
     """ProjectRemovedError."""
 
     status_code = 503
-    default_detail = "This project has been removed. Please choose another project"
+    default_detail = "This project has been removed. Please choose another project."
     default_code = "project_removed_error"
 
 
@@ -50,3 +50,12 @@ class ProjectAlreadyTraining(APIException):
     status_code = 400
     default_detail = "Project already training."
     default_code = "project_already_training"
+
+
+class ProjectTrainWithoutParts(APIException):
+    """ProjectTrainWithoutParts.
+    """
+
+    status_code = 400
+    default_detail = "Project can not train without parts."
+    default_code = "project_train_without_parts"

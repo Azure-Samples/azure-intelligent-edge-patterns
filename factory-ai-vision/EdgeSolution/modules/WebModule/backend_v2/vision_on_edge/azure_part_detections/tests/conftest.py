@@ -6,6 +6,9 @@ from unittest import mock
 import pytest
 
 from ...azure_settings.models import Setting
+from ...cameras.models import Camera
+
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -18,6 +21,11 @@ def mock_get_domain_id(monkeypatch):
     monkeypatch.setattr(
         Setting, "get_domain_id", mock.MagicMock(return_value="Fake_id")
     )
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_camera_verify_rtsp(monkeypatch):
+    monkeypatch.setattr(Camera, "verify_rtsp", mock.MagicMock(return_value=True))
 
 
 # @pytest.fixture(scope="module")

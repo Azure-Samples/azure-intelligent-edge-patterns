@@ -23,28 +23,34 @@ class PdProbThresholdOutOfRange(APIException):
     default_code = "pd_prob_threshold_out_of_range"
 
 
-class PdConfigureWithoutInferenceModule(APIException):
+class PdDeployWithoutInferenceModule(APIException):
     status_code = 400
-    default_detail = "Please set inference module before configure/deploy."
-    default_code = "pd_configure_without_inference_module"
+    default_detail = "Please set inference module before deploy/deploy."
+    default_code = "pd_deploy_without_inference_module"
 
 
-class PdConfigureWithoutProject(APIException):
+class PdDeployWithoutProject(APIException):
     status_code = 400
-    default_detail = "Please set project/model before configure/deploy."
-    default_code = "pd_configure_without_project"
+    default_detail = "Please set project/model before deploy/deploy."
+    default_code = "pd_deploy_without_project"
 
 
-class PdConfigureWithoutCameras(APIException):
+class PdDeployWithoutCameras(APIException):
     status_code = 400
-    default_detail = "Please set cameras before configure/deploy."
-    default_code = "pd_configure_without_cameras"
+    default_detail = "Please set cameras before deploy/deploy."
+    default_code = "pd_deploy_without_cameras"
 
 
 class PdInferenceModuleUnreachable(APIException):
     status_code = 503
     default_detail = "Inference module url unreachable."
     default_code = "pd_inference_module_unreachable"
+
+
+class PdRelabelWithoutProject(APIException):
+    status_code = 400
+    default_detail = "Part Detection does not have an project."
+    default_code = "pd_relabel_without_project"
 
 
 class PdRelabelConfidenceOutOfRange(APIException):

@@ -13,7 +13,7 @@ from azure.cognitiveservices.vision.customvision.training.models import (
 from django.db import models
 from django.db.models.signals import pre_save
 from django.utils import timezone
-from msrest.exceptions import DeserializationError as MSDeserializationError
+from rest_framework.exceptions import APIException
 
 from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..azure_settings.models import Setting
@@ -21,6 +21,7 @@ from .exceptions import (
     ProjectCannotChangeDemoError,
     ProjectCustomVisionError,
     ProjectResetWithoutNameError,
+    ProjectTrainWithoutParts,
     ProjectWithoutSettingError,
 )
 
@@ -227,6 +228,46 @@ class Project(models.Model):
             raise ProjectCustomVisionError
         trainer = self.setting.get_trainer_obj()
         trainer.delete_tag(project_id=self.customvision_id, tag_id=tag_id)
+
+    def is_trainable(self, raise_exception: bool = False) -> bool:
+        """is_trainable.
+
+        Args:
+            raise_exception (bool): raise_exception
+
+        Returns:
+            bool: is_trainable
+        """
+        try:
+            if self.is_demo:
+                raise ProjectCannotChangeDemoError
+            if not self.part_set.exists():
+                raise ProjectTrainWithoutParts
+            for part in self.part_set.all():
+                part.is_trainable(raise_exception=True)
+            return True
+        except APIException:
+            if raise_exception:
+                raise
+            return False
+
+    def is_deployable(self, raise_exception: bool = False) -> bool:
+        """is_deployable.
+
+        Args:
+            raise_exception (bool): raise_exception
+
+        Returns:
+            bool: is_trainable
+        """
+        try:
+            if self.is_demo:
+                return True
+            return self.is_trainable(raise_exception=True)
+        except APIException:
+            if raise_exception:
+                raise
+            return False
 
     def train_project(self):
         """train_project.

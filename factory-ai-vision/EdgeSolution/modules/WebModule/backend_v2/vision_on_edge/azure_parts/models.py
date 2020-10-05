@@ -5,8 +5,11 @@ import logging
 
 from django.db import models
 from django.db.models.signals import pre_save
+from rest_framework.exceptions import APIException
 
-from vision_on_edge.azure_projects.models import Project
+from ..azure_projects.models import Project
+from .constants import CUSTOMVISION_LEAST_IMAGE_TO_TRAIN
+from .exceptions import PartNotEnoughImagesToTrain
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,53 @@ class Part(models.Model):
 
     class Meta:
         unique_together = ("name_lower", "project")
+
+    def is_trainable(self, raise_exception: bool = False) -> bool:
+        """is_trainable.
+
+        Args:
+            raise_exception (bool): raise_exception
+
+        Returns:
+            bool: if part has enough images and is trainable.
+        """
+        try:
+            if self.project.is_demo:
+                return True
+            local_count = self.get_tagged_images_count_local()
+            remote_count = self.get_tagged_images_count_remote()
+            if local_count + remote_count >= CUSTOMVISION_LEAST_IMAGE_TO_TRAIN:
+                return True
+            raise PartNotEnoughImagesToTrain(
+                detail=(
+                    f"{self.name} has {local_count} local, {remote_count} remote images."
+                    + f"(expected least total: {CUSTOMVISION_LEAST_IMAGE_TO_TRAIN})"
+                )
+            )
+        except APIException:
+            if raise_exception:
+                raise
+            return False
+
+    def get_tagged_images_count_local(self) -> int:
+        return self.image_set.filter(uploaded=False, is_relabel=False).count()
+
+    def get_tagged_images_count_remote(self) -> int:
+        """get_tagged_images_count.
+
+        Returns:
+            int: Tagged images count on Custom Vision
+        """
+        if self.project.is_demo:
+            return CUSTOMVISION_LEAST_IMAGE_TO_TRAIN
+        if not self.project.customvision_id:
+            return 0
+        if not self.customvision_id:
+            return 0
+        trainer = self.project.get_trainer_obj()
+        return trainer.get_tagged_image_count(
+            project_id=self.project.customvision_id, tag_ids=[self.customvision_id]
+        )
 
     def __str__(self):
         return self.name
