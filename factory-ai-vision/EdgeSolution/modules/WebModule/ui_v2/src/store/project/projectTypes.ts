@@ -169,16 +169,6 @@ export type PostProjectFaliedAction = ProjectAction & {
   error: Error;
 };
 
-export const DELETE_PROJECT_SUCCESS = 'DELETE_PROJECT_SUCCESS';
-export type DeleteProjectSuccessAction = ProjectAction & {
-  type: typeof DELETE_PROJECT_SUCCESS;
-};
-
-export const DELETE_PROJECT_FALIED = 'DELETE_PROJECT_FALIED';
-export type DeleteProjectFaliedAction = ProjectAction & {
-  type: typeof DELETE_PROJECT_FALIED;
-};
-
 export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
 export type UpdateProjectDataAction = ProjectAction & {
   type: typeof UPDATE_PROJECT_DATA;
@@ -210,8 +200,6 @@ export type ProjectActionTypes =
   | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction
-  | DeleteProjectSuccessAction
-  | DeleteProjectFaliedAction
   | UpdateProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
