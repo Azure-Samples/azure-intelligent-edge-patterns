@@ -39,6 +39,7 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     hasRelabeled: false,
     timestamp: response.timestamp,
     camera: response.camera,
+    uploaded: response.uploaded,
   };
 };
 
