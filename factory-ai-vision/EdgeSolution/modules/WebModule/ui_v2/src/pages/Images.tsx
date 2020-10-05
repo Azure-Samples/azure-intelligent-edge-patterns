@@ -8,6 +8,8 @@ import {
   Pivot,
   PivotItem,
   MessageBar,
+  Separator,
+  mergeStyleSets,
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
@@ -25,6 +27,11 @@ import { Instruction } from '../components/Instruction';
 import { Status } from '../store/project/projectTypes';
 
 const theme = getTheme();
+const classes = mergeStyleSets({
+  seperator: {
+    margin: '20px 0px',
+  },
+});
 
 export const Images: React.FC = () => {
   const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
@@ -141,6 +148,9 @@ export const Images: React.FC = () => {
                   />
                 ) : (
                   <>
+                    <Separator alignContent="start" className={classes.seperator}>
+                      Deployment captures
+                    </Separator>
                     {relabelImages.length > 0 && (
                       <MessageBar styles={{ root: { margin: '12px 0px' } }}>
                         Images saved from the current deployment. Confirm or modify the objects identified to
@@ -148,6 +158,9 @@ export const Images: React.FC = () => {
                       </MessageBar>
                     )}
                     <ImageList images={relabelImages} />
+                    <Separator alignContent="start" className={classes.seperator}>
+                      Manually added
+                    </Separator>
                     <ImageList images={unlabeledImages} />
                   </>
                 )}
