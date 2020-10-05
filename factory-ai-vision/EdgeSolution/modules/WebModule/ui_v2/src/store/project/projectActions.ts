@@ -11,10 +11,6 @@ import {
   POST_PROJECT_SUCCESS,
   POST_PROJECT_FALIED,
   PostProjectFaliedAction,
-  DeleteProjectSuccessAction,
-  DELETE_PROJECT_SUCCESS,
-  DeleteProjectFaliedAction,
-  DELETE_PROJECT_FALIED,
   ProjectData,
   PostProjectRequestAction,
   POST_PROJECT_REQUEST,
@@ -126,15 +122,6 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
 const postProjectFail = (error: Error, isDemo: boolean): PostProjectFaliedAction => ({
   type: POST_PROJECT_FALIED,
   error,
-  isDemo,
-});
-
-const deleteProjectSuccess = (isDemo: boolean): DeleteProjectSuccessAction => ({
-  type: DELETE_PROJECT_SUCCESS,
-  isDemo,
-});
-const deleteProjectFailed = (isDemo: boolean): DeleteProjectFaliedAction => ({
-  type: DELETE_PROJECT_FALIED,
   isDemo,
 });
 
@@ -279,18 +266,6 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
 export const getConfigure = createWrappedAsync<any, number>('project/configure', async (projectId) => {
   await Axios.get(`/api/part_detections/${projectId}/configure`);
 });
-
-export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
-  const projectId = getProjectData(getState()).id;
-  return Axios.patch(`/api/part_detections/${projectId}/`, { cameras: [], has_configured: false })
-    .then(() => {
-      return dispatch(deleteProjectSuccess(isDemo));
-    })
-    .catch((err) => {
-      alert(err);
-      dispatch(deleteProjectFailed(isDemo));
-    });
-};
 
 export const thunkGetTrainingLog = (projectId: number, isDemo: boolean, cameraId: number) => (
   dispatch,

@@ -6,8 +6,6 @@ import {
   GET_PROJECT_FAILED,
   POST_PROJECT_SUCCESS,
   POST_PROJECT_FALIED,
-  DELETE_PROJECT_SUCCESS,
-  DELETE_PROJECT_FALIED,
   GET_PROJECT_REQUEST,
   UPDATE_PROJECT_DATA,
   POST_PROJECT_REQUEST,
@@ -100,22 +98,6 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
       return { ...state, isLoading: false, error: action.error };
     case getConfigure.fulfilled.toString():
       return { ...state, status: Status.WaitTraining };
-    case DELETE_PROJECT_SUCCESS:
-      return {
-        ...state,
-        isLoading: false,
-        data: initialProjectData,
-        originData: initialProjectData,
-        trainingMetrics: {
-          curConsequence: null,
-          prevConsequence: null,
-        },
-        trainingLog: '',
-        status: Status.None,
-        error: null,
-      };
-    case DELETE_PROJECT_FALIED:
-      return { ...state };
     case UPDATE_PROJECT_DATA:
       return { ...state, data: { ...state.data, ...action.payload } };
     case pullCVProjects.fulfilled.toString():
