@@ -104,6 +104,7 @@ class Stream:
         # lva signal
         self.lva_last_send_time = time.time()
         self.lva_interval = 0
+        self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
         self.use_line = False
@@ -121,7 +122,7 @@ class Stream:
         gm.invoke_graph_instance_deactivate(self.cam_id)
 
     def _set(self, rtspUrl, frameRate):
-        gm.invoke_instance_set(LVA_MODE, self.cam_id, rtspUrl, frameRate)
+        gm.invoke_instance_set(self.lva_mode, self.cam_id, rtspUrl, frameRate)
 
     def _start(self):
         gm.invoke_graph_instance_activate(self.cam_id)
@@ -148,7 +149,8 @@ class Stream:
                 cnt += 1
                 if cnt % 30 == 1:
                     logging.info(
-                        "send through channel {}".format(bytes(self.cam_id, "utf-8"))
+                        "send through channel {}".format(
+                            bytes(self.cam_id, "utf-8"))
                     )
                 # self.mutex.acquire()
                 # FIXME may find a better way to deal with encoding
@@ -186,6 +188,7 @@ class Stream:
         cam_type,
         cam_source,
         frameRate,
+        lva_mode,
         cam_id,
         has_aoi,
         aoi_info,
@@ -197,9 +200,10 @@ class Stream:
 
         # if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
-        if self.cam_source != cam_source or round(self.frameRate) != round(frameRate):
+        if self.cam_source != cam_source or round(self.frameRate) != round(frameRate) or self.lva_mode != lva_mode:
             self.cam_source = cam_source
             self.frameRate = frameRate
+            self.lva_mode = lva_mode
             self._update_instance(normalize_rtsp(cam_source), str(frameRate))
 
         self.has_aoi = has_aoi
@@ -363,6 +367,16 @@ class Stream:
         else:
             self.iothub_interval = 60 / fpm  # seconds
 
+    def update_lva_mode(self, lva_mode):
+        if lva_mode == self.lva_mode:
+            logging.info("Not changing lva_mode")
+        else:
+            self._stop()
+            self.lva_mode = lva_mode
+            self._set(self.cam_source, self.frameRate)
+            self._start()
+            logging.info("Change lva_mode to {}".format(lva_mode))
+
     def delete(self):
         # self.mutex.acquire()
         self.cam_is_alive = False
@@ -390,7 +404,8 @@ class Stream:
         # self.mutex.release()
 
         # check whether it's the tag we want
-        predictions = list(p for p in predictions if p["tagName"] in self.model.parts)
+        predictions = list(
+            p for p in predictions if p["tagName"] in self.model.parts)
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -411,7 +426,8 @@ class Stream:
             self.process_send_message_to_iothub(predictions)
 
         # check whether it's larger than threshold
-        predictions = list(p for p in predictions if p["probability"] >= self.threshold)
+        predictions = list(
+            p for p in predictions if p["probability"] >= self.threshold)
 
         # update last_prediction_count
         _last_prediction_count = {}
@@ -448,7 +464,8 @@ class Stream:
         if self.scenario:
             # print('drawing...', flush=True)
             # print(self.scenario, flush=True)
-            self.last_drawn_img = self.scenario.draw_counter(self.last_drawn_img)
+            self.last_drawn_img = self.scenario.draw_counter(
+                self.last_drawn_img)
             # FIXME close this
             # self.scenario.draw_constraint(self.last_drawn_img)
             if self.get_mode() == "DD":
@@ -477,7 +494,8 @@ class Stream:
                     tag = prediction["tagName"]
                     height, width = img.shape[0], img.shape[1]
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    labels = json.dumps([{"x1": x1, "x2": x2, "y1": y1, "y2": y2}])
+                    labels = json.dumps(
+                        [{"x1": x1, "x2": x2, "y1": y1, "y2": y2}])
                     jpg = cv2.imencode(".jpg", img)[1].tobytes()
 
                     send_retrain_image_to_webmodule(
@@ -521,7 +539,8 @@ class Stream:
             for prediction in predictions:
                 if prediction["probability"] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    cv2.rectangle(img, (x1, max(y1, 15)), (x2, y2), (255, 255, 255), 1)
+                    cv2.rectangle(img, (x1, max(y1, 15)),
+                                  (x2, y2), (255, 255, 255), 1)
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
@@ -566,9 +585,11 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
 
         if aoi_area["type"] == "BBox":
             if (
-                (label["x1"] <= x1 <= label["x2"]) or (label["x1"] <= x2 <= label["x2"])
+                (label["x1"] <= x1 <= label["x2"]) or (
+                    label["x1"] <= x2 <= label["x2"])
             ) and (
-                (label["y1"] <= y1 <= label["y2"]) or (label["y1"] <= y2 <= label["y2"])
+                (label["y1"] <= y1 <= label["y2"]) or (
+                    label["y1"] <= y2 <= label["y2"])
             ):
                 return True
 

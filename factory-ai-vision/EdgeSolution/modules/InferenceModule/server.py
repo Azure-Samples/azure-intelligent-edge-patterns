@@ -31,6 +31,7 @@ from webmodule_utils import PART_DETECTION_MODE_CHOICES
 # Set logging parameters
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MODEL_DIR = "model"
 UPLOAD_INTERVAL = 1  # sec
@@ -224,6 +225,14 @@ def update_cams():
     frame_rate = fps
     onnx.set_frame_rate(fps)
 
+    # lva_mode
+
+    if "lva_mode" in data.keys():
+        lva_mode = data["lva_mode"]
+        onnx.set_lva_mode(lva_mode)
+    else:
+        lva_mode = onnx.lva_mode
+
     for cam in data["cameras"]:
         cam_type = cam["type"]
         cam_source = cam["source"]
@@ -256,6 +265,7 @@ def update_cams():
             cam_type,
             cam_source,
             frame_rate,
+            lva_mode,
             cam_id,
             has_aoi,
             aoi_info,
@@ -429,6 +439,17 @@ def get_recommended_fps():
 # def get_current_fps():
 #     return onnx.frame_rate
 
+@app.route("/update_lva_mode")
+def update_lva_mode():
+    logger.info("Updating lva_mode...")
+    lva_mode = request.args.get("lva_mode")
+    if not lva_mode:
+        return "missing lva_mode"
+
+    for s in stream_manager.get_streams():
+        s.update_lva_mode(lva_mode)
+    return "ok"
+
 
 def init_topology():
 
@@ -443,8 +464,10 @@ def init_topology():
     )
 
     for i in range(len(instances["payload"]["value"])):
-        gm.invoke_graph_instance_deactivate(instances["payload"]["value"][i]["name"])
-        gm.invoke_graph_instance_delete(instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_deactivate(
+            instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_delete(
+            instances["payload"]["value"][i]["name"])
 
     topologies = gm.invoke_graph_topology_list()
     if instances["status"] != 200:
@@ -457,14 +480,12 @@ def init_topology():
     )
 
     for i in range(len(topologies["payload"]["value"])):
-        gm.invoke_graph_topology_delete(topologies["payload"]["value"][i]["name"])
+        gm.invoke_graph_topology_delete(
+            topologies["payload"]["value"][i]["name"])
 
-    logger.info(
-        "========== Setting default grpc topology ==========".format(
-            len(topologies["payload"]["value"])
-        )
-    )
-    ret = gm.invoke_topology_set(LVA_MODE)
+    logger.info("========== Setting default grpc/http topology ==========")
+    ret = gm.invoke_topology_set("grpc")
+    ret = gm.invoke_topology_set("http")
 
     return 1
 
@@ -496,7 +517,8 @@ def benchmark():
     onnx.update_model(SCENARIO1_MODEL)
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
-        s.update_cam("video", SAMPLE_VIDEO, 30, s.cam_id, False, None, "PC", [], [])
+        s.update_cam("video", SAMPLE_VIDEO, 30,
+                     s.cam_id, False, None, "PC", [], [])
 
     def _f():
         print("--- Thread", threading.current_thread(), "started---", flush=True)
@@ -506,8 +528,10 @@ def benchmark():
             s.predict(img)
         t1_t = time.time()
         print("---- Thread", threading.current_thread(), "----", flush=True)
-        print("Processing", n_images, "images in", t1_t - t0_t, "seconds", flush=True)
-        print("  Avg:", (t1_t - t0_t) / n_images * 1000, "ms per image", flush=True)
+        print("Processing", n_images, "images in",
+              t1_t - t0_t, "seconds", flush=True)
+        print("  Avg:", (t1_t - t0_t) / n_images *
+              1000, "ms per image", flush=True)
 
     threads = []
     for i in range(n_threads):
