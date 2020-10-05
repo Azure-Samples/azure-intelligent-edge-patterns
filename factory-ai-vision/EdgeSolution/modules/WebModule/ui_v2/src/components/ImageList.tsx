@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
 import { FocusZone, List, IRectangle, mergeStyleSets } from '@fluentui/react';
-import { useConstCallback } from '@uifabric/react-hooks';
 import { useDispatch } from 'react-redux';
 import * as R from 'ramda';
 
@@ -33,13 +32,13 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
     return R.sort(timeStampDiff, images);
   }, [images]);
 
-  const getItemCountForPage = useConstCallback((itemIndex: number, surfaceRect: IRectangle) => {
+  const getItemCountForPage = useCallback((itemIndex: number, surfaceRect: IRectangle) => {
     if (itemIndex === 0) {
       columnCount.current = Math.ceil(surfaceRect.width / MAX_ROW_HEIGHT);
       rowHeight.current = Math.floor(surfaceRect.width / columnCount.current);
     }
     return columnCount.current * ROWS_PER_PAGE;
-  });
+  }, []);
 
   const onRenderCell = useCallback(
     (item: Item) => {
@@ -77,9 +76,9 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
     [dispatch, sortedImages],
   );
 
-  const getPageHeight = useConstCallback((): number => {
+  const getPageHeight = useCallback((): number => {
     return rowHeight.current * ROWS_PER_PAGE;
-  });
+  }, []);
 
   return (
     <>
