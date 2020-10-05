@@ -23,7 +23,7 @@ import {
   InferenceProtocol,
   InferenceSource,
 } from './projectTypes';
-import { updateProbThreshold } from './projectActions';
+import { getConfigure, updateProbThreshold } from './projectActions';
 import { pullCVProjects } from '../trainingProjectSlice';
 
 const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Status => {
@@ -95,10 +95,11 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         isLoading: false,
         data: action.data,
         originData: action.data,
-        status: Status.WaitTraining,
       };
     case POST_PROJECT_FALIED:
       return { ...state, isLoading: false, error: action.error };
+    case getConfigure.fulfilled.toString():
+      return { ...state, status: Status.WaitTraining };
     case DELETE_PROJECT_SUCCESS:
       return {
         ...state,

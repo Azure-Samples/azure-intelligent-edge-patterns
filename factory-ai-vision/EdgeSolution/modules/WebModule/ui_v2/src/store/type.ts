@@ -51,4 +51,5 @@ export type Image = {
   hasRelabeled: boolean;
   timestamp: string;
   camera: number;
+  uploaded: boolean;
 };

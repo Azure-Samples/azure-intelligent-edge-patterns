@@ -268,16 +268,17 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
           false,
         ),
       );
-      getTrain(data.id);
+      dispatch(getConfigure(data.id));
       return data.id;
     })
     .catch((err) => {
       dispatch(postProjectFail(err, false));
     }) as Promise<number>;
 };
-const getTrain = (projectId): void => {
-  Axios.get(`/api/part_detections/${projectId}/configure`).catch((err) => console.error(err));
-};
+
+export const getConfigure = createWrappedAsync<any, number>('project/configure', async (projectId) => {
+  await Axios.get(`/api/part_detections/${projectId}/configure`);
+});
 
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
   const projectId = getProjectData(getState()).id;
