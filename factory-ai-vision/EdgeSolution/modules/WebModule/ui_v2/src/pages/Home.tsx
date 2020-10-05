@@ -16,6 +16,9 @@ export const Home: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
+  const hasCVProject = useSelector(
+    (state: State) => !!state.trainingProject.entities[state.trainingProject.nonDemo[0]].customVisionId,
+  );
   const hasCamera = useSelector((state: State) => selectNonDemoCameras(state).length > 0);
   const hasImages = useSelector((state: State) => selectAllImages(state).length > 0);
   const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
@@ -45,7 +48,12 @@ export const Home: React.FC = () => {
           <Deployment />
         </Route>
         <Route path="/home/customize">
-          <Customize hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
+          <Customize
+            hasCVProject={hasCVProject}
+            hasCamera={hasCamera}
+            hasImages={hasImages}
+            hasTask={projectHasConfiged}
+          />
         </Route>
         <Route path="/home/getStarted">
           <GetStarted />
