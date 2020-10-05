@@ -151,7 +151,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Go to your device (via ssh), use `docker ps` to check whether all the modules are pulled and running. You should see 6 modules running including:
 
-  a. visionwebmodule
+  a. webmodule
 
   b. inferencemodule
 
@@ -191,7 +191,7 @@ If you are running into issues, please check following for assistnat:
          [https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview)
 2. If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running:
    YOUR_CONTAINER_REGISTRY_NAME/inferencemodule:x.x.xx-cpuamd64 (or gpu)
-   YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
+   YOUR_CONTAINER_REGISTRY_NAME/webmodule:x.x.xx-cpuamd64
 
    If you don’t see above, the conatiners aren't downloaded successfully yet
 

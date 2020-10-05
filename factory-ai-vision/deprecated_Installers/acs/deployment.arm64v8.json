@@ -57,7 +57,7 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/visionwebmodule:0.1.20-arm64v8",
+              "image": "intelligentedge/webmodule:0.1.20-arm64v8",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8080\"}]}}}"
             }
           },
