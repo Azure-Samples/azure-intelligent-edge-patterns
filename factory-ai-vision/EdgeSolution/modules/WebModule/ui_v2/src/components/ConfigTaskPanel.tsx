@@ -96,7 +96,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
   const scenarios = useSelector((state: State) => state.scenario);
-  const demoProject = useSelector((state: State) => state.trainingProject.isDemo);
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -104,7 +103,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     const cloneProject = R.clone(projectData);
     (cloneProject as any)[key] = value;
     if (key === 'trainingProject') {
-      if (!demoProject.includes(cloneProject.trainingProject)) cloneProject.needRetraining = false;
       cloneProject.parts = [];
       cloneProject.cameras = [];
 
