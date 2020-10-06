@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Stack,
   PrimaryButton,
@@ -53,6 +53,7 @@ import { getTrainingProject } from '../store/trainingProjectSlice';
 import { Insights } from './DeploymentInsights';
 import { Instruction } from './Instruction';
 import { selectAllImages } from '../store/imageSlice';
+import { initialProjectData } from '../store/project/projectReducer';
 
 const { palette } = getTheme();
 
@@ -95,14 +96,15 @@ export const Deployment: React.FC = () => {
     (state: State) => selectAllImages(state).filter((e) => !e.uploaded).length,
   );
 
-  const [isEditPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
+  const [isEditPanelOpen, { setTrue: openEditPanel, setFalse: closeEditPanel }] = useBoolean(false);
+  const [isCreatePanelOpen, { setTrue: openCreatePanel, setFalse: closeCreatePanel }] = useBoolean(false);
 
   useEffect(() => {
     (async () => {
       const hasConfigured = await dispatch(thunkGetProject());
-      if (!hasConfigured) openPanel();
+      if (!hasConfigured) openCreatePanel();
     })();
-  }, [dispatch, openPanel]);
+  }, [dispatch, openCreatePanel]);
 
   useEffect(() => {
     dispatch(getTrainingProject(true));
@@ -125,28 +127,42 @@ export const Deployment: React.FC = () => {
     dispatch(updateProjectData({ probThreshold: newValue }, false));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 
-  const updateModel = () => {
+  const updateModel = useCallback(() => {
     dispatch(getConfigure(projectId));
-  };
+  }, [dispatch, projectId]);
 
-  const commandBarItems: ICommandBarItemProps[] = [
-    {
-      key: 'update',
-      text: 'Update model',
-      iconProps: {
-        iconName: 'Edit',
+  const commandBarItems: ICommandBarItemProps[] = useMemo(() => {
+    const items = [
+      {
+        key: 'create',
+        text: 'Create new task',
+        iconProps: {
+          iconName: 'Add',
+        },
+        onClick: openCreatePanel,
       },
-      onClick: updateModel,
-    },
-    {
-      key: 'edit',
-      text: 'Edit task',
-      iconProps: {
-        iconName: 'Edit',
+      {
+        key: 'edit',
+        text: 'Edit task',
+        iconProps: {
+          iconName: 'Edit',
+        },
+        onClick: openEditPanel,
       },
-      onClick: openPanel,
-    },
-  ];
+    ];
+
+    if (newImagesCount)
+      items.unshift({
+        key: 'update',
+        text: 'Update model',
+        iconProps: {
+          iconName: 'Edit',
+        },
+        onClick: updateModel,
+      });
+
+    return items;
+  }, [newImagesCount, openCreatePanel, openEditPanel, updateModel]);
 
   const onRenderMain = () => {
     if (status === Status.None)
@@ -154,7 +170,7 @@ export const Deployment: React.FC = () => {
         <EmptyAddIcon
           title="Config a task"
           subTitle=""
-          primary={{ text: 'Config task', onClick: openPanel }}
+          primary={{ text: 'Config task', onClick: openEditPanel }}
         />
       );
     if (status === Status.WaitTraining)
@@ -179,7 +195,7 @@ export const Deployment: React.FC = () => {
     return (
       <>
         <CommandBar items={commandBarItems} style={{ display: 'block' }} />
-        {newImagesCount && (
+        {!!newImagesCount && (
           <Instruction
             title={`${newImagesCount} new images have been added to your model!`}
             subtitle="Update the model to improve your current deployment"
@@ -251,7 +267,12 @@ export const Deployment: React.FC = () => {
   return (
     <>
       <Stack styles={{ root: { height: '100%' } }}>{onRenderMain()}</Stack>
-      <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closePanel} projectData={projectData} isEdit />
+      <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closeEditPanel} projectData={projectData} isEdit />
+      <ConfigTaskPanel
+        isOpen={isCreatePanelOpen}
+        onDismiss={closeCreatePanel}
+        projectData={initialProjectData}
+      />
     </>
   );
 };
