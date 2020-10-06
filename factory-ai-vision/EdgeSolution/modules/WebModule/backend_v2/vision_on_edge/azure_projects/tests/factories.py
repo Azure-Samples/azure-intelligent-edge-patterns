@@ -17,3 +17,15 @@ class ProjectFactory(DjangoModelFactory):
     class Meta:
         model = Project
         django_get_or_create = ["name"]
+
+
+class DemoProjectFactory(DjangoModelFactory):
+    """DemoProjectFactory."""
+
+    setting = factory.SubFactory(SettingFactory)
+    is_demo = True
+    name = Faker("sentence")
+
+    class Meta:
+        model = Project
+        django_get_or_create = ["name"]

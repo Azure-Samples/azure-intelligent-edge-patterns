@@ -27,9 +27,6 @@ from ...general.api.serializers import (
 from ...general.shortcuts import drf_get_object_or_404
 from ...images.models import Image
 from ..exceptions import (
-    PdConfigureWithoutCameras,
-    PdConfigureWithoutInferenceModule,
-    PdConfigureWithoutProject,
     PdExportInfereceReadTimeout,
     PdInferenceModuleUnreachable,
     PdProbThresholdNotInteger,
@@ -37,6 +34,7 @@ from ..exceptions import (
     PdRelabelConfidenceOutOfRange,
     PdRelabelDemoProjectError,
     PdRelabelImageFull,
+    PdRelabelWithoutProject,
 )
 from ..models import PartDetection, PDScenario
 from ..utils import if_trained_then_deploy_helper
@@ -178,16 +176,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         """
         queryset = self.get_queryset()
         instance = drf_get_object_or_404(queryset, pk=pk)
-        # if project is demo, let training status go to ok and should go on.
-        if (
-            not hasattr(instance, "inference_module")
-            or getattr(instance, "inference_module") is None
-        ):
-            raise PdConfigureWithoutInferenceModule
-        if not hasattr(instance, "project") or getattr(instance, "project") is None:
-            raise PdConfigureWithoutProject
-        if not hasattr(instance, "cameras") or getattr(instance, "cameras") is None:
-            raise PdConfigureWithoutCameras
+        instance.is_deployable(raise_exception=True)
+
         upcreate_training_status(
             project_id=instance.project.id, **progress.PROGRESS_1_FINDING_PROJECT
         )

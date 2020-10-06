@@ -6,12 +6,19 @@ import logging
 import requests
 from django.db import models
 from django.utils import timezone
+from rest_framework.exceptions import APIException
 
 from ..azure_parts.models import Part
 from ..azure_projects.models import Project
 from ..cameras.models import Camera
 from ..inference_modules.models import InferenceModule
-from .exceptions import PdProbThresholdNotInteger, PdProbThresholdOutOfRange
+from .exceptions import (
+    PdDeployWithoutCameras,
+    PdDeployWithoutInferenceModule,
+    PdDeployWithoutProject,
+    PdProbThresholdNotInteger,
+    PdProbThresholdOutOfRange,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +72,27 @@ class PartDetection(models.Model):
             "http://" + self.inference_module.url + "/update_prob_threshold",
             params={"prob_threshold": prob_threshold},
         )
+
+    def is_deployable(self, raise_exception: bool = False) -> bool:
+        try:
+            if not self.inference_module:
+                raise PdDeployWithoutInferenceModule
+            if not self.project:
+                raise PdDeployWithoutProject
+            if not self.cameras.all().exists():
+                raise PdDeployWithoutCameras
+            self.project.is_deployable(raise_exception=True)
+            return True
+        except APIException:
+            if raise_exception:
+                raise
+            return False
+
+    def __str__(self) -> str:
+        return self.name.__str__()
+
+    def __repr__(self) -> str:
+        return self.name.__repr__()
 
 
 class PDScenario(models.Model):

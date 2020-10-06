@@ -5,7 +5,13 @@ from unittest import mock
 
 import pytest
 
-from ..exceptions import ProjectCustomVisionError, ProjectWithoutSettingError
+from ...azure_parts.tests.factories import PartFactory
+from ..exceptions import (
+    ProjectCannotChangeDemoError,
+    ProjectCustomVisionError,
+    ProjectTrainWithoutParts,
+    ProjectWithoutSettingError,
+)
 from .conftest import MockedProject
 from .factories import ProjectFactory
 
@@ -122,3 +128,32 @@ def test_update_valid_customvision_id():
 def test_get_project():
     project = ProjectFactory()
     assert project.get_project_obj().name == MockedProject().name
+
+
+@pytest.mark.fast
+def test_project_is_trainable():
+    project = ProjectFactory()
+    assert not project.is_trainable()
+    with pytest.raises(ProjectTrainWithoutParts):
+        project.is_trainable(raise_exception=True)
+
+
+@pytest.mark.fast
+def test_demo_project_is_trainable(demo_project):
+    assert not demo_project.is_trainable()
+    with pytest.raises(ProjectCannotChangeDemoError):
+        demo_project.is_trainable(raise_exception=True)
+
+
+@pytest.mark.fast
+def test_is_deployable():
+    project = ProjectFactory()
+    assert not project.is_deployable()
+    with pytest.raises(ProjectTrainWithoutParts):
+        project.is_deployable(raise_exception=True)
+
+
+@pytest.mark.fast
+def test_demo_project_is_deployable(demo_project):
+    assert demo_project.is_deployable()
+    assert demo_project.is_deployable(raise_exception=True)
