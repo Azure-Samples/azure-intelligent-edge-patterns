@@ -10,7 +10,6 @@ import time
 import cv2
 import numpy as np
 import zmq
-
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_iot.utils import is_edge
 from vision_on_edge.azure_settings.models import Setting
@@ -54,7 +53,7 @@ class VideoFeed:
 
         video feed genarator
         """
-        print("*****GENERATOR *****", flush=True)
+        logger.info("*****GENERATOR *****")
         count = 0
         while self.is_opened:
             if self.buf is not None:

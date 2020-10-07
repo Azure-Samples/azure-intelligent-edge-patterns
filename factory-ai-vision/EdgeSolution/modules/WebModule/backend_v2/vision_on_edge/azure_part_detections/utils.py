@@ -71,7 +71,7 @@ def if_trained_then_deploy_worker(part_detection_id):
     try:
         deploy_worker(part_detection_id=part_detection_obj.id)
         logger.info("Part Detection successfully deployed to inference_module!")
-    except:
+    except Exception:
         logger.info("Part Detection deploy to inference_module failed !")
 
     # =====================================================
@@ -100,7 +100,6 @@ def deploy_worker(part_detection_id):
         logger.error("This PartDetection is not configured")
         logger.error("Not sending any request to inference")
         return
-    parts_to_detect = [p.name for p in instance.parts.all()]
     confidence_min = getattr(instance, "accuracyRangeMin", 30)
     confidence_max = getattr(instance, "accuracyRangeMax", 80)
     max_images = getattr(instance, "maxImages", 10)
@@ -148,11 +147,18 @@ def deploy_worker(part_detection_id):
     # =====================================================
     # 3. Update parts                                   ===
     # =====================================================
-    requests.get(
-        "http://" + str(instance.inference_module.url) + "/update_parts",
-        params={"parts": parts_to_detect},
+    logger.info("Update Parts!!!")
+    parts = instance.parts.all()
+    res_data = {"parts": []}
+
+    for part in parts.all():
+        res_data["parts"].append({"id": part.id, "name": part.name})
+    requests.post(
+        url="http://" + instance.inference_module.url + "/update_parts",
+        json=res_data,
         timeout=REQUEST_TIMEOUT,
     )
+
     requests.get(
         "http://" + instance.inference_module.url + "/update_retrain_parameters",
         params={

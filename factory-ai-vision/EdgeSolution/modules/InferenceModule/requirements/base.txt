@@ -2,7 +2,7 @@ azure-iot-device==2.0.1
 azure-iot-hub==2.2.2rc0
 chardet==3.0.4
 click==7.1.2
-Flask==1.1.2
+FastAPI
 idna==2.9
 itsdangerous==1.1.0
 janus==0.5.0
@@ -27,4 +27,5 @@ grpcio
 utility
 filterpy
 scikit-image
+uvicorn
 certifi # certifi should always be latest
