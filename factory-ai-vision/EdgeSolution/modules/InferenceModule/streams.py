@@ -35,6 +35,8 @@ try:
 except:
     iot = None
 
+logger = logging.getLogger(__name__)
+
 
 class Stream:
     def __init__(
@@ -142,7 +144,7 @@ class Stream:
         def run(self):
 
             while "flags" not in dir(self.last_drawn_img):
-                logging.info("not sending last_drawn_img")
+                logger.info("not sending last_drawn_img")
                 time.sleep(2)
             cnt = 0
             while self.cam_is_alive:
@@ -195,7 +197,7 @@ class Stream:
         line_info=None,
         zone_info=None,
     ):
-        print("[INFO] Updating Cam ...", flush=True)
+        logger.info("Updating Cam ...")
 
         # if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
@@ -343,7 +345,7 @@ class Stream:
             self._stop()
             self._set(rtspUrl, frameRate)
             self._start()
-        logging.info(
+        logger.info(
             "Instance {} updated, rtsp = {}, frameRate = {}".format(
                 self.cam_id, rtspUrl, frameRate
             )
@@ -372,13 +374,13 @@ class Stream:
 
     def update_lva_mode(self, lva_mode):
         if lva_mode == self.lva_mode:
-            logging.info("Not changing lva_mode")
+            logger.info("Not changing lva_mode.")
         else:
             self._stop()
             self.lva_mode = lva_mode
             self._set(self.cam_source, self.frameRate)
             self._start()
-            logging.info("Change lva_mode to {}".format(lva_mode))
+            logger.info("Change lva_mode to {}".format(lva_mode))
 
     def delete(self):
         # self.mutex.acquire()
@@ -386,7 +388,7 @@ class Stream:
         # self.mutex.release()
 
         gm.invoke_graph_instance_deactivate(self.cam_id)
-        logging.info("Deactivate stream {}".format(self.cam_id))
+        logger.info("Deactivate stream {}".format(self.cam_id))
 
     def predict(self, image):
 

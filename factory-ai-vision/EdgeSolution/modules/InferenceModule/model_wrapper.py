@@ -101,7 +101,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.lva_mode = lva_mode
 
     def update_parts(self, parts):
-        print("[INFO] Updating Parts ...", parts)
+        logger.info("Updating Parts ... %s", parts)
         self.parts = parts
 
     def load_model(self, model_dir, is_default_model, is_scenario_model):
