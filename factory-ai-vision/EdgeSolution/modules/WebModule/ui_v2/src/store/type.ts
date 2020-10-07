@@ -7,6 +7,8 @@ export type BoxLabel = {
 
 export type PolygonLabel = Position2D[];
 
+export type LineLabel = [Position2D, Position2D];
+
 export enum AnnotationState {
   Empty = 'Empty',
   P1Added = 'P1Added',
@@ -48,4 +50,5 @@ export type Image = {
   confidence: number;
   hasRelabeled: boolean;
   timestamp: string;
+  camera: number;
 };

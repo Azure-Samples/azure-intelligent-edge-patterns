@@ -119,7 +119,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     framesPerMin: data?.metrics_frame_per_minutes,
     accuracyThreshold: data?.metrics_accuracy_threshold,
     cvProjectId: data?.customvision_project_id,
-    probThreshold: data?.prob_threshold.toString() ?? '10',
+    probThreshold: data?.prob_threshold?.toString() ?? '10',
   },
   isDemo,
 });
@@ -252,7 +252,7 @@ export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Pr
         framesPerMin: data[0]?.metrics_frame_per_minutes,
         accuracyThreshold: data[0]?.metrics_accuracy_threshold,
         cvProjectId: data[0]?.customvision_project_id,
-        probThreshold: data[0]?.prob_threshold.toString() ?? '10',
+        probThreshold: data[0]?.prob_threshold?.toString() ?? '10',
       };
       dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
       return void 0;

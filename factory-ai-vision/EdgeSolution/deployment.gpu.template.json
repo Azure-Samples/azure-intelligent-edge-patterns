@@ -68,7 +68,8 @@
               "DBNAME": { "value": "vision_on_edge" },
               "DBHOST": { "value": "172.18.0.1" },
               "DBUSER": { "value": "vision_on_edge" },
-              "DBPASS": { "value": "vision_on_edge" }
+              "DBPASS": { "value": "vision_on_edge" },
+              "DF_INFERENECE_IS_GPU": { "value": true }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
@@ -115,6 +116,14 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              }
+            },
             "settings": {
               "image": "${MODULES.InferenceModule.gpuamd64}",
               "createOptions": {
@@ -131,8 +140,44 @@
                       }
                     ]
                   },
+                  "IpcMode": "container:lvaEdge",
                   "runtime": "nvidia"
                 }
+              }
+            }
+          },
+          "lvaEdge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/media/live-video-analytics:1",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "Binds": [],
+                  "IpcMode": "shareable"
+                }
+              }
+            }
+          },
+
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.RtspSimModule}",
+              "createOptions": {
+                "HostConfig": {}
               }
             }
           }
@@ -143,7 +188,8 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream"
+          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream",
+          "InferenceToLVA": "FROM /messages/modules/InferenceModule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
@@ -155,6 +201,24 @@
     },
     "VisionSampleModule": {
       "properties.desired": {}
+    },
+    "lvaEdge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/media",
+        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourcegroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$SERVICE_NAME",
+        "aadTenantId": "$TENANT_ID",
+        "aadServicePrincipalAppId": "$SERVICE_PRINCIPAL_APP_ID",
+        "aadServicePrincipalSecret": "$SERVICE_PRINCIPAL_SECRET",
+        "aadEndpoint": "https://login.microsoftonline.com",
+        "aadResourceId": "https://management.core.windows.net/",
+        "armEndpoint": "https://management.azure.com/",
+        "diagnosticsEventsOutputName": "AmsDiagnostics",
+        "operationalEventsOutputName": "AmsOperational",
+        "logLevel": "Information",
+        "logCategories": "Application,Events",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
     }
   }
 }

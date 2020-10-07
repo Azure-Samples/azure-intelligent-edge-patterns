@@ -1,0 +1,12 @@
+table {
+  font-size: 14px;
+  flex-grow: 1;
+}
+
+th {
+  text-align: start;
+}
+
+td {
+  padding: 5px 5px;
+}

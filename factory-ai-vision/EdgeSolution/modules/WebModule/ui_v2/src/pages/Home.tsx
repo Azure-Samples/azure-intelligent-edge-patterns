@@ -1,29 +1,25 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
-import {
-  Stack,
-  CommandBar,
-  getTheme,
-  ICommandBarItemProps,
-  Pivot,
-  PivotItem,
-  Spinner,
-} from '@fluentui/react';
-import { GetStarted } from '../components/GetStarted';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useHistory, Switch, Route, Redirect } from 'react-router-dom';
+import { Stack, Pivot, PivotItem, Spinner } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAllCameras, getCameras } from '../store/cameraSlice';
+
 import { State } from 'RootStateType';
+import { Customize } from '../components/Customize';
+import { getCameras, selectNonDemoCameras } from '../store/cameraSlice';
 import { selectAllImages, getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
-
-const theme = getTheme();
+import { Deployment } from '../components/Deployment';
+import { GetStarted } from '../components/GetStarted';
 
 export const Home: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
-  const hasCamera = useSelector((state: State) => selectAllCameras(state).length > 0);
+  const hasCVProject = useSelector(
+    (state: State) => !!state.trainingProject.entities[state.trainingProject.nonDemo[0]].customVisionId,
+  );
+  const hasCamera = useSelector((state: State) => selectNonDemoCameras(state).length > 0);
   const hasImages = useSelector((state: State) => selectAllImages(state).length > 0);
   const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
   const [loading, setLoading] = useState(false);
@@ -33,48 +29,50 @@ export const Home: React.FC = () => {
       setLoading(true);
       await dispatch(getCameras(false));
       await dispatch(getImages());
-      await dispatch(thunkGetProject(false));
+      await dispatch(thunkGetProject());
       setLoading(false);
       setLoading(false);
     })();
-  }, []);
-
-  const commandBarItems: ICommandBarItemProps[] = useMemo(
-    () => [
-      {
-        key: 'addBtn',
-        text: 'New Task',
-        iconProps: {
-          iconName: 'Add',
-        },
-        onClick: () => {},
-      },
-    ],
-    [],
-  );
+  }, [dispatch]);
 
   const onPivotChange = (item: PivotItem) => {
-    history.push(`/${item.props.itemKey}`);
+    history.push(`/home/${item.props.itemKey}`);
   };
 
-  if (loading) return <Spinner label="Loading" />;
+  const onRenderMain = () => {
+    if (loading) return <Spinner label="Loading" />;
+
+    return (
+      <Switch>
+        <Route path="/home/deployment">
+          <Deployment />
+        </Route>
+        <Route path="/home/customize">
+          <Customize
+            hasCVProject={hasCVProject}
+            hasCamera={hasCamera}
+            hasImages={hasImages}
+            hasTask={projectHasConfiged}
+          />
+        </Route>
+        <Route path="/home/getStarted">
+          <GetStarted />
+        </Route>
+        <Route>
+          <Redirect to={projectHasConfiged ? '/home/deployment' : '/home/getStarted'} />
+        </Route>
+      </Switch>
+    );
+  };
 
   return (
     <Stack styles={{ root: { height: '100%' } }}>
-      <CommandBar
-        items={commandBarItems}
-        styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
-      />
-      <Stack styles={{ root: { padding: '15px' } }} grow>
-        <Pivot selectedKey={location.pathname.split('/')[1]} onLinkClick={onPivotChange}>
-          <PivotItem itemKey="getStarted" headerText="Get started">
-            <GetStarted hasCamera={hasCamera} hasImages={hasImages} hasTask={projectHasConfiged} />
-          </PivotItem>
-          <PivotItem itemKey="task" headerText="Task">
-            Task
-          </PivotItem>
-        </Pivot>
-      </Stack>
+      <Pivot selectedKey={location.pathname.split('/')[2]} onLinkClick={onPivotChange}>
+        <PivotItem itemKey="getStarted" headerText="Get started" />
+        <PivotItem itemKey="customize" headerText="Customize" />
+        <PivotItem itemKey="deployment" headerText="Deployment" />
+      </Pivot>
+      <Stack grow>{onRenderMain()}</Stack>
     </Stack>
   );
 };

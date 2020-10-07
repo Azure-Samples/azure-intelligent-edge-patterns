@@ -1,10 +1,10 @@
 import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
-import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
+import { Stage, Layer, Image, Group, Text as KonvaText, Text, Rect, Label, Tag } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
-import getResizeImageFunction from './util/resizeImage';
+import getResizeImageFunction, { CanvasFit } from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
@@ -40,7 +40,7 @@ const Scene: FC<SceneProps> = ({
   imgPart,
 }) => {
   const dispatch = useDispatch();
-  const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
+  const resizeImage = useCallback(getResizeImageFunction(defaultSize, CanvasFit.Contain), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
   const noMoreCreate = useMemo(
     () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
@@ -165,13 +165,16 @@ const Scene: FC<SceneProps> = ({
                   dispatch={dispatch}
                   changeCursorState={changeCursorState}
                 />
-                <Text
+                <LabelText
                   x={annotation.label.x1}
-                  y={annotation.label.y1 - 25 / scale.current}
+                  y={
+                    annotation.label.y1 < 20 / scale.current
+                      ? annotation.label.y1
+                      : annotation.label.y1 - 30 / scale.current
+                  }
                   fontSize={20 / scale.current}
-                  fill="red"
                   text={imgPart?.name}
-                  test="part"
+                  padding={5 / scale.current}
                 />
               </Group>
             ))}
@@ -191,3 +194,21 @@ const Scene: FC<SceneProps> = ({
 };
 
 export default Scene;
+
+type LabelTextProps = {
+  x: number;
+  y: number;
+  fontSize: number;
+  padding: number;
+  text: string;
+};
+
+export const LabelText: React.FC<LabelTextProps> = ({ x, y, fontSize, text, padding }) => {
+  if (!text) return null;
+  return (
+    <Label x={x} y={y}>
+      <Tag fill="white" />
+      <Text fontSize={fontSize} text={text} padding={padding} />
+    </Label>
+  );
+};

@@ -1,120 +1,113 @@
-import React from 'react';
-import { Link as ReactRouterLink } from 'react-router-dom';
-import { Stack, Text, Image, Link, mergeStyleSets, getTheme, concatStyleSets, IStyle } from '@fluentui/react';
+import React, { useState, useEffect } from 'react';
+import { Stack, Text, Link, mergeStyleSets } from '@fluentui/react';
 import { Card } from '@uifabric/react-cards';
-import { AcceptMediumIcon } from '@fluentui/react-icons';
 
-const theme = getTheme();
+import { State } from 'RootStateType';
+import { useDispatch, useSelector } from 'react-redux';
+import { ConfigTaskPanel } from './ConfigTaskPanel';
+import { initialProjectData } from '../store/project/projectReducer';
+import { getScenario } from '../store/scenarioSlice';
 
-const idxIconBase: IStyle = {
-  borderRadius: '12px',
-  width: '20px',
-  height: '20px',
-  fontSize: '10px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginTop: '12px',
-};
-const cardStyleSets = mergeStyleSets({
-  container: {
-    width: '300px',
-    height: '292px',
-    borderRadius: '2px',
-  },
-  mainSection: {
+const classes = mergeStyleSets({
+  gridContainer: {
     display: 'grid',
-    gridTemplateColumns: '35px auto',
-    gridTemplateRows: '30px auto 20px',
-    padding: '14px',
-    paddingTop: 0,
+    gridTemplate: 'repeat(3, 1fr) / repeat(3, 1fr)',
+    gridGap: '12px',
+    marginTop: '24px',
   },
-  idxIcon: concatStyleSets(idxIconBase, { color: theme.palette.themePrimary, border: '1px solid' }),
-  checkIcon: concatStyleSets(idxIconBase, { color: theme.palette.white, backgroundColor: '#5DB300' }),
-  mainSectionTitle: { gridColumn: '2 / span 1', gridRow: '1 / span 2', fontWeight: 600, fontSize: '16px' },
-  mainSectionContentTxt: { gridColumn: '2 / span 1', gridRow: '2 / span 1', fontSize: '13px' },
-  mainSectionAction: { gridColumn: '2 / span 1', gridRow: '3 / span 1', fontSize: '13px' },
 });
 
-type GetStartedType = {
-  hasCamera: boolean;
-  hasImages: boolean;
-  hasTask: boolean;
-};
+const demoProjectsInfo = [
+  {
+    title: 'Counting objects',
+    subTitle: 'Identify and count the number of objects in the factory',
+  },
+  {
+    title: 'Employee safety',
+    subTitle: 'Detect if person is standing too close to a machine',
+  },
+  {
+    title: 'Defect detection',
+    subTitle: 'Detect products with defects',
+  },
+  {
+    title: 'Machine misalignment',
+    subTitle: 'Detect if a machine is now aligned or working correctly',
+  },
+  {
+    title: 'Tool detection',
+    subTitle: 'Detect when an employee is using the wrong tool',
+  },
+  {
+    title: 'Part confirmation',
+    subTitle: 'Detect if the correct part is being used',
+  },
+];
 
-export const GetStarted: React.FC<GetStartedType> = ({ hasCamera, hasImages, hasTask }) => {
+export const GetStarted: React.FC = () => {
+  const scenario = useSelector((state: State) => state.scenario);
+  const recomendedFps = useSelector((state: State) => state.project.data.recomendedFps);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getScenario());
+  }, [dispatch]);
+
+  const [selectedScenarioIdx, setselectedScenarioIdx] = useState(-1);
+  const openPanel = (name: string) => () =>
+    setselectedScenarioIdx(scenario.findIndex((e) => e.name === name));
+  const closePanel = () => setselectedScenarioIdx(-1);
+
   return (
-    <Stack horizontalAlign="center">
-      <Text variant="xLarge" styles={{ root: { margin: '4px' } }}>
-        Get started
-      </Text>
-      <Text>Follow these steps to start using machine learning in your factory</Text>
-      <Text styles={{ root: { paddingBottom: '24px' } }}>
-        To configure the <Link href="https://www.customvision.ai/">Custom Vision project</Link> go to
-        Settings.
-      </Text>
-      <Stack horizontal tokens={{ childrenGap: 20 }}>
-        <GetStartedCard
-          no={1}
-          checked={hasCamera}
-          title="Connect cameras"
-          contentTxt="Add and configure the cameras in the factory"
-          actionTxt="Go to Cameras"
-          actionLink="/cameras"
-        />
-        <GetStartedCard
-          no={2}
-          checked={hasImages}
-          title="Add images and tag parts"
-          contentTxt="Capture images from your video streams and tag parts"
-          actionTxt="Go to Images"
-          actionLink="/images"
-        />
-        <GetStartedCard
-          no={3}
-          checked={hasTask}
-          title="Ready to go!"
-          contentTxt="Start identifying parts from your cameras’ live streams"
-          actionTxt="Begin a task"
-          actionLink="/task"
-        />
+    <>
+      <Stack horizontalAlign="center">
+        <h4>Get started with our pre-built scenarios</h4>
+        <Text>
+          Choose one of the following pre-trained templates to start running inferences on demo or custom
+          cameras
+        </Text>
+        <div className={classes.gridContainer}>
+          {demoProjectsInfo.map((info) => (
+            <DemoCard
+              key={info.title}
+              title={info.title}
+              subTitle={info.subTitle}
+              onClick={openPanel(info.title)}
+              available={!!scenario.find((e) => e.name === info.title)}
+            />
+          ))}
+        </div>
       </Stack>
-    </Stack>
+      <ConfigTaskPanel
+        isOpen={selectedScenarioIdx > -1}
+        onDismiss={closePanel}
+        projectData={{ ...initialProjectData, ...scenario[selectedScenarioIdx], recomendedFps }}
+        trainingProjectOfSelectedScenario={scenario[selectedScenarioIdx]?.trainingProject}
+      />
+    </>
   );
 };
 
-const GetStartedCard: React.FC<{
-  no: number;
-  checked: boolean;
+type DemoCardProps = {
   title: string;
-  contentTxt: string;
-  actionTxt: string;
-  actionLink: string;
-}> = ({ no, checked, title, contentTxt, actionTxt, actionLink }) => {
-  const renderIdxIcon = (): JSX.Element =>
-    checked ? (
-      <div className={cardStyleSets.checkIcon}>
-        <AcceptMediumIcon />
-      </div>
-    ) : (
-      <div className={cardStyleSets.idxIcon}>
-        <p>{no}</p>
-      </div>
-    );
+  subTitle: string;
+  onClick: () => void;
+  available: boolean;
+};
 
+export const DemoCard: React.FC<DemoCardProps> = ({ title, subTitle, onClick, available }) => {
   return (
-    <Card className={cardStyleSets.container}>
-      <Card.Item fill>
-        <Image src="/icon/get-started.png" width="100%" />
-      </Card.Item>
-      <Card.Section className={cardStyleSets.mainSection}>
-        {renderIdxIcon()}
-        <Text className={cardStyleSets.mainSectionTitle}>{title}</Text>
-        <Text className={cardStyleSets.mainSectionContentTxt}>{contentTxt}</Text>
-        <Link className={cardStyleSets.mainSectionAction} to={actionLink} as={ReactRouterLink}>
-          {actionTxt} {'>'}
-        </Link>
-      </Card.Section>
+    <Card styles={{ root: { padding: '20px', alignItems: 'flex-start' } }}>
+      <h4>{title}</h4>
+      <Text styles={{ root: { height: '100px' } }}>{subTitle}</Text>
+      {available ? (
+        <Link onClick={onClick}>{'Deploy scenario >'}</Link>
+      ) : (
+        <Text styles={{ root: { backgroundColor: 'rgba(242, 201, 76, 0.8)', padding: '2px 8px' } }}>
+          COMING SOON
+        </Text>
+      )}
     </Card>
   );
 };

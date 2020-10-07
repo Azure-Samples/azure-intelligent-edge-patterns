@@ -28,7 +28,7 @@ class Image(models.Model):
     """
 
     image = models.ImageField(upload_to="images/")
-    part = models.ForeignKey(Part, on_delete=models.CASCADE)
+    part = models.ForeignKey(Part, on_delete=models.CASCADE, null=True)
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)

@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import {
   Project,
   ProjectActionTypes,
@@ -17,11 +18,13 @@ import {
   GET_TRAINING_METRICS_REQUEST,
   GET_TRAINING_METRICS_SUCCESS,
   GET_TRAINING_METRICS_FAILED,
-  GET_INFERENCE_METRICS_REQUEST,
-  GET_INFERENCE_METRICS_SUCCESS,
-  GET_INFERENCE_METRICS_FAILED,
-  UPDATE_ORIGIN_PROJECT_DATA,
+  ProjectData,
+  InferenceMode,
+  InferenceProtocal,
+  InferenceSource,
 } from './projectTypes';
+import { updateProbThreshold } from './projectActions';
+import { pullCVProjects } from '../trainingProjectSlice';
 
 const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Status => {
   if (hasConfigured && status === Status.None) return Status.WaitTraining;
@@ -29,67 +32,46 @@ const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Statu
   return Status.None;
 };
 
+export const initialProjectData: ProjectData = {
+  id: null,
+  cameras: [],
+  location: null,
+  parts: [],
+  trainingProject: null,
+  needRetraining: true,
+  accuracyRangeMin: 60,
+  accuracyRangeMax: 80,
+  maxImages: 20,
+  modelUrl: '',
+  sendMessageToCloud: false,
+  framesPerMin: 6,
+  probThreshold: '10',
+  name: '',
+  sendVideoToCloud: false,
+  inferenceMode: InferenceMode.PartDetection,
+  deployTimeStamp: '',
+  setFpsManually: false,
+  fps: 10,
+  recomendedFps: 10,
+  inferenceProtocol: InferenceProtocal.GRPC,
+  inferenceSource: InferenceSource.LVA,
+};
+
 const initialState: Project = {
   isLoading: false,
-  data: {
-    id: null,
-    camera: null,
-    location: null,
-    parts: [],
-    needRetraining: true,
-    accuracyRangeMin: 60,
-    accuracyRangeMax: 80,
-    maxImages: 20,
-    modelUrl: '',
-    sendMessageToCloud: false,
-    framesPerMin: 6,
-    accuracyThreshold: 50,
-    probThreshold: '10',
-  },
-  originData: {
-    id: null,
-    camera: null,
-    location: null,
-    parts: [],
-    needRetraining: true,
-    accuracyRangeMin: 60,
-    accuracyRangeMax: 80,
-    maxImages: 50,
-    modelUrl: '',
-    sendMessageToCloud: false,
-    framesPerMin: 6,
-    accuracyThreshold: 50,
-    probThreshold: '10',
-  },
+  data: initialProjectData,
+  originData: initialProjectData,
   trainingMetrics: {
     prevConsequence: null,
     curConsequence: null,
   },
-  inferenceMetrics: {
-    successRate: null,
-    successfulInferences: null,
-    unIdetifiedItems: null,
-    isGpu: false,
-    averageTime: null,
-    partCount: {},
-  },
   status: Status.None,
   error: null,
-  trainingLogs: [],
+  trainingLog: '',
   progress: null,
 };
 
-/**
- * Share this reducer between project and demoProject
- * Check the `isDemo` property in action to check if it is right reducer
- * @param isDemo
- */
-const createProjectReducerByIsDemo = (isDemo: boolean) => (
-  state = initialState,
-  action: ProjectActionTypes,
-): Project => {
-  if (isDemo !== action.isDemo) return state;
-
+const projectReducer = (state = initialState, action: ProjectActionTypes): Project => {
   switch (action.type) {
     case GET_PROJECT_REQUEST:
       return { ...state, isLoading: true, error: null };
@@ -108,56 +90,26 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
     case POST_PROJECT_REQUEST:
       return { ...state, isLoading: true };
     case POST_PROJECT_SUCCESS:
-      return { ...state, isLoading: false, data: action.data, originData: action.data };
+      return {
+        ...state,
+        isLoading: false,
+        data: action.data,
+        originData: action.data,
+        status: Status.WaitTraining,
+      };
     case POST_PROJECT_FALIED:
       return { ...state, isLoading: false, error: action.error };
     case DELETE_PROJECT_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        data: {
-          id: null,
-          camera: null,
-          location: null,
-          parts: [],
-          needRetraining: true,
-          accuracyRangeMin: 60,
-          accuracyRangeMax: 80,
-          maxImages: 50,
-          modelUrl: '',
-          sendMessageToCloud: false,
-          framesPerMin: 6,
-          accuracyThreshold: 50,
-          probThreshold: '10',
-        },
-        originData: {
-          id: null,
-          camera: null,
-          location: null,
-          parts: [],
-          needRetraining: true,
-          accuracyRangeMin: 60,
-          accuracyRangeMax: 80,
-          maxImages: 50,
-          modelUrl: '',
-          sendMessageToCloud: false,
-          framesPerMin: 6,
-          accuracyThreshold: 50,
-          probThreshold: '10',
-        },
-        inferenceMetrics: {
-          successRate: 0,
-          successfulInferences: 0,
-          unIdetifiedItems: 0,
-          isGpu: false,
-          averageTime: 0,
-          partCount: {},
-        },
+        data: initialProjectData,
+        originData: initialProjectData,
         trainingMetrics: {
           curConsequence: null,
           prevConsequence: null,
         },
-        trainingLogs: [],
+        trainingLog: '',
         status: Status.None,
         error: null,
       };
@@ -165,22 +117,20 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
       return { ...state };
     case UPDATE_PROJECT_DATA:
       return { ...state, data: { ...state.data, ...action.payload } };
-    case UPDATE_ORIGIN_PROJECT_DATA:
+    case pullCVProjects.fulfilled.toString():
       return { ...state, originData: state.data };
     case GET_TRAINING_LOG_REQUEST:
       return {
         ...state,
       };
     case GET_TRAINING_LOG_SUCCESS: {
-      let trainingLogs;
-      if (action.payload.newStatus === Status.FinishTraining) trainingLogs = [];
-      else if (state.trainingLogs[state.trainingLogs.length - 1] !== action.payload.trainingLog)
-        trainingLogs = [...state.trainingLogs, action.payload.trainingLog];
-      else trainingLogs = state.trainingLogs;
+      let trainingLog;
+      if (action.payload.newStatus === Status.FinishTraining) trainingLog = '';
+      else trainingLog = action.payload.trainingLog;
 
       return {
         ...state,
-        trainingLogs,
+        trainingLog,
         progress: action.payload.progress ?? state.progress,
         status: action.payload.newStatus,
       };
@@ -188,7 +138,7 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
     case GET_TRAINING_LOG_FAILED:
       return {
         ...state,
-        trainingLogs: [],
+        trainingLog: '',
         data: { ...state.data },
         status: Status.TrainingFailed,
         error: action.error,
@@ -206,23 +156,17 @@ const createProjectReducerByIsDemo = (isDemo: boolean) => (
         ...state,
         error: action.error,
       };
-    case GET_INFERENCE_METRICS_REQUEST:
-      return state;
-    case GET_INFERENCE_METRICS_SUCCESS:
-      return { ...state, inferenceMetrics: action.payload };
-    case GET_INFERENCE_METRICS_FAILED:
-      return { ...state, error: action.error };
     case 'CHANGE_STATUS':
       return { ...state, status: action.status };
-    case 'UPDATE_PROB_THRESHOLD_REQUEST':
+    case updateProbThreshold.pending.toString():
       return { ...state, isLoading: true, error: null };
-    case 'UPDATE_PROB_THRESHOLD_SUCCESS':
+    case updateProbThreshold.fulfilled.toString():
+      return { ...state, isLoading: false, originData: R.clone(state.data) };
+    case updateProbThreshold.rejected.toString():
       return { ...state, isLoading: false };
-    case 'UPDATE_PROB_THRESHOLD_FAILED':
-      return { ...state, isLoading: false, error: action.error };
     default:
       return { ...state };
   }
 };
 
-export default createProjectReducerByIsDemo;
+export default projectReducer;

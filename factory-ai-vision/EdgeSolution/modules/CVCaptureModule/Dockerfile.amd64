@@ -1,0 +1,18 @@
+FROM amd64/python:3.8
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY main .
+
+EXPOSE 8001
+
+CMD ["uvicorn", "main:app", "--port", "8001"]

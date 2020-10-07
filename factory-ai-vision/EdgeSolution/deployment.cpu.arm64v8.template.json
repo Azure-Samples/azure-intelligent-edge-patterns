@@ -68,7 +68,8 @@
               "DBNAME": { "value": "vision_on_edge" },
               "DBHOST": { "value": "172.18.0.1" },
               "DBUSER": { "value": "vision_on_edge" },
-              "DBPASS": { "value": "vision_on_edge" }
+              "DBPASS": { "value": "vision_on_edge" },
+              "DF_INFERENECE_IS_GPU": { "value": false }
             },
             "settings": {
               "image": "${MODULES.WebModule.arm64v8-ubuntu}",
@@ -115,6 +116,14 @@
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              }
+            },
             "settings": {
               "image": "${MODULES.InferenceModule.cpuarm64v8}",
               "createOptions": {
