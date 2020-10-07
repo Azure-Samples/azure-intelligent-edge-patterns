@@ -25,10 +25,6 @@ install-dev: requirements/local.txt ## install dev dependencies
 run: server.py
 	@$(PYTHON) $<
 
-.PHONY: run-fake
-run-fake: webmodule_utils/fake_server.py ## install dependencies
-	@$(PYTHON) $<
-
 .PHONY: test
 test: ## unit test
 	@echo "Testing..."

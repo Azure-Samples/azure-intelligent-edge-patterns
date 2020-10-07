@@ -53,7 +53,6 @@ class PartDetection(models.Model):
 
     maxImages = models.IntegerField(default=10)
     metrics_is_send_iothub = models.BooleanField(default=False)
-    metrics_accuracy_threshold = models.IntegerField(default=50)
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=60)
     send_video_to_cloud = models.BooleanField(default=False)

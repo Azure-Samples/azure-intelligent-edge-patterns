@@ -41,9 +41,8 @@ ENV CONDA_ENV_NAME python38
 RUN conda create --name python38 python=3.8.5 -y && \
     . activate python38
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime" ]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime" ]
 RUN apt-get install -y python3-numpy python3-zmq
 RUN pip install -U certifi --ignore-installed
 
@@ -60,6 +59,8 @@ COPY scenario_models scenario_models/
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 
+COPY api/__init__.py ./api/__init__.py
+COPY api/models.py ./api/models.py
 COPY arguments.py ./
 COPY config.py ./
 COPY exception_handler.py ./
@@ -84,7 +85,6 @@ COPY stream_manager.py ./
 COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
-COPY webmodule_utils/*.py ./webmodule_utils/
 
 EXPOSE 5558
 EXPOSE 5000
