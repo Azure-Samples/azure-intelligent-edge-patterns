@@ -63,7 +63,7 @@ http_inference_engine = HttpInferenceEngine(stream_manager)
 
 @app.get("/streams")
 def streams():
-    """prediction."""
+    """streams."""
     # logger.info(onnx.last_prediction)
     # onnx.last_prediction
     logger.info("Streams: %s", stream_manager.streams)
@@ -81,6 +81,8 @@ def prediction(cam_id: str):
 
 @app.post("/predict")
 async def predict(camera_id: str, request: Request):
+    """predict.
+    """
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -137,6 +139,8 @@ def update_part_detection_id(part_detection_id: int):
 def update_retrain_parameters(
     is_retrain: bool, confidence_min: int, confidence_max: int, max_images: int
 ):
+    """update_retrain_parameters.
+    """
 
     # FIXME currently set all streams
     # cam_id = request.args.get('cam_id')
@@ -161,6 +165,8 @@ def update_retrain_parameters(
 
 @app.post("/update_model")
 def update_model(request_body: UploadModelBody):
+    """update_model.
+    """
 
     if not request_body.model_uri and not request_body.model_dir:
         return "missing model_uri or model_dir", 400
@@ -354,11 +360,7 @@ def get_scenario():
 
 @app.get("/update_prob_threshold")
 def update_prob_threshold(prob_threshold: int):
-    """update_prob_threshold.
-
-    Args:
-    prob_threshold (int): prob_threshold
-    """
+    """update_prob_threshold."""
 
     logger.info("Updating prob_threshold to")
     logger.info("  prob_threshold: %s", prob_threshold)
@@ -373,15 +375,6 @@ def update_prob_threshold(prob_threshold: int):
         stream.reset_metrics()
 
     return "ok"
-
-
-# RON FIXME
-# @app.route("/update_fps")
-# def update_fps():
-#     fps = request.args.get("fps")
-#     if not fps:
-#         return "missing fps"
-#     onnx.frame_rate = int(fps)
 
 
 @app.get("/get_recommended_fps")
@@ -466,6 +459,8 @@ def local_main():
 
 
 def benchmark():
+    """benchmark.
+    """
     # app.run(host='0.0.0.0', debug=False)
     # s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
     SAMPLE_VIDEO = "./sample_video/video.mp4"
