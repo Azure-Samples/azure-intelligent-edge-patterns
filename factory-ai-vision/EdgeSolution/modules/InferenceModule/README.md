@@ -17,32 +17,22 @@
 
 ## Developers
 
-1.  Install
+1. Install
 
-    ```bash
-    make install-dev
-    ```
+   ```bash
+   make install-dev
+   ```
 
-2.  Tests
+2. Tests
 
-    ```bash
-    make test
-    ```
+   ```bash
+   make test
+   ```
 
-3.  Coverage
+3. Coverage
 
-    To run the tests, check your test coverage, and generate an HTML coverage report::
+   To run the tests, check your test coverage, and generate an HTML coverage report::
 
-    ```bash
-    make coverage
-    ```
-
-## Running Fake server
-
-1.  Run
-
-    ```bash
-    make run-fake
-    # or
-    python webmodule_utils/fake_server.py
-    ```
+   ```bash
+   make coverage
+   ```

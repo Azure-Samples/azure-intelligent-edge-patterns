@@ -223,7 +223,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     def train(self, request, pk=None) -> Response:
         """train."""
         queryset = self.get_queryset()
-        drf_get_object_or_404(queryset, pk=pk)
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
+        project_obj.is_trainable(raise_exception=True)
         TRAINING_MANAGER.add(project_id=pk)
         return Response({"status": "ok"})
 
