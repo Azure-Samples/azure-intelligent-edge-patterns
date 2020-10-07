@@ -118,7 +118,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
     recomendedFps: data?.recomendedFps ?? 10,
-    inferenceProtocol: data?.inference_protocal ?? InferenceProtocal.GRPC,
+    inferenceProtocol: data?.inference_protocol ?? InferenceProtocal.GRPC,
     inferenceSource: data?.inference_source ?? InferenceSource.LVA,
   },
   isDemo,
@@ -217,7 +217,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         setFpsManually: partDetection[0]?.fps !== recomendedFps,
         recomendedFps,
         fps: partDetection[0]?.fps ?? 10,
-        inferenceProtocol: partDetection[0]?.inference_protocal ?? InferenceProtocal.GRPC,
+        inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocal.GRPC,
         inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
       };
       dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
@@ -254,7 +254,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       send_video_to_cloud: projectData.sendVideoToCloud,
       inference_mode: projectData.inferenceMode,
       fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
-      inference_protocal: projectData.inferenceProtocol,
+      inference_protocol: projectData.inferenceProtocol,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
