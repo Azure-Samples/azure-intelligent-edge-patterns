@@ -20,6 +20,8 @@ import {
   GET_TRAINING_METRICS_FAILED,
   ProjectData,
   InferenceMode,
+  InferenceProtocal,
+  InferenceSource,
 } from './projectTypes';
 import { updateProbThreshold } from './projectActions';
 import { pullCVProjects } from '../trainingProjectSlice';
@@ -51,6 +53,8 @@ export const initialProjectData: ProjectData = {
   setFpsManually: false,
   fps: 10,
   recomendedFps: 10,
+  inferenceProtocol: InferenceProtocal.GRPC,
+  inferenceSource: InferenceSource.LVA,
 };
 
 const initialState: Project = {

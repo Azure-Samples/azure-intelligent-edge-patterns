@@ -22,7 +22,12 @@ import Axios from 'axios';
 import { State } from 'RootStateType';
 import { getCameras, cameraOptionsSelectorInConfig } from '../store/cameraSlice';
 import { partOptionsSelector, getParts } from '../store/partSlice';
-import { ProjectData, InferenceMode } from '../store/project/projectTypes';
+import {
+  ProjectData,
+  InferenceMode,
+  InferenceProtocal,
+  InferenceSource,
+} from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
 import { thunkPostProject } from '../store/project/projectActions';
@@ -318,6 +323,22 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               maskChar=" "
             />
           </Stack.Item>
+          {projectData.inferenceSource === InferenceSource.LVA && (
+            <Stack.Item disableShrink>
+              <div className={classNames.textWrapper}>
+                <Label>Portocal of inference</Label>
+              </div>
+              <Toggle
+                inlineLabel
+                label={projectData.inferenceProtocol}
+                checked={projectData.inferenceProtocol === InferenceProtocal.GRPC}
+                onChange={(_, checked) => {
+                  if (checked) onChange('inferenceProtocol', InferenceProtocal.GRPC);
+                  else onChange('inferenceProtocol', InferenceProtocal.Http);
+                }}
+              />
+            </Stack.Item>
+          )}
         </Stack>
       </ExpandPanel>
     </Panel>
