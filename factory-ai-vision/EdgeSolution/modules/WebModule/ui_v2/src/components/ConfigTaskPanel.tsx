@@ -199,8 +199,8 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
         iconPosition="end"
         bottomBorder
       >
-        <Stack horizontal tokens={{ childrenGap: 50 }} styles={{ root: { paddingTop: '30px' } }}>
-          <Stack.Item>
+        <Stack horizontal tokens={{ childrenGap: 50 }} wrap styles={{ root: { paddingTop: '30px' } }}>
+          <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
               <Label>Cloud messaging</Label>
               <Text>Send successful inferences to the cloud</Text>
@@ -229,7 +229,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             )}
           </Stack.Item>
           {canSelectProjectRetrain && (
-            <Stack.Item>
+            <Stack.Item disableShrink>
               <div className={classNames.textWrapper}>
                 <Label>Retraining image</Label>
                 <Text>Save images to tag and improve training model</Text>
@@ -279,7 +279,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               )}
             </Stack.Item>
           )}
-          <Stack.Item>
+          <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
               <Label>Send video to cloud</Label>
             </div>
@@ -292,7 +292,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               }}
             />
           </Stack.Item>
-          <Stack.Item>
+          <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
               <Label>Camera FPS</Label>
             </div>
