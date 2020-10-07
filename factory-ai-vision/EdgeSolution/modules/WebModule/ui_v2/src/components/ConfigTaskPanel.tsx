@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as R from 'ramda';
 import {
@@ -91,6 +91,10 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   }, [initialProjectData]);
 
   const cameraOptions = useSelector(cameraOptionsSelectorInConfig(projectData.trainingProject));
+  const selectedCameraOptions = useMemo(
+    () => cameraOptions.filter((e) => projectData.cameras.includes(e.key)),
+    [cameraOptions, projectData.cameras],
+  );
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
   const trainingProjectOptions = useSelector(
     trainingProjectOptionsSelector(
@@ -114,6 +118,10 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       const relatedScenario = scenarios.find((e) => e.trainingProject === cloneProject.trainingProject);
       if (relatedScenario !== undefined) cloneProject.inferenceMode = relatedScenario.inferenceMode;
       else cloneProject.inferenceMode = InferenceMode.PartDetection;
+    } else if (key === 'cameras') {
+      cloneProject.cameraToBeRecord = cloneProject.cameraToBeRecord.filter((e) =>
+        cloneProject.cameras.includes(e),
+      );
     }
     setProjectData(cloneProject);
   }
@@ -294,6 +302,20 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               checked={projectData.sendVideoToCloud}
               onChange={(_, checked) => {
                 onChange('sendVideoToCloud', checked);
+              }}
+            />
+            <Dropdown
+              disabled={!projectData.sendVideoToCloud}
+              options={selectedCameraOptions}
+              multiSelect
+              selectedKeys={projectData.cameraToBeRecord}
+              onChange={(_, option) => {
+                onChange(
+                  'cameraToBeRecord',
+                  option.selected
+                    ? [...projectData.cameraToBeRecord, option.key as number]
+                    : projectData.cameraToBeRecord.filter((key) => key !== option.key),
+                );
               }}
             />
           </Stack.Item>
