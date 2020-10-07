@@ -10,6 +10,7 @@ Repo for curbside pick-up demo using ALPR models in Live Video Analytics platfor
   * d. Media Services
   * e. Azure container registry
 * An [Azure Stack Edge](https://azure.microsoft.com/en-us/products/azure-stack/edge/) Device or a Linux VM (with an NVIDIA GPU with CUDA drivers installed).
+* For Azure Stack Edge please [run this scenario](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-sample-module)
 * Git: https://git-scm.com/download
 * VS Code: https://code.visualstudio.com/Download
 * Docker: https://www.docker.com/get-started
