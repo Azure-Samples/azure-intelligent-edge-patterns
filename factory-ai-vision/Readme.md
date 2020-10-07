@@ -55,7 +55,6 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 ### Prerequisites
 
-<<<<<<< HEAD
 Before installation, please make sure you have the following:
 
 1.  At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux)
