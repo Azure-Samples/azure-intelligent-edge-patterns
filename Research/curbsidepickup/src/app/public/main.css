@@ -1,0 +1,63 @@
+/*
+  Your use of the content in the files referenced here is subject to the terms of the license at http://aka.ms/fabric-assets-license
+*/
+html {
+  scroll-behavior: smooth; }
+
+body {
+  margin-bottom: 4rem; }
+
+header {
+  margin: 1em 1em; }
+  header #logo img {
+    width: 108px;
+    height: 20px; }
+
+#main {
+  margin: 0 1rem; }
+  #main div[data-template] {
+    display: none; }
+  #main #layout {
+    display: flex; }
+  #main #parking-lot {
+    flex-grow: 2;
+    display: flex;
+    flex-wrap: wrap; }
+    #main #parking-lot .parking-spot {
+      flex-shrink: 30;
+      flex-basis: 20%;
+      box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108);
+      margin-top: 1rem;
+      margin-right: 1rem;
+      padding: 1rem;
+      height: 18rem; }
+      #main #parking-lot .parking-spot i {
+        color: #8a8886;
+        width: 1.5rem;
+        font-size: 1vw; }
+      #main #parking-lot .parking-spot .no-vehicle {
+        font-size: 2rem;
+        color: #8a8886; }
+      #main #parking-lot .parking-spot .parking-spot-id {
+        color: #dddddd;
+        display: block;
+        float: right;
+        position: relative;
+        top: 0;
+        right: 0; }
+      #main #parking-lot .parking-spot .customer {
+        font-size: 1.2rem;
+        white-space: nowrap; }
+      #main #parking-lot .parking-spot .license-plate {
+        font-size: 1rem; }
+      #main #parking-lot .parking-spot .vehicle-image img {
+        width: 200px;
+        margin: 1rem 0rem; }
+      #main #parking-lot .parking-spot ul.delivery {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: inline-table;
+        font-size: 1rem; }
+      #main #parking-lot .parking-spot:hover {
+        background-color: #eeeeee; }

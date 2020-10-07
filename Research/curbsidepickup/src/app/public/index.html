@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>AMS Curbside demo</title>
+    <meta name="robots" content="noodp,noydir">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+        integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+    <link rel="stylesheet"
+        href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
+    <link rel="stylesheet" href="main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/js/app.js"></script>
+</head>
+
+<body class="ms-Fabric" dir="ltr">
+    <header>
+        <a id="logo" href="https://www.microsoft.com">
+            <img src="https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31">
+        </a>
+    </header>
+
+    <div id="main" class="ms-font-su">
+        <div id="templates">
+
+            <div class="parking-spot" data-template="parkingSpot">
+                <span class="parking-spot-id">{{index}}</span>
+                {{#if name}}
+                <div class="customer">
+                    <div class="name"><i class="ms-Icon ms-Icon--Contact"></i> {{name}}</div>
+                    <div class="license-plate"><i class="ms-Icon ms-Icon--Car"></i> {{licensePlate}}</div>
+                    <div class="vehicle-image"><img src="{{vehicleImageUrl}}" /></div>
+                    <div>
+                        <i class="ms-Icon ms-Icon--Shop"></i>
+                        <ul class="delivery">
+                            {{#each packages}}
+                            <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+                {{^}}
+                <div class="no-vehicle">No vehicle</div>
+                {{/if}}
+            </div>
+
+        </div>
+
+        <span class="ms-fontColor-themePrimary">Curbside</span>
+
+        <div id="layout">
+
+            <div id="parking-lot">
+                <!-- parking spots here -->
+            </div>
+
+            <div id="details">
+                details
+            </div>
+            
+        </div>
+
+    </div>
+
+
+
+    <footer>
+        <nav>
+        </nav>
+    </footer>
+</body>
+
+</html>
