@@ -12,6 +12,11 @@ from ..azure_parts.models import Part
 from ..azure_projects.models import Project
 from ..cameras.models import Camera
 from ..inference_modules.models import InferenceModule
+from .constants import (
+    INFERENCE_MODE_CHOICES,
+    INFERENCE_PROTOCOL_CHOICES,
+    INFERENCE_SOURCE_CHOICES,
+)
 from .exceptions import (
     PdDeployWithoutCameras,
     PdDeployWithoutInferenceModule,
@@ -21,13 +26,6 @@ from .exceptions import (
 )
 
 logger = logging.getLogger(__name__)
-
-INFERENCE_MODE_CHOICES = [
-    ("PD", "part_detection"),
-    ("PC", "part_counting"),
-    ("ES", "employee_safety"),
-    ("DD", "defect_detection"),
-]
 
 
 class PartDetection(models.Model):
@@ -41,6 +39,12 @@ class PartDetection(models.Model):
     )
     inference_mode = models.CharField(
         max_length=40, choices=INFERENCE_MODE_CHOICES, default="PD"
+    )
+    inference_protocol = models.CharField(
+        max_length=40, choices=INFERENCE_PROTOCOL_CHOICES, default="http"
+    )
+    inference_source = models.CharField(
+        max_length=40, choices=INFERENCE_SOURCE_CHOICES, default="lva"
     )
     parts = models.ManyToManyField(Part, blank=True)
     needRetraining = models.BooleanField(default=True)
@@ -73,6 +77,14 @@ class PartDetection(models.Model):
         )
 
     def is_deployable(self, raise_exception: bool = False) -> bool:
+        """is_deployable.
+
+        Args:
+            raise_exception (bool): raise_exception
+
+        Returns:
+            bool: is_deployable
+        """
         try:
             if not self.inference_module:
                 raise PdDeployWithoutInferenceModule

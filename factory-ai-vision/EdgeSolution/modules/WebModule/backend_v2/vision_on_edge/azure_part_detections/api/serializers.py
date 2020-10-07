@@ -6,6 +6,7 @@ import logging
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
+from ..constants import INFERENCE_PROTOCOL_CHOICES
 from ..models import PartDetection, PDScenario
 
 logger = logging.getLogger(__name__)
@@ -73,5 +74,6 @@ class UpdateCamBodySerializer(serializers.Serializer):
         lines = serializers.CharField(required=False, allow_blank=True)
         zones = serializers.CharField(required=False, allow_blank=True)
 
+    lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
     fps = serializers.IntegerField()
     cameras = CameraItem(many=True)

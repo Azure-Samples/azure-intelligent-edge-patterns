@@ -95,7 +95,7 @@ def deploy_worker(part_detection_id):
         part_detection_obj: Part Detection Objects
     """
     REQUEST_TIMEOUT = 60
-    instance = PartDetection.objects.get(pk=part_detection_id)
+    instance: PartDetection = PartDetection.objects.get(pk=part_detection_id)
     if not instance.has_configured:
         logger.error("This PartDetection is not configured")
         logger.error("Not sending any request to inference")
@@ -184,7 +184,11 @@ def deploy_worker(part_detection_id):
     # =====================================================
     logger.info("Update Cam!!!")
     cameras = instance.cameras.all()
-    res_data = {"fps": instance.fps, "cameras": []}
+    res_data = {
+        "fps": instance.fps,
+        "lva_mode": instance.inference_protocol,
+        "cameras": [],
+    }
 
     for cam in cameras.all():
         if cam.area:
@@ -210,9 +214,10 @@ def deploy_worker(part_detection_id):
             )
     serializer = UpdateCamBodySerializer(data=res_data)
     serializer.is_valid(raise_exception=True)
+    logger.info(serializer.validated_data)
     requests.post(
         url="http://" + instance.inference_module.url + "/update_cams",
-        json=json.loads(json.dumps(serializer.validated_data)),
+        json=dict(serializer.validated_data),
         timeout=REQUEST_TIMEOUT,
     )
     # =====================================================

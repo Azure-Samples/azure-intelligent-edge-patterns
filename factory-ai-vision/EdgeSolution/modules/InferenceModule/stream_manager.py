@@ -7,7 +7,6 @@ import zmq
 from streams import Stream
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class StreamManager(object):
