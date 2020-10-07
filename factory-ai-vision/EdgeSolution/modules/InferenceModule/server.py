@@ -304,7 +304,7 @@ def update_parts(parts: PartsModel):
         logger.error("Update parts failed...")
         # return 'unknown format'
 
-    onnx.update_parts(parts)
+    onnx.update_parts(part_names)
 
     return "ok"
 
