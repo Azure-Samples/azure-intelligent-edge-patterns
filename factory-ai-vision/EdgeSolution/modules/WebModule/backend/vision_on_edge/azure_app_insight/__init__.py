@@ -1,0 +1,2 @@
+"""Azure Application insight app.
+"""
