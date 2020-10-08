@@ -179,7 +179,7 @@ def update_model(request_body: UploadModelBody):
 
         logger.info("Got Model URI %s", request_body.model_uri)
 
-        # FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
+        # FIXME webmodule didnt send set detection_mode as Part Detection sometimes.
         # workaround
         onnx.set_detection_mode("PD")
         onnx.set_is_scenario(False)
@@ -276,7 +276,7 @@ def update_cams(request_body: CamerasModel):
 def update_part_detection_mode(part_detection_mode: PartDetectionModeEnum):
     """update_part_detection_mode."""
 
-    onnx.set_detection_mode(part_detection_mode)
+    onnx.set_detection_mode(part_detection_mode.value)
     return "ok"
 
 
