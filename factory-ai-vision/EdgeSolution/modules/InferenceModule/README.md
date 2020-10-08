@@ -24,6 +24,10 @@
    make run
    ```
 
+3. Swagger Documents
+
+   [http://localhost:5000/docs](http://localhost:5000/docs)
+
 ## Developers
 
 1. Install requirements
