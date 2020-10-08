@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('images', '0003_auto_20200902_0609'),
+        ("images", "0003_auto_20200902_0609"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='image',
-            name='manual_checked',
+            model_name="image",
+            name="manual_checked",
             field=models.BooleanField(default=False),
         ),
     ]
