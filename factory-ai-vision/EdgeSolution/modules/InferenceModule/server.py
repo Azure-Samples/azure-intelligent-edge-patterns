@@ -346,15 +346,13 @@ def get_scenario():
                 "is_retrain": stream.is_retrain,
             }
         )
-    return json.dumps(
-        {
-            "num_streams": len(stream_manager.streams),
-            "stream_ids": list(stream_manager.streams.keys()),
-            "streams_status": streams_status,
-            "parts": onnx.parts,
-            "scenario": onnx.detection_mode,
-        }
-    )
+    return {
+        "num_streams": len(stream_manager.streams),
+        "stream_ids": list(stream_manager.streams.keys()),
+        "streams_status": streams_status,
+        "parts": onnx.parts,
+        "scenario": onnx.detection_mode,
+    }
 
 
 @app.get("/update_prob_threshold")
