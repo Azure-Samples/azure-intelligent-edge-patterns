@@ -1,3 +1,6 @@
+"""App API views.
+"""
+
 import json
 import logging
 
@@ -21,7 +24,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         serialized_data = self.serializer_class(data=request.data)
         # logger.warning('serialized data type:%s'%type(serialized_data))
         if serialized_data.is_valid():
-            logger.info('is_valid')
+            logger.info("is_valid")
             serialized_data.save()
 
             return Response(data=serialized_data.data, status=201)

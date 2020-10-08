@@ -1,5 +1,4 @@
-"""
-Camera utils views
+"""App utils views.
 """
 
 import logging
@@ -15,26 +14,24 @@ logger = logging.getLogger(__name__)
 
 @api_view()
 def verify_rtsp(request):
-    """test if a rtsp is valid"""
+    """verify_rtsp.
+
+    Args:
+        request:
+    """
     logger.info("Verifying rtsp")
-    rtsp = request.query_params.get('rtsp')
+    rtsp = request.query_params.get("rtsp")
     logger.info("rtsp %s", rtsp)
 
     if rtsp is None:
         return Response(
-            {
-                'status': 'failed',
-                'log': 'rtsp not given'
-            },
+            {"status": "failed", "log": "rtsp not given"},
             status=status.HTTP_400_BAD_REQUEST,
         )
     rtsp_ok = Camera.verify_rtsp(rtsp)
     if not rtsp_ok:
         return Response(
-            {
-                'status': 'failed',
-                'log': 'rtsp not valid'
-            },
+            {"status": "failed", "log": "rtsp not valid"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    return Response({'status': 'ok'})
+    return Response({"status": "ok"})

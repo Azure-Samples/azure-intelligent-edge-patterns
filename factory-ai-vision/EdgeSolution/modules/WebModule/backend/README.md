@@ -1,52 +1,60 @@
 # Vision On Edge - Web Module
 
-## How to run
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=00000)](https://pycqa.github.io/isort/)
 
-### Migrate
+## Quick Start
 
-```bash
-python manage.py makemigration
-python manage.py migrate
-```
+1. Run Django
 
-### Configure
+   ```bash
+   pip install -r requirements/production-x86.txt
+   # Arm: pip install -r requirements/production-arm.txt
+   python manage.py makemigration
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-```bash
-vim config.py
-vim configs/app_insight.py
-```
+2. Django REST Framework UI
+   [http://localhost:8000/api/](http://localhost:8000/api/)
+3. Swagger Documents
+   [http://localhost:8000/api/swagger](http://localhost:8000/api/swagger)
 
-### Run server
+## Production Setup
 
-```bash
-python manage.py runserver
-```
+1. Run Django
 
-Go to [Web UI](http://localhost:8000)
+   ```bash
+   pip install -r requirements/production-x86.txt
+   # Arm: pip install -r requirements/production-arm.txt
+   export DBNAME="YOUR_DB_NAME"
+   export DBNAME="YOUR_DB_NAME"
+   export DBHOST="YOUR_DB_HOST"
+   export DBUSER="YOUR_DB_USER"
+   export DBPASS="YOUR_DB_PASSWORD"
+   python manage.py makemigration
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-## Pylint
+## Developers
 
-```bash
-pylint
-```
+1.  Installation
 
-## How to test
+    ```bash
+    make install-dev
+    ```
 
-Go to project directory (same level with manage.py)
+2.  Tests
 
-```bash
-export ENDPOINT=${your_endpoint}
-export TRAINING_KEY=${your_key}
-pytest
-```
+    ```bash
+    make test
+    ```
 
-## Test coverage
+3.  Coverage
 
-To run the tests, check your test coverage, and generate an HTML coverage report::
+    To run the tests, check your test coverage, and generate an HTML coverage report::
 
-```bash
-$ coverage run -m pytest
-$ coverage html
-$ open htmlcov/index.html
-```
-
+    ```bash
+    make coverage
+    ```

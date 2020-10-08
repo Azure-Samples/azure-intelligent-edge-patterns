@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Azure Notification Factories
 """
 
@@ -9,8 +8,7 @@ from vision_on_edge.notifications.models import Notification
 
 
 class NotificationFactory(DjangoModelFactory):
-    """NotificationFactory.
-    """
+    """NotificationFactory."""
 
     notification_type = "project"
     sender = "system"
@@ -19,7 +17,6 @@ class NotificationFactory(DjangoModelFactory):
     timestamp = timezone.now()
 
     class Meta:
-        """Meta.
-        """
+        """Meta."""
 
         model = Notification

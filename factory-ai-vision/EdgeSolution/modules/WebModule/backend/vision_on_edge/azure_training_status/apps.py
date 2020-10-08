@@ -1,4 +1,5 @@
-"""App"""
+"""App.
+"""
 
 import logging
 import sys
@@ -9,17 +10,25 @@ logger = logging.getLogger(__name__)
 
 
 class AzureTrainingStatusConfig(AppConfig):
-    """App Config
+    """App Config"""
 
-    Import signals and create demo objects.
-    """
-
-    name = 'vision_on_edge.azure_training_status'
+    name = "vision_on_edge.azure_training_status"
 
     def ready(self):
-        """
-        Azure Training Status App Ready
-        """
-        if 'runserver' in sys.argv:
+        """ready."""
+        if "runserver" in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
+            from ..azure_projects.models import Project
             from . import signals
+            from .models import TrainingStatus
+
+            for project in Project.objects.all():
+                try:
+                    ts_obj = project.trainingstatus
+                except Project.trainingstatus.RelatedObjectDoesNotExist:
+                    TrainingStatus.objects.create(project=project)
+            for ts_obj in TrainingStatus.objects.all():
+                if ts_obj.status not in ["ok", "failed"]:
+                    ts_obj.status = "ok"
+                    ts_obj.log = "reset by app"
+                    ts_obj.save()

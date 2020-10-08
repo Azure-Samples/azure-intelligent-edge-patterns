@@ -1,5 +1,4 @@
-"""
-Models for azure prediction
+"""App models.
 """
 
 import logging
@@ -11,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class ImagePrediction(models.Model):
-    """Image Prediction"""
+    """Image Prediction model."""
+
     image = models.ImageField(upload_to="predictions/")
     predicted = models.BooleanField(default=False)
 
@@ -22,18 +22,13 @@ class ImagePrediction(models.Model):
         Args:
             kwargs:
         """
-
-        if 'instance' not in kwargs:
-            logger.info("no instance given")
-            return
-
-        instance = kwargs['instacne']
+        instance = kwargs["instacne"]
         logger.info("Image Prediction Presave")
         if not instance.predicted:
             logger.info("Predictiing")
             # Do something here...
 
 
-pre_save.connect(ImagePrediction.pre_save,
-                 ImagePrediction,
-                 dispatch_uid="ImagePrediction_pre")
+pre_save.connect(
+    ImagePrediction.pre_save, ImagePrediction, dispatch_uid="ImagePrediction_pre"
+)

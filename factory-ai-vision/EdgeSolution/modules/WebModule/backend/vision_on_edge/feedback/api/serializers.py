@@ -1,3 +1,6 @@
+"""App API serializers.
+"""
+
 import logging
 
 from django.contrib.auth.models import User
@@ -9,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Feedback
         fields = "__all__"

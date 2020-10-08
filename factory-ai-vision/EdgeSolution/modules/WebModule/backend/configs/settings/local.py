@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Django settings for vision_on_edge project.
 
 Use in development.
@@ -12,6 +11,7 @@ from .base import *
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-LOGGING = logging_config.LOGGING_CONFIG_DEV
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 
-# pylint: enable = wildcard-import, unused-wildcard-import
+LOGGING = logging_config.LOGGING_CONFIG_DEV

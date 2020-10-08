@@ -30,13 +30,13 @@ FROM backend-base as backend-production
 
 WORKDIR /app
 
-COPY backend_v2/requirements requirements
+COPY backend/requirements requirements
 RUN pip install -r ./requirements/production-x86.txt
 
-COPY backend_v2/manage.py .
-COPY backend_v2/config.py .
-COPY backend_v2/vision_on_edge vision_on_edge
-COPY backend_v2/configs configs
+COPY backend/manage.py .
+COPY backend/config.py .
+COPY backend/vision_on_edge vision_on_edge
+COPY backend/configs configs
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 

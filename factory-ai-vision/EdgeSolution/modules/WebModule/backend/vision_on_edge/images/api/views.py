@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-"""App views
+"""App views.
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -14,24 +13,20 @@ from .serializers import ImageSerializer
 
 # pylint: disable=too-many-ancestors
 class ImageViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """Image ModelViewSet
-    """
+    """Image ModelViewSet."""
 
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (filters.OrderingFilter,)
-    filter_mappings = {
-        "is_demo": "is_demo",
-        "project_id": "project_id",
-    }
+    filter_mappings = {"is_demo": "is_demo", "project_id": "project_id"}
 
     def destroy(self, request, **kwargs):
         """destroy.
 
-        only delete image on customvision when api_call
+        Only delete image on customvision when api call.
         """
-        if Image.objects.filter(pk=kwargs['pk']).exists():
-            img_obj = Image.objects.get(pk=kwargs['pk'])
+        if Image.objects.filter(pk=kwargs["pk"]).exists():
+            img_obj = Image.objects.get(pk=kwargs["pk"])
             img_obj.delete_on_customvision = True
             img_obj.delete()
 

@@ -1,1 +1,2 @@
-"""Azure IoT Edge app."""
+"""Azure IoT Edge app.
+"""
