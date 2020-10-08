@@ -151,7 +151,7 @@ export const Deployment: React.FC = () => {
     ];
 
     if (newImagesCount)
-      items.unshift({
+      items.splice(1, 0, {
         key: 'update',
         text: 'Update model',
         iconProps: {
