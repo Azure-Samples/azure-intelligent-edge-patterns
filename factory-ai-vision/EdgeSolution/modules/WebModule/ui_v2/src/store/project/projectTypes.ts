@@ -50,7 +50,7 @@ export enum InferenceMode {
   DefectDetection = 'DD',
 }
 
-export enum InferenceProtocal {
+export enum InferenceProtocol {
   Http = 'http',
   GRPC = 'grpc',
 }
@@ -82,7 +82,7 @@ export type ProjectData = {
   setFpsManually: boolean;
   fps: number;
   recomendedFps: number;
-  inferenceProtocol: InferenceProtocal;
+  inferenceProtocol: InferenceProtocol;
   inferenceSource: InferenceSource;
 };
 

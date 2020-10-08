@@ -25,7 +25,7 @@ import { partOptionsSelector, getParts } from '../store/partSlice';
 import {
   ProjectData,
   InferenceMode,
-  InferenceProtocal,
+  InferenceProtocol,
   InferenceSource,
 } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
@@ -326,15 +326,15 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           {projectData.inferenceSource === InferenceSource.LVA && (
             <Stack.Item disableShrink>
               <div className={classNames.textWrapper}>
-                <Label>Portocal of inference</Label>
+                <Label>Protocol of inference</Label>
               </div>
               <Toggle
                 inlineLabel
                 label={projectData.inferenceProtocol}
-                checked={projectData.inferenceProtocol === InferenceProtocal.GRPC}
+                checked={projectData.inferenceProtocol === InferenceProtocol.GRPC}
                 onChange={(_, checked) => {
-                  if (checked) onChange('inferenceProtocol', InferenceProtocal.GRPC);
-                  else onChange('inferenceProtocol', InferenceProtocal.Http);
+                  if (checked) onChange('inferenceProtocol', InferenceProtocol.GRPC);
+                  else onChange('inferenceProtocol', InferenceProtocol.Http);
                 }}
               />
             </Stack.Item>

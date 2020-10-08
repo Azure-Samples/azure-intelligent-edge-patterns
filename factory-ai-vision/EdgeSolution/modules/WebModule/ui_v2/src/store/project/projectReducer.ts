@@ -20,7 +20,7 @@ import {
   GET_TRAINING_METRICS_FAILED,
   ProjectData,
   InferenceMode,
-  InferenceProtocal,
+  InferenceProtocol,
   InferenceSource,
 } from './projectTypes';
 import { updateProbThreshold } from './projectActions';
@@ -53,7 +53,7 @@ export const initialProjectData: ProjectData = {
   setFpsManually: false,
   fps: 10,
   recomendedFps: 10,
-  inferenceProtocol: InferenceProtocal.GRPC,
+  inferenceProtocol: InferenceProtocol.GRPC,
   inferenceSource: InferenceSource.LVA,
 };
 

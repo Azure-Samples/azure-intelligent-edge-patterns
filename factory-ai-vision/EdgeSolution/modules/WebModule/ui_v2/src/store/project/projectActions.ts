@@ -42,7 +42,7 @@ import {
   StopInferenceAction,
   ChangeStatusAction,
   TrainingStatus,
-  InferenceProtocal,
+  InferenceProtocol,
   InferenceSource,
 } from './projectTypes';
 import { selectAllImages } from '../imageSlice';
@@ -118,7 +118,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
     recomendedFps: data?.recomendedFps ?? 10,
-    inferenceProtocol: data?.inference_protocol ?? InferenceProtocal.GRPC,
+    inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
     inferenceSource: data?.inference_source ?? InferenceSource.LVA,
   },
   isDemo,
@@ -217,7 +217,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         setFpsManually: partDetection[0]?.fps !== recomendedFps,
         recomendedFps,
         fps: partDetection[0]?.fps ?? 10,
-        inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocal.GRPC,
+        inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocol.GRPC,
         inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
       };
       dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
