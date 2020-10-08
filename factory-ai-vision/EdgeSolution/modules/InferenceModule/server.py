@@ -145,7 +145,6 @@ def update_retrain_parameters(
     # FIXME currently set all streams
     # cam_id = request.args.get('cam_id')
     # s = stream_manager.get_stream_by_id(cam_id)
-    is_retrain = is_retrain == "True"
     confidence_min = int(confidence_min) * 0.01
     confidence_max = int(confidence_max) * 0.01
     max_images = int(max_images)
