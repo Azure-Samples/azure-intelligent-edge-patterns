@@ -6,23 +6,27 @@
 
 ## Quick Start
 
-1. Run Django
+1. Install requirements
 
    ```bash
    pip install -r requirements/production-x86.txt
    # Arm: pip install -r requirements/production-arm.txt
+   ```
 
+2. Run Server
+
+   ```bash
    # start django
    python manage.py makemigration
    python manage.py migrate
    python manage.py runserver
    ```
 
-2. Django REST Framework UI
+3. Django REST Framework UI
 
    [http://localhost:8000/api/](http://localhost:8000/api/)
 
-3. Swagger Documents
+4. Swagger Documents
 
    [http://localhost:8000/api/swagger](http://localhost:8000/api/swagger)
 
