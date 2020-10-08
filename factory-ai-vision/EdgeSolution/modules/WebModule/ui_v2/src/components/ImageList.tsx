@@ -15,7 +15,7 @@ const classNames = mergeStyleSets({
   },
 });
 
-export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'isRelabel'> & {
+export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'manualChecked'> & {
   partName: string;
   cameraName: string;
 };
@@ -38,7 +38,7 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
             imgTimeStamp={timeStampConverter(item.timestamp)}
             cameraName={item.cameraName}
             partName={item.partName}
-            isRelabel={item.isRelabel}
+            manualChecked={item.manualChecked}
             pointerCursor
             onClick={() =>
               dispatch(

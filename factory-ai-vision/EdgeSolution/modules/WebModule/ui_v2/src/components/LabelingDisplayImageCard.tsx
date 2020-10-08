@@ -9,7 +9,7 @@ type LabelingDilplayImageCardProps = {
   cameraName: string;
   imgTimeStamp: string;
   partName: string;
-  isRelabel: boolean;
+  manualChecked: boolean;
 };
 
 export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> = ({
@@ -17,9 +17,9 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
   cameraName,
   imgTimeStamp,
   partName,
-  isRelabel,
+  manualChecked,
 }) => {
-  const partTagStatus = isRelabel ? Status.Inactive : Status.Active;
+  const partTagStatus = manualChecked ? Status.Active : Status.Inactive;
   return (
     <Card
       tokens={{ childrenGap: 0 }}

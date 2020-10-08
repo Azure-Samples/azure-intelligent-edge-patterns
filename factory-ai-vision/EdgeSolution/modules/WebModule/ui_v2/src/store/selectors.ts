@@ -25,7 +25,7 @@ export const selectImageItemByTaggedPart = (partId) =>
               id: img.id,
               image: img.image,
               timestamp: img.timestamp,
-              isRelabel: img.isRelabel,
+              manualChecked: img.manualChecked,
               partName: partEntities[img.part]?.name || '',
               cameraName: cameraEntities[img.camera]?.name,
             };
@@ -48,7 +48,7 @@ export const selectImageItemByUntagged = (unTagged: boolean) =>
               id: img.id,
               image: img.image,
               timestamp: img.timestamp,
-              isRelabel: img.isRelabel,
+              manualChecked: img.manualChecked,
               partName: partEntities[img.part]?.name || '',
               cameraName: cameraEntities[img.camera]?.name,
             };
@@ -68,7 +68,7 @@ export const selectImageItemByRelabel = () =>
               id: img.id,
               image: img.image,
               timestamp: img.timestamp,
-              isRelabel: img.isRelabel,
+              manualChecked: img.manualChecked,
               partName: partEntities[img.part]?.name || '',
               cameraName: cameraEntities[img.camera]?.name,
             };
