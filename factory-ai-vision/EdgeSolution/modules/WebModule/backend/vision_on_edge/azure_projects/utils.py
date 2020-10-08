@@ -147,6 +147,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                 customvision_id=img.id,
                 project_id=project_id,
                 uploaded=True,
+                manual_checked=True,
             )
             try:
                 img_obj.get_remote_image()
@@ -208,6 +209,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                     remote_url=img.original_image_uri,
                     project=project_obj,
                     customvision_id=img.id,
+                    manual_checked=True,
                 )
                 if created:
                     logger.info("Downloading img %s", img.id)

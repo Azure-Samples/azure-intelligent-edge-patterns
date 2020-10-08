@@ -8,6 +8,8 @@ import {
   Pivot,
   PivotItem,
   MessageBar,
+  Separator,
+  mergeStyleSets,
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
@@ -15,7 +17,7 @@ import Axios from 'axios';
 import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
-import { postImages, getImages } from '../store/imageSlice';
+import { postImages, getImages, selectAllImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
 import { selectImageItemByUntagged, selectImageItemByRelabel } from '../store/selectors';
 import { getParts } from '../store/partSlice';
@@ -25,6 +27,11 @@ import { Instruction } from '../components/Instruction';
 import { Status } from '../store/project/projectTypes';
 
 const theme = getTheme();
+const classes = mergeStyleSets({
+  seperator: {
+    margin: '20px 0px',
+  },
+});
 
 export const Images: React.FC = () => {
   const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
@@ -44,6 +51,9 @@ export const Images: React.FC = () => {
   );
   const imageIsEnoughForTraining = useSelector(
     (state: State) => state.project.status === Status.None && labeledImages.length >= 15,
+  );
+  const hasRelabelImgReadyToTrain = useSelector((state: State) =>
+    selectAllImages(state).some((e) => e.isRelabel && e.manualChecked && !e.uploaded),
   );
 
   const onUpload = () => {
@@ -127,6 +137,16 @@ export const Images: React.FC = () => {
               button={{ text: 'Go to Home', to: '/home/customize' }}
             />
           )}
+          {relabelImages.length === 0 && hasRelabelImgReadyToTrain && (
+            <Instruction
+              title="All images saved from the current deployment have been tagged!"
+              subtitle="Update the deployment to retrain the model"
+              button={{
+                text: 'Update model',
+                to: '/home/deployment',
+              }}
+            />
+          )}
           <Breadcrumb items={[{ key: 'images', text: 'Images' }]} />
           {labeledImages.length + unlabeledImages.length ? (
             <Pivot>
@@ -141,6 +161,9 @@ export const Images: React.FC = () => {
                   />
                 ) : (
                   <>
+                    <Separator alignContent="start" className={classes.seperator}>
+                      Deployment captures
+                    </Separator>
                     {relabelImages.length > 0 && (
                       <MessageBar styles={{ root: { margin: '12px 0px' } }}>
                         Images saved from the current deployment. Confirm or modify the objects identified to
@@ -148,6 +171,9 @@ export const Images: React.FC = () => {
                       </MessageBar>
                     )}
                     <ImageList images={relabelImages} />
+                    <Separator alignContent="start" className={classes.seperator}>
+                      Manually added
+                    </Separator>
                     <ImageList images={unlabeledImages} />
                   </>
                 )}

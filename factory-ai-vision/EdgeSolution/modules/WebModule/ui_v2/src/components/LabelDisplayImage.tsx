@@ -16,7 +16,7 @@ interface LabelDisplayImageProps {
   imgTimeStamp: string;
   cameraName: string;
   partName: string;
-  isRelabel: boolean;
+  manualChecked: boolean;
   pointerCursor?: boolean;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
@@ -26,7 +26,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   imgTimeStamp,
   cameraName,
   partName,
-  isRelabel,
+  manualChecked,
   pointerCursor = false,
   onClick,
 }) => {
@@ -49,7 +49,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
 
   return (
     <LabelingDisplayImageCard
-      isRelabel={isRelabel}
+      manualChecked={manualChecked}
       cameraName={cameraName}
       imgTimeStamp={imgTimeStamp}
       partName={partName}

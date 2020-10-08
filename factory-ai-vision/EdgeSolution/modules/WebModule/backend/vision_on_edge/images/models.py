@@ -33,6 +33,7 @@ class Image(models.Model):
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)
     uploaded = models.BooleanField(default=False)
+    manual_checked = models.BooleanField(default=False)
 
     customvision_id = models.CharField(max_length=1000, null=True, blank=True)
     remote_url = models.CharField(max_length=1000, null=True)

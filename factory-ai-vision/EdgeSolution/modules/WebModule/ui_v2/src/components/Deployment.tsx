@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Stack,
   PrimaryButton,
@@ -26,11 +26,11 @@ import { Project, Status, InferenceMode } from '../store/project/projectTypes';
 import { useInterval } from '../hooks/useInterval';
 import {
   thunkGetTrainingLog,
-  thunkDeleteProject,
   thunkGetTrainingMetrics,
   thunkGetProject,
   updateProjectData,
   updateProbThreshold,
+  getConfigure,
 } from '../store/project/projectActions';
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
 import { selectCamerasByIds, selectCameraById } from '../store/cameraSlice';
@@ -51,6 +51,9 @@ import { Shape, Purpose } from '../store/shared/BaseShape';
 import { EmptyAddIcon } from './EmptyAddIcon';
 import { getTrainingProject } from '../store/trainingProjectSlice';
 import { Insights } from './DeploymentInsights';
+import { Instruction } from './Instruction';
+import { selectAllImages } from '../store/imageSlice';
+import { initialProjectData } from '../store/project/projectReducer';
 
 const { palette } = getTheme();
 
@@ -88,15 +91,19 @@ export const Deployment: React.FC = () => {
   const partNames = useSelector(selectPartNamesById(parts));
   const dispatch = useDispatch();
   const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
+  const newImagesCount = useSelector(
+    (state: State) => selectAllImages(state).filter((e) => !e.uploaded && e.manualChecked).length,
+  );
 
-  const [isEditPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
+  const [isEditPanelOpen, { setTrue: openEditPanel, setFalse: closeEditPanel }] = useBoolean(false);
+  const [isCreatePanelOpen, { setTrue: openCreatePanel, setFalse: closeCreatePanel }] = useBoolean(false);
 
   useEffect(() => {
     (async () => {
       const hasConfigured = await dispatch(thunkGetProject());
-      if (!hasConfigured) openPanel();
+      if (!hasConfigured) openCreatePanel();
     })();
-  }, [dispatch, openPanel]);
+  }, [dispatch, openCreatePanel]);
 
   useEffect(() => {
     dispatch(getTrainingProject(true));
@@ -119,32 +126,42 @@ export const Deployment: React.FC = () => {
     dispatch(updateProjectData({ probThreshold: newValue }, false));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 
-  const commandBarItems: ICommandBarItemProps[] = [
-    {
-      key: 'edit',
-      text: 'Edit',
-      iconProps: {
-        iconName: 'Edit',
-      },
-      onClick: openPanel,
-    },
-    {
-      key: 'delete',
-      text: 'Delete',
-      iconProps: {
-        iconName: 'Delete',
-      },
-      onClick: () => {
-        // Because onClick cannot accept the return type Promise<void>, use the IIFE to workaround
-        (async () => {
-          // eslint-disable-next-line no-restricted-globals
-          if (!confirm('Sure you want to delete?')) return;
+  const updateModel = useCallback(() => {
+    dispatch(getConfigure(projectId));
+  }, [dispatch, projectId]);
 
-          await dispatch(thunkDeleteProject(false));
-        })();
+  const commandBarItems: ICommandBarItemProps[] = useMemo(() => {
+    const items = [
+      {
+        key: 'create',
+        text: 'Create new task',
+        iconProps: {
+          iconName: 'Add',
+        },
+        onClick: openCreatePanel,
       },
-    },
-  ];
+      {
+        key: 'edit',
+        text: 'Edit task',
+        iconProps: {
+          iconName: 'Edit',
+        },
+        onClick: openEditPanel,
+      },
+    ];
+
+    if (newImagesCount)
+      items.splice(1, 0, {
+        key: 'update',
+        text: 'Update model',
+        iconProps: {
+          iconName: 'Edit',
+        },
+        onClick: updateModel,
+      });
+
+    return items;
+  }, [newImagesCount, openCreatePanel, openEditPanel, updateModel]);
 
   const onRenderMain = () => {
     if (status === Status.None)
@@ -152,7 +169,7 @@ export const Deployment: React.FC = () => {
         <EmptyAddIcon
           title="Config a task"
           subTitle=""
-          primary={{ text: 'Config task', onClick: openPanel }}
+          primary={{ text: 'Config task', onClick: openEditPanel }}
         />
       );
     if (status === Status.WaitTraining)
@@ -175,73 +192,86 @@ export const Deployment: React.FC = () => {
       );
 
     return (
-      <Stack horizontal grow>
-        <Stack grow>
-          <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
-            <Stack grow>
-              <LiveViewContainer showVideo={true} cameraId={selectedCamera} />
-            </Stack>
-            <Stack horizontal horizontalAlign="space-between">
-              <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
-                <Text variant="xLarge">{name}</Text>
-                <Text styles={{ root: { color: palette.neutralSecondary } }}>
-                  Started running <b>{moment(deployTimeStamp).fromNow()}</b>
-                </Text>
-                <CommandBar items={commandBarItems} styles={{ root: { padding: 0 } }} />
+      <>
+        <CommandBar items={commandBarItems} style={{ display: 'block' }} />
+        {!!newImagesCount && (
+          <Instruction
+            title={`${newImagesCount} new images have been added to your model!`}
+            subtitle="Update the model to improve your current deployment"
+            button={{ text: 'Update model', onClick: updateModel }}
+            styles={{ root: { margin: '0px 25px' } }}
+          />
+        )}
+        <Stack horizontal grow>
+          <Stack grow>
+            <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
+              <Stack grow>
+                <LiveViewContainer showVideo={true} cameraId={selectedCamera} />
               </Stack>
-              <Dropdown
-                options={cameraOptions}
-                label="Select Camera"
-                styles={{
-                  root: { display: 'flex', alignItems: 'flex-start' },
-                  dropdown: { width: '180px', marginLeft: '24px' },
-                }}
-                selectedKey={selectedCamera}
-                onChange={(_, option) => setselectedCamera(option.key as number)}
+              <Stack horizontal horizontalAlign="space-between">
+                <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
+                  <Text variant="xLarge">{name}</Text>
+                  <Text styles={{ root: { color: palette.neutralSecondary } }}>
+                    Started running <b>{moment(deployTimeStamp).fromNow()}</b>
+                  </Text>
+                </Stack>
+                <Dropdown
+                  options={cameraOptions}
+                  label="Select Camera"
+                  styles={{
+                    root: { display: 'flex', alignItems: 'flex-start' },
+                    dropdown: { width: '180px', marginLeft: '24px' },
+                  }}
+                  selectedKey={selectedCamera}
+                  onChange={(_, option) => setselectedCamera(option.key as number)}
+                />
+              </Stack>
+            </Stack>
+            <Separator styles={{ root: { padding: 0 } }} />
+            <Stack tokens={{ childrenGap: 17, padding: 25 }}>
+              <ConfigurationInfo
+                cameraNames={cameraOptions.map((e) => e.text)}
+                fps={fps}
+                partNames={partNames}
+                sendMessageToCloud={sendMessageToCloud}
+                framesPerMin={framesPerMin}
+                needRetraining={needRetraining}
+                accuracyRangeMin={accuracyRangeMin}
+                accuracyRangeMax={accuracyRangeMax}
+                probThreshold={probThreshold}
+                originProbThreshold={originData.probThreshold}
+                updateProbThreshold={changeProbThreshold}
+                saveProbThreshold={saveProbThresholde}
+                maxImages={maxImages}
               />
             </Stack>
           </Stack>
-          <Separator styles={{ root: { padding: 0 } }} />
-          <Stack tokens={{ childrenGap: 17, padding: 25 }}>
-            <ConfigurationInfo
-              cameraNames={cameraOptions.map((e) => e.text)}
-              fps={fps}
-              partNames={partNames}
-              sendMessageToCloud={sendMessageToCloud}
-              framesPerMin={framesPerMin}
-              needRetraining={needRetraining}
-              accuracyRangeMin={accuracyRangeMin}
-              accuracyRangeMax={accuracyRangeMax}
-              probThreshold={probThreshold}
-              originProbThreshold={originData.probThreshold}
-              updateProbThreshold={changeProbThreshold}
-              saveProbThreshold={saveProbThresholde}
-              maxImages={maxImages}
-            />
+          {/* Vertical seperator has z-index in 1 as default, which will be on top of the panel */}
+          <Separator vertical styles={{ root: { zIndex: 0 } }} />
+          <Stack styles={{ root: { width: '435px' } }}>
+            <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}` } }}>
+              <PivotItem headerText="Insights">
+                <Insights status={status} projectId={projectData.id} cameraId={selectedCamera} />
+              </PivotItem>
+              <PivotItem headerText="Areas of interest">
+                <VideoAnnosControls cameraId={selectedCamera} />
+              </PivotItem>
+            </Pivot>
           </Stack>
         </Stack>
-        {/* Vertical seperator has z-index in 1 as default, which will be on top of the panel */}
-        <Separator vertical styles={{ root: { zIndex: 0 } }} />
-        <Stack styles={{ root: { width: '435px' } }}>
-          <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}` } }}>
-            <PivotItem headerText="Insights">
-              <Insights status={status} projectId={projectData.id} cameraId={selectedCamera} />
-            </PivotItem>
-            <PivotItem headerText="Areas of interest">
-              <VideoAnnosControls cameraId={selectedCamera} />
-            </PivotItem>
-          </Pivot>
-        </Stack>
-      </Stack>
+      </>
     );
   };
 
   return (
     <>
-      <Stack horizontal styles={{ root: { height: '100%' } }}>
-        {onRenderMain()}
-      </Stack>
-      <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closePanel} projectData={projectData} isEdit />
+      <Stack styles={{ root: { height: '100%' } }}>{onRenderMain()}</Stack>
+      <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closeEditPanel} projectData={projectData} isEdit />
+      <ConfigTaskPanel
+        isOpen={isCreatePanelOpen}
+        onDismiss={closeCreatePanel}
+        projectData={initialProjectData}
+      />
     </>
   );
 };
