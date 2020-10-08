@@ -17,7 +17,7 @@ import Axios from 'axios';
 import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
-import { postImages, getImages } from '../store/imageSlice';
+import { postImages, getImages, selectAllImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
 import { selectImageItemByUntagged, selectImageItemByRelabel } from '../store/selectors';
 import { getParts } from '../store/partSlice';
@@ -51,6 +51,9 @@ export const Images: React.FC = () => {
   );
   const imageIsEnoughForTraining = useSelector(
     (state: State) => state.project.status === Status.None && labeledImages.length >= 15,
+  );
+  const hasRelabelImgReadyToTrain = useSelector((state: State) =>
+    selectAllImages(state).some((e) => e.isRelabel && e.manualChecked && !e.uploaded),
   );
 
   const onUpload = () => {
@@ -132,6 +135,16 @@ export const Images: React.FC = () => {
               title="Successfully added and tagged enough photos!"
               subtitle="Now you can start deploying your model."
               button={{ text: 'Go to Home', to: '/home/customize' }}
+            />
+          )}
+          {relabelImages.length === 0 && hasRelabelImgReadyToTrain && (
+            <Instruction
+              title="All images saved from the current deployment have been tagged!"
+              subtitle="Update the deployment to retrain the model"
+              button={{
+                text: 'Update model',
+                to: '/home/deployment',
+              }}
             />
           )}
           <Breadcrumb items={[{ key: 'images', text: 'Images' }]} />
