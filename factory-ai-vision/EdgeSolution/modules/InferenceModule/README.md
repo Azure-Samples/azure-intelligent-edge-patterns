@@ -1,23 +1,32 @@
 # Vision On Edge - Inference Module
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=00000)](https://pycqa.github.io/isort/)
 
 ## Quick Start
 
-1. Run Server
+1. Install requirements
 
    ```bash
-   make install
+   pip install -r requirements
 
+   # Or using Makefile
+   make install
+   ```
+
+2. Run Server
+
+   ```bash
    python server.py
-   # Or
+
+   # Or using Makefile
    make run
    ```
 
 ## Developers
 
-1. Install
+1. Install requirements
 
    ```bash
    make install-dev
