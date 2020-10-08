@@ -46,10 +46,11 @@ export type Image = {
   id: number;
   image: string;
   part: number;
-  isRelabel: boolean;
+  readonly isRelabel: boolean;
   confidence: number;
   hasRelabeled: boolean;
   timestamp: string;
   camera: number;
   uploaded: boolean;
+  manualChecked: boolean;
 };
