@@ -92,8 +92,7 @@ export const Deployment: React.FC = () => {
   const dispatch = useDispatch();
   const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
   const newImagesCount = useSelector(
-    // TODO also checked manual_checked
-    (state: State) => selectAllImages(state).filter((e) => !e.uploaded).length,
+    (state: State) => selectAllImages(state).filter((e) => !e.uploaded && e.manualChecked).length,
   );
 
   const [isEditPanelOpen, { setTrue: openEditPanel, setFalse: closeEditPanel }] = useBoolean(false);
