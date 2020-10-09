@@ -30,6 +30,8 @@ Check out [this video](https://lnkd.in/grQKBN8) to see brief introduction in act
 ## Hardware
 You need to have one of the following:
 -	**Azure Stack Edge**  
+-   Please ensure that you have compute configured and you can run [GPU getting started module here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-sample-module-marketplace)
+
 or
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
      * For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
@@ -57,7 +59,8 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 Before installation, please make sure you have the following: 
    1.	At least one IoT Edge with port 8080 and 5000 opened and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
    2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
-   3.   Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal 
+   3.   Azure Media Service with Service pricipal added, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/create-custom-azure-resource-manager-role-how-to 
+   
 ### Get Started:
 Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip) 
 
