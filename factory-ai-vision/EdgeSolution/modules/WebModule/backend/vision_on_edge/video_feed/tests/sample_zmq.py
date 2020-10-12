@@ -26,7 +26,7 @@ def run():
                 print("\n\nBye bye\n")
                 break
 
-    threading.Thread(target=worker).start()
+    threading.Thread(target=worker, daemon=True).start()
 
 
 if __name__ == "__main__":

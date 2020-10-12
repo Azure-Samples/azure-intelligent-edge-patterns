@@ -268,6 +268,7 @@ def if_trained_then_deploy_helper(part_detection_id):
         name="if_trained_then_deploy_catcher",
         target=if_trained_then_deploy_catcher,
         args=(part_detection_id,),
+        daemon=True,
     ).start()
 
 
@@ -278,5 +279,8 @@ def deploy_all_helper(part_detection_id=None, instance: PartDetection = None) ->
     """
     if part_detection_id or instance:
         threading.Thread(
-            name="deploy_all_helper", target=deploy_worker, args=(part_detection_id,)
+            name="deploy_all_helper",
+            target=deploy_worker,
+            args=(part_detection_id,),
+            daemon=True,
         ).start()

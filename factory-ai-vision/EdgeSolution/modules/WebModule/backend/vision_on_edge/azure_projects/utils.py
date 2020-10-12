@@ -549,7 +549,7 @@ class TrainingManager:
                 self.mutex.release()
                 time.sleep(3)
 
-        threading.Thread(target=_gc, args=(self,)).start()
+        threading.Thread(target=_gc, args=(self,), daemon=True).start()
 
 
 class TrainingTask:
@@ -572,6 +572,7 @@ class TrainingTask:
             target=train_project_catcher,
             name=f"train_project_worker_{self.project_id}",
             kwargs={"project_id": self.project_id},
+            daemon=True,
         )
         self.worker.start()
 

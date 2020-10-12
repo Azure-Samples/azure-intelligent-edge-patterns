@@ -376,7 +376,7 @@ class Task(models.Model):
                 break
             return
 
-        threading.Thread(target=_export_worker, args=(self,)).start()
+        threading.Thread(target=_export_worker, args=(self,), daemon=True).start()
 
 
 pre_save.connect(Project.pre_save, Project, dispatch_uid="Project_pre")

@@ -181,4 +181,4 @@ class StreamManager:
                 self.mutex.release()
                 time.sleep(3)
 
-        threading.Thread(target=_gc, args=(self,)).start()
+        threading.Thread(target=_gc, args=(self,), daemon=True).start()
