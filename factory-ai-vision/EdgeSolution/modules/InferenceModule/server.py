@@ -572,8 +572,8 @@ def main():
             server.add_insecure_port(f"[::]:{grpcServerPort}")
             server.start()
         else:
-            logger.info("opencv server with zmq")
-            opencv_zmq()
+            logger.info("opencv server")
+            # opencv_zmq()
         uvicorn.run(app, host="0.0.0.0", port=5000)
         # server.wait_for_termination()
 
