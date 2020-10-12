@@ -30,6 +30,7 @@ DETECTION_BUFFER_SIZE = 10000
 UPLOAD_INTERVAL = 5
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
+IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 
 try:
     iot = IoTHubModuleClient.create_from_edge_environment()
@@ -212,7 +213,12 @@ class Stream:
             self.cam_source = cam_source
             self.frameRate = frameRate
             self.lva_mode = lva_mode
-            self._update_instance(normalize_rtsp(cam_source), str(frameRate))
+            if IS_OPENCV == "true":
+                logger.info("post to CVModule")
+                data = {'stream_id': self.cam_id, 'rtsp': self.cam_source, 'endpoint': 'http://InferenceModule:5000'}
+                res = requests.post("http://CVCaptureModule:9000/streams", json=data)
+            else:
+                self._update_instance(normalize_rtsp(cam_source), str(frameRate))
 
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
@@ -389,8 +395,12 @@ class Stream:
         # self.mutex.acquire()
         self.cam_is_alive = False
         # self.mutex.release()
-
-        gm.invoke_graph_instance_deactivate(self.cam_id)
+        
+        if IS_OPENCV == 'true':
+            logger.info("get CVModule")
+            res = requests.get("http://CVCaptureModule:9000/delete_stream/"+self.cam_id)
+        else:
+            gm.invoke_graph_instance_deactivate(self.cam_id)
         logger.info("Deactivate stream {}".format(self.cam_id))
 
     def predict(self, image):

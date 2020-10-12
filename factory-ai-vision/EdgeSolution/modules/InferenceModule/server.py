@@ -6,8 +6,10 @@ import logging
 import logging.config
 import os
 import sys
+import socket
 import threading
 import time
+import zmq
 from concurrent import futures
 from typing import List
 
@@ -52,6 +54,7 @@ IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
+IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 
 # Main thread
 
@@ -496,6 +499,44 @@ def benchmark():
     logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
     logger.info("============= BenchMarking (End) ==================")
 
+def cvcapture_url():
+    if is_edge():
+        ip = socket.gethostbyname("CVCaptureModule")
+        return "tcp://" + ip + ":5556"
+    return "tcp://localhost:5556"
+
+def opencv_zmq():
+    context = zmq.Context()
+    receiver = context.socket(zmq.SUB)
+    receiver.setsockopt(zmq.SUBSCRIBE, bytes('', 'utf-8'))
+    receiver.connect(cvcapture_url())
+    cnt = {}
+    def run():
+        while True:
+            buf = receiver.recv_multipart()
+            
+            if buf[0] not in cnt.keys():
+                cnt[buf[0]] = 1
+            else:
+                cnt[buf[0]] += 1
+            logger.info('receiving from channel {0}, cnt: {1}'.format(buf[0], cnt[buf[0]]))
+            stream = stream_manager.get_stream_by_id(buf[0].decode('utf-8'))
+            logger.info(buf[0])
+            if not stream:
+                predicitons = []
+                logger.info("Stream not ready yet.")
+                continue
+            try:
+                nparr = np.frombuffer(buf[1], np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                stream.predict(img)
+                predictions = stream.last_prediction
+                logger.info("Predictions %s", predictions)
+            except:
+                logger.error("Unexpected error: %s", sys.exc_info())
+        receiver.close()
+    threading.Thread(target=run).start()
+
 
 def main():
     """main.
@@ -506,29 +547,33 @@ def main():
         # Get application arguments
         argument_parser = ArgumentParser(ArgumentsType.SERVER)
 
-        # Get port number
-        grpcServerPort = argument_parser.GetGrpcServerPort()
-        logger.info("gRPC server port: %s", grpcServerPort)
+        if IS_OPENCV == 'false':
+            # Get port number
+            grpcServerPort = argument_parser.GetGrpcServerPort()
+            logger.info("gRPC server port: %s", grpcServerPort)
 
-        # init graph topology & instance
-        counter = 0
-        while init_topology() == -1:
-            if counter == 100:
-                logger.critical(
-                    "Failed to init topology, please check whether direct method still works"
-                )
-                sys.exit(-1)
-            logger.warning("Failed to init topology, try again 10 secs later")
-            time.sleep(10)
-            counter += 1
+            # init graph topology & instance
+            counter = 0
+            while init_topology() == -1:
+                if counter == 100:
+                    logger.critical(
+                        "Failed to init topology, please check whether direct method still works"
+                    )
+                    sys.exit(-1)
+                logger.warning("Failed to init topology, try again 10 secs later")
+                time.sleep(10)
+                counter += 1
 
-        # create gRPC server and start running
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        extension_pb2_grpc.add_MediaGraphExtensionServicer_to_server(
-            InferenceEngine(stream_manager), server
-        )
-        server.add_insecure_port(f"[::]:{grpcServerPort}")
-        server.start()
+            # create gRPC server and start running
+            server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+            extension_pb2_grpc.add_MediaGraphExtensionServicer_to_server(
+                InferenceEngine(stream_manager), server
+            )
+            server.add_insecure_port(f"[::]:{grpcServerPort}")
+            server.start()
+        else:
+            logger.info("opencv server with zmq")
+            opencv_zmq()
         uvicorn.run(app, host="0.0.0.0", port=5000)
         # server.wait_for_termination()
 
