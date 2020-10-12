@@ -144,6 +144,7 @@ class UpdateCamBodySerializer(serializers.Serializer):
         aoi = serializers.CharField(required=False)
         lines = serializers.CharField(required=False, allow_blank=True)
         zones = serializers.CharField(required=False, allow_blank=True)
+        send_video_to_cloud = serializers.BooleanField()
 
     lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
     fps = serializers.IntegerField()

@@ -14,12 +14,20 @@ class CameraModel(BaseModel):
     lines: str
     zones: str
     aoi: str = None
+    send_video_to_cloud: bool
 
 
 class CamerasModel(BaseModel):
     lva_mode: Literal["http", "grpc"]
     fps: int
     cameras: List[CameraModel]
+
+
+class StreamModel(BaseModel):
+    cam_id: str
+    cam_type: str
+    cam_source: str = None
+    send_video_to_cloud: bool
 
 
 class PartModel(BaseModel):
