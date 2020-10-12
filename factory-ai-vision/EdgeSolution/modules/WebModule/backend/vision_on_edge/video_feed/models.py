@@ -47,7 +47,7 @@ class VideoFeed:
                 self.buf = self.receiver.recv_multipart()
             self.receiver.close()
 
-        threading.Thread(target=_start, args=(self,)).start()
+        threading.Thread(target=_start, args=(self,), daemon=True).start()
 
     def gen(self):
         """gen
