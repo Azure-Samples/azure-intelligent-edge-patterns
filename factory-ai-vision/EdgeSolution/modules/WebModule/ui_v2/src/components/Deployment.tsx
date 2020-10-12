@@ -169,7 +169,7 @@ export const Deployment: React.FC = () => {
         <EmptyAddIcon
           title="Config a task"
           subTitle=""
-          primary={{ text: 'Config task', onClick: openEditPanel }}
+          primary={{ text: 'Config task', onClick: openCreatePanel }}
         />
       );
     if (status === Status.WaitTraining)
