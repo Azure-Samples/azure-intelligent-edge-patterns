@@ -11,6 +11,7 @@ import requests
 from azure.iot.device import IoTHubModuleClient
 from shapely.geometry import Polygon
 
+from api.models import StreamModel
 from exception_handler import PrintGetExceptionDetails
 from invoke import gm
 from object_detection import ObjectDetection
@@ -46,9 +47,11 @@ class Stream:
         sender,
         cam_type="video_file",
         cam_source="./sample_video/video.mp4",
+        send_video_to_cloud: bool = False,
     ):
         self.cam_id = cam_id
         self.model = model
+        self.send_video_to_cloud = send_video_to_cloud
 
         self.render = False
 
@@ -461,7 +464,7 @@ class Stream:
             self.scenario.update(_detections)
 
         self.draw_img()
-        if self.model.send_video_to_cloud:
+        if self.send_video_to_cloud:
             self.precess_send_signal_to_lva()
 
         if self.scenario:
@@ -544,6 +547,14 @@ class Stream:
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
+
+    def to_api_model(self):
+        return StreamModel(
+            cam_id=self.cam_id,
+            cam_type=self.cam_type,
+            cam_source=self.cam_source,
+            send_video_to_cloud=self.send_video_to_cloud,
+        )
 
 
 def web_module_url():

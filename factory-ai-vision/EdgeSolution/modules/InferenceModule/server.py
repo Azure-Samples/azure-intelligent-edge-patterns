@@ -9,6 +9,7 @@ import sys
 import threading
 import time
 from concurrent import futures
+from typing import List
 
 import cv2
 import grpc
@@ -17,7 +18,13 @@ import uvicorn
 from fastapi import BackgroundTasks, FastAPI, Request
 
 import extension_pb2_grpc
-from api.models import CamerasModel, PartDetectionModeEnum, PartsModel, UploadModelBody
+from api.models import (
+    CamerasModel,
+    PartDetectionModeEnum,
+    PartsModel,
+    StreamModel,
+    UploadModelBody,
+)
 from arguments import ArgumentParser, ArgumentsType
 from exception_handler import PrintGetExceptionDetails
 from http_inference_engine import HttpInferenceEngine
@@ -62,12 +69,11 @@ http_inference_engine = HttpInferenceEngine(stream_manager)
 
 
 @app.get("/streams")
-def streams():
+def streams() -> List[StreamModel]:
     """streams."""
     # logger.info(onnx.last_prediction)
     # onnx.last_prediction
-    logger.info("Streams: %s", stream_manager.streams)
-    return {"streams": list(stream_manager.streams.keys())}
+    return [stream.to_api_model() for stream in stream_manager.streams.values()]
 
 
 @app.get("/prediction")
@@ -81,8 +87,7 @@ def prediction(cam_id: str):
 
 @app.post("/predict")
 async def predict(camera_id: str, request: Request):
-    """predict.
-    """
+    """predict."""
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -139,8 +144,7 @@ def update_part_detection_id(part_detection_id: int):
 def update_retrain_parameters(
     is_retrain: bool, confidence_min: int, confidence_max: int, max_images: int
 ):
-    """update_retrain_parameters.
-    """
+    """update_retrain_parameters."""
 
     # FIXME currently set all streams
     # cam_id = request.args.get('cam_id')
@@ -164,8 +168,7 @@ def update_retrain_parameters(
 
 @app.post("/update_model")
 def update_model(request_body: UploadModelBody):
-    """update_model.
-    """
+    """update_model."""
 
     if not request_body.model_uri and not request_body.model_dir:
         return "missing model_uri or model_dir", 400
@@ -266,6 +269,7 @@ def update_cams(request_body: CamerasModel):
             line_info,
             zone_info,
         )
+        stream.send_video_to_cloud = cam.send_video_to_cloud
 
     logger.info("Streams %s", stream_manager.streams)
     return "ok"
@@ -276,16 +280,6 @@ def update_part_detection_mode(part_detection_mode: PartDetectionModeEnum):
     """update_part_detection_mode."""
 
     onnx.set_detection_mode(part_detection_mode.value)
-    return "ok"
-
-
-@app.get("/update_send_video_to_cloud")
-def update_send_video_to_cloud(send_video_to_cloud: bool):
-    """update_send_video_to_cloud."""
-
-    onnx.send_video_to_cloud = send_video_to_cloud
-    # for s in stream_manager.get_streams():
-    #     s.model.send_video_to_cloud = send_video_to_cloud
     return "ok"
 
 
@@ -393,8 +387,7 @@ def get_recommended_fps(number_of_cameras: int):
 
 @app.get("/update_lva_mode")
 def update_lva_mode(lva_mode: str):
-    """update_lva_mode.
-    """
+    """update_lva_mode."""
     logger.info("Updating lva_mode...")
 
     for s in stream_manager.get_streams():
@@ -456,8 +449,7 @@ def local_main():
 
 
 def benchmark():
-    """benchmark.
-    """
+    """benchmark."""
     # app.run(host='0.0.0.0', debug=False)
     # s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
     SAMPLE_VIDEO = "./sample_video/video.mp4"
