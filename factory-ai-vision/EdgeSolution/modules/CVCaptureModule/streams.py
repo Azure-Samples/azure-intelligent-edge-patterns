@@ -71,6 +71,7 @@ class Stream:
 
                     self.last_img = img
                     self.last_update = time.time()
+                    time.sleep(0.04)
                     # print(jpg)
                 else:
                     self.restart_cam()
