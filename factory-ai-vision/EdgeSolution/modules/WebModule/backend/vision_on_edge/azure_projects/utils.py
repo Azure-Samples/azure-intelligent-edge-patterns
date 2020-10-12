@@ -8,21 +8,20 @@ import threading
 import time
 import traceback
 
-from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
-from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_settings.exceptions import SettingCustomVisionAccessFailed
-from vision_on_edge.azure_training_status.utils import upcreate_training_status
-from vision_on_edge.images.models import Image
+from configs.general_configs import PRINT_THREAD
 
+from ..azure_app_insight.utils import get_app_insight_logger
+from ..azure_parts.models import Part
 from ..azure_parts.utils import batch_upload_parts_to_customvision
+from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..azure_training_status import progress
+from ..azure_training_status.utils import upcreate_training_status
+from ..images.models import Image
 from ..images.utils import upload_images_to_customvision_helper
 from .exceptions import ProjectAlreadyTraining, ProjectRemovedError
 from .models import Project, Task
 
 logger = logging.getLogger(__name__)
-
-PRINT_TASKS = True
 
 
 def update_app_insight_counter(
@@ -536,7 +535,7 @@ class TrainingManager:
         def _gc(self):
             while True:
                 self.mutex.acquire()
-                if PRINT_TASKS:
+                if PRINT_THREAD:
                     logger.info("tasks: %s", self.training_tasks)
                 to_delete = []
                 for project_id in self.training_tasks:
