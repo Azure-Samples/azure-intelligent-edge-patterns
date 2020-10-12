@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 
 class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
-    """Project ModelViewSet"""
+    """PartDetection ModelViewSet"""
 
     queryset = PartDetection.objects.all()
     serializer_class = PartDetectionSerializer
@@ -298,7 +298,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
 
 class PDScenarioViewSet(viewsets.ReadOnlyModelViewSet):
-    """Project ModelViewSet"""
+    """PDScenario ModelViewSet"""
 
     queryset = PDScenario.objects.all()
     serializer_class = PDScenarioSerializer

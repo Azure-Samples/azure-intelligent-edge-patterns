@@ -6,6 +6,7 @@ import logging
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
+from ...general.shortcuts import drf_get_object_or_404
 from ..constants import INFERENCE_PROTOCOL_CHOICES
 from ..models import PartDetection, PDScenario
 
@@ -15,10 +16,78 @@ logger = logging.getLogger(__name__)
 class PartDetectionSerializer(serializers.ModelSerializer):
     """Part Detection Serializer"""
 
+    class SendVideoToCloudInfoSerializer(serializers.Serializer):
+        camera_id = serializers.IntegerField()
+        send_video_to_cloud = serializers.BooleanField()
+
+    send_video_to_cloud = SendVideoToCloudInfoSerializer(many=True, required=False)
+
     class Meta:
         model = PartDetection
-        fields = "__all__"
-        extra_kwargs = {"prob_threshold": {"required": False}}
+        fields = [
+            "name",
+            "accuracyRangeMax",
+            "accuracyRangeMin",
+            "cameras",
+            "deploy_timestamp",
+            "deployed",
+            "fps",
+            "has_configured",
+            "inference_mode",
+            "inference_module",
+            "inference_protocol",
+            "inference_source",
+            "maxImages",
+            "metrics_frame_per_minutes",
+            "metrics_is_send_iothub",
+            "needRetraining",
+            "parts",
+            "prob_threshold",
+            "project",
+            "send_video_to_cloud",
+        ]
+        extra_kwargs = {
+            "prob_threshold": {"required": False},
+            "send_video_to_cloud": {"required": False},
+        }
+
+    def update(self, instance, validated_data):
+
+        for attr in [
+            "name",
+            "accuracyRangeMax",
+            "accuracyRangeMin",
+            # "cameras",
+            # "deploy_timestamp",
+            "deployed",
+            "fps",
+            "has_configured",
+            "inference_mode",
+            "inference_module",
+            "inference_protocol",
+            "inference_source",
+            "maxImages",
+            "metrics_frame_per_minutes",
+            "metrics_is_send_iothub",
+            "needRetraining",
+            # "parts",
+            "prob_threshold",
+            "project",
+            # "send_video_to_cloud",
+        ]:
+            setattr(instance, attr, validated_data[attr])
+        instance.cameras.set(validated_data.pop("cameras"))
+        instance.parts.set(validated_data.pop("parts"))
+        if "send_video_to_cloud" in validated_data:
+            send_video_to_cloud = validated_data.pop("send_video_to_cloud")
+            for svtc_info in send_video_to_cloud:
+                camera = drf_get_object_or_404(
+                    instance.cameras.all(), pk=svtc_info["camera_id"]
+                )
+                camera.send_video_to_cloud = svtc_info["send_video_to_cloud"]
+                camera.save()
+        instance.save()
+        return instance
 
 
 class PDScenarioSerializer(serializers.ModelSerializer):
