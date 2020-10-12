@@ -59,7 +59,6 @@ class PartDetection(models.Model):
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=60)
-    send_video_to_cloud = models.BooleanField(default=False)
     fps = models.IntegerField(default=10)
 
     def update_prob_threshold(self, prob_threshold):
@@ -98,6 +97,12 @@ class PartDetection(models.Model):
             if raise_exception:
                 raise
             return False
+
+    def send_video_to_cloud(self):
+        return [
+            {"camera_id": cam.id, "send_video_to_cloud": cam.send_video_to_cloud}
+            for cam in self.cameras.all()
+        ]
 
     def __str__(self) -> str:
         return self.name.__str__()

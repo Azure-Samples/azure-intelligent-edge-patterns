@@ -28,6 +28,7 @@ class Camera(models.Model):
     )
     is_demo = models.BooleanField(default=False)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    send_video_to_cloud = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
