@@ -31,6 +31,8 @@ async def read_stream(stream_id):
 
 is_running = True
 
+RTSPSIM_PREFIX = "rtsp://rtspsim:554/media"
+
 
 @app.post("/streams")
 async def create_stream(stream: Stream):
@@ -39,7 +41,11 @@ async def create_stream(stream: Stream):
     # FIXME use your stream manager to fix it
     def _new_streaming():
         endpoint = get_inference_url() + "/predict?cam_id" + stream.stream_id
-        cap = cv2.VideoCapture(stream.rtsp)
+        rtsp = stream.rtsp
+        if rtsp.startswith(RTSPSIM_PREFIX):
+            rtsp = "videos" + rtsp.split(RTSPSIM_PREFIX)[1]
+
+        cap = cv2.VideoCapture(rtsp)
         while is_running:
             is_ok, img = cap.read()
             if is_ok:
