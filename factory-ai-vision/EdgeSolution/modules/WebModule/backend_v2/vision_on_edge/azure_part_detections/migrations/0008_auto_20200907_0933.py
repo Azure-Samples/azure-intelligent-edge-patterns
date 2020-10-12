@@ -6,18 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cameras', '0002_camera_location'),
-        ('azure_part_detections', '0007_auto_20200907_0740'),
+        ("cameras", "0002_camera_location"),
+        ("azure_part_detections", "0007_auto_20200907_0740"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='partdetection',
-            name='camera',
-        ),
+        migrations.RemoveField(model_name="partdetection", name="camera"),
         migrations.AddField(
-            model_name='partdetection',
-            name='cameras',
-            field=models.ManyToManyField(blank=True, to='cameras.Camera'),
+            model_name="partdetection",
+            name="cameras",
+            field=models.ManyToManyField(blank=True, to="cameras.Camera"),
         ),
     ]

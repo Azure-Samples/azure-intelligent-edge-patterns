@@ -5,24 +5,38 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('azure_part_detections', '0010_partdetection_send_video_to_cloud'),
-    ]
+    dependencies = [("azure_part_detections", "0010_partdetection_send_video_to_cloud")]
 
     operations = [
         migrations.RenameField(
-            model_name='partdetection',
-            old_name='maxImage',
-            new_name='maxImages',
+            model_name="partdetection", old_name="maxImage", new_name="maxImages"
         ),
         migrations.AlterField(
-            model_name='partdetection',
-            name='inference_mode',
-            field=models.CharField(choices=[('PD', 'part_detection'), ('PC', 'part_counting'), ('ES', 'employee_safety'), ('DD', 'defect_detection')], default='PD', max_length=40),
+            model_name="partdetection",
+            name="inference_mode",
+            field=models.CharField(
+                choices=[
+                    ("PD", "part_detection"),
+                    ("PC", "part_counting"),
+                    ("ES", "employee_safety"),
+                    ("DD", "defect_detection"),
+                ],
+                default="PD",
+                max_length=40,
+            ),
         ),
         migrations.AlterField(
-            model_name='pdscenario',
-            name='inference_mode',
-            field=models.CharField(choices=[('PD', 'part_detection'), ('PC', 'part_counting'), ('ES', 'employee_safety'), ('DD', 'defect_detection')], default='PD', max_length=40),
+            model_name="pdscenario",
+            name="inference_mode",
+            field=models.CharField(
+                choices=[
+                    ("PD", "part_detection"),
+                    ("PC", "part_counting"),
+                    ("ES", "employee_safety"),
+                    ("DD", "defect_detection"),
+                ],
+                default="PD",
+                max_length=40,
+            ),
         ),
     ]

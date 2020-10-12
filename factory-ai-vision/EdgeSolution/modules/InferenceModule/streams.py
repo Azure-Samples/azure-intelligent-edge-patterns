@@ -1,49 +1,52 @@
+import base64
+import json
+import logging
 import os
 import threading
-import cv2
-import json
 import time
-import base64
-import requests
+
+import cv2
 import numpy as np
-
-from shapely.geometry import Polygon
-from exception_handler import PrintGetExceptionDetails
+import requests
 from azure.iot.device import IoTHubModuleClient
+from shapely.geometry import Polygon
 
-from onnxruntime_predict import ONNXRuntimeObjectDetection
-from object_detection import ObjectDetection
-from utility import get_file_zip, normalize_rtsp
+from exception_handler import PrintGetExceptionDetails
 from invoke import gm
-#from tracker import Tracker
-from scenarios import PartCounter, DefeatDetection, DangerZone, Detection
-from utility import draw_label
+from object_detection import ObjectDetection
+from onnxruntime_predict import ONNXRuntimeObjectDetection
 
-import logging
+# from tracker import Tracker
+from scenarios import DangerZone, DefeatDetection, Detection, PartCounter
+from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
-DETECTION_TYPE_NOTHING = 'nothing'
-DETECTION_TYPE_SUCCESS = 'success'
-DETECTION_TYPE_UNIDENTIFIED = 'unidentified'
+DETECTION_TYPE_NOTHING = "nothing"
+DETECTION_TYPE_SUCCESS = "success"
+DETECTION_TYPE_UNIDENTIFIED = "unidentified"
 DETECTION_BUFFER_SIZE = 10000
 
 # for Retraining
 UPLOAD_INTERVAL = 5
+
+LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 
 try:
     iot = IoTHubModuleClient.create_from_edge_environment()
 except:
     iot = None
 
-is_edge = False
-try:
-    IoTHubModuleClient.create_from_edge_environment()
-    is_edge = True
-except:
-    pass
+logger = logging.getLogger(__name__)
 
 
-class Stream():
-    def __init__(self, cam_id, model, sender, cam_type="video_file", cam_source='./sample_video/video.mp4'):
+class Stream:
+    def __init__(
+        self,
+        cam_id,
+        model,
+        sender,
+        cam_type="video_file",
+        cam_source="./sample_video/video.mp4",
+    ):
         self.cam_id = cam_id
         self.model = model
 
@@ -57,7 +60,7 @@ class Stream():
             frameRate = 30
         else:
             frameRate = 10
-        #self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
+        # self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
         self.cam_is_alive = True
 
         self.IMG_WIDTH = 960
@@ -65,7 +68,7 @@ class Stream():
         self.image_shape = [540, 960]
 
         self.last_img = None
-        #self.last_edge_img = None
+        # self.last_edge_img = None
         self.last_drawn_img = None
         self.last_prediction = []
         self.last_prediction_count = {}
@@ -75,8 +78,8 @@ class Stream():
         self.confidence_max = 80 * 0.01
         self.max_images = 10
         self.last_upload_time = 0
-        #self.is_upload_image = False
-        #self.current_uploaded_images = {}
+        # self.is_upload_image = False
+        # self.current_uploaded_images = {}
 
         self.detection_success_num = 0
         self.detection_unidentified_num = 0
@@ -103,54 +106,65 @@ class Stream():
         # lva signal
         self.lva_last_send_time = time.time()
         self.lva_interval = 0
+        self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
         self.use_line = False
         self.use_zone = False
-        #self.tracker = Tracker()
+        # self.tracker = Tracker()
         self.scenario = None
         self.scenario_type = None
         self.start_zmq()
+        self.is_benchmark = False
+
+    def set_is_benchmark(self, is_benchmark):
+        self.is_benchmark = is_benchmark
 
     def _stop(self):
         gm.invoke_graph_instance_deactivate(self.cam_id)
 
     def _set(self, rtspUrl, frameRate):
-        gm.invoke_graph_grpc_instance_set(self.cam_id, rtspUrl, frameRate)
+        gm.invoke_instance_set(self.lva_mode, self.cam_id, rtspUrl, frameRate)
 
     def _start(self):
         gm.invoke_graph_instance_activate(self.cam_id)
 
     def reset_metrics(self):
-        self.mutex.acquire()
+        # self.mutex.acquire()
         self.detection_success_num = 0
         self.detection_unidentified_num = 0
         self.detection_total = 0
         self.detections = []
-        #self.last_prediction_count = {}
+        # self.last_prediction_count = {}
         if self.scenario:
             self.scenario.reset_metrics()
-        self.mutex.release()
+        # self.mutex.release()
 
     def start_zmq(self):
         def run(self):
 
-            while 'flags' not in dir(self.last_drawn_img):
-                logging.info('not sending last_drawn_img')
+            while "flags" not in dir(self.last_drawn_img):
+                logger.info("not sending last_drawn_img")
                 time.sleep(2)
             cnt = 0
             while self.cam_is_alive:
                 cnt += 1
                 if cnt % 30 == 1:
-                    logging.info('send through channel {0}'.format(
-                        bytes(self.cam_id, 'utf-8')))
-                self.mutex.acquire()
+                    logging.info(
+                        "send through channel {}".format(bytes(self.cam_id, "utf-8"))
+                    )
+                # self.mutex.acquire()
                 # FIXME may find a better way to deal with encoding
-                self.zmq_sender.send_multipart([bytes(
-                    self.cam_id, 'utf-8'), cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()])
-                self.mutex.release()
+                self.zmq_sender.send_multipart(
+                    [
+                        bytes(self.cam_id, "utf-8"),
+                        cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes(),
+                    ]
+                )
+                # self.mutex.release()
                 # FIXME need to fine tune this value
                 time.sleep(0.03)
+
         threading.Thread(target=run, args=(self,)).start()
 
     def get_scenario_metrics(self):
@@ -160,111 +174,128 @@ class Stream():
 
     def restart_cam(self):
 
-        print('[INFO] Restarting Cam', flush=True)
+        print("[INFO] Restarting Cam", flush=True)
 
-        #cam = cv2.VideoCapture(normalize_rtsp(self.cam_source))
+        # cam = cv2.VideoCapture(normalize_rtsp(self.cam_source))
 
         # Protected by Mutex
         # self.mutex.acquire()
         # self.cam.release()
-        #self.cam = cam
+        # self.cam = cam
         # self.mutex.release()
 
-    def update_cam(self, cam_type, cam_source, frameRate, cam_id, has_aoi, aoi_info, scenario_type=None, line_info=None, zone_info=None):
-        print('[INFO] Updating Cam ...', flush=True)
+    def update_cam(
+        self,
+        cam_type,
+        cam_source,
+        frameRate,
+        lva_mode,
+        cam_id,
+        has_aoi,
+        aoi_info,
+        scenario_type=None,
+        line_info=None,
+        zone_info=None,
+    ):
+        logger.info("Updating Cam ...")
 
         # if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
-        if self.cam_source != cam_source or round(self.frameRate) != round(frameRate):
+        if (
+            self.cam_source != cam_source
+            or round(self.frameRate) != round(frameRate)
+            or self.lva_mode != lva_mode
+        ):
             self.cam_source = cam_source
             self.frameRate = frameRate
+            self.lva_mode = lva_mode
             self._update_instance(normalize_rtsp(cam_source), str(frameRate))
 
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
         detection_mode = self.model.get_detection_mode()
-        if detection_mode == 'PC':
-            print('[INFO] Line INFO', line_info, flush=True)
+        if detection_mode == "PC":
+            print("[INFO] Line INFO", line_info, flush=True)
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
             try:
                 line_info = json.loads(line_info)
-                self.use_line = line_info['useCountingLine']
-                lines = line_info['countingLines']
+                self.use_line = line_info["useCountingLine"]
+                lines = line_info["countingLines"]
                 if len(lines) > 0:
-                    x1 = int(lines[0]['label'][0]['x'])
-                    y1 = int(lines[0]['label'][0]['y'])
-                    x2 = int(lines[0]['label'][1]['x'])
-                    y2 = int(lines[0]['label'][1]['y'])
+                    x1 = int(lines[0]["label"][0]["x"])
+                    y1 = int(lines[0]["label"][0]["y"])
+                    x2 = int(lines[0]["label"][1]["x"])
+                    y2 = int(lines[0]["label"][1]["y"])
                     self.scenario.set_line(x1, y1, x2, y2)
-                    print('Upading Line:', flush=True)
-                    print('    use_line:', self.use_line, flush=True)
-                    print('        line:', x1, y1, x2, y2, flush=True)
+                    print("Upading Line:", flush=True)
+                    print("    use_line:", self.use_line, flush=True)
+                    print("        line:", x1, y1, x2, y2, flush=True)
                 else:
-                    print('Upading Line:', flush=True)
-                    print('    use_line:', self.use_line, flush=True)
+                    print("Upading Line:", flush=True)
+                    print("    use_line:", self.use_line, flush=True)
 
             except:
                 self.use_line = False
-                print('Upading Line[*]:', flush=True)
-                print('    use_line   :', False, flush=True)
+                print("Upading Line[*]:", flush=True)
+                print("    use_line   :", False, flush=True)
 
-        elif detection_mode == 'ES':
-            print('[INFO] Zone INFO', zone_info, flush=True)
+        elif detection_mode == "ES":
+            print("[INFO] Zone INFO", zone_info, flush=True)
             self.scenario = DangerZone()
             self.scenario_type = self.model.detection_mode
             # FIXME
-            self.scenario.set_targets(['Person'])
+            self.scenario.set_targets(["Person"])
             try:
                 zone_info = json.loads(zone_info)
-                self.use_zone = zone_info['useDangerZone']
-                zones = zone_info['dangerZones']
+                self.use_zone = zone_info["useDangerZone"]
+                zones = zone_info["dangerZones"]
                 _zones = []
-                print('Upading Line:', flush=True)
-                print('    use_zone:', self.use_zone, flush=True)
+                print("Upading Line:", flush=True)
+                print("    use_zone:", self.use_zone, flush=True)
                 for zone in zones:
-                    x1 = int(zone['label']['x1'])
-                    y1 = int(zone['label']['y1'])
-                    x2 = int(zone['label']['x2'])
-                    y2 = int(zone['label']['y2'])
+                    x1 = int(zone["label"]["x1"])
+                    y1 = int(zone["label"]["y1"])
+                    x2 = int(zone["label"]["x2"])
+                    y2 = int(zone["label"]["y2"])
                     _zones.append([x1, y1, x2, y2])
-                    print('     zone:', x1, y1, x2, y2, flush=True)
+                    print("     zone:", x1, y1, x2, y2, flush=True)
                 self.scenario.set_zones(_zones)
 
             except:
                 self.use_zone = False
-                print('Upading Zone[*]:', flush=True)
-                print('    use_zone   :', False, flush=True)
+                print("Upading Zone[*]:", flush=True)
+                print("    use_zone   :", False, flush=True)
 
-        elif detection_mode == 'DD':
-            print('[INFO] Line INFO', line_info, flush=True)
+        elif detection_mode == "DD":
+            print("[INFO] Line INFO", line_info, flush=True)
             self.scenario = DefeatDetection()
             self.scenario_type = self.model.detection_mode
             # FIXME
-            self.scenario.set_ok('Bottle - OK')
-            self.scenario.set_ng('Bottle - NG')
+            self.scenario.set_ok("Bottle - OK")
+            self.scenario.set_ng("Bottle - NG")
             try:
                 line_info = json.loads(line_info)
-                self.use_line = line_info['useCountingLine']
-                lines = line_info['countingLines']
+                self.use_line = line_info["useCountingLine"]
+                lines = line_info["countingLines"]
                 if len(lines) > 0:
-                    x1 = int(lines[0]['label'][0]['x'])
-                    y1 = int(lines[0]['label'][0]['y'])
-                    x2 = int(lines[0]['label'][1]['x'])
-                    y2 = int(lines[0]['label'][1]['y'])
+                    x1 = int(lines[0]["label"][0]["x"])
+                    y1 = int(lines[0]["label"][0]["y"])
+                    x2 = int(lines[0]["label"][1]["x"])
+                    y2 = int(lines[0]["label"][1]["y"])
                     self.scenario.set_line(x1, y1, x2, y2)
-                    print('Upading Line:', flush=True)
-                    print('    use_line:', self.use_line, flush=True)
-                    print('        line:', x1, y1, x2, y2, flush=True)
+                    print("Upading Line:", flush=True)
+                    print("    use_line:", self.use_line, flush=True)
+                    print("        line:", x1, y1, x2, y2, flush=True)
                 else:
-                    print('Upading Line:', flush=True)
-                    print('    use_line:', self.use_line, flush=True)
+                    print("Upading Line:", flush=True)
+                    print("    use_line:", self.use_line, flush=True)
 
             except:
                 self.use_line = False
-                print('Upading Line[*]:', flush=True)
-                print('    use_line   :', False, flush=True)
+                print("Upading Line[*]:", flush=True)
+                print("    use_line   :", False, flush=True)
         else:
             self.scenario = None
             self.scenario_type = self.model.detection_mode
@@ -273,13 +304,12 @@ class Stream():
         return self.model.detection_mode
 
     def update_detection_status(self, predictions):
-        self.mutex.acquire()
-
+        # self.mutex.acquire()
 
         detection_type = DETECTION_TYPE_NOTHING
         for prediction in predictions:
             if detection_type != DETECTION_TYPE_SUCCESS:
-                if prediction['probability'] >= self.threshold:
+                if prediction["probability"] >= self.threshold:
                     detection_type = DETECTION_TYPE_SUCCESS
                     break
                 else:
@@ -308,16 +338,22 @@ class Stream():
                     self.detection_success_num += 1
                 self.detection_total += 1
 
-        self.mutex.release()
+        # self.mutex.release()
 
     def _update_instance(self, rtspUrl, frameRate):
-        self._stop()
-        self._set(rtspUrl, frameRate)
-        self._start()
-        logging.info("Instance {0} updated, rtsp = {1}, frameRate = {2}".format(
-            self.cam_id, rtspUrl, frameRate))
+        if not self.is_benchmark:
+            self._stop()
+            self._set(rtspUrl, frameRate)
+            self._start()
+        logger.info(
+            "Instance {} updated, rtsp = {}, frameRate = {}".format(
+                self.cam_id, rtspUrl, frameRate
+            )
+        )
 
-    def update_retrain_parameters(self, is_retrain, confidence_min, confidence_max, max_images):
+    def update_retrain_parameters(
+        self, is_retrain, confidence_min, confidence_max, max_images
+    ):
         self.is_retrain = is_retrain
         self.max_images = max_images
         # FIMXE may need to move it to other place
@@ -336,13 +372,23 @@ class Stream():
         else:
             self.iothub_interval = 60 / fpm  # seconds
 
+    def update_lva_mode(self, lva_mode):
+        if lva_mode == self.lva_mode:
+            logger.info("Not changing lva_mode.")
+        else:
+            self._stop()
+            self.lva_mode = lva_mode
+            self._set(self.cam_source, self.frameRate)
+            self._start()
+            logger.info("Change lva_mode to {}".format(lva_mode))
+
     def delete(self):
-        self.mutex.acquire()
+        # self.mutex.acquire()
         self.cam_is_alive = False
-        self.mutex.release()
+        # self.mutex.release()
 
         gm.invoke_graph_instance_deactivate(self.cam_id)
-        logging.info('Deactivate stream {0}'.format(self.cam_id))
+        logger.info("Deactivate stream {}".format(self.cam_id))
 
     def predict(self, image):
 
@@ -357,15 +403,13 @@ class Stream():
         image = cv2.resize(image, (width, height))
 
         # prediction
-        self.mutex.acquire()
+        # self.mutex.acquire()
         predictions, inf_time = self.model.Score(image)
-        #print('predictions', predictions, flush=True)
-        self.mutex.release()
+        # print('predictions', predictions, flush=True)
+        # self.mutex.release()
 
         # check whether it's the tag we want
-        predictions = list(
-            p for p in predictions if p['tagName'] in self.model.parts)
-
+        predictions = list(p for p in predictions if p["tagName"] in self.model.parts)
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -376,7 +420,6 @@ class Stream():
                     _predictions.append(p)
             predictions = _predictions
 
-
         # update detection status before filter out by threshold
         self.update_detection_status(predictions)
 
@@ -386,16 +429,13 @@ class Stream():
         if self.iothub_is_send:
             self.process_send_message_to_iothub(predictions)
 
-
-        # check whether it's larger than threshold 
-        predictions = list(
-            p for p in predictions if p['probability'] >= self.threshold)
-
+        # check whether it's larger than threshold
+        predictions = list(p for p in predictions if p["probability"] >= self.threshold)
 
         # update last_prediction_count
         _last_prediction_count = {}
         for p in predictions:
-            tag = p['tagName']
+            tag = p["tagName"]
             if tag not in _last_prediction_count:
                 _last_prediction_count[tag] = 1
             else:
@@ -411,52 +451,57 @@ class Stream():
         # Update Tracker / Scenario
         _detections = []
         for prediction in predictions:
-            tag = prediction['tagName']
-            #if prediction['probability'] > 0.5:
+            tag = prediction["tagName"]
+            # if prediction['probability'] > 0.5:
             (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
             _detections.append(
-                Detection(tag, x1, y1, x2, y2, prediction['probability']))
+                Detection(tag, x1, y1, x2, y2, prediction["probability"])
+            )
         if self.scenario:
             self.scenario.update(_detections)
-
 
         self.draw_img()
         if self.model.send_video_to_cloud:
             self.precess_send_signal_to_lva()
 
         if self.scenario:
-            #print('drawing...', flush=True)
-            #print(self.scenario, flush=True)
-            self.last_drawn_img = self.scenario.draw_counter(
-                self.last_drawn_img)
+            # print('drawing...', flush=True)
+            # print(self.scenario, flush=True)
+            self.last_drawn_img = self.scenario.draw_counter(self.last_drawn_img)
             # FIXME close this
             # self.scenario.draw_constraint(self.last_drawn_img)
-            if self.get_mode() == 'DD':
+            if self.get_mode() == "DD":
                 self.scenario.draw_objs(self.last_drawn_img)
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
-        self.average_inference_time = 1/16*inf_time_ms + 15/16*self.average_inference_time
-
+        self.average_inference_time = (
+            1 / 16 * inf_time_ms + 15 / 16 * self.average_inference_time
+        )
 
     def process_retrain_image(self, predictions, img):
         for prediction in predictions:
             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
-                confidence = prediction['probability']
-                print('comparing...', self.confidence_min,
-                      confidence, self.confidence_max, flush=True)
+                confidence = prediction["probability"]
+                print(
+                    "comparing...",
+                    self.confidence_min,
+                    confidence,
+                    self.confidence_max,
+                    flush=True,
+                )
                 if self.confidence_min <= confidence <= self.confidence_max:
-                    print('preparing...', flush=True)
+                    print("preparing...", flush=True)
                     # prepare the data to send
-                    tag = prediction['tagName']
+                    tag = prediction["tagName"]
                     height, width = img.shape[0], img.shape[1]
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    labels = json.dumps(
-                        [{'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2}])
-                    jpg = cv2.imencode('.jpg', img)[1].tobytes()
+                    labels = json.dumps([{"x1": x1, "x2": x2, "y1": y1, "y2": y2}])
+                    jpg = cv2.imencode(".jpg", img)[1].tobytes()
 
                     send_retrain_image_to_webmodule(
-                        jpg, tag, labels, confidence, self.cam_id)
+                        jpg, tag, labels, confidence, self.cam_id
+                    )
 
                     self.last_upload_time = time.time()
                     break
@@ -464,15 +509,17 @@ class Stream():
     def process_send_message_to_iothub(self, predictions):
         if self.iothub_last_send_time + self.iothub_interval < time.time():
             predictions = list(
-                p for p in predictions if p['probability'] >= self.threshold)
-            send_message_to_iothub(predictions)
-            self.iothub_last_send_time = time.time()
+                p for p in predictions if p["probability"] >= self.threshold
+            )
+            if len(predictions) > 0:
+                send_message_to_iothub(predictions)
+                self.iothub_last_send_time = time.time()
 
     def precess_send_signal_to_lva(self):
         if self.lva_last_send_time + self.lva_interval < time.time():
             to_send = False
             for p in self.last_prediction:
-                if p['probability'] >= self.threshold:
+                if p["probability"] >= self.threshold:
                     to_send = True
             if to_send:
                 send_message_to_lva()
@@ -489,9 +536,9 @@ class Stream():
         if self.has_aoi:
             draw_aoi(img, self.aoi_info)
 
-        if self.get_mode() != 'DD':
+        if self.get_mode() != "DD":
             for prediction in predictions:
-                if prediction['probability'] > self.threshold:
+                if prediction["probability"] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
                     cv2.rectangle(img, (x1, max(y1, 15)), (x2, y2), (255, 255, 255), 1)
                     draw_confidence_level(img, prediction)
@@ -500,27 +547,31 @@ class Stream():
 
 
 def web_module_url():
-    if is_edge:
-        return 'WebModule:8000'
+    if is_edge():
+        return "WebModule:8000"
     else:
-        return 'localhost:8000'
+        return "localhost:8000"
 
 
 def draw_aoi(img, aoi_info):
     for aoi_area in aoi_info:
-        aoi_type = aoi_area['type']
-        label = aoi_area['label']
+        aoi_type = aoi_area["type"]
+        label = aoi_area["label"]
 
-        if aoi_type == 'BBox':
-            cv2.rectangle(img,
-                          (int(label['x1']), int(label['y1'])),
-                          (int(label['x2']), int(label['y2'])), (255, 255, 255), 2)
+        if aoi_type == "BBox":
+            cv2.rectangle(
+                img,
+                (int(label["x1"]), int(label["y1"])),
+                (int(label["x2"]), int(label["y2"])),
+                (255, 255, 255),
+                2,
+            )
 
-        elif aoi_area['type'] == 'Polygon':
+        elif aoi_area["type"] == "Polygon":
             l = len(label)
             for index, point in enumerate(label):
-                p1 = (point['x'], point['y'])
-                p2 = (label[(index+1) % l]['x'], label[(index+1) % l]['y'])
+                p1 = (point["x"], point["y"])
+                p2 = (label[(index + 1) % l]["x"], label[(index + 1) % l]["y"])
                 cv2.line(img, p1, p2, (255, 255, 255), 2)
 
 
@@ -529,18 +580,21 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
     obj_shape = Polygon([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
 
     for aoi_area in aoi_info:
-        aoi_type = aoi_area['type']
-        label = aoi_area['label']
+        aoi_type = aoi_area["type"]
+        label = aoi_area["label"]
 
-        if aoi_area['type'] == 'BBox':
-            if ((label['x1'] <= x1 <= label['x2']) or (label['x1'] <= x2 <= label['x2'])) and \
-                    ((label['y1'] <= y1 <= label['y2']) or (label['y1'] <= y2 <= label['y2'])):
+        if aoi_area["type"] == "BBox":
+            if (
+                (label["x1"] <= x1 <= label["x2"]) or (label["x1"] <= x2 <= label["x2"])
+            ) and (
+                (label["y1"] <= y1 <= label["y2"]) or (label["y1"] <= y2 <= label["y2"])
+            ):
                 return True
 
-        elif aoi_area['type'] == 'Polygon':
+        elif aoi_area["type"] == "Polygon":
             points = []
             for point in label:
-                points.append([point['x'], point['y']])
+                points.append([point["x"], point["y"]])
             aoi_shape = Polygon(points)
             if aoi_shape.is_valid and aoi_shape.intersects(obj_shape):
                 return True
@@ -549,14 +603,14 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
 
 
 def parse_bbox(prediction, width, height):
-    x1 = int(prediction['boundingBox']['left'] * width)
-    y1 = int(prediction['boundingBox']['top'] * height)
-    x2 = x1 + int(prediction['boundingBox']['width'] * width)
-    y2 = y1 + int(prediction['boundingBox']['height'] * height)
-    x1 = min(max(x1, 0), width-1)
-    x2 = min(max(x2, 0), width-1)
-    y1 = min(max(y1, 0), height-1)
-    y2 = min(max(y2, 0), height-1)
+    x1 = int(prediction["boundingBox"]["left"] * width)
+    y1 = int(prediction["boundingBox"]["top"] * height)
+    x2 = x1 + int(prediction["boundingBox"]["width"] * width)
+    y2 = y1 + int(prediction["boundingBox"]["height"] * height)
+    x1 = min(max(x1, 0), width - 1)
+    x2 = min(max(x2, 0), width - 1)
+    y1 = min(max(y1, 0), height - 1)
+    y2 = min(max(y2, 0), height - 1)
     return (x1, y1), (x2, y2)
 
 
@@ -567,12 +621,12 @@ def draw_confidence_level(img, prediction):
     font_scale = 0.7
     thickness = 1
 
-    prob_str = str(int(prediction['probability']*1000)/10)
-    prob_str = ' (' + prob_str + '%)'
+    prob_str = str(int(prediction["probability"] * 1000) / 10)
+    prob_str = " (" + prob_str + "%)"
 
     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
-    text = prediction['tagName'] + prob_str
+    text = prediction["tagName"] + prob_str
     img = draw_label(img, text, (x1, max(y1, 15)))
 
     return img
@@ -581,44 +635,43 @@ def draw_confidence_level(img, prediction):
 def send_message_to_iothub(predictions):
     if iot:
         try:
-            iot.send_message_to_output(
-                json.dumps(predictions), 'metrics')
+            iot.send_message_to_output(json.dumps(predictions), "metrics")
         except:
-            print(
-                '[ERROR] Failed to send message to iothub', flush=True)
-        print(
-            '[INFO] sending metrics to iothub', flush=True)
+            print("[ERROR] Failed to send message to iothub", flush=True)
+        print("[INFO] sending metrics to iothub", flush=True)
     else:
-        #print('[METRICS]', json.dumps(predictions_to_send))
+        # print('[METRICS]', json.dumps(predictions_to_send))
         pass
 
 
 def send_message_to_lva():
     if iot:
         try:
-            iot.send_message_to_output('{}', 'InferenceToLVA')
+            iot.send_message_to_output("{}", "InferenceToLVA")
         except:
-            print(
-                '[ERROR] Failed to send signal to LVA', flush=True)
-        print(
-            '[INFO] sending signal to LVA', flush=True)
+            print("[ERROR] Failed to send signal to LVA", flush=True)
+        print("[INFO] sending signal to LVA", flush=True)
     else:
-        #print('[INFO] Cannot detect IoT module')
+        # print('[INFO] Cannot detect IoT module')
         pass
 
 
 def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
-    print('[INFO] Sending Image to relabeling', tag, flush=True)
+    print("[INFO] Sending Image to relabeling", tag, flush=True)
     try:
         # requests.post('http://'+web_module_url()+'/api/relabel', data={
-        res = requests.post('http://'+web_module_url()+'/api/part_detections/1/upload_relabel_image/', data={
-            'confidence': confidence,
-            'labels': labels,
-            'part_name': tag,
-            'is_relabel': True,
-            'img': base64.b64encode(jpg),
-            'camera_id': cam_id
-        })
+        res = requests.post(
+            "http://"
+            + web_module_url()
+            + "/api/part_detections/1/upload_relabel_image/",
+            data={
+                "confidence": confidence,
+                "labels": labels,
+                "part_name": tag,
+                "is_relabel": True,
+                "img": base64.b64encode(jpg),
+                "camera_id": cam_id,
+            },
+        )
     except:
-        print(
-            '[ERROR] Failed to update image for relabeling', flush=True)
+        print("[ERROR] Failed to update image for relabeling", flush=True)

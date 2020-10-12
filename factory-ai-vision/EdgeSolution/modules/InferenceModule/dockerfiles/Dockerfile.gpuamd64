@@ -21,38 +21,44 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # TODO: Consider move env to the end of dockerfile
-ENV LANG en_US.UTF-8 
+ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 RUN rm -rf /opt/miniconda
 RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
-COPY requirements.txt ./
+
+COPY requirements/base.txt ./requirements/base.txt
 ENV CONDA_ENV_NAME python38
 RUN conda create --name python38 python=3.8.5 -y &&\
     . activate python38
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install flask opencv-python onnxruntime-gpu" ]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime-gpu==1.4.0" ]
 
 COPY coco_classes.txt ./
 COPY default_model default_model/
 COPY default_model_6parts default_model_6parts/
 COPY grpc_topology.json ./
+COPY http_topology.json ./
 COPY sample_video sample_video/
 COPY scenario_models scenario_models/
 RUN chmod 777 sample_video/video.mp4
 RUN chmod 777 default_model
 
+COPY api/__init__.py ./api/__init__.py
+COPY api/models.py ./api/models.py
 COPY arguments.py ./
 COPY config.py ./
 COPY exception_handler.py ./
 COPY extension_pb2.py ./
 COPY extension_pb2_grpc.py ./
+COPY http_inference_engine.py ./
+COPY img.png ./
 COPY inference_engine.py ./
 COPY inferencing_pb2.py ./
 COPY invoke.py ./
+COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
 COPY main.py ./
 COPY media_pb2.py ./
 COPY model_wrapper.py ./
@@ -67,7 +73,8 @@ COPY stream_manager.py ./
 COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
-COPY webmodule_utils/*.py ./webmodule_utils/
+
+RUN apt-get update && apt-get install unzip
 
 EXPOSE 5558
 EXPOSE 5000

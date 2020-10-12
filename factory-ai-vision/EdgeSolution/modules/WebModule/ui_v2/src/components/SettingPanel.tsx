@@ -7,7 +7,6 @@ import {
   Toggle,
   mergeStyles,
   LayerHost,
-  Customizer,
   PrimaryButton,
   Stack,
   Dropdown,
@@ -22,10 +21,8 @@ import {
   Checkbox,
   MessageBar,
   MessageBarType,
-  Link,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import {
@@ -38,12 +35,8 @@ import {
 } from '../store/setting/settingAction';
 import { WarningDialog } from './WarningDialog';
 import { dummyFunction } from '../utils/dummyFunction';
-import {
-  selectNonDemoProject,
-  createNewTrainingProject,
-  pullCVProjects,
-} from '../store/trainingProjectSlice';
-import { CreateByNameDialog } from './CreateByNameDialog';
+import { selectNonDemoProject, pullCVProjects } from '../store/trainingProjectSlice';
+import { CreateProjectDialog } from './CreateProjectDialog';
 
 type SettingPanelProps = {
   isOpen: boolean;
@@ -78,7 +71,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   );
   const defaultCustomvisionId = useSelector((state: State) => {
     const [selectedTrainingProject] = selectNonDemoProject(state);
-    return state.trainingProject.entities[selectedTrainingProject.id]?.customVisionId;
+    return state.trainingProject.entities[selectedTrainingProject?.id]?.customVisionId;
   });
   const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
   const originSettingData = useSelector((state: State) => state.setting.origin);
@@ -88,7 +81,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const [loadImgWarning, setloadImgWarning] = useState(false);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
   const error = useSelector((state: State) => state.setting.error);
-  const [projectDialogHidden, { setFalse: openDialg, setTrue: closeDialog }] = useBoolean(true);
 
   const dispatch = useDispatch();
 
@@ -115,10 +107,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     else setLoadFullImages(checked);
   };
 
-  const onCreateProject = async (name: string) => {
-    await dispatch(createNewTrainingProject(name));
-  };
-
   const updateIsCollectData = (isCollectData, hasInit?): void => {
     dispatch(patchIsCollectData({ id: settingData.id, isCollectData, hasInit }));
   };
@@ -138,128 +126,120 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   return (
     <>
       {isOpen && <LayerHost id={MAIN_LAYER_HOST_ID} className={layerHostClass} />}
-      <Customizer scopedSettings={{ Layer: { hostId: MAIN_LAYER_HOST_ID } }}>
-        <Panel
-          hasCloseButton={canBeDismissed}
-          headerText="Settings"
-          isOpen={isOpen}
-          type={PanelType.smallFluid}
-          onDismiss={onDismiss}
-          {...(!canBeDismissed && { onOuterClick: dummyFunction })}
-        >
-          <Stack tokens={{ childrenGap: 17 }}>
-            <h4>Azure Cognitive Services settings</h4>
-            <TextField
-              className={textFieldClass}
-              label="Endpoint"
-              required
-              value={settingData.namespace}
-              onChange={(_, value): void => {
-                dispatch(updateNamespace(value));
-              }}
-              onRenderLabel={(props) => <CustomLabel {...props} />}
-            />
-            <TextField
-              className={textFieldClass}
-              label="Key"
-              required
-              value={settingData.key}
-              onChange={(_, value): void => {
-                dispatch(updateKey(value));
-              }}
-            />
-            {error && <MessageBar messageBarType={MessageBarType.blocked}>{error.message}</MessageBar>}
-            <Stack.Item>
-              <WarningDialog
-                contentText={
-                  <Text variant="large">
-                    Update Key / Namespace will remove all the objects, sure you want to update?
-                  </Text>
-                }
-                confirmButton="Yes"
-                onConfirm={onSave}
-                trigger={<PrimaryButton text="Save" disabled={cannotUpdateOrSave} />}
-              />
-            </Stack.Item>
-            {showProjectDropdown && (
-              <>
-                <Dropdown
-                  className={textFieldClass}
-                  label="Project"
-                  required
-                  options={cvProjectOptions}
-                  onChange={onDropdownChange}
-                  selectedKey={selectedCustomvisionId}
-                  styles={{ dropdownItemsWrapper: { maxHeight: '80vh' } }}
-                />
-                <Link onClick={openDialg}>Create new project</Link>
-                <CreateByNameDialog
-                  hidden={projectDialogHidden}
-                  onDismiss={closeDialog}
-                  title="Create new project"
-                  subText="Create a new project will remove all the objects and images"
-                  onCreate={onCreateProject}
-                />
-                <Checkbox checked={loadFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
-                <WarningDialog
-                  open={loadImgWarning}
-                  contentText={
-                    <Text variant="large">
-                      Depends on the number of images, loading full images takes time
-                    </Text>
-                  }
-                  onConfirm={() => {
-                    setLoadFullImages(true);
-                    setloadImgWarning(false);
-                  }}
-                  onCancel={() => setloadImgWarning(false)}
-                />
-                <Stack horizontal tokens={{ childrenGap: 10 }}>
-                  <WarningDialog
-                    contentText={
-                      <Text variant="large">
-                        Load Project will remove all the objects, sure you want to do that?
-                      </Text>
-                    }
-                    trigger={<PrimaryButton text="Load" disabled={loading} />}
-                    onConfirm={onLoad}
-                  />
-                  {loading && <Spinner label="loading" />}
-                </Stack>
-              </>
-            )}
-            <Toggle
-              label="Allow sending usage data"
-              styles={{ root: { paddingTop: 50 } }}
-              checked={isCollectingData}
-              onChange={(_, checked) => updateIsCollectData(checked, true)}
-            />
+      <Panel
+        hasCloseButton={canBeDismissed}
+        headerText="Settings"
+        isOpen={isOpen}
+        type={PanelType.smallFluid}
+        onDismiss={onDismiss}
+        {...(!canBeDismissed && { onOuterClick: dummyFunction })}
+        layerProps={{
+          hostId: MAIN_LAYER_HOST_ID,
+        }}
+      >
+        <Stack tokens={{ childrenGap: 17 }}>
+          <h4>Azure Cognitive Services settings</h4>
+          <TextField
+            className={textFieldClass}
+            label="Endpoint"
+            required
+            value={settingData.namespace}
+            onChange={(_, value): void => {
+              dispatch(updateNamespace(value));
+            }}
+            onRenderLabel={(props) => <CustomLabel {...props} />}
+          />
+          <TextField
+            className={textFieldClass}
+            label="Key"
+            required
+            value={settingData.key}
+            onChange={(_, value): void => {
+              dispatch(updateKey(value));
+            }}
+          />
+          {error && <MessageBar messageBarType={MessageBarType.blocked}>{error.message}</MessageBar>}
+          <Stack.Item>
             <WarningDialog
               contentText={
-                <>
-                  <h1 style={{ textAlign: 'center' }}>Data Collection Policy</h1>
-                  <p>
-                    The software may collect information about your use of the software and send it to
-                    Microsoft. Microsoft may use this information to provide services and improve our products
-                    and services. You may turn off the telemetry as described in the repository or clicking
-                    settings on top right corner. Our privacy statement is located at{' '}
-                    <a href="https://go.microsoft.com/fwlink/?LinkID=824704">
-                      https://go.microsoft.com/fwlink/?LinkID=824704
-                    </a>
-                    . You can learn more about data collection and use in the help documentation and our
-                    privacy statement. Your use of the software operates as your consent to these practices.
-                  </p>
-                </>
+                <Text variant="large">
+                  Update Key / Namespace will remove all the objects, sure you want to update?
+                </Text>
               }
-              open={openDataPolicyDialog}
-              confirmButton="I agree"
-              cancelButton="I don't agree"
-              onConfirm={(): void => updateIsCollectData(true, true)}
-              onCancel={(): void => updateIsCollectData(false, true)}
+              confirmButton="Yes"
+              onConfirm={onSave}
+              trigger={<PrimaryButton text="Save" disabled={cannotUpdateOrSave} />}
             />
-          </Stack>
-        </Panel>
-      </Customizer>
+          </Stack.Item>
+          {showProjectDropdown && (
+            <>
+              <Dropdown
+                className={textFieldClass}
+                label="Project"
+                required
+                options={cvProjectOptions}
+                onChange={onDropdownChange}
+                selectedKey={selectedCustomvisionId}
+                calloutProps={{ calloutMaxHeight: 300 }}
+              />
+              <CreateProjectDialog />
+              <Checkbox checked={loadFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
+              <WarningDialog
+                open={loadImgWarning}
+                contentText={
+                  <Text variant="large">Depends on the number of images, loading full images takes time</Text>
+                }
+                onConfirm={() => {
+                  setLoadFullImages(true);
+                  setloadImgWarning(false);
+                }}
+                onCancel={() => setloadImgWarning(false)}
+              />
+              <Stack horizontal tokens={{ childrenGap: 10 }}>
+                <WarningDialog
+                  contentText={
+                    <Text variant="large">
+                      Load Project will remove all the objects, sure you want to do that?
+                    </Text>
+                  }
+                  trigger={<PrimaryButton text="Load" disabled={loading} />}
+                  onConfirm={onLoad}
+                />
+                {loading && <Spinner label="loading" />}
+              </Stack>
+            </>
+          )}
+          <Toggle
+            label="Allow sending usage data"
+            styles={{ root: { paddingTop: 50 } }}
+            checked={isCollectingData}
+            onChange={(_, checked) => updateIsCollectData(checked, true)}
+          />
+          <WarningDialog
+            contentText={
+              <>
+                <h1 style={{ textAlign: 'center' }}>Data Collection Policy</h1>
+                <p>
+                  The software may collect information about your use of the software and send it to
+                  Microsoft. Microsoft may use this information to provide services and improve our products
+                  and services. You may turn off the telemetry as described in the repository or clicking
+                  settings on top right corner. Our privacy statement is located at{' '}
+                  <a href="https://go.microsoft.com/fwlink/?LinkID=824704">
+                    https://go.microsoft.com/fwlink/?LinkID=824704
+                  </a>
+                  . You can learn more about data collection and use in the help documentation and our privacy
+                  statement. Your use of the software operates as your consent to these practices.
+                </p>
+              </>
+            }
+            open={openDataPolicyDialog}
+            confirmButton="I agree"
+            cancelButton="I don't agree"
+            onConfirm={(): void => updateIsCollectData(true, true)}
+            onCancel={(): void => updateIsCollectData(false, true)}
+          />
+        </Stack>
+      </Panel>
     </>
   );
 };
@@ -275,7 +255,7 @@ export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
       </Stack>
       <Dialog
         title="Get Endpoint and Key"
-        isOpen={isModalOpen}
+        hidden={!isModalOpen}
         modalProps={{ layerProps: { hostId: null } }}
         maxWidth={800}
       >

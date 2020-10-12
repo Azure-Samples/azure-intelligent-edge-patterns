@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App signals.
 """
 
@@ -14,16 +13,18 @@ from .utils import deploy_all_helper
 logger = logging.getLogger(__name__)
 
 
-@receiver(signal=pre_save,
-          sender=PartDetection,
-          dispatch_uid="azure_part_detection_has_configured_handler")
+@receiver(
+    signal=pre_save,
+    sender=PartDetection,
+    dispatch_uid="azure_part_detection_has_configured_handler",
+)
 def azure_part_detection_has_configured_handler(**kwargs):
     """PartDetection is_configured handler
 
     For now, only one project can have is configured = True
     """
 
-    instance = kwargs['instance']
+    instance = kwargs["instance"]
     logger.info("Changing has_configured")
     if instance.has_configured:
         for other_pd in PartDetection.objects.exclude(id=instance.id):
@@ -32,19 +33,22 @@ def azure_part_detection_has_configured_handler(**kwargs):
     logger.info("Signal end")
 
 
-@receiver(signal=post_save,
-          sender=PartDetection,
-          dispatch_uid="azure_part_detection_post_save_deploy_handler")
+@receiver(
+    signal=post_save,
+    sender=PartDetection,
+    dispatch_uid="azure_part_detection_post_save_deploy_handler",
+)
 def azure_part_detection_post_save_deploy_handler(**kwargs):
-    """Project is_configured handler
-    """
-    instance = kwargs['instance']
+    """Project is_configured handler"""
+    instance = kwargs["instance"]
     deploy_all_helper(part_detection_id=instance.id)
 
 
-@receiver(signal=m2m_changed,
-          sender=PartDetection.cameras.through,
-          dispatch_uid="azure_part_detection_camera_m2m_change")
+@receiver(
+    signal=m2m_changed,
+    sender=PartDetection.cameras.through,
+    dispatch_uid="azure_part_detection_camera_m2m_change",
+)
 def azure_part_detection_camera_m2m_change(**kwargs):
     """azure_part_detection_camera_m2m_change.
 
@@ -57,9 +61,11 @@ def azure_part_detection_camera_m2m_change(**kwargs):
         deploy_all_helper(part_detection_id=instance.id)
 
 
-@receiver(signal=post_save,
-          sender=Camera,
-          dispatch_uid="azure_part_detection_camera_config_change_handler")
+@receiver(
+    signal=post_save,
+    sender=Camera,
+    dispatch_uid="azure_part_detection_camera_config_change_handler",
+)
 def azure_part_detection_camera_config_change_handler(**kwargs):
     """azure_part_detection_camera_config_change_handler.
 

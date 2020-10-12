@@ -4,11 +4,11 @@ import { Stack, TextField, IconButton } from '@fluentui/react';
 import { PartTag, Status as PartTagStatus } from '../PartTag';
 
 type ConfigurationInfoProps = {
-  cameraName: string;
+  cameraNames: string[];
+  fps: number;
   partNames: string[];
   sendMessageToCloud: boolean;
   framesPerMin: number;
-  accuracyThreshold: number;
   needRetraining: boolean;
   accuracyRangeMin: number;
   accuracyRangeMax: number;
@@ -19,13 +19,9 @@ type ConfigurationInfoProps = {
   saveProbThreshold: () => void;
 };
 
-const getCloudMessageTxt = (
-  sendMessageToCloud: boolean,
-  framesPerMin: number,
-  accuracyThreshold: number,
-): string => {
+const getCloudMessageTxt = (sendMessageToCloud: boolean, framesPerMin: number): string => {
   if (!sendMessageToCloud) return 'No';
-  return `Yes - ${framesPerMin} frames per minute, ${accuracyThreshold}% accuracy threshold`;
+  return `Yes - ${framesPerMin} frames per minute.`;
 };
 
 const getRetrainingTxt = (
@@ -47,7 +43,11 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
           <tbody>
             <tr>
               <td>Camera</td>
-              <td>{props.cameraName}</td>
+              <td>
+                {props.cameraNames.join(', ')}
+                <br />
+                <b>{props.fps} fps per camera</b>
+              </td>
             </tr>
             <tr>
               <td>Objects</td>
@@ -64,7 +64,7 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
             <tr>
               <td>Confirmation threshold</td>
               <td>
-                <Stack horizontal horizontalAlign="center">
+                <Stack horizontal>
                   <TextField
                     type="number"
                     value={props.probThreshold}
@@ -83,9 +83,7 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
             </tr>
             <tr>
               <td>Cloud message</td>
-              <td>
-                {getCloudMessageTxt(props.sendMessageToCloud, props.framesPerMin, props.accuracyThreshold)}
-              </td>
+              <td>{getCloudMessageTxt(props.sendMessageToCloud, props.framesPerMin)}</td>
             </tr>
             <tr>
               <td>Capture retraining images</td>

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """API exception_handler.
 """
 
@@ -20,15 +19,14 @@ def ms_style_exception_handler(exc, context):
 
     if isinstance(exc, APIException) and response is not None:
         res_data = {"error": {}}
-        res_data["error"]['status_code'] = response.status_code
+        res_data["error"]["status_code"] = response.status_code
         if isinstance(exc, ValidationError):
-            res_data["error"]['code'] = 'validation_error'
+            res_data["error"]["code"] = "validation_error"
         else:
-            res_data["error"]['code'] = exc.detail.code
-        res_data["error"]['message'] = str(exc.detail)
+            res_data["error"]["code"] = exc.detail.code
+        res_data["error"]["message"] = str(exc.detail)
         serializer = MSStyleErrorResponseSerializer(data=res_data)
         if serializer.is_valid(raise_exception=False):
-            return Response(serializer.validated_data,
-                            status=response.status_code)
+            return Response(serializer.validated_data, status=response.status_code)
     # Fallback
     return response

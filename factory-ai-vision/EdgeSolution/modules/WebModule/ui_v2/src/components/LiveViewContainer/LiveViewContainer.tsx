@@ -14,6 +14,7 @@ import {
   removeVideoAnno,
   finishLabel,
 } from '../../store/videoAnnoSlice';
+import { InferenceMode } from '../../store/project/projectTypes';
 
 export const LiveViewContainer: React.FC<{
   showVideo: boolean;
@@ -21,9 +22,15 @@ export const LiveViewContainer: React.FC<{
 }> = ({ showVideo, cameraId }) => {
   const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
   const showCountingLine = useSelector<State, boolean>(
-    (state) => selectCameraById(state, cameraId)?.useCountingLine,
+    (state) =>
+      selectCameraById(state, cameraId)?.useCountingLine &&
+      [InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(state.project.data.inferenceMode),
   );
-  const showDangerZone = useSelector((state: State) => selectCameraById(state, cameraId)?.useDangerZone);
+  const showDangerZone = useSelector(
+    (state: State) =>
+      selectCameraById(state, cameraId)?.useDangerZone &&
+      state.project.data.inferenceMode === InferenceMode.EmployeeSafety,
+  );
   const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const imageInfo = useImage(`/api/inference/video_feed?camera_id=${cameraId}`, '', true, true);

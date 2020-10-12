@@ -29,7 +29,7 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
       <Card.Section fill styles={{ root: { overflow: 'hidden' } }}>
         {children}
       </Card.Section>
-      <Card.Section styles={{ root: { padding: '12px 16px 14px 16px' } }}>
+      <Card.Section styles={{ root: { padding: '12px 16px 14px 16px' } }} tokens={{ childrenGap: 5 }}>
         <Stack horizontal horizontalAlign="space-between">
           <Text variant="small" styles={{ root: { color: palette.neutralSecondary } }}>
             {cameraName}

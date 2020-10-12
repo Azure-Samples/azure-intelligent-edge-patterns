@@ -10,10 +10,10 @@ RUN apt-get update \
     && update-locale LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
-ENV LANG en_US.UTF-8 
+ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
-# 
+#
 RUN apt-get install -y python3
 RUN apt-get -y install python3-pip
 RUN apt-get install -y libgl1-mesa-glx
@@ -58,7 +58,7 @@ COPY requirements.txt ./
 RUN pip3 install --upgrade pip
 RUN pip3 install -U certifi --ignore-installed
 RUN pip3 install -r requirements.txt --ignore-installed && \
-    pip3 install flask 
+    pip3 install flask
 
 COPY coco_classes.txt ./
 COPY default_model default_model/
@@ -74,9 +74,11 @@ COPY config.py ./
 COPY exception_handler.py ./
 COPY extension_pb2.py ./
 COPY extension_pb2_grpc.py ./
+COPY http_inference_engine.py ./
 COPY inference_engine.py ./
 COPY inferencing_pb2.py ./
 COPY invoke.py ./
+COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
 COPY main.py ./
 COPY media_pb2.py ./
 COPY model_wrapper.py ./
@@ -91,7 +93,6 @@ COPY stream_manager.py ./
 COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
-COPY webmodule_utils/*.py ./webmodule_utils/
 
 EXPOSE 5558
 EXPOSE 5000

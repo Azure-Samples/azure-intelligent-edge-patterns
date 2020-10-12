@@ -50,6 +50,16 @@ export enum InferenceMode {
   DefectDetection = 'DD',
 }
 
+export enum InferenceProtocal {
+  Http = 'http',
+  GRPC = 'grpc',
+}
+
+export enum InferenceSource {
+  LVA = 'lva',
+  CaptureModule = 'capture_module',
+}
+
 export type ProjectData = {
   id: number;
   cameras: number[];
@@ -62,7 +72,6 @@ export type ProjectData = {
   maxImages: number;
   sendMessageToCloud: boolean;
   framesPerMin: number;
-  accuracyThreshold: number;
   modelUrl: string;
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
@@ -70,6 +79,11 @@ export type ProjectData = {
   sendVideoToCloud: boolean;
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
+  setFpsManually: boolean;
+  fps: number;
+  recomendedFps: number;
+  inferenceProtocol: InferenceProtocal;
+  inferenceSource: InferenceSource;
 };
 
 // Describing the different ACTION NAMES available

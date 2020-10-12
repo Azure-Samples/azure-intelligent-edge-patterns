@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API serializers.
 """
 
@@ -16,9 +15,5 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = '__all__'
-        extra_kwargs = {
-            "timestamp": {
-                "required": False
-            },
-        }
+        fields = "__all__"
+        extra_kwargs = {"timestamp": {"required": False}}

@@ -13,6 +13,7 @@ import {
 } from '@fluentui/react';
 import { Card } from '@uifabric/react-cards';
 import { AcceptMediumIcon } from '@fluentui/react-icons';
+import { CreateProjectDialog } from './CreateProjectDialog';
 
 const theme = getTheme();
 
@@ -52,12 +53,13 @@ const cardStyleSets = mergeStyleSets({
 });
 
 type CustomizeType = {
+  hasCVProject: boolean;
   hasCamera: boolean;
   hasImages: boolean;
   hasTask: boolean;
 };
 
-export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTask }) => {
+export const Customize: React.FC<CustomizeType> = ({ hasCVProject, hasCamera, hasImages, hasTask }) => {
   return (
     <Stack horizontalAlign="center">
       <Stack horizontalAlign="center" styles={{ root: { paddingTop: 60, paddingBottom: 40 } }}>
@@ -69,7 +71,19 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
       <Stack horizontal tokens={{ childrenGap: 20 }}>
         <GetStartedCard
           no={1}
-          checked={hasCamera}
+          checked={hasCVProject}
+          title="Create your own project"
+          contentTxt="Add and configure the cameras in the factory"
+          onRenderActionLink={() => (
+            <div className={cardStyleSets.mainSectionAction}>
+              <CreateProjectDialog />
+            </div>
+          )}
+          src="/icons/get-started.png"
+        />
+        <GetStartedCard
+          no={2}
+          checked={hasCVProject && hasCamera}
           title="Connect your own video feed"
           contentTxt="Add and configure the cameras in the factory"
           actionTxt="Go to Cameras"
@@ -77,8 +91,8 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
           src="/icons/customize_1.svg"
         />
         <GetStartedCard
-          no={2}
-          checked={hasImages && hasCamera}
+          no={3}
+          checked={hasCVProject && hasImages && hasCamera}
           title="Capture images and tag objects"
           contentTxt="Capture images from your video streams and tag objects"
           actionTxt="Go to Images"
@@ -86,8 +100,8 @@ export const Customize: React.FC<CustomizeType> = ({ hasCamera, hasImages, hasTa
           src="/icons/customize_2.svg"
         />
         <GetStartedCard
-          no={3}
-          checked={hasTask && hasImages && hasCamera}
+          no={4}
+          checked={hasCVProject && hasTask && hasImages && hasCamera}
           title="Ready to go!"
           contentTxt="Start identifying parts from your cameras’ live streams"
           actionTxt="Begin a task"
@@ -104,10 +118,11 @@ const GetStartedCard: React.FC<{
   checked: boolean;
   title: string;
   contentTxt: string;
-  actionTxt: string;
-  actionLink: string;
+  actionTxt?: string;
+  actionLink?: string;
+  onRenderActionLink?: () => JSX.Element;
   src: string;
-}> = ({ no, checked, title, contentTxt, actionTxt, actionLink, src }) => {
+}> = ({ no, checked, title, contentTxt, actionTxt, actionLink, src, onRenderActionLink }) => {
   const renderIdxIcon = (): JSX.Element =>
     checked ? (
       <div className={cardStyleSets.checkIcon}>
@@ -128,9 +143,13 @@ const GetStartedCard: React.FC<{
         {renderIdxIcon()}
         <Text className={cardStyleSets.mainSectionTitle}>{title}</Text>
         <Text className={cardStyleSets.mainSectionContentTxt}>{contentTxt}</Text>
-        <Link className={cardStyleSets.mainSectionAction} to={actionLink} as={ReactRouterLink}>
-          {actionTxt} {'>'}
-        </Link>
+        {onRenderActionLink ? (
+          onRenderActionLink()
+        ) : (
+          <Link className={cardStyleSets.mainSectionAction} to={actionLink} as={ReactRouterLink}>
+            {actionTxt} {'>'}
+          </Link>
+        )}
       </Card.Section>
     </Card>
   );

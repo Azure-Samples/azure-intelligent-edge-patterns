@@ -1,27 +1,25 @@
-# -*- coding: utf-8 -*-
-"""Azure Project Factories
+"""App model factories
 """
 
-from typing import Any, Sequence
-
 import factory
-from factory import DjangoModelFactory, Faker, post_generation
+from factory import DjangoModelFactory, Faker
 
 from ...azure_projects.tests.factories import ProjectFactory
-from ...cameras.tests.factories import CameraFactory
+
+# from ...cameras.tests.factories import CameraFactory
+# from ...parts.tests.factories import PartFactory
+from ...inference_modules.tests.factories import InferenceModuleFactory
+from ..models import PartDetection
 
 
 class PartDetectionFactory(DjangoModelFactory):
-    """PartDetectionFactory.
-    """
+    """PartDetectionFactory."""
 
-    setting = factory.SubFactory(SettingFactory)
-
-    customvision_project_name = Faker("sentence")
+    name = Faker("name")
+    project = factory.SubFactory(ProjectFactory)
+    inference_module = factory.SubFactory(InferenceModuleFactory)
 
     class Meta:
-        """Meta.
-        """
+        """Meta."""
 
-        model = Project
-        django_get_or_create = ["customvision_project_name"]
+        model = PartDetection

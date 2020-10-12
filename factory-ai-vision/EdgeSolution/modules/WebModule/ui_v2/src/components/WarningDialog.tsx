@@ -37,11 +37,7 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({
 
   return (
     <>
-      <Dialog
-        isOpen={open === undefined ? isOpen : open}
-        maxWidth={800}
-        modalProps={{ layerProps: { hostId: null } }}
-      >
+      <Dialog hidden={!(open === undefined ? isOpen : open)} maxWidth={800}>
         <Stack horizontalAlign="center">
           <InfoIcon style={{ fontSize: 50, margin: 10 }} />
           {contentText}

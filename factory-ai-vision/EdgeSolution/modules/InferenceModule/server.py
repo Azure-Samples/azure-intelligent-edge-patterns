@@ -1,61 +1,101 @@
+"""Server.
+"""
+
 import json
 import logging
+import logging.config
 import os
-import time
 import sys
 import threading
+import time
 from concurrent import futures
 
+import cv2
 import grpc
-import requests
-from flask import Flask, Response, request
+import numpy as np
+import uvicorn
+from fastapi import BackgroundTasks, FastAPI, Request
 
 import extension_pb2_grpc
+from api.models import CamerasModel, PartDetectionModeEnum, PartsModel, UploadModelBody
 from arguments import ArgumentParser, ArgumentsType
 from exception_handler import PrintGetExceptionDetails
+from http_inference_engine import HttpInferenceEngine
 from inference_engine import InferenceEngine
 from invoke import gm
+from logging_conf import logging_config
 from model_wrapper import ONNXRuntimeModelDeploy
 from stream_manager import StreamManager
-from utility import get_file_zip, normalize_rtsp
-from webmodule_utils import PART_DETECTION_MODE_CHOICES
+from utility import is_edge
 
-#sys.path.insert(0, '../lib')
+# sys.path.insert(0, '../lib')
+# Set logging parameters
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
-MODEL_DIR = 'model'
+MODEL_DIR = "model"
 UPLOAD_INTERVAL = 1  # sec
 
-DETECTION_TYPE_NOTHING = 'nothing'
-DETECTION_TYPE_SUCCESS = 'success'
-DETECTION_TYPE_UNIDENTIFIED = 'unidentified'
+DETECTION_TYPE_NOTHING = "nothing"
+DETECTION_TYPE_SUCCESS = "success"
+DETECTION_TYPE_UNIDENTIFIED = "unidentified"
 DETECTION_BUFFER_SIZE = 10000
 
 IMG_WIDTH = 960
 IMG_HEIGHT = 540
+
+LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 
 # Main thread
 
 onnx = ONNXRuntimeModelDeploy()
 stream_manager = StreamManager(onnx)
 
-app = Flask(__name__)
+app = FastAPI(
+    title="InferenceModule", description="Factory AI InferenceModule.", version="0.0.1",
+)
 
 
-@app.route('/prediction', methods=['GET'])
-def prediction():
-    # print(onnx.last_prediction)
+## FIXME ##
+# injest to flask/fastapi context
+http_inference_engine = HttpInferenceEngine(stream_manager)
+
+
+@app.get("/streams")
+def streams():
+    """streams."""
+    # logger.info(onnx.last_prediction)
     # onnx.last_prediction
-    cam_id = request.args.get('cam_id')
-    s = stream_manager.get_stream_by_id(cam_id)
-    return json.dumps(s.last_prediction)
+    logger.info("Streams: %s", stream_manager.streams)
+    return {"streams": list(stream_manager.streams.keys())}
 
 
+@app.get("/prediction")
+def prediction(cam_id: str):
+    """prediction."""
+    # logger.info(onnx.last_prediction)
+    # onnx.last_prediction
+    stream = stream_manager.get_stream_by_id(cam_id)
+    return json.dumps(stream.last_prediction)
 
-@app.route('/metrics', methods=['GET'])
-def metrics():
+
+@app.post("/predict")
+async def predict(camera_id: str, request: Request):
+    """predict.
+    """
+    img_raw = await request.body()
+    nparr = np.frombuffer(img_raw, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    results = http_inference_engine.predict(camera_id, img)
+
+    if len(results) > 0:
+        return json.dumps({"inferences": results}), 200
+    return "", 204
+
+
+@app.get("/metrics")
+def metrics(cam_id: str):
+    """metrics."""
     inference_num = 0
     unidentified_num = 0
     total = 0
@@ -65,8 +105,7 @@ def metrics():
     is_gpu = onnx.is_gpu
     scenario_metrics = []
 
-    stream_id = request.args.get('cam_id')
-    stream = stream_manager.get_stream_by_id_danger(stream_id)
+    stream = stream_manager.get_stream_by_id_danger(cam_id)
     if stream:
         last_prediction_count = {}
         inference_num = stream.detection_success_num
@@ -79,360 +118,449 @@ def metrics():
             success_rate = 0
         else:
             success_rate = inference_num * 100 / total
-    return json.dumps({
-        'success_rate': success_rate,
-        'inference_num': inference_num,
-        'unidentified_num': unidentified_num,
-        'is_gpu': is_gpu,
-        'average_inference_time': average_inference_time,
-        'last_prediction_count': last_prediction_count,
-        'scenario_metrics': scenario_metrics
-    })
+    return {
+        "success_rate": success_rate,
+        "inference_num": inference_num,
+        "unidentified_num": unidentified_num,
+        "is_gpu": is_gpu,
+        "average_inference_time": average_inference_time,
+        "last_prediction_count": last_prediction_count,
+        "scenario_metrics": scenario_metrics,
+    }
 
 
-@app.route('/update_part_detection_id')
-def update_part_detection_id():
-    return 'ok'
+@app.get("/update_part_detection_id")
+def update_part_detection_id(part_detection_id: int):
+    """update_part_detection_id."""
+    return "ok"
 
 
-@app.route('/update_retrain_parameters')
-def update_retrain_parameters():
-
-    is_retrain = request.args.get('is_retrain')
-    if not is_retrain:
-        return 'missing is_retrain'
-
-    confidence_min = request.args.get('confidence_min')
-    if not confidence_min:
-        return 'missing confidence_min'
-
-    confidence_max = request.args.get('confidence_max')
-    if not confidence_max:
-        return 'missing confidence_max'
-
-    max_images = request.args.get('max_images')
-    if not max_images:
-        return 'missing max_images'
+@app.get("/update_retrain_parameters")
+def update_retrain_parameters(
+    is_retrain: bool, confidence_min: int, confidence_max: int, max_images: int
+):
+    """update_retrain_parameters.
+    """
 
     # FIXME currently set all streams
-    #cam_id = request.args.get('cam_id')
-    #s = stream_manager.get_stream_by_id(cam_id)
-    is_retrain = (is_retrain == 'True')
+    # cam_id = request.args.get('cam_id')
+    # s = stream_manager.get_stream_by_id(cam_id)
+    is_retrain = is_retrain == "True"
     confidence_min = int(confidence_min) * 0.01
     confidence_max = int(confidence_max) * 0.01
     max_images = int(max_images)
-    for s in stream_manager.get_streams():
-        s.update_retrain_parameters(
-            is_retrain, confidence_min, confidence_max, max_images)
+    for stream in stream_manager.get_streams():
+        stream.update_retrain_parameters(
+            is_retrain, confidence_min, confidence_max, max_images
+        )
 
     # FIXME will need to show it for different stream
-    print('[INFO] updaing retrain parameters to')
-    print('  confidecen_min:', confidence_min)
-    print('  confidecen_max:', confidence_max)
-    print('  max_images  :', max_images)
+    logger.info("Updating retrain parameters to")
+    logger.info("  confidecen_min: %s", confidence_min)
+    logger.info("  confidecen_max: %s", confidence_max)
+    logger.info("  max_images  : %s", max_images)
 
-    return 'ok'
+    return "ok"
 
 
-@app.route('/update_model')
-def update_model():
+@app.post("/update_model")
+def update_model(request_body: UploadModelBody):
+    """update_model.
+    """
 
-    model_uri = request.args.get('model_uri')
-    model_dir = request.args.get('model_dir')
-    if not model_uri and not model_dir:
-        return ('missing model_uri or model_dir')
+    if not request_body.model_uri and not request_body.model_dir:
+        return "missing model_uri or model_dir", 400
 
-    print('[INFO] Update Model ...', flush=True)
-    if model_uri:
+    model_uri = request_body.model_uri
+    model_dir = request_body.model_dir
 
-        print('[INFO] Got Model URI', model_uri, flush=True)
+    logger.info("Updating Model ...")
+    if request_body.model_uri:
 
-        #FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
+        logger.info("Got Model URI %s", request_body.model_uri)
+
+        # FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
         # workaround
-        onnx.set_detection_mode('PD')
+        onnx.set_detection_mode("PD")
         onnx.set_is_scenario(False)
 
         if model_uri == onnx.model_uri:
-            print('[INFO] Model Uri unchanged', flush=True)
-        else:
-            get_file_zip(model_uri, MODEL_DIR)
-            onnx.model_uri = model_uri
+            logger.info("Model Uri unchanged.")
+            return "ok", 200
+        if onnx.model_downloading:
+            logger.info("Already have a thread downloading project.")
+            return "Already downloading model", 400
+        onnx.model_uri = model_uri
+        # TODO: use background task
+        # background_tasks.add_task(
+        # onnx.download_and_update_model, request_body.model_uri, MODEL_DIR
+        # )
+        onnx.download_and_update_model(model_uri, MODEL_DIR)
+        # onnx.model_downloaded = False
+        # get_file_zip(model_uri, MODEL_DIR)
+        # onnx.model_downloaded = True
+        logger.info("Downloading in background ...")
+        return "ok"
 
-        onnx.update_model('model')
-        print('[INFO] Update Finished ...', flush=True)
-
-        return 'ok'
-
-    elif model_dir:
-        print('[INFO] Got Model DIR', model_dir)
+    if request_body.model_dir:
+        logger.info("Got Model DIR %s", request_body.model_dir)
         onnx.set_is_scenario(True)
-        onnx.update_model(model_dir)
-        print('[INFO] Update Finished ...')
-        return 'ok'
+        onnx.update_model(request_body.model_dir)
+        logger.info("Update Finished ...")
+        return "ok"
 
 
-@app.route('/update_cams', methods=['POST'])
-def update_cams():
+@app.post("/update_cams")
+def update_cams(request_body: CamerasModel):
     """update_cams.
 
     Update multiple cameras at once.
     Cameras not in List should not inferecence.
     """
-    data = request.get_json()
-    logger.info(data["cameras"])
-    stream_manager.update_streams(list(cam['id'] for cam in data["cameras"]))
+    logger.info(request_body)
+    fps = request_body.fps
+    stream_manager.update_streams([cam.id for cam in request_body.cameras])
     n = stream_manager.get_streams_num_danger()
-    frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
+    # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
+    # recommended_fps = onnx.get_recommended_frame_rate(n)
+    frame_rate = fps
+    onnx.set_frame_rate(fps)
 
-    for cam in data["cameras"]:
-        cam_type = cam['type']
-        cam_source = cam['source']
-        cam_id = cam['id']
+    # lva_mode
+
+    if request_body.lva_mode:
+        lva_mode = request_body.lva_mode
+        onnx.set_lva_mode(lva_mode)
+    else:
+        lva_mode = onnx.lva_mode
+
+    for cam in request_body.cameras:
+        cam_type = cam.type
+        cam_source = cam.source
+        cam_id = cam.id
         # TODO: IF onnx.part_detection_mode == "PC" (PartCounting), use lines to count
-        line_info = cam.get('lines', None)
-        zone_info = cam.get('zones', None)
+        line_info = cam.lines
+        zone_info = cam.zones
 
-        if not cam_type:
-            return 'missing cam_type'
-        if not cam_source:
-            return 'missing cam_source'
-        if not cam_id:
-            return 'missing cam_id'
-
-        if 'aoi' in cam.keys():
-            aoi = json.loads(cam['aoi'])
-            has_aoi = aoi['useAOI']
-            aoi_info = aoi['AOIs']
-            print('aoi information', aoi, flush=True)
+        if cam.aoi:
+            aoi = json.loads(cam.aoi)
+            has_aoi = aoi["useAOI"]
+            aoi_info = aoi["AOIs"]
+            logger.info("aoi information")
         else:
             has_aoi = False
             aoi_info = None
 
-        logger.info('updating camera {0}'.format(cam_id))
-        s = stream_manager.get_stream_by_id(cam_id)
-        #s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
+        logger.info("Updating camera %s", cam_id)
+        stream = stream_manager.get_stream_by_id(cam_id)
+        # s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
-        s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
-                     onnx.detection_mode, line_info, zone_info)
+        stream.update_cam(
+            cam_type,
+            cam_source,
+            frame_rate,
+            lva_mode,
+            cam_id,
+            has_aoi,
+            aoi_info,
+            onnx.detection_mode,
+            line_info,
+            zone_info,
+        )
 
-    return 'ok'
+    logger.info("Streams %s", stream_manager.streams)
+    return "ok"
 
 
-@app.route('/update_part_detection_mode')
-def update_part_detection_mode():
-    """update_part_detection_mode.
-    """
+@app.get("/update_part_detection_mode")
+def update_part_detection_mode(part_detection_mode: PartDetectionModeEnum):
+    """update_part_detection_mode."""
 
-    part_detection_mode = request.args.get('part_detection_mode')
-    if not part_detection_mode:
-        return 'missing part_detection_mode'
-
-    if part_detection_mode not in PART_DETECTION_MODE_CHOICES:
-        return 'invalid part_detection_mode'
     onnx.set_detection_mode(part_detection_mode)
-    return 'ok'
+    return "ok"
 
 
-@app.route('/update_send_video_to_cloud')
-def update_send_video_to_cloud():
-    """update_part_detection_mode.
-    """
+@app.get("/update_send_video_to_cloud")
+def update_send_video_to_cloud(send_video_to_cloud: bool):
+    """update_send_video_to_cloud."""
 
-    send_video_to_cloud = request.args.get('send_video_to_cloud')
-    if not send_video_to_cloud:
-        return 'missing send_video_to_cloud'
-
-    if send_video_to_cloud in ['False', 'false']:
-        send_video_to_cloud = False
-    elif send_video_to_cloud in ['True', 'true']:
-        send_video_to_cloud = True
-    else:
-        return 'unknown send_video_to_cloud params'
-
-    # TODO: Change something here
     onnx.send_video_to_cloud = send_video_to_cloud
     # for s in stream_manager.get_streams():
     #     s.model.send_video_to_cloud = send_video_to_cloud
-    return 'ok'
+    return "ok"
 
 
-@app.route('/update_parts')
-def update_parts():
+@app.post("/update_parts")
+def update_parts(parts: PartsModel):
+    """update_parts."""
     try:
-        print('----Upadate parts----', flush=True)
-        parts = request.args.getlist('parts')
-        print('[INFO] Updating parts', parts, flush=True)
-        onnx.parts = parts
-        print('[INFO] Updated parts', parts, flush=True)
-    except:
-        print('[ERROR] Unknown format', parts, flush=True)
+        logger.info("Updating parts...")
+        part_names = [part.name for part in parts.parts]
+        logger.info("Parts: %s", part_names)
+        # FIXME: Save the part id and use part id to relabel
+        onnx.parts = part_names
+        logger.info("Update parts success.")
+    except Exception:
+        logger.error("Update parts failed...")
         # return 'unknown format'
 
-    onnx.update_parts(parts)
+    onnx.update_parts(part_names)
 
-    return 'ok'
-
-
-# @app.route('/update_threshold')
-# def update_threshold():
-#    print('[WARNING] is depreciated')
-#    return 'ok'
+    return "ok"
 
 
-@app.route('/update_iothub_parameters')
-def update_iothub_parameters():
-    is_send = request.args.get('is_send')
-    threshold = request.args.get('threshold')
-    fpm = request.args.get('fpm')
+@app.get("/update_iothub_parameters")
+def update_iothub_parameters(is_send: bool, threshold: int, fpm: int):
+    """update_iothub_parameters."""
 
-    if not is_send:
-        return 'missing is_send'
-    if not threshold:
-        return 'missing threshold'
-    if not fpm:
-        return 'missing fpm'
+    threshold = threshold * 0.01
 
-    is_send = (is_send == 'True')
-    threshold = int(threshold) * 0.01
-    fpm = int(fpm)
-
-    print('[INFO] updating iothub parameters ...', flush=True)
-    print('[INFO]   is_send', is_send, flush=True)
-    print('[INFO]   threshold', threshold, flush=True)
-    print('[INFO]   fpm', fpm, flush=True)
+    logger.info("Updating iothub parameters ...")
+    logger.info("  is_send  : %s", is_send)
+    logger.info("  threshold: %s", threshold)
+    logger.info("  fpm      : %s", fpm)
 
     # FIXME currently set all streams
-    #cam_id = request.args.get('cam_id')
-    #s = stream_manager.get_stream_by_id(cam_id)
-    for s in stream_manager.get_streams():
-        s.update_iothub_parameters(is_send, threshold, fpm)
-    return 'ok'
+    # cam_id = request.args.get('cam_id')
+    # s = stream_manager.get_stream_by_id(cam_id)
+    for stream in stream_manager.get_streams():
+        stream.update_iothub_parameters(is_send, threshold, fpm)
+    return "ok"
 
 
-@app.route('/status')
+@app.get("/status")
 def get_scenario():
+    """get_scenario."""
     streams_status = []
+    for stream in stream_manager.get_streams():
+        streams_status.append(
+            {
+                "cam_id": stream.cam_id,
+                "stream_id": stream.cam_id,
+                "cam_source": stream.cam_source,
+                "cam_is_alive": stream.cam_is_alive,
+                "confidence_min": stream.confidence_min,
+                "confidence_max": stream.confidence_max,
+                "max_images": stream.max_images,
+                "threshold": stream.threshold,
+                "has_aoi": stream.has_aoi,
+                "is_retrain": stream.is_retrain,
+            }
+        )
+    return json.dumps(
+        {
+            "num_streams": len(stream_manager.streams),
+            "stream_ids": list(stream_manager.streams.keys()),
+            "streams_status": streams_status,
+            "parts": onnx.parts,
+            "scenario": onnx.detection_mode,
+        }
+    )
+
+
+@app.get("/update_prob_threshold")
+def update_prob_threshold(prob_threshold: int):
+    """update_prob_threshold."""
+
+    logger.info("Updating prob_threshold to")
+    logger.info("  prob_threshold: %s", prob_threshold)
+
+    for stream in stream_manager.get_streams():
+        stream.threshold = int(prob_threshold) * 0.01
+        logger.info("Updating")
+        # s.detection_success_num = 0
+        # s.detection_unidentified_num = 0
+        # s.detection_total = 0
+        # s.detections = []
+        stream.reset_metrics()
+
+    return "ok"
+
+
+@app.get("/get_recommended_fps")
+def get_recommended_fps(number_of_cameras: int):
+    """get_recommended_fps.
+
+    Args:
+        number_of_cameras (int): number_of_cameras
+    """
+    return onnx.get_recommended_frame_rate(number_of_cameras)
+
+
+# @app.route("/get_current_fps")
+# def get_current_fps():
+# """get_current_fps.
+# """
+# return onnx.frame_rate
+
+
+@app.get("/update_lva_mode")
+def update_lva_mode(lva_mode: str):
+    """update_lva_mode.
+    """
+    logger.info("Updating lva_mode...")
+
     for s in stream_manager.get_streams():
-        streams_status.append({
-            'cam_id': s.cam_id,
-            'stream_id': s.cam_id,
-            'cam_source': s.cam_source,
-            'cam_is_alive': s.cam_is_alive,
-            'confidence_min': s.confidence_min,
-            'confidence_max': s.confidence_max,
-            'max_images': s.max_images,
-            'threshold': s.threshold,
-            'has_aoi': s.has_aoi,
-            'is_retrain': s.is_retrain,
-        })
-    return json.dumps({
-        'num_streams': len(stream_manager.streams),
-        'stream_ids': list(stream_manager.streams.keys()),
-        'streams_status': streams_status,
-        'parts': onnx.parts,
-        'scenario': onnx.detection_mode
-    })
+        s.update_lva_mode(lva_mode)
 
 
-@app.route('/update_prob_threshold')
-def update_prob_threshold():
-    prob_threshold = request.args.get('prob_threshold')
-    if not prob_threshold:
-        return 'missing prob_threshold'
-
-    print('[INFO] updaing prob_threshold to')
-    print('  prob_threshold:', prob_threshold)
-
-    for s in stream_manager.get_streams():
-        s.threshold = int(prob_threshold) * 0.01
-        print('[INFO] Updating', s, 'threshold to', s.threshold, flush=True)
-        #s.detection_success_num = 0
-        #s.detection_unidentified_num = 0
-        #s.detection_total = 0
-        #s.detections = []
-        s.reset_metrics()
-
-    return 'ok'
+@app.get("/update_fps")
+def update_fps(fps: int):
+    """update_fps."""
+    logger.info("Updating fps")
+    logger.info("  fps: %s", fps)
+    return "ok"
 
 
 def init_topology():
+    """init_topology.
+
+    Init LVA topologies
+    """
 
     instances = gm.invoke_graph_instance_list()
-    if instances['status'] != 200:
-        logger.warning('Failed to invoker direct method', instances['payload'])
+    if instances["status"] != 200:
+        logger.warning("Failed to invoker direct method: %s", instances["payload"])
         return -1
-    logger.info('========== Deleting {0} instance(s) =========='.format(
-        len(instances['payload']['value'])))
+    logger.info(
+        "========== Deleting %s instance(s) ==========",
+        len(instances["payload"]["value"]),
+    )
 
-    for i in range(len(instances['payload']['value'])):
-        gm.invoke_graph_instance_deactivate(
-            instances['payload']['value'][i]['name'])
-        gm.invoke_graph_instance_delete(
-            instances['payload']['value'][i]['name'])
+    for i in range(len(instances["payload"]["value"])):
+        gm.invoke_graph_instance_deactivate(instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_delete(instances["payload"]["value"][i]["name"])
 
     topologies = gm.invoke_graph_topology_list()
-    if instances['status'] != 200:
-        logger.warning('Failed to invoker direct method', instances['payload'])
+    if instances["status"] != 200:
+        logger.warning("Failed to invoker direct method: %s", instances["payload"])
         return -1
-    logger.info('========== Deleting {0} topology =========='.format(
-        len(topologies['payload']['value'])))
+    logger.info(
+        "========== Deleting %s topology ==========",
+        len(topologies["payload"]["value"]),
+    )
 
-    for i in range(len(topologies['payload']['value'])):
-        gm.invoke_graph_topology_delete(
-            topologies['payload']['value'][i]['name'])
+    for i in range(len(topologies["payload"]["value"])):
+        gm.invoke_graph_topology_delete(topologies["payload"]["value"][i]["name"])
 
-    logger.info('========== Setting default grpc topology =========='.format(
-        len(topologies['payload']['value'])))
-    ret = gm.invoke_graph_grpc_topology_set()
+    logger.info("========== Setting default grpc/http topology ==========")
+    ret = gm.invoke_topology_set("grpc")
+    ret = gm.invoke_topology_set("http")
 
     return 1
 
 
-def Main():
+def local_main():
+    """local_main.
+
+    For local development.
+    """
+    uvicorn.run(app, host="0.0.0.0", port=5000)
+
+
+def benchmark():
+    """benchmark.
+    """
+    # app.run(host='0.0.0.0', debug=False)
+    # s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
+    SAMPLE_VIDEO = "./sample_video/video.mp4"
+    SCENARIO1_MODEL = "scenario_models/1"
+
+    n_threads = 3
+    n_images = 100
+    logger.info("============= BenchMarking (Begin) ==================")
+    logger.info("--- Settings ----")
+    logger.info("%s threads", n_threads)
+    logger.info("%s images", n_images)
+
+    stream_ids = list(str(i) for i in range(n_threads))
+    stream_manager.update_streams(stream_ids)
+    onnx.set_is_scenario(True)
+    onnx.update_model(SCENARIO1_MODEL)
+    for s in stream_manager.get_streams():
+        s.set_is_benchmark(True)
+        s.update_cam("video", SAMPLE_VIDEO, 30, s.cam_id, False, None, "PC", [], [])
+
+    def _f():
+        logger.info("--- Thread %s started---", threading.current_thread())
+        t0_t = time.time()
+        img = cv2.imread("img.png")
+        for i in range(n_images):
+            s.predict(img)
+        t1_t = time.time()
+        print("---- Thread", threading.current_thread(), "----", flush=True)
+        print("Processing", n_images, "images in", t1_t - t0_t, "seconds", flush=True)
+        print("  Avg:", (t1_t - t0_t) / n_images * 1000, "ms per image", flush=True)
+
+    threads = []
+    for i in range(n_threads):
+        threads.append(threading.Thread(target=_f))
+    t0 = time.time()
+    for i in range(n_threads):
+        threads[i].start()
+    for i in range(n_threads):
+        threads[i].join()
+    t1 = time.time()
+    # print(t1-t0)
+    logger.info("---- Overall ----")
+    logger.info("Processing %s images in %s seconds", n_images * n_threads, t1 - t0)
+    logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
+    logger.info("============= BenchMarking (End) ==================")
+
+
+def main():
+    """main.
+
+    Main loop.
+    """
     try:
         # Get application arguments
-        ap = ArgumentParser(ArgumentsType.SERVER)
+        argument_parser = ArgumentParser(ArgumentsType.SERVER)
 
         # Get port number
-        grpcServerPort = ap.GetGrpcServerPort()
-        logger.info('gRPC server port: {0}'.format(grpcServerPort))
+        grpcServerPort = argument_parser.GetGrpcServerPort()
+        logger.info("gRPC server port: %s", grpcServerPort)
 
         # init graph topology & instance
         counter = 0
         while init_topology() == -1:
             if counter == 100:
-               logger.critical('Failed to init topology, please check whether direct method still works')
-               exit(-1)
-            logger.warning('Failed to init topology, try again 10 secs later')
+                logger.critical(
+                    "Failed to init topology, please check whether direct method still works"
+                )
+                sys.exit(-1)
+            logger.warning("Failed to init topology, try again 10 secs later")
             time.sleep(10)
             counter += 1
 
         # create gRPC server and start running
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         extension_pb2_grpc.add_MediaGraphExtensionServicer_to_server(
-            InferenceEngine(stream_manager), server)
-        server.add_insecure_port(f'[::]:{grpcServerPort}')
+            InferenceEngine(stream_manager), server
+        )
+        server.add_insecure_port(f"[::]:{grpcServerPort}")
         server.start()
-        app.run(host='0.0.0.0', debug=False)
+        uvicorn.run(app, host="0.0.0.0", port=5000)
         # server.wait_for_termination()
 
     except:
         PrintGetExceptionDetails()
         raise
-        #exit(-1)
+        # exit(-1)
 
 
 if __name__ == "__main__":
-    logging_level = logging.DEBUG if os.getenv('DEBUG') else logging.INFO
+    import logging.config
 
-    # Set logging parameters
-    logging.basicConfig(
-        level=logging_level,
-        format='[LVAX] [%(asctime)-15s] [%(threadName)-12.12s] [%(levelname)s]: %(message)s',
-        handlers=[
-            # logging.FileHandler(LOG_FILE_NAME),     # write in a log file
-            logging.StreamHandler(sys.stdout)  # write in stdout
-        ])
+    if os.getenv("PRODUCTION"):
+        logging.config.dictConfig(logging_config.LOGGING_CONFIG_PRODUCTION)
+    else:
+        logging.config.dictConfig(logging_config.LOGGING_CONFIG_DEV)
 
-    # Call Main logic
-    Main()
+    logger.info("is_edge: %s", is_edge())
+    if is_edge():
+        main()
+    else:
+        logger.info("Assume running at local development.")
+        local_main()
+        # benchmark()

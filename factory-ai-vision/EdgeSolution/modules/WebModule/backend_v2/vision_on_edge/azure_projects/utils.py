@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App utilities.
 """
 
@@ -11,8 +10,7 @@ import traceback
 
 from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
 from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_settings.exceptions import \
-    SettingCustomVisionAccessFailed
+from vision_on_edge.azure_settings.exceptions import SettingCustomVisionAccessFailed
 from vision_on_edge.azure_training_status.utils import upcreate_training_status
 from vision_on_edge.images.models import Image
 
@@ -28,13 +26,13 @@ PRINT_TASKS = True
 
 
 def update_app_insight_counter(
-        project_obj,
-        has_new_parts: bool,
-        has_new_images: bool,
-        parts_last_train: int,
-        images_last_train: int,
+    project_obj,
+    has_new_parts: bool,
+    has_new_images: bool,
+    parts_last_train: int,
+    images_last_train: int,
 ):
-    """Send message to app insight"""
+    """Send message to app insight."""
     try:
         retrain = train = 0
         if has_new_parts:
@@ -45,13 +43,13 @@ def update_app_insight_counter(
             retrain = 1
         else:
             logger.info("Project not changed")
-        logger.info("Sending Data to App Insight %s",
-                    project_obj.setting.is_collect_data)
+        logger.info(
+            "Sending Data to App Insight %s", project_obj.setting.is_collect_data
+        )
         if project_obj.setting.is_collect_data:
             logger.info("Sending Logs to App Insight")
             trainer = project_obj.setting.get_trainer_obj()
-            images_now = trainer.get_tagged_image_count(
-                project_obj.customvision_id)
+            images_now = trainer.get_tagged_image_count(project_obj.customvision_id)
             parts_now = len(trainer.get_tags(project_obj.customvision_id))
             # Traces
             az_logger = get_app_insight_logger()
@@ -71,8 +69,7 @@ def update_app_insight_counter(
         raise
 
 
-def pull_cv_project_helper(project_id, customvision_project_id: str,
-                           is_partial: bool):
+def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial: bool):
     """pull_cv_project_helper.
 
     Args:
@@ -102,8 +99,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
         raise ProjectRemovedError
 
     # Invalid CustomVision Project ID handled by exception
-    project_obj.name = trainer.get_project(
-        project_id=customvision_project_id).name
+    project_obj.name = trainer.get_project(project_id=customvision_project_id).name
     project_obj.customvision_id = customvision_project_id
     project_obj.save()
 
@@ -116,20 +112,21 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     counter = 0
     tags = trainer.get_tags(customvision_project_id)
     for tag in tags:
-        logger.info("Creating Part %s: %s %s", counter, tag.name,
-                    tag.description)
+        logger.info("Creating Part %s: %s %s", counter, tag.name, tag.description)
         part_obj, created = Part.objects.update_or_create(
             project_id=project_id,
             name=tag.name,
             description=tag.description if tag.description else "",
-            customvision_id=tag.id)
+            customvision_id=tag.id,
+        )
 
         # Make sure part is created
         if not created:
             logger.exception("%s not created", tag.name)
             continue
-        logger.info("Create Part %s: %s %s Success!", counter, tag.name,
-                    tag.description)
+        logger.info(
+            "Create Part %s: %s %s Success!", counter, tag.name, tag.description
+        )
         counter += 1
 
         # Download one image as icon
@@ -138,7 +135,8 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
 
             # Image file
             imgs_with_tag = trainer.get_tagged_images(
-                project_id=customvision_project_id, tag_ids=[tag.id], take=1)
+                project_id=customvision_project_id, tag_ids=[tag.id], take=1
+            )
             if len(imgs_with_tag) < 1:
                 logger.info("This tag does not have an image")
                 continue
@@ -148,11 +146,13 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
                 remote_url=img.original_image_uri,
                 customvision_id=img.id,
                 project_id=project_id,
-                uploaded=True)
+                uploaded=True,
+            )
             try:
                 img_obj.get_remote_image()
             except Exception:
-                logger.exception("Download remote image error")
+                logger.exception("Download remote image occur exception.")
+                logger.exception("Image discarded...")
                 img_obj.delete()
                 continue
 
@@ -185,26 +185,30 @@ def pull_cv_project_helper(project_id, customvision_project_id: str,
     # Full Download
     logger.info("Pulling Tagged Images...")
     img_counter = 0
-    imgs_count = trainer.get_tagged_image_count(
-        project_id=customvision_project_id)
+    imgs_count = trainer.get_tagged_image_count(project_id=customvision_project_id)
     img_batch_size = 50
     img_index = 0
 
     while img_index <= imgs_count:
         logger.info("Img Index: %s. Img Count: %s", img_index, imgs_count)
-        imgs = trainer.get_tagged_images(project_id=customvision_project_id,
-                                         take=img_batch_size,
-                                         skip=img_index)
+        imgs = trainer.get_tagged_images(
+            project_id=customvision_project_id, take=img_batch_size, skip=img_index
+        )
         for img in imgs:
             logger.info("*** img %s", img_counter)
             for region in img.regions:
-                part_obj = Part.objects.filter(name=region.tag_name,
-                                               project_id=project_id)
+                part_objs = Part.objects.filter(
+                    name=region.tag_name, project_id=project_id
+                )
+                if not part_objs.exists():
+                    continue
+                part_obj = part_objs.first()
                 img_obj, created = Image.objects.update_or_create(
                     part=part_obj,
                     remote_url=img.original_image_uri,
                     project=project_obj,
-                    customvision_id=img.id)
+                    customvision_id=img.id,
+                )
                 if created:
                     logger.info("Downloading img %s", img.id)
                     img_obj.get_remote_image()
@@ -236,23 +240,25 @@ def train_project_worker(project_id):
     """train_project_worker.
 
     Args:
-        project_id:
+        project_id: Django ORM project id
     """
     # =====================================================
     # 0. Get Project in Django                          ===
     # =====================================================
     project_obj = Project.objects.get(pk=project_id)
     logger.info("Project id: %s", project_obj.id)
-    if (not project_obj.setting or not project_obj.setting.is_trainer_valid):
-        upcreate_training_status(project_id=project_obj.id,
-                                 status="failed",
-                                 log="Custom Vision Access Error")
+    if not project_obj.setting or not project_obj.setting.is_trainer_valid:
+        upcreate_training_status(
+            project_id=project_obj.id, status="failed", log="Custom Vision Access Error"
+        )
         return
     if project_obj.is_demo:
         logger.info("Demo project is already trained")
-        upcreate_training_status(project_id=project_obj.id,
-                                 need_to_send_notification=True,
-                                 **progress.PROGRESS_0_OK)
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress.PROGRESS_0_OK,
+        )
         return
 
     # =====================================================
@@ -277,9 +283,11 @@ def train_project_worker(project_id):
         )
     except Exception:
         project_obj.create_project()
-        upcreate_training_status(project_id=project_obj.id,
-                                 need_to_send_notification=True,
-                                 **progress.PROGRESS_2_PROJECT_CREATED)
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress.PROGRESS_2_PROJECT_CREATED,
+        )
 
     project_obj = Project.objects.get(pk=project_id)
     logger.info("Project created on Custom Vision.")
@@ -289,9 +297,11 @@ def train_project_worker(project_id):
     # =====================================================
     # 3. Upload parts                                   ===
     # =====================================================
-    upcreate_training_status(project_id=project_obj.id,
-                             need_to_send_notification=True,
-                             **progress.PROGRESS_3_UPLOADING_PARTS)
+    upcreate_training_status(
+        project_id=project_obj.id,
+        need_to_send_notification=True,
+        **progress.PROGRESS_3_UPLOADING_PARTS,
+    )
 
     # Get tags_dict to avoid getting tags every time
     tags = trainer.get_tags(project_id=project_obj.customvision_id)
@@ -302,19 +312,20 @@ def train_project_worker(project_id):
     has_new_parts = False
     has_new_images = False
     parts_last_train = len(tags)
-    images_last_train = trainer.get_tagged_image_count(
-        project_obj.customvision_id)
+    images_last_train = trainer.get_tagged_image_count(project_obj.customvision_id)
 
     # Create/update tags on Custom Vision Project
-    has_new_parts = batch_upload_parts_to_customvision(project_id=project_id,
-                                                       part_ids=part_ids,
-                                                       tags_dict=tags_dict)
+    has_new_parts = batch_upload_parts_to_customvision(
+        project_id=project_id, part_ids=part_ids, tags_dict=tags_dict
+    )
     if has_new_parts:
         project_changed = True
 
-    upcreate_training_status(project_id=project_obj.id,
-                             need_to_send_notification=True,
-                             **progress.PROGRESS_4_UPLOADING_IMAGES)
+    upcreate_training_status(
+        project_id=project_obj.id,
+        need_to_send_notification=True,
+        **progress.PROGRESS_4_UPLOADING_IMAGES,
+    )
 
     # =====================================================
     # 4. Upload images to Custom Vision Project         ===
@@ -322,7 +333,8 @@ def train_project_worker(project_id):
     for part_id in part_ids:
         logger.info("Uploading images with part_id %s", part_id)
         has_new_images = upload_images_to_customvision_helper(
-            project_id=project_obj.id, part_id=part_id)
+            project_id=project_obj.id, part_id=part_id
+        )
         if has_new_images:
             project_changed = True
 
@@ -332,13 +344,17 @@ def train_project_worker(project_id):
     logger.info("Submit Training Task")
     if not project_changed:
         logger.info("Project not changed. Not Training!")
-        upcreate_training_status(project_id=project_obj.id,
-                                 need_to_send_notification=True,
-                                 **progress.PROGRESS_0_OK)
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress.PROGRESS_0_OK,
+        )
         return
-    upcreate_training_status(project_id=project_obj.id,
-                             need_to_send_notification=True,
-                             **progress.PROGRESS_5_SUBMITTING_TRAINING_TASK)
+    upcreate_training_status(
+        project_id=project_obj.id,
+        need_to_send_notification=True,
+        **progress.PROGRESS_5_SUBMITTING_TRAINING_TASK,
+    )
     training_task_submit_success = project_obj.train_project()
     # App Insight
     if training_task_submit_success:
@@ -366,7 +382,8 @@ def train_project_worker(project_id):
             upcreate_training_status(
                 project_id=project_obj.id,
                 need_to_send_notification=True,
-                **progress.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV)
+                **progress.PROGRESS_6_PREPARING_CUSTOM_VISION_ENV,
+            )
             status_init = True
         if len(iterations) > 0:
             logger.info("Iteration Found %s", iterations[0])
@@ -391,9 +408,11 @@ def train_project_worker(project_id):
         iterations = trainer.get_iterations(customvision_id)
         iteration = iterations[0]
         if not status_init:
-            upcreate_training_status(project_id=project_obj.id,
-                                     need_to_send_notification=True,
-                                     **progress.PROGRESS_7_TRAINING)
+            upcreate_training_status(
+                project_id=project_obj.id,
+                need_to_send_notification=True,
+                **progress.PROGRESS_7_TRAINING,
+            )
             status_init = True
         if iteration.exportable and iteration.status == "Completed":
             break
@@ -407,9 +426,11 @@ def train_project_worker(project_id):
         time.sleep(1)
         exports = trainer.get_exports(customvision_id, iteration.id)
         if not status_init:
-            upcreate_training_status(project_id=project_obj.id,
-                                     need_to_send_notification=True,
-                                     **progress.PROGRESS_8_EXPORTING)
+            upcreate_training_status(
+                project_id=project_obj.id,
+                need_to_send_notification=True,
+                **progress.PROGRESS_8_EXPORTING,
+            )
             status_init = True
         if len(exports) == 0 or not exports[0].download_uri:
 
@@ -430,13 +451,15 @@ def train_project_worker(project_id):
 
     for iteration in iterations[:2]:
         train_performance_list.append(
-            trainer.get_iteration_performance(customvision_id,
-                                              iteration.id).as_dict())
+            trainer.get_iteration_performance(customvision_id, iteration.id).as_dict()
+        )
 
-    upcreate_training_status(project_id=project_obj.id,
-                             performance=json.dumps(train_performance_list),
-                             need_to_send_notification=True,
-                             **progress.PROGRESS_0_OK)
+    upcreate_training_status(
+        project_id=project_obj.id,
+        performance=json.dumps(train_performance_list),
+        need_to_send_notification=True,
+        **progress.PROGRESS_0_OK,
+    )
     logger.info("Training Performance: %s", train_performance_list)
 
     # =====================================================
@@ -462,25 +485,27 @@ def train_project_catcher(project_id):
     try:
         train_project_worker(project_id=project_id)
     except Exception:
-        upcreate_training_status(project_id=project_id,
-                                 status="failed",
-                                 log=traceback.format_exc(),
-                                 need_to_send_notification=True)
+        upcreate_training_status(
+            project_id=project_id,
+            status="failed",
+            log=traceback.format_exc(),
+            need_to_send_notification=True,
+        )
 
 
-class TrainingManager():
-    """TrainingManager.
-    """
+class TrainingManager:
+    """TrainingManager."""
 
     def __init__(self):
-        """__init__.
-        """
+        """__init__."""
         self.training_tasks = {}
         self.mutex = threading.Lock()
-        self.gc()
+        self.garbage_collector()
 
     def add(self, project_id):
-        """add stream
+        """add.
+
+        Add a project in training tasks.
         """
         if project_id in self.training_tasks:
             raise ProjectAlreadyTraining
@@ -491,20 +516,19 @@ class TrainingManager():
         self.mutex.release()
 
     def get_task_by_id(self, project_id):
-        """get_stream_by_id
-        """
+        """get_task_by_id."""
 
         self.mutex.acquire()
         if project_id in self.training_tasks:
-            return self.training_tasks['project_id']
+            return self.training_tasks["project_id"]
         self.mutex.release()
         return None
 
-    def gc(self):
-        """Garbage collector
+    def garbage_collector(self):
+        """garbage_collector.
 
         IMPORTANT, autoreloader will not reload threading,
-        please restart the server if you modify the thread
+        please restart the server if you modify the thread.
         """
 
         def _gc(self):
@@ -515,8 +539,7 @@ class TrainingManager():
                 to_delete = []
                 for project_id in self.training_tasks:
                     if not self.training_tasks[project_id].worker.is_alive():
-                        logger.info("Project %s Training Task is finished",
-                                    project_id)
+                        logger.info("Project %s Training Task is finished", project_id)
                         to_delete.append(project_id)
 
                 for project_id in to_delete:
@@ -528,28 +551,27 @@ class TrainingManager():
         threading.Thread(target=_gc, args=(self,)).start()
 
 
-class TrainingTask():
-    """TrainingTask.
-    """
+class TrainingTask:
+    """TrainingTask."""
 
     def __init__(self, project_id):
         """__init__.
 
         Args:
-            project_id:
+            project_id: Django ORM
         """
         self.project_id = project_id
         self.status = "init"
         self.worker = None
 
     def start(self):
-        """start.
-        """
+        """start."""
         self.status = "running"
         self.worker = threading.Thread(
             target=train_project_catcher,
-            name=f'train_project_worker_{self.project_id}',
-            kwargs={'project_id': self.project_id})
+            name=f"train_project_worker_{self.project_id}",
+            kwargs={"project_id": self.project_id},
+        )
         self.worker.start()
 
     def __str__(self):
@@ -559,7 +581,7 @@ class TrainingTask():
         return "<Training Task " + str(self.project_id) + ">"
 
 
-if 'runserver' in sys.argv:
-    TrainingManagerInstance = TrainingManager()
+if "runserver" in sys.argv:
+    TRAINING_MANAGER = TrainingManager()
 else:
-    TrainingManagerInstance = None
+    TRAINING_MANAGER = None

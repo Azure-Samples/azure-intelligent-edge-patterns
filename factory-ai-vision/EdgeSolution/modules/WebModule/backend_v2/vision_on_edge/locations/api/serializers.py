@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App API serializers.
 """
 
@@ -17,8 +16,4 @@ class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = "__all__"
-        extra_kwargs = {
-            "description": {
-                "required": False
-            },
-        }
+        extra_kwargs = {"description": {"required": False}}

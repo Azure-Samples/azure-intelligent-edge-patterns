@@ -1,11 +1,12 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FocusZone, List, IRectangle, mergeStyleSets } from '@fluentui/react';
 import { useConstCallback } from '@uifabric/react-hooks';
 import { useDispatch } from 'react-redux';
+import * as R from 'ramda';
 
 import { Image } from '../store/type';
 import LabelDisplayImage from './LabelDisplayImage';
-import { openLabelingPage } from '../store/labelingPageSlice';
+import { OpenFrom, openLabelingPage } from '../store/labelingPageSlice';
 import { timeStampConverter } from '../utils/timeStampConverter';
 
 const ROWS_PER_PAGE = 3;
@@ -19,12 +20,18 @@ const classNames = mergeStyleSets({
 
 export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'isRelabel'> & {
   partName: string;
+  cameraName: string;
 };
 
 export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
   const columnCount = React.useRef(0);
   const rowHeight = React.useRef(0);
   const dispatch = useDispatch();
+
+  const sortedImages = useMemo(() => {
+    const timeStampDiff = (a: Item, b: Item) => Date.parse(b.timestamp) - Date.parse(a.timestamp);
+    return R.sort(timeStampDiff, images);
+  }, [images]);
 
   const getItemCountForPage = useConstCallback((itemIndex: number, surfaceRect: IRectangle) => {
     if (itemIndex === 0) {
@@ -50,17 +57,24 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
             imgId={item.id}
             imgUrl={item.image}
             imgTimeStamp={timeStampConverter(item.timestamp)}
+            cameraName={item.cameraName}
             partName={item.partName}
             isRelabel={item.isRelabel}
             pointerCursor
             onClick={() =>
-              dispatch(openLabelingPage({ selectedImageId: item.id, imageIds: images.map((e) => e.id) }))
+              dispatch(
+                openLabelingPage({
+                  selectedImageId: item.id,
+                  imageIds: sortedImages.map((e) => e.id),
+                  openFrom: OpenFrom.DisplayImage,
+                }),
+              )
             }
           />
         </div>
       );
     },
-    [dispatch, images],
+    [dispatch, sortedImages],
   );
 
   const getPageHeight = useConstCallback((): number => {
@@ -71,7 +85,7 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
     <>
       <FocusZone>
         <List
-          items={images}
+          items={sortedImages}
           getItemCountForPage={getItemCountForPage}
           getPageHeight={getPageHeight}
           renderedWindowsAhead={4}

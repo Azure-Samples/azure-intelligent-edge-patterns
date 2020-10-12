@@ -35,15 +35,21 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [{
-                      "HostPort": "5671"
-                    }],
-                    "8883/tcp": [{
-                      "HostPort": "8883"
-                    }],
-                    "443/tcp": [{
-                      "HostPort": "443"
-                    }]
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
                   }
                 }
               }
@@ -74,16 +80,19 @@
               },
               "DBPASS": {
                 "value": "vision_on_edge"
-              }
+              },
+              "DF_INFERENECE_IS_GPU": { "value": false }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8000/tcp": [{
-                      "HostPort": "8080"
-                    }]
+                    "8000/tcp": [
+                      {
+                        "HostPort": "8080"
+                      }
+                    ]
                   }
                 }
               }
@@ -110,9 +119,11 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5432/tcp": [{
-                      "HostPort": "5432"
-                    }]
+                    "5432/tcp": [
+                      {
+                        "HostPort": "5432"
+                      }
+                    ]
                   }
                 }
               }
@@ -126,6 +137,9 @@
             "env": {
               "IOTHUB_CONNECTION_STRING": {
                 "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
               }
             },
             "settings": {
@@ -133,12 +147,16 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [{
-                      "HostPort": "5000"
-                    }],
-                    "5558/tcp": [{
-                      "HostPort": "5558"
-                    }]
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
                   },
                   "IpcMode": "container:lvaEdge",
                   "runtime": "runc"

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App.
 """
 
@@ -11,24 +10,23 @@ logger = logging.getLogger(__name__)
 
 
 class AzurePartDetectionConfig(AppConfig):
-    """App Config.
-    """
+    """App Config."""
 
-    name = 'vision_on_edge.azure_part_detections'
+    name = "vision_on_edge.azure_part_detections"
 
     def ready(self):
-        """ready.
-        """
+        """ready."""
 
-        if 'runserver' in sys.argv:
+        if "runserver" in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
             logger.info("ready while running server")
             logger.info("Importing Signals")
-            from . import signals
-            from ..azure_projects.models import Project
             from ..azure_part_detections.models import PartDetection, PDScenario
+            from ..azure_projects.models import Project
             from ..cameras.models import Camera
             from ..inference_modules.models import InferenceModule
+            from . import signals
+
             # pylint: enable=unused-import, import-outside-toplevel
             create_demo = True
             if create_demo:
@@ -37,9 +35,11 @@ class AzurePartDetectionConfig(AppConfig):
             else:
                 project_obj = inference_obj = None
             if PartDetection.objects.count() == 0:
-                PartDetection.objects.create(name="Part Detection",
-                                             project=project_obj,
-                                             inference_module=inference_obj)
+                PartDetection.objects.create(
+                    name="Part Detection",
+                    project=project_obj,
+                    inference_module=inference_obj,
+                )
             PDScenario.objects.all().delete()
             # =============================================
             # Simple Part Detection                     ===
@@ -47,12 +47,13 @@ class AzurePartDetectionConfig(AppConfig):
             pd_scenario = PDScenario.objects.create(
                 name="Simple Part Detection",
                 inference_mode="PD",
-                project=Project.objects.get(
-                    name="Demo Part Detection Project"))
+                project=Project.objects.get(name="Demo Part Detection Project"),
+            )
             pd_scenario.parts.set(
                 Project.objects.get(
-                    is_demo=True,
-                    name="Demo Part Detection Project").part_set.all())
+                    is_demo=True, name="Demo Part Detection Project"
+                ).part_set.all()
+            )
             # =============================================
             # Part Counting                             ===
             # =============================================
@@ -62,41 +63,46 @@ class AzurePartDetectionConfig(AppConfig):
                 project=Project.objects.get(name="Demo Part Counting Project"),
             )
             pc_scenario.cameras.set(
-                Camera.objects.filter(is_demo=True,
-                                      name="Scenario 1 - Counting Objects"))
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 1 - Counting Objects"
+                )
+            )
             pc_scenario.parts.set(
                 Project.objects.get(
-                    is_demo=True,
-                    name="Demo Part Counting Project").part_set.all())
+                    is_demo=True, name="Demo Part Counting Project"
+                ).part_set.all()
+            )
             # =============================================
             # Employee safety                           ===
             # =============================================
             es_scenario = PDScenario.objects.create(
                 name="Employee safety",
                 inference_mode="ES",
-                project=Project.objects.get(
-                    name="Demo Employee Safety Project"),
+                project=Project.objects.get(name="Demo Employee Safety Project"),
             )
             es_scenario.cameras.set(
-                Camera.objects.filter(is_demo=True,
-                                      name="Scenario 2 - Employ Safety"))
+                Camera.objects.filter(is_demo=True, name="Scenario 2 - Employ Safety")
+            )
             es_scenario.parts.set(
                 Project.objects.get(
-                    is_demo=True,
-                    name="Demo Employee Safety Project").part_set.all())
+                    is_demo=True, name="Demo Employee Safety Project"
+                ).part_set.all()
+            )
             # =============================================
             # Defect Detection                          ===
             # =============================================
             dd_scenario = PDScenario.objects.create(
                 name="Defect detection",
                 inference_mode="DD",
-                project=Project.objects.get(
-                    name="Demo Defect Detection Project"),
+                project=Project.objects.get(name="Demo Defect Detection Project"),
             )
             dd_scenario.cameras.set(
-                Camera.objects.filter(is_demo=True,
-                                      name="Scenario 3 - Defect Detection"))
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 3 - Defect Detection"
+                )
+            )
             dd_scenario.parts.set(
                 Project.objects.get(
-                    is_demo=True,
-                    name="Demo Defect Detection Project").part_set.all())
+                    is_demo=True, name="Demo Defect Detection Project"
+                ).part_set.all()
+            )

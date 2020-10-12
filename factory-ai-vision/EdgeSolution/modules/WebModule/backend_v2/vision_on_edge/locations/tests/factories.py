@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 """Location Factories
 """
 
 from factory import DjangoModelFactory, Faker
+
 from vision_on_edge.locations.models import Location
 
 
 class LocationFactory(DjangoModelFactory):
-    """LocationFactory.
-    """
+    """LocationFactory."""
 
     name = Faker("city")
     description = Faker("sentence")

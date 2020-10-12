@@ -65,13 +65,13 @@ export const Deployment: React.FC = () => {
     parts,
     sendMessageToCloud,
     framesPerMin,
-    accuracyThreshold,
     needRetraining,
     accuracyRangeMin,
     accuracyRangeMax,
     maxImages,
     name,
     probThreshold,
+    fps,
   } = projectData;
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
@@ -204,11 +204,11 @@ export const Deployment: React.FC = () => {
           <Separator styles={{ root: { padding: 0 } }} />
           <Stack tokens={{ childrenGap: 17, padding: 25 }}>
             <ConfigurationInfo
-              cameraName={cameraOptions.map((e) => e.text).join(', ')}
+              cameraNames={cameraOptions.map((e) => e.text)}
+              fps={fps}
               partNames={partNames}
               sendMessageToCloud={sendMessageToCloud}
               framesPerMin={framesPerMin}
-              accuracyThreshold={accuracyThreshold}
               needRetraining={needRetraining}
               accuracyRangeMin={accuracyRangeMin}
               accuracyRangeMax={accuracyRangeMax}
@@ -220,7 +220,8 @@ export const Deployment: React.FC = () => {
             />
           </Stack>
         </Stack>
-        <Separator vertical />
+        {/* Vertical seperator has z-index in 1 as default, which will be on top of the panel */}
+        <Separator vertical styles={{ root: { zIndex: 0 } }} />
         <Stack styles={{ root: { width: '435px' } }}>
           <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}` } }}>
             <PivotItem headerText="Insights">

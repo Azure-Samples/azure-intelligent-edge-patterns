@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App utilities.
 """
 
@@ -9,11 +8,13 @@ from .models import TrainingStatus
 logger = logging.getLogger(__name__)
 
 
-def upcreate_training_status(project_id,
-                             status: str,
-                             log: str,
-                             performance: str = "{}",
-                             need_to_send_notification: bool = False):
+def upcreate_training_status(
+    project_id,
+    status: str,
+    log: str,
+    performance: str = "{}",
+    need_to_send_notification: bool = False,
+):
     """upcreate_training_status.
 
     Consider using constants.PROGRESS_X to replace status and log.

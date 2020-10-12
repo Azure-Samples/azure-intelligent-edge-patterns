@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('azure_part_detections', '0003_auto_20200827_1139'),
-    ]
+    dependencies = [("azure_part_detections", "0003_auto_20200827_1139")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='partdetection',
-            name='location',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="partdetection", name="location")]

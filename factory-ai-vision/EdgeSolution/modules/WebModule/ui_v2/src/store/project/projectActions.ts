@@ -42,6 +42,8 @@ import {
   StopInferenceAction,
   ChangeStatusAction,
   TrainingStatus,
+  InferenceProtocal,
+  InferenceSource,
 } from './projectTypes';
 import { selectAllImages } from '../imageSlice';
 import { createWrappedAsync } from '../shared/createWrappedAsync';
@@ -108,12 +110,16 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     maxImages: data?.maxImages ?? 20,
     sendMessageToCloud: data?.metrics_is_send_iothub,
     framesPerMin: data?.metrics_frame_per_minutes,
-    accuracyThreshold: data?.metrics_accuracy_threshold,
     probThreshold: data?.prob_threshold.toString() ?? '10',
     name: data?.name ?? '',
     inferenceMode: data?.inference_mode ?? '',
     sendVideoToCloud: data?.send_video_to_cloud ?? false,
     deployTimeStamp: data?.deploy_timestamp ?? '',
+    setFpsManually: data?.setFpsManually ?? false,
+    fps: data?.fps ?? 10,
+    recomendedFps: data?.recomendedFps ?? 10,
+    inferenceProtocol: data?.inference_protocol ?? InferenceProtocal.GRPC,
+    inferenceSource: data?.inference_source ?? InferenceSource.LVA,
   },
   isDemo,
 });
@@ -181,32 +187,41 @@ const getProjectData = (state: State): ProjectData => state.project.data;
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> => {
   dispatch(getProjectRequest(false));
 
-  const url = '/api/part_detections/';
+  const getPartDetection = Axios.get('/api/part_detections/');
+  const getInferenceModule = Axios.get('/api/inference_modules/');
 
-  return Axios.get(url)
-    .then(({ data }) => {
+  return Promise.all([getPartDetection, getInferenceModule])
+    .then((results) => {
+      const partDetection = results[0].data;
+      const infModuleIdx = results[1].data.findIndex((e) => e.id === partDetection[0].inference_module);
+      const recomendedFps = results[1].data[infModuleIdx]?.is_gpu ? 30 : 10;
+
       const project: ProjectData = {
-        id: data[0]?.id ?? null,
-        cameras: data[0]?.cameras ?? [],
-        location: data[0]?.location ?? null,
-        parts: data[0]?.parts ?? [],
-        modelUrl: data[0]?.download_uri ?? '',
-        needRetraining: data[0]?.needRetraining ?? true,
-        accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
-        accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
-        maxImages: data[0]?.maxImages ?? 20,
-        sendMessageToCloud: data[0]?.metrics_is_send_iothub,
-        framesPerMin: data[0]?.metrics_frame_per_minutes,
-        accuracyThreshold: data[0]?.metrics_accuracy_threshold,
-        probThreshold: data[0]?.prob_threshold.toString() ?? '10',
-        trainingProject: data[0]?.project ?? null,
-        name: data[0]?.name ?? '',
-        inferenceMode: data[0]?.inference_mode ?? '',
-        sendVideoToCloud: data[0]?.send_video_to_cloud ?? false,
-        deployTimeStamp: data[0]?.deploy_timestamp ?? '',
+        id: partDetection[0]?.id ?? null,
+        cameras: partDetection[0]?.cameras ?? [],
+        location: partDetection[0]?.location ?? null,
+        parts: partDetection[0]?.parts ?? [],
+        modelUrl: partDetection[0]?.download_uri ?? '',
+        needRetraining: partDetection[0]?.needRetraining ?? true,
+        accuracyRangeMin: partDetection[0]?.accuracyRangeMin ?? 60,
+        accuracyRangeMax: partDetection[0]?.accuracyRangeMax ?? 80,
+        maxImages: partDetection[0]?.maxImages ?? 20,
+        sendMessageToCloud: partDetection[0]?.metrics_is_send_iothub,
+        framesPerMin: partDetection[0]?.metrics_frame_per_minutes,
+        probThreshold: partDetection[0]?.prob_threshold.toString() ?? '10',
+        trainingProject: partDetection[0]?.project ?? null,
+        name: partDetection[0]?.name ?? '',
+        inferenceMode: partDetection[0]?.inference_mode ?? '',
+        sendVideoToCloud: partDetection[0]?.send_video_to_cloud ?? false,
+        deployTimeStamp: partDetection[0]?.deploy_timestamp ?? '',
+        setFpsManually: partDetection[0]?.fps !== recomendedFps,
+        recomendedFps,
+        fps: partDetection[0]?.fps ?? 10,
+        inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocal.GRPC,
+        inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
       };
-      dispatch(getProjectSuccess(project, data[0]?.has_configured, false));
-      return data[0]?.has_configured;
+      dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
+      return partDetection[0]?.has_configured;
     })
     .catch((err) => {
       dispatch(getProjectFailed(err, false));
@@ -220,6 +235,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
   const projectId = getState().project.data.id;
   const isProjectEmpty = projectId === null || projectId === undefined;
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
+  const isDemo = getState().trainingProject.isDemo.includes(projectData.trainingProject);
 
   dispatch(postProjectRequest(false));
 
@@ -228,16 +244,17 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       parts: projectData.parts,
       cameras: projectData.cameras,
       project: projectData.trainingProject,
-      needRetraining: projectData.needRetraining,
+      needRetraining: isDemo ? false : projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
       maxImages: projectData.maxImages,
       metrics_is_send_iothub: projectData.sendMessageToCloud,
       metrics_frame_per_minutes: projectData.framesPerMin,
-      metrics_accuracy_threshold: projectData.accuracyThreshold,
       name: projectData.name,
       send_video_to_cloud: projectData.sendVideoToCloud,
       inference_mode: projectData.inferenceMode,
+      fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
+      inference_protocol: projectData.inferenceProtocol,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
@@ -245,7 +262,12 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
     },
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data, false));
+      dispatch(
+        postProjectSuccess(
+          { ...data, setFpsManually: projectData.setFpsManually, recomendedFps: projectData.recomendedFps },
+          false,
+        ),
+      );
       getTrain(data.id);
       return data.id;
     })
@@ -257,12 +279,9 @@ const getTrain = (projectId): void => {
   Axios.get(`/api/part_detections/${projectId}/configure`).catch((err) => console.error(err));
 };
 
-/**
- * @deprecated
- */
 export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
   const projectId = getProjectData(getState()).id;
-  return Axios.get(`/api/projects/${projectId}/reset_camera`)
+  return Axios.patch(`/api/part_detections/${projectId}/`, { cameras: [], has_configured: false })
     .then(() => {
       return dispatch(deleteProjectSuccess(isDemo));
     })

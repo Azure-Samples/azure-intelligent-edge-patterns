@@ -5,14 +5,16 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('notifications', '0001_initial'),
-    ]
+    dependencies = [("notifications", "0001_initial")]
 
     operations = [
         migrations.AlterField(
-            model_name='notification',
-            name='notification_type',
-            field=models.CharField(choices=[('project', 'project'), ('part_detection', 'part_detection')], default='project', max_length=20),
-        ),
+            model_name="notification",
+            name="notification_type",
+            field=models.CharField(
+                choices=[("project", "project"), ("part_detection", "part_detection")],
+                default="project",
+                max_length=20,
+            ),
+        )
     ]

@@ -19,7 +19,7 @@ import { useQuery } from '../hooks/useQuery';
 import { selectPartById, getParts, deletePart } from '../store/partSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
-import LabelingPage, { LabelPageMode } from '../components/LabelingPage/LabelingPage';
+import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
@@ -207,7 +207,7 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
         </Stack>
       </Stack>
       <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
-      <LabelingPage mode={LabelPageMode.MultiPage} />
+      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
       <input
         ref={fileInputRef}
         type="file"

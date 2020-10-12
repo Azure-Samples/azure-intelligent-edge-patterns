@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App signals.
 """
 
@@ -13,14 +12,15 @@ from .models import TrainingStatus
 logger = logging.getLogger(__name__)
 
 
-@receiver(signal=post_save,
-          sender=Project,
-          dispatch_uid="training_status_project_created_listener")
+@receiver(
+    signal=post_save,
+    sender=Project,
+    dispatch_uid="training_status_project_created_listener",
+)
 def training_status_project_created_listener(**kwargs):
-    """Project create change.
-    """
-    instance = kwargs['instance']
-    created = kwargs['created']
+    """Project create change."""
+    instance = kwargs["instance"]
+    created = kwargs["created"]
     if created:
         logger.info("Azure Project created. Create TrainingStatus Object")
         TrainingStatus.objects.update_or_create(
@@ -28,7 +28,7 @@ def training_status_project_created_listener(**kwargs):
             defaults={
                 "status": "ok",
                 "log": "Status : Has not configured",
-                "performance": "{}"
+                "performance": "{}",
             },
         )
     else:
