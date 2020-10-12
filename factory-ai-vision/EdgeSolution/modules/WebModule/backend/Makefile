@@ -20,6 +20,11 @@ install-dev: requirements/local.txt ## install dev dependencies
 	@pre-commit install
 	@echo "Installing pre-commit hook, done."
 
+.PHONY: run
+run:
+	@$(PYTHON) manage.py migrate
+	@$(PYTHON) manage.py runserver
+
 .PHONY: test
 test: ## unit test
 	@echo "Testing..."
