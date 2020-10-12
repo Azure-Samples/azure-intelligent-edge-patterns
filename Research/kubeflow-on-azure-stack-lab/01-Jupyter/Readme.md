@@ -27,10 +27,13 @@ ML/NN and AI more broadly, are mathematical concepts and could be implemented in
 and frameworks. In this lab we will use mostly Python, but you are free to pick whatever you are comfortable
 with - many of the deployment options are language-agnostic as long as apis are satisfied. 
 
-## Tensorboard access
+## (Optional) Tensorboard access
 
 There is another useful tool to monitor some ML applications if
 they support it. We provided a sample file to start it in your Kubernetes cluster, `tensorboard.yaml`.
+
+**Pre-requisite**: You need persistent volume. Follow the steps in [Installing Storage](installing_storage.md) to create a Persistent Volume Claim
+that you could use in your Kubernetes deployments.
 
 To start Tensorboard running, deploy it using `kubectl`, and theck that the pod is up:
 
@@ -56,7 +59,7 @@ Now you can access the port you forward from your Kubernetes environment:
 
 ## Tensorboard deployment
 
-Here is how you would connect your Tensorboard with the persistence we discuss next:
+Here is how you would connect your Tensorboard with the persistence:
 
     $ cat tb.yaml
     apiVersion: extensions/v1beta1

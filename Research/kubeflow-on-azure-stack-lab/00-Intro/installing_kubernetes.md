@@ -39,12 +39,12 @@ you will need to ask your cloud administrator. You need the following:
 
 Make sure you have all this information before proceeding further.
 
-You can chose to create a Kubernetes object from your Portal, keeping
-in mind the settings and adjustments we discuss below.
+Even though you can create a Kubernetes object from your Portal, for Kubeflow we need to make a few
+configuration changes, and it is easier to do with AKS-e. ***Please continue to the next chapterm and do not create a Kubernetes cluster using Portal.***
 
 ![pics/creating_k8s_marketplace.png](pics/creating_k8s_marketplace.png)
 
-# Installing Kubernetes using AKS-e (Skip the rest of the page if you did it using Portal)
+# Installing Kubernetes using AKS-e
 
 ## Login to the desired cloud
 
@@ -160,9 +160,28 @@ In our case we updated these fields:
 - "portalURL": "https://portal.demo2.stackpoc.com"
 - "dnsPrefix": "kube-rgDEMO2"
 - "keyData": "\<whatever is in id_rsa_for_demo.pub\>"
-- updated the `"orchestratorReleaseVersion"` from 1.15 to 1.15.5(which is among the listed supported versions)
+- updated the `"orchestratorReleaseVersion"` with what is among the listed supported versions
+- changed the master count from 3 to 1. And have 4 pool count.
+- added "apiServerConfig" values to resolve istion-system token storage.
 
-Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDEMO2_demoe2.json`:
+***Note that `apiServerConfig` may not be available from the template.*** Please make sure you have this definition in "kuberntetesconfig":
+```
+        "properties": {
+                ...
+            "orchestratorProfile": {
+                ...
+                "kubernetesConfig": {
+                ...
+                    "apiServerConfig": {
+                        "--service-account-api-audiences": "api,istio-ca",
+                        "--service-account-issuer": "kubernetes.default.svc",
+                        "--service-account-signing-key-file": "/etc/kubernetes/certs/apiserver.key"
+                    }
+        ...
+        ...
+```
+
+Here is the resulting `kube-rgDEMO2_demoe2.json`:
 
     {
         "apiVersion": "vlabs",
@@ -170,17 +189,17 @@ Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDE
         "properties": {
             "orchestratorProfile": {
                 "orchestratorType": "Kubernetes",
-                "orchestratorRelease": "1.15",
+                "orchestratorRelease": "1.17",
+                "orchestratorVersion": "1.17.11",
                 "kubernetesConfig": {
                     "cloudProviderBackoff": true,
                     "cloudProviderBackoffRetries": 1,
                     "cloudProviderBackoffDuration": 30,
                     "cloudProviderRateLimit": true,
-                    "cloudProviderRateLimitQPS": 3,
-                    "cloudProviderRateLimitBucket": 10,
-                    "cloudProviderRateLimitQPSWrite": 3,
-                    "cloudProviderRateLimitBucketWrite": 10,
-                    "kubernetesImageBase": "mcr.microsoft.com/k8s/azurestack/core/",
+                    "cloudProviderRateLimitQPS": 100,
+                    "cloudProviderRateLimitBucket": 150,
+                    "cloudProviderRateLimitQPSWrite": 25,
+                    "cloudProviderRateLimitBucketWrite": 30,
                     "useInstanceMetadata": false,
                     "networkPlugin": "kubenet",
                     "kubeletConfig": {
@@ -190,6 +209,11 @@ Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDE
                         "--node-monitor-grace-period": "5m",
                         "--pod-eviction-timeout": "5m",
                         "--route-reconciliation-period": "1m"
+                    },
+                    "apiServerConfig": {
+                        "--service-account-api-audiences": "api,istio-ca",
+                        "--service-account-issuer": "kubernetes.default.svc",
+                        "--service-account-signing-key-file": "/etc/kubernetes/certs/apiserver.key"
                     }
                 }
             },
@@ -209,7 +233,7 @@ Let's also change the master count from 3 to 1. Here is the resulting `kube-rgDE
             "agentPoolProfiles": [
                 {
                     "name": "linuxpool",
-                    "count": 3,
+                    "count": 4,
                     "vmSize": "Standard_F16",
                     "distro": "aks-ubuntu-16.04",
                     "availabilityProfile": "AvailabilitySet",
@@ -241,11 +265,11 @@ see details in a separate page, [Installing aks-engine](installing_aks-engine.md
 Download `aks-engine` installation script:
 
     $ curl -o get-akse.sh https://raw.githubusercontent.com/Azure/aks-engine/master/scripts/get-akse.sh
-    $ chmod 700 get-akse.sh
+    $ chmod 755 get-akse.sh
 
 Run the installer, specifying its version:
 
-    $ ./get-akse.sh --version v0.43.0
+    $ ./get-akse.sh --version v0.55.4
 
 If you have problems, please refer to the official page: [Install the AKS engine on Linux in Azure Stack](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-kubernetes-aks-engine-deploy-linux).
 
@@ -257,7 +281,7 @@ does have the connection, and uncompress it on the machine where you plan using 
 Verify `aks-engine` version:
 
     $ aks-engine version
-    Version: v0.43.0
+    Version: v0.55.4
     GitCommit: 8928a4094
     GitTreeState: clean
 
@@ -344,7 +368,8 @@ environment.
 
 For this demo we will substitute `azurefile` with our own locally-mounted network storage.
 
-Follow the steps in [Installing Storage](../01-Jupyter/installing_storage.md) to create a Persistent Volume Claim
+Follow the steps in [Installing Storage](../01-Jupyter/installing_storage.md)
+to create a Persistent Volume Claim
 that you could use in your Kubernetes deployments.
 
 For simplicity, we create a Samba server, but you are welcome to use nfs

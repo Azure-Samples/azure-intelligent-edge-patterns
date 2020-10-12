@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
           - name: tensorflow
-            image: kubeflow/tf-dist-mnist-test:1.0
+            image: rollingstone/tf-dist-mnist-test:1.0
             volumeMounts:
             - mountPath: "/tmp/mnist-data"
               name: samba-share-volume2
@@ -26,7 +26,7 @@ spec:
         spec:
           containers:
           - name: tensorflow
-            image: kubeflow/tf-dist-mnist-test:1.0
+            image: rollingstone/tf-dist-mnist-test:1.0
             volumeMounts:
             - mountPath: "/tmp/mnist-data"
               name: samba-share-volume2

@@ -17,7 +17,15 @@ the master node of your Kubernetes cluster:
 At your Kubernetes master node:
 
     $ git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
+
+Make sure you cloned from the right repository and you are on the correct branch.
+
     $ cd azure-intelligent-edge-patterns/Research/kubeflow-on-azure-stack/sbin
+
+If for some reasons, the scripts are not executable(happens with cross-platform git commits),
+update the file permissions:
+
+    $ chmod 755 *.sh
 
 **IMPORTANT:**
 
@@ -80,8 +88,15 @@ become `Running` and the list will be empty:
 
 When the pods have been created, you can proceed.
 
-To start using Kubeflow, you may want to make Kubeflow Dashboard be visible, so you will need
-to change the type of the ingress behavior - from `NodePort` to `LoadBalancer`, using this
+**IMPORTANT:**
+To open the dashboard to a public IP address, you should first implement a solution to prevent unauthorized access. You can read more about Azure authentication options from [Access Control for Azure Deployment](https://www.kubeflow.org/docs/azure/authentication/).
+
+For demo use, you can use port-forwarding to visit your cluster, run the following command and visit http://localhost:8080:
+
+    $ kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
+
+Or, again, **for non-production deployment**, you can to make Kubeflow Dashboard be externally visible by
+changing the type of the ingress behavior - from `NodePort` to `LoadBalancer`, using this
 command (default editor is vi, to edit you need to press `i`, and to save and exit, `<esc>:wq`):
 
     $ ./edit_external_access.sh
@@ -117,17 +132,17 @@ Download the `kfctl` from [Kubeflow releases](https://github.com/kubeflow/kfctl/
 
     $ mkdir kubeflow
     $ cd kubeflow/
-    $ wget https://github.com/kubeflow/kfctl/releases/download/v1.0.2/kfctl_v1.0.2-0-ga476281_linux.tar.gz
+    $ wget https://github.com/kubeflow/kfctl/releases/download/v1.1.0/kfctl_v1.1.0-0-ga776281_linux.tar.gz
     ...
-    ‘kfctl_v1.0.1-0-gf3edb9b_linux.tar.gz’ saved [31630869/31630869]
+    ‘kfctl_v1.1.0-0-gf9edb9b_linux.tar.gz’ saved [31630869/31630869]
 
-    $ tar -xvf kfctl_v1.0.1-0-gf3edb9b_linux.tar.gz
+    $ tar -xvf kfctl_v1.1.0-0-gf7edb9b_linux.tar.gz
 
     $ export PATH=$PATH:~/kubeflow/
     $ export KF_NAME=sandboxASkf
     $ export BASE_DIR=/opt/
     $ export KF_DIR=${BASE_DIR}/${KF_NAME}
-    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.0-branch/kfdef/kfctl_k8s_istio.v1.0.2.yaml"
+    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.1-branch/kfdef/kfctl_k8s_istio.v1.1.0.yaml"
     
 Generate and deploy Kubeflow:
 
