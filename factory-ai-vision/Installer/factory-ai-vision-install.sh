@@ -7,7 +7,7 @@ AZURE_CORE_ONLY_SHOW_ERRORS=True
 CR=$'\r'
 # ARM deployment script for Custom Vison solution (Free SKU)
 customVisionArm=deploy-custom-vision-arm.json
-# edge-deployment-json is the template, 
+# edge-deployment-json is the template,
 #edgeDeploymentJson=deployment.amd64.json
 # edge-deploy-json is the deployment description with keys and endpoints added
 edgeDeployJson=deploy.modules.json
@@ -24,27 +24,30 @@ rgName=visiononedge-rg
 
 # SETLOCAL ENABLEDELAYEDEXPANSION
 
-# ############################## Install Prereqs ##############################  
+# ############################## Install Prereqs ##############################
 
-echo Installing / updating the IoT extension
-az extension update --name azure-iot
+echo Checking the az command
+az version --output none
 
 if [ ! $? -eq 0 ]; then
   # Azure CLI is not installed.  It has an MSI installer on Windows, or is available over REST.
   echo
-  echo It looks like Azure CLI is not installed.  Please install it from: 
+  echo It looks like Azure CLI is not installed.  Please install it from:
   echo https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
   echo and try again
   read -p "Press any key to exit..."
   exit 1
 fi
 
+echo Installing / updating the IoT extension
+az extension update --name azure-iot
+
 ################################ Get Tenant ###################################
 # remove the header and ---- from output list - start good var data at var1
 #COLUMNS=1
 #outputarrten=()
 #echo Logging on to Azure...
-#output=$(az login -o table --query [].name --only-show-errors) 
+#output=$(az login -o table --query [].name --only-show-errors)
 #let cnt=0
 #while IFS=' ' read -r line
 #do
@@ -134,83 +137,108 @@ if [ "$cvTrainingEndpoint" == "" ]; then
   # the Custom Vision variables
   cvTrainingApiKey=${outputarrcv[0]}
   cvTrainingEndpoint=${outputarrcv[1]}
- 
+
   echo API Key: $cvTrainingApiKey
   echo Endpoint: $cvTrainingEndpoint
 fi
 
+
+# ############################## Get Streaming Type #####################################
+while true; do
+  read -p "Do you want to use Azure Live Video Analytics? (y or n): " -n 1 -r; echo
+  case $REPLY in
+      [Yy]* ) streaming="lva"; break;;
+      [Nn]* ) streaming="opencv"; break;;
+      * ) echo "Please answer yes or no.";;
+  esac
+done
+
 # ############################## Get Azure Media SErvice #####################################
 
-echo listing Azure Media Services
-outputams=$(az ams account list --only-show-errors -o table --query [].name) 
-outputarrams=()
-let cnt=0
-while read -r line
-do
- if [ $cnt -gt 1 ]; then
-    outputarrams+=("$line")
- fi
- let cnt++
-done <<< "$outputams"
+if [ $streaming == "lva" ]; then
+    echo listing Azure Media Services
+    outputams=$(az ams account list --only-show-errors -o table --query [].name)
+    outputarrams=()
+    let cnt=0
+    while read -r line
+    do
+     if [ $cnt -gt 1 ]; then
+        outputarrams+=("$line")
+     fi
+     let cnt++
+    done <<< "$outputams"
 
-# get length of an array
-tLen=${#outputarrams[@]}
+    # get length of an array
+    tLen=${#outputarrams[@]}
 
-if [ $tLen -le 0 ]; then
-  echo Azure Media Services not found
-  echo Sorry, this demo requires that you have an existing Azure Media Services
-  read -p "Press <Enter> key to exit..."; echo
-  exit 1
-fi
-# Only one option so no need to prompt for choice
-if [ $tLen -le 1 ]; then
-  while true; do
-    read -p "please confirm install to ${outputarrams[0]%$CR} ams (y or n): " -n 1 -r;echo
-    case $REPLY in
-        [Yy]* ) break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-  done
-  amsServiceName=${outputarrams[0]%$CR}
-else
-  PS3='Choose the number corresponding to your Azure Medis Service '
-  select opt in "${outputarrams[@]}"
-  do
-    echo "you chose: " $opt
-    amsServiceName=${opt%$CR}
-    break
-  done
-fi
+    if [ $tLen -le 0 ]; then
+      echo Azure Media Services not found
+      echo Sorry, this demo requires that you have an existing Azure Media Services
+      read -p "Press <Enter> key to exit..."; echo
+      exit 1
+    fi
+    # Only one option so no need to prompt for choice
+    if [ $tLen -le 1 ]; then
+      while true; do
+        read -p "please confirm install to ${outputarrams[0]%$CR} ams (y or n): " -n 1 -r;echo
+        case $REPLY in
+            [Yy]* ) break;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+      done
+      amsServiceName=${outputarrams[0]%$CR}
+    else
+      PS3='Choose the number corresponding to your Azure Medis Service '
+      select opt in "${outputarrams[@]}"
+      do
+        echo "you chose: " $opt
+        amsServiceName=${opt%$CR}
+        break
+      done
+    fi
 
-amsResourceGroup=$(az ams account list --only-show-errors -o tsv --query '[].[name,resourceGroup]' | grep $amsServiceName | awk '{print $2}')
+    amsResourceGroup=$(az ams account list --only-show-errors -o tsv --query '[].[name,resourceGroup]' | grep $amsServiceName | awk '{print $2}')
 
-amsServicePrincipalName=factoryai
-outputams=$(az ams account sp create  --name $amsServicePrincipalName --account-name $amsServiceName --resource-group $amsResourceGroup  --query '[SubscriptionId, AadTenantId, AadClientId, AadSecret]' -o tsv)
-outputamsarr=()
-while read -r line
-do
-    outputamsarr+=("$line")
-done <<< "$outputams"
+    amsServicePrincipalName=factoryai
+    outputams=$(az ams account sp create  --name $amsServicePrincipalName --account-name $amsServiceName --resource-group $amsResourceGroup  --query '[SubscriptionId, AadTenantId, AadClientId, AadSecret]' -o tsv)
+    outputamsarr=()
+    while read -r line
+    do
+        outputamsarr+=("$line")
+    done <<< "$outputams"
 
-amsSubscriptionId=${outputamsarr[0]}
-amsTenantId=${outputamsarr[1]}
-amsServicePrincipalAppId=${outputamsarr[2]}
-amsServicePrincipalSecret=${outputamsarr[3]}
+    amsSubscriptionId=${outputamsarr[0]}
+    amsTenantId=${outputamsarr[1]}
+    amsServicePrincipalAppId=${outputamsarr[2]}
+    amsServicePrincipalSecret=${outputamsarr[3]}
 
-isAmsServicePrincipalCreated=True
-if [[ $amsServicePrincipalSecret == Cannot* ]]; then
-    isAmsServicePrincipalCreated=False
-    echo "AMS Service Principal '$amsServicePrincipalName' exists"
-    echo "Please enter your Principal Secret for 'factoryai'"
-    read amsServicePrincipalSecret
-fi
+    isAmsServicePrincipalCreated=True
+    if [[ $amsServicePrincipalSecret == Cannot* ]]; then
+        isAmsServicePrincipalCreated=False
+        echo "AMS Service Principal '$amsServicePrincipalName' exists"
+        echo "Please enter your Principal Secret for 'factoryai'"
+        read amsServicePrincipalSecret
+    fi
 
-if [[ $isAmsServicePrincipalCreated == True ]]; then
-    echo "New Azure Media Service Priniple '$amsServicePrincipalName' is created"
-    echo "***************************************************************************"
-    echo "*** Please copy your SERVICE_PRINCIPAL_SECRET, it cannot be shown again ***"
-    echo "***************************************************************************"
+    if [[ $isAmsServicePrincipalCreated == True ]]; then
+        echo "New Azure Media Service Priniple '$amsServicePrincipalName' is created"
+        echo "***************************************************************************"
+        echo "*** Please copy your SERVICE_PRINCIPAL_SECRET, it cannot be shown again ***"
+        echo "***************************************************************************"
+        echo "============================================================"
+        echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
+        echo "RESOURCE_GROUP           :" $amsResourceGroup
+        echo "TENANT_ID                :" $amsTenantId
+        echo "SERVICE_NAME             :" $amsServiceName
+        echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
+        echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
+        echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
+        echo "============================================================"
+        read -p "Press any key to continue..."
+    fi
+
+    echo Azure Media Service Parameters:
     echo "============================================================"
     echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
     echo "RESOURCE_GROUP           :" $amsResourceGroup
@@ -220,24 +248,12 @@ if [[ $isAmsServicePrincipalCreated == True ]]; then
     echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
     echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
     echo "============================================================"
-    read -p "Press any key to continue..."
-fi
-
-echo Azure Media Service Parameters:
-echo "============================================================"
-echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
-echo "RESOURCE_GROUP           :" $amsResourceGroup
-echo "TENANT_ID                :" $amsTenantId
-echo "SERVICE_NAME             :" $amsServiceName
-echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
-echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
-echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
-echo "============================================================"
+fi # if [ $streaming == "lva" ]; then
 
 # ############################## Get IoT Hub #####################################
 
 echo listing IoT Hubs
-outputhubs=$(az iot hub list --only-show-errors -o table --query [].name) 
+outputhubs=$(az iot hub list --only-show-errors -o table --query [].name)
 outputarrhubs=()
 let cnt=0
 while read -r line
