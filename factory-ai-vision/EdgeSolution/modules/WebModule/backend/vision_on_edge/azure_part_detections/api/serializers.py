@@ -25,6 +25,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PartDetection
         fields = [
+            "id",
             "name",
             "accuracyRangeMax",
             "accuracyRangeMin",
@@ -75,7 +76,8 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "project",
             # "send_video_to_cloud",
         ]:
-            setattr(instance, attr, validated_data[attr])
+            if attr in validated_data:
+                setattr(instance, attr, validated_data[attr])
         instance.cameras.set(validated_data.pop("cameras"))
         instance.parts.set(validated_data.pop("parts"))
         if "send_video_to_cloud" in validated_data:
