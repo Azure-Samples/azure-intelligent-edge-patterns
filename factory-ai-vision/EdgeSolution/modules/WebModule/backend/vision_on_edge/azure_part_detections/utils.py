@@ -121,11 +121,6 @@ def deploy_worker(part_detection_id):
         params={"part_detection_mode": instance.inference_mode},
         timeout=REQUEST_TIMEOUT,
     )
-    requests.get(
-        "http://" + str(instance.inference_module.url) + "/update_send_video_to_cloud",
-        params={"send_video_to_cloud": instance.send_video_to_cloud},
-        timeout=REQUEST_TIMEOUT,
-    )
 
     # =====================================================
     # 2. Update model                                  ===
@@ -200,6 +195,7 @@ def deploy_worker(part_detection_id):
                     "aoi": cam.area,
                     "lines": cam.lines,
                     "zones": cam.danger_zones,
+                    "send_video_to_cloud": cam.send_video_to_cloud,
                 }
             )
         else:
@@ -210,6 +206,7 @@ def deploy_worker(part_detection_id):
                     "source": cam.rtsp,
                     "lines": cam.lines,
                     "zones": cam.danger_zones,
+                    "send_video_to_cloud": cam.send_video_to_cloud,
                 }
             )
     serializer = UpdateCamBodySerializer(data=res_data)

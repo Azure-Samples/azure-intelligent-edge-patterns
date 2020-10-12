@@ -46,6 +46,7 @@ export const initialProjectData: ProjectData = {
   probThreshold: '10',
   name: '',
   sendVideoToCloud: false,
+  cameraToBeRecord: [],
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
   setFpsManually: false,

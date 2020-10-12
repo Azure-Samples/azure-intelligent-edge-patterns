@@ -77,6 +77,8 @@ export type ProjectData = {
   probThreshold: string;
   name: string;
   sendVideoToCloud: boolean;
+  // TODO
+  cameraToBeRecord: number[];
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
   setFpsManually: boolean;
