@@ -65,16 +65,12 @@ class Stream:
                     #     "Content-Length": len(jpg),
                     # }
                     # res = requests.post(endpoint, files=files)
-                    if cnt % 30 == 1:
-                        logger.warning(
-                            "send through channel {0} to inference server , count = {1}".format(
-                                bytes(self.cam_id, "utf-8"), cnt)
-                        )
-                    data = cv2.imencode('.jpg', img)[1].tobytes()
-                    res = requests.post(endpoint, data=data)
 
-                    # self.last_img = img
-                    # self.last_update = time.time()
+                    # data = cv2.imencode('.jpg', img)[1].tobytes()
+                    # res = requests.post(endpoint, data=data)
+
+                    self.last_img = img
+                    self.last_update = time.time()
                     # print(jpg)
                 else:
                     self.restart_cam()
@@ -105,7 +101,7 @@ class Stream:
                 
         threading.Thread(target=_new_streaming,
                          args=(self,), daemon=True).start()
-        # threading.Thread(target=run_send, args=(self,), daemon=True).start()
+        threading.Thread(target=run_send, args=(self,), daemon=True).start()
 
     def start_zmq(self):
         def run_capture(self):
