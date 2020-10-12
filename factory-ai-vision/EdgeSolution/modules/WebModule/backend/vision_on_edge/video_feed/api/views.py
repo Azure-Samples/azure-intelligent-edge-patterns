@@ -13,6 +13,8 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from configs.general_configs import PRINT_THREAD
+
 from ...cameras.models import Camera
 from ...general.api.swagger_schemas import StreamAutoSchema
 from ..models import VideoFeed
@@ -20,7 +22,6 @@ from ..models import VideoFeed
 logger = logging.getLogger(__name__)
 
 STREAM_GC_TIME_THRESHOLD = 15  # Seconds
-PRINT_STREAMS = True
 
 
 class StreamManager:
@@ -57,7 +58,7 @@ class StreamManager:
         def _gc(self):
             while True:
                 self.mutex.acquire()
-                if PRINT_STREAMS:
+                if PRINT_THREAD:
                     logger.info("streams: %s", self.streams)
                 to_delete = []
                 for index, stream in enumerate(self.streams):
