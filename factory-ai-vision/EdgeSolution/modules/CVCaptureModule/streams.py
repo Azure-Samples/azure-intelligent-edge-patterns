@@ -48,11 +48,14 @@ class Stream:
 
     def start_http(self):
         def _new_streaming(self):
+            cnt = 0
+            endpoint = self.endpoint + "/predict?camera_id=" + self.cam_id
             if self.cam_source == "0":
                 self.cam = cv2.VideoCapture(0)
             else:
                 self.cam = cv2.VideoCapture(self.cam_source)
             while self.cam_is_alive:
+                cnt += 1
                 is_ok, img = self.cam.read()
                 if is_ok:
                     # jpg = cv2.imencode(".jpg", img)[1]
@@ -62,12 +65,16 @@ class Stream:
                     #     "Content-Length": len(jpg),
                     # }
                     # res = requests.post(endpoint, files=files)
+                    if cnt % 30 == 1:
+                        logger.warning(
+                            "send through channel {0} to inference server , count = {1}".format(
+                                bytes(self.cam_id, "utf-8"), cnt)
+                        )
+                    data = cv2.imencode('.jpg', img)[1].tobytes()
+                    res = requests.post(endpoint, data=data)
 
-                    # data = cv2.imencode('.jpg', img)[1].tobytes()
-                    # res = requests.post(endpoint, data=data)
-
-                    self.last_img = img
-                    self.last_update = time.time()
+                    # self.last_img = img
+                    # self.last_update = time.time()
                     # print(jpg)
                 else:
                     self.restart_cam()
@@ -98,7 +105,7 @@ class Stream:
                 
         threading.Thread(target=_new_streaming,
                          args=(self,), daemon=True).start()
-        threading.Thread(target=run_send, args=(self,), daemon=True).start()
+        # threading.Thread(target=run_send, args=(self,), daemon=True).start()
 
     def start_zmq(self):
         def run_capture(self):
