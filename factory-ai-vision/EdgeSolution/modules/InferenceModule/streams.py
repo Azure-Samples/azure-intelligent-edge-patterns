@@ -113,6 +113,8 @@ class Stream:
         self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
+        self.last_update = None
+        self.last_send = None
         self.use_line = False
         self.use_zone = False
         # self.tracker = Tracker()
@@ -152,6 +154,9 @@ class Stream:
                 time.sleep(2)
             cnt = 0
             while self.cam_is_alive:
+
+                if self.last_send == self.last_update:
+                    continue
                 cnt += 1
                 if cnt % 30 == 1:
                     logging.info(
@@ -165,6 +170,7 @@ class Stream:
                         cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes(),
                     ]
                 )
+                self.last_send = self.last_update
                 # self.mutex.release()
                 # FIXME need to fine tune this value
                 time.sleep(0.03)
@@ -557,6 +563,7 @@ class Stream:
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
+        self.last_update = time.time()
 
     def to_api_model(self):
         return StreamModel(

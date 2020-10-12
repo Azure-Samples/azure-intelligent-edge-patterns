@@ -43,8 +43,8 @@ class Stream:
         self.last_send = None
 
         self.zmq_sender = sender
-        # self.start_http()
-        self.start_zmq()
+        self.start_http()
+        # self.start_zmq()
 
     def start_http(self):
         def _new_streaming(self):
