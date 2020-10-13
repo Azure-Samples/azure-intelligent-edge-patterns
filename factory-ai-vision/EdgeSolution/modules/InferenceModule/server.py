@@ -5,11 +5,10 @@ import json
 import logging
 import logging.config
 import os
-import sys
 import socket
+import sys
 import threading
 import time
-import zmq
 from concurrent import futures
 from typing import List
 
@@ -17,7 +16,9 @@ import cv2
 import grpc
 import numpy as np
 import uvicorn
+import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
+from fastapi.responses import StreamingResponse
 
 import extension_pb2_grpc
 from api.models import (
@@ -405,6 +406,40 @@ def update_fps(fps: int):
     return "ok"
 
 
+class DisplayManager:
+    def __init__(self):
+        self.diplay_ids = []
+
+    def keep_alive(self, cam_id):
+        display = self.display_cam_ids.get(cam_id)
+        display["last_alive"] = time.time()
+
+
+@app.get("/video_feed")
+async def video_feed(cam_id: str):
+    stream = stream_manager.get_stream_by_id(cam_id)
+    if stream:
+        print("[INFO] Preparing Video Feed for stream %s" % cam_id, flush=True)
+        stream.last_display_keep_alive = time.time()
+        return StreamingResponse(
+            stream.gen(), media_type="multipart/x-mixed-replace; boundary=frame"
+        )
+    else:
+        print("[Warning] Cannot find stream %s" % cam_id, flush=True)
+        return "failed"
+
+
+@app.get("/video_feed/keep_alive")
+async def keep_alive(cam_id: str):
+    stream = stream_manager.get_stream_by_id(cam_id)
+    if stream:
+        print("[INFO] Keep Alive for stream %s" % cam_id, flush=True)
+        stream.update_display_keep_alive()
+    else:
+        print("[Warning] Cannot find stream %s" % cam_id)
+        return "failed"
+
+
 def init_topology():
     """init_topology.
 
@@ -499,28 +534,33 @@ def benchmark():
     logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
     logger.info("============= BenchMarking (End) ==================")
 
+
 def cvcapture_url():
     if is_edge():
         ip = socket.gethostbyname("CVCaptureModule")
         return "tcp://" + ip + ":5556"
     return "tcp://localhost:5556"
 
+
 def opencv_zmq():
     context = zmq.Context()
     receiver = context.socket(zmq.SUB)
-    receiver.setsockopt(zmq.SUBSCRIBE, bytes('', 'utf-8'))
+    receiver.setsockopt(zmq.SUBSCRIBE, bytes("", "utf-8"))
     receiver.connect(cvcapture_url())
     cnt = {}
+
     def run():
         while True:
             buf = receiver.recv_multipart()
-            
+
             if buf[0] not in cnt.keys():
                 cnt[buf[0]] = 1
             else:
                 cnt[buf[0]] += 1
-            logger.info('receiving from channel {0}, cnt: {1}'.format(buf[0], cnt[buf[0]]))
-            stream = stream_manager.get_stream_by_id(buf[0].decode('utf-8'))
+            logger.info(
+                "receiving from channel {}, cnt: {}".format(buf[0], cnt[buf[0]])
+            )
+            stream = stream_manager.get_stream_by_id(buf[0].decode("utf-8"))
             logger.info(buf[0])
             if not stream:
                 predicitons = []
@@ -535,6 +575,7 @@ def opencv_zmq():
             except:
                 logger.error("Unexpected error: %s", sys.exc_info())
         receiver.close()
+
     threading.Thread(target=run).start()
 
 
@@ -547,7 +588,7 @@ def main():
         # Get application arguments
         argument_parser = ArgumentParser(ArgumentsType.SERVER)
 
-        if IS_OPENCV == 'false':
+        if IS_OPENCV == "false":
             # Get port number
             grpcServerPort = argument_parser.GetGrpcServerPort()
             logger.info("gRPC server port: %s", grpcServerPort)
