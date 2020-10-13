@@ -48,7 +48,7 @@ export const LiveViewContainer: React.FC<{
   }, [showUpdateSuccessTxt]);
 
   useInterval(() => {
-    Axios.get('/api/inference/video_feed/keep_alive').catch(console.error);
+    Axios.get(`/api/inference/video_feed/keep_alive?camera_id=${cameraId}`).catch(console.error);
   }, 3000);
 
   return (
