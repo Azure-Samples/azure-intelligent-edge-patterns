@@ -140,7 +140,7 @@ STATICFILES_DIRS = [UI_DIR / "static"]
 
 STATIC_URL = "/static/"
 
-MEDIA_URL = "8080:/media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = PROJECT_ROOT / "media"
 
 ICON_URL = "/icons/"
