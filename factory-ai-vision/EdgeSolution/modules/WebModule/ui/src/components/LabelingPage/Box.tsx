@@ -5,17 +5,20 @@ import { KonvaEventObject } from 'konva/types/Node';
 import { Box2dComponentProps, WorkState, LabelingCursorStates } from './type';
 import { updateAnnotation } from '../../store/annotationSlice';
 import { BoxLabel } from '../../store/type';
+import { dummyFunction } from '../../utils/dummyFunction';
 
 export const Box2d: FC<Box2dComponentProps> = ({
   scale,
   workState,
-  onSelect,
-  selected,
+  onSelect = dummyFunction,
+  selected = true,
   annotationIndex,
   visible = true,
   annotation,
-  dispatch,
-  changeCursorState = null,
+  dispatch = dummyFunction,
+  changeCursorState = dummyFunction,
+  color = 'white',
+  draggable = true,
 }) => {
   const [vertices, setVertices] = useState<BoxLabel>(annotation.label);
   const anchorRadius: number = 5 / scale;
@@ -121,7 +124,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
           vertices.x1,
           vertices.y1,
         ]}
-        stroke="red"
+        stroke={color}
         strokeWidth={strokeWidth}
         closed={true}
         onMouseEnter={(): void => changeCursorState(LabelingCursorStates.pointer)}
@@ -133,8 +136,8 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x1}
         y={vertices.y1}
         radius={anchorRadius}
-        fill="red"
-        draggable={true}
+        fill={color}
+        draggable={draggable}
         onDragMove={onDragAnchor({ xi: 'x1', yi: 'y1' })}
         onDragEnd={dispatchLabel}
         onMouseEnter={(): void => {
@@ -151,8 +154,8 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x2}
         y={vertices.y1}
         radius={anchorRadius}
-        fill="red"
-        draggable={true}
+        fill={color}
+        draggable={draggable}
         onDragMove={onDragAnchor({ xi: 'x2', yi: 'y1' })}
         onDragEnd={dispatchLabel}
         onMouseEnter={(): void => {
@@ -169,8 +172,8 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x2}
         y={vertices.y2}
         radius={anchorRadius}
-        fill="red"
-        draggable={true}
+        fill={color}
+        draggable={draggable}
         onDragMove={onDragAnchor({ xi: 'x2', yi: 'y2' })}
         onDragEnd={dispatchLabel}
         onMouseEnter={(): void => {
@@ -187,8 +190,8 @@ export const Box2d: FC<Box2dComponentProps> = ({
         x={vertices.x1}
         y={vertices.y2}
         radius={anchorRadius}
-        fill="red"
-        draggable={true}
+        fill={color}
+        draggable={draggable}
         onDragMove={onDragAnchor({ xi: 'x1', yi: 'y2' })}
         onDragEnd={dispatchLabel}
         onMouseEnter={(): void => {

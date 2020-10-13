@@ -1,4 +1,5 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
+#FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
+FROM mcr.microsoft.com/azureml/onnxruntime:latest-cuda
 
 WORKDIR /app
 
@@ -34,7 +35,7 @@ RUN conda create --name python38 python=3.8.5 -y &&\
     . activate python38
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
 RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime-gpu==1.4.0" ]
+RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime-gpu==1.5.1" ]
 
 COPY coco_classes.txt ./
 COPY default_model default_model/

@@ -1,20 +1,13 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  nanoid,
-  createEntityAdapter,
-  PayloadAction,
-  ThunkAction,
-  Action,
-} from '@reduxjs/toolkit';
+import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
 
 import { State } from 'RootStateType';
 import { Annotation, AnnotationState, Image } from './type';
-import { openLabelingPage } from './labelingPageSlice';
-import { deleteImage } from './actions';
+import { OpenFrom, openLabelingPage } from './labelingPageSlice';
+import { deleteImage, changeImage } from './actions';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 // Type definition
 type ImageFromServer = {
@@ -28,6 +21,9 @@ type ImageFromServer = {
   remote_url: string;
   part: number;
   project: number;
+  timestamp: string;
+  camera: number;
+  manual_checked: boolean;
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
@@ -42,6 +38,10 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     isRelabel: response.is_relabel,
     confidence: response.confidence,
     hasRelabeled: false,
+    timestamp: response.timestamp,
+    camera: response.camera,
+    uploaded: response.uploaded,
+    manualChecked: response.manual_checked,
   };
 };
 
@@ -83,17 +83,17 @@ const serializeLabels = R.map<ImageFromServer, ImageFromServerWithSerializedLabe
 const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeLabels);
 
 // Async Thunk Actions
-export const getImages = createAsyncThunk('images/get', async () => {
+export const getImages = createWrappedAsync('images/get', async () => {
   const response = await Axios.get(`/api/images/`);
   return normalizeImages(response.data).entities;
 });
 
-export const postImages = createAsyncThunk('image/post', async (newImage: FormData) => {
+export const postImages = createWrappedAsync('image/post', async (newImage: FormData) => {
   const response = await Axios.post('/api/images/', newImage);
   return normalizeImages([response.data]).entities;
 });
 
-export const captureImage = createAsyncThunk<
+export const captureImage = createWrappedAsync<
   any,
   { streamId: string; imageIds: number[]; shouldOpenLabelingPage: boolean }
 >('image/capture', async ({ streamId, imageIds, shouldOpenLabelingPage }, { dispatch }) => {
@@ -102,26 +102,36 @@ export const captureImage = createAsyncThunk<
 
   if (shouldOpenLabelingPage)
     dispatch(
-      openLabelingPage({ imageIds: [...imageIds, capturedImage.id], selectedImageId: capturedImage.id }),
+      openLabelingPage({
+        imageIds: [...imageIds, capturedImage.id],
+        selectedImageId: capturedImage.id,
+        openFrom: OpenFrom.AfterCapture,
+      }),
     );
 
   return normalizeImages([response.data.image]).entities;
 });
 
-export const saveLabelImageAnnotation = createAsyncThunk<
-  any,
-  { isRelabel: boolean; isRelabelDone: boolean },
-  { state: State }
->('image/saveAnno', async ({ isRelabel, isRelabelDone }, { getState }) => {
-  const imageId = getState().labelingPage.selectedImageId;
-  const annoEntities = getState().annotations.entities;
-  const labels = Object.values(annoEntities)
-    .filter((e: Annotation) => e.image === imageId)
-    .map((e: Annotation) => e.label);
+export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { state: State }>(
+  'image/saveAnno',
+  async (_, { getState }) => {
+    const imageId = getState().labelingPage.selectedImageId;
+    const annoEntities = getState().annotations.entities;
+    const labels = Object.values(annoEntities)
+      .filter((e: Annotation) => e.image === imageId)
+      .map((e: Annotation) => e.label);
+    const imgPart = getState().labelImages.entities[imageId].part;
 
-  await Axios.patch(`/api/images/${imageId}/`, { labels: JSON.stringify(labels) });
-  return { isRelabel, imageId, isRelabelDone };
-});
+    const manualChecked = labels.length > 0;
+
+    await Axios.patch(`/api/images/${imageId}/`, {
+      labels: JSON.stringify(labels),
+      manual_checked: manualChecked,
+      part: imgPart,
+    });
+    return { imageId, manualChecked };
+  },
+);
 
 const imageAdapter = createEntityAdapter<Image>();
 
@@ -139,22 +149,17 @@ const slice = createSlice({
       .addCase(captureImage.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
       })
-      .addCase(
-        saveLabelImageAnnotation.fulfilled,
-        (state, action: PayloadAction<{ isRelabel: boolean; imageId: number; isRelabelDone: boolean }>) => {
-          if (action.payload.isRelabel)
-            imageAdapter.updateOne(state, { id: action.payload.imageId, changes: { hasRelabeled: true } });
-          if (action.payload.isRelabelDone)
-            state.ids.forEach((id) => {
-              const { hasRelabeled } = state.entities[id];
-              if (!hasRelabeled) state.entities[id].part = null;
-            });
-        },
-      )
+      .addCase(saveLabelImageAnnotation.fulfilled, (state, action) => {
+        imageAdapter.updateOne(state, {
+          id: action.payload.imageId,
+          changes: { manualChecked: action.payload.manualChecked },
+        });
+      })
       .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
       .addCase(postImages.fulfilled, (state, action) => {
         imageAdapter.upsertMany(state, action.payload.images);
-      });
+      })
+      .addCase(changeImage, (state, action) => imageAdapter.updateOne(state, action.payload.changePart));
   },
 });
 

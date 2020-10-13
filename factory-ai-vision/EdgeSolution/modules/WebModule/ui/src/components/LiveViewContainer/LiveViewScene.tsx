@@ -12,11 +12,13 @@ import {
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import { LiveViewProps, MaskProps, AOIBoxProps, AOILayerProps } from './LiveViewContainer.type';
-import { CreatingState } from '../../store/AOISlice';
+import { LiveViewProps, MaskProps, BoxProps, VideoAnnosGroupProps } from './LiveViewContainer.type';
+import { CreatingState } from '../../store/videoAnnoSlice';
 import { isBBox } from '../../store/shared/Box2d';
 import { isPolygon } from '../../store/shared/Polygon';
 import { Shape } from '../../store/shared/BaseShape';
+import { isLine } from '../../store/shared/Line';
+import { isAOIShape, isCountingLine, isDangerZone } from '../../store/shared/VideoAnnoUtil';
 
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
@@ -26,15 +28,17 @@ const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
 };
 
 export const LiveViewScene: React.FC<LiveViewProps> = ({
-  AOIs,
+  videoAnnos,
   creatingShape,
   onCreatingPoint,
-  updateAOI,
-  removeAOI,
+  updateVideoAnno,
+  removeVideoAnno,
   finishLabel,
-  visible,
+  AOIVisible,
+  countingLineVisible,
   imageInfo,
   creatingState,
+  dangerZoneVisible,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
@@ -86,15 +90,15 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     if (creatingState !== CreatingState.Creating) return;
 
     const { x, y } = getRelativePosition(e.target.getLayer());
-    if (creatingShape === Shape.BBox) updateAOI(AOIs[AOIs.length - 1].id, { x2: x, y2: y });
-    else if (creatingShape === Shape.Polygon)
-      updateAOI(AOIs[AOIs.length - 1].id, { idx: -1, vertex: { x, y } });
+    if (creatingShape === Shape.BBox) updateVideoAnno(videoAnnos[videoAnnos.length - 1].id, { x2: x, y2: y });
+    else if (creatingShape === Shape.Polygon || creatingShape === Shape.Line)
+      updateVideoAnno(videoAnnos[videoAnnos.length - 1].id, { idx: -1, vertex: { x, y } });
   };
 
   useEffect(() => {
     const div = divRef.current;
     const handleFPress = (e) => {
-      if (e.key === 'f') {
+      if (e.key === 'd') {
         finishLabel();
       }
     };
@@ -104,23 +108,62 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
     };
   }, []);
 
+  const AOIs = useMemo(() => {
+    return videoAnnos.filter(isAOIShape);
+  }, [videoAnnos]);
+
+  const countingLines = useMemo(() => {
+    return videoAnnos.filter(isCountingLine);
+  }, [videoAnnos]);
+
+  const dangerZone = useMemo(() => {
+    return videoAnnos.filter(isDangerZone);
+  }, [videoAnnos]);
+
   return (
     <div ref={divRef} style={{ width: '100%', height: '100%' }} tabIndex={0}>
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
         <Layer ref={layerRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}>
           <KonvaImage image={imgEle} ref={imgRef} />
           {
-            /* Render when image is loaded to prevent AOI boxes show in unscale size */
+            /* Render when image is loaded to prevent the shapes show in unscale size */
             status === 'loaded' && (
-              <AOILayer
-                imgWidth={imgWidth}
-                imgHeight={imgHeight}
-                AOIs={AOIs}
-                updateAOI={updateAOI}
-                removeAOI={removeAOI}
-                visible={visible}
-                creatingState={creatingState}
-              />
+              <>
+                {/** AOIs */}
+                <VideoAnnosGroup
+                  imgWidth={imgWidth}
+                  imgHeight={imgHeight}
+                  videoAnnos={AOIs}
+                  updateVideoAnno={updateVideoAnno}
+                  removeVideoAnno={removeVideoAnno}
+                  visible={AOIVisible}
+                  creatingState={creatingState}
+                  needMask={true}
+                />
+                {/** Counting Lines */}
+                <VideoAnnosGroup
+                  imgWidth={imgWidth}
+                  imgHeight={imgHeight}
+                  videoAnnos={countingLines}
+                  updateVideoAnno={updateVideoAnno}
+                  removeVideoAnno={removeVideoAnno}
+                  visible={countingLineVisible}
+                  creatingState={creatingState}
+                  needMask={false}
+                />
+                {/** Danger Zones */}
+                <VideoAnnosGroup
+                  imgWidth={imgWidth}
+                  imgHeight={imgHeight}
+                  videoAnnos={dangerZone}
+                  updateVideoAnno={updateVideoAnno}
+                  removeVideoAnno={removeVideoAnno}
+                  visible={dangerZoneVisible}
+                  creatingState={creatingState}
+                  needMask={false}
+                  color="yellow"
+                />
+              </>
             )
           }
         </Layer>
@@ -129,45 +172,64 @@ export const LiveViewScene: React.FC<LiveViewProps> = ({
   );
 };
 
-const AOILayer: React.FC<AOILayerProps> = ({
+const VideoAnnosGroup: React.FC<VideoAnnosGroupProps> = ({
   imgWidth,
   imgHeight,
-  AOIs,
-  updateAOI,
-  removeAOI,
+  videoAnnos,
+  updateVideoAnno,
+  removeVideoAnno,
   visible,
   creatingState,
+  needMask,
+  color = 'white',
 }): JSX.Element => {
   return (
     <>
-      <Mask width={imgWidth} height={imgHeight} holes={AOIs} visible={visible} />
-      {AOIs.map((e) => {
+      {needMask && <Mask width={imgWidth} height={imgHeight} holes={videoAnnos} visible={visible} />}
+      {videoAnnos.map((e) => {
         if (isBBox(e)) {
           return (
-            <AOIBox
+            <Box
               key={e.id}
               box={{ ...e.vertices, id: e.id }}
               visible={visible}
               boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
               onBoxChange={(changes): void => {
-                updateAOI(e.id, changes);
+                updateVideoAnno(e.id, changes);
               }}
-              removeBox={() => removeAOI(e.id)}
+              removeBox={() => removeVideoAnno(e.id)}
               creatingState={creatingState}
+              color={color}
             />
           );
         }
         if (isPolygon(e)) {
           return (
-            <AOIPolygon
+            <Polygon
               key={e.id}
               id={e.id}
               polygon={e.vertices}
               visible={visible}
-              removeBox={() => removeAOI(e.id)}
+              removeBox={() => removeVideoAnno(e.id)}
               creatingState={creatingState}
-              handleChange={(idx, vertex) => updateAOI(e.id, { idx, vertex })}
+              handleChange={(idx, vertex) => updateVideoAnno(e.id, { idx, vertex })}
               boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+              color={color}
+            />
+          );
+        }
+        if (isLine(e)) {
+          return (
+            <Polygon
+              key={e.id}
+              id={e.id}
+              polygon={e.vertices}
+              visible={visible}
+              removeBox={() => removeVideoAnno(e.id)}
+              creatingState={creatingState}
+              handleChange={(idx, vertex) => updateVideoAnno(e.id, { idx, vertex })}
+              boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
+              color={color}
             />
           );
         }
@@ -180,7 +242,7 @@ const AOILayer: React.FC<AOILayerProps> = ({
 function polygonArea(vertices) {
   let area = 0;
   for (let i = 0; i < vertices.length; i++) {
-    let j = (i + 1) % vertices.length;
+    const j = (i + 1) % vertices.length;
     area += vertices[i].x * vertices[j].y;
     area -= vertices[j].x * vertices[i].y;
   }
@@ -233,8 +295,7 @@ const Mask: React.FC<MaskProps> = ({ width, height, holes, visible }) => {
   );
 };
 
-const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChange, boundary }) => {
-  const COLOR = 'white';
+const Polygon = ({ id, polygon, visible, removeBox, creatingState, handleChange, boundary, color }) => {
   const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
 
@@ -295,15 +356,14 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChan
       cache={[{ drawBorder: true }]}
       ref={groupRef}
     >
-      {/** A bigger region for mouseEnter event */}
-      <Line x={polygon[0].x} y={polygon[0].y - 50} points={borderPoints} closed scale={{ x: 1.2, y: 1.2 }} />
       <Line
         x={polygon[0].x}
         y={polygon[0].y}
         points={borderPoints}
         closed
-        stroke={COLOR}
+        stroke={color}
         strokeWidth={2 / scale}
+        hitStrokeWidth={50 / scale}
       />
       {polygon.map((e, i) => (
         <Circle
@@ -313,8 +373,9 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChan
           x={e.x}
           y={e.y}
           radius={radius}
-          fill={COLOR}
+          fill={color}
           onDragMove={onDragMove(i)}
+          hitStrokeWidth={50 / scale}
         />
       ))}
       <Path
@@ -337,9 +398,16 @@ const AOIPolygon = ({ id, polygon, visible, removeBox, creatingState, handleChan
   );
 };
 
-const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, removeBox, creatingState }) => {
+const Box: React.FC<BoxProps> = ({
+  box,
+  onBoxChange,
+  visible,
+  boundary,
+  removeBox,
+  creatingState,
+  color,
+}) => {
   const { x1, y1, x2, y2 } = box;
-  const COLOR = 'white';
   const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
 
@@ -396,25 +464,24 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, re
       cache={[{ drawBorder: true }]}
       ref={groupRef}
     >
-      {/** A bigger region for mouseEnter event */}
-      <Line x={x1} y={y1 - 80} points={[0, -80, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, -80]} closed />
       <Line
         x={x1}
         y={y1}
         points={[0, 0, 0, y2 - y1, x2 - x1, y2 - y1, x2 - x1, 0]}
         closed
-        stroke={COLOR}
+        stroke={color}
         strokeWidth={2 / scale}
+        hitStrokeWidth={50 / scale}
       />
-      <Circle draggable name="leftTop" x={x1} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
-      <Circle draggable name="rightTop" x={x2} y={y1} radius={radius} fill={COLOR} onDragMove={handleDrag} />
+      <Circle draggable name="leftTop" x={x1} y={y1} radius={radius} fill={color} onDragMove={handleDrag} />
+      <Circle draggable name="rightTop" x={x2} y={y1} radius={radius} fill={color} onDragMove={handleDrag} />
       <Circle
         draggable
         name="rightBottom"
         x={x2}
         y={y2}
         radius={radius}
-        fill={COLOR}
+        fill={color}
         onDragMove={handleDrag}
       />
       <Circle
@@ -423,7 +490,7 @@ const AOIBox: React.FC<AOIBoxProps> = ({ box, onBoxChange, visible, boundary, re
         x={x1}
         y={y2}
         radius={radius}
-        fill={COLOR}
+        fill={color}
         onDragMove={handleDrag}
       />
       <Path

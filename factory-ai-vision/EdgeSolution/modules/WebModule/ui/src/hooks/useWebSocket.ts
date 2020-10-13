@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { receiveNotification } from '../action/creators/notificationActionCreators';
+import { receiveNotification } from '../store/notificationSlice';
 
 export const useWebSocket = (): void => {
   const dispatch = useDispatch();
@@ -13,7 +13,6 @@ export const useWebSocket = (): void => {
     const ws = new WebSocket(endPoint);
 
     ws.onmessage = ({ data }): void => {
-      console.log(data);
       const deSerializedData = JSON.parse(data);
       dispatch(receiveNotification(deSerializedData));
     };

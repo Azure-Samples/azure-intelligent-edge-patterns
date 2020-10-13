@@ -90,6 +90,7 @@ class Stream:
                     continue
                 if self.last_send == self.last_update:
                     # logger.warning('no new img')
+                    time.sleep(0.03)
                     continue
                 if cnt % 30 == 1:
                     logger.warning(
@@ -139,6 +140,7 @@ class Stream:
                     continue
                 if self.last_send == self.last_update:
                     # logger.warning('no new img')
+                    time.sleep(0.03)
                     continue
                 if cnt % 30 == 1:
                     logger.warning(

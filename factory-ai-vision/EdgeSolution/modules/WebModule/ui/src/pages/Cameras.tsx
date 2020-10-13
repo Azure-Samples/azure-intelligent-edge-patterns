@@ -1,70 +1,56 @@
-/* eslint-disable @typescript-eslint/camelcase */
-import React, { useEffect, FC } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Grid } from '@fluentui/react-northstar';
+import React, { useState, useMemo } from 'react';
+import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
+import { useConstCallback } from '@uifabric/react-hooks';
+import { useSelector } from 'react-redux';
 
-import { getCameras, postCamera, selectAllCameras } from '../store/cameraSlice';
-import ImageLink from '../components/ImageLink';
-import { AddModuleDialog } from '../components/AddModuleDialog/AddModuleDialog';
+import { State } from 'RootStateType';
+import { CameraDetailList } from '../components/CameraDetailList';
+import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
+import { Instruction } from '../components/Instruction';
 
-const Cameras: FC = (): JSX.Element => {
-  const dispatch = useDispatch();
-  const cameras = useSelector(selectAllCameras);
+const theme = getTheme();
 
-  useEffect(() => {
-    dispatch(getCameras(false));
-  }, [dispatch]);
+export const Cameras: React.FC = () => {
+  const [isPanelOpen, setPanelOpen] = useState(false);
+  const showInstruction = useSelector(
+    (state: State) => state.camera.nonDemo.length > 0 && state.labelImages.ids.length === 0,
+  );
+
+  const dismissPanel = useConstCallback(() => setPanelOpen(false));
+  const openPanel = useConstCallback(() => setPanelOpen(true));
+
+  const commandBarItems: ICommandBarItemProps[] = useMemo(
+    () => [
+      {
+        key: 'addBtn',
+        text: 'Add',
+        iconProps: {
+          iconName: 'Add',
+        },
+        onClick: openPanel,
+      },
+    ],
+    [openPanel],
+  );
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexFlow: 'column',
-        justifyContent: 'space-between',
-        padding: '3em',
-        height: '100%',
-      }}
-    >
-      <Grid columns="8" styles={{ height: '75%' }}>
-        {cameras.map((camera, i) => (
-          <ImageLink
-            key={i}
-            to={`/cameras/detail?cameraId=${camera.id}`}
-            defaultSrc="/icons/Play.png"
-            bgImgSrc="/icons/defaultCamera.png"
-            width="6.25em"
-            height="6.25em"
-            bgImgStyle={{
-              backgroundSize: '60%',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-            label={camera.name}
-          />
-        ))}
-      </Grid>
-      <AddModuleDialog
-        header="Add Camera"
-        fields={[
-          {
-            placeholder: 'Name',
-            key: 'name',
-            type: 'input',
-            required: true,
-          },
-          {
-            placeholder: 'RTSP URL',
-            key: 'rtsp',
-            type: 'input',
-            required: true,
-          },
-        ]}
-        onConfirm={({ name, rtsp }): void => {
-          dispatch(postCamera({ name, rtsp }));
-        }}
+    <Stack styles={{ root: { height: '100%' } }}>
+      <CommandBar
+        items={commandBarItems}
+        styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
       />
-    </div>
+      <Stack styles={{ root: { padding: '15px' } }} grow>
+        {showInstruction && (
+          <Instruction
+            title="Successfully added a camera!"
+            subtitle="Now that you have added a camera, you can use that camera to capture images and tag objects for your model."
+            button={{ text: 'Go to Images', to: '/images' }}
+          />
+        )}
+        <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
+        <CameraDetailList onAddBtnClick={openPanel} />
+      </Stack>
+      <AddEditCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
+    </Stack>
   );
 };
-
-export default Cameras;

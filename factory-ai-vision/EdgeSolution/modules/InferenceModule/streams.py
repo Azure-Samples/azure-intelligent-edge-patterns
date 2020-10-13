@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import logging
@@ -31,6 +32,8 @@ UPLOAD_INTERVAL = 5
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 IS_OPENCV = os.environ.get("IS_OPENCV", "false")
+
+DISPLAY_KEEP_ALIVE_THRESHOLD = 10  # seconds
 
 try:
     iot = IoTHubModuleClient.create_from_edge_environment()
@@ -66,6 +69,7 @@ class Stream:
             frameRate = 10
         # self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
         self.cam_is_alive = True
+        self.last_display_keep_alive = None
 
         self.IMG_WIDTH = 960
         self.IMG_HEIGHT = 540
@@ -156,6 +160,7 @@ class Stream:
             while self.cam_is_alive:
 
                 if self.last_send == self.last_update:
+                    time.sleep(0.03)
                     continue
                 cnt += 1
                 if cnt % 30 == 1:
@@ -221,7 +226,11 @@ class Stream:
             self.lva_mode = lva_mode
             if IS_OPENCV == "true":
                 logger.info("post to CVModule")
-                data = {'stream_id': self.cam_id, 'rtsp': self.cam_source, 'endpoint': 'http://InferenceModule:5000'}
+                data = {
+                    "stream_id": self.cam_id,
+                    "rtsp": self.cam_source,
+                    "endpoint": "http://InferenceModule:5000",
+                }
                 res = requests.post("http://CVCaptureModule:9000/streams", json=data)
             else:
                 self._update_instance(normalize_rtsp(cam_source), str(frameRate))
@@ -401,10 +410,12 @@ class Stream:
         # self.mutex.acquire()
         self.cam_is_alive = False
         # self.mutex.release()
-        
-        if IS_OPENCV == 'true':
+
+        if IS_OPENCV == "true":
             logger.info("get CVModule")
-            res = requests.get("http://CVCaptureModule:9000/delete_stream/"+self.cam_id)
+            res = requests.get(
+                "http://CVCaptureModule:9000/delete_stream/" + self.cam_id
+            )
         else:
             gm.invoke_graph_instance_deactivate(self.cam_id)
         logger.info("Deactivate stream {}".format(self.cam_id))
@@ -572,6 +583,21 @@ class Stream:
             cam_source=self.cam_source,
             send_video_to_cloud=self.send_video_to_cloud,
         )
+
+    def update_display_keep_alive(self):
+        self.last_display_keep_alive = time.time()
+
+    def display_is_alive(self):
+        return self.last_display_keep_alive + DISPLAY_KEEP_ALIVE_THRESHOLD > time.time()
+
+    def gen(self):
+        while self.cam_is_alive and self.display_is_alive():
+            if self.last_drawn_img is not None:
+                jpg = cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()
+                yield (
+                    b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + jpg + b"\r\n"
+                )
+            time.sleep(0.04)
 
 
 def web_module_url():

@@ -1,17 +1,16 @@
-import { createAsyncThunk, createSlice, createEntityAdapter } from '@reduxjs/toolkit';
+import { createSlice, createEntityAdapter } from '@reduxjs/toolkit';
 import Axios from 'axios';
 import { State } from 'RootStateType';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 export type Location = {
   id: number;
   name: string;
-  description: string;
-  is_demo: boolean;
 };
 
 const locationsAdapter = createEntityAdapter<Location>();
 
-export const getLocations = createAsyncThunk<any, boolean, { state: State }>(
+export const getLocations = createWrappedAsync<any, boolean, { state: State }>(
   'locations/get',
   async (isDemo) => {
     const response = await Axios.get(`/api/locations?is_demo=${Number(isDemo)}`);
@@ -22,12 +21,15 @@ export const getLocations = createAsyncThunk<any, boolean, { state: State }>(
   },
 );
 
-export const postLocation = createAsyncThunk('locations/post', async (newLocation: Omit<Location, 'id'>) => {
-  const response = await Axios.post(`/api/locations/`, newLocation);
-  return response.data;
-});
+export const postLocation = createWrappedAsync(
+  'locations/post',
+  async (newLocation: Omit<Location, 'id'>) => {
+    const response = await Axios.post(`/api/locations/`, newLocation);
+    return response.data;
+  },
+);
 
-export const deleteLocation = createAsyncThunk('locations/delete', async (id: number) => {
+export const deleteLocation = createWrappedAsync('locations/delete', async (id: number) => {
   await Axios.delete(`/api/locations/${id}/`);
   return id;
 });
@@ -51,4 +53,5 @@ export default reducer;
 export const {
   selectAll: selectAllLocations,
   selectById: selectLocationById,
+  selectEntities: selectLocationEntities,
 } = locationsAdapter.getSelectors<State>((state) => state.locations);
