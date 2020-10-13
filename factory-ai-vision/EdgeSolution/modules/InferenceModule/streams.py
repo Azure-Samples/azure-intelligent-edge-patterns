@@ -590,14 +590,14 @@ class Stream:
     def display_is_alive(self):
         return self.last_display_keep_alive + DISPLAY_KEEP_ALIVE_THRESHOLD > time.time()
 
-    async def gen(self):
+    def gen(self):
         while self.cam_is_alive and self.display_is_alive():
             if self.last_drawn_img is not None:
                 jpg = cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()
                 yield (
                     b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + jpg + b"\r\n"
                 )
-            asyncio.sleep(0.04)
+            time.sleep(0.04)
 
 
 def web_module_url():
