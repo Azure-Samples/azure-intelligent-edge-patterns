@@ -7,19 +7,25 @@ import threading
 import time
 
 from django.http import StreamingHttpResponse
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from configs.general_configs import PRINT_THREAD
+
+from ...cameras.models import Camera
+from ...general.api.swagger_schemas import StreamAutoSchema
 from ..models import VideoFeed
 
 logger = logging.getLogger(__name__)
 
-STREAM_GC_TIME_THRESHOLD = 5  # Seconds
+STREAM_GC_TIME_THRESHOLD = 15  # Seconds
 
 
-class StreamManager():
-    """StreamManager
-    """
+class StreamManager:
+    """StreamManager"""
 
     def __init__(self):
         self.streams = []
@@ -27,11 +33,20 @@ class StreamManager():
         self.gc()
 
     def add(self, stream: VideoFeed):
-        """add stream
-        """
+        """add stream"""
         self.mutex.acquire()
         self.streams.append(stream)
         self.mutex.release()
+
+    def get_stream_by_camera_id(self, camera_id):
+        self.mutex.acquire()
+        for stream in self.streams:
+            if stream.camera_id == camera_id:
+                stream.update_keep_alive()
+                self.mutex.release()
+                return stream
+        self.mutex.release()
+        return None
 
     def gc(self):
         """Garbage collector
@@ -43,17 +58,21 @@ class StreamManager():
         def _gc(self):
             while True:
                 self.mutex.acquire()
-                logger.info("streams: %s", self.streams)
+                if PRINT_THREAD:
+                    logger.info("streams: %s", self.streams)
                 to_delete = []
                 for index, stream in enumerate(self.streams):
-                    logger.info('Stream %s elapse time: %s, Currnet time: %s',
-                                index, stream.keep_alive, time.time())
-                    if stream.keep_alive + STREAM_GC_TIME_THRESHOLD < time.time(
-                    ):
+                    logger.info(
+                        "Stream %s elapse time: %s, Currnet time: %s",
+                        index,
+                        stream.keep_alive,
+                        time.time(),
+                    )
+                    if stream.keep_alive + STREAM_GC_TIME_THRESHOLD < time.time():
 
                         # stop the inactive stream
                         # (the ones users didnt click disconnect)
-                        logger.info('stream %s inactive', index)
+                        logger.info("stream %s inactive", index)
                         stream.close()
 
                         # collect the stream, to delete later
@@ -65,7 +84,7 @@ class StreamManager():
                 self.mutex.release()
                 time.sleep(3)
 
-        threading.Thread(target=_gc, args=(self,)).start()
+        threading.Thread(target=_gc, args=(self,), daemon=True).start()
 
     def keep_alive_(self):
         cnt = 0
@@ -77,31 +96,48 @@ class StreamManager():
         return cnt
 
 
-if 'runserver' in sys.argv:
+if "runserver" in sys.argv:
     stream_manager = StreamManager()
 
 
-@api_view()
+@swagger_auto_schema(
+    auto_schema=StreamAutoSchema,
+    method="get",
+    operation_summary="Open a videofeed.",
+    manual_parameters=[
+        openapi.Parameter(
+            "camera_id",
+            openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description="camera_id",
+        )
+    ],
+)
+@api_view(["GET"])
 def video_feed(request):
-    """videofeed return
-    """
+    """videofeed."""
 
-    s = VideoFeed()
-    stream_manager.add(s)
+    camera_id = request.query_params.get("camera_id") or None
+    try:
+        Camera.objects.get(pk=camera_id)
+    except Exception:
+        raise NotFound(detail=f"camera_id: {camera_id} not found")
+    stream = stream_manager.get_stream_by_camera_id(camera_id)
+    if stream is None:
+        stream = VideoFeed(camera_id)
+        stream_manager.add(stream)
 
     return StreamingHttpResponse(
-        s.gen(), content_type="multipart/x-mixed-replace;boundary=frame")
+        stream.gen(), content_type="multipart/x-mixed-replace;boundary=frame"
+    )
 
 
-@api_view()
+@swagger_auto_schema(operation_summary="Keep a videofeed alive.", method="get")
+@api_view(["GET"])
 def keep_alive(request):
-    """keep stream alive
-    """
+    """keep stream alive"""
 
     logger.info("Keeping streams alive")
 
     cnt = stream_manager.keep_alive_()
-    return Response({
-        'status': 'ok',
-        'detail': 'keep %s stream(s) alive' % cnt
-    })
+    return Response({"status": "ok", "detail": "keep %s stream(s) alive" % cnt})

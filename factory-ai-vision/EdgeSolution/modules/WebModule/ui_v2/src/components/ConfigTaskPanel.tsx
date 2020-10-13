@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as R from 'ramda';
 import {
@@ -25,7 +25,7 @@ import { partOptionsSelector, getParts } from '../store/partSlice';
 import {
   ProjectData,
   InferenceMode,
-  InferenceProtocal,
+  InferenceProtocol,
   InferenceSource,
 } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
@@ -91,6 +91,10 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   }, [initialProjectData]);
 
   const cameraOptions = useSelector(cameraOptionsSelectorInConfig(projectData.trainingProject));
+  const selectedCameraOptions = useMemo(
+    () => cameraOptions.filter((e) => projectData.cameras.includes(e.key)),
+    [cameraOptions, projectData.cameras],
+  );
   const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
   const trainingProjectOptions = useSelector(
     trainingProjectOptionsSelector(
@@ -114,6 +118,12 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       const relatedScenario = scenarios.find((e) => e.trainingProject === cloneProject.trainingProject);
       if (relatedScenario !== undefined) cloneProject.inferenceMode = relatedScenario.inferenceMode;
       else cloneProject.inferenceMode = InferenceMode.PartDetection;
+    } else if (key === 'cameras') {
+      cloneProject.cameraToBeRecord = cloneProject.cameraToBeRecord.filter((e) =>
+        cloneProject.cameras.includes(e),
+      );
+    } else if (key === 'sendVideoToCloud' && !value) {
+      cloneProject.cameraToBeRecord = [];
     }
     setProjectData(cloneProject);
   }
@@ -296,6 +306,20 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
                 onChange('sendVideoToCloud', checked);
               }}
             />
+            <Dropdown
+              disabled={!projectData.sendVideoToCloud}
+              options={selectedCameraOptions}
+              multiSelect
+              selectedKeys={projectData.cameraToBeRecord}
+              onChange={(_, option) => {
+                onChange(
+                  'cameraToBeRecord',
+                  option.selected
+                    ? [...projectData.cameraToBeRecord, option.key as number]
+                    : projectData.cameraToBeRecord.filter((key) => key !== option.key),
+                );
+              }}
+            />
           </Stack.Item>
           <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
@@ -326,15 +350,15 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           {projectData.inferenceSource === InferenceSource.LVA && (
             <Stack.Item disableShrink>
               <div className={classNames.textWrapper}>
-                <Label>Portocal of inference</Label>
+                <Label>Protocol of inference</Label>
               </div>
               <Toggle
                 inlineLabel
                 label={projectData.inferenceProtocol}
-                checked={projectData.inferenceProtocol === InferenceProtocal.GRPC}
+                checked={projectData.inferenceProtocol === InferenceProtocol.GRPC}
                 onChange={(_, checked) => {
-                  if (checked) onChange('inferenceProtocol', InferenceProtocal.GRPC);
-                  else onChange('inferenceProtocol', InferenceProtocal.Http);
+                  if (checked) onChange('inferenceProtocol', InferenceProtocol.GRPC);
+                  else onChange('inferenceProtocol', InferenceProtocol.Http);
                 }}
               />
             </Stack.Item>

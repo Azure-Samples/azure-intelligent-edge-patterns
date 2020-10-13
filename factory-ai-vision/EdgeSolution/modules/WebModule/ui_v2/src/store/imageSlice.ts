@@ -23,6 +23,7 @@ type ImageFromServer = {
   project: number;
   timestamp: string;
   camera: number;
+  manual_checked: boolean;
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
@@ -39,6 +40,8 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     hasRelabeled: false,
     timestamp: response.timestamp,
     camera: response.camera,
+    uploaded: response.uploaded,
+    manualChecked: response.manual_checked,
   };
 };
 
@@ -119,12 +122,14 @@ export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { sta
       .map((e: Annotation) => e.label);
     const imgPart = getState().labelImages.entities[imageId].part;
 
+    const manualChecked = labels.length > 0;
+
     await Axios.patch(`/api/images/${imageId}/`, {
       labels: JSON.stringify(labels),
-      is_relabel: false,
+      manual_checked: manualChecked,
       part: imgPart,
     });
-    return { imageId };
+    return { imageId, manualChecked };
   },
 );
 
@@ -145,7 +150,10 @@ const slice = createSlice({
         imageAdapter.upsertMany(state, action.payload.images);
       })
       .addCase(saveLabelImageAnnotation.fulfilled, (state, action) => {
-        imageAdapter.updateOne(state, { id: action.payload.imageId, changes: { isRelabel: false } });
+        imageAdapter.updateOne(state, {
+          id: action.payload.imageId,
+          changes: { manualChecked: action.payload.manualChecked },
+        });
       })
       .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
       .addCase(postImages.fulfilled, (state, action) => {

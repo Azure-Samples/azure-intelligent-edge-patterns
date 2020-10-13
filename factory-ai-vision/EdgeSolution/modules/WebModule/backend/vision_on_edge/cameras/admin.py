@@ -1,5 +1,4 @@
-"""
-Camera admin
+"""App admin.
 """
 from django.contrib import admin
 

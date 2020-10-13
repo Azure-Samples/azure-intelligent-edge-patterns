@@ -1,4 +1,4 @@
-"""App Serializers.
+"""App API serializers.
 """
 
 import logging
@@ -11,13 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class SettingSerializer(serializers.ModelSerializer):
-    """SettingSerializer.
-    """
+    """SettingSerializer."""
 
     class Meta:
-        """Meta.
-        """
-
         model = Setting
         fields = "__all__"
 
@@ -32,16 +28,22 @@ class SettingSerializer(serializers.ModelSerializer):
             endpoint=validated_data["endpoint"],
             training_key=validated_data["training_key"],
             defaults={
-                "name":
-                    validated_data["name"],
-                "iot_hub_connection_string":
-                    validated_data["iot_hub_connection_string"],
-                "device_id":
-                    validated_data["device_id"],
-                "module_id":
-                    validated_data["module_id"],
-                "is_collect_data":
-                    validated_data["is_collect_data"],
+                "name": validated_data["name"],
+                "iot_hub_connection_string": validated_data[
+                    "iot_hub_connection_string"
+                ],
+                "device_id": validated_data["device_id"],
+                "module_id": validated_data["module_id"],
+                "is_collect_data": validated_data["is_collect_data"],
             },
         )
         return obj
+
+
+class ListProjectProjectSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+
+
+class ListProjectSerializer(serializers.Serializer):
+    projects = ListProjectProjectSerializer(many=True)

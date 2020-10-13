@@ -11,10 +11,6 @@ import {
   POST_PROJECT_SUCCESS,
   POST_PROJECT_FALIED,
   PostProjectFaliedAction,
-  DeleteProjectSuccessAction,
-  DELETE_PROJECT_SUCCESS,
-  DeleteProjectFaliedAction,
-  DELETE_PROJECT_FALIED,
   ProjectData,
   PostProjectRequestAction,
   POST_PROJECT_REQUEST,
@@ -42,7 +38,7 @@ import {
   StopInferenceAction,
   ChangeStatusAction,
   TrainingStatus,
-  InferenceProtocal,
+  InferenceProtocol,
   InferenceSource,
 } from './projectTypes';
 import { selectAllImages } from '../imageSlice';
@@ -113,12 +109,13 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     probThreshold: data?.prob_threshold.toString() ?? '10',
     name: data?.name ?? '',
     inferenceMode: data?.inference_mode ?? '',
-    sendVideoToCloud: data?.send_video_to_cloud ?? false,
+    sendVideoToCloud: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+    cameraToBeRecord: data?.send_video_to_cloud.filter((e) => e.send_video_to_cloud).map((e) => e.camera_id),
     deployTimeStamp: data?.deploy_timestamp ?? '',
     setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
     recomendedFps: data?.recomendedFps ?? 10,
-    inferenceProtocol: data?.inference_protocol ?? InferenceProtocal.GRPC,
+    inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
     inferenceSource: data?.inference_source ?? InferenceSource.LVA,
   },
   isDemo,
@@ -126,15 +123,6 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
 const postProjectFail = (error: Error, isDemo: boolean): PostProjectFaliedAction => ({
   type: POST_PROJECT_FALIED,
   error,
-  isDemo,
-});
-
-const deleteProjectSuccess = (isDemo: boolean): DeleteProjectSuccessAction => ({
-  type: DELETE_PROJECT_SUCCESS,
-  isDemo,
-});
-const deleteProjectFailed = (isDemo: boolean): DeleteProjectFaliedAction => ({
-  type: DELETE_PROJECT_FALIED,
   isDemo,
 });
 
@@ -212,12 +200,15 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         trainingProject: partDetection[0]?.project ?? null,
         name: partDetection[0]?.name ?? '',
         inferenceMode: partDetection[0]?.inference_mode ?? '',
-        sendVideoToCloud: partDetection[0]?.send_video_to_cloud ?? false,
+        sendVideoToCloud: partDetection[0]?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+        cameraToBeRecord: partDetection[0]?.send_video_to_cloud
+          .filter((e) => e.send_video_to_cloud)
+          .map((e) => e.camera_id),
         deployTimeStamp: partDetection[0]?.deploy_timestamp ?? '',
         setFpsManually: partDetection[0]?.fps !== recomendedFps,
         recomendedFps,
         fps: partDetection[0]?.fps ?? 10,
-        inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocal.GRPC,
+        inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocol.GRPC,
         inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
       };
       dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
@@ -251,7 +242,10 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       metrics_is_send_iothub: projectData.sendMessageToCloud,
       metrics_frame_per_minutes: projectData.framesPerMin,
       name: projectData.name,
-      send_video_to_cloud: projectData.sendVideoToCloud,
+      send_video_to_cloud: projectData.cameras.map((e) => ({
+        camera_id: e,
+        send_video_to_cloud: projectData.cameraToBeRecord.includes(e),
+      })),
       inference_mode: projectData.inferenceMode,
       fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
@@ -268,28 +262,17 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
           false,
         ),
       );
-      getTrain(data.id);
+      dispatch(getConfigure(data.id));
       return data.id;
     })
     .catch((err) => {
       dispatch(postProjectFail(err, false));
     }) as Promise<number>;
 };
-const getTrain = (projectId): void => {
-  Axios.get(`/api/part_detections/${projectId}/configure`).catch((err) => console.error(err));
-};
 
-export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
-  const projectId = getProjectData(getState()).id;
-  return Axios.patch(`/api/part_detections/${projectId}/`, { cameras: [], has_configured: false })
-    .then(() => {
-      return dispatch(deleteProjectSuccess(isDemo));
-    })
-    .catch((err) => {
-      alert(err);
-      dispatch(deleteProjectFailed(isDemo));
-    });
-};
+export const getConfigure = createWrappedAsync<any, number>('project/configure', async (projectId) => {
+  await Axios.get(`/api/part_detections/${projectId}/configure`);
+});
 
 export const thunkGetTrainingLog = (projectId: number, isDemo: boolean, cameraId: number) => (
   dispatch,

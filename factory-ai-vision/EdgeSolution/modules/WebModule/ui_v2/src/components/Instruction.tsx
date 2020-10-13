@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Text, PrimaryButton, Stack, IconButton } from '@fluentui/react';
 import { useHistory } from 'react-router-dom';
+import * as R from 'ramda';
 
 type InstructionProps = {
   title: string;
@@ -8,11 +9,19 @@ type InstructionProps = {
   smallIcon?: boolean;
   button?: {
     text: string;
-    to: string;
+    to?: string;
+    onClick?: () => void;
   };
+  styles?: any;
 };
 
-export const Instruction: React.FC<InstructionProps> = ({ title, subtitle, button, smallIcon }) => {
+export const Instruction: React.FC<InstructionProps> = ({
+  title,
+  subtitle,
+  button,
+  smallIcon,
+  styles = {},
+}) => {
   const [visible, setvisible] = useState(true);
   const history = useHistory();
 
@@ -20,16 +29,19 @@ export const Instruction: React.FC<InstructionProps> = ({ title, subtitle, butto
 
   return (
     <Stack
-      styles={{
-        root: {
-          background: '#F8FFF0',
-          border: '1px solid #57A300',
-          borderRadius: '2px',
-          padding: '19px 7px',
-          position: 'relative',
-          margin: '24px 0px',
+      styles={R.mergeDeepRight(
+        {
+          root: {
+            background: '#F8FFF0',
+            border: '1px solid #57A300',
+            borderRadius: '2px',
+            padding: '19px 7px',
+            position: 'relative',
+            margin: '24px 0px',
+          },
         },
-      }}
+        styles,
+      )}
       horizontal
     >
       <img src={smallIcon ? '/icons/instruction_icon_sm.svg' : '/icons/instruction_icon.svg'} />
@@ -41,7 +53,10 @@ export const Instruction: React.FC<InstructionProps> = ({ title, subtitle, butto
             <PrimaryButton
               text={button.text}
               styles={{ root: { marginTop: '15px' } }}
-              onClick={() => history.push(button.to)}
+              onClick={() => {
+                if (button.onClick) button.onClick();
+                if (button.to) history.push(button.to);
+              }}
             />
           )}
         </Stack.Item>

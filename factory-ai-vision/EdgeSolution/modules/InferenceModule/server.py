@@ -6,9 +6,12 @@ import logging
 import logging.config
 import os
 import sys
+import socket
 import threading
 import time
+import zmq
 from concurrent import futures
+from typing import List
 
 import cv2
 import grpc
@@ -17,7 +20,13 @@ import uvicorn
 from fastapi import BackgroundTasks, FastAPI, Request
 
 import extension_pb2_grpc
-from api.models import CamerasModel, PartDetectionModeEnum, PartsModel, UploadModelBody
+from api.models import (
+    CamerasModel,
+    PartDetectionModeEnum,
+    PartsModel,
+    StreamModel,
+    UploadModelBody,
+)
 from arguments import ArgumentParser, ArgumentsType
 from exception_handler import PrintGetExceptionDetails
 from http_inference_engine import HttpInferenceEngine
@@ -45,6 +54,7 @@ IMG_WIDTH = 960
 IMG_HEIGHT = 540
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
+IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 
 # Main thread
 
@@ -62,12 +72,11 @@ http_inference_engine = HttpInferenceEngine(stream_manager)
 
 
 @app.get("/streams")
-def streams():
+def streams() -> List[StreamModel]:
     """streams."""
     # logger.info(onnx.last_prediction)
     # onnx.last_prediction
-    logger.info("Streams: %s", stream_manager.streams)
-    return {"streams": list(stream_manager.streams.keys())}
+    return [stream.to_api_model() for stream in stream_manager.streams.values()]
 
 
 @app.get("/prediction")
@@ -81,8 +90,7 @@ def prediction(cam_id: str):
 
 @app.post("/predict")
 async def predict(camera_id: str, request: Request):
-    """predict.
-    """
+    """predict."""
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -139,13 +147,11 @@ def update_part_detection_id(part_detection_id: int):
 def update_retrain_parameters(
     is_retrain: bool, confidence_min: int, confidence_max: int, max_images: int
 ):
-    """update_retrain_parameters.
-    """
+    """update_retrain_parameters."""
 
     # FIXME currently set all streams
     # cam_id = request.args.get('cam_id')
     # s = stream_manager.get_stream_by_id(cam_id)
-    is_retrain = is_retrain == "True"
     confidence_min = int(confidence_min) * 0.01
     confidence_max = int(confidence_max) * 0.01
     max_images = int(max_images)
@@ -165,8 +171,7 @@ def update_retrain_parameters(
 
 @app.post("/update_model")
 def update_model(request_body: UploadModelBody):
-    """update_model.
-    """
+    """update_model."""
 
     if not request_body.model_uri and not request_body.model_dir:
         return "missing model_uri or model_dir", 400
@@ -179,7 +184,7 @@ def update_model(request_body: UploadModelBody):
 
         logger.info("Got Model URI %s", request_body.model_uri)
 
-        # FIXME webmodule didnt send set detection_mode as Part Detection somtimes.
+        # FIXME webmodule didnt send set detection_mode as Part Detection sometimes.
         # workaround
         onnx.set_detection_mode("PD")
         onnx.set_is_scenario(False)
@@ -267,6 +272,7 @@ def update_cams(request_body: CamerasModel):
             line_info,
             zone_info,
         )
+        stream.send_video_to_cloud = cam.send_video_to_cloud
 
     logger.info("Streams %s", stream_manager.streams)
     return "ok"
@@ -276,17 +282,7 @@ def update_cams(request_body: CamerasModel):
 def update_part_detection_mode(part_detection_mode: PartDetectionModeEnum):
     """update_part_detection_mode."""
 
-    onnx.set_detection_mode(part_detection_mode)
-    return "ok"
-
-
-@app.get("/update_send_video_to_cloud")
-def update_send_video_to_cloud(send_video_to_cloud: bool):
-    """update_send_video_to_cloud."""
-
-    onnx.send_video_to_cloud = send_video_to_cloud
-    # for s in stream_manager.get_streams():
-    #     s.model.send_video_to_cloud = send_video_to_cloud
+    onnx.set_detection_mode(part_detection_mode.value)
     return "ok"
 
 
@@ -347,15 +343,13 @@ def get_scenario():
                 "is_retrain": stream.is_retrain,
             }
         )
-    return json.dumps(
-        {
-            "num_streams": len(stream_manager.streams),
-            "stream_ids": list(stream_manager.streams.keys()),
-            "streams_status": streams_status,
-            "parts": onnx.parts,
-            "scenario": onnx.detection_mode,
-        }
-    )
+    return {
+        "num_streams": len(stream_manager.streams),
+        "stream_ids": list(stream_manager.streams.keys()),
+        "streams_status": streams_status,
+        "parts": onnx.parts,
+        "scenario": onnx.detection_mode,
+    }
 
 
 @app.get("/update_prob_threshold")
@@ -396,8 +390,7 @@ def get_recommended_fps(number_of_cameras: int):
 
 @app.get("/update_lva_mode")
 def update_lva_mode(lva_mode: str):
-    """update_lva_mode.
-    """
+    """update_lva_mode."""
     logger.info("Updating lva_mode...")
 
     for s in stream_manager.get_streams():
@@ -459,8 +452,7 @@ def local_main():
 
 
 def benchmark():
-    """benchmark.
-    """
+    """benchmark."""
     # app.run(host='0.0.0.0', debug=False)
     # s.update_cam(cam_type, cam_source, frame_rate, cam_id, has_aoi, aoi_info,
     SAMPLE_VIDEO = "./sample_video/video.mp4"
@@ -507,6 +499,44 @@ def benchmark():
     logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
     logger.info("============= BenchMarking (End) ==================")
 
+def cvcapture_url():
+    if is_edge():
+        ip = socket.gethostbyname("CVCaptureModule")
+        return "tcp://" + ip + ":5556"
+    return "tcp://localhost:5556"
+
+def opencv_zmq():
+    context = zmq.Context()
+    receiver = context.socket(zmq.SUB)
+    receiver.setsockopt(zmq.SUBSCRIBE, bytes('', 'utf-8'))
+    receiver.connect(cvcapture_url())
+    cnt = {}
+    def run():
+        while True:
+            buf = receiver.recv_multipart()
+            
+            if buf[0] not in cnt.keys():
+                cnt[buf[0]] = 1
+            else:
+                cnt[buf[0]] += 1
+            logger.info('receiving from channel {0}, cnt: {1}'.format(buf[0], cnt[buf[0]]))
+            stream = stream_manager.get_stream_by_id(buf[0].decode('utf-8'))
+            logger.info(buf[0])
+            if not stream:
+                predicitons = []
+                logger.info("Stream not ready yet.")
+                continue
+            try:
+                nparr = np.frombuffer(buf[1], np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                stream.predict(img)
+                predictions = stream.last_prediction
+                logger.info("Predictions %s", predictions)
+            except:
+                logger.error("Unexpected error: %s", sys.exc_info())
+        receiver.close()
+    threading.Thread(target=run).start()
+
 
 def main():
     """main.
@@ -517,29 +547,33 @@ def main():
         # Get application arguments
         argument_parser = ArgumentParser(ArgumentsType.SERVER)
 
-        # Get port number
-        grpcServerPort = argument_parser.GetGrpcServerPort()
-        logger.info("gRPC server port: %s", grpcServerPort)
+        if IS_OPENCV == 'false':
+            # Get port number
+            grpcServerPort = argument_parser.GetGrpcServerPort()
+            logger.info("gRPC server port: %s", grpcServerPort)
 
-        # init graph topology & instance
-        counter = 0
-        while init_topology() == -1:
-            if counter == 100:
-                logger.critical(
-                    "Failed to init topology, please check whether direct method still works"
-                )
-                sys.exit(-1)
-            logger.warning("Failed to init topology, try again 10 secs later")
-            time.sleep(10)
-            counter += 1
+            # init graph topology & instance
+            counter = 0
+            while init_topology() == -1:
+                if counter == 100:
+                    logger.critical(
+                        "Failed to init topology, please check whether direct method still works"
+                    )
+                    sys.exit(-1)
+                logger.warning("Failed to init topology, try again 10 secs later")
+                time.sleep(10)
+                counter += 1
 
-        # create gRPC server and start running
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        extension_pb2_grpc.add_MediaGraphExtensionServicer_to_server(
-            InferenceEngine(stream_manager), server
-        )
-        server.add_insecure_port(f"[::]:{grpcServerPort}")
-        server.start()
+            # create gRPC server and start running
+            server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+            extension_pb2_grpc.add_MediaGraphExtensionServicer_to_server(
+                InferenceEngine(stream_manager), server
+            )
+            server.add_insecure_port(f"[::]:{grpcServerPort}")
+            server.start()
+        else:
+            logger.info("opencv server")
+            # opencv_zmq()
         uvicorn.run(app, host="0.0.0.0", port=5000)
         # server.wait_for_termination()
 

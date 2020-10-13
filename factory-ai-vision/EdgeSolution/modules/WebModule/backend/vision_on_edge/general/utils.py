@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Universal utils that does not depends on any model
 """
 

@@ -1,5 +1,4 @@
-"""
-Serializers
+"""App API serializers.
 """
 
 import logging
@@ -17,8 +16,4 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = "__all__"
-        extra_kwargs = {
-            "timestamp": {
-                "required": False
-            },
-        }
+        extra_kwargs = {"timestamp": {"required": False}}

@@ -50,7 +50,7 @@ export enum InferenceMode {
   DefectDetection = 'DD',
 }
 
-export enum InferenceProtocal {
+export enum InferenceProtocol {
   Http = 'http',
   GRPC = 'grpc',
 }
@@ -77,12 +77,14 @@ export type ProjectData = {
   probThreshold: string;
   name: string;
   sendVideoToCloud: boolean;
+  // TODO
+  cameraToBeRecord: number[];
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
   setFpsManually: boolean;
   fps: number;
   recomendedFps: number;
-  inferenceProtocol: InferenceProtocal;
+  inferenceProtocol: InferenceProtocol;
   inferenceSource: InferenceSource;
 };
 
@@ -169,16 +171,6 @@ export type PostProjectFaliedAction = ProjectAction & {
   error: Error;
 };
 
-export const DELETE_PROJECT_SUCCESS = 'DELETE_PROJECT_SUCCESS';
-export type DeleteProjectSuccessAction = ProjectAction & {
-  type: typeof DELETE_PROJECT_SUCCESS;
-};
-
-export const DELETE_PROJECT_FALIED = 'DELETE_PROJECT_FALIED';
-export type DeleteProjectFaliedAction = ProjectAction & {
-  type: typeof DELETE_PROJECT_FALIED;
-};
-
 export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
 export type UpdateProjectDataAction = ProjectAction & {
   type: typeof UPDATE_PROJECT_DATA;
@@ -210,8 +202,6 @@ export type ProjectActionTypes =
   | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction
-  | DeleteProjectSuccessAction
-  | DeleteProjectFaliedAction
   | UpdateProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction

@@ -1,6 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { selectAllImages } from './imageSlice';
-import { selectAllAnno } from './annotationSlice';
 import { selectPartEntities, selectAllParts } from './partSlice';
 import { Item as ImageListItem } from '../components/ImageList';
 import { selectNonDemoProject } from './trainingProjectSlice';
@@ -26,7 +25,7 @@ export const selectImageItemByTaggedPart = (partId) =>
               id: img.id,
               image: img.image,
               timestamp: img.timestamp,
-              isRelabel: img.isRelabel,
+              manualChecked: img.manualChecked,
               partName: partEntities[img.part]?.name || '',
               cameraName: cameraEntities[img.camera]?.name,
             };
@@ -36,14 +35,12 @@ export const selectImageItemByTaggedPart = (partId) =>
 
 export const selectImageItemByUntagged = (unTagged: boolean) =>
   createSelector(
-    [selectAllImages, selectAllAnno, selectPartEntities, selectCameraEntities],
-    (images, annos, partEntities, cameraEntities) =>
+    [selectAllImages, selectPartEntities, selectCameraEntities],
+    (images, partEntities, cameraEntities) =>
       images
         .filter((img) => {
-          const hasAnno = !!annos.find((anno) => img.id === anno.image);
-          if (img.isRelabel) return false;
-          if (unTagged) return !hasAnno;
-          return hasAnno;
+          if (unTagged) return !img.manualChecked && !img.isRelabel;
+          return img.manualChecked;
         })
         .map(
           (img): ImageListItem => {
@@ -51,7 +48,7 @@ export const selectImageItemByUntagged = (unTagged: boolean) =>
               id: img.id,
               image: img.image,
               timestamp: img.timestamp,
-              isRelabel: img.isRelabel,
+              manualChecked: img.manualChecked,
               partName: partEntities[img.part]?.name || '',
               cameraName: cameraEntities[img.camera]?.name,
             };
@@ -64,14 +61,14 @@ export const selectImageItemByRelabel = () =>
     [selectAllImages, selectPartEntities, selectCameraEntities],
     (images, partEntities, cameraEntities) =>
       images
-        .filter((img) => img.isRelabel)
+        .filter((img) => img.isRelabel && !img.manualChecked)
         .map(
           (img): ImageListItem => {
             return {
               id: img.id,
               image: img.image,
               timestamp: img.timestamp,
-              isRelabel: img.isRelabel,
+              manualChecked: img.manualChecked,
               partName: partEntities[img.part]?.name || '',
               cameraName: cameraEntities[img.camera]?.name,
             };

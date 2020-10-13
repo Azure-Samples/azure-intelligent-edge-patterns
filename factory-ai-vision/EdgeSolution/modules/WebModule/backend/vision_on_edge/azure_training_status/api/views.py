@@ -1,4 +1,4 @@
-"""App views
+"""App API views.
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -14,7 +14,7 @@ from .serializers import TrainingStatusSerializer
 logger = logging.getLogger(__name__)
 
 
-class TrainingStatusViewSet(FiltersMixin, viewsets.ModelViewSet):
+class TrainingStatusViewSet(FiltersMixin, viewsets.ReadOnlyModelViewSet):
     """TrainingStatusViewSet.
 
     Filters:

@@ -11,6 +11,7 @@ import requests
 from azure.iot.device import IoTHubModuleClient
 from shapely.geometry import Polygon
 
+from api.models import StreamModel
 from exception_handler import PrintGetExceptionDetails
 from invoke import gm
 from object_detection import ObjectDetection
@@ -29,6 +30,7 @@ DETECTION_BUFFER_SIZE = 10000
 UPLOAD_INTERVAL = 5
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
+IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 
 try:
     iot = IoTHubModuleClient.create_from_edge_environment()
@@ -46,9 +48,11 @@ class Stream:
         sender,
         cam_type="video_file",
         cam_source="./sample_video/video.mp4",
+        send_video_to_cloud: bool = False,
     ):
         self.cam_id = cam_id
         self.model = model
+        self.send_video_to_cloud = send_video_to_cloud
 
         self.render = False
 
@@ -109,6 +113,8 @@ class Stream:
         self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
+        self.last_update = None
+        self.last_send = None
         self.use_line = False
         self.use_zone = False
         # self.tracker = Tracker()
@@ -148,6 +154,9 @@ class Stream:
                 time.sleep(2)
             cnt = 0
             while self.cam_is_alive:
+
+                if self.last_send == self.last_update:
+                    continue
                 cnt += 1
                 if cnt % 30 == 1:
                     logging.info(
@@ -161,6 +170,7 @@ class Stream:
                         cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes(),
                     ]
                 )
+                self.last_send = self.last_update
                 # self.mutex.release()
                 # FIXME need to fine tune this value
                 time.sleep(0.03)
@@ -209,7 +219,12 @@ class Stream:
             self.cam_source = cam_source
             self.frameRate = frameRate
             self.lva_mode = lva_mode
-            self._update_instance(normalize_rtsp(cam_source), str(frameRate))
+            if IS_OPENCV == "true":
+                logger.info("post to CVModule")
+                data = {'stream_id': self.cam_id, 'rtsp': self.cam_source, 'endpoint': 'http://InferenceModule:5000'}
+                res = requests.post("http://CVCaptureModule:9000/streams", json=data)
+            else:
+                self._update_instance(normalize_rtsp(cam_source), str(frameRate))
 
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
@@ -386,8 +401,12 @@ class Stream:
         # self.mutex.acquire()
         self.cam_is_alive = False
         # self.mutex.release()
-
-        gm.invoke_graph_instance_deactivate(self.cam_id)
+        
+        if IS_OPENCV == 'true':
+            logger.info("get CVModule")
+            res = requests.get("http://CVCaptureModule:9000/delete_stream/"+self.cam_id)
+        else:
+            gm.invoke_graph_instance_deactivate(self.cam_id)
         logger.info("Deactivate stream {}".format(self.cam_id))
 
     def predict(self, image):
@@ -461,7 +480,7 @@ class Stream:
             self.scenario.update(_detections)
 
         self.draw_img()
-        if self.model.send_video_to_cloud:
+        if self.send_video_to_cloud:
             self.precess_send_signal_to_lva()
 
         if self.scenario:
@@ -544,6 +563,15 @@ class Stream:
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
+        self.last_update = time.time()
+
+    def to_api_model(self):
+        return StreamModel(
+            cam_id=self.cam_id,
+            cam_type=self.cam_type,
+            cam_source=self.cam_source,
+            send_video_to_cloud=self.send_video_to_cloud,
+        )
 
 
 def web_module_url():
