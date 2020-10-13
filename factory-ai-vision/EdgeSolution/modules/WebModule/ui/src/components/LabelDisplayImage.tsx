@@ -1,11 +1,11 @@
-import React, { useCallback, useLayoutEffect, memo, MouseEvent, FC, useRef } from 'react';
+import React, { useCallback, useLayoutEffect, memo, MouseEvent, FC, useRef, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Image, Layer, Stage } from 'react-konva';
 
 import useImage from './LabelingPage/util/useImage';
 import getResizeImageFunction, { CanvasFit } from './LabelingPage/util/resizeImage';
 import { Size2D } from '../store/type';
-import { selectAnnoByImgId } from '../store/annotationSlice';
+import { imgAnnoSelectorFactory } from '../store/annotationSlice';
 import { LabelingDisplayImageCard } from './LabelingDisplayImageCard';
 import { Box2d } from './LabelingPage/Box';
 import { WorkState } from './LabelingPage/type';
@@ -36,7 +36,8 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   const resizeImage = useCallback(getResizeImageFunction(imgSize.current, CanvasFit.Cover), [
     imgSize.current,
   ]);
-  const annotations = useSelector(selectAnnoByImgId(imgId));
+  const imgAnnoSelector = useMemo(() => imgAnnoSelectorFactory(imgId), [imgId]);
+  const annotations = useSelector(imgAnnoSelector);
 
   useLayoutEffect(() => {
     const container: HTMLDivElement = document.querySelector('#container');

@@ -19,7 +19,7 @@ import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages, selectAllImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
-import { selectImageItemByUntagged, selectImageItemByRelabel } from '../store/selectors';
+import { imageItemSelectorFactory, relabelImageSelector } from '../store/selectors';
 import { getParts } from '../store/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { useInterval } from '../hooks/useInterval';
@@ -33,15 +33,18 @@ const classes = mergeStyleSets({
   },
 });
 
+const labeledImagesSelector = imageItemSelectorFactory(false);
+const unlabeledImagesSelector = imageItemSelectorFactory(true);
+
 export const Images: React.FC = () => {
   const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
   const openCaptureDialog = () => setCaptureDialogOpen(true);
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
-  const labeledImages = useSelector(selectImageItemByUntagged(false));
-  const unlabeledImages = useSelector(selectImageItemByUntagged(true));
-  const relabelImages = useSelector(selectImageItemByRelabel());
+  const labeledImages = useSelector(labeledImagesSelector);
+  const unlabeledImages = useSelector(unlabeledImagesSelector);
+  const relabelImages = useSelector(relabelImageSelector);
   const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
   const imageAddedButNoAnno = useSelector(
     (state: State) => state.labelImages.ids.length > 0 && state.annotations.ids.length === 0,

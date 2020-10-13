@@ -251,7 +251,7 @@ export const cameraOptionsSelector = createSelector(selectAllCameras, (cameras) 
  * If the given training project is in the predefined scenarios, also return the camera of the scenario.
  * @param trainingProjectId
  */
-export const cameraOptionsSelectorInConfig = (trainingProjectId: number) =>
+export const cameraOptionsSelectorFactoryInConfig = (trainingProjectId: number) =>
   createSelector([selectAllCameras, (state: State) => state.scenario], (cameras, scenarios) => {
     const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
     return cameras
@@ -262,5 +262,5 @@ export const cameraOptionsSelectorInConfig = (trainingProjectId: number) =>
       }));
   });
 
-export const selectCamerasByIds = (ids) =>
+export const camerasSelectorFactory = (ids) =>
   createSelector(selectCameraEntities, (entities) => ids.map((id) => entities[id]));

@@ -33,12 +33,12 @@ import {
   getConfigure,
 } from '../store/project/projectActions';
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
-import { selectCamerasByIds, selectCameraById } from '../store/cameraSlice';
-import { selectPartNamesById } from '../store/partSlice';
+import { camerasSelectorFactory, selectCameraById } from '../store/cameraSlice';
+import { partNamesSelectorFactory } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
 import {
-  selectVideoAnnosByCamera,
-  selectOriginVideoAnnosByCamera,
+  videoAnnosSelectorFactory,
+  originVideoAnnosSelectorFactory,
   onCreateVideoAnnoBtnClick,
 } from '../store/videoAnnoSlice';
 import {
@@ -76,8 +76,9 @@ export const Deployment: React.FC = () => {
     probThreshold,
     fps,
   } = projectData;
+  const camerasSelector = useMemo(() => camerasSelectorFactory(projectCameraIds), [projectCameraIds]);
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
-    selectCamerasByIds(projectCameraIds)(state).map((e) => ({ key: e?.id, text: e?.name })),
+    camerasSelector(state).map((e) => ({ key: e?.id, text: e?.name })),
   );
   const isDemo = useSelector((state: State) => {
     const trainingProjectId = state.project.data.trainingProject;
@@ -88,7 +89,8 @@ export const Deployment: React.FC = () => {
     if (projectCameraIds.length) setselectedCamera(projectCameraIds[0]);
   }, [projectCameraIds]);
 
-  const partNames = useSelector(selectPartNamesById(parts));
+  const partNamesSelector = useMemo(() => partNamesSelectorFactory(parts), [parts]);
+  const partNames = useSelector(partNamesSelector);
   const dispatch = useDispatch();
   const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
   const newImagesCount = useSelector(
@@ -289,8 +291,10 @@ const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => 
   const showDangerZone = useSelector<State, boolean>(
     (state) => selectCameraById(state, cameraId)?.useDangerZone,
   );
-  const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
-  const originVideoAnnos = useSelector(selectOriginVideoAnnosByCamera(cameraId));
+  const videoAnnosSelector = useMemo(() => videoAnnosSelectorFactory(cameraId), [cameraId]);
+  const videoAnnos = useSelector(videoAnnosSelector);
+  const originVideoAnnosSelector = useMemo(() => originVideoAnnosSelectorFactory(cameraId), [cameraId]);
+  const originVideoAnnos = useSelector(originVideoAnnosSelector);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
   const videoAnnoPurpose = useSelector((state: State) => state.videoAnnos.purpose);
