@@ -37,7 +37,7 @@ result_before_save = pretrained_model(x)
 ### our own image, a template how we should be pre-processing input for the inference to work
 file2 = tf.keras.utils.get_file(
             "bowtie.jpg",
-            "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/articles/2016/12/bowtie-legend-1518553248.jpg"
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Bill_Nye_with_trademark_blue_lab_coat_and_bowtie.jpg/319px-Bill_Nye_with_trademark_blue_lab_coat_and_bowtie.jpg"
             )
 img2 = tf.keras.preprocessing.image.load_img(file2, target_size=[224, 224])
 x2 = tf.keras.preprocessing.image.img_to_array(img2)
@@ -64,7 +64,7 @@ tf.saved_model.save(pretrained_model, mobilenet_save_path)
 
 loaded = tf.saved_model.load(mobilenet_save_path)
 print("list(loaded.signatures.keys(): ", list(loaded.signatures.keys()))  # ["serving_default"]
-print("mobilenet_save_path is ", mobilenet_save_path);
+print("mobilenet_save_path is ", mobilenet_save_path)
 
 infer = loaded.signatures["serving_default"]
 print("infer. structured_outputs: ", infer.structured_outputs)
