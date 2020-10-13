@@ -8,7 +8,7 @@ import useImage from '../LabelingPage/util/useImage';
 import { useInterval } from '../../hooks/useInterval';
 import { selectCameraById } from '../../store/cameraSlice';
 import {
-  selectVideoAnnosByCamera,
+  videoAnnosSelectorFactory,
   updateVideoAnno,
   onCreatingPoint,
   removeVideoAnno,
@@ -31,7 +31,8 @@ export const LiveViewContainer: React.FC<{
       selectCameraById(state, cameraId)?.useDangerZone &&
       state.project.data.inferenceMode === InferenceMode.EmployeeSafety,
   );
-  const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
+  const videoAnnosSelector = videoAnnosSelectorFactory(cameraId);
+  const videoAnnos = useSelector(videoAnnosSelector);
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
   const imageInfo = useImage(`/api/inference/video_feed?camera_id=${cameraId}`, '', true, true);
   const creatingVideoAnno = useSelector((state: State) => state.videoAnnos.creatingState);
