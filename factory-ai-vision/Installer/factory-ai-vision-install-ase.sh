@@ -140,6 +140,7 @@ if [ "$cvTrainingEndpoint" == "" ]; then
 
   echo API Key: $cvTrainingApiKey
   echo Endpoint: $cvTrainingEndpoint
+fi
 
 # ############################## Get Streaming Type #####################################
 
