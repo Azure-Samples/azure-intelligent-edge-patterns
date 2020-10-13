@@ -20,6 +20,7 @@ metadata:
   name: "pytorch-cifar10-gpu"
 spec:
   default:
+    parallelism: 1
     predictor:
       pytorch:
         storageUri: "gs://kfserving-samples/models/pytorch/cifar10/"
