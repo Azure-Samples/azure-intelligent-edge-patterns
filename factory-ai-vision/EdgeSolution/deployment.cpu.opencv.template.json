@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -67,11 +61,9 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8080/tcp": [
-                      {
-                        "HostPort": "8080"
-                      }
-                    ]
+                    "8080/tcp": [{
+                      "HostPort": "8080"
+                    }]
                   }
                 }
               }
@@ -128,85 +120,77 @@
             "settings": {
               "image": "${MODULES.WebDBModule}"
             }
-          }
-        },
-        "InferenceModule": {
-          "version": "1.0",
-          "type": "docker",
-          "status": "running",
-          "restartPolicy": "always",
-          "env": {
-            "IOTHUB_CONNECTION_STRING": {
-              "value": "$IOTHUB_CONNECTION_STRING"
-            },
-            "LVA_MODE": {
-              "value": "$LVA_MODE"
-            },
-            "IS_OPENCV": {
-              "value": "true"
-            }
           },
-          "settings": {
-            "image": "${MODULES.InferenceModule.cpuamd64}",
-            "createOptions": {
-              "HostConfig": {
-                "PortBindings": {
-                  "5000/tcp": [
-                    {
+          "InferenceModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              },
+              "IS_OPENCV": {
+                "value": "true"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.InferenceModule.cpuamd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5000/tcp": [{
                       "HostPort": "5000"
-                    }
-                  ],
-                  "5558/tcp": [
-                    {
+                    }],
+                    "5558/tcp": [{
                       "HostPort": "5558"
-                    }
-                  ]
-                },
-                "runtime": "runc"
+                    }]
+                  },
+                  "runtime": "runc"
+                }
               }
-            }
-          }
-        },
-        "CVCaptureModule": {
-          "version": "1.0",
-          "type": "docker",
-          "status": "running",
-          "restartPolicy": "always",
-          "env": {
-            "IOTHUB_CONNECTION_STRING": {
-              "value": "$IOTHUB_CONNECTION_STRING"
             }
           },
-          "settings": {
-            "image": "${MODULES.CVCaptureModule.amd64}",
-            "createOptions": {
-              "HostConfig": {
-                "PortBindings": {
-                  "9000/tcp": [
-                    {
+          "CVCaptureModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.CVCaptureModule.amd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "9000/tcp": [{
                       "HostPort": "9000"
-                    }
-                  ],
-                  "5559/tcp": [
-                    {
+                    }],
+                    "5559/tcp": [{
                       "HostPort": "5559"
-                    }
-                  ]
-                },
-                "runtime": "runc"
+                    }]
+                  },
+                  "runtime": "runc"
+                }
               }
             }
-          }
-        },
-        "rtspsim": {
-          "version": "1.0",
-          "type": "docker",
-          "status": "running",
-          "restartPolicy": "always",
-          "settings": {
-            "image": "${MODULES.RtspSimModule}",
-            "createOptions": {
-              "HostConfig": {}
+          },
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.RtspSimModule}",
+              "createOptions": {
+                "HostConfig": {}
+              }
             }
           }
         }
