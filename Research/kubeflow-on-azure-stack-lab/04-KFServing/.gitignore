@@ -1,2 +1,8 @@
 
 build_models
+
+# we create these files with our script
+mybowtie.npy
+mybowtie2.npy
+mybowtie.npy
+resized_image.jpg

@@ -138,10 +138,10 @@ Do the inferencing itself:
     * Connection #0 to host 12.34.56.78 left intact
     }
 
-    See [Tensorflow rest api documentation](https://www.tensorflow.org/tfx/serving/api_rest) on constructing and interpreting the json inpu/output.
+See [Tensorflow rest api documentation](https://www.tensorflow.org/tfx/serving/api_rest) on constructing and interpreting the json inpu/output.
 
-    For example, for the custom model we created earlier, we would need to define the instances with `input_1`.
-    We can feed the 3-dimensional array with pixel values like so:
+For example, for the custom model we created earlier, we would need to define the instances with `input_1`.
+We can feed the 3-dimensional array with pixel values like so (see script `tensorflow_web_infer.py` for implementation suggestions):
     
     {
         "instances":[
@@ -154,7 +154,7 @@ Do the inferencing itself:
         ]
     }
 
-    And we should get the predictions. 
+And we should get the predictions. 
 
     {
     "predictions": [[7.41982103e-06, 0.00287958328, 0.000219230162, 4.96962894e-05,
@@ -162,7 +162,7 @@ Do the inferencing itself:
     ]]
     }
 
-    It is up to the user of the api to pre-process the input and to post-process the results according to the application's needs.
+It is up to the user of the api to pre-process the input and to post-process the results according to the application's needs.
 
 ## Links
 
