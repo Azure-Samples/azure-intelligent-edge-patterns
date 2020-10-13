@@ -87,6 +87,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
                     instance.cameras.all(), pk=svtc_info["camera_id"]
                 )
                 camera.send_video_to_cloud = svtc_info["send_video_to_cloud"]
+                camera.skip_signals = True
                 camera.save()
         instance.save()
         return instance

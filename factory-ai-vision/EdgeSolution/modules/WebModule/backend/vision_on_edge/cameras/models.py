@@ -68,6 +68,8 @@ class Camera(models.Model):
     def pre_save(**kwargs):
         """pre_save."""
         instance = kwargs["instance"]
+        if hasattr(instance, "skip_signals") and instance.skip_signals:
+            return
         if instance.is_demo:
             return
         if instance.rtsp is None:
