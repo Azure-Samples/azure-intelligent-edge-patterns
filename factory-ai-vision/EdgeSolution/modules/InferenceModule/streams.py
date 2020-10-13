@@ -156,6 +156,7 @@ class Stream:
             while self.cam_is_alive:
 
                 if self.last_send == self.last_update:
+                    time.sleep(0.03)
                     continue
                 cnt += 1
                 if cnt % 30 == 1:
