@@ -193,7 +193,7 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
           items={commandBarItems}
           styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
         />
-        <Stack styles={{ root: { padding: '15px' } }} grow>
+        <div style={{ padding: '15px' }}>
           {labeledImages.length ? (
             <ImageList images={labeledImages} />
           ) : (
@@ -204,7 +204,7 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
               secondary={{ text: 'Upload images', onClick: onUpload }}
             />
           )}
-        </Stack>
+        </div>
       </Stack>
       <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
       <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
