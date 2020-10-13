@@ -70,6 +70,13 @@ You might also need to resolve the access issues, see [Kubernetes documentation]
 
 ## Infrerencing using KFServing
 
+We created separate demos for
+
+ - [KFServing TensorFlow models](tensorflow.md)
+ - [KFServing PyTorch models](pytorch.md)
+
+Here we will walk through a demo for SKLearn.
+
 To create KFServing inference service, you can try a sample from [kfserving repository](https://github.com/kubeflow/kfserving):
 
     $ kubectl create namespace kfserving-test
