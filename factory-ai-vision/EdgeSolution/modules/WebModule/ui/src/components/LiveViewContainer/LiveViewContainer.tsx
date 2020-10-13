@@ -33,7 +33,7 @@ export const LiveViewContainer: React.FC<{
   );
   const videoAnnos = useSelector(selectVideoAnnosByCamera(cameraId));
   const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
-  const imageInfo = useImage(`/api/inference/video_feed?camera_id=${cameraId}`, '', true, true);
+  const imageInfo = useImage(`/video_feed?cam_id=${cameraId}`, '', true, true);
   const creatingVideoAnno = useSelector((state: State) => state.videoAnnos.creatingState);
   const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
   const dispatch = useDispatch();
@@ -48,7 +48,7 @@ export const LiveViewContainer: React.FC<{
   }, [showUpdateSuccessTxt]);
 
   useInterval(() => {
-    Axios.get(`/api/inference/video_feed/keep_alive?camera_id=${cameraId}`).catch(console.error);
+    Axios.get(`/video_feed/keep_alive?cam_id=${cameraId}`).catch(console.error);
   }, 3000);
 
   return (
