@@ -1,8 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { selectAllImages } from './imageSlice';
-import { selectPartEntities } from './partSlice';
-import { selectAllAnno } from './annotationSlice';
-import { LabelImage } from './type';
+import { selectPartEntities, selectAllParts } from './partSlice';
+import { Item as ImageListItem } from '../components/ImageList';
+import { selectNonDemoProject } from './trainingProjectSlice';
+import { selectCameraEntities } from './cameraSlice';
 
 const selectImagesByRelabel = (isRelabel) =>
   createSelector(selectAllImages, (images) =>
@@ -12,24 +13,70 @@ const selectImagesByRelabel = (isRelabel) =>
 const selectImagesByPart = (partId) =>
   createSelector(selectImagesByRelabel(false), (images) => images.filter((img) => img.part === partId));
 
-const mapImageToLabelImage = (images, partEntities, allAnno): LabelImage[] =>
-  images.map((img) => ({
-    id: img.id,
-    image: img.image,
-    labels: allAnno.filter((e) => e.image === img.id),
-    part: {
-      id: img.part,
-      name: partEntities[img.part]?.name,
-    },
-    is_relabel: img.isRelabel,
-    confidence: img.confidence,
-    hasRelabeled: img.hasRelabeled,
-  }));
+export const selectImageItemByTaggedPart = (partId) =>
+  createSelector(
+    [selectAllImages, selectPartEntities, selectCameraEntities],
+    (images, partEntities, cameraEntities) =>
+      images
+        .filter((img) => img.part === partId && !img.isRelabel)
+        .map(
+          (img): ImageListItem => {
+            return {
+              id: img.id,
+              image: img.image,
+              timestamp: img.timestamp,
+              manualChecked: img.manualChecked,
+              partName: partEntities[img.part]?.name || '',
+              cameraName: cameraEntities[img.camera]?.name,
+            };
+          },
+        ),
+  );
 
-export const makeLabelImageSelector = (partId) =>
-  createSelector([selectImagesByPart(partId), selectPartEntities, selectAllAnno], mapImageToLabelImage);
+export const selectImageItemByUntagged = (unTagged: boolean) =>
+  createSelector(
+    [selectAllImages, selectPartEntities, selectCameraEntities],
+    (images, partEntities, cameraEntities) =>
+      images
+        .filter((img) => {
+          if (unTagged) return !img.manualChecked && !img.isRelabel;
+          return img.manualChecked;
+        })
+        .map(
+          (img): ImageListItem => {
+            return {
+              id: img.id,
+              image: img.image,
+              timestamp: img.timestamp,
+              manualChecked: img.manualChecked,
+              partName: partEntities[img.part]?.name || '',
+              cameraName: cameraEntities[img.camera]?.name,
+            };
+          },
+        ),
+  );
 
-export const selectRelabelImages = createSelector(
-  [selectImagesByRelabel(true), selectPartEntities, selectAllAnno],
-  mapImageToLabelImage,
+export const selectImageItemByRelabel = () =>
+  createSelector(
+    [selectAllImages, selectPartEntities, selectCameraEntities],
+    (images, partEntities, cameraEntities) =>
+      images
+        .filter((img) => img.isRelabel && !img.manualChecked)
+        .map(
+          (img): ImageListItem => {
+            return {
+              id: img.id,
+              image: img.image,
+              timestamp: img.timestamp,
+              manualChecked: img.manualChecked,
+              partName: partEntities[img.part]?.name || '',
+              cameraName: cameraEntities[img.camera]?.name,
+            };
+          },
+        ),
+  );
+
+export const selectNonDemoPart = createSelector(
+  [selectAllParts, selectNonDemoProject],
+  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
 );

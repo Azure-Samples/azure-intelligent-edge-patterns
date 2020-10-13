@@ -1,11 +1,10 @@
 import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
-import { Button, CloseIcon } from '@fluentui/react-northstar';
-import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
+import { Stage, Layer, Image, Group, Text as KonvaText, Text, Rect, Label, Tag } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
-import getResizeImageFunction from './util/resizeImage';
+import getResizeImageFunction, { CanvasFit } from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
@@ -14,14 +13,12 @@ import {
   thunkCreateAnnotation,
 } from '../../store/annotationSlice';
 import RemoveBoxButton from './RemoveBoxButton';
-import { PartForm } from '../PartForm';
 import { Annotation, Size2D } from '../../store/type';
 import { Part } from '../../store/partSlice';
-import { thunkChangeImgPart } from '../../store/imageSlice';
 
 const defaultSize: Size2D = {
-  width: 800,
-  height: 600,
+  width: 720,
+  height: 520,
 };
 
 interface SceneProps {
@@ -31,7 +28,6 @@ interface SceneProps {
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
-  partFormDisabled: boolean;
   imgPart: Part;
 }
 const Scene: FC<SceneProps> = ({
@@ -41,11 +37,10 @@ const Scene: FC<SceneProps> = ({
   workState,
   setWorkState,
   onBoxCreated,
-  partFormDisabled,
   imgPart,
 }) => {
   const dispatch = useDispatch();
-  const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
+  const resizeImage = useCallback(getResizeImageFunction(defaultSize, CanvasFit.Contain), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
   const noMoreCreate = useMemo(
     () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
@@ -130,21 +125,7 @@ const Scene: FC<SceneProps> = ({
   const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
   return (
-    <div style={{ margin: '0.2em', position: 'relative' }}>
-      {annotations.length !== 0 &&
-      showOuterRemoveButton &&
-      !isDragging &&
-      workState !== WorkState.Creating ? (
-        <Button
-          iconOnly
-          text
-          styles={{ color: '#F9526B', ':hover': { color: '#E73550' } }}
-          content={<CloseIcon size="large" />}
-          onClick={removeBox}
-        />
-      ) : (
-        <div style={{ height: '2em' }} />
-      )}
+    <div>
       <Stage
         width={imageSize.width}
         height={imageSize.height}
@@ -184,14 +165,16 @@ const Scene: FC<SceneProps> = ({
                   dispatch={dispatch}
                   changeCursorState={changeCursorState}
                 />
-                <Text
+                <LabelText
                   x={annotation.label.x1}
-                  y={annotation.label.y1 - 25 / scale.current}
+                  y={
+                    annotation.label.y1 < 20 / scale.current
+                      ? annotation.label.y1
+                      : annotation.label.y1 - 30 / scale.current
+                  }
                   fontSize={20 / scale.current}
-                  fill="red"
                   text={imgPart?.name}
-                  test="part"
-                  visible={!partFormDisabled}
+                  padding={5 / scale.current}
                 />
               </Group>
             ))}
@@ -206,23 +189,26 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
-      {!partFormDisabled &&
-        selectedAnnotationIndex !== null &&
-        workState !== WorkState.Creating &&
-        annotations[selectedAnnotationIndex] && (
-          <PartForm
-            top={annotations[0]?.label.y1 * scale.current - 10}
-            left={annotations[0]?.label.x2 * scale.current + 10}
-            open={true}
-            onDismiss={(): void => onSelect(null)}
-            selectedPart={imgPart}
-            setSelectedPart={(part): void => {
-              dispatch(thunkChangeImgPart(part));
-            }}
-          />
-        )}
     </div>
   );
 };
 
 export default Scene;
+
+type LabelTextProps = {
+  x: number;
+  y: number;
+  fontSize: number;
+  padding: number;
+  text: string;
+};
+
+export const LabelText: React.FC<LabelTextProps> = ({ x, y, fontSize, text, padding }) => {
+  if (!text) return null;
+  return (
+    <Label x={x} y={y}>
+      <Tag fill="white" />
+      <Text fontSize={fontSize} text={text} padding={padding} />
+    </Label>
+  );
+};

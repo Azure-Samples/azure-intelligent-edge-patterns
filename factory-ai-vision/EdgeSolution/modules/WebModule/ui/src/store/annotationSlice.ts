@@ -80,7 +80,10 @@ const entityAdapter = createEntityAdapter<Annotation>();
 
 const slice = createSlice({
   name: 'label',
-  initialState: entityAdapter.getInitialState(),
+  initialState: {
+    ...entityAdapter.getInitialState(),
+    originEntities: entityAdapter.getInitialState().entities,
+  },
   reducers: {
     createAnnotation: {
       prepare: (point: Position2D, imageId: number) => ({
@@ -166,3 +169,6 @@ export const labelPageAnnoSelector = createSelector(
   [selectedImageIdSelector, selectAllAnno],
   (selectedImageId, allAnnos) => allAnnos.filter((anno) => anno.image === selectedImageId),
 );
+
+export const selectAnnoByImgId = (imgId: number) =>
+  createSelector(selectAllAnno, (anno) => anno.filter((e) => e.image === imgId));

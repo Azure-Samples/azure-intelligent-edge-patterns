@@ -4,10 +4,7 @@
     "source.fixAll": false,
     "source.fixAll.eslint": false
   },
-  "eslint.workingDirectories": [
-    "./EdgeSolution/modules/WebModule/ui/src",
-    "./EdgeSolution/modules/WebModule/ui_v2/src"
-  ],
+  "eslint.workingDirectories": ["./EdgeSolution/modules/WebModule/ui/src"],
   "eslint.enable": true,
   "eslint.validate": [
     "javascript",

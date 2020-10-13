@@ -1,20 +1,11 @@
-import { ThunkAction } from 'redux-thunk';
-import { Action } from 'redux';
+import { ThunkAction, Action } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 
 export type Project = {
   isLoading: boolean;
-  trainingLogs: string[];
+  trainingLog: string;
   data: ProjectData;
   originData: ProjectData;
-  inferenceMetrics: {
-    successRate: number;
-    successfulInferences: number;
-    unIdetifiedItems: number;
-    isGpu: boolean;
-    averageTime: number;
-    partCount: Record<string, number>;
-  };
   progress: number;
   trainingMetrics: TrainingMetrics;
   status: Status;
@@ -52,22 +43,49 @@ export type Consequence = {
   mAP: number;
 };
 
+export enum InferenceMode {
+  PartDetection = 'PD',
+  PartCounting = 'PC',
+  EmployeeSafety = 'ES',
+  DefectDetection = 'DD',
+}
+
+export enum InferenceProtocol {
+  Http = 'http',
+  GRPC = 'grpc',
+}
+
+export enum InferenceSource {
+  LVA = 'lva',
+  CaptureModule = 'capture_module',
+}
+
 export type ProjectData = {
   id: number;
-  camera: any;
-  location: any;
-  parts: any[];
+  cameras: number[];
+  location: number;
+  parts: number[];
+  trainingProject: number;
   needRetraining: boolean;
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
   sendMessageToCloud: boolean;
   framesPerMin: number;
-  accuracyThreshold: number;
   modelUrl: string;
-  cvProjectId?: string;
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
+  name: string;
+  sendVideoToCloud: boolean;
+  // TODO
+  cameraToBeRecord: number[];
+  inferenceMode: InferenceMode;
+  deployTimeStamp: string;
+  setFpsManually: boolean;
+  fps: number;
+  recomendedFps: number;
+  inferenceProtocol: InferenceProtocol;
+  inferenceSource: InferenceSource;
 };
 
 // Describing the different ACTION NAMES available
@@ -136,30 +154,6 @@ export type GetTrainingMetricsFailedAction = ProjectAction & {
   error: Error;
 };
 
-export const GET_INFERENCE_METRICS_REQUEST = 'GET_TRAINING_INFERENCE_REQUEST';
-export type GetInferenceMetricsRequestAction = ProjectAction & {
-  type: typeof GET_INFERENCE_METRICS_REQUEST;
-};
-
-export const GET_INFERENCE_METRICS_SUCCESS = 'GET_INFERENCE_METRICS_SUCCESS';
-export type GetInferenceMetricsSuccessAction = ProjectAction & {
-  type: typeof GET_INFERENCE_METRICS_SUCCESS;
-  payload: {
-    successRate: number;
-    successfulInferences: number;
-    unIdetifiedItems: number;
-    isGpu: boolean;
-    averageTime: number;
-    partCount: Record<string, number>;
-  };
-};
-
-export const GET_INFERENCE_METRICS_FAILED = 'GET_INFERENCE_METRICS_FAILED';
-export type GetInferenceMetricsFailedAction = ProjectAction & {
-  type: typeof GET_INFERENCE_METRICS_FAILED;
-  error: Error;
-};
-
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
 export type PostProjectRequestAction = ProjectAction & {
   type: typeof POST_PROJECT_REQUEST;
@@ -177,25 +171,10 @@ export type PostProjectFaliedAction = ProjectAction & {
   error: Error;
 };
 
-export const DELETE_PROJECT_SUCCESS = 'DELETE_PROJECT_SUCCESS';
-export type DeleteProjectSuccessAction = ProjectAction & {
-  type: typeof DELETE_PROJECT_SUCCESS;
-};
-
-export const DELETE_PROJECT_FALIED = 'DELETE_PROJECT_FALIED';
-export type DeleteProjectFaliedAction = ProjectAction & {
-  type: typeof DELETE_PROJECT_FALIED;
-};
-
 export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
 export type UpdateProjectDataAction = ProjectAction & {
   type: typeof UPDATE_PROJECT_DATA;
   payload: Partial<ProjectData>;
-};
-
-export const UPDATE_ORIGIN_PROJECT_DATA = 'UPDATE_ORIGIN_PROJECT_DATA';
-export type UpdateOriginProjectDataAction = ProjectAction & {
-  type: typeof UPDATE_ORIGIN_PROJECT_DATA;
 };
 
 export const START_INFERENCE = 'START_INFERENCE';
@@ -213,19 +192,6 @@ export type ChangeStatusAction = ProjectAction & {
   status: Status;
 };
 
-export type UpdateProbThresholdRequestAction = ProjectAction & {
-  type: 'UPDATE_PROB_THRESHOLD_REQUEST';
-};
-
-export type UpdateProbThresholdSuccessAction = ProjectAction & {
-  type: 'UPDATE_PROB_THRESHOLD_SUCCESS';
-};
-
-export type UpdateProbThresholdFailedAction = ProjectAction & {
-  type: 'UPDATE_PROB_THRESHOLD_FAILED';
-  error: Error;
-};
-
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
@@ -236,22 +202,13 @@ export type ProjectActionTypes =
   | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction
-  | DeleteProjectSuccessAction
-  | DeleteProjectFaliedAction
   | UpdateProjectDataAction
-  | UpdateOriginProjectDataAction
   | GetTrainingMetricsRequestAction
   | GetTrainingMetricsSuccessAction
   | GetTrainingMetricsFailedAction
-  | GetInferenceMetricsRequestAction
-  | GetInferenceMetricsSuccessAction
-  | GetInferenceMetricsFailedAction
   | StartInferenceAction
   | StopInferenceAction
-  | ChangeStatusAction
-  | UpdateProbThresholdRequestAction
-  | UpdateProbThresholdSuccessAction
-  | UpdateProbThresholdFailedAction;
+  | ChangeStatusAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

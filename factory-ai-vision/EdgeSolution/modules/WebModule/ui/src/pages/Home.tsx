@@ -1,58 +1,78 @@
-import React, { FC } from 'react';
-import { Text, Flex } from '@fluentui/react-northstar';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useHistory, Switch, Route, Redirect } from 'react-router-dom';
+import { Stack, Pivot, PivotItem, Spinner } from '@fluentui/react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import ImageLink from '../components/ImageLink';
+import { State } from 'RootStateType';
+import { Customize } from '../components/Customize';
+import { getCameras, selectNonDemoCameras } from '../store/cameraSlice';
+import { selectAllImages, getImages } from '../store/imageSlice';
+import { thunkGetProject } from '../store/project/projectActions';
+import { Status } from '../store/project/projectTypes';
+import { Deployment } from '../components/Deployment';
+import { GetStarted } from '../components/GetStarted';
 
-const Home: FC = () => {
+export const Home: React.FC = () => {
+  const location = useLocation();
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const hasCVProject = useSelector(
+    (state: State) => !!state.trainingProject.entities[state.trainingProject.nonDemo[0]].customVisionId,
+  );
+  const hasCamera = useSelector((state: State) => selectNonDemoCameras(state).length > 0);
+  const hasImages = useSelector((state: State) => selectAllImages(state).length > 0);
+  const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await dispatch(getCameras(false));
+      await dispatch(getImages());
+      await dispatch(thunkGetProject());
+      setLoading(false);
+      setLoading(false);
+    })();
+  }, [dispatch]);
+
+  const onPivotChange = (item: PivotItem) => {
+    history.push(`/home/${item.props.itemKey}`);
+  };
+
+  const onRenderMain = () => {
+    if (loading) return <Spinner label="Loading" />;
+
+    return (
+      <Switch>
+        <Route path="/home/deployment">
+          <Deployment />
+        </Route>
+        <Route path="/home/customize">
+          <Customize
+            hasCVProject={hasCVProject}
+            hasCamera={hasCamera}
+            hasImages={hasImages}
+            hasTask={projectHasConfiged}
+          />
+        </Route>
+        <Route path="/home/getStarted">
+          <GetStarted />
+        </Route>
+        <Route>
+          <Redirect to={projectHasConfiged ? '/home/deployment' : '/home/getStarted'} />
+        </Route>
+      </Switch>
+    );
+  };
+
   return (
-    <Flex column gap="gap.medium">
-      <Text size="larger" weight="semibold">
-        Hello User!
-      </Text>
-      <Text color="white" styles={{ backgroundColor: '#373644', padding: '0.125em 0.125em 0.125em 0.625em' }}>
-        GET STARTED:
-      </Text>
-      <Flex gap="gap.large">
-        <ImageLink
-          imgSrc="/icons/location-filled.png"
-          to="/locations"
-          label="Register a new Location"
-          width="6.25em"
-        />
-        <ImageLink
-          imgSrc="/icons/camera-filled.png"
-          to="/cameras"
-          label="Register a new Camera"
-          width="6.25em"
-          imgPadding="0.625em 0.1875em 0.625em 0.1875em"
-        />
-        <ImageLink imgSrc="/icons/part-filled.png" to="/parts" label="Register a new Part" width="6.25em" />
-      </Flex>
-      <Text color="white" styles={{ backgroundColor: '#373644', padding: '0.125em 0.125em 0.125em 0.625em' }}>
-        SELECT FROM THE FOLLOWING TASKS:
-      </Text>
-      <Flex gap="gap.large">
-        <ImageLink
-          imgSrc="/icons/doubleCube.png"
-          to="/partIdentification"
-          label="Identify Parts"
-          width="6.25em"
-        />
-        <ImageLink
-          imgSrc="/icons/manual-filled.png"
-          to="/manual"
-          label="Identify items manually"
-          width="6.25em"
-        />
-        <ImageLink
-          imgSrc="/icons/pretrained-model-filled.png"
-          to="/pretrainDetection/"
-          label="Demo Model"
-          width="6.25em"
-        />
-      </Flex>
-    </Flex>
+    <Stack styles={{ root: { height: '100%' } }}>
+      <Pivot selectedKey={location.pathname.split('/')[2]} onLinkClick={onPivotChange}>
+        <PivotItem itemKey="getStarted" headerText="Get started" />
+        <PivotItem itemKey="customize" headerText="Customize" />
+        <PivotItem itemKey="deployment" headerText="Deployment" />
+      </Pivot>
+      <Stack grow>{onRenderMain()}</Stack>
+    </Stack>
   );
 };
-
-export default Home;

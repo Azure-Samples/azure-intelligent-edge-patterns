@@ -1,5 +1,5 @@
 {
-  "env": { "browser": true },
+  "env": { "browser": true, "jest": true },
   "extends": [
     "airbnb-base",
     "eslint:recommended",
@@ -11,7 +11,8 @@
     "plugin:import/typescript",
     "plugin:promise/recommended",
     "prettier",
-    "prettier/@typescript-eslint"
+    "prettier/@typescript-eslint",
+    "plugin:jest/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -26,7 +27,8 @@
     "sort-class-members",
     "json",
     "react",
-    "react-hooks"
+    "react-hooks",
+    "jest"
   ],
   "settings": {
     "react": {

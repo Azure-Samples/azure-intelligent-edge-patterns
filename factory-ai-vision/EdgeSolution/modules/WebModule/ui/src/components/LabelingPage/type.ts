@@ -11,13 +11,15 @@ export enum LabelingCursorStates {
 export interface Box2dComponentProps {
   workState: WorkState;
   scale: number;
-  onSelect: Function;
+  onSelect?: Function;
   annotation: Annotation;
   annotationIndex: number;
-  selected: boolean;
+  selected?: boolean;
   visible?: boolean;
-  dispatch: any;
+  dispatch?: any;
   changeCursorState?: (cursorType?: LabelingCursorStates) => void;
+  color?: string;
+  draggable?: boolean;
   // instanceID: number;
 }
 
