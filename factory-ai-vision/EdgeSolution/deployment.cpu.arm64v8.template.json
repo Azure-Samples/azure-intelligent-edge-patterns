@@ -57,6 +57,26 @@
           }
         },
         "modules": {
+          "NginxModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.NginxModule.arm64v8}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "8080/tcp": [
+                      {
+                        "HostPort": "8080"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           "WebModule": {
             "version": "1.0",
             "type": "docker",
@@ -72,18 +92,7 @@
               "DF_INFERENECE_IS_GPU": { "value": false }
             },
             "settings": {
-              "image": "${MODULES.WebModule.arm64v8-ubuntu}",
-              "createOptions": {
-                "HostConfig": {
-                  "PortBindings": {
-                    "8000/tcp": [
-                      {
-                        "HostPort": "8080"
-                      }
-                    ]
-                  }
-                }
-              }
+              "image": "${MODULES.WebModule.arm64v8-ubuntu}"
             }
           },
           "WebDBModule": {
