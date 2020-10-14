@@ -1,5 +1,6 @@
 """App drf url tests.
 """
+from unittest import mock
 
 import pytest
 from django.urls import resolve, reverse
@@ -10,12 +11,13 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.fast
-def test_view_detail():
+def test_view_detail(monkeypatch, mock_cv2_capture):
     """test_view_detail.
 
     Args:
         camera (Camera): camera
     """
+
     cam_1 = CameraFactory()
     cam_1.save()
     assert (

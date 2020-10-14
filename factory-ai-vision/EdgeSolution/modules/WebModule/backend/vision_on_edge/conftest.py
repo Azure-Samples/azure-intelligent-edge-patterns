@@ -1,6 +1,8 @@
 """Conftest
 """
+from unittest import mock
 
+import cv2
 import pytest
 
 from .azure_part_detections.models import PartDetection
@@ -32,6 +34,27 @@ def media_storage(settings, tmpdir):
         tmpdir:
     """
     settings.MEDIA_ROOT = tmpdir.strpath
+
+
+@pytest.fixture(scope="function", autouse=False)
+def mock_cv2_capture(monkeypatch):
+    # pylint: disable = missing-class-docstring, invalid-name, missing-function-docstring, no-self-use
+    class MockedVideoCap:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def isOpened(self):
+            return True
+
+        def read(self):
+            return (True, "foo")
+
+        def release(self):
+            pass
+
+    monkeypatch.setattr(
+        cv2, "VideoCapture", mock.MagicMock(return_value=MockedVideoCap())
+    )
 
 
 @pytest.fixture

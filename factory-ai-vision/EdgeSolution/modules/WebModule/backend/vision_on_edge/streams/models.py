@@ -7,7 +7,9 @@ import time
 
 import cv2
 
-from ..azure_iot.utils import get_iothub_module_client
+from configs.general_configs import PRINT_THREAD
+
+from ..cameras.utils import normalize_rtsp, verify_rtsp
 from .exceptions import StreamOpenRTSPError
 
 logger = logging.getLogger(__name__)
@@ -17,21 +19,13 @@ KEEP_ALIVE_THRESHOLD = 10  # Seconds
 
 # Stream Manager
 STREAM_GC_TIME_THRESHOLD = 5  # Seconds
-PRINT_STREAMS = False
 
 
 class Stream:
     """Stream Class"""
 
     def __init__(self, rtsp, camera_id, part_id=None):
-        if rtsp == "0":
-            self.rtsp = 0
-        elif rtsp == "1":
-            self.rtsp = 1
-        elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
-            self.rtsp = "rtsp" + rtsp[4:]
-        else:
-            self.rtsp = rtsp
+        self.rtsp = normalize_rtsp(rtsp=rtsp)
         self.camera_id = camera_id
         self.part_id = part_id
 
@@ -43,15 +37,12 @@ class Stream:
         self.id = id(self)
 
         self.mutex = threading.Lock()
-        self.iot = get_iothub_module_client()
         self.keep_alive = time.time()
-        self.cap = None
-        logger.info("iot %s", self.iot)
 
         # test rtsp
-        self.cap = cv2.VideoCapture(self.rtsp)
-        if not self.cap.isOpened():
+        if not verify_rtsp(self.rtsp):
             raise StreamOpenRTSPError
+        self.cap = cv2.VideoCapture(self.rtsp)
 
     def update_keep_alive(self):
         """update_keep_alive."""
@@ -113,9 +104,9 @@ class Stream:
         self.status = "stopped"
         try:
             self.cap.release()
-            logger.info("Release cap success")
+            logger.info("Release cap success/")
         except:
-            logger.error("Release cap failed")
+            logger.error("Release cap failed.")
 
     def __str__(self):
         return f"<Stream id:{self.id} rtsp:{self.rtsp}>"
@@ -161,7 +152,7 @@ class StreamManager:
         def _gc(self):
             while True:
                 self.mutex.acquire()
-                if PRINT_STREAMS:
+                if PRINT_THREAD:
                     logger.info("streams: %s", self.streams)
                 to_delete = []
                 for stream in self.streams:

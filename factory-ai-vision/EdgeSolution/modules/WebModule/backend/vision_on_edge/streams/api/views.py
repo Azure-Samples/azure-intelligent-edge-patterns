@@ -5,8 +5,6 @@ import datetime
 import io
 import logging
 import sys
-import threading
-import time
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.images import ImageFile
@@ -27,7 +25,11 @@ from ...general.api.serializers import (
 from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
-from ..exceptions import StreamNotFoundError
+from ..exceptions import (
+    StreamNotFoundError,
+    StreamPartIdNotFound,
+    StreamRtspCameraNotFound,
+)
 from ..models import Stream, StreamManager
 from .serializers import (
     StreamCaptureResponseSerializer,
@@ -73,16 +75,10 @@ def connect_stream(request):
         try:
             Part.objects.get(pk=part_id)
         except ObjectDoesNotExist:
-            return Response(
-                {"status": "failed", "log": "part_id doesnt exist."},  # yapf
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise StreamPartIdNotFound
         part_id = int(part_id)
     if not Camera.objects.filter(rtsp=rtsp).exists():
-        return Response(
-            {"status": "failed", "log": "rtsp given does not belong to any camera."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        raise StreamRtspCameraNotFound
     camera_id = Camera.objects.filter(rtsp=rtsp).first().id
     stream_obj = Stream(rtsp=rtsp, camera_id=camera_id, part_id=part_id)
     stream_manager.add(stream_obj)
