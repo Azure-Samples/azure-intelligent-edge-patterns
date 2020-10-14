@@ -27,7 +27,6 @@ from vision_on_edge.notifications.api import views as notifications_views
 
 # from vision_on_edge.relabeling.api import views as relabel_views
 from vision_on_edge.streams.api import views as stream_views
-from vision_on_edge.video_feed.api import views as videofeed_views
 
 # from vision_on_edge.image_predictions.api import \
 # views as image_prediction_views
@@ -98,10 +97,6 @@ urlpatterns += [
     path("streams/<int:stream_id>/video_feed", stream_views.video_feed),
     path("streams/<int:stream_id>/capture", stream_views.capture),
     path("streams/<int:stream_id>/keep_alive", stream_views.keep_alive),
-    path("inference/video_feed", videofeed_views.video_feed),
-    path("inference/video_feed/keep_alive", videofeed_views.keep_alive),
-    # path('projects/<int:project_id>/inference_video_feed',
-    # stream_views.inference_video_feed),
     # path('relabel/update', relabel_views.relabel_update),
     path("appinsight/", include("vision_on_edge.azure_app_insight.urls")),
     # path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp),
