@@ -99,15 +99,18 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     def export(self, request, pk=None) -> Response:
         """get the status of train job sent to custom vision"""
         queryset = self.get_queryset()
-        part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
-        project_obj = part_detection_obj.project
-        deploy_status_obj = DeployStatus.objects.get(part_detection=part_detection_obj)
-        inference_module_obj = part_detection_obj.inference_module
+        instance = drf_get_object_or_404(queryset, pk=pk)
+        cam_id = request.query_params.get("camera_id")
+
+        # Related objects
+        project_obj = instance.project
+        deploy_status_obj = DeployStatus.objects.get(part_detection=instance)
+        inference_module_obj = instance.inference_module
+        drf_get_object_or_404(instance.cameras.all(), pk=cam_id)
 
         success_rate = 0.0
         inference_num = 0
         unidentified_num = 0
-        cam_id = request.query_params.get("camera_id")
         if deploy_status_obj.status != "ok":
             return Response(
                 {
