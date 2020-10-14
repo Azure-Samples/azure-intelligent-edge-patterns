@@ -262,7 +262,6 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
           false,
         ),
       );
-      dispatch(getConfigure(data.id));
       return data.id;
     })
     .catch((err) => {
