@@ -78,8 +78,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         try:
             prob_threshold = int(prob_threshold)
-        except Exception:
-            raise PdProbThresholdNotInteger
+        except Exception as err:
+            raise PdProbThresholdNotInteger from err
 
         if prob_threshold > 100 or prob_threshold < 0:
             raise PdProbThresholdOutOfRange
@@ -140,10 +140,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             average_inference_time = data["average_inference_time"]
             last_prediction_count = data["last_prediction_count"]
             scenario_metrics = data["scenario_metrics"] or []
-        except requests.exceptions.ConnectionError:
-            raise PdInferenceModuleUnreachable
-        except ReadTimeout:
-            raise PdExportInfereceReadTimeout
+        except requests.exceptions.ConnectionError as err:
+            raise PdInferenceModuleUnreachable from err
+        except ReadTimeout as err:
+            raise PdExportInfereceReadTimeout from err
         deploy_status_obj.save()
         logger.info(
             "Deploy status: %s, %s", deploy_status_obj.status, deploy_status_obj.log
@@ -217,7 +217,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         project_obj = instance.project
         if project_obj is None:
-            raise PdConfigureWithoutProject
+            raise PdRelabelWithoutProject
 
         if project_obj.is_demo:
             raise PdRelabelDemoProjectError

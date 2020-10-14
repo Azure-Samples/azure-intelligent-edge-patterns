@@ -13,8 +13,10 @@ from ..utils import is_valid_rtsp, normalize_rtsp, verify_rtsp
     [
         [0, True],
         ["0", True],
-        [1, False],
-        ["1", False],
+        [1, True],
+        ["1", True],
+        [2, False],
+        ["2", False],
         ["RTSP://QQ", True],
         ["rtsp://QQ", True],
         ["rTsP://QQ", True],

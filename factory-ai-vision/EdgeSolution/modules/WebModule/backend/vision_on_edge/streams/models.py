@@ -31,9 +31,8 @@ class Stream:
 
         self.last_active = time.time()
         self.status = "init"
-        self.last_img = None
         self.cur_img_index = 0
-        self.last_get_img_index = 0
+        self.last_get_img_index = 1
         self.id = id(self)
 
         self.mutex = threading.Lock()
@@ -43,6 +42,7 @@ class Stream:
         if not verify_rtsp(self.rtsp):
             raise StreamOpenRTSPError
         self.cap = cv2.VideoCapture(self.rtsp)
+        self.last_img = self.cap.read()[1]
 
     def update_keep_alive(self):
         """update_keep_alive."""

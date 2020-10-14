@@ -12,6 +12,9 @@ from .factories import CameraFactory
 
 pytestmark = pytest.mark.django_db
 
+# pylint: disable=W0613
+# skip unused-argument mock_cv2_capture
+
 
 @pytest.mark.fast
 def test_rtsp(mock_cv2_capture):

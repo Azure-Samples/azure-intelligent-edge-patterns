@@ -36,9 +36,13 @@ def media_storage(settings, tmpdir):
     settings.MEDIA_ROOT = tmpdir.strpath
 
 
+img_read = cv2.VideoCapture("vision_on_edge/cameras/tests/test.png").read()
+
+
 @pytest.fixture(scope="function", autouse=False)
 def mock_cv2_capture(monkeypatch):
     # pylint: disable = missing-class-docstring, invalid-name, missing-function-docstring, no-self-use
+
     class MockedVideoCap:
         def __init__(self, *args, **kwargs):
             pass
@@ -47,7 +51,7 @@ def mock_cv2_capture(monkeypatch):
             return True
 
         def read(self):
-            return (True, "foo")
+            return img_read
 
         def release(self):
             pass
@@ -88,7 +92,7 @@ def part() -> Part:
 
 
 @pytest.fixture
-def image() -> Image:
+def image(mock_cv2_capture) -> Image:
     return ImageFactory()
 
 
@@ -98,7 +102,7 @@ def inference_module() -> InferenceModule:
 
 
 @pytest.fixture
-def camera() -> Camera:
+def camera(mock_cv2_capture) -> Camera:
     return CameraFactory()
 
 
