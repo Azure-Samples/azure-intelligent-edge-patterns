@@ -21,6 +21,7 @@ app = FastAPI()
 class Stream(BaseModel):
     stream_id: str
     rtsp: str
+    fps: int
     endpoint: str
 
 
