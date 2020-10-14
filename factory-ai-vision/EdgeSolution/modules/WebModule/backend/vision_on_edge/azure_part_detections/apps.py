@@ -6,6 +6,8 @@ import sys
 
 from django.apps import AppConfig
 
+from configs.part_detection import DF_PD_VIDEO_SOURCE_IS_OPENCV
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,6 +30,7 @@ class AzurePartDetectionConfig(AppConfig):
             from . import signals
 
             # pylint: enable=unused-import, import-outside-toplevel
+
             create_demo = True
             if create_demo:
                 project_obj = Project.objects.filter(is_demo=False).first()
@@ -39,6 +42,9 @@ class AzurePartDetectionConfig(AppConfig):
                     name="Part Detection",
                     project=project_obj,
                     inference_module=inference_obj,
+                    inference_source=(
+                        "opencv" if DF_PD_VIDEO_SOURCE_IS_OPENCV else "lva"
+                    ),
                 )
             PDScenario.objects.all().delete()
             # =============================================

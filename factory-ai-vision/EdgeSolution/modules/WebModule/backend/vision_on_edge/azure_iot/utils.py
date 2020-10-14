@@ -21,7 +21,7 @@ def is_edge() -> bool:
         return False
 
 
-def get_iothub_module_client():
+def get_iothub_module_client(raise_exception=False):
     try:
         iot = IoTHubModuleClient.create_from_edge_environment()
         return iot
