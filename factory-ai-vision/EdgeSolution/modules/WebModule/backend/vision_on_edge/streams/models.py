@@ -104,7 +104,7 @@ class Stream:
         self.status = "stopped"
         try:
             self.cap.release()
-            logger.info("Release cap success/")
+            logger.info("Release cap success.")
         except:
             logger.error("Release cap failed.")
 
