@@ -124,7 +124,7 @@ class Stream:
         # self.tracker = Tracker()
         self.scenario = None
         self.scenario_type = None
-        self.start_zmq()
+        # self.start_zmq()
         self.is_benchmark = False
 
     def set_is_benchmark(self, is_benchmark):
