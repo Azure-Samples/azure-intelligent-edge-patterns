@@ -115,6 +115,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
     recomendedFps: data?.recomendedFps ?? 10,
+    totalRecomendedFps: data?.totalRecomendedFps ?? 10,
     inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
     inferenceSource: data?.inference_source ?? InferenceSource.LVA,
   },
@@ -182,7 +183,8 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
     .then((results) => {
       const partDetection = results[0].data;
       const infModuleIdx = results[1].data.findIndex((e) => e.id === partDetection[0].inference_module);
-      const recomendedFps = results[1].data[infModuleIdx]?.is_gpu ? 30 : 10;
+      const totalRecomendedFps = results[1].data[infModuleIdx]?.is_gpu ? 30 : 10;
+      const recomendedFps = totalRecomendedFps / (partDetection[0].cameras?.length || 1);
 
       const project: ProjectData = {
         id: partDetection[0]?.id ?? null,
@@ -208,6 +210,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         setFpsManually: partDetection[0]?.fps !== recomendedFps,
         recomendedFps,
         fps: partDetection[0]?.fps ?? 10,
+        totalRecomendedFps,
         inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocol.GRPC,
         inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
       };

@@ -83,6 +83,7 @@ export type ProjectData = {
   deployTimeStamp: string;
   setFpsManually: boolean;
   fps: number;
+  totalRecomendedFps: number;
   recomendedFps: number;
   inferenceProtocol: InferenceProtocol;
   inferenceSource: InferenceSource;

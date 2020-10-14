@@ -52,6 +52,7 @@ export const initialProjectData: ProjectData = {
   setFpsManually: false,
   fps: 10,
   recomendedFps: 10,
+  totalRecomendedFps: 10,
   inferenceProtocol: InferenceProtocol.GRPC,
   inferenceSource: InferenceSource.LVA,
 };
