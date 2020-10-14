@@ -109,7 +109,18 @@
               }
             },
             "settings": {
-              "image": "${MODULES.WebModule}"
+              "image": "${MODULES.WebModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "8000/tcp": [
+                      {
+                        "HostPort": "8000"
+                      }
+                    ]
+                  }
+                }
+              }
             }
           },
           "WebDBModule": {
