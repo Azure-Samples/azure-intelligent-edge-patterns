@@ -94,7 +94,8 @@ async def predict(camera_id: str, request: Request):
     """predict."""
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    img = nparr.reshape(960, -1, 3)
+    # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     results = http_inference_engine.predict(camera_id, img)
 
     if len(results) > 0:

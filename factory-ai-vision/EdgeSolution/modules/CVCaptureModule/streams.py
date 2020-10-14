@@ -104,8 +104,9 @@ class Stream:
                             bytes(self.cam_id, "utf-8"), cnt
                         )
                     )
-                data = cv2.imencode(".jpg", self.last_img)[1].tobytes()
-                # res = requests.post(endpoint, data=data)
+                # data = cv2.imencode(".jpg", self.last_img)[1].tobytes()
+                data = self.last_img.tobytes()
+                res = requests.post(endpoint, data=data)
                 self.last_send = self.last_update
                 time.sleep(1 / self.fps)
 
