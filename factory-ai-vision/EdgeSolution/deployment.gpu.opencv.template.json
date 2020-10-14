@@ -103,6 +103,9 @@
               },
               "DF_INFERENECE_IS_GPU": {
                 "value": true
+              },
+              "DF_PD_VIDEO_SOURCE": {
+                "value": "opencv"
               }
             },
             "settings": {
