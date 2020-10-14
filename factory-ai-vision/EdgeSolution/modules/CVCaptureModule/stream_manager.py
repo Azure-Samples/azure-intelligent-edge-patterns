@@ -2,8 +2,8 @@ import logging
 import threading
 
 import zmq
-
 from streams import Stream
+
 # FIXME RON
 
 logger = logging.getLogger(__name__)

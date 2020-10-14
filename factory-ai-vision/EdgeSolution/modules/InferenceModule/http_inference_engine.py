@@ -15,7 +15,7 @@ class HttpInferenceEngine:
         """predict.
         """
         stream = self.stream_manager.get_stream_by_id(cam_id)
-        logger.info(cam_id)
+        #logger.info(cam_id)
         if not stream:
             predicitons = []
             logger.info("Stream not ready yet.")
@@ -24,7 +24,7 @@ class HttpInferenceEngine:
         try:
             stream.predict(img)
             predictions = stream.last_prediction
-            logger.info("Predictions %s", predictions)
+            #logger.info("Predictions %s", predictions)
         except:
             logger.error("Unexpected error: %s", sys.exc_info())
 

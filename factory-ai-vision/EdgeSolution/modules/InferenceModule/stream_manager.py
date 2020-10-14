@@ -102,7 +102,7 @@ class StreamManager(object):
             return None
         stream = self.streams[stream_id]
         self.mutex.release()
-        logger.info("Got stream: %s", stream_id)
+        #logger.info("Got stream: %s", stream_id)
         return stream
 
     def _delete_stream_by_id(self, stream_id):
