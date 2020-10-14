@@ -140,8 +140,8 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     sendTrainInfoToAppInsight(projectData.parts);
 
     setdeploying(true);
-    await dispatch(thunkPostProject(projectData));
-    await dispatch(getConfigure(projectData.id));
+    const projectId = await dispatch(thunkPostProject(projectData));
+    await dispatch(getConfigure((projectId as unknown) as number));
     setdeploying(false);
 
     onDismiss();
