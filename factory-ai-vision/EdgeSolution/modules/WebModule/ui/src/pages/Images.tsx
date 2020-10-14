@@ -52,8 +52,9 @@ export const Images: React.FC = () => {
   const imageIsEnoughForTraining = useSelector(
     (state: State) => state.project.status === Status.None && labeledImages.length >= 15,
   );
-  const hasRelabelImgReadyToTrain = useSelector((state: State) =>
-    selectAllImages(state).some((e) => e.isRelabel && e.manualChecked && !e.uploaded),
+  const relabelImgsReadyToTrain = useSelector(
+    (state: State) =>
+      selectAllImages(state).filter((e) => e.isRelabel && e.manualChecked && !e.uploaded).length,
   );
 
   const onUpload = () => {
@@ -137,9 +138,9 @@ export const Images: React.FC = () => {
               button={{ text: 'Go to Home', to: '/home/customize' }}
             />
           )}
-          {relabelImages.length === 0 && hasRelabelImgReadyToTrain && (
+          {relabelImgsReadyToTrain > 0 && (
             <Instruction
-              title="All images saved from the current deployment have been tagged!"
+              title={`${relabelImgsReadyToTrain} images saved from the current deployment have been tagged!`}
               subtitle="Update the deployment to retrain the model"
               button={{
                 text: 'Update model',
