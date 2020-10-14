@@ -1,6 +1,6 @@
 import asyncio
-import signal
 import logging
+import signal
 import threading
 
 import cv2
@@ -8,9 +8,8 @@ import requests
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-from utility import get_inference_url
 from stream_manager import StreamManager
-
+from utility import get_inference_url
 
 logger = logging.getLogger(__name__)
 stream_manager = StreamManager()
@@ -29,13 +28,22 @@ class Stream(BaseModel):
 async def index():
     # FIXME
     number_of_streams = 0
-    return {"number_of_streams": number_of_streams}
+    infos = []
+    for stream in stream_manager.get_streams():
+        infos.append(
+            {
+                "cam_id": stream.cam_id,
+                "cam_source": stream.cam_source,
+                "fps": stream.fps,
+            }
+        )
+    return {"number_of_streams": number_of_streams, "infos": infos}
 
 
 @app.get("/delete_stream/{stream_id}")
 async def delete_stream(stream_id):
     stream_manager.delete_stream(stream_id)
-    logger.info("Delete stream {0}".format(stream_id))
+    logger.info("Delete stream {}".format(stream_id))
 
     return "ok"
 
