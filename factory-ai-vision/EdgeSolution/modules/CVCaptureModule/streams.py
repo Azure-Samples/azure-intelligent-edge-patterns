@@ -33,7 +33,7 @@ class Stream:
         # else:
         #     frameRate = 10
         self.cam = None
-        self.fps = 20
+        self.fps = fps
         self.cam_is_alive = True
 
         self.IMG_WIDTH = 960
