@@ -97,7 +97,7 @@ async def predict(camera_id: str, request: Request):
     img = nparr.reshape(-1, 960, 3)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     results = http_inference_engine.predict(camera_id, img)
-    if int(time.time()%5 == 0):
+    if int(time.time()) % 5 == 0:
         logger.warning(results)
     if len(results) > 0:
         return json.dumps({"inferences": results}), 200
