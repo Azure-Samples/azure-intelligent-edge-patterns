@@ -24,7 +24,7 @@ class StreamManager(object):
         self.sender = self.context.socket(zmq.PUB)
         self.sender.bind("tcp://*:5556")
 
-    def _add_new_stream(self, stream_id, rtsp, endpoint):
+    def _add_new_stream(self, stream_id, rtsp, fps, endpoint):
         """ internal function, no thread protect """
         logger.info('Add new stream: %s', stream_id)
 
@@ -33,7 +33,7 @@ class StreamManager(object):
             return False
 
         # FIXME RON check this
-        stream = Stream(stream_id, rtsp, endpoint, self.sender)
+        stream = Stream(stream_id, rtsp, fps, endpoint, self.sender)
         self.streams[stream_id] = stream
 
     def get_streams(self):
@@ -52,11 +52,11 @@ class StreamManager(object):
     def delete_stream(self, stream_id):
         self._delete_stream_by_id(stream_id)
 
-    def add_stream(self, stream_id, rtsp, endpoint):
+    def add_stream(self, stream_id, rtsp, fps, endpoint):
         self.mutex.acquire()
         if stream_id in self.streams:
             s = self.streams.get(stream_id, None)
-            if s.check_update(rtsp, endpoint):
+            if s.check_update(rtsp, fps, endpoint):
                 self._delete_stream_by_id(stream_id)
             else:
                 print('nothing change')

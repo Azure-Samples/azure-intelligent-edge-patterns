@@ -56,7 +56,7 @@ async def create_stream(stream: Stream):
     rtsp = stream.rtsp
     if rtsp.startswith(RTSPSIM_PREFIX):
         rtsp = "videos" + rtsp.split(RTSPSIM_PREFIX)[1]
-    stream_manager.add_stream(stream.stream_id, rtsp, stream.endpoint)
+    stream_manager.add_stream(stream.stream_id, rtsp, stream.fps, stream.endpoint)
 
     # FIXME use your stream manager to fix it
 

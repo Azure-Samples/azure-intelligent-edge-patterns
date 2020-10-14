@@ -17,6 +17,7 @@ class Stream:
         self,
         cam_id,
         cam_source,
+        fps,
         endpoint,
         sender
     ):
@@ -32,6 +33,7 @@ class Stream:
         # else:
         #     frameRate = 10
         self.cam = None
+        self.fps = 20
         self.cam_is_alive = True
 
         self.IMG_WIDTH = 960
@@ -276,12 +278,12 @@ class Stream:
             self.scenario = None
             self.scenario_type = self.model.detection_mode
 
-    def check_update(self, rtsp, endpoint):
+    def check_update(self, rtsp, fps, endpoint):
         print(endpoint)
         print(type(endpoint))
         print(self.endpoint)
         print(type(self.endpoint))
-        return (rtsp != self.cam_source or endpoint != self.endpoint)
+        return (rtsp != self.cam_source or endpoint != self.endpoint or self.fps != fps)
 
     def delete(self):
         # self.mutex.acquire()
