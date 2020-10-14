@@ -94,12 +94,24 @@ Give it some time to create the pods. You should eventually see it with `READY` 
     NAME             READY     URL                                         DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
     flowers-sample   True      http://flowers-sample.default.example.com   90                10               48s
 
-Now, you can identify the host and port to make requests to:
+Now, you can identify the host and port to make requests to, it [depends on your environment](https://github.com/kubeflow/kfserving).
+
+For stand-alone KFServing using minikube:
+
+    $ export INGRESS_HOST=$(minikube ip)
+    $ export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+
+For KFServing deployment within Kubeflow:
+
+    $ export INGRESS_HOST=$(kubectl -n istio-system get service kfserving-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    $ export INGRESS_PORT=$(kubectl -n istio-system get service kfserving-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+
+For other stand-alone KFServing deployments:
 
     $ export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
     $ export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
 
-And define the model you want to interact with(for the `curl` we compose later):
+We also need to define the model you want to interact with(for the `curl` we compose later):
 
     $ export MODEL_NAME=flowers-sample
     $ export INPUT_PATH=@./tensorflow_input.json
