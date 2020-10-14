@@ -30,7 +30,7 @@ import {
 } from '../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
-import { thunkPostProject } from '../store/project/projectActions';
+import { getConfigure, thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
 import { getScenario } from '../store/scenarioSlice';
 
@@ -107,6 +107,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const scenarios = useSelector((state: State) => state.scenario);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [deploying, setdeploying] = useState(false);
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
     const cloneProject = R.clone(projectData);
@@ -138,16 +139,22 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);
 
+    setdeploying(true);
     await dispatch(thunkPostProject(projectData));
+    await dispatch(getConfigure(projectData.id));
+    setdeploying(false);
 
     onDismiss();
     history.push('/home/deployment');
   };
 
   const onRenderFooterContent = () => {
+    let deployBtnTxt = 'Deploy';
+    if (isEdit) deployBtnTxt = 'Redeploy';
+    if (deploying) deployBtnTxt = 'Deploying';
     return (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton text={isEdit ? 'Redeploy' : 'Deploy'} onClick={onStart} />
+        <PrimaryButton text={deployBtnTxt} onClick={onStart} disabled={deploying} />
         <DefaultButton text="Cancel" onClick={onDismiss} />
       </Stack>
     );
