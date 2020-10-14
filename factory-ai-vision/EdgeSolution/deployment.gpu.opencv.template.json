@@ -102,7 +102,7 @@
                 "value": "vision_on_edge"
               },
               "DF_INFERENECE_IS_GPU": {
-                "value": false
+                "value": true
               }
             },
             "settings": {
