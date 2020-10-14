@@ -296,33 +296,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           )}
           <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
-              <Label>Send video to cloud</Label>
-            </div>
-            <Toggle
-              inlineLabel
-              label="Enable sending video"
-              checked={projectData.sendVideoToCloud}
-              onChange={(_, checked) => {
-                onChange('sendVideoToCloud', checked);
-              }}
-            />
-            <Dropdown
-              disabled={!projectData.sendVideoToCloud}
-              options={selectedCameraOptions}
-              multiSelect
-              selectedKeys={projectData.cameraToBeRecord}
-              onChange={(_, option) => {
-                onChange(
-                  'cameraToBeRecord',
-                  option.selected
-                    ? [...projectData.cameraToBeRecord, option.key as number]
-                    : projectData.cameraToBeRecord.filter((key) => key !== option.key),
-                );
-              }}
-            />
-          </Stack.Item>
-          <Stack.Item disableShrink>
-            <div className={classNames.textWrapper}>
               <Label>Camera FPS</Label>
             </div>
             <Toggle
@@ -348,20 +321,49 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             />
           </Stack.Item>
           {projectData.inferenceSource === InferenceSource.LVA && (
-            <Stack.Item disableShrink>
-              <div className={classNames.textWrapper}>
-                <Label>Protocol of inference</Label>
-              </div>
-              <Toggle
-                inlineLabel
-                label={projectData.inferenceProtocol}
-                checked={projectData.inferenceProtocol === InferenceProtocol.GRPC}
-                onChange={(_, checked) => {
-                  if (checked) onChange('inferenceProtocol', InferenceProtocol.GRPC);
-                  else onChange('inferenceProtocol', InferenceProtocol.Http);
-                }}
-              />
-            </Stack.Item>
+            <>
+              <Stack.Item disableShrink>
+                <div className={classNames.textWrapper}>
+                  <Label>Send video to cloud</Label>
+                </div>
+                <Toggle
+                  inlineLabel
+                  label="Enable sending video"
+                  checked={projectData.sendVideoToCloud}
+                  onChange={(_, checked) => {
+                    onChange('sendVideoToCloud', checked);
+                  }}
+                />
+                <Dropdown
+                  disabled={!projectData.sendVideoToCloud}
+                  options={selectedCameraOptions}
+                  multiSelect
+                  selectedKeys={projectData.cameraToBeRecord}
+                  onChange={(_, option) => {
+                    onChange(
+                      'cameraToBeRecord',
+                      option.selected
+                        ? [...projectData.cameraToBeRecord, option.key as number]
+                        : projectData.cameraToBeRecord.filter((key) => key !== option.key),
+                    );
+                  }}
+                />
+              </Stack.Item>
+              <Stack.Item disableShrink>
+                <div className={classNames.textWrapper}>
+                  <Label>Protocol of inference</Label>
+                </div>
+                <Toggle
+                  inlineLabel
+                  label={projectData.inferenceProtocol}
+                  checked={projectData.inferenceProtocol === InferenceProtocol.GRPC}
+                  onChange={(_, checked) => {
+                    if (checked) onChange('inferenceProtocol', InferenceProtocol.GRPC);
+                    else onChange('inferenceProtocol', InferenceProtocol.Http);
+                  }}
+                />
+              </Stack.Item>
+            </>
           )}
         </Stack>
       </ExpandPanel>
