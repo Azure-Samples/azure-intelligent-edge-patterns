@@ -110,7 +110,7 @@ Go to factory-ai-vision repo and click on Installers folder, there are two zip f
 <br/>And please copy the information 
 <br/>You will need the secret information for later usage 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step7.png)
-If you would like to install with opencv version, please input “no”
+<br/>If you would like to install with opencv version, please input “no”
 
 10. There will be a list of IoT hubs, please choose “customvision”
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step8.png)
