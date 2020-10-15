@@ -16,8 +16,14 @@ const classNames = mergeStyleSets({
 });
 
 export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'manualChecked'> & {
-  partName: string;
-  cameraName: string;
+  part: {
+    id: number;
+    name: string;
+  };
+  camera: {
+    id: number;
+    name: string;
+  };
 };
 
 export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
@@ -36,8 +42,8 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
             imgId={item.id}
             imgUrl={item.image}
             imgTimeStamp={timeStampConverter(item.timestamp)}
-            cameraName={item.cameraName}
-            partName={item.partName}
+            cameraName={item.camera.name}
+            partName={item.part.name}
             manualChecked={item.manualChecked}
             pointerCursor
             onClick={() =>

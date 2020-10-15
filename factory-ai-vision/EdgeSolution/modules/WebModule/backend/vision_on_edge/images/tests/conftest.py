@@ -26,4 +26,3 @@ def mock_validate(monkeypatch):
         Project, "get_project_obj", mock.MagicMock(return_value=fake_project)
     )
     monkeypatch.setattr(Project, "validate", mock.MagicMock(return_value=True))
-    monkeypatch.setattr(Camera, "verify_rtsp", mock.MagicMock(return_value=True))

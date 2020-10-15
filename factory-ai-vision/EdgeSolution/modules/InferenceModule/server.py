@@ -94,9 +94,11 @@ async def predict(camera_id: str, request: Request):
     """predict."""
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    img = nparr.reshape(-1, 960, 3)
+    # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     results = http_inference_engine.predict(camera_id, img)
-
+    if int(time.time()) % 5 == 0:
+        logger.warning(results)
     if len(results) > 0:
         return json.dumps({"inferences": results}), 200
     return "", 204
@@ -192,6 +194,7 @@ def update_model(request_body: UploadModelBody):
 
         if model_uri == onnx.model_uri:
             logger.info("Model Uri unchanged.")
+            onnx.update_model("model")
             return "ok", 200
         if onnx.model_downloading:
             logger.info("Already have a thread downloading project.")
@@ -229,8 +232,9 @@ def update_cams(request_body: CamerasModel):
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
     # recommended_fps = onnx.get_recommended_frame_rate(n)
-    frame_rate = fps
-    onnx.set_frame_rate(fps)
+    frame_rate = int(fps / n)
+    onnx.set_frame_rate(int(fps/n))
+    logger.warning('update frame rate to {0}'.format(frame_rate))
 
     # lva_mode
 

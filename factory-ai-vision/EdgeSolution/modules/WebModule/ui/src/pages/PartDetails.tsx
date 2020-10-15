@@ -24,7 +24,7 @@ import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
-import { selectImageItemByTaggedPart } from '../store/selectors';
+import { partImageItemSelectorFactory } from '../store/selectors';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
@@ -40,7 +40,9 @@ export const PartDetails: React.FC = () => {
   const openPanel = () => setEditPanelOpen(true);
   const closePanel = () => setEditPanelOpen(false);
 
-  const labeledImages = useSelector(selectImageItemByTaggedPart(partId));
+  // Create a memoized selector so the selector factory won't return different selectors every render
+  const labeledImagesSelector = useMemo(() => partImageItemSelectorFactory(partId), [partId]);
+  const labeledImages = useSelector(labeledImagesSelector);
 
   const commandBarItems: ICommandBarItemProps[] = [
     {

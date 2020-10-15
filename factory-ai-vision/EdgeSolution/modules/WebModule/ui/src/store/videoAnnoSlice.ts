@@ -173,10 +173,10 @@ export const { selectAll: selectAllVideoAnnos } = entityAdapter.getSelectors<Sta
   (state) => state.videoAnnos,
 );
 
-export const selectVideoAnnosByCamera = (cameraId: number) =>
+export const videoAnnosSelectorFactory = (cameraId: number) =>
   createSelector(selectAllVideoAnnos, (annos) => annos.filter((e) => e.camera === cameraId));
 
-export const selectOriginVideoAnnosByCamera = (cameraId: number) =>
+export const originVideoAnnosSelectorFactory = (cameraId: number) =>
   createSelector(
     (state: State) => Object.values(state.videoAnnos.originEntities || {}),
     (originAnnos: VideoAnno[]) => originAnnos.filter((e) => e.camera === cameraId),

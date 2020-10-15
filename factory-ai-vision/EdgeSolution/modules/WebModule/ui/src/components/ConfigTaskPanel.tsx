@@ -20,17 +20,17 @@ import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { getCameras, cameraOptionsSelectorInConfig } from '../store/cameraSlice';
-import { partOptionsSelector, getParts } from '../store/partSlice';
+import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../store/cameraSlice';
+import { partOptionsSelectorFactory, getParts } from '../store/partSlice';
 import {
   ProjectData,
   InferenceMode,
   InferenceProtocol,
   InferenceSource,
 } from '../store/project/projectTypes';
-import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
+import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
-import { thunkPostProject } from '../store/project/projectActions';
+import { getConfigure, thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
 import { getScenario } from '../store/scenarioSlice';
 
@@ -90,23 +90,32 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     setProjectData(initialProjectData);
   }, [initialProjectData]);
 
-  const cameraOptions = useSelector(cameraOptionsSelectorInConfig(projectData.trainingProject));
+  const cameraOptionsSelectorInConfig = useMemo(
+    () => cameraOptionsSelectorFactoryInConfig(projectData.trainingProject),
+    [projectData.trainingProject],
+  );
+  const cameraOptions = useSelector(cameraOptionsSelectorInConfig);
   const selectedCameraOptions = useMemo(
     () => cameraOptions.filter((e) => projectData.cameras.includes(e.key)),
     [cameraOptions, projectData.cameras],
   );
-  const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
-  const trainingProjectOptions = useSelector(
-    trainingProjectOptionsSelector(
-      isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
-    ),
+
+  const partOptionsSelector = useMemo(() => partOptionsSelectorFactory(projectData.trainingProject), [
+    projectData.trainingProject,
+  ]);
+  const partOptions = useSelector(partOptionsSelector);
+
+  const trainingProjectOptionsSelector = trainingProjectOptionsSelectorFactory(
+    isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
   );
+  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
   const scenarios = useSelector((state: State) => state.scenario);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [deploying, setdeploying] = useState(false);
 
   function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
     const cloneProject = R.clone(projectData);
@@ -121,6 +130,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     } else if (key === 'cameras') {
       cloneProject.cameraToBeRecord = cloneProject.cameraToBeRecord.filter((e) =>
         cloneProject.cameras.includes(e),
+      );
+      cloneProject.recomendedFps = Math.floor(
+        cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1),
       );
     } else if (key === 'sendVideoToCloud' && !value) {
       cloneProject.cameraToBeRecord = [];
@@ -138,16 +150,22 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const onStart = async () => {
     sendTrainInfoToAppInsight(projectData.parts);
 
-    await dispatch(thunkPostProject(projectData));
+    setdeploying(true);
+    const projectId = await dispatch(thunkPostProject(projectData));
+    await dispatch(getConfigure((projectId as unknown) as number));
+    setdeploying(false);
 
     onDismiss();
     history.push('/home/deployment');
   };
 
   const onRenderFooterContent = () => {
+    let deployBtnTxt = 'Deploy';
+    if (isEdit) deployBtnTxt = 'Redeploy';
+    if (deploying) deployBtnTxt = 'Deploying';
     return (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton text={isEdit ? 'Redeploy' : 'Deploy'} onClick={onStart} />
+        <PrimaryButton text={deployBtnTxt} onClick={onStart} disabled={deploying} />
         <DefaultButton text="Cancel" onClick={onDismiss} />
       </Stack>
     );
@@ -296,33 +314,6 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           )}
           <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
-              <Label>Send video to cloud</Label>
-            </div>
-            <Toggle
-              inlineLabel
-              label="Enable sending video"
-              checked={projectData.sendVideoToCloud}
-              onChange={(_, checked) => {
-                onChange('sendVideoToCloud', checked);
-              }}
-            />
-            <Dropdown
-              disabled={!projectData.sendVideoToCloud}
-              options={selectedCameraOptions}
-              multiSelect
-              selectedKeys={projectData.cameraToBeRecord}
-              onChange={(_, option) => {
-                onChange(
-                  'cameraToBeRecord',
-                  option.selected
-                    ? [...projectData.cameraToBeRecord, option.key as number]
-                    : projectData.cameraToBeRecord.filter((key) => key !== option.key),
-                );
-              }}
-            />
-          </Stack.Item>
-          <Stack.Item disableShrink>
-            <div className={classNames.textWrapper}>
               <Label>Camera FPS</Label>
             </div>
             <Toggle
@@ -348,20 +339,49 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             />
           </Stack.Item>
           {projectData.inferenceSource === InferenceSource.LVA && (
-            <Stack.Item disableShrink>
-              <div className={classNames.textWrapper}>
-                <Label>Protocol of inference</Label>
-              </div>
-              <Toggle
-                inlineLabel
-                label={projectData.inferenceProtocol}
-                checked={projectData.inferenceProtocol === InferenceProtocol.GRPC}
-                onChange={(_, checked) => {
-                  if (checked) onChange('inferenceProtocol', InferenceProtocol.GRPC);
-                  else onChange('inferenceProtocol', InferenceProtocol.Http);
-                }}
-              />
-            </Stack.Item>
+            <>
+              <Stack.Item disableShrink>
+                <div className={classNames.textWrapper}>
+                  <Label>Send video to cloud</Label>
+                </div>
+                <Toggle
+                  inlineLabel
+                  label="Enable sending video"
+                  checked={projectData.sendVideoToCloud}
+                  onChange={(_, checked) => {
+                    onChange('sendVideoToCloud', checked);
+                  }}
+                />
+                <Dropdown
+                  disabled={!projectData.sendVideoToCloud}
+                  options={selectedCameraOptions}
+                  multiSelect
+                  selectedKeys={projectData.cameraToBeRecord}
+                  onChange={(_, option) => {
+                    onChange(
+                      'cameraToBeRecord',
+                      option.selected
+                        ? [...projectData.cameraToBeRecord, option.key as number]
+                        : projectData.cameraToBeRecord.filter((key) => key !== option.key),
+                    );
+                  }}
+                />
+              </Stack.Item>
+              <Stack.Item disableShrink>
+                <div className={classNames.textWrapper}>
+                  <Label>Protocol of inference</Label>
+                </div>
+                <Toggle
+                  inlineLabel
+                  label={projectData.inferenceProtocol}
+                  checked={projectData.inferenceProtocol === InferenceProtocol.GRPC}
+                  onChange={(_, checked) => {
+                    if (checked) onChange('inferenceProtocol', InferenceProtocol.GRPC);
+                    else onChange('inferenceProtocol', InferenceProtocol.Http);
+                  }}
+                />
+              </Stack.Item>
+            </>
           )}
         </Stack>
       </ExpandPanel>

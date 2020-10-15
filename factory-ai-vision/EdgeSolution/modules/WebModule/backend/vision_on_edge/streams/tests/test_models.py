@@ -1,7 +1,9 @@
 """App model tests.
 """
+# pylint: disable=W0613
+# skip unused-argument mock_cv2_capture
 
-from unittest import mock
+import time
 
 import pytest
 
@@ -11,81 +13,140 @@ from ..models import Stream
 pytestmark = pytest.mark.django_db
 
 
-class fake_cap:
-    def isOpened(self):
-        return True
-
-
 @pytest.mark.fast
-@mock.patch(
-    "vision_on_edge.cameras.models.Camera.verify_rtsp",
-    mock.MagicMock(return_value=True),
+@pytest.mark.parametrize(
+    "rtsp_input, output",
+    [
+        [0, 0],
+        ["0", 0],
+        [1, 1],
+        ["1", 1],
+        ["RTSP://QQ", "rtsp://QQ"],
+        ["rtsp://QQ", "rtsp://QQ"],
+        ["rTsP://QQ", "rtsp://QQ"],
+        ["@@rtsp://QQ", "@@rtsp://QQ"],
+        ["rtP://QQ", "rtP://QQ"],
+        ["http://www.google.com", "http://www.google.com"],
+    ],
 )
-@mock.patch(
-    "vision_on_edge.streams.models.cv2.VideoCapture",
-    mock.MagicMock(return_value=fake_cap()),
-)
-def test_rtsp():
+def test_rtsp(mock_cv2_capture, rtsp_input, output):
     """test_rtsp.
 
     stream open rtsp should be lowercase
+    [0, "0"] => 0
+    [1. "1"] => 1
     """
     cam1 = CameraFactory()
-    cam1.rtsp = "RTSP://fake_url"
+    cam1.rtsp = rtsp_input
     cam1.save()
     stream1 = Stream(rtsp=cam1.rtsp, camera_id=cam1.id)
-    assert stream1.rtsp == "rtsp://fake_url"
+    assert stream1.rtsp == output
 
 
 @pytest.mark.fast
-@mock.patch(
-    "vision_on_edge.cameras.models.Camera.verify_rtsp",
-    mock.MagicMock(return_value=True),
-)
-@mock.patch(
-    "vision_on_edge.streams.models.cv2.VideoCapture",
-    mock.MagicMock(return_value=fake_cap()),
-)
-def test_rtsp_0():
-    """test_rtsp.
-
-    stream open rtsp "0" should be save as integer
+def test_method_keep_alive(camera):
+    """test_method_keep_alive.
     """
-    # String 0
-    cam1 = CameraFactory()
-    cam1.rtsp = "0"
-    cam1.save()
-    stream1 = Stream(rtsp=cam1.rtsp, camera_id=cam1.id)
-    assert stream1.rtsp == 0
-    # Integer 0
-    cam1.rtsp = 0
-    cam1.save()
-    stream1 = Stream(rtsp=cam1.rtsp, camera_id=cam1.id)
-    assert stream1.rtsp == 0
+    time_start = time.time()
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    stream_obj.update_keep_alive()
+    assert stream_obj.keep_alive > time_start
 
 
 @pytest.mark.fast
-@mock.patch(
-    "vision_on_edge.cameras.models.Camera.verify_rtsp",
-    mock.MagicMock(return_value=True),
-)
-@mock.patch(
-    "vision_on_edge.streams.models.cv2.VideoCapture",
-    mock.MagicMock(return_value=fake_cap()),
-)
-def test_rtsp_1():
-    """test_rtsp.
-
-    stream open rtsp "1" should be save as integer
+def test_method_gen(camera):
+    """test_method_get_frame.
     """
-    # String 1
-    cam1 = CameraFactory()
-    cam1.rtsp = "1"
-    cam1.save()
-    stream1 = Stream(rtsp=cam1.rtsp, camera_id=cam1.id)
-    assert stream1.rtsp == 1
-    # Integer 1
-    cam1.rtsp = 1
-    cam1.save()
-    stream1 = Stream(rtsp=cam1.rtsp, camera_id=cam1.id)
-    assert stream1.rtsp == 1
+    time_start = time.time()
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    assert stream_obj.cur_img_index == 0
+    assert stream_obj.last_get_img_index == 1
+    gen = stream_obj.gen()
+    next(gen)
+    assert stream_obj.cur_img_index == 1
+    assert stream_obj.last_get_img_index == 1
+    next(gen)
+    assert stream_obj.cur_img_index == 2
+    assert stream_obj.last_get_img_index == 1
+
+
+@pytest.mark.fast
+def test_method_get_frame(camera):
+    """test_method_get_frame.
+
+    Make sure a stream can get_frame right after it init.
+    (No gen() call needed)
+    """
+    time_start = time.time()
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    stream_obj.get_frame()
+    assert time.time() - time_start < 3
+
+
+@pytest.mark.fast
+def test_method_get_frame_after_generated(camera):
+    """test_method_get_frame.
+
+    Make sure a stream can get_frame right after gen()
+    """
+    time_start = time.time()
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    stream_obj.get_frame()
+    next(stream_obj.gen())
+    stream_obj.get_frame()
+    assert time.time() - time_start < 3
+
+
+def test_method_get_frame_no_generated(camera):
+    """test_method_get_frame.
+
+    Make sure a stream will wait to try get a new image
+    """
+    time_start = time.time()
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    stream_obj.get_frame()
+    stream_obj.get_frame()
+    assert time.time() - time_start > 3
+
+
+@pytest.mark.fast
+def test_method_get_frame_after_generated_twice(camera):
+    """test_method_get_frame.
+    """
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    gen = stream_obj.gen()
+    next(gen)
+    next(gen)
+    next(gen)
+
+
+@pytest.mark.fast
+def test_method_gen_members(camera):
+    """test_method_get_frame.
+    """
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    assert stream_obj.cur_img_index == 0
+    assert stream_obj.last_get_img_index == 1
+    gen = stream_obj.gen()
+    next(gen)
+    assert stream_obj.cur_img_index == 1
+    assert stream_obj.last_get_img_index == 1
+    next(gen)
+    assert stream_obj.cur_img_index == 2
+    assert stream_obj.last_get_img_index == 1
+    stream_obj.get_frame()
+    assert stream_obj.cur_img_index == 2
+    assert stream_obj.last_get_img_index == 2
+
+
+@pytest.mark.fast
+def test_method_stop(camera):
+    """test_method_get_frame.
+    """
+    stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
+    assert stream_obj.status == "init"
+    gen = stream_obj.gen()
+    next(gen)
+    assert stream_obj.status == "running"
+    stream_obj.close()
+    assert stream_obj.status == "stopped"

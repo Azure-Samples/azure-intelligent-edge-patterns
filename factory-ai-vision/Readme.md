@@ -23,19 +23,20 @@ Check out [this video](https://lnkd.in/grQKBN8) to see brief introduction in act
 [![video](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/assets/Ignite.JPG)](https://lnkd.in/grQKBN8)
 
 
-# Prerequiste
+<!-- # Prerequiste -->
 
-## Hardware
+<!--## Hardware
 
-You need to have one of the following:
+<!--You need to have one of the following:
 
-- **Azure Stack Edge**
+<!-- - **Azure Stack Edge**
   or
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
   - For running on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
   - For running on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
 
-### NOTE:This solution is only supported on linux based Azure IoT edge devices
+<!-- ### NOTE:This solution is only supported on linux based Azure IoT edge devices -->
+
 
 
 # Prerequiste
@@ -79,13 +80,48 @@ Before installation, please make sure you have the following:
 ### Get Started:
 Go to factory-ai-vision repo and click on Installers folder, there are two zip files, [Windows.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/Windows.zip) and [bash.zip](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Installers/bash.zip) 
 
-1. Open your browser, connect to https://shell.azure.com/ , switch to Bash
-2. Download acs.zip from github `wget https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
-3. Unzip it `unzip acs.zip`
-4. Execute the installer `bash factory-ai-vision-install.sh`
-5. During the, you will enter your customvision credentials (optional), select your Azure Media Service, IoTHub, and Edge device. Note that if it's your first time to deploy, it will create a service principal for Azure Media Service, please backup the `SERVICE_PRINCIPAL_SECRET` by your own, which will be shown in the screen while selecing Azure Media Service. It won't be shown again once creating. If it's not the first time doing deployment via Installer, you will be asked to enter that secret
-6. If it's the first time deployment, you will be expected to wait around 10-15 minutes
-7. Open your browser, connect to http://YOUR_IP:8080
+1. Open your browser and paste the linke https://shell.azure.com/  to open the shell installer. And choose “bash” mode
+2. You will need a Azure subscription to continue
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step1.png)
+3. To download acs.zip from github by pasting `wget https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step2.png)
+4. Unzip it `unzip acs.zip`. The file name can be found above if different from acs.zip listed above. 
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step3.png)
+5. Execute the installer `bash factory-ai-vision-install.sh`
+
+6. It will check the az command and check if installing/updating the IoT extension
+<br/>You would be asking:
+<br/>Would you like to use an existing Custom Vision Service? (y or n):  y 
+<br/>If you choose “yes”, you will asking to input endpoint and key.
+<br/>Please enter your Custom Vision endpoint: xxxxxx
+<br/>Please enter your Custom Vision Key: xxxxxx
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step4.png)
+
+7. If you choose not to use existing account, please go ahead to create a new one with the instruction
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step5.png)
+
+8. Do you want to use Azure Live Video Analytics? (y or n): 
+<br/>If you choose yes, 
+<br/>Select from one of listing Azure Media Service 
+<br/>And Choose the number corresponding to your Azure Media Service 
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step6.png)
+
+9. Or if you don’t have one, it will create new azure media service principle for you. 
+<br/>And please copy the information 
+<br/>You will need the secret information for later usage 
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step7.png)
+<br/>If you would like to install with opencv version, please input “no”
+
+10. There will be a list of IoT hubs, please choose “customvision”
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step8.png)
+
+11. It will show a list of devices in your account, and choose the device to install your visiononedge 
+<br/>You will be asking if your device have a GPU or not
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
+
+12. The installation will be started after. 
+<br/>Open your browser, connect to http://YOUR_IP:8080
+
 
 ## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
 

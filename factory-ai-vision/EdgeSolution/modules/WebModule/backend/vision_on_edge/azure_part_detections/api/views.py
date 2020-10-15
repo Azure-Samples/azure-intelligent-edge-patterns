@@ -78,8 +78,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         try:
             prob_threshold = int(prob_threshold)
-        except Exception:
-            raise PdProbThresholdNotInteger
+        except Exception as err:
+            raise PdProbThresholdNotInteger from err
 
         if prob_threshold > 100 or prob_threshold < 0:
             raise PdProbThresholdOutOfRange
@@ -99,15 +99,18 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     def export(self, request, pk=None) -> Response:
         """get the status of train job sent to custom vision"""
         queryset = self.get_queryset()
-        part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
-        project_obj = part_detection_obj.project
-        deploy_status_obj = DeployStatus.objects.get(part_detection=part_detection_obj)
-        inference_module_obj = part_detection_obj.inference_module
+        instance = drf_get_object_or_404(queryset, pk=pk)
+        cam_id = request.query_params.get("camera_id")
+
+        # Related objects
+        project_obj = instance.project
+        deploy_status_obj = DeployStatus.objects.get(part_detection=instance)
+        inference_module_obj = instance.inference_module
+        drf_get_object_or_404(instance.cameras.all(), pk=cam_id)
 
         success_rate = 0.0
         inference_num = 0
         unidentified_num = 0
-        cam_id = request.query_params.get("camera_id")
         if deploy_status_obj.status != "ok":
             return Response(
                 {
@@ -137,10 +140,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             average_inference_time = data["average_inference_time"]
             last_prediction_count = data["last_prediction_count"]
             scenario_metrics = data["scenario_metrics"] or []
-        except requests.exceptions.ConnectionError:
-            raise PdInferenceModuleUnreachable
-        except ReadTimeout:
-            raise PdExportInfereceReadTimeout
+        except requests.exceptions.ConnectionError as err:
+            raise PdInferenceModuleUnreachable from err
+        except ReadTimeout as err:
+            raise PdExportInfereceReadTimeout from err
         deploy_status_obj.save()
         logger.info(
             "Deploy status: %s, %s", deploy_status_obj.status, deploy_status_obj.log
@@ -214,7 +217,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         project_obj = instance.project
         if project_obj is None:
-            raise PdConfigureWithoutProject
+            raise PdRelabelWithoutProject
 
         if project_obj.is_demo:
             raise PdRelabelDemoProjectError

@@ -35,15 +35,21 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [{
-                      "HostPort": "5671"
-                    }],
-                    "8883/tcp": [{
-                      "HostPort": "8883"
-                    }],
-                    "443/tcp": [{
-                      "HostPort": "443"
-                    }]
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
                   }
                 }
               }
@@ -61,9 +67,11 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8080/tcp": [{
-                      "HostPort": "8080"
-                    }]
+                    "8080/tcp": [
+                      {
+                        "HostPort": "8080"
+                      }
+                    ]
                   }
                 }
               }
@@ -76,10 +84,10 @@
             "restartPolicy": "always",
             "env": {
               "TRAINING_KEY": {
-                "value": "<CUSTOM-VISION-TRAINING-KEY>"
+                "value": "$CUSTOM_VISION_TRAINING_KEY"
               },
               "ENDPOINT": {
-                "value": "<CUSTOM-VISION-ENDPOINT>"
+                "value": "$CUSTOM_VISION_ENDPOINT"
               },
               "DBNAME": {
                 "value": "vision_on_edge"
@@ -95,6 +103,9 @@
               },
               "DF_INFERENECE_IS_GPU": {
                 "value": false
+              },
+              "DF_PD_VIDEO_SOURCE": {
+                "value": "opencv"
               }
             },
             "settings": {
@@ -142,12 +153,16 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [{
-                      "HostPort": "5000"
-                    }],
-                    "5558/tcp": [{
-                      "HostPort": "5558"
-                    }]
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
                   },
                   "runtime": "runc"
                 }
@@ -169,12 +184,16 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "9000/tcp": [{
-                      "HostPort": "9000"
-                    }],
-                    "5559/tcp": [{
-                      "HostPort": "5559"
-                    }]
+                    "9000/tcp": [
+                      {
+                        "HostPort": "9000"
+                      }
+                    ],
+                    "5559/tcp": [
+                      {
+                        "HostPort": "5559"
+                      }
+                    ]
                   },
                   "runtime": "runc"
                 }

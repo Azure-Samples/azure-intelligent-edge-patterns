@@ -3,11 +3,11 @@
 
 import logging
 
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from ..models import Camera
+from ..exceptions import CameraRtspInvalid
+from ..utils import verify_rtsp as verify_rtsp_func
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +24,8 @@ def verify_rtsp(request):
     logger.info("rtsp %s", rtsp)
 
     if rtsp is None:
-        return Response(
-            {"status": "failed", "log": "rtsp not given"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    rtsp_ok = Camera.verify_rtsp(rtsp)
+        raise CameraRtspInvalid
+    rtsp_ok = verify_rtsp_func(rtsp)
     if not rtsp_ok:
-        return Response(
-            {"status": "failed", "log": "rtsp not valid"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        raise CameraRtspInvalid
     return Response({"status": "ok"})

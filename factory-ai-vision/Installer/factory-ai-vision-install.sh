@@ -40,7 +40,11 @@ if [ ! $? -eq 0 ]; then
 fi
 
 echo Installing / updating the IoT extension
+az extension add --name azure-iot
 az extension update --name azure-iot
+
+echo Deleting conflict Extension
+az extension remove --name azure-cli-iot-ext
 
 ################################ Get Tenant ###################################
 # remove the header and ---- from output list - start good var data at var1
@@ -363,7 +367,12 @@ done
 #else
 #    edgeDeploymentJson=deployment.amd64.json
 #fi
-edgeDeploymentJson=deployment.amd64.json
+if [ $streaming == "lva" ]; then
+    edgeDeploymentJson=deployment.amd64.json
+else
+    edgeDeploymentJson=deployment.opencv.amd64.json
+fi
+
 
 ################################ Write Config ############################################
 

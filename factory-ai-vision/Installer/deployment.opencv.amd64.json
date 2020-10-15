@@ -16,7 +16,7 @@
           "edgeAgent": {
             "type": "docker",
             "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9.5",
               "createOptions": "{}"
             }
           },
@@ -31,6 +31,16 @@
           }
         },
         "modules": {
+          "NginxModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "intelligentedge/nginxmodule:0.1.29-amd64",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8080/tcp\":[{\"HostPort\":\"8080\"}]}}}"
+            }
+          },
           "WebModule": {
             "version": "1.0",
             "type": "docker",
@@ -57,7 +67,7 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/webmodule:0.1.28-amd64",
+              "image": "intelligentedge/webmodule:0.1.29-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
             }
           },
@@ -78,7 +88,7 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/webdbmodule:0.1.28-amd64",
+              "image": "intelligentedge/webdbmodule:0.1.29-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5432/tcp\":[{\"HostPort\":\"5432\"}]}}}"
             }
           },
@@ -88,26 +98,26 @@
             "status": "running",
             "restartPolicy": "always",
             "env": {
-              "LVA_MODE": {
-                "value": "grpc"
-              },
               "IOTHUB_CONNECTION_STRING": {
                 "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "IS_OPENCV": {
+                "value": "true"
               }
             },
             "settings": {
-              "image": "intelligentedge/inferencemodule:0.1.28-<cpu or gpu>amd64",
+              "image": "intelligentedge/inferencemodule:0.1.29-<cpu or gpu>amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"44000/tcp\":[{\"HostPort\":\"44000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
             }
           },
-          "lvaEdge": {
+          "CVCaptureModule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/live-video-analytics:1",
-              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"Binds\":[],\"IpcMode\":\"host\"}}"
+              "image": "intelligentedge/cameramodule:0.1.29-amd64",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"9000/tcp\":[{\"HostPort\":\"9000\"}],\"5559/tcp\":[{\"HostPort\":\"5559\"}]},\"runtime\":\"runc\"}}"
             }
           },
           "rtspsim": {
@@ -116,7 +126,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/rtspsimmodule:0.0.6-amd64",
+              "image": "intelligentedge/rtspsimmodule:0.1.29-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
             }
           }
@@ -140,24 +150,6 @@
     },
     "VisionSampleModule": {
       "properties.desired": {}
-    },
-    "lvaEdge": {
-      "properties.desired": {
-        "applicationDataDirectory": "/var/media",
-        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourcegroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$SERVICE_NAME",
-        "aadTenantId": "$TENANT_ID",
-        "aadServicePrincipalAppId": "$SERVICE_PRINCIPAL_APP_ID",
-        "aadServicePrincipalSecret": "$SERVICE_PRINCIPAL_SECRET",
-        "aadEndpoint": "https://login.microsoftonline.com",
-        "aadResourceId": "https://management.core.windows.net/",
-        "armEndpoint": "https://management.azure.com/",
-        "diagnosticsEventsOutputName": "AmsDiagnostics",
-        "operationalEventsOutputName": "AmsOperational",
-        "logLevel": "Information",
-        "logCategories": "Application,Events",
-        "allowUnsecuredEndpoints": true,
-        "telemetryOptOut": false
-      }
     }
   }
 }

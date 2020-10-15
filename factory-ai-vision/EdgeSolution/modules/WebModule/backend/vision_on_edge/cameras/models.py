@@ -3,15 +3,13 @@
 
 import logging
 
-import cv2
 from django.db import models
 from django.db.models.signals import pre_save
-
-from vision_on_edge.general.utils import normalize_rtsp
 
 from ..locations.models import Location
 from .constants import gen_default_lines, gen_default_zones
 from .exceptions import CameraRtspInvalid
+from .utils import verify_rtsp
 
 logger = logging.getLogger(__name__)
 
@@ -34,35 +32,7 @@ class Camera(models.Model):
         return self.name
 
     def __repr__(self):
-        return self.name
-
-    @staticmethod
-    def verify_rtsp(rtsp):
-        """Validate a rtsp.
-        Args:
-            rtsp (str)
-
-        Returns:
-            is_rtsp_valid (bool)
-        """
-
-        logger.info("Camera static method: verify_rtsp")
-        logger.info(rtsp)
-        if rtsp == "0":
-            rtsp = 0
-        elif isinstance(rtsp, str) and rtsp.lower().find("rtsp") == 0:
-            logger.error("This is a rtsp")
-            rtsp = "rtsp" + rtsp[4:]
-        cap = cv2.VideoCapture(rtsp)
-        if not cap.isOpened():
-            cap.release()
-            return False
-        is_ok, _ = cap.read()
-        if not is_ok:
-            cap.release()
-            return False
-        cap.release()
-        return True
+        return self.name.__repr__()
 
     @staticmethod
     def pre_save(**kwargs):
@@ -74,8 +44,7 @@ class Camera(models.Model):
             return
         if instance.rtsp is None:
             raise CameraRtspInvalid
-        rtsp_ok = Camera.verify_rtsp(rtsp=instance.rtsp)
-        if not rtsp_ok:
+        if not verify_rtsp(rtsp=instance.rtsp):
             raise CameraRtspInvalid
 
 

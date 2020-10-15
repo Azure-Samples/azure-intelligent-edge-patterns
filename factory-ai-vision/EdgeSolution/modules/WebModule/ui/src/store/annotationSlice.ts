@@ -169,6 +169,5 @@ export const labelPageAnnoSelector = createSelector(
   [selectedImageIdSelector, selectAllAnno],
   (selectedImageId, allAnnos) => allAnnos.filter((anno) => anno.image === selectedImageId),
 );
-
-export const selectAnnoByImgId = (imgId: number) =>
+export const imgAnnoSelectorFactory = (imgId: number) =>
   createSelector(selectAllAnno, (anno) => anno.filter((e) => e.image === imgId));

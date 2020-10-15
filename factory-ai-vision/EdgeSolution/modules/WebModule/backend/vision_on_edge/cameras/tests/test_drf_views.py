@@ -1,23 +1,26 @@
 """App drf view tests.
 """
-
 import json
+from unittest import mock
 
 import pytest
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
+from .. import models
 from ..api.serializers import CameraSerializer
 from ..api.views import CameraViewSet
+from ..models import Camera
 from .factories import CameraFactory
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.fast
-def test_get():
+def test_get(monkeypatch, mock_cv2_capture):
     """test_get_queryset."""
     factory = APIRequestFactory()
+
     cam_1 = CameraFactory()
     camera_list_view = CameraViewSet.as_view({"get": "list"})
     request = factory.get("/fake-url/")
