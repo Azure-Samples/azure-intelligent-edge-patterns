@@ -14,7 +14,6 @@ import {
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
-import * as R from 'ramda';
 
 import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
@@ -22,12 +21,12 @@ import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages, selectAllImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
 import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../store/selectors';
-import { getParts, selectAllParts } from '../store/partSlice';
+import { getParts } from '../store/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { useInterval } from '../hooks/useInterval';
 import { Instruction } from '../components/Instruction';
 import { Status } from '../store/project/projectTypes';
-import { selectAllCameras, selectNonDemoCameras } from '../store/cameraSlice';
+import { selectNonDemoCameras } from '../store/cameraSlice';
 
 const theme = getTheme();
 const classes = mergeStyleSets({
