@@ -131,7 +131,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       cloneProject.cameraToBeRecord = cloneProject.cameraToBeRecord.filter((e) =>
         cloneProject.cameras.includes(e),
       );
-      cloneProject.recomendedFps = cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1);
+      cloneProject.recomendedFps = Math.floor(
+        cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1),
+      );
     } else if (key === 'sendVideoToCloud' && !value) {
       cloneProject.cameraToBeRecord = [];
     }
