@@ -194,6 +194,7 @@ def update_model(request_body: UploadModelBody):
 
         if model_uri == onnx.model_uri:
             logger.info("Model Uri unchanged.")
+            onnx.update_model("model")
             return "ok", 200
         if onnx.model_downloading:
             logger.info("Already have a thread downloading project.")

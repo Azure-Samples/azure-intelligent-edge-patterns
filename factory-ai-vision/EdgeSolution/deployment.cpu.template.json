@@ -22,7 +22,7 @@
           "edgeAgent": {
             "type": "docker",
             "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9.5",
               "createOptions": {}
             }
           },
@@ -104,7 +104,18 @@
               "DF_INFERENECE_IS_GPU": { "value": false }
             },
             "settings": {
-              "image": "${MODULES.WebModule}"
+              "image": "${MODULES.WebModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "8000/tcp": [
+                      {
+                        "HostPort": "8000"
+                      }
+                    ]
+                  }
+                }
+              }
             }
           },
           "WebDBModule": {
