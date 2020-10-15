@@ -4,36 +4,46 @@ import { selectPartEntities, selectAllParts } from './partSlice';
 import { Item as ImageListItem } from '../components/ImageList';
 import { selectNonDemoProject } from './trainingProjectSlice';
 import { selectCameraEntities } from './cameraSlice';
+import { Image } from './type';
 
-const selectImagesByRelabel = (isRelabel) =>
-  createSelector(selectAllImages, (images) =>
-    images.filter((img) => img.isRelabel === isRelabel && img.part !== null),
-  );
+const getImgListItem = (img: Image, partEntities, cameraEntities): ImageListItem => {
+  const part = partEntities[img.part];
+  const camera = cameraEntities[img.camera];
 
-const selectImagesByPart = (partId) =>
-  createSelector(selectImagesByRelabel(false), (images) => images.filter((img) => img.part === partId));
+  return {
+    id: img.id,
+    image: img.image,
+    timestamp: img.timestamp,
+    manualChecked: img.manualChecked,
+    part: {
+      id: part?.id || null,
+      name: part?.name || '',
+    },
+    camera: {
+      id: camera?.id || null,
+      name: camera?.name || '',
+    },
+  };
+};
 
-export const selectImageItemByTaggedPart = (partId) =>
+/**
+ * Get the part-image selector by passing the part ID
+ * @param partId
+ */
+export const partImageItemSelectorFactory = (partId) =>
   createSelector(
     [selectAllImages, selectPartEntities, selectCameraEntities],
     (images, partEntities, cameraEntities) =>
       images
         .filter((img) => img.part === partId && !img.isRelabel)
-        .map(
-          (img): ImageListItem => {
-            return {
-              id: img.id,
-              image: img.image,
-              timestamp: img.timestamp,
-              manualChecked: img.manualChecked,
-              partName: partEntities[img.part]?.name || '',
-              cameraName: cameraEntities[img.camera]?.name,
-            };
-          },
-        ),
+        .map((img) => getImgListItem(img, partEntities, cameraEntities)),
   );
 
-export const selectImageItemByUntagged = (unTagged: boolean) =>
+/**
+ * Create a memoize image item selector by passing untagged
+ * @param unTagged If the selector need to select untagged image
+ */
+export const imageItemSelectorFactory = (unTagged: boolean) =>
   createSelector(
     [selectAllImages, selectPartEntities, selectCameraEntities],
     (images, partEntities, cameraEntities) =>
@@ -42,39 +52,16 @@ export const selectImageItemByUntagged = (unTagged: boolean) =>
           if (unTagged) return !img.manualChecked && !img.isRelabel;
           return img.manualChecked;
         })
-        .map(
-          (img): ImageListItem => {
-            return {
-              id: img.id,
-              image: img.image,
-              timestamp: img.timestamp,
-              manualChecked: img.manualChecked,
-              partName: partEntities[img.part]?.name || '',
-              cameraName: cameraEntities[img.camera]?.name,
-            };
-          },
-        ),
+        .map((img) => getImgListItem(img, partEntities, cameraEntities)),
   );
 
-export const selectImageItemByRelabel = () =>
-  createSelector(
-    [selectAllImages, selectPartEntities, selectCameraEntities],
-    (images, partEntities, cameraEntities) =>
-      images
-        .filter((img) => img.isRelabel && !img.manualChecked)
-        .map(
-          (img): ImageListItem => {
-            return {
-              id: img.id,
-              image: img.image,
-              timestamp: img.timestamp,
-              manualChecked: img.manualChecked,
-              partName: partEntities[img.part]?.name || '',
-              cameraName: cameraEntities[img.camera]?.name,
-            };
-          },
-        ),
-  );
+export const relabelImageSelector = createSelector(
+  [selectAllImages, selectPartEntities, selectCameraEntities],
+  (images, partEntities, cameraEntities) =>
+    images
+      .filter((img) => img.isRelabel && !img.manualChecked)
+      .map((img) => getImgListItem(img, partEntities, cameraEntities)),
+);
 
 export const selectNonDemoPart = createSelector(
   [selectAllParts, selectNonDemoProject],

@@ -113,7 +113,7 @@ export const selectNonDemoProject = getNonDemoSelector('trainingProject', select
  * If the given training project is in the predefined scenarios, also return the training project of the scenario.
  * @param trainingProjectId
  */
-export const trainingProjectOptionsSelector = (trainingProjectId: number) =>
+export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number) =>
   createSelector(
     [selectAllTrainingProjects, (state: State) => state.scenario],
     (trainingProjects, scenarios) => {

@@ -10,6 +10,7 @@ import {
   MessageBar,
   Separator,
   mergeStyleSets,
+  ContextualMenuItemType,
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
@@ -19,12 +20,13 @@ import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages, selectAllImages } from '../store/imageSlice';
 import { ImageList } from '../components/ImageList';
-import { selectImageItemByUntagged, selectImageItemByRelabel } from '../store/selectors';
+import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../store/selectors';
 import { getParts } from '../store/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { useInterval } from '../hooks/useInterval';
 import { Instruction } from '../components/Instruction';
 import { Status } from '../store/project/projectTypes';
+import { selectNonDemoCameras } from '../store/cameraSlice';
 
 const theme = getTheme();
 const classes = mergeStyleSets({
@@ -33,15 +35,46 @@ const classes = mergeStyleSets({
   },
 });
 
+const labeledImagesSelector = imageItemSelectorFactory(false);
+const unlabeledImagesSelector = imageItemSelectorFactory(true);
+
+const onToggleFilterItem = (targetItem: number) => (allItems: Record<number, boolean>) => ({
+  ...allItems,
+  [targetItem]: !allItems[targetItem],
+});
+/**
+ * A hooks that return the command bar items of filter object and the selected filter object id
+ * @param selector The redux selector of the item
+ */
+function useFilterItems<T extends { id: number; name: string }>(
+  selector: (state: State) => T[],
+): [ICommandBarItemProps[], string[]] {
+  const [filterItems, setFilterItems] = useState({});
+  const itemsInStore = useSelector(selector);
+  const items: ICommandBarItemProps[] = useMemo(
+    () =>
+      itemsInStore.map((c) => ({
+        key: c.id.toString(),
+        text: c.name,
+        canCheck: true,
+        checked: filterItems[c.id],
+        onClick: () => setFilterItems(onToggleFilterItem(c.id)),
+      })),
+    [itemsInStore, filterItems],
+  );
+
+  return [items, Object.keys(filterItems).filter((e) => filterItems[e])];
+}
+
 export const Images: React.FC = () => {
   const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
   const openCaptureDialog = () => setCaptureDialogOpen(true);
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
-  const labeledImages = useSelector(selectImageItemByUntagged(false));
-  const unlabeledImages = useSelector(selectImageItemByUntagged(true));
-  const relabelImages = useSelector(selectImageItemByRelabel());
+  let labeledImages = useSelector(labeledImagesSelector);
+  let unlabeledImages = useSelector(unlabeledImagesSelector);
+  let relabelImages = useSelector(relabelImageSelector);
   const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
   const imageAddedButNoAnno = useSelector(
     (state: State) => state.labelImages.ids.length > 0 && state.annotations.ids.length === 0,
@@ -91,6 +124,48 @@ export const Images: React.FC = () => {
     [],
   );
 
+  const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
+  const [partItems, filteredParts] = useFilterItems(selectNonDemoPart);
+
+  if (filteredCameras.length) {
+    labeledImages = labeledImages.filter((e) => filteredCameras.includes(e.camera.id?.toString()));
+    relabelImages = relabelImages.filter((e) => filteredCameras.includes(e.camera.id?.toString()));
+    unlabeledImages = unlabeledImages.filter((e) => filteredCameras.includes(e.camera?.id.toString()));
+  }
+
+  if (filteredParts.length) {
+    labeledImages = labeledImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
+    relabelImages = relabelImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
+    unlabeledImages = unlabeledImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
+  }
+
+  const commandBarFarItems: ICommandBarItemProps[] = useMemo(
+    () => [
+      {
+        key: 'filter',
+        iconOnly: true,
+        iconProps: { iconName: 'Filter' },
+        subMenuProps: {
+          items: [
+            {
+              key: 'byPart',
+              text: 'Filter by object',
+              itemType: ContextualMenuItemType.Header,
+            },
+            ...partItems,
+            {
+              key: 'byCamera',
+              text: 'Filter by camera',
+              itemType: ContextualMenuItemType.Header,
+            },
+            ...cameraItems,
+          ],
+        },
+      },
+    ],
+    [cameraItems, partItems],
+  );
+
   useEffect(() => {
     dispatch(getImages());
     // For image list items
@@ -129,6 +204,7 @@ export const Images: React.FC = () => {
         <CommandBar
           items={commandBarItems}
           styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+          farItems={commandBarFarItems}
         />
         <Stack styles={{ root: { padding: '15px' } }} grow>
           {imageIsEnoughForTraining && (

@@ -20,15 +20,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { getCameras, cameraOptionsSelectorInConfig } from '../store/cameraSlice';
-import { partOptionsSelector, getParts } from '../store/partSlice';
+import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../store/cameraSlice';
+import { partOptionsSelectorFactory, getParts } from '../store/partSlice';
 import {
   ProjectData,
   InferenceMode,
   InferenceProtocol,
   InferenceSource,
 } from '../store/project/projectTypes';
-import { getTrainingProject, trainingProjectOptionsSelector } from '../store/trainingProjectSlice';
+import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../store/trainingProjectSlice';
 import { getAppInsights } from '../TelemetryService';
 import { getConfigure, thunkPostProject } from '../store/project/projectActions';
 import { ExpandPanel } from './ExpandPanel';
@@ -90,17 +90,25 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     setProjectData(initialProjectData);
   }, [initialProjectData]);
 
-  const cameraOptions = useSelector(cameraOptionsSelectorInConfig(projectData.trainingProject));
+  const cameraOptionsSelectorInConfig = useMemo(
+    () => cameraOptionsSelectorFactoryInConfig(projectData.trainingProject),
+    [projectData.trainingProject],
+  );
+  const cameraOptions = useSelector(cameraOptionsSelectorInConfig);
   const selectedCameraOptions = useMemo(
     () => cameraOptions.filter((e) => projectData.cameras.includes(e.key)),
     [cameraOptions, projectData.cameras],
   );
-  const partOptions = useSelector(partOptionsSelector(projectData.trainingProject));
-  const trainingProjectOptions = useSelector(
-    trainingProjectOptionsSelector(
-      isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
-    ),
+
+  const partOptionsSelector = useMemo(() => partOptionsSelectorFactory(projectData.trainingProject), [
+    projectData.trainingProject,
+  ]);
+  const partOptions = useSelector(partOptionsSelector);
+
+  const trainingProjectOptionsSelector = trainingProjectOptionsSelectorFactory(
+    isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
   );
+  const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
   const canSelectProjectRetrain = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
