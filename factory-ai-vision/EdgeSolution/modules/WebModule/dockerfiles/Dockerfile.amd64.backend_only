@@ -1,0 +1,32 @@
+# =========================================================
+# === Build Backend Base                                ===
+# =========================================================
+FROM amd64/python:3.8 as backend-base
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
+
+
+# =========================================================
+# === Build Backend Production                          ===
+# =========================================================
+FROM backend-base as backend-production
+
+WORKDIR /app
+
+COPY backend/requirements requirements
+RUN pip install -r ./requirements/production-x86.txt
+
+COPY backend/manage.py .
+COPY backend/config.py .
+COPY backend/vision_on_edge vision_on_edge
+COPY backend/configs configs
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+
+EXPOSE 8000
+
+CMD python manage.py runserver 0.0.0.0:8000

@@ -124,15 +124,20 @@ class Stream:
             while self.cam_is_alive:
                 is_ok, img = self.cam.read()
                 if is_ok:
-                    # self.mutex.acquire()
-                    # FIXME may find a better way to deal with encoding
 
+                    width = IMG_WIDTH
+                    ratio = IMG_WIDTH / img.shape[1]
+                    height = int(img.shape[0] * ratio + 0.000001)
+                    #if height >= self.IMG_HEIGHT:
+                    #    height = self.IMG_HEIGHT
+                    #    ratio = self.IMG_HEIGHT / img.shape[0]
+                    #    width = int(img.shape[1] * ratio + 0.000001)
+
+                    img = cv2.resize(img, (width, height))
                     self.last_img = img
                     self.last_update = time.time()
 
-                    # self.mutex.release()
-                    # FIXME need to fine tune this value
-                    time.sleep(0.02)
+                    time.sleep(1 / self.fps)
                 else:
                     time.sleep(1)
                     self.restart_cam()
@@ -148,7 +153,7 @@ class Stream:
                     continue
                 if self.last_send == self.last_update:
                     # logger.warning('no new img')
-                    time.sleep(0.03)
+                    time.sleep(1 / self.fps)
                     continue
                 if cnt % 30 == 1:
                     logger.warning(
@@ -160,11 +165,11 @@ class Stream:
                 # FIXME may find a better way to deal with encoding
                 self.zmq_sender.send_multipart(
                     [
-                        bytes(self.cam_id, "utf-8"),
-                        cv2.imencode(".jpg", self.last_img)[1].tobytes(),
+                        bytes(self.cam_id, "utf-8"),self.last_img.tobytes(),
                     ]
                 )
                 self.last_send = self.last_update
+                time.sleep(1 / self.fps)
 
         threading.Thread(target=run_capture, args=(self,), daemon=True).start()
         threading.Thread(target=run_send, args=(self,), daemon=True).start()

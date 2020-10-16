@@ -45,7 +45,7 @@ class Part(models.Model):
                 return True
             raise PartNotEnoughImagesToTrain(
                 detail=(
-                    f"{self.name} has {local_count} local, {remote_count} remote images."
+                    f"{self.name} image count local: {local_count} remote {remote_count}"
                     + f"(expected least total: {CUSTOMVISION_LEAST_IMAGE_TO_TRAIN})"
                 )
             )
@@ -55,7 +55,17 @@ class Part(models.Model):
             return False
 
     def get_tagged_images_count_local(self) -> int:
-        return self.image_set.filter(uploaded=False, is_relabel=False).count()
+        """get_tagged_images_count_local.
+
+        Args:
+
+        Returns:
+            int:
+        """
+        try:
+            return self.image_set.filter(uploaded=False, manual_checked=True).count()
+        except AttributeError:
+            return 0
 
     def get_tagged_images_count_remote(self) -> int:
         """get_tagged_images_count.

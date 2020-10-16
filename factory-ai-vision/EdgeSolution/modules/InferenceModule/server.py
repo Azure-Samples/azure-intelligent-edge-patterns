@@ -232,8 +232,8 @@ def update_cams(request_body: CamerasModel):
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
     # recommended_fps = onnx.get_recommended_frame_rate(n)
-    frame_rate = int(fps / n)
-    onnx.set_frame_rate(int(fps/n))
+    frame_rate = fps
+    onnx.set_frame_rate(fps)
     logger.warning('update frame rate to {0}'.format(frame_rate))
 
     # lva_mode
@@ -572,7 +572,8 @@ def opencv_zmq():
                 continue
             try:
                 nparr = np.frombuffer(buf[1], np.uint8)
-                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                img = nparr.reshape(-1, 960, 3)
+                # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 stream.predict(img)
                 predictions = stream.last_prediction
                 logger.info("Predictions %s", predictions)
@@ -580,7 +581,8 @@ def opencv_zmq():
                 logger.error("Unexpected error: %s", sys.exc_info())
         receiver.close()
 
-    threading.Thread(target=run).start()
+    threading.Thread(target=run, daemon=True).start()
+    # threading.Thread(target=run).start()
 
 
 def main():
