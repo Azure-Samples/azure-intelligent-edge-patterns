@@ -31,7 +31,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 <br/>If you choose “yes”, you will asking to input endpoint and key.
 <br/>Please enter your Custom Vision endpoint: xxxxxx
 <br/>Please enter your Custom Vision Key: xxxxxx
-You can find your training key [here](https://www.customvision.ai/projects#/setting)
+<br/> You can find your training key [here](https://www.customvision.ai/projects#/setting)
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step4.png)
 
 7. If you choose not to use existing account, please go ahead to create a new one with the instruction
