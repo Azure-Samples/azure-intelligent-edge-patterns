@@ -178,7 +178,7 @@
                       }
                     ]
                   },
-                  "IpcMode": "container:lvaEdge",
+                  "IpcMode": "host",
                   "runtime": "runc"
                 }
               }
