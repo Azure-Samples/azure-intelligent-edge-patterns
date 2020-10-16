@@ -190,7 +190,13 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig": {}
+                "HostConfig":{
+                  "PortBindings":{
+                    "554/tcp":[{
+                      "HostPort":"554"
+                    }]
+                  }
+                }
               }
             }
           }
