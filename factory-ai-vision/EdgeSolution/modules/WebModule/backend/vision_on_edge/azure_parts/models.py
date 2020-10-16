@@ -63,7 +63,7 @@ class Part(models.Model):
             int:
         """
         try:
-            return self.image_set.filter(uploaded=False, manual_checked=False).count()
+            return self.image_set.filter(uploaded=False, manual_checked=True).count()
         except AttributeError:
             return 0
 
