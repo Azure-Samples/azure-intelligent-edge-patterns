@@ -200,7 +200,7 @@
                       "max-file": "10"
                     }
                   },
-                  "IpcMode": "shareable"
+                  "IpcMode": "host"
                 }
               }
             }

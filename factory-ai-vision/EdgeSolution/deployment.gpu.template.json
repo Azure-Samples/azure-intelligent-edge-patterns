@@ -176,7 +176,7 @@
                     }
                   },
                   "Binds": [],
-                  "IpcMode": "shareable"
+                  "IpcMode": "host"
                 }
               }
             }
