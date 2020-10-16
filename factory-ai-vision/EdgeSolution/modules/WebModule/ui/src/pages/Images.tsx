@@ -145,7 +145,7 @@ export const Images: React.FC = () => {
       {
         key: 'filter',
         iconOnly: true,
-        iconProps: { iconName: 'Filter' },
+        iconProps: { iconName: filteredCameras.length || filteredParts.length ? 'FilterSolid' : 'Filter' },
         subMenuProps: {
           items: [
             {
