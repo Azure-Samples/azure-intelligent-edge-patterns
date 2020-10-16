@@ -176,6 +176,11 @@
                       {
                         "HostPort": "5558"
                       }
+                    ],
+                    "44000/tcp": [
+                      {
+                        "HostPort": "44000"
+                      }
                     ]
                   },
                   "IpcMode": "host",
