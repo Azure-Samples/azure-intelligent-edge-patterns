@@ -1,6 +1,4 @@
-# Architecture
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/factoryaidiagram.png)
 
 # Vision on Edge Shell Installer
 
