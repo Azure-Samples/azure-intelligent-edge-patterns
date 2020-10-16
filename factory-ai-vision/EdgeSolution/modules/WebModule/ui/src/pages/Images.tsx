@@ -19,7 +19,6 @@ import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages, selectAllImages } from '../store/imageSlice';
-import { ImageList, Item } from '../components/ImageList';
 import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../store/selectors';
 import { getParts } from '../store/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
@@ -27,6 +26,7 @@ import { useInterval } from '../hooks/useInterval';
 import { Instruction } from '../components/Instruction';
 import { Status } from '../store/project/projectTypes';
 import { selectNonDemoCameras } from '../store/cameraSlice';
+import { FilteredImgList } from '../components/FilteredImgList';
 
 const theme = getTheme();
 const classes = mergeStyleSets({
@@ -64,15 +64,6 @@ function useFilterItems<T extends { id: number; name: string }>(
   );
 
   return [items, Object.keys(filterItems).filter((e) => filterItems[e])];
-}
-
-function filterImgs(imgs: Item[], filterCameras: string[], filterParts: string[]): Item[] {
-  let filteredImgs = imgs;
-  if (filterCameras.length)
-    filteredImgs = filteredImgs.filter((img) => filterCameras.includes(img.camera.id?.toString()));
-  if (filterParts.length)
-    filteredImgs = filteredImgs.filter((img) => filterParts.includes(img.part.id?.toString()));
-  return filteredImgs;
 }
 
 export const Images: React.FC = () => {
@@ -135,10 +126,6 @@ export const Images: React.FC = () => {
 
   const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
   const [partItems, filteredParts] = useFilterItems(selectNonDemoPart);
-
-  const filteredLabeledImgs = filterImgs(labeledImages, filteredCameras, filteredParts);
-  const filteredRelabelImgs = filterImgs(relabelImages, filteredCameras, filteredParts);
-  const filteredUnlabelImgs = filterImgs(unlabeledImages, filteredCameras, filteredParts);
 
   const commandBarFarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -239,26 +226,44 @@ export const Images: React.FC = () => {
                   />
                 ) : (
                   <>
-                    <Separator alignContent="start" className={classes.seperator}>
-                      Deployment captures
-                    </Separator>
                     {relabelImages.length > 0 && (
-                      <MessageBar styles={{ root: { margin: '12px 0px' } }}>
-                        Images saved from the current deployment. Confirm or modify the objects identified to
-                        improve your model.
-                      </MessageBar>
+                      <>
+                        <Separator alignContent="start" className={classes.seperator}>
+                          Deployment captures
+                        </Separator>
+                        <MessageBar styles={{ root: { margin: '12px 0px' } }}>
+                          Images saved from the current deployment. Confirm or modify the objects identified
+                          to improve your model.
+                        </MessageBar>
+                        <FilteredImgList
+                          images={relabelImages}
+                          filteredCameras={filteredCameras}
+                          filteredParts={filteredParts}
+                        />
+                      </>
                     )}
-                    <ImageList images={filteredRelabelImgs} />
-                    <Separator alignContent="start" className={classes.seperator}>
-                      Manually added
-                    </Separator>
-                    <ImageList images={filteredUnlabelImgs} />
+                    {unlabeledImages.length > 0 && (
+                      <>
+                        <Separator alignContent="start" className={classes.seperator}>
+                          Manually added
+                        </Separator>
+                        <FilteredImgList
+                          images={unlabeledImages}
+                          filteredCameras={filteredCameras}
+                          filteredParts={filteredParts}
+                        />
+                      </>
+                    )}
                   </>
                 )}
               </PivotItem>
               <PivotItem headerText="Tagged">
                 {onRenderInstructionInsidePivot()}
-                <ImageList images={filteredLabeledImgs} />
+                <FilteredImgList
+                  images={labeledImages}
+                  filteredCameras={filteredCameras}
+                  filteredParts={filteredParts}
+                />
               </PivotItem>
             </Pivot>
           ) : (

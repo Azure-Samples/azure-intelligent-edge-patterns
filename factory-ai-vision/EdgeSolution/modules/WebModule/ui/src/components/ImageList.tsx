@@ -62,12 +62,5 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
     [dispatch, sortedImages],
   );
 
-  if (sortedImages.length === 0)
-    return (
-      <MessageBar styles={{ root: { margin: '5px 0px' } }}>
-        There are no images that match your current filter
-      </MessageBar>
-    );
-
   return <>{sortedImages.map(onRenderCell)}</>;
 };
