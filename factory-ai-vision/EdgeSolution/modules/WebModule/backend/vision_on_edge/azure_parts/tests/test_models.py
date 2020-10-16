@@ -66,7 +66,7 @@ def test_part_is_trainable_2(part):
 @pytest.mark.fast
 def test_part_is_trainable_3(part):
     for _ in range(CUSTOMVISION_LEAST_IMAGE_TO_TRAIN):
-        Image.objects.create(part=part, is_relabel=True)
+        Image.objects.create(part=part, is_relabel=True, manual_checked=True)
     assert not part.is_trainable()
     with pytest.raises(PartNotEnoughImagesToTrain):
         assert part.is_trainable(raise_exception=True)
