@@ -47,8 +47,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 <br/>And please copy the "SERVICE-PRINCIPLE-SECRET" information in the bottom
 <br/>You will need the secret information for later use
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step7.png)
-
-<br/>You will install with opencv version if you choose “no”
+<br/>You will being with opencv installation if you choose “no”
 
 10. There will be a list of IoT hubs, please choose “customvision”
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step8.png)
