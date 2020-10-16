@@ -150,6 +150,50 @@ Do the inferencing itself:
     * Connection #0 to host 12.34.56.78 left intact
     }
 
+## Deploying custom model
+
+The prepared sample model is stored at `gs://kfserving-samples/models/tensorflow/flowers`. The custom model you build yourself also
+needs to be put into the location InferenceService CRD understands, which is, at the moment of writing this documentation, one of:
+`gs://`, `s3://`, or `pvc://`.
+
+For a detouched cluster, you could create a local storage using the `persistence.yaml` we provide in `sbin` folder, deploy it
+in `kfserving-test` namespace like so:
+
+    $ kubectl create -f persistence.yaml -n kfserving-test
+    storageclass.storage.k8s.io/local-storage created
+    persistentvolume/samba-share-volume created
+    persistentvolumeclaim/samba-share-claim created
+
+You should see the volume claims:
+
+    $ kubectl get pvc -n kfserving-test
+    NAME                STATUS   VOLUME               CAPACITY   ACCESS MODES   STORAGECLASS    AGE
+    samba-share-claim   Bound    samba-share-volume   2Gi        RWX            local-storage   16h
+
+And the volume itself:
+
+    $ kubectl get pv -n kfserving-test
+    NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                              STORAGECLASS    REASON   AGE
+    ...
+    samba-share-volume                         2Gi        RWX            Retain           Bound    kfserving-test/samba-share-claim   local-storage            16h
+
+Then you can copy your model from the `build_models` to where your pvc points to, and mark it in your deployment .yaml, like so:
+
+    $ cat tensorflow_custom_model.yaml
+    apiVersion: "serving.kubeflow.org/v1alpha2"
+    kind: "InferenceService"
+    metadata:
+    name: "custom-model"
+    spec:
+    default:
+        predictor:
+        tensorflow:
+            #storageUri: "gs://rollingstone/mobilenet"
+            storageUri: "pvc://samba-share-claim/mymodels/build_models/mobilenet"
+
+
+## Inferencing using custom model
+
 See [Tensorflow rest api documentation](https://www.tensorflow.org/tfx/serving/api_rest) on constructing and interpreting the json inpu/output.
 
 For example, for the custom model we created earlier, we would need to define the instances with `input_1`.
@@ -175,6 +219,7 @@ And we should get the predictions.
     }
 
 It is up to the user of the api to pre-process the input and to post-process the results according to the application's needs.
+See `tensorflow_web_infer.py` for example of how to pick the right index and get the label for your model.
 
 ## Links
 
