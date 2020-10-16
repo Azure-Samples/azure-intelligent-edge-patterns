@@ -16,7 +16,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
    
 ### Get Started:
 
-1. Open your browser and paste the link https://shell.azure.com/  to open the shell installer. And choose “bash” mode
+1. Open your browser and paste the link https://shell.azure.com/  to open the shell installer. 
 2. You will need a Azure subscription to continue. Choose your Azure account.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step1.png)
 3. To download acs.zip from github `wget https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
