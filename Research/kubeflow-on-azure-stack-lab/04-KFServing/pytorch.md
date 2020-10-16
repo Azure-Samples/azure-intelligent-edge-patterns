@@ -2,19 +2,27 @@
 
 ## Building a model and running inference on it.
 
-You can run inferencing using pytorchserver. See [KFServing PyTorch demo](https://github.com/kubeflow/kfserving/tree/master/docs/samples/pytorch) for more information if needed.
+You can run inferencing using pytorchserver, a part of Kubeflow KFServing GitHub reposotory.
+See [KFServing PyTorch demo](https://github.com/kubeflow/kfserving/tree/master/docs/samples/pytorch) for more information if needed.
 
-You need to have the pytorchserver installed. Clone KFServing repository and install the pre-requisites.
+You need to have the `pytorchserver` installed. You may need to install the prerequisites manually, specifying
+versions and hardware nuances(CUDA version, etc.)
+
+In simple case:
+
+    $ pip install torch torchvision
+
+Clone KFServing repository and install the pre-requisites. See KFServing's
+[python/pytorchserver](https://github.com/kubeflow/kfserving/tree/master/python/pytorchserver)
+if you have any issues.
 
     $ git clone https://github.com/kubeflow/kfserving.git
     $ cd kfserving/python/pytorchserver
     $ pip install -e .
 
-See KFServing's [python/pytorchserver](https://github.com/kubeflow/kfserving/tree/master/python/pytorchserver) if you have any issues.
-
 Verify that it works:
 
-    /kfserving/python/pytorchserver$ python3python3 -m pytorchserver -h
+    /kfserving/python/pytorchserver$ python3 -m pytorchserver -h
     usage: __main__.py [-h] [--http_port HTTP_PORT] [--grpc_port GRPC_PORT]
                     [--max_buffer_size MAX_BUFFER_SIZE] [--workers WORKERS]
                     --model_dir MODEL_DIR [--model_name MODEL_NAME]
@@ -102,9 +110,17 @@ Wait until the pods are running and the service is 'ready' and has URL:
 
 Define the parameters you will be using in your requests:
 
-    $ MODEL_NAME=pytorch-cifar10
-    $ INPUT_PATH=@./pytorch_input.json
-    $ SERVICE_HOSTNAME=$(kubectl get inferenceservice pytorch-cifar10 -n kfserving-test -o jsonpath='{.status.url}' | cut -d "/" -f 3)
+    $ export MODEL_NAME=pytorch-cifar10
+    $ export INPUT_PATH=@./pytorch_input.json
+    $ export SERVICE_HOSTNAME=$(kubectl get inferenceservice pytorch-cifar10 -n kfserving-test -o jsonpath='{.status.url}' | cut -d "/" -f 3)
+
+Depending on your environment, if you run on KFServing that is part of Kubeflow instalation(this is what we do thuought this lab):
+
+    $ export INGRESS_HOST=$(kubectl -n istio-system get service kfserving-ingressgateway  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    $ export INGRESS_PORT=$(kubectl -n istio-system get service kfserving-ingressgateway  -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+
+Or for more generic case:
+
     $ export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
     $ export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
     
