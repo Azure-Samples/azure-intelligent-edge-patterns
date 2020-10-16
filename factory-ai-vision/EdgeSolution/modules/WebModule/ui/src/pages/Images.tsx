@@ -164,7 +164,7 @@ export const Images: React.FC = () => {
         },
       },
     ],
-    [cameraItems, partItems],
+    [cameraItems, filteredCameras.length, filteredParts.length, partItems],
   );
 
   useEffect(() => {
