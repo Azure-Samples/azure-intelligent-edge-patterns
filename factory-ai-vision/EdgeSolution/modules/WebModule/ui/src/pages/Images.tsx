@@ -19,7 +19,7 @@ import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages, selectAllImages } from '../store/imageSlice';
-import { ImageList } from '../components/ImageList';
+import { ImageList, Item } from '../components/ImageList';
 import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../store/selectors';
 import { getParts } from '../store/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
@@ -66,15 +66,24 @@ function useFilterItems<T extends { id: number; name: string }>(
   return [items, Object.keys(filterItems).filter((e) => filterItems[e])];
 }
 
+function filterImgs(imgs: Item[], filterCameras: string[], filterParts: string[]): Item[] {
+  let filteredImgs = imgs;
+  if (filterCameras.length)
+    filteredImgs = filteredImgs.filter((img) => filterCameras.includes(img.camera.id?.toString()));
+  if (filterParts.length)
+    filteredImgs = filteredImgs.filter((img) => filterParts.includes(img.part.id?.toString()));
+  return filteredImgs;
+}
+
 export const Images: React.FC = () => {
   const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
   const openCaptureDialog = () => setCaptureDialogOpen(true);
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
-  let labeledImages = useSelector(labeledImagesSelector);
-  let unlabeledImages = useSelector(unlabeledImagesSelector);
-  let relabelImages = useSelector(relabelImageSelector);
+  const labeledImages = useSelector(labeledImagesSelector);
+  const unlabeledImages = useSelector(unlabeledImagesSelector);
+  const relabelImages = useSelector(relabelImageSelector);
   const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
   const imageAddedButNoAnno = useSelector(
     (state: State) => state.labelImages.ids.length > 0 && state.annotations.ids.length === 0,
@@ -127,17 +136,9 @@ export const Images: React.FC = () => {
   const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
   const [partItems, filteredParts] = useFilterItems(selectNonDemoPart);
 
-  if (filteredCameras.length) {
-    labeledImages = labeledImages.filter((e) => filteredCameras.includes(e.camera.id?.toString()));
-    relabelImages = relabelImages.filter((e) => filteredCameras.includes(e.camera.id?.toString()));
-    unlabeledImages = unlabeledImages.filter((e) => filteredCameras.includes(e.camera?.id.toString()));
-  }
-
-  if (filteredParts.length) {
-    labeledImages = labeledImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
-    relabelImages = relabelImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
-    unlabeledImages = unlabeledImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
-  }
+  const filteredLabeledImgs = filterImgs(labeledImages, filteredCameras, filteredParts);
+  const filteredRelabelImgs = filterImgs(relabelImages, filteredCameras, filteredParts);
+  const filteredUnlabelImgs = filterImgs(unlabeledImages, filteredCameras, filteredParts);
 
   const commandBarFarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -247,17 +248,17 @@ export const Images: React.FC = () => {
                         improve your model.
                       </MessageBar>
                     )}
-                    <ImageList images={relabelImages} />
+                    <ImageList images={filteredRelabelImgs} />
                     <Separator alignContent="start" className={classes.seperator}>
                       Manually added
                     </Separator>
-                    <ImageList images={unlabeledImages} />
+                    <ImageList images={filteredUnlabelImgs} />
                   </>
                 )}
               </PivotItem>
               <PivotItem headerText="Tagged">
                 {onRenderInstructionInsidePivot()}
-                <ImageList images={labeledImages} />
+                <ImageList images={filteredLabeledImgs} />
               </PivotItem>
             </Pivot>
           ) : (
