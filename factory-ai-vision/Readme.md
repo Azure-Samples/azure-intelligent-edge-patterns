@@ -139,7 +139,7 @@ YOUR_CONTAINER_REGISTRY_NAME/visionwebmodule:x.x.xx-cpuamd64
    If you don’t see above, the conatiners aren't downloaded successfully yet
 
 3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
-4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
+4. If you can visit the website (in 8181 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened
 
 # Installation Guide (New Version)
 
@@ -174,7 +174,7 @@ We provide two ways:
 4. Execute the installer ```bash factory-ai-vision-install.sh```
 5. During the, you will enter your customvision credentials (optional), select your Azure Media Service, IoTHub, and Edge device. Note that if it's your first time to deploy, it will create a service principal for Azure Media Service, please backup the ```SERVICE_PRINCIPAL_SECRET``` by your own, which will be shown in the screen while selecing Azure Media Service. It won't be shown again once creating. If it's not the first time doing deployment via Installer, you will be asked to enter that secret
 6. If it's the first time deployment, you will be expected to wait around 10-15 minutes
-7. Open your browser, connect to http://YOUR_IP:8080
+7. Open your browser, connect to http://YOUR_IP:8181
 
 ### Build from source code (Method2)
 - Clone yadavm_factoryai_lpr branch 
@@ -230,4 +230,4 @@ We provide two ways:
     
     f. azureiotedge-agent
     
-- Please wait until all 6 are running. Open your browser and connect http://YOUR_IP:8080
+- Please wait until all 6 are running. Open your browser and connect http://YOUR_IP:8181
