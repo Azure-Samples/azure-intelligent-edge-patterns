@@ -9,8 +9,8 @@ from ..models import Image
 pytestmark = pytest.mark.django_db
 
 
-def test_delete_relable_if_acc_range_change(project, part):
-    """test_delete_relable_if_acc_range_change.
+def test_delete_relabel_if_acc_range_change(project, part):
+    """test_delete_relabel_if_acc_range_change.
 
     If Project relabel accuracy range change, delete all relabel images.
     """
@@ -31,8 +31,8 @@ def test_delete_relable_if_acc_range_change(project, part):
     assert Image.objects.all().count() == 0
 
 
-def test_delete_relable_if_acc_range_min_change(project, part):
-    """test_delete_relable_if_acc_range_min_change.
+def test_delete_relabel_if_acc_range_min_change(project, part):
+    """test_delete_relabel_if_acc_range_min_change.
 
     If Project relabel accuracyRangeMin change, delete all
     relabel image
@@ -52,8 +52,8 @@ def test_delete_relable_if_acc_range_min_change(project, part):
     assert Image.objects.all().count() == 0
 
 
-def test_delete_relable_if_acc_range_max_change(project, part):
-    """test_delete_relable_if_acc_range_max_change.
+def test_delete_relabel_if_acc_range_max_change(project, part):
+    """test_delete_relabel_if_acc_range_max_change.
 
     If Project relabel accuracyRangeMax change, delete all
     relabel image

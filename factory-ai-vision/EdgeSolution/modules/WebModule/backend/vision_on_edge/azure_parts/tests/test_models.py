@@ -58,7 +58,7 @@ def test_part_is_trainable(part):
 @pytest.mark.fast
 def test_part_is_trainable_2(part):
     for _ in range(CUSTOMVISION_LEAST_IMAGE_TO_TRAIN):
-        Image.objects.create(part=part, uploaded=False)
+        Image.objects.create(part=part, manual_checked=True)
     assert part.is_trainable()
     assert part.is_trainable(raise_exception=True)
 
@@ -66,7 +66,7 @@ def test_part_is_trainable_2(part):
 @pytest.mark.fast
 def test_part_is_trainable_3(part):
     for _ in range(CUSTOMVISION_LEAST_IMAGE_TO_TRAIN):
-        Image.objects.create(part=part, is_relabel=True)
+        Image.objects.create(part=part, manual_checked=False)
     assert not part.is_trainable()
     with pytest.raises(PartNotEnoughImagesToTrain):
         assert part.is_trainable(raise_exception=True)
@@ -76,7 +76,7 @@ def test_part_is_trainable_3(part):
 def test_part_is_trainable_4(part, monkeypatch):
     images_on_cloud = 5
     for _ in range(CUSTOMVISION_LEAST_IMAGE_TO_TRAIN - images_on_cloud):
-        Image.objects.create(part=part, uploaded=False)
+        Image.objects.create(part=part, manual_checked=True)
     assert not part.is_trainable()
     with pytest.raises(PartNotEnoughImagesToTrain):
         assert not part.is_trainable(raise_exception=True)
@@ -95,7 +95,7 @@ def test_part_is_trainable_4(part, monkeypatch):
 def test_part_is_trainable_5(part, monkeypatch):
     images_on_cloud = 5
     for _ in range(CUSTOMVISION_LEAST_IMAGE_TO_TRAIN - images_on_cloud):
-        Image.objects.create(part=part, uploaded=False)
+        Image.objects.create(part=part, manual_checked=True)
     assert not part.is_trainable()
     with pytest.raises(PartNotEnoughImagesToTrain):
         assert not part.is_trainable(raise_exception=True)

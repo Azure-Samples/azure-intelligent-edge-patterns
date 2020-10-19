@@ -64,7 +64,7 @@ Check out the architecture below to see how Vision on Edge works. You can also g
 To install the Vision on Edge Solution Accelerator, the following prerequisites are required...
 
 1. You must have an Azure subscription.
-2. That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device), port 5000 and 8080 need to be opened in the IoT Edge device/vm.
+2. That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device), port 5000 and 8181 need to be opened in the IoT Edge device/vm.
 3. If you choose to deploy a new instance of Custom Vision service, this installer will try to install the free version. If you have an existing free version, install will fail.
 
 # Vision on Edge Installer
@@ -73,7 +73,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 
 Before installation, please make sure you have the following: 
-   1.	At least one IoT Edge with port 8080 and 5000 opened and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
+   1.	At least one IoT Edge with port 8181 and 5000 opened and is connected to your Iot Hub. please follow this documentation for [deployment information](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) 
    2.	Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
    3.   Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
    
@@ -120,7 +120,7 @@ Go to factory-ai-vision repo and click on Installers folder, there are two zip f
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
 12. The installation will be started after. 
-<br/>Open your browser, connect to http://YOUR_IP:8080
+<br/>Open your browser, connect to http://YOUR_IP:8181
 
 
 ## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
@@ -130,7 +130,7 @@ Go to factory-ai-vision repo and click on Installers folder, there are two zip f
 Before installation, You must have the following services set up to use Vision on Edge:
 
 1.  **Docker**: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
-2.  **IoT Edge Port**: At least one IoT Edge with Port 8080 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux
+2.  **IoT Edge Port**: At least one IoT Edge with Port 8181 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux
 3.  **Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
 4.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
 5.  **Azure Media Service**, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
@@ -210,7 +210,7 @@ To learn more about this development environment, check out [this tutorial](http
 
   f. azureiotedge-agent
 
-- Please wait until all 6 are running. Open your browser and connect [http://YOUR_IP:8080](http://YOUR_IP:8080)
+- Please wait until all 6 are running. Open your browser and connect [http://YOUR_IP:8181](http://YOUR_IP:8181)
 
 ### Video Tutorial
 
@@ -242,5 +242,5 @@ If you are running into issues, please check following for assistnat:
 
    If you don’t see above, the conatiners aren't downloaded successfully yet
 
-3. If the inference & visionweb modules exist but still cannot see the page in 8080 port, check whether 8080 port on your edge is opened.
-4. If you can visit the website (in 8080 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened.
+3. If the inference & visionweb modules exist but still cannot see the page in 8181 port, check whether 8181 port on your edge is opened.
+4. If you can visit the website (in 8181 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened.

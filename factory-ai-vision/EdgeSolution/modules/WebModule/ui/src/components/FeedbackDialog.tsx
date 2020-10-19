@@ -21,7 +21,7 @@ type FeedbackDialogProps = {
 const SATISFACTION = ['VB', 'PR', 'FR', 'GD', 'EX'];
 
 export const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ hidden, onDismiss }) => {
-  const [rating, setrating] = useState(1);
+  const [rating, setrating] = useState(5);
   const [loading, setLoading] = useState(false);
 
   const onRateChange = (_, newRating) => setrating(newRating);

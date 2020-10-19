@@ -19,7 +19,6 @@ import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages, selectAllImages } from '../store/imageSlice';
-import { ImageList } from '../components/ImageList';
 import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../store/selectors';
 import { getParts } from '../store/partSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
@@ -27,6 +26,7 @@ import { useInterval } from '../hooks/useInterval';
 import { Instruction } from '../components/Instruction';
 import { Status } from '../store/project/projectTypes';
 import { selectNonDemoCameras } from '../store/cameraSlice';
+import { FilteredImgList } from '../components/FilteredImgList';
 
 const theme = getTheme();
 const classes = mergeStyleSets({
@@ -72,9 +72,9 @@ export const Images: React.FC = () => {
   const closeCaptureDialog = () => setCaptureDialogOpen(false);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
-  let labeledImages = useSelector(labeledImagesSelector);
-  let unlabeledImages = useSelector(unlabeledImagesSelector);
-  let relabelImages = useSelector(relabelImageSelector);
+  const labeledImages = useSelector(labeledImagesSelector);
+  const unlabeledImages = useSelector(unlabeledImagesSelector);
+  const relabelImages = useSelector(relabelImageSelector);
   const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
   const imageAddedButNoAnno = useSelector(
     (state: State) => state.labelImages.ids.length > 0 && state.annotations.ids.length === 0,
@@ -127,24 +127,12 @@ export const Images: React.FC = () => {
   const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
   const [partItems, filteredParts] = useFilterItems(selectNonDemoPart);
 
-  if (filteredCameras.length) {
-    labeledImages = labeledImages.filter((e) => filteredCameras.includes(e.camera.id?.toString()));
-    relabelImages = relabelImages.filter((e) => filteredCameras.includes(e.camera.id?.toString()));
-    unlabeledImages = unlabeledImages.filter((e) => filteredCameras.includes(e.camera?.id.toString()));
-  }
-
-  if (filteredParts.length) {
-    labeledImages = labeledImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
-    relabelImages = relabelImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
-    unlabeledImages = unlabeledImages.filter((e) => filteredParts.includes(e.part.id?.toString()));
-  }
-
   const commandBarFarItems: ICommandBarItemProps[] = useMemo(
     () => [
       {
         key: 'filter',
         iconOnly: true,
-        iconProps: { iconName: 'Filter' },
+        iconProps: { iconName: filteredCameras.length || filteredParts.length ? 'FilterSolid' : 'Filter' },
         subMenuProps: {
           items: [
             {
@@ -163,7 +151,7 @@ export const Images: React.FC = () => {
         },
       },
     ],
-    [cameraItems, partItems],
+    [cameraItems, filteredCameras.length, filteredParts.length, partItems],
   );
 
   useEffect(() => {
@@ -238,26 +226,44 @@ export const Images: React.FC = () => {
                   />
                 ) : (
                   <>
-                    <Separator alignContent="start" className={classes.seperator}>
-                      Deployment captures
-                    </Separator>
                     {relabelImages.length > 0 && (
-                      <MessageBar styles={{ root: { margin: '12px 0px' } }}>
-                        Images saved from the current deployment. Confirm or modify the objects identified to
-                        improve your model.
-                      </MessageBar>
+                      <>
+                        <Separator alignContent="start" className={classes.seperator}>
+                          Deployment captures
+                        </Separator>
+                        <MessageBar styles={{ root: { margin: '12px 0px' } }}>
+                          Images saved from the current deployment. Confirm or modify the objects identified
+                          to improve your model.
+                        </MessageBar>
+                        <FilteredImgList
+                          images={relabelImages}
+                          filteredCameras={filteredCameras}
+                          filteredParts={filteredParts}
+                        />
+                      </>
                     )}
-                    <ImageList images={relabelImages} />
-                    <Separator alignContent="start" className={classes.seperator}>
-                      Manually added
-                    </Separator>
-                    <ImageList images={unlabeledImages} />
+                    {unlabeledImages.length > 0 && (
+                      <>
+                        <Separator alignContent="start" className={classes.seperator}>
+                          Manually added
+                        </Separator>
+                        <FilteredImgList
+                          images={unlabeledImages}
+                          filteredCameras={filteredCameras}
+                          filteredParts={filteredParts}
+                        />
+                      </>
+                    )}
                   </>
                 )}
               </PivotItem>
               <PivotItem headerText="Tagged">
                 {onRenderInstructionInsidePivot()}
-                <ImageList images={labeledImages} />
+                <FilteredImgList
+                  images={labeledImages}
+                  filteredCameras={filteredCameras}
+                  filteredParts={filteredParts}
+                />
               </PivotItem>
             </Pivot>
           ) : (

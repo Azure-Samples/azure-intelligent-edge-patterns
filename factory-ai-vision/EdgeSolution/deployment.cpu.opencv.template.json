@@ -66,10 +66,17 @@
               "image": "${MODULES.NginxModule.amd64}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
-                    "8080/tcp": [
+                    "8181/tcp": [
                       {
-                        "HostPort": "8080"
+                        "HostPort": "8181"
                       }
                     ]
                   }
@@ -109,7 +116,25 @@
               }
             },
             "settings": {
-              "image": "${MODULES.WebModule}"
+              "image": "${MODULES.WebModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "8000/tcp": [
+                      {
+                        "HostPort": "8000"
+                      }
+                    ]
+                  }
+                }
+              }
             }
           },
           "WebDBModule": {
@@ -152,6 +177,13 @@
               "image": "${MODULES.InferenceModule.cpuamd64}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
                     "5000/tcp": [
                       {
@@ -183,6 +215,13 @@
               "image": "${MODULES.CVCaptureModule.amd64}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
                     "9000/tcp": [
                       {
@@ -208,7 +247,20 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig": {}
+                "HostConfig":{
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings":{
+                    "554/tcp":[{
+                      "HostPort":"554"
+                    }]
+                  }
+                }
               }
             }
           }

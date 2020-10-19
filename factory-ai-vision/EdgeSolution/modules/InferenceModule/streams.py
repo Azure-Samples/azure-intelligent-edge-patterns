@@ -76,6 +76,7 @@ class Stream:
         self.image_shape = [540, 960]
 
         self.last_img = None
+        self.last_recv_img = None
         # self.last_edge_img = None
         self.last_drawn_img = None
         self.last_prediction = []
