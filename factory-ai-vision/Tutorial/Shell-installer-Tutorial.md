@@ -19,9 +19,9 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 1. Open your browser and paste the link https://shell.azure.com/  to open the shell installer. 
 2. You will need a Azure subscription to continue. Choose your Azure account.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step1.png)
-3. To download acs.zip from github by putting the following command `wget https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
+3. To download acs.zip from github by putting the following command `wget -O acs.zip https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step2.png)
-4. Unzip it `unzip acs.zip`. If you have downloaded before, the file name might be different with an extension. The file name can be found above if is different from acs.zip listed above. 
+4. Unzip it `unzip -o acs.zip`. If you have downloaded before, the file name might be different with an extension. The file name can be found above if is different from acs.zip listed above. 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step3.png)
 5. Execute the installer `bash factory-ai-vision-install.sh`
 
@@ -37,26 +37,25 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 7. If you choose not to use existing account, please go ahead to create a new one with the instruction
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step5.png)
 
-8. Once you input custom vision account information. The next step, you will be asked to choose if you want to install with LVA or opencv module. 
+8. Once you input custom vision account information. The next you will be able to choose if you want to install with LVA or opencv. 
 <br/>Do you want to install with Azure Live Video Analytics? (y or n): 
-<br/>If you choose YES, a listing of Azure Media Service existing in the directory will be shown and please go ahead to choose one that you have permission to access.
-<br/>Once you choose the number corresponding to your Azure Media Service account. This is where you will be asked for the principle secret 
+<br/>If you choose YES, select from one of listing Azure Media Service in your account.
+<br/>And Choose the number corresponding to your Azure Media Service. This is where you will be asked for the principle secret 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step6.png)
 
-9. Or if you don’t have Azure media service yet, it will create new azure media service principle for you. 
-Note: please be sure you have directory permission for this action. 
-<br/>Once you succeed created one, you will have grant the "SERVICE-PRINCIPLE-SECRET" information and be sure to copy it for later use.
+9. Or if you don’t have one, but you would like to install with LVA, it will create new azure media service principle for you. 
+<br/>And please copy the "SERVICE-PRINCIPLE-SECRET" information in the bottom
+<br/>You will need the secret information for later use
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step7.png)
+<br/>You will being with opencv installation if you choose “no”
 
-<br/>You also have the option to choose not to install with LVA module. In this case, you will begin with opencv installation. 
-
-10. The next step, you will see a list of IoT hubs, and please choose “customvision” in this case. It will connect to your custom vision account and we have start the inferencing module there. 
+10. There will be a list of IoT hubs, please choose “customvision”
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step8.png)
 
-11. Once you login to your custom vision account, it will show a list of devices in your account, and please choose one device you want your visiononedge installed.
-<br/>And you will be asked if your device have a GPU or not
+11. It will show a list of devices in your account, and choose the device to install your visiononedge 
+<br/>You will be asking if your device have a GPU or not
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
 12. The installation will be started after. Please wait for couple minutes to complete the installation. 
-<br/>All you need to do is to open your browser, connect to http://YOUR_IP:8080, then you are ready to go!
+<br/>Open your browser, connect to http://YOUR_IP:8080
 
