@@ -103,6 +103,12 @@
                 "type": "String",
                 "description": "input maximumFPs",
                 "default": "30"
+            },
+            {
+                "name": "instanceId",
+                "type": "String",
+                "description": "instance id",
+                "default": "0"
             }
         ],
         "sources": [{

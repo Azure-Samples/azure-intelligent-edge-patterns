@@ -11,7 +11,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 2. That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device).
 <br/>At least one IoT Edge with port 8080 and 5000 opened and is connected to your Iot Hub. please follow this [documentation](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) for deployment information
 3. Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
-4. Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
+4. (Optional) Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
  
    
 ### Get Started:
@@ -19,9 +19,9 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 1. Open your browser and paste the link https://shell.azure.com/  to open the shell installer. 
 2. You will need a Azure subscription to continue. Choose your Azure account.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step1.png)
-3. To download acs.zip from github by putting the following command `wget https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
+3. To download acs.zip from github by putting the following command `wget -O acs.zip https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step2.png)
-4. Unzip it `unzip acs.zip`. If you have downloaded before, the file name might be different with an extension. The file name can be found above if is different from acs.zip listed above. 
+4. Unzip it `unzip -o acs.zip`. If you have downloaded before, the file name might be different with an extension. The file name can be found above if is different from acs.zip listed above. 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step3.png)
 5. Execute the installer `bash factory-ai-vision-install.sh`
 

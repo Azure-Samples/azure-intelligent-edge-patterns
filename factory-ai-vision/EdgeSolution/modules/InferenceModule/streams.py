@@ -9,7 +9,7 @@ import time
 import cv2
 import numpy as np
 import requests
-from azure.iot.device import IoTHubModuleClient
+from azure.iot.device import IoTHubModuleClient, Message
 from shapely.geometry import Polygon
 
 from api.models import StreamModel
@@ -114,7 +114,7 @@ class Stream:
 
         # lva signal
         self.lva_last_send_time = time.time()
-        self.lva_interval = 0
+        self.lva_interval = 10
         self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
@@ -554,7 +554,7 @@ class Stream:
                 if p["probability"] >= self.threshold:
                     to_send = True
             if to_send:
-                send_message_to_lva()
+                send_message_to_lva(self.cam_id)
                 self.lva_last_send_time = time.time()
                 self.lva_interval = 60
 
@@ -700,10 +700,13 @@ def send_message_to_iothub(predictions):
         pass
 
 
-def send_message_to_lva():
+def send_message_to_lva(cam_id):
     if iot:
         try:
-            iot.send_message_to_output("{}", "InferenceToLVA")
+            target = "/graphInstances/" + str(cam_id)
+            msg = Message("")
+            msg.custom_properties["eventTarget"] = target
+            iot.send_message_to_output(msg, "InferenceToLVA")
         except:
             print("[ERROR] Failed to send signal to LVA", flush=True)
         print("[INFO] sending signal to LVA", flush=True)

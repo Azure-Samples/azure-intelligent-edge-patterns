@@ -3,12 +3,13 @@
 # =========================================================
 FROM node:12 as builder
 
-WORKDIR /
-COPY ui app
 WORKDIR /app
-RUN rm -rf node_modules/
-RUN rm -rf build/
+COPY ui/package.json .
+COPY ui/yarn.lock .
 RUN yarn install --production
+COPY ui/tsconfig.json .
+COPY ui/src/ ./src
+COPY ui/public/ ./public
 RUN yarn build
 
 # =========================================================

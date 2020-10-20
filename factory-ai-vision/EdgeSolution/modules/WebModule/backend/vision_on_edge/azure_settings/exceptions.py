@@ -25,7 +25,7 @@ class SettingCustomVisionAccessFailed(APIException):
     """SettingCustomVisionAccessFailed."""
 
     status_code = 503
-    default_detail = "Training key or Endpoint is invalid. Please change the settings"
+    default_detail = "Training key or Endpoint is invalid. Please change the settings."
     default_code = "setting_custom_vision_access_failed"
 
 
@@ -33,5 +33,4 @@ class SettingCustomVisionCannotCreateProject(APIException):
     """SettingCustomVisionCannotCreateProject."""
 
     status_code = 503
-    default_detail = "Custom Vision projects reach limitation. Please delete some project or contact with admin"
-    default_code = "setting_custom_vision_cannot_create_project"
+    default_detail = "Custom Vision projects reach limitation. Please delete some projects or contact admin."

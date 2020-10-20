@@ -149,6 +149,7 @@ class GraphManager:
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
                 {"name": "frameRate", "value": frameRate},
+                {"name": "instanceId", "value": name},
                 {
                     "name": "grpcExtensionAddress",
                     "value": "tcp://InferenceModule:44000",
