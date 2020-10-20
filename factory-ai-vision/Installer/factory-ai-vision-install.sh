@@ -44,7 +44,7 @@ az extension add --name azure-iot
 az extension update --name azure-iot
 
 echo Deleting conflict Extension
-az extension remove --name azure-cli-iot-ext
+(az version | grep azure-cli-iot-ext) && az extension remove --name azure-cli-iot-ext
 
 ################################ Get Tenant ###################################
 # remove the header and ---- from output list - start good var data at var1
@@ -178,6 +178,8 @@ if [ $streaming == "lva" ]; then
     if [ $tLen -le 0 ]; then
       echo Azure Media Services not found
       echo Sorry, this demo requires that you have an existing Azure Media Services
+      echo Please following this documentation to create it first 
+      echo https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
       read -p "Press <Enter> key to exit..."; echo
       exit 1
     fi
