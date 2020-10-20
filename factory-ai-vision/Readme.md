@@ -1,17 +1,10 @@
----
-languages:
-  - json
-  - python
-  - JavaScript
-products:
-  - azure Stack
-  - Custom Vision
-  - Onnxruntime
-  - azure-iot-edge
-page_type: sample solution
-description: "This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop."
-urlFragment: custom-vision-azure-iot
----
+
+| languages                  | products                                                              | page_type       | description                                                                                                                                                                                                                          | urlFragment             |
+| -------------------------- | --------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| -json<br>-python<br>-javascript | -azure Stack<br>-Custom Vision<br>-Onnxruntime<br>-azure-iot-edge | sample solution | This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | custom-vision-azure-iot |
+
+
+
 
 # Custom vision + Azure IoT Edge for Factory AI
 
