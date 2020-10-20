@@ -15,7 +15,10 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 from rest_framework.exceptions import APIException
 
-from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ..azure_settings.exceptions import (
+    SettingCustomVisionAccessFailed,
+    SettingCustomVisionCannotCreateProject,
+)
 from ..azure_settings.models import Setting
 from .exceptions import (
     ProjectCannotChangeDemoError,
@@ -178,13 +181,10 @@ class Project(models.Model):
         """
         logger.info("Creating obj detection project")
 
-        trainer = self.setting.get_trainer_obj()
         try:
             if not self.name:
                 self.name = "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
-            project = trainer.create_project(
-                name=self.name, domain_id=self.setting.obj_detection_domain_id
-            )
+            project = self.setting.create_project(project_name=self.name)
             self.customvision_id = project.id
             self.name = project.name
             update_fields = ["customvision_id", "name"]
