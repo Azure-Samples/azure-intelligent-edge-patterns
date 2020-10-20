@@ -68,9 +68,11 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 4. Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/previous/media-services-portal-create-account#create-an-ams-account
  
 
-# Vision on Edge Installer (Azure Shell Installer)
+# Vision on Edge Installer 
    
+## Option 1: Azure Shell Installer
 ### Get Started:
+
 Please refer to this tutorial to follow the [instruction](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
 
 
