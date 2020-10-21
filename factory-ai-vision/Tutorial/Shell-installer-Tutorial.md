@@ -58,7 +58,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
 12. The installation will be started after. Please wait for couple minutes to complete the installation. 
-<br/> You can check the deployment status on the [Azure portal](portal.azure.com)
+<br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
 
 13. Open your browser, connect to http://YOUR_IP:8181
 
