@@ -11,8 +11,9 @@ import {
   Link,
 } from '@fluentui/react';
 import * as R from 'ramda';
-import { useDispatch, useSelector } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
+import { State } from 'RootStateType';
 
 import { postCamera, putCamera } from '../store/cameraSlice';
 import { selectAllLocations, getLocations, postLocation } from '../store/locationSlice';
@@ -27,6 +28,7 @@ type AddEditCameraPanelProps = {
   isOpen: boolean;
   onDissmiss: () => void;
   mode: PanelMode;
+  locationOptions: IDropdownOption[];
   initialValue?: Form;
   cameraId?: number;
 };
@@ -59,20 +61,20 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
   isOpen,
   onDissmiss,
   mode,
+  locationOptions,
   initialValue = initialForm,
   cameraId,
 }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Form>(initialValue);
   const [dialogHidden, setDialogHidden] = useState(true);
-  const locationOptions = useSelector(selectLocationOptions);
   const dispatch = useDispatch();
 
   const validate = useCallback(() => {
     let hasError = false;
 
     Object.keys(formData).forEach((key) => {
-      if (!formData[key].value) {
+      if (!formData[key].value && formData[key].value !== 0) {
         setFormData(R.assocPath([key, 'errMsg'], `This field is required`));
         hasError = true;
       }
@@ -188,3 +190,12 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
     </Panel>
   );
 };
+
+const mapState = (state: State, ownProps) => {
+  return {
+    ...ownProps,
+    locationOptions: selectLocationOptions(state),
+  };
+};
+
+export default connect(mapState)(AddEditCameraPanel);

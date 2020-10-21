@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { CameraDetailList } from '../components/CameraDetailList';
-import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
+import AddEditCameraPanel, { PanelMode } from '../components/AddCameraPanel';
 import { Instruction } from '../components/Instruction';
 
 const theme = getTheme();
