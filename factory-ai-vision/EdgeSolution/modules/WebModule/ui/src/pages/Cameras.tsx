@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
-import { useConstCallback } from '@uifabric/react-hooks';
+import { useBoolean } from '@uifabric/react-hooks';
 import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
@@ -11,13 +11,10 @@ import { Instruction } from '../components/Instruction';
 const theme = getTheme();
 
 export const Cameras: React.FC = () => {
-  const [isPanelOpen, setPanelOpen] = useState(false);
+  const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const showInstruction = useSelector(
     (state: State) => state.camera.nonDemo.length > 0 && state.labelImages.ids.length === 0,
   );
-
-  const dismissPanel = useConstCallback(() => setPanelOpen(false));
-  const openPanel = useConstCallback(() => setPanelOpen(true));
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
