@@ -1,20 +1,27 @@
 
-| description                | products                                                              | page_type       | description                                                                                                                                                                                                                          | urlFragment             |
-| -------------------------- | --------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop.| - azure Stack<br/> -Custom Vision<br/>-Onnxruntime<br/>-azure-iot-edge | sample solution | -json<br>-python<br>-javascript | custom-vision-azure-iot |
+| description                | products                                                              | page_type       | description                                                                                                                                                                                                                          |   
+| -------------------------- | --------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | 
+| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop.| - azure Stack<br/> -Custom Vision<br/>-Onnxruntime<br/>-azure-iot-edge | sample solution | -json<br>-python<br>-javascript | 
 
 
 
 
-# Custom vision + Azure IoT Edge for Factory AI
-
-This is a sample showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
-You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU.
+# Vision on Edge Solution
+This is a solution showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
+You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft LVA and openCV. 
 
 
 Check out [this video](https://lnkd.in/grQKBN8) to see brief introduction in action and understand how the value is delievered: 
 [![video](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/assets/Ignite.JPG)](https://lnkd.in/grQKBN8)
 
+## Product
+- azure Stack Edge<br/>: See more [here] (https://azure.microsoft.com/en-us/products/azure-stack/edge/)
+- Custom Vision<br/>: Learn more [here] (https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
+- Onnxruntime<br/>
+- Azure-iot-edge <br/>
+- OpenVINO/cpu <br/>
+- TensorRT for Nvidia/gpu <br/>
+- Arm64/cpu <br/>
 
 <!-- # Prerequiste -->
 
@@ -35,7 +42,7 @@ Check out [this video](https://lnkd.in/grQKBN8) to see brief introduction in act
 # Prerequiste
 ## Hardware
 You need to have one of the following:
--	**Azure Stack Edge**: A portfolio of devices that bring the compute, storage and intelligence to the edge right where data is created
+-	**Azure Stack Edge**: A portfolio of devices that bring the compute, storage and intelligence to the edge right where data is created. Find out more [here](https://azure.microsoft.com/en-us/products/azure-stack/edge/) 
 -   Please ensure that you have compute configured and you can run [GPU getting started module here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-sample-module-marketplace)
 
 or
@@ -49,37 +56,26 @@ or
 Check out the architecture below to see how Vision on Edge works on both LVA and OpenCV module. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:
 
 # Architecture
-### LVA Module 
+### LVA Module (Recommended)
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/lva.png)
 
 ### OpenCV Module
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/opencv.png)
 
-## Get Started
 
-To install the Vision on Edge Solution Accelerator, the following prerequisites are required:
 
-1. You must have an Azure subscription.
-<br/> if you don’t have one, you can create one here: https://azure.microsoft.com/en-us/pricing/purchase-options/pay-as-you-go/
-2. That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device).
-<br/>At least one IoT Edge with port 8181 and 5000 opened and is connected to your Iot Hub. please follow this [documentation](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) for deployment information
-3. Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/customvisioninfo.png)
-4. Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/previous/media-services-portal-create-account#create-an-ams-account
- 
-
-# Vision on Edge Installer 
+## Get Started:  Vision on Edge Installer 
    
-## Option 1: Azure Shell Installer
-### Get Started:
+### Option 1: Azure Shell Installer
+#### Get Started:
 
 Please refer to this tutorial to follow the [instruction](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
 
 
 
-## Option 2: Manual installation building a docker container and deploy by Visual Studio Code
+### Option 2: Manual installation building a docker container and deploy by Visual Studio Code
 
-### Prerequisites
+#### Prerequisites
 
 Before installation, You must have the following services set up to use Vision on Edge:
 
