@@ -40,6 +40,8 @@ describe('Post project', () => {
         send_video_to_cloud: initialProjectData.sendVideoToCloud,
         inference_mode: initialProjectData.inferenceMode,
         fps: 10,
+        inference_protocol: 'grpc',
+        send_video_to_cloud: [],
       },
     });
   });
