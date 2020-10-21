@@ -15,8 +15,8 @@ Check out [this video](https://lnkd.in/grQKBN8) to see brief introduction in act
 [![video](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/assets/Ignite.JPG)](https://lnkd.in/grQKBN8)
 
 ## Product
-- azure Stack Edge: Learn more [here] (https://azure.microsoft.com/en-us/products/azure-stack/edge/)
-- Custom Visio: Learn more [here] (https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
+- azure Stack Edge: Learn more [here](https://azure.microsoft.com/en-us/products/azure-stack/edge/)
+- Custom Visio: Learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
 - Onnxruntime<br/>
 - Azure-iot-edge <br/>
 - OpenVINO/cpu <br/>
