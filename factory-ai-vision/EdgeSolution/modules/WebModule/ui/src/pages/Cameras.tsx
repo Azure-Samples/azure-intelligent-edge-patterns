@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { CameraDetailList } from '../components/CameraDetailList';
-import AddEditCameraPanel, { PanelMode } from '../components/AddCameraPanel';
+import AddCameraPanel, { PanelMode } from '../components/AddCameraPanel';
 import { Instruction } from '../components/Instruction';
 
 const theme = getTheme();
@@ -50,7 +50,7 @@ export const Cameras: React.FC = () => {
         <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
         <CameraDetailList onAddBtnClick={openPanel} />
       </Stack>
-      <AddEditCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
+      <AddCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
     </Stack>
   );
 };

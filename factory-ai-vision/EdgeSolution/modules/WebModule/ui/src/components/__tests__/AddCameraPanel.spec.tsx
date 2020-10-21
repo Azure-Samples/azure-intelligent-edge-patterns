@@ -6,7 +6,7 @@ import { render } from '../../testUtils/renderWithRedux';
 import { dummyFunction } from '../../utils/dummyFunction';
 import { PanelMode } from '../AddPartPanel';
 import { postCamera as mockPostCamera } from '../../store/cameraSlice';
-import { AddEditCameraPanel } from '../AddCameraPanel';
+import { Component as AddCameraPanel } from '../AddCameraPanel';
 
 jest.mock('../../store/cameraSlice', () => ({
   ...jest.requireActual('../../store/cameraSlice'),
@@ -15,12 +15,7 @@ jest.mock('../../store/cameraSlice', () => ({
 
 test('should able to enter camera name, RTSP Url', () => {
   const { getByLabelText } = render(
-    <AddEditCameraPanel
-      isOpen={true}
-      onDissmiss={dummyFunction}
-      mode={PanelMode.Create}
-      locationOptions={[]}
-    />,
+    <AddCameraPanel isOpen={true} onDissmiss={dummyFunction} mode={PanelMode.Create} locationOptions={[]} />,
   );
 
   const testCamera = 'test camera';
@@ -40,7 +35,7 @@ test('should dispatch the right API in different mode', async () => {
     text: 'location1',
   };
   const { getByLabelText, getByRole } = render(
-    <AddEditCameraPanel
+    <AddCameraPanel
       isOpen={true}
       onDissmiss={dummyFunction}
       mode={PanelMode.Create}

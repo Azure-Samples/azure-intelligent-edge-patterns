@@ -57,7 +57,7 @@ const selectLocationOptions = createSelector(selectAllLocations, (locations) =>
   })),
 );
 
-export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
+export const Component: React.FC<AddEditCameraPanelProps> = ({
   isOpen,
   onDissmiss,
   mode,
@@ -198,4 +198,4 @@ const mapState = (state: State, ownProps) => {
   };
 };
 
-export default connect(mapState)(AddEditCameraPanel);
+export default connect(mapState)(Component);

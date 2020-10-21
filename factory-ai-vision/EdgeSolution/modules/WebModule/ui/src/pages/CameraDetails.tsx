@@ -22,7 +22,7 @@ import { useQuery } from '../hooks/useQuery';
 import { selectCameraById, getCameras, deleteCamera } from '../store/cameraSlice';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
-import AddEditCameraPanel, { PanelMode } from '../components/AddCameraPanel';
+import AddCameraPanel, { PanelMode } from '../components/AddCameraPanel';
 import { selectLocationById } from '../store/locationSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { captureImage } from '../store/imageSlice';
@@ -115,7 +115,7 @@ export const CameraDetails: React.FC = () => {
         </Stack>
       </Stack>
       <LabelingPage />
-      <AddEditCameraPanel
+      <AddCameraPanel
         isOpen={editPanelOpen}
         onDissmiss={closePanel}
         mode={PanelMode.Update}
