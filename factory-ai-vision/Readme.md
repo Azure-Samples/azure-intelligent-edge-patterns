@@ -164,7 +164,17 @@ To learn more about this development environment, check out [this tutorial](http
 
 ### Video Tutorial
 
-- Getting started with VS code [https://youtu.be/ORTwMYOxkVs]
+- Tutorial 0 - Build with VS code [https://youtu.be/ORTwMYOxkVs]
+
+- Tutorial 1: Azure Shell Installer [https://youtu.be/Z-iGND-Xtdg]
+
+- Tutorial 2 - Start with prebuilt scenario [https://youtu.be/dihAdZTGj-g]
+
+- Tutorial 3 - Start with creating new project, capture images, tagging images and deploy [https://youtu.be/Ut8UXHR2dCk]
+
+- Tutorial 4 - Retraining and improve your model [https://youtu.be/TsKvBerShbE]
+
+- Tutorial 5: Advance capabilities setting [https://youtu.be/GdgVJq2V0Io]
 
 # Privacy Notice
 
