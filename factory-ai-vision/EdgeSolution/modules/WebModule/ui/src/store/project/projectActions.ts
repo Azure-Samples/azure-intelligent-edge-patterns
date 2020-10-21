@@ -183,7 +183,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
     .then((results) => {
       const partDetection = results[0].data;
       const infModuleIdx = results[1].data.findIndex((e) => e.id === partDetection[0].inference_module);
-      const totalRecomendedFps = results[1].data[infModuleIdx]?.is_gpu ? 30 : 10;
+      const totalRecomendedFps = results[1].data[infModuleIdx]?.recommended_fps;
       const recomendedFps = Math.floor(totalRecomendedFps / (partDetection[0].cameras?.length || 1));
 
       const project: ProjectData = {
