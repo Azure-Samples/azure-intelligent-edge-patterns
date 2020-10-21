@@ -227,13 +227,12 @@ def update_cams(request_body: CamerasModel):
     Cameras not in List should not inferecence.
     """
     logger.info(request_body)
-    fps = request_body.fps
+    frame_rate = request_body.fps
     stream_manager.update_streams([cam.id for cam in request_body.cameras])
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
     # recommended_fps = onnx.get_recommended_frame_rate(n)
-    frame_rate = fps
-    onnx.set_frame_rate(fps)
+    onnx.set_frame_rate(frame_rate)
     logger.warning('update frame rate to {0}'.format(frame_rate))
 
     # lva_mode
@@ -383,7 +382,16 @@ def get_recommended_fps(number_of_cameras: int):
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return onnx.get_recommended_frame_rate(number_of_cameras)
+    return {'fps': int(onnx.get_recommended_frame_rate(number_of_cameras))}
+
+@app.get("/get_recommended_total_fps")
+def get_recommended_total_fps():
+    """get_recommended_fps.
+
+    Args:
+        number_of_cameras (int): number_of_cameras
+    """
+    return {'fps': int(onnx.get_recommended_total_frame_rate())}
 
 
 # @app.route("/get_current_fps")
@@ -498,7 +506,7 @@ def benchmark():
     SCENARIO1_MODEL = "scenario_models/1"
 
     n_threads = 3
-    n_images = 100
+    n_images = 30
     logger.info("============= BenchMarking (Begin) ==================")
     logger.info("--- Settings ----")
     logger.info("%s threads", n_threads)
@@ -533,10 +541,16 @@ def benchmark():
         threads[i].join()
     t1 = time.time()
     # print(t1-t0)
+
+    discount = 0.75
+    max_total_frame_rate = discount * (n_images * n_threads) / (t1-t0)
+
     logger.info("---- Overall ----")
     logger.info("Processing %s images in %s seconds", n_images * n_threads, t1 - t0)
     logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
+    logger.info("  Recommended Total FPS: %s", max_total_frame_rate)
     logger.info("============= BenchMarking (End) ==================")
+    onnx.set_max_total_frame_rate(max_total_frame_rate)
 
 
 def cvcapture_url():
@@ -638,10 +652,12 @@ if __name__ == "__main__":
     else:
         logging.config.dictConfig(logging_config.LOGGING_CONFIG_DEV)
 
+    benchmark()
+
     logger.info("is_edge: %s", is_edge())
+
     if is_edge():
         main()
     else:
         logger.info("Assume running at local development.")
         local_main()
-        # benchmark()

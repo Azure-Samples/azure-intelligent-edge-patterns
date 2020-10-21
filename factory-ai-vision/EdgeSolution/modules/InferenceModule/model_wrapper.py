@@ -57,9 +57,9 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.is_gpu = onnxruntime.get_device() == "GPU"
 
         if self.is_gpu:
-            self.max_frame_rate = GPU_MAX_FRAME_RATE
+            self.max_total_frame_rate = GPU_MAX_FRAME_RATE
         else:
-            self.max_frame_rate = CPU_MAX_FRAME_RATE
+            self.max_total_frame_rate = CPU_MAX_FRAME_RATE
         self.update_frame_rate_by_number_of_streams(1)
 
     def set_is_scenario(self, is_scenario):
@@ -74,9 +74,13 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         else:
             return self.detection_mode
 
+    def set_max_total_frame_rate(self, fps):
+        self.max_total_frame_rate = fps
+        print("[INFO] set max total frame rate as", fps, flush=True)
+
     def update_frame_rate_by_number_of_streams(self, number_of_streams):
         if number_of_streams > 0:
-            self.frame_rate = max(1, int(self.max_frame_rate / number_of_streams))
+            self.frame_rate = max(1, int(self.max_total_frame_rate / number_of_streams))
             print("[INFO] set frame rate as", self.frame_rate, flush=True)
         else:
             print(
@@ -87,9 +91,12 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def get_recommended_frame_rate(self, number_of_streams):
         if number_of_streams > 0:
-            return max(1, int(self.max_frame_rate / number_of_streams))
+            return max(1, int(self.max_total_frame_rate / number_of_streams))
         else:
-            return self.max_frame_rate
+            return self.max_total_frame_rate
+
+    def get_recommended_total_frame_rate(self):
+        return self.max_total_frame_rate
 
     def set_frame_rate(self, frame_rate):
         self.frame_rate = frame_rate
