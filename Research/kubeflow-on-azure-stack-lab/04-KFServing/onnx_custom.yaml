@@ -1,9 +1,9 @@
 apiVersion: "serving.kubeflow.org/v1alpha2"
 kind: "InferenceService"
 metadata:
-  name: "style-sample"
+  name: "mnist-onnx"
 spec:
   default:
     predictor:
       onnx:
-        storageUri: "gs://kfserving-examples/onnx/style"
+        storageUri: "pvc://samba-share-claim/mymodels/build_models/mnist-onnx"
