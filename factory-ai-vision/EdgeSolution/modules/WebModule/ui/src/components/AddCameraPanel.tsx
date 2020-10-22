@@ -24,13 +24,16 @@ export enum PanelMode {
   Update,
 }
 
-type AddEditCameraPanelProps = {
+type OwnProps = {
   isOpen: boolean;
   onDissmiss: () => void;
   mode: PanelMode;
-  locationOptions: IDropdownOption[];
   initialValue?: Form;
   cameraId?: number;
+};
+
+type AddEditCameraPanelProps = OwnProps & {
+  locationOptions: IDropdownOption[];
 };
 
 type FormData<V> = {
@@ -191,7 +194,7 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
   );
 };
 
-const mapState = (state: State, ownProps) => {
+const mapState = (state: State, ownProps: OwnProps): AddEditCameraPanelProps => {
   return {
     ...ownProps,
     locationOptions: selectLocationOptions(state),
