@@ -1,0 +1,11 @@
+# models, data, and intermediate files for tensorflow demo
+build_models
+# we create these files with our script
+mybowtie.npy
+mybowtie2.npy
+mybowtie.npy
+resized_image.jpg
+
+# models, data, and intermediate files for the pytorch demo
+data
+model.pt
