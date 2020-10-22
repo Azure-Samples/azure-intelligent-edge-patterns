@@ -52,7 +52,7 @@ import { EmptyAddIcon } from './EmptyAddIcon';
 import { getTrainingProject } from '../store/trainingProjectSlice';
 import { Insights } from './DeploymentInsights';
 import { Instruction } from './Instruction';
-import { selectAllImages } from '../store/imageSlice';
+import { getImages, selectAllImages } from '../store/imageSlice';
 import { initialProjectData } from '../store/project/projectReducer';
 
 const { palette } = getTheme();
@@ -109,6 +109,9 @@ export const Deployment: React.FC = () => {
 
   useEffect(() => {
     dispatch(getTrainingProject(true));
+    // The property `upload` would be changed after configure
+    // Re fetch the images to get the latest data
+    dispatch(getImages());
   }, [dispatch]);
 
   useInterval(
@@ -128,8 +131,8 @@ export const Deployment: React.FC = () => {
     dispatch(updateProjectData({ probThreshold: newValue }, false));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 
-  const updateModel = useCallback(() => {
-    dispatch(getConfigure(projectId));
+  const updateModel = useCallback(async () => {
+    await dispatch(getConfigure(projectId));
   }, [dispatch, projectId]);
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(() => {
@@ -196,14 +199,7 @@ export const Deployment: React.FC = () => {
     return (
       <>
         <CommandBar items={commandBarItems} style={{ display: 'block' }} />
-        {!!newImagesCount && (
-          <Instruction
-            title={`${newImagesCount} new images have been added to your model!`}
-            subtitle="Update the model to improve your current deployment"
-            button={{ text: 'Update model', onClick: updateModel }}
-            styles={{ root: { margin: '0px 25px' } }}
-          />
-        )}
+        <UpdateModelInstruction newImagesCount={newImagesCount} updateModel={updateModel} />
         <Stack horizontal grow>
           <Stack grow>
             <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
@@ -276,6 +272,28 @@ export const Deployment: React.FC = () => {
       />
     </>
   );
+};
+
+// Extract this component so when every time the instruction being show,
+// It will get the latest images
+const UpdateModelInstruction = ({ newImagesCount, updateModel }) => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getImages());
+  }, [dispatch]);
+
+  if (newImagesCount)
+    return (
+      <Instruction
+        title={`${newImagesCount} new images have been added to your model!`}
+        subtitle="Update the model to improve your current deployment"
+        button={{ text: 'Update model', onClick: updateModel }}
+        styles={{ root: { margin: '0px 25px' } }}
+      />
+    );
+
+  return null;
 };
 
 type VideoAnnosControlsProps = {
