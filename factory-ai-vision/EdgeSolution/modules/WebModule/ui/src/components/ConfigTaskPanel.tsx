@@ -315,6 +315,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
               <Label>Camera FPS</Label>
+              <Text>Set the frames the camera capture per second to get best performance</Text>
             </div>
             <Toggle
               inlineLabel
@@ -343,6 +344,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               <Stack.Item disableShrink>
                 <div className={classNames.textWrapper}>
                   <Label>Send video to cloud</Label>
+                  <Text>Define criteria to trigger event to store in cloud</Text>
                 </div>
                 <Toggle
                   inlineLabel
@@ -370,6 +372,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               <Stack.Item disableShrink>
                 <div className={classNames.textWrapper}>
                   <Label>Protocol of inference</Label>
+                  <Text>Select HTTP or gPRC protocol to best fit your inference module</Text>
                 </div>
                 <Toggle
                   inlineLabel
