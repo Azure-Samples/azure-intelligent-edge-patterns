@@ -19,7 +19,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 1. Open your browser and paste the link https://shell.azure.com/  to open the shell installer. 
 2. You will need a Azure subscription to continue. Choose your Azure account.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step1.png)
-3. To download acs.zip from github by putting the following command `wget -O acs.zip https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
+3. To download installer (acs.zip) from github by putting the following command `wget -O acs.zip https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step2.png)
 4. Unzip it `unzip -o acs.zip`. 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step3.png)
@@ -58,7 +58,13 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
 12. The installation will be started after. Please wait for couple minutes to complete the installation. 
-<br/> You can check the deployment status on the [Azure portal](portal.azure.com)
+<br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
 
 13. Open your browser, connect to http://YOUR_IP:8181
 
+14. Check out our tutorials on youtube channel 
+
+- Tutorial 2 - [Start with prebuilt scenario](https://youtu.be/dihAdZTGj-g)
+- Tutorial 3 - [Start with creating new project, capture images, tagging images and deploy](https://youtu.be/Ut8UXHR2dCk)
+- Tutorial 4 - [Retraining and improve your model](https://youtu.be/TsKvBerShbE)
+- Tutorial 5: [Advance capabilities setting](https://youtu.be/GdgVJq2V0Io)
