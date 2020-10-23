@@ -16,6 +16,7 @@ import {
   ActionButton,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import { useQuery } from '../hooks/useQuery';
@@ -40,9 +41,7 @@ export const CameraDetails: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const [editPanelOpen, setEditPanelOpen] = useState(false);
-  const openPanel = () => setEditPanelOpen(true);
-  const closePanel = () => setEditPanelOpen(false);
+  const [editPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
