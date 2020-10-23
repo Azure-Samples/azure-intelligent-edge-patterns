@@ -11,8 +11,9 @@ import {
   Link,
 } from '@fluentui/react';
 import * as R from 'ramda';
-import { useDispatch, useSelector } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
+import { State } from 'RootStateType';
 
 import { postCamera, putCamera } from '../store/cameraSlice';
 import { selectAllLocations, getLocations, postLocation } from '../store/locationSlice';
@@ -23,12 +24,16 @@ export enum PanelMode {
   Update,
 }
 
-type AddEditCameraPanelProps = {
+type OwnProps = {
   isOpen: boolean;
   onDissmiss: () => void;
   mode: PanelMode;
   initialValue?: Form;
   cameraId?: number;
+};
+
+type AddEditCameraPanelProps = OwnProps & {
+  locationOptions: IDropdownOption[];
 };
 
 type FormData<V> = {
@@ -55,24 +60,24 @@ const selectLocationOptions = createSelector(selectAllLocations, (locations) =>
   })),
 );
 
-export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
+export const Component: React.FC<AddEditCameraPanelProps> = ({
   isOpen,
   onDissmiss,
   mode,
+  locationOptions,
   initialValue = initialForm,
   cameraId,
 }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Form>(initialValue);
   const [dialogHidden, setDialogHidden] = useState(true);
-  const locationOptions = useSelector(selectLocationOptions);
   const dispatch = useDispatch();
 
   const validate = useCallback(() => {
     let hasError = false;
 
     Object.keys(formData).forEach((key) => {
-      if (!formData[key].value) {
+      if (!formData[key].value && formData[key].value !== 0) {
         setFormData(R.assocPath([key, 'errMsg'], `This field is required`));
         hasError = true;
       }
@@ -188,3 +193,12 @@ export const AddEditCameraPanel: React.FC<AddEditCameraPanelProps> = ({
     </Panel>
   );
 };
+
+const mapState = (state: State, ownProps: OwnProps): AddEditCameraPanelProps => {
+  return {
+    ...ownProps,
+    locationOptions: selectLocationOptions(state),
+  };
+};
+
+export default connect(mapState)(Component);
