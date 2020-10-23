@@ -96,7 +96,7 @@ To learn more about this development environment, check out [this tutorial](http
 - Clone yadavm_factoryai_lpr branch
 
   ```bash
-  git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git --single-branch --branch yadavm_factoryai_lpr
+  git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
   ```
 
 - Go to factoryai directory and open your vscode
