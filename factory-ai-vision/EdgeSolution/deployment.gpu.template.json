@@ -216,7 +216,7 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig":{
+                "HostConfig": {
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -224,10 +224,12 @@
                       "max-file": "10"
                     }
                   },
-                  "PortBindings":{
-                    "554/tcp":[{
-                      "HostPort":"554"
-                    }]
+                  "PortBindings": {
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
                   }
                 }
               }

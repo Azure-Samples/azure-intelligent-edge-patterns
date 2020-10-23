@@ -108,7 +108,9 @@
               "DBPASS": {
                 "value": "vision_on_edge"
               },
-              "DF_INFERENECE_IS_GPU": { "value": false }
+              "DF_INFERENECE_IS_GPU": {
+                "value": false
+              }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
@@ -247,7 +249,7 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig":{
+                "HostConfig": {
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -255,10 +257,12 @@
                       "max-file": "10"
                     }
                   },
-                  "PortBindings":{
-                    "554/tcp":[{
-                      "HostPort":"554"
-                    }]
+                  "PortBindings": {
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
                   }
                 }
               }
