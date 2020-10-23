@@ -14,6 +14,7 @@ import {
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
@@ -35,6 +36,12 @@ const classes = mergeStyleSets({
   },
 });
 
+/**
+ * Use the factory to create selector here.
+ * If we put them inside the component,
+ * every time component rerender will return a different selector,
+ * which loose the benefit of memoization.
+ */
 const labeledImagesSelector = imageItemSelectorFactory(false);
 const unlabeledImagesSelector = imageItemSelectorFactory(true);
 
@@ -67,9 +74,9 @@ function useFilterItems<T extends { id: number; name: string }>(
 }
 
 export const Images: React.FC = () => {
-  const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
-  const openCaptureDialog = () => setCaptureDialogOpen(true);
-  const closeCaptureDialog = () => setCaptureDialogOpen(false);
+  const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
+    false,
+  );
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
   const labeledImages = useSelector(labeledImagesSelector);
@@ -121,7 +128,7 @@ export const Images: React.FC = () => {
         onClick: openCaptureDialog,
       },
     ],
-    [],
+    [openCaptureDialog],
   );
 
   const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
