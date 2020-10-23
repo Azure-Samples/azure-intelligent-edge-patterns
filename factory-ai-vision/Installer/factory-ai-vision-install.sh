@@ -465,7 +465,7 @@ if [ "$isCfg" != true ]; then
     echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiConfigName
     echo amsTanantId='"'$amsTenantId'"' >> $factoryaiConfigName
     echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiConfigName
-    echo amsServicePrincipalSecret='"'$amsServicePrincipalName'"' >> $factoryaiConfigName
+    echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
 fi
 
