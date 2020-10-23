@@ -7,10 +7,17 @@ import { dummyFunction } from '../../utils/dummyFunction';
 import { PanelMode } from '../AddPartPanel';
 import { postCamera as mockPostCamera } from '../../store/cameraSlice';
 import { Component as AddCameraPanel } from '../AddCameraPanel';
+import { postLocation as mockPostLocation } from '../../store/locationSlice';
 
 jest.mock('../../store/cameraSlice', () => ({
   ...jest.requireActual('../../store/cameraSlice'),
   postCamera: jest.fn(),
+}));
+
+jest.mock('../../store/locationSlice', () => ({
+  ...jest.requireActual('../../store/locationSlice'),
+  getLocations: jest.fn().mockReturnValue({ type: 'test' }),
+  postLocation: jest.fn(),
 }));
 
 test('should able to enter camera name, RTSP Url', () => {
@@ -62,5 +69,34 @@ test('should dispatch the right API in different mode', async () => {
       rtsp: testRtspUrl,
       location: mockLocationOption.key,
     });
+  });
+});
+
+test('able to create a new location with the dialog', async () => {
+  const { getByTestId, getByRole, getByDisplayValue } = render(
+    <AddCameraPanel isOpen={true} onDissmiss={dummyFunction} mode={PanelMode.Create} locationOptions={[]} />,
+  );
+
+  userEvent.click(getByRole('button', { name: /create location/i }));
+  userEvent.type(getByTestId(/location-input/i), 'new location');
+
+  expect(getByDisplayValue('new location')).not.toBeNull();
+});
+
+test('should dispatch right action when pressing create button', async () => {
+  const { getByRole, getByTestId } = render(
+    <AddCameraPanel isOpen={true} onDissmiss={dummyFunction} mode={PanelMode.Create} locationOptions={[]} />,
+  );
+  (mockPostLocation as any).mockReturnValueOnce(() => Promise.resolve({ payload: { id: 0 } }));
+
+  userEvent.click(getByRole('button', { name: /create location/i }));
+
+  const mockLocationName = 'new location';
+  userEvent.type(getByTestId(/location-input/i), mockLocationName);
+  userEvent.click(getByRole('button', { name: 'Create' }));
+
+  await waitFor(() => {
+    expect(mockPostLocation).toHaveBeenCalledTimes(1);
+    expect(mockPostLocation).toHaveBeenCalledWith({ name: mockLocationName });
   });
 });
