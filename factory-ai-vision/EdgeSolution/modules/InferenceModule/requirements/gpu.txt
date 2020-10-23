@@ -1,0 +1,2 @@
+-r ./base.txt
+onnxruntime-gpu==1.5.1
