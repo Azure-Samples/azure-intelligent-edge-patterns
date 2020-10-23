@@ -22,7 +22,7 @@
           "edgeAgent": {
             "type": "docker",
             "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9.5",
               "createOptions": {}
             }
           },
@@ -66,10 +66,17 @@
               "image": "${MODULES.NginxModule.amd64}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
                     "8181/tcp": [
                       {
-                        "HostPort": "8080"
+                        "HostPort": "8181"
                       }
                     ]
                   }
@@ -101,15 +108,28 @@
               "DBPASS": {
                 "value": "vision_on_edge"
               },
-              "DF_INFERENECE_IS_GPU": {
-                "value": false
-              },
-              "DF_PD_VIDEO_SOURCE": {
-                "value": "opencv"
-              }
+              "DF_INFERENECE_IS_GPU": { "value": false }
             },
             "settings": {
-              "image": "${MODULES.WebModule.amd64.backend_only}"
+              "image": "${MODULES.WebModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "8000/tcp": [
+                      {
+                        "HostPort": "8000"
+                      }
+                    ]
+                  }
+                }
+              }
             }
           },
           "WebDBModule": {
@@ -129,7 +149,25 @@
               }
             },
             "settings": {
-              "image": "${MODULES.WebDBModule}"
+              "image": "${MODULES.WebDBModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "5432/tcp": [
+                      {
+                        "HostPort": "5432"
+                      }
+                    ]
+                  }
+                }
+              }
             }
           },
           "InferenceModule": {
@@ -143,15 +181,19 @@
               },
               "LVA_MODE": {
                 "value": "$LVA_MODE"
-              },
-              "IS_OPENCV": {
-                "value": "true"
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.cpuamd64}",
+              "image": "${MODULES.InferenceModule.vpuamd64}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
                     "5000/tcp": [
                       {
@@ -162,44 +204,41 @@
                       {
                         "HostPort": "5558"
                       }
+                    ],
+                    "44000/tcp": [
+                      {
+                        "HostPort": "44000"
+                      }
                     ]
                   },
+                  "IpcMode": "host",
                   "runtime": "runc"
                 }
               }
             }
           },
-          "CVCaptureModule": {
+          "lvaEdge": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
-            "env": {
-              "IOTHUB_CONNECTION_STRING": {
-                "value": "$IOTHUB_CONNECTION_STRING"
-              }
-            },
             "settings": {
-              "image": "${MODULES.CVCaptureModule.amd64}",
+              "image": "mcr.microsoft.com/media/live-video-analytics:1",
               "createOptions": {
                 "HostConfig": {
-                  "PortBindings": {
-                    "9000/tcp": [
-                      {
-                        "HostPort": "9000"
-                      }
-                    ],
-                    "5559/tcp": [
-                      {
-                        "HostPort": "5559"
-                      }
-                    ]
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
                   },
-                  "runtime": "runc"
+                  "IpcMode": "host"
                 }
               }
             }
           },
+
           "rtspsim": {
             "version": "1.0",
             "type": "docker",
@@ -208,7 +247,20 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig": {}
+                "HostConfig":{
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings":{
+                    "554/tcp":[{
+                      "HostPort":"554"
+                    }]
+                  }
+                }
               }
             }
           }
@@ -232,6 +284,24 @@
     },
     "VisionSampleModule": {
       "properties.desired": {}
+    },
+    "lvaEdge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/media",
+        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourcegroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$SERVICE_NAME",
+        "aadTenantId": "$TENANT_ID",
+        "aadServicePrincipalAppId": "$SERVICE_PRINCIPAL_APP_ID",
+        "aadServicePrincipalSecret": "$SERVICE_PRINCIPAL_SECRET",
+        "aadEndpoint": "https://login.microsoftonline.com",
+        "aadResourceId": "https://management.core.windows.net/",
+        "armEndpoint": "https://management.azure.com/",
+        "diagnosticsEventsOutputName": "AmsDiagnostics",
+        "operationalEventsOutputName": "AmsOperational",
+        "logLevel": "Information",
+        "logCategories": "Application,Events",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
     }
   }
 }
