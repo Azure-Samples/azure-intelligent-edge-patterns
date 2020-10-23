@@ -233,7 +233,7 @@ def update_cams(request_body: CamerasModel):
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
     # recommended_fps = onnx.get_recommended_frame_rate(n)
     onnx.set_frame_rate(frame_rate)
-    logger.warning('update frame rate to {0}'.format(frame_rate))
+    logger.warning("update frame rate to {}".format(frame_rate))
 
     # lva_mode
 
@@ -382,7 +382,8 @@ def get_recommended_fps(number_of_cameras: int):
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return {'fps': int(onnx.get_recommended_frame_rate(number_of_cameras))}
+    return {"fps": int(onnx.get_recommended_frame_rate(number_of_cameras))}
+
 
 @app.get("/get_recommended_total_fps")
 def get_recommended_total_fps():
@@ -391,7 +392,7 @@ def get_recommended_total_fps():
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return {'fps': int(onnx.get_recommended_total_frame_rate())}
+    return {"fps": int(onnx.get_recommended_total_frame_rate())}
 
 
 # @app.route("/get_current_fps")
@@ -459,8 +460,9 @@ def init_topology():
     """
 
     instances = gm.invoke_graph_instance_list()
+    logger.info("instances %s", instances)
     if instances["status"] != 200:
-        logger.warning("Failed to invoker direct method: %s", instances["payload"])
+        logger.warning("Failed to invoke direct method: %s", instances["payload"])
         return -1
     logger.info(
         "========== Deleting %s instance(s) ==========",
@@ -543,7 +545,7 @@ def benchmark():
     # print(t1-t0)
 
     discount = 0.75
-    max_total_frame_rate = discount * (n_images * n_threads) / (t1-t0)
+    max_total_frame_rate = discount * (n_images * n_threads) / (t1 - t0)
 
     logger.info("---- Overall ----")
     logger.info("Processing %s images in %s seconds", n_images * n_threads, t1 - t0)
