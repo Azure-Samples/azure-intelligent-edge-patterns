@@ -1,3 +1,6 @@
+# syntax = docker/dockerfile:experimental
+# export DOCKER_BUILDKIT=1 to enable cache
+
 # =========================================================
 # Base
 # =========================================================
@@ -7,6 +10,7 @@ WORKDIR /app
 ENV LANG en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ARG SYSTEM_CORES=4
+ENV MAKEFLAGS="-j$(SYSTEM_CORES)"
 
 # =========================================================
 # Install system packages
@@ -39,11 +43,11 @@ RUN apt-get update && \
 # =========================================================
 WORKDIR /app
 
-RUN pip install --upgrade pip
-RUN pip install wheel cython protobuf
+RUN --mount=type=cache,mode=0755,target=/root/.cache/pip ["pip", "install", "--upgrade", "pip"]
+RUN --mount=type=cache,mode=0755,target=/root/.cache/pip ["pip", "install", "wheel", "cython", "protobuf"]
 COPY requirements/base.txt ./requirements/base.txt
-RUN pip install $(cat ./requirements/base.txt | grep numpy)
-RUN ["pip", "install", "-r", "requirements/base.txt"]
+RUN --mount=type=cache,mode=0755,target=/root/.cache/pip pip install $(cat ./requirements/base.txt | grep numpy)
+RUN --mount=type=cache,mode=0755,target=/root/.cache/pip ["pip", "install", "-r", "requirements/base.txt"]
 
 # =========================================================
 # Install onnxruntime
