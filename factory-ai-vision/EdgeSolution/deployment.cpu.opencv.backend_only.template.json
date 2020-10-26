@@ -69,7 +69,7 @@
                   "PortBindings": {
                     "8181/tcp": [
                       {
-                        "HostPort": "8080"
+                        "HostPort": "8181"
                       }
                     ]
                   }

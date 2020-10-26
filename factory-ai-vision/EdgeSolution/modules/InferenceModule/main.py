@@ -92,7 +92,7 @@ except:
 
 def web_module_url():
     if is_edge():
-        return "172.18.0.1:8080"
+        return "172.18.0.1:8181"
     else:
         return "localhost:8000"
 
