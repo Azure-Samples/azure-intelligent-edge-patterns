@@ -1,5 +1,6 @@
 import { Size2D } from '../../../store/type';
 
+// Simulate css object-fit properties
 export enum CanvasFit {
   Contain,
   Cover,
