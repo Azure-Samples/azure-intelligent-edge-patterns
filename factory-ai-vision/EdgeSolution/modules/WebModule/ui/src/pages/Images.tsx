@@ -69,8 +69,9 @@ function useFilterItems<T extends { id: number; name: string }>(
       })),
     [itemsInStore, filterItems],
   );
+  const filteredItems = useMemo(() => Object.keys(filterItems).filter((e) => filterItems[e]), [filterItems]);
 
-  return [items, Object.keys(filterItems).filter((e) => filterItems[e])];
+  return [items, filteredItems];
 }
 
 export const Images: React.FC = () => {
