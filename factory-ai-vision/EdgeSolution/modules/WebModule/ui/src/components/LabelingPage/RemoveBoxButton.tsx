@@ -1,4 +1,4 @@
-import React, { FC, memo, Dispatch, useState, useEffect } from 'react';
+import React, { FC, memo, useState, useEffect } from 'react';
 import { Group, Line, Rect } from 'react-konva';
 
 import { LabelingCursorStates } from './type';
@@ -10,7 +10,6 @@ interface RemoveBoxButtonProps {
   label: BoxLabel;
   changeCursorState: (cursorType?: LabelingCursorStates) => void;
   scale: number;
-  setShowOuterRemoveButton: Dispatch<boolean>;
   removeBox: () => void;
 }
 const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
@@ -19,7 +18,6 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
   label,
   changeCursorState,
   scale,
-  setShowOuterRemoveButton,
   removeBox,
 }) => {
   const [color, setColor] = useState<string>('#F9526B');
@@ -53,8 +51,6 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
       y = -60;
     }
   }
-  if (y === -60) setShowOuterRemoveButton(true);
-  else setShowOuterRemoveButton(false);
 
   useEffect(() => {
     setStrokeWidth(1.5 / scale);

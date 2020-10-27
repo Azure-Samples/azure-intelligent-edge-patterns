@@ -1,10 +1,10 @@
 import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
-import { Stage, Layer, Image, Group, Text as KonvaText, Text, Rect, Label, Tag } from 'react-konva';
+import { Stage, Layer, Image, Group, Text as KonvaText, Text, Label, Tag } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
-import getResizeImageFunction, { CanvasFit } from './util/resizeImage';
+import resizeImageFunction, { CanvasFit } from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
@@ -40,7 +40,6 @@ const Scene: FC<SceneProps> = ({
   imgPart,
 }) => {
   const dispatch = useDispatch();
-  const resizeImage = useCallback(getResizeImageFunction(defaultSize, CanvasFit.Contain), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
   const noMoreCreate = useMemo(
     () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
@@ -49,7 +48,6 @@ const Scene: FC<SceneProps> = ({
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
-  const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<number>(1);
   const changeCursorState = useCallback(
@@ -69,7 +67,6 @@ const Scene: FC<SceneProps> = ({
   const removeBox = useCallback((): void => {
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
-    setShowOuterRemoveButton(false);
     setSelectedAnnotationIndex(null);
   }, [dispatch, annotations, selectedAnnotationIndex, setWorkState]);
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
@@ -117,10 +114,10 @@ const Scene: FC<SceneProps> = ({
     if (workState === WorkState.None && !noMoreCreate) setSelectedAnnotationIndex(null);
   }, [workState, noMoreCreate]);
   useEffect(() => {
-    const [outcomeSize, outcomeScale] = resizeImage(size);
+    const [outcomeSize, outcomeScale] = resizeImageFunction(defaultSize, CanvasFit.Contain, size);
     setImageSize(outcomeSize);
     scale.current = outcomeScale;
-  }, [size, resizeImage]);
+  }, [size]);
 
   const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
@@ -152,7 +149,6 @@ const Scene: FC<SceneProps> = ({
                   label={annotation.label}
                   scale={scale.current}
                   changeCursorState={changeCursorState}
-                  setShowOuterRemoveButton={setShowOuterRemoveButton}
                   removeBox={removeBox}
                 />
                 <Box2d
