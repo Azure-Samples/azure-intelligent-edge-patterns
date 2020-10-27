@@ -80,7 +80,7 @@ it('should show the go label button after capturing first image', async () => {
   });
 });
 
-it('should dispatch right action when pressing go label button', async () => {
+it('should dispatch right action when pressing go tagging button', async () => {
   const mockOpenLabelingPage = jest.fn();
   const { getByRole } = render(
     <CaptureDialog
