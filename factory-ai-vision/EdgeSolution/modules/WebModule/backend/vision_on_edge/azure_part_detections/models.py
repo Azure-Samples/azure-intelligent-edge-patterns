@@ -10,6 +10,7 @@ from rest_framework.exceptions import APIException
 
 from ..azure_parts.models import Part
 from ..azure_projects.models import Project
+from ..camera_tasks.models import CameraTask
 from ..cameras.models import Camera
 from ..inference_modules.models import InferenceModule
 from .constants import (
@@ -99,10 +100,7 @@ class PartDetection(models.Model):
             return False
 
     def send_video_to_cloud(self):
-        return [
-            {"camera_id": cam.id, "send_video_to_cloud": cam.send_video_to_cloud}
-            for cam in self.cameras.all()
-        ]
+        return CameraTask.objects.filter(camera__in=self.cameras.all())
 
     def __str__(self) -> str:
         return self.name.__str__()

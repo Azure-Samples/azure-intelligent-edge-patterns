@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "vision_on_edge.azure_part_detections",
     "vision_on_edge.feedback",
     "vision_on_edge.locations",
+    "vision_on_edge.camera_tasks",
     #    'vision_on_edge.image_predictions',
     "vision_on_edge.azure_pd_deploy_status",
     "rest_framework",
