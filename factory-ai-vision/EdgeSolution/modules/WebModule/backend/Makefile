@@ -31,6 +31,13 @@ test: ## unit test
 	@pytest
 	@echo "Testing passed\n"
 
+.PHONY: graph
+graph: ## unit test
+	@echo "Making graph..."
+	@echo "You may need to install graphviz"
+	@$(PYTHON) manage.py graph_models -a -o myapp_models.png
+	@echo "Graph: myapp_models.png"
+
 .PHONY: coverage-html
 coverage-html: ## Dev
 	@echo "Running coverage..."
