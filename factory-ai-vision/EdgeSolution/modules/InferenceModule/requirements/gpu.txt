@@ -1,2 +1,3 @@
 -r ./base.txt
-onnxruntime-gpu==1.5.1
+opencv==4.4.0
+onnxruntime==1.5.2
