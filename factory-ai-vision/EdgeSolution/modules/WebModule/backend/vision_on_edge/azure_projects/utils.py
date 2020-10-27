@@ -508,7 +508,7 @@ class TrainingManager:
         self.mutex = threading.Lock()
         self.garbage_collector()
 
-    def add(self, project_id):
+    def add(self, project_id, export_flavor: str = ""):
         """add.
 
         Add a project in training tasks.
@@ -516,7 +516,7 @@ class TrainingManager:
         if project_id in self.training_tasks:
             raise ProjectAlreadyTraining
         self.mutex.acquire()
-        task = TrainingTask(project_id=project_id)
+        task = TrainingTask(project_id=project_id, export_flavor=export_flavor)
         self.training_tasks[project_id] = task
         task.start()
         self.mutex.release()
@@ -560,7 +560,7 @@ class TrainingManager:
 class TrainingTask:
     """TrainingTask."""
 
-    def __init__(self, project_id):
+    def __init__(self, project_id, export_flavor):
         """__init__.
 
         Args:
@@ -569,6 +569,7 @@ class TrainingTask:
         self.project_id = project_id
         self.status = "init"
         self.worker = None
+        self.export_flavor = export_flavor
 
     def start(self):
         """start."""
@@ -576,7 +577,7 @@ class TrainingTask:
         self.worker = threading.Thread(
             target=train_project_catcher,
             name=f"train_project_worker_{self.project_id}",
-            kwargs={"project_id": self.project_id},
+            kwargs={"project_id": self.project_id, "export_flavor": self.export_flavor},
             daemon=True,
         )
         self.worker.start()
