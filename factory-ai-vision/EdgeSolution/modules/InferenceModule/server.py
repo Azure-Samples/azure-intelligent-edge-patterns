@@ -19,6 +19,7 @@ import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import StreamingResponse
+import onnxruntime
 
 import extension_pb2_grpc
 from api.models import (
@@ -451,6 +452,15 @@ async def keep_alive(cam_id: str):
     else:
         print("[Warning] Cannot find stream %s" % cam_id)
         return "failed"
+
+
+@app.get('/get_device')
+def get_device():
+    device = onnxruntime.get_device()
+    if device == 'CPU-OPENVINO_MYRIAD':
+        device = 'vpu'
+    device = device.lower()
+    return {'device': device}
 
 
 def init_topology():
