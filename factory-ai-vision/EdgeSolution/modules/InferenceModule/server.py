@@ -116,6 +116,7 @@ def metrics(cam_id: str):
     last_prediction_count = {}
     is_gpu = onnx.is_gpu
     scenario_metrics = []
+    device = onnx.get_device()
 
     stream = stream_manager.get_stream_by_id_danger(cam_id)
     if stream:
@@ -135,6 +136,7 @@ def metrics(cam_id: str):
         "inference_num": inference_num,
         "unidentified_num": unidentified_num,
         "is_gpu": is_gpu,
+        'device': device,
         "average_inference_time": average_inference_time,
         "last_prediction_count": last_prediction_count,
         "scenario_metrics": scenario_metrics,
@@ -456,10 +458,7 @@ async def keep_alive(cam_id: str):
 
 @app.get('/get_device')
 def get_device():
-    device = onnxruntime.get_device()
-    if device == 'CPU-OPENVINO_MYRIAD':
-        device = 'vpu'
-    device = device.lower()
+    device = onnx.get_device()
     return {'device': device}
 
 
