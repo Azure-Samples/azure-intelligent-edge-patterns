@@ -237,7 +237,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     logger.info("Pulling Custom Vision Project... End")
 
 
-def train_project_worker(project_id):
+def train_project_worker(project_id, export_flavor: str = ""):
     """train_project_worker.
 
     Args:
@@ -425,7 +425,10 @@ def train_project_worker(project_id):
     status_init = False
     while True:
         time.sleep(1)
-        exports = trainer.get_exports(customvision_id, iteration.id)
+        if fp16:
+            exports = trainer.get_exports(customvision_id, iteration.id)
+        else:
+            exports = trainer.get_exports(customvision_id, iteration.id)
         if not status_init:
             upcreate_training_status(
                 project_id=project_obj.id,
@@ -435,7 +438,9 @@ def train_project_worker(project_id):
             status_init = True
         if len(exports) == 0 or not exports[0].download_uri:
 
-            res = project_obj.export_iterationv3_2(iteration.id)
+            res = project_obj.export_iterationv3_2(
+                iteration.id, export_flavor=export_flavor
+            )
             logger.info("Export response from Custom Vision: %s", res.json())
             continue
         break
