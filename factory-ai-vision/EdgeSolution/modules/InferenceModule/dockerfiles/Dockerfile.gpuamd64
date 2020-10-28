@@ -39,17 +39,20 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 RUN rm -rf /opt/miniconda
 RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
 RUN echo ". /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
+RUN conda init
+RUN conda create --name python38 python=3.8.5 -y
+SHELL ["conda", "run", "-n", "python38", "/bin/bash", "-c"]
+RUN which pip
+
 
 # =========================================================
 # Install Python package
 # =========================================================
+RUN pip install --upgrade pip
 COPY requirements/base.txt ./requirements/base.txt
+RUN pip install -r requirements/base.txt
 COPY requirements/gpu.txt ./requirements/gpu.txt
-ENV CONDA_ENV_NAME python38
-RUN conda create --name python38 python=3.8.5 -y &&\
-    conda activate python38
-RUN [ "/bin/bash", "-c", "conda activate python38 && pip install --upgrade pip"]
-RUN [ "/bin/bash", "-c", "conda activate python38 && pip install -r requirements/gpu.txt"]
+RUN pip install -r requirements/gpu.txt
 
 # =========================================================
 # Copy Source Code
@@ -98,4 +101,4 @@ COPY utility.py ./
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
+CMD python3 server.py -p 44000
