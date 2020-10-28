@@ -110,11 +110,11 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     probThreshold: data?.prob_threshold.toString() ?? '10',
     name: data?.name ?? '',
     inferenceMode: data?.inference_mode ?? '',
-    // TODO
-    SVTCisOpen: false,
-    SVTCcameras: [],
-    SVTCparts: [],
-    SVTCconfirmationThreshold: 10,
+    SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+    SVTCcameras: data?.send_video_to_cloud.map((e) => e.camera),
+    // All the camera will detect same parts
+    SVTCparts: data?.send_video_to_cloud[0]?.parts || [],
+    SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
     deployTimeStamp: data?.deploy_timestamp ?? '',
     setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
@@ -206,11 +206,12 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         trainingProject: partDetection[0]?.project ?? null,
         name: partDetection[0]?.name ?? '',
         inferenceMode: partDetection[0]?.inference_mode ?? '',
-        // TODO
-        SVTCisOpen: false,
-        SVTCcameras: [],
-        SVTCparts: [],
-        SVTCconfirmationThreshold: 10,
+        SVTCisOpen: partDetection[0]?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+        SVTCcameras: partDetection[0]?.send_video_to_cloud.map((e) => e.camera),
+        // All the camera will detect same parts
+        SVTCparts: partDetection[0]?.send_video_to_cloud[0]?.parts || [],
+        SVTCconfirmationThreshold:
+          partDetection[0]?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
         deployTimeStamp: partDetection[0]?.deploy_timestamp ?? '',
         setFpsManually: partDetection[0]?.fps !== recomendedFps,
         recomendedFps,
@@ -250,12 +251,13 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       metrics_is_send_iothub: projectData.sendMessageToCloud,
       metrics_frame_per_minutes: projectData.framesPerMin,
       name: projectData.name,
-      // TODO
-      // send_video_to_cloud: projectData.cameras.map((e) => ({
-      //   camera_id: e,
-      //   send_video_to_cloud: projectData.cameraToBeRecord.includes(e),
-      // })),
-      // inference_mode: projectData.inferenceMode,
+      send_video_to_cloud: projectData.cameras.map((e) => ({
+        camera: e,
+        parts: projectData.SVTCparts,
+        send_video_to_cloud: projectData.SVTCcameras.includes(e),
+        send_video_to_cloud_threshold: projectData.SVTCconfirmationThreshold,
+      })),
+      inference_mode: projectData.inferenceMode,
       fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
     },
