@@ -20,7 +20,7 @@ export const LiveViewContainer: React.FC<{
   showVideo: boolean;
   cameraId: number;
 }> = ({ showVideo, cameraId }) => {
-  const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
+  const showAOI = useSelector<State, boolean>((state) => Boolean(selectCameraById(state, cameraId)?.useAOI));
   const showCountingLine = useSelector<State, boolean>(
     (state) =>
       selectCameraById(state, cameraId)?.useCountingLine &&
