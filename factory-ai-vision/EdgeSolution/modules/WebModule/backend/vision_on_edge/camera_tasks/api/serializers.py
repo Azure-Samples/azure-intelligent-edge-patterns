@@ -15,8 +15,6 @@ logger = logging.getLogger(__name__)
 class CameraTaskSerializer(serializers.ModelSerializer):
     """Part Detection Serializer"""
 
-    id = serializers.CharField()
-
     class Meta:
         model = CameraTask
-        fields = "__all__"
+        exclude = ["id", "name"]

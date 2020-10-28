@@ -20,4 +20,5 @@ class CameraTask(models.Model):
     name = models.CharField(blank=True, max_length=200)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     send_video_to_cloud = models.BooleanField(default=False)
+    send_video_to_cloud_threshold = models.IntegerField(default=60)
     parts = models.ManyToManyField(Part, blank=True)

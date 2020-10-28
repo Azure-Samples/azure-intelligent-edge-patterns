@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class PartDetectionSerializer(serializers.ModelSerializer):
     """Part Detection Serializer"""
 
-    send_video_to_cloud = CameraTaskSerializer(many=True, required=False)
+    send_video_to_cloud = CameraTaskSerializer(many=True, required=False, partial=True)
 
     class Meta:
         model = PartDetection
@@ -83,11 +83,12 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             for camera_task in camera_tasks:
                 camera_task_instance = drf_get_object_or_404(
                     CameraTask.objects.filter(camera_id__in=instance.cameras.all()),
-                    pk=camera_task["id"],
+                    camera_id=camera_task["camera"],
                 )
                 serializer = CameraTaskSerializer(
                     instance=camera_task_instance,
                     data=CameraTaskSerializer(camera_task).data,
+                    partial=True,
                 )
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
