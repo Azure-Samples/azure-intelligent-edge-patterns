@@ -74,6 +74,9 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         else:
             return self.detection_mode
 
+    def get_device(self):
+        return onnxruntime.get_device()
+
     def set_max_total_frame_rate(self, fps):
         self.max_total_frame_rate = fps
         print("[INFO] set max total frame rate as", fps, flush=True)

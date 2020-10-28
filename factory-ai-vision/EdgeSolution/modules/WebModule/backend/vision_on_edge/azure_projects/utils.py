@@ -480,7 +480,7 @@ def train_project_worker(project_id, export_flavor: str = ""):
     project_obj.save()
 
 
-def train_project_catcher(project_id):
+def train_project_catcher(project_id, export_flavor):
     """train_project_catcher.
 
     Dummy exception handler.
