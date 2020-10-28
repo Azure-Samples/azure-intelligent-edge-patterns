@@ -22,7 +22,7 @@
           "edgeAgent": {
             "type": "docker",
             "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9.5",
               "createOptions": {}
             }
           },
@@ -66,6 +66,13 @@
               "image": "${MODULES.NginxModule.amd64}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
                     "8181/tcp": [
                       {
@@ -101,32 +108,23 @@
               "DBPASS": {
                 "value": "vision_on_edge"
               },
-              "DF_INFERENECE_IS_GPU": {
-                "value": true
-              }
+              "DF_INFERENECE_IS_GPU": { "value": false }
             },
             "settings": {
-              "image": "${MODULES.WebModule}"
-            }
-          },
-          "WebDBModule": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "env": {
-              "POSTGRES_PASSWORD": { "value": "vision_on_edge" },
-              "POSTGRES_USER": { "value": "vision_on_edge" },
-              "POSTGRES_DB": { "value": "vision_on_edge" }
-            },
-            "settings": {
-              "image": "${MODULES.WebDBModule}",
+              "image": "${MODULES.WebModule}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
-                    "5432/tcp": [
+                    "8000/tcp": [
                       {
-                        "HostPort": "5432"
+                        "HostPort": "8000"
                       }
                     ]
                   }
@@ -140,36 +138,43 @@
             "status": "running",
             "restartPolicy": "always",
             "env": {
-              "LVA_MODE": {
-                "value": "http"
-              },
               "IOTHUB_CONNECTION_STRING": {
                 "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.gpuamd64}",
+              "image": "${MODULES.InferenceModule.vpuamd64}",
               "createOptions": {
                 "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
                   "PortBindings": {
                     "5000/tcp": [
                       {
                         "HostPort": "5000"
                       }
                     ],
-                    "44000/tcp": [
-                      {
-                        "HostPort": "44000"
-                      }
-                    ],
                     "5558/tcp": [
                       {
                         "HostPort": "5558"
                       }
+                    ],
+                    "44000/tcp": [
+                      {
+                        "HostPort": "44000"
+                      }
                     ]
                   },
-                  "IpcMode": "container:lvaEdge",
-                  "runtime": "nvidia"
+                  "IpcMode": "host",
+                  "runtime": "runc"
                 }
               }
             }
@@ -190,13 +195,49 @@
                       "max-file": "10"
                     }
                   },
-                  "Binds": [],
-                  "IpcMode": "shareable"
+                  "IpcMode": "host"
                 }
               }
             }
           },
-
+          "CVCaptureModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.CVCaptureModule.amd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "9000/tcp": [
+                      {
+                        "HostPort": "9000"
+                      }
+                    ],
+                    "5559/tcp": [
+                      {
+                        "HostPort": "5559"
+                      }
+                    ]
+                  },
+                  "runtime": "runc"
+                }
+              }
+            }
+          },
           "rtspsim": {
             "version": "1.0",
             "type": "docker",
@@ -205,13 +246,18 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig": {
-                  "PortBindings": {
-                    "554/tcp": [
-                      {
-                        "HostPort": "554"
-                      }
-                    ]
+                "HostConfig":{
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings":{
+                    "554/tcp":[{
+                      "HostPort":"554"
+                    }]
                   }
                 }
               }
