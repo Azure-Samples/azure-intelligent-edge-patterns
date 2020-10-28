@@ -124,20 +124,6 @@
               }
             }
           },
-          "WebDBModule": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "env": {
-              "POSTGRES_PASSWORD": { "value": "vision_on_edge" },
-              "POSTGRES_USER": { "value": "vision_on_edge" },
-              "POSTGRES_DB": { "value": "vision_on_edge" }
-            },
-            "settings": {
-              "image": "${MODULES.WebDBModule}"
-            }
-          },
           "InferenceModule": {
             "version": "1.0",
             "type": "docker",
@@ -216,7 +202,7 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig":{
+                "HostConfig": {
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -224,10 +210,12 @@
                       "max-file": "10"
                     }
                   },
-                  "PortBindings":{
-                    "554/tcp":[{
-                      "HostPort":"554"
-                    }]
+                  "PortBindings": {
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
                   }
                 }
               }

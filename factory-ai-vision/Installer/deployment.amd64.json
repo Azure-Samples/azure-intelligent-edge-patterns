@@ -37,7 +37,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/nginxmodule:0.1.34-amd64",
+              "image": "intelligentedge/nginxmodule:0.1.35-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8181/tcp\":[{\"HostPort\":\"8181\"}]}}}"
             }
           },
@@ -67,29 +67,8 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/webmodule:0.1.34-amd64",
+              "image": "intelligentedge/webmodule:0.1.35-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
-            }
-          },
-          "WebDBModule": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "env": {
-              "POSTGRES_PASSWORD": {
-                "value": "vision_on_edge"
-              },
-              "POSTGRES_USER": {
-                "value": "vision_on_edge"
-              },
-              "POSTGRES_DB": {
-                "value": "vision_on_edge"
-              }
-            },
-            "settings": {
-              "image": "intelligentedge/webdbmodule:0.1.34-amd64",
-              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5432/tcp\":[{\"HostPort\":\"5432\"}]}}}"
             }
           },
           "InferenceModule": {
@@ -103,7 +82,7 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/inferencemodule:0.1.34-<cpu or gpu>amd64",
+              "image": "intelligentedge/inferencemodule:0.1.35-<cpu or gpu>amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"44000/tcp\":[{\"HostPort\":\"44000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
             }
           },
@@ -123,7 +102,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/rtspsimmodule:0.1.34-amd64",
+              "image": "intelligentedge/rtspsimmodule:0.1.35-amd64",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
             }
           }

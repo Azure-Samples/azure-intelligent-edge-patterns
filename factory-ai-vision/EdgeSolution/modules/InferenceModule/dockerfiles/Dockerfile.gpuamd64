@@ -1,8 +1,13 @@
-#FROM mcr.microsoft.com/azureml/onnxruntime:v0.5.0-tensorrt19.06
+# =========================================================
+# Base
+# =========================================================
 FROM mcr.microsoft.com/azureml/onnxruntime:latest-cuda
 
 WORKDIR /app
 
+# =========================================================
+# Install system packages
+# =========================================================
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libboost-filesystem-dev \
@@ -12,7 +17,9 @@ RUN apt-get update && \
     libgl1-mesa-glx \
     libgtk2.0-dev \
     libssl-dev \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
@@ -25,18 +32,32 @@ RUN apt-get update \
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
+# =========================================================
+# Install Miniconda
+# =========================================================
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 RUN rm -rf /opt/miniconda
 RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
+RUN echo ". /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
+RUN conda init bash
+RUN conda create --name python38 python=3.8.5 -y
+SHELL ["conda", "run", "-n", "python38", "/bin/bash", "-c"]
+RUN which pip
+RUN which python3
 
+
+# =========================================================
+# Install Python package
+# =========================================================
+RUN pip install --upgrade pip
 COPY requirements/base.txt ./requirements/base.txt
-ENV CONDA_ENV_NAME python38
-RUN conda create --name python38 python=3.8.5 -y &&\
-    . activate python38
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime-gpu==1.5.1" ]
+RUN pip install -r requirements/base.txt
+COPY requirements/gpu.txt ./requirements/gpu.txt
+RUN pip install -r requirements/gpu.txt
 
+# =========================================================
+# Copy Source Code
+# =========================================================
 COPY coco_classes.txt ./
 COPY default_model default_model/
 COPY default_model_6parts default_model_6parts/
@@ -75,8 +96,9 @@ COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
 
-RUN apt-get update && apt-get install unzip
-
+# =========================================================
+# Run
+# =========================================================
 EXPOSE 5558
 EXPOSE 5000
 

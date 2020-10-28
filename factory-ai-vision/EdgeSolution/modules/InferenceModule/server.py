@@ -19,6 +19,7 @@ import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import StreamingResponse
+import onnxruntime
 
 import extension_pb2_grpc
 from api.models import (
@@ -56,6 +57,8 @@ IMG_HEIGHT = 540
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 IS_OPENCV = os.environ.get("IS_OPENCV", "false")
+
+NO_DISPLAY = os.environ.get("NO_DISPLAY", "false")
 
 # Main thread
 
@@ -115,6 +118,7 @@ def metrics(cam_id: str):
     last_prediction_count = {}
     is_gpu = onnx.is_gpu
     scenario_metrics = []
+    device = onnx.get_device()
 
     stream = stream_manager.get_stream_by_id_danger(cam_id)
     if stream:
@@ -134,6 +138,7 @@ def metrics(cam_id: str):
         "inference_num": inference_num,
         "unidentified_num": unidentified_num,
         "is_gpu": is_gpu,
+        'device': device,
         "average_inference_time": average_inference_time,
         "last_prediction_count": last_prediction_count,
         "scenario_metrics": scenario_metrics,
@@ -233,7 +238,7 @@ def update_cams(request_body: CamerasModel):
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
     # recommended_fps = onnx.get_recommended_frame_rate(n)
     onnx.set_frame_rate(frame_rate)
-    logger.warning('update frame rate to {0}'.format(frame_rate))
+    logger.warning("update frame rate to {}".format(frame_rate))
 
     # lva_mode
 
@@ -382,7 +387,8 @@ def get_recommended_fps(number_of_cameras: int):
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return {'fps': int(onnx.get_recommended_frame_rate(number_of_cameras))}
+    return {"fps": int(onnx.get_recommended_frame_rate(number_of_cameras))}
+
 
 @app.get("/get_recommended_total_fps")
 def get_recommended_total_fps():
@@ -391,7 +397,11 @@ def get_recommended_total_fps():
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return {'fps': int(onnx.get_recommended_total_frame_rate())}
+    return {"fps": int(onnx.get_recommended_total_frame_rate())}
+
+@app.get("/recommended_fps")
+def recommended_fps():
+    return {"fps": int(onnx.get_recommended_total_frame_rate())}
 
 
 # @app.route("/get_current_fps")
@@ -429,6 +439,7 @@ class DisplayManager:
 
 @app.get("/video_feed")
 async def video_feed(cam_id: str):
+    if NO_DISPLAY == "true" : return 'ok'
     stream = stream_manager.get_stream_by_id(cam_id)
     if stream:
         print("[INFO] Preparing Video Feed for stream %s" % cam_id, flush=True)
@@ -452,6 +463,12 @@ async def keep_alive(cam_id: str):
         return "failed"
 
 
+@app.get('/get_device')
+def get_device():
+    device = onnx.get_device()
+    return {'device': device}
+
+
 def init_topology():
     """init_topology.
 
@@ -459,8 +476,9 @@ def init_topology():
     """
 
     instances = gm.invoke_graph_instance_list()
+    logger.info("instances %s", instances)
     if instances["status"] != 200:
-        logger.warning("Failed to invoker direct method: %s", instances["payload"])
+        logger.warning("Failed to invoke direct method: %s", instances["payload"])
         return -1
     logger.info(
         "========== Deleting %s instance(s) ==========",
@@ -506,13 +524,13 @@ def benchmark():
     SCENARIO1_MODEL = "scenario_models/1"
 
     n_threads = 3
-    n_images = 30
+    n_images = 15
     logger.info("============= BenchMarking (Begin) ==================")
     logger.info("--- Settings ----")
     logger.info("%s threads", n_threads)
     logger.info("%s images", n_images)
 
-    stream_ids = list(str(i) for i in range(n_threads))
+    stream_ids = list(str(i+10000) for i in range(n_threads))
     stream_manager.update_streams(stream_ids)
     onnx.set_is_scenario(True)
     onnx.update_model(SCENARIO1_MODEL)
@@ -543,13 +561,17 @@ def benchmark():
     # print(t1-t0)
 
     discount = 0.75
-    max_total_frame_rate = discount * (n_images * n_threads) / (t1-t0)
+    max_total_frame_rate = discount * (n_images * n_threads) / (t1 - t0)
 
     logger.info("---- Overall ----")
     logger.info("Processing %s images in %s seconds", n_images * n_threads, t1 - t0)
     logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
     logger.info("  Recommended Total FPS: %s", max_total_frame_rate)
     logger.info("============= BenchMarking (End) ==================")
+
+    stream_manager.update_streams([])
+
+    max_total_frame_rate = max(1, max_total_frame_rate)
     onnx.set_max_total_frame_rate(max_total_frame_rate)
 
 

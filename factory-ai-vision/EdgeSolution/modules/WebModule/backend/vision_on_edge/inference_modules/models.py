@@ -27,5 +27,13 @@ class InferenceModule(models.Model):
             result = 10
         return result
 
+    def is_vpu(self) -> bool:
+        try:
+            response = requests.get("http://" + self.url + "/get_device")
+            result = response.json()["device"]
+            return result == "vpu"
+        except:
+            return False
+
     def __str__(self):
         return self.name

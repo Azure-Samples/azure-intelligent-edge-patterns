@@ -237,7 +237,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     logger.info("Pulling Custom Vision Project... End")
 
 
-def train_project_worker(project_id):
+def train_project_worker(project_id, export_flavor: str = ""):
     """train_project_worker.
 
     Args:
@@ -425,7 +425,10 @@ def train_project_worker(project_id):
     status_init = False
     while True:
         time.sleep(1)
-        exports = trainer.get_exports(customvision_id, iteration.id)
+        if fp16:
+            exports = trainer.get_exports(customvision_id, iteration.id)
+        else:
+            exports = trainer.get_exports(customvision_id, iteration.id)
         if not status_init:
             upcreate_training_status(
                 project_id=project_obj.id,
@@ -435,7 +438,9 @@ def train_project_worker(project_id):
             status_init = True
         if len(exports) == 0 or not exports[0].download_uri:
 
-            res = project_obj.export_iterationv3_2(iteration.id)
+            res = project_obj.export_iterationv3_2(
+                iteration.id, export_flavor=export_flavor
+            )
             logger.info("Export response from Custom Vision: %s", res.json())
             continue
         break
@@ -475,7 +480,7 @@ def train_project_worker(project_id):
     project_obj.save()
 
 
-def train_project_catcher(project_id):
+def train_project_catcher(project_id, export_flavor):
     """train_project_catcher.
 
     Dummy exception handler.
@@ -503,7 +508,7 @@ class TrainingManager:
         self.mutex = threading.Lock()
         self.garbage_collector()
 
-    def add(self, project_id):
+    def add(self, project_id, export_flavor: str = ""):
         """add.
 
         Add a project in training tasks.
@@ -511,7 +516,7 @@ class TrainingManager:
         if project_id in self.training_tasks:
             raise ProjectAlreadyTraining
         self.mutex.acquire()
-        task = TrainingTask(project_id=project_id)
+        task = TrainingTask(project_id=project_id, export_flavor=export_flavor)
         self.training_tasks[project_id] = task
         task.start()
         self.mutex.release()
@@ -555,7 +560,7 @@ class TrainingManager:
 class TrainingTask:
     """TrainingTask."""
 
-    def __init__(self, project_id):
+    def __init__(self, project_id, export_flavor):
         """__init__.
 
         Args:
@@ -564,6 +569,7 @@ class TrainingTask:
         self.project_id = project_id
         self.status = "init"
         self.worker = None
+        self.export_flavor = export_flavor
 
     def start(self):
         """start."""
@@ -571,7 +577,7 @@ class TrainingTask:
         self.worker = threading.Thread(
             target=train_project_catcher,
             name=f"train_project_worker_{self.project_id}",
-            kwargs={"project_id": self.project_id},
+            kwargs={"project_id": self.project_id, "export_flavor": self.export_flavor},
             daemon=True,
         )
         self.worker.start()

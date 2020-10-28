@@ -57,10 +57,10 @@ Check out the architecture below to see how Vision on Edge works on both LVA and
 
 # Architecture
 ### LVA Module (Recommended)
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/lva.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/LVA_nginx.png)
 
 ### OpenCV Module
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/opencv.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/opencv_nginx.png)
 
 
 

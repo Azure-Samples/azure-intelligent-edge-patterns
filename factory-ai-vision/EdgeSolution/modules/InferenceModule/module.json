@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/inferencemodule",
     "tag": {
-      "version": "0.1.549",
+      "version": "0.1.587",
       "platforms": {
         "cpuamd64": "./dockerfiles/Dockerfile.cpuamd64",
         "gpuamd64": "./dockerfiles/Dockerfile.gpuamd64",
@@ -16,8 +16,7 @@
         "arm32v7": "./dockerfiles/Dockerfile.arm32v7",
         "arm32v7.debug": "./dockerfiles/Dockerfile.arm32v7.debug",
         "arm64v8": "./dockerfiles/Dockerfile.arm64v8",
-        "arm64v8.debug": "./dockerfiles/Dockerfile.arm64v8.debug",
-        "fake": "./dockerfiles/Dockerfile.fake"
+        "arm64v8.debug": "./dockerfiles/Dockerfile.arm64v8.debug"
       }
     },
     "buildOptions": [],

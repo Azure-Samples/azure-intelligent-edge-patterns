@@ -295,7 +295,7 @@ class Project(models.Model):
         is_task_success = True
         return is_task_success
 
-    def export_iterationv3_2(self, iteration_id):
+    def export_iterationv3_2(self, iteration_id, export_flavor: str = ""):
         """export_iterationv3_2.
 
         CustomVisionTrainingClient SDK may have some issues exporting.
@@ -313,6 +313,8 @@ class Project(models.Model):
             + iteration_id
             + "/export?platform=ONNX"
         )
+        if export_flavor:
+            url.append(f"&flavor={export_flavor}")
         res = requests.post(
             url, "{body}", headers={"Training-key": setting_obj.training_key}
         )
