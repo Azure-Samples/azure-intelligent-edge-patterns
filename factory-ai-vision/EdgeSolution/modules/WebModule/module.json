@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/webmodule",
     "tag": {
-      "version": "0.3.534",
+      "version": "0.3.535",
       "platforms": {
         "amd64": "./dockerfiles/Dockerfile.amd64",
         "amd64.backend_only": "./dockerfiles/Dockerfile.amd64.backend_only",
