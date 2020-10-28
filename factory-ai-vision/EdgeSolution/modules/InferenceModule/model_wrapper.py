@@ -36,9 +36,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def __init__(self, cam_type="video_file", model_dir="./default_model"):
         self.lock = threading.Lock()
-        self.model = self.load_model(
-            model_dir, is_default_model=True, is_scenario_model=False
-        )
+        #self.model = self.load_model(
+        #    model_dir, is_default_model=True, is_scenario_model=False
+        #)
+        self.model = None
         self.model_uri = None
         self.model_downloading = False
         self.lva_mode = LVA_MODE
@@ -83,9 +84,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             return "PD"
         else:
             return self.detection_mode
-
-    def get_device(self):
-        return onnxruntime.get_device()
 
     def set_max_total_frame_rate(self, fps):
         self.max_total_frame_rate = fps
