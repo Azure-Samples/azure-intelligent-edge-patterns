@@ -17,5 +17,4 @@ opencensus-ext-django==0.7.2
 opencensus-ext-stackdriver==0.7.2
 channels==2.4.0
 django-extra-fields==3.0.0
-<<<<<<< Updated upstream
 django-extensions==3.0.9
