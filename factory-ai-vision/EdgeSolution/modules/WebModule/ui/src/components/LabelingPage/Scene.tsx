@@ -41,10 +41,7 @@ const Scene: FC<SceneProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
-  const noMoreCreate = useMemo(
-    () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
-    [labelingType, annotations],
-  );
+  const noMoreCreate = labelingType === LabelingType.SingleAnnotation && annotations.length === 1;
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
@@ -74,8 +71,7 @@ const Scene: FC<SceneProps> = ({
     if (noMoreCreate || workState === WorkState.Creating) return;
 
     dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
-    // FIXME Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
-    // Should put this state in redux
+    // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
     setSelectedAnnotationIndex(annotations.length);
     setWorkState(WorkState.Creating);
   };
@@ -94,7 +90,6 @@ const Scene: FC<SceneProps> = ({
     }
   };
 
-  // FIXIME: Probably use useReduce for this case
   const onSelect = (index: number): void => {
     setSelectedAnnotationIndex(index);
     if (index === null) setWorkState(WorkState.None);

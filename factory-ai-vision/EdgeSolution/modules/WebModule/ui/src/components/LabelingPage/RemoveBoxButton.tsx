@@ -6,6 +6,7 @@ import { Size2D, BoxLabel } from '../../store/type';
 
 interface RemoveBoxButtonProps {
   visible: boolean;
+  // To make the button inside the image boundary
   imageSize: Size2D;
   label: BoxLabel;
   changeCursorState: (cursorType?: LabelingCursorStates) => void;
