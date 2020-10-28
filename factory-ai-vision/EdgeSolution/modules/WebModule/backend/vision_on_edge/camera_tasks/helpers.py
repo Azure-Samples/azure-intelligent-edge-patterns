@@ -11,4 +11,4 @@ logger = logging.getLogger()
 
 def create_tasks_at_startup():
     for cam in Camera.objects.all():
-        camera_tasks = CameraTask.objects.update_or_create(camera=cam)
+        CameraTask.objects.update_or_create(camera=cam)

@@ -19,17 +19,19 @@ logger = logging.getLogger(__name__)
 )
 def training_status_project_created_listener(**kwargs):
     """Project create change."""
+
     instance = kwargs["instance"]
     created = kwargs["created"]
-    if created:
-        logger.info("Azure Project created. Create TrainingStatus Object")
-        TrainingStatus.objects.update_or_create(
-            project_id=instance.id,
-            defaults={
-                "status": "ok",
-                "log": "Status : Has not configured",
-                "performance": "{}",
-            },
-        )
-    else:
+    if not created:
         logger.info("Project not created. Pass...")
+        return
+
+    logger.info("Azure Project created. Create TrainingStatus object.")
+    TrainingStatus.objects.update_or_create(
+        project_id=instance.id,
+        defaults={
+            "status": "ok",
+            "log": "Status : Has not configured",
+            "performance": "{}",
+        },
+    )
