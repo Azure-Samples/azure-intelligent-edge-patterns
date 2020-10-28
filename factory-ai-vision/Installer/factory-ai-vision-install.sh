@@ -384,15 +384,33 @@ if [ "$isCfg" != true ]; then
     fi
 
 
-    ################################ Check for GPU ###########################################
-    while true; do
-      read -p "Does your device have a GPU? (y or n): " -n 1 -r; echo
-      case $REPLY in
-          [Yy]* ) cpuGpu="gpu"; runtime="nvidia"; break;;
-          [Nn]* ) cpuGpu="cpu"; runtime="runc"  ; break;;
-          * ) echo "Please answer yes or no.";;
-      esac
+    ################################ Check for Device ###########################################
+    #while true; do
+    #  read -p "Does your device have a GPU? (y or n): " -n 1 -r; echo
+    #  case $REPLY in
+    #      [Yy]* ) cpuGpu="gpu"; runtime="nvidia"; break;;
+    #      [Nn]* ) cpuGpu="cpu"; runtime="runc"  ; break;;
+    #      * ) echo "Please answer yes or no.";;
+    #  esac
+    #done
+    PS3='Choose the number corisponding to the Azure Stack Edge device: '
+    deviceOptions="cpu gpu vpu"
+    select cpuGpu in $deviceOptions
+    do
+      echo "you chose: " $cpuGpu
+      if [ "$cpuGpu" != "" ]; then
+          break
+      fi
     done
+    if [ "$cpuGpu" == "cpu" ]; then
+        runtime="runc"
+    fi
+    if [ "$cpuGpu" == "gpu" ]; then
+        runtime="nvidia"
+    fi
+    if [ "$cpuGpu" == "vpu" ]; then
+        runtime="runc"
+    fi
 
 fi #if [ $isCfg != true ]; then
 
