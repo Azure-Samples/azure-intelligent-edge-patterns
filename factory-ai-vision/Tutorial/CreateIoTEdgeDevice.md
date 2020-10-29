@@ -17,7 +17,7 @@ This quickstart walks you through creating a Linux virtual machine that's config
 
 If you don't have an active Azure subscription, create a [free account](https://azure.microsoft.com/free) before you begin.
 
-[!INCLUDE [cloud-shell-try-it.md](../../includes/cloud-shell-try-it.md)]
+[!INCLUDE [cloud-shell-try-it.md](https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/cloud-shell-try-it.md)]
 
 You use the Azure CLI to complete many of the steps in this quickstart, and Azure IoT has an extension to enable additional functionality.
 
