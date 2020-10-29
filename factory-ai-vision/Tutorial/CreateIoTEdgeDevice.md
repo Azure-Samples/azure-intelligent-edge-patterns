@@ -106,6 +106,6 @@ The IoT Edge runtime is deployed on all IoT Edge devices. It has three component
 
 During the runtime configuration, you provide a device connection string. This is the string that you retrieved from the Azure CLI. This string associates your physical device with the IoT Edge device identity in Azure.
 
-## please udpate instruction to open network port 8181
+## please follow instruction to open network port 8181
 
 Nexst step :: shell.azure.com 
