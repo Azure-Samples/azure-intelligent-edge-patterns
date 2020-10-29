@@ -26,8 +26,16 @@ Add the Azure IoT extension to the Cloud Shell instance.
    ```azurecli-interactive
    az extension add --name azure-iot
    ```
+> [!NOTE]
+> This article uses the newest version of the Azure IoT extension, called `azure-iot`. The legacy version is called `azure-cli-iot-ext`.You should only have one version installed at a time. You can use the command `az extension list` to validate the currently installed extensions.
+>
+> Use `az extension remove --name azure-cli-iot-ext` to remove the legacy version of the extension.
+>
+> Use `az extension add --name azure-iot` to add the new version of the extension. 
+>
+> To see what extensions you have installed, use `az extension list`.
 
-[!INCLUDE [iot-hub-cli-version-info](https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/iot-hub-cli-version-info.md)]
+
 
 ## Prerequisites
 
