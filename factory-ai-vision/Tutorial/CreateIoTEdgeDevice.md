@@ -108,4 +108,18 @@ During the runtime configuration, you provide a device connection string. This i
 
 ## please follow instruction to open network port 8181
 
-Nexst step :: shell.azure.com 
+Go to https://portal.azure.com/#home. Click on Virtual Machines and then Add to create your virtual Machine. 
+
+![Diagram - Go to Azure Portal to create Virtual Machine](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_1.png)
+
+Click on the device that you would like to deploy, and go to Networking.
+
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_2.png)
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_3.png)
+
+Check if you have opened the 8181 port. If not, please click on Add Inbound Port Rule, and fill out Destination port ranges and port Name. After this, you will see a pop up telling you that it’s creating security rule ‘Port_8181’. 
+
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_4.png)
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_5.png)
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_6.png)
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_7.png)
