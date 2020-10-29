@@ -195,7 +195,11 @@ def deploy_worker(part_detection_id):
                     "aoi": cam.area,
                     "lines": cam.lines,
                     "zones": cam.danger_zones,
-                    "send_video_to_cloud": cam.send_video_to_cloud,
+                    "send_video_to_cloud": cam.cameratask_set.first().send_video_to_cloud,
+                    "send_video_to_cloud_parts": [
+                        {"id": part.id, "name": part.name}
+                        for part in cam.cameratask_set.first().parts.all()
+                    ],
                 }
             )
         else:
@@ -206,7 +210,11 @@ def deploy_worker(part_detection_id):
                     "source": cam.rtsp,
                     "lines": cam.lines,
                     "zones": cam.danger_zones,
-                    "send_video_to_cloud": cam.send_video_to_cloud,
+                    "send_video_to_cloud": cam.cameratask_set.first().send_video_to_cloud,
+                    "send_video_to_cloud_parts": [
+                        {"id": part.id, "name": part.name}
+                        for part in cam.cameratask_set.first().parts.all()
+                    ],
                 }
             )
     serializer = UpdateCamBodySerializer(data=res_data)

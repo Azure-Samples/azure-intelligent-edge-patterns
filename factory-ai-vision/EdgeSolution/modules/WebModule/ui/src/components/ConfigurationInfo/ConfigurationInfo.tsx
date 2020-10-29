@@ -17,6 +17,12 @@ type ConfigurationInfoProps = {
   originProbThreshold: string;
   updateProbThreshold: (string) => void;
   saveProbThreshold: () => void;
+  SVTCisOpen: boolean;
+  SVTCcameraNames: string[];
+  SVTCpartNames: string[];
+  SVTCthreshold: number;
+  protocol: string;
+  isLVA: boolean;
 };
 
 const getCloudMessageTxt = (sendMessageToCloud: boolean, framesPerMin: number): string => {
@@ -32,6 +38,14 @@ const getRetrainingTxt = (
 ): string => {
   if (!needRetraining) return 'No';
   return `Yes - ${maxImages} images in the ${accuracyRangeMin}-${accuracyRangeMax}% accuracy range`;
+};
+
+const getSendVideoTxt = (isOpen, cameras, parts, threshold) => {
+  if (isOpen)
+    return `Yes - when ${cameras.join(', ')} detect ${parts.join(
+      ', ',
+    )} above the ${threshold}% confirmation threshold`;
+  return 'No';
 };
 
 export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
@@ -57,10 +71,6 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
                 ))}
               </td>
             </tr>
-          </tbody>
-        </table>
-        <table>
-          <tbody>
             <tr>
               <td>Confirmation threshold</td>
               <td>
@@ -81,6 +91,10 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
                 </Stack>
               </td>
             </tr>
+          </tbody>
+        </table>
+        <table>
+          <tbody>
             <tr>
               <td>Cloud message</td>
               <td>{getCloudMessageTxt(props.sendMessageToCloud, props.framesPerMin)}</td>
@@ -96,6 +110,25 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
                 )}
               </td>
             </tr>
+            {props.isLVA && (
+              <>
+                <tr>
+                  <td>Send video to cloud</td>
+                  <td>
+                    {getSendVideoTxt(
+                      props.SVTCisOpen,
+                      props.SVTCcameraNames,
+                      props.SVTCpartNames,
+                      props.SVTCthreshold,
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Protocol</td>
+                  <td>{props.protocol}</td>
+                </tr>
+              </>
+            )}
           </tbody>
         </table>
       </Stack>

@@ -76,9 +76,11 @@ export type ProjectData = {
   // use text input brings a better UX, so we set it to string here
   probThreshold: string;
   name: string;
-  sendVideoToCloud: boolean;
-  // TODO
-  cameraToBeRecord: number[];
+  // Send video to cloud
+  SVTCisOpen: boolean;
+  SVTCcameras: number[];
+  SVTCparts: number[];
+  SVTCconfirmationThreshold: number;
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
   setFpsManually: boolean;

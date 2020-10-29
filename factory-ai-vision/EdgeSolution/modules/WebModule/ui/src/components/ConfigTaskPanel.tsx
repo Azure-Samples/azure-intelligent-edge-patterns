@@ -104,6 +104,10 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     projectData.trainingProject,
   ]);
   const partOptions = useSelector(partOptionsSelector);
+  const selectedPartOptions = useMemo(() => partOptions.filter((e) => projectData.parts.includes(e.key)), [
+    partOptions,
+    projectData.parts,
+  ]);
 
   const trainingProjectOptionsSelector = trainingProjectOptionsSelectorFactory(
     isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
@@ -128,14 +132,16 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       if (relatedScenario !== undefined) cloneProject.inferenceMode = relatedScenario.inferenceMode;
       else cloneProject.inferenceMode = InferenceMode.PartDetection;
     } else if (key === 'cameras') {
-      cloneProject.cameraToBeRecord = cloneProject.cameraToBeRecord.filter((e) =>
-        cloneProject.cameras.includes(e),
-      );
+      cloneProject.SVTCcameras = cloneProject.SVTCcameras.filter((e) => cloneProject.cameras.includes(e));
       cloneProject.recomendedFps = Math.floor(
         cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1),
       );
-    } else if (key === 'sendVideoToCloud' && !value) {
-      cloneProject.cameraToBeRecord = [];
+    } else if (key === 'parts') {
+      cloneProject.SVTCparts = cloneProject.SVTCparts.filter((e) => cloneProject.parts.includes(e));
+    } else if (key === 'SVTCisOpen' && !value) {
+      cloneProject.SVTCcameras = [];
+      cloneProject.SVTCconfirmationThreshold = 0;
+      cloneProject.SVTCparts = [];
     }
     setProjectData(cloneProject);
   }
@@ -315,6 +321,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
           <Stack.Item disableShrink>
             <div className={classNames.textWrapper}>
               <Label>Camera FPS</Label>
+              <Text>Set the frames the camera capture per second to get best performance</Text>
             </div>
             <Toggle
               inlineLabel
@@ -343,33 +350,60 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               <Stack.Item disableShrink>
                 <div className={classNames.textWrapper}>
                   <Label>Send video to cloud</Label>
+                  <Text>Define criteria to trigger event to store in cloud</Text>
                 </div>
                 <Toggle
                   inlineLabel
                   label="Enable sending video"
-                  checked={projectData.sendVideoToCloud}
+                  checked={projectData.SVTCisOpen}
                   onChange={(_, checked) => {
-                    onChange('sendVideoToCloud', checked);
+                    onChange('SVTCisOpen', checked);
                   }}
                 />
                 <Dropdown
-                  disabled={!projectData.sendVideoToCloud}
+                  label="Cameras"
+                  disabled={!projectData.SVTCisOpen}
                   options={selectedCameraOptions}
                   multiSelect
-                  selectedKeys={projectData.cameraToBeRecord}
+                  selectedKeys={projectData.SVTCcameras}
                   onChange={(_, option) => {
                     onChange(
-                      'cameraToBeRecord',
+                      'SVTCcameras',
                       option.selected
-                        ? [...projectData.cameraToBeRecord, option.key as number]
-                        : projectData.cameraToBeRecord.filter((key) => key !== option.key),
+                        ? [...projectData.SVTCcameras, option.key as number]
+                        : projectData.SVTCcameras.filter((key) => key !== option.key),
                     );
+                  }}
+                />
+                <Dropdown
+                  label="Objects"
+                  disabled={!projectData.SVTCisOpen}
+                  options={selectedPartOptions}
+                  multiSelect
+                  selectedKeys={projectData.SVTCparts}
+                  onChange={(_, option) => {
+                    onChange(
+                      'SVTCparts',
+                      option.selected
+                        ? [...projectData.SVTCparts, option.key as number]
+                        : projectData.SVTCparts.filter((key) => key !== option.key),
+                    );
+                  }}
+                />
+                <TextField
+                  label="Confirmation threshold"
+                  type="number"
+                  disabled={!projectData.SVTCisOpen}
+                  value={projectData.SVTCconfirmationThreshold.toString()}
+                  onChange={(_, newValue) => {
+                    onChange('SVTCconfirmationThreshold', parseInt(newValue, 10));
                   }}
                 />
               </Stack.Item>
               <Stack.Item disableShrink>
                 <div className={classNames.textWrapper}>
                   <Label>Protocol of inference</Label>
+                  <Text>Select HTTP or gPRC protocol to best fit your inference module</Text>
                 </div>
                 <Toggle
                   inlineLabel

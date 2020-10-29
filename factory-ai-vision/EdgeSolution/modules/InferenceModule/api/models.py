@@ -7,20 +7,9 @@ from typing import List, Literal
 from pydantic import BaseModel
 
 
-class CameraModel(BaseModel):
+class PartModel(BaseModel):
     id: str
-    type: str
-    source: str
-    lines: str
-    zones: str
-    aoi: str = None
-    send_video_to_cloud: bool
-
-
-class CamerasModel(BaseModel):
-    lva_mode: Literal["http", "grpc"]
-    fps: int
-    cameras: List[CameraModel]
+    name: str
 
 
 class StreamModel(BaseModel):
@@ -28,11 +17,8 @@ class StreamModel(BaseModel):
     cam_type: str
     cam_source: str = None
     send_video_to_cloud: bool
-
-
-class PartModel(BaseModel):
-    id: str
-    name: str
+    send_video_to_cloud_parts: List[PartModel]
+    send_video_to_cloud_threshould: int
 
 
 class PartsModel(BaseModel):
@@ -49,3 +35,21 @@ class PartDetectionModeEnum(str, Enum):
 class UploadModelBody(BaseModel):
     model_uri: str = None
     model_dir: str = None
+
+
+class CameraModel(BaseModel):
+    id: str
+    type: str
+    source: str
+    lines: str
+    zones: str
+    aoi: str = None
+    send_video_to_cloud: bool
+    send_video_to_cloud_parts: List[PartModel]
+    send_video_to_cloud_threshould: int = 60
+
+
+class CamerasModel(BaseModel):
+    lva_mode: Literal["http", "grpc"]
+    fps: int
+    cameras: List[CameraModel]

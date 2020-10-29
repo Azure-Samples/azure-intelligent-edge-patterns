@@ -22,7 +22,7 @@ import moment from 'moment';
 
 import { State } from 'RootStateType';
 import { LiveViewContainer } from './LiveViewContainer';
-import { Project, Status, InferenceMode } from '../store/project/projectTypes';
+import { Project, Status, InferenceMode, InferenceSource } from '../store/project/projectTypes';
 import { useInterval } from '../hooks/useInterval';
 import {
   thunkGetTrainingLog,
@@ -34,7 +34,7 @@ import {
 } from '../store/project/projectActions';
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
 import { camerasSelectorFactory, selectCameraById } from '../store/cameraSlice';
-import { partNamesSelectorFactory } from '../store/partSlice';
+import { partNamesSelectorFactory, partOptionsSelectorFactory } from '../store/partSlice';
 import { ConfigTaskPanel } from './ConfigTaskPanel';
 import {
   videoAnnosSelectorFactory,
@@ -90,6 +90,8 @@ export const Deployment: React.FC = () => {
   }, [projectCameraIds]);
 
   const partNamesSelector = useMemo(() => partNamesSelectorFactory(parts), [parts]);
+  const partOptionsSelector = useMemo(() => partOptionsSelectorFactory(trainingProject), [trainingProject]);
+  const partOptions = useSelector(partOptionsSelector);
   const partNames = useSelector(partNamesSelector);
   const dispatch = useDispatch();
   const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
@@ -241,6 +243,16 @@ export const Deployment: React.FC = () => {
                 updateProbThreshold={changeProbThreshold}
                 saveProbThreshold={saveProbThresholde}
                 maxImages={maxImages}
+                SVTCcameraNames={cameraOptions
+                  .filter((e) => projectData.SVTCcameras.includes(e.key as number))
+                  .map((e) => e.text)}
+                SVTCpartNames={partOptions
+                  .filter((e) => projectData.SVTCparts.includes(e.key as number))
+                  .map((e) => e.text)}
+                SVTCisOpen={projectData.SVTCisOpen}
+                SVTCthreshold={projectData.SVTCconfirmationThreshold}
+                protocol={projectData.inferenceProtocol}
+                isLVA={projectData.inferenceSource === InferenceSource.LVA}
               />
             </Stack>
           </Stack>
