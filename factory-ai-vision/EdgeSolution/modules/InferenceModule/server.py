@@ -15,11 +15,11 @@ from typing import List
 import cv2
 import grpc
 import numpy as np
+import onnxruntime
 import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import StreamingResponse
-import onnxruntime
 
 import extension_pb2_grpc
 from api.models import (
@@ -73,8 +73,8 @@ app = FastAPI(
 http_inference_engine = HttpInferenceEngine(stream_manager)
 
 
-@app.get("/streams")
-def streams() -> List[StreamModel]:
+@app.get("/get_streams")
+def get_streams() -> List[StreamModel]:
     """streams."""
     # logger.info(onnx.last_prediction)
     # onnx.last_prediction
@@ -136,7 +136,7 @@ def metrics(cam_id: str):
         "inference_num": inference_num,
         "unidentified_num": unidentified_num,
         "is_gpu": is_gpu,
-        'device': device,
+        "device": device,
         "average_inference_time": average_inference_time,
         "last_prediction_count": last_prediction_count,
         "scenario_metrics": scenario_metrics,
@@ -280,6 +280,10 @@ def update_cams(request_body: CamerasModel):
             zone_info,
         )
         stream.send_video_to_cloud = cam.send_video_to_cloud
+        stream.send_video_to_cloud_parts = [
+            part.name for part in cam.send_video_to_cloud_parts
+        ]
+        stream.send_video_to_cloud_threshould = cam.send_video_to_cloud_threshould
 
     logger.info("Streams %s", stream_manager.streams)
     return "ok"
@@ -456,10 +460,10 @@ async def keep_alive(cam_id: str):
         return "failed"
 
 
-@app.get('/get_device')
+@app.get("/get_device")
 def get_device():
     device = onnx.get_device()
-    return {'device': device}
+    return {"device": device}
 
 
 def init_topology():
