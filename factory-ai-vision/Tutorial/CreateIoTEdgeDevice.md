@@ -141,7 +141,7 @@ Go to https://portal.azure.com/#home. Click on Virtual Machines. If you have not
 
 ![Diagram - Go to Azure Portal to create Virtual Machine](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_1.png)
 
-Click on the device that you would like to deploy, and go to Networking.
+On the list of devices, click on the device that you would like to deploy, and go to Networking.
 
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_2.png)
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_3.png)
