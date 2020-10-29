@@ -158,6 +158,7 @@ And fill out Destination port ranges and port Name. After this, you will see a p
 <br/>
 <br/>
 <br/>
+<br/>
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_6.png)
 <br/>
 <br/>
