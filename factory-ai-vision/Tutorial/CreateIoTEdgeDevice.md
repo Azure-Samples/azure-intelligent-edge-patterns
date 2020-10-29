@@ -17,7 +17,7 @@ This quickstart walks you through creating a Linux virtual machine that's config
 
 If you don't have an active Azure subscription, create a [free account](https://azure.microsoft.com/free) before you begin.
 
-[!INCLUDE [cloud-shell-try-it.md](https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/cloud-shell-try-it.md)]
+[!INCLUDE [cloud-shell-try-it.md](../../includes/cloud-shell-try-it.md)]
 
 You use the Azure CLI to complete many of the steps in this quickstart, and Azure IoT has an extension to enable additional functionality.
 
@@ -27,7 +27,7 @@ Add the Azure IoT extension to the Cloud Shell instance.
    az extension add --name azure-iot
    ```
 
-[!INCLUDE [iot-hub-cli-version-info](../../includes/iot-hub-cli-version-info.md)]
+[!INCLUDE [iot-hub-cli-version-info](https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/iot-hub-cli-version-info.md)]
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ Cloud resources:
 
 Start the quickstart by creating an IoT hub with Azure CLI.
 
-![Diagram - Create an IoT hub in the cloud](./media/quickstart-linux/create-iot-hub.png)
+![Diagram - Create an IoT hub in the cloud](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart-linux/create-iot-hub.png)
 
 The free level of IoT Hub works for this quickstart. If you've used IoT Hub in the past and already have a hub created, you can use that IoT hub.
 
@@ -59,7 +59,7 @@ The following code creates a free **F1** hub in the resource group **IoTEdgeReso
 
 Register an IoT Edge device with your newly created IoT hub.
 
-![Diagram - Register a device with an IoT Hub identity](./media/quickstart-linux/register-device.png)
+![Diagram - Register a device with an IoT Hub identity](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart-linux/register-device.png)
 
 Create a device identity for your IoT Edge device so that it can communicate with your IoT hub. The device identity lives in the cloud, and you use a unique device connection string to associate a physical device to a device identity.
 
@@ -79,13 +79,13 @@ Since IoT Edge devices behave and can be managed differently than typical IoT de
    az iot hub device-identity connection-string show --device-id myEdgeDevice --hub-name {hub_name}
    ```
 
-   ![View connection string from CLI output](./media/quickstart/retrieve-connection-string.png)
+   ![View connection string from CLI output](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart/retrieve-connection-string.png)
 
 ## Configure your IoT Edge device
 
 Create a virtual machine with the Azure IoT Edge runtime on it.
 
-![Diagram - Start the runtime on device](./media/quickstart-linux/start-runtime.png)
+![Diagram - Start the runtime on device](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart-linux/start-runtime.png)
 
 ### Deploy the IoT Edge device
 
