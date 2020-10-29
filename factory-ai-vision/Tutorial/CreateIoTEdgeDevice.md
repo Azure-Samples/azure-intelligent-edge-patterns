@@ -152,11 +152,14 @@ Check if you have opened the 8181 port. If not, please click on 'Add Inbound Por
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_4.png)
 <br/>
 <br/>
+<br/>
 And fill out Destination port ranges and port Name. After this, you will see a pop up telling you that it’s creating security rule ‘Port_8181’. 
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_5.png)
 <br/>
 <br/>
+<br/>
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_6.png)
+<br/>
 <br/>
 <br/>
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_7.png)
