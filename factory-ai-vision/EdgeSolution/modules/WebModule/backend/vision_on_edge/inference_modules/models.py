@@ -18,11 +18,13 @@ class InferenceModule(models.Model):
 
     def recommended_fps(self) -> int:
         try:
-            response = requests.get("http://" + self.url + "/recommended_fps")
+            response = requests.get(
+                "http://" + self.url + "/get_recommended_total_fps", timeout=3
+            )
             result = int(response.json()["fps"])
         except Exception:
             logger.exception(
-                "Get recommended_fps from inference module failed. Fallback to default"
+                "Get recommended_fps from inference module failed. Fallback to default."
             )
             result = 10
         return result

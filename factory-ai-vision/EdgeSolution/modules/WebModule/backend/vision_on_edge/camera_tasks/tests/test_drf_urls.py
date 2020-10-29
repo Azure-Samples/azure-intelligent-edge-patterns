@@ -9,19 +9,19 @@ from .factories import CameraTaskFactory
 pytestmark = pytest.mark.django_db
 
 
-def test_part_detection_detail(part_detection):
-    """test_part_detection_detail."""
+def test_camera_task_detail(camera_task):
+    """test_camera_task_detail."""
     assert (
-        reverse("api:CameraTask-detail", kwargs={"pk": part_detection.id})
-        == f"/api/part_detections/{part_detection.id}"
+        reverse("api:cameratask-detail", kwargs={"pk": camera_task.id})
+        == f"/api/camera_tasks/{camera_task.id}"
     )
     assert (
-        resolve(f"/api/part_detections/{part_detection.id}").view_name
-        == "api:CameraTask-detail"
+        resolve(f"/api/camera_tasks/{camera_task.id}").view_name
+        == "api:cameratask-detail"
     )
 
 
-def test_part_detection_list():
-    """test_part_detection_list."""
-    assert reverse("api:CameraTask-list") == "/api/part_detections"
-    assert resolve("/api/part_detections").view_name == "api:CameraTask-list"
+def test_camera_task_list():
+    """test_camera_task_list."""
+    assert reverse("api:cameratask-list") == "/api/camera_tasks"
+    assert resolve("/api/camera_tasks").view_name == "api:cameratask-list"
