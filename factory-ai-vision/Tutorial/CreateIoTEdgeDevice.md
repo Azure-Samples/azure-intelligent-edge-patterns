@@ -40,6 +40,7 @@ To run the code in this article in Azure Cloud Shell:
 1. Select **Enter** to run the code.
 
 
+
 You use the Azure CLI to complete many of the steps in this quickstart, and Azure IoT has an extension to enable additional functionality.
 
 Add the Azure IoT extension to the Cloud Shell instance.
@@ -55,6 +56,7 @@ Add the Azure IoT extension to the Cloud Shell instance.
 > Use `az extension add --name azure-iot` to add the new version of the extension. 
 >
 > To see what extensions you have installed, use `az extension list`.
+
 
 
 
