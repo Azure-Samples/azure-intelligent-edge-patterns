@@ -58,13 +58,17 @@ IMG_HEIGHT = 540
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 
+NO_DISPLAY = os.environ.get("NO_DISPLAY", "false")
+
 # Main thread
 
 onnx = ONNXRuntimeModelDeploy()
 stream_manager = StreamManager(onnx)
 
 app = FastAPI(
-    title="InferenceModule", description="Factory AI InferenceModule.", version="0.0.1",
+    title="InferenceModule",
+    description="Factory AI InferenceModule.",
+    version="0.0.1",
 )
 
 
@@ -402,6 +406,11 @@ def get_recommended_total_fps():
     return {"fps": int(onnx.get_recommended_total_frame_rate())}
 
 
+@app.get("/recommended_fps")
+def recommended_fps():
+    return {"fps": int(onnx.get_recommended_total_frame_rate())}
+
+
 # @app.route("/get_current_fps")
 # def get_current_fps():
 # """get_current_fps.
@@ -437,6 +446,8 @@ class DisplayManager:
 
 @app.get("/video_feed")
 async def video_feed(cam_id: str):
+    if NO_DISPLAY == "true":
+        return "ok"
     stream = stream_manager.get_stream_by_id(cam_id)
     if stream:
         print("[INFO] Preparing Video Feed for stream %s" % cam_id, flush=True)
@@ -526,13 +537,13 @@ def benchmark():
     SCENARIO1_MODEL = "scenario_models/1"
 
     n_threads = 3
-    n_images = 30
+    n_images = 15
     logger.info("============= BenchMarking (Begin) ==================")
     logger.info("--- Settings ----")
     logger.info("%s threads", n_threads)
     logger.info("%s images", n_images)
 
-    stream_ids = list(str(i) for i in range(n_threads))
+    stream_ids = list(str(i + 10000) for i in range(n_threads))
     stream_manager.update_streams(stream_ids)
     onnx.set_is_scenario(True)
     onnx.update_model(SCENARIO1_MODEL)
@@ -576,6 +587,10 @@ def benchmark():
                 (n_images * n_threads) * 1000)
     logger.info("  Recommended Total FPS: %s", max_total_frame_rate)
     logger.info("============= BenchMarking (End) ==================")
+
+    stream_manager.update_streams([])
+
+    max_total_frame_rate = max(1, max_total_frame_rate)
     onnx.set_max_total_frame_rate(max_total_frame_rate)
 
 

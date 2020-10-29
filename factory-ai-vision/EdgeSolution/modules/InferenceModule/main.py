@@ -53,9 +53,9 @@ SCENARIO2_VIDEO = "../RtspSimModule/videos/scenario2-employ-safety.mkv"
 SCENARIO3_VIDEO = "../RtspSimModule/videos/scenario3-defect-detection.mkv"
 
 DEFAULT_MODEL = "default_model"
-SCENARIO1_MODEL = "scenario_models/1"
-SCENARIO2_MODEL = "scenario_models/2"
-SCENARIO3_MODEL = "scenario_models/3"
+SCENARIO1_MODEL = "scenario_models/onnx/1"
+SCENARIO2_MODEL = "scenario_models/onnx/2"
+SCENARIO3_MODEL = "scenario_models/onnx/3"
 DOWNLOADED_MODEL = "model"
 
 ### CONFIGURATION <BEG> ###

@@ -36,9 +36,10 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def __init__(self, cam_type="video_file", model_dir="./default_model"):
         self.lock = threading.Lock()
-        self.model = self.load_model(
-            model_dir, is_default_model=True, is_scenario_model=False
-        )
+        #self.model = self.load_model(
+        #    model_dir, is_default_model=True, is_scenario_model=False
+        #)
+        self.model = None
         self.model_uri = None
         self.model_downloading = False
         self.lva_mode = LVA_MODE
@@ -62,6 +63,16 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             self.max_total_frame_rate = CPU_MAX_FRAME_RATE
         self.update_frame_rate_by_number_of_streams(1)
 
+    @property
+    def is_vpu(self):
+        return self.get_device() == 'vpu'
+
+    def get_device(self):
+        device = onnxruntime.get_device()
+        if device == 'CPU-OPENVINO_MYRIAD':
+            device = 'vpu'
+        return device.lower()
+
     def set_is_scenario(self, is_scenario):
         self.is_scenario = is_scenario
 
@@ -73,9 +84,6 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
             return "PD"
         else:
             return self.detection_mode
-
-    def get_device(self):
-        return onnxruntime.get_device()
 
     def set_max_total_frame_rate(self, fps):
         self.max_total_frame_rate = fps
@@ -178,6 +186,13 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
     def update_model(self, model_dir):
         is_default_model = "default_model" in model_dir
         is_scenario_model = "scenario_models" in model_dir
+
+        if is_scenario_model:
+            if self.is_vpu:
+                model_dir += '/onnxfloat16'
+            else:
+                model_dir += '/onnx'
+
         model = self.load_model(model_dir, is_default_model, is_scenario_model)
 
         # Protected by Mutex
