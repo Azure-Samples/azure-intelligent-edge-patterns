@@ -15,11 +15,11 @@ from typing import List
 import cv2
 import grpc
 import numpy as np
+import onnxruntime
 import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import StreamingResponse
-import onnxruntime
 
 import extension_pb2_grpc
 from api.models import (
@@ -66,7 +66,9 @@ onnx = ONNXRuntimeModelDeploy()
 stream_manager = StreamManager(onnx)
 
 app = FastAPI(
-    title="InferenceModule", description="Factory AI InferenceModule.", version="0.0.1",
+    title="InferenceModule",
+    description="Factory AI InferenceModule.",
+    version="0.0.1",
 )
 
 
@@ -138,7 +140,7 @@ def metrics(cam_id: str):
         "inference_num": inference_num,
         "unidentified_num": unidentified_num,
         "is_gpu": is_gpu,
-        'device': device,
+        "device": device,
         "average_inference_time": average_inference_time,
         "last_prediction_count": last_prediction_count,
         "scenario_metrics": scenario_metrics,
@@ -399,6 +401,7 @@ def get_recommended_total_fps():
     """
     return {"fps": int(onnx.get_recommended_total_frame_rate())}
 
+
 @app.get("/recommended_fps")
 def recommended_fps():
     return {"fps": int(onnx.get_recommended_total_frame_rate())}
@@ -439,7 +442,8 @@ class DisplayManager:
 
 @app.get("/video_feed")
 async def video_feed(cam_id: str):
-    if NO_DISPLAY == "true" : return 'ok'
+    if NO_DISPLAY == "true":
+        return "ok"
     stream = stream_manager.get_stream_by_id(cam_id)
     if stream:
         print("[INFO] Preparing Video Feed for stream %s" % cam_id, flush=True)
@@ -463,10 +467,10 @@ async def keep_alive(cam_id: str):
         return "failed"
 
 
-@app.get('/get_device')
+@app.get("/get_device")
 def get_device():
     device = onnx.get_device()
-    return {'device': device}
+    return {"device": device}
 
 
 def init_topology():
@@ -530,7 +534,7 @@ def benchmark():
     logger.info("%s threads", n_threads)
     logger.info("%s images", n_images)
 
-    stream_ids = list(str(i+10000) for i in range(n_threads))
+    stream_ids = list(str(i + 10000) for i in range(n_threads))
     stream_manager.update_streams(stream_ids)
     onnx.set_is_scenario(True)
     onnx.update_model(SCENARIO1_MODEL)
@@ -559,6 +563,7 @@ def benchmark():
         threads[i].join()
     t1 = time.time()
     # print(t1-t0)
+    stream_manager.update_streams([])
 
     discount = 0.75
     max_total_frame_rate = discount * (n_images * n_threads) / (t1 - t0)
