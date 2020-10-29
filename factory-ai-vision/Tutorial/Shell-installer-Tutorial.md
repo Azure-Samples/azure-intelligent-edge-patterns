@@ -67,4 +67,4 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 - Tutorial 2 - [Start with prebuilt scenario](https://youtu.be/dihAdZTGj-g)
 - Tutorial 3 - [Start with creating new project, capture images, tagging images and deploy](https://youtu.be/cCEW6nsd8xQ)
 - Tutorial 4 - [Retraining and improve your model](https://youtu.be/OxK9feR_T3U)
-- Tutorial 5: [Advance capabilities setting](https://youtu.be/Bv7wxfFEdtI)
+- Tutorial 5 - [Advance capabilities setting](https://youtu.be/Bv7wxfFEdtI)
