@@ -137,7 +137,7 @@ During the runtime configuration, you provide a device connection string. This i
 
 ## please follow instruction to open network port 8181
 
-Go to https://portal.azure.com/#home. Click on Virtual Machines and then Add to create your virtual Machine. 
+Go to https://portal.azure.com/#home. Click on Virtual Machines. If you have not created one, hit Add to create your virtual Machine. 
 
 ![Diagram - Go to Azure Portal to create Virtual Machine](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_1.png)
 
