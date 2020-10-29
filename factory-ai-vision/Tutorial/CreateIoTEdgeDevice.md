@@ -17,7 +17,28 @@ This quickstart walks you through creating a Linux virtual machine that's config
 
 If you don't have an active Azure subscription, create a [free account](https://azure.microsoft.com/free) before you begin.
 
-[!INCLUDE [cloud-shell-try-it.md](../../includes/cloud-shell-try-it.md)]
+## Use Azure Cloud Shell
+
+Azure hosts Azure Cloud Shell, an interactive shell environment that you can use through your browser. You can use either Bash or PowerShell with Cloud Shell to work with Azure services. You can use the Cloud Shell preinstalled commands to run the code in this article without having to install anything on your local environment.
+
+To start Azure Cloud Shell:
+
+| Option | Example/Link |
+|-----------------------------------------------|---|
+| Select **Try It** in the upper-right corner of a code block. Selecting **Try It** doesn't automatically copy the code to Cloud Shell. | ![Example of Try It for Azure Cloud Shell](https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/media/cloud-shell-try-it/hdi-azure-cli-try-it.png) |
+| Go to [https://shell.azure.com](https://shell.azure.com), or select the **Launch Cloud Shell** button to open Cloud Shell in your browser. | [![Launch Cloud Shell in a new window](https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/media/cloud-shell-try-it/hdi-launch-cloud-shell.png)](https://shell.azure.com) |
+| Select the **Cloud Shell** button on the menu bar at the upper right in the [Azure portal](https://portal.azure.com). | ![Cloud Shell button in the Azure portal](https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/media/cloud-shell-try-it/hdi-cloud-shell-menu.png) |
+
+To run the code in this article in Azure Cloud Shell:
+
+1. Start Cloud Shell.
+
+1. Select the **Copy** button on a code block to copy the code.
+
+1. Paste the code into the Cloud Shell session by selecting **Ctrl**+**Shift**+**V** on Windows and Linux or by selecting **Cmd**+**Shift**+**V** on macOS.
+
+1. Select **Enter** to run the code.
+
 
 You use the Azure CLI to complete many of the steps in this quickstart, and Azure IoT has an extension to enable additional functionality.
 
@@ -26,8 +47,16 @@ Add the Azure IoT extension to the Cloud Shell instance.
    ```azurecli-interactive
    az extension add --name azure-iot
    ```
+> [!NOTE]
+> This article uses the newest version of the Azure IoT extension, called `azure-iot`. The legacy version is called `azure-cli-iot-ext`.You should only have one version installed at a time. You can use the command `az extension list` to validate the currently installed extensions.
+>
+> Use `az extension remove --name azure-cli-iot-ext` to remove the legacy version of the extension.
+>
+> Use `az extension add --name azure-iot` to add the new version of the extension. 
+>
+> To see what extensions you have installed, use `az extension list`.
 
-[!INCLUDE [iot-hub-cli-version-info](../../includes/iot-hub-cli-version-info.md)]
+
 
 ## Prerequisites
 
@@ -43,7 +72,7 @@ Cloud resources:
 
 Start the quickstart by creating an IoT hub with Azure CLI.
 
-![Diagram - Create an IoT hub in the cloud](./media/quickstart-linux/create-iot-hub.png)
+![Diagram - Create an IoT hub in the cloud](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart-linux/create-iot-hub.png)
 
 The free level of IoT Hub works for this quickstart. If you've used IoT Hub in the past and already have a hub created, you can use that IoT hub.
 
@@ -59,7 +88,7 @@ The following code creates a free **F1** hub in the resource group **IoTEdgeReso
 
 Register an IoT Edge device with your newly created IoT hub.
 
-![Diagram - Register a device with an IoT Hub identity](./media/quickstart-linux/register-device.png)
+![Diagram - Register a device with an IoT Hub identity](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart-linux/register-device.png)
 
 Create a device identity for your IoT Edge device so that it can communicate with your IoT hub. The device identity lives in the cloud, and you use a unique device connection string to associate a physical device to a device identity.
 
@@ -79,13 +108,13 @@ Since IoT Edge devices behave and can be managed differently than typical IoT de
    az iot hub device-identity connection-string show --device-id myEdgeDevice --hub-name {hub_name}
    ```
 
-   ![View connection string from CLI output](./media/quickstart/retrieve-connection-string.png)
+   ![View connection string from CLI output](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart/retrieve-connection-string.png)
 
 ## Configure your IoT Edge device
 
 Create a virtual machine with the Azure IoT Edge runtime on it.
 
-![Diagram - Start the runtime on device](./media/quickstart-linux/start-runtime.png)
+![Diagram - Start the runtime on device](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart-linux/start-runtime.png)
 
 ### Deploy the IoT Edge device
 
@@ -106,6 +135,31 @@ The IoT Edge runtime is deployed on all IoT Edge devices. It has three component
 
 During the runtime configuration, you provide a device connection string. This is the string that you retrieved from the Azure CLI. This string associates your physical device with the IoT Edge device identity in Azure.
 
-## please udpate instruction to open network port 8181
+## please follow instruction to open network port 8181
 
-Nexst step :: shell.azure.com 
+Go to https://portal.azure.com/#home. Click on Virtual Machines. If you have not created one, hit Add to create your virtual Machine. 
+
+![Diagram - Go to Azure Portal to create Virtual Machine](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_1.png)
+
+On the list of devices, click on the device that you would like to deploy.
+
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_2.png)
+Go  to  Networking.
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_3.png)
+
+Check if you have opened the 8181 port. If not, please click on 'Add Inbound Port Rule'. 
+
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_4.png)
+<br/>
+<br/>
+<br/>
+And fill out Destination port ranges and port Name. After this, you will see a pop up telling you that it’s creating security rule ‘Port_8181’. 
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_5.png)
+<br/>
+<br/>
+<br/>
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_6.png)
+<br/>
+<br/>
+<br/>
+![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_7.png)
