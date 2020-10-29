@@ -11,7 +11,7 @@ In this quickstart you learn how to:
 * Install and start the IoT Edge runtime on your virtual device.
 
 
-![Diagram - Quickstart architecture for device and cloud](./media/quickstart-linux/install-edge-full.png)
+![Diagram - Quickstart architecture for device and cloud](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-edge/media/quickstart/install-edge-full.png)
 
 This quickstart walks you through creating a Linux virtual machine that's configured to be an IoT Edge device. Then, you deploy a module from the Azure portal to your device. The module used in this quickstart is a simulated sensor that generates temperature, humidity, and pressure data. The other Azure IoT Edge tutorials build upon the work you do here by deploying additional modules that analyze the simulated data for business insights.
 
