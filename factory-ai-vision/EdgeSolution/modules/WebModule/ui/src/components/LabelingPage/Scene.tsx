@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef, Dispatch } from 'react';
 import { Stage, Layer, Image, Group, Text as KonvaText, Text, Label, Tag } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
@@ -47,6 +47,11 @@ const Scene: FC<SceneProps> = ({
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<number>(1);
+
+  /**
+   * Change the type of cursor. If passing nothing, than it will set to default
+   * @param cursorType The css cursor
+   */
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
       if (!cursorType) {
@@ -61,11 +66,13 @@ const Scene: FC<SceneProps> = ({
     },
     [noMoreCreate],
   );
+
   const removeBox = useCallback((): void => {
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
     setSelectedAnnotationIndex(null);
   }, [dispatch, annotations, selectedAnnotationIndex, setWorkState]);
+
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
@@ -99,15 +106,15 @@ const Scene: FC<SceneProps> = ({
   useEffect(() => {
     // * Single bounding box labeling type condition
     if (noMoreCreate) {
-      changeCursorState();
       setSelectedAnnotationIndex(0);
-    } else {
-      changeCursorState();
     }
+    changeCursorState();
   }, [noMoreCreate, changeCursorState]);
+
   useEffect(() => {
     if (workState === WorkState.None && !noMoreCreate) setSelectedAnnotationIndex(null);
   }, [workState, noMoreCreate]);
+
   useEffect(() => {
     const [outcomeSize, outcomeScale] = resizeImageFunction(defaultSize, CanvasFit.Contain, size);
     setImageSize(outcomeSize);
