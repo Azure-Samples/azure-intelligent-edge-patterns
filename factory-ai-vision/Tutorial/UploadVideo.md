@@ -28,7 +28,7 @@ After the [shell installation tutorial](https://github.com/linkernetworks/azure-
 ```bash
 sudo docker ps
 ```
-![Diagram - Check RTSP simulator container](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_1.png)
+![Diagram - Check RTSP simulator container](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/upload_video1.png)
 Since the RTSP simulator would only host the video in the specific location in its container. So you would have to put your video file into the container of the RTSP simulator.
 On your IoT Edge device, you can copy the video file you just upload into the RTSP simulator container through ***docker cp*** command:
 ```bash
