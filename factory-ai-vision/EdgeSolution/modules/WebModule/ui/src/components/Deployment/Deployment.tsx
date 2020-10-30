@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Stack,
   PrimaryButton,
-  ProgressIndicator,
   Text,
   getTheme,
   Separator,
@@ -21,46 +20,43 @@ import { useBoolean } from '@uifabric/react-hooks';
 import moment from 'moment';
 
 import { State } from 'RootStateType';
-import { LiveViewContainer } from './LiveViewContainer';
-import { Project, Status, InferenceMode, InferenceSource } from '../store/project/projectTypes';
-import { useInterval } from '../hooks/useInterval';
+import { LiveViewContainer } from '../LiveViewContainer';
+import { Project, Status, InferenceMode, InferenceSource } from '../../store/project/projectTypes';
 import {
-  thunkGetTrainingLog,
   thunkGetTrainingMetrics,
   thunkGetProject,
   updateProjectData,
   updateProbThreshold,
   getConfigure,
-} from '../store/project/projectActions';
-import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
-import { camerasSelectorFactory, selectCameraById } from '../store/cameraSlice';
-import { partNamesSelectorFactory, partOptionsSelectorFactory } from '../store/partSlice';
-import { ConfigTaskPanel } from './ConfigTaskPanel/ConfigTaskPanel';
+} from '../../store/project/projectActions';
+import { ConfigurationInfo } from '../ConfigurationInfo/ConfigurationInfo';
+import { camerasSelectorFactory, selectCameraById } from '../../store/cameraSlice';
+import { partNamesSelectorFactory, partOptionsSelectorFactory } from '../../store/partSlice';
+import { ConfigTaskPanel } from '../ConfigTaskPanel/ConfigTaskPanel';
 import {
   videoAnnosSelectorFactory,
   originVideoAnnosSelectorFactory,
   onCreateVideoAnnoBtnClick,
-} from '../store/videoAnnoSlice';
+} from '../../store/videoAnnoSlice';
 import {
   toggleShowAOI,
   updateCameraArea,
   toggleShowCountingLines,
   toggleShowDangerZones,
-} from '../store/actions';
-import { Shape, Purpose } from '../store/shared/BaseShape';
-import { EmptyAddIcon } from './EmptyAddIcon';
-import { getTrainingProject } from '../store/trainingProjectSlice';
-import { Insights } from './DeploymentInsights';
-import { Instruction } from './Instruction';
-import { getImages, selectAllImages } from '../store/imageSlice';
-import { initialProjectData } from '../store/project/projectReducer';
+} from '../../store/actions';
+import { Shape, Purpose } from '../../store/shared/BaseShape';
+import { EmptyAddIcon } from '../EmptyAddIcon';
+import { getTrainingProject } from '../../store/trainingProjectSlice';
+import { Insights } from '../DeploymentInsights';
+import { Instruction } from '../Instruction';
+import { getImages, selectAllImages } from '../../store/imageSlice';
+import { initialProjectData } from '../../store/project/projectReducer';
+import { Progress } from './Progress';
 
 const { palette } = getTheme();
 
 export const Deployment: React.FC = () => {
-  const { status, progress, trainingLog, data: projectData, originData } = useSelector<State, Project>(
-    (state) => state.project,
-  );
+  const { status, data: projectData, originData } = useSelector<State, Project>((state) => state.project);
   const {
     id: projectId,
     cameras: projectCameraIds,
@@ -115,13 +111,6 @@ export const Deployment: React.FC = () => {
     // Re fetch the images to get the latest data
     dispatch(getImages());
   }, [dispatch]);
-
-  useInterval(
-    () => {
-      dispatch(thunkGetTrainingLog(projectId, isDemo, selectedCamera));
-    },
-    status === Status.WaitTraining ? 5000 : null,
-  );
 
   useEffect(() => {
     if (status === Status.FinishTraining) {
@@ -179,24 +168,8 @@ export const Deployment: React.FC = () => {
           primary={{ text: 'Config task', onClick: openCreatePanel }}
         />
       );
-    if (status === Status.WaitTraining)
-      return (
-        <Stack horizontalAlign="center" verticalAlign="center" grow tokens={{ childrenGap: 24 }}>
-          <Stack horizontalAlign="center" tokens={{ childrenGap: 5 }}>
-            {progress !== null && (
-              <>
-                <Text variant="xxLarge">{`${progress}%`}</Text>
-                <Text>{trainingLog}</Text>
-              </>
-            )}
-          </Stack>
-          <ProgressIndicator
-            barHeight={4}
-            styles={{ root: { width: '600px' } }}
-            percentComplete={progress !== null ? progress / 100 : null}
-          />
-        </Stack>
-      );
+
+    if (status === Status.WaitTraining) return <Progress projectId={projectId} cameraId={selectedCamera} />;
 
     return (
       <>

@@ -3,10 +3,8 @@ import { State } from 'RootStateType';
 
 export type Project = {
   isLoading: boolean;
-  trainingLog: string;
   data: ProjectData;
   originData: ProjectData;
-  progress: number;
   trainingMetrics: TrainingMetrics;
   status: Status;
   error: Error;
@@ -24,18 +22,6 @@ export enum Status {
   TrainingFailed = 'trainingFailed',
   StartInference = 'startInference',
 }
-
-export const TrainingStatus = {
-  'finding project': 10,
-  'uploading project': 20,
-  'uploading parts': 30,
-  'uploading images': 40,
-  'preparing training task': 50,
-  'preparing custom vision environment': 60,
-  training: 70,
-  exporting: 80,
-  deploying: 90,
-};
 
 export type Consequence = {
   precision: number;
@@ -116,27 +102,6 @@ export type GetProjectFailedAction = ProjectAction & {
   error: Error;
 };
 
-export const GET_TRAINING_LOG_REQUEST = 'GET_TRAINING_LOG_REQUEST';
-export type GetTrainingLogRequesAction = ProjectAction & {
-  type: typeof GET_TRAINING_LOG_REQUEST;
-};
-
-export const GET_TRAINING_LOG_SUCCESS = 'GET_TRAINING_LOG_SUCCESS';
-export type GetTrainingLogSuccessAction = ProjectAction & {
-  type: typeof GET_TRAINING_LOG_SUCCESS;
-  payload: {
-    trainingLog: string;
-    newStatus: Status;
-    progress: number;
-  };
-};
-
-export const GET_TRAINING_LOG_FAILED = 'GET_TRAINING_LOG_FAILED';
-export type GetTrainingLogFailedAction = ProjectAction & {
-  type: typeof GET_TRAINING_LOG_FAILED;
-  error: Error;
-};
-
 export const GET_TRAINING_METRICS_REQUEST = 'GET_TRAINING_METRICS_REQUEST';
 export type GetTrainingMetricsRequestAction = ProjectAction & {
   type: typeof GET_TRAINING_METRICS_REQUEST;
@@ -190,6 +155,16 @@ export type StopInferenceAction = ProjectAction & {
   type: typeof STOP_INFERENCE;
 };
 
+export const TRAIN_SUCCESS = 'TRAIN_SUCCESS';
+export type TrainSuccessAction = {
+  type: typeof TRAIN_SUCCESS;
+};
+
+export const TRAIN_FAILED = 'TRAIN_FAILED';
+export type TrainFailedAction = {
+  type: typeof TRAIN_FAILED;
+};
+
 export type ChangeStatusAction = ProjectAction & {
   type: 'CHANGE_STATUS';
   status: Status;
@@ -199,9 +174,6 @@ export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
   | GetProjectFailedAction
-  | GetTrainingLogRequesAction
-  | GetTrainingLogSuccessAction
-  | GetTrainingLogFailedAction
   | PostProjectRequestAction
   | PostProjectSuccessAction
   | PostProjectFaliedAction
@@ -211,6 +183,8 @@ export type ProjectActionTypes =
   | GetTrainingMetricsFailedAction
   | StartInferenceAction
   | StopInferenceAction
+  | TrainSuccessAction
+  | TrainFailedAction
   | ChangeStatusAction;
 
 // Describing the different THUNK ACTION NAMES available
