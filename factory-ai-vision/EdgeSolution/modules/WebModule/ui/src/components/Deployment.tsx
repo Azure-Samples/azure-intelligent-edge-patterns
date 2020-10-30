@@ -35,7 +35,7 @@ import {
 import { ConfigurationInfo } from './ConfigurationInfo/ConfigurationInfo';
 import { camerasSelectorFactory, selectCameraById } from '../store/cameraSlice';
 import { partNamesSelectorFactory, partOptionsSelectorFactory } from '../store/partSlice';
-import { ConfigTaskPanel } from './ConfigTaskPanel';
+import { ConfigTaskPanel } from './ConfigTaskPanel/ConfigTaskPanel';
 import {
   videoAnnosSelectorFactory,
   originVideoAnnosSelectorFactory,

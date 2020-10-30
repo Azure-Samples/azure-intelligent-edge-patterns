@@ -4,8 +4,11 @@ import { ActionButton, getTheme, Separator, Stack, Text } from '@fluentui/react'
 const { palette } = getTheme();
 
 type ExpandPanelProps = {
+  // The title text to be shown when the panel is hidden
   titleHidden: string;
+  // The title text to be shown when the panel is expanded
   titleVisible?: string;
+  // The position of the chevron icon
   iconPosition?: 'start' | 'end';
   bottomBorder?: boolean;
   suffix?: string;

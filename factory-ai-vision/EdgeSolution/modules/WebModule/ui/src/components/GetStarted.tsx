@@ -4,7 +4,7 @@ import { Card } from '@uifabric/react-cards';
 
 import { State } from 'RootStateType';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConfigTaskPanel } from './ConfigTaskPanel';
+import { ConfigTaskPanel } from './ConfigTaskPanel/ConfigTaskPanel';
 import { initialProjectData } from '../store/project/projectReducer';
 import { getScenario } from '../store/scenarioSlice';
 
