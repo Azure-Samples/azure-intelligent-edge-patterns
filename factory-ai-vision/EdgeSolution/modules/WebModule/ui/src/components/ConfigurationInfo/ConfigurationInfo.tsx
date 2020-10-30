@@ -50,7 +50,7 @@ const getSendVideoTxt = (isOpen, cameras, parts, threshold) => {
 
 export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
   return (
-    <>
+    <Stack tokens={{ childrenGap: 17, padding: 25 }}>
       <h4 style={{ margin: 5 }}>Configuration</h4>
       <Stack horizontal>
         <table>
@@ -132,6 +132,6 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
           </tbody>
         </table>
       </Stack>
-    </>
+    </Stack>
   );
 };

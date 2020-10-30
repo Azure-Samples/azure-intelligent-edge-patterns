@@ -31,7 +31,7 @@ import { partNamesSelectorFactory, partOptionsSelectorFactory } from '../../stor
 import { ConfigTaskPanel } from '../ConfigTaskPanel/ConfigTaskPanel';
 import { EmptyAddIcon } from '../EmptyAddIcon';
 import { getTrainingProject } from '../../store/trainingProjectSlice';
-import { Insights } from '../DeploymentInsights';
+import { Insights } from './DeploymentInsights';
 import { Instruction } from '../Instruction';
 import { getImages, selectAllImages } from '../../store/imageSlice';
 import { initialProjectData } from '../../store/project/projectReducer';
@@ -157,7 +157,7 @@ export const Deployment: React.FC = () => {
     if (status === Status.WaitTraining) return <Progress projectId={projectId} cameraId={selectedCamera} />;
 
     return (
-      <>
+      <Stack styles={{ root: { height: '100%' } }}>
         <CommandBar items={commandBarItems} style={{ display: 'block' }} />
         <UpdateModelInstruction newImagesCount={newImagesCount} updateModel={updateModel} />
         <Stack horizontal grow>
@@ -216,24 +216,22 @@ export const Deployment: React.FC = () => {
           </Stack>
           {/* Vertical seperator has z-index in 1 as default, which will be on top of the panel */}
           <Separator vertical styles={{ root: { zIndex: 0 } }} />
-          <Stack styles={{ root: { width: '435px' } }}>
-            <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}` } }}>
-              <PivotItem headerText="Insights">
-                <Insights status={status} projectId={projectData.id} cameraId={selectedCamera} />
-              </PivotItem>
-              <PivotItem headerText="Areas of interest">
-                <VideoAnnosControls cameraId={selectedCamera} />
-              </PivotItem>
-            </Pivot>
-          </Stack>
+          <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}`, width: '435px' } }}>
+            <PivotItem headerText="Insights">
+              <Insights status={status} projectId={projectData.id} cameraId={selectedCamera} />
+            </PivotItem>
+            <PivotItem headerText="Areas of interest">
+              <VideoAnnosControls cameraId={selectedCamera} />
+            </PivotItem>
+          </Pivot>
         </Stack>
-      </>
+      </Stack>
     );
   };
 
   return (
     <>
-      <Stack styles={{ root: { height: '100%' } }}>{onRenderMain()}</Stack>
+      {onRenderMain()}
       <ConfigTaskPanel isOpen={isEditPanelOpen} onDismiss={closeEditPanel} projectData={projectData} isEdit />
       <ConfigTaskPanel
         isOpen={isCreatePanelOpen}
