@@ -9,7 +9,7 @@ Upload your own video to your Azure IoT Edge device for further analysis in this
 
 ## Prerequisites
 
-Before you start, you should complete the previous  [Deploy your first IoT Edge module to a virtual Linux device](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md)  and  [Vision on Edge Shell Installer)](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md)  tutorial.
+Before you start, you should complete the previous  [Deploy your first IoT Edge module to a virtual Linux device](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md)  and  [Vision on Edge Shell Installer](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md)  tutorial.
 
 You also need an Azure subscription. If you don't have an Azure subscription, you can create one for free on the  [Azure sign-up page](https://aka.ms/createazuresubscription).
 <br/><br/>
