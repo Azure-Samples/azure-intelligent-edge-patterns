@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Stack,
-  PrimaryButton,
   Text,
   getTheme,
   Separator,
@@ -11,17 +10,14 @@ import {
   PivotItem,
   IDropdownOption,
   Dropdown,
-  Toggle,
-  ActionButton,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
-import * as R from 'ramda';
 import { useBoolean } from '@uifabric/react-hooks';
 import moment from 'moment';
 
 import { State } from 'RootStateType';
 import { LiveViewContainer } from '../LiveViewContainer';
-import { Project, Status, InferenceMode, InferenceSource } from '../../store/project/projectTypes';
+import { Project, Status, InferenceSource } from '../../store/project/projectTypes';
 import {
   thunkGetTrainingMetrics,
   thunkGetProject,
@@ -30,21 +26,9 @@ import {
   getConfigure,
 } from '../../store/project/projectActions';
 import { ConfigurationInfo } from '../ConfigurationInfo/ConfigurationInfo';
-import { camerasSelectorFactory, selectCameraById } from '../../store/cameraSlice';
+import { camerasSelectorFactory } from '../../store/cameraSlice';
 import { partNamesSelectorFactory, partOptionsSelectorFactory } from '../../store/partSlice';
 import { ConfigTaskPanel } from '../ConfigTaskPanel/ConfigTaskPanel';
-import {
-  videoAnnosSelectorFactory,
-  originVideoAnnosSelectorFactory,
-  onCreateVideoAnnoBtnClick,
-} from '../../store/videoAnnoSlice';
-import {
-  toggleShowAOI,
-  updateCameraArea,
-  toggleShowCountingLines,
-  toggleShowDangerZones,
-} from '../../store/actions';
-import { Shape, Purpose } from '../../store/shared/BaseShape';
 import { EmptyAddIcon } from '../EmptyAddIcon';
 import { getTrainingProject } from '../../store/trainingProjectSlice';
 import { Insights } from '../DeploymentInsights';
@@ -52,6 +36,7 @@ import { Instruction } from '../Instruction';
 import { getImages, selectAllImages } from '../../store/imageSlice';
 import { initialProjectData } from '../../store/project/projectReducer';
 import { Progress } from './Progress';
+import { VideoAnnosControls } from './VideoControls';
 
 const { palette } = getTheme();
 
@@ -279,124 +264,4 @@ const UpdateModelInstruction = ({ newImagesCount, updateModel }) => {
     );
 
   return null;
-};
-
-type VideoAnnosControlsProps = {
-  cameraId: number;
-};
-
-const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => {
-  const [loading, setLoading] = useState(false);
-  const showAOI = useSelector<State, boolean>((state) => selectCameraById(state, cameraId)?.useAOI);
-  const showCountingLine = useSelector<State, boolean>(
-    (state) => selectCameraById(state, cameraId)?.useCountingLine,
-  );
-  const showDangerZone = useSelector<State, boolean>(
-    (state) => selectCameraById(state, cameraId)?.useDangerZone,
-  );
-  const videoAnnosSelector = useMemo(() => videoAnnosSelectorFactory(cameraId), [cameraId]);
-  const videoAnnos = useSelector(videoAnnosSelector);
-  const originVideoAnnosSelector = useMemo(() => originVideoAnnosSelectorFactory(cameraId), [cameraId]);
-  const originVideoAnnos = useSelector(originVideoAnnosSelector);
-  const [showUpdateSuccessTxt, setShowUpdateSuccessTxt] = useState(false);
-  const videoAnnoShape = useSelector((state: State) => state.videoAnnos.shape);
-  const videoAnnoPurpose = useSelector((state: State) => state.videoAnnos.purpose);
-  const inferenceMode = useSelector((state: State) => state.project.data.inferenceMode);
-  const dispatch = useDispatch();
-
-  const onAOIToggleClick = async (): Promise<void> => {
-    setLoading(true);
-    await dispatch(toggleShowAOI({ cameraId, checked: !showAOI }));
-    setShowUpdateSuccessTxt(true);
-    setLoading(false);
-  };
-
-  const onCountingLineToggleClick = async () => {
-    setLoading(true);
-    await dispatch(toggleShowCountingLines({ cameraId, checked: !showCountingLine }));
-    setShowUpdateSuccessTxt(true);
-    setLoading(false);
-  };
-
-  const onDangerZoneToggleClick = async (): Promise<void> => {
-    setLoading(true);
-    await dispatch(toggleShowDangerZones({ cameraId, checked: !showDangerZone }));
-    setShowUpdateSuccessTxt(true);
-    setLoading(false);
-  };
-
-  const onUpdate = async (): Promise<void> => {
-    setLoading(true);
-    await dispatch(updateCameraArea(cameraId));
-    setShowUpdateSuccessTxt(true);
-    setLoading(false);
-  };
-
-  const hasEdit = !R.equals(originVideoAnnos, videoAnnos);
-  const updateBtnDisabled = !hasEdit;
-
-  return (
-    <Stack tokens={{ childrenGap: 10, padding: 20 }}>
-      <Text>Use areas of interest to section parts of the image into separate inference zones</Text>
-      <Toggle label="Enable area of interest" checked={showAOI} onClick={onAOIToggleClick} inlineLabel />
-      <ActionButton
-        iconProps={{ iconName: 'Add' }}
-        text="Create Box"
-        checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.AOI}
-        disabled={!showAOI}
-        onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.AOI }));
-        }}
-      />
-      <ActionButton
-        iconProps={{ iconName: 'Add' }}
-        text={videoAnnoShape === Shape.Polygon ? 'Press D to Finish' : 'Create Polygon'}
-        checked={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI}
-        disabled={!showAOI}
-        onClick={(): void => {
-          dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.AOI }));
-        }}
-      />
-      {[InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(inferenceMode) && (
-        <>
-          <Toggle
-            label="Enable counting lines"
-            checked={showCountingLine}
-            onClick={onCountingLineToggleClick}
-            inlineLabel
-          />
-          <ActionButton
-            iconProps={{ iconName: 'Add' }}
-            text="Create counting line"
-            checked={videoAnnoShape === Shape.Line && videoAnnoPurpose === Purpose.Counting}
-            disabled={!showCountingLine}
-            onClick={(): void => {
-              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Line, purpose: Purpose.Counting }));
-            }}
-          />
-        </>
-      )}
-      {inferenceMode === InferenceMode.EmployeeSafety && (
-        <>
-          <Toggle
-            label="Enable danger zones"
-            checked={showDangerZone}
-            onClick={onDangerZoneToggleClick}
-            inlineLabel
-          />
-          <ActionButton
-            iconProps={{ iconName: 'Add' }}
-            text="Create danger zone"
-            checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
-            disabled={!showDangerZone}
-            onClick={(): void => {
-              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.DangerZone }));
-            }}
-          />
-        </>
-      )}
-      <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
-      <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
-    </Stack>
-  );
 };
