@@ -18,7 +18,7 @@ class StreamModel(BaseModel):
     cam_source: str = None
     send_video_to_cloud: bool
     send_video_to_cloud_parts: List[PartModel]
-    send_video_to_cloud_threshould: int
+    send_video_to_cloud_threshold: int
 
 
 class PartsModel(BaseModel):
@@ -46,7 +46,7 @@ class CameraModel(BaseModel):
     aoi: str = None
     send_video_to_cloud: bool
     send_video_to_cloud_parts: List[PartModel]
-    send_video_to_cloud_threshould: int = 60
+    send_video_to_cloud_threshold: int = 60
 
 
 class CamerasModel(BaseModel):
