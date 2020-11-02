@@ -6,6 +6,7 @@ import { InferenceSource, ProjectData } from '../../store/project/projectTypes';
 import { ExpandPanel } from '../ExpandPanel';
 import { CameraFPSOptions } from './CameraFPSOptions';
 import { CloudMsgOption } from './CloudMsgOption';
+import { DisableVideoOption } from './DisableVideoFeedOption';
 import { ProtocolOptions } from './ProtocolOptions';
 import { RetrainImgOption } from './RetrainImgOption';
 import { SendVideoOptions } from './SendVideoOptions';
@@ -64,6 +65,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
           </>
         )}
         <ProtocolOptions inferenceProtocol={projectData.inferenceProtocol} onChange={onChange} />
+        <DisableVideoOption disableVideoFeed={projectData.disableVideoFeed} onChange={onChange} />
       </Stack>
     </ExpandPanel>
   );

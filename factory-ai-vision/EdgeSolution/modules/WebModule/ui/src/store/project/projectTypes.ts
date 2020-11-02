@@ -75,6 +75,7 @@ export type ProjectData = {
   recomendedFps: number;
   inferenceProtocol: InferenceProtocol;
   inferenceSource: InferenceSource;
+  disableVideoFeed: boolean;
 };
 
 // Describing the different ACTION NAMES available

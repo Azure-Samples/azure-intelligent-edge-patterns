@@ -95,6 +95,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     totalRecomendedFps: data?.totalRecomendedFps ?? 10,
     inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
     inferenceSource: data?.inference_source ?? InferenceSource.LVA,
+    disableVideoFeed: data?.disable_video_feed ?? false,
   },
   isDemo,
 });
@@ -200,6 +201,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         totalRecomendedFps,
         inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocol.GRPC,
         inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
+        disableVideoFeed: partDetection[0]?.disable_video_feed ?? false,
       };
       dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
       return partDetection[0]?.has_configured;
@@ -241,6 +243,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       inference_mode: projectData.inferenceMode,
       fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
+      disable_video_feed: projectData.disableVideoFeed,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

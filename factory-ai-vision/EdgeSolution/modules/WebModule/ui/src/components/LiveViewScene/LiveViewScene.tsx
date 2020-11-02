@@ -39,6 +39,7 @@ type StateProps = {
   countingLineVisible: boolean;
   dangerZoneVisible: boolean;
   creatingState: CreatingState;
+  disableVideoFeed: boolean;
 };
 
 type OwnProps = {
@@ -66,8 +67,9 @@ const Component: React.FC<LiveViewProps> = ({
   countingLineVisible,
   creatingState,
   dangerZoneVisible,
+  disableVideoFeed,
 }) => {
-  const imageInfo = useImage(`/video_feed?cam_id=${cameraId}`, '', true, true);
+  const imageInfo = useImage(disableVideoFeed ? '' : `/video_feed?cam_id=${cameraId}`, '', true, true);
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
   const imgRef = useRef(null);
@@ -75,9 +77,12 @@ const Component: React.FC<LiveViewProps> = ({
 
   const [imgEle, status, { width: imgWidth, height: imgHeight }] = imageInfo;
 
-  useInterval(() => {
-    Axios.get(`/video_feed/keep_alive?cam_id=${cameraId}`).catch(console.error);
-  }, 3000);
+  useInterval(
+    () => {
+      Axios.get(`/video_feed/keep_alive?cam_id=${cameraId}`).catch(console.error);
+    },
+    disableVideoFeed ? null : 3000,
+  );
 
   /* The component need to support image with Content-type "multipart/x-mixed-replace",
      which will keep updating the image data.
@@ -158,6 +163,11 @@ const Component: React.FC<LiveViewProps> = ({
       style={{ width: '100%', height: '100%', backgroundColor: 'black', minHeight: '500px' }}
       tabIndex={0}
     >
+      {disableVideoFeed && (
+        <p style={{ color: 'white' }}>
+          You have disabled the live video in advaced setting. Enable it to show the video.
+        </p>
+      )}
       <Stage ref={stageRef} style={{ cursor: creatingState !== CreatingState.Disabled ? 'crosshair' : '' }}>
         <Layer ref={layerRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}>
           <KonvaImage image={imgEle} ref={imgRef} />
@@ -219,6 +229,7 @@ const mapState = (state: State, { cameraId }: OwnProps): StateProps => ({
     selectCameraById(state, cameraId)?.useDangerZone &&
     state.project.data.inferenceMode === InferenceMode.EmployeeSafety,
   creatingState: state.videoAnnos.creatingState,
+  disableVideoFeed: state.project.data.disableVideoFeed,
 });
 
 const mapDispatch = (dispatch, { cameraId }: OwnProps): DispatchProps => ({
