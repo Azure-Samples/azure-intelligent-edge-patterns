@@ -48,7 +48,7 @@ export const initialProjectData: ProjectData = {
   SVTCcameras: [],
   SVTCisOpen: false,
   SVTCparts: [],
-  SVTCconfirmationThreshold: 10,
+  SVTCconfirmationThreshold: 60,
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
   setFpsManually: false,
