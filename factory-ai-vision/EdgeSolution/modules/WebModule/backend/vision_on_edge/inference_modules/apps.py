@@ -6,8 +6,6 @@ import sys
 
 from django.apps import AppConfig
 
-from configs.inference_module import DF_INFERENECE_IS_GPU
-
 from ..azure_iot.utils import inference_module_url
 
 logger = logging.getLogger(__name__)
@@ -30,7 +28,6 @@ class InferenceModulesConfig(AppConfig):
                 url=inference_module_url(),
                 defaults={
                     "name": "default_inference_module",
-                    "is_gpu": DF_INFERENECE_IS_GPU,
                 },
             )
 

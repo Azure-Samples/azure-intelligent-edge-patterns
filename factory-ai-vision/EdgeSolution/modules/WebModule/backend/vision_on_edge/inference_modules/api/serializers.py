@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class InferenceModuleSerializer(serializers.ModelSerializer):
     """InferenceModuleSerializer"""
 
+    device = serializers.CharField(required=False, read_only=True)
     recommended_fps = serializers.IntegerField(required=False, read_only=True)
 
     class Meta:
