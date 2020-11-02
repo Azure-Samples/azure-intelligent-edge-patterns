@@ -4,6 +4,7 @@ import os
 import pathlib
 import ssl
 import sys
+import time
 import threading
 import urllib.request
 from builtins import input
@@ -20,6 +21,7 @@ DEVICE_ID = os.environ.get("IOTEDGE_DEVICEID", "local")
 MODULE_ID = "lvaEdge"
 
 default_payload = {"@apiVersion": "1.0"}
+logger = logging.getLogger(__name__)
 
 # Known issue from LVA
 # https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/troubleshoot-how-to#multiple-direct-methods-in-parallel--timeout-failure
@@ -29,7 +31,15 @@ mutex = threading.Lock()
 class GraphManager:
     def __init__(self):
         if is_edge():
-            self.registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
+            try:
+                self.registry_manager = IoTHubRegistryManager(
+                    IOTHUB_CONNECTION_STRING)
+            except:
+                logger.warning(
+                    'IoTHub authentication failed. The server will terminate in 10 seconds.')
+                time.sleep(10)
+                sys.exit(-1)
+
         else:
             self.registry_manager = None
         self.device_id = DEVICE_ID
@@ -52,7 +62,8 @@ class GraphManager:
             return res.as_dict()
         except:
             mutex.release()
-            print("[ERROR] Failed to invoke direct method:", sys.exc_info(), flush=True)
+            print("[ERROR] Failed to invoke direct method:",
+                  sys.exc_info(), flush=True)
             return {"error": "failed to invoke direct method"}
 
     def invoke_graph_topology_get(self, name):
@@ -168,7 +179,8 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate):
-        inferencingUrl = "http://InferenceModule:5000/predict?camera_id=" + str(name)
+        inferencingUrl = "http://InferenceModule:5000/predict?camera_id=" + \
+            str(name)
         properties = {
             "topologyName": "InferencingWithHttpExtension",
             "description": "Sample graph description",

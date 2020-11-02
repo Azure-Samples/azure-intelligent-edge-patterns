@@ -486,6 +486,11 @@ def init_topology():
 
     instances = gm.invoke_graph_instance_list()
     logger.info("instances %s", instances)
+    if 'error' in instances.keys():
+        logger.waening(
+            '[HttpOperationError] Probably caused by invalid IoTHub connection string. The server will terminate in 10 seconds.')
+        time.sleep(10)
+        sys.exit(-1)
     if instances["status"] != 200:
         logger.warning("Failed to invoke direct method: %s",
                        instances["payload"])
