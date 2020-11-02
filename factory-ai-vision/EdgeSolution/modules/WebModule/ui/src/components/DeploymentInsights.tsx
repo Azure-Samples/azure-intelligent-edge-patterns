@@ -72,6 +72,9 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
             Math.round(inferenceMetrics.averageTime * 100) / 100
           }/ms`}
         </Text>
+        {inferenceMetrics.device === 'vpu' && (
+          <img src="/icons/openvino_logo.png" style={{ width: '100px' }} />
+        )}
       </Stack>
       <Stack
         styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
