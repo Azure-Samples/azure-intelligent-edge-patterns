@@ -14,7 +14,6 @@ class InferenceModule(models.Model):
 
     name = models.CharField(max_length=200)
     url = models.CharField(max_length=1000, unique=True)
-    is_gpu = models.BooleanField(default=False)
 
     def recommended_fps(self) -> int:
         try:
@@ -28,6 +27,14 @@ class InferenceModule(models.Model):
             )
             result = 10
         return result
+
+    def device(self) -> bool:
+        try:
+            response = requests.get("http://" + self.url + "/get_device")
+            result = response.json()["device"]
+            return result
+        except:
+            return "cpu"
 
     def is_vpu(self) -> bool:
         try:

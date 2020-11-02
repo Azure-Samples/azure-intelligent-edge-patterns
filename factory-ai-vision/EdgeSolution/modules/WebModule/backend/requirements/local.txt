@@ -20,7 +20,6 @@ pre-commit==2.7.1
 factory-boy==2.12.0
 django-coverage-plugin==1.8.0
 pytest-django==3.9.0
-django-extensions
 
 # IPython
 # ---------------------------------------------------------
