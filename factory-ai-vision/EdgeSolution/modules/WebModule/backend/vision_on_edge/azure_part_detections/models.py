@@ -61,6 +61,7 @@ class PartDetection(models.Model):
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=60)
     fps = models.IntegerField(default=10)
+    disable_video_feed=models.BooleanField(default=False)
 
     def update_prob_threshold(self, prob_threshold):
         """update confidenece threshold of BoundingBox"""

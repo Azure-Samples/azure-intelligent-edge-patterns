@@ -44,6 +44,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "prob_threshold",
             "project",
             "send_video_to_cloud",
+            "disable_video_feed",
         ]
         extra_kwargs = {
             "prob_threshold": {"required": False},
