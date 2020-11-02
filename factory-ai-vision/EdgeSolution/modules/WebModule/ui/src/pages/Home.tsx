@@ -31,7 +31,6 @@ export const Home: React.FC = () => {
       await dispatch(getImages());
       await dispatch(thunkGetProject());
       setLoading(false);
-      setLoading(false);
     })();
   }, [dispatch]);
 
