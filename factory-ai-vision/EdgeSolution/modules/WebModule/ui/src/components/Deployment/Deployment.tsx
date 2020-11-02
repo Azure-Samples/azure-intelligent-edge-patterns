@@ -16,8 +16,7 @@ import { useBoolean } from '@uifabric/react-hooks';
 import moment from 'moment';
 
 import { State } from 'RootStateType';
-import { LiveViewContainer } from '../LiveViewContainer';
-import { Project, Status, InferenceSource } from '../../store/project/projectTypes';
+import { InferenceSource, Project, Status } from '../../store/project/projectTypes';
 import {
   thunkGetTrainingMetrics,
   thunkGetProject,
@@ -37,6 +36,7 @@ import { getImages, selectAllImages } from '../../store/imageSlice';
 import { initialProjectData } from '../../store/project/projectReducer';
 import { Progress } from './Progress';
 import { VideoAnnosControls } from './VideoControls';
+import { LiveViewScene } from '../LiveViewScene';
 
 const { palette } = getTheme();
 
@@ -164,7 +164,7 @@ export const Deployment: React.FC = () => {
           <Stack grow>
             <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
               <Stack grow>
-                <LiveViewContainer showVideo={true} cameraId={selectedCamera} />
+                <LiveViewScene cameraId={selectedCamera} />
               </Stack>
               <Stack horizontal horizontalAlign="space-between">
                 <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
