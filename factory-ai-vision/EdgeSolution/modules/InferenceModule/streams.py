@@ -56,7 +56,7 @@ class Stream:
         self.cam_id = cam_id
         self.model = model
         self.send_video_to_cloud = send_video_to_cloud
-        self.send_video_to_cloud_threshold = 0
+        self.send_video_to_cloud_threshold = 60
         self.send_video_to_cloud_parts = []
 
         self.render = False
@@ -168,7 +168,8 @@ class Stream:
                 cnt += 1
                 if cnt % 30 == 1:
                     logging.info(
-                        "send through channel {}".format(bytes(self.cam_id, "utf-8"))
+                        "send through channel {}".format(
+                            bytes(self.cam_id, "utf-8"))
                     )
                 # self.mutex.acquire()
                 # FIXME may find a better way to deal with encoding
@@ -235,9 +236,11 @@ class Stream:
                     "fps": self.frameRate,
                     "endpoint": "http://InferenceModule:5000",
                 }
-                res = requests.post("http://CVCaptureModule:9000/streams", json=data)
+                res = requests.post(
+                    "http://CVCaptureModule:9000/streams", json=data)
             else:
-                self._update_instance(normalize_rtsp(cam_source), str(frameRate))
+                self._update_instance(
+                    normalize_rtsp(cam_source), str(frameRate))
 
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
@@ -443,7 +446,8 @@ class Stream:
         # self.mutex.release()
 
         # check whether it's the tag we want
-        predictions = list(p for p in predictions if p["tagName"] in self.model.parts)
+        predictions = list(
+            p for p in predictions if p["tagName"] in self.model.parts)
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -464,7 +468,8 @@ class Stream:
             self.process_send_message_to_iothub(predictions)
 
         # check whether it's larger than threshold
-        predictions = list(p for p in predictions if p["probability"] >= self.threshold)
+        predictions = list(
+            p for p in predictions if p["probability"] >= self.threshold)
 
         # update last_prediction_count
         _last_prediction_count = {}
@@ -501,7 +506,8 @@ class Stream:
         if self.scenario:
             # print('drawing...', flush=True)
             # print(self.scenario, flush=True)
-            self.last_drawn_img = self.scenario.draw_counter(self.last_drawn_img)
+            self.last_drawn_img = self.scenario.draw_counter(
+                self.last_drawn_img)
             # FIXME close this
             # self.scenario.draw_constraint(self.last_drawn_img)
             if self.get_mode() == "DD":
@@ -530,7 +536,8 @@ class Stream:
                     tag = prediction["tagName"]
                     height, width = img.shape[0], img.shape[1]
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    labels = json.dumps([{"x1": x1, "x2": x2, "y1": y1, "y2": y2}])
+                    labels = json.dumps(
+                        [{"x1": x1, "x2": x2, "y1": y1, "y2": y2}])
                     jpg = cv2.imencode(".jpg", img)[1].tobytes()
 
                     send_retrain_image_to_webmodule(
@@ -558,6 +565,15 @@ class Stream:
                     and p["probability"] >= self.send_video_to_cloud_threshold
                 ):
                     to_send = True
+            logger.warning('********** precess send signal to lva **********')
+            logger.warning('********** precess send signal to lva **********')
+            logger.warning('parts to send: {}'.format(
+                self.send_video_to_cloud_parts))
+            logger.warning('sending threshold: {}'.format(
+                self.send_video_to_cloud_threshold))
+            logger.warning('to_send: {}'.format(to_send))
+            logger.warning('********** precess send signal to lva **********')
+            logger.warning('********** precess send signal to lva **********')
             if to_send:
                 send_message_to_lva(self.cam_id)
                 self.lva_last_send_time = time.time()
@@ -577,7 +593,8 @@ class Stream:
             for prediction in predictions:
                 if prediction["probability"] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    cv2.rectangle(img, (x1, max(y1, 15)), (x2, y2), (255, 255, 255), 1)
+                    cv2.rectangle(img, (x1, max(y1, 15)),
+                                  (x2, y2), (255, 255, 255), 1)
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
@@ -646,9 +663,11 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
 
         if aoi_area["type"] == "BBox":
             if (
-                (label["x1"] <= x1 <= label["x2"]) or (label["x1"] <= x2 <= label["x2"])
+                (label["x1"] <= x1 <= label["x2"]) or (
+                    label["x1"] <= x2 <= label["x2"])
             ) and (
-                (label["y1"] <= y1 <= label["y2"]) or (label["y1"] <= y2 <= label["y2"])
+                (label["y1"] <= y1 <= label["y2"]) or (
+                    label["y1"] <= y2 <= label["y2"])
             ):
                 return True
 
