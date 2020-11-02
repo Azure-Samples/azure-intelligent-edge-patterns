@@ -8,7 +8,10 @@ type ProtocolOptionsProps = Pick<ProjectData, 'inferenceProtocol'> & { onChange:
 
 export const ProtocolOptions: React.FC<ProtocolOptionsProps> = ({ inferenceProtocol, onChange }) => {
   return (
-    <OptionLayout title="Protocol of inference">
+    <OptionLayout
+      title="Protocol of inference"
+      subTitle="Select HTTP or gRPC protocol to best fit your inference model"
+    >
       <Toggle
         inlineLabel
         label={inferenceProtocol}

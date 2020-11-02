@@ -15,7 +15,10 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
   onChange,
 }) => {
   return (
-    <OptionLayout title="Camera FPS">
+    <OptionLayout
+      title="Camera FPS"
+      subTitle="Set the frames the camera capture per second to get best performance"
+    >
       <Toggle
         inlineLabel
         label="Enable setting FPS manually"
