@@ -25,6 +25,11 @@ run:
 	@$(PYTHON) manage.py migrate
 	@$(PYTHON) manage.py runserver
 
+.PHONY: run-shell
+run-shell:
+	@$(PYTHON) manage.py migrate
+	@$(PYTHON) manage.py shell
+
 .PHONY: test
 test: ## unit test
 	@echo "Testing..."
