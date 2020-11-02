@@ -3,8 +3,11 @@ import { deleteImage, changeImage } from './actions';
 
 export enum OpenFrom {
   None = 'None',
+  // After pressing `Capture image` button in camera detail
   AfterCapture = 'AfterCapture',
+  // Clicking the display images
   DisplayImage = 'DisplayImage',
+  // After pressing `go tagging` in the capture dialog
   CaptureDialog = 'CaptureDialog',
 }
 

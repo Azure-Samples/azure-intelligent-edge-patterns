@@ -50,7 +50,7 @@ export const LeftNav: React.FC = () => {
       {
         links: navLinks.map((link) => ({
           ...link,
-          // Set url to empty string to avoid defautl redirect behaviour
+          // Set url to empty string to avoid default behaviour of redirecting
           url: '',
           // For selection
           key: link.url.replace('/', ''),

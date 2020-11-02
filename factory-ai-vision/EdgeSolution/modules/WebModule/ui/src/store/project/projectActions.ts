@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import Axios from 'axios';
 import * as R from 'ramda';
 import { State } from 'RootStateType';
@@ -18,12 +19,6 @@ import {
   GET_PROJECT_REQUEST,
   UpdateProjectDataAction,
   UPDATE_PROJECT_DATA,
-  GetTrainingLogRequesAction,
-  GET_TRAINING_LOG_REQUEST,
-  GetTrainingLogSuccessAction,
-  GET_TRAINING_LOG_SUCCESS,
-  GetTrainingLogFailedAction,
-  GET_TRAINING_LOG_FAILED,
   Status,
   GetTrainingMetricsRequestAction,
   GET_TRAINING_METRICS_REQUEST,
@@ -37,9 +32,12 @@ import {
   STOP_INFERENCE,
   StopInferenceAction,
   ChangeStatusAction,
-  TrainingStatus,
   InferenceProtocol,
   InferenceSource,
+  TrainSuccessAction,
+  TRAIN_SUCCESS,
+  TrainFailedAction,
+  TRAIN_FAILED,
 } from './projectTypes';
 import { selectAllImages } from '../imageSlice';
 import { createWrappedAsync } from '../shared/createWrappedAsync';
@@ -59,30 +57,6 @@ export const getProjectSuccess = (
 });
 const getProjectFailed = (error: Error, isDemo: boolean): GetProjectFailedAction => ({
   type: GET_PROJECT_FAILED,
-  error,
-  isDemo,
-});
-
-const getTrainingLogRequest = (isDemo: boolean): GetTrainingLogRequesAction => ({
-  type: GET_TRAINING_LOG_REQUEST,
-  isDemo,
-});
-const getTrainingLogSuccess = (
-  trainingLog: string,
-  newStatus: Status,
-  isDemo: boolean,
-  progress: number,
-): GetTrainingLogSuccessAction => ({
-  type: GET_TRAINING_LOG_SUCCESS,
-  payload: {
-    trainingLog,
-    newStatus,
-    progress,
-  },
-  isDemo,
-});
-const getTrainingStatusFailed = (error: Error, isDemo: boolean): GetTrainingLogFailedAction => ({
-  type: GET_TRAINING_LOG_FAILED,
   error,
   isDemo,
 });
@@ -109,8 +83,11 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     probThreshold: data?.prob_threshold.toString() ?? '10',
     name: data?.name ?? '',
     inferenceMode: data?.inference_mode ?? '',
-    sendVideoToCloud: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
-    cameraToBeRecord: data?.send_video_to_cloud.filter((e) => e.send_video_to_cloud).map((e) => e.camera_id),
+    SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+    SVTCcameras: data?.send_video_to_cloud.map((e) => e.camera),
+    // All the camera will detect same parts
+    SVTCparts: data?.send_video_to_cloud[0]?.parts || [],
+    SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
     deployTimeStamp: data?.deploy_timestamp ?? '',
     setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
@@ -118,6 +95,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     totalRecomendedFps: data?.totalRecomendedFps ?? 10,
     inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
     inferenceSource: data?.inference_source ?? InferenceSource.LVA,
+    disableVideoFeed: data?.disable_video_feed ?? false,
   },
   isDemo,
 });
@@ -154,6 +132,14 @@ export const startInference = (isDemo: boolean): StartInferenceAction => ({
 export const stopInference = (isDemo: boolean): StopInferenceAction => ({
   type: STOP_INFERENCE,
   isDemo,
+});
+
+export const trainSuccess = (): TrainSuccessAction => ({
+  type: TRAIN_SUCCESS,
+});
+
+export const trainFailed = (): TrainFailedAction => ({
+  type: TRAIN_FAILED,
 });
 
 export const updateProjectData = (
@@ -202,10 +188,12 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         trainingProject: partDetection[0]?.project ?? null,
         name: partDetection[0]?.name ?? '',
         inferenceMode: partDetection[0]?.inference_mode ?? '',
-        sendVideoToCloud: partDetection[0]?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
-        cameraToBeRecord: partDetection[0]?.send_video_to_cloud
-          .filter((e) => e.send_video_to_cloud)
-          .map((e) => e.camera_id),
+        SVTCisOpen: partDetection[0]?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+        SVTCcameras: partDetection[0]?.send_video_to_cloud.map((e) => e.camera),
+        // All the camera will detect same parts
+        SVTCparts: partDetection[0]?.send_video_to_cloud[0]?.parts || [],
+        SVTCconfirmationThreshold:
+          partDetection[0]?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
         deployTimeStamp: partDetection[0]?.deploy_timestamp ?? '',
         setFpsManually: partDetection[0]?.fps !== recomendedFps,
         recomendedFps,
@@ -213,6 +201,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         totalRecomendedFps,
         inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocol.GRPC,
         inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
+        disableVideoFeed: partDetection[0]?.disable_video_feed ?? false,
       };
       dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
       return partDetection[0]?.has_configured;
@@ -246,12 +235,15 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       metrics_frame_per_minutes: projectData.framesPerMin,
       name: projectData.name,
       send_video_to_cloud: projectData.cameras.map((e) => ({
-        camera_id: e,
-        send_video_to_cloud: projectData.cameraToBeRecord.includes(e),
+        camera: e,
+        parts: projectData.SVTCparts,
+        send_video_to_cloud: projectData.SVTCcameras.includes(e),
+        send_video_to_cloud_threshold: projectData.SVTCconfirmationThreshold,
       })),
       inference_mode: projectData.inferenceMode,
       fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
+      disable_video_feed: projectData.disableVideoFeed,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
@@ -275,23 +267,6 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
 export const getConfigure = createWrappedAsync<any, number>('project/configure', async (projectId) => {
   await Axios.get(`/api/part_detections/${projectId}/configure`);
 });
-
-export const thunkGetTrainingLog = (projectId: number, isDemo: boolean, cameraId: number) => (
-  dispatch,
-): Promise<any> => {
-  dispatch(getTrainingLogRequest(isDemo));
-
-  return Axios.get(`/api/part_detections/${projectId}/export?camera_id=${cameraId}`)
-    .then(({ data }) => {
-      if (data.status === 'failed') throw new Error(data.log);
-      else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo, 0));
-      else
-        dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo, TrainingStatus[data.status]));
-      return void 0;
-    })
-    .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
-};
 
 export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boolean) => (
   dispacth,

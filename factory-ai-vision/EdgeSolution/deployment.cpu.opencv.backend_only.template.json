@@ -101,9 +101,6 @@
               "DBPASS": {
                 "value": "vision_on_edge"
               },
-              "DF_INFERENECE_IS_GPU": {
-                "value": false
-              },
               "DF_PD_VIDEO_SOURCE": {
                 "value": "opencv"
               }

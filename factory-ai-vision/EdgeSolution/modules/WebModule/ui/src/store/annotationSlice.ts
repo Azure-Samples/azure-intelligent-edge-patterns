@@ -29,7 +29,6 @@ export const BoxObj = {
     return BoxObj.add(p, BoxObj.init(imageId, id));
   },
   add({ x, y }, obj) {
-    // make the original object immutable, for future history usage
     const newObj = { ...obj };
 
     if (obj.annotationState === AnnotationState.Empty) {
@@ -47,15 +46,13 @@ export const BoxObj = {
     return BoxObj.setVerticesToValidValue(newObj);
   },
   setVerticesToInt(obj: Annotation): Annotation {
-    const newObj = { ...obj };
-    const { x1, y1, x2, y2 } = newObj.label;
-    newObj.label = {
-      x1: Math.round(x1),
-      y1: Math.round(y1),
-      x2: Math.round(x2),
-      y2: Math.round(y2),
+    const roundLabel = {
+      x1: Math.round,
+      y1: Math.round,
+      x2: Math.round,
+      y2: Math.round,
     };
-    return newObj;
+    return R.evolve({ label: roundLabel }, obj);
   },
   setVerticesPointsOrder(obj: Annotation): Annotation {
     const newObj = { ...obj };
@@ -72,7 +69,7 @@ export const BoxObj = {
     return newObj;
   },
   setVerticesToValidValue(object: Annotation): Annotation {
-    return BoxObj.setVerticesPointsOrder(BoxObj.setVerticesToInt(object));
+    return R.compose(BoxObj.setVerticesPointsOrder, BoxObj.setVerticesToInt)(object);
   },
 };
 
@@ -105,6 +102,7 @@ const slice = createSlice({
 
       if (creatingAnnotation.annotationState === AnnotationState.Finish) {
         if (
+          // | 0 is same as Math.floor
           (creatingAnnotation.label.x1 | 0) === (creatingAnnotation.label.x2 | 0) &&
           (creatingAnnotation.label.y1 | 0) === (creatingAnnotation.label.y2 | 0)
         ) {

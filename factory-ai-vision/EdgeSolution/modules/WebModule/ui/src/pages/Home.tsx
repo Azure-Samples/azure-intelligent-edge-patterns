@@ -9,7 +9,7 @@ import { getCameras, selectNonDemoCameras } from '../store/cameraSlice';
 import { selectAllImages, getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
-import { Deployment } from '../components/Deployment';
+import { Deployment } from '../components/Deployment/Deployment';
 import { GetStarted } from '../components/GetStarted';
 
 export const Home: React.FC = () => {
@@ -30,7 +30,6 @@ export const Home: React.FC = () => {
       await dispatch(getCameras(false));
       await dispatch(getImages());
       await dispatch(thunkGetProject());
-      setLoading(false);
       setLoading(false);
     })();
   }, [dispatch]);

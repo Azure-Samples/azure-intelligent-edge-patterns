@@ -15,11 +15,11 @@ from typing import List
 import cv2
 import grpc
 import numpy as np
+import onnxruntime
 import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import StreamingResponse
-import onnxruntime
 
 import extension_pb2_grpc
 from api.models import (
@@ -66,7 +66,9 @@ onnx = ONNXRuntimeModelDeploy()
 stream_manager = StreamManager(onnx)
 
 app = FastAPI(
-    title="InferenceModule", description="Factory AI InferenceModule.", version="0.0.1",
+    title="InferenceModule",
+    description="Factory AI InferenceModule.",
+    version="0.0.1",
 )
 
 
@@ -75,8 +77,8 @@ app = FastAPI(
 http_inference_engine = HttpInferenceEngine(stream_manager)
 
 
-@app.get("/streams")
-def streams() -> List[StreamModel]:
+@app.get("/get_streams")
+def get_streams() -> List[StreamModel]:
     """streams."""
     # logger.info(onnx.last_prediction)
     # onnx.last_prediction
@@ -138,7 +140,7 @@ def metrics(cam_id: str):
         "inference_num": inference_num,
         "unidentified_num": unidentified_num,
         "is_gpu": is_gpu,
-        'device': device,
+        "device": device,
         "average_inference_time": average_inference_time,
         "last_prediction_count": last_prediction_count,
         "scenario_metrics": scenario_metrics,
@@ -282,6 +284,11 @@ def update_cams(request_body: CamerasModel):
             zone_info,
         )
         stream.send_video_to_cloud = cam.send_video_to_cloud
+        stream.send_video_to_cloud_parts = [
+            part.name for part in cam.send_video_to_cloud_parts
+        ]
+        stream.send_video_to_cloud_threshold = int(
+            cam.send_video_to_cloud_threshold) * 0.01
 
     logger.info("Streams %s", stream_manager.streams)
     return "ok"
@@ -399,6 +406,7 @@ def get_recommended_total_fps():
     """
     return {"fps": int(onnx.get_recommended_total_frame_rate())}
 
+
 @app.get("/recommended_fps")
 def recommended_fps():
     return {"fps": int(onnx.get_recommended_total_frame_rate())}
@@ -439,7 +447,8 @@ class DisplayManager:
 
 @app.get("/video_feed")
 async def video_feed(cam_id: str):
-    if NO_DISPLAY == "true" : return 'ok'
+    if NO_DISPLAY == "true":
+        return "ok"
     stream = stream_manager.get_stream_by_id(cam_id)
     if stream:
         print("[INFO] Preparing Video Feed for stream %s" % cam_id, flush=True)
@@ -463,10 +472,10 @@ async def keep_alive(cam_id: str):
         return "failed"
 
 
-@app.get('/get_device')
+@app.get("/get_device")
 def get_device():
     device = onnx.get_device()
-    return {'device': device}
+    return {"device": device}
 
 
 def init_topology():
@@ -477,8 +486,14 @@ def init_topology():
 
     instances = gm.invoke_graph_instance_list()
     logger.info("instances %s", instances)
+    if 'error' in instances.keys():
+        logger.warning(
+            '[HttpOperationError] Probably caused by invalid IoTHub connection string. The server will terminate in 10 seconds.')
+        time.sleep(10)
+        sys.exit(-1)
     if instances["status"] != 200:
-        logger.warning("Failed to invoke direct method: %s", instances["payload"])
+        logger.warning("Failed to invoke direct method: %s",
+                       instances["payload"])
         return -1
     logger.info(
         "========== Deleting %s instance(s) ==========",
@@ -486,12 +501,15 @@ def init_topology():
     )
 
     for i in range(len(instances["payload"]["value"])):
-        gm.invoke_graph_instance_deactivate(instances["payload"]["value"][i]["name"])
-        gm.invoke_graph_instance_delete(instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_deactivate(
+            instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_delete(
+            instances["payload"]["value"][i]["name"])
 
     topologies = gm.invoke_graph_topology_list()
     if instances["status"] != 200:
-        logger.warning("Failed to invoker direct method: %s", instances["payload"])
+        logger.warning("Failed to invoker direct method: %s",
+                       instances["payload"])
         return -1
     logger.info(
         "========== Deleting %s topology ==========",
@@ -499,7 +517,8 @@ def init_topology():
     )
 
     for i in range(len(topologies["payload"]["value"])):
-        gm.invoke_graph_topology_delete(topologies["payload"]["value"][i]["name"])
+        gm.invoke_graph_topology_delete(
+            topologies["payload"]["value"][i]["name"])
 
     logger.info("========== Setting default grpc/http topology ==========")
     ret = gm.invoke_topology_set("grpc")
@@ -530,13 +549,14 @@ def benchmark():
     logger.info("%s threads", n_threads)
     logger.info("%s images", n_images)
 
-    stream_ids = list(str(i+10000) for i in range(n_threads))
+    stream_ids = list(str(i + 10000) for i in range(n_threads))
     stream_manager.update_streams(stream_ids)
     onnx.set_is_scenario(True)
     onnx.update_model(SCENARIO1_MODEL)
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
-        s.update_cam("video", SAMPLE_VIDEO, 30, s.cam_id, False, None, "PC", [], [])
+        s.update_cam("video", SAMPLE_VIDEO, 30,
+                     s.cam_id, False, None, "PC", [], [])
 
     def _f():
         logger.info("--- Thread %s started---", threading.current_thread())
@@ -546,8 +566,10 @@ def benchmark():
             s.predict(img)
         t1_t = time.time()
         print("---- Thread", threading.current_thread(), "----", flush=True)
-        print("Processing", n_images, "images in", t1_t - t0_t, "seconds", flush=True)
-        print("  Avg:", (t1_t - t0_t) / n_images * 1000, "ms per image", flush=True)
+        print("Processing", n_images, "images in",
+              t1_t - t0_t, "seconds", flush=True)
+        print("  Avg:", (t1_t - t0_t) / n_images *
+              1000, "ms per image", flush=True)
 
     threads = []
     for i in range(n_threads):
@@ -559,13 +581,16 @@ def benchmark():
         threads[i].join()
     t1 = time.time()
     # print(t1-t0)
+    stream_manager.update_streams([])
 
     discount = 0.75
     max_total_frame_rate = discount * (n_images * n_threads) / (t1 - t0)
 
     logger.info("---- Overall ----")
-    logger.info("Processing %s images in %s seconds", n_images * n_threads, t1 - t0)
-    logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
+    logger.info("Processing %s images in %s seconds",
+                n_images * n_threads, t1 - t0)
+    logger.info("  Avg: %s ms per image", (t1 - t0) /
+                (n_images * n_threads) * 1000)
     logger.info("  Recommended Total FPS: %s", max_total_frame_rate)
     logger.info("============= BenchMarking (End) ==================")
 
@@ -598,7 +623,8 @@ def opencv_zmq():
             else:
                 cnt[buf[0]] += 1
             logger.info(
-                "receiving from channel {}, cnt: {}".format(buf[0], cnt[buf[0]])
+                "receiving from channel {}, cnt: {}".format(
+                    buf[0], cnt[buf[0]])
             )
             stream = stream_manager.get_stream_by_id(buf[0].decode("utf-8"))
             logger.info(buf[0])
@@ -643,7 +669,8 @@ def main():
                         "Failed to init topology, please check whether direct method still works"
                     )
                     sys.exit(-1)
-                logger.warning("Failed to init topology, try again 10 secs later")
+                logger.warning(
+                    "Failed to init topology, try again 10 secs later")
                 time.sleep(10)
                 counter += 1
 

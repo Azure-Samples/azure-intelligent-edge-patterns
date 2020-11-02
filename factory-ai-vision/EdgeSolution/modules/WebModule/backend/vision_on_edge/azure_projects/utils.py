@@ -237,7 +237,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     logger.info("Pulling Custom Vision Project... End")
 
 
-def train_project_worker(project_id, export_flavor: str = ""):
+def train_project_worker(project_id):
     """train_project_worker.
 
     Args:
@@ -425,10 +425,6 @@ def train_project_worker(project_id, export_flavor: str = ""):
     status_init = False
     while True:
         time.sleep(1)
-        if fp16:
-            exports = trainer.get_exports(customvision_id, iteration.id)
-        else:
-            exports = trainer.get_exports(customvision_id, iteration.id)
         if not status_init:
             upcreate_training_status(
                 project_id=project_obj.id,
@@ -436,12 +432,25 @@ def train_project_worker(project_id, export_flavor: str = ""):
                 **progress.PROGRESS_8_EXPORTING,
             )
             status_init = True
-        if len(exports) == 0 or not exports[0].download_uri:
-
-            res = project_obj.export_iterationv3_2(
-                iteration.id, export_flavor=export_flavor
-            )
-            logger.info("Export response from Custom Vision: %s", res.json())
+        try:
+            project_obj.export_iteration(iteration.id)
+        except Exception:
+            logger.exception("Export already in queue")
+        try:
+            project_obj.export_iteration(iteration.id, flavor="ONNXFloat16")
+        except Exception:
+            logger.exception("Export already in queue")
+        try:
+            exports = project_obj.get_exports(iteration.id)
+        except:
+            logger.exception("get_exports exception")
+            continue
+        if (
+            len(exports) < 2
+            or not exports[0].download_uri
+            or not exports[1].download_uri
+        ):
+            logger.info("Status: exporting model")
             continue
         break
 
@@ -452,7 +461,13 @@ def train_project_worker(project_id, export_flavor: str = ""):
     logger.info("Training about to completed.")
 
     exports = trainer.get_exports(customvision_id, iteration.id)
-    project_obj.download_uri = exports[0].download_uri
+    if not exports[0].flavor:
+        project_obj.download_uri = exports[0].download_uri
+        project_obj.download_uri_fp16 = exports[1].download_uri
+    else:
+        project_obj.download_uri = exports[1].download_uri
+        project_obj.download_uri_fp16 = exports[0].download_uri
+
     train_performance_list = []
 
     for iteration in iterations[:2]:
@@ -480,7 +495,7 @@ def train_project_worker(project_id, export_flavor: str = ""):
     project_obj.save()
 
 
-def train_project_catcher(project_id, export_flavor):
+def train_project_catcher(project_id):
     """train_project_catcher.
 
     Dummy exception handler.
@@ -508,7 +523,7 @@ class TrainingManager:
         self.mutex = threading.Lock()
         self.garbage_collector()
 
-    def add(self, project_id, export_flavor: str = ""):
+    def add(self, project_id):
         """add.
 
         Add a project in training tasks.
@@ -516,7 +531,7 @@ class TrainingManager:
         if project_id in self.training_tasks:
             raise ProjectAlreadyTraining
         self.mutex.acquire()
-        task = TrainingTask(project_id=project_id, export_flavor=export_flavor)
+        task = TrainingTask(project_id=project_id)
         self.training_tasks[project_id] = task
         task.start()
         self.mutex.release()
@@ -560,7 +575,7 @@ class TrainingManager:
 class TrainingTask:
     """TrainingTask."""
 
-    def __init__(self, project_id, export_flavor):
+    def __init__(self, project_id):
         """__init__.
 
         Args:
@@ -569,7 +584,6 @@ class TrainingTask:
         self.project_id = project_id
         self.status = "init"
         self.worker = None
-        self.export_flavor = export_flavor
 
     def start(self):
         """start."""
@@ -577,7 +591,7 @@ class TrainingTask:
         self.worker = threading.Thread(
             target=train_project_catcher,
             name=f"train_project_worker_{self.project_id}",
-            kwargs={"project_id": self.project_id, "export_flavor": self.export_flavor},
+            kwargs={"project_id": self.project_id},
             daemon=True,
         )
         self.worker.start()

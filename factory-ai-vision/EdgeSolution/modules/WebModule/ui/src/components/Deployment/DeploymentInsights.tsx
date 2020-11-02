@@ -3,9 +3,9 @@ import { Link as RRDLink } from 'react-router-dom';
 import { Stack, Text, Link, getTheme } from '@fluentui/react';
 import Axios from 'axios';
 
-import { ExpandPanel } from './ExpandPanel';
-import { useInterval } from '../hooks/useInterval';
-import { Status } from '../store/project/projectTypes';
+import { ExpandPanel } from '../ExpandPanel';
+import { useInterval } from '../../hooks/useInterval';
+import { Status } from '../../store/project/projectTypes';
 
 const { palette } = getTheme();
 
@@ -27,7 +27,7 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
     successRate: 0,
     successfulInferences: 0,
     unIdentifiedItems: 0,
-    isGpu: false,
+    device: '',
     averageTime: 0,
     objectCounts: [],
     numAccrossLine: 0,
@@ -43,7 +43,7 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
             successRate: data.success_rate,
             successfulInferences: data.inference_num,
             unIdentifiedItems: data.unidentified_num,
-            isGpu: data.gpu,
+            device: data.device,
             averageTime: data.average_time,
             objectCounts: normalizeObjectCount(data.count),
             numAccrossLine: data.scenario_metrics?.find((e) => e.name === 'all_objects')?.count,
@@ -68,10 +68,13 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
           {inferenceMetrics.successRate}%
         </Text>
         <Text>
-          {`Running on ${inferenceMetrics.isGpu ? 'GPU' : 'CPU'} (accelerated) ${
+          {`Running on ${inferenceMetrics.device.toUpperCase()} (accelerated) ${
             Math.round(inferenceMetrics.averageTime * 100) / 100
           }/ms`}
         </Text>
+        {inferenceMetrics.device === 'vpu' && (
+          <img src="/icons/openvino_logo.png" style={{ width: '100px' }} />
+        )}
       </Stack>
       <Stack
         styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}

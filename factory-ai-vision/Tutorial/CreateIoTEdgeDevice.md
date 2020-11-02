@@ -40,7 +40,6 @@ To run the code in this article in Azure Cloud Shell:
 1. Select **Enter** to run the code.
 
 
-
 You use the Azure CLI to complete many of the steps in this quickstart, and Azure IoT has an extension to enable additional functionality.
 
 Add the Azure IoT extension to the Cloud Shell instance.
@@ -56,7 +55,6 @@ Add the Azure IoT extension to the Cloud Shell instance.
 > Use `az extension add --name azure-iot` to add the new version of the extension. 
 >
 > To see what extensions you have installed, use `az extension list`.
-
 
 
 
@@ -120,6 +118,7 @@ Create a virtual machine with the Azure IoT Edge runtime on it.
 
 ### Deploy the IoT Edge device
 
+
 This section uses an Azure Resource Manager template to create a new virtual machine and install the IoT Edge runtime on it. If you want to use your own Linux device instead, you can follow the installation steps in [Install the Azure IoT Edge runtime](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge?tabs=linux), then return to this quickstart.
 
 
@@ -160,6 +159,7 @@ And fill out Destination port ranges and port Name. After this, you will see a p
 <br/>
 <br/>
 <br/>
+
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_6.png)
 <br/>
 <br/>

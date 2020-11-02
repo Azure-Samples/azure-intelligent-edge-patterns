@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { mergeStyleSets, MessageBar } from '@fluentui/react';
+import { mergeStyleSets } from '@fluentui/react';
 import { useDispatch } from 'react-redux';
 import * as R from 'ramda';
 

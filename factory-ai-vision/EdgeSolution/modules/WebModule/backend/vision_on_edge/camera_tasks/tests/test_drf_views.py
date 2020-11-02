@@ -1,0 +1,2 @@
+"""App drf view tests.
+"""
