@@ -127,7 +127,14 @@ def deploy_worker(part_detection_id):
     # =====================================================
     if not instance.project:
         pass
-    elif not instance.project.is_demo:
+    elif instance.project.is_demo:
+        requests.post(
+            "http://" + str(instance.inference_module.url) + "/update_model",
+            json={"model_dir": instance.project.download_uri},
+            timeout=REQUEST_TIMEOUT,
+        )
+
+    elif not instance.inference_module.is_vpu():
         requests.post(
             "http://" + str(instance.inference_module.url) + "/update_model",
             json={"model_uri": instance.project.download_uri},
@@ -136,9 +143,10 @@ def deploy_worker(part_detection_id):
     else:
         requests.post(
             "http://" + str(instance.inference_module.url) + "/update_model",
-            json={"model_dir": instance.project.download_uri},
+            json={"model_uri": instance.project.download_uri_fp16},
             timeout=REQUEST_TIMEOUT,
         )
+
     # =====================================================
     # 3. Update parts                                   ===
     # =====================================================

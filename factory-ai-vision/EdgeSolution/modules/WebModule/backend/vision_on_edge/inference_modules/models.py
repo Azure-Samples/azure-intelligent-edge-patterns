@@ -41,7 +41,7 @@ class InferenceModule(models.Model):
             response = requests.get("http://" + self.url + "/get_device")
             result = response.json()["device"]
             return result == "vpu"
-        except:
+        except Exception:
             return False
 
     def __str__(self):

@@ -202,14 +202,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         )
         instance.has_configured = True
         instance.save()
-        if instance.inference_module.is_vpu():
-            export_flavor = "ONNXFloat16"
-        else:
-            export_flavor = None
 
-        TRAINING_MANAGER.add(
-            project_id=instance.project.id, export_flavor=export_flavor
-        )
+        TRAINING_MANAGER.add(project_id=instance.project.id)
         if_trained_then_deploy_helper(part_detection_id=instance.id)
         return Response({"status": "ok"})
 
