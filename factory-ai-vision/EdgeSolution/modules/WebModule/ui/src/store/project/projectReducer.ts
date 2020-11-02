@@ -56,6 +56,7 @@ export const initialProjectData: ProjectData = {
   totalRecomendedFps: 10,
   inferenceProtocol: InferenceProtocol.GRPC,
   inferenceSource: InferenceSource.LVA,
+  disableVideoFeed: false,
 };
 
 const initialState: Project = {
