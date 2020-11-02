@@ -565,15 +565,15 @@ class Stream:
                     and p["probability"] >= self.send_video_to_cloud_threshold
                 ):
                     to_send = True
-            logging.warning('********** precess send signal to lva **********')
-            logging.warning('********** precess send signal to lva **********')
-            logging.warning('parts to send: {}'.format(
+            logger.warning('********** precess send signal to lva **********')
+            logger.warning('********** precess send signal to lva **********')
+            logger.warning('parts to send: {}'.format(
                 self.send_video_to_cloud_parts))
-            logging.warning('send threshold: {}'.format(
+            logger.warning('sending threshold: {}'.format(
                 self.send_video_to_cloud_threshold))
-            logging.warning('to_send: {}'.format(to_send))
-            logging.warning('********** precess send signal to lva **********')
-            logging.warning('********** precess send signal to lva **********')
+            logger.warning('to_send: {}'.format(to_send))
+            logger.warning('********** precess send signal to lva **********')
+            logger.warning('********** precess send signal to lva **********')
             if to_send:
                 send_message_to_lva(self.cam_id)
                 self.lva_last_send_time = time.time()

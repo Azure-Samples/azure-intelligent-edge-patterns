@@ -288,7 +288,7 @@ def update_cams(request_body: CamerasModel):
             part.name for part in cam.send_video_to_cloud_parts
         ]
         stream.send_video_to_cloud_threshold = int(
-            cam.send_video_to_cloud_threshold)*0.01
+            cam.send_video_to_cloud_threshold) * 0.01
 
     logger.info("Streams %s", stream_manager.streams)
     return "ok"
