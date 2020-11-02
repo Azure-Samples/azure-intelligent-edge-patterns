@@ -3,9 +3,9 @@ import { Link as RRDLink } from 'react-router-dom';
 import { Stack, Text, Link, getTheme } from '@fluentui/react';
 import Axios from 'axios';
 
-import { ExpandPanel } from './ExpandPanel';
-import { useInterval } from '../hooks/useInterval';
-import { Status } from '../store/project/projectTypes';
+import { ExpandPanel } from '../ExpandPanel';
+import { useInterval } from '../../hooks/useInterval';
+import { Status } from '../../store/project/projectTypes';
 
 const { palette } = getTheme();
 

@@ -5,7 +5,7 @@ import { Part, getParts, postPart } from '../../store/partSlice';
 import { thunkChangeImgPart } from '../../store/imageSlice';
 import { selectNonDemoPart } from '../../store/selectors';
 
-export const PartPicker: React.FC<{ selectedPart: number }> = ({ selectedPart }) => {
+export const PartPicker: React.FC = () => {
   const parts = useSelector(selectNonDemoPart);
   const dispatch = useDispatch();
 
@@ -14,8 +14,7 @@ export const PartPicker: React.FC<{ selectedPart: number }> = ({ selectedPart })
     setNewPartName(newValue);
   };
   const onTextFieldEnter = async (evt: React.KeyboardEvent) => {
-    // Enter
-    if (evt.keyCode === 13) {
+    if (evt.nativeEvent.code === 'Enter') {
       await dispatch(postPart({ name: newPartName, description: '' }));
       setNewPartName('');
     }

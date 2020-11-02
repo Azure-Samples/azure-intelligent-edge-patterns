@@ -1,10 +1,10 @@
-import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
-import { Stage, Layer, Image, Group, Text as KonvaText, Text, Rect, Label, Tag } from 'react-konva';
+import React, { FC, useState, useEffect, useCallback, useRef, Dispatch } from 'react';
+import { Stage, Layer, Image, Group, Text as KonvaText, Text, Label, Tag } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
-import getResizeImageFunction, { CanvasFit } from './util/resizeImage';
+import resizeImageFunction, { CanvasFit } from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
@@ -40,18 +40,18 @@ const Scene: FC<SceneProps> = ({
   imgPart,
 }) => {
   const dispatch = useDispatch();
-  const resizeImage = useCallback(getResizeImageFunction(defaultSize, CanvasFit.Contain), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
-  const noMoreCreate = useMemo(
-    () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
-    [labelingType, annotations],
-  );
+  const noMoreCreate = labelingType === LabelingType.SingleAnnotation && annotations.length === 1;
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
-  const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<number>(1);
+
+  /**
+   * Change the type of cursor. If passing nothing, than it will set to default
+   * @param cursorType The css cursor
+   */
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
       if (!cursorType) {
@@ -66,19 +66,19 @@ const Scene: FC<SceneProps> = ({
     },
     [noMoreCreate],
   );
+
   const removeBox = useCallback((): void => {
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
-    setShowOuterRemoveButton(false);
     setSelectedAnnotationIndex(null);
   }, [dispatch, annotations, selectedAnnotationIndex, setWorkState]);
+
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
 
     dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
-    // FIXME Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
-    // Should put this state in redux
+    // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
     setSelectedAnnotationIndex(annotations.length);
     setWorkState(WorkState.Creating);
   };
@@ -97,7 +97,6 @@ const Scene: FC<SceneProps> = ({
     }
   };
 
-  // FIXIME: Probably use useReduce for this case
   const onSelect = (index: number): void => {
     setSelectedAnnotationIndex(index);
     if (index === null) setWorkState(WorkState.None);
@@ -107,20 +106,20 @@ const Scene: FC<SceneProps> = ({
   useEffect(() => {
     // * Single bounding box labeling type condition
     if (noMoreCreate) {
-      changeCursorState();
       setSelectedAnnotationIndex(0);
-    } else {
-      changeCursorState();
     }
+    changeCursorState();
   }, [noMoreCreate, changeCursorState]);
+
   useEffect(() => {
     if (workState === WorkState.None && !noMoreCreate) setSelectedAnnotationIndex(null);
   }, [workState, noMoreCreate]);
+
   useEffect(() => {
-    const [outcomeSize, outcomeScale] = resizeImage(size);
+    const [outcomeSize, outcomeScale] = resizeImageFunction(defaultSize, CanvasFit.Contain, size);
     setImageSize(outcomeSize);
     scale.current = outcomeScale;
-  }, [size, resizeImage]);
+  }, [size]);
 
   const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
@@ -152,7 +151,6 @@ const Scene: FC<SceneProps> = ({
                   label={annotation.label}
                   scale={scale.current}
                   changeCursorState={changeCursorState}
-                  setShowOuterRemoveButton={setShowOuterRemoveButton}
                   removeBox={removeBox}
                 />
                 <Box2d

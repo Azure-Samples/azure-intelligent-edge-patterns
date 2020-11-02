@@ -19,12 +19,6 @@ import {
   GET_PROJECT_REQUEST,
   UpdateProjectDataAction,
   UPDATE_PROJECT_DATA,
-  GetTrainingLogRequesAction,
-  GET_TRAINING_LOG_REQUEST,
-  GetTrainingLogSuccessAction,
-  GET_TRAINING_LOG_SUCCESS,
-  GetTrainingLogFailedAction,
-  GET_TRAINING_LOG_FAILED,
   Status,
   GetTrainingMetricsRequestAction,
   GET_TRAINING_METRICS_REQUEST,
@@ -38,9 +32,12 @@ import {
   STOP_INFERENCE,
   StopInferenceAction,
   ChangeStatusAction,
-  TrainingStatus,
   InferenceProtocol,
   InferenceSource,
+  TrainSuccessAction,
+  TRAIN_SUCCESS,
+  TrainFailedAction,
+  TRAIN_FAILED,
 } from './projectTypes';
 import { selectAllImages } from '../imageSlice';
 import { createWrappedAsync } from '../shared/createWrappedAsync';
@@ -60,30 +57,6 @@ export const getProjectSuccess = (
 });
 const getProjectFailed = (error: Error, isDemo: boolean): GetProjectFailedAction => ({
   type: GET_PROJECT_FAILED,
-  error,
-  isDemo,
-});
-
-const getTrainingLogRequest = (isDemo: boolean): GetTrainingLogRequesAction => ({
-  type: GET_TRAINING_LOG_REQUEST,
-  isDemo,
-});
-const getTrainingLogSuccess = (
-  trainingLog: string,
-  newStatus: Status,
-  isDemo: boolean,
-  progress: number,
-): GetTrainingLogSuccessAction => ({
-  type: GET_TRAINING_LOG_SUCCESS,
-  payload: {
-    trainingLog,
-    newStatus,
-    progress,
-  },
-  isDemo,
-});
-const getTrainingStatusFailed = (error: Error, isDemo: boolean): GetTrainingLogFailedAction => ({
-  type: GET_TRAINING_LOG_FAILED,
   error,
   isDemo,
 });
@@ -158,6 +131,14 @@ export const startInference = (isDemo: boolean): StartInferenceAction => ({
 export const stopInference = (isDemo: boolean): StopInferenceAction => ({
   type: STOP_INFERENCE,
   isDemo,
+});
+
+export const trainSuccess = (): TrainSuccessAction => ({
+  type: TRAIN_SUCCESS,
+});
+
+export const trainFailed = (): TrainFailedAction => ({
+  type: TRAIN_FAILED,
 });
 
 export const updateProjectData = (
@@ -283,23 +264,6 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
 export const getConfigure = createWrappedAsync<any, number>('project/configure', async (projectId) => {
   await Axios.get(`/api/part_detections/${projectId}/configure`);
 });
-
-export const thunkGetTrainingLog = (projectId: number, isDemo: boolean, cameraId: number) => (
-  dispatch,
-): Promise<any> => {
-  dispatch(getTrainingLogRequest(isDemo));
-
-  return Axios.get(`/api/part_detections/${projectId}/export?camera_id=${cameraId}`)
-    .then(({ data }) => {
-      if (data.status === 'failed') throw new Error(data.log);
-      else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo, 0));
-      else
-        dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo, TrainingStatus[data.status]));
-      return void 0;
-    })
-    .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
-};
 
 export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boolean) => (
   dispacth,

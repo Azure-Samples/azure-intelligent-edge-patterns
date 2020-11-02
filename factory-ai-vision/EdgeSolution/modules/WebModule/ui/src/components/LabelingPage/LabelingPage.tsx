@@ -159,7 +159,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const onRenderInfoOnRight = (): JSX.Element => (
     <>
       {onRenderPrediction()}
-      <PartPicker selectedPart={imgPart?.id} />
+      <PartPicker />
     </>
   );
 

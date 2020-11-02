@@ -15,6 +15,7 @@ export type Setting = {
   error: Error;
   current: SettingData;
   origin: SettingData;
+  // If the given endpoint and key is valid
   isTrainerValid: boolean;
   cvProjects: CVProject[];
   appInsightHasInit: boolean;
