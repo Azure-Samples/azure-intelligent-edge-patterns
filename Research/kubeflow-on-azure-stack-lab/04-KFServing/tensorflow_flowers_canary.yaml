@@ -1,0 +1,31 @@
+#
+# originally from https://github.com/kubeflow/kfserving/tree/master/docs/samples
+# see the repository for model changes.
+#
+
+#
+# This is how it works:
+#
+# $ kubectl apply -f tensorflow_flowers_canary.yaml  -n kfserving-test
+# inferenceservice.serving.kubeflow.org/flowers-sample configured
+#
+# $ kubectl get inferenceservices -n kfserving-test
+# NAME             READY     URL                                         DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
+# flowers-sample   True      http://flowers-sample.default.example.com   90                10               48s
+#
+apiVersion: "serving.kubeflow.org/v1alpha2"
+kind: "InferenceService"
+metadata:
+  name: "flowers-sample"
+spec:
+  default:
+    predictor:
+      # 90% of traffic is sent to this model
+      tensorflow:
+        storageUri: "gs://kfserving-samples/models/tensorflow/flowers"
+  canaryTrafficPercent: 10
+  canary:
+    predictor:
+      # 10% of traffic is sent to this model
+      tensorflow:
+        storageUri: "gs://kfserving-samples/models/tensorflow/flowers-2"

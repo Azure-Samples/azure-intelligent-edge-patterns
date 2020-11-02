@@ -118,7 +118,8 @@ Create a virtual machine with the Azure IoT Edge runtime on it.
 
 ### Deploy the IoT Edge device
 
-This section uses an Azure Resource Manager template to create a new virtual machine and install the IoT Edge runtime on it. If you want to use your own Linux device instead, you can follow the installation steps in [Install the Azure IoT Edge runtime](how-to-install-iot-edge.md), then return to this quickstart.
+
+This section uses an Azure Resource Manager template to create a new virtual machine and install the IoT Edge runtime on it. If you want to use your own Linux device instead, you can follow the installation steps in [Install the Azure IoT Edge runtime](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge?tabs=linux), then return to this quickstart.
 
 
 ## ARM Template to deploy IoT Edge enabled VM
@@ -158,7 +159,7 @@ And fill out Destination port ranges and port Name. After this, you will see a p
 <br/>
 <br/>
 <br/>
-<br/>
+
 ![Diagram - Create Virtual Machine and go to networking](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/go%20to%20azure%20portal_6.png)
 <br/>
 <br/>
