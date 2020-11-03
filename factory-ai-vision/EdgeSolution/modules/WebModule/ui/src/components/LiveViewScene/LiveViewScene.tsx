@@ -25,6 +25,11 @@ import { dummyFunction } from '../../utils/dummyFunction';
 import { VideoAnnosGroup } from './VideoAnnosGroup';
 import { Position2D } from '../../store/type';
 
+/**
+ * Because the layer has been scaled to fit the window size, we need to transform the coordinate to the
+ * original image coordinate
+ * @param layer
+ */
 const getRelativePosition = (layer: Konva.Layer): { x: number; y: number } => {
   const transform = layer.getAbsoluteTransform().copy();
   transform.invert();
@@ -55,6 +60,27 @@ type DispatchProps = {
 
 type LiveViewProps = OwnProps & StateProps & DispatchProps;
 
+const mapState = (state: State, { cameraId }: OwnProps): StateProps => ({
+  videoAnnos: videoAnnosSelectorFactory(cameraId)(state),
+  creatingShape: state.videoAnnos.shape,
+  AOIVisible: Boolean(selectCameraById(state, cameraId)?.useAOI),
+  countingLineVisible:
+    selectCameraById(state, cameraId)?.useCountingLine &&
+    [InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(state.project.data.inferenceMode),
+  dangerZoneVisible:
+    selectCameraById(state, cameraId)?.useDangerZone &&
+    state.project.data.inferenceMode === InferenceMode.EmployeeSafety,
+  creatingState: state.videoAnnos.creatingState,
+  disableVideoFeed: state.project.data.disableVideoFeed,
+});
+
+const mapDispatch = (dispatch, { cameraId }: OwnProps): DispatchProps => ({
+  onCreatingPoint: (point) => dispatch(onCreatingPointAction({ point, cameraId })),
+  updateVideoAnno: (id, changes) => dispatch(updateVideoAnnoAction({ id, changes })),
+  removeVideoAnno: (annoId) => dispatch(removeVideoAnnoAction(annoId)),
+  finishLabel: () => dispatch(finishLabelAction()),
+});
+
 const Component: React.FC<LiveViewProps> = ({
   cameraId,
   videoAnnos,
@@ -69,13 +95,16 @@ const Component: React.FC<LiveViewProps> = ({
   dangerZoneVisible,
   disableVideoFeed,
 }) => {
-  const imageInfo = useImage(disableVideoFeed ? '' : `/video_feed?cam_id=${cameraId}`, '', true, true);
+  const [imgEle, status, { width: imgWidth, height: imgHeight }] = useImage(
+    disableVideoFeed ? '' : `/video_feed?cam_id=${cameraId}`,
+    '',
+    true,
+    true,
+  );
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef(null);
   const imgRef = useRef(null);
   const layerRef = useRef<Konva.Layer>(null);
-
-  const [imgEle, status, { width: imgWidth, height: imgHeight }] = imageInfo;
 
   useInterval(
     () => {
@@ -134,16 +163,16 @@ const Component: React.FC<LiveViewProps> = ({
 
   useEffect(() => {
     const div = divRef.current;
-    const handleFPress = (e) => {
+    const handleKeyPress = (e) => {
       if (e.key === 'd') {
         finishLabel();
       }
     };
-    div.addEventListener('keydown', handleFPress);
+    div.addEventListener('keydown', handleKeyPress);
     return () => {
-      div.removeEventListener('keydown', handleFPress);
+      div.removeEventListener('keydown', handleKeyPress);
     };
-  }, []);
+  }, [finishLabel]);
 
   const AOIs = useMemo(() => {
     return videoAnnos.filter(isAOIShape);
@@ -217,26 +246,5 @@ const Component: React.FC<LiveViewProps> = ({
     </div>
   );
 };
-
-const mapState = (state: State, { cameraId }: OwnProps): StateProps => ({
-  videoAnnos: videoAnnosSelectorFactory(cameraId)(state),
-  creatingShape: state.videoAnnos.shape,
-  AOIVisible: Boolean(selectCameraById(state, cameraId)?.useAOI),
-  countingLineVisible:
-    selectCameraById(state, cameraId)?.useCountingLine &&
-    [InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(state.project.data.inferenceMode),
-  dangerZoneVisible:
-    selectCameraById(state, cameraId)?.useDangerZone &&
-    state.project.data.inferenceMode === InferenceMode.EmployeeSafety,
-  creatingState: state.videoAnnos.creatingState,
-  disableVideoFeed: state.project.data.disableVideoFeed,
-});
-
-const mapDispatch = (dispatch, { cameraId }: OwnProps): DispatchProps => ({
-  onCreatingPoint: (point) => dispatch(onCreatingPointAction({ point, cameraId })),
-  updateVideoAnno: (id, changes) => dispatch(updateVideoAnnoAction({ id, changes })),
-  removeVideoAnno: (annoId) => dispatch(removeVideoAnnoAction(annoId)),
-  finishLabel: () => dispatch(finishLabelAction()),
-});
 
 export const LiveViewScene = connect(mapState, mapDispatch)(Component);

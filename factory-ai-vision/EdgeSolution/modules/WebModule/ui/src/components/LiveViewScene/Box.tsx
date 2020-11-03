@@ -33,7 +33,7 @@ export const Box: React.FC<BoxProps> = ({
   color,
 }) => {
   const { x1, y1, x2, y2 } = box;
-  const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
+  const [cancelBtnVisible, setCancelBtnVisible] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
 
   const handleDrag = (e: KonvaEventObject<DragEvent>): void => {
@@ -41,6 +41,7 @@ export const Box: React.FC<BoxProps> = ({
 
     if (x < boundary.x1) {
       x = boundary.x1;
+      // Set the target(should be the dragging circle) to the boundary
       e.target.x(x);
     }
 
@@ -84,8 +85,8 @@ export const Box: React.FC<BoxProps> = ({
   return (
     <Group
       visible={visible}
-      onMouseEnter={(): void => setCanceBtnVisible(true)}
-      onMouseLeave={(): void => setCanceBtnVisible(false)}
+      onMouseEnter={(): void => setCancelBtnVisible(true)}
+      onMouseLeave={(): void => setCancelBtnVisible(false)}
       cache={[{ drawBorder: true }]}
       ref={groupRef}
     >
