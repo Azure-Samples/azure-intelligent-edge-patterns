@@ -18,7 +18,7 @@ import { BBox, BBoxType, isBBox } from './shared/Box2d';
 import { Polygon, PolygonType, isPolygon } from './shared/Polygon';
 import { Line, LineType, isLine } from './shared/Line';
 
-// Use enum string to make debugginh easier.
+// Use enum string to make debugging easier.
 export enum CreatingState {
   Disabled = 'Disabled',
   Waiting = 'Waiting',
