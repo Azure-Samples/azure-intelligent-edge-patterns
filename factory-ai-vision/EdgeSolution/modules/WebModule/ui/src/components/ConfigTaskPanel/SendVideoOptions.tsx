@@ -6,7 +6,7 @@ import { OnChangeType } from './type';
 
 type SendVideoOptionsProps = Pick<
   ProjectData,
-  'SVTCisOpen' | 'SVTCcameras' | 'SVTCparts' | 'SVTCconfirmationThreshold'
+  'SVTCisOpen' | 'SVTCcameras' | 'SVTCparts' | 'SVTCconfirmationThreshold' | 'SVTCRecordingDuration'
 > & {
   onChange: OnChangeType;
   selectedCameraOptions: IDropdownOption[];
@@ -18,6 +18,7 @@ export const SendVideoOptions: React.FC<SendVideoOptionsProps> = ({
   SVTCcameras,
   SVTCparts,
   SVTCconfirmationThreshold,
+  SVTCRecordingDuration,
   onChange,
   selectedCameraOptions,
   selectedPartOptions,
@@ -70,6 +71,16 @@ export const SendVideoOptions: React.FC<SendVideoOptionsProps> = ({
         onChange={(_, newValue) => {
           onChange('SVTCconfirmationThreshold', parseInt(newValue, 10));
         }}
+      />
+      <Dropdown
+        label="Recording duration (min)"
+        options={Array(5)
+          .fill(1)
+          .map((_, idx) => idx + 1)
+          .map((e) => ({ key: e, text: e.toString() }))}
+        selectedKey={SVTCRecordingDuration}
+        disabled={!SVTCisOpen}
+        onChange={(_, option) => onChange('SVTCRecordingDuration', option.key as number)}
       />
     </OptionLayout>
   );

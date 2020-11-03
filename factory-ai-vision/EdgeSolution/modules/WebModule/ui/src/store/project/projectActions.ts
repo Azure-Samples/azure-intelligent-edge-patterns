@@ -88,6 +88,7 @@ const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessActio
     // All the camera will detect same parts
     SVTCparts: data?.send_video_to_cloud[0]?.parts || [],
     SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
+    SVTCRecordingDuration: data?.send_video_to_cloud[0]?.recording_duration || 1,
     deployTimeStamp: data?.deploy_timestamp ?? '',
     setFpsManually: data?.setFpsManually ?? false,
     fps: data?.fps ?? 10,
@@ -194,6 +195,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         SVTCparts: partDetection[0]?.send_video_to_cloud[0]?.parts || [],
         SVTCconfirmationThreshold:
           partDetection[0]?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
+        SVTCRecordingDuration: partDetection[0]?.send_video_to_cloud[0]?.recording_duration || 1,
         deployTimeStamp: partDetection[0]?.deploy_timestamp ?? '',
         setFpsManually: partDetection[0]?.fps !== recomendedFps,
         recomendedFps,
@@ -239,6 +241,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         parts: projectData.SVTCparts,
         send_video_to_cloud: projectData.SVTCcameras.includes(e),
         send_video_to_cloud_threshold: projectData.SVTCconfirmationThreshold,
+        recording_duration: projectData.SVTCRecordingDuration,
       })),
       inference_mode: projectData.inferenceMode,
       fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
