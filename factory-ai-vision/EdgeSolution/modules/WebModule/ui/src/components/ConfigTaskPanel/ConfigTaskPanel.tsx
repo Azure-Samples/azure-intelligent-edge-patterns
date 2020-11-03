@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as R from 'ramda';
 import {
@@ -23,6 +23,7 @@ import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
 import { AdvancedOptions } from './AdvancedOptions';
+import { OnChangeType } from './type';
 
 const sendTrainInfoToAppInsight = async (selectedParts: ProjectData['parts']): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -55,6 +56,47 @@ const panelStyles = {
   },
 };
 
+const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChangeType] => {
+  const [projectData, setProjectData] = useState(initialProjectData);
+  useEffect(() => {
+    setProjectData(initialProjectData);
+  }, [initialProjectData]);
+
+  const scenarios = useSelector((state: State) => state.scenario);
+
+  const onChange: OnChangeType = useCallback(
+    (key, value) => {
+      const cloneProject = R.clone(projectData);
+      cloneProject[key] = value;
+      if (key === 'trainingProject') {
+        // Because demo parts and demo camera can only be used in demo training project(6 scenarios)
+        // We should reset them every time the training project is changed
+        cloneProject.parts = [];
+        cloneProject.cameras = [];
+
+        const relatedScenario = scenarios.find((e) => e.trainingProject === cloneProject.trainingProject);
+        if (relatedScenario !== undefined) cloneProject.inferenceMode = relatedScenario.inferenceMode;
+        else cloneProject.inferenceMode = InferenceMode.PartDetection;
+      } else if (key === 'cameras') {
+        cloneProject.SVTCcameras = cloneProject.SVTCcameras.filter((e) => cloneProject.cameras.includes(e));
+        cloneProject.recomendedFps = Math.floor(
+          cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1),
+        );
+      } else if (key === 'parts') {
+        cloneProject.SVTCparts = cloneProject.SVTCparts.filter((e) => cloneProject.parts.includes(e));
+      } else if (key === 'SVTCisOpen' && !value) {
+        cloneProject.SVTCcameras = [];
+        cloneProject.SVTCconfirmationThreshold = 0;
+        cloneProject.SVTCparts = [];
+      }
+      setProjectData(cloneProject);
+    },
+    [projectData, scenarios],
+  );
+
+  return [projectData, onChange];
+};
+
 type ConfigTaskPanelProps = {
   isOpen: boolean;
   onDismiss: () => void;
@@ -70,10 +112,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   trainingProjectOfSelectedScenario = null,
   isEdit = false,
 }) => {
-  const [projectData, setProjectData] = useState(initialProjectData);
-  useEffect(() => {
-    setProjectData(initialProjectData);
-  }, [initialProjectData]);
+  const [projectData, onChange] = useProjectData(initialProjectData);
 
   const cameraOptionsSelectorInConfig = useMemo(
     () => cameraOptionsSelectorFactoryInConfig(projectData.trainingProject),
@@ -98,37 +137,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
   );
   const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
-  const scenarios = useSelector((state: State) => state.scenario);
   const dispatch = useDispatch();
   const history = useHistory();
   const [deploying, setdeploying] = useState(false);
-
-  function onChange<K extends keyof ProjectData>(key: K, value: ProjectData[K]) {
-    const cloneProject = R.clone(projectData);
-    cloneProject[key] = value;
-    if (key === 'trainingProject') {
-      // Because demo parts and demo camera can only be used in demo training project(6 scenarios)
-      // We should reset them every time the training project is changed
-      cloneProject.parts = [];
-      cloneProject.cameras = [];
-
-      const relatedScenario = scenarios.find((e) => e.trainingProject === cloneProject.trainingProject);
-      if (relatedScenario !== undefined) cloneProject.inferenceMode = relatedScenario.inferenceMode;
-      else cloneProject.inferenceMode = InferenceMode.PartDetection;
-    } else if (key === 'cameras') {
-      cloneProject.SVTCcameras = cloneProject.SVTCcameras.filter((e) => cloneProject.cameras.includes(e));
-      cloneProject.recomendedFps = Math.floor(
-        cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1),
-      );
-    } else if (key === 'parts') {
-      cloneProject.SVTCparts = cloneProject.SVTCparts.filter((e) => cloneProject.parts.includes(e));
-    } else if (key === 'SVTCisOpen' && !value) {
-      cloneProject.SVTCcameras = [];
-      cloneProject.SVTCconfirmationThreshold = 0;
-      cloneProject.SVTCparts = [];
-    }
-    setProjectData(cloneProject);
-  }
 
   useEffect(() => {
     dispatch(getParts());
