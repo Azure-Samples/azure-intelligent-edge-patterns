@@ -121,7 +121,7 @@ To learn more about this development environment, check out [this tutorial](http
   RESOURCE_GROUP=""
   TENANT_ID=""
   SERVICE_NAME=""
-  SERVICE_PRINCPAL_APP_ID=""
+  SERVICE_PRINCIPAL_APP_ID=""
   SERVICE_PRINCIPAL_SECRET=""
   ```
 
