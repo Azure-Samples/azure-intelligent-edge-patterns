@@ -24,11 +24,10 @@ import { getConfigure, thunkPostProject } from '../../store/project/projectActio
 import { getScenario } from '../../store/scenarioSlice';
 import { AdvancedOptions } from './AdvancedOptions';
 
-const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
+const sendTrainInfoToAppInsight = async (selectedParts: ProjectData['parts']): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
 
-  const selectedPartIds = selectedParts.map((e) => e.id);
-  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(e.part)).length;
+  const interestedImagesLength = images.filter((e) => selectedParts.includes(e.part)).length;
   const appInsight = getAppInsights();
   if (appInsight)
     appInsight.trackEvent({
@@ -104,9 +103,9 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const history = useHistory();
   const [deploying, setdeploying] = useState(false);
 
-  function onChange<K extends keyof P, P = ProjectData>(key: K, value: P[K]) {
+  function onChange<K extends keyof ProjectData>(key: K, value: ProjectData[K]) {
     const cloneProject = R.clone(projectData);
-    (cloneProject as any)[key] = value;
+    cloneProject[key] = value;
     if (key === 'trainingProject') {
       // Because demo parts and demo camera can only be used in demo training project(6 scenarios)
       // We should reset them every time the training project is changed
