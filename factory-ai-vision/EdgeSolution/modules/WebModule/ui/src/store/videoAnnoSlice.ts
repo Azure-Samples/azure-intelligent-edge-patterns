@@ -36,9 +36,6 @@ const slice = createSlice({
     purpose: Purpose.None,
   },
   reducers: {
-    createDefaultVideoAnno: (state, action: PayloadAction<BBoxType>) => {
-      entityAdapter.upsertOne(state, action.payload);
-    },
     onCreatingPoint: (state, action: PayloadAction<{ point: Position2D; cameraId: number }>) => {
       const { point, cameraId } = action.payload;
       const { purpose } = state;
@@ -164,7 +161,6 @@ export const {
   updateVideoAnno,
   onCreatingPoint,
   removeVideoAnno,
-  createDefaultVideoAnno,
   onCreateVideoAnnoBtnClick,
   finishLabel,
 } = slice.actions;
