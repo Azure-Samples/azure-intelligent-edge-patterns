@@ -13,7 +13,12 @@ import {
 } from '@fluentui/react';
 import { Card } from '@uifabric/react-cards';
 import { AcceptMediumIcon } from '@fluentui/react-icons';
+import { connect } from 'react-redux';
+
+import { State } from 'RootStateType';
 import { CreateProjectDialog } from './CreateProjectDialog';
+import { selectNonDemoCameras } from '../store/cameraSlice';
+import { selectAllImages } from '../store/imageSlice';
 
 const theme = getTheme();
 
@@ -54,14 +59,24 @@ const cardStyleSets = mergeStyleSets({
   mainSectionAction: { gridColumn: '2 / span 1', gridRow: '3 / span 1', fontSize: '13px', margin: 0 },
 });
 
-type CustomizeType = {
-  hasCVProject: boolean;
-  hasCamera: boolean;
-  hasImages: boolean;
+type OwnProps = {
   hasTask: boolean;
 };
 
-export const Customize: React.FC<CustomizeType> = ({ hasCVProject, hasCamera, hasImages, hasTask }) => {
+type CustomizeProps = OwnProps & {
+  hasCVProject: boolean;
+  hasCamera: boolean;
+  hasImages: boolean;
+};
+
+const mapState = (state: State, ownProps: OwnProps): CustomizeProps => ({
+  ...ownProps,
+  hasCVProject: Boolean(state.trainingProject.entities[state.trainingProject.nonDemo[0]].customVisionId),
+  hasCamera: selectNonDemoCameras(state).length > 0,
+  hasImages: selectAllImages(state).length > 0,
+});
+
+const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImages, hasTask }) => {
   return (
     <Stack horizontalAlign="center">
       <Stack horizontalAlign="center" styles={{ root: { paddingTop: 60, paddingBottom: 40 } }}>
@@ -114,6 +129,8 @@ export const Customize: React.FC<CustomizeType> = ({ hasCVProject, hasCamera, ha
     </Stack>
   );
 };
+
+export const Customize = connect(mapState)(Component);
 
 const GetStartedCard: React.FC<{
   no: number;
