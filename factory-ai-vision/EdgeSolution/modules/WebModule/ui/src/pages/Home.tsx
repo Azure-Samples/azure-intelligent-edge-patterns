@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { Customize } from '../components/Customize';
-import { getCameras, selectNonDemoCameras } from '../store/cameraSlice';
-import { selectAllImages, getImages } from '../store/imageSlice';
+import { getCameras } from '../store/cameraSlice';
+import { getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
 import { Status } from '../store/project/projectTypes';
 import { Deployment } from '../components/Deployment/Deployment';
@@ -16,11 +16,6 @@ export const Home: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
-  const hasCVProject = useSelector(
-    (state: State) => !!state.trainingProject.entities[state.trainingProject.nonDemo[0]].customVisionId,
-  );
-  const hasCamera = useSelector((state: State) => selectNonDemoCameras(state).length > 0);
-  const hasImages = useSelector((state: State) => selectAllImages(state).length > 0);
   const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
   const [loading, setLoading] = useState(false);
 
@@ -47,12 +42,7 @@ export const Home: React.FC = () => {
           <Deployment />
         </Route>
         <Route path="/home/customize">
-          <Customize
-            hasCVProject={hasCVProject}
-            hasCamera={hasCamera}
-            hasImages={hasImages}
-            hasTask={projectHasConfiged}
-          />
+          <Customize hasTask={projectHasConfiged} />
         </Route>
         <Route path="/home/getStarted">
           <GetStarted />
