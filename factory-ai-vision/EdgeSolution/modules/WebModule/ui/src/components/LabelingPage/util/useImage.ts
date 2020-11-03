@@ -61,7 +61,7 @@ const useImage = (
 
     // Use this hack to force web not caching image
     // See https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
-    img.src = nocache ? `${url}&${uniqidRef.current}` : url;
+    img.src = nocache ? `${url}&hash_id=${uniqidRef.current}` : url;
 
     return (): void => {
       img.removeEventListener('load', onload);
@@ -69,7 +69,7 @@ const useImage = (
       // Cancel loading
       img.src = '';
       img.remove();
-      // refresh the uniqid so it won't be cached by browser
+      // refresh the uniqid so the image won't be cached by browser
       uniqidRef.current = nanoid();
     };
   }, [url, crossOrigin, prevUrl, nocache]);
