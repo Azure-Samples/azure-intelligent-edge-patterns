@@ -22,7 +22,7 @@
           "edgeAgent": {
             "type": "docker",
             "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9.5",
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
               "createOptions": {}
             }
           },
@@ -96,10 +96,18 @@
               "ENDPOINT": {
                 "value": "$CUSTOM_VISION_ENDPOINT"
               },
-              "DBNAME": { "value": "vision_on_edge" },
-              "DBHOST": { "value": "172.18.0.1" },
-              "DBUSER": { "value": "vision_on_edge" },
-              "DBPASS": { "value": "vision_on_edge" }
+              "DBNAME": {
+                "value": "vision_on_edge"
+              },
+              "DBHOST": {
+                "value": "172.18.0.1"
+              },
+              "DBUSER": {
+                "value": "vision_on_edge"
+              },
+              "DBPASS": {
+                "value": "vision_on_edge"
+              }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
@@ -192,7 +200,6 @@
               }
             }
           },
-
           "rtspsim": {
             "version": "1.0",
             "type": "docker",
