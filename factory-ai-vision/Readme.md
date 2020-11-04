@@ -162,7 +162,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Please wait until all 6 are running. Open your browser and connect [http://YOUR_IP:8181](http://YOUR_IP:8181)
 
-# Upload your own video to be processed
+### Upload your own video to be processed
 
 If you don't have camera devices to connect to your IoT Edge device, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).  
 
