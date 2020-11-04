@@ -172,7 +172,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Tutorial 3 - Start with creating new project, capture images, tagging images and deploy [https://youtu.be/cCEW6nsd8xQ]
 
-- Tutorial 4 - Retraining and improve your model [https://youtu.be/VNfOqP2Ag5U]
+- Tutorial 4 - Retraining and improve your model [https://youtu.be/OxK9feR_T3U]
 
 - Tutorial 5: Advance capabilities setting [https://youtu.be/Bv7wxfFEdtI]
 
