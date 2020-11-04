@@ -70,7 +70,7 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
         <Text>
           {`Running on ${inferenceMetrics.device.toUpperCase()} (accelerated) ${
             Math.round(inferenceMetrics.averageTime * 100) / 100
-          }/ms`}
+          } ms`}
         </Text>
         {inferenceMetrics.device === 'vpu' && (
           <img src="/icons/openvino_logo.png" style={{ width: '100px' }} />
