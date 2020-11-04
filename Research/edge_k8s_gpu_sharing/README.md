@@ -134,6 +134,27 @@ If, for example, you create three deployments, you should see at least three pro
 
 And you can validate them functioning by running inferences on deployed models simulataneously.
 
+See the scripts `runtest_infer2.py` and `feed_more.ps1` for a way to feed the model servers
+with inferencing requests:
+
+    > python.exe .\runtest_infer2.py
+    scoring_uri is http://123.45.67.89:5001/score
+    test_sample1 size is 62821
+    test_sample2 size is 188183
+    0:  Found a :: snow leopard, ounce, Panthera uncia
+    1:  Found a :: cheeseburger
+    2:  Found a :: snow leopard, ounce, Panthera uncia
+    3:  Found a :: cheeseburger
+    ... cut ...
+    96:  Found a :: snow leopard, ounce, Panthera uncia
+    97:  Found a :: cheeseburger
+    98:  Found a :: snow leopard, ounce, Panthera uncia
+    99:  Found a :: cheeseburger
+    Time elapsed: 2.5069718 seconds
+
+The GPU utilization should be better with running multiple models, so the asynchronous runs
+of, say `runtest_infer3.py` on the second deployment, should be faster than the sequential.
+
 # Links
 
   - https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-connect-powershell-interface#view-gpu-driver-information
