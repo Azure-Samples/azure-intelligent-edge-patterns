@@ -157,6 +157,7 @@ class UpdateCamBodySerializer(serializers.Serializer):
         send_video_to_cloud = serializers.BooleanField()
         send_video_to_cloud_parts = Parts(many=True)
         send_video_to_cloud_threshold = serializers.IntegerField()
+        recording_duration = serializers.IntegerField()
 
     lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
     fps = serializers.IntegerField()

@@ -91,6 +91,12 @@
                 "type": "String",
                 "description": "instance id",
                 "default": "0"
+            },
+            {
+                "name": "recordingDuration",
+                "type": "String",
+                "description": "recording duration",
+                "default": "60"
             }
         ],
         "sources": [{
@@ -180,7 +186,7 @@
                 "@type": "#Microsoft.Media.MediaGraphAssetSink",
                 "name": "assetSink",
                 "assetNamePattern": "sampleAssetFromEVR-LVAEdge-${instanceId}-${System.DateTime}",
-                "segmentLength": "PT30S",
+                "segmentLength": "${recordingDuration}",
                 "LocalMediaCacheMaximumSizeMiB": "2048",
                 "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
                 "inputs": [{
