@@ -48,8 +48,8 @@ in a deployment .yaml these entries would request an allocation of one gpu devic
                   nvidia.com/gpu: 1
     ...
 
-To damonstrate this, let's deploy one of our previous models from [machine-learning-notebooks/deploying-on-k8s](../../machine-learning-notebooks/deploying-on-k8s),
-you will need to run this notebook to create the container image: [machine-learning-notebooks/deploying-on-k8s/production-deploy-to-k8s-gpu.ipynb](../../machine-learning-notebooks/deploying-on-k8s/production-deploy-to-k8s-gpu.ipynb).
+To damonstrate this, let's deploy one of our previous models from [machine-learning-notebooks/deploying-on-k8s](../machine-learning-notebooks/deploying-on-k8s),
+you will need to run this notebook to create the container image: [machine-learning-notebooks/deploying-on-k8s/production-deploy-to-k8s-gpu.ipynb](../machine-learning-notebooks/deploying-on-k8s/production-deploy-to-k8s-gpu.ipynb).
 
 `deploy_infer.yaml` will look like this:
 
@@ -145,7 +145,7 @@ Let us also delete the first deployment we did and the service we created for it
 
 ## Defining GPU device visibility
 
-There is an alternative that allows a fractional allocation of GPU resources. It is a preview feagure for
+There is an alternative that allows a fractional allocation of GPU resources. It is a preview feature for
 Azure Stack Edge Pro, called Multi-Process Service (MPS).
 
 To enable it(once you have 
