@@ -1,7 +1,7 @@
 #
 # Run this like so:
 # 
-# $ python runtest_infer2.py
+# $ python runtest_infer3.py
 #
 
 import requests
