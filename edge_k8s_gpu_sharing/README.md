@@ -327,6 +327,31 @@ Open browser on http://127.0.0.1:8888 (or, with the token) and you should see th
 
 ![pics/notebook_snapshot.png](pics/notebook_snapshot.png)
 
+And you should see all three processes in Edge-device analog of nvidia-smi:
+
+    [123.45.67.89]: PS>Get-HcsGpuNvidiaSmi
+    
+    +-----------------------------------------------------------------------------+
+    | NVIDIA-SMI 440.64.00    Driver Version: 440.64.00    CUDA Version: 10.2     |
+    |-------------------------------+----------------------+----------------------+
+    | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+    | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+    |===============================+======================+======================|
+    |   0  Tesla T4            On   | 00008439:00:00.0 Off |                    0 |
+    | N/A   60C    P0    30W /  70W |  14436MiB / 15109MiB |      0%      Default |
+    +-------------------------------+----------------------+----------------------+
+
+    +-----------------------------------------------------------------------------+
+    | Processes:                                                       GPU Memory |
+    |  GPU       PID   Type   Process name                             Usage      |
+    |=============================================================================|
+    |    0     79811      C   ...b7ee7d45easgasrgqergasrgfsd9/bin/python  1057MiB |
+    |    0    190519      C   python3                                      355MiB |
+    |    0    198661      C   ...b7ee7d45e44b2b71c8argfdrfash/bin/python 13013MiB |
+    +-----------------------------------------------------------------------------+
+
+All processes are running on GPU 0, as we defined them.
+
 ## Deleting all deployments
 
 To clean the environment from what we created, we need to delete the deployments and services:
