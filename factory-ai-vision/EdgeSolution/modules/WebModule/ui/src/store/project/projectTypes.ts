@@ -66,6 +66,7 @@ export type ProjectData = {
   SVTCcameras: number[];
   SVTCparts: number[];
   SVTCconfirmationThreshold: number;
+  SVTCRecordingDuration: number;
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
   setFpsManually: boolean;

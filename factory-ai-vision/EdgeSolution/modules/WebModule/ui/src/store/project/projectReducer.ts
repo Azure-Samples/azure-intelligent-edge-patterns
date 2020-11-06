@@ -48,6 +48,7 @@ export const initialProjectData: ProjectData = {
   SVTCisOpen: false,
   SVTCparts: [],
   SVTCconfirmationThreshold: 60,
+  SVTCRecordingDuration: 1,
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
   setFpsManually: false,
