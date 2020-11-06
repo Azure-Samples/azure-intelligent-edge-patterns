@@ -107,8 +107,6 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         ...state,
         status: Status.TrainingFailed,
       };
-    case 'CHANGE_STATUS':
-      return { ...state, status: action.status };
     case updateProbThreshold.pending.toString():
       return { ...state, isLoading: true, error: null };
     case updateProbThreshold.fulfilled.toString():

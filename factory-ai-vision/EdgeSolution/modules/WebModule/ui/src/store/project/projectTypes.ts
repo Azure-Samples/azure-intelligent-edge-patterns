@@ -115,16 +115,6 @@ export type UpdateProjectDataAction = {
   payload: Partial<ProjectData>;
 };
 
-export const START_INFERENCE = 'START_INFERENCE';
-export type StartInferenceAction = {
-  type: typeof START_INFERENCE;
-};
-
-export const STOP_INFERENCE = 'STOP_INFERENCE';
-export type StopInferenceAction = {
-  type: typeof STOP_INFERENCE;
-};
-
 export const TRAIN_SUCCESS = 'TRAIN_SUCCESS';
 export type TrainSuccessAction = {
   type: typeof TRAIN_SUCCESS;
@@ -135,11 +125,6 @@ export type TrainFailedAction = {
   type: typeof TRAIN_FAILED;
 };
 
-export type ChangeStatusAction = {
-  type: 'CHANGE_STATUS';
-  status: Status;
-};
-
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
@@ -148,11 +133,8 @@ export type ProjectActionTypes =
   | PostProjectSuccessAction
   | PostProjectFaliedAction
   | UpdateProjectDataAction
-  | StartInferenceAction
-  | StopInferenceAction
   | TrainSuccessAction
-  | TrainFailedAction
-  | ChangeStatusAction;
+  | TrainFailedAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

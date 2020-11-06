@@ -18,12 +18,6 @@ import {
   GET_PROJECT_REQUEST,
   UpdateProjectDataAction,
   UPDATE_PROJECT_DATA,
-  Status,
-  StartInferenceAction,
-  START_INFERENCE,
-  STOP_INFERENCE,
-  StopInferenceAction,
-  ChangeStatusAction,
   InferenceProtocol,
   InferenceSource,
   TrainSuccessAction,
@@ -57,14 +51,6 @@ const postProjectFail = (error: Error): PostProjectFaliedAction => ({
   error,
 });
 
-export const startInference = (): StartInferenceAction => ({
-  type: START_INFERENCE,
-});
-
-export const stopInference = (): StopInferenceAction => ({
-  type: STOP_INFERENCE,
-});
-
 export const trainSuccess = (): TrainSuccessAction => ({
   type: TRAIN_SUCCESS,
 });
@@ -76,11 +62,6 @@ export const trainFailed = (): TrainFailedAction => ({
 export const updateProjectData = (partialProjectData: Partial<ProjectData>): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
   payload: partialProjectData,
-});
-
-export const changeStatus = (status: Status): ChangeStatusAction => ({
-  type: 'CHANGE_STATUS',
-  status,
 });
 
 const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps: number): ProjectData => ({
