@@ -73,7 +73,13 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
           } ms`}
         </Text>
         {inferenceMetrics.device === 'vpu' && (
-          <img src="/icons/openvino_logo.png" style={{ width: '100px' }} />
+          <a
+            href="https://software.intel.com/content/www/us/en/develop/tools/openvino-toolkit.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img src="/icons/openvino_logo.png" style={{ width: '100px' }} />
+          </a>
         )}
       </Stack>
       <Stack
