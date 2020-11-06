@@ -10,9 +10,6 @@ import {
   UPDATE_PROJECT_DATA,
   POST_PROJECT_REQUEST,
   Status,
-  GET_TRAINING_METRICS_REQUEST,
-  GET_TRAINING_METRICS_SUCCESS,
-  GET_TRAINING_METRICS_FAILED,
   ProjectData,
   InferenceMode,
   InferenceProtocol,
@@ -62,10 +59,6 @@ const initialState: Project = {
   isLoading: false,
   data: initialProjectData,
   originData: initialProjectData,
-  trainingMetrics: {
-    prevConsequence: null,
-    curConsequence: null,
-  },
   status: Status.None,
   error: null,
 };
@@ -106,26 +99,13 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
     case TRAIN_SUCCESS: {
       return {
         ...state,
-        status: Status.FinishTraining,
+        status: Status.StartInference,
       };
     }
     case TRAIN_FAILED:
       return {
         ...state,
         status: Status.TrainingFailed,
-      };
-    case GET_TRAINING_METRICS_REQUEST:
-      return state;
-    case GET_TRAINING_METRICS_SUCCESS:
-      return {
-        ...state,
-        trainingMetrics: action.payload,
-        status: Status.StartInference,
-      };
-    case GET_TRAINING_METRICS_FAILED:
-      return {
-        ...state,
-        error: action.error,
       };
     case 'CHANGE_STATUS':
       return { ...state, status: action.status };

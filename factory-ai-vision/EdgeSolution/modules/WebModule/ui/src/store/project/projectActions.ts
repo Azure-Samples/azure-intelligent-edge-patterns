@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import Axios from 'axios';
-import * as R from 'ramda';
 import { State } from 'RootStateType';
 import {
   ProjectThunk,
@@ -20,13 +19,6 @@ import {
   UpdateProjectDataAction,
   UPDATE_PROJECT_DATA,
   Status,
-  GetTrainingMetricsRequestAction,
-  GET_TRAINING_METRICS_REQUEST,
-  GetTrainingMetricsSuccessAction,
-  GET_TRAINING_METRICS_SUCCESS,
-  GetTrainingMetricsFailedAction,
-  GET_TRAINING_METRICS_FAILED,
-  Consequence,
   StartInferenceAction,
   START_INFERENCE,
   STOP_INFERENCE,
@@ -39,7 +31,6 @@ import {
   TrainFailedAction,
   TRAIN_FAILED,
 } from './projectTypes';
-import { selectAllImages } from '../imageSlice';
 import { createWrappedAsync } from '../shared/createWrappedAsync';
 
 const getProjectRequest = (): GetProjectRequestAction => ({
@@ -63,21 +54,6 @@ const postProjectSuccess = (data: ProjectData): PostProjectSuccessAction => ({
 });
 const postProjectFail = (error: Error): PostProjectFaliedAction => ({
   type: POST_PROJECT_FALIED,
-  error,
-});
-
-const getTrainingMetricsRequest = (): GetTrainingMetricsRequestAction => ({
-  type: GET_TRAINING_METRICS_REQUEST,
-});
-const getTrainingMetricsSuccess = (
-  curConsequence: Consequence,
-  prevConsequence: Consequence,
-): GetTrainingMetricsSuccessAction => ({
-  type: GET_TRAINING_METRICS_SUCCESS,
-  payload: { prevConsequence, curConsequence },
-});
-const getTrainingMetricsFailed = (error: Error): GetTrainingMetricsFailedAction => ({
-  type: GET_TRAINING_METRICS_FAILED,
   error,
 });
 
@@ -227,35 +203,6 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
 export const getConfigure = createWrappedAsync<any, number>('project/configure', async (projectId) => {
   await Axios.get(`/api/part_detections/${projectId}/configure`);
 });
-
-export const thunkGetTrainingMetrics = (trainingProjectId: number) => (dispacth): Promise<any> => {
-  dispacth(getTrainingMetricsRequest());
-
-  return Axios.get(`/api/projects/${trainingProjectId}/train_performance`)
-    .then(({ data }) => {
-      const newIteration = data.iterations.find((e) => e.iteration_name === 'new');
-      const prevIteration = data.iterations.find((e) => e.iteration_name === 'previous');
-
-      const curConsequence: Consequence = newIteration
-        ? {
-            precision: newIteration.precision,
-            recall: newIteration.recall,
-            mAP: newIteration.map,
-          }
-        : null;
-
-      const prevConsequence: Consequence = prevIteration
-        ? {
-            precision: prevIteration.precision,
-            recall: prevIteration.recall,
-            mAP: prevIteration.map,
-          }
-        : null;
-
-      return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence));
-    })
-    .catch((err) => dispacth(getTrainingMetricsFailed(err)));
-};
 
 export const updateProbThreshold = createWrappedAsync<any, undefined, { state: State }>(
   'project/updateProbThreshold',

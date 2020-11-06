@@ -5,29 +5,16 @@ export type Project = {
   isLoading: boolean;
   data: ProjectData;
   originData: ProjectData;
-  trainingMetrics: TrainingMetrics;
   status: Status;
   error: Error;
-};
-
-export type TrainingMetrics = {
-  prevConsequence: Consequence;
-  curConsequence: Consequence;
 };
 
 export enum Status {
   None = 'none',
   WaitTraining = 'waitTraining',
-  FinishTraining = 'finishTraining',
   TrainingFailed = 'trainingFailed',
   StartInference = 'startInference',
 }
-
-export type Consequence = {
-  precision: number;
-  recall: number;
-  mAP: number;
-};
 
 export enum InferenceMode {
   PartDetection = 'PD',
@@ -105,26 +92,6 @@ export type GetProjectFailedAction = {
   error: Error;
 };
 
-export const GET_TRAINING_METRICS_REQUEST = 'GET_TRAINING_METRICS_REQUEST';
-export type GetTrainingMetricsRequestAction = {
-  type: typeof GET_TRAINING_METRICS_REQUEST;
-};
-
-export const GET_TRAINING_METRICS_SUCCESS = 'GET_TRAINING_METRICS_SUCCESS';
-export type GetTrainingMetricsSuccessAction = {
-  type: typeof GET_TRAINING_METRICS_SUCCESS;
-  payload: {
-    prevConsequence: Consequence;
-    curConsequence: Consequence;
-  };
-};
-
-export const GET_TRAINING_METRICS_FAILED = 'GET_TRAINING_METRICS_FAILED';
-export type GetTrainingMetricsFailedAction = {
-  type: typeof GET_TRAINING_METRICS_FAILED;
-  error: Error;
-};
-
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
 export type PostProjectRequestAction = {
   type: typeof POST_PROJECT_REQUEST;
@@ -181,9 +148,6 @@ export type ProjectActionTypes =
   | PostProjectSuccessAction
   | PostProjectFaliedAction
   | UpdateProjectDataAction
-  | GetTrainingMetricsRequestAction
-  | GetTrainingMetricsSuccessAction
-  | GetTrainingMetricsFailedAction
   | StartInferenceAction
   | StopInferenceAction
   | TrainSuccessAction
