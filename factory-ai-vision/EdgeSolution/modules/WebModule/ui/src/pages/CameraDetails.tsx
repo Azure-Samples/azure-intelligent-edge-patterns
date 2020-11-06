@@ -109,7 +109,7 @@ export const CameraDetails: React.FC = () => {
           <Breadcrumb items={breadCrumbItems} />
           <Stack tokens={{ childrenGap: 20 }} horizontal grow>
             <CameraInfo rtsp={maskRtsp(camera.rtsp)} location={locationName} />
-            <CameraLiveFeed rtsp={camera.rtsp} onBtnClick={onCaptureBtnClick} />
+            <CameraLiveFeed cameraId={camera.id} onBtnClick={onCaptureBtnClick} />
           </Stack>
         </Stack>
       </Stack>
@@ -165,8 +165,8 @@ const CameraInfo: React.FC<{ rtsp: string; location: string }> = ({ rtsp, locati
   </Stack>
 );
 
-const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: (streamId) => void }> = ({
-  rtsp,
+const CameraLiveFeed: React.FC<{ cameraId: number; onBtnClick: (streamId) => void }> = ({
+  cameraId,
   onBtnClick: btnClickCb,
 }) => {
   const streamIdRef = useRef('');
@@ -182,7 +182,7 @@ const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: (streamId) => void }>
       <Stack.Item grow>
         <div style={{ height: '90%' }}>
           <RTSPVideo
-            rtsp={rtsp}
+            cameraId={cameraId}
             onStreamCreated={(streamId) => {
               streamIdRef.current = streamId;
             }}

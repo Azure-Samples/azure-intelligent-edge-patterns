@@ -5,12 +5,16 @@ import { useInterval } from '../../hooks/useInterval';
 import { handleAxiosError } from '../../utils/handleAxiosError';
 
 type RTSPVideoProps = {
-  rtsp: string;
+  cameraId: number;
   onStreamCreated?: (streamId: string) => void;
   partId?: number;
 };
 
-export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCreated, partId = null }) => {
+export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
+  cameraId,
+  onStreamCreated,
+  partId = null,
+}) => {
   const [streamId, setStreamId] = useState<string>('');
 
   const onDisconnect = (): void => {
@@ -33,11 +37,11 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCre
   });
 
   useEffect(() => {
-    if (!rtsp) return;
+    if (typeof cameraId !== 'number') return;
     const url =
       partId === null
-        ? `/api/streams/connect/?rtsp=${rtsp}`
-        : `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
+        ? `/api/streams/connect/?camera_id=${cameraId}`
+        : `/api/streams/connect/?part_id=${partId}&camera_id=${cameraId}`;
     Axios.get(url)
       .then(({ data }) => {
         setStreamId(data.stream_id);
@@ -49,7 +53,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCre
         console.error(err);
       });
     // Ignore the dependency `onStreamCreated` because it may cause unecessary triggered in the useEffect
-  }, [partId, rtsp]);
+  }, [partId, cameraId]);
 
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 
