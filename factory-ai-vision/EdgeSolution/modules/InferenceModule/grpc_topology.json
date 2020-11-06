@@ -186,7 +186,7 @@
                 "@type": "#Microsoft.Media.MediaGraphAssetSink",
                 "name": "assetSink",
                 "assetNamePattern": "sampleAssetFromEVR-LVAEdge-${instanceId}-${System.DateTime}",
-                "segmentLength": "${recordingDuration}",
+                "segmentLength": "PT30S",
                 "LocalMediaCacheMaximumSizeMiB": "2048",
                 "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
                 "inputs": [{
