@@ -9,8 +9,8 @@ import sys
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.images import ImageFile
 from django.http import HttpResponse, StreamingHttpResponse
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -211,7 +211,11 @@ def keep_alive(request, stream_id):
     logger.info("Keeping streams alive")
     stream = stream_manager.get_stream_by_id(stream_id)
     if stream:
+        logger.info("===============================")
+        logger.info("Last active", stream.last_active)
         stream.update_keep_alive()
+        logger.info("Last active", stream.last_active)
+        logger.info("===============================")
         return Response({"status": "ok"})
     raise StreamNotFoundError
 

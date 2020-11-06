@@ -160,6 +160,8 @@ class StreamManager:
                         # stop the inactive stream
                         # (the ones users didnt click disconnect)
                         logger.info("stream %s inactive", stream)
+                        logger.info("Time now %s", time.time())
+                        logger.info("Stream alive through %s", stream.last_active)
                         stream.close()
 
                         # collect the stream, to delete later

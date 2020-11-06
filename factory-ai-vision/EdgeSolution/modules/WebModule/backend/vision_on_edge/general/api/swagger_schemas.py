@@ -1,7 +1,7 @@
 """Custom yasg schema.
 """
 
-from drf_yasg.inspectors import SwaggerAutoSchema
+from drf_yasg2.inspectors import SwaggerAutoSchema
 
 
 class StreamAutoSchema(SwaggerAutoSchema):
