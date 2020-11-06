@@ -72,7 +72,7 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
             Math.round(inferenceMetrics.averageTime * 100) / 100
           } ms`}
         </Text>
-        {inferenceMetrics.device === 'vpu' && (
+        {(inferenceMetrics.device === 'vpu' || inferenceMetrics.device === 'cpu') && (
           <a
             href="https://software.intel.com/content/www/us/en/develop/tools/openvino-toolkit.html"
             target="_blank"
