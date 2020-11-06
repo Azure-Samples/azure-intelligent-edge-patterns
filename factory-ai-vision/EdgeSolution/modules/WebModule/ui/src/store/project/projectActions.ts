@@ -269,32 +269,6 @@ export const updateProbThreshold = createWrappedAsync<any, undefined, { state: S
   },
 );
 
-export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState): Promise<any> => {
-  dispatch(postProjectRequest());
-  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectData(getState());
-
-  return Axios.patch(`/api/part_detections/${projectId}/`, {
-    accuracyRangeMin,
-    accuracyRangeMax,
-  })
-    .then(({ data }) => {
-      dispatch(postProjectSuccess(data));
-      return void 0;
-    })
-    .catch((e) => {
-      if (e.response) {
-        throw new Error(e.response.data.log);
-      } else if (e.request) {
-        throw new Error(e.request);
-      } else {
-        throw e;
-      }
-    })
-    .catch((e) => {
-      dispatch(postProjectFail(e));
-    });
-};
-
 export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[]): ProjectThunk => (
   dispatch,
   getState,
