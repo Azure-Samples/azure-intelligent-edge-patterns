@@ -268,35 +268,3 @@ export const updateProbThreshold = createWrappedAsync<any, undefined, { state: S
     return response.data;
   },
 );
-
-export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[]): ProjectThunk => (
-  dispatch,
-  getState,
-): void => {
-  const images = selectAllImages(getState()).filter((e) => !e.isRelabel);
-
-  const partsWithImageLength = images.reduce((acc, cur) => {
-    const id = cur.part;
-    const relatedPartIdx = acc.findIndex((e) => e.id === id);
-    if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
-    return acc;
-  }, R.clone(newSelectedParts));
-
-  const minimumLengthPart = partsWithImageLength.reduce(
-    (acc, cur) => {
-      if (cur.length < acc.length) return { name: cur.name, length: cur.length };
-      return acc;
-    },
-    { name: '', length: Infinity },
-  );
-  if (minimumLengthPart.length === Infinity) return;
-  if (minimumLengthPart.length < 30) {
-    dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }));
-  } else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80) {
-    dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }));
-  } else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130) {
-    dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }));
-  } else if (minimumLengthPart.length >= 130) {
-    dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }));
-  }
-};
