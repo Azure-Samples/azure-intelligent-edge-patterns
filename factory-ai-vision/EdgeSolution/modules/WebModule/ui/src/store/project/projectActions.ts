@@ -65,39 +65,9 @@ const postProjectRequest = (isDemo: boolean): PostProjectRequestAction => ({
   type: POST_PROJECT_REQUEST,
   isDemo,
 });
-const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessAction => ({
+const postProjectSuccess = (data: ProjectData, isDemo: boolean): PostProjectSuccessAction => ({
   type: POST_PROJECT_SUCCESS,
-  data: {
-    id: data?.id ?? null,
-    cameras: data?.cameras ?? [],
-    location: data?.location ?? null,
-    parts: data?.parts ?? [],
-    trainingProject: data?.project ?? null,
-    modelUrl: data?.download_uri ?? '',
-    needRetraining: data?.needRetraining ?? true,
-    accuracyRangeMin: data?.accuracyRangeMin ?? 60,
-    accuracyRangeMax: data?.accuracyRangeMax ?? 80,
-    maxImages: data?.maxImages ?? 20,
-    sendMessageToCloud: data?.metrics_is_send_iothub,
-    framesPerMin: data?.metrics_frame_per_minutes,
-    probThreshold: data?.prob_threshold ?? 10,
-    name: data?.name ?? '',
-    inferenceMode: data?.inference_mode ?? '',
-    SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
-    SVTCcameras: data?.send_video_to_cloud.map((e) => e.camera),
-    // All the camera will detect same parts
-    SVTCparts: data?.send_video_to_cloud[0]?.parts || [],
-    SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
-    SVTCRecordingDuration: data?.send_video_to_cloud[0]?.recording_duration || 1,
-    deployTimeStamp: data?.deploy_timestamp ?? '',
-    setFpsManually: data?.setFpsManually ?? false,
-    fps: data?.fps ?? 10,
-    recomendedFps: data?.recomendedFps ?? 10,
-    totalRecomendedFps: data?.totalRecomendedFps ?? 10,
-    inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
-    inferenceSource: data?.inference_source ?? InferenceSource.LVA,
-    disableVideoFeed: data?.disable_video_feed ?? false,
-  },
+  data,
   isDemo,
 });
 const postProjectFail = (error: Error, isDemo: boolean): PostProjectFaliedAction => ({
@@ -158,6 +128,41 @@ export const changeStatus = (status: Status, isDemo: boolean): ChangeStatusActio
   isDemo,
 });
 
+const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps: number): ProjectData => ({
+  id: data?.id ?? null,
+  cameras: data?.cameras ?? [],
+  parts: data?.parts ?? [],
+  trainingProject: data?.project ?? null,
+  name: data?.name ?? '',
+  // Retraining
+  needRetraining: data?.needRetraining ?? true,
+  accuracyRangeMin: data?.accuracyRangeMin ?? 60,
+  accuracyRangeMax: data?.accuracyRangeMax ?? 80,
+  maxImages: data?.maxImages ?? 20,
+  // Cloud message
+  sendMessageToCloud: data?.metrics_is_send_iothub,
+  framesPerMin: data?.metrics_frame_per_minutes,
+  probThreshold: data?.prob_threshold ?? 10,
+  inferenceMode: data?.inference_mode ?? '',
+  // Send video to cloud
+  SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+  SVTCcameras: data?.send_video_to_cloud.map((e) => e.camera),
+  SVTCparts: data?.send_video_to_cloud[0]?.parts || [], // All the camera will detect same parts
+  SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
+  SVTCRecordingDuration: data?.send_video_to_cloud[0]?.recording_duration ?? 1,
+  // Camera fps
+  setFpsManually: data?.fps !== recomendedFps,
+  recomendedFps,
+  fps: data?.fps ?? 10,
+  totalRecomendedFps,
+  // Disable live video
+  disableVideoFeed: data?.disable_video_feed ?? false,
+  // Other
+  deployTimeStamp: data?.deploy_timestamp ?? '',
+  inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
+  inferenceSource: data?.inference_source ?? InferenceSource.LVA,
+});
+
 const getProjectData = (state: State): ProjectData => state.project.data;
 
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> => {
@@ -173,39 +178,13 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
       const totalRecomendedFps = results[1].data[infModuleIdx]?.recommended_fps;
       const recomendedFps = Math.floor(totalRecomendedFps / (partDetection[0].cameras?.length || 1));
 
-      const project: ProjectData = {
-        id: partDetection[0]?.id ?? null,
-        cameras: partDetection[0]?.cameras ?? [],
-        location: partDetection[0]?.location ?? null,
-        parts: partDetection[0]?.parts ?? [],
-        modelUrl: partDetection[0]?.download_uri ?? '',
-        needRetraining: partDetection[0]?.needRetraining ?? true,
-        accuracyRangeMin: partDetection[0]?.accuracyRangeMin ?? 60,
-        accuracyRangeMax: partDetection[0]?.accuracyRangeMax ?? 80,
-        maxImages: partDetection[0]?.maxImages ?? 20,
-        sendMessageToCloud: partDetection[0]?.metrics_is_send_iothub,
-        framesPerMin: partDetection[0]?.metrics_frame_per_minutes,
-        probThreshold: partDetection[0]?.prob_threshold ?? 10,
-        trainingProject: partDetection[0]?.project ?? null,
-        name: partDetection[0]?.name ?? '',
-        inferenceMode: partDetection[0]?.inference_mode ?? '',
-        SVTCisOpen: partDetection[0]?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
-        SVTCcameras: partDetection[0]?.send_video_to_cloud.map((e) => e.camera),
-        // All the camera will detect same parts
-        SVTCparts: partDetection[0]?.send_video_to_cloud[0]?.parts || [],
-        SVTCconfirmationThreshold:
-          partDetection[0]?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
-        SVTCRecordingDuration: partDetection[0]?.send_video_to_cloud[0]?.recording_duration || 1,
-        deployTimeStamp: partDetection[0]?.deploy_timestamp ?? '',
-        setFpsManually: partDetection[0]?.fps !== recomendedFps,
-        recomendedFps,
-        fps: partDetection[0]?.fps ?? 10,
-        totalRecomendedFps,
-        inferenceProtocol: partDetection[0]?.inference_protocol ?? InferenceProtocol.GRPC,
-        inferenceSource: partDetection[0]?.inference_source ?? InferenceSource.LVA,
-        disableVideoFeed: partDetection[0]?.disable_video_feed ?? false,
-      };
-      dispatch(getProjectSuccess(project, partDetection[0]?.has_configured, false));
+      dispatch(
+        getProjectSuccess(
+          normalizeServerToClient(partDetection[0], recomendedFps, totalRecomendedFps),
+          partDetection[0]?.has_configured,
+          false,
+        ),
+      );
       return partDetection[0]?.has_configured;
     })
     .catch((err) => {
@@ -257,7 +236,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
     .then(({ data }) => {
       dispatch(
         postProjectSuccess(
-          { ...data, setFpsManually: projectData.setFpsManually, recomendedFps: projectData.recomendedFps },
+          normalizeServerToClient(data, projectData.recomendedFps, projectData.totalRecomendedFps),
           false,
         ),
       );

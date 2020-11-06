@@ -48,34 +48,40 @@ export enum InferenceSource {
 
 export type ProjectData = {
   id: number;
-  cameras: number[];
-  location: number;
-  parts: number[];
+  /* --- Configured by user --- */
+  name: string;
   trainingProject: number;
+  cameras: number[];
+  parts: number[];
+  /* --- Advanced options --- */
+  // Retraining
   needRetraining: boolean;
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
+  // Cloud message
   sendMessageToCloud: boolean;
   framesPerMin: number;
-  modelUrl: string;
   probThreshold: number;
-  name: string;
   // Send video to cloud
   SVTCisOpen: boolean;
   SVTCcameras: number[];
   SVTCparts: number[];
   SVTCconfirmationThreshold: number;
   SVTCRecordingDuration: number;
-  inferenceMode: InferenceMode;
-  deployTimeStamp: string;
+  // Camera fps
   setFpsManually: boolean;
   fps: number;
   totalRecomendedFps: number;
   recomendedFps: number;
+  // Protocol of inference
   inferenceProtocol: InferenceProtocol;
-  inferenceSource: InferenceSource;
+  // Disalbe live video
   disableVideoFeed: boolean;
+  /* --- Other --- */
+  inferenceMode: InferenceMode;
+  deployTimeStamp: string;
+  inferenceSource: InferenceSource;
 };
 
 // Describing the different ACTION NAMES available
