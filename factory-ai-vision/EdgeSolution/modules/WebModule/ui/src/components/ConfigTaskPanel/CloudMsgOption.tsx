@@ -1,17 +1,17 @@
 import { TextField, Toggle } from '@fluentui/react';
-import React from 'react';
+import React, { FC } from 'react';
+import { ProjectData } from '../../store/project/projectTypes';
 import { OptionLayout } from './OptionLayout';
 import { OnChangeType } from './type';
 
-type CloudMsgOptionProps = {
-  sendMessageToCloud: boolean;
-  framesPerMin: number;
+type PropsType = Pick<ProjectData, 'sendMessageToCloud' | 'framesPerMin' | 'probThreshold'> & {
   onChange: OnChangeType;
 };
 
-export const CloudMsgOption: React.FC<CloudMsgOptionProps> = ({
+export const CloudMsgOption: FC<PropsType> = ({
   sendMessageToCloud,
   framesPerMin,
+  probThreshold,
   onChange,
 }) => {
   return (
@@ -25,16 +25,28 @@ export const CloudMsgOption: React.FC<CloudMsgOptionProps> = ({
         inlineLabel
       />
       {sendMessageToCloud && (
-        <TextField
-          label="Frames per minute"
-          type="number"
-          value={framesPerMin?.toString()}
-          onChange={(_, newValue) => {
-            onChange('framesPerMin', parseInt(newValue, 10));
-          }}
-          disabled={!sendMessageToCloud}
-          required
-        />
+        <>
+          <TextField
+            label="Frames per minute"
+            type="number"
+            value={framesPerMin?.toString()}
+            onChange={(_, newValue) => {
+              onChange('framesPerMin', parseInt(newValue, 10));
+            }}
+            disabled={!sendMessageToCloud}
+            required
+          />
+          <TextField
+            label="Confirmation threshold"
+            type="number"
+            value={probThreshold?.toString()}
+            onChange={(_, newValue) => {
+              onChange('probThreshold', parseInt(newValue, 10));
+            }}
+            disabled={!sendMessageToCloud}
+            required
+          />
+        </>
       )}
     </OptionLayout>
   );

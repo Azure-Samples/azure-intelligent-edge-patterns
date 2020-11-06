@@ -34,6 +34,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
         <CloudMsgOption
           sendMessageToCloud={projectData.sendMessageToCloud}
           framesPerMin={projectData.framesPerMin}
+          probThreshold={projectData.probThreshold}
           onChange={onChange}
         />
         {selectedTrainProjectIsNotDemo && (

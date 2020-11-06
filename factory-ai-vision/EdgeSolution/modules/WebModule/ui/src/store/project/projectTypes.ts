@@ -59,8 +59,7 @@ export type ProjectData = {
   sendMessageToCloud: boolean;
   framesPerMin: number;
   modelUrl: string;
-  // use text input brings a better UX, so we set it to string here
-  probThreshold: string;
+  probThreshold: number;
   name: string;
   // Send video to cloud
   SVTCisOpen: boolean;
