@@ -8,7 +8,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 1. You must have an Azure subscription.
 <br/> if you don’t have one, you can create one here: https://azure.microsoft.com/en-us/pricing/purchase-options/pay-as-you-go/
-2. That subscription must contain Azure Stack Edge or IoT hub Edge device with port 8181 opened. please follow this [documentation](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) for deployment information
+2. That subscription must contain Azure Stack Edge or IoT hub Edge device with port 8181 opened. please follow this [documentation](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md) for deployment information
 3. Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings) and learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/customvisioninfo.png)
 4. (Optional) Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
@@ -64,7 +64,10 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 14. Check out our tutorials on youtube channel 
 
-- Tutorial 2 - [Start with prebuilt scenario](https://youtu.be/dihAdZTGj-g)
-- Tutorial 3 - [Start with creating new project, capture images, tagging images and deploy](https://youtu.be/cCEW6nsd8xQ)
-- Tutorial 4 - [Retraining and improve your model](https://youtu.be/OxK9feR_T3U)
-- Tutorial 5 - [Advance capabilities setting](https://youtu.be/Bv7wxfFEdtI)
+
+- Tutorial 2 - <a href="https://youtu.be/dihAdZTGj-g" target="_blank">Start with prebuilt scenario</a>
+- Tutorial 3 - <a href="https://www.youtube.com/watch?v=cCEW6nsd8xQ" target="_blank">Start with creating new project, capture images, tagging images and deploy</a>
+- Tutorial 4 - <a href="https://www.youtube.com/watch?v=OxK9feR_T3U" target="_blank">Retraining and improve your model</a>
+- Tutorial 5 - <a href="https://www.youtube.com/watch?v=Bv7wxfFEdtI" target="_blank">Advance capabilities setting</a>
+
+

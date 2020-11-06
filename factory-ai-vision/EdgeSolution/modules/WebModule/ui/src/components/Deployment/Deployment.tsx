@@ -103,7 +103,7 @@ export const Deployment: React.FC = () => {
     }
   }, [dispatch, status, projectId, isDemo, trainingProject]);
 
-  const changeProbThreshold = (newValue: string) =>
+  const changeProbThreshold = (newValue: number) =>
     dispatch(updateProjectData({ probThreshold: newValue }, false));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 

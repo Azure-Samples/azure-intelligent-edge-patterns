@@ -42,7 +42,7 @@ export const initialProjectData: ProjectData = {
   modelUrl: '',
   sendMessageToCloud: false,
   framesPerMin: 6,
-  probThreshold: '10',
+  probThreshold: 10,
   name: '',
   SVTCcameras: [],
   SVTCisOpen: false,
