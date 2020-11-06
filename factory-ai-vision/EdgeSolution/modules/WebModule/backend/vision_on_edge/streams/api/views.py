@@ -47,7 +47,10 @@ if "runserver" in sys.argv:
     method="get",
     manual_parameters=[
         openapi.Parameter(
-            "rtsp", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="RTSP"
+            "camera_id",
+            openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description="Camera ID",
         ),
         openapi.Parameter(
             "part_id",
@@ -70,17 +73,17 @@ def connect_stream(request):
         request:
     """
     part_id = request.query_params.get("part_id") or None
-    rtsp = request.query_params.get("rtsp") or "0"
+    camera_id = request.query_params.get("camera_id")
     if part_id is not None:
         try:
             Part.objects.get(pk=part_id)
         except ObjectDoesNotExist:
             raise StreamPartIdNotFound
         part_id = int(part_id)
-    if not Camera.objects.filter(rtsp=rtsp).exists():
+    if not Camera.objects.filter(pk=camera_id).exists():
         raise StreamRtspCameraNotFound
-    camera_id = Camera.objects.filter(rtsp=rtsp).first().id
-    stream_obj = Stream(rtsp=rtsp, camera_id=camera_id, part_id=part_id)
+    camera_obj = Camera.objects.get(pk=camera_id)
+    stream_obj = Stream(rtsp=camera_obj.rtsp, camera_id=camera_id, part_id=part_id)
     stream_manager.add(stream_obj)
     response_data = {"status": "ok", "stream_id": stream_obj.id}
     serializer = StreamConnectResponseSerializer(data=response_data)
