@@ -47,7 +47,7 @@ fi
 
 
 # azSubscriptonName = The friendly name of the Azure subscription
-# iotHubName = The IoT Hub that corisponds to the ASE device
+# iotHubName = The IoT Hub that corresponds to the ASE device
 # edgeDeviceId = The device id of the ASE device
 # cvTrainingApiKey = The Custom Vision service training key
 # cvTrainingEndpoint = The Custom Vision service end point
