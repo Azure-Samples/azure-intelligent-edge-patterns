@@ -42,67 +42,51 @@ import {
 import { selectAllImages } from '../imageSlice';
 import { createWrappedAsync } from '../shared/createWrappedAsync';
 
-const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
+const getProjectRequest = (): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
-  isDemo,
 });
-export const getProjectSuccess = (
-  project: ProjectData,
-  hasConfigured: boolean,
-  isDemo: boolean,
-): GetProjectSuccessAction => ({
+export const getProjectSuccess = (project: ProjectData, hasConfigured: boolean): GetProjectSuccessAction => ({
   type: GET_PROJECT_SUCCESS,
   payload: { project, hasConfigured },
-  isDemo,
 });
-const getProjectFailed = (error: Error, isDemo: boolean): GetProjectFailedAction => ({
+const getProjectFailed = (error: Error): GetProjectFailedAction => ({
   type: GET_PROJECT_FAILED,
   error,
-  isDemo,
 });
 
-const postProjectRequest = (isDemo: boolean): PostProjectRequestAction => ({
+const postProjectRequest = (): PostProjectRequestAction => ({
   type: POST_PROJECT_REQUEST,
-  isDemo,
 });
-const postProjectSuccess = (data: ProjectData, isDemo: boolean): PostProjectSuccessAction => ({
+const postProjectSuccess = (data: ProjectData): PostProjectSuccessAction => ({
   type: POST_PROJECT_SUCCESS,
   data,
-  isDemo,
 });
-const postProjectFail = (error: Error, isDemo: boolean): PostProjectFaliedAction => ({
+const postProjectFail = (error: Error): PostProjectFaliedAction => ({
   type: POST_PROJECT_FALIED,
   error,
-  isDemo,
 });
 
-const getTrainingMetricsRequest = (isDemo: boolean): GetTrainingMetricsRequestAction => ({
+const getTrainingMetricsRequest = (): GetTrainingMetricsRequestAction => ({
   type: GET_TRAINING_METRICS_REQUEST,
-  isDemo,
 });
 const getTrainingMetricsSuccess = (
   curConsequence: Consequence,
   prevConsequence: Consequence,
-  isDemo: boolean,
 ): GetTrainingMetricsSuccessAction => ({
   type: GET_TRAINING_METRICS_SUCCESS,
   payload: { prevConsequence, curConsequence },
-  isDemo,
 });
-const getTrainingMetricsFailed = (error: Error, isDemo: boolean): GetTrainingMetricsFailedAction => ({
+const getTrainingMetricsFailed = (error: Error): GetTrainingMetricsFailedAction => ({
   type: GET_TRAINING_METRICS_FAILED,
   error,
-  isDemo,
 });
 
-export const startInference = (isDemo: boolean): StartInferenceAction => ({
+export const startInference = (): StartInferenceAction => ({
   type: START_INFERENCE,
-  isDemo,
 });
 
-export const stopInference = (isDemo: boolean): StopInferenceAction => ({
+export const stopInference = (): StopInferenceAction => ({
   type: STOP_INFERENCE,
-  isDemo,
 });
 
 export const trainSuccess = (): TrainSuccessAction => ({
@@ -113,19 +97,14 @@ export const trainFailed = (): TrainFailedAction => ({
   type: TRAIN_FAILED,
 });
 
-export const updateProjectData = (
-  partialProjectData: Partial<ProjectData>,
-  isDemo: boolean,
-): UpdateProjectDataAction => ({
+export const updateProjectData = (partialProjectData: Partial<ProjectData>): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
   payload: partialProjectData,
-  isDemo,
 });
 
-export const changeStatus = (status: Status, isDemo: boolean): ChangeStatusAction => ({
+export const changeStatus = (status: Status): ChangeStatusAction => ({
   type: 'CHANGE_STATUS',
   status,
-  isDemo,
 });
 
 const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps: number): ProjectData => ({
@@ -166,7 +145,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
 const getProjectData = (state: State): ProjectData => state.project.data;
 
 export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> => {
-  dispatch(getProjectRequest(false));
+  dispatch(getProjectRequest());
 
   const getPartDetection = Axios.get('/api/part_detections/');
   const getInferenceModule = Axios.get('/api/inference_modules/');
@@ -182,13 +161,12 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         getProjectSuccess(
           normalizeServerToClient(partDetection[0], recomendedFps, totalRecomendedFps),
           partDetection[0]?.has_configured,
-          false,
         ),
       );
       return partDetection[0]?.has_configured;
     })
     .catch((err) => {
-      dispatch(getProjectFailed(err, false));
+      dispatch(getProjectFailed(err));
     });
 };
 
@@ -201,7 +179,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
   const isDemo = getState().trainingProject.isDemo.includes(projectData.trainingProject);
 
-  dispatch(postProjectRequest(false));
+  dispatch(postProjectRequest());
 
   return Axios(url, {
     data: {
@@ -237,13 +215,12 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       dispatch(
         postProjectSuccess(
           normalizeServerToClient(data, projectData.recomendedFps, projectData.totalRecomendedFps),
-          false,
         ),
       );
       return data.id;
     })
     .catch((err) => {
-      dispatch(postProjectFail(err, false));
+      dispatch(postProjectFail(err));
     }) as Promise<number>;
 };
 
@@ -251,10 +228,8 @@ export const getConfigure = createWrappedAsync<any, number>('project/configure',
   await Axios.get(`/api/part_detections/${projectId}/configure`);
 });
 
-export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boolean) => (
-  dispacth,
-): Promise<any> => {
-  dispacth(getTrainingMetricsRequest(isDemo));
+export const thunkGetTrainingMetrics = (trainingProjectId: number) => (dispacth): Promise<any> => {
+  dispacth(getTrainingMetricsRequest());
 
   return Axios.get(`/api/projects/${trainingProjectId}/train_performance`)
     .then(({ data }) => {
@@ -277,9 +252,9 @@ export const thunkGetTrainingMetrics = (trainingProjectId: number, isDemo: boole
           }
         : null;
 
-      return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence, isDemo));
+      return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence));
     })
-    .catch((err) => dispacth(getTrainingMetricsFailed(err, isDemo)));
+    .catch((err) => dispacth(getTrainingMetricsFailed(err)));
 };
 
 export const updateProbThreshold = createWrappedAsync<any, undefined, { state: State }>(
@@ -294,11 +269,8 @@ export const updateProbThreshold = createWrappedAsync<any, undefined, { state: S
   },
 );
 
-export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
-  dispatch,
-  getState,
-): Promise<any> => {
-  dispatch(postProjectRequest(isDemo));
+export const thunkUpdateAccuracyRange = (): ProjectThunk => (dispatch, getState): Promise<any> => {
+  dispatch(postProjectRequest());
   const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectData(getState());
 
   return Axios.patch(`/api/part_detections/${projectId}/`, {
@@ -306,7 +278,7 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
     accuracyRangeMax,
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data, isDemo));
+      dispatch(postProjectSuccess(data));
       return void 0;
     })
     .catch((e) => {
@@ -319,11 +291,11 @@ export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
       }
     })
     .catch((e) => {
-      dispatch(postProjectFail(e, isDemo));
+      dispatch(postProjectFail(e));
     });
 };
 
-export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean): ProjectThunk => (
+export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[]): ProjectThunk => (
   dispatch,
   getState,
 ): void => {
@@ -345,12 +317,12 @@ export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: b
   );
   if (minimumLengthPart.length === Infinity) return;
   if (minimumLengthPart.length < 30) {
-    dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }, isDemo));
+    dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }));
   } else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80) {
-    dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }, isDemo));
+    dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }));
   } else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130) {
-    dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }, isDemo));
+    dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }));
   } else if (minimumLengthPart.length >= 130) {
-    dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }, isDemo));
+    dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }));
   }
 };

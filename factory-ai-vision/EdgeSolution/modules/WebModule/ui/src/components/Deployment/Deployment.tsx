@@ -99,12 +99,11 @@ export const Deployment: React.FC = () => {
 
   useEffect(() => {
     if (status === Status.FinishTraining) {
-      dispatch(thunkGetTrainingMetrics(trainingProject, isDemo));
+      dispatch(thunkGetTrainingMetrics(trainingProject));
     }
   }, [dispatch, status, projectId, isDemo, trainingProject]);
 
-  const changeProbThreshold = (newValue: number) =>
-    dispatch(updateProjectData({ probThreshold: newValue }, false));
+  const changeProbThreshold = (newValue: number) => dispatch(updateProjectData({ probThreshold: newValue }));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 
   const updateModel = useCallback(async () => {

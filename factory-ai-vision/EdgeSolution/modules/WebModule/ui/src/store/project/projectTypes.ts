@@ -85,17 +85,13 @@ export type ProjectData = {
 };
 
 // Describing the different ACTION NAMES available
-type ProjectAction = {
-  isDemo: boolean;
-};
-// FIXME Replace constant with string
 export const GET_PROJECT_REQUEST = 'GET_PROJECT_REQUEST';
-export type GetProjectRequestAction = ProjectAction & {
+export type GetProjectRequestAction = {
   type: typeof GET_PROJECT_REQUEST;
 };
 
 export const GET_PROJECT_SUCCESS = 'GET_PROJECT_SUCCESS';
-export type GetProjectSuccessAction = ProjectAction & {
+export type GetProjectSuccessAction = {
   type: typeof GET_PROJECT_SUCCESS;
   payload: {
     project: ProjectData;
@@ -104,18 +100,18 @@ export type GetProjectSuccessAction = ProjectAction & {
 };
 
 export const GET_PROJECT_FAILED = 'GET_PROJECT_FAILED';
-export type GetProjectFailedAction = ProjectAction & {
+export type GetProjectFailedAction = {
   type: typeof GET_PROJECT_FAILED;
   error: Error;
 };
 
 export const GET_TRAINING_METRICS_REQUEST = 'GET_TRAINING_METRICS_REQUEST';
-export type GetTrainingMetricsRequestAction = ProjectAction & {
+export type GetTrainingMetricsRequestAction = {
   type: typeof GET_TRAINING_METRICS_REQUEST;
 };
 
 export const GET_TRAINING_METRICS_SUCCESS = 'GET_TRAINING_METRICS_SUCCESS';
-export type GetTrainingMetricsSuccessAction = ProjectAction & {
+export type GetTrainingMetricsSuccessAction = {
   type: typeof GET_TRAINING_METRICS_SUCCESS;
   payload: {
     prevConsequence: Consequence;
@@ -124,41 +120,41 @@ export type GetTrainingMetricsSuccessAction = ProjectAction & {
 };
 
 export const GET_TRAINING_METRICS_FAILED = 'GET_TRAINING_METRICS_FAILED';
-export type GetTrainingMetricsFailedAction = ProjectAction & {
+export type GetTrainingMetricsFailedAction = {
   type: typeof GET_TRAINING_METRICS_FAILED;
   error: Error;
 };
 
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
-export type PostProjectRequestAction = ProjectAction & {
+export type PostProjectRequestAction = {
   type: typeof POST_PROJECT_REQUEST;
 };
 
 export const POST_PROJECT_SUCCESS = 'POST_PROJECT_SUCCESS';
-export type PostProjectSuccessAction = ProjectAction & {
+export type PostProjectSuccessAction = {
   type: typeof POST_PROJECT_SUCCESS;
   data: ProjectData;
 };
 
 export const POST_PROJECT_FALIED = 'POST_PROJECT_FALIED';
-export type PostProjectFaliedAction = ProjectAction & {
+export type PostProjectFaliedAction = {
   type: typeof POST_PROJECT_FALIED;
   error: Error;
 };
 
 export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
-export type UpdateProjectDataAction = ProjectAction & {
+export type UpdateProjectDataAction = {
   type: typeof UPDATE_PROJECT_DATA;
   payload: Partial<ProjectData>;
 };
 
 export const START_INFERENCE = 'START_INFERENCE';
-export type StartInferenceAction = ProjectAction & {
+export type StartInferenceAction = {
   type: typeof START_INFERENCE;
 };
 
 export const STOP_INFERENCE = 'STOP_INFERENCE';
-export type StopInferenceAction = ProjectAction & {
+export type StopInferenceAction = {
   type: typeof STOP_INFERENCE;
 };
 
@@ -172,7 +168,7 @@ export type TrainFailedAction = {
   type: typeof TRAIN_FAILED;
 };
 
-export type ChangeStatusAction = ProjectAction & {
+export type ChangeStatusAction = {
   type: 'CHANGE_STATUS';
   status: Status;
 };
