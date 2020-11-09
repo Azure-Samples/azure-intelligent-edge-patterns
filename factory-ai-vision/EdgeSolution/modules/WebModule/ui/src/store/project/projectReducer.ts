@@ -10,9 +10,6 @@ import {
   UPDATE_PROJECT_DATA,
   POST_PROJECT_REQUEST,
   Status,
-  GET_TRAINING_METRICS_REQUEST,
-  GET_TRAINING_METRICS_SUCCESS,
-  GET_TRAINING_METRICS_FAILED,
   ProjectData,
   InferenceMode,
   InferenceProtocol,
@@ -32,22 +29,21 @@ const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Statu
 export const initialProjectData: ProjectData = {
   id: null,
   cameras: [],
-  location: null,
   parts: [],
   trainingProject: null,
   needRetraining: true,
   accuracyRangeMin: 60,
   accuracyRangeMax: 80,
   maxImages: 20,
-  modelUrl: '',
   sendMessageToCloud: false,
   framesPerMin: 6,
-  probThreshold: '10',
+  probThreshold: 10,
   name: '',
   SVTCcameras: [],
   SVTCisOpen: false,
   SVTCparts: [],
   SVTCconfirmationThreshold: 60,
+  SVTCRecordingDuration: 1,
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
   setFpsManually: false,
@@ -63,10 +59,6 @@ const initialState: Project = {
   isLoading: false,
   data: initialProjectData,
   originData: initialProjectData,
-  trainingMetrics: {
-    prevConsequence: null,
-    curConsequence: null,
-  },
   status: Status.None,
   error: null,
 };
@@ -107,7 +99,7 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
     case TRAIN_SUCCESS: {
       return {
         ...state,
-        status: Status.FinishTraining,
+        status: Status.StartInference,
       };
     }
     case TRAIN_FAILED:
@@ -115,21 +107,6 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
         ...state,
         status: Status.TrainingFailed,
       };
-    case GET_TRAINING_METRICS_REQUEST:
-      return state;
-    case GET_TRAINING_METRICS_SUCCESS:
-      return {
-        ...state,
-        trainingMetrics: action.payload,
-        status: Status.StartInference,
-      };
-    case GET_TRAINING_METRICS_FAILED:
-      return {
-        ...state,
-        error: action.error,
-      };
-    case 'CHANGE_STATUS':
-      return { ...state, status: action.status };
     case updateProbThreshold.pending.toString():
       return { ...state, isLoading: true, error: null };
     case updateProbThreshold.fulfilled.toString():

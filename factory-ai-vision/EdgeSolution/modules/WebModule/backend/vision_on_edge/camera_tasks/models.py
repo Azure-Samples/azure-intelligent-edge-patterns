@@ -22,3 +22,4 @@ class CameraTask(models.Model):
     send_video_to_cloud = models.BooleanField(default=False)
     send_video_to_cloud_threshold = models.IntegerField(default=60)
     parts = models.ManyToManyField(Part, blank=True)
+    recording_duration = models.IntegerField(default=1)

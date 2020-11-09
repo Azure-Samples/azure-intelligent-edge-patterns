@@ -34,6 +34,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
         <CloudMsgOption
           sendMessageToCloud={projectData.sendMessageToCloud}
           framesPerMin={projectData.framesPerMin}
+          probThreshold={projectData.probThreshold}
           onChange={onChange}
         />
         {selectedTrainProjectIsNotDemo && (
@@ -58,6 +59,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
               SVTCcameras={projectData.SVTCcameras}
               SVTCparts={projectData.SVTCparts}
               SVTCconfirmationThreshold={projectData.SVTCconfirmationThreshold}
+              SVTCRecordingDuration={projectData.SVTCRecordingDuration}
               onChange={onChange}
               selectedCameraOptions={selectedCameraOptions}
               selectedPartOptions={selectedPartOptions}

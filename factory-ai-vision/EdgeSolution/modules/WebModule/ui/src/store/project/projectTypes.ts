@@ -5,29 +5,16 @@ export type Project = {
   isLoading: boolean;
   data: ProjectData;
   originData: ProjectData;
-  trainingMetrics: TrainingMetrics;
   status: Status;
   error: Error;
-};
-
-export type TrainingMetrics = {
-  prevConsequence: Consequence;
-  curConsequence: Consequence;
 };
 
 export enum Status {
   None = 'none',
   WaitTraining = 'waitTraining',
-  FinishTraining = 'finishTraining',
   TrainingFailed = 'trainingFailed',
   StartInference = 'startInference',
 }
-
-export type Consequence = {
-  precision: number;
-  recall: number;
-  mAP: number;
-};
 
 export enum InferenceMode {
   PartDetection = 'PD',
@@ -48,48 +35,50 @@ export enum InferenceSource {
 
 export type ProjectData = {
   id: number;
-  cameras: number[];
-  location: number;
-  parts: number[];
+  /* --- Configured by user --- */
+  name: string;
   trainingProject: number;
+  cameras: number[];
+  parts: number[];
+  /* --- Advanced options --- */
+  // Retraining
   needRetraining: boolean;
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
+  // Cloud message
   sendMessageToCloud: boolean;
   framesPerMin: number;
-  modelUrl: string;
-  // use text input brings a better UX, so we set it to string here
-  probThreshold: string;
-  name: string;
+  probThreshold: number;
   // Send video to cloud
   SVTCisOpen: boolean;
   SVTCcameras: number[];
   SVTCparts: number[];
   SVTCconfirmationThreshold: number;
-  inferenceMode: InferenceMode;
-  deployTimeStamp: string;
+  SVTCRecordingDuration: number;
+  // Camera fps
   setFpsManually: boolean;
   fps: number;
   totalRecomendedFps: number;
   recomendedFps: number;
+  // Protocol of inference
   inferenceProtocol: InferenceProtocol;
-  inferenceSource: InferenceSource;
+  // Disalbe live video
   disableVideoFeed: boolean;
+  /* --- Other --- */
+  inferenceMode: InferenceMode;
+  deployTimeStamp: string;
+  inferenceSource: InferenceSource;
 };
 
 // Describing the different ACTION NAMES available
-type ProjectAction = {
-  isDemo: boolean;
-};
-// FIXME Replace constant with string
 export const GET_PROJECT_REQUEST = 'GET_PROJECT_REQUEST';
-export type GetProjectRequestAction = ProjectAction & {
+export type GetProjectRequestAction = {
   type: typeof GET_PROJECT_REQUEST;
 };
 
 export const GET_PROJECT_SUCCESS = 'GET_PROJECT_SUCCESS';
-export type GetProjectSuccessAction = ProjectAction & {
+export type GetProjectSuccessAction = {
   type: typeof GET_PROJECT_SUCCESS;
   payload: {
     project: ProjectData;
@@ -98,62 +87,32 @@ export type GetProjectSuccessAction = ProjectAction & {
 };
 
 export const GET_PROJECT_FAILED = 'GET_PROJECT_FAILED';
-export type GetProjectFailedAction = ProjectAction & {
+export type GetProjectFailedAction = {
   type: typeof GET_PROJECT_FAILED;
   error: Error;
 };
 
-export const GET_TRAINING_METRICS_REQUEST = 'GET_TRAINING_METRICS_REQUEST';
-export type GetTrainingMetricsRequestAction = ProjectAction & {
-  type: typeof GET_TRAINING_METRICS_REQUEST;
-};
-
-export const GET_TRAINING_METRICS_SUCCESS = 'GET_TRAINING_METRICS_SUCCESS';
-export type GetTrainingMetricsSuccessAction = ProjectAction & {
-  type: typeof GET_TRAINING_METRICS_SUCCESS;
-  payload: {
-    prevConsequence: Consequence;
-    curConsequence: Consequence;
-  };
-};
-
-export const GET_TRAINING_METRICS_FAILED = 'GET_TRAINING_METRICS_FAILED';
-export type GetTrainingMetricsFailedAction = ProjectAction & {
-  type: typeof GET_TRAINING_METRICS_FAILED;
-  error: Error;
-};
-
 export const POST_PROJECT_REQUEST = 'POST_PROJECT_REQUEST';
-export type PostProjectRequestAction = ProjectAction & {
+export type PostProjectRequestAction = {
   type: typeof POST_PROJECT_REQUEST;
 };
 
 export const POST_PROJECT_SUCCESS = 'POST_PROJECT_SUCCESS';
-export type PostProjectSuccessAction = ProjectAction & {
+export type PostProjectSuccessAction = {
   type: typeof POST_PROJECT_SUCCESS;
   data: ProjectData;
 };
 
 export const POST_PROJECT_FALIED = 'POST_PROJECT_FALIED';
-export type PostProjectFaliedAction = ProjectAction & {
+export type PostProjectFaliedAction = {
   type: typeof POST_PROJECT_FALIED;
   error: Error;
 };
 
 export const UPDATE_PROJECT_DATA = 'UPDATE_PROJECT_DATA';
-export type UpdateProjectDataAction = ProjectAction & {
+export type UpdateProjectDataAction = {
   type: typeof UPDATE_PROJECT_DATA;
   payload: Partial<ProjectData>;
-};
-
-export const START_INFERENCE = 'START_INFERENCE';
-export type StartInferenceAction = ProjectAction & {
-  type: typeof START_INFERENCE;
-};
-
-export const STOP_INFERENCE = 'STOP_INFERENCE';
-export type StopInferenceAction = ProjectAction & {
-  type: typeof STOP_INFERENCE;
 };
 
 export const TRAIN_SUCCESS = 'TRAIN_SUCCESS';
@@ -166,11 +125,6 @@ export type TrainFailedAction = {
   type: typeof TRAIN_FAILED;
 };
 
-export type ChangeStatusAction = ProjectAction & {
-  type: 'CHANGE_STATUS';
-  status: Status;
-};
-
 export type ProjectActionTypes =
   | GetProjectRequestAction
   | GetProjectSuccessAction
@@ -179,14 +133,8 @@ export type ProjectActionTypes =
   | PostProjectSuccessAction
   | PostProjectFaliedAction
   | UpdateProjectDataAction
-  | GetTrainingMetricsRequestAction
-  | GetTrainingMetricsSuccessAction
-  | GetTrainingMetricsFailedAction
-  | StartInferenceAction
-  | StopInferenceAction
   | TrainSuccessAction
-  | TrainFailedAction
-  | ChangeStatusAction;
+  | TrainFailedAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;

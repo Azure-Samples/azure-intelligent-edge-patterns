@@ -58,6 +58,7 @@ class Stream:
         self.send_video_to_cloud = send_video_to_cloud
         self.send_video_to_cloud_threshold = 60
         self.send_video_to_cloud_parts = []
+        self.recording_duration = 60
 
         self.render = False
 
@@ -136,8 +137,9 @@ class Stream:
     def _stop(self):
         gm.invoke_graph_instance_deactivate(self.cam_id)
 
-    def _set(self, rtspUrl, frameRate):
-        gm.invoke_instance_set(self.lva_mode, self.cam_id, rtspUrl, frameRate)
+    def _set(self, rtspUrl, frameRate, recording_duration):
+        gm.invoke_instance_set(self.lva_mode, self.cam_id,
+                               rtspUrl, frameRate, recording_duration)
 
     def _start(self):
         gm.invoke_graph_instance_activate(self.cam_id)
@@ -208,6 +210,7 @@ class Stream:
         cam_type,
         cam_source,
         frameRate,
+        recording_duration,
         lva_mode,
         cam_id,
         has_aoi,
@@ -224,10 +227,12 @@ class Stream:
             self.cam_source != cam_source
             or round(self.frameRate) != round(frameRate)
             or self.lva_mode != lva_mode
+            or self.recording_duration != recording_duration
         ):
             self.cam_source = cam_source
             self.frameRate = frameRate
             self.lva_mode = lva_mode
+            self.recording_duration = recording_duration
             if IS_OPENCV == "true":
                 logger.info("post to CVModule")
                 data = {
@@ -240,7 +245,7 @@ class Stream:
                     "http://CVCaptureModule:9000/streams", json=data)
             else:
                 self._update_instance(
-                    normalize_rtsp(cam_source), str(frameRate))
+                    normalize_rtsp(cam_source), str(frameRate), str(recording_duration))
 
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
@@ -371,14 +376,14 @@ class Stream:
 
         # self.mutex.release()
 
-    def _update_instance(self, rtspUrl, frameRate):
+    def _update_instance(self, rtspUrl, frameRate, recording_duration):
         if not self.is_benchmark:
             self._stop()
-            self._set(rtspUrl, frameRate)
+            self._set(rtspUrl, frameRate, recording_duration)
             self._start()
         logger.info(
-            "Instance {} updated, rtsp = {}, frameRate = {}".format(
-                self.cam_id, rtspUrl, frameRate
+            "Instance {} updated, rtsp = {}, frameRate = {}, recording_duration = {}".format(
+                self.cam_id, rtspUrl, frameRate, recording_duration
             )
         )
 

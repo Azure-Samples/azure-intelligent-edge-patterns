@@ -10,28 +10,30 @@ jest.mock('axios', () => ({
 }));
 
 test('should create the stream with right query parameter', async () => {
-  const fakeRTSP = 'rtsp://';
+  const fakeCameraId = 0;
   const fakePartId = 10;
   const mockOnStreamCreated = jest.fn();
   (MockAxios.get as any).mockResolvedValue({ data: { stream_id: '' } });
-  render(<RTSPVideo rtsp={fakeRTSP} onStreamCreated={mockOnStreamCreated} />);
+  render(<RTSPVideo cameraId={fakeCameraId} onStreamCreated={mockOnStreamCreated} />);
 
   await waitFor(() => {
-    expect(MockAxios.get).toBeCalledWith(`/api/streams/connect/?rtsp=${fakeRTSP}`);
+    expect(MockAxios.get).toBeCalledWith(`/api/streams/connect/?camera_id=${fakeCameraId}`);
   });
 
-  render(<RTSPVideo rtsp={fakeRTSP} onStreamCreated={mockOnStreamCreated} partId={fakePartId} />);
+  render(<RTSPVideo cameraId={fakeCameraId} onStreamCreated={mockOnStreamCreated} partId={fakePartId} />);
   await waitFor(() => {
-    expect(MockAxios.get).toBeCalledWith(`/api/streams/connect/?part_id=${fakePartId}&rtsp=${fakeRTSP}`);
+    expect(MockAxios.get).toBeCalledWith(
+      `/api/streams/connect/?part_id=${fakePartId}&camera_id=${fakeCameraId}`,
+    );
   });
 });
 
 test('should called the callback `onStreamCreated` with stream ID when stream created', async () => {
-  const fakeRTSP = 'rtsp://';
+  const fakeCameraId = 0;
   const mockOnStreamCreated = jest.fn();
   const mockStreamId = 'streamId';
   (MockAxios.get as any).mockResolvedValue({ data: { stream_id: mockStreamId } });
-  render(<RTSPVideo rtsp={fakeRTSP} onStreamCreated={mockOnStreamCreated} />);
+  render(<RTSPVideo cameraId={fakeCameraId} onStreamCreated={mockOnStreamCreated} />);
 
   await waitFor(() => {
     expect(mockOnStreamCreated).toBeCalledWith(mockStreamId);
@@ -41,11 +43,11 @@ test('should called the callback `onStreamCreated` with stream ID when stream cr
 jest.useFakeTimers();
 
 test('should polling keep alive if the stream exist', async () => {
-  const fakeRTSP = 'rtsp://';
+  const fakeCameraId = 0;
   const mockOnStreamCreated = jest.fn();
   const mockStreamId = 'streamId';
   (MockAxios.get as any).mockResolvedValue({ data: { stream_id: mockStreamId } });
-  render(<RTSPVideo rtsp={fakeRTSP} onStreamCreated={mockOnStreamCreated} />);
+  render(<RTSPVideo cameraId={fakeCameraId} onStreamCreated={mockOnStreamCreated} />);
 
   await waitFor(() => {
     expect(MockAxios.get).toHaveBeenLastCalledWith(`/api/streams/${mockStreamId}/keep_alive`);

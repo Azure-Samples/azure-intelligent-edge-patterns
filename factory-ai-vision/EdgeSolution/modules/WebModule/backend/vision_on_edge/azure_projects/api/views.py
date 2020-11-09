@@ -11,8 +11,8 @@ from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException,
 )
 from django.utils import timezone
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
