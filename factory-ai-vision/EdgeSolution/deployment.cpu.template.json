@@ -225,6 +225,36 @@
                 }
               }
             }
+          },
+          "UploadModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.UploadModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "Mounts": [{
+                    "Target": "/app/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "7000/tcp": [{
+                      "HostPort": "7000"
+                    }]
+                  }
+                }
+              }
+            }
           }
         }
       }
