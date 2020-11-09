@@ -69,7 +69,7 @@ Check out the architecture below to see how Vision on Edge works on both LVA and
 ### Option 1: Azure Shell Installer
 #### Get Started:
 
-Please refer to this tutorial to follow the [instruction](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
+Please refer to this tutorial to follow the [instruction](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
 
 
 
