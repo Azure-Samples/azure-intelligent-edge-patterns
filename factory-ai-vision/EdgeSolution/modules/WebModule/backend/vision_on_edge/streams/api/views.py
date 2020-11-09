@@ -212,9 +212,9 @@ def keep_alive(request, stream_id):
     stream = stream_manager.get_stream_by_id(stream_id)
     if stream:
         logger.info("===============================")
-        logger.info("Last active", stream.last_active)
+        logger.info("Last active %s", stream.last_active)
         stream.update_keep_alive()
-        logger.info("Last active", stream.last_active)
+        logger.info("Last active %s", stream.last_active)
         logger.info("===============================")
         return Response({"status": "ok"})
     raise StreamNotFoundError
