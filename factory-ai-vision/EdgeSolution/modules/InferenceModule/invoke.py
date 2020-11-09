@@ -153,7 +153,8 @@ class GraphManager:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
-    def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate):
+    def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate, recording_duration):
+        recordingDuration = "PT{}S".format(recording_duration)
         properties = {
             "topologyName": "InferencingWithGrpcExtension",
             "description": "Sample graph description",
@@ -161,6 +162,7 @@ class GraphManager:
                 {"name": "rtspUrl", "value": rtspUrl},
                 {"name": "frameRate", "value": frameRate},
                 {"name": "instanceId", "value": name},
+                {"name": "recordingDuration", "value": recordingDuration},
                 {
                     "name": "grpcExtensionAddress",
                     "value": "tcp://InferenceModule:44000",
@@ -178,15 +180,18 @@ class GraphManager:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
-    def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate):
+    def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate, recording_duration):
         inferencingUrl = "http://InferenceModule:5000/predict?camera_id=" + \
             str(name)
+        recordingDuration = "PT{}S".format(recording_duration)
         properties = {
             "topologyName": "InferencingWithHttpExtension",
             "description": "Sample graph description",
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
                 {"name": "frameRate", "value": frameRate},
+                {"name": "instanceId", "value": name},
+                {"name": "recordingDuration", "value": recordingDuration},
                 {"name": "inferencingUrl", "value": inferencingUrl},
                 {"name": "frameHeight", "value": "540"},
                 {"name": "frameWidth", "value": "960"},
@@ -202,11 +207,11 @@ class GraphManager:
         else:
             return "LVA mode error"
 
-    def invoke_instance_set(self, mode, name, rtspUrl, frameRate):
+    def invoke_instance_set(self, mode, name, rtspUrl, frameRate, recording_duration):
         if mode == "grpc":
-            return self.invoke_graph_grpc_instance_set(name, rtspUrl, frameRate)
+            return self.invoke_graph_grpc_instance_set(name, rtspUrl, frameRate, recording_duration)
         elif mode == "http":
-            return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate)
+            return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate, recording_duration)
         else:
             return "LVA mode error"
 

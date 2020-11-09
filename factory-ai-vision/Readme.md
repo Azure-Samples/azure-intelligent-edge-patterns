@@ -121,7 +121,7 @@ To learn more about this development environment, check out [this tutorial](http
   RESOURCE_GROUP=""
   TENANT_ID=""
   SERVICE_NAME=""
-  SERVICE_PRINCPAL_APP_ID=""
+  SERVICE_PRINCIPAL_APP_ID=""
   SERVICE_PRINCIPAL_SECRET=""
   ```
 
@@ -162,19 +162,26 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Please wait until all 6 are running. Open your browser and connect [http://YOUR_IP:8181](http://YOUR_IP:8181)
 
+
 ### Video Tutorial
 
 - Tutorial 0 - Build with VS code [https://youtu.be/ORTwMYOxkVs]
 
-- Tutorial 1: Azure Shell Installer [https://youtu.be/Z-iGND-Xtdg]
+- Tutorial 1: Azure Shell Installer [https://youtu.be/6sDILwkP1yc]
 
 - Tutorial 2 - Start with prebuilt scenario [https://youtu.be/dihAdZTGj-g]
 
-- Tutorial 3 - Start with creating new project, capture images, tagging images and deploy [https://youtu.be/Ut8UXHR2dCk]
+- Tutorial 3 - Start with creating new project, capture images, tagging images and deploy [https://youtu.be/cCEW6nsd8xQ]
 
-- Tutorial 4 - Retraining and improve your model [https://youtu.be/TsKvBerShbE]
+- Tutorial 4 - Retraining and improve your model [https://youtu.be/OxK9feR_T3U]
 
-- Tutorial 5: Advance capabilities setting [https://youtu.be/GdgVJq2V0Io]
+- Tutorial 5: Advance capabilities setting [https://youtu.be/Bv7wxfFEdtI]
+
+
+# Upload your own video to be processed
+
+If you don't have camera devices to connect to your IoT Edge device, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).  
+
 
 # Upload your own video to be processed
 

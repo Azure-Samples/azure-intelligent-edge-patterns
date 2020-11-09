@@ -76,7 +76,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
   const originSettingData = useSelector((state: State) => state.setting.origin);
   const [loading, setloading] = useState(false);
-  const cannotUpdateOrSave = R.equals(settingData, originSettingData);
+  const dontNeedUpdateOrSave = R.equals(settingData, originSettingData);
   const [loadFullImages, setLoadFullImages] = useState(false);
   const [loadImgWarning, setloadImgWarning] = useState(false);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
@@ -168,7 +168,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
               }
               confirmButton="Yes"
               onConfirm={onSave}
-              trigger={<PrimaryButton text="Save" disabled={cannotUpdateOrSave} />}
+              trigger={<PrimaryButton text="Save" disabled={dontNeedUpdateOrSave} />}
             />
           </Stack.Item>
           {showProjectDropdown && (

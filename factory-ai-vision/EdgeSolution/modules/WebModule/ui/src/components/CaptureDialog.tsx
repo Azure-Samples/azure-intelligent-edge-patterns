@@ -14,13 +14,8 @@ import {
 import { useSelector, connect } from 'react-redux';
 import { AcceptMediumIcon } from '@fluentui/react-icons';
 
-import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
-import {
-  cameraOptionsSelector,
-  selectCameraById,
-  getCameras as getCamerasAction,
-} from '../store/cameraSlice';
+import { cameraOptionsSelector, getCameras as getCamerasAction } from '../store/cameraSlice';
 import { captureImage as captureImgAction } from '../store/imageSlice';
 import { OpenFrom, openLabelingPage as openLabelingPageAction } from '../store/labelingPageSlice';
 
@@ -67,7 +62,6 @@ export const Component: React.FC<CaptureDialogProps> = ({
   const [selectedCameraId, setSelectedCameraId] = useState(
     cameraOptions.length === 1 ? cameraOptions[0].key : null,
   );
-  const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
   const [status, setStatus] = useState<Status>(Status.Waiting);
   const streamIdRef = useRef('');
   const capturedImgs = useRef<number[]>([]);
@@ -144,7 +138,7 @@ export const Component: React.FC<CaptureDialogProps> = ({
           <Stack horizontal tokens={{ childrenGap: 30 }}>
             <Stack styles={{ root: { width: '75%', height: '500px', position: 'relative' } }}>
               <RTSPVideo
-                rtsp={rtsp}
+                cameraId={selectedCameraId}
                 onStreamCreated={(streamId) => {
                   streamIdRef.current = streamId;
                 }}
