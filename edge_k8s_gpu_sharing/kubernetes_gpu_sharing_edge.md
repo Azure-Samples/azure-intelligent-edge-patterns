@@ -48,7 +48,7 @@ in a deployment .yaml these entries would request an allocation of one gpu devic
                   nvidia.com/gpu: 1
     ...
 
-To damonstrate this, let's deploy one of our previous models from [machine-learning-notebooks/deploying-on-k8s](../machine-learning-notebooks/deploying-on-k8s),
+To damonstrate this, let's deploy one of our previous models from [machine-learning-notebooks/deploying-on-k8s](../machine-learning-notebooks/deploying-on-k8s/Readme.md),
 you will need to run this notebook to create the container image: [machine-learning-notebooks/deploying-on-k8s/production-deploy-to-k8s-gpu.ipynb](../machine-learning-notebooks/deploying-on-k8s/production-deploy-to-k8s-gpu.ipynb).
 
 `deploy_infer.yaml` will look like this:
@@ -366,5 +366,4 @@ To clean the environment from what we created, we need to delete the deployments
 # Links
 
   - https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-connect-powershell-interface#view-gpu-driver-information
-  
   - https://nvidia.github.io/gpu-operator/

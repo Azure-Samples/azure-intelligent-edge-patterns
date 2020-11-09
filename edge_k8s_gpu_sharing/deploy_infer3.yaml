@@ -24,6 +24,7 @@ spec:
     spec:
       containers:
       - name: my-infer3
+        # !!! put your own image location instead
         image: myregistry.azurecr.io/rollingstone/myinfer:1.0
         env:
         - name: NVIDIA_VISIBLE_DEVICES
@@ -38,5 +39,5 @@ spec:
           limits:
             # not using gpu allocation via `limits`, using NVIDIA_VISIBLE_DEVICES env.
             # nvidia.com/gpu:  1
-      imagePullSecrets:
-        - name: secret4acr2infer
+      #imagePullSecrets:
+      #  - name: secret4acr2infer
