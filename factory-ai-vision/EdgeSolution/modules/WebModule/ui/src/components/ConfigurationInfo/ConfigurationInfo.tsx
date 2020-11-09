@@ -3,7 +3,7 @@ import './ConfigurationInfo.style.css';
 import { Stack, TextField, IconButton } from '@fluentui/react';
 import { PartTag, Status as PartTagStatus } from '../PartTag';
 
-type ConfigurationInfoProps = {
+type PropsType = {
   cameraNames: string[];
   fps: number;
   partNames: string[];
@@ -13,10 +13,16 @@ type ConfigurationInfoProps = {
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
-  probThreshold: string;
-  originProbThreshold: string;
-  updateProbThreshold: (string) => void;
+  probThreshold: number;
+  originProbThreshold: number;
+  updateProbThreshold: (value: number) => void;
   saveProbThreshold: () => void;
+  SVTCisOpen: boolean;
+  SVTCcameraNames: string[];
+  SVTCpartNames: string[];
+  SVTCthreshold: number;
+  protocol: string;
+  isLVA: boolean;
 };
 
 const getCloudMessageTxt = (sendMessageToCloud: boolean, framesPerMin: number): string => {
@@ -34,9 +40,17 @@ const getRetrainingTxt = (
   return `Yes - ${maxImages} images in the ${accuracyRangeMin}-${accuracyRangeMax}% accuracy range`;
 };
 
-export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
+const getSendVideoTxt = (isOpen, cameras, parts, threshold) => {
+  if (isOpen)
+    return `Yes - when ${cameras.join(', ')} detect ${parts.join(
+      ', ',
+    )} above the ${threshold}% confirmation threshold`;
+  return 'No';
+};
+
+export const ConfigurationInfo: React.FC<PropsType> = (props) => {
   return (
-    <>
+    <Stack tokens={{ childrenGap: 17, padding: 25 }}>
       <h4 style={{ margin: 5 }}>Configuration</h4>
       <Stack horizontal>
         <table>
@@ -57,18 +71,14 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
                 ))}
               </td>
             </tr>
-          </tbody>
-        </table>
-        <table>
-          <tbody>
             <tr>
               <td>Confirmation threshold</td>
               <td>
                 <Stack horizontal>
                   <TextField
                     type="number"
-                    value={props.probThreshold}
-                    onChange={(_, newValue) => props.updateProbThreshold(newValue)}
+                    value={props.probThreshold?.toString()}
+                    onChange={(_, newValue) => props.updateProbThreshold(parseInt(newValue, 10))}
                     underlined
                     suffix="%"
                     styles={{ root: { display: 'inline-block' } }}
@@ -81,6 +91,10 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
                 </Stack>
               </td>
             </tr>
+          </tbody>
+        </table>
+        <table>
+          <tbody>
             <tr>
               <td>Cloud message</td>
               <td>{getCloudMessageTxt(props.sendMessageToCloud, props.framesPerMin)}</td>
@@ -96,9 +110,28 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
                 )}
               </td>
             </tr>
+            {props.isLVA && (
+              <>
+                <tr>
+                  <td>Send video to cloud</td>
+                  <td>
+                    {getSendVideoTxt(
+                      props.SVTCisOpen,
+                      props.SVTCcameraNames,
+                      props.SVTCpartNames,
+                      props.SVTCthreshold,
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Protocol</td>
+                  <td>{props.protocol}</td>
+                </tr>
+              </>
+            )}
           </tbody>
         </table>
       </Stack>
-    </>
+    </Stack>
   );
 };

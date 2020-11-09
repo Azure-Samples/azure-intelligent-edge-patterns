@@ -11,14 +11,13 @@ import {
   Text,
   Spinner,
 } from '@fluentui/react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, connect } from 'react-redux';
 import { AcceptMediumIcon } from '@fluentui/react-icons';
 
-import { State } from 'RootStateType';
 import { RTSPVideo } from './RTSPVideo';
-import { cameraOptionsSelector, selectCameraById, getCameras } from '../store/cameraSlice';
-import { captureImage } from '../store/imageSlice';
-import { OpenFrom, openLabelingPage } from '../store/labelingPageSlice';
+import { cameraOptionsSelector, getCameras as getCamerasAction } from '../store/cameraSlice';
+import { captureImage as captureImgAction } from '../store/imageSlice';
+import { OpenFrom, openLabelingPage as openLabelingPageAction } from '../store/labelingPageSlice';
 
 const { palette } = getTheme();
 
@@ -33,19 +32,36 @@ enum Status {
   Success,
 }
 
-type CaptureDialogProps = {
+type OwnProps = {
   isOpen: boolean;
   onDismiss: () => void;
   partId?: number;
 };
 
-export const CaptureDialog: React.FC<CaptureDialogProps> = ({ isOpen, onDismiss, partId = null }) => {
+type CaptureDialogProps = OwnProps & {
+  captureImage;
+  openLabelingPage;
+  getCameras;
+};
+
+const mapDispatch = (dispatch) => ({
+  captureImage: (action) => dispatch(captureImgAction(action)),
+  openLabelingPage: (action) => dispatch(openLabelingPageAction(action)),
+  getCameras: (action) => dispatch(getCamerasAction(action)),
+});
+
+export const Component: React.FC<CaptureDialogProps> = ({
+  isOpen,
+  onDismiss,
+  partId = null,
+  captureImage,
+  openLabelingPage,
+  getCameras,
+}) => {
   const cameraOptions = useSelector(cameraOptionsSelector);
   const [selectedCameraId, setSelectedCameraId] = useState(
     cameraOptions.length === 1 ? cameraOptions[0].key : null,
   );
-  const rtsp = useSelector((state: State) => selectCameraById(state, selectedCameraId)?.rtsp);
-  const dispatch = useDispatch();
   const [status, setStatus] = useState<Status>(Status.Waiting);
   const streamIdRef = useRef('');
   const capturedImgs = useRef<number[]>([]);
@@ -62,32 +78,31 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({ isOpen, onDismiss,
 
   const onCaptureClick = async () => {
     setStatus(Status.Capturing);
-    const action = await dispatch(
-      captureImage({ streamId: streamIdRef.current, imageIds: [], shouldOpenLabelingPage: false }),
-    );
+    const action = await captureImage({
+      streamId: streamIdRef.current,
+      imageIds: [],
+      shouldOpenLabelingPage: false,
+    });
     const { payload } = action as any;
     if (payload) capturedImgs.current.push(parseInt(Object.keys(payload.images)[0], 10));
     setStatus(Status.Success);
   };
 
   const onGoTaggingClick = () => {
-    dispatch(
-      openLabelingPage({
-        imageIds: capturedImgs.current,
-        selectedImageId: capturedImgs.current[0],
-        openFrom: OpenFrom.CaptureDialog,
-      }),
-    );
+    openLabelingPage({
+      imageIds: capturedImgs.current,
+      selectedImageId: capturedImgs.current[0],
+      openFrom: OpenFrom.CaptureDialog,
+    });
     closeDialog();
   };
 
   useEffect(() => {
     (async () => {
-      const res = await dispatch(getCameras(false));
-      const { payload } = res as any;
-      if (payload && payload.result.length === 1) setSelectedCameraId(payload.result[0]);
+      const res = await getCameras(false);
+      if (res?.payload?.result.length === 1) setSelectedCameraId(res.payload.result[0]);
     })();
-  }, [dispatch]);
+  }, [getCameras]);
 
   useEffect(() => {
     if (status === Status.Success) {
@@ -123,7 +138,7 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({ isOpen, onDismiss,
           <Stack horizontal tokens={{ childrenGap: 30 }}>
             <Stack styles={{ root: { width: '75%', height: '500px', position: 'relative' } }}>
               <RTSPVideo
-                rtsp={rtsp}
+                cameraId={selectedCameraId}
                 onStreamCreated={(streamId) => {
                   streamIdRef.current = streamId;
                 }}
@@ -156,6 +171,8 @@ export const CaptureDialog: React.FC<CaptureDialogProps> = ({ isOpen, onDismiss,
     </Dialog>
   );
 };
+
+export const CaptureDialog = connect(null, mapDispatch)(Component);
 
 const CaptureBanner: React.FC<{ top: ReactText; left: ReactText; status: Status }> = ({
   top,

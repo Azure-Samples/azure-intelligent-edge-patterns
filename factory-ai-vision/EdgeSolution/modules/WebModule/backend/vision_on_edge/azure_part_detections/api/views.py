@@ -8,8 +8,8 @@ import logging
 import requests
 from django.core.files.images import ImageFile
 from django.utils import timezone
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
 from requests.exceptions import ReadTimeout
 from rest_framework import filters, viewsets
@@ -57,7 +57,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_mappings = {"inference_module": "inference_module", "project": "project"}
 
     @swagger_auto_schema(
-        operation_summary="Export Part Detection status",
+        operation_summary="Update Probability Threshold.",
         manual_parameters=[
             openapi.Parameter(
                 "prob_threshold",
@@ -88,7 +88,16 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         return Response({"status": "ok"})
 
     @swagger_auto_schema(
-        operation_summary="Export Part Detection status",
+        operation_summary="Export Part Detection status.",
+        manual_parameters=[
+            openapi.Parameter(
+                "camera_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="Camera ID",
+                required=True,
+            )
+        ],
         responses={
             "200": ExportSerializer,
             "400": MSStyleErrorResponseSerializer,
@@ -111,6 +120,13 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         success_rate = 0.0
         inference_num = 0
         unidentified_num = 0
+        try:
+            device = inference_module_obj.device()
+        except requests.exceptions.ConnectionError as err:
+            raise PdInferenceModuleUnreachable from err
+        except ReadTimeout as err:
+            raise PdExportInfereceReadTimeout from err
+
         if deploy_status_obj.status != "ok":
             return Response(
                 {
@@ -120,7 +136,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                     "success_rate": 0.0,
                     "inference_num": 0,
                     "unidentified_num": 0,
-                    "gpu": "",
+                    "device": device,
                     "count": 0,
                     "average_time": 0.0,
                     "scenario_metrics": [],
@@ -135,8 +151,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
             inference_num = data["inference_num"]
+            device = inference_module_obj.device()
             unidentified_num = data["unidentified_num"]
-            is_gpu = data["is_gpu"]
             average_inference_time = data["average_inference_time"]
             last_prediction_count = data["last_prediction_count"]
             scenario_metrics = data["scenario_metrics"] or []
@@ -160,7 +176,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 "success_rate": success_rate,
                 "inference_num": inference_num,
                 "unidentified_num": unidentified_num,
-                "gpu": is_gpu,
+                "device": device,
                 "count": last_prediction_count,
                 "average_time": average_inference_time,
                 "scenario_metrics": scenario_metrics,
@@ -168,7 +184,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         )
 
     @swagger_auto_schema(
-        operation_summary="Train the project then deploy to Inference",
+        operation_summary="Train the project then deploy to Inference Module.",
         responses={"200": SimpleOKSerializer, "400": MSStyleErrorResponseSerializer},
     )
     @action(detail=True, methods=["get"])

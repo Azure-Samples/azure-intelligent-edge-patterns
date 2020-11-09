@@ -127,7 +127,14 @@ def deploy_worker(part_detection_id):
     # =====================================================
     if not instance.project:
         pass
-    elif not instance.project.is_demo:
+    elif instance.project.is_demo:
+        requests.post(
+            "http://" + str(instance.inference_module.url) + "/update_model",
+            json={"model_dir": instance.project.download_uri},
+            timeout=REQUEST_TIMEOUT,
+        )
+
+    elif not instance.inference_module.is_vpu():
         requests.post(
             "http://" + str(instance.inference_module.url) + "/update_model",
             json={"model_uri": instance.project.download_uri},
@@ -136,9 +143,10 @@ def deploy_worker(part_detection_id):
     else:
         requests.post(
             "http://" + str(instance.inference_module.url) + "/update_model",
-            json={"model_dir": instance.project.download_uri},
+            json={"model_uri": instance.project.download_uri_fp16},
             timeout=REQUEST_TIMEOUT,
         )
+
     # =====================================================
     # 3. Update parts                                   ===
     # =====================================================
@@ -195,7 +203,13 @@ def deploy_worker(part_detection_id):
                     "aoi": cam.area,
                     "lines": cam.lines,
                     "zones": cam.danger_zones,
-                    "send_video_to_cloud": cam.send_video_to_cloud,
+                    "send_video_to_cloud": cam.cameratask_set.first().send_video_to_cloud,
+                    "send_video_to_cloud_parts": [
+                        {"id": part.id, "name": part.name}
+                        for part in cam.cameratask_set.first().parts.all()
+                    ],
+                    "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
+                    "recording_duration": cam.cameratask_set.first().recording_duration,
                 }
             )
         else:
@@ -206,7 +220,13 @@ def deploy_worker(part_detection_id):
                     "source": cam.rtsp,
                     "lines": cam.lines,
                     "zones": cam.danger_zones,
-                    "send_video_to_cloud": cam.send_video_to_cloud,
+                    "send_video_to_cloud": cam.cameratask_set.first().send_video_to_cloud,
+                    "send_video_to_cloud_parts": [
+                        {"id": part.id, "name": part.name}
+                        for part in cam.cameratask_set.first().parts.all()
+                    ],
+                    "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
+                    "recording_duration": cam.cameratask_set.first().recording_duration,
                 }
             )
     serializer = UpdateCamBodySerializer(data=res_data)

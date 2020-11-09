@@ -13,7 +13,12 @@ import {
 } from '@fluentui/react';
 import { Card } from '@uifabric/react-cards';
 import { AcceptMediumIcon } from '@fluentui/react-icons';
+import { connect } from 'react-redux';
+
+import { State } from 'RootStateType';
 import { CreateProjectDialog } from './CreateProjectDialog';
+import { selectNonDemoCameras } from '../store/cameraSlice';
+import { selectAllImages } from '../store/imageSlice';
 
 const theme = getTheme();
 
@@ -30,6 +35,7 @@ const idxIconBase: IStyle = {
 const cardStyleSets = mergeStyleSets({
   container: {
     width: '300px',
+    height: '320px',
     borderRadius: '2px',
   },
   imgSection: {
@@ -40,26 +46,37 @@ const cardStyleSets = mergeStyleSets({
     display: 'grid',
     gridTemplateColumns: '24px auto',
     columnGap: '11px',
-    gridTemplateRows: '1fr 1fr 30px',
+    gridTemplateRows: '1fr 1fr 1fr',
     rowGap: '4px',
     padding: '14px',
     paddingTop: 0,
+    height: '150px',
   },
   idxIcon: concatStyleSets(idxIconBase, { color: theme.palette.themePrimary, border: '1px solid' }),
   checkIcon: concatStyleSets(idxIconBase, { color: theme.palette.white, backgroundColor: '#5DB300' }),
   mainSectionTitle: { gridColumn: '2 / span 1', gridRow: '1 / span 2', fontWeight: 600, fontSize: '16px' },
   mainSectionContentTxt: { gridColumn: '2 / span 1', gridRow: '2 / span 1', fontSize: '13px' },
-  mainSectionAction: { gridColumn: '2 / span 1', gridRow: '3 / span 1', fontSize: '13px' },
+  mainSectionAction: { gridColumn: '2 / span 1', gridRow: '3 / span 1', fontSize: '13px', margin: 0 },
 });
 
-type CustomizeType = {
-  hasCVProject: boolean;
-  hasCamera: boolean;
-  hasImages: boolean;
+type OwnProps = {
   hasTask: boolean;
 };
 
-export const Customize: React.FC<CustomizeType> = ({ hasCVProject, hasCamera, hasImages, hasTask }) => {
+type CustomizeProps = OwnProps & {
+  hasCVProject: boolean;
+  hasCamera: boolean;
+  hasImages: boolean;
+};
+
+const mapState = (state: State, ownProps: OwnProps): CustomizeProps => ({
+  ...ownProps,
+  hasCVProject: Boolean(state.trainingProject.entities[state.trainingProject.nonDemo[0]].customVisionId),
+  hasCamera: selectNonDemoCameras(state).length > 0,
+  hasImages: selectAllImages(state).length > 0,
+});
+
+const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImages, hasTask }) => {
   return (
     <Stack horizontalAlign="center">
       <Stack horizontalAlign="center" styles={{ root: { paddingTop: 60, paddingBottom: 40 } }}>
@@ -73,7 +90,7 @@ export const Customize: React.FC<CustomizeType> = ({ hasCVProject, hasCamera, ha
           no={1}
           checked={hasCVProject}
           title="Create your own project"
-          contentTxt="Add and configure the cameras in the factory"
+          contentTxt="Name your project in the factory"
           onRenderActionLink={() => (
             <div className={cardStyleSets.mainSectionAction}>
               <CreateProjectDialog />
@@ -112,6 +129,8 @@ export const Customize: React.FC<CustomizeType> = ({ hasCVProject, hasCamera, ha
     </Stack>
   );
 };
+
+export const Customize = connect(mapState)(Component);
 
 const GetStartedCard: React.FC<{
   no: number;

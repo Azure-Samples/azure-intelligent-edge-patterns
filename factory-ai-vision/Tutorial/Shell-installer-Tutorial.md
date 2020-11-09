@@ -8,9 +8,9 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 1. You must have an Azure subscription.
 <br/> if you don’t have one, you can create one here: https://azure.microsoft.com/en-us/pricing/purchase-options/pay-as-you-go/
-2. That subscription must contain an IoT Hub with a registered IoT Edge device (generally this will be an Azure Stack Edge Device).
-<br/>At least one IoT Edge with port 8080 and 5000 opened and is connected to your Iot Hub. please follow this [documentation](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) for deployment information
-3. Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings)
+2. That subscription must contain Azure Stack Edge or IoT hub Edge device with port 8181 opened. please follow this [documentation](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md) for deployment information
+3. Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings) and learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/customvisioninfo.png)
 4. (Optional) Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
  
    
@@ -19,15 +19,16 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 1. Open your browser and paste the link https://shell.azure.com/  to open the shell installer. 
 2. You will need a Azure subscription to continue. Choose your Azure account.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step1.png)
-3. To download acs.zip from github by putting the following command `wget -O acs.zip https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
+3. To download installer (acs.zip) from github by putting the following command `wget -O acs.zip https://github.com/Azure-Samples/azure-intelligent-edge-patterns/raw/master/factory-ai-vision/Installer/acs.zip`
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step2.png)
-4. Unzip it `unzip -o acs.zip`. If you have downloaded before, the file name might be different with an extension. The file name can be found above if is different from acs.zip listed above. 
+4. Unzip it `unzip -o acs.zip`. 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step3.png)
 5. Execute the installer `bash factory-ai-vision-install.sh`
 
 6. It will check the az command and check if it requires any installing/updating the IoT extension
 <br/>You would be asked:
 <br/>Would you like to use an existing Custom Vision Service? (y or n):  y 
+<br/>To learn more about Custom Vision Service, please refer the linke [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
 <br/>If you choose “yes”, you will asking to input endpoint and key.
 <br/>Please enter your Custom Vision endpoint: xxxxxx
 <br/>Please enter your Custom Vision Key: xxxxxx
@@ -43,7 +44,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 <br/>And Choose the number corresponding to your Azure Media Service. This is where you will be asked for the principle secret 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step6.png)
 
-9. Or if you don’t have one, but you would like to install with LVA, it will create new azure media service principle for you. 
+9. Or if you don’t have one, but you would like to install with LVA, please go ahead and create a [new account] and come back to continue the installer. 
 <br/>And please copy the "SERVICE-PRINCIPLE-SECRET" information in the bottom
 <br/>You will need the secret information for later use
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step7.png)
@@ -57,5 +58,16 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
 12. The installation will be started after. Please wait for couple minutes to complete the installation. 
-<br/>Open your browser, connect to http://YOUR_IP:8080
+<br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
+
+13. Open your browser, connect to http://YOUR_IP:8181
+
+14. Check out our tutorials on youtube channel 
+
+
+- Tutorial 2 - <a href="https://youtu.be/dihAdZTGj-g" target="_blank">Start with prebuilt scenario</a>
+- Tutorial 3 - <a href="https://www.youtube.com/watch?v=cCEW6nsd8xQ" target="_blank">Start with creating new project, capture images, tagging images and deploy</a>
+- Tutorial 4 - <a href="https://www.youtube.com/watch?v=OxK9feR_T3U" target="_blank">Retraining and improve your model</a>
+- Tutorial 5 - <a href="https://www.youtube.com/watch?v=Bv7wxfFEdtI" target="_blank">Advance capabilities setting</a>
+
 

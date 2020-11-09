@@ -6,6 +6,7 @@ import { ai } from '../TelemetryService';
 
 /**
  * This Component provides telemetry with Azure App Insights
+ * See the [repo](https://github.com/microsoft/ApplicationInsights-JS/tree/master/extensions/applicationinsights-react-js) for more info
  */
 const TelemetryProvider: React.FC<any> = ({ instrumentationKey, isAppInsightOn, history, children }) => {
   const initialized = useRef(false);

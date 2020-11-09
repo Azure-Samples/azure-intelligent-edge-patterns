@@ -425,7 +425,6 @@ def train_project_worker(project_id):
     status_init = False
     while True:
         time.sleep(1)
-        exports = trainer.get_exports(customvision_id, iteration.id)
         if not status_init:
             upcreate_training_status(
                 project_id=project_obj.id,
@@ -433,10 +432,25 @@ def train_project_worker(project_id):
                 **progress.PROGRESS_8_EXPORTING,
             )
             status_init = True
-        if len(exports) == 0 or not exports[0].download_uri:
-
-            res = project_obj.export_iterationv3_2(iteration.id)
-            logger.info("Export response from Custom Vision: %s", res.json())
+        try:
+            project_obj.export_iteration(iteration.id)
+        except Exception:
+            logger.exception("Export already in queue")
+        try:
+            project_obj.export_iteration(iteration.id, flavor="ONNXFloat16")
+        except Exception:
+            logger.exception("Export already in queue")
+        try:
+            exports = project_obj.get_exports(iteration.id)
+        except:
+            logger.exception("get_exports exception")
+            continue
+        if (
+            len(exports) < 2
+            or not exports[0].download_uri
+            or not exports[1].download_uri
+        ):
+            logger.info("Status: exporting model")
             continue
         break
 
@@ -447,7 +461,13 @@ def train_project_worker(project_id):
     logger.info("Training about to completed.")
 
     exports = trainer.get_exports(customvision_id, iteration.id)
-    project_obj.download_uri = exports[0].download_uri
+    if not exports[0].flavor:
+        project_obj.download_uri = exports[0].download_uri
+        project_obj.download_uri_fp16 = exports[1].download_uri
+    else:
+        project_obj.download_uri = exports[1].download_uri
+        project_obj.download_uri_fp16 = exports[0].download_uri
+
     train_performance_list = []
 
     for iteration in iterations[:2]:

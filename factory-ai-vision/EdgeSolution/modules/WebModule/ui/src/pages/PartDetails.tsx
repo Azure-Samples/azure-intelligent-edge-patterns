@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   Breadcrumb,
@@ -13,6 +13,7 @@ import {
   Spinner,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import { useQuery } from '../hooks/useQuery';
@@ -36,9 +37,7 @@ export const PartDetails: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const [editPanelOpen, setEditPanelOpen] = useState(false);
-  const openPanel = () => setEditPanelOpen(true);
-  const closePanel = () => setEditPanelOpen(false);
+  const [editPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
   // Create a memoized selector so the selector factory won't return different selectors every render
   const labeledImagesSelector = useMemo(() => partImageItemSelectorFactory(partId), [partId]);
@@ -85,6 +84,8 @@ export const PartDetails: React.FC = () => {
       text: 'Objects',
       href: '/parts',
       onClick: (ev, item) => {
+        // Default behaviour will reload the entire page.
+        // Prevent this behaviour and use react-router-dom instead
         ev.preventDefault();
         history.push(item.href);
       },
@@ -141,9 +142,9 @@ const PartInfo: React.FC<{ description: string; numImages: number }> = ({ descri
 );
 
 export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
-  const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
-  const openCaptureDialog = () => setCaptureDialogOpen(true);
-  const closeCaptureDialog = () => setCaptureDialogOpen(false);
+  const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
+    false,
+  );
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
   const partId = parseInt(useQuery().get('partId'), 10);
@@ -179,12 +180,12 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
         onClick: openCaptureDialog,
       },
     ],
-    [],
+    [openCaptureDialog],
   );
 
   useEffect(() => {
     dispatch(getImages());
-    // For image list items
+    // Image list items need part info
     dispatch(getParts());
   }, [dispatch]);
 

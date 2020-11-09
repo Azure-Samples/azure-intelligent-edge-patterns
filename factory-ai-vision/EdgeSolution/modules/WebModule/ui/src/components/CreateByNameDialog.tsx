@@ -45,7 +45,7 @@ export const CreateByNameDialog: React.FC<CreateByNameDialogProps> = ({
       onDismiss={onDismiss}
     >
       <ProgressIndicator barHeight={loading ? 2 : 0} />
-      <TextField onChange={onTextChange} disabled={loading} />
+      <TextField onChange={onTextChange} disabled={loading} data-testid="location-input" />
       <DialogFooter>
         <PrimaryButton text="Create" onClick={onCreateClick} disabled={loading || !name} />
         <DefaultButton text="Cancel" onClick={onDismiss} />

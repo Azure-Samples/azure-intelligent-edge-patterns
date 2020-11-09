@@ -1,3 +1,8 @@
+/**
+ * Slices such as camera and training project has the concept of `isDemo`,
+ * which means if the project / camera is for the six demo scenarios only.
+ */
+
 import {
   EntityState,
   EntityId,

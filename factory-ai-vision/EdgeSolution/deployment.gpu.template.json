@@ -96,11 +96,18 @@
               "ENDPOINT": {
                 "value": "$CUSTOM_VISION_ENDPOINT"
               },
-              "DBNAME": { "value": "vision_on_edge" },
-              "DBHOST": { "value": "172.18.0.1" },
-              "DBUSER": { "value": "vision_on_edge" },
-              "DBPASS": { "value": "vision_on_edge" },
-              "DF_INFERENECE_IS_GPU": { "value": true }
+              "DBNAME": {
+                "value": "vision_on_edge"
+              },
+              "DBHOST": {
+                "value": "172.18.0.1"
+              },
+              "DBUSER": {
+                "value": "vision_on_edge"
+              },
+              "DBPASS": {
+                "value": "vision_on_edge"
+              }
             },
             "settings": {
               "image": "${MODULES.WebModule}",
@@ -122,20 +129,6 @@
                   }
                 }
               }
-            }
-          },
-          "WebDBModule": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "env": {
-              "POSTGRES_PASSWORD": { "value": "vision_on_edge" },
-              "POSTGRES_USER": { "value": "vision_on_edge" },
-              "POSTGRES_DB": { "value": "vision_on_edge" }
-            },
-            "settings": {
-              "image": "${MODULES.WebDBModule}"
             }
           },
           "InferenceModule": {
@@ -207,7 +200,6 @@
               }
             }
           },
-
           "rtspsim": {
             "version": "1.0",
             "type": "docker",
@@ -216,7 +208,7 @@
             "settings": {
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
-                "HostConfig":{
+                "HostConfig": {
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -224,10 +216,12 @@
                       "max-file": "10"
                     }
                   },
-                  "PortBindings":{
-                    "554/tcp":[{
-                      "HostPort":"554"
-                    }]
+                  "PortBindings": {
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
                   }
                 }
               }

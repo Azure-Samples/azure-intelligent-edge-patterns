@@ -1,47 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 
 import { useInterval } from '../../hooks/useInterval';
 import { handleAxiosError } from '../../utils/handleAxiosError';
 
 type RTSPVideoProps = {
-  rtsp: string;
+  cameraId: number;
   onStreamCreated?: (streamId: string) => void;
   partId?: number;
 };
 
-export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCreated, partId = null }) => {
+export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
+  cameraId,
+  onStreamCreated,
+  partId = null,
+}) => {
   const [streamId, setStreamId] = useState<string>('');
-
-  const onCreateStream = useCallback((): void => {
-    if (!rtsp) return;
-    const url =
-      partId === null
-        ? `/api/streams/connect/?rtsp=${rtsp}`
-        : `/api/streams/connect/?part_id=${partId}&rtsp=${rtsp}`;
-    Axios.get(url)
-      .then(({ data }) => {
-        setStreamId(data.stream_id);
-        onStreamCreated(data.stream_id);
-        return void 0;
-      })
-      .catch(handleAxiosError)
-      .catch((err) => {
-        console.error(err);
-      });
-  }, [partId, rtsp]);
 
   const onDisconnect = (): void => {
     setStreamId('');
-    fetch(`/api/streams/${streamId}/disconnect`)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        return null;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    fetch(`/api/streams/${streamId}/disconnect`).catch(console.error);
   };
 
   useInterval(
@@ -59,8 +37,23 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({ rtsp, onStreamCre
   });
 
   useEffect(() => {
-    onCreateStream();
-  }, [onCreateStream]);
+    if (typeof cameraId !== 'number') return;
+    const url =
+      partId === null
+        ? `/api/streams/connect/?camera_id=${cameraId}`
+        : `/api/streams/connect/?part_id=${partId}&camera_id=${cameraId}`;
+    Axios.get(url)
+      .then(({ data }) => {
+        setStreamId(data.stream_id);
+        onStreamCreated(data.stream_id);
+        return void 0;
+      })
+      .catch(handleAxiosError)
+      .catch((err) => {
+        console.error(err);
+      });
+    // Ignore the dependency `onStreamCreated` because it may cause unecessary triggered in the useEffect
+  }, [partId, cameraId]);
 
   const src = streamId ? `/api/streams/${streamId}/video_feed` : '';
 

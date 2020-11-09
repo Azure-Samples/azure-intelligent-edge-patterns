@@ -16,12 +16,14 @@ class AzureTrainingStatusConfig(AppConfig):
 
     def ready(self):
         """ready."""
+
         if "runserver" in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
             from ..azure_projects.models import Project
             from . import signals
             from .models import TrainingStatus
 
+            # pylint: disable = no-member
             for project in Project.objects.all():
                 try:
                     ts_obj = project.trainingstatus

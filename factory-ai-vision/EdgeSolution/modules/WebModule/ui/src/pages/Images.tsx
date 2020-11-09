@@ -14,6 +14,7 @@ import {
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
@@ -35,6 +36,12 @@ const classes = mergeStyleSets({
   },
 });
 
+/**
+ * Use the factory to create selector here.
+ * If we put them inside the component,
+ * every time component rerender will return a different selector,
+ * which loose the benefit of memoization.
+ */
 const labeledImagesSelector = imageItemSelectorFactory(false);
 const unlabeledImagesSelector = imageItemSelectorFactory(true);
 
@@ -62,20 +69,36 @@ function useFilterItems<T extends { id: number; name: string }>(
       })),
     [itemsInStore, filterItems],
   );
+  const filteredItems = useMemo(() => Object.keys(filterItems).filter((e) => filterItems[e]), [filterItems]);
 
-  return [items, Object.keys(filterItems).filter((e) => filterItems[e])];
+  return [items, filteredItems];
 }
 
+/**
+ * Tell server that the user is checking the re-label images,
+ * so it won't update the re-label images queue.
+ * @param isAlive The condition if the re-label images is being checked
+ */
+const useKeepAlive = (isAlive) => {
+  const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
+  useInterval(
+    () => {
+      Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
+    },
+    isAlive ? 3000 : null,
+  );
+};
+
 export const Images: React.FC = () => {
-  const [isCaptureDialgOpen, setCaptureDialogOpen] = useState(false);
-  const openCaptureDialog = () => setCaptureDialogOpen(true);
-  const closeCaptureDialog = () => setCaptureDialogOpen(false);
+  const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
+    false,
+  );
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
   const labeledImages = useSelector(labeledImagesSelector);
   const unlabeledImages = useSelector(unlabeledImagesSelector);
+  // Re-labeled images stands for those images that is capture from the inference
   const relabelImages = useSelector(relabelImageSelector);
-  const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
   const imageAddedButNoAnno = useSelector(
     (state: State) => state.labelImages.ids.length > 0 && state.annotations.ids.length === 0,
   );
@@ -121,7 +144,7 @@ export const Images: React.FC = () => {
         onClick: openCaptureDialog,
       },
     ],
-    [],
+    [openCaptureDialog],
   );
 
   const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
@@ -132,6 +155,7 @@ export const Images: React.FC = () => {
       {
         key: 'filter',
         iconOnly: true,
+        // Make the icon solid if there is a filter applied
         iconProps: { iconName: filteredCameras.length || filteredParts.length ? 'FilterSolid' : 'Filter' },
         subMenuProps: {
           items: [
@@ -156,16 +180,11 @@ export const Images: React.FC = () => {
 
   useEffect(() => {
     dispatch(getImages());
-    // For image list items
+    // We need part info for image list items
     dispatch(getParts());
   }, [dispatch]);
 
-  useInterval(
-    () => {
-      Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
-    },
-    relabelImages.length > 0 ? 3000 : null,
-  );
+  useKeepAlive(relabelImages.length > 0);
 
   const onRenderInstructionInsidePivot = () => (
     <>
@@ -185,6 +204,80 @@ export const Images: React.FC = () => {
       )}
     </>
   );
+
+  const onRenderUntaggedPivot = () => {
+    if (unlabeledImages.length === 0 && relabelImages.length === 0)
+      return (
+        <EmptyAddIcon
+          title="Looks like you don’t have any untagged images"
+          subTitle="Continue adding and tagging more images from your video streams to improve your model"
+          primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
+          secondary={{ text: 'Upload images', onClick: onUpload }}
+        />
+      );
+
+    return (
+      <>
+        {relabelImages.length > 0 && (
+          <>
+            <Separator alignContent="start" className={classes.seperator}>
+              Deployment captures
+            </Separator>
+            <MessageBar styles={{ root: { margin: '12px 0px' } }}>
+              Images saved from the current deployment. Confirm or modify the objects identified to improve
+              your model.
+            </MessageBar>
+            <FilteredImgList
+              images={relabelImages}
+              filteredCameras={filteredCameras}
+              filteredParts={filteredParts}
+            />
+          </>
+        )}
+        {unlabeledImages.length > 0 && (
+          <>
+            <Separator alignContent="start" className={classes.seperator}>
+              Manually added
+            </Separator>
+            <FilteredImgList
+              images={unlabeledImages}
+              filteredCameras={filteredCameras}
+              filteredParts={filteredParts}
+            />
+          </>
+        )}
+      </>
+    );
+  };
+
+  const onRenderMain = () => {
+    if (labeledImages.length + unlabeledImages.length)
+      return (
+        <Pivot>
+          <PivotItem headerText="Untagged">
+            {onRenderInstructionInsidePivot()}
+            {onRenderUntaggedPivot()}
+          </PivotItem>
+          <PivotItem headerText="Tagged">
+            {onRenderInstructionInsidePivot()}
+            <FilteredImgList
+              images={labeledImages}
+              filteredCameras={filteredCameras}
+              filteredParts={filteredParts}
+            />
+          </PivotItem>
+        </Pivot>
+      );
+
+    return (
+      <EmptyAddIcon
+        title="Add images"
+        subTitle="Capture images from your video streams and tag parts"
+        primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
+        secondary={{ text: 'Upload images', onClick: onUpload }}
+      />
+    );
+  };
 
   return (
     <>
@@ -213,67 +306,7 @@ export const Images: React.FC = () => {
             />
           )}
           <Breadcrumb items={[{ key: 'images', text: 'Images' }]} />
-          {labeledImages.length + unlabeledImages.length ? (
-            <Pivot>
-              <PivotItem headerText="Untagged">
-                {onRenderInstructionInsidePivot()}
-                {unlabeledImages.length === 0 && relabelImages.length === 0 ? (
-                  <EmptyAddIcon
-                    title="Looks like you don’t have any untagged images"
-                    subTitle="Continue adding and tagging more images from your video streams to improve your model"
-                    primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
-                    secondary={{ text: 'Upload images', onClick: onUpload }}
-                  />
-                ) : (
-                  <>
-                    {relabelImages.length > 0 && (
-                      <>
-                        <Separator alignContent="start" className={classes.seperator}>
-                          Deployment captures
-                        </Separator>
-                        <MessageBar styles={{ root: { margin: '12px 0px' } }}>
-                          Images saved from the current deployment. Confirm or modify the objects identified
-                          to improve your model.
-                        </MessageBar>
-                        <FilteredImgList
-                          images={relabelImages}
-                          filteredCameras={filteredCameras}
-                          filteredParts={filteredParts}
-                        />
-                      </>
-                    )}
-                    {unlabeledImages.length > 0 && (
-                      <>
-                        <Separator alignContent="start" className={classes.seperator}>
-                          Manually added
-                        </Separator>
-                        <FilteredImgList
-                          images={unlabeledImages}
-                          filteredCameras={filteredCameras}
-                          filteredParts={filteredParts}
-                        />
-                      </>
-                    )}
-                  </>
-                )}
-              </PivotItem>
-              <PivotItem headerText="Tagged">
-                {onRenderInstructionInsidePivot()}
-                <FilteredImgList
-                  images={labeledImages}
-                  filteredCameras={filteredCameras}
-                  filteredParts={filteredParts}
-                />
-              </PivotItem>
-            </Pivot>
-          ) : (
-            <EmptyAddIcon
-              title="Add images"
-              subTitle="Capture images from your video streams and tag parts"
-              primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
-              secondary={{ text: 'Upload images', onClick: onUpload }}
-            />
-          )}
+          {onRenderMain()}
         </Stack>
       </Stack>
       <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} />

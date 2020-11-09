@@ -40,6 +40,9 @@ class Project(models.Model):
     )
     name = models.CharField(max_length=200, null=True, blank=True, default="")
     download_uri = models.CharField(max_length=1000, null=True, blank=True, default="")
+    download_uri_fp16 = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
 
@@ -295,8 +298,8 @@ class Project(models.Model):
         is_task_success = True
         return is_task_success
 
-    def export_iterationv3_2(self, iteration_id):
-        """export_iterationv3_2.
+    def export_iteration(self, iteration_id, platform: str = "ONNX", flavor: str = ""):
+        """export_iterationv3_3.
 
         CustomVisionTrainingClient SDK may have some issues exporting.
         Use the REST API
@@ -304,17 +307,27 @@ class Project(models.Model):
         # trainer.export_iteration(customvision_id,
         # iteration.id,
         # 'ONNX')
-        setting_obj = self.setting
-        url = (
-            setting_obj.endpoint
-            + "customvision/v3.2/training/projects/"
-            + self.customvision_id
-            + "/iterations/"
-            + iteration_id
-            + "/export?platform=ONNX"
+        trainer = self.get_trainer_obj()
+        res = trainer.export_iteration(
+            project_id=self.customvision_id,
+            iteration_id=iteration_id,
+            platform=platform,
+            flavor=flavor,
         )
-        res = requests.post(
-            url, "{body}", headers={"Training-key": setting_obj.training_key}
+        return res
+
+    def get_exports(self, iteration_id):
+        """export_iterationv3_3.
+
+        CustomVisionTrainingClient SDK may have some issues exporting.
+        Use the REST API
+        """
+        # trainer.export_iteration(customvision_id,
+        # iteration.id,
+        # 'ONNX')
+        trainer = self.get_trainer_obj()
+        res = trainer.get_exports(
+            project_id=self.customvision_id, iteration_id=iteration_id
         )
         return res
 
@@ -351,27 +364,42 @@ class Task(models.Model):
                     self.log = "Status : training model"
                     self.save()
                     continue
-
-                exports = trainer.get_exports(customvision_id, iteration.id)
-                if len(exports) == 0 or not exports[0].download_uri:
+                try:
+                    project_obj.export_iteration(iteration.id)
+                    project_obj.export_iteration(iteration.id, flavor="ONNXFloat16")
+                except Exception:
+                    logger.exception("Export already in queue")
+                exports = project_obj.get_exports(iteration.id)
+                if (
+                    len(exports) < 2
+                    or not exports[0].download_uri
+                    or not exports[1].download_uri
+                ):
                     logger.info("Status: exporting model")
                     self.status = "running"
                     self.log = "Status : exporting model"
-                    res = project_obj.export_iterationv3_2(iteration.id)
                     self.save()
-                    logger.info(res.json())
                     continue
 
                 logger.info(
                     "Successfully export model. download_uri: %s",
                     exports[0].download_uri,
                 )
+                logger.info(
+                    "Successfully export model. download_uri: %s",
+                    exports[1].download_uri,
+                )
                 self.status = "ok"
                 self.log = "Status : work done"
                 self.save()
                 # Get the latest object
                 project_obj = Project.objects.get(pk=project_obj.id)
-                project_obj.download_uri = exports[0].download_uri
+                if not exports[0].flavor:
+                    project_obj.download_uri = exports[0].download_uri
+                    project_obj.download_uri_fp16 = exports[1].download_uri
+                else:
+                    project_obj.download_uri = exports[1].download_uri
+                    project_obj.download_uri_fp16 = exports[0].download_uri
                 project_obj.save()
                 break
             return

@@ -67,9 +67,9 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8080/tcp": [
+                    "8181/tcp": [
                       {
-                        "HostPort": "8080"
+                        "HostPort": "8181"
                       }
                     ]
                   }
@@ -100,9 +100,6 @@
               },
               "DBPASS": {
                 "value": "vision_on_edge"
-              },
-              "DF_INFERENECE_IS_GPU": {
-                "value": false
               },
               "DF_PD_VIDEO_SOURCE": {
                 "value": "opencv"

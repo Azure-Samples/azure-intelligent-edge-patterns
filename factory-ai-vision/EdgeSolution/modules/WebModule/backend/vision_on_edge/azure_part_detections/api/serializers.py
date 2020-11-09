@@ -6,6 +6,8 @@ import logging
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
+from ...camera_tasks.api.serializers import CameraTaskSerializer
+from ...camera_tasks.models import CameraTask
 from ...general.shortcuts import drf_get_object_or_404
 from ..constants import INFERENCE_PROTOCOL_CHOICES
 from ..models import PartDetection, PDScenario
@@ -16,11 +18,7 @@ logger = logging.getLogger(__name__)
 class PartDetectionSerializer(serializers.ModelSerializer):
     """Part Detection Serializer"""
 
-    class SendVideoToCloudInfoSerializer(serializers.Serializer):
-        camera_id = serializers.IntegerField()
-        send_video_to_cloud = serializers.BooleanField()
-
-    send_video_to_cloud = SendVideoToCloudInfoSerializer(many=True, required=False)
+    send_video_to_cloud = CameraTaskSerializer(many=True, required=False, partial=True)
 
     class Meta:
         model = PartDetection
@@ -46,6 +44,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "prob_threshold",
             "project",
             "send_video_to_cloud",
+            "disable_video_feed",
         ]
         extra_kwargs = {
             "prob_threshold": {"required": False},
@@ -75,20 +74,26 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "prob_threshold",
             "project",
             # "send_video_to_cloud",
+            "disable_video_feed",
         ]:
             if attr in validated_data:
                 setattr(instance, attr, validated_data[attr])
         instance.cameras.set(validated_data.pop("cameras"))
         instance.parts.set(validated_data.pop("parts"))
         if "send_video_to_cloud" in validated_data:
-            send_video_to_cloud = validated_data.pop("send_video_to_cloud")
-            for svtc_info in send_video_to_cloud:
-                camera = drf_get_object_or_404(
-                    instance.cameras.all(), pk=svtc_info["camera_id"]
+            camera_tasks = validated_data.pop("send_video_to_cloud")
+            for camera_task in camera_tasks:
+                camera_task_instance = drf_get_object_or_404(
+                    CameraTask.objects.filter(camera_id__in=instance.cameras.all()),
+                    camera_id=camera_task["camera"],
                 )
-                camera.send_video_to_cloud = svtc_info["send_video_to_cloud"]
-                camera.skip_signals = True
-                camera.save()
+                serializer = CameraTaskSerializer(
+                    instance=camera_task_instance,
+                    data=CameraTaskSerializer(camera_task).data,
+                    partial=True,
+                )
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
         instance.save()
         return instance
 
@@ -139,6 +144,10 @@ class UpdateCamBodySerializer(serializers.Serializer):
     class CameraItem(serializers.Serializer):
         """CameraItem."""
 
+        class Parts(serializers.Serializer):
+            id = serializers.CharField()
+            name = serializers.CharField()
+
         id = serializers.CharField()
         type = serializers.CharField()
         source = serializers.CharField()
@@ -146,6 +155,9 @@ class UpdateCamBodySerializer(serializers.Serializer):
         lines = serializers.CharField(required=False, allow_blank=True)
         zones = serializers.CharField(required=False, allow_blank=True)
         send_video_to_cloud = serializers.BooleanField()
+        send_video_to_cloud_parts = Parts(many=True)
+        send_video_to_cloud_threshold = serializers.IntegerField()
+        recording_duration = serializers.IntegerField()
 
     lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
     fps = serializers.IntegerField()

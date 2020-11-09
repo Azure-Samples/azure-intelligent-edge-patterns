@@ -15,6 +15,7 @@ from typing import List
 import cv2
 import grpc
 import numpy as np
+import onnxruntime
 import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
@@ -57,13 +58,17 @@ IMG_HEIGHT = 540
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 
+NO_DISPLAY = os.environ.get("NO_DISPLAY", "false")
+
 # Main thread
 
 onnx = ONNXRuntimeModelDeploy()
 stream_manager = StreamManager(onnx)
 
 app = FastAPI(
-    title="InferenceModule", description="Factory AI InferenceModule.", version="0.0.1",
+    title="InferenceModule",
+    description="Factory AI InferenceModule.",
+    version="0.0.1",
 )
 
 
@@ -72,8 +77,8 @@ app = FastAPI(
 http_inference_engine = HttpInferenceEngine(stream_manager)
 
 
-@app.get("/streams")
-def streams() -> List[StreamModel]:
+@app.get("/get_streams")
+def get_streams() -> List[StreamModel]:
     """streams."""
     # logger.info(onnx.last_prediction)
     # onnx.last_prediction
@@ -115,6 +120,7 @@ def metrics(cam_id: str):
     last_prediction_count = {}
     is_gpu = onnx.is_gpu
     scenario_metrics = []
+    device = onnx.get_device()
 
     stream = stream_manager.get_stream_by_id_danger(cam_id)
     if stream:
@@ -134,6 +140,7 @@ def metrics(cam_id: str):
         "inference_num": inference_num,
         "unidentified_num": unidentified_num,
         "is_gpu": is_gpu,
+        "device": device,
         "average_inference_time": average_inference_time,
         "last_prediction_count": last_prediction_count,
         "scenario_metrics": scenario_metrics,
@@ -227,14 +234,13 @@ def update_cams(request_body: CamerasModel):
     Cameras not in List should not inferecence.
     """
     logger.info(request_body)
-    fps = request_body.fps
+    frame_rate = request_body.fps
     stream_manager.update_streams([cam.id for cam in request_body.cameras])
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
     # recommended_fps = onnx.get_recommended_frame_rate(n)
-    frame_rate = fps
-    onnx.set_frame_rate(fps)
-    logger.warning('update frame rate to {0}'.format(frame_rate))
+    onnx.set_frame_rate(frame_rate)
+    logger.warning("update frame rate to {}".format(frame_rate))
 
     # lva_mode
 
@@ -265,10 +271,12 @@ def update_cams(request_body: CamerasModel):
         stream = stream_manager.get_stream_by_id(cam_id)
         # s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
+        recording_duration = int(cam.recording_duration*60)
         stream.update_cam(
             cam_type,
             cam_source,
             frame_rate,
+            recording_duration,
             lva_mode,
             cam_id,
             has_aoi,
@@ -278,6 +286,13 @@ def update_cams(request_body: CamerasModel):
             zone_info,
         )
         stream.send_video_to_cloud = cam.send_video_to_cloud
+        stream.send_video_to_cloud_parts = [
+            part.name for part in cam.send_video_to_cloud_parts
+        ]
+        stream.send_video_to_cloud_threshold = int(
+            cam.send_video_to_cloud_threshold) * 0.01
+        # recording_duration is set in topology, sould be handled in s.update_cam, not here
+        # stream.recording_duration = int(cam.recording_duration*60)
 
     logger.info("Streams %s", stream_manager.streams)
     return "ok"
@@ -383,7 +398,22 @@ def get_recommended_fps(number_of_cameras: int):
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return onnx.get_recommended_frame_rate(number_of_cameras)
+    return {"fps": int(onnx.get_recommended_frame_rate(number_of_cameras))}
+
+
+@app.get("/get_recommended_total_fps")
+def get_recommended_total_fps():
+    """get_recommended_fps.
+
+    Args:
+        number_of_cameras (int): number_of_cameras
+    """
+    return {"fps": int(onnx.get_recommended_total_frame_rate())}
+
+
+@app.get("/recommended_fps")
+def recommended_fps():
+    return {"fps": int(onnx.get_recommended_total_frame_rate())}
 
 
 # @app.route("/get_current_fps")
@@ -421,6 +451,8 @@ class DisplayManager:
 
 @app.get("/video_feed")
 async def video_feed(cam_id: str):
+    if NO_DISPLAY == "true":
+        return "ok"
     stream = stream_manager.get_stream_by_id(cam_id)
     if stream:
         print("[INFO] Preparing Video Feed for stream %s" % cam_id, flush=True)
@@ -444,6 +476,12 @@ async def keep_alive(cam_id: str):
         return "failed"
 
 
+@app.get("/get_device")
+def get_device():
+    device = onnx.get_device()
+    return {"device": device}
+
+
 def init_topology():
     """init_topology.
 
@@ -451,8 +489,15 @@ def init_topology():
     """
 
     instances = gm.invoke_graph_instance_list()
+    logger.info("instances %s", instances)
+    if 'error' in instances.keys():
+        logger.warning(
+            '[HttpOperationError] Probably caused by invalid IoTHub connection string. The server will terminate in 10 seconds.')
+        time.sleep(10)
+        sys.exit(-1)
     if instances["status"] != 200:
-        logger.warning("Failed to invoker direct method: %s", instances["payload"])
+        logger.warning("Failed to invoke direct method: %s",
+                       instances["payload"])
         return -1
     logger.info(
         "========== Deleting %s instance(s) ==========",
@@ -460,12 +505,15 @@ def init_topology():
     )
 
     for i in range(len(instances["payload"]["value"])):
-        gm.invoke_graph_instance_deactivate(instances["payload"]["value"][i]["name"])
-        gm.invoke_graph_instance_delete(instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_deactivate(
+            instances["payload"]["value"][i]["name"])
+        gm.invoke_graph_instance_delete(
+            instances["payload"]["value"][i]["name"])
 
     topologies = gm.invoke_graph_topology_list()
     if instances["status"] != 200:
-        logger.warning("Failed to invoker direct method: %s", instances["payload"])
+        logger.warning("Failed to invoker direct method: %s",
+                       instances["payload"])
         return -1
     logger.info(
         "========== Deleting %s topology ==========",
@@ -473,7 +521,8 @@ def init_topology():
     )
 
     for i in range(len(topologies["payload"]["value"])):
-        gm.invoke_graph_topology_delete(topologies["payload"]["value"][i]["name"])
+        gm.invoke_graph_topology_delete(
+            topologies["payload"]["value"][i]["name"])
 
     logger.info("========== Setting default grpc/http topology ==========")
     ret = gm.invoke_topology_set("grpc")
@@ -498,19 +547,20 @@ def benchmark():
     SCENARIO1_MODEL = "scenario_models/1"
 
     n_threads = 3
-    n_images = 100
+    n_images = 15
     logger.info("============= BenchMarking (Begin) ==================")
     logger.info("--- Settings ----")
     logger.info("%s threads", n_threads)
     logger.info("%s images", n_images)
 
-    stream_ids = list(str(i) for i in range(n_threads))
+    stream_ids = list(str(i + 10000) for i in range(n_threads))
     stream_manager.update_streams(stream_ids)
     onnx.set_is_scenario(True)
     onnx.update_model(SCENARIO1_MODEL)
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
-        s.update_cam("video", SAMPLE_VIDEO, 30, s.cam_id, False, None, "PC", [], [])
+        s.update_cam("video", SAMPLE_VIDEO, 30,
+                     s.cam_id, False, None, "PC", [], [])
 
     def _f():
         logger.info("--- Thread %s started---", threading.current_thread())
@@ -520,8 +570,10 @@ def benchmark():
             s.predict(img)
         t1_t = time.time()
         print("---- Thread", threading.current_thread(), "----", flush=True)
-        print("Processing", n_images, "images in", t1_t - t0_t, "seconds", flush=True)
-        print("  Avg:", (t1_t - t0_t) / n_images * 1000, "ms per image", flush=True)
+        print("Processing", n_images, "images in",
+              t1_t - t0_t, "seconds", flush=True)
+        print("  Avg:", (t1_t - t0_t) / n_images *
+              1000, "ms per image", flush=True)
 
     threads = []
     for i in range(n_threads):
@@ -533,10 +585,23 @@ def benchmark():
         threads[i].join()
     t1 = time.time()
     # print(t1-t0)
+    stream_manager.update_streams([])
+
+    discount = 0.75
+    max_total_frame_rate = discount * (n_images * n_threads) / (t1 - t0)
+
     logger.info("---- Overall ----")
-    logger.info("Processing %s images in %s seconds", n_images * n_threads, t1 - t0)
-    logger.info("  Avg: %s ms per image", (t1 - t0) / (n_images * n_threads) * 1000)
+    logger.info("Processing %s images in %s seconds",
+                n_images * n_threads, t1 - t0)
+    logger.info("  Avg: %s ms per image", (t1 - t0) /
+                (n_images * n_threads) * 1000)
+    logger.info("  Recommended Total FPS: %s", max_total_frame_rate)
     logger.info("============= BenchMarking (End) ==================")
+
+    stream_manager.update_streams([])
+
+    max_total_frame_rate = max(1, max_total_frame_rate)
+    onnx.set_max_total_frame_rate(max_total_frame_rate)
 
 
 def cvcapture_url():
@@ -562,7 +627,8 @@ def opencv_zmq():
             else:
                 cnt[buf[0]] += 1
             logger.info(
-                "receiving from channel {}, cnt: {}".format(buf[0], cnt[buf[0]])
+                "receiving from channel {}, cnt: {}".format(
+                    buf[0], cnt[buf[0]])
             )
             stream = stream_manager.get_stream_by_id(buf[0].decode("utf-8"))
             logger.info(buf[0])
@@ -607,7 +673,8 @@ def main():
                         "Failed to init topology, please check whether direct method still works"
                     )
                     sys.exit(-1)
-                logger.warning("Failed to init topology, try again 10 secs later")
+                logger.warning(
+                    "Failed to init topology, try again 10 secs later")
                 time.sleep(10)
                 counter += 1
 
@@ -638,10 +705,12 @@ if __name__ == "__main__":
     else:
         logging.config.dictConfig(logging_config.LOGGING_CONFIG_DEV)
 
+    benchmark()
+
     logger.info("is_edge: %s", is_edge())
+
     if is_edge():
         main()
     else:
         logger.info("Assume running at local development.")
         local_main()
-        # benchmark()

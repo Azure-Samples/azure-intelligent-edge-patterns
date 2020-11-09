@@ -9,17 +9,13 @@ import {
   GET_PROJECT_REQUEST,
   UPDATE_PROJECT_DATA,
   POST_PROJECT_REQUEST,
-  GET_TRAINING_LOG_REQUEST,
-  GET_TRAINING_LOG_SUCCESS,
-  GET_TRAINING_LOG_FAILED,
   Status,
-  GET_TRAINING_METRICS_REQUEST,
-  GET_TRAINING_METRICS_SUCCESS,
-  GET_TRAINING_METRICS_FAILED,
   ProjectData,
   InferenceMode,
   InferenceProtocol,
   InferenceSource,
+  TRAIN_SUCCESS,
+  TRAIN_FAILED,
 } from './projectTypes';
 import { getConfigure, updateProbThreshold } from './projectActions';
 import { pullCVProjects } from '../trainingProjectSlice';
@@ -33,20 +29,21 @@ const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Statu
 export const initialProjectData: ProjectData = {
   id: null,
   cameras: [],
-  location: null,
   parts: [],
   trainingProject: null,
   needRetraining: true,
   accuracyRangeMin: 60,
   accuracyRangeMax: 80,
   maxImages: 20,
-  modelUrl: '',
   sendMessageToCloud: false,
   framesPerMin: 6,
-  probThreshold: '10',
+  probThreshold: 10,
   name: '',
-  sendVideoToCloud: false,
-  cameraToBeRecord: [],
+  SVTCcameras: [],
+  SVTCisOpen: false,
+  SVTCparts: [],
+  SVTCconfirmationThreshold: 60,
+  SVTCRecordingDuration: 1,
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
   setFpsManually: false,
@@ -55,20 +52,15 @@ export const initialProjectData: ProjectData = {
   totalRecomendedFps: 10,
   inferenceProtocol: InferenceProtocol.GRPC,
   inferenceSource: InferenceSource.LVA,
+  disableVideoFeed: false,
 };
 
 const initialState: Project = {
   isLoading: false,
   data: initialProjectData,
   originData: initialProjectData,
-  trainingMetrics: {
-    prevConsequence: null,
-    curConsequence: null,
-  },
   status: Status.None,
   error: null,
-  trainingLog: '',
-  progress: null,
 };
 
 const projectReducer = (state = initialState, action: ProjectActionTypes): Project => {
@@ -104,45 +96,17 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
       return { ...state, data: { ...state.data, ...action.payload } };
     case pullCVProjects.fulfilled.toString():
       return { ...state, originData: state.data };
-    case GET_TRAINING_LOG_REQUEST:
+    case TRAIN_SUCCESS: {
       return {
         ...state,
-      };
-    case GET_TRAINING_LOG_SUCCESS: {
-      let trainingLog;
-      if (action.payload.newStatus === Status.FinishTraining) trainingLog = '';
-      else trainingLog = action.payload.trainingLog;
-
-      return {
-        ...state,
-        trainingLog,
-        progress: action.payload.progress ?? state.progress,
-        status: action.payload.newStatus,
-      };
-    }
-    case GET_TRAINING_LOG_FAILED:
-      return {
-        ...state,
-        trainingLog: '',
-        data: { ...state.data },
-        status: Status.TrainingFailed,
-        error: action.error,
-      };
-    case GET_TRAINING_METRICS_REQUEST:
-      return state;
-    case GET_TRAINING_METRICS_SUCCESS:
-      return {
-        ...state,
-        trainingMetrics: action.payload,
         status: Status.StartInference,
       };
-    case GET_TRAINING_METRICS_FAILED:
+    }
+    case TRAIN_FAILED:
       return {
         ...state,
-        error: action.error,
+        status: Status.TrainingFailed,
       };
-    case 'CHANGE_STATUS':
-      return { ...state, status: action.status };
     case updateProbThreshold.pending.toString():
       return { ...state, isLoading: true, error: null };
     case updateProbThreshold.fulfilled.toString():

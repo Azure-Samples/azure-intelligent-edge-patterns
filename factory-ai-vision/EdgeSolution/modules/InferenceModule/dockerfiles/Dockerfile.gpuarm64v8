@@ -1,59 +1,157 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:v.1.4.0-jetpack4.4-l4t-base-r32.4.3 as base
+# =========================================================
+# Base
+# =========================================================
+ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.3
+FROM ${BASE_IMAGE} as base
 
+WORKDIR /app
+ENV LANG en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ARG SYSTEM_CORES=4
+
+# =========================================================
+# Install system packages
+# =========================================================
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
     git \
+    wget \
+    unzip \
+    yasm \
+    pkg-config \
+    libtbb2 \
+    libtbb-dev \
+    libpq-dev \
     libprotobuf-dev \
     protobuf-compiler \
+    libgeos-dev \
+    ca-certificates \
+    bzip2 \
     unzip \
     && rm -rf /var/lib/apt/lists/*
+# protobuf-compiler:   https://github.com/onnx/onnx#build-onnx-on-arm-64
+# libprotobuf-dev:     https://github.com/onnx/onnx#build-onnx-on-arm-64
+# libgeos-dev:         Shapely
 
+# =========================================================
+# Install Python package
+# =========================================================
+WORKDIR /code/
 
-# Onnx builder
-# --------------------------------------------------------
-FROM base as builder
-RUN pip install cython protobuf
+ARG MINIFORGE_VERSION=4.8.2-1
+ENV CONDA_DIR=/opt/conda
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+ENV PATH=${CONDA_DIR}/bin:${PATH}
 
-#RUN mkdir /code
-WORKDIR /code
-RUN git clone --single-branch https://github.com/onnx/onnx.git
-WORKDIR /code/onnx
-RUN git submodule update --init --recursive
-RUN python3 setup.py install
+RUN wget --no-hsts \
+        --quiet \
+        https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-aarch64.sh \
+        -O /tmp/miniforge.sh && \
+    /bin/bash /tmp/miniforge.sh \
+        -b \
+        -p ${CONDA_DIR} && \
+    rm /tmp/miniforge.sh && \
+    conda clean -tipsy && \
+    find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
+    find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
+    conda clean -afy
 
-# Final Result
-# --------------------------------------------------------
-FROM builder as final
-#FROM nvidia/cuda:10.1-cudnn7-devel
+RUN conda create --name python38 python=3.8
+RUN echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> /etc/skel/.bashrc
+RUN echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> ~/.bashrc
+SHELL ["conda", "run", "-n", "python38", "/bin/bash", "-c"]
+
+# =========================================================
+# Install Python package
+# =========================================================
 WORKDIR /app
 
-#Upgradin CUDA to 10.2
-#RUN sudo apt-get install -y software-properties-common
-#RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-ubuntu1604.pin
-#RUN sudo mv cuda-ubuntu1604.pin /etc/apt/preferences.d/cuda-repository-pin-600
-#RUN sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-#RUN sudo add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/ /"
-#RUN sudo apt-get update
-#RUN sudo apt-get -y install cuda
-
+RUN pip install --upgrade pip
+RUN pip install wheel cython protobuf
 COPY requirements/base.txt ./requirements/base.txt
-ENV CONDA_ENV_NAME python38
-RUN conda create --name python38 python=3.8.5 -y && \
-    . activate python38
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime" ]
-RUN apt-get install -y python3-numpy python3-zmq
-RUN pip install -U certifi --ignore-installed
+# Workaround scikit image requires numpy while dependency is not resolved
+RUN pip install $(cat ./requirements/base.txt | grep numpy)
+RUN pip install -r requirements/base.txt
 
-COPY requirements-gpuarm.txt ./
-RUN pip install -r requirements-gpuarm.txt
-#RUN pip install onnxruntime-gpu
+# =========================================================
+# Install onnxruntime
+# =========================================================
+ARG ONNXRUNTIME_REPO="https://github.com/Microsoft/onnxruntime"
+ARG ONNXRUNTIME_SERVER_BRANCH="rel-1.5.2"
 
+WORKDIR /code
+
+RUN git clone \
+        --single-branch \
+        --branch ${ONNXRUNTIME_SERVER_BRANCH} \
+        --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
+    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh && \
+    cd onnxruntime && \
+    /bin/sh ./build.sh \
+        --use_openmp \
+        --config Release \
+        --build_wheel \
+        --update \
+        --build \
+        --parallel \
+        --use_cuda \
+        --cuda_home /usr/local/cuda \
+        --cudnn_home /usr/lib/aarch64-linux-gnu \
+        --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER) && \
+    pip install /code/onnxruntime/build/Linux/Release/dist/*.whl && \
+    cd .. && \
+    rm -rf onnxruntime
+
+RUN python -c "import onnxruntime; print(onnxruntime.__version__)"
+
+# =========================================================
+# Install opencv
+# =========================================================
+ARG OPENCV_REPO="https://github.com/opencv/opencv.git"
+ARG OPENCV_TAG="4.4.0"
+
+WORKDIR /code
+
+RUN apt-get update && \
+    apt-get install -y\
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer1.0-dev \
+    libgtk-3-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libopenexr-dev \
+    libtiff-dev \
+    libwebp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --single-branch \
+        --branch ${OPENCV_TAG} \
+        --recursive ${OPENCV_REPO} \
+        opencv && \
+    cd opencv && \
+    mkdir build && \
+    cd build && \
+    cmake ../ && \
+    make -j${SYSTEM_CORES} && \
+    make install && \
+    cd /code && \
+    rm -rf opencv
+
+RUN ["python","-c", "\"import cv2;print(cv2.__version__)\""]
+
+# =========================================================
+# Copy Source Code
+# =========================================================
 COPY coco_classes.txt ./
 COPY default_model default_model/
 COPY default_model_6parts default_model_6parts/
 COPY grpc_topology.json ./
+COPY http_topology.json ./
 COPY sample_video sample_video/
 COPY scenario_models scenario_models/
 RUN chmod 777 sample_video/video.mp4
@@ -67,6 +165,7 @@ COPY exception_handler.py ./
 COPY extension_pb2.py ./
 COPY extension_pb2_grpc.py ./
 COPY http_inference_engine.py ./
+COPY img.png ./
 COPY inference_engine.py ./
 COPY inferencing_pb2.py ./
 COPY invoke.py ./
@@ -86,7 +185,10 @@ COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
 
+# =========================================================
+# Run
+# =========================================================
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
+CMD [ "python3", "server.py", "-p", "44000"]

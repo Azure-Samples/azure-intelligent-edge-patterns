@@ -16,13 +16,14 @@ import {
   ActionButton,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
 import { useQuery } from '../hooks/useQuery';
 import { selectCameraById, getCameras, deleteCamera } from '../store/cameraSlice';
 import { RTSPVideo } from '../components/RTSPVideo';
 import { thunkGetProject } from '../store/project/projectActions';
-import { AddEditCameraPanel, PanelMode } from '../components/AddCameraPanel';
+import AddCameraPanel, { PanelMode } from '../components/AddCameraPanel';
 import { selectLocationById } from '../store/locationSlice';
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { captureImage } from '../store/imageSlice';
@@ -40,9 +41,7 @@ export const CameraDetails: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const [editPanelOpen, setEditPanelOpen] = useState(false);
-  const openPanel = () => setEditPanelOpen(true);
-  const closePanel = () => setEditPanelOpen(false);
+  const [editPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
@@ -110,12 +109,12 @@ export const CameraDetails: React.FC = () => {
           <Breadcrumb items={breadCrumbItems} />
           <Stack tokens={{ childrenGap: 20 }} horizontal grow>
             <CameraInfo rtsp={maskRtsp(camera.rtsp)} location={locationName} />
-            <CameraLiveFeed rtsp={camera.rtsp} onBtnClick={onCaptureBtnClick} />
+            <CameraLiveFeed cameraId={camera.id} onBtnClick={onCaptureBtnClick} />
           </Stack>
         </Stack>
       </Stack>
       <LabelingPage />
-      <AddEditCameraPanel
+      <AddCameraPanel
         isOpen={editPanelOpen}
         onDissmiss={closePanel}
         mode={PanelMode.Update}
@@ -166,8 +165,8 @@ const CameraInfo: React.FC<{ rtsp: string; location: string }> = ({ rtsp, locati
   </Stack>
 );
 
-const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: (streamId) => void }> = ({
-  rtsp,
+const CameraLiveFeed: React.FC<{ cameraId: number; onBtnClick: (streamId) => void }> = ({
+  cameraId,
   onBtnClick: btnClickCb,
 }) => {
   const streamIdRef = useRef('');
@@ -183,7 +182,7 @@ const CameraLiveFeed: React.FC<{ rtsp: string; onBtnClick: (streamId) => void }>
       <Stack.Item grow>
         <div style={{ height: '90%' }}>
           <RTSPVideo
-            rtsp={rtsp}
+            cameraId={cameraId}
             onStreamCreated={(streamId) => {
               streamIdRef.current = streamId;
             }}

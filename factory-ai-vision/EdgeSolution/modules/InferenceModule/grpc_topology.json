@@ -91,6 +91,12 @@
                 "type": "String",
                 "description": "instance id",
                 "default": "0"
+            },
+            {
+                "name": "recordingDuration",
+                "type": "String",
+                "description": "recording duration",
+                "default": "60"
             }
         ],
         "sources": [{

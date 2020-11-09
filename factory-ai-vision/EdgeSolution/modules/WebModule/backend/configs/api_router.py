@@ -3,8 +3,8 @@
 
 from django.conf.urls import url
 from django.urls import include, path
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
+from drf_yasg2 import openapi
+from drf_yasg2.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
@@ -16,6 +16,7 @@ from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training_status.api import (
     views as azure_training_status_views,
 )
+from vision_on_edge.camera_tasks.api import views as camera_task_views
 
 # from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views as camera_views
@@ -35,26 +36,24 @@ router = DefaultRouter()
 router.trailing_slash = "/?"
 app_name = "api"
 
-router.register("settings", azure_setting_views.SettingViewSet)
-router.register("projects", azure_projects_views.ProjectViewSet)
-router.register("training_status", azure_training_status_views.TrainingStatusViewSet)
-router.register("notifications", notifications_views.NotificationViewSet)
-router.register("cameras", camera_views.CameraViewSet)
-router.register("parts", azure_part_views.PartViewSet)
-router.register("images", image_views.ImageViewSet)
-router.register("locations", location_views.LocationViewSet)
-router.register("inference_modules", inference_module_views.InferenceModuleViewSet)
-router.register("part_detections", part_detection_views.PartDetectionViewSet)
-router.register("part_detection_scenarios", part_detection_views.PDScenarioViewSet)
-router.register("deploy_status", azure_deploy_status_views.DeployStatusViewSet)
+
 # router.register('image_predictions',
 # image_prediction_views.ImagePredictionViewSet)
-
 # router.register('tasks', azure_projects_views.TaskViewSet)
-
+router.register("camera_tasks", camera_task_views.CameraTaskViewSet)
+router.register("cameras", camera_views.CameraViewSet)
+router.register("deploy_status", azure_deploy_status_views.DeployStatusViewSet)
 router.register("feedback", feedback_views.FeedbackViewSet)
-
-# router.register('images', image_views.ImageViewSet)
+router.register("images", image_views.ImageViewSet)
+router.register("inference_modules", inference_module_views.InferenceModuleViewSet)
+router.register("locations", location_views.LocationViewSet)
+router.register("notifications", notifications_views.NotificationViewSet)
+router.register("part_detection_scenarios", part_detection_views.PDScenarioViewSet)
+router.register("part_detections", part_detection_views.PartDetectionViewSet)
+router.register("parts", azure_part_views.PartViewSet)
+router.register("projects", azure_projects_views.ProjectViewSet)
+router.register("settings", azure_setting_views.SettingViewSet)
+router.register("training_status", azure_training_status_views.TrainingStatusViewSet)
 
 urlpatterns = router.urls
 
