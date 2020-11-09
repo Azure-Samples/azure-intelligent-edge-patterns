@@ -7,7 +7,12 @@ This demo shows how to deploy multiple gpu-requiring workloads on a cluster with
 Please follow the instructions in [Deploying model to Kubernetes](../machine-learning-notebooks/deploying-on-k8s/Readme.md)
 to make sure you have a GPU-capable node on your vm.
 
-Please see [NVIDIA webpage](https://docs.nvidia.com/datacenter/kubernetes/kubernetes-upstream/index.html#kubernetes-run-a-workload) if you have any problems. You should be able to run nvidia-smi:
+If you need to install docker, follow the instructions at [Nvidia cloud native containers](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
+And if you need to install the drivers, see [Azure VM driver stup](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/n-series-driver-setup) or related. You might have to upgrade your system and/or drivers to work.
+
+Please see [NVIDIA webpage](https://docs.nvidia.com/datacenter/kubernetes/kubernetes-upstream/index.html#kubernetes-run-a-workload) if you have any problems.
+
+Before moving forward, you should be able to run nvidia-smi:
 
     $ sudo docker run --rm --runtime=nvidia nvidia/cuda nvidia-smi
     +-----------------------------------------------------------------------------+
