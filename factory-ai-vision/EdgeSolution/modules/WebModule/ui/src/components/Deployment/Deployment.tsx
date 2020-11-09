@@ -18,7 +18,6 @@ import moment from 'moment';
 import { State } from 'RootStateType';
 import { InferenceSource, Project, Status } from '../../store/project/projectTypes';
 import {
-  thunkGetTrainingMetrics,
   thunkGetProject,
   updateProjectData,
   updateProbThreshold,
@@ -61,10 +60,6 @@ export const Deployment: React.FC = () => {
   const cameraOptions: IDropdownOption[] = useSelector((state: State) =>
     camerasSelector(state).map((e) => ({ key: e?.id, text: e?.name })),
   );
-  const isDemo = useSelector((state: State) => {
-    const trainingProjectId = state.project.data.trainingProject;
-    return state.trainingProject.entities[trainingProjectId]?.isDemo;
-  });
   const [selectedCamera, setselectedCamera] = useState(projectCameraIds[0]);
   useEffect(() => {
     if (projectCameraIds.length) setselectedCamera(projectCameraIds[0]);
@@ -97,14 +92,7 @@ export const Deployment: React.FC = () => {
     dispatch(getImages());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (status === Status.FinishTraining) {
-      dispatch(thunkGetTrainingMetrics(trainingProject, isDemo));
-    }
-  }, [dispatch, status, projectId, isDemo, trainingProject]);
-
-  const changeProbThreshold = (newValue: number) =>
-    dispatch(updateProjectData({ probThreshold: newValue }, false));
+  const changeProbThreshold = (newValue: number) => dispatch(updateProjectData({ probThreshold: newValue }));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 
   const updateModel = useCallback(async () => {
