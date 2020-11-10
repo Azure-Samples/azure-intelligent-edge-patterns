@@ -120,7 +120,7 @@ export const CameraDetails: React.FC = () => {
         mode={PanelMode.Update}
         initialValue={{
           name: { value: camera.name, errMsg: '' },
-          rtsp: { value: camera.rtsp, errMsg: '' },
+          url: { value: camera.rtsp, errMsg: '' },
           location: { value: camera.location, errMsg: '' },
         }}
         cameraId={cameraId}
