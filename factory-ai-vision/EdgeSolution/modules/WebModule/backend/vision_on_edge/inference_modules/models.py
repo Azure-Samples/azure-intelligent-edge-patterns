@@ -30,7 +30,7 @@ class InferenceModule(models.Model):
 
     def device(self) -> bool:
         try:
-            response = requests.get("http://" + self.url + "/get_device")
+            response = requests.get("http://" + self.url + "/get_device", timeout=1)
             result = response.json()["device"]
             return result
         except:
