@@ -56,6 +56,7 @@ export type ProjectData = {
   SVTCparts: number[];
   SVTCconfirmationThreshold: number;
   SVTCRecordingDuration: number;
+  SVTCEnableTracking: boolean;
   // Camera fps
   setFpsManually: boolean;
   fps: number;
