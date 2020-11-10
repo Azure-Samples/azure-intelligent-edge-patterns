@@ -36,7 +36,6 @@ class Stream:
         self.id = id(self)
 
         self.mutex = threading.Lock()
-        self.keep_alive = time.time()
 
         # test rtsp
         if not verify_rtsp(self.rtsp):
@@ -46,7 +45,7 @@ class Stream:
 
     def update_keep_alive(self):
         """update_keep_alive."""
-        self.keep_alive = time.time()
+        self.last_active = time.time()
 
     def gen(self):
         """generator for stream."""
@@ -54,7 +53,7 @@ class Stream:
 
         logger.info("start streaming with %s", self.rtsp)
         while self.status == "running" and (
-            self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()
+            self.last_active + KEEP_ALIVE_THRESHOLD > time.time()
         ):
             if not self.cap.isOpened():
                 raise StreamOpenRTSPError
@@ -161,6 +160,8 @@ class StreamManager:
                         # stop the inactive stream
                         # (the ones users didnt click disconnect)
                         logger.info("stream %s inactive", stream)
+                        logger.info("Time now %s", time.time())
+                        logger.info("Stream alive through %s", stream.last_active)
                         stream.close()
 
                         # collect the stream, to delete later

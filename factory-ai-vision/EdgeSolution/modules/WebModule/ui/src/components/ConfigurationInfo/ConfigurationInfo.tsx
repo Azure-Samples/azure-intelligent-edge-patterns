@@ -3,7 +3,7 @@ import './ConfigurationInfo.style.css';
 import { Stack, TextField, IconButton } from '@fluentui/react';
 import { PartTag, Status as PartTagStatus } from '../PartTag';
 
-type ConfigurationInfoProps = {
+type PropsType = {
   cameraNames: string[];
   fps: number;
   partNames: string[];
@@ -13,9 +13,9 @@ type ConfigurationInfoProps = {
   accuracyRangeMin: number;
   accuracyRangeMax: number;
   maxImages: number;
-  probThreshold: string;
-  originProbThreshold: string;
-  updateProbThreshold: (string) => void;
+  probThreshold: number;
+  originProbThreshold: number;
+  updateProbThreshold: (value: number) => void;
   saveProbThreshold: () => void;
   SVTCisOpen: boolean;
   SVTCcameraNames: string[];
@@ -48,7 +48,7 @@ const getSendVideoTxt = (isOpen, cameras, parts, threshold) => {
   return 'No';
 };
 
-export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
+export const ConfigurationInfo: React.FC<PropsType> = (props) => {
   return (
     <Stack tokens={{ childrenGap: 17, padding: 25 }}>
       <h4 style={{ margin: 5 }}>Configuration</h4>
@@ -77,8 +77,8 @@ export const ConfigurationInfo: React.FC<ConfigurationInfoProps> = (props) => {
                 <Stack horizontal>
                   <TextField
                     type="number"
-                    value={props.probThreshold}
-                    onChange={(_, newValue) => props.updateProbThreshold(newValue)}
+                    value={props.probThreshold?.toString()}
+                    onChange={(_, newValue) => props.updateProbThreshold(parseInt(newValue, 10))}
                     underlined
                     suffix="%"
                     styles={{ root: { display: 'inline-block' } }}

@@ -28,7 +28,7 @@ if [ -d "factoryai_configs" ]; then
 fi
 
 if [ "$isCfg" = true ]; then
-  PS3='Choose the number corisponding to the Azure Stack Edge device: '
+  PS3='Choose the number corresponding to the Azure Stack Edge device: '
   configs=`ls factoryai_configs`
   select opt in $configs
   do
@@ -47,7 +47,7 @@ fi
 
 
 # azSubscriptonName = The friendly name of the Azure subscription
-# iotHubName = The IoT Hub that corisponds to the ASE device
+# iotHubName = The IoT Hub that corresponds to the ASE device
 # edgeDeviceId = The device id of the ASE device
 # cvTrainingApiKey = The Custom Vision service training key
 # cvTrainingEndpoint = The Custom Vision service end point
@@ -95,7 +95,7 @@ echo Deleting conflict Extension
 ## get length of an array
 #tLen=${#outputarrten[@]}
 #
-#PS3='Choose the number corisponding to your tenant: '
+#PS3='Choose the number corresponding to your tenant: '
 #select opt in "${outputarrten[@]}"
 #do
 #  # remove carriage return
@@ -324,7 +324,7 @@ if [ "$isCfg" != true ]; then
       done
       iotHubName=${outputarrhubs[0]%$CR}
     else
-      PS3='Choose the number corisponding to the IoTHub managing your target edge device: '
+      PS3='Choose the number corresponding to the IoTHub managing your target edge device: '
       select opt in "${outputarrhubs[@]}"
       do
         echo "you chose: " $opt
@@ -374,7 +374,7 @@ if [ "$isCfg" != true ]; then
       done
       edgeDeviceId=${outputarrdevs[0]%$CR}
     else
-      PS3='Choose the number corisponding to the Azure Stack Edge device: '
+      PS3='Choose the number corresponding to the Azure Stack Edge device: '
       select opt in "${outputarrdevs[@]}"
       do
         echo "you chose: " $opt
@@ -393,7 +393,7 @@ if [ "$isCfg" != true ]; then
     #      * ) echo "Please answer yes or no.";;
     #  esac
     #done
-    PS3='Choose the number corisponding to the Azure Stack Edge device: '
+    PS3='Choose the number corresponding to the Azure Stack Edge device: '
     deviceOptions="cpu gpu vpu"
     select cpuGpu in $deviceOptions
     do
@@ -472,7 +472,7 @@ fi
 
 # ############################## Deploy Edge Modules #####################################
 
-echo Deploying conatiners to Azure Stack Edge
+echo Deploying containers to Azure Stack Edge
 echo This will take more than 10 min at normal connection speeds.  Status can be checked on the Azure Stack Edge device
 
 #echo az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson

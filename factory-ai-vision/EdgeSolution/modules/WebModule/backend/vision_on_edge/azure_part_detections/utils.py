@@ -209,6 +209,7 @@ def deploy_worker(part_detection_id):
                         for part in cam.cameratask_set.first().parts.all()
                     ],
                     "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
+                    "recording_duration": cam.cameratask_set.first().recording_duration,
                 }
             )
         else:
@@ -225,6 +226,7 @@ def deploy_worker(part_detection_id):
                         for part in cam.cameratask_set.first().parts.all()
                     ],
                     "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
+                    "recording_duration": cam.cameratask_set.first().recording_duration,
                 }
             )
     serializer = UpdateCamBodySerializer(data=res_data)
