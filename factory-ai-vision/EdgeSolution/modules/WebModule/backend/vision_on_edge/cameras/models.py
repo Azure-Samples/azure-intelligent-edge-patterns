@@ -18,7 +18,7 @@ class Camera(models.Model):
     """Camera Model."""
 
     name = models.CharField(max_length=200)
-    rtsp = models.CharField(max_length=1000)
+    rtsp = models.CharField(max_length=1000, blank=True)
     area = models.CharField(max_length=1000, blank=True)
     lines = models.CharField(max_length=1000, blank=True, default=gen_default_lines)
     danger_zones = models.CharField(
