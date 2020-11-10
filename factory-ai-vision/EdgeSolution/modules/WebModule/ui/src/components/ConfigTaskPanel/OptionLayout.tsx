@@ -14,12 +14,12 @@ type OptionLayoutProps = {
 
 export const OptionLayout: React.FC<OptionLayoutProps> = ({ title, subTitle = '', children }) => {
   return (
-    <Stack.Item disableShrink>
+    <Stack disableShrink tokens={{ childrenGap: 5, maxWidth: 305 }}>
       <div className={classNames.textWrapper}>
         <Label>{title}</Label>
         <Text>{subTitle}</Text>
       </div>
       {children}
-    </Stack.Item>
+    </Stack>
   );
 };

@@ -60,6 +60,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
               SVTCparts={projectData.SVTCparts}
               SVTCconfirmationThreshold={projectData.SVTCconfirmationThreshold}
               SVTCRecordingDuration={projectData.SVTCRecordingDuration}
+              SVTCEnableTracking={projectData.SVTCEnableTracking}
               onChange={onChange}
               selectedCameraOptions={selectedCameraOptions}
               selectedPartOptions={selectedPartOptions}
