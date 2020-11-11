@@ -160,5 +160,5 @@ class UpdateCamBodySerializer(serializers.Serializer):
         recording_duration = serializers.IntegerField()
 
     lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
-    fps = serializers.IntegerField()
+    fps = serializers.FloatField()
     cameras = CameraItem(many=True)
