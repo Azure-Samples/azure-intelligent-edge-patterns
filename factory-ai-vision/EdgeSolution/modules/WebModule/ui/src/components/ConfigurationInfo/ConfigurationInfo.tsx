@@ -5,7 +5,7 @@ import { PartTag, Status as PartTagStatus } from '../PartTag';
 
 type PropsType = {
   cameraNames: string[];
-  fps: number;
+  fps: string;
   partNames: string[];
   sendMessageToCloud: boolean;
   framesPerMin: number;
