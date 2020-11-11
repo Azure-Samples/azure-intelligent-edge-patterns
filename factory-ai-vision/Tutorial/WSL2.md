@@ -76,4 +76,3 @@
    > ![](media/image12.png)
 
     F.  Done and Enjoy your WSL2 !
-
