@@ -10,5 +10,5 @@ you also need to get you Azure Stack Edge setup and run a sample a gpu sample as
 
 ## Deploy to the Azure stack edge
 You can deploy to the Azure stack edge as 
-- Notebook example: [model-register-and-deploy](../deploying-on-iotedge/production-deploy-to-ase-gpu.ipynb).
+- Notebook example: [model-register-and-deploy](deploy-with-openvino.ipynb).
 - [ONNX Runtime with OpenVINO using Azure ML](https://github.com/Azure-Samples/onnxruntime-iot-edge/tree/master/AzureML-OpenVINO).
