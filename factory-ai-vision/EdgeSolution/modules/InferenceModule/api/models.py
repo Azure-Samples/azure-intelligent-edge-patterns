@@ -48,6 +48,7 @@ class CameraModel(BaseModel):
     send_video_to_cloud_parts: List[PartModel]
     send_video_to_cloud_threshold: int = 60
     recording_duration: int = 60
+    enable_tracking: bool
 
 
 class CamerasModel(BaseModel):
