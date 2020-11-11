@@ -58,7 +58,7 @@ export type ProjectData = {
   SVTCRecordingDuration: number;
   // Camera fps
   setFpsManually: boolean;
-  fps: number;
+  fps: string; // use string in fe for better ux
   totalRecomendedFps: number;
   recomendedFps: number;
   // Protocol of inference

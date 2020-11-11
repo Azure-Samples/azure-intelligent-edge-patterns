@@ -47,7 +47,7 @@ export const initialProjectData: ProjectData = {
   inferenceMode: InferenceMode.PartDetection,
   deployTimeStamp: '',
   setFpsManually: false,
-  fps: 10,
+  fps: '10.0',
   recomendedFps: 10,
   totalRecomendedFps: 10,
   inferenceProtocol: InferenceProtocol.GRPC,

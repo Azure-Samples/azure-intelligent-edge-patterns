@@ -89,7 +89,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   // Camera fps
   setFpsManually: data?.fps !== recomendedFps,
   recomendedFps,
-  fps: data?.fps ?? 10,
+  fps: data?.fps.toString() ?? '10.0',
   totalRecomendedFps,
   // Disable live video
   disableVideoFeed: data?.disable_video_feed ?? false,
@@ -159,7 +159,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         recording_duration: projectData.SVTCRecordingDuration,
       })),
       inference_mode: projectData.inferenceMode,
-      fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
+      fps: projectData.setFpsManually ? parseFloat(projectData.fps) : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
       disable_video_feed: projectData.disableVideoFeed,
     },
