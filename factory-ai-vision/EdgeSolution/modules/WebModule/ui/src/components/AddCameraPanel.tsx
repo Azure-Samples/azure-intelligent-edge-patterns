@@ -43,13 +43,13 @@ type FormData<V> = {
 
 type Form = {
   name: FormData<string>;
-  rtsp: FormData<string>;
+  url: FormData<string>;
   location: FormData<number>;
 };
 
 const initialForm: Form = {
   name: { value: '', errMsg: '' },
-  rtsp: { value: '', errMsg: '' },
+  url: { value: '', errMsg: '' },
   location: { value: null, errMsg: '' },
 };
 
@@ -71,6 +71,7 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Form>(initialValue);
   const [dialogHidden, setDialogHidden] = useState(true);
+  const [createByMediaSource, setCreateByMediaSource] = useState(false);
   const dispatch = useDispatch();
 
   const validate = useCallback(() => {
@@ -93,7 +94,7 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
       await dispatch(
         postCamera({
           name: formData.name.value,
-          rtsp: formData.rtsp.value,
+          [createByMediaSource ? 'media_source' : 'rtsp']: formData.url.value,
           location: formData.location.value,
         }),
       );
@@ -103,7 +104,7 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
         putCamera({
           id: cameraId,
           name: formData.name.value,
-          rtsp: formData.rtsp.value,
+          [createByMediaSource ? 'media_source' : 'rtsp']: formData.url.value,
           location: formData.location.value,
         }),
       );
@@ -112,10 +113,11 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
     onDissmiss();
   }, [
     cameraId,
+    createByMediaSource,
     dispatch,
     formData.location.value,
     formData.name.value,
-    formData.rtsp.value,
+    formData.url.value,
     mode,
     onDissmiss,
     validate,
@@ -155,7 +157,7 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
       isOpen={isOpen}
       onDismiss={onDissmiss}
       hasCloseButton
-      headerText="Add Camera"
+      headerText={mode === PanelMode.Create ? 'Add Camera' : 'Edit Camera'}
       onRenderFooterContent={onRenderFooterContent}
       isFooterAtBottom={true}
     >
@@ -167,11 +169,22 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
         onChange={onChange('name')}
         required
       />
+      {mode === PanelMode.Create && (
+        <Dropdown
+          label="Create by"
+          selectedKey={createByMediaSource ? 'createByMedia' : 'createByRTSP'}
+          onChange={(_, option) => setCreateByMediaSource(option.key === 'createByMedia')}
+          options={[
+            { key: 'createByMedia', text: 'Media source' },
+            { key: 'createByRTSP', text: 'RTSP URL' },
+          ]}
+        />
+      )}
       <TextField
-        label="RTSP URL"
-        value={formData.rtsp.value}
-        errorMessage={formData.rtsp.errMsg}
-        onChange={onChange('rtsp')}
+        label={createByMediaSource ? 'Media source URL' : 'RTSP URL'}
+        value={formData.url.value}
+        errorMessage={formData.url.errMsg}
+        onChange={onChange('url')}
         required
       />
       <Dropdown

@@ -254,6 +254,7 @@ def update_cams(request_body: CamerasModel):
         cam_type = cam.type
         cam_source = cam.source
         cam_id = cam.id
+        cam_name = cam.name
         # TODO: IF onnx.part_detection_mode == "PC" (PartCounting), use lines to count
         line_info = cam.lines
         zone_info = cam.zones
@@ -279,6 +280,7 @@ def update_cams(request_body: CamerasModel):
             recording_duration,
             lva_mode,
             cam_id,
+            cam_name,
             has_aoi,
             aoi_info,
             onnx.detection_mode,

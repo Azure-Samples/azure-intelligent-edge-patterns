@@ -60,7 +60,7 @@ class PartDetection(models.Model):
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=60)
-    fps = models.IntegerField(default=10)
+    fps = models.FloatField(default=10.0)
     disable_video_feed=models.BooleanField(default=False)
 
     def update_prob_threshold(self, prob_threshold):

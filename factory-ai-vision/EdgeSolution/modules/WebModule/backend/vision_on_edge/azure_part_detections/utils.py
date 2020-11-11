@@ -198,6 +198,7 @@ def deploy_worker(part_detection_id):
             res_data["cameras"].append(
                 {
                     "id": cam.id,
+                    "name": cam.name,
                     "type": "rtsp",
                     "source": cam.rtsp,
                     "aoi": cam.area,
@@ -216,6 +217,7 @@ def deploy_worker(part_detection_id):
             res_data["cameras"].append(
                 {
                     "id": cam.id,
+                    "name": cam.name,
                     "type": "rtsp",
                     "source": cam.rtsp,
                     "lines": cam.lines,

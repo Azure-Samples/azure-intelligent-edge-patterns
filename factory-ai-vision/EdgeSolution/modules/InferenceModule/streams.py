@@ -53,6 +53,7 @@ class Stream:
         cam_source="./sample_video/video.mp4",
         send_video_to_cloud: bool = False,
     ):
+        self.name = ''
         self.cam_id = cam_id
         self.model = model
         self.send_video_to_cloud = send_video_to_cloud
@@ -67,9 +68,9 @@ class Stream:
         self.cam_type = cam_type
         self.cam_source = None
         if self.model.is_gpu:
-            frameRate = 30
+            self.frameRate = 30
         else:
-            frameRate = 10
+            self.frameRate = 10
         # self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
         self.cam_is_alive = True
         self.last_display_keep_alive = None
@@ -121,8 +122,8 @@ class Stream:
         self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
-        self.last_update = None
-        self.last_send = None
+        self.last_update = 0
+        self.last_send = 0
         self.use_line = False
         self.use_zone = False
         # self.tracker = Tracker()
@@ -216,6 +217,7 @@ class Stream:
         recording_duration,
         lva_mode,
         cam_id,
+        cam_name,
         has_aoi,
         aoi_info,
         scenario_type=None,
@@ -250,6 +252,7 @@ class Stream:
                 self._update_instance(
                     normalize_rtsp(cam_source), str(frameRate), str(recording_duration))
 
+        self.name = cam_name
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
@@ -575,7 +578,9 @@ class Stream:
                 p for p in predictions if p["probability"] >= self.threshold
             )
             if len(predictions) > 0:
-                send_message_to_iothub(predictions)
+                message_body = {'camera_name': self.name,
+                                'inferences': predictions}
+                send_message_to_iothub(message_body)
                 self.iothub_last_send_time = time.time()
 
     def precess_send_signal_to_lva(self):
@@ -642,12 +647,17 @@ class Stream:
 
     def gen(self):
         while self.cam_is_alive and self.display_is_alive():
-            if self.last_drawn_img is not None:
+            if self.last_drawn_img is not None and self.last_update > self.last_send:
+                self.last_send = self.last_update
                 jpg = cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()
+                logger.warning(
+                    '===== sneding jpg to browser, size: {}'.format(len(jpg)))
                 yield (
                     b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + jpg + b"\r\n"
                 )
-            time.sleep(0.04)
+                time.sleep(1/self.frameRate)
+            else:
+                time.sleep(0.04)
 
 
 def web_module_url():
