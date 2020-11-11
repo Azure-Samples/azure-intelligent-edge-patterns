@@ -82,3 +82,8 @@ def verify_rtsp(rtsp, raise_exception: bool = False):
         return False
     cap.release()
     return True
+
+
+def upload_media_source(media_source):
+    rtsp = "rtps://QQ"
+    return rtsp
