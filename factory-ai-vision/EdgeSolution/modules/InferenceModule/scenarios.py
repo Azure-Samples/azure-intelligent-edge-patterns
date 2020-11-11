@@ -23,6 +23,70 @@ class Scenario:
     def get_metrics(self):
         raise NotImplementedError
 
+class PartDetection(Scenario):
+    def __init__(self, threshold=0.3, max_age=5, min_hits=2, iou_threshold=0.3):
+        #self.tracker = Tracker(
+        #    max_age=max_age, min_hits=min_hits, iou_threshold=iou_threshold
+        #)
+        self.detected = {}
+        self.counter = 0
+        self.threshold = threshold
+        self.max_age = max_age
+        self.min_hits = min_hits
+        self.iou_threshold = iou_threshold
+        self.trackers = {}
+        self.parts = []
+
+    def set_parts(self, parts):
+        self.parts = parts
+        self.trackers = {}
+        for part in parts:
+            self.trackers[part] = Tracker(
+                max_age=self.max_age, min_hits=self.min_hits, iou_threshold=self.iou_threshold
+            )
+        #print(self.parts)
+
+    def update(self, detections):
+        for part in self.parts:
+            _detections = list(d for d in detections if (d.score > self.threshold and d.tag in self.parts))
+            _detections = list([d.x1, d.y1, d.x2, d.y2, d.score] for d in _detections)
+            self.trackers[part].update(_detections)
+            #objs = self.tracker.get_objs()
+
+    def reset_metrics(self):
+        return
+
+    def get_metrics(self):
+        return []
+
+    def draw_counter(self, img):
+        return
+
+    def draw_constraint(self, img):
+        return
+
+    def draw_objs(self, img, is_id=True, is_rect=True):
+        for part in self.parts:
+            #print(part)
+            for obj in self.trackers[part].get_objs():
+                #print(obj)
+                font = cv2.FONT_HERSHEY_DUPLEX
+                font_scale = 0.7
+                thickness = 1
+                x1, y1, x2, y2, oid = obj
+                x1 = int(x1)
+                y1 = int(y1)
+                x2 = int(x2)
+                y2 = int(y2)
+                oid = int(oid)
+                x = x1
+                y = y1 - 5
+                if is_id:
+                    img = draw_label(img, str(part), (x, y))
+                if is_rect:
+                    img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), thickness)
+        return img
+
 
 # all objects all counted together
 class PartCounter(Scenario):
@@ -35,7 +99,7 @@ class PartCounter(Scenario):
         self.line = None
         self.threshold = threshold
 
-    def set_theshold(self):
+    def set_threshold(self):
         self.threshold = threshold
 
     def reset_metrics(self):
@@ -340,6 +404,7 @@ class DangerZone(Scenario):
         self.zones = []
         self.targets = []
         self.threshold = threshold
+        self.has_new_event = False
 
     def set_treshold(self):
         self.threshold = threshold
@@ -376,6 +441,7 @@ class DangerZone(Scenario):
         self.tracker.update(detections)
         objs = self.tracker.get_objs()
         counted = []
+        has_new_event = False
         for obj in objs:
             x1, y1, x2, y2, oid = obj
             if oid in self.detected:
@@ -383,6 +449,7 @@ class DangerZone(Scenario):
                     if self.is_inside_zones(x1, y1, x2, y2):
                         self.detected[oid]["expired"] = True
                         print("*** new object counted", flush=True)
+                        has_new_event = True
                         self.counter += 1
                         # counted.append(self.detected[oid])
                     else:
@@ -398,6 +465,7 @@ class DangerZone(Scenario):
                     "y2": y2,
                     "expired": False,
                 }
+        self.has_new_event = has_new_event
 
         return self.counter, objs, counted
 

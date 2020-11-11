@@ -150,6 +150,7 @@ class Stream:
         self.detection_unidentified_num = 0
         self.detection_total = 0
         self.detections = []
+        self.use_tracker = False
         # self.last_prediction_count = {}
         if self.scenario:
             self.scenario.reset_metrics()
@@ -469,8 +470,6 @@ class Stream:
         if self.is_retrain:
             self.process_retrain_image(predictions, image)
 
-        if self.iothub_is_send:
-            self.process_send_message_to_iothub(predictions)
 
         # check whether it's larger than threshold
         predictions = list(
@@ -505,18 +504,29 @@ class Stream:
             self.scenario.update(_detections)
 
         self.draw_img()
-        if self.send_video_to_cloud:
-            self.precess_send_signal_to_lva()
 
         if self.scenario:
-            # print('drawing...', flush=True)
-            # print(self.scenario, flush=True)
             self.last_drawn_img = self.scenario.draw_counter(
                 self.last_drawn_img)
-            # FIXME close this
-            # self.scenario.draw_constraint(self.last_drawn_img)
             if self.get_mode() == "DD":
                 self.scenario.draw_objs(self.last_drawn_img)
+            if self.get_mode() == 'PD' and self.use_tracker is True:
+                self.scenario.draw_objs(self.last_drawn_img)
+
+        
+        if self.iothub_is_send:
+            if self.get_mode() == 'ES':
+                if self.scenario.has_new_event:
+                    self.process_send_message_to_iothub(predictions)
+            else:
+                self.process_send_message_to_iothub(predictions)
+
+        if self.send_video_to_cloud:
+            if self.get_mode() == 'ES':
+                if self.scenario.has_new_event:
+                    self.precess_send_signal_to_lva()
+            else:
+                self.precess_send_signal_to_lva()
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
@@ -594,7 +604,11 @@ class Stream:
         if self.has_aoi:
             draw_aoi(img, self.aoi_info)
 
-        if self.get_mode() != "DD":
+        # if it's DD, use the draw_objects function from it
+        is_draw = True
+        if self.get_mode() == "DD": is_draw = False 
+        if (self.get_mode() == 'PD' and self.use_tracker is True): is_draw = False
+        if is_draw:
             for prediction in predictions:
                 if prediction["probability"] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
