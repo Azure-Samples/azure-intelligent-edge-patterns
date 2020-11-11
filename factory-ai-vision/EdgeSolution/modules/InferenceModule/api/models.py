@@ -39,6 +39,7 @@ class UploadModelBody(BaseModel):
 
 class CameraModel(BaseModel):
     id: str
+    name: str
     type: str
     source: str
     lines: str

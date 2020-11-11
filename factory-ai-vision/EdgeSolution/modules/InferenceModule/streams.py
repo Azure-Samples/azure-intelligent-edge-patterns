@@ -53,6 +53,7 @@ class Stream:
         cam_source="./sample_video/video.mp4",
         send_video_to_cloud: bool = False,
     ):
+        self.name = ''
         self.cam_id = cam_id
         self.model = model
         self.send_video_to_cloud = send_video_to_cloud
@@ -213,6 +214,7 @@ class Stream:
         recording_duration,
         lva_mode,
         cam_id,
+        cam_name,
         has_aoi,
         aoi_info,
         scenario_type=None,
@@ -247,6 +249,7 @@ class Stream:
                 self._update_instance(
                     normalize_rtsp(cam_source), str(frameRate), str(recording_duration))
 
+        self.name = cam_name
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
@@ -558,7 +561,9 @@ class Stream:
                 p for p in predictions if p["probability"] >= self.threshold
             )
             if len(predictions) > 0:
-                send_message_to_iothub(predictions)
+                message_body = {'camera_name': self.name,
+                                'inferences': predictions}
+                send_message_to_iothub(message_body)
                 self.iothub_last_send_time = time.time()
 
     def precess_send_signal_to_lva(self):

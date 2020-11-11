@@ -149,6 +149,7 @@ class UpdateCamBodySerializer(serializers.Serializer):
             name = serializers.CharField()
 
         id = serializers.CharField()
+        name = serializers.CharField()
         type = serializers.CharField()
         source = serializers.CharField()
         aoi = serializers.CharField(required=False)
