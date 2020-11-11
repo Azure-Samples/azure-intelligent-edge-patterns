@@ -19,7 +19,7 @@ from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 
 # from tracker import Tracker
-from scenarios import DangerZone, DefeatDetection, Detection, PartCounter
+from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection
 from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
 DETECTION_TYPE_NOTHING = "nothing"
@@ -202,6 +202,8 @@ class Stream:
 
         # Protected by Mutex
         # self.mutex.acquire()
+            self.scenario = PartCounter()
+            self.scenario_type = self.model.detection_mode
         # self.cam.release()
         # self.cam = cam
         # self.mutex.release()
@@ -252,7 +254,12 @@ class Stream:
         self.aoi_info = aoi_info
 
         detection_mode = self.model.get_detection_mode()
-        if detection_mode == "PC":
+        if detection_mode = "PD":
+            self.scenario = PartDetection()
+            self.scenario.set_parts(self.model.parts)
+            self.scenario_type = self.model.detection_mode
+
+        elif detection_mode == "PC":
             print("[INFO] Line INFO", line_info, flush=True)
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
