@@ -8,7 +8,7 @@ Please follow the instructions in [Deploying model to Kubernetes](../machine-lea
 to make sure you have a GPU-capable node on your vm.
 
 If you need to install docker, follow the instructions at [Nvidia cloud native containers](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
-And if you need to install the drivers, see [Azure VM driver stup](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/n-series-driver-setup) or related. You might have to upgrade your system and/or drivers to work.
+And if you need to install the drivers, see [Azure VM driver setup](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/n-series-driver-setup) or related. You might have to upgrade your system and/or drivers to work.
 
 Please see [NVIDIA webpage](https://docs.nvidia.com/datacenter/kubernetes/kubernetes-upstream/index.html#kubernetes-run-a-workload) if you have any problems.
 
