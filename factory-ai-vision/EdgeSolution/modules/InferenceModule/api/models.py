@@ -52,5 +52,5 @@ class CameraModel(BaseModel):
 
 class CamerasModel(BaseModel):
     lva_mode: Literal["http", "grpc"]
-    fps: int
+    fps: float
     cameras: List[CameraModel]
