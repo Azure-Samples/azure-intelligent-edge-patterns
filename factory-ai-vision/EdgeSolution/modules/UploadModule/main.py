@@ -6,7 +6,7 @@ import subprocess
 
 import requests
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -60,6 +60,8 @@ async def upload(stream: Stream):
     # FIXME use your stream manager to fix it
 
     filename = download_file(url)
+    if filename.startswith('invalid'):
+        raise HTTPException(status_code=400, detail="invalid source")
     output_filename = upload_file(filename)
 
     return RTSPSIM_PREFIX+output_filename
@@ -69,6 +71,8 @@ def download_file(url):
     local_filename = url.split('/')[-1]
     # NOTE the stream=True parameter below
     with requests.get(url, stream=True) as r:
+        if 'video' not in r.headers.get('content-type'):
+            return 'invalid url'
         r.raise_for_status()
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):

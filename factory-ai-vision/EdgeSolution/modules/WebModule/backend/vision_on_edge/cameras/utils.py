@@ -88,7 +88,7 @@ def verify_rtsp(rtsp, raise_exception: bool = False):
 
 def upload_media_source(media_source):
     res = requests.post(
-        "http://" + str(upload_module_url()) + "/upload", data={"url": media_source}
+        "http://" + str(upload_module_url()) + "/upload", json={"url": media_source}
     )
     if res.status_code != 200:
         raise CameraMediaSourceInvalid
