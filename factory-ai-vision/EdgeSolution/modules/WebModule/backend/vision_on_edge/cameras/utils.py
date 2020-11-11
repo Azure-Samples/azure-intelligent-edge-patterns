@@ -6,8 +6,10 @@ Does not depends on app/models.
 import logging
 
 import cv2
+import requests
 
 from .exceptions import CameraRtspBusy, CameraRtspInvalid
+from ..azure_iot.utils import upload_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -85,5 +87,7 @@ def verify_rtsp(rtsp, raise_exception: bool = False):
 
 
 def upload_media_source(media_source):
-    rtsp = "rtps://QQ"
+    res = requests.post('http://' + str(upload_module_url()) +
+                        '/upload', data={'url': media_source})
+    rtsp = res.json()
     return rtsp
