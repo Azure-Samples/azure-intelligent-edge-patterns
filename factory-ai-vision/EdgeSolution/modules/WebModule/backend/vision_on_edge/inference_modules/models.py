@@ -15,17 +15,17 @@ class InferenceModule(models.Model):
     name = models.CharField(max_length=200)
     url = models.CharField(max_length=1000, unique=True)
 
-    def recommended_fps(self) -> int:
+    def recommended_fps(self) -> float:
         try:
             response = requests.get(
                 "http://" + self.url + "/get_recommended_total_fps", timeout=3
             )
-            result = int(response.json()["fps"])
+            result = float(response.json()["fps"])
         except Exception:
             logger.exception(
                 "Get recommended_fps from inference module failed. Fallback to default."
             )
-            result = 10
+            result = 10.0
         return result
 
     def device(self) -> bool:
