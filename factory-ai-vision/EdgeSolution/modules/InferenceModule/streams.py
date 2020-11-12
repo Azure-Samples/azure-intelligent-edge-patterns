@@ -515,8 +515,7 @@ class Stream:
         self.draw_img()
 
         if self.scenario:
-            self.last_drawn_img = self.scenario.draw_counter(
-                self.last_drawn_img)
+            self.scenario.draw_counter(self.last_drawn_img)
             if self.get_mode() == "DD":
                 self.scenario.draw_objs(self.last_drawn_img)
             if self.get_mode() == 'PD' and self.use_tracker is True:
