@@ -29,7 +29,7 @@ fi
 
 if [ "$isCfg" = true ]; then
   PS3='Choose the number corresponding to the Azure Stack Edge device: '
-  configs=`ls factoryai_configs`
+  configs=`ls factoryai_configs/factoryai_cfgs`
   select opt in $configs
   do
       echo "you chose: " $opt
