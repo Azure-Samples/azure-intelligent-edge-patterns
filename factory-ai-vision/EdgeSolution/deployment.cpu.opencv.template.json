@@ -208,7 +208,7 @@
               "createOptions": {
                 "HostConfig": {
                   "Mounts": [{
-                    "Target": "/app/upload",
+                    "Target": "/live/mediaServer/media/upload",
                     "Source": "upload_data",
                     "Type": "volume"
                   }],
