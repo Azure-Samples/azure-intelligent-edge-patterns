@@ -1,4 +1,4 @@
-import { Dropdown, IDropdownOption, TextField, Toggle } from '@fluentui/react';
+import { Checkbox, Dropdown, IDropdownOption, TextField, Toggle } from '@fluentui/react';
 import React from 'react';
 import { ProjectData } from '../../store/project/projectTypes';
 import { OptionLayout } from './OptionLayout';
@@ -6,7 +6,12 @@ import { OnChangeType } from './type';
 
 type SendVideoOptionsProps = Pick<
   ProjectData,
-  'SVTCisOpen' | 'SVTCcameras' | 'SVTCparts' | 'SVTCconfirmationThreshold' | 'SVTCRecordingDuration'
+  | 'SVTCisOpen'
+  | 'SVTCcameras'
+  | 'SVTCparts'
+  | 'SVTCconfirmationThreshold'
+  | 'SVTCRecordingDuration'
+  | 'SVTCEnableTracking'
 > & {
   onChange: OnChangeType;
   selectedCameraOptions: IDropdownOption[];
@@ -19,6 +24,7 @@ export const SendVideoOptions: React.FC<SendVideoOptionsProps> = ({
   SVTCparts,
   SVTCconfirmationThreshold,
   SVTCRecordingDuration,
+  SVTCEnableTracking,
   onChange,
   selectedCameraOptions,
   selectedPartOptions,
@@ -81,6 +87,14 @@ export const SendVideoOptions: React.FC<SendVideoOptionsProps> = ({
         selectedKey={SVTCRecordingDuration}
         disabled={!SVTCisOpen}
         onChange={(_, option) => onChange('SVTCRecordingDuration', option.key as number)}
+      />
+      <Checkbox
+        label="Enable tracking"
+        checked={SVTCEnableTracking}
+        onChange={(_, checked) => {
+          onChange('SVTCEnableTracking', checked);
+        }}
+        disabled={!SVTCisOpen}
       />
     </OptionLayout>
   );

@@ -37,11 +37,13 @@ describe('Post project', () => {
         metrics_is_send_iothub: initialProjectData.sendMessageToCloud,
         metrics_frame_per_minutes: initialProjectData.framesPerMin,
         name: initialProjectData.name,
-        send_video_to_cloud: initialProjectData.sendVideoToCloud,
+        send_video_to_cloud: [],
         inference_mode: initialProjectData.inferenceMode,
         fps: 10,
         inference_protocol: 'grpc',
         send_video_to_cloud: [],
+        disable_video_feed: false,
+        prob_threshold: 10,
       },
     });
   });
