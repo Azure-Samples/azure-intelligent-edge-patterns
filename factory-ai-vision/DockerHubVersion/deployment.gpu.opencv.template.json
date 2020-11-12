@@ -1,0 +1,268 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "intelcustomvision": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_NAME"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9.5",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "NginxModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.NginxModule.amd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "8181/tcp": [
+                      {
+                        "HostPort": "8181"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "WebModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "TRAINING_KEY": {
+                "value": "$CUSTOM_VISION_TRAINING_KEY"
+              },
+              "ENDPOINT": {
+                "value": "$CUSTOM_VISION_ENDPOINT"
+              },
+              "DBNAME": {
+                "value": "vision_on_edge"
+              },
+              "DBHOST": {
+                "value": "172.18.0.1"
+              },
+              "DBUSER": {
+                "value": "vision_on_edge"
+              },
+              "DBPASS": {
+                "value": "vision_on_edge"
+              },
+              "DF_PD_VIDEO_SOURCE": {
+                "value": "opencv"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.WebModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "8000/tcp": [
+                      {
+                        "HostPort": "8000"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "InferenceModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              },
+              "IS_OPENCV": {
+                "value": "true"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.InferenceModule.gpuamd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
+                  },
+                  "runtime": "nvidia"
+                }
+              }
+            }
+          },
+          "CVCaptureModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.CVCaptureModule.amd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "9000/tcp": [
+                      {
+                        "HostPort": "9000"
+                      }
+                    ],
+                    "5559/tcp": [
+                      {
+                        "HostPort": "5559"
+                      }
+                    ]
+                  },
+                  "runtime": "runc"
+                }
+              }
+            }
+          },
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.RtspSimModule}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream",
+          "InferenceToLVA": "FROM /messages/modules/InferenceModule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "WebModule": {
+      "properties.desired": {}
+    },
+    "VisionSampleModule": {
+      "properties.desired": {}
+    }
+  }
+}
