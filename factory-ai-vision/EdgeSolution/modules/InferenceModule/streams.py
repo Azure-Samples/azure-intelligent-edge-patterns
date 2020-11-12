@@ -203,8 +203,8 @@ class Stream:
 
         # Protected by Mutex
         # self.mutex.acquire()
-            self.scenario = PartCounter()
-            self.scenario_type = self.model.detection_mode
+        self.scenario = PartCounter()
+        self.scenario_type = self.model.detection_mode
         # self.cam.release()
         # self.cam = cam
         # self.mutex.release()
@@ -257,7 +257,7 @@ class Stream:
         self.aoi_info = aoi_info
 
         detection_mode = self.model.get_detection_mode()
-        if detection_mode = "PD":
+        if detection_mode == "PD":
             self.scenario = PartDetection()
             self.scenario.set_parts(self.model.parts)
             self.scenario_type = self.model.detection_mode
@@ -480,7 +480,6 @@ class Stream:
         if self.is_retrain:
             self.process_retrain_image(predictions, image)
 
-
         # check whether it's larger than threshold
         predictions = list(
             p for p in predictions if p["probability"] >= self.threshold)
@@ -523,7 +522,6 @@ class Stream:
             if self.get_mode() == 'PD' and self.use_tracker is True:
                 self.scenario.draw_objs(self.last_drawn_img)
 
-        
         if self.iothub_is_send:
             if self.get_mode() == 'ES':
                 if self.scenario.has_new_event:
@@ -618,8 +616,10 @@ class Stream:
 
         # if it's DD, use the draw_objects function from it
         is_draw = True
-        if self.get_mode() == "DD": is_draw = False 
-        if (self.get_mode() == 'PD' and self.use_tracker is True): is_draw = False
+        if self.get_mode() == "DD":
+            is_draw = False
+        if (self.get_mode() == 'PD' and self.use_tracker is True):
+            is_draw = False
         if is_draw:
             for prediction in predictions:
                 if prediction["probability"] > self.threshold:
