@@ -495,7 +495,7 @@ if [ "$isCfg" != true ]; then
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
 
     mkdir -p factoryai_configs/ams_cfgs
-    factoryaiAmsConfigName=factoryai_configs/ams_cfgs/amsServiceName.cfg
+    factoryaiAmsConfigName=factoryai_configs/ams_cfgs/$amsServiceName.cfg
     echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiAmsConfigName
     echo amsServiceName='"'$amsServiceName'"' >> $factoryaiAmsConfigName
     echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiAmsConfigName
