@@ -16,7 +16,7 @@ rgName=visiononedge-rg
 
 now=`date +"%Y_%m_%d_%H_%M_%S"`
 
-if [ -d "factoryai_configs" ]; then
+if [ -d "factoryai_configs/factoryai_cfgs" ]; then
     while true; do
         read -p "Do you want to use the existing config files? (y or n): " -n 1 -r; echo
         case $REPLY in
@@ -41,7 +41,7 @@ if [ "$isCfg" = true ]; then
   source factoryai_configs/$opt
   echo Read from config ...
   echo '################################################'
-  cat factoryai_configs/$opt
+  cat factoryai_configs/factoryai_cfgs/$opt
   echo '################################################'
 fi
 
