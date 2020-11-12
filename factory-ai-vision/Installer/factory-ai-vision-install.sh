@@ -511,7 +511,7 @@ echo Deploying containers to Azure Stack Edge
 echo This will take more than 10 min at normal connection speeds.  Status can be checked on the Azure Stack Edge device
 
 #echo az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson
-#output=$(az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson)
+output=$(az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson)
 
 echo "installation complete"
 
