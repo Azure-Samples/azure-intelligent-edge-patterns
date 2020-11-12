@@ -257,7 +257,7 @@ if [ "$isCfg" != true ]; then
 
 	if [ -f factoryai_configs/ams_cfgs/$amsServiceName ]; then
 		echo "Using Existing Service Principle"
-		source factoryai_configs/$amsServiceName
+		source factoryai_configs/ams_cfgs/$amsServiceName
 		echo Azure Media Service Parameters:
 		echo "============================================================"
 		echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
