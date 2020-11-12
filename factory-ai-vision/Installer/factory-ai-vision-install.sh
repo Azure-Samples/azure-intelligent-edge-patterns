@@ -476,7 +476,7 @@ do
 done < "$input" > ./$edgeDeployJson
 
 if [ "$isCfg" != true ]; then
-    mkdir -p factoryai_configs
+    mkdir -p factoryai_configs/factoryai_cfgs
     factoryaiConfigName=factoryai_configs/factoryai_cfgs/factoryai_"$edgeDeviceId"_"$cpuGpu"_"$streaming"_"$now".cfg
     echo cvTrainingEndpoint='"'$cvTrainingEndpoint'"' >> $factoryaiConfigName
     echo cvTrainingApiKey='"'$cvTrainingApiKey'"' >> $factoryaiConfigName
@@ -493,6 +493,7 @@ if [ "$isCfg" != true ]; then
     echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
 
+    mkdir -p factoryai_configs/ams_cfgs
     factoryaiAmsConfigName=factoryai_configs/ams_cfgs/amsServiceName.cfg
     echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiAmsConfigName
     echo amsServiceName='"'$amsServiceName'"' >> $factoryaiAmsConfigName
