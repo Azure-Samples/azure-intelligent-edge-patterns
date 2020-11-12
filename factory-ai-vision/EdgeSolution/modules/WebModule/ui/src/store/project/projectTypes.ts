@@ -63,7 +63,7 @@ export type ProjectData = {
   recomendedFps: number;
   // Protocol of inference
   inferenceProtocol: InferenceProtocol;
-  // Disalbe live video
+  // Disable live video
   disableVideoFeed: boolean;
   /* --- Other --- */
   inferenceMode: InferenceMode;
