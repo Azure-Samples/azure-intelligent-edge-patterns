@@ -106,7 +106,17 @@
             "restartPolicy": "always",
             "settings": {
               "image": "intelligentedge/rtspsimmodule:0.1.38-amd64",
-              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
+              "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/live/mediaServer/media/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
+            }
+          },
+          "UploadModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "intelligentedge/uploadmodule:0.1.38-amd64",
+              "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/app/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7000/tcp\":[{\"HostPort\":\"7000\"}]}}}"
             }
           }
         }
