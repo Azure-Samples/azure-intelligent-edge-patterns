@@ -476,6 +476,7 @@ do
 done < "$input" > ./$edgeDeployJson
 
 if [ "$isCfg" != true ]; then
+    mkdir -p factoryai_configs
     mkdir -p factoryai_configs/factoryai_cfgs
     factoryaiConfigName=factoryai_configs/factoryai_cfgs/factoryai_"$edgeDeviceId"_"$cpuGpu"_"$streaming"_"$now".cfg
     echo cvTrainingEndpoint='"'$cvTrainingEndpoint'"' >> $factoryaiConfigName
