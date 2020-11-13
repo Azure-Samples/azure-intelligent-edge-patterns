@@ -272,7 +272,7 @@ def update_cams(request_body: CamerasModel):
         stream = stream_manager.get_stream_by_id(cam_id)
         # s.update_cam(cam_type, cam_source, cam_id, has_aoi, aoi_info, cam_lines)
         # FIXME has_aoi
-        recording_duration = int(cam.recording_duration*60)
+        recording_duration = int(cam.recording_duration * 60)
         stream.update_cam(
             cam_type,
             cam_source,
@@ -291,8 +291,10 @@ def update_cams(request_body: CamerasModel):
         stream.send_video_to_cloud_parts = [
             part.name for part in cam.send_video_to_cloud_parts
         ]
-        stream.send_video_to_cloud_threshold = int(
-            cam.send_video_to_cloud_threshold) * 0.01
+        stream.send_video_to_cloud_threshold = (
+            int(cam.send_video_to_cloud_threshold) * 0.01
+        )
+        stream.use_tracker = cam.enable_tracking
         # recording_duration is set in topology, sould be handled in s.update_cam, not here
         # stream.recording_duration = int(cam.recording_duration*60)
 
@@ -492,9 +494,10 @@ def init_topology():
 
     instances = gm.invoke_graph_instance_list()
     logger.info("instances %s", instances)
-    if 'error' in instances.keys():
+    if "error" in instances.keys():
         logger.warning(
-            '[HttpOperationError] Probably caused by invalid IoTHub connection string. The server will terminate in 10 seconds.')
+            "[HttpOperationError] Probably caused by invalid IoTHub connection string. The server will terminate in 10 seconds."
+        )
         time.sleep(10)
         sys.exit(-1)
     if instances["status"] != 200:
