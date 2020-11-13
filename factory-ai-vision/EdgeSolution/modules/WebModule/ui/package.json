@@ -36,7 +36,8 @@
     "typescript": "^3.9.3"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PROXY_PORT=8000 react-scripts start",
+    "start:simulator": "PROXY_PORT=8181 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jest-environment-jsdom-sixteen",
     "test:coverage": "react-scripts test --env=jest-environment-jsdom-sixteen --coverage --watchAll=false",
@@ -57,7 +58,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8000",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/eslint-plugin-tslint": "^2.25.0",
@@ -75,6 +75,7 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.1",
     "eslint-plugin-sort-class-members": "^1.6.0",
+    "http-proxy-middleware": "^1.0.6",
     "jest-environment-jsdom-sixteen": "^1.0.3",
     "prettier": "^2.1.2",
     "redux-mock-store": "^1.5.4",
