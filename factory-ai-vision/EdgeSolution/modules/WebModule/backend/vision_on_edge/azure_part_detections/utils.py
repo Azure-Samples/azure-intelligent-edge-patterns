@@ -196,6 +196,7 @@ def deploy_worker(part_detection_id):
     for cam in cameras.all():
         cam_info = {
             "id": cam.id,
+            "name": cam.name,
             "type": "rtsp",
             "source": cam.rtsp,
             "lines": cam.lines,
