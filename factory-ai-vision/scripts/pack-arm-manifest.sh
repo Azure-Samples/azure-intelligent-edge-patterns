@@ -8,7 +8,7 @@ GIT_ROOT=$(git rev-parse --show-toplevel)
 echo ${GIT_ROOT}
 
 PROJECT_PATH="${GIT_ROOT}/factory-ai-vision"
-SOLUTION_PATH="${PROJECT_PATH}/DockerHubVersion"
+SOLUTION_PATH="${PROJECT_PATH}/EdgeSolution"
 
 cd ${SOLUTION_PATH}
 find . -name "*" | grep -E "deployment.*.template.json|module.json|env-template" | zip archive -@

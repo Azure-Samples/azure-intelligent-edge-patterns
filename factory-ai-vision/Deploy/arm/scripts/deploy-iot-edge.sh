@@ -84,7 +84,7 @@ ENV_PATH="${MANIFEST_PATH}/.env"
 rm -rf ${REPO_OUTPUT_DIR}
 rm -f archive.zip
 
-wget "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/feat/arm-deploy/factory-ai-vision/DockerHubVersion/archive.zip"
+wget "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/EdgeSolution/archive.zip"
 unzip archive.zip -d ${REPO_OUTPUT_DIR}
 rm -f archive.zip
 cp ${ENV_TEMPLATE_PATH} ${ENV_PATH}
