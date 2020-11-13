@@ -48,7 +48,7 @@
                 "name": "imageEncoding",
                 "type": "String",
                 "description": "image encoding for frames",
-                "default": "jpeg"
+                "default": "bmp"
             },
             {
                 "name": "imageQuality",
@@ -96,7 +96,7 @@
                 "name": "recordingDuration",
                 "type": "String",
                 "description": "recording duration",
-                "default": "60"
+                "default": "PT60S"
             }
         ],
         "sources": [{
@@ -165,8 +165,7 @@
                     },
                     "format": {
                         "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
-                        "encoding": "${imageEncoding}",
-                        "quality": "${imageQuality}"
+                        "encoding": "${imageEncoding}"
                     }
                 },
                 "inputs": [{
@@ -186,7 +185,7 @@
                 "@type": "#Microsoft.Media.MediaGraphAssetSink",
                 "name": "assetSink",
                 "assetNamePattern": "sampleAssetFromEVR-LVAEdge-${instanceId}-${System.DateTime}",
-                "segmentLength": "PT30S",
+                "segmentLength": "${recordingDuration}",
                 "LocalMediaCacheMaximumSizeMiB": "2048",
                 "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
                 "inputs": [{

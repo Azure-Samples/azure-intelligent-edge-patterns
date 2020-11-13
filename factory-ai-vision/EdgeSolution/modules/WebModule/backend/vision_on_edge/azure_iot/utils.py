@@ -44,3 +44,15 @@ def inference_module_url() -> str:
     if is_edge():
         return "InferenceModule:5000"
     return "localhost:5000"
+
+
+def upload_module_url() -> str:
+    """inference_module_url.
+
+    Returns:
+        str: inference_module_url
+    """
+
+    if is_edge():
+        return "UploadModule:7000"
+    return "localhost:7000"

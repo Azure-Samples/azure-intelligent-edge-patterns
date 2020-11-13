@@ -16,7 +16,7 @@ rgName=visiononedge-rg
 
 now=`date +"%Y_%m_%d_%H_%M_%S"`
 
-if [ -d "factoryai_configs" ]; then
+if [ -d "factoryai_configs/factoryai_cfgs" ]; then
     while true; do
         read -p "Do you want to use the existing config files? (y or n): " -n 1 -r; echo
         case $REPLY in
@@ -29,7 +29,7 @@ fi
 
 if [ "$isCfg" = true ]; then
   PS3='Choose the number corresponding to the Azure Stack Edge device: '
-  configs=`ls factoryai_configs`
+  configs=`ls factoryai_configs/factoryai_cfgs`
   select opt in $configs
   do
       echo "you chose: " $opt
@@ -41,7 +41,7 @@ if [ "$isCfg" = true ]; then
   source factoryai_configs/$opt
   echo Read from config ...
   echo '################################################'
-  cat factoryai_configs/$opt
+  cat factoryai_configs/factoryai_cfgs/$opt
   echo '################################################'
 fi
 
@@ -209,15 +209,31 @@ if [ "$isCfg" != true ]; then
         tLen=${#outputarrams[@]}
 
         if [ $tLen -le 0 ]; then
-          echo Azure Media Services not found
-          echo Sorry, this demo requires that you have an existing Azure Media Services
-          echo Please following this documentation to create it first 
-          echo https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
-          read -p "Press <Enter> key to exit..."; echo
-          exit 1
-        fi
+          #echo Azure Media Services not found
+          #echo Sorry, this demo requires that you have an existing Azure Media Services
+          #echo Please following this documentation to create it first 
+          #echo https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
+          #read -p "Press <Enter> key to exit..."; echo
+          #exit 1
+          today=`date +%m%d"`
+          newResourceGroup=factoryai${today}`python -c "import random; import string; print(''.join(random.choice(string.ascii_lowercase) for i in range(2)))"`
+          newStorageAccount=${newResourceGroup}sa
+	  amsServiceName=${newResourceGroup}ams
+	  echo "There's no AMS inside the subscription ..."
+	  echo "We'll create a Resource Group with Storage Account and AMS inside"
+
+	  echo Creating Resource Group $newResourceGroup
+          az group create --location westus2 --resource-group $newResourceGroup
+
+	  echo Creating Storage Account $newStorageAccount
+          az storage account create -n $newStorageAccount  -g $newResourceGroup -l westus2 --sku Standard_LRS
+
+	  echo Create Azure Media Service $amsServiceName
+	  az ams account create --location westus2 --name $amsServiceName --resource-group $newResourceGroup --storage-account $newStorageAccount
+
+
         # Only one option so no need to prompt for choice
-        if [ $tLen -le 1 ]; then
+        elif [ $tLen -le 1 ]; then
           while true; do
             read -p "please confirm install to ${outputarrams[0]%$CR} ams (y or n): " -n 1 -r;echo
             case $REPLY in
@@ -237,56 +253,64 @@ if [ "$isCfg" != true ]; then
           done
         fi
 
-        amsResourceGroup=$(az ams account list --only-show-errors -o tsv --query '[].[name,resourceGroup]' | grep $amsServiceName | awk '{print $2}')
 
-        amsServicePrincipalName=factoryai_$now
-        outputams=$(az ams account sp create  --name $amsServicePrincipalName --account-name $amsServiceName --resource-group $amsResourceGroup  --query '[SubscriptionId, AadTenantId, AadClientId, AadSecret]' -o tsv)
-        outputamsarr=()
-        while read -r line
-        do
-            outputamsarr+=("$line")
-        done <<< "$outputams"
+	if [ -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg ]; then
+		echo "Using Existing Service Principle"
+		source factoryai_configs/ams_cfgs/"$amsServiceName".cfg
+		echo Azure Media Service Parameters:
+		echo "============================================================"
+		echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
+		echo "RESOURCE_GROUP           :" $amsResourceGroup
+		echo "TENANT_ID                :" $amsTenantId
+		echo "SERVICE_NAME             :" $amsServiceName
+		echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
+		#echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
+		echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
+		echo "============================================================"
 
-        amsSubscriptionId=${outputamsarr[0]}
-        amsTenantId=${outputamsarr[1]}
-        amsServicePrincipalAppId=${outputamsarr[2]}
-        amsServicePrincipalSecret=${outputamsarr[3]}
+        else
+		amsResourceGroup=$(az ams account list --only-show-errors -o tsv --query '[].[name,resourceGroup]' | grep $amsServiceName | awk '{print $2}')
 
-        isAmsServicePrincipalCreated=True
-        if [[ $amsServicePrincipalSecret == Cannot* ]]; then
-            isAmsServicePrincipalCreated=False
-            echo "AMS Service Principal '$amsServicePrincipalName' exists"
-            echo "Please enter your Principal Secret for 'factoryai'"
-            read amsServicePrincipalSecret
-        fi
+		amsServicePrincipalName=factoryai_$now
+		outputams=$(az ams account sp create  --name $amsServicePrincipalName --account-name $amsServiceName --resource-group $amsResourceGroup  --query '[SubscriptionId, AadTenantId, AadClientId, AadSecret]' -o tsv)
+		outputamsarr=()
+		while read -r line
+		do
+		    outputamsarr+=("$line")
+		done <<< "$outputams"
 
-        if [[ $isAmsServicePrincipalCreated == True ]]; then
-            echo "New Azure Media Service Priniple '$amsServicePrincipalName' is created"
-            echo "***************************************************************************"
-            echo "*** Please copy your SERVICE_PRINCIPAL_SECRET, it cannot be shown again ***"
-            echo "***************************************************************************"
-            echo "============================================================"
-            echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
-            echo "RESOURCE_GROUP           :" $amsResourceGroup
-            echo "TENANT_ID                :" $amsTenantId
-            echo "SERVICE_NAME             :" $amsServiceName
-            echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
-            echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
-            echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
-            echo "============================================================"
-            read -p "Press any key to continue..."
-        fi
+		amsSubscriptionId=${outputamsarr[0]}
+		amsTenantId=${outputamsarr[1]}
+		amsServicePrincipalAppId=${outputamsarr[2]}
+		amsServicePrincipalSecret=${outputamsarr[3]}
 
-        echo Azure Media Service Parameters:
-        echo "============================================================"
-        echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
-        echo "RESOURCE_GROUP           :" $amsResourceGroup
-        echo "TENANT_ID                :" $amsTenantId
-        echo "SERVICE_NAME             :" $amsServiceName
-        echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
-        echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
-        echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
-        echo "============================================================"
+		isAmsServicePrincipalCreated=True
+		if [[ $amsServicePrincipalSecret == Cannot* ]]; then
+		    isAmsServicePrincipalCreated=False
+		    echo "AMS Service Principal '$amsServicePrincipalName' exists"
+		    echo "Please enter your Principal Secret for 'factoryai'"
+		    read amsServicePrincipalSecret
+		fi
+
+		if [[ $isAmsServicePrincipalCreated == True ]]; then
+		    echo "New Azure Media Service Priniple '$amsServicePrincipalName' is created"
+		    echo "***************************************************************************"
+		    echo "*** Please copy your SERVICE_PRINCIPAL_SECRET, it cannot be shown again ***"
+		    echo "***************************************************************************"
+		    echo "============================================================"
+		    echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
+		    echo "RESOURCE_GROUP           :" $amsResourceGroup
+		    echo "TENANT_ID                :" $amsTenantId
+		    echo "SERVICE_NAME             :" $amsServiceName
+		    echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
+		    echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
+		    echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
+		    echo "============================================================"
+		    read -p "Press any key to continue..."
+		fi
+	fi
+
+
     fi # if [ $streaming == "lva" ]; then
 
     # ############################## Get IoT Hub #####################################
@@ -452,7 +476,8 @@ done < "$input" > ./$edgeDeployJson
 
 if [ "$isCfg" != true ]; then
     mkdir -p factoryai_configs
-    factoryaiConfigName=factoryai_configs/factoryai_"$edgeDeviceId"_"$cpuGpu"_"$streaming"_"$now".cfg
+    mkdir -p factoryai_configs/factoryai_cfgs
+    factoryaiConfigName=factoryai_configs/factoryai_cfgs/factoryai_"$edgeDeviceId"_"$cpuGpu"_"$streaming"_"$now".cfg
     echo cvTrainingEndpoint='"'$cvTrainingEndpoint'"' >> $factoryaiConfigName
     echo cvTrainingApiKey='"'$cvTrainingApiKey'"' >> $factoryaiConfigName
     echo cpuGpu='"'$cpuGpu'"' >> $factoryaiConfigName
@@ -463,10 +488,19 @@ if [ "$isCfg" != true ]; then
     echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiConfigName
     echo amsServiceName='"'$amsServiceName'"' >> $factoryaiConfigName
     echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiConfigName
-    echo amsTanantId='"'$amsTenantId'"' >> $factoryaiConfigName
+    echo amsTenantId='"'$amsTenantId'"' >> $factoryaiConfigName
     echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiConfigName
     echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
+
+    mkdir -p factoryai_configs/ams_cfgs
+    factoryaiAmsConfigName=factoryai_configs/ams_cfgs/"$amsServiceName".cfg
+    echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiAmsConfigName
+    echo amsServiceName='"'$amsServiceName'"' >> $factoryaiAmsConfigName
+    echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiAmsConfigName
+    echo amsTenantId='"'$amsTenantId'"' >> $factoryaiAmsConfigName
+    echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiAmsConfigName
+    echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiAmsConfigName
 fi
 
 
