@@ -48,7 +48,7 @@
                 "name": "imageEncoding",
                 "type": "String",
                 "description": "image encoding for frames",
-                "default": "jpeg"
+                "default": "bmp"
             },
             {
                 "name": "imageQuality",
@@ -165,8 +165,7 @@
                     },
                     "format": {
                         "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
-                        "encoding": "${imageEncoding}",
-                        "quality": "${imageQuality}"
+                        "encoding": "${imageEncoding}"
                     }
                 },
                 "inputs": [{

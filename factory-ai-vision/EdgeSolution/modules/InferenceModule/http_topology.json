@@ -66,7 +66,7 @@
                 "name": "imageEncoding",
                 "type": "String",
                 "description": "image encoding for frames",
-                "default": "jpeg"
+                "default": "bmp"
             },
             {
                 "name": "imageQuality",
