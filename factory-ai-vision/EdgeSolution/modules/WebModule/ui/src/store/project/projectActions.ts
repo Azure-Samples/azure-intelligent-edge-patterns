@@ -78,7 +78,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   // Cloud message
   sendMessageToCloud: data?.metrics_is_send_iothub,
   framesPerMin: data?.metrics_frame_per_minutes,
-  probThreshold: data?.prob_threshold ?? 10,
+  probThreshold: data?.prob_threshold ?? 60,
   inferenceMode: data?.inference_mode ?? '',
   // Send video to cloud
   SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),

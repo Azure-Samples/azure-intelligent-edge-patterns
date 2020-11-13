@@ -37,7 +37,7 @@ export const initialProjectData: ProjectData = {
   maxImages: 20,
   sendMessageToCloud: false,
   framesPerMin: 6,
-  probThreshold: 10,
+  probThreshold: 60,
   name: '',
   SVTCcameras: [],
   SVTCisOpen: false,
