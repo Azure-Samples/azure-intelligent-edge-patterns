@@ -92,6 +92,7 @@ def update_patch_version(version_str):
 def update_minor_version(version_str):
     semantic_version = to_semantic_versions(version_str)
     semantic_version[1] += 1
+    semantic_version[2] = 0
     version_str = ".".join([str(v) for v in semantic_version])
     return version_str
 
