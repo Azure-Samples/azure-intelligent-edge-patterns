@@ -231,10 +231,9 @@ if [ "$isCfg" != true ]; then
 	  echo Create Azure Media Service $amsServiceName
 	  az ams account create --location westus2 --name $amsServiceName --resource-group $newResourceGroup --storage-account $newStorageAccount
 
-        fi
 
         # Only one option so no need to prompt for choice
-        if [ $tLen -le 1 ]; then
+        elif [ $tLen -le 1 ]; then
           while true; do
             read -p "please confirm install to ${outputarrams[0]%$CR} ams (y or n): " -n 1 -r;echo
             case $REPLY in
