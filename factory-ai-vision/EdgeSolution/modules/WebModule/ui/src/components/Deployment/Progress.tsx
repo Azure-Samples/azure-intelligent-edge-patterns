@@ -42,7 +42,7 @@ export const Progress: React.FC<{ projectId: number; cameraId: number }> = ({ pr
   return (
     <Stack horizontalAlign="center" verticalAlign="center" grow tokens={{ childrenGap: 24 }}>
       <Stack horizontalAlign="center" tokens={{ childrenGap: 5 }}>
-        {trainingInfo.progress !== null && (
+        {typeof trainingInfo.progress === 'number' && (
           <>
             <Text variant="xxLarge">{`${trainingInfo.progress}%`}</Text>
             <Text>{trainingInfo.log}</Text>

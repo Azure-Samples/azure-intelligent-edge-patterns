@@ -22,7 +22,7 @@
           "edgeAgent": {
             "type": "docker",
             "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9.5",
               "createOptions": {}
             }
           },
@@ -193,13 +193,11 @@
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/live/mediaServer/media/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/live/mediaServer/media/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -241,40 +239,6 @@
                     "7000/tcp": [{
                       "HostPort": "7000"
                     }]
-                  }
-                }
-              }
-            }
-          },
-          "UploadModule": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "${MODULES.UploadModule}",
-              "createOptions": {
-                "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/app/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
-                  "LogConfig": {
-                    "Type": "",
-                    "Config": {
-                      "max-size": "10m",
-                      "max-file": "10"
-                    }
-                  },
-                  "PortBindings": {
-                    "7000/tcp": [
-                      {
-                        "HostPort": "7000"
-                      }
-                    ]
                   }
                 }
               }
