@@ -98,8 +98,11 @@ def prediction(cam_id: str):
 async def predict(camera_id: str, request: Request):
     """predict."""
     img_raw = await request.body()
-    nparr = np.frombuffer(img_raw, np.uint8)
-    img = nparr.reshape(-1, 960, 3)
+    if IS_OPENCV:
+        nparr = np.frombuffer(img_raw, np.uint8)
+        img = nparr.reshape(-1, 960, 3)
+    else:
+        img = cv2.imdecode(np.frombuffer(img_raw, dtype=np.uint8), -1)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     results = http_inference_engine.predict(camera_id, img)
     if int(time.time()) % 5 == 0:
