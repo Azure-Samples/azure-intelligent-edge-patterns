@@ -46,26 +46,24 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             onChange={onChange}
           />
         )}
+        <CameraFPSOptions
+          setFpsManually={projectData.setFpsManually}
+          fps={projectData.fps}
+          recomendedFps={projectData.recomendedFps}
+          onChange={onChange}
+        />
         {projectData.inferenceSource === InferenceSource.LVA && (
-          <>
-            <CameraFPSOptions
-              setFpsManually={projectData.setFpsManually}
-              fps={projectData.fps}
-              recomendedFps={projectData.recomendedFps}
-              onChange={onChange}
-            />
-            <SendVideoOptions
-              SVTCisOpen={projectData.SVTCisOpen}
-              SVTCcameras={projectData.SVTCcameras}
-              SVTCparts={projectData.SVTCparts}
-              SVTCconfirmationThreshold={projectData.SVTCconfirmationThreshold}
-              SVTCRecordingDuration={projectData.SVTCRecordingDuration}
-              SVTCEnableTracking={projectData.SVTCEnableTracking}
-              onChange={onChange}
-              selectedCameraOptions={selectedCameraOptions}
-              selectedPartOptions={selectedPartOptions}
-            />
-          </>
+          <SendVideoOptions
+            SVTCisOpen={projectData.SVTCisOpen}
+            SVTCcameras={projectData.SVTCcameras}
+            SVTCparts={projectData.SVTCparts}
+            SVTCconfirmationThreshold={projectData.SVTCconfirmationThreshold}
+            SVTCRecordingDuration={projectData.SVTCRecordingDuration}
+            SVTCEnableTracking={projectData.SVTCEnableTracking}
+            onChange={onChange}
+            selectedCameraOptions={selectedCameraOptions}
+            selectedPartOptions={selectedPartOptions}
+          />
         )}
         <ProtocolOptions inferenceProtocol={projectData.inferenceProtocol} onChange={onChange} />
         <DisableVideoOption disableVideoFeed={projectData.disableVideoFeed} onChange={onChange} />
