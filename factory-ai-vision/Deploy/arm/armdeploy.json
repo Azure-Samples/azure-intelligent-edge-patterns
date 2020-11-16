@@ -5,7 +5,7 @@
     "resourceGroupName": {
       "type": "string",
       "metadata": {
-        "description": "Enter the name of resource group to be created for Iot Hub, Storage Account and Web App."
+        "description": "Enter the name of resource group of existing Iot Hub, Azure Media Service and Custom Vision."
       }
     },
     "deviceArchitecture": {
@@ -18,14 +18,13 @@
     },
     "containerRegistryName": {
       "type": "string",
-      "defaultValue": "factoryairegistry.azurecr.io",
+      "defaultValue": "docker.io",
       "metadata": {
         "description": "Container Registry Name."
       }
     },
     "containerRegistryUserName": {
       "type": "string",
-      "defaultValue": "factoryairegistry",
       "metadata": {
         "description": "Container Registry Username."
       }
@@ -57,36 +56,40 @@
       "defaultValue": "",
       "type": "string",
       "metadata": {
-        "description": "Enter the name of existing Iot Hub. This is required only if 'Use Existing Edge Device' is set to 'Yes'"
+        "description": "Enter the name of existing Iot Hub."
       }
     },
     "edgeDeviceName": {
       "defaultValue": "",
       "type": "string",
       "metadata": {
-        "description": "Enter the name of existing Iot Hub. This is required only if 'Use Existing Edge Device' is set to 'Yes'"
+        "description": "Enter the name of existing Iot Hub Edge Device."
       }
     },
     "customVisionName": {
       "type": "string",
-      "defaultValue": "mycustomvision"
+      "metadata": {
+        "description": "Enter the name of existing Custom Vision."
+      }
     },
     "mediaServiceName": {
       "type": "string",
-      "defaultValue": "myams"
+      "metadata": {
+        "description": "Enter the name of existing Azure Media Service."
+      }
     },
     "mediaServiceServicePrincipalName": {
       "type": "string",
       "defaultValue": "myamsspname",
       "metadata": {
-        "description": "Azure Media Service Principal name"
+        "description": "Enter the name of existing Azure Media Service Principal name."
       }
     },
     "mediaServiceServicePrincipalSecret": {
       "type": "string",
       "defaultValue": "myamsspsecret",
       "metadata": {
-        "defaultValue": "Azure Media Service Principal secret"
+        "defaultValue": "Azure Media Service Principal secret."
       }
     }
   },
