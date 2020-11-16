@@ -15,17 +15,13 @@ RUN yarn build
 # =========================================================
 # === Build Backend                                     ===
 # =========================================================
-FROM arm64v8/python:3.8-slim-buster as backend-base
+FROM arm64v8/python:3.8 as backend-base
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     libffi-dev \
-    libssl-dev \
-    python3-dev \
-    python3-opencv \
     && rm -rf /var/lib/apt/lists/*
-RUN ln -s /usr/lib/python3/dist-packages/cv2.cpython-37m-aarch64-linux-gnu.so /usr/local/lib/python3.8/site-packages/cv2.so
 
 # =========================================================
 # === Build Backend Production                          ===
