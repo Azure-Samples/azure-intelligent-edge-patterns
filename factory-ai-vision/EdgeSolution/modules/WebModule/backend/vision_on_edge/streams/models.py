@@ -35,8 +35,6 @@ class Stream:
         self.last_get_img_index = 1
         self.id = id(self)
 
-        self.mutex = threading.Lock()
-
         # test rtsp
         if not verify_rtsp(self.rtsp):
             raise StreamOpenRTSPError
@@ -51,7 +49,7 @@ class Stream:
         """generator for stream."""
         self.status = "running"
 
-        logger.info("start streaming with %s", self.rtsp)
+        logger.info("Start streaming with %s.", self.rtsp)
         while self.status == "running" and (
             self.last_active + KEEP_ALIVE_THRESHOLD > time.time()
         ):
@@ -74,12 +72,12 @@ class Stream:
                 + cv2.imencode(".jpg", img)[1].tobytes()
                 + b"\r\n"
             )
-        logger.info("%s releasing self...", self)
         self.cap.release()
+        logger.info("%s cap released.", self)
 
     def get_frame(self):
         """get_frame."""
-        logger.info("get frame %s", self)
+        logger.info("%s get frame.", self)
         # b, img = self.cap.read()
         time_begin = time.time()
         while True:
@@ -101,11 +99,7 @@ class Stream:
         close the stream.
         """
         self.status = "stopped"
-        try:
-            self.cap.release()
-            logger.info("Release cap success.")
-        except:
-            logger.error("Release cap failed.")
+        logger.info("%s stopped.", self)
 
     def __str__(self):
         return f"<Stream id:{self.id} rtsp:{self.rtsp}>"
@@ -124,7 +118,9 @@ class StreamManager:
 
     def add(self, stream: Stream):
         """add stream"""
+        self.mutex.acquire()
         self.streams.append(stream)
+        self.mutex.release()
 
     def get_stream_by_id(self, stream_id):
         """get_stream_by_id"""
