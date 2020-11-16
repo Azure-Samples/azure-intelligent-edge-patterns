@@ -103,7 +103,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.WebModule.arm64v8-ubuntu}"
+              "image": "${MODULES.WebModule.arm64v8}"
             }
           },
           "InferenceModule": {
