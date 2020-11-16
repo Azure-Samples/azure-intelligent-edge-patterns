@@ -405,7 +405,7 @@ def get_recommended_fps(number_of_cameras: int):
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return {"fps": int(onnx.get_recommended_frame_rate(number_of_cameras))}
+    return {"fps": onnx.get_recommended_frame_rate(number_of_cameras)}
 
 
 @app.get("/get_recommended_total_fps")
@@ -415,12 +415,12 @@ def get_recommended_total_fps():
     Args:
         number_of_cameras (int): number_of_cameras
     """
-    return {"fps": int(onnx.get_recommended_total_frame_rate())}
+    return {"fps": onnx.get_recommended_total_frame_rate()}
 
 
 @app.get("/recommended_fps")
 def recommended_fps():
-    return {"fps": int(onnx.get_recommended_total_frame_rate())}
+    return {"fps": onnx.get_recommended_total_frame_rate()}
 
 
 # @app.route("/get_current_fps")
