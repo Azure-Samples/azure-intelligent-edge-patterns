@@ -67,10 +67,18 @@ async def upload(stream: Stream):
     return RTSPSIM_PREFIX+output_filename
 
 
+def normalize_url(url):
+    if '//' not in url:
+        normalized_url = 'http://' + url
+    return normalized_url
+
+
 def download_file(url):
     local_filename = url.split('/')[-1]
     # NOTE the stream=True parameter below
-    with requests.get(url, stream=True) as r:
+    normalized_url = normalize_url(url)
+    logger.warning('download link: {}'.format(normalized_url))
+    with requests.get(normalized_url, stream=True) as r:
         if 'video' not in r.headers.get('content-type'):
             return 'invalid url'
         r.raise_for_status()
@@ -87,7 +95,7 @@ def download_file(url):
 def upload_file(filename):
     output_filename = filename.split('.')[0] + '.mkv'
     subprocess.run(["ffmpeg", "-i", filename, "-vcodec", "copy",
-                    "-acodec", "copy",  "-an", output_filename])
+                    "-acodec", "copy",  "-an", output_filename, "-y"])
     subprocess.run(["cp", output_filename, "./upload/"])
     subprocess.run(["rm", filename])
     subprocess.run(["rm", output_filename])
