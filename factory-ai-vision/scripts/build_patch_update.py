@@ -4,7 +4,7 @@ import logging
 from logging_config import LOGGING_CONFIG_DEV
 from utils import (get_git_root, get_modules, get_script_abs_dir,
                    get_script_abs_path, get_script_name,
-                   update_module_minor_version)
+                   update_module_patch_version)
 
 if __name__ == "__main__":
     logging.config.dictConfig(LOGGING_CONFIG_DEV)
