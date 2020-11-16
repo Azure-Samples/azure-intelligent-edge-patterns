@@ -155,7 +155,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.RtspSimModule}",
+              "image": "${MODULES.RtspSimModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "Mounts": [{
@@ -185,7 +185,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.UploadModule}",
+              "image": "${MODULES.UploadModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "Mounts": [{
