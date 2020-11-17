@@ -23,6 +23,7 @@ import {
   MessageBarType,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import {
@@ -123,6 +124,20 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     if (showProjectDropdown) dispatch(thunkGetAllCvProjects());
   }, [dispatch, showProjectDropdown]);
 
+  const [gitSha1, setgitSha1] = useState('');
+
+  useEffect(() => {
+    // Could only get the file in production build
+    if (process.env.NODE_ENV === 'production') {
+      Axios.get('/static/git_sha1.txt')
+        .then((res) => {
+          setgitSha1(res.data);
+          return void 0;
+        })
+        .catch(alert);
+    }
+  }, []);
+
   return (
     <>
       {isOpen && <LayerHost id={MAIN_LAYER_HOST_ID} className={layerHostClass} />}
@@ -196,11 +211,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                 onCancel={() => setloadImgWarning(false)}
               />
               <Stack horizontal tokens={{ childrenGap: 10 }}>
-                <PrimaryButton
-                  text="Load"
-                  disabled={loading}
-                  onClick={onLoad}
-                  />
+                <PrimaryButton text="Load" disabled={loading} onClick={onLoad} />
                 {loading && <Spinner label="loading" />}
               </Stack>
             </>
@@ -234,6 +245,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
             onConfirm={(): void => updateIsCollectData(true, true)}
             onCancel={(): void => updateIsCollectData(false, true)}
           />
+          <Text>Version: {gitSha1}</Text>
         </Stack>
       </Panel>
     </>
