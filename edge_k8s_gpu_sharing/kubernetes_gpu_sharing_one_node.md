@@ -4,7 +4,7 @@ This demo shows how to deploy multiple gpu-requiring workloads on a cluster with
 
 ## Pre-requisites
 
-Please follow the instructions in [Deploying model to Kubernetes](../deploying-on-k8s/README.md)
+Please follow the instructions in [Prep steps for Docker and Kubernetes](prep_steps_for_docker_and_k8s.md)
 to make sure you have a GPU-capable node on your vm.
 
 Please see [NVIDIA webpage](https://docs.nvidia.com/datacenter/kubernetes/kubernetes-upstream/index.html#kubernetes-run-a-workload) if you have any problems. You should be able to run nvidia-smi:
