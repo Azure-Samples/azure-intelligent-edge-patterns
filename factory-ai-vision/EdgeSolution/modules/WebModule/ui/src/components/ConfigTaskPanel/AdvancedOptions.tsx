@@ -28,6 +28,8 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   const selectedTrainProjectIsNotDemo = useSelector((state: State) =>
     state.trainingProject.nonDemo.includes(projectData.trainingProject),
   );
+  const inferenceSource = useSelector((state: State) => state.project.data.inferenceSource);
+
   return (
     <ExpandPanel titleHidden="Advanced options" titleVisible="Fewer options" iconPosition="end" bottomBorder>
       <Stack horizontal tokens={{ childrenGap: 50 }} wrap styles={{ root: { paddingTop: '30px' } }}>
@@ -52,20 +54,22 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
           recomendedFps={projectData.recomendedFps}
           onChange={onChange}
         />
-        {projectData.inferenceSource === InferenceSource.LVA && (
-          <SendVideoOptions
-            SVTCisOpen={projectData.SVTCisOpen}
-            SVTCcameras={projectData.SVTCcameras}
-            SVTCparts={projectData.SVTCparts}
-            SVTCconfirmationThreshold={projectData.SVTCconfirmationThreshold}
-            SVTCRecordingDuration={projectData.SVTCRecordingDuration}
-            SVTCEnableTracking={projectData.SVTCEnableTracking}
-            onChange={onChange}
-            selectedCameraOptions={selectedCameraOptions}
-            selectedPartOptions={selectedPartOptions}
-          />
+        {inferenceSource === InferenceSource.LVA && (
+          <>
+            <SendVideoOptions
+              SVTCisOpen={projectData.SVTCisOpen}
+              SVTCcameras={projectData.SVTCcameras}
+              SVTCparts={projectData.SVTCparts}
+              SVTCconfirmationThreshold={projectData.SVTCconfirmationThreshold}
+              SVTCRecordingDuration={projectData.SVTCRecordingDuration}
+              SVTCEnableTracking={projectData.SVTCEnableTracking}
+              onChange={onChange}
+              selectedCameraOptions={selectedCameraOptions}
+              selectedPartOptions={selectedPartOptions}
+            />
+            <ProtocolOptions inferenceProtocol={projectData.inferenceProtocol} onChange={onChange} />
+          </>
         )}
-        <ProtocolOptions inferenceProtocol={projectData.inferenceProtocol} onChange={onChange} />
         <DisableVideoOption disableVideoFeed={projectData.disableVideoFeed} onChange={onChange} />
       </Stack>
     </ExpandPanel>
