@@ -100,6 +100,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     setloading(true);
     await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
     setloading(false);
+    onDismiss();
   };
 
   const onLoadFullImgChange = (_, checked: boolean) => {
@@ -196,11 +197,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                 onCancel={() => setloadImgWarning(false)}
               />
               <Stack horizontal tokens={{ childrenGap: 10 }}>
-                <PrimaryButton
-                  text="Load"
-                  disabled={loading}
-                  onClick={onLoad}
-                  />
+                <PrimaryButton text="Load" disabled={loading} onClick={onLoad} />
                 {loading && <Spinner label="loading" />}
               </Stack>
             </>

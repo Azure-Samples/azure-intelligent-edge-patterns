@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import Axios from 'axios';
+
 import { State } from 'RootStateType';
 import {
   ProjectThunk,
@@ -90,7 +91,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   // Camera fps
   setFpsManually: data?.fps !== recomendedFps,
   recomendedFps,
-  fps: data?.fps.toString() ?? '10.0',
+  fps: Number(data?.fps).toFixed(1).toString() ?? '10.0',
   totalRecomendedFps,
   // Disable live video
   disableVideoFeed: data?.disable_video_feed ?? false,
@@ -118,7 +119,9 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
       ]) => {
         const relatedInferenceModule = inferenceModule.find((e) => e.id === partDetection.inference_module);
         const totalRecomendedFps = relatedInferenceModule?.recommended_fps;
-        const recomendedFps = Math.floor(totalRecomendedFps / (partDetection.cameras?.length || 1));
+
+        const baseCamers = partDetection.cameras?.length || 1;
+        const recomendedFps = Math.round((totalRecomendedFps / baseCamers) * 10) / 10;
 
         dispatch(
           getProjectSuccess(

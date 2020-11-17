@@ -88,6 +88,13 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
         cloneProject.SVTCcameras = [];
         cloneProject.SVTCconfirmationThreshold = 0;
         cloneProject.SVTCparts = [];
+      } else if (key === 'fps' && value) {
+        // keep Decimal point 1
+        if (!Number(value)) return;
+
+        const newFps = Math.floor(+value * 10) / 10;
+
+        cloneProject.fps = newFps.toFixed(1).toString();
       }
       setProjectData(cloneProject);
     },
