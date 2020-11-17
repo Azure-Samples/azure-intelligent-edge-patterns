@@ -196,15 +196,11 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                 onCancel={() => setloadImgWarning(false)}
               />
               <Stack horizontal tokens={{ childrenGap: 10 }}>
-                <WarningDialog
-                  contentText={
-                    <Text variant="large">
-                      Load Project will remove all the objects, sure you want to do that?
-                    </Text>
-                  }
-                  trigger={<PrimaryButton text="Load" disabled={loading} />}
-                  onConfirm={onLoad}
-                />
+                <PrimaryButton
+                  text="Load"
+                  disabled={loading}
+                  onClick={onLoad}
+                  />
                 {loading && <Spinner label="loading" />}
               </Stack>
             </>
