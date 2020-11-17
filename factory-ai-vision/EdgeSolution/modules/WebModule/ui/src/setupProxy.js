@@ -3,10 +3,8 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function (app) {
   app.use(
-    '/api',
-    createProxyMiddleware({
+    createProxyMiddleware(['/api', '/video_feed'], {
       target: `http://localhost:${process.env.PROXY_PORT}`,
-      changeOrigin: true,
     }),
   );
 };

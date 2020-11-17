@@ -118,7 +118,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
       ]) => {
         const relatedInferenceModule = inferenceModule.find((e) => e.id === partDetection.inference_module);
         const totalRecomendedFps = relatedInferenceModule?.recommended_fps;
-        const recomendedFps = Math.floor(totalRecomendedFps / (partDetection[0].cameras?.length || 1));
+        const recomendedFps = Math.floor(totalRecomendedFps / (partDetection.cameras?.length || 1));
 
         dispatch(
           getProjectSuccess(
