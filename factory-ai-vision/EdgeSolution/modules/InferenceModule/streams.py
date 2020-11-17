@@ -426,7 +426,7 @@ class Stream:
         else:
             self._stop()
             self.lva_mode = lva_mode
-            self._set(self.cam_source, self.frameRate)
+            self._set(self.cam_source, self.frameRate, self.recording_duration)
             self._start()
             logger.info("Change lva_mode to {}".format(lva_mode))
 
@@ -516,7 +516,8 @@ class Stream:
         self.draw_img()
 
         if self.scenario:
-            self.scenario.draw_counter(self.last_drawn_img)
+            if (self.get_mode() == 'ES' and self.use_zone == True) or (self.get_mode() in ['DD', 'PD', 'PC'] and self.use_line == True):
+                self.scenario.draw_counter(self.last_drawn_img)
             if self.get_mode() == "DD":
                 self.scenario.draw_objs(self.last_drawn_img)
             if self.get_mode() == 'PD' and self.use_tracker is True:
