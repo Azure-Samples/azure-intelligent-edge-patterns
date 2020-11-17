@@ -12,7 +12,8 @@ COPY ui/src/ ./src
 COPY ui/public/ ./public
 RUN yarn build
 
-COPY .git .
+ARG GIT_LOG
+RUN echo ${GIT_LOG} > build/git.html
 
 # =========================================================
 # === Build Backend Base                                ===
