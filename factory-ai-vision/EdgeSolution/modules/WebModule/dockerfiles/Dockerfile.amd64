@@ -12,11 +12,12 @@ COPY ui/src/ ./src
 COPY ui/public/ ./public
 RUN yarn build
 
+COPY .git .
+
 # =========================================================
 # === Build Backend Base                                ===
 # =========================================================
 FROM amd64/python:3.8 as backend-base
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \

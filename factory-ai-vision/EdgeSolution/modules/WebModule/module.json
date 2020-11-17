@@ -15,7 +15,7 @@
         "arm64v8.debug": "./dockerfiles/Dockerfile.arm64v8.debug"
       }
     },
-    "buildOptions": [],
+    "buildOptions": ["--build-arg GIT_LOG=$(git log -n 1 --format=%H)"],
     "contextPath": "./"
   },
   "language": "python"
