@@ -39,6 +39,7 @@ class UploadModelBody(BaseModel):
 
 class CameraModel(BaseModel):
     id: str
+    name: str
     type: str
     source: str
     lines: str
@@ -48,9 +49,10 @@ class CameraModel(BaseModel):
     send_video_to_cloud_parts: List[PartModel]
     send_video_to_cloud_threshold: int = 60
     recording_duration: int = 60
+    enable_tracking: bool
 
 
 class CamerasModel(BaseModel):
     lva_mode: Literal["http", "grpc"]
-    fps: int
+    fps: float
     cameras: List[CameraModel]

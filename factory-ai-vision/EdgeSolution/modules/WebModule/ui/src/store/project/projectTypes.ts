@@ -56,14 +56,15 @@ export type ProjectData = {
   SVTCparts: number[];
   SVTCconfirmationThreshold: number;
   SVTCRecordingDuration: number;
+  SVTCEnableTracking: boolean;
   // Camera fps
   setFpsManually: boolean;
-  fps: number;
+  fps: string; // use string in fe for better ux
   totalRecomendedFps: number;
   recomendedFps: number;
   // Protocol of inference
   inferenceProtocol: InferenceProtocol;
-  // Disalbe live video
+  // Disable live video
   disableVideoFeed: boolean;
   /* --- Other --- */
   inferenceMode: InferenceMode;

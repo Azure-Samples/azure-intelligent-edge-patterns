@@ -30,7 +30,7 @@ class Stream:
         # else:
         #     frameRate = 10
         self.cam = None
-        self.fps = max(1, fps)
+        self.fps = max(0.1, fps)
         self.cam_is_alive = True
 
         self.IMG_WIDTH = 960
@@ -67,7 +67,7 @@ class Stream:
                     width = IMG_WIDTH
                     ratio = IMG_WIDTH / img.shape[1]
                     height = int(img.shape[0] * ratio + 0.000001)
-                    #if height >= self.IMG_HEIGHT:
+                    # if height >= self.IMG_HEIGHT:
                     #    height = self.IMG_HEIGHT
                     #    ratio = self.IMG_HEIGHT / img.shape[0]
                     #    width = int(img.shape[1] * ratio + 0.000001)
@@ -90,7 +90,8 @@ class Stream:
             cnt = 0
             while self.cam_is_alive:
                 if self.last_img is None:
-                    logger.warning("stream {} img not ready".format(self.cam_id))
+                    logger.warning(
+                        "stream {} img not ready".format(self.cam_id))
                     time.sleep(1)
                     continue
                 if self.last_send == self.last_update:
@@ -110,7 +111,8 @@ class Stream:
                 self.last_send = self.last_update
                 time.sleep(1 / self.fps)
 
-        threading.Thread(target=_new_streaming, args=(self,), daemon=True).start()
+        threading.Thread(target=_new_streaming,
+                         args=(self,), daemon=True).start()
         threading.Thread(target=run_send, args=(self,), daemon=True).start()
 
     def start_zmq(self):
@@ -128,7 +130,7 @@ class Stream:
                     width = IMG_WIDTH
                     ratio = IMG_WIDTH / img.shape[1]
                     height = int(img.shape[0] * ratio + 0.000001)
-                    #if height >= self.IMG_HEIGHT:
+                    # if height >= self.IMG_HEIGHT:
                     #    height = self.IMG_HEIGHT
                     #    ratio = self.IMG_HEIGHT / img.shape[0]
                     #    width = int(img.shape[1] * ratio + 0.000001)
@@ -148,7 +150,8 @@ class Stream:
             while self.cam_is_alive:
                 cnt += 1
                 if self.last_img is None:
-                    logger.warning("stream {} img not ready".format(self.cam_id))
+                    logger.warning(
+                        "stream {} img not ready".format(self.cam_id))
                     time.sleep(1)
                     continue
                 if self.last_send == self.last_update:
@@ -165,7 +168,7 @@ class Stream:
                 # FIXME may find a better way to deal with encoding
                 self.zmq_sender.send_multipart(
                     [
-                        bytes(self.cam_id, "utf-8"),self.last_img.tobytes(),
+                        bytes(self.cam_id, "utf-8"), self.last_img.tobytes(),
                     ]
                 )
                 self.last_send = self.last_update

@@ -165,21 +165,15 @@ export const getCameras = createWrappedAsync<any, boolean, { state: State }>(
   },
 );
 
-export const postCamera = createWrappedAsync(
-  'cameras/post',
-  async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'location'>) => {
-    const response = await Axios.post(`/api/cameras/`, newCamera);
-    return response.data;
-  },
-);
+export const postCamera = createWrappedAsync('cameras/post', async (newCamera: any) => {
+  const response = await Axios.post(`/api/cameras/`, newCamera);
+  return response.data;
+});
 
-export const putCamera = createWrappedAsync(
-  'cameras/put',
-  async (newCamera: Pick<Camera, 'name' | 'rtsp' | 'id' | 'location'>) => {
-    const response = await Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
-    return response.data;
-  },
-);
+export const putCamera = createWrappedAsync('cameras/put', async (newCamera: any) => {
+  const response = await Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
+  return response.data;
+});
 
 export const deleteCamera = createWrappedAsync('cameras/delete', async (id: number) => {
   await Axios.delete(`/api/cameras/${id}/`);

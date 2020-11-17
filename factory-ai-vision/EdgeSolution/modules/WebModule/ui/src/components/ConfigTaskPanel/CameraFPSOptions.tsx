@@ -1,4 +1,4 @@
-import { Toggle, MaskedTextField } from '@fluentui/react';
+import { Toggle, TextField } from '@fluentui/react';
 import React from 'react';
 import { ProjectData } from '../../store/project/projectTypes';
 import { OptionLayout } from './OptionLayout';
@@ -27,18 +27,19 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
           onChange('setFpsManually', checked);
         }}
       />
-      <MaskedTextField
-        value={(setFpsManually ? fps : recomendedFps)?.toString()}
-        onChange={(_, val) => onChange('fps', parseInt(val, 10))}
+      <TextField
+        value={(setFpsManually ? fps : recomendedFps)?.toString() || ''}
+        onChange={(_, val) => {
+          onChange('fps', val);
+        }}
         disabled={!setFpsManually}
         errorMessage={
-          fps > recomendedFps && setFpsManually
+          parseFloat(fps) > recomendedFps && setFpsManually
             ? `The recommended value for FPS is '${recomendedFps}', higher than the recommended value will affect the performance.`
             : ''
         }
         styles={{ errorMessage: { maxWidth: '200px' } }}
-        mask="999 fps"
-        maskChar=" "
+        suffix="FPS"
       />
     </OptionLayout>
   );

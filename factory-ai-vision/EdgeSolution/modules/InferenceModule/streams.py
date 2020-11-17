@@ -19,7 +19,7 @@ from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
 
 # from tracker import Tracker
-from scenarios import DangerZone, DefeatDetection, Detection, PartCounter
+from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection
 from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
 DETECTION_TYPE_NOTHING = "nothing"
@@ -53,6 +53,7 @@ class Stream:
         cam_source="./sample_video/video.mp4",
         send_video_to_cloud: bool = False,
     ):
+        self.name = ''
         self.cam_id = cam_id
         self.model = model
         self.send_video_to_cloud = send_video_to_cloud
@@ -67,9 +68,9 @@ class Stream:
         self.cam_type = cam_type
         self.cam_source = None
         if self.model.is_gpu:
-            frameRate = 30
+            self.frameRate = 30
         else:
-            frameRate = 10
+            self.frameRate = 10
         # self.cam = cv2.VideoCapture(normalize_rtsp(cam_source))
         self.cam_is_alive = True
         self.last_display_keep_alive = None
@@ -121,8 +122,8 @@ class Stream:
         self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
-        self.last_update = None
-        self.last_send = None
+        self.last_update = 0
+        self.last_send = 0
         self.use_line = False
         self.use_zone = False
         # self.tracker = Tracker()
@@ -130,6 +131,7 @@ class Stream:
         self.scenario_type = None
         # self.start_zmq()
         self.is_benchmark = False
+        self.use_tracker = False
 
     def set_is_benchmark(self, is_benchmark):
         self.is_benchmark = is_benchmark
@@ -150,6 +152,7 @@ class Stream:
         self.detection_unidentified_num = 0
         self.detection_total = 0
         self.detections = []
+        self.use_tracker = False
         # self.last_prediction_count = {}
         if self.scenario:
             self.scenario.reset_metrics()
@@ -201,6 +204,8 @@ class Stream:
 
         # Protected by Mutex
         # self.mutex.acquire()
+        self.scenario = PartCounter()
+        self.scenario_type = self.model.detection_mode
         # self.cam.release()
         # self.cam = cam
         # self.mutex.release()
@@ -213,6 +218,7 @@ class Stream:
         recording_duration,
         lva_mode,
         cam_id,
+        cam_name,
         has_aoi,
         aoi_info,
         scenario_type=None,
@@ -247,11 +253,17 @@ class Stream:
                 self._update_instance(
                     normalize_rtsp(cam_source), str(frameRate), str(recording_duration))
 
+        self.name = cam_name
         self.has_aoi = has_aoi
         self.aoi_info = aoi_info
 
         detection_mode = self.model.get_detection_mode()
-        if detection_mode == "PC":
+        if detection_mode == "PD":
+            self.scenario = PartDetection()
+            self.scenario.set_parts(self.model.parts)
+            self.scenario_type = self.model.detection_mode
+
+        elif detection_mode == "PC":
             print("[INFO] Line INFO", line_info, flush=True)
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
@@ -469,9 +481,6 @@ class Stream:
         if self.is_retrain:
             self.process_retrain_image(predictions, image)
 
-        if self.iothub_is_send:
-            self.process_send_message_to_iothub(predictions)
-
         # check whether it's larger than threshold
         predictions = list(
             p for p in predictions if p["probability"] >= self.threshold)
@@ -505,18 +514,27 @@ class Stream:
             self.scenario.update(_detections)
 
         self.draw_img()
-        if self.send_video_to_cloud:
-            self.precess_send_signal_to_lva()
 
         if self.scenario:
-            # print('drawing...', flush=True)
-            # print(self.scenario, flush=True)
-            self.last_drawn_img = self.scenario.draw_counter(
-                self.last_drawn_img)
-            # FIXME close this
-            # self.scenario.draw_constraint(self.last_drawn_img)
+            self.scenario.draw_counter(self.last_drawn_img)
             if self.get_mode() == "DD":
                 self.scenario.draw_objs(self.last_drawn_img)
+            if self.get_mode() == 'PD' and self.use_tracker is True:
+                self.scenario.draw_objs(self.last_drawn_img)
+
+        if self.iothub_is_send:
+            if self.get_mode() == 'ES':
+                if self.scenario.has_new_event:
+                    self.process_send_message_to_iothub(predictions)
+            else:
+                self.process_send_message_to_iothub(predictions)
+
+        if self.send_video_to_cloud:
+            if self.get_mode() == 'ES':
+                if self.scenario.has_new_event:
+                    self.precess_send_signal_to_lva()
+            else:
+                self.precess_send_signal_to_lva()
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
@@ -558,7 +576,9 @@ class Stream:
                 p for p in predictions if p["probability"] >= self.threshold
             )
             if len(predictions) > 0:
-                send_message_to_iothub(predictions)
+                message_body = {'camera_name': self.name,
+                                'inferences': predictions}
+                send_message_to_iothub(message_body)
                 self.iothub_last_send_time = time.time()
 
     def precess_send_signal_to_lva(self):
@@ -594,7 +614,13 @@ class Stream:
         if self.has_aoi:
             draw_aoi(img, self.aoi_info)
 
-        if self.get_mode() != "DD":
+        # if it's DD, use the draw_objects function from it
+        is_draw = True
+        if self.get_mode() == "DD":
+            is_draw = False
+        if (self.get_mode() == 'PD' and self.use_tracker is True):
+            is_draw = False
+        if is_draw:
             for prediction in predictions:
                 if prediction["probability"] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
@@ -621,12 +647,17 @@ class Stream:
 
     def gen(self):
         while self.cam_is_alive and self.display_is_alive():
-            if self.last_drawn_img is not None:
+            if self.last_drawn_img is not None and self.last_update > self.last_send:
+                self.last_send = self.last_update
                 jpg = cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()
+                logger.warning(
+                    '===== sneding jpg to browser, size: {}'.format(len(jpg)))
                 yield (
                     b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + jpg + b"\r\n"
                 )
-            time.sleep(0.04)
+                time.sleep(1/self.frameRate)
+            else:
+                time.sleep(0.04)
 
 
 def web_module_url():

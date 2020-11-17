@@ -4,7 +4,7 @@
   "image": {
     "repository": "intelligentedge/visionsamplemodule",
     "tag": {
-      "version": "0.1.20",
+      "version": "0.2.0",
       "platforms": {
         "cpuamd64": "./Dockerfile.cpuamd64",
         "gpuamd64": "./Dockerfile.gpuamd64",
