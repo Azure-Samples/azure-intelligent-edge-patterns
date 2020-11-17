@@ -109,20 +109,26 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
   const getInferenceModule = Axios.get('/api/inference_modules/');
 
   return Promise.all([getPartDetection, getInferenceModule])
-    .then((results) => {
-      const partDetection = results[0].data;
-      const infModuleIdx = results[1].data.findIndex((e) => e.id === partDetection[0].inference_module);
-      const totalRecomendedFps = results[1].data[infModuleIdx]?.recommended_fps;
-      const recomendedFps = Math.floor(totalRecomendedFps / (partDetection[0].cameras?.length || 1));
+    .then(
+      ([
+        {
+          data: [partDetection], // Because we will always got one partDetection currently, pick the first one
+        },
+        { data: inferenceModule },
+      ]) => {
+        const relatedInferenceModule = inferenceModule.find((e) => e.id === partDetection.inference_module);
+        const totalRecomendedFps = relatedInferenceModule?.recommended_fps;
+        const recomendedFps = Math.floor(totalRecomendedFps / (partDetection[0].cameras?.length || 1));
 
-      dispatch(
-        getProjectSuccess(
-          normalizeServerToClient(partDetection[0], recomendedFps, totalRecomendedFps),
-          partDetection[0]?.has_configured,
-        ),
-      );
-      return partDetection[0]?.has_configured;
-    })
+        dispatch(
+          getProjectSuccess(
+            normalizeServerToClient(partDetection, recomendedFps, totalRecomendedFps),
+            partDetection?.has_configured,
+          ),
+        );
+        return partDetection?.has_configured;
+      },
+    )
     .catch((err) => {
       dispatch(getProjectFailed(err));
     });
