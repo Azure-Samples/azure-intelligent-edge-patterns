@@ -23,6 +23,7 @@ import {
   MessageBarType,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import Axios from 'axios';
 
 import { State } from 'RootStateType';
 import {
@@ -123,6 +124,20 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   useEffect(() => {
     if (showProjectDropdown) dispatch(thunkGetAllCvProjects());
   }, [dispatch, showProjectDropdown]);
+
+  const [gitSha1, setgitSha1] = useState('');
+
+  useEffect(() => {
+    // Could only get the file in production build
+    if (process.env.NODE_ENV === 'production') {
+      Axios.get('/static/git_sha1.txt')
+        .then((res) => {
+          setgitSha1(res.data);
+          return void 0;
+        })
+        .catch(alert);
+    }
+  }, []);
 
   return (
     <>
@@ -231,6 +246,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
             onConfirm={(): void => updateIsCollectData(true, true)}
             onCancel={(): void => updateIsCollectData(false, true)}
           />
+          <Text>Version: {gitSha1}</Text>
         </Stack>
       </Panel>
     </>
