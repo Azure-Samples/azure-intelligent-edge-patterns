@@ -1,5 +1,5 @@
 import { Toggle, TextField } from '@fluentui/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ProjectData } from '../../store/project/projectTypes';
 import { OptionLayout } from './OptionLayout';
 import { OnChangeType } from './type';
@@ -14,6 +14,17 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
   recomendedFps,
   onChange,
 }) => {
+  const fpsErrorMsg = useMemo(() => {
+    if (!Number(fps)) return `Only number format.`;
+
+    if (+fps < 0.1) return `FPS cannot be less than 0.1.`;
+
+    if (parseFloat(fps) > recomendedFps && setFpsManually)
+      return `The recommended value for FPS is '${recomendedFps}', higher than the recommended value will affect the performance.`;
+
+    return '';
+  }, [setFpsManually, fps, recomendedFps]);
+
   return (
     <OptionLayout
       title="Camera FPS"
@@ -33,11 +44,7 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
           onChange('fps', val);
         }}
         disabled={!setFpsManually}
-        errorMessage={
-          parseFloat(fps) > recomendedFps && setFpsManually
-            ? `The recommended value for FPS is '${recomendedFps}', higher than the recommended value will affect the performance.`
-            : ''
-        }
+        errorMessage={fpsErrorMsg}
         styles={{ errorMessage: { maxWidth: '200px' } }}
         suffix="FPS"
       />
