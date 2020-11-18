@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import { ProjectData } from '../../store/project/projectTypes';
 import { OptionLayout } from './OptionLayout';
 import { OnChangeType } from './type';
-import * as R from 'ramda';
 
 type CameraFPSOptionsProps = Pick<ProjectData, 'setFpsManually' | 'fps' | 'recomendedFps'> & {
   onChange: OnChangeType;
