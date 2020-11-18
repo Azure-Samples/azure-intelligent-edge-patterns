@@ -21,6 +21,7 @@ import {
   Checkbox,
   MessageBar,
   MessageBarType,
+  getTheme,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -46,6 +47,8 @@ type SettingPanelProps = {
   showProjectDropdown: boolean;
   openDataPolicyDialog: boolean;
 };
+
+const { palette } = getTheme();
 
 const textFieldClass = mergeStyles({
   width: 500,
@@ -152,6 +155,12 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
         layerProps={{
           hostId: MAIN_LAYER_HOST_ID,
         }}
+        isFooterAtBottom
+        onRenderFooterContent={() => (
+          <Text variant="small" styles={{ root: { color: palette.neutralTertiary } }}>
+            Version: {gitSha1}
+          </Text>
+        )}
       >
         <Stack tokens={{ childrenGap: 17 }}>
           <h4>Azure Cognitive Services settings</h4>
@@ -246,7 +255,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
             onConfirm={(): void => updateIsCollectData(true, true)}
             onCancel={(): void => updateIsCollectData(false, true)}
           />
-          <Text>Version: {gitSha1}</Text>
         </Stack>
       </Panel>
     </>
