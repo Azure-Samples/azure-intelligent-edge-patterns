@@ -68,6 +68,7 @@ async def upload(stream: Stream):
 
 
 def normalize_url(url):
+    normalized_url = url
     if '//' not in url:
         normalized_url = 'http://' + url
     return normalized_url
