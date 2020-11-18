@@ -12,6 +12,9 @@ COPY ui/src/ ./src
 COPY ui/public/ ./public
 RUN yarn build
 
+ARG GIT_LOG
+RUN echo ${GIT_LOG} > ./build/static/git_sha1.txt
+
 # =========================================================
 # === Build Backend                                     ===
 # =========================================================
