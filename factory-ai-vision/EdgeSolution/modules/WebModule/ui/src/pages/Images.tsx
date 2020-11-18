@@ -112,6 +112,7 @@ export const Images: React.FC = () => {
     (state: State) =>
       selectAllImages(state).filter((e) => e.isRelabel && e.manualChecked && !e.uploaded).length,
   );
+  const nonDemoProjectId = useSelector((state: State) => state.trainingProject.nonDemo[0]);
 
   const onUpload = () => {
     fileInputRef.current.click();
@@ -179,10 +180,13 @@ export const Images: React.FC = () => {
   );
 
   useEffect(() => {
-    dispatch(getImages());
-    // We need part info for image list items
-    dispatch(getParts());
-  }, [dispatch]);
+    (async () => {
+      await Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
+      dispatch(getImages());
+      // We need part info for image list items
+      dispatch(getParts());
+    })();
+  }, [dispatch, nonDemoProjectId]);
 
   useKeepAlive(relabelImages.length > 0);
 
