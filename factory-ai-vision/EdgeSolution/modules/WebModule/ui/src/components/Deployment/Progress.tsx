@@ -5,6 +5,7 @@ import { ProgressIndicator, Stack, Text } from '@fluentui/react';
 
 import { useInterval } from '../../hooks/useInterval';
 import { trainFailed, trainSuccess } from '../../store/project/projectActions';
+import { getErrorLog } from '../../store/shared/createWrappedAsync';
 
 const TrainingStatus = {
   'finding project': 10,
@@ -35,7 +36,7 @@ export const Progress: React.FC<{ projectId: number; cameraId: number }> = ({ pr
       })
       .catch((err) => {
         dispatch(trainFailed());
-        alert(err);
+        alert(getErrorLog(err));
       });
   }, 5000);
 
