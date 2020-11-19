@@ -83,7 +83,9 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   inferenceMode: data?.inference_mode ?? '',
   // Send video to cloud
   SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
-  SVTCcameras: data?.send_video_to_cloud.map((e) => e.camera),
+  SVTCcameras: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud)
+    ? data?.send_video_to_cloud.map((e) => e.camera)
+    : [],
   SVTCparts: data?.send_video_to_cloud[0]?.parts || [], // All the camera will detect same parts
   SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
   SVTCRecordingDuration: data?.send_video_to_cloud[0]?.recording_duration ?? 1,
