@@ -153,11 +153,13 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
 
     setdeploying(true);
     const projectId = await dispatch(thunkPostProject(projectData));
-    await dispatch(getConfigure((projectId as unknown) as number));
-    setdeploying(false);
+    if (typeof projectId === 'number') {
+      await dispatch(getConfigure((projectId as unknown) as number));
 
-    onDismiss();
-    history.push('/home/deployment');
+      onDismiss();
+      history.push('/home/deployment');
+    }
+    setdeploying(false);
   };
 
   const onRenderFooterContent = () => {

@@ -26,7 +26,7 @@ import {
   TrainFailedAction,
   TRAIN_FAILED,
 } from './projectTypes';
-import { createWrappedAsync } from '../shared/createWrappedAsync';
+import { createWrappedAsync, getErrorLog } from '../shared/createWrappedAsync';
 
 const getProjectRequest = (): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -134,6 +134,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
     )
     .catch((err) => {
       dispatch(getProjectFailed(err));
+      alert(getErrorLog(err));
     });
 };
 
@@ -189,6 +190,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
     })
     .catch((err) => {
       dispatch(postProjectFail(err));
+      alert(getErrorLog(err));
     }) as Promise<number>;
 };
 
