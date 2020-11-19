@@ -84,6 +84,11 @@ And let us set the following:
     $ INPUT_PATH=@./triton_input.json
     $ SERVICE_HOSTNAME=$(kubectl get inferenceservices -n kfserving-test bert-large -o jsonpath='{.status.url}' | cut -d "/" -f 3)
 
+You should see the service `Alive`:
+
+    $ curl -H "Host: ${SERVICE_HOSTNAME}" http://${INGRESS_HOST}:${INGRESS_PORT}
+    Alive
+
 And now we can run the web requests for the inferencing server we created:
 
     $ curl -v -H "Host: ${SERVICE_HOSTNAME}" -d $INPUT_PATH http://${INGRESS_HOST}:${INGRESS_PORT}/v1/models/$MODEL_NAME:predict
@@ -104,7 +109,7 @@ And now we can run the web requests for the inferencing server we created:
     < server: istio-envoy
     < x-envoy-upstream-service-time: 3814
     <
-    * Connection #0 to host 38.102.181.75 left intact
+    * Connection #0 to host 12.34.56.78 left intact
     {"predictions": "John F. Kennedy", "prob": 77.91852121017916}
 
 So, we got JFK with 78% certainty, which is reasonable.
