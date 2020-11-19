@@ -28,6 +28,8 @@ import {
 } from './projectTypes';
 import { createWrappedAsync, getErrorLog } from '../shared/createWrappedAsync';
 
+import { extractRecommendFps } from '../../utils/extractRecommendFps';
+
 const getProjectRequest = (): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
 });
@@ -120,12 +122,12 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         const relatedInferenceModule = inferenceModule.find((e) => e.id === partDetection.inference_module);
         const totalRecomendedFps = relatedInferenceModule?.recommended_fps;
 
-        const baseCamers = partDetection.cameras?.length || 1;
-        const recomendedFps = Math.round((totalRecomendedFps / baseCamers) * 10) / 10;
+        const baseCameras = partDetection.cameras?.length || 1;
+        const recommendedFps = extractRecommendFps(totalRecomendedFps, baseCameras);
 
         dispatch(
           getProjectSuccess(
-            normalizeServerToClient(partDetection, recomendedFps, totalRecomendedFps),
+            normalizeServerToClient(partDetection, recommendedFps, totalRecomendedFps),
             partDetection?.has_configured,
           ),
         );
