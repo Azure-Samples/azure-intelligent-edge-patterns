@@ -16,29 +16,9 @@
         "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
       }
     },
-    "containerRegistryName": {
-      "type": "string",
-      "defaultValue": "docker.io",
-      "metadata": {
-        "description": "Container Registry Name."
-      }
-    },
-    "containerRegistryUserName": {
-      "type": "string",
-      "metadata": {
-        "description": "Container Registry Username."
-      }
-    },
-    "containerRegistryPassword": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Container Registry Password."
-      }
-    },
     "moduleRuntime": {
-      "defaultValue": "CPU",
-      "allowedValues": ["CPU", "NVIDIA", "MOVIDIUS"],
+      "defaultValue": "cpu",
+      "allowedValues": ["cpu", "gpu (NVIDIA)", "vpu (Movidius)"],
       "type": "string",
       "metadata": {
         "description": "Select value for runtime for Detector module on Edge Device. Set it to 'CPU' to use CPU to run detector module. If the Edge Device has Nvidia GPU, set it to 'NVIDIA' to use GPU to run detector module or to use movidius set it to 'MOVIDIUS'."
@@ -98,7 +78,10 @@
     "resourceGroupName": "[parameters('resourceGroupName')]",
     "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,parameters('resourceGroupName')),1,4))]",
     "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,parameters('resourceGroupName')),1,4))]",
-    "managedIdentityResourceGroup": "[parameters('resourceGroupName')]"
+    "managedIdentityResourceGroup": "[parameters('resourceGroupName')]",
+    "containerRegistryName": "docker.io",
+    "containerRegistryUserName": "",
+    "containerRegistryPassword": ""
   },
   "resources": [
     {
@@ -218,13 +201,13 @@
             "value": "[parameters('moduleRuntime')]"
           },
           "containerRegistryName": {
-            "value": "[parameters('containerRegistryName')]"
+            "value": "[variables('containerRegistryName')]"
           },
           "containerRegistryUserName": {
-            "value": "[parameters('containerRegistryUserName')]"
+            "value": "[variables('containerRegistryUserName')]"
           },
           "containerRegistryPassword": {
-            "value": "[parameters('containerRegistryPassword')]"
+            "value": "[variables('containerRegistryPassword')]"
           },
           "managedIdentityResourceGroup": {
             "value": "[variables('managedIdentityResourceGroup')]"

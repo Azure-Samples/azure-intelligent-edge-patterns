@@ -103,7 +103,7 @@ AMS_SP_SECRET=$(echo ${AMS_SP_JSON} | jq ".AadSecret")
 AMS_SP_ID=$(echo ${AMS_SP_JSON} | jq ".AadClientId")
 AMS_NAME="\"${AMS_NAME}\""
 
-echo "$(info) Gening .env ${ENV_PATH}"
+echo "$(info) Generating .env ${ENV_PATH}"
 
 
 sed -i -e "s|^CONTAINER_REGISTRY_NAME=.*$|CONTAINER_REGISTRY_NAME=${CONTAINER_REGISTRY_NAME}|g" ${ENV_PATH}
@@ -134,9 +134,9 @@ MANIFEST_TEMPLATE_BASE_NAME="deployment"
 MANIFEST_ENVIRONMENT_VARIABLES_FILENAME=".env"
 
 
-if [ "$INFERENCE_MODULE_RUNTIME" == "NVIDIA" ]; then
+if echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'gpu' > /dev/null ; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.gpu"
-elif [ "$INFERENCE_MODULE_RUNTIME" == "MOVIDIUS" ]; then
+elif echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'vpu' > /dev/null ; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.vpu"
 else
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.cpu"
