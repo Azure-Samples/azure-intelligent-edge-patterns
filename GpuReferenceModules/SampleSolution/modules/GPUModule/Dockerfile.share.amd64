@@ -1,0 +1,26 @@
+#FROM amd64/python:3.7-slim-buster
+#FROM nvcr.io/nvidia/tensorflow:19.12-tf1-py3
+#FROM nvcr.io/nvidia/tensorflow:20.03-tf2-py3
+#FROM nvcr.io/nvidia/tensorflow:20.10-tf2-py3
+FROM amd64/python:3.7-slim-buster
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
+
+WORKDIR /app
+
+# COPY requirements.txt .
+# RUN pip install -r requirements.txt
+WORKDIR /app
+
+#COPY requirements.txt ./
+#RUN pip install -r requirements.txt
+
+COPY . .
+
+
+CMD [ "python3", "-u", "./main_local_share.py" ]
