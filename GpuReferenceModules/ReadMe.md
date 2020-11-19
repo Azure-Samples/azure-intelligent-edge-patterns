@@ -1,12 +1,11 @@
-# Deploy a GPU enabled IoT Module on Azure Stack Hub
+# Deploy a Share enabled IoT Module on Azure Stack Hub
 ## About this sample
 ### Overview
 In this article you'll learn how to:
-  - Deploy a GPU module to an IoT Edge VM on Azure Stack Hub
-  - Benchmark processing times for GPUs and CPUs
+  - Deploy a share module to an IoT Edge VM on Azure Stack Hub
+  
 
-### Included Models
-This sample includes PyTorch and TensorFlow benchmarking sample code for CPU against GPU
+
 
 ## How to run this sample
 ### Prerequisites
@@ -41,9 +40,9 @@ Before you begin, make sure you have:
 1.  Open the “GpuReferenceModules” folder in Visual Studio Code.
 2.  Fill in the values in the .env.template file for your ACR.
 ```
-        REGISTRY_NAME=<YourAcrUri>
-        REGISTRY_USER_NAME=<YourAcrUserName>
-        REGISTRY_PASSWORD=<YourAcrPassword>
+        CONTAINER_REGISTRY_NAME=<YourAcrUri>
+        CONTAINER_REGISTRY_USER_NAME=<YourAcrUserName>
+        CONTAINER_REGISTRY_PASSWORD=<YourAcrPassword>
 ```
 3.  Rename the file to ".env".
 4.  Sign into Docker by entering the following command in the Visual
@@ -54,16 +53,9 @@ Before you begin, make sure you have:
 ```
       docker login -u <REGISTRY_USER_NAME> -p <REGISTRY_PASSWORD> <REGISTRY_NAME>.azurecr.io
 ```
-5.  In the VS Code explorer, right-click the deployment.iotedgevm.template.json
+5.  In the VS Code explorer, right-click the deployment.share.template.json
     file and select Build and Push IoT Edge solution.
 
-## Setup Monitoring 
-
-1.  Download Azure IoT Explorer, and connect the application to your IoT Hub.
-
-2.  Select your IoT Device and navigate to Telemetry from the navigation menu.
-
-3. Press Start to begin monitoring output from the IoT Edge Device.
 
 ## Deploy to Azure Stack
 
@@ -83,11 +75,27 @@ receive the deployment.
 4.  Right-click the name of your IoT Edge device, then select Create
     Deployment for Single Device.
 
-5.  Select the `deployment.amd64.json` file in the config folder and then click
+5.  Select the `deployment.share.amd64.json` file in the config folder and then click
     Select Edge Deployment Manifest. Do not use the
     `deployment.template.json` file.
 
 6.  Click the refresh button. You should see GPUModule running.
+
+## how to test 
+
+- connect to your device and mount a share with name "inputlocalshare" in portal as per instruction [here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-j-series-deploy-add-shares)
+- create 2 files on this share name them as "mytest.txt" and "mysharetest.txt"
+- check logs of GPUMODULE using minishell as per instruction [here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-connect-powershell-interface#use-iotedge-commands)
+
+iotedge logs GPUMODULE 
+
+see if you can get as below 
+
+File exists:True
+File exists:True
+
+  
+
 
 # Next Steps
 
