@@ -8,6 +8,10 @@ type CameraFPSOptionsProps = Pick<ProjectData, 'setFpsManually' | 'fps' | 'recom
   onChange: OnChangeType;
 };
 
+const extractDecimalFPS = (fps: number): string => {
+  return fps.toFixed(1).toString();
+};
+
 export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
   setFpsManually,
   fps,
@@ -20,9 +24,17 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
     if (+fps < 0.1) return `FPS cannot be less than 0.1.`;
 
     if (parseFloat(fps) > recomendedFps && setFpsManually)
-      return `The recommended value for FPS is '${recomendedFps}', higher than the recommended value will affect the performance.`;
+      return `The recommended value for FPS is '${extractDecimalFPS(
+        +recomendedFps,
+      )}', higher than the recommended value will affect the performance.`;
 
     return '';
+  }, [setFpsManually, fps, recomendedFps]);
+
+  const localFPS = useMemo(() => {
+    const originalFPS = extractDecimalFPS(setFpsManually ? +fps : +recomendedFps);
+
+    return originalFPS || '';
   }, [setFpsManually, fps, recomendedFps]);
 
   return (
@@ -39,7 +51,7 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
         }}
       />
       <TextField
-        value={(setFpsManually ? fps : recomendedFps)?.toString() || ''}
+        value={localFPS}
         onChange={(_, val) => {
           onChange('fps', val);
         }}
