@@ -22,11 +22,8 @@ import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../..
 import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
-import { OnChangeType } from './type';
-
-import { extractRecommendFps } from '../../utils/extractRecommendFps';
-
 import { AdvancedOptions } from './AdvancedOptions';
+import { OnChangeType } from './type';
 
 const sendTrainInfoToAppInsight = async (selectedParts: ProjectData['parts']): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -82,10 +79,8 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
         else cloneProject.inferenceMode = InferenceMode.PartDetection;
       } else if (key === 'cameras') {
         cloneProject.SVTCcameras = cloneProject.SVTCcameras.filter((e) => cloneProject.cameras.includes(e));
-
-        cloneProject.recomendedFps = extractRecommendFps(
-          cloneProject.totalRecomendedFps,
-          cloneProject.cameras.length || 1,
+        cloneProject.recomendedFps = Math.floor(
+          cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1),
         );
       } else if (key === 'parts') {
         cloneProject.SVTCparts = cloneProject.SVTCparts.filter((e) => cloneProject.parts.includes(e));
