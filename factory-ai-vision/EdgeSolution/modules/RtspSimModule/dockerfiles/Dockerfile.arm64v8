@@ -1,1 +1,3 @@
-FROM arm64v8/postgres:12.3
+# TODO: replace arm64 rtsp-sim base image
+FROM mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2
+COPY ./videos/* /live/mediaServer/media/
