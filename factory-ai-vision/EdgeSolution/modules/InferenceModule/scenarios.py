@@ -23,11 +23,12 @@ class Scenario:
     def get_metrics(self):
         raise NotImplementedError
 
+
 class PartDetection(Scenario):
     def __init__(self, threshold=0.3, max_age=5, min_hits=2, iou_threshold=0.3):
-        #self.tracker = Tracker(
+        # self.tracker = Tracker(
         #    max_age=max_age, min_hits=min_hits, iou_threshold=iou_threshold
-        #)
+        # )
         self.detected = {}
         self.counter = 0
         self.threshold = threshold
@@ -44,12 +45,14 @@ class PartDetection(Scenario):
             self.trackers[part] = Tracker(
                 max_age=self.max_age, min_hits=self.min_hits, iou_threshold=self.iou_threshold
             )
-        #print(self.parts)
+        # print(self.parts)
 
     def update(self, detections):
         for part in self.parts:
-            _detections = list(d for d in detections if (d.score > self.threshold and d.tag in self.parts))
-            _detections = list([d.x1, d.y1, d.x2, d.y2, d.score] for d in _detections)
+            _detections = list(d for d in detections if (
+                d.score > self.threshold and d.tag in self.parts))
+            _detections = list([d.x1, d.y1, d.x2, d.y2, d.score]
+                               for d in _detections)
             self.trackers[part].update(_detections)
             #objs = self.tracker.get_objs()
 
@@ -67,9 +70,9 @@ class PartDetection(Scenario):
 
     def draw_objs(self, img, is_id=True, is_rect=True):
         for part in self.parts:
-            #print(part)
+            # print(part)
             for obj in self.trackers[part].get_objs():
-                #print(obj)
+                # print(obj)
                 font = cv2.FONT_HERSHEY_DUPLEX
                 font_scale = 0.7
                 thickness = 1
@@ -84,7 +87,8 @@ class PartDetection(Scenario):
                 if is_id:
                     img = draw_label(img, str(part), (x, y))
                 if is_rect:
-                    img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), thickness)
+                    img = cv2.rectangle(
+                        img, (x1, y1), (x2, y2), (255, 255, 255), thickness)
         return img
 
 
@@ -108,14 +112,19 @@ class PartCounter(Scenario):
     def get_metrics(self):
         return [{"name": "all_objects", "count": self.counter}]
 
-    def set_line(self, x1, y1, x2, y2):
-        self.line = Line(x1, y1, x2, y2)
+    def set_line(self, lines):
+        lines_ = []
+        for line in lines:
+            l = Line(line[0], line[1], line[2], line[3])
+            lines_.append(l)
+        self.line = lines_
 
     def update(self, detections):
         if len(detections) == 0:
             return
         detections = list(d for d in detections if d.score > self.threshold)
-        detections = list([d.x1, d.y1, d.x2, d.y2, d.score] for d in detections)
+        detections = list([d.x1, d.y1, d.x2, d.y2, d.score]
+                          for d in detections)
         self.tracker.update(detections)
         objs = self.tracker.get_objs()
         counted = []
@@ -193,7 +202,8 @@ class PartCounter(Scenario):
             if is_id:
                 img = draw_label(img, str(oid), (x, y))
             if is_rect:
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), thickness)
+                img = cv2.rectangle(img, (x1, y1), (x2, y2),
+                                    (255, 255, 255), thickness)
         return img
 
 
@@ -266,7 +276,8 @@ class DefeatDetection(Scenario):
                     print("delete overlayed obj", i)
                     break
 
-        _detections = list([d.x1, d.y1, d.x2, d.y2, d.score] for d in detections)
+        _detections = list([d.x1, d.y1, d.x2, d.y2, d.score]
+                           for d in detections)
         self.tracker.update(_detections)
         objs = self.tracker.get_objs()
 
@@ -517,7 +528,8 @@ class DangerZone(Scenario):
             if is_id:
                 img = draw_label(img, str(oid), (x, y))
             if is_rect:
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), thickness)
+                img = cv2.rectangle(img, (x1, y1), (x2, y2),
+                                    (255, 255, 255), thickness)
         return img
 
 
