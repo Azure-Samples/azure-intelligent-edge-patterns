@@ -10,10 +10,6 @@ type CameraFPSOptionsProps = Pick<ProjectData, 'setFpsManually' | 'fps' | 'recom
   onChange: OnChangeType;
 };
 
-const extractDecimalFPS = (fps: number): string => {
-  return fps.toFixed(1).toString();
-};
-
 export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
   setFpsManually,
   fps,
