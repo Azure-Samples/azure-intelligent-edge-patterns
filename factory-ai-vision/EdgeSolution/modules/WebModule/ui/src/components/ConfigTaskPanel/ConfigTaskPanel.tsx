@@ -13,6 +13,7 @@ import {
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
+import { createSelector } from '@reduxjs/toolkit';
 
 import { State } from 'RootStateType';
 import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../../store/cameraSlice';
@@ -61,9 +62,12 @@ const panelStyles = {
 
 const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChangeType] => {
   const [projectData, setProjectData] = useState(initialProjectData);
+
+  const trainingProjects = useSelector((state: State) => state.trainingProject);
+
   useEffect(() => {
     setProjectData(initialProjectData);
-  }, [initialProjectData]);
+  }, [initialProjectData, trainingProjects]);
 
   const scenarios = useSelector((state: State) => state.scenario);
 
@@ -88,6 +92,9 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
           cloneProject.cameras.length || 1,
         );
       } else if (key === 'parts') {
+        console.log(value);
+        console.log(cloneProject.SVTCparts.filter((e) => cloneProject.parts.includes(e)));
+
         cloneProject.SVTCparts = cloneProject.SVTCparts.filter((e) => cloneProject.parts.includes(e));
       } else if (key === 'SVTCisOpen' && !value) {
         cloneProject.SVTCcameras = [];
