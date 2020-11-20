@@ -271,15 +271,18 @@ class Stream:
                 line_info = json.loads(line_info)
                 self.use_line = line_info["useCountingLine"]
                 lines = line_info["countingLines"]
+                lines_to_set = []
                 if len(lines) > 0:
-                    x1 = int(lines[0]["label"][0]["x"])
-                    y1 = int(lines[0]["label"][0]["y"])
-                    x2 = int(lines[0]["label"][1]["x"])
-                    y2 = int(lines[0]["label"][1]["y"])
-                    self.scenario.set_line(x1, y1, x2, y2)
+                    for i in range(len(lines)):
+                        x1 = int(lines[i]["label"][0]["x"])
+                        y1 = int(lines[i]["label"][0]["y"])
+                        x2 = int(lines[i]["label"][1]["x"])
+                        y2 = int(lines[i]["label"][1]["y"])
+                        print("        line:", x1, y1, x2, y2, flush=True)
+                        lines_to_set.append([x1, y1, x2, y2])
+                    self.scenario.set_line(lines_to_set)
                     print("Upading Line:", flush=True)
                     print("    use_line:", self.use_line, flush=True)
-                    print("        line:", x1, y1, x2, y2, flush=True)
                 else:
                     print("Upading Line:", flush=True)
                     print("    use_line:", self.use_line, flush=True)
