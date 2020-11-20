@@ -21,18 +21,18 @@ jest.mock('../../store/locationSlice', () => ({
 }));
 
 test('should able to enter camera name, RTSP Url', () => {
-  const { getByLabelText } = render(
+  const { getByRole } = render(
     <AddCameraPanel isOpen={true} onDissmiss={dummyFunction} mode={PanelMode.Create} locationOptions={[]} />,
   );
 
   const testCamera = 'test camera';
   const testRtspUrl = 'rtsp://';
 
-  userEvent.type(getByLabelText(/camera name/i), testCamera);
-  userEvent.type(getByLabelText(/rtsp url/i), testRtspUrl);
+  userEvent.type(getByRole('textbox', { name: /camera name/i }), testCamera);
+  userEvent.type(getByRole('textbox', { name: /rtsp url/i }), testRtspUrl);
 
-  expect(getByLabelText(/camera name/i)).toHaveValue(testCamera);
-  expect(getByLabelText(/rtsp url/i)).toHaveValue(testRtspUrl);
+  expect(getByRole('textbox', { name: /camera name/i })).toHaveValue(testCamera);
+  expect(getByRole('textbox', { name: /rtsp url/i })).toHaveValue(testRtspUrl);
 });
 
 test('should dispatch the right API in different mode', async () => {
@@ -41,7 +41,7 @@ test('should dispatch the right API in different mode', async () => {
     key: 0,
     text: 'location1',
   };
-  const { getByLabelText, getByRole } = render(
+  const { getByRole, getByLabelText } = render(
     <AddCameraPanel
       isOpen={true}
       onDissmiss={dummyFunction}
@@ -53,11 +53,11 @@ test('should dispatch the right API in different mode', async () => {
   const testCamera = 'test camera';
   const testRtspUrl = 'rtsp://';
 
-  userEvent.type(getByLabelText(/camera name/i), testCamera);
-  userEvent.type(getByLabelText(/rtsp url/i), testRtspUrl);
+  userEvent.type(getByRole('textbox', { name: /camera name/i }), testCamera);
+  userEvent.type(getByRole('textbox', { name: /rtsp url/i }), testRtspUrl);
 
   // Pick a location
-  userEvent.click(getByRole('option'));
+  userEvent.click(getByLabelText('Location'));
   userEvent.click(getByRole('option', { name: mockLocationOption.text }));
 
   userEvent.click(getByRole('button', { name: /add/i }));
