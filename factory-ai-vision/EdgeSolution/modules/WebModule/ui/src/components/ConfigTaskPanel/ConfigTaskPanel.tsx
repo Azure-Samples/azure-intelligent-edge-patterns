@@ -61,9 +61,12 @@ const panelStyles = {
 
 const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChangeType] => {
   const [projectData, setProjectData] = useState(initialProjectData);
+
+  const trainingProjects = useSelector((state: State) => state.trainingProject);
+
   useEffect(() => {
     setProjectData(initialProjectData);
-  }, [initialProjectData]);
+  }, [initialProjectData, trainingProjects]);
 
   const scenarios = useSelector((state: State) => state.scenario);
 
