@@ -64,6 +64,9 @@
               },
               "DBPASS": {
                 "value": "vision_on_edge"
+              },
+	      "DF_PD_VIDEO_SOURCE": {
+                "value": "opencv"
               }
             },
             "settings": {
