@@ -72,6 +72,13 @@ You might also need to resolve the access issues, see [Kubernetes documentation]
 
 ## Infrerencing using KFServing
 
+You are free to deploy your own, custom-made `inferenceservice` if you want.
+
+For that, please see a separate sub-page, [KFServing custom-made inferenceservice](custom/Readme.md)
+
+It is more common to use models from popular frameworks, for example, [TensorFlow](tensorflow.md),
+[PyTorch](pytorch.md), [ONNX](onnx.md), Triton, XGBoost, or SKLearn. We describe them below.
+
 ---
 
 ### KFServing TensorFlow models

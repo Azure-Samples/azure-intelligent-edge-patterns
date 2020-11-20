@@ -1,0 +1,19 @@
+apiVersion: serving.kubeflow.org/v1alpha2
+kind: InferenceService
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: custom-sample
+spec:
+  default:
+    predictor:
+      custom:
+        container:
+          name: custom
+          # Put your own container registry and image name.
+          # For example if your Dockerhub login is 'rollingstone', type this:
+          # image: rollingstone/custom-sample
+          image: rollingstone/custom-sample
+          env:
+            - name: GREETING_TARGET
+              value: "Yay, we are using KFServing!"
