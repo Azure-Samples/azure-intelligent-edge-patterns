@@ -1,4 +1,3 @@
-# syntax = docker/dockerfile:experimental
 # =========================================================
 # Base
 # =========================================================
@@ -71,13 +70,13 @@ SHELL ["/bin/bash", "-c"]
 WORKDIR /app
 RUN cp /usr/bin/make /usr/bin/make.bak && \
     echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make
-RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install --upgrade pip
-RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install wheel cython protobuf
+RUN source activate python38 && pip install --upgrade pip
+RUN source activate python38 && pip install wheel cython protobuf
 COPY requirements/base.txt ./requirements/base.txt
 # Workaround scikit image requires numpy while dependency is not resolved
-RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install $(cat ./requirements/base.txt | grep numpy)
+RUN source activate python38 && pip install $(cat ./requirements/base.txt | grep numpy)
 RUN mv /usr/bin/make.bak /usr/bin/make
-RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install -r requirements/base.txt
+RUN source activate python38 && pip install -r requirements/base.txt
 
 # =========================================================
 # Install onnxruntime
@@ -130,19 +129,15 @@ RUN git clone \
     cd .. && \
     rm -rf onnxruntime
 
-WORKDIR /app
-RUN source activate python38 && python -c "import onnxruntime; print(onnxruntime.__version__)"
-
 # =========================================================
 # Install opencv
 # =========================================================
 WORKDIR /app
-COPY requirements/gpuarm64v8.txt ./requirements/gpuarm64v8.txt
+COPY requirements/gpuarm64v8.txt .
 RUN cp /usr/bin/make /usr/bin/make.bak && \
-    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make
-RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install -r requirements/gpuarm64v8.txt
-RUN mv /usr/bin/make.bak /usr/bin/make
-RUN ["python","-c", "\"import cv2;print(cv2.__version__)\""]
+    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
+    source activate python38 && pip install -r requirements/gpuarm64v8.txt && \
+    mv /usr/bin/make.bak /usr/bin/make
 
 # =========================================================
 # Shapely Work arount
