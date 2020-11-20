@@ -25,6 +25,7 @@ import {
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import {
@@ -86,6 +87,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
   const error = useSelector((state: State) => state.setting.error);
 
+  const location = useLocation();
   const dispatch = useDispatch();
 
   const onSave = async () => {
@@ -103,6 +105,12 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const onLoad = async () => {
     setloading(true);
     await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
+
+    if (location.pathname === '/home/deployment') {
+      window.location.reload();
+      return;
+    }
+
     setloading(false);
     onDismiss();
   };
