@@ -1,11 +1,12 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "resourceGroupName": {
+    "location": {
       "type": "string",
+      "defaultValue": "[resourceGroup().location]",
       "metadata": {
-        "description": "Enter the name of resource group of existing Iot Hub, Azure Media Service and Custom Vision."
+        "description": "Location for the resources."
       }
     },
     "deviceArchitecture": {
@@ -74,11 +75,10 @@
     }
   },
   "variables": {
-    "location": "[deployment().location]",
-    "resourceGroupName": "[parameters('resourceGroupName')]",
-    "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,parameters('resourceGroupName')),1,4))]",
-    "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,parameters('resourceGroupName')),1,4))]",
-    "managedIdentityResourceGroup": "[parameters('resourceGroupName')]",
+    "resourceGroupName": "[resourceGroup().name]",
+    "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+    "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+    "managedIdentityResourceGroup": "[variables('resourceGroupName')]",
     "containerRegistryName": "docker.io",
     "containerRegistryUserName": "",
     "containerRegistryPassword": ""
@@ -88,7 +88,7 @@
       "type": "Microsoft.Resources/resourceGroups",
       "apiVersion": "2020-06-01",
       "name": "[variables('resourceGroupName')]",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "properties": {}
     },
     {
@@ -96,7 +96,7 @@
       "apiVersion": "2020-06-01",
       "name": "CreatingManagedIdentity",
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]"
+        "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -110,12 +110,12 @@
               "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
               "name": "[variables('managedIdentityName')]",
               "apiVersion": "2018-11-30",
-              "location": "[variables('location')]"
+              "location": "[parameters('location')]"
             }
           ]
         }
       },
-      "resourceGroup": "[parameters('resourceGroupName')]"
+      "resourceGroup": "[variables('resourceGroupName')]"
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -156,14 +156,14 @@
           ]
         }
       },
-      "resourceGroup": "[parameters('resourceGroupName')]"
+      "resourceGroup": "[variables('resourceGroupName')]"
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "ResourcesDeployment",
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]",
+        "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]",
         "CreatingRoleAssignments",
         "CreatingManagedIdentity"
       ],
@@ -174,7 +174,7 @@
         },
         "parameters": {
           "resourceGroupName": {
-            "value": "[parameters('resourceGroupName')]"
+            "value": "[variables('resourceGroupName')]"
           },
           "videoCaptureModule": {
             "value": "[parameters('videoCaptureModule')]"
@@ -192,7 +192,7 @@
             "value": "[parameters('iotHubName')]"
           },
           "resourceGroupLocation": {
-            "value": "[variables('location')]"
+            "value": "[parameters('location')]"
           },
           "deviceArchitecture": {
             "value": "[parameters('deviceArchitecture')]"
@@ -375,7 +375,7 @@
           ]
         }
       },
-      "resourceGroup": "[parameters('resourceGroupName')]"
+      "resourceGroup": "[variables('resourceGroupName')]"
     }
   ]
 }
