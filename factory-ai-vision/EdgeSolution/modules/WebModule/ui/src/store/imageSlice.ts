@@ -1,4 +1,4 @@
-import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action } from '@reduxjs/toolkit';
+import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action, AsyncThunk } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
@@ -83,7 +83,21 @@ const serializeLabels = R.map<ImageFromServer, ImageFromServerWithSerializedLabe
 const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeLabels);
 
 // Async Thunk Actions
-export const getImages = createWrappedAsync('images/get', async () => {
+export const getImages = createWrappedAsync<
+  ReturnType<typeof normalizeImages>['entities'],
+  { freezeRelabelImgs: boolean },
+  // TODO Use the type State will cause annotationSlice/addOriginEntitiesReducer encounter own annotation referencing
+  // issue. Should define the type State manually instead of getting it from return type.
+  { state: any }
+>('images/get', async ({ freezeRelabelImgs }, { getState }) => {
+  if (freezeRelabelImgs) {
+    /**
+     * Call keep_alive can freeze the relabel images
+     * Prevent from getting stale images, we should call the keep_alive before get images.
+     */
+    const nonDemoProjectId = getState().trainingProject.nonDemo[0];
+    await Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
+  }
   const response = await Axios.get(`/api/images/`);
   return normalizeImages(response.data).entities;
 });

@@ -23,7 +23,7 @@ export const Home: React.FC = () => {
     (async () => {
       setLoading(true);
       await dispatch(getCameras(false));
-      await dispatch(getImages());
+      await dispatch(getImages({ freezeRelabelImgs: false }));
       await dispatch(thunkGetProject());
       setLoading(false);
     })();

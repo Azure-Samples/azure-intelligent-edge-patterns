@@ -89,7 +89,7 @@ export const Deployment: React.FC = () => {
     dispatch(getTrainingProject(true));
     // The property `upload` would be changed after configure
     // Re fetch the images to get the latest data
-    dispatch(getImages());
+    dispatch(getImages({ freezeRelabelImgs: false }));
   }, [dispatch]);
 
   const changeProbThreshold = (newValue: number) => dispatch(updateProjectData({ probThreshold: newValue }));
@@ -236,7 +236,7 @@ const UpdateModelInstruction = ({ newImagesCount, updateModel }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getImages());
+    dispatch(getImages({ freezeRelabelImgs: false }));
   }, [dispatch]);
 
   if (newImagesCount)
