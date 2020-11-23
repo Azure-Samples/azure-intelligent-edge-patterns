@@ -4,10 +4,7 @@ This demo shows how to deploy multiple gpu-requiring workloads on a cluster with
 
 ## Pre-requisites
 
-To create a one-node gpu-capable Kubernetes cluster, you need a gpu-capable VM. During creation of the
-VMs, you need to specify a GPU-capable VM Size(either at Portal, or in your deployment template).
-
-Please follow the instructions in [Deploying model to Kubernetes](../machine-learning-notebooks/deploying-on-k8s/Readme.md)
+Follow the instructions in [Prep steps for Docker and Kubernetes](prep_steps_for_docker_and_k8s.md)
 to make sure you have a GPU-capable node on your vm.
 
 If you need to install docker, follow the instructions at [Nvidia cloud native containers](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
