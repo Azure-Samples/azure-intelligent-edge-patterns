@@ -54,14 +54,12 @@
     },
     "mediaServiceServicePrincipalName": {
       "type": "string",
-      "defaultValue": "myamsspname",
       "metadata": {
         "description": "Enter the name of existing Azure Media Service Principal name."
       }
     },
     "mediaServiceServicePrincipalSecret": {
-      "type": "string",
-      "defaultValue": "myamsspsecret",
+      "type": "secretstring",
       "metadata": {
         "defaultValue": "Azure Media Service Principal secret."
       }
