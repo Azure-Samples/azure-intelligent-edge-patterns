@@ -78,19 +78,9 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Resources/resourceGroups",
-      "apiVersion": "2020-06-01",
-      "name": "[variables('resourceGroupName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {}
-    },
-    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "CreatingManagedIdentity",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
-      ],
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -155,11 +145,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "ResourcesDeployment",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]",
-        "CreatingRoleAssignments",
-        "CreatingManagedIdentity"
-      ],
+      "dependsOn": ["CreatingRoleAssignments", "CreatingManagedIdentity"],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
