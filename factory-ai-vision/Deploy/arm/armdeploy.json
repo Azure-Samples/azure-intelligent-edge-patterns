@@ -2,6 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for the resources."
+      }
+    },
     "deviceArchitecture": {
       "defaultValue": "X86",
       "allowedValues": ["X86", "ARM64"],
@@ -60,7 +67,7 @@
       }
     },
     "mediaServiceServicePrincipalSecret": {
-      "type": "securestring",
+      "type": "string",
       "defaultValue": "myamsspsecret",
       "metadata": {
         "defaultValue": "Azure Media Service Principal secret."
@@ -78,9 +85,19 @@
   },
   "resources": [
     {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('resourceGroupName')]",
+      "location": "[parameters('location')]",
+      "properties": {}
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "CreatingManagedIdentity",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -93,7 +110,7 @@
               "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
               "name": "[variables('managedIdentityName')]",
               "apiVersion": "2018-11-30",
-              "location": "[resourceGroup().location]"
+              "location": "[parameters('location')]"
             }
           ]
         }
@@ -145,7 +162,11 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "ResourcesDeployment",
-      "dependsOn": ["CreatingRoleAssignments", "CreatingManagedIdentity"],
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]",
+        "CreatingRoleAssignments",
+        "CreatingManagedIdentity"
+      ],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
@@ -171,7 +192,7 @@
             "value": "[parameters('iotHubName')]"
           },
           "resourceGroupLocation": {
-            "value": "[resourceGroup().location]"
+            "value": "[parameters('location')]"
           },
           "deviceArchitecture": {
             "value": "[parameters('deviceArchitecture')]"
