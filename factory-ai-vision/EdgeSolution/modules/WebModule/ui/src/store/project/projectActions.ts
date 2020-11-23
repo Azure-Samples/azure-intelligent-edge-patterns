@@ -78,7 +78,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   // Cloud message
   sendMessageToCloud: data?.metrics_is_send_iothub,
   framesPerMin: data?.metrics_frame_per_minutes,
-  probThreshold: data?.prob_threshold ?? 10,
+  probThreshold: data?.prob_threshold ?? 60,
   inferenceMode: data?.inference_mode ?? '',
   // Send video to cloud
   SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
@@ -86,10 +86,11 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   SVTCparts: data?.send_video_to_cloud[0]?.parts || [], // All the camera will detect same parts
   SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
   SVTCRecordingDuration: data?.send_video_to_cloud[0]?.recording_duration ?? 1,
+  SVTCEnableTracking: data?.send_video_to_cloud[0]?.enable_tracking ?? false,
   // Camera fps
   setFpsManually: data?.fps !== recomendedFps,
   recomendedFps,
-  fps: data?.fps ?? 10,
+  fps: data?.fps.toString() ?? '10.0',
   totalRecomendedFps,
   // Disable live video
   disableVideoFeed: data?.disable_video_feed ?? false,
@@ -157,9 +158,10 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         send_video_to_cloud: projectData.SVTCcameras.includes(e),
         send_video_to_cloud_threshold: projectData.SVTCconfirmationThreshold,
         recording_duration: projectData.SVTCRecordingDuration,
+        enable_tracking: projectData.SVTCEnableTracking,
       })),
       inference_mode: projectData.inferenceMode,
-      fps: projectData.setFpsManually ? projectData.fps : projectData.recomendedFps,
+      fps: projectData.setFpsManually ? parseFloat(projectData.fps) : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
       disable_video_feed: projectData.disableVideoFeed,
     },

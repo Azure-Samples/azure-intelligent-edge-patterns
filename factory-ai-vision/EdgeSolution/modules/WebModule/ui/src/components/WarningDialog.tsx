@@ -49,7 +49,13 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({
           </Stack>
         </DialogFooter>
       </Dialog>
-      <div onClick={openDialog}>{trigger}</div>
+      <div
+        onClick={(e) => {
+          if (e.target !== e.currentTarget) openDialog();
+        }}
+      >
+        {trigger}
+      </div>
     </>
   );
 };

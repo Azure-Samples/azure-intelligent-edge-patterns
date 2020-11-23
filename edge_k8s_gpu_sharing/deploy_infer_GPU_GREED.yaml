@@ -7,21 +7,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-infer-GPU_GREED
+  name: my-infer-gpugreed
   labels:
-    app: my-infer-GPU_GREED
+    app: my-infer-gpugreed
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: my-infer-GPU_GREED
+      app: my-infer-gpugreed
   template:
     metadata:
       labels:
-        app: my-infer-GPU_GREED
+        app: my-infer-gpugreed
     spec:
       containers:
-      - name: my-infer-GPU_GREED
+      - name: my-infer-gpugreed
+        # !!! put your own image location instead
         image: myregistry.azurecr.io/rollingstone/myinfer:1.0
         ports:
         # we use only 5001, but the container exposes  EXPOSE 5001 8883 8888
@@ -37,5 +38,5 @@ spec:
             # memory: "128Mi" #128 MB
             # cpu: "200m" # 200 millicpu (0.2 or 20% of the cpu)
             nvidia.com/gpu:  100
-      imagePullSecrets:
-        - name: secret4acr2infer
+      #imagePullSecrets:
+      #  - name: secret4acr2infer

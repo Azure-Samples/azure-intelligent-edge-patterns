@@ -21,6 +21,7 @@ from ..azure_settings.exceptions import (
 )
 from ..azure_settings.models import Setting
 from .exceptions import (
+    ProjectAlreadyTraining,
     ProjectCannotChangeDemoError,
     ProjectCustomVisionError,
     ProjectResetWithoutNameError,
@@ -248,6 +249,9 @@ class Project(models.Model):
                 raise ProjectTrainWithoutParts
             for part in self.part_set.all():
                 part.is_trainable(raise_exception=True)
+            for iteration in self.get_iterations():
+                if iteration.status.lower() == "training":
+                    raise ProjectAlreadyTraining
             return True
         except APIException:
             if raise_exception:
@@ -330,6 +334,11 @@ class Project(models.Model):
             project_id=self.customvision_id, iteration_id=iteration_id
         )
         return res
+
+    def get_iterations(self):
+        """get_iterations"""
+        trainer = self.get_trainer_obj()
+        return trainer.get_iterations(project_id=self.customvision_id)
 
 
 class Task(models.Model):

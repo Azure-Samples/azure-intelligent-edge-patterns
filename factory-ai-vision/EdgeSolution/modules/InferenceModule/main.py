@@ -18,7 +18,7 @@ from shapely.geometry import Polygon
 
 from object_detection import ObjectDetection
 from onnxruntime_predict import ONNXRuntimeObjectDetection
-from scenarios import DangerZone, DefeatDetection, Detection, PartCounter
+from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection
 from tracker import Tracker, draw_counter
 from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
@@ -37,10 +37,15 @@ from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 # scenario.set_zones([[85, 340, 743, 407]])
 # scenario.set_targets(['Box'])
 
-scenario = DefeatDetection()
-scenario.set_ok("Bottle - OK")
-scenario.set_ng("Bottle - NG")
-scenario.set_line(600, 0, 600, 800)
+#scenario = DefeatDetection()
+#scenario.set_ok("Bottle - OK")
+#scenario.set_ng("Bottle - NG")
+#scenario.set_line(600, 0, 600, 800)
+
+scenario = PartDetection()
+#scenario.set_parts(["Bottle - OK", "Bottle - NG"])
+scenario.set_parts(["Box"])
+
 
 # scenario= DefeatDetection()
 # scenario.set_ok('Box')
@@ -53,14 +58,14 @@ SCENARIO2_VIDEO = "../RtspSimModule/videos/scenario2-employ-safety.mkv"
 SCENARIO3_VIDEO = "../RtspSimModule/videos/scenario3-defect-detection.mkv"
 
 DEFAULT_MODEL = "default_model"
-SCENARIO1_MODEL = "scenario_models/onnx/1"
-SCENARIO2_MODEL = "scenario_models/onnx/2"
-SCENARIO3_MODEL = "scenario_models/onnx/3"
+SCENARIO1_MODEL = "scenario_models/1/onnx"
+SCENARIO2_MODEL = "scenario_models/2/onnx"
+SCENARIO3_MODEL = "scenario_models/3/onnx"
 DOWNLOADED_MODEL = "model"
 
 ### CONFIGURATION <BEG> ###
-CAM_SOURCE = SCENARIO3_VIDEO
-MODEL = SCENARIO3_MODEL
+CAM_SOURCE = SCENARIO1_VIDEO
+MODEL = SCENARIO1_MODEL
 
 ### CONFIGURATION <END> ###
 
@@ -737,6 +742,7 @@ def video_feed():
             if inference:
                 height, width = img.shape[0], img.shape[1]
                 predictions = onnx.last_prediction
+                #print(predictions)
                 for prediction in predictions:
                     tag = prediction["tagName"]
 
@@ -772,12 +778,7 @@ def video_feed():
             scenario.draw_objs(img)
             # counter, objs, counted = tracker.update(detections)
 
-            # print(objs)
             time.sleep(0.02)
-            # print(img.shape)
-            # img = cv2.line(img, (int(170/2), int(680/2)), (int(1487/2), int(815/2)), (0, 255, 255), 5)
-            # img = tracker.draw_counter(img)
-            # img = tracker.draw_line(img)
             yield (
                 b"--frame\r\n"
                 b"Content-Type: image/jpeg\r\n\r\n"

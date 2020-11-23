@@ -194,41 +194,26 @@ def deploy_worker(part_detection_id):
     }
 
     for cam in cameras.all():
+        cam_info = {
+            "id": cam.id,
+            "name": cam.name,
+            "type": "rtsp",
+            "source": cam.rtsp,
+            "lines": cam.lines,
+            "zones": cam.danger_zones,
+            "send_video_to_cloud": cam.cameratask_set.first().send_video_to_cloud,
+            "send_video_to_cloud_parts": [
+                {"id": part.id, "name": part.name}
+                for part in cam.cameratask_set.first().parts.all()
+            ],
+            "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
+            "recording_duration": cam.cameratask_set.first().recording_duration,
+            "enable_tracking": cam.cameratask_set.first().enable_tracking,
+        }
         if cam.area:
-            res_data["cameras"].append(
-                {
-                    "id": cam.id,
-                    "type": "rtsp",
-                    "source": cam.rtsp,
-                    "aoi": cam.area,
-                    "lines": cam.lines,
-                    "zones": cam.danger_zones,
-                    "send_video_to_cloud": cam.cameratask_set.first().send_video_to_cloud,
-                    "send_video_to_cloud_parts": [
-                        {"id": part.id, "name": part.name}
-                        for part in cam.cameratask_set.first().parts.all()
-                    ],
-                    "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
-                    "recording_duration": cam.cameratask_set.first().recording_duration,
-                }
-            )
-        else:
-            res_data["cameras"].append(
-                {
-                    "id": cam.id,
-                    "type": "rtsp",
-                    "source": cam.rtsp,
-                    "lines": cam.lines,
-                    "zones": cam.danger_zones,
-                    "send_video_to_cloud": cam.cameratask_set.first().send_video_to_cloud,
-                    "send_video_to_cloud_parts": [
-                        {"id": part.id, "name": part.name}
-                        for part in cam.cameratask_set.first().parts.all()
-                    ],
-                    "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
-                    "recording_duration": cam.cameratask_set.first().recording_duration,
-                }
-            )
+            cam_info["aoi"] = cam.area
+        res_data["cameras"].append(cam_info)
+
     serializer = UpdateCamBodySerializer(data=res_data)
     serializer.is_valid(raise_exception=True)
     logger.info(serializer.validated_data)
