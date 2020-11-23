@@ -278,8 +278,10 @@ class Stream:
                         y1 = int(lines[i]["label"][0]["y"])
                         x2 = int(lines[i]["label"][1]["x"])
                         y2 = int(lines[i]["label"][1]["y"])
-                        print("        line:", x1, y1, x2, y2, flush=True)
-                        lines_to_set.append([x1, y1, x2, y2])
+                        line_id = str(lines[i]['id'])
+                        print("        line:", x1, y1,
+                              x2, y2, line_id, flush=True)
+                        lines_to_set.append([x1, y1, x2, y2, line_id])
                     self.scenario.set_line(lines_to_set)
                     print("Upading Line:", flush=True)
                     print("    use_line:", self.use_line, flush=True)

@@ -5,15 +5,16 @@ from sort import *
 
 #_m = (170 - 1487) / (680 - 815)
 #_b = 680/2 - _m * 170/2
-#def compute_direction(_m, _b, x, y):
+# def compute_direction(_m, _b, x, y):
 #    return _m * x + _b - y
-#def is_same_direction(x1, y1, x2, y2):
+# def is_same_direction(x1, y1, x2, y2):
 #    return 0.000000001 < (compute_direction(x1, y1) * compute_direction(x2, y2))
 
 
 class Tracker():
     def __init__(self, max_age=1, min_hits=3, iou_threshold=0.3):
-        self.tracker = Sort(max_age=max_age, min_hits=min_hits, iou_threshold=0.3)
+        self.tracker = Sort(
+            max_age=max_age, min_hits=min_hits, iou_threshold=0.3)
         self.objs = []
 
     def update(self, detections):
@@ -29,6 +30,7 @@ class Tracker():
 
 class Line():
     def __init__(self, x1, y1, x2, y2):
+        self.id = None
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -49,6 +51,7 @@ class Line():
     def is_same_side(self, x1, y1, x2, y2):
         return 0.000000001 < (self.compute_side(x1, y1) * self.compute_side(x2, y2))
 
+
 def bb_intersection_over_union(boxA, boxB):
     # determine the (x, y)-coordinates of the intersection rectangle
     xA = max(boxA[0], boxB[0])
@@ -68,6 +71,7 @@ def bb_intersection_over_union(boxA, boxB):
     # return the intersection over union value
     return iou
 
+
 class Rect():
     def __init__(self, x1, y1, x2, y2):
         self.x1 = x1
@@ -84,7 +88,6 @@ class Rect():
             return False
 
 
-
 def draw_counter(img, counter):
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.7
@@ -92,6 +95,7 @@ def draw_counter(img, counter):
     img = cv2.putText(img, 'Objects: '+str(counter),
                       (img.shape[1]-150, 30), font, font_scale, (0, 255, 255), thickness)
     return img
+
 
 class _Tracker():
 
@@ -128,7 +132,8 @@ class _Tracker():
 
     def draw_line(self, img):
         if self.line_x1:
-            img = cv2.line(img, (int(self.line_x1), int(self.line_y1)), (int(self.line_x2), int(self.line_y2)), (0, 255, 255), 5)
+            img = cv2.line(img, (int(self.line_x1), int(self.line_y1)), (int(
+                self.line_x2), int(self.line_y2)), (0, 255, 255), 5)
         return img
 
     def draw_counter(self, img):
@@ -157,7 +162,7 @@ class _Tracker():
             y1 = int(y1)
             y2 = int(y2)
             oid = int(oid)
-            #img = cv2.rectangle(
+            # img = cv2.rectangle(
             #    img, (x1, y1), (x2, y2), (0, 255, 255), 2)
             #img = draw_oid(img, x1, y1, oid)
             #img = cv2.line(img, (int(170/2), int(680/2)), (int(1487/2), int(815/2)), (0, 255, 255), 5)
@@ -180,9 +185,9 @@ class _Tracker():
                         self.detected[oid]['yc'] = xc
             else:
                 self.detected[oid] = {
-                  'xc': xc,
-                  'yc': yc,
-                  'expired': False
+                    'xc': xc,
+                    'yc': yc,
+                    'expired': False
                 }
 
         return self.counter, objs, counted

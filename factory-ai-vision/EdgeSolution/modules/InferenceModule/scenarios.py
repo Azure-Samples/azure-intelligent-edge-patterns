@@ -99,15 +99,17 @@ class PartCounter(Scenario):
             max_age=max_age, min_hits=min_hits, iou_threshold=iou_threshold
         )
         self.detected = {}
-        self.counter = 0
-        self.line = None
+        self.counter = {}
+        self.line = []
         self.threshold = threshold
 
     def set_threshold(self):
         self.threshold = threshold
 
     def reset_metrics(self):
-        self.counter = 0
+        for i in self.counter:
+            self.counter[i] = 0
+        # self.counter = 0
 
     def get_metrics(self):
         return [{"name": "all_objects", "count": self.counter}]
@@ -117,6 +119,8 @@ class PartCounter(Scenario):
         for line in lines:
             l = Line(line[0], line[1], line[2], line[3])
             lines_.append(l)
+            l.id = line[4]
+            self.counter[l.id] = 0
         self.line = lines_
 
     def update(self, detections):
@@ -132,24 +136,27 @@ class PartCounter(Scenario):
             x1, y1, x2, y2, oid = obj
             xc, yc = compute_center(x1, y1, x2, y2)
             if oid in self.detected:
-                if self.detected[oid]["expired"] is False:
-                    if self.line and (
-                        not self.line.is_same_side(
-                            xc, yc, self.detected[oid]["xc"], self.detected[oid]["yc"]
-                        )
-                    ):
-                        self.detected[oid]["expired"] = True
-                        print("*** new object counted", flush=True)
-                        print("*** id: ", oid, flush=True)
-                        print("***", self.detected[oid], flush=True)
-                        print("*** (x, y)", xc, yc, flush=True)
-                        self.counter += 1
-                        counted.append(self.detected[oid])
-                    else:
-                        self.detected[oid]["xc"] = xc
-                        self.detected[oid]["yc"] = yc
+                for line in self.line:
+                    if line.id not in self.detected[oid]["expired"].keys():
+                        self.detected[oid]["expired"][line.id] = False
+                    if self.detected[oid]["expired"][line.id] is False:
+                        if line and (
+                            not line.is_same_side(
+                                xc, yc, self.detected[oid]["xc"], self.detected[oid]["yc"]
+                            )
+                        ):
+                            self.detected[oid]["expired"][line.id] = True
+                            print("*** new object counted", flush=True)
+                            print("*** id: ", oid, flush=True)
+                            print("***", self.detected[oid], flush=True)
+                            print("*** (x, y)", xc, yc, flush=True)
+                            self.counter[line.id] += 1
+                            counted.append(self.detected[oid])
+                        else:
+                            self.detected[oid]["xc"] = xc
+                            self.detected[oid]["yc"] = yc
             else:
-                self.detected[oid] = {"xc": xc, "yc": yc, "expired": False}
+                self.detected[oid] = {"xc": xc, "yc": yc, "expired": {}}
 
         return self.counter, objs, counted
 
@@ -157,18 +164,21 @@ class PartCounter(Scenario):
         font = cv2.FONT_HERSHEY_DUPLEX
         font_scale = 0.7
         thickness = 1
-        x = int(max(0, img.shape[1] - 150))
+        x = int(max(0, img.shape[1] - 250))
         y = int(min(30, img.shape[0]))
         # print(x, y, flush=True)
-        img = cv2.putText(
-            img,
-            "Objects: " + str(self.counter),
-            (x, y),
-            font,
-            font_scale,
-            (255, 255, 255),
-            thickness,
-        )
+        for i in self.counter:
+
+            img = cv2.putText(
+                img,
+                "Objects(Line {}): {}".format(i[-2:], str(self.counter[i])),
+                (x, y),
+                font,
+                font_scale,
+                (255, 255, 255),
+                thickness,
+            )
+            y += 25
         return img
 
     def draw_constraint(self, img):
