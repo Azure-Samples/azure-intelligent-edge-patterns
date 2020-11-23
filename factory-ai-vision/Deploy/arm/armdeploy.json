@@ -59,7 +59,7 @@
       }
     },
     "mediaServiceServicePrincipalSecret": {
-      "type": "secretstring",
+      "type": "securestring",
       "metadata": {
         "defaultValue": "Azure Media Service Principal secret."
       }
