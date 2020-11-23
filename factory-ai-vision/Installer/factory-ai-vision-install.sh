@@ -478,7 +478,7 @@ if [ "$isCfg" != true ]; then
     mkdir -p factoryai_configs
     mkdir -p factoryai_configs/factoryai_cfgs
     factoryaiConfigName=factoryai_configs/factoryai_cfgs/factoryai_"$edgeDeviceId"_"$cpuGpu"_"$streaming"_"$now".cfg
-    echo cvTrainingEndpoint='"'$cvTrainingEndpoint'"' >> $factoryaiConfigName
+    echo cvTrainingEndpoint='"'$cvTrainingEndpoint'"' > $factoryaiConfigName
     echo cvTrainingApiKey='"'$cvTrainingApiKey'"' >> $factoryaiConfigName
     echo cpuGpu='"'$cpuGpu'"' >> $factoryaiConfigName
     echo runtime='"'$runtime'"' >> $factoryaiConfigName
@@ -495,7 +495,7 @@ if [ "$isCfg" != true ]; then
 
     mkdir -p factoryai_configs/ams_cfgs
     factoryaiAmsConfigName=factoryai_configs/ams_cfgs/"$amsServiceName".cfg
-    echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiAmsConfigName
+    echo amsSubscriptionId='"'$amsSubscriptionId'"' > $factoryaiAmsConfigName
     echo amsServiceName='"'$amsServiceName'"' >> $factoryaiAmsConfigName
     echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiAmsConfigName
     echo amsTenantId='"'$amsTenantId'"' >> $factoryaiAmsConfigName
