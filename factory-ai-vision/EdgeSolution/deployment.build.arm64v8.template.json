@@ -22,49 +22,42 @@
         "systemModules": {},
         "modules": {
           "NginxModule": {
-            "version": "1.0",
             "type": "docker",
             "settings": {
               "image": "${MODULES.NginxModule.arm64v8}"
             }
           },
           "WebModule": {
-            "version": "1.0",
             "type": "docker",
             "settings": {
               "image": "${MODULES.WebModule.arm64v8}"
             }
           },
           "InferenceModuleCPU": {
-            "version": "1.0",
             "type": "docker",
             "settings": {
               "image": "${MODULES.InferenceModule.cpuarm64v8}"
             }
           },
           "InferenceModuleGPU": {
-            "version": "1.0",
             "type": "docker",
             "settings": {
               "image": "${MODULES.InferenceModule.gpuarm64v8}"
             }
           },
           "InferenceModuleJetson": {
-            "version": "1.0",
             "type": "docker",
             "settings": {
               "image": "${MODULES.InferenceModule.jetson}"
             }
           },
           "rtspsim": {
-            "version": "1.0",
             "type": "docker",
             "settings": {
               "image": "${MODULES.RtspSimModule.arm64v8}"
             }
           },
           "UploadModule": {
-            "version": "1.0",
             "type": "docker",
             "settings": {
               "image": "${MODULES.UploadModule.arm64v8}"
