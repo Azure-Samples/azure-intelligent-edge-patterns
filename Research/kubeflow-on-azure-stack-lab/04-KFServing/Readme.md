@@ -97,6 +97,14 @@ Please see a separate sub-page, [KFServing models saved in ONNX format](onnx.md)
 
 ---
 
+### KFServing using Triton
+
+Triton is a high-performance inferencing server from NVIDIA
+
+Please see a separate sub-page, [KFServing using Triton](triton/Readme.md)
+
+---
+
 ### KFServing model SKLearn Iris model
 
 Let us walk through a demo for SKLearn, which is similar for other ML frameworks.
@@ -219,6 +227,7 @@ See https://github.com/kubeflow/kfserving for more details.
 - [https://www.kubeflow.org/docs/components/serving/kfserving/](https://www.kubeflow.org/docs/components/serving/kfserving/)
 - [Kafka Event Source](https://github.com/knative/eventing-contrib/tree/master/kafka/source)
 - [knative client](https://github.com/knative/client)
+- https://developer.nvidia.com/nvidia-triton-inference-server
 
 ---
 
