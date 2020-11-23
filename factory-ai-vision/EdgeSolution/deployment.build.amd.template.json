@@ -1,0 +1,77 @@
+
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "intelcustomvision": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_NAME"
+              }
+            }
+          }
+        },
+        "systemModules": {},
+        "modules": {
+          "NginxModule": {
+            "version": "1.0",
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.NginxModule.amd64}"
+            }
+          },
+          "WebModule": {
+            "version": "1.0",
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.WebModule.amd64}"
+            }
+          },
+          "InferenceModuleCPU": {
+            "version": "1.0",
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.InferenceModule.cpuamd64}"
+            }
+          },
+          "InferenceModuleGPU": {
+            "version": "1.0",
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.InferenceModule.gpuamd64}"
+            }
+          },
+          "InferenceModuleGPU": {
+            "version": "1.0",
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.InferenceModule.vpuamd64}"
+            }
+          },
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.RtspSimModule.amd64}"
+            }
+          },
+          "UploadModule": {
+            "version": "1.0",
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.UploadModule.amd64}"
+            }
+          }
+        }
+      }
+    }
+  }
+}
