@@ -4,12 +4,13 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/inferencemodule",
     "tag": {
-      "version": "0.2.0",
+      "version": "0.4.0",
       "platforms": {
         "cpuamd64": "./dockerfiles/Dockerfile.cpuamd64",
         "gpuamd64": "./dockerfiles/Dockerfile.gpuamd64",
         "vpuamd64": "./dockerfiles/Dockerfile.vpuamd64",
         "gpuarm64v8": "./dockerfiles/Dockerfile.gpuarm64v8",
+        "jetson": "./dockerfiles/Dockerfile.jetson",
         "cpuarm64v8": "./dockerfiles/Dockerfile.cpuarm64v8",
         "amd64": "./dockerfiles/Dockerfile.amd64",
         "amd64.debug": "./dockerfiles/Dockerfile.amd64.debug",

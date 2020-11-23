@@ -179,7 +179,7 @@ export const Images: React.FC = () => {
   );
 
   useEffect(() => {
-    dispatch(getImages());
+    dispatch(getImages({ freezeRelabelImgs: true }));
     // We need part info for image list items
     dispatch(getParts());
   }, [dispatch]);

@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/webmodule",
     "tag": {
-      "version": "0.2.0",
+      "version": "0.4.0",
       "platforms": {
         "amd64": "./dockerfiles/Dockerfile.amd64",
         "amd64.backend_only": "./dockerfiles/Dockerfile.amd64.backend_only",
@@ -12,11 +12,12 @@
         "arm32v7": "./dockerfiles/Dockerfile.arm32v7",
         "arm32v7.debug": "./dockerfiles/Dockerfile.arm32v7.debug",
         "arm64v8": "./dockerfiles/Dockerfile.arm64v8",
-        "arm64v8-ubuntu": "./dockerfiles/Dockerfile.arm64v8-ubuntu",
         "arm64v8.debug": "./dockerfiles/Dockerfile.arm64v8.debug"
       }
     },
-    "buildOptions": [],
+    "buildOptions": [
+      "--build-arg GIT_LOG=$(git rev-parse HEAD)"
+    ],
     "contextPath": "./"
   },
   "language": "python"

@@ -53,4 +53,4 @@ class Camera(models.Model):
             raise CameraRtspInvalid
 
 
-# pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")
+pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")

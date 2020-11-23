@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import Axios from 'axios';
+
 import { State } from 'RootStateType';
 import {
   ProjectThunk,
@@ -25,7 +26,9 @@ import {
   TrainFailedAction,
   TRAIN_FAILED,
 } from './projectTypes';
-import { createWrappedAsync } from '../shared/createWrappedAsync';
+import { createWrappedAsync, getErrorLog } from '../shared/createWrappedAsync';
+
+import { extractRecommendFps } from '../../utils/extractRecommendFps';
 
 const getProjectRequest = (): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -82,7 +85,9 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   inferenceMode: data?.inference_mode ?? '',
   // Send video to cloud
   SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
-  SVTCcameras: data?.send_video_to_cloud.map((e) => e.camera),
+  SVTCcameras: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud)
+    ? data?.send_video_to_cloud.map((e) => e.camera)
+    : [],
   SVTCparts: data?.send_video_to_cloud[0]?.parts || [], // All the camera will detect same parts
   SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
   SVTCRecordingDuration: data?.send_video_to_cloud[0]?.recording_duration ?? 1,
@@ -90,7 +95,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   // Camera fps
   setFpsManually: data?.fps !== recomendedFps,
   recomendedFps,
-  fps: data?.fps.toString() ?? '10.0',
+  fps: Number(data?.fps).toFixed(1).toString() ?? '10.0',
   totalRecomendedFps,
   // Disable live video
   disableVideoFeed: data?.disable_video_feed ?? false,
@@ -109,22 +114,31 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
   const getInferenceModule = Axios.get('/api/inference_modules/');
 
   return Promise.all([getPartDetection, getInferenceModule])
-    .then((results) => {
-      const partDetection = results[0].data;
-      const infModuleIdx = results[1].data.findIndex((e) => e.id === partDetection[0].inference_module);
-      const totalRecomendedFps = results[1].data[infModuleIdx]?.recommended_fps;
-      const recomendedFps = Math.floor(totalRecomendedFps / (partDetection[0].cameras?.length || 1));
+    .then(
+      ([
+        {
+          data: [partDetection], // Because we will always got one partDetection currently, pick the first one
+        },
+        { data: inferenceModule },
+      ]) => {
+        const relatedInferenceModule = inferenceModule.find((e) => e.id === partDetection.inference_module);
+        const totalRecomendedFps = relatedInferenceModule?.recommended_fps;
 
-      dispatch(
-        getProjectSuccess(
-          normalizeServerToClient(partDetection[0], recomendedFps, totalRecomendedFps),
-          partDetection[0]?.has_configured,
-        ),
-      );
-      return partDetection[0]?.has_configured;
-    })
+        const baseCameras = partDetection.cameras?.length || 1;
+        const recommendedFps = extractRecommendFps(totalRecomendedFps, baseCameras);
+
+        dispatch(
+          getProjectSuccess(
+            normalizeServerToClient(partDetection, recommendedFps, totalRecomendedFps),
+            partDetection?.has_configured,
+          ),
+        );
+        return partDetection?.has_configured;
+      },
+    )
     .catch((err) => {
       dispatch(getProjectFailed(err));
+      alert(getErrorLog(err));
     });
 };
 
@@ -180,6 +194,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
     })
     .catch((err) => {
       dispatch(postProjectFail(err));
+      alert(getErrorLog(err));
     }) as Promise<number>;
 };
 

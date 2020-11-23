@@ -1,13 +1,7 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "resourceGroupName": {
-      "type": "string",
-      "metadata": {
-        "description": "Enter the name of resource group to be created for Iot Hub, Storage Account and Web App."
-      }
-    },
     "deviceArchitecture": {
       "defaultValue": "X86",
       "allowedValues": ["X86", "ARM64"],
@@ -16,30 +10,9 @@
         "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
       }
     },
-    "containerRegistryName": {
-      "type": "string",
-      "defaultValue": "factoryairegistry.azurecr.io",
-      "metadata": {
-        "description": "Container Registry Name."
-      }
-    },
-    "containerRegistryUserName": {
-      "type": "string",
-      "defaultValue": "factoryairegistry",
-      "metadata": {
-        "description": "Container Registry Username."
-      }
-    },
-    "containerRegistryPassword": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Container Registry Password."
-      }
-    },
     "moduleRuntime": {
-      "defaultValue": "CPU",
-      "allowedValues": ["CPU", "NVIDIA", "MOVIDIUS"],
+      "defaultValue": "cpu",
+      "allowedValues": ["cpu", "gpu (NVIDIA)", "vpu (Movidius)"],
       "type": "string",
       "metadata": {
         "description": "Select value for runtime for Detector module on Edge Device. Set it to 'CPU' to use CPU to run detector module. If the Edge Device has Nvidia GPU, set it to 'NVIDIA' to use GPU to run detector module or to use movidius set it to 'MOVIDIUS'."
@@ -57,61 +30,55 @@
       "defaultValue": "",
       "type": "string",
       "metadata": {
-        "description": "Enter the name of existing Iot Hub. This is required only if 'Use Existing Edge Device' is set to 'Yes'"
+        "description": "Enter the name of existing Iot Hub."
       }
     },
     "edgeDeviceName": {
       "defaultValue": "",
       "type": "string",
       "metadata": {
-        "description": "Enter the name of existing Iot Hub. This is required only if 'Use Existing Edge Device' is set to 'Yes'"
+        "description": "Enter the name of existing Iot Hub Edge Device."
       }
     },
     "customVisionName": {
       "type": "string",
-      "defaultValue": "mycustomvision"
+      "metadata": {
+        "description": "Enter the name of existing Custom Vision."
+      }
     },
     "mediaServiceName": {
       "type": "string",
-      "defaultValue": "myams"
+      "metadata": {
+        "description": "Enter the name of existing Azure Media Service."
+      }
     },
     "mediaServiceServicePrincipalName": {
       "type": "string",
-      "defaultValue": "myamsspname",
       "metadata": {
-        "description": "Azure Media Service Principal name"
+        "description": "Enter the name of existing Azure Media Service Principal name."
       }
     },
     "mediaServiceServicePrincipalSecret": {
-      "type": "string",
-      "defaultValue": "myamsspsecret",
+      "type": "securestring",
       "metadata": {
-        "defaultValue": "Azure Media Service Principal secret"
+        "defaultValue": "Azure Media Service Principal secret."
       }
     }
   },
   "variables": {
-    "location": "[deployment().location]",
-    "resourceGroupName": "[parameters('resourceGroupName')]",
-    "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,parameters('resourceGroupName')),1,4))]",
-    "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,parameters('resourceGroupName')),1,4))]",
-    "managedIdentityResourceGroup": "[parameters('resourceGroupName')]"
+    "resourceGroupName": "[resourceGroup().name]",
+    "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+    "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+    "managedIdentityResourceGroup": "[variables('resourceGroupName')]",
+    "containerRegistryName": "docker.io",
+    "containerRegistryUserName": "",
+    "containerRegistryPassword": ""
   },
   "resources": [
-    {
-      "type": "Microsoft.Resources/resourceGroups",
-      "apiVersion": "2020-06-01",
-      "name": "[variables('resourceGroupName')]",
-      "location": "[variables('location')]",
-      "properties": {}
-    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "CreatingManagedIdentity",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]"
-      ],
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -124,12 +91,12 @@
               "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
               "name": "[variables('managedIdentityName')]",
               "apiVersion": "2018-11-30",
-              "location": "[variables('location')]"
+              "location": "[resourceGroup().location]"
             }
           ]
         }
       },
-      "resourceGroup": "[parameters('resourceGroupName')]"
+      "resourceGroup": "[variables('resourceGroupName')]"
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -170,17 +137,13 @@
           ]
         }
       },
-      "resourceGroup": "[parameters('resourceGroupName')]"
+      "resourceGroup": "[variables('resourceGroupName')]"
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "ResourcesDeployment",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]",
-        "CreatingRoleAssignments",
-        "CreatingManagedIdentity"
-      ],
+      "dependsOn": ["CreatingRoleAssignments", "CreatingManagedIdentity"],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
@@ -188,7 +151,7 @@
         },
         "parameters": {
           "resourceGroupName": {
-            "value": "[parameters('resourceGroupName')]"
+            "value": "[variables('resourceGroupName')]"
           },
           "videoCaptureModule": {
             "value": "[parameters('videoCaptureModule')]"
@@ -206,7 +169,7 @@
             "value": "[parameters('iotHubName')]"
           },
           "resourceGroupLocation": {
-            "value": "[variables('location')]"
+            "value": "[resourceGroup().location]"
           },
           "deviceArchitecture": {
             "value": "[parameters('deviceArchitecture')]"
@@ -215,13 +178,13 @@
             "value": "[parameters('moduleRuntime')]"
           },
           "containerRegistryName": {
-            "value": "[parameters('containerRegistryName')]"
+            "value": "[variables('containerRegistryName')]"
           },
           "containerRegistryUserName": {
-            "value": "[parameters('containerRegistryUserName')]"
+            "value": "[variables('containerRegistryUserName')]"
           },
           "containerRegistryPassword": {
-            "value": "[parameters('containerRegistryPassword')]"
+            "value": "[variables('containerRegistryPassword')]"
           },
           "managedIdentityResourceGroup": {
             "value": "[variables('managedIdentityResourceGroup')]"
@@ -389,7 +352,7 @@
           ]
         }
       },
-      "resourceGroup": "[parameters('resourceGroupName')]"
+      "resourceGroup": "[variables('resourceGroupName')]"
     }
   ]
 }

@@ -184,7 +184,7 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
   );
 
   useEffect(() => {
-    dispatch(getImages());
+    dispatch(getImages({ freezeRelabelImgs: false }));
     // Image list items need part info
     dispatch(getParts());
   }, [dispatch]);

@@ -21,8 +21,11 @@ import {
   Checkbox,
   MessageBar,
   MessageBarType,
+  getTheme,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import Axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import {
@@ -45,6 +48,8 @@ type SettingPanelProps = {
   showProjectDropdown: boolean;
   openDataPolicyDialog: boolean;
 };
+
+const { palette } = getTheme();
 
 const textFieldClass = mergeStyles({
   width: 500,
@@ -82,6 +87,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
   const error = useSelector((state: State) => state.setting.error);
 
+  const location = useLocation();
   const dispatch = useDispatch();
 
   const onSave = async () => {
@@ -99,7 +105,14 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const onLoad = async () => {
     setloading(true);
     await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
+
+    if (location.pathname === '/home/deployment') {
+      window.location.reload();
+      return;
+    }
+
     setloading(false);
+    onDismiss();
   };
 
   const onLoadFullImgChange = (_, checked: boolean) => {
@@ -123,6 +136,20 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     if (showProjectDropdown) dispatch(thunkGetAllCvProjects());
   }, [dispatch, showProjectDropdown]);
 
+  const [gitSha1, setgitSha1] = useState('');
+
+  useEffect(() => {
+    // Could only get the file in production build
+    if (process.env.NODE_ENV === 'production') {
+      Axios.get('/static/git_sha1.txt')
+        .then((res) => {
+          setgitSha1(res.data);
+          return void 0;
+        })
+        .catch(alert);
+    }
+  }, []);
+
   return (
     <>
       {isOpen && <LayerHost id={MAIN_LAYER_HOST_ID} className={layerHostClass} />}
@@ -136,6 +163,12 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
         layerProps={{
           hostId: MAIN_LAYER_HOST_ID,
         }}
+        isFooterAtBottom
+        onRenderFooterContent={() => (
+          <Text variant="small" styles={{ root: { color: palette.neutralTertiary } }}>
+            Version: {gitSha1}
+          </Text>
+        )}
       >
         <Stack tokens={{ childrenGap: 17 }}>
           <h4>Azure Cognitive Services settings</h4>
@@ -196,15 +229,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                 onCancel={() => setloadImgWarning(false)}
               />
               <Stack horizontal tokens={{ childrenGap: 10 }}>
-                <WarningDialog
-                  contentText={
-                    <Text variant="large">
-                      Load Project will remove all the objects, sure you want to do that?
-                    </Text>
-                  }
-                  trigger={<PrimaryButton text="Load" disabled={loading} />}
-                  onConfirm={onLoad}
-                />
+                <PrimaryButton text="Load" disabled={loading} onClick={onLoad} />
                 {loading && <Spinner label="loading" />}
               </Stack>
             </>

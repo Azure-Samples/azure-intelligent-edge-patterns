@@ -1,11 +1,12 @@
+# syntax = docker/dockerfile:experimental
 # =========================================================
 # Base
 # =========================================================
-ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.3
+ARG BASE_IMAGE=nvcr.io/nvidia/cuda-arm64:11.1-devel-ubuntu18.04
 FROM ${BASE_IMAGE} as base
 
 WORKDIR /app
-ENV LANG en_US.UTF-8
+ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ARG SYSTEM_CORES=4
 
@@ -14,23 +15,26 @@ ARG SYSTEM_CORES=4
 # =========================================================
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential \
-    cmake \
-    git \
-    wget \
-    unzip \
-    yasm \
-    pkg-config \
-    libtbb2 \
-    libtbb-dev \
-    libpq-dev \
-    libprotobuf-dev \
-    protobuf-compiler \
-    libgeos-dev \
-    ca-certificates \
-    bzip2 \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+        build-essential \
+        cmake \
+        git \
+        wget \
+        unzip \
+        yasm \
+        pkg-config \
+        libtbb2 \
+        libtbb-dev \
+        libpq-dev \
+        libprotobuf-dev \
+        protobuf-compiler \
+        libgeos-dev \
+        ca-certificates \
+        bzip2 \
+        unzip \
+        curl \
+        libcurl4-openssl-dev \
+        libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
 # protobuf-compiler:   https://github.com/onnx/onnx#build-onnx-on-arm-64
 # libprotobuf-dev:     https://github.com/onnx/onnx#build-onnx-on-arm-64
 # libgeos-dev:         Shapely
@@ -39,10 +43,8 @@ RUN apt-get update && \
 # Install Python package
 # =========================================================
 WORKDIR /code/
-
 ARG MINIFORGE_VERSION=4.8.2-1
 ENV CONDA_DIR=/opt/conda
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH=${CONDA_DIR}/bin:${PATH}
 
 RUN wget --no-hsts \
@@ -58,37 +60,62 @@ RUN wget --no-hsts \
     find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
     conda clean -afy
 
-RUN conda create --name python38 python=3.8
-RUN echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> /etc/skel/.bashrc
-RUN echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> ~/.bashrc
-SHELL ["conda", "run", "-n", "python38", "/bin/bash", "-c"]
+RUN conda create --name python38 python=3.8 && \
+    echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> /etc/skel/.bashrc && \
+    echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> ~/.bashrc
+SHELL ["/bin/bash", "-c"]
 
 # =========================================================
 # Install Python package
 # =========================================================
 WORKDIR /app
-
-RUN pip install --upgrade pip
-RUN pip install wheel cython protobuf
 COPY requirements/base.txt ./requirements/base.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    cp /usr/bin/make /usr/bin/make.bak && \
+    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
+    pip install --upgrade pip && \
+    pip install wheel cython protobuf
 # Workaround scikit image requires numpy while dependency is not resolved
-RUN pip install $(cat ./requirements/base.txt | grep numpy)
-RUN pip install -r requirements/base.txt
+RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install $(cat ./requirements/base.txt | grep numpy)
+RUN mv /usr/bin/make.bak /usr/bin/make
+RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install -r requirements/base.txt
 
 # =========================================================
 # Install onnxruntime
 # =========================================================
 ARG ONNXRUNTIME_REPO="https://github.com/Microsoft/onnxruntime"
 ARG ONNXRUNTIME_SERVER_BRANCH="rel-1.5.2"
+ARG CMAKE_VERSION="3.14.3"
+ARG CMAKE_TAR_LINK="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
 
 WORKDIR /code
 
+RUN wget --no-hsts \
+	    --quiet \
+	    "${CMAKE_TAR_LINK}" &&\
+    tar zxf "cmake-${CMAKE_VERSION}.tar.gz" &&\
+    rm "cmake-${CMAKE_VERSION}.tar.gz"
+
+RUN cd /code/cmake-${CMAKE_VERSION} && \
+    ./configure --system-curl --parallel=${SYSTEM_CORES} && \
+    make -j${SYSTEM_CORES} && \
+    make install && \
+    cd /code && \
+    rm -rf /code/cmake-${CMAKE_VERSION}
+
+WORKDIR /code
+
+RUN apt-get update && \
+    apt-get install -y \
+    libcudnn8=8.0.5.39-1+cuda11.1 \
+    libcudnn8-dev=8.0.5.39-1+cuda11.1 \
+    && rm -rf /var/lib/apt/lists/*
 RUN git clone \
         --single-branch \
         --branch ${ONNXRUNTIME_SERVER_BRANCH} \
         --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
-    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh && \
     cd onnxruntime && \
+    source activate python38 && \
     /bin/sh ./build.sh \
         --use_openmp \
         --config Release \
@@ -104,49 +131,26 @@ RUN git clone \
     cd .. && \
     rm -rf onnxruntime
 
-RUN python -c "import onnxruntime; print(onnxruntime.__version__)"
-
 # =========================================================
 # Install opencv
 # =========================================================
-ARG OPENCV_REPO="https://github.com/opencv/opencv.git"
-ARG OPENCV_TAG="4.4.0"
+WORKDIR /app
+COPY requirements/gpuarm64v8.txt ./requirements/gpuarm64v8.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    cp /usr/bin/make /usr/bin/make.bak && \
+    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
+    source activate python38 && pip install -r requirements/gpuarm64v8.txt && \
+    mv /usr/bin/make.bak /usr/bin/make
 
-WORKDIR /code
-
-RUN apt-get update && \
-    apt-get install -y\
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
-    libgstreamer-plugins-base1.0-dev \
-    libgstreamer1.0-dev \
-    libgtk-3-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libopenexr-dev \
-    libtiff-dev \
-    libwebp-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN git clone --single-branch \
-        --branch ${OPENCV_TAG} \
-        --recursive ${OPENCV_REPO} \
-        opencv && \
-    cd opencv && \
-    mkdir build && \
-    cd build && \
-    cmake ../ && \
-    make -j${SYSTEM_CORES} && \
-    make install && \
-    cd /code && \
-    rm -rf opencv
-
-RUN ["python","-c", "\"import cv2;print(cv2.__version__)\""]
+# =========================================================
+# Shapely Work arount
+# =========================================================
+RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
 
 # =========================================================
 # Copy Source Code
 # =========================================================
+WORKDIR /app
 COPY coco_classes.txt ./
 COPY default_model default_model/
 COPY default_model_6parts default_model_6parts/

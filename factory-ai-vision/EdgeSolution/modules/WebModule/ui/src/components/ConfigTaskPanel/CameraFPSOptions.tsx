@@ -1,5 +1,7 @@
 import { Toggle, TextField } from '@fluentui/react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import * as R from 'ramda';
+
 import { ProjectData } from '../../store/project/projectTypes';
 import { OptionLayout } from './OptionLayout';
 import { OnChangeType } from './type';
@@ -14,6 +16,28 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
   recomendedFps,
   onChange,
 }) => {
+  const fpsErrorMsg = useMemo(() => {
+    if (setFpsManually) {
+      if (R.isEmpty(fps)) return `Need to enter number.`;
+      if (+fps < 0.1) return `FPS cannot be less than 0.1.`;
+      if (!Number(fps)) return `Only number format.`;
+      if (parseFloat(fps) > recomendedFps)
+        return `The recommended value for FPS is '
+        ${recomendedFps.toFixed(1).toString()}
+      ', higher than the recommended value will affect the performance.`;
+    }
+
+    return '';
+  }, [setFpsManually, fps, recomendedFps]);
+
+  const localFPS = useMemo(() => {
+    const originalFPS = setFpsManually ? fps : recomendedFps;
+
+    if (Number.isInteger(originalFPS)) return (+originalFPS).toFixed(1).toString();
+
+    return originalFPS.toString() || '';
+  }, [setFpsManually, fps, recomendedFps]);
+
   return (
     <OptionLayout
       title="Camera FPS"
@@ -28,16 +52,13 @@ export const CameraFPSOptions: React.FC<CameraFPSOptionsProps> = ({
         }}
       />
       <TextField
-        value={(setFpsManually ? fps : recomendedFps)?.toString() || ''}
+        value={localFPS}
         onChange={(_, val) => {
-          onChange('fps', val);
+          const newVa = val.replace(/(\d+)(\.\d)(\d*)/, '$1$2');
+          onChange('fps', newVa);
         }}
         disabled={!setFpsManually}
-        errorMessage={
-          parseFloat(fps) > recomendedFps && setFpsManually
-            ? `The recommended value for FPS is '${recomendedFps}', higher than the recommended value will affect the performance.`
-            : ''
-        }
+        errorMessage={fpsErrorMsg}
         styles={{ errorMessage: { maxWidth: '200px' } }}
         suffix="FPS"
       />

@@ -6,6 +6,7 @@ import Axios from 'axios';
 import { ExpandPanel } from '../ExpandPanel';
 import { useInterval } from '../../hooks/useInterval';
 import { Status } from '../../store/project/projectTypes';
+import { getErrorLog } from '../../store/shared/createWrappedAsync';
 
 const { palette } = getTheme();
 
@@ -52,7 +53,7 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
           });
           return void 0;
         })
-        .catch(alert);
+        .catch((e) => alert(getErrorLog(e)));
     },
     status === Status.StartInference ? 5000 : null,
   );

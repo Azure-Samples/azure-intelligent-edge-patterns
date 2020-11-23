@@ -22,8 +22,11 @@ import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../..
 import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
-import { AdvancedOptions } from './AdvancedOptions';
 import { OnChangeType } from './type';
+
+import { extractRecommendFps } from '../../utils/extractRecommendFps';
+
+import { AdvancedOptions } from './AdvancedOptions';
 
 const sendTrainInfoToAppInsight = async (selectedParts: ProjectData['parts']): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
@@ -58,6 +61,7 @@ const panelStyles = {
 
 const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChangeType] => {
   const [projectData, setProjectData] = useState(initialProjectData);
+
   useEffect(() => {
     setProjectData(initialProjectData);
   }, [initialProjectData]);
@@ -79,8 +83,10 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
         else cloneProject.inferenceMode = InferenceMode.PartDetection;
       } else if (key === 'cameras') {
         cloneProject.SVTCcameras = cloneProject.SVTCcameras.filter((e) => cloneProject.cameras.includes(e));
-        cloneProject.recomendedFps = Math.floor(
-          cloneProject.totalRecomendedFps / (cloneProject.cameras.length || 1),
+
+        cloneProject.recomendedFps = extractRecommendFps(
+          cloneProject.totalRecomendedFps,
+          cloneProject.cameras.length || 1,
         );
       } else if (key === 'parts') {
         cloneProject.SVTCparts = cloneProject.SVTCparts.filter((e) => cloneProject.parts.includes(e));
@@ -153,11 +159,13 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
 
     setdeploying(true);
     const projectId = await dispatch(thunkPostProject(projectData));
-    await dispatch(getConfigure((projectId as unknown) as number));
-    setdeploying(false);
+    if (typeof projectId === 'number') {
+      await dispatch(getConfigure((projectId as unknown) as number));
 
-    onDismiss();
-    history.push('/home/deployment');
+      onDismiss();
+      history.push('/home/deployment');
+    }
+    setdeploying(false);
   };
 
   const onRenderFooterContent = () => {
