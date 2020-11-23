@@ -152,9 +152,8 @@ class PartCounter(Scenario):
                             print("*** (x, y)", xc, yc, flush=True)
                             self.counter[line.id] += 1
                             counted.append(self.detected[oid])
-                        else:
-                            self.detected[oid]["xc"] = xc
-                            self.detected[oid]["yc"] = yc
+                self.detected[oid]["xc"] = xc
+                self.detected[oid]["yc"] = yc
             else:
                 self.detected[oid] = {"xc": xc, "yc": yc, "expired": {}}
 

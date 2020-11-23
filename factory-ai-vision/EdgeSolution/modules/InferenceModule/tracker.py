@@ -35,18 +35,22 @@ class Line():
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        if y1 == y2:
-            self.m = 99999999
-            self.b = y1
+        if x1 == x2:
+            self.is_vertical = True
+            self.x = x1
         else:
-            self.m = (x1 - y1) / (x2 - y2)
+            self.is_vertical = False
+            self.m = (y1-y2) / (x1-x2)
             self.b = y1 - self.m * x1
 
     def __str__(self):
         return 'Line: (%d,%d) -> (%d,%d), m: %s, b: %s' % (self.x1, self.y1, self.x2, self.y2, self.m, self.b)
 
     def compute_side(self, x, y):
-        return self.m * x + self.b - y
+        if self.is_vertical:
+            return self.x - x
+        else:
+            return self.m * x + self.b - y
 
     def is_same_side(self, x1, y1, x2, y2):
         return 0.000000001 < (self.compute_side(x1, y1) * self.compute_side(x2, y2))
