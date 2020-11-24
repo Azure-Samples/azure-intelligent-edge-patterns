@@ -186,6 +186,8 @@ const Component: React.FC<LiveViewProps> = ({
     return videoAnnos.filter(isDangerZone);
   }, [videoAnnos]);
 
+  console.log('countingLines', countingLines);
+
   return (
     <div
       ref={divRef}
