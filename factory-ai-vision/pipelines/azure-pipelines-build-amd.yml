@@ -18,8 +18,9 @@ steps:
     displayName: "Azure IoT Edge - Build module images"
   - task: AzureIoTEdge@2
     inputs:
-      action: "Push module images"
-      containerregistrytype: "Generic Container Registry"
-      templateFilePath: "./factory-ai-vision/EdgeSolution/deployment.build.amd.template.json"
-      defaultPlatform: "amd64"
-      fillRegistryCredential: "false"
+      action: 'Push module images'
+      containerregistrytype: 'Generic Container Registry'
+      dockerRegistryConnection: 'intelligentedge'
+      templateFilePath: './factory-ai-vision/EdgeSolution/deployment.build.amd.template.json'
+      defaultPlatform: 'amd64'
+      fillRegistryCredential: 'false'
