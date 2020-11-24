@@ -44,6 +44,13 @@ class Project(models.Model):
     download_uri_fp16 = models.CharField(
         max_length=1000, null=True, blank=True, default=""
     )
+    is_prediction_module = models.BooleanField(default=False)
+    prediction_uri = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
+    prediction_header = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
     training_counter = models.IntegerField(default=0)
     is_demo = models.BooleanField(default=False)
 
