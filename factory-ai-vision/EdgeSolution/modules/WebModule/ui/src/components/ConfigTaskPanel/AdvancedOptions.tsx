@@ -32,7 +32,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   const inferenceSource = useSelector((state: State) => state.project.data.inferenceSource);
 
   return (
-    <Stack tokens={{ childrenGap: 30 }} wrap styles={{ root: { paddingTop: '30px' } }}>
+    <Stack tokens={{ childrenGap: 30 }} wrap styles={{ root: { paddingTop: '20px' } }}>
       <CloudMsgOption
         sendMessageToCloud={projectData.sendMessageToCloud}
         framesPerMin={projectData.framesPerMin}
