@@ -8,8 +8,10 @@ import subprocess
 from os import listdir
 
 from semantic_version import Version
+from utils_file import FileContext
 
 logger = logging.getLogger(__name__)
+
 
 def is_module_dir(path):
     if not os.path.isdir(path):
@@ -27,17 +29,17 @@ class Module:
         if not is_module_dir(path):
             raise ValueError("%s is not a module" % path)
         self.path = path
-    
+
     @property
     def name(self):
         return self.path.split("/")[-1]
 
     def __str__(self):
         return self.name.__str__()
-    
+
     def __repr__(self):
         return self.name.__repr__()
-        
+
     @property
     def module_path(self):
         return self.path + "/module.json"
@@ -51,13 +53,13 @@ class Module:
     def version(self):
         return Version(self.module["image"]["tag"]["version"])
 
-    @version.setter    
+    @version.setter
     def version(self, version):
         module = self.module
         module["image"]["tag"]["version"] = str(version)
         with open(self.module_path, "w") as outfile:
             json.dump(module, outfile, indent=2)
-    
+
     def next_patch(self):
         self.version = self.version.next_patch()
 
@@ -66,6 +68,7 @@ class Module:
 
     def next_major(self):
         self.version = self.version.next_major()
+
 
 def get_modules(path, with_path: bool = False):
     module_candidates = listdir(path)
@@ -78,6 +81,12 @@ def get_modules(path, with_path: bool = False):
 
 
 if __name__ == "__main__":
-    module = Module(path="/home/ubuntu/code/azure-intelligent-edge-patterns/factory-ai-vision/EdgeSolution/modules/WebModule")
-    print(module.version)
-    print(get_modules("/home/ubuntu/code/azure-intelligent-edge-patterns/factory-ai-vision/EdgeSolution/modules/"))
+    fc = FileContext(__file__)
+    module = Module(
+        path=fc.git_root + "/factory-ai-vision/EdgeSolution/modules/WebModule"
+    )
+    print("WebModule Version:", module.version)
+    print(
+        "All modules found:",
+        get_modules(fc.git_root + "/factory-ai-vision/EdgeSolution/modules/"),
+    )
