@@ -1,0 +1,70 @@
+
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "intelcustomvision": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_NAME"
+              }
+            }
+          }
+        },
+        "systemModules": {},
+        "modules": {
+          "NginxModule": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.NginxModule.arm64v8}"
+            }
+          },
+          "WebModule": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.WebModule.arm64v8}"
+            }
+          },
+          "InferenceModuleCPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.InferenceModule.cpuarm64v8}"
+            }
+          },
+          "InferenceModuleGPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.InferenceModule.gpuarm64v8}"
+            }
+          },
+          "InferenceModuleJetson": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.InferenceModule.jetson}"
+            }
+          },
+          "rtspsim": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.RtspSimModule.arm64v8}"
+            }
+          },
+          "UploadModule": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.UploadModule.arm64v8}"
+            }
+          }
+        }
+      }
+    }
+  }
+}

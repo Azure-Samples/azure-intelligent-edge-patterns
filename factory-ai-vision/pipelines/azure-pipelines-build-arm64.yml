@@ -1,0 +1,23 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - none
+
+pool: arm64
+
+steps:
+  - task: AzureIoTEdge@2
+    inputs:
+      action: "Build module images"
+      templateFilePath: "./factory-ai-vision/EdgeSolution/deployment.build.arm64v8.template.json"
+    displayName: "Azure IoT Edge - Build module images"
+  - task: AzureIoTEdge@2
+    inputs:
+      action: "Push module images"
+      containerregistrytype: "Generic Container Registry"
+      dockerRegistryConnection: "intelligentedge"
+      templateFilePath: "./factory-ai-vision/EdgeSolution/deployment.build.arm64v8.template.json"
+      fillRegistryCredential: "false"
