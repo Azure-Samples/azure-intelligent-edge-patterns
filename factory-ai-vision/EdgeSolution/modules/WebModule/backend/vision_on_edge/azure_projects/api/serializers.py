@@ -3,6 +3,7 @@
 
 import logging
 
+from drf_extra_fields.fields import Base64FileField
 from rest_framework import serializers
 
 from ...azure_parts.models import Part
@@ -11,12 +12,29 @@ from ..models import Project, Task
 logger = logging.getLogger(__name__)
 
 
+class LabelTxtBase64File(Base64FileField):
+    ALLOWED_TYPES = ["txt"]
+
+    class Meta:
+        swagger_schema_fields = {
+            "type": "string",
+            "title": "Label txt (base64)",
+            "description": "Label txt base64 encoded content",
+            "read_only": False,
+            "write_only": True,
+        }
+
+    def get_file_extension(self, filename, decoded_file):
+        return "txt"
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     """Project Serializer"""
 
-    labels = serializers.FileField(write_only=True, required=False)
+    labels = LabelTxtBase64File(write_only=True, required=False)
 
     def validate(self, value):
+        """validate"""
         if "labels" in value:
             if "is_prediction_module" not in value or not value["is_prediction_module"]:
                 raise serializers.ValidationError(
@@ -36,6 +54,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             validated_data["is_prediction_module"] = True
             validated_data["is_demo"] = False
         project = Project.objects.create(**validated_data)
+
         if labels:
             label = labels.readline().decode().replace("\n", "").replace("\r", "")
             while label:
@@ -43,14 +62,13 @@ class ProjectSerializer(serializers.ModelSerializer):
                 label = labels.readline().decode().replace("\n", "").replace("\r", "")
         return project
 
-        project = project.objects.create(**validated_data)
-
     class Meta:
         model = Project
         fields = "__all__"
         extra_kwargs = {
             "download_uri": {"required": False},
             "customvision_id": {"required": False},
+            "labels": {"write_only": True},
         }
 
 
