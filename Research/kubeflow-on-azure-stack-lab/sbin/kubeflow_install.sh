@@ -10,16 +10,21 @@ export KF_CTL_DIR=~/kubeflow/
 export KF_NAME=sandboxASkf
 export KF_USERNAME=azureuser
 
-export KFCTL_RELEASE_FILENAME=kfctl_v1.1.0-0-g9a3621e_linux.tar.gz
-export KFCTL_RELEASE_URI="https://github.com/kubeflow/kfctl/releases/download/v1.1.0/${KFCTL_RELEASE_FILENAME}"
 #export KFCTL_RELEASE_FILENAME=kfctl_v1.0.2-0-ga476281_linux.tar.gz
 #export KFCTL_RELEASE_URI="https://github.com/kubeflow/kfctl/releases/download/v1.0.2/${KFCTL_RELEASE_FILENAME}"
+#export KFCTL_RELEASE_FILENAME=kfctl_v1.1.0-0-g9a3621e_linux.tar.gz
+#export KFCTL_RELEASE_URI="https://github.com/kubeflow/kfctl/releases/download/v1.1.0/${KFCTL_RELEASE_FILENAME}"
+export KFCTL_RELEASE_FILENAME=kfctl_v1.2-rc.2-0-g1316754_linux.tar.gz
+export KFCTL_RELEASE_URI="https://github.com/kubeflow/kfctl/releases/download/v1.2-rc.2/${KFCTL_RELEASE_FILENAME}"
 
 export KF_DIR_BASE=/opt
 
-export KF_CONFIG_FILENAME="kfctl_k8s_istio.v1.1.0.yaml"
-#export KF_CONFIG_FILENAME="kfctl_k8s_istio.v1.0.2.yaml"
-export KF_CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.1-branch/kfdef/${KF_CONFIG_FILENAME}"
+#export KF_CONFIG_FILENAME="kfctl_k8s_istio.v1.1.0.yaml"
+##export KF_CONFIG_FILENAME="kfctl_k8s_istio.v1.0.2.yaml"
+#export KF_CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.1-branch/kfdef/${KF_CONFIG_FILENAME}"
+export KF_CONFIG_FILENAME="kfctl_k8s_istio.v1.2.0.yaml"
+export KF_CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/${KF_CONFIG_FILENAME}"
+
 
 export DO_UNATTENDED=0
 
