@@ -37,6 +37,10 @@ class UploadModelBody(BaseModel):
     model_dir: str = None
 
 
+class UpdateEndpointBody(BaseModel):
+    endpoint: str = None
+
+
 class CameraModel(BaseModel):
     id: str
     name: str

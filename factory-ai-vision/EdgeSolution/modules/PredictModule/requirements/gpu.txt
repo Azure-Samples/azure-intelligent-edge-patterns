@@ -1,0 +1,3 @@
+-r ./base.txt
+opencv-python==4.4.0.44
+onnxruntime-gpu

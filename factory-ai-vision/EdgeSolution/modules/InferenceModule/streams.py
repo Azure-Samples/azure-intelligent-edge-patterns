@@ -458,7 +458,11 @@ class Stream:
 
         # prediction
         # self.mutex.acquire()
-        predictions, inf_time = self.model.Score(image)
+        # predictions, inf_time = self.model.Score(image)
+        data = image.tobytes()
+        res = requests.post(self.model.endpoint, data=data)
+        predictions = json.loads(res.json()[0])['predictions']
+        inf_time = json.loads(res.json()[0])['inf_time']
         # print('predictions', predictions, flush=True)
         # self.mutex.release()
 
@@ -659,6 +663,13 @@ class Stream:
                 time.sleep(1/self.frameRate)
             else:
                 time.sleep(0.04)
+
+
+def predict_module_url():
+    if is_edge():
+        return "PredictModule:7777"
+    else:
+        return "localhost:7777"
 
 
 def web_module_url():
