@@ -79,11 +79,13 @@ async def predict(request: Request):
     img = nparr.reshape(-1, 960, 3)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     predictions, inf_time = onnx.Score(img)
+    results = customvision_to_lva_format(predictions)
     # if int(time.time()) % 5 == 0:
     #     logger.info(predictions)
 
-    return json.dumps({"predictions": predictions, "inf_time": inf_time}), 200
-    return "", 204
+    return json.dumps({"inferences": results, "inf_time": inf_time}), 200
+    # return json.dumps({"predictions": predictions, "inf_time": inf_time}), 200
+    # return "", 204
 
 
 @app.post("/update_model")
@@ -131,6 +133,50 @@ def update_model(request_body: UploadModelBody):
         onnx.update_model(request_body.model_dir)
         logger.info("Update Finished ...")
         return "ok"
+
+
+def customvision_to_lva_format(predictions):
+    results = []
+    for prediction in predictions:
+        tag_name = prediction["tagName"]
+        confidence = prediction["probability"]
+        box = {
+            "l": prediction["boundingBox"]["left"],
+            "t": prediction["boundingBox"]["top"],
+            "w": prediction["boundingBox"]["width"],
+            "h": prediction["boundingBox"]["height"],
+        }
+        results.append(
+            {
+                "type": "entity",
+                "entity": {
+                    "tag": {"value": tag_name, "confidence": confidence},
+                    "box": box,
+                },
+            }
+        )
+    return(results)
+
+
+def lva_to_customvision_format(predictions):
+    results = []
+    for prediction in predictions:
+        tagName = prediction['entity']['tag']['value']
+        probability = prediction['entity']['tag']['confidence']
+        boundingBox = {
+            "left": prediction['entity']['box']['l'],
+            "top": prediction['entity']['box']['t'],
+            "width": prediction['entity']['box']['w'],
+            "hetght": prediction['entity']['box']['h'],
+        }
+        results.append(
+            {
+                "tagName": tagName,
+                "probability": probability,
+                "boundingBox": boundingBox,
+            }
+        )
+    return(results)
 
 
 def local_main():

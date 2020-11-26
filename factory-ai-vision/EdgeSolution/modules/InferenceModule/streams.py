@@ -9,6 +9,7 @@ import time
 import cv2
 import numpy as np
 import requests
+from io import BytesIO, BufferedReader
 from azure.iot.device import IoTHubModuleClient, Message
 from shapely.geometry import Polygon
 
@@ -84,6 +85,7 @@ class Stream:
         # self.last_edge_img = None
         self.last_drawn_img = None
         self.last_prediction = []
+        self.last_prediction_lva = []
         self.last_prediction_count = {}
 
         self.is_retrain = False
@@ -454,15 +456,27 @@ class Stream:
             ratio = self.IMG_HEIGHT / image.shape[0]
             width = int(image.shape[1] * ratio + 0.000001)
 
-        image = cv2.resize(image, (width, height))
-
         # prediction
         # self.mutex.acquire()
         # predictions, inf_time = self.model.Score(image)
-        data = image.tobytes()
-        res = requests.post(self.model.endpoint, data=data)
-        predictions = json.loads(res.json()[0])['predictions']
-        inf_time = json.loads(res.json()[0])['inf_time']
+        if 'Module' in self.model.endpoint:
+            image = cv2.resize(image, (width, height))
+            data = image.tobytes()
+            res = requests.post(self.model.endpoint, data=data)
+            lva_prediction = json.loads(res.json()[0])['inferences']
+            inf_time = json.loads(res.json()[0])['inf_time']
+            predictions = lva_to_customvision_format(lva_prediction)
+        else:
+            image = cv2.resize(image, (416, 416))   # for yolo enpoint testing
+            str_encode = cv2.imencode('.jpg', image)[1].tostring()
+            f4 = BytesIO(str_encode)
+            f5 = BufferedReader(f4)
+            s = time.time()
+            res = requests.post(self.model.endpoint, data=f5)
+            inf_time = time.time() - s
+            logger.warning('request prediction time: {}'.format(inf_time))
+            lva_prediction = res.json()['inferences']
+            predictions = lva_to_customvision_format(lva_prediction)
         # print('predictions', predictions, flush=True)
         # self.mutex.release()
 
@@ -806,3 +820,24 @@ def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
         )
     except:
         print("[ERROR] Failed to update image for relabeling", flush=True)
+
+
+def lva_to_customvision_format(predictions):
+    results = []
+    for prediction in predictions:
+        tagName = prediction['entity']['tag']['value']
+        probability = prediction['entity']['tag']['confidence']
+        boundingBox = {
+            "left": prediction['entity']['box']['l'],
+            "top": prediction['entity']['box']['t'],
+            "width": prediction['entity']['box']['w'],
+            "height": prediction['entity']['box']['h'],
+        }
+        results.append(
+            {
+                "tagName": tagName,
+                "probability": probability,
+                "boundingBox": boundingBox,
+            }
+        )
+    return(results)
