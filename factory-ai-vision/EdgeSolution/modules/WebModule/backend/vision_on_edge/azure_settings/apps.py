@@ -9,9 +9,9 @@ from django.apps import AppConfig
 from configs.customvision_config import ENDPOINT, TRAINING_KEY
 from configs.iot_config import DEVICE_ID, IOT_HUB_CONNECTION_STRING, MODULE_ID
 
-logger = logging.getLogger(__name__)
+from .constants import DEFAULT_SETTING_NAME
 
-DEFAULT_SETTING_NAME = "DEFAULT_SETTING"
+logger = logging.getLogger(__name__)
 
 
 class AzureSettingsConfig(AppConfig):

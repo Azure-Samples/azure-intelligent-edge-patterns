@@ -261,6 +261,14 @@ def train_project_worker(project_id):
             **progress.PROGRESS_0_OK,
         )
         return
+    if project_obj.is_prediction_module:
+        logger.info("Prediction Module need no train.")
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress.PROGRESS_0_OK,
+        )
+        return
 
     # =====================================================
     # 1. Prepare Custom Vision Client                   ===

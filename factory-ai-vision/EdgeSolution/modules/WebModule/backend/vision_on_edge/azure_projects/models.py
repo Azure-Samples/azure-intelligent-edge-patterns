@@ -134,8 +134,8 @@ class Project(models.Model):
             return
 
         # Don't change demo project
-        if instance.is_demo and instance.id:
-            raise ProjectCannotChangeDemoError
+        # if instance.is_demo and instance.id:
+        #    raise ProjectCannotChangeDemoError
 
         # Set default name
         instance.name = (
@@ -276,6 +276,8 @@ class Project(models.Model):
         """
         try:
             if self.is_demo:
+                return True
+            if self.is_prediction_module:
                 return True
             return self.is_trainable(raise_exception=True)
         except APIException:
