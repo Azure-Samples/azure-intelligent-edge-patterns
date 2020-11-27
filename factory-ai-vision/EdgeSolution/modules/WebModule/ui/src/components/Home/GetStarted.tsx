@@ -16,9 +16,9 @@ import { AcceptMediumIcon } from '@fluentui/react-icons';
 import { connect } from 'react-redux';
 
 import { State } from 'RootStateType';
-import { CreateProjectDialog } from './CreateProjectDialog';
-import { selectNonDemoCameras } from '../store/cameraSlice';
-import { selectAllImages } from '../store/imageSlice';
+import { CreateProjectDialog } from '../CreateProjectDialog';
+import { selectNonDemoCameras } from '../../store/cameraSlice';
+import { selectAllImages } from '../../store/imageSlice';
 
 const theme = getTheme();
 
@@ -126,11 +126,19 @@ const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImage
           src="/icons/customize_3.svg"
         />
       </Stack>
+      <Stack horizontalAlign="center" styles={{ root: { paddingTop: 50 } }}>
+        <Text className={cardStyleSets.mainSectionContentTxt} styles={{ root: { margin: '4px' } }}>
+          Already have your own Custom Vision module?
+        </Text>
+        <Link className={cardStyleSets.mainSectionContentTxt} to="/models" as={ReactRouterLink}>
+          {'Go to modules >'}
+        </Link>
+      </Stack>
     </Stack>
   );
 };
 
-export const Customize = connect(mapState)(Component);
+export const GetStarted = connect(mapState)(Component);
 
 const GetStartedCard: React.FC<{
   no: number;

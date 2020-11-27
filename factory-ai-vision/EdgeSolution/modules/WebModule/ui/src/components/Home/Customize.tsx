@@ -4,9 +4,9 @@ import { Card } from '@uifabric/react-cards';
 
 import { State } from 'RootStateType';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConfigTaskPanel } from './ConfigTaskPanel/ConfigTaskPanel';
-import { initialProjectData } from '../store/project/projectReducer';
-import { getScenario } from '../store/scenarioSlice';
+import { ConfigTaskPanel } from '../ConfigTaskPanel/ConfigTaskPanel';
+import { initialProjectData } from '../../store/project/projectReducer';
+import { getScenario } from '../../store/scenarioSlice';
 
 const classes = mergeStyleSets({
   gridContainer: {
@@ -44,7 +44,7 @@ const demoProjectsInfo = [
   },
 ];
 
-export const GetStarted: React.FC = () => {
+export const Customize: React.FC = () => {
   const scenario = useSelector((state: State) => state.scenario);
   const recomendedFps = useSelector((state: State) => state.project.data.recomendedFps);
 

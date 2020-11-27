@@ -106,7 +106,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     setloading(true);
     await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
 
-    if (location.pathname === '/home/deployment') {
+    if (location.pathname === '/deployment') {
       window.location.reload();
       return;
     }
