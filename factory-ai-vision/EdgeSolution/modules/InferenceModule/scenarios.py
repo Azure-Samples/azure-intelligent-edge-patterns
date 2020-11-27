@@ -420,7 +420,7 @@ class DangerZone(Scenario):
             max_age=max_age, min_hits=min_hits, iou_threshold=iou_threshold
         )
         self.detected = {}
-        self.counter = 0
+        self.counter = {}
         self.zones = []
         self.targets = []
         self.threshold = threshold
@@ -430,7 +430,9 @@ class DangerZone(Scenario):
         self.threshold = threshold
 
     def reset_metrics(self):
-        self.counter = 0
+        # self.counter = 0
+        for i in self.counter:
+            self.counter[i] = 0
 
     def set_targets(self, targets):
         self.targets = targets
@@ -441,8 +443,11 @@ class DangerZone(Scenario):
     def set_zones(self, zones):
         self.zones = []
         for zone in zones:
-            x1, y1, x2, y2 = zone
-            self.zones.append(Rect(x1, y1, x2, y2))
+            x1, y1, x2, y2, zone_id = zone
+            _zone = Rect(x1, y1, x2, y2)
+            _zone.id = zone_id
+            self.counter[_zone.id] = 0
+            self.zones.append(_zone)
 
     def is_inside_zones(self, x1, y1, x2, y2):
         for zone in self.zones:
@@ -465,25 +470,27 @@ class DangerZone(Scenario):
         for obj in objs:
             x1, y1, x2, y2, oid = obj
             if oid in self.detected:
-                if self.detected[oid]["expired"] is False:
-                    if self.is_inside_zones(x1, y1, x2, y2):
-                        self.detected[oid]["expired"] = True
-                        print("*** new object counted", flush=True)
-                        has_new_event = True
-                        self.counter += 1
-                        # counted.append(self.detected[oid])
-                    else:
-                        self.detected[oid]["x1"] = x1
-                        self.detected[oid]["y1"] = y1
-                        self.detected[oid]["x2"] = x2
-                        self.detected[oid]["y2"] = y2
+                for zone in self.zones:
+                    if zone.id not in self.detected[oid]["expired"].keys():
+                        self.detected[oid]["expired"][zone.id] = False
+                    if self.detected[oid]["expired"][zone.id] is False:
+                        if zone.is_inside(x1, y1, x2, y2):
+                            self.detected[oid]["expired"][zone.id] = True
+                            print("*** new object counted", flush=True)
+                            has_new_event = True
+                            self.counter[zone.id] += 1
+                            # counted.append(self.detected[oid])
+                self.detected[oid]["x1"] = x1
+                self.detected[oid]["y1"] = y1
+                self.detected[oid]["x2"] = x2
+                self.detected[oid]["y2"] = y2
             else:
                 self.detected[oid] = {
                     "x1": x1,
                     "y1": y1,
                     "x2": x2,
                     "y2": y2,
-                    "expired": False,
+                    "expired": {},
                 }
         self.has_new_event = has_new_event
 
@@ -493,17 +500,19 @@ class DangerZone(Scenario):
         font = cv2.FONT_HERSHEY_DUPLEX
         font_scale = 0.7
         thickness = 1
-        x = int(max(0, img.shape[1] - 200))
+        x = int(max(0, img.shape[1] - 300))
         y = int(min(30, img.shape[0]))
-        img = cv2.putText(
-            img,
-            "Violations: " + str(self.counter),
-            (x, y),
-            font,
-            font_scale,
-            (255, 255, 255),
-            thickness,
-        )
+        for i in self.counter:
+            img = cv2.putText(
+                img,
+                "Violations(Zone {}): {}".format(i[-2:], str(self.counter[i])),
+                (x, y),
+                font,
+                font_scale,
+                (255, 255, 255),
+                thickness,
+            )
+            y += 25
         return img
 
     def draw_constraint(self, img):

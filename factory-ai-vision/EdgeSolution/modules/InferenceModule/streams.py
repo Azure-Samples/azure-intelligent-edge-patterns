@@ -312,7 +312,8 @@ class Stream:
                     y1 = int(zone["label"]["y1"])
                     x2 = int(zone["label"]["x2"])
                     y2 = int(zone["label"]["y2"])
-                    _zones.append([x1, y1, x2, y2])
+                    zone_id = zone['id']
+                    _zones.append([x1, y1, x2, y2, zone_id])
                     print("     zone:", x1, y1, x2, y2, flush=True)
                 self.scenario.set_zones(_zones)
 

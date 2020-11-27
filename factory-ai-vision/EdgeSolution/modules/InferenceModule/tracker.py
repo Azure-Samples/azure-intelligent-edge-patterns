@@ -78,6 +78,7 @@ def bb_intersection_over_union(boxA, boxB):
 
 class Rect():
     def __init__(self, x1, y1, x2, y2):
+        self.id = None
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
