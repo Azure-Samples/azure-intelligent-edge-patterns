@@ -192,11 +192,13 @@ def update_endpoint(request_body: UpdateEndpointBody):
         return "missing endpoint", 400
 
     endpoint = request_body.endpoint
-    headers = json.loads(request_body.header)
+    if request_body.headers:
+        headers = json.loads(request_body.headers)
+        onnx.headers = headers
+
     if 'http' not in endpoint:
         endpoint = 'http://' + endpoint
     onnx.endpoint = endpoint
-    onnx.headers = headers
     return 'ok', 200
 
 

@@ -39,7 +39,7 @@ class UploadModelBody(BaseModel):
 
 class UpdateEndpointBody(BaseModel):
     endpoint: str = None
-    header: str = None
+    headers: str = None
 
 
 class CameraModel(BaseModel):

@@ -474,9 +474,12 @@ class Stream:
             s = time.time()
             res = requests.post(self.model.endpoint, data=f5)
             inf_time = time.time() - s
+            if res.status_code == 200:
+                lva_prediction = res.json()['inferences']
+                predictions = lva_to_customvision_format(lva_prediction)
+            else:
+                logger.warning('No inference result')
             logger.warning('request prediction time: {}'.format(inf_time))
-            lva_prediction = res.json()['inferences']
-            predictions = lva_to_customvision_format(lva_prediction)
         # print('predictions', predictions, flush=True)
         # self.mutex.release()
 
