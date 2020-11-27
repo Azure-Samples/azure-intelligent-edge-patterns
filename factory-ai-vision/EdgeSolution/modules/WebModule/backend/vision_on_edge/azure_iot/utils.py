@@ -66,5 +66,5 @@ def prediction_module_url() -> str:
     """
 
     if is_edge():
-        return "PredictionModule:7777/predict"
+        return "PredictModule:7777/predict"
     return "localhost:7777/predict"
