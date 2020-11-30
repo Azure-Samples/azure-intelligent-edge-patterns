@@ -1,10 +1,9 @@
 /* eslint react/display-name: "off" */
 
 import React, { useEffect } from 'react';
+import * as R from 'ramda';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-
-import * as R from 'ramda';
 import { DetailsList, CheckboxVisibility } from '@fluentui/react';
 
 import {
@@ -12,6 +11,8 @@ import {
   trainingProjectIsPredictionModelFactory,
   TrainingProject as TrainingProjectType,
 } from '../../store/trainingProjectSlice';
+
+import { Url } from '../../enums';
 
 import { EmptyAddIcon } from '../EmptyAddIcon';
 
@@ -27,7 +28,7 @@ const BaseModel: React.FC<ModelsProps> = ({ trainingProject }) => {
   const history = useHistory();
 
   const onRowClick = (item) => {
-    history.push(`/models/detail?modelId=${item.id}`);
+    history.push(`${Url.MODELS_DETAIL}?modelId=${item.id}`);
   };
 
   return (

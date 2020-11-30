@@ -5,9 +5,12 @@ import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui
 import { createSelector } from '@reduxjs/toolkit';
 
 import { getCameras, Camera, selectNonDemoCameras } from '../store/cameraSlice';
-import { EmptyAddIcon } from './EmptyAddIcon';
 import { selectLocationEntities } from '../store/locationSlice';
+
 import { maskRtsp } from '../utils/maskRTSP';
+import { Url } from '../enums';
+
+import { EmptyAddIcon } from './EmptyAddIcon';
 
 const selectDetailListItems = createSelector(
   [selectNonDemoCameras, selectLocationEntities],
@@ -28,7 +31,7 @@ export const CameraDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAd
   const history = useHistory();
 
   const onRowClick = (item: Camera) => {
-    history.push(`/cameras/detail?cameraId=${item.id}`);
+    history.push(`${Url.CAMERAS_DETAIL}?cameraId=${item.id}`);
   };
 
   useEffect(() => {

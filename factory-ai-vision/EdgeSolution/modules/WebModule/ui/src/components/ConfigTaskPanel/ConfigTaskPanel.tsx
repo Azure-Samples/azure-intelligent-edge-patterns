@@ -25,6 +25,7 @@ import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
 import { OnChangeType } from './type';
+import { Url } from '../../enums';
 
 import { extractRecommendFps } from '../../utils/extractRecommendFps';
 
@@ -165,7 +166,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       await dispatch(getConfigure((projectId as unknown) as number));
 
       onDismiss();
-      history.push('/deployment');
+      history.push(Url.DEPLOYMENT);
     }
     setdeploying(false);
   };

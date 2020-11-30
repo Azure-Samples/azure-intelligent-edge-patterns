@@ -17,17 +17,20 @@ import Axios from 'axios';
 import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
-import { EmptyAddIcon } from '../components/EmptyAddIcon';
-import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages, selectAllImages } from '../store/imageSlice';
 import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../store/selectors';
 import { getParts } from '../store/partSlice';
-import LabelingPage from '../components/LabelingPage/LabelingPage';
-import { useInterval } from '../hooks/useInterval';
-import { Instruction } from '../components/Instruction';
-import { Status } from '../store/project/projectTypes';
 import { selectNonDemoCameras } from '../store/cameraSlice';
+import { Status } from '../store/project/projectTypes';
+
+import { useInterval } from '../hooks/useInterval';
+import { Url } from '../enums';
+
+import LabelingPage from '../components/LabelingPage/LabelingPage';
+import { CaptureDialog } from '../components/CaptureDialog';
+import { Instruction } from '../components/Instruction';
 import { FilteredImgList } from '../components/FilteredImgList';
+import { EmptyAddIcon } from '../components/EmptyAddIcon';
 
 const theme = getTheme();
 const classes = mergeStyleSets({
@@ -301,7 +304,7 @@ export const Images: React.FC = () => {
               subtitle="Update the deployment to retrain the model"
               button={{
                 text: 'Update model',
-                to: '/home/deployment',
+                to: Url.DEPLOYMENT,
               }}
             />
           )}

@@ -2,10 +2,12 @@ import { INavLinkGroup, Nav, INavLink } from '@fluentui/react';
 import React, { useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import { Url } from '../enums';
+
 const navLinks: INavLink[] = [
   {
     name: 'Home',
-    url: '/home',
+    url: Url.HOME,
     iconProps: {
       imageProps: {
         src: '/icons/home.svg',
@@ -14,7 +16,7 @@ const navLinks: INavLink[] = [
   },
   {
     name: 'Cameras',
-    url: '/cameras',
+    url: Url.CAMERAS,
     iconProps: {
       imageProps: {
         src: '/icons/cameras.svg',
@@ -23,7 +25,7 @@ const navLinks: INavLink[] = [
   },
   {
     name: 'Images',
-    url: '/images',
+    url: Url.IMAGES,
     iconProps: {
       imageProps: {
         src: '/icons/images.svg',
@@ -32,7 +34,7 @@ const navLinks: INavLink[] = [
   },
   {
     name: 'Objects',
-    url: '/parts',
+    url: Url.PARTS,
     iconProps: {
       imageProps: {
         src: '/icons/objects.svg',
@@ -41,7 +43,7 @@ const navLinks: INavLink[] = [
   },
   {
     name: 'Models',
-    url: '/models',
+    url: Url.MODELS,
     iconProps: {
       imageProps: {
         src: '/icons/models.svg',
@@ -50,7 +52,7 @@ const navLinks: INavLink[] = [
   },
   {
     name: 'Deployment',
-    url: '/deployment',
+    url: Url.DEPLOYMENT,
     iconProps: {
       imageProps: {
         src: '/icons/deployment.svg',

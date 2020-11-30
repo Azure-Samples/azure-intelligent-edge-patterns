@@ -4,8 +4,11 @@ import { useHistory } from 'react-router-dom';
 import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui/react';
 
 import { getParts, Part } from '../store/partSlice';
-import { EmptyAddIcon } from './EmptyAddIcon';
 import { selectNonDemoPart } from '../store/selectors';
+
+import { Url } from '../enums';
+
+import { EmptyAddIcon } from './EmptyAddIcon';
 
 export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddBtnClick }) => {
   const [loading, setLoading] = useState(false);
@@ -15,7 +18,7 @@ export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddB
   const history = useHistory();
 
   const onRowClick = (item: Part) => {
-    history.push(`/parts/detail?partId=${item.id}`);
+    history.push(`${Url.PARTS_DETAIL}?partId=${item.id}`);
   };
 
   useEffect(() => {
