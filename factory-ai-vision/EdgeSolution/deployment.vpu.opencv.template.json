@@ -168,6 +168,41 @@
               }
             }
           },
+          "PredictModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.PredictModule.cpuamd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
+                  },
+                  "IpcMode": "host",
+                  "runtime": "runc"
+                }
+              }
+            }
+          },
           "CVCaptureModule": {
             "version": "1.0",
             "type": "docker",

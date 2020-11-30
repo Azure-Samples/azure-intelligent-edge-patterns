@@ -43,6 +43,8 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         self.model_uri = None
         self.model_downloading = False
         self.lva_mode = LVA_MODE
+        self.endpoint = 'http://PredictModule:7777/predict'
+        self.headers = None
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 

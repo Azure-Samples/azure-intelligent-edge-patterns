@@ -165,7 +165,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       await dispatch(getConfigure((projectId as unknown) as number));
 
       onDismiss();
-      history.push('/home/deployment');
+      history.push('/deployment');
     }
     setdeploying(false);
   };

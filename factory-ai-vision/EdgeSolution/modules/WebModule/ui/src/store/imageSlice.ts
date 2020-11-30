@@ -1,4 +1,4 @@
-import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action, AsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';

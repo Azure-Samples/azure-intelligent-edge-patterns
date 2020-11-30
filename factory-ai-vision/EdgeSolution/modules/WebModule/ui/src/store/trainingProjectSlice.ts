@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import { createSlice, createEntityAdapter, createSelector } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
@@ -12,11 +14,14 @@ import {
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 
-type TrainingProject = {
+export type TrainingProject = {
   id: number;
   name: string;
   customVisionId: string;
   isDemo: boolean;
+  isPredicationModel: boolean;
+  predictionUri: string;
+  predictionHeader: string;
 };
 
 const normalize = (e) => ({
@@ -24,6 +29,9 @@ const normalize = (e) => ({
   name: e.name,
   customVisionId: e.customvision_id,
   isDemo: e.is_demo,
+  isPredicationModel: e.is_prediction_module,
+  predictionUri: e.prediction_uri,
+  predictionHeader: e.prediction_header,
 });
 
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
@@ -82,6 +90,47 @@ export const createNewTrainingProject = createWrappedAsync<any, string, { state:
   },
 );
 
+const extractConvertCustomProject = (project) => {
+  return {
+    is_prediction_module: true,
+    name: project.name,
+    labels: project.labels,
+    prediction_uri: project.endPoint,
+    prediction_header: project.header,
+  };
+};
+
+export const createCustomProject = createWrappedAsync<any, any, { state: State }>(
+  'trainingSlice/createNewCustom',
+  async (project) => {
+    const data = extractConvertCustomProject(project);
+
+    const response = await Axios.post(`/api/projects`, data);
+    return normalize(response.data);
+  },
+);
+
+export const updateCustomProject = createWrappedAsync<any, any, { state: State }>(
+  'trainingSlice/UpdateCustom',
+  async (project) => {
+    const data = extractConvertCustomProject(project);
+
+    const response = await Axios.patch(`/api/projects/${project.id}`, data);
+    return normalize(response.data);
+  },
+);
+
+export const deleteCustomProject = createWrappedAsync<any, { id: number; resolve: () => void }>(
+  'trainingSlice/DeleteCustom',
+  async ({ id, resolve }) => {
+    await Axios.delete(`/api/projects/${id}/`);
+
+    resolve();
+
+    return id;
+  },
+);
+
 const entityAdapter = createEntityAdapter<TrainingProject>();
 
 const slice = createSlice({
@@ -93,6 +142,9 @@ const slice = createSlice({
       .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
       .addCase(refreshTrainingProject.fulfilled, entityAdapter.setAll)
       .addCase(createNewTrainingProject.fulfilled, entityAdapter.upsertOne)
+      .addCase(createCustomProject.fulfilled, entityAdapter.upsertOne)
+      .addCase(updateCustomProject.fulfilled, entityAdapter.upsertOne)
+      .addCase(deleteCustomProject.fulfilled, entityAdapter.removeOne)
       .addMatcher(isCRDAction, insertDemoFields);
   },
 });
@@ -125,4 +177,9 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
           text: e.name,
         }));
     },
+  );
+
+export const trainingProjectIsPredictionModelFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.filter((project) => project.isPredicationModel),
   );
