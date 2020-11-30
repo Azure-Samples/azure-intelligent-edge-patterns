@@ -104,7 +104,7 @@
             },
             "settings": {
               "image": "intelligentedge/predictmodule:0.5.0-<cpu or gpu>amd64",
-              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7777/tcp\":[{\"HostPort\":\"7777\"}]},\"IpcMode\":\"host\",\"runtime\":\"runc\"}}"
+              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7777/tcp\":[{\"HostPort\":\"7777\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
             }
           },
           "lvaEdge": {
