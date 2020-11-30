@@ -253,6 +253,10 @@ if [ "$isCfg" != true ]; then
           done
         fi
 
+	if [ `cat factoryai_configs/ams_cfgs/"$amsServiceName".cfg  | grep amsServicePrincipalAppId | wc -l ` -eq 0 ]; then
+		rm -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg
+	fi
+
 
 	if [ -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg ]; then
 		echo "Using Existing Service Principle"
