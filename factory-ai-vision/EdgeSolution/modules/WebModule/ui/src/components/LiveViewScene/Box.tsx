@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import React, { useRef, useState } from 'react';
-import { Circle, Group, Line, Path } from 'react-konva';
+import { Circle, Group, Line, Path, Text } from 'react-konva';
 import { BoxLabel } from '../../store/type';
 import { CreatingState } from '../../store/videoAnnoSlice';
 
@@ -21,6 +21,7 @@ type BoxProps = {
   removeBox: (id: string) => void;
   creatingState: CreatingState;
   color;
+  orderIdx?: number;
 };
 
 export const Box: React.FC<BoxProps> = ({
@@ -31,6 +32,7 @@ export const Box: React.FC<BoxProps> = ({
   removeBox,
   creatingState,
   color,
+  orderIdx = 0,
 }) => {
   const { x1, y1, x2, y2 } = box;
   const [cancelBtnVisible, setCancelBtnVisible] = useState(false);
@@ -133,6 +135,16 @@ export const Box: React.FC<BoxProps> = ({
           e.target.getStage().container().style.cursor = 'default';
         }}
         onClick={(): void => removeBox(box.id)}
+        scale={{ x: 1 / scale, y: 1 / scale }}
+      />
+      <Text
+        x={x2}
+        y={y1}
+        text={orderIdx && orderIdx.toString()}
+        fontSize={30}
+        fill={color}
+        strokeWidth={3}
+        visible={!!orderIdx}
         scale={{ x: 1 / scale, y: 1 / scale }}
       />
     </Group>
