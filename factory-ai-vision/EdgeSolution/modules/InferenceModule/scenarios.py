@@ -170,7 +170,7 @@ class PartCounter(Scenario):
 
             img = cv2.putText(
                 img,
-                "Objects(Line {}): {}".format(i[-2:], str(self.counter[i])),
+                "Objects(Line {}): {}".format(i, str(self.counter[i])),
                 (x, y),
                 font,
                 font_scale,
@@ -505,7 +505,7 @@ class DangerZone(Scenario):
         for i in self.counter:
             img = cv2.putText(
                 img,
-                "Violations(Zone {}): {}".format(i[-2:], str(self.counter[i])),
+                "Violations(Zone {}): {}".format(i, str(self.counter[i])),
                 (x, y),
                 font,
                 font_scale,

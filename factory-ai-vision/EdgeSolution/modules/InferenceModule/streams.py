@@ -278,7 +278,7 @@ class Stream:
                         y1 = int(lines[i]["label"][0]["y"])
                         x2 = int(lines[i]["label"][1]["x"])
                         y2 = int(lines[i]["label"][1]["y"])
-                        line_id = str(lines[i]['id'])
+                        line_id = str(lines[i]['order'])
                         print("        line:", x1, y1,
                               x2, y2, line_id, flush=True)
                         lines_to_set.append([x1, y1, x2, y2, line_id])
@@ -312,7 +312,7 @@ class Stream:
                     y1 = int(zone["label"]["y1"])
                     x2 = int(zone["label"]["x2"])
                     y2 = int(zone["label"]["y2"])
-                    zone_id = zone['id']
+                    zone_id = str(zone['order'])
                     _zones.append([x1, y1, x2, y2, zone_id])
                     print("     zone:", x1, y1, x2, y2, flush=True)
                 self.scenario.set_zones(_zones)
