@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import React, { useMemo, useRef, useState } from 'react';
-import { Group, Line, Circle, Path } from 'react-konva';
+import { Group, Line, Circle, Path, Text } from 'react-konva';
 import { PolygonLabel } from '../../store/type';
 import { CreatingState } from '../../store/videoAnnoSlice';
 
@@ -13,6 +13,7 @@ type PolygonProps = {
   handleChange: (idx: number, vertex) => void;
   boundary: { x1: number; y1: number; x2: number; y2: number };
   color: string;
+  orderIdx?: number;
 };
 
 export const Polygon: React.FC<PolygonProps> = ({
@@ -23,6 +24,7 @@ export const Polygon: React.FC<PolygonProps> = ({
   handleChange,
   boundary,
   color,
+  orderIdx = 0,
 }) => {
   const [cancelBtnVisible, setCanceBtnVisible] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
@@ -120,6 +122,16 @@ export const Polygon: React.FC<PolygonProps> = ({
           e.target.getStage().container().style.cursor = 'default';
         }}
         onClick={(): void => removePolygon()}
+        scale={{ x: 1 / scale, y: 1 / scale }}
+      />
+      <Text
+        x={polygon[1].x + 5 / scale}
+        y={polygon[1].y - 20 / scale}
+        text={orderIdx && orderIdx.toString()}
+        fontSize={30}
+        fill={color}
+        strokeWidth={3}
+        visible={!!orderIdx}
         scale={{ x: 1 / scale, y: 1 / scale }}
       />
     </Group>

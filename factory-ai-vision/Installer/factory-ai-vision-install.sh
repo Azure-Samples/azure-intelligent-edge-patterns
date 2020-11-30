@@ -264,7 +264,7 @@ if [ "$isCfg" != true ]; then
 		echo "TENANT_ID                :" $amsTenantId
 		echo "SERVICE_NAME             :" $amsServiceName
 		echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
-		#echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
+		echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
 		echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
 		echo "============================================================"
 
@@ -478,7 +478,7 @@ if [ "$isCfg" != true ]; then
     mkdir -p factoryai_configs
     mkdir -p factoryai_configs/factoryai_cfgs
     factoryaiConfigName=factoryai_configs/factoryai_cfgs/factoryai_"$edgeDeviceId"_"$cpuGpu"_"$streaming"_"$now".cfg
-    echo cvTrainingEndpoint='"'$cvTrainingEndpoint'"' >> $factoryaiConfigName
+    echo cvTrainingEndpoint='"'$cvTrainingEndpoint'"' > $factoryaiConfigName
     echo cvTrainingApiKey='"'$cvTrainingApiKey'"' >> $factoryaiConfigName
     echo cpuGpu='"'$cpuGpu'"' >> $factoryaiConfigName
     echo runtime='"'$runtime'"' >> $factoryaiConfigName
@@ -491,15 +491,17 @@ if [ "$isCfg" != true ]; then
     echo amsTenantId='"'$amsTenantId'"' >> $factoryaiConfigName
     echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiConfigName
     echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiConfigName
+    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
 
     mkdir -p factoryai_configs/ams_cfgs
     factoryaiAmsConfigName=factoryai_configs/ams_cfgs/"$amsServiceName".cfg
-    echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiAmsConfigName
+    echo amsSubscriptionId='"'$amsSubscriptionId'"' > $factoryaiAmsConfigName
     echo amsServiceName='"'$amsServiceName'"' >> $factoryaiAmsConfigName
     echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiAmsConfigName
     echo amsTenantId='"'$amsTenantId'"' >> $factoryaiAmsConfigName
     echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiAmsConfigName
+    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiAmsConfigName
     echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiAmsConfigName
 fi
 

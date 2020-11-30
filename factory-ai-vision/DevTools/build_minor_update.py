@@ -2,13 +2,10 @@
 import logging
 
 from logging_config import LOGGING_CONFIG_DEV
-from utils import (get_git_root, get_modules, get_script_abs_dir,
-                   get_script_abs_path, get_script_name,
-                   update_module_minor_version, update_module_patch_version)
+from utils_file import FileContext
 
 if __name__ == "__main__":
     logging.config.dictConfig(LOGGING_CONFIG_DEV)
-    logger = logging.getLogger(__file__)
 
     script_abs_path = get_script_abs_path(__file__)
     script_name = get_script_name(__file__)
