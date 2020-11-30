@@ -485,6 +485,7 @@ class Stream:
                 predictions = lva_to_customvision_format(lva_prediction)
             else:
                 logger.warning('No inference result')
+                predictions = []
             logger.warning('request prediction time: {}'.format(inf_time))
         # print('predictions', predictions, flush=True)
         # self.mutex.release()
