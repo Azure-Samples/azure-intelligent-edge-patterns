@@ -95,13 +95,13 @@ export const updateCameraArea = createWrappedAsync<any, number, { state: State }
     const countingLines = getCountingLines(getState(), cameraId);
     const dangerZones = getDangerZones(getState(), cameraId);
 
-    const enhanceCountingLines = plusOrderVideoAnnos(countingLines);
-    const enhancedangerZones = plusOrderVideoAnnos(dangerZones);
+    const enhanceOrderCountingLines = plusOrderVideoAnnos(countingLines);
+    const enhanceOrderDangerZones = plusOrderVideoAnnos(dangerZones);
 
     await Axios.patch(`/api/cameras/${cameraId}/`, {
       area: JSON.stringify({ useAOI, AOIs }),
-      lines: JSON.stringify({ useCountingLine, enhanceCountingLines }),
-      danger_zones: JSON.stringify({ useDangerZone, enhancedangerZones }),
+      lines: JSON.stringify({ useCountingLine, countingLines: enhanceOrderCountingLines }),
+      danger_zones: JSON.stringify({ useDangerZone, dangerZones: enhanceOrderDangerZones }),
     });
   },
 );
