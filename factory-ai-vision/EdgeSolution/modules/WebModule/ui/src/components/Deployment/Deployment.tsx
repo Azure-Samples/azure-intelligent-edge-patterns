@@ -46,7 +46,7 @@ import { LiveViewScene } from '../LiveViewScene';
 const { palette } = getTheme();
 
 const BaseDeployment: React.FC<DeploymentProps> = (props) => {
-  const { openCreatePanel, openEditPanel } = props;
+  const { onOpenCreatePanel, onOpenEditPanel } = props;
 
   const { status, data: projectData, originData } = useSelector<State, Project>((state) => state.project);
   const {
@@ -77,11 +77,12 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
   const partOptionsSelector = useMemo(() => partOptionsSelectorFactory(trainingProject), [trainingProject]);
   const partOptions = useSelector(partOptionsSelector);
   const partNames = useSelector(partNamesSelector);
-  const dispatch = useDispatch();
   const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
   const newImagesCount = useSelector(
     (state: State) => selectAllImages(state).filter((e) => !e.uploaded && e.manualChecked).length,
   );
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getTrainingProject(true));
@@ -105,7 +106,7 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
         iconProps: {
           iconName: 'Add',
         },
-        onClick: openCreatePanel,
+        onClick: onOpenCreatePanel,
       },
       {
         key: 'edit',
@@ -113,7 +114,7 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
         iconProps: {
           iconName: 'Edit',
         },
-        onClick: openEditPanel,
+        onClick: onOpenEditPanel,
       },
     ];
 
@@ -128,14 +129,14 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
       });
 
     return items;
-  }, [newImagesCount, openCreatePanel, openEditPanel, updateModel]);
+  }, [newImagesCount, onOpenCreatePanel, onOpenEditPanel, updateModel]);
 
   if (status === Status.None)
     return (
       <EmptyAddIcon
         title="Config a task"
         subTitle=""
-        primary={{ text: 'Config task', onClick: openCreatePanel }}
+        primary={{ text: 'Config task', onClick: onOpenCreatePanel }}
       />
     );
 
@@ -216,8 +217,8 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
 
 export const Deployment = R.compose(
   (BaseComponent: React.ComponentType<AdditionalProps>): React.FC => () => {
-    const [isEditPanelOpen, { setTrue: openEditPanel, setFalse: closeEditPanel }] = useBoolean(false);
-    const [isCreatePanelOpen, { setTrue: openCreatePanel, setFalse: closeCreatePanel }] = useBoolean(false);
+    const [isEditPanelOpen, { setTrue: onOpenEditPanel, setFalse: onCloseEditPanel }] = useBoolean(false);
+    const [isCreatePanelOpen, { setTrue: onOpenCreatePanel, setFalse: closeCreatePanel }] = useBoolean(false);
 
     const { data: projectData } = useSelector<State, Project>((state) => state.project);
 
@@ -226,16 +227,16 @@ export const Deployment = R.compose(
     useEffect(() => {
       (async () => {
         const hasConfigured = await dispatch(thunkGetProject());
-        if (!hasConfigured) openCreatePanel();
+        if (!hasConfigured) onOpenCreatePanel();
       })();
-    }, [dispatch, openCreatePanel]);
+    }, [dispatch, onOpenCreatePanel]);
 
     return (
       <>
-        <BaseComponent openCreatePanel={openCreatePanel} openEditPanel={openEditPanel} />
+        <BaseComponent onOpenCreatePanel={onOpenCreatePanel} onOpenEditPanel={onOpenEditPanel} />
         <ConfigTaskPanel
           isOpen={isEditPanelOpen}
-          onDismiss={closeEditPanel}
+          onDismiss={onCloseEditPanel}
           projectData={projectData}
           isEdit
         />

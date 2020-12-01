@@ -1,6 +1,6 @@
 export type AdditionalProps = {
-  openCreatePanel: () => void;
-  openEditPanel: () => void;
+  onOpenCreatePanel: () => void;
+  onOpenEditPanel: () => void;
 };
 
 export type DeploymentProps = AdditionalProps;
