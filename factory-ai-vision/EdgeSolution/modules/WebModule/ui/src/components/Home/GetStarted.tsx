@@ -133,7 +133,7 @@ const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImage
         <Text className={cardStyleSets.mainSectionContentTxt} styles={{ root: { margin: '4px' } }}>
           Already have your own Custom Vision module?
         </Text>
-        <Link className={cardStyleSets.mainSectionContentTxt} to="/models" as={ReactRouterLink}>
+        <Link className={cardStyleSets.mainSectionContentTxt} to={Url.MODELS} as={ReactRouterLink}>
           {'Go to modules >'}
         </Link>
       </Stack>

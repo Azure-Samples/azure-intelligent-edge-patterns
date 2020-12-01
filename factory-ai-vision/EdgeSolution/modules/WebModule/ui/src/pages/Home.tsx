@@ -55,7 +55,7 @@ export const Home = R.compose(
     const history = useHistory();
 
     const onPivotChange = (item: PivotItem) => {
-      history.push(`/home/${item.props.itemKey}`);
+      history.push(`${Url.HOME}/${item.props.itemKey}`);
     };
 
     return (

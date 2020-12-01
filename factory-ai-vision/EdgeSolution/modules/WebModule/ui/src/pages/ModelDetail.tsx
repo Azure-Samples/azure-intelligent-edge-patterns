@@ -26,6 +26,7 @@ import {
 } from '../store/trainingProjectSlice';
 
 import { useQuery } from '../hooks/useQuery';
+import { Url } from '../enums';
 
 import AddCameraPanel, { PanelMode } from '../components/Models/AddModelPanel';
 
@@ -69,7 +70,7 @@ const BaseModelDetail: React.FC<ModelDetailProps> = ({ handlePanelOpen, project 
             deleteCustomProject({
               id: project.id,
               resolve: () => {
-                history.push('/models');
+                history.push(Url.MODELS);
               },
             }),
           );

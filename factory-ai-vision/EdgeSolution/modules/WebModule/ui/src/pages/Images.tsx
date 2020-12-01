@@ -295,7 +295,7 @@ export const Images: React.FC = () => {
             <Instruction
               title="Successfully added and tagged enough photos!"
               subtitle="Now you can start deploying your model."
-              button={{ text: 'Go to Home', to: '/home/customize' }}
+              button={{ text: 'Go to Home', to: Url.HOME_CUSTOMIZE }}
             />
           )}
           {relabelImgsReadyToTrain > 0 && (

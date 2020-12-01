@@ -19,13 +19,16 @@ import { State } from 'RootStateType';
 import { useQuery } from '../hooks/useQuery';
 import { selectPartById, getParts, deletePart } from '../store/partSlice';
 import { thunkGetProject } from '../store/project/projectActions';
-import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
-import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
-import { CaptureDialog } from '../components/CaptureDialog';
 import { postImages, getImages } from '../store/imageSlice';
-import { ImageList } from '../components/ImageList';
 import { partImageItemSelectorFactory } from '../store/selectors';
+
+import { Url } from '../enums';
+
+import LabelingPage from '../components/LabelingPage/LabelingPage';
+import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
+import { ImageList } from '../components/ImageList';
+import { CaptureDialog } from '../components/CaptureDialog';
 
 const theme = getTheme();
 const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
@@ -65,7 +68,7 @@ export const PartDetails: React.FC = () => {
           if (!confirm('Sure you want to delete?')) return;
 
           await dispatch(deletePart(partId));
-          history.push('/parts');
+          history.push(Url.PARTS);
         })();
       },
     },

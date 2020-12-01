@@ -11,7 +11,7 @@ enum Url {
   PARTS_DETAIL = '/parts/detail',
 
   CAMERAS = '/cameras',
-  CAMERAS_DETAIL = '/cameras',
+  CAMERAS_DETAIL = '/cameras/detail',
 
   MODELS = '/models',
   MODELS_DETAIL = '/models/detail',
