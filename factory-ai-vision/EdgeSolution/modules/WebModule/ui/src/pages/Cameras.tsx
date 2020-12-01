@@ -4,8 +4,11 @@ import { useBoolean } from '@uifabric/react-hooks';
 import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
-import { CameraDetailList } from '../components/CameraDetailList';
+
+import { Url } from '../enums';
+
 import AddCameraPanel, { PanelMode } from '../components/AddCameraPanel';
+import { CameraDetailList } from '../components/CameraDetailList';
 import { Instruction } from '../components/Instruction';
 
 const theme = getTheme();
@@ -41,7 +44,7 @@ export const Cameras: React.FC = () => {
           <Instruction
             title="Successfully added a camera!"
             subtitle="Now that you have added a camera, you can use that camera to capture images and tag objects for your model."
-            button={{ text: 'Go to Images', to: '/images' }}
+            button={{ text: 'Go to Images', to: Url.IMAGES }}
           />
         )}
         <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />

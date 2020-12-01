@@ -10,7 +10,9 @@ import { State } from 'RootStateType';
 import { getCameras } from '../store/cameraSlice';
 import { getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
+
 import { Status } from '../store/project/projectTypes';
+import { Url } from '../enums';
 
 import { Customize } from '../components/Home/Customize';
 import { GetStarted } from '../components/Home/GetStarted';
@@ -34,14 +36,14 @@ const BaseHome: React.FC = () => {
 
   return (
     <Switch>
-      <Route path="/home/customize">
+      <Route path={Url.HOME_CUSTOMIZE}>
         <Customize />
       </Route>
-      <Route path="/home/getStarted">
+      <Route path={Url.HOME_GET_STARTED}>
         <GetStarted hasTask={projectHasConfiged} />
       </Route>
-      <Route path="/home">
-        <Redirect to={'/home/getStarted'} />
+      <Route path={Url.HOME}>
+        <Redirect to={Url.HOME_GET_STARTED} />
       </Route>
     </Switch>
   );
@@ -53,7 +55,7 @@ export const Home = R.compose(
     const history = useHistory();
 
     const onPivotChange = (item: PivotItem) => {
-      history.push(`/home/${item.props.itemKey}`);
+      history.push(`${Url.HOME}/${item.props.itemKey}`);
     };
 
     return (

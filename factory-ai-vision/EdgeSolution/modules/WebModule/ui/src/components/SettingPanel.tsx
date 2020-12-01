@@ -36,9 +36,12 @@ import {
   patchIsCollectData,
   thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
-import { WarningDialog } from './WarningDialog';
-import { dummyFunction } from '../utils/dummyFunction';
 import { selectNonDemoProject, pullCVProjects } from '../store/trainingProjectSlice';
+
+import { dummyFunction } from '../utils/dummyFunction';
+import { Url } from '../enums';
+
+import { WarningDialog } from './WarningDialog';
 import { CreateProjectDialog } from './CreateProjectDialog';
 
 type SettingPanelProps = {
@@ -106,7 +109,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     setloading(true);
     await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
 
-    if (location.pathname === '/deployment') {
+    if (location.pathname === Url.DEPLOYMENT) {
       window.location.reload();
       return;
     }

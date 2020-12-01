@@ -16,6 +16,9 @@ import { AcceptMediumIcon } from '@fluentui/react-icons';
 import { connect } from 'react-redux';
 
 import { State } from 'RootStateType';
+
+import { Url } from '../../enums';
+
 import { CreateProjectDialog } from '../CreateProjectDialog';
 import { selectNonDemoCameras } from '../../store/cameraSlice';
 import { selectAllImages } from '../../store/imageSlice';
@@ -104,7 +107,7 @@ const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImage
           title="Connect your own video feed"
           contentTxt="Add and configure the cameras in the factory"
           actionTxt="Go to Cameras"
-          actionLink="/cameras"
+          actionLink={Url.CAMERAS}
           src="/icons/customize_1.svg"
         />
         <GetStartedCard
@@ -113,7 +116,7 @@ const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImage
           title="Capture images and tag objects"
           contentTxt="Capture images from your video streams and tag objects"
           actionTxt="Go to Images"
-          actionLink="/images"
+          actionLink={Url.IMAGES}
           src="/icons/customize_2.svg"
         />
         <GetStartedCard
@@ -122,7 +125,7 @@ const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImage
           title="Ready to go!"
           contentTxt="Start identifying parts from your cameras’ live streams"
           actionTxt="Begin a task"
-          actionLink="/home/deployment"
+          actionLink={Url.DEPLOYMENT}
           src="/icons/customize_3.svg"
         />
       </Stack>
@@ -130,7 +133,7 @@ const Component: React.FC<CustomizeProps> = ({ hasCVProject, hasCamera, hasImage
         <Text className={cardStyleSets.mainSectionContentTxt} styles={{ root: { margin: '4px' } }}>
           Already have your own Custom Vision module?
         </Text>
-        <Link className={cardStyleSets.mainSectionContentTxt} to="/models" as={ReactRouterLink}>
+        <Link className={cardStyleSets.mainSectionContentTxt} to={Url.MODELS} as={ReactRouterLink}>
           {'Go to modules >'}
         </Link>
       </Stack>

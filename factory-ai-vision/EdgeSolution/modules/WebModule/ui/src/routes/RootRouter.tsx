@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { State } from 'RootStateType';
 
 import { Status } from '../store/project/projectTypes';
+import { Url } from '../enums';
 
 import { Home } from '../pages/Home';
 import { Cameras } from '../pages/Cameras';
@@ -21,17 +22,17 @@ export const RootRouter: FC = () => {
 
   return (
     <Switch>
-      <Route path="/deployment" component={DeploymentPage} />
-      <Route path="/models/detail" component={ModelDetail} />
-      <Route path="/models" component={Models} />
-      <Route path="/cameras/detail" component={CameraDetails} />
-      <Route path="/cameras" component={Cameras} />
-      <Route path="/parts/detail" component={PartDetails} />
-      <Route path="/parts" component={Parts} />
-      <Route path="/images" component={Images} />
-      <Route path="/home" component={Home} />
-      <Route path="/">
-        <Redirect to={projectHasConfiged ? '/deployment' : '/home'} />
+      <Route path={Url.DEPLOYMENT} component={DeploymentPage} />
+      <Route path={Url.MODELS_DETAIL} component={ModelDetail} />
+      <Route path={Url.MODELS} component={Models} />
+      <Route path={Url.CAMERAS_DETAIL} component={CameraDetails} />
+      <Route path={Url.CAMERAS} component={Cameras} />
+      <Route path={Url.PARTS_DETAIL} component={PartDetails} />
+      <Route path={Url.PARTS} component={Parts} />
+      <Route path={Url.IMAGES} component={Images} />
+      <Route path={Url.HOME} component={Home} />
+      <Route path={Url.ROOT}>
+        <Redirect to={projectHasConfiged ? Url.DEPLOYMENT : Url.HOME} />
       </Route>
     </Switch>
   );
