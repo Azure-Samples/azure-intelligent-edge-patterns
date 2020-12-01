@@ -124,8 +124,6 @@ export const ModelDetail = R.compose(
     const modelId = parseInt(useQuery().get('modelId'), 10);
     const trainingProject = useSelector((state: State) => selectTrainingProjectById(state, modelId));
 
-    console.log('TrainingProject', trainingProject);
-
     return (
       <>
         <BaseComponent handlePanelOpen={handlePanelOpen} project={trainingProject} />
