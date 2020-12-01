@@ -2,7 +2,7 @@
 """
 
 from enum import Enum
-from typing import List, Literal
+from typing import List
 
 from pydantic import BaseModel
 
@@ -15,12 +15,6 @@ class CameraModel(BaseModel):
     zones: str
     aoi: str = None
     send_video_to_cloud: bool
-
-
-class CamerasModel(BaseModel):
-    lva_mode: Literal["http", "grpc"]
-    fps: int
-    cameras: List[CameraModel]
 
 
 class StreamModel(BaseModel):

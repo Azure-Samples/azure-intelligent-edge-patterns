@@ -1,5 +1,37 @@
-#FROM mcr.microsoft.com/azureml/onnxruntime:latest-openvino-myriad
-FROM waitingkuo/onnxruntime-vpu
+FROM mcr.microsoft.com/azureml/onnxruntime:latest-openvino-myriad
+# FROM waitingkuo/onnxruntime-vpu
+
+# Get rid of UDEV by rebuilding libusb without UDEV support in the Docker* image 
+
+ARG BUILD_DEPENDENCIES="autoconf \
+    automake \
+    build-essential \
+    libtool \
+    unzip \
+    udev"
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ${BUILD_DEPENDENCIES} && \
+    rm -rf /var/lib/apt/lists/*
+#RUN usermod -aG users openvino
+WORKDIR /opt
+RUN curl -L https://github.com/libusb/libusb/archive/v1.0.22.zip --output v1.0.22.zip && \
+    unzip v1.0.22.zip
+WORKDIR /opt/libusb-1.0.22
+RUN ./bootstrap.sh && \
+    ./configure --disable-udev --enable-shared && \
+    make -j4
+WORKDIR /opt/libusb-1.0.22/libusb
+RUN /bin/mkdir -p '/usr/local/lib' && \
+    /bin/bash ../libtool --mode=install /usr/bin/install -c libusb-1.0.la '/usr/local/lib' && \
+    /bin/mkdir -p '/usr/local/include/libusb-1.0' && \
+    /usr/bin/install -c -m 644 libusb.h '/usr/local/include/libusb-1.0' && \
+    /bin/mkdir -p '/usr/local/lib/pkgconfig'
+WORKDIR /opt/libusb-1.0.22/
+RUN /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
+    cp /opt/intel/openvino/deployment_tools/inference_engine/external/97-myriad-usbboot.rules /etc/udev/rules.d/ && \
+    ldconfig
+
+
 
 WORKDIR /app
 

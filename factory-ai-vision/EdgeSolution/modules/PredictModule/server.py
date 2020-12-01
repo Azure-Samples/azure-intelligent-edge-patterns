@@ -20,7 +20,6 @@ from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import StreamingResponse
 
 from api.models import (
-    CamerasModel,
     PartDetectionModeEnum,
     PartsModel,
     StreamModel,

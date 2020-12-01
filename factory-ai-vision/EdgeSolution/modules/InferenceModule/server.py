@@ -229,7 +229,7 @@ def update_model(request_body: UploadModelBody):
 
         if model_uri == onnx.model_uri:
             logger.info("Model Uri unchanged.")
-            onnx.update_model("model")
+            # onnx.update_model("model")
             return "ok", 200
         if onnx.model_downloading:
             logger.info("Already have a thread downloading project.")
@@ -239,7 +239,7 @@ def update_model(request_body: UploadModelBody):
         # background_tasks.add_task(
         # onnx.download_and_update_model, request_body.model_uri, MODEL_DIR
         # )
-        onnx.download_and_update_model(model_uri, MODEL_DIR)
+        # onnx.download_and_update_model(model_uri, MODEL_DIR)
         # onnx.model_downloaded = False
         # get_file_zip(model_uri, MODEL_DIR)
         # onnx.model_downloaded = True
@@ -255,7 +255,7 @@ def update_model(request_body: UploadModelBody):
         )
 
         onnx.set_is_scenario(True)
-        onnx.update_model(request_body.model_dir)
+        # onnx.update_model(request_body.model_dir)
         logger.info("Update Finished ...")
         return "ok"
 
@@ -595,7 +595,11 @@ def benchmark():
     stream_ids = list(str(i + 10000) for i in range(n_threads))
     stream_manager.update_streams(stream_ids)
     onnx.set_is_scenario(True)
-    onnx.update_model(SCENARIO1_MODEL)
+    r = requests.post(
+        "http://" + predict_module_url() + "/update_model",
+        json={"model_dir": SCENARIO1_MODEL}
+    )
+    # onnx.update_model(SCENARIO1_MODEL)
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
         s.update_cam("video", SAMPLE_VIDEO, 30,
@@ -640,6 +644,7 @@ def benchmark():
     stream_manager.update_streams([])
 
     max_total_frame_rate = max(1, max_total_frame_rate)
+    max_total_frame_rate = min(30, max_total_frame_rate)
     onnx.set_max_total_frame_rate(max_total_frame_rate)
 
 
