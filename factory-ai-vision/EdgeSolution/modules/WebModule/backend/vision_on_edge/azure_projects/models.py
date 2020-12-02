@@ -15,6 +15,7 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 from rest_framework.exceptions import APIException
 
+from ..azure_iot.utils import prediction_module_url
 from ..azure_settings.exceptions import (
     SettingCustomVisionAccessFailed,
     SettingCustomVisionCannotCreateProject,
@@ -96,6 +97,14 @@ class Project(models.Model):
             raise ProjectCustomVisionError
         trainer = self.setting.get_trainer_obj()
         return trainer.get_project(self.customvision_id)
+
+    def get_prediction_uri(self):
+        """get_prediction_uri"""
+        if self.prediction_uri:
+            return self.prediction_uri
+        if self.customvision_id and self.download_uri and self.download_uri_fp16:
+            return prediction_module_url()
+        return self.prediction_uri
 
     def validate(self, raise_exception: bool = False) -> bool:
         """validate.

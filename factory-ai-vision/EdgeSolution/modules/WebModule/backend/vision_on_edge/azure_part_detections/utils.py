@@ -128,7 +128,7 @@ def deploy_worker(part_detection_id):
     requests.post(
         "http://" + str(instance.inference_module.url) + "/update_endpoint",
         json={
-            "endpoint": instance.project.prediction_uri,
+            "endpoint": instance.project.get_prediction_uri(),
             "headers": instance.project.prediction_header,
         },
         timeout=REQUEST_TIMEOUT,
