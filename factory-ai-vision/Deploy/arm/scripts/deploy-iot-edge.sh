@@ -2,6 +2,7 @@
 
 # This script generates a deployment manifest template and deploys it to an existing IoT Edge device
 
+. .env
 # =========================================================
 # Variables
 # =========================================================
@@ -90,8 +91,8 @@ CUSTOM_VISION_TRAINING_KEY=$(az cognitiveservices account keys list --name ${CUS
 CUSTOM_VISION_ENDPOINT=$(az cognitiveservices account show --name ${CUSTOMVISION_NAME} -g ${RESOURCE_GROUP} | jq ".properties.endpoint")
 SUBSCRIPTION_ID=$(az account show | jq ".id")
 TENANT_ID=$(az account show | jq ".managedByTenants[0].tenantId")
-AMS_SP_SECRET=$(echo ${AMS_SP_JSON} | jq ".AadSecret")
-AMS_SP_ID=$(echo ${AMS_SP_JSON} | jq ".AadClientId")
+AMS_SP_SECRET="\"${AMS_SP_SECRET}\""
+AMS_SP_ID="\"${AMS_SP_NAME}\""
 AMS_NAME="\"${AMS_NAME}\""
 
 printf "\n%60s\n" " " | tr ' ' '-'
