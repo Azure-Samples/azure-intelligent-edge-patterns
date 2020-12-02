@@ -28,23 +28,23 @@ exitWithError() {
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing apt-packages "
-apt-get update && apt-get install -y jq coreutils python3 python3-pip unzip
+apt-get update && apt-get install -y jq coreutils unzip
 echo "$(info) Apt-packages installed"
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing pip packages."
-python3 -m pip -q install --upgrade pip
+python -m pip -q install --upgrade pip
 echo "$(info) Installing iotedgedev."
-pip3 -q install --upgrade iotedgedev==${IOTEDGE_DEV_VERSION}
+pip -q install --upgrade iotedgedev==${IOTEDGE_DEV_VERSION}
 
 echo "$(info) Updating Azure CLI."
-pip3 -q install --upgrade azure-cli
-pip3 -q install --upgrade azure-cli-telemetry
+pip -q install --upgrade azure-cli
+pip -q install --upgrade azure-cli-telemetry
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing Azure IoT extension."
 az extension add --name azure-iot
-pip3 -q install --upgrade jsonschema
+pip -q install --upgrade jsonschema
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Checking IoT Hub and IoT Edge Device."
@@ -146,7 +146,7 @@ MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.template.json"
 MANIFEST_TEMPLATE_PATH="${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
 echo "$(info) Deployment template choosen: ${MANIFEST_TEMPLATE_NAME}"
 echo "$(info) Deployment template file path: ${MANIFEST_TEMPLATE_PATH}"
-echo "$(pwd)"
+echo "$(info) PWD: $(pwd)"
 
 
 
