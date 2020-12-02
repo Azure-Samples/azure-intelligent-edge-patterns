@@ -2,7 +2,6 @@
 
 # This script generates a deployment manifest template and deploys it to an existing IoT Edge device
 
-. .env
 # =========================================================
 # Variables
 # =========================================================
@@ -29,23 +28,23 @@ exitWithError() {
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing apt-packages "
-apt-get update && apt-get install -y jq coreutils
+apt-get update && apt-get install -y jq coreutils python3 python3-pip unzip
 echo "$(info) Apt-packages installed"
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing pip packages."
-python -m pip -q install --upgrade pip
+python3 -m pip -q install --upgrade pip
 echo "$(info) Installing iotedgedev."
-pip -q install --upgrade iotedgedev==${IOTEDGE_DEV_VERSION}
+pip3 -q install --upgrade iotedgedev==${IOTEDGE_DEV_VERSION}
 
 echo "$(info) Updating Azure CLI."
-pip -q install --upgrade azure-cli
-pip -q install --upgrade azure-cli-telemetry
+pip3 -q install --upgrade azure-cli
+pip3 -q install --upgrade azure-cli-telemetry
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing Azure IoT extension."
 az extension add --name azure-iot
-pip -q install --upgrade jsonschema
+pip3 -q install --upgrade jsonschema
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Checking IoT Hub and IoT Edge Device."
@@ -96,7 +95,7 @@ AMS_SP_ID="\"${AMS_SP_NAME}\""
 AMS_NAME="\"${AMS_NAME}\""
 
 printf "\n%60s\n" " " | tr ' ' '-'
-echo "$(info) Generating .env ${ENV_PATH}"
+echo "$(info) Generating .env at: ${ENV_PATH}"
 
 sed -i -e "s|^CONTAINER_REGISTRY_NAME=.*$|CONTAINER_REGISTRY_NAME=\"${CONTAINER_REGISTRY_NAME}\"|g" ${ENV_PATH}
 sed -i -e "s|^CONTAINER_REGISTRY_USERNAME=.*$|CONTAINER_REGISTRY_USERNAME=\"${CONTAINER_REGISTRY_USERNAME}\"|g" ${ENV_PATH}
