@@ -605,6 +605,10 @@ def benchmark():
         s.update_cam("video", SAMPLE_VIDEO, 30,
                      s.cam_id, False, None, "PC", [], [])
 
+    # vpu's first image take long time
+    img = cv2.imread("img.png")
+    s.predict(img)
+
     def _f():
         logger.info("--- Thread %s started---", threading.current_thread())
         t0_t = time.time()
