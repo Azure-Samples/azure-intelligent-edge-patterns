@@ -1,4 +1,3 @@
-
 {
   "$schema-template": "2.0.0",
   "modulesContent": {
@@ -45,10 +44,28 @@
               "image": "${MODULES.InferenceModule.gpuamd64}"
             }
           },
-          "InferenceModuleGPU": {
+          "InferenceModuleVPU": {
             "type": "docker",
             "settings": {
               "image": "${MODULES.InferenceModule.vpuamd64}"
+            }
+          },
+          "PredictModuleCPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.cpuamd64}"
+            }
+          },
+          "PredictModuleGPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.gpuamd64}"
+            }
+          },
+          "PredictModuleVPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.vpuamd64}"
             }
           },
           "rtspsim": {

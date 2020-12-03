@@ -1,4 +1,3 @@
-
 {
   "$schema-template": "2.0.0",
   "modulesContent": {
@@ -49,6 +48,24 @@
             "type": "docker",
             "settings": {
               "image": "${MODULES.InferenceModule.jetson}"
+            }
+          },
+          "PredictModuleCPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.cpuarm64v8}"
+            }
+          },
+          "PredictModuleGPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.gpuarm64v8}"
+            }
+          },
+          "PredictModuleJetson": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.jetson}"
             }
           },
           "rtspsim": {
