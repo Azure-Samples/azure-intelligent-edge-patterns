@@ -116,6 +116,7 @@ rm "${ENV_PATH}-e"
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Choosing deployment template"
 cat ${ENV_PATH}
+cp ${ENV_PATH} /mnt/azscripts/azscriptinput/.env
 
 echo "$(info) INFERENCE_MODULE_RUNTIME: ${INFERENCE_MODULE_RUNTIME}"
 echo "$(info) EDGE_DEVICE_ARCHITECTURE: ${EDGE_DEVICE_ARCHITECTURE}"
