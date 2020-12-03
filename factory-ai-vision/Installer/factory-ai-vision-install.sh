@@ -38,7 +38,7 @@ if [ "$isCfg" = true ]; then
       fi
   done
   
-  source factoryai_configs/$opt
+  source factoryai_configs/factoryai_cfgs/$opt
   echo Read from config ...
   echo '################################################'
   cat factoryai_configs/factoryai_cfgs/$opt
