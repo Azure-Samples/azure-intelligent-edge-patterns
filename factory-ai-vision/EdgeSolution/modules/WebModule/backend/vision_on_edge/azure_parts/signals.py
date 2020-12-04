@@ -74,7 +74,11 @@ def delete_part_on_customvision_handler(**kwargs):
     if not instance.customvision_id:
         logger.info("Part have no customvision_id. Skip")
 
-    if instance.project is None or not instance.project.setting.is_trainer_valid:
+    if (
+        instance.project is None
+        or instance.project.setting is None
+        or not instance.project.setting.is_trainer_valid
+    ):
         logger.error("Have customvision_id but no valid project with key")
         return
 

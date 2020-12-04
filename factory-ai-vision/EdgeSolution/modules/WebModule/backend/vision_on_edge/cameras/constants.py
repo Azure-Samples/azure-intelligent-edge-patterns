@@ -14,6 +14,7 @@ def gen_default_lines():
                 "id": "$UUID_PLACE_HOLDER",
                 "type": "Line",
                 "label": [{"x": 229, "y": 215}, {"x": 916, "y": 255}],
+                "order": 1,
             }
         ],
     }
@@ -30,6 +31,7 @@ def gen_default_zones():
                 "id": "$UUID_PLACE_HOLDER",
                 "type": "BBox",
                 "label": {"x1": 23, "y1": 58, "x2": 452, "y2": 502},
+                "order": 1,
             }
         ],
     }
@@ -49,6 +51,7 @@ def gen_default_lines_dd():
                 "id": "$UUID_PLACE_HOLDER",
                 "type": "Line",
                 "label": [{"x": 611, "y": 17}, {"x": 611, "y": 504}],
+                "order": 1,
             }
         ],
     }

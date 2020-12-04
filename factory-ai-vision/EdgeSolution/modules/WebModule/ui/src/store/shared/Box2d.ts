@@ -7,6 +7,7 @@ import { Position2D, BoxLabel } from '../type';
 export type BBoxType = VideoAnno & {
   type: Shape.BBox;
   vertices: BoxLabel;
+  order?: number;
 };
 
 export class BBox extends BaseShape {

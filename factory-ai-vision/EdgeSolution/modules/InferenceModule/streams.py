@@ -9,6 +9,7 @@ import time
 import cv2
 import numpy as np
 import requests
+from io import BytesIO, BufferedReader
 from azure.iot.device import IoTHubModuleClient, Message
 from shapely.geometry import Polygon
 
@@ -84,6 +85,7 @@ class Stream:
         # self.last_edge_img = None
         self.last_drawn_img = None
         self.last_prediction = []
+        self.last_prediction_lva = []
         self.last_prediction_count = {}
 
         self.is_retrain = False
@@ -271,15 +273,20 @@ class Stream:
                 line_info = json.loads(line_info)
                 self.use_line = line_info["useCountingLine"]
                 lines = line_info["countingLines"]
+                lines_to_set = []
                 if len(lines) > 0:
-                    x1 = int(lines[0]["label"][0]["x"])
-                    y1 = int(lines[0]["label"][0]["y"])
-                    x2 = int(lines[0]["label"][1]["x"])
-                    y2 = int(lines[0]["label"][1]["y"])
-                    self.scenario.set_line(x1, y1, x2, y2)
+                    for i in range(len(lines)):
+                        x1 = int(lines[i]["label"][0]["x"])
+                        y1 = int(lines[i]["label"][0]["y"])
+                        x2 = int(lines[i]["label"][1]["x"])
+                        y2 = int(lines[i]["label"][1]["y"])
+                        line_id = str(lines[i]['order'])
+                        print("        line:", x1, y1,
+                              x2, y2, line_id, flush=True)
+                        lines_to_set.append([x1, y1, x2, y2, line_id])
+                    self.scenario.set_line(lines_to_set)
                     print("Upading Line:", flush=True)
                     print("    use_line:", self.use_line, flush=True)
-                    print("        line:", x1, y1, x2, y2, flush=True)
                 else:
                     print("Upading Line:", flush=True)
                     print("    use_line:", self.use_line, flush=True)
@@ -307,7 +314,8 @@ class Stream:
                     y1 = int(zone["label"]["y1"])
                     x2 = int(zone["label"]["x2"])
                     y2 = int(zone["label"]["y2"])
-                    _zones.append([x1, y1, x2, y2])
+                    zone_id = str(zone['order'])
+                    _zones.append([x1, y1, x2, y2, zone_id])
                     print("     zone:", x1, y1, x2, y2, flush=True)
                 self.scenario.set_zones(_zones)
 
@@ -454,11 +462,31 @@ class Stream:
             ratio = self.IMG_HEIGHT / image.shape[0]
             width = int(image.shape[1] * ratio + 0.000001)
 
-        image = cv2.resize(image, (width, height))
-
         # prediction
         # self.mutex.acquire()
-        predictions, inf_time = self.model.Score(image)
+        # predictions, inf_time = self.model.Score(image)
+        if 'Module' in self.model.endpoint:
+            image = cv2.resize(image, (width, height))
+            data = image.tobytes()
+            res = requests.post(self.model.endpoint, data=data)
+            lva_prediction = json.loads(res.json()[0])['inferences']
+            inf_time = json.loads(res.json()[0])['inf_time']
+            predictions = lva_to_customvision_format(lva_prediction)
+        else:
+            image = cv2.resize(image, (416, 416))   # for yolo enpoint testing
+            str_encode = cv2.imencode('.jpg', image)[1].tostring()
+            f4 = BytesIO(str_encode)
+            f5 = BufferedReader(f4)
+            s = time.time()
+            res = requests.post(self.model.endpoint, data=f5)
+            inf_time = time.time() - s
+            if res.status_code == 200:
+                lva_prediction = res.json()['inferences']
+                predictions = lva_to_customvision_format(lva_prediction)
+            else:
+                logger.warning('No inference result')
+                predictions = []
+            logger.warning('request prediction time: {}'.format(inf_time))
         # print('predictions', predictions, flush=True)
         # self.mutex.release()
 
@@ -661,6 +689,13 @@ class Stream:
                 time.sleep(0.04)
 
 
+def predict_module_url():
+    if is_edge():
+        return "PredictModule:7777"
+    else:
+        return "localhost:7777"
+
+
 def web_module_url():
     if is_edge():
         return "WebModule:8000"
@@ -795,3 +830,24 @@ def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
         )
     except:
         print("[ERROR] Failed to update image for relabeling", flush=True)
+
+
+def lva_to_customvision_format(predictions):
+    results = []
+    for prediction in predictions:
+        tagName = prediction['entity']['tag']['value']
+        probability = prediction['entity']['tag']['confidence']
+        boundingBox = {
+            "left": prediction['entity']['box']['l'],
+            "top": prediction['entity']['box']['t'],
+            "width": prediction['entity']['box']['w'],
+            "height": prediction['entity']['box']['h'],
+        }
+        results.append(
+            {
+                "tagName": tagName,
+                "probability": probability,
+                "boundingBox": boundingBox,
+            }
+        )
+    return(results)

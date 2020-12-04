@@ -162,6 +162,47 @@
               }
             }
           },
+          "PredictModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.PredictModule.vpuamd64}",
+              "createOptions": {
+                "HostConfig": {
+                  "Binds": [
+                    "/dev/bus/usb:/dev/bus/usb"
+                  ],
+                  "DeviceCgroupRules": [
+                    "c 189:* rmw"
+                  ],
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
+                  },
+                  "IpcMode": "host",
+                  "runtime": "runc"
+                }
+              }
+            }
+          },
           "lvaEdge": {
             "version": "1.0",
             "type": "docker",

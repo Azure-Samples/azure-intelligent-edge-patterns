@@ -54,19 +54,19 @@ ARG ONNXRUNTIME_SERVER_BRANCH="rel-1.5.2"
 WORKDIR /code
 
 RUN git clone \
-        --single-branch \
-        --branch ${ONNXRUNTIME_SERVER_BRANCH} \
-        --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
+    --single-branch \
+    --branch ${ONNXRUNTIME_SERVER_BRANCH} \
+    --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
     /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh && \
     cd onnxruntime && \
     /bin/sh ./build.sh \
-        --use_openmp \
-        --config Release \
-        --build_wheel \
-        --update \
-        --build \
-        --parallel \
-        --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER) && \
+    --use_openmp \
+    --config Release \
+    --build_wheel \
+    --update \
+    --build \
+    --parallel \
+    --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER) && \
     pip install /code/onnxruntime/build/Linux/Release/dist/*.whl && \
     cd .. && \
     rm -rf onnxruntime
@@ -97,9 +97,9 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --single-branch \
-        --branch ${OPENCV_TAG} \
-        --recursive ${OPENCV_REPO} \
-        opencv && \
+    --branch ${OPENCV_TAG} \
+    --recursive ${OPENCV_REPO} \
+    opencv && \
     cd opencv && \
     mkdir build && \
     cd build && \
@@ -114,6 +114,7 @@ RUN ["python","-c", "\"import cv2;print(cv2.__version__)\""]
 # =========================================================
 # Copy Source Code
 # =========================================================
+WORKDIR /app
 COPY coco_classes.txt ./
 COPY default_model default_model/
 COPY default_model_6parts default_model_6parts/

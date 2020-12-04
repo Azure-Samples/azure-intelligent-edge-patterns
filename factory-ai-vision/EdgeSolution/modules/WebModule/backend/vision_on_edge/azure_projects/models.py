@@ -15,6 +15,7 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 from rest_framework.exceptions import APIException
 
+from ..azure_iot.utils import prediction_module_url
 from ..azure_settings.exceptions import (
     SettingCustomVisionAccessFailed,
     SettingCustomVisionCannotCreateProject,
@@ -42,6 +43,13 @@ class Project(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True, default="")
     download_uri = models.CharField(max_length=1000, null=True, blank=True, default="")
     download_uri_fp16 = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
+    is_prediction_module = models.BooleanField(default=False)
+    prediction_uri = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
+    prediction_header = models.CharField(
         max_length=1000, null=True, blank=True, default=""
     )
     training_counter = models.IntegerField(default=0)
@@ -90,6 +98,14 @@ class Project(models.Model):
         trainer = self.setting.get_trainer_obj()
         return trainer.get_project(self.customvision_id)
 
+    def get_prediction_uri(self):
+        """get_prediction_uri"""
+        if self.prediction_uri:
+            return self.prediction_uri
+        if self.customvision_id and self.download_uri and self.download_uri_fp16:
+            return prediction_module_url()
+        return self.prediction_uri
+
     def validate(self, raise_exception: bool = False) -> bool:
         """validate.
 
@@ -127,8 +143,8 @@ class Project(models.Model):
             return
 
         # Don't change demo project
-        if instance.is_demo and instance.id:
-            raise ProjectCannotChangeDemoError
+        # if instance.is_demo and instance.id:
+        #    raise ProjectCannotChangeDemoError
 
         # Set default name
         instance.name = (
@@ -269,6 +285,8 @@ class Project(models.Model):
         """
         try:
             if self.is_demo:
+                return True
+            if self.is_prediction_module:
                 return True
             return self.is_trainable(raise_exception=True)
         except APIException:

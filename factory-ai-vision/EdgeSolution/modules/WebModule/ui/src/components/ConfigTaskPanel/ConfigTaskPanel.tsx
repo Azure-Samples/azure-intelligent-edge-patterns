@@ -10,6 +10,8 @@ import {
   TextField,
   PanelType,
   getTheme,
+  Pivot,
+  PivotItem,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -23,6 +25,7 @@ import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
 import { OnChangeType } from './type';
+import { Url } from '../../enums';
 
 import { extractRecommendFps } from '../../utils/extractRecommendFps';
 
@@ -163,7 +166,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       await dispatch(getConfigure((projectId as unknown) as number));
 
       onDismiss();
-      history.push('/home/deployment');
+      history.push(Url.DEPLOYMENT);
     }
     setdeploying(false);
   };
@@ -191,56 +194,66 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
       type={PanelType.smallFluid}
       styles={panelStyles}
     >
-      <Stack tokens={{ childrenGap: 10 }} styles={{ root: { width: '300px' } }}>
-        <TextField required value={projectData.name} onChange={(_, newValue) => onChange('name', newValue)} />
-        <Dropdown
-          label="Model"
-          options={trainingProjectOptions}
-          required
-          selectedKey={projectData.trainingProject}
-          onChange={(_, options) => {
-            onChange('trainingProject', options.key as number);
-          }}
-        />
-        <Dropdown
-          label="Camera"
-          multiSelect
-          options={cameraOptions}
-          required
-          selectedKeys={projectData.cameras}
-          onChange={(_, option) => {
-            onChange(
-              'cameras',
-              option.selected
-                ? [...projectData.cameras, option.key as number]
-                : projectData.cameras.filter((key) => key !== option.key),
-            );
-          }}
-        />
-        <Dropdown
-          label="Objects"
-          multiSelect
-          options={partOptions}
-          required
-          selectedKeys={projectData.parts}
-          onChange={(_, option) => {
-            if (option) {
-              onChange(
-                'parts',
-                option.selected
-                  ? [...projectData.parts, option.key as number]
-                  : projectData.parts.filter((key) => key !== option.key),
-              );
-            }
-          }}
-        />
-      </Stack>
-      <AdvancedOptions
-        projectData={projectData}
-        selectedCameraOptions={selectedCameraOptions}
-        selectedPartOptions={selectedPartOptions}
-        onChange={onChange}
-      />
+      <Pivot>
+        <PivotItem headerText="Basic">
+          <Stack tokens={{ childrenGap: 10 }} styles={{ root: { paddingTop: '30px', width: '300px' } }}>
+            <TextField
+              required
+              value={projectData.name}
+              onChange={(_, newValue) => onChange('name', newValue)}
+            />
+            <Dropdown
+              label="Model"
+              options={trainingProjectOptions}
+              required
+              selectedKey={projectData.trainingProject}
+              onChange={(_, options) => {
+                onChange('trainingProject', options.key as number);
+              }}
+            />
+            <Dropdown
+              label="Camera"
+              multiSelect
+              options={cameraOptions}
+              required
+              selectedKeys={projectData.cameras}
+              onChange={(_, option) => {
+                onChange(
+                  'cameras',
+                  option.selected
+                    ? [...projectData.cameras, option.key as number]
+                    : projectData.cameras.filter((key) => key !== option.key),
+                );
+              }}
+            />
+            <Dropdown
+              label="Objects"
+              multiSelect
+              options={partOptions}
+              required
+              selectedKeys={projectData.parts}
+              onChange={(_, option) => {
+                if (option) {
+                  onChange(
+                    'parts',
+                    option.selected
+                      ? [...projectData.parts, option.key as number]
+                      : projectData.parts.filter((key) => key !== option.key),
+                  );
+                }
+              }}
+            />
+          </Stack>
+        </PivotItem>
+        <PivotItem headerText="Advanced">
+          <AdvancedOptions
+            projectData={projectData}
+            selectedCameraOptions={selectedCameraOptions}
+            selectedPartOptions={selectedPartOptions}
+            onChange={onChange}
+          />
+        </PivotItem>
+      </Pivot>
     </Panel>
   );
 };

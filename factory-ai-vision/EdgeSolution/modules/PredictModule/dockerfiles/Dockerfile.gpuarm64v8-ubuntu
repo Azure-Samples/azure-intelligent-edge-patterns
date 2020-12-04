@@ -1,0 +1,86 @@
+# Still testing
+# Base
+# --------------------------------------------------------
+FROM arm64v8/ubuntu as base
+
+RUN apt-get update \
+    && apt-get install -y locales \
+    && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales \
+    && update-locale LANG=en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+ENV DEBIAN_FRONTEND noninteractive
+#
+RUN apt-get install -y python3
+RUN apt-get -y install python3-pip
+RUN apt-get install -y libgl1-mesa-glx
+RUN apt-get install -y python3-cryptography
+RUN apt-get install -y python3-zmq
+RUN apt-get install -y python3-opencv
+RUN apt-get install -y python3-ruamel.yaml
+
+# Onnx Runtime Builder
+# --------------------------------------------------------
+From base as onnxruntime-builder
+ARG ONNXRUNTIME_REPO=https://github.com/Microsoft/onnxruntime
+ARG ONNXRUNTIME_BRANCH=master
+
+RUN mkdir /code
+WORKDIR /code
+ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:/code/cmake-3.14.3-Linux-x86_64/bin:/opt/miniconda/bin:${PATH}
+ENV LD_LIBRARY_PATH /opt/miniconda/lib:$LD_LIBRARY_PATH
+
+# Prepare onnxruntime repository & build onnxruntime with TensorRT
+RUN apt-get install -y git
+RUN git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime
+RUN /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh
+RUN cp onnxruntime/docs/Privacy.md /code/Privacy.md
+RUN cp onnxruntime/dockerfiles/LICENSE-IMAGE.txt /code/LICENSE-IMAGE.txt
+RUN cp onnxruntime/ThirdPartyNotices.txt /code/ThirdPartyNotices.txt
+RUN cd onnxruntime &&\
+    /bin/sh ./build.sh --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /workspace/tensorrt --config Release --build_wheel --update --build --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER)
+RUN pip3 install /code/onnxruntime/build/Linux/Release/dist/*.whl
+RUN cd .. &&\
+    rm -rf onnxruntime cmake-3.14.3-Linux-x86_64
+
+# Final result
+# --------------------------------------------------------
+FROM onnxruntime-builder as final
+
+RUN mkdir /app
+WORKDIR /app
+
+RUN apt-get install -y numpy
+COPY requirements.txt ./
+RUN pip3 install --upgrade pip
+RUN pip3 install -U certifi --ignore-installed
+RUN pip3 install -r requirements.txt --ignore-installed && \
+    pip3 install flask
+
+COPY coco_classes.txt ./
+COPY default_model default_model/
+COPY default_model_6parts default_model_6parts/
+COPY sample_video sample_video/
+COPY scenario_models scenario_models/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+
+COPY config.py ./
+COPY exception_handler.py ./
+COPY inference_engine.py ./
+COPY inferencing_pb2.py ./
+COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
+COPY model_wrapper.py ./
+COPY object_detection.py ./
+COPY object_detection2.py ./
+COPY onnxruntime_predict.py ./
+COPY server.py ./
+COPY utility.py ./
+
+EXPOSE 5558
+EXPOSE 5000
+
+CMD [ "python3 server.py" ]

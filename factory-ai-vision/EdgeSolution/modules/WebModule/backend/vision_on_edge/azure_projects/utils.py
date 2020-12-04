@@ -244,21 +244,33 @@ def train_project_worker(project_id):
         project_id: Django ORM project id
     """
     # =====================================================
-    # 0. Get Project in Django                          ===
+    # 0. Bypass project that need no traing             ===
     # =====================================================
     project_obj = Project.objects.get(pk=project_id)
     logger.info("Project id: %s", project_obj.id)
-    if not project_obj.setting or not project_obj.setting.is_trainer_valid:
-        upcreate_training_status(
-            project_id=project_obj.id, status="failed", log="Custom Vision Access Error"
-        )
-        return
     if project_obj.is_demo:
         logger.info("Demo project is already trained")
         upcreate_training_status(
             project_id=project_obj.id,
             need_to_send_notification=True,
             **progress.PROGRESS_0_OK,
+        )
+        return
+    if project_obj.is_prediction_module:
+        logger.info("Prediction Module need no train.")
+        upcreate_training_status(
+            project_id=project_obj.id,
+            need_to_send_notification=True,
+            **progress.PROGRESS_0_OK,
+        )
+        return
+
+    # =====================================================
+    # 0. Get Project in Django                          ===
+    # =====================================================
+    if not project_obj.setting or not project_obj.setting.is_trainer_valid:
+        upcreate_training_status(
+            project_id=project_obj.id, status="failed", log="Custom Vision Access Error"
         )
         return
 

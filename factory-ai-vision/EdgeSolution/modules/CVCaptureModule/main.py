@@ -62,9 +62,10 @@ RTSPSIM_PREFIX = "rtsp://rtspsim:554/media"
 async def create_stream(stream: Stream):
     print("[INFO] Creating Stream", stream.stream_id)
     rtsp = stream.rtsp
-    if rtsp.startswith(RTSPSIM_PREFIX):
+    if rtsp.startswith(RTSPSIM_PREFIX) and '/upload/' not in rtsp:
         rtsp = "videos" + rtsp.split(RTSPSIM_PREFIX)[1]
-    stream_manager.add_stream(stream.stream_id, rtsp, stream.fps, stream.endpoint)
+    stream_manager.add_stream(stream.stream_id, rtsp,
+                              stream.fps, stream.endpoint)
 
     # FIXME use your stream manager to fix it
 

@@ -18,7 +18,7 @@ class ObjectDetection(object):
     ANCHORS = np.array([[0.573, 0.677], [1.87, 2.06], [
                        3.34, 5.47], [7.88, 3.53], [9.77, 9.17]])
     IOU_THRESHOLD = 0.45
-    DEFAULT_INPUT_SIZE = 512 * 512
+    DEFAULT_INPUT_SIZE = 416 * 416
 
     def __init__(self, labels, prob_threshold=0.10, max_detections=20):
         """Initialize the class
@@ -209,7 +209,7 @@ class ObjectDetection(object):
         #logging.info('Postprocess time: {0}'.format(end_post))
 
         #logging.info('***** avg *****')
-        #logging.info('[avg] pre: {0}, inf: {1}, post: {2}'.format(
+        # logging.info('[avg] pre: {0}, inf: {1}, post: {2}'.format(
         #    np.mean(self.pre), np.mean(self.inf), np.mean(self.post)))
         #logging.info('***** avg *****')
 

@@ -38,7 +38,7 @@ if [ "$isCfg" = true ]; then
       fi
   done
   
-  source factoryai_configs/$opt
+  source factoryai_configs/factoryai_cfgs/$opt
   echo Read from config ...
   echo '################################################'
   cat factoryai_configs/factoryai_cfgs/$opt
@@ -253,6 +253,10 @@ if [ "$isCfg" != true ]; then
           done
         fi
 
+	if [ `cat factoryai_configs/ams_cfgs/"$amsServiceName".cfg  | grep amsServicePrincipalAppId | wc -l ` -eq 0 ]; then
+		rm -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg
+	fi
+
 
 	if [ -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg ]; then
 		echo "Using Existing Service Principle"
@@ -264,7 +268,7 @@ if [ "$isCfg" != true ]; then
 		echo "TENANT_ID                :" $amsTenantId
 		echo "SERVICE_NAME             :" $amsServiceName
 		echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
-		#echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
+		echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
 		echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
 		echo "============================================================"
 
@@ -491,6 +495,7 @@ if [ "$isCfg" != true ]; then
     echo amsTenantId='"'$amsTenantId'"' >> $factoryaiConfigName
     echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiConfigName
     echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiConfigName
+    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
 
     mkdir -p factoryai_configs/ams_cfgs
@@ -500,6 +505,7 @@ if [ "$isCfg" != true ]; then
     echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiAmsConfigName
     echo amsTenantId='"'$amsTenantId'"' >> $factoryaiAmsConfigName
     echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiAmsConfigName
+    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiAmsConfigName
     echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiAmsConfigName
 fi
 

@@ -44,7 +44,7 @@ def azure_setting_change_handler(**kwargs):
 
     logger.info("Setting endpoint or training_key changed...")
     logger.info("Deleting all project belong this settings....")
-    Project.objects.filter(setting=kwargs["instance"], is_demo=False).delete()
+    Project.objects.filter(setting=instance, is_demo=False).delete()
     logger.info("Creating a none-demo project....")
     if Project.objects.filter(setting=kwargs["instance"], is_demo=False).count() < 1:
         Project.objects.update_or_create(setting=kwargs["instance"], is_demo=False)

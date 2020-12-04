@@ -41,20 +41,22 @@ export const Progress: React.FC<{ projectId: number; cameraId: number }> = ({ pr
   }, 5000);
 
   return (
-    <Stack horizontalAlign="center" verticalAlign="center" grow tokens={{ childrenGap: 24 }}>
-      <Stack horizontalAlign="center" tokens={{ childrenGap: 5 }}>
-        {typeof trainingInfo.progress === 'number' && (
-          <>
-            <Text variant="xxLarge">{`${trainingInfo.progress}%`}</Text>
-            <Text>{trainingInfo.log}</Text>
-          </>
-        )}
+    <Stack styles={{ root: { height: '100%' } }}>
+      <Stack horizontalAlign="center" verticalAlign="center" grow tokens={{ childrenGap: 24 }}>
+        <Stack horizontalAlign="center" tokens={{ childrenGap: 5 }}>
+          {typeof trainingInfo.progress === 'number' && (
+            <>
+              <Text variant="xxLarge">{`${trainingInfo.progress}%`}</Text>
+              <Text>{trainingInfo.log}</Text>
+            </>
+          )}
+        </Stack>
+        <ProgressIndicator
+          barHeight={4}
+          styles={{ root: { width: '600px' } }}
+          percentComplete={trainingInfo.progress !== null ? trainingInfo.progress / 100 : null}
+        />
       </Stack>
-      <ProgressIndicator
-        barHeight={4}
-        styles={{ root: { width: '600px' } }}
-        percentComplete={trainingInfo.progress !== null ? trainingInfo.progress / 100 : null}
-      />
     </Stack>
   );
 };

@@ -28,7 +28,7 @@ exitWithError() {
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing apt-packages "
-apt-get update && apt-get install -y jq coreutils
+apt-get update && apt-get install -y jq coreutils unzip
 echo "$(info) Apt-packages installed"
 
 printf "\n%60s\n" " " | tr ' ' '-'
@@ -89,18 +89,18 @@ IOTHUB_CONNECTION_STRING=$(az iot hub show-connection-string --name ${IOTHUB_NAM
 CUSTOM_VISION_TRAINING_KEY=$(az cognitiveservices account keys list --name ${CUSTOMVISION_NAME} -g ${RESOURCE_GROUP} | jq ".key1")
 CUSTOM_VISION_ENDPOINT=$(az cognitiveservices account show --name ${CUSTOMVISION_NAME} -g ${RESOURCE_GROUP} | jq ".properties.endpoint")
 SUBSCRIPTION_ID=$(az account show | jq ".id")
-TENANT_ID=$(az account show | jq ".managedByTenants[0].tenantId")
-AMS_SP_SECRET=$(echo ${AMS_SP_JSON} | jq ".AadSecret")
-AMS_SP_ID=$(echo ${AMS_SP_JSON} | jq ".AadClientId")
+TENANT_ID=$(az account show | jq ".tenantId")
+AMS_SP_SECRET="\"${AMS_SP_SECRET}\""
+AMS_SP_ID="\"${AMS_SP_NAME}\""
 AMS_NAME="\"${AMS_NAME}\""
 
 printf "\n%60s\n" " " | tr ' ' '-'
-echo "$(info) Generating .env ${ENV_PATH}"
+echo "$(info) Generating .env at: ${ENV_PATH}"
 
 sed -i -e "s|^CONTAINER_REGISTRY_NAME=.*$|CONTAINER_REGISTRY_NAME=\"${CONTAINER_REGISTRY_NAME}\"|g" ${ENV_PATH}
 sed -i -e "s|^CONTAINER_REGISTRY_USERNAME=.*$|CONTAINER_REGISTRY_USERNAME=\"${CONTAINER_REGISTRY_USERNAME}\"|g" ${ENV_PATH}
 sed -i -e "s|^CONTAINER_REGISTRY_PASSWORD=.*$|CONTAINER_REGISTRY_PASSWORD=\"${CONTAINER_REGISTRY_PASSWORD}\"|g" ${ENV_PATH}
-sed -i -e "s|^IOTHUB_CONNECTION_STRING=.*$|IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING|g" ${ENV_PATH}
+sed -i -e "s|^IOTHUB_CONNECTION_STRING=.*$|IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}|g" ${ENV_PATH}
 sed -i -e "s/^SUBSCRIPTION_ID=.*$/SUBSCRIPTION_ID=${SUBSCRIPTION_ID}/g" ${ENV_PATH}
 sed -i -e "s/^RESOURCE_GROUP=.*$/RESOURCE_GROUP=\"${RESOURCE_GROUP}\"/g" ${ENV_PATH}
 sed -i -e "s/^TENANT_ID=.*$/TENANT_ID=${TENANT_ID}/g" ${ENV_PATH}
@@ -109,11 +109,14 @@ sed -i -e "s/^SERVICE_PRINCIPAL_APP_ID=.*$/SERVICE_PRINCIPAL_APP_ID=${AMS_SP_ID}
 sed -i -e "s/^SERVICE_PRINCIPAL_SECRET=.*$/SERVICE_PRINCIPAL_SECRET=${AMS_SP_SECRET}/g" ${ENV_PATH}
 sed -i -e "s|^CUSTOM_VISION_ENDPOINT=.*$|CUSTOM_VISION_ENDPOINT=${CUSTOM_VISION_ENDPOINT}|g" ${ENV_PATH}
 sed -i -e "s/^CUSTOM_VISION_TRAINING_KEY.*$/CUSTOM_VISION_TRAINING_KEY=${CUSTOM_VISION_TRAINING_KEY}/g" ${ENV_PATH}
+sed -i -e "s/^LVA_MODE.*$/LVA_MODE=\"${VIDEO_CAPTURE_MODULE}\"/g" ${ENV_PATH}
 rm "${ENV_PATH}-e"
 
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Choosing deployment template"
+cat ${ENV_PATH}
+cp ${ENV_PATH} /mnt/azscripts/azscriptinput/.env
 
 echo "$(info) INFERENCE_MODULE_RUNTIME: ${INFERENCE_MODULE_RUNTIME}"
 echo "$(info) EDGE_DEVICE_ARCHITECTURE: ${EDGE_DEVICE_ARCHITECTURE}"
@@ -145,7 +148,7 @@ MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.template.json"
 MANIFEST_TEMPLATE_PATH="${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
 echo "$(info) Deployment template choosen: ${MANIFEST_TEMPLATE_NAME}"
 echo "$(info) Deployment template file path: ${MANIFEST_TEMPLATE_PATH}"
-echo "$(pwd)"
+echo "$(info) PWD: $(pwd)"
 
 
 

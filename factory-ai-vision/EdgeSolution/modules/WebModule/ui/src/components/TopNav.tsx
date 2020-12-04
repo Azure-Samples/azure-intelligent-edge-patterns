@@ -14,8 +14,11 @@ import { useBoolean } from '@uifabric/react-hooks';
 import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
-import { FeedbackDialog } from './FeedbackDialog';
 import { selectUnreadNotification } from '../store/notificationSlice';
+
+import { Url } from '../enums';
+
+import { FeedbackDialog } from './FeedbackDialog';
 import { NotificationPanel } from './NotificationPanel';
 
 const theme = getTheme();
@@ -106,13 +109,13 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
       iconOnly: true,
       onRenderIcon: () => <WaffleIcon style={{ fontSize: '20px' }} />,
       buttonStyles: commandBarBtnStyles,
-      onClick: () => history.push('/home'),
+      onClick: () => history.push(Url.HOME),
     },
     {
       key: 'title',
       text: 'Vision on Edge',
       buttonStyles: commandBarBtnStyles,
-      onClick: () => history.push('/home'),
+      onClick: () => history.push(Url.HOME),
     },
   ];
 

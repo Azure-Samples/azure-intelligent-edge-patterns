@@ -267,7 +267,7 @@
             {
               "type": "Microsoft.Resources/deploymentScripts",
               "apiVersion": "2019-10-01-preview",
-              "name": "ModuleDeployment",
+              "name": "[concat('ModuleDeployment',parameters('utcValue'))]",
               "location": "[parameters('resourceGroupLocation')]",
               "kind": "AzureCLI",
               "identity": {

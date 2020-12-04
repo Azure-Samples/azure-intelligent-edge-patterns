@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { Stage, Image as KonvaImage, Layer } from 'react-konva';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
-
 import { connect } from 'react-redux';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
+import { Shape, VideoAnno } from '../../store/shared/BaseShape';
+import { InferenceMode } from '../../store/project/projectTypes';
+import { Position2D } from '../../store/type';
+
 import {
   CreatingState,
   finishLabel as finishLabelAction,
@@ -15,15 +18,15 @@ import {
   updateVideoAnno as updateVideoAnnoAction,
   videoAnnosSelectorFactory,
 } from '../../store/videoAnnoSlice';
-import { Shape, VideoAnno } from '../../store/shared/BaseShape';
-import { isAOIShape, isCountingLine, isDangerZone } from '../../store/shared/VideoAnnoUtil';
 import { selectCameraById } from '../../store/cameraSlice';
-import { InferenceMode } from '../../store/project/projectTypes';
+
 import useImage from '../LabelingPage/util/useImage';
 import { useInterval } from '../../hooks/useInterval';
+import { isAOIShape, isCountingLine, isDangerZone } from '../../store/shared/VideoAnnoUtil';
 import { dummyFunction } from '../../utils/dummyFunction';
+import { plusOrderVideoAnnos } from '../../utils/plusVideoAnnos';
+
 import { VideoAnnosGroup } from './VideoAnnosGroup';
-import { Position2D } from '../../store/type';
 
 /**
  * Because the layer has been scaled to fit the window size, we need to transform the coordinate to the
@@ -158,7 +161,10 @@ const Component: React.FC<LiveViewProps> = ({
     const { x, y } = getRelativePosition(e.target.getLayer());
     if (creatingShape === Shape.BBox) updateVideoAnno(videoAnnos[videoAnnos.length - 1].id, { x2: x, y2: y });
     else if (creatingShape === Shape.Polygon || creatingShape === Shape.Line)
-      updateVideoAnno(videoAnnos[videoAnnos.length - 1].id, { idx: -1, vertex: { x, y } });
+      updateVideoAnno(videoAnnos[videoAnnos.length - 1].id, {
+        idx: -1,
+        vertex: { x, y },
+      });
   };
 
   useEffect(() => {
@@ -179,11 +185,11 @@ const Component: React.FC<LiveViewProps> = ({
   }, [videoAnnos]);
 
   const countingLines = useMemo(() => {
-    return videoAnnos.filter(isCountingLine);
+    return plusOrderVideoAnnos(videoAnnos.filter(isCountingLine));
   }, [videoAnnos]);
 
   const dangerZone = useMemo(() => {
-    return videoAnnos.filter(isDangerZone);
+    return plusOrderVideoAnnos(videoAnnos.filter(isDangerZone));
   }, [videoAnnos]);
 
   return (

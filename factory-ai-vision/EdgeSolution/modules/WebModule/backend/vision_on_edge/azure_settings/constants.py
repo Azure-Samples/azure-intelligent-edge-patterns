@@ -1,0 +1,4 @@
+"""App Constants
+"""
+
+DEFAULT_SETTING_NAME = "DEFAULT_SETTING"

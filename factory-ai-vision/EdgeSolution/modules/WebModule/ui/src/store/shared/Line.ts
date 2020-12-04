@@ -7,6 +7,7 @@ import { Position2D, LineLabel } from '../type';
 export type LineType = VideoAnno & {
   type: Shape.Line;
   vertices: LineLabel;
+  order?: number;
 };
 
 export class Line extends BaseShape {
