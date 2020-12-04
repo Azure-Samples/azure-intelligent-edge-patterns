@@ -469,9 +469,14 @@ class Stream:
             image = cv2.resize(image, (width, height))
             data = image.tobytes()
             res = requests.post(self.model.endpoint, data=data)
-            lva_prediction = json.loads(res.json()[0])['inferences']
-            inf_time = json.loads(res.json()[0])['inf_time']
-            predictions = lva_to_customvision_format(lva_prediction)
+            if res.json()[1] == 200:
+                lva_prediction = json.loads(res.json()[0])['inferences']
+                inf_time = json.loads(res.json()[0])['inf_time']
+                predictions = lva_to_customvision_format(lva_prediction)
+            else:
+                logger.warning('No inference result')
+                predictions = []
+                inf_time = 0
         else:
             image = cv2.resize(image, (416, 416))   # for yolo enpoint testing
             str_encode = cv2.imencode('.jpg', image)[1].tostring()
