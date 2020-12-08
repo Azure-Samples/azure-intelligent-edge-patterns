@@ -164,7 +164,6 @@ COPY api/__init__.py ./api/__init__.py
 COPY api/models.py ./api/models.py
 COPY config.py ./
 COPY exception_handler.py ./
-COPY http_inference_engine.py ./
 COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
 COPY model_wrapper.py ./
 COPY object_detection.py ./

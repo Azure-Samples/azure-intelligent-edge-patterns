@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:experimental
 # =========================================================
 # Base
 # =========================================================
@@ -40,24 +41,44 @@ RUN apt-get update && \
 WORKDIR /app
 
 RUN pip install --upgrade pip
-RUN pip install wheel cython protobuf
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install wheel cython protobuf
 COPY requirements/base.txt ./requirements/base.txt
-RUN pip install $(cat ./requirements/base.txt | grep numpy)
-RUN ["pip", "install", "-r", "requirements/base.txt"]
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install $(cat ./requirements/base.txt | grep numpy)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements/base.txt
 
 # =========================================================
 # Install onnxruntime
 # =========================================================
 ARG ONNXRUNTIME_REPO="https://github.com/Microsoft/onnxruntime"
 ARG ONNXRUNTIME_SERVER_BRANCH="rel-1.5.2"
+ARG CMAKE_VERSION="3.14.3"
+ARG CMAKE_TAR_LINK="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
 
 WORKDIR /code
 
-RUN git clone \
+RUN wget --no-hsts \
+	    --quiet \
+	    "${CMAKE_TAR_LINK}" &&\
+    tar zxf "cmake-${CMAKE_VERSION}.tar.gz" &&\
+    rm "cmake-${CMAKE_VERSION}.tar.gz"
+
+RUN cd /code/cmake-${CMAKE_VERSION} && \
+    ./configure --system-curl --parallel=${SYSTEM_CORES} && \
+    make -j${SYSTEM_CORES} && \
+    make install && \
+    cd /code && \
+    rm -rf /code/cmake-${CMAKE_VERSION}
+
+WORKDIR /code
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    git clone \
     --single-branch \
     --branch ${ONNXRUNTIME_SERVER_BRANCH} \
     --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
-    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh && \
     cd onnxruntime && \
     /bin/sh ./build.sh \
     --use_openmp \
@@ -71,45 +92,16 @@ RUN git clone \
     cd .. && \
     rm -rf onnxruntime
 
-RUN python -c "import onnxruntime; print(onnxruntime.__version__)"
-
 # =========================================================
 # Install opencv
 # =========================================================
-ARG OPENCV_REPO="https://github.com/opencv/opencv.git"
-ARG OPENCV_TAG="4.4.0"
-
-WORKDIR /code
-
-RUN apt-get update && \
-    apt-get install -y\
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
-    libgstreamer-plugins-base1.0-dev \
-    libgstreamer1.0-dev \
-    libgtk-3-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libopenexr-dev \
-    libtiff-dev \
-    libwebp-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN git clone --single-branch \
-    --branch ${OPENCV_TAG} \
-    --recursive ${OPENCV_REPO} \
-    opencv && \
-    cd opencv && \
-    mkdir build && \
-    cd build && \
-    cmake ../ && \
-    make -j${SYSTEM_CORES} && \
-    make install && \
-    cd /code && \
-    rm -rf opencv
-
-RUN ["python","-c", "\"import cv2;print(cv2.__version__)\""]
+WORKDIR /app
+COPY requirements/cpuarm64v8.txt ./requirements/cpuarm64v8.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    cp /usr/bin/make /usr/bin/make.bak && \
+    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
+    pip install -r requirements/cpuarm64v8.txt && \
+    mv /usr/bin/make.bak /usr/bin/make
 
 # =========================================================
 # Copy Source Code
@@ -144,8 +136,8 @@ COPY model_wrapper.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
 COPY onnxruntime_predict.py ./
-COPY scenarios.py ./
 COPY server.py ./
+COPY scenarios.py ./
 COPY shared_memory.py ./
 COPY sort.py ./
 COPY stream_manager.py ./

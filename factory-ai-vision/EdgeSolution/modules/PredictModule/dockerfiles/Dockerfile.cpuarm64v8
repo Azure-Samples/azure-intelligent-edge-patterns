@@ -133,7 +133,6 @@ COPY model_wrapper.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
 COPY onnxruntime_predict.py ./
-COPY scenarios.py ./
 COPY server.py ./
 COPY utility.py ./
 
