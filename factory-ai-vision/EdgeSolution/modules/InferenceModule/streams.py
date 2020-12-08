@@ -16,8 +16,6 @@ from shapely.geometry import Polygon
 from api.models import StreamModel
 from exception_handler import PrintGetExceptionDetails
 from invoke import gm
-from object_detection import ObjectDetection
-from onnxruntime_predict import ONNXRuntimeObjectDetection
 
 # from tracker import Tracker
 from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection

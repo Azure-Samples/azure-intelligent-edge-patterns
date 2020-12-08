@@ -134,6 +134,12 @@ def update_model(request_body: UploadModelBody):
         return "ok"
 
 
+@app.get("/get_device")
+def get_device():
+    device = onnx.get_device()
+    return {"device": device}
+
+
 def customvision_to_lva_format(predictions):
     results = []
     for prediction in predictions:

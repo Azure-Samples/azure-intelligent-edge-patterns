@@ -83,6 +83,7 @@ COPY invoke.py ./
 COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
 COPY main.py ./
 COPY media_pb2.py ./
+COPY model_object.py ./
 COPY model_wrapper.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./

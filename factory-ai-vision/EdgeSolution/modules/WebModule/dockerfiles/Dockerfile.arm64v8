@@ -18,7 +18,7 @@ RUN echo ${GIT_LOG} > ./build/static/git_sha1.txt
 # =========================================================
 # === Build Backend                                     ===
 # =========================================================
-FROM arm64v8/python:3.8 as backend-base
+FROM arm64v8/python:3.8-slim-buster as backend-base
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

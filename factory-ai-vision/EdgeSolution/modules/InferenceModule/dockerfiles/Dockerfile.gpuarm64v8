@@ -15,25 +15,25 @@ ARG SYSTEM_CORES=4
 # =========================================================
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential \
-        cmake \
-        git \
-        wget \
-        unzip \
-        yasm \
-        pkg-config \
-        libtbb2 \
-        libtbb-dev \
-        libpq-dev \
-        libprotobuf-dev \
-        protobuf-compiler \
-        libgeos-dev \
-        ca-certificates \
-        bzip2 \
-        unzip \
-        curl \
-        libcurl4-openssl-dev \
-        libssl-dev && \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    unzip \
+    yasm \
+    pkg-config \
+    libtbb2 \
+    libtbb-dev \
+    libpq-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libgeos-dev \
+    ca-certificates \
+    bzip2 \
+    unzip \
+    curl \
+    libcurl4-openssl-dev \
+    libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 # protobuf-compiler:   https://github.com/onnx/onnx#build-onnx-on-arm-64
 # libprotobuf-dev:     https://github.com/onnx/onnx#build-onnx-on-arm-64
@@ -48,12 +48,12 @@ ENV CONDA_DIR=/opt/conda
 ENV PATH=${CONDA_DIR}/bin:${PATH}
 
 RUN wget --no-hsts \
-        --quiet \
-        https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-aarch64.sh \
-        -O /tmp/miniforge.sh && \
+    --quiet \
+    https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-aarch64.sh \
+    -O /tmp/miniforge.sh && \
     /bin/bash /tmp/miniforge.sh \
-        -b \
-        -p ${CONDA_DIR} && \
+    -b \
+    -p ${CONDA_DIR} && \
     rm /tmp/miniforge.sh && \
     conda clean -tipsy && \
     find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
@@ -91,8 +91,8 @@ ARG CMAKE_TAR_LINK="https://github.com/Kitware/CMake/releases/download/v${CMAKE_
 WORKDIR /code
 
 RUN wget --no-hsts \
-	    --quiet \
-	    "${CMAKE_TAR_LINK}" &&\
+    --quiet \
+    "${CMAKE_TAR_LINK}" &&\
     tar zxf "cmake-${CMAKE_VERSION}.tar.gz" &&\
     rm "cmake-${CMAKE_VERSION}.tar.gz"
 
@@ -111,22 +111,22 @@ RUN apt-get update && \
     libcudnn8-dev=8.0.5.39-1+cuda11.1 \
     && rm -rf /var/lib/apt/lists/*
 RUN git clone \
-        --single-branch \
-        --branch ${ONNXRUNTIME_SERVER_BRANCH} \
-        --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
+    --single-branch \
+    --branch ${ONNXRUNTIME_SERVER_BRANCH} \
+    --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
     cd onnxruntime && \
     source activate python38 && \
     /bin/sh ./build.sh \
-        --use_openmp \
-        --config Release \
-        --build_wheel \
-        --update \
-        --build \
-        --parallel \
-        --use_cuda \
-        --cuda_home /usr/local/cuda \
-        --cudnn_home /usr/lib/aarch64-linux-gnu \
-        --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER) && \
+    --use_openmp \
+    --config Release \
+    --build_wheel \
+    --update \
+    --build \
+    --parallel \
+    --use_cuda \
+    --cuda_home /usr/local/cuda \
+    --cudnn_home /usr/lib/aarch64-linux-gnu \
+    --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER) && \
     pip install /code/onnxruntime/build/Linux/Release/dist/*.whl && \
     cd .. && \
     rm -rf onnxruntime
@@ -176,6 +176,7 @@ COPY invoke.py ./
 COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
 COPY main.py ./
 COPY media_pb2.py ./
+COPY model_object.py ./
 COPY model_wrapper.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
