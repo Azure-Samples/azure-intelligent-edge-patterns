@@ -42,28 +42,28 @@ RUN apt-get update && \
 # =========================================================
 # Install Python package
 # =========================================================
-WORKDIR /code/
-ARG MINIFORGE_VERSION=4.8.2-1
-ENV CONDA_DIR=/opt/conda
-ENV PATH=${CONDA_DIR}/bin:${PATH}
+# WORKDIR /code/
+# ARG MINIFORGE_VERSION=4.8.2-1
+# ENV CONDA_DIR=/opt/conda
+# ENV PATH=${CONDA_DIR}/bin:${PATH}
 
-RUN wget --no-hsts \
-    --quiet \
-    https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-aarch64.sh \
-    -O /tmp/miniforge.sh && \
-    /bin/bash /tmp/miniforge.sh \
-    -b \
-    -p ${CONDA_DIR} && \
-    rm /tmp/miniforge.sh && \
-    conda clean -tipsy && \
-    find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
-    find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
-    conda clean -afy
+# RUN wget --no-hsts \
+#     --quiet \
+#     https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-aarch64.sh \
+#     -O /tmp/miniforge.sh && \
+#     /bin/bash /tmp/miniforge.sh \
+#     -b \
+#     -p ${CONDA_DIR} && \
+#     rm /tmp/miniforge.sh && \
+#     conda clean -tipsy && \
+#     find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
+#     find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
+#     conda clean -afy
 
-RUN conda create --name python38 python=3.8 && \
-    echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> /etc/skel/.bashrc && \
-    echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> ~/.bashrc
-SHELL ["/bin/bash", "-c"]
+# RUN conda create --name python38 python=3.8 && \
+#     echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> /etc/skel/.bashrc && \
+#     echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate python38" >> ~/.bashrc
+# SHELL ["/bin/bash", "-c"]
 
 # =========================================================
 # Install Python package
@@ -76,16 +76,19 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip && \
     pip install wheel cython protobuf
 # Workaround scikit image requires numpy while dependency is not resolved
-RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install $(cat ./requirements/base.txt | grep numpy)
+# RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install $(cat ./requirements/base.txt | grep numpy)
+RUN --mount=type=cache,target=/root/.cache/pip pip install $(cat ./requirements/base.txt | grep numpy)
 RUN mv /usr/bin/make.bak /usr/bin/make
-RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install -r requirements/base.txt
+# RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install -r requirements/base.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements/base.txt
 
 # =========================================================
 # Install onnxruntime
 # =========================================================
 WORKDIR /code/onnxruntime
 COPY prebuild/jetson/onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl .
-RUN source activate python38 && pip install onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl
+# RUN source activate python38 && pip install onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl
+RUN pip install onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl
 
 # =========================================================
 # Install opencv
@@ -95,13 +98,13 @@ COPY requirements/gpuarm64v8.txt ./requirements/gpuarm64v8.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     cp /usr/bin/make /usr/bin/make.bak && \
     echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
-    source activate python38 && pip install -r requirements/gpuarm64v8.txt && \
+    pip install -r requirements/gpuarm64v8.txt && \
     mv /usr/bin/make.bak /usr/bin/make
 
 # =========================================================
 # Shapely Work arount
 # =========================================================
-RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
+# RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
 
 # =========================================================
 # Copy Source Code
@@ -131,4 +134,4 @@ COPY utility.py ./
 
 EXPOSE 7777
 
-CMD [ "python3", "server.py"]
+CMD [ "python", "server.py"]
