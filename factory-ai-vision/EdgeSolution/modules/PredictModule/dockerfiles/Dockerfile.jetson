@@ -96,8 +96,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # =========================================================
 WORKDIR /app
 COPY requirements/gpuarm64v8.txt ./requirements/gpuarm64v8.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    cp /usr/bin/make /usr/bin/make.bak && \
+RUN cp /usr/bin/make /usr/bin/make.bak && \
     source activate python38 && \
     conda install opencv && \
     mv /usr/bin/make.bak /usr/bin/make
