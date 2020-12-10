@@ -16,7 +16,7 @@ from typing import List
 import cv2
 import grpc
 import numpy as np
-import onnxruntime
+# import onnxruntime
 import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
@@ -37,7 +37,8 @@ from http_inference_engine import HttpInferenceEngine
 from inference_engine import InferenceEngine
 from invoke import gm
 from logging_conf import logging_config
-from model_wrapper import ONNXRuntimeModelDeploy
+# from model_wrapper import ONNXRuntimeModelDeploy
+from model_object import ModelObject
 from stream_manager import StreamManager
 from utility import is_edge
 
@@ -64,7 +65,8 @@ NO_DISPLAY = os.environ.get("NO_DISPLAY", "false")
 
 # Main thread
 
-onnx = ONNXRuntimeModelDeploy()
+# onnx = ONNXRuntimeModelDeploy()
+onnx = ModelObject()
 stream_manager = StreamManager(onnx)
 
 app = FastAPI(

@@ -15,7 +15,6 @@ import extension_pb2_grpc
 import inferencing_pb2
 import media_pb2
 from exception_handler import PrintGetExceptionDetails
-from model_wrapper import ONNXRuntimeModelDeploy
 from shared_memory import SharedMemoryManager
 
 # Get debug flag from env variable (Returns None if not set)
@@ -38,7 +37,8 @@ class State:
 
             # Get how data will be transferred
             if (
-                self._mediaStreamDescriptor.WhichOneof("data_transfer_properties")
+                self._mediaStreamDescriptor.WhichOneof(
+                    "data_transfer_properties")
                 is None
             ):
                 self._contentTransferType = TransferType.BYTES
@@ -160,7 +160,8 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
         try:
             # Get reference to raw bytes
             if clientState._contentTransferType == TransferType.BYTES:
-                rawBytes = memoryview(mediaSample.content_bytes.bytes).toreadonly()
+                rawBytes = memoryview(
+                    mediaSample.content_bytes.bytes).toreadonly()
             elif clientState._contentTransferType == TransferType.REFERENCE:
                 # Data sent over shared memory buffer
                 addressOffset = mediaSample.content_reference.address_offset
@@ -188,7 +189,8 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
             ):
 
                 # np.frombuffer is zero copy command
-                cvImage = cv2.imdecode(np.frombuffer(rawBytes, dtype=np.uint8), -1)
+                cvImage = cv2.imdecode(np.frombuffer(
+                    rawBytes, dtype=np.uint8), -1)
 
             # Handle RAW content (Just place holder for the user to handle each variation...)
             elif (
@@ -200,7 +202,8 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                 )
                 if pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.RGBA:
                     cvImage = cv2.cvtColor(
-                        np.frombuffer(rawBytes, dtype=np.uint8), cv2.COLOR_RGBA2RGB
+                        np.frombuffer(
+                            rawBytes, dtype=np.uint8), cv2.COLOR_RGBA2RGB
                     )
                 elif pixelFormat == media_pb2.VideoFrameSampleFormat.PixelFormat.BGR24:
                     # logging.info('&&&&&&&&&& BGR mode &&&&&&&&&&')
@@ -325,7 +328,8 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                     # logging.info(
                     #    '***** std. Inference time *****: {0}'.format(np.std(total_time)))
                 except:
-                    print("[ERROR] Unexpected error:", sys.exc_info(), flush=True)
+                    print("[ERROR] Unexpected error:",
+                          sys.exc_info(), flush=True)
                     predictions = []
             # stream_manager.update(cvImage, instance_id)
             # logging.debug(

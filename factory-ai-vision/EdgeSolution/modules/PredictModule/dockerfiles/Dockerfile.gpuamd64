@@ -35,15 +35,15 @@ ENV LC_ALL en_US.UTF-8
 # =========================================================
 # Install Miniconda
 # =========================================================
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN rm -rf /opt/miniconda
-RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
-RUN echo ". /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
-RUN conda init bash
-RUN conda create --name python38 python=3.8.5 -y
-SHELL ["conda", "run", "-n", "python38", "/bin/bash", "-c"]
-RUN which pip
-RUN which python3
+# RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# RUN rm -rf /opt/miniconda
+# RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
+# RUN echo ". /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
+# RUN conda init bash
+# RUN conda create --name python38 python=3.8.5 -y
+# SHELL ["conda", "run", "-n", "python38", "/bin/bash", "-c"]
+# RUN which pip
+# RUN which python3
 
 
 # =========================================================
@@ -81,4 +81,5 @@ COPY utility.py ./
 
 EXPOSE 7777
 
-CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py"]
+# CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py"]
+CMD [ "python", "server.py"]

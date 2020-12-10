@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -67,11 +61,9 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8181/tcp": [
-                      {
-                        "HostPort": "8181"
-                      }
-                    ]
+                    "8181/tcp": [{
+                      "HostPort": "8181"
+                    }]
                   }
                 }
               }
@@ -146,20 +138,16 @@
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.cpuamd64}",
+              "image": "${MODULES.InferenceModule.amd64}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ]
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }],
+                    "5558/tcp": [{
+                      "HostPort": "5558"
+                    }]
                   },
                   "runtime": "runc"
                 }
@@ -181,16 +169,12 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "9000/tcp": [
-                      {
-                        "HostPort": "9000"
-                      }
-                    ],
-                    "5559/tcp": [
-                      {
-                        "HostPort": "5559"
-                      }
-                    ]
+                    "9000/tcp": [{
+                      "HostPort": "9000"
+                    }],
+                    "5559/tcp": [{
+                      "HostPort": "5559"
+                    }]
                   },
                   "runtime": "runc"
                 }
