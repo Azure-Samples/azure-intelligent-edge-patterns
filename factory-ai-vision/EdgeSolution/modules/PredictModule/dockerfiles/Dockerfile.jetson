@@ -21,7 +21,7 @@ RUN apt-get update && \
     wget \
     unzip \
     yasm \
-    pkg-config \
+    pkg-config \    
     libtbb2 \
     libtbb-dev \
     libpq-dev \
@@ -73,6 +73,7 @@ COPY requirements/base.txt ./requirements/base.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     cp /usr/bin/make /usr/bin/make.bak && \
     echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
+    source activate python38 && \
     pip install --upgrade pip && \
     pip install wheel cython protobuf
 # Workaround scikit image requires numpy while dependency is not resolved
@@ -87,19 +88,20 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements/base.
 # =========================================================
 WORKDIR /code/onnxruntime
 COPY prebuild/jetson/onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl .
-# RUN source activate python38 && pip install onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl
-RUN pip install onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl
 
+RUN source activate python38 && pip install onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl
+RUN --mount=type=cache,target=/root/.cache/pip \
+    source activate python38 && \
+    pip uninstall -y onnx && \
+    pip install onnx
 # =========================================================
 # Install opencv
 # =========================================================
 WORKDIR /app
 COPY requirements/gpuarm64v8.txt ./requirements/gpuarm64v8.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    cp /usr/bin/make /usr/bin/make.bak && \
-    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
-    pip install -r requirements/gpuarm64v8.txt && \
-    mv /usr/bin/make.bak /usr/bin/make
+
+RUN source activate python38 && \
+    conda install opencv
 
 # =========================================================
 # Shapely Work arount
@@ -128,10 +130,9 @@ COPY model_wrapper.py ./
 COPY object_detection.py ./
 COPY object_detection2.py ./
 COPY onnxruntime_predict.py ./
-COPY scenarios.py ./
 COPY server.py ./
 COPY utility.py ./
 
 EXPOSE 7777
 
-CMD [ "python", "server.py"]
+CMD source activate activate python38 && python3 server.py

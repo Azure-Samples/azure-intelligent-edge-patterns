@@ -73,6 +73,7 @@ COPY requirements/base.txt ./requirements/base.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     cp /usr/bin/make /usr/bin/make.bak && \
     echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
+    source activate python38 && \
     pip install --upgrade pip && \
     pip install wheel cython protobuf
 # Workaround scikit image requires numpy while dependency is not resolved
@@ -152,4 +153,4 @@ COPY utility.py ./
 EXPOSE 5558
 EXPOSE 5000
 
-CMD [ "python3", "server.py", "-p", "44000"]
+CMD source activate python38 && python3 server.py -p 4000
