@@ -110,7 +110,7 @@ RUN source activate python38 && \
 # =========================================================
 # Shapely Work arount
 # =========================================================
-# RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
+RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
 
 # =========================================================
 # Copy Source Code

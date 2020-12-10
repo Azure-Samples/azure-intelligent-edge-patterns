@@ -110,6 +110,9 @@
               },
               "LVA_MODE": {
                 "value": "$LVA_MODE"
+              },
+              "IS_OPENCV": {
+                "value": "true"
               }
             },
             "settings": {
