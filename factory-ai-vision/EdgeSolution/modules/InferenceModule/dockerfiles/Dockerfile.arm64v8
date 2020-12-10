@@ -1,12 +1,9 @@
 # syntax = docker/dockerfile:experimental
-FROM arm64v8/python:3.8.6-slim-buster
+FROM goatwu1993/arm64-python3-opencv:py3.8.6-cv4.4.0.44
 
 WORKDIR /app
 
-WORKDIR /app
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US.UTF-8
-ARG SYSTEM_CORES=4
+ARG SYSTEM_CORES=8
 
 # =========================================================
 # Install system packages
@@ -15,87 +12,36 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
-    git \
-    wget \
-    unzip \
     yasm \
     pkg-config \
     libtbb2 \
     libtbb-dev \
     libpq-dev \
-    libprotobuf-dev \
-    protobuf-compiler \
-    libgeos-dev \
     ca-certificates \
     bzip2 \
-    unzip \
+    libgeos-dev \
     curl \
     libcurl4-openssl-dev \
     libssl-dev && \
     rm -rf /var/lib/apt/lists/*
-# protobuf-compiler:   https://github.com/onnx/onnx#build-onnx-on-arm-64
-# libprotobuf-dev:     https://github.com/onnx/onnx#build-onnx-on-arm-64
 # libgeos-dev:         Shapely
 
 # =========================================================
 # Install Python package
 # =========================================================
-WORKDIR /code/
-ARG MINIFORGE_VERSION=4.8.2-1
-ENV CONDA_DIR=/opt/conda
-ENV PATH=${CONDA_DIR}/bin:${PATH}
-
-RUN wget --no-hsts \
-    --quiet \
-    https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-aarch64.sh \
-    -O /tmp/miniforge.sh && \
-    /bin/bash /tmp/miniforge.sh \
-    -b \
-    -p ${CONDA_DIR} && \
-    rm /tmp/miniforge.sh && \
-    conda clean -tipsy && \
-    find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
-    find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
-    conda clean -afy
-
-
-# =========================================================
-# Install Python package
-# =========================================================
 WORKDIR /app
+RUN echo "/usr/bin/make --jobs=${SYSTEM_CORES} \$@" > /usr/local/bin/make && \
+    chmod 755 /usr/local/bin/make
+RUN pip install --upgrade pip
+
 COPY requirements/base.txt ./requirements/base.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    cp /usr/bin/make /usr/bin/make.bak && \
-    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
-    pip install --upgrade pip && \
-    pip install wheel cython protobuf
 # Workaround scikit image requires numpy while dependency is not resolved
-RUN --mount=type=cache,target=/root/.cache/pip pip install $(cat ./requirements/base.txt | grep numpy)
-RUN mv /usr/bin/make.bak /usr/bin/make
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements/base.txt
-
-# =========================================================
-# Install onnxruntime
-# =========================================================
-# WORKDIR /code/onnxruntime
-# COPY prebuild/jetson/onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl .
-# RUN source activate python38 && pip install onnxruntime_gpu_noopenmp-1.5.2-cp38-cp38-linux_aarch64.whl
-
-# =========================================================
-# Install opencv
-# =========================================================
-WORKDIR /app
-COPY requirements/gpuarm64v8.txt ./requirements/gpuarm64v8.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    cp /usr/bin/make /usr/bin/make.bak && \
-    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
-    pip install -r requirements/gpuarm64v8.txt && \
-    mv /usr/bin/make.bak /usr/bin/make
+    pip install $(cat ./requirements/base.txt | grep numpy)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements/base.txt
 
-# =========================================================
-# Shapely Work arount
-# =========================================================
-# RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
+RUN rm /usr/local/bin/make
 
 # =========================================================
 # Copy Source Code

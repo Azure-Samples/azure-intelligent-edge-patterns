@@ -113,7 +113,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.jetson}",
+              "image": "${MODULES.InferenceModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {

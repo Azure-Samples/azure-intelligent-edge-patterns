@@ -70,17 +70,18 @@ RUN apt-get update && \
 # =========================================================
 WORKDIR /app
 COPY requirements/base.txt ./requirements/base.txt
+RUN echo "/usr/bin/make --jobs=${SYSTEM_CORES} \$@" > /usr/local/bin/make && \
+    chmod 755 /usr/local/bin/make
 RUN --mount=type=cache,target=/root/.cache/pip \
-    cp /usr/bin/make /usr/bin/make.bak && \
-    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
     pip install --upgrade pip && \
     pip install wheel cython protobuf
 # Workaround scikit image requires numpy while dependency is not resolved
 # RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install $(cat ./requirements/base.txt | grep numpy)
-RUN --mount=type=cache,target=/root/.cache/pip pip install $(cat ./requirements/base.txt | grep numpy)
-RUN mv /usr/bin/make.bak /usr/bin/make
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install $(cat ./requirements/base.txt | grep numpy)
 # RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install -r requirements/base.txt
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements/base.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements/base.txt
 
 # =========================================================
 # Install onnxruntime
@@ -139,15 +140,7 @@ RUN git clone \
 WORKDIR /app
 COPY requirements/gpuarm64v8.txt ./requirements/gpuarm64v8.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    cp /usr/bin/make /usr/bin/make.bak && \
-    echo "make.bak --jobs=${SYSTEM_CORES} \$@" > /usr/bin/make && \
-    pip install -r requirements/gpuarm64v8.txt && \
-    mv /usr/bin/make.bak /usr/bin/make
-
-# =========================================================
-# Shapely Work arount
-# =========================================================
-# RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
+    pip install -r requirements/gpuarm64v8.txt
 
 # =========================================================
 # Copy Source Code
