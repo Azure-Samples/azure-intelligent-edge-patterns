@@ -89,5 +89,5 @@ class PdRelabelDemoProjectError(APIException):
 
 class PdExportCameraRemoved(APIException):
     status_code = 404
-    default_detail = "Camera already removed from this deployment. Please refresh"
+    default_detail = "Camera already removed from this deployment. Please refresh."
     default_code = "pd_export_camera_removed"
