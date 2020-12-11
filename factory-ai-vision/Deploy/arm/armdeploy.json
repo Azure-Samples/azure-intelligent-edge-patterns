@@ -69,7 +69,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "defaultValue": "Azure Media Service Principal secret. Required when using LVA."
+        "description": "Azure Media Service Principal secret. Required when using LVA."
       }
     }
   },
