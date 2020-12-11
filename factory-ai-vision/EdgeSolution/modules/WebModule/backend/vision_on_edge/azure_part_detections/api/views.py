@@ -89,6 +89,33 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         return Response({"status": "ok"})
 
     @swagger_auto_schema(
+        operation_summary="Example Camera Removed error.",
+        manual_parameters=[
+            openapi.Parameter(
+                "camera_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="Camera ID",
+                required=True,
+            )
+        ],
+        responses={
+            "200": ExportSerializer,
+            "400": MSStyleErrorResponseSerializer,
+        },
+    )
+    @action(detail=True, methods=["get"])
+    def example_camera_removed_error(self, request, pk=None) -> Response:
+        """Example API when camara removed"""
+        queryset = self.get_queryset()
+        instance = drf_get_object_or_404(queryset, pk=pk)
+        cam_id = request.query_params.get("camera_id")
+        try:
+            drf_get_object_or_404(instance.cameras.all(), pk=5566)
+        except Exception as e:
+            raise PdExportCameraRemoved from e
+
+    @swagger_auto_schema(
         operation_summary="Export Part Detection status.",
         manual_parameters=[
             openapi.Parameter(
