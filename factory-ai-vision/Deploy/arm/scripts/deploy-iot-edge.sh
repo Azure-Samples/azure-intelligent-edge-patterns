@@ -124,7 +124,9 @@ echo "$(info) VIDEO_CAPTURE_MODULE:     ${VIDEO_CAPTURE_MODULE}"
 
 MANIFEST_TEMPLATE_BASE_NAME="deployment"
 
-if echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'gpu' > /dev/null ; then
+if echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'jetson' > /dev/null ; then
+    MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.jetson"
+elif echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'gpu' > /dev/null ; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.gpu"
 elif echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'nvidia' > /dev/null ; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.gpu"
