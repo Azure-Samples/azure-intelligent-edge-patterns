@@ -54,7 +54,7 @@ IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 onnx = ONNXRuntimeModelDeploy()
 
 app = FastAPI(
-    title="InferenceModule", description="Factory AI InferenceModule.", version="0.0.1",
+    title="PredictModule", description="Factory AI PredictModule.", version="0.0.1",
 )
 
 
