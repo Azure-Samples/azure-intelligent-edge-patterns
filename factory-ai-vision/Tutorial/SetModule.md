@@ -61,7 +61,7 @@ Review your deployment information, then select  **Create**.
  
 ### Check the deployed module in your edge device
 After the deployment, you can check the module in your edge device through **docker ps** command.
-  ![Diagram - heck the deployed module in your edge device](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/set_module_3.png)
+  ![Diagram - heck the deployed module in your edge device](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/set_module_4.png)
 </br>
 
 Now you have your own inference module in the edge device and the prediction endpoint can be access through ***/score*** with port ***80*** if your image is built from [video-analysis/yolov4-tflite-tiny](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny)
