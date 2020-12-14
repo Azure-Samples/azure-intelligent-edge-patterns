@@ -24,7 +24,7 @@ This tutorial shows how to deploy your inference module to an IoT Edge device th
 
 ## Deploy your inference module from Azure portal
 
-You can quickly deploy a module from the Azure Marketplace onto your device in your IoT Hub in the Azure portal.
+You can quickly deploy a module from the image URI onto your device in your IoT Hub in the Azure portal.
 
 ### Set Module from Azure portal
 
