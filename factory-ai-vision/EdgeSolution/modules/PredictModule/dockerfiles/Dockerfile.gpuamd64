@@ -49,11 +49,11 @@ ENV LC_ALL en_US.UTF-8
 # =========================================================
 # Install Python package
 # =========================================================
-RUN pip install --upgrade pip
+RUN pip3 install --upgrade pip
 COPY requirements/base.txt ./requirements/base.txt
-RUN pip install -r requirements/base.txt
+RUN pip3 install -r requirements/base.txt
 COPY requirements/gpu.txt ./requirements/gpu.txt
-RUN pip install -r requirements/gpu.txt
+RUN pip3 install -r requirements/gpu.txt
 
 # =========================================================
 # Copy Source Code
@@ -82,4 +82,4 @@ COPY utility.py ./
 EXPOSE 7777
 
 # CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py"]
-CMD [ "python", "server.py"]
+CMD [ "python3", "server.py"]
