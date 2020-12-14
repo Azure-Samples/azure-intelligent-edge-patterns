@@ -44,7 +44,7 @@ You can quickly deploy a module from the image URI onto your device in your IoT 
 
 ### Input all necessary information
 
-Input your desired module name and pre-build image URL
+Input your desired module name and pre-build image URI.
 
 ![Diagram - Input all necessary information](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/set_module_2.png)
 </br>
@@ -65,7 +65,7 @@ After the deployment, you can check the module in your edge device through **doc
 </br>
 
 Now you have your own inference module in the edge device and the prediction endpoint can be access through ***/score*** with port ***80*** if your image is built from [video-analysis/yolov4-tflite-tiny](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny).</br>
-Your predict endpoint would be ***http://{module name}:80/score*** and can be access within your edge device.
+Your predict endpoint would be ***http://{module name}:80/score*** and can be access only within your edge device.
 </br></br>
 
 
