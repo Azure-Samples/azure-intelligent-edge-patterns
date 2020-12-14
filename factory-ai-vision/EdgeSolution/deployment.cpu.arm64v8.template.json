@@ -112,7 +112,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.cpuarm64v8}",
+              "image": "${MODULES.InferenceModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {

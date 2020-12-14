@@ -141,7 +141,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.cpuamd64}",
+              "image": "${MODULES.InferenceModule.amd64}",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {

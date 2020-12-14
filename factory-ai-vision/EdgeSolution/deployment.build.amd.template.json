@@ -32,22 +32,10 @@
               "image": "${MODULES.WebModule.amd64}"
             }
           },
-          "InferenceModuleCPU": {
+          "InferenceModule": {
             "type": "docker",
             "settings": {
-              "image": "${MODULES.InferenceModule.cpuamd64}"
-            }
-          },
-          "InferenceModuleGPU": {
-            "type": "docker",
-            "settings": {
-              "image": "${MODULES.InferenceModule.gpuamd64}"
-            }
-          },
-          "InferenceModuleVPU": {
-            "type": "docker",
-            "settings": {
-              "image": "${MODULES.InferenceModule.vpuamd64}"
+              "image": "${MODULES.InferenceModule.amd64}"
             }
           },
           "PredictModuleCPU": {

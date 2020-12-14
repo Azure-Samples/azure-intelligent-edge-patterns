@@ -1,4 +1,3 @@
-
 {
   "$schema-template": "2.0.0",
   "modulesContent": {
@@ -113,7 +112,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.jetson}",
+              "image": "${MODULES.InferenceModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
@@ -124,6 +123,41 @@
                       "HostPort": "5558"
                     }]
                   },
+                  "runtime": "nvidia"
+                }
+              }
+            }
+          },
+          "PredictModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.PredictModule.jetson}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
+                  },
+                  "IpcMode": "host",
                   "runtime": "nvidia"
                 }
               }
