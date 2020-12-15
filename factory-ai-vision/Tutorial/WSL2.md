@@ -59,7 +59,7 @@
 
          iotedge logs -f WebModule \--tail 500
 
-    B.  Go to <http://localhost:8080/> and add a new location.
+    B.  Go to <http://localhost:8181/> and add a new camera.
 
 > ![](media/image9.png)
 
