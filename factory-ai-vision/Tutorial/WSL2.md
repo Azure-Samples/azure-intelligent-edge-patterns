@@ -59,14 +59,14 @@
 
          iotedge logs -f WebModule \--tail 500
 
-    B.  Go to <http://localhost:8181/> and add a new camera.
+    B.  Go to <http://localhost:8181/>.
 
 > ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-1.png)
 
-    C.  Choose "demo Pretrained Detection " and Configure
+    C.  Go to Deployment, and then go to Edit Task and choose your model, camera, and objects, and click Deploy.
 
-    D.  Check the Right-hand side Configuration about GPU(accelerated) :
-        around 10-15 ms , compared with CPU around 300-500 ms.
+    D.  Check the Right-hand side Insights about GPU(accelerated).
+> ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-3.png)
 
 ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-2.png)
 
