@@ -63,7 +63,7 @@
 
 > ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-3.png)
 
-    C.  Go to Home, and then go to Scenario Library and choose your scenario; and then choose your camera and detect objects, and click Deploy.
+    C.  Go to Home, and click Scenario Library to choose your scenario; choose your camera and detect objects, and click Deploy.
     
 > ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-1.png)
 
