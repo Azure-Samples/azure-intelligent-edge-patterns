@@ -61,9 +61,9 @@
 
     B.  Go to <http://localhost:8181/>.
 
-> ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl-3.png)
+> ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-3.png)
 
-    C.  Go to Deployment, and then go to Edit Task and choose your model, camera, and objects, and click Deploy.
+    C.  Go to Home, and then go to Scenario Library and choose your scenario; and then choose your camera and detect objects, and click Deploy.
 > ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-1.png)
 
     D.  Check the Right-hand side Insights about GPU(accelerated).
