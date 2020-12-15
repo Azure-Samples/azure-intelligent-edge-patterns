@@ -64,8 +64,8 @@ After the deployment, you can check the module in your edge device through **doc
   ![Diagram - heck the deployed module in your edge device](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/set_module_4.png)
 </br>
 
-Now you have your own inference module in the edge device and the prediction endpoint can be access through ***/score*** with port ***80*** if your image is built from [video-analysis/yolov4-tflite-tiny](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny).</br>
-Your predict endpoint would be ***http://{module name}:80/score*** and can be access only within your edge device.
+Now you have your own inference module in the edge device and the prediction endpoint can be accessed through ***/score*** with port ***80*** if your image is built from [video-analysis/yolov4-tflite-tiny](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny).</br>
+Your predict endpoint would be ***http://{module name}:80/score*** and can be accessed only within your edge device.
 </br></br>
 
 
