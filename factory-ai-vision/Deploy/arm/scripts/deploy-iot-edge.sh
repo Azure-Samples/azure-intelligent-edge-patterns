@@ -28,7 +28,7 @@ exitWithError() {
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing apt-packages "
-apt-get update && apt-get install -y jq coreutils unzip
+# apt-get update && apt-get install -y jq coreutils unzip
 echo "$(info) Apt-packages installed"
 
 printf "\n%60s\n" " " | tr ' ' '-'
