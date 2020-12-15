@@ -13,7 +13,7 @@ This tutorial shows how to deploy your inference module to an IoT Edge device th
 
 ## Deploy your inference module from Azure portal
 
-You can quickly deploy a module from the Azure Marketplace onto your device in your IoT Hub in the Azure portal.<br>
+You can quickly deploy a module from the image URI onto your device in your IoT Hub in the Azure portal.
 
 ### Push image to registry
 
@@ -56,7 +56,7 @@ After pushing the image to your container registry, in the above example, your i
   
 ### Input all necessary information
 
-Input your desired module name and pre-build image URI
+Input your desired module name and pre-build image URI.
 
 ![Diagram - Input all necessary information](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/set_module_2.png
 </br>
@@ -82,14 +82,11 @@ After the deployment, you can check the module in your edge device through **doc
 ![Diagram - heck the deployed module in your edge device](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/set_module_4.png)
 </br>
 
-  
-
-Now you have your own inference module in the edge device and the prediction endpoint can be access through ***/score*** with port ***80*** if your image is built from [Tiny YOLOv4 TensorFlow Lite model](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny).</br>
-
-Your predict endpoint would be ***http://{module name}:80/score*** and can be access within your edge device.
+Now you have your own inference module in the edge device and the prediction endpoint can be accessed through ***/score*** with port ***80*** if your image is built from [video-analysis/yolov4-tflite-tiny](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny).</br>
+Your predict endpoint would be ***http://{module name}:80/score*** and can be accessed only within your edge device.
 </br></br>
 
 
 ## Next steps
 
-  Learn how to [Bring your own model to the solution](Bring_your_own_model.md)
+Learn how to [Bring your own model to the solution](Bring_your_own_model.md)
