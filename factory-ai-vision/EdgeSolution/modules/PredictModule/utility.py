@@ -139,7 +139,7 @@ def unzip_and_move(file_path=None, dst_folder="model"):
     # zip_ref.close()
     # print("files unzipped to : %s, Complete" % dirpath_file, flush=True)
     # transferdlc(True,"twin_provided_model")
-    subprocess.run(["unzip", file_path, "-d", dst_folder], capture_output=True)
+    subprocess.run(["unzip", file_path, "-d", dst_folder])
 
     return True
 
