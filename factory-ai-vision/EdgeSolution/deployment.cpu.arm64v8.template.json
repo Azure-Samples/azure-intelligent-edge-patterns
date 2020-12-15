@@ -35,15 +35,21 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [{
-                      "HostPort": "5671"
-                    }],
-                    "8883/tcp": [{
-                      "HostPort": "8883"
-                    }],
-                    "443/tcp": [{
-                      "HostPort": "443"
-                    }]
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
                   }
                 }
               }
@@ -61,9 +67,11 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8181/tcp": [{
-                      "HostPort": "8181"
-                    }]
+                    "8181/tcp": [
+                      {
+                        "HostPort": "8181"
+                      }
+                    ]
                   }
                 }
               }
@@ -116,12 +124,16 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [{
-                      "HostPort": "5000"
-                    }],
-                    "5558/tcp": [{
-                      "HostPort": "5558"
-                    }]
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
                   },
                   "runtime": "runc"
                 }
@@ -142,7 +154,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.PredictModule.cpuamd64}",
+              "image": "${MODULES.PredictModule.cpuarm64}",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -153,9 +165,11 @@
                     }
                   },
                   "PortBindings": {
-                    "7777/tcp": [{
-                      "HostPort": "7777"
-                    }]
+                    "7777/tcp": [
+                      {
+                        "HostPort": "7777"
+                      }
+                    ]
                   },
                   "IpcMode": "host",
                   "runtime": "runc"
@@ -201,9 +215,11 @@
                     }
                   },
                   "PortBindings": {
-                    "554/tcp": [{
-                      "HostPort": "554"
-                    }]
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
                   }
                 }
               }
@@ -218,11 +234,13 @@
               "image": "${MODULES.UploadModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [{
-                    "Target": "/app/upload",
-                    "Source": "upload_data",
-                    "Type": "volume"
-                  }],
+                  "Mounts": [
+                    {
+                      "Target": "/app/upload",
+                      "Source": "upload_data",
+                      "Type": "volume"
+                    }
+                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -231,9 +249,11 @@
                     }
                   },
                   "PortBindings": {
-                    "7000/tcp": [{
-                      "HostPort": "7000"
-                    }]
+                    "7000/tcp": [
+                      {
+                        "HostPort": "7000"
+                      }
+                    ]
                   }
                 }
               }
