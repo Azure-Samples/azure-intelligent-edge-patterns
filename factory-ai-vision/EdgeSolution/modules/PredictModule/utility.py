@@ -32,7 +32,8 @@ def getWlanIp():
         if IP.split(".")[0] == "172":
             print("Ip address detected is :: " + IP)
             IP = "172.17.0.1"
-            print("Ip address changed to :: " + IP + "to avoid docker interface")
+            print("Ip address changed to :: " +
+                  IP + "to avoid docker interface")
         print("Ip address detected is :: " + IP)
 
     except:
@@ -109,11 +110,12 @@ def get_file_zip(url, dst_folder="model"):
         print("Downloading File :: %s" % FileName, flush=True)
 
         # urllib2.urlretrieve(url, filename=src_file_path)
-        subprocess.run(["wget", "-O", src_file_path, url], capture_output=True)
+        subprocess.run(["wget", "-O", src_file_path, url])
         print("Downloading File :: %s, complete!" % FileName, flush=True)
         print("Unzip and move...", flush=True)
         print(
-            "src_file_path: {}, dst_file_path: {}".format(src_file_path, dst_folder),
+            "src_file_path: {}, dst_file_path: {}".format(
+                src_file_path, dst_folder),
             flush=True,
         )
         result = unzip_and_move(src_file_path, dst_folder)
@@ -137,7 +139,7 @@ def unzip_and_move(file_path=None, dst_folder="model"):
     # zip_ref.close()
     # print("files unzipped to : %s, Complete" % dirpath_file, flush=True)
     # transferdlc(True,"twin_provided_model")
-    subprocess.run(["unzip", file_path, "-d", dst_folder], capture_output=True)
+    subprocess.run(["unzip", file_path, "-d", dst_folder])
 
     return True
 
