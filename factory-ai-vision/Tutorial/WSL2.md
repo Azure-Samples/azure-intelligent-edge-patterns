@@ -26,28 +26,28 @@
 2.  Install IoT Edge and Configure your device on IoT Hub by the
     [doc](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux).
 
-![](media/image3.png)
+![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image3.png)
 
 3.  Steps to run AI workload for Web Module & Inference Module --
 
     A.  Start the previous distro environment
 
-> ![](media/image4.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image4.png)
     B.  Clone the
     [start.sh](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/start.sh)
     on the root folder.
 
     C.  cd \~ & ./start.sh
 
-> ![](media/image5.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image5.png)
 
     D.  Check your module status :
 
-> ![](media/image6.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image6.png)
 
     E.  nano the /etc/docker/daemon.json as
 
-> ![](media/image7.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image7.png)
 
     F.  systemctl restart docker & iotedge restart
 
