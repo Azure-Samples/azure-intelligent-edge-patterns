@@ -19,7 +19,7 @@ RUN echo ${GIT_LOG} > ./build/static/git_sha1.txt
 # =========================================================
 # === Build Backend                                     ===
 # =========================================================
-FROM goatwu1993/arm64-python3-opencv:py3.8.6-cv4.4.0.44
+FROM intelligentedge/python3-opencv:py3.8.6-cv4.4.0.44-arm64v8
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

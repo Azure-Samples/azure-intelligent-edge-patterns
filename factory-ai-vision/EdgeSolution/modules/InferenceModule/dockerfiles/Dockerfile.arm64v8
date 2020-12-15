@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM goatwu1993/arm64-python3-opencv:py3.8.6-cv4.4.0.44
+FROM intelligentedge/python3-opencv:py3.8.6-cv4.4.0.44-arm64v8
 
 WORKDIR /app
 
