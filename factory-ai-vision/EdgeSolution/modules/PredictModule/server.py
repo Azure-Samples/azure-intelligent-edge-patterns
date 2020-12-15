@@ -79,8 +79,8 @@ async def predict(request: Request):
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     predictions, inf_time = onnx.Score(img)
     results = customvision_to_lva_format(predictions)
-    # if int(time.time()) % 5 == 0:
-    #     logger.info(predictions)
+    if int(time.time()) % 5 == 0:
+        logger.info(predictions)
 
     return json.dumps({"inferences": results, "inf_time": inf_time}), 200
     # return json.dumps({"predictions": predictions, "inf_time": inf_time}), 200
