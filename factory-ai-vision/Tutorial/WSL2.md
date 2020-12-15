@@ -61,18 +61,18 @@
 
     B.  Go to <http://localhost:8181/> and add a new camera.
 
-> ![](media/image9.png)
+> ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-1.png)
 
     C.  Choose "demo Pretrained Detection " and Configure
 
     D.  Check the Right-hand side Configuration about GPU(accelerated) :
         around 10-15 ms , compared with CPU around 300-500 ms.
 
-![](media/image11.png)
+![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-2.png)
 
     E.  Verify the logs on inference module : some onnxruntime warning but
         initializer scalepreprocessor scale.
 
-   > ![](media/image12.png)
+   > ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image12.png)
 
     F.  Done and Enjoy your WSL2 !
