@@ -17,7 +17,7 @@ You can quickly deploy a module from the image URI onto your device in your IoT 
 
 ### Push image to registry
 
-After [Tiny YOLOv4 TensorFlow Lite model](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny) tutorial, you would have the image foe the inference module. To deploy the module to your edge device, first you have to push the image to the registry to get image URI.
+After [Tiny YOLOv4 TensorFlow Lite model](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny) tutorial, you would have the image for the inference module. To deploy the module to your edge device, first you have to push the image to the registry to get image URI.
 
 Before you can push an image to your registry, you must tag it with the fully qualified name of your registry login server. The login server name is in the format `<registry-name>`.azurecr.io (must be all lowercase), for example, mycontainerregistry.azurecr.io.
 
