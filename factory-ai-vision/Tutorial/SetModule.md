@@ -39,7 +39,7 @@ Finally, use docker push to push the image to the registry instance. Replace `<l
 docker push <login-server>/hello-world:v1
 ```
 
-After pushing the image to your container registry, in the above example, your image URI would be ***mycontainerregistry.azurecr.io/hello-world:v1***.
+After pushing the image to your container registry, in the above example, your image URI would be **mycontainerregistry.azurecr.io/hello-world:v1**.
 <br>
  
 ### Set Module from Azure portal
@@ -63,7 +63,7 @@ Input your desired module name and pre-build image URI.
 
 ### Review + Create
 
-After setting your module, click ***Review + create***
+After setting your module, click **Review + create**
 </br>
 
 The review section shows you the JSON deployment manifest that was created based on the modules you set. Check whether the module you set in the previous section is defined in the manifest.
@@ -82,8 +82,8 @@ After the deployment, you can check the module in your edge device through **doc
 ![Diagram - heck the deployed module in your edge device](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/set_module_4.png)
 </br>
 
-Now you have your own inference module in the edge device and the prediction endpoint can be accessed through ***/score*** with port ***80*** if your image is built from [video-analysis/yolov4-tflite-tiny](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny).</br>
-Your predict endpoint would be ***http://{module name}:80/score*** and can be accessed only within your edge device.
+Now you have your own inference module in the edge device and the prediction endpoint can be accessed through **/score** with port **80** if your image is built from [Tiny YOLOv4 TensorFlow Lite model](https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analysis/yolov4-tflite-tiny).</br>
+Your predict endpoint would be **http://{module name}:80/score** and can be accessed only within your edge device.
 </br></br>
 
 
