@@ -4,7 +4,7 @@ import json
 import logging
 import logging.config
 import os
-import subprocess
+
 from os import listdir
 
 from semantic_version import Version
@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 def is_module_dir(path):
+    """check if a path is module dir
+    """
     if not os.path.isdir(path):
         return False
     if path.lower().find("module") < 0:
@@ -25,6 +27,8 @@ def is_module_dir(path):
 
 
 class Module:
+    """A wrapper for a module dir
+    """
     def __init__(self, path):
         if not is_module_dir(path):
             raise ValueError("%s is not a module" % path)
@@ -70,7 +74,8 @@ class Module:
         self.version = self.version.next_major()
 
 
-def get_modules(path, with_path: bool = False):
+def get_modules(path):
+    """get_modules"""
     module_candidates = listdir(path)
     rs = []
     for module_path in module_candidates:
