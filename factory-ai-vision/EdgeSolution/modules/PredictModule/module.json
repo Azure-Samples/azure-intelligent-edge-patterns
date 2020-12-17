@@ -11,7 +11,7 @@
         "vpuamd64": "./dockerfiles/Dockerfile.vpuamd64",
         "gpuarm64v8": "./dockerfiles/Dockerfile.gpuarm64v8",
         "cpuarm64v8": "./dockerfiles/Dockerfile.cpuarm64v8",
-        "jetson": "./dockerfiles/Dockerfile.jetson"
+        "jetson": "./dockerfiles/Dockerfile.jetsonarm64v8"
       }
     },
     "buildOptions": [],

@@ -765,7 +765,9 @@ if __name__ == "__main__":
     logger.info("is_edge: %s", is_edge())
 
     if is_edge():
+        print('==== Benchmark start ====', flush=True)
         benchmark()
+        print('==== Benchmark  end  ====', flush=True)
         main()
     else:
         logger.info("Assume running at local development.")
