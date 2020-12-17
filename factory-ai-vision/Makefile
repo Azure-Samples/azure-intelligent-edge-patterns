@@ -32,16 +32,24 @@ push-image-all: ## Push all docker images (both x64 and arm64v8)
 	@make push-image-x86
 	@echo "Pushed all images, complete!"
 
-.PHONY: patch-version
-patch-version: ## Update patch version
+.PHONY: update-patch
+update-patch: ## Update patch version
 	@echo "Update version for each modules..."
-	@python DevTools/build_patch_update.py
+	@$(PYTHON) DevTools/update_version.py patch
 	@make pack-arm
 	@echo "Update version for each modules, complete! Please build and update images and commit manually"
 
-.PHONY: release-version
-release-version: ## Update minor version
+.PHONY: update-minor
+update-minor: ## Update minor version
 	@echo "Update version for each modules..."
-	@python DevTools/build_minor_update.py
+	@$(PYTHON) DevTools/update_version.py minor
 	@make pack-arm
 	@echo "Update version for each modules, complete! Please build and update images and commit manually"
+
+.PHONY: update-major
+update-major: ## Update major version
+	@echo "Update version for each modules..."
+	@$(PYTHON) DevTools/update_version.py major
+	@make pack-arm
+	@echo "Update version for each modules, complete! Please build and update images and commit manually"
+

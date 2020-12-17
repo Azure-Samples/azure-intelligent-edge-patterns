@@ -11,11 +11,11 @@ if __name__ == "__main__":
 
     fc = FileContext(__file__)
     modules = get_modules(fc.git_root + "/factory-ai-vision/EdgeSolution/modules")
-    
+
     for module in modules:
-        if args.update_type == 'patch':
+        if args.type == 'patch':
             module.next_patch()
-        elif args.update_type == 'minor':
+        elif args.type == 'minor':
             module.next_minor()
-        elif args.update_type == 'major':
+        elif args.type == 'major':
             module.next_major()
