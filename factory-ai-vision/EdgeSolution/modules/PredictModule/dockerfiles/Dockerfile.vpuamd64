@@ -27,6 +27,7 @@ RUN /bin/mkdir -p '/usr/local/lib' && \
     /usr/bin/install -c -m 644 libusb.h '/usr/local/include/libusb-1.0' && \
     /bin/mkdir -p '/usr/local/lib/pkgconfig'
 WORKDIR /opt/libusb-1.0.22/
+RUN cd /opt/intel && ln -s openvino_2021 openvino
 RUN /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
     cp /opt/intel/openvino/deployment_tools/inference_engine/external/97-myriad-usbboot.rules /etc/udev/rules.d/ && \
     ldconfig
