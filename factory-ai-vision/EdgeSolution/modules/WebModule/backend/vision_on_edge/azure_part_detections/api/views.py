@@ -146,7 +146,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             res = requests.get(
                 "http://" + inference_module_obj.url + "/metrics",
                 params={"cam_id": cam_id},
-                timeout=3,
+                timeout=5,
             )
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100
