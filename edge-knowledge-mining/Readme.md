@@ -7,7 +7,8 @@ Check out [this video](https://channel9.msdn.com/Shows/IT-Ops-Talk/Knowledge-Min
 
 [![Knowledge Mining on Azure Stack Edge](https://sec.ch9.ms/ch9/efcb/ea7f3693-0144-4949-9094-2d154847efcb/AzureStackEdge_512.jpg)](https://sec.ch9.ms/ch9/d218/48b1b0d3-a01f-42d2-b23d-da8db5efd218/AzureStackEdge_high.mp4 "Knowledge Mining on Azure Stack Edge")
 
-This could be used for your line of business, archival, or mission-oriented data to quickly uncover insights and increase your situational awareness. 
-In the new year, we’ll be following up with a series of videos to walk through the architecture and publishing the code pattern here.
+This could be used for your line of business, archival or mission-oriented data to quickly uncover insights and increase your situational awareness. 
 
-Stay tuned for updates…
+We’ll be following up with a series of videos to walk through the architecture, DevOps and code in this repository.
+
+Please stay tuned for updates…
