@@ -1,4 +1,3 @@
-# syntax = docker/dockerfile:experimental
 FROM intelligentedge/python3-opencv:py3.8.6-cv4.4.0.44-arm64v8
 
 WORKDIR /app
@@ -36,10 +35,10 @@ RUN pip install --upgrade pip
 
 COPY requirements/base.txt ./requirements/base.txt
 # Workaround scikit image requires numpy while dependency is not resolved
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install $(cat ./requirements/base.txt | grep numpy)
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements/base.txt
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip install $(cat ./requirements/base.txt | grep numpy)
+#RUN --mount=type=cache,target=/root/.cache/pip \
+RUN pip install -r requirements/base.txt
 
 RUN rm /usr/local/bin/make
 
