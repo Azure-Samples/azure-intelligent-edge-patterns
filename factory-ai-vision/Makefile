@@ -53,3 +53,10 @@ update-major: ## Update major version
 	@make pack-arm
 	@echo "Update version for each modules, complete! Please build and update images and commit manually"
 
+.PHONY: set-version
+set-version: ## Set version (make set-version version=x.x.x")
+	@echo "Update version for each modules..."
+	@$(PYTHON) DevTools/update_version.py set --version=$(version)
+	@make pack-arm
+	@echo "Update version for each modules, complete! Please build and update images and commit manually"
+
