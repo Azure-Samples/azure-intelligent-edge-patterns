@@ -73,8 +73,8 @@ COPY requirements/base.txt ./requirements/base.txt
 RUN echo "/usr/bin/make --jobs=${SYSTEM_CORES} \$@" > /usr/local/bin/make && \
     chmod 755 /usr/local/bin/make
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip && \
-    pip install wheel cython protobuf
+    pip3 install --upgrade pip && \
+    pip3 install wheel cython protobuf
 # Workaround scikit image requires numpy while dependency is not resolved
 # RUN --mount=type=cache,target=/root/.cache/pip source activate python38 && pip install $(cat ./requirements/base.txt | grep numpy)
 RUN --mount=type=cache,target=/root/.cache/pip \

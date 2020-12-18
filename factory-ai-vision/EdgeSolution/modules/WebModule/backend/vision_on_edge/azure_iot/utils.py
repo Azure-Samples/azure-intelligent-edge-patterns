@@ -42,7 +42,7 @@ def inference_module_url() -> str:
     """
 
     if is_edge():
-        return "InferenceModule:5000"
+        return "inferencemodule:5000"
     return "localhost:5000"
 
 
@@ -54,7 +54,7 @@ def upload_module_url() -> str:
     """
 
     if is_edge():
-        return "UploadModule:7000"
+        return "uploadmodule:7000"
     return "localhost:7000"
 
 
@@ -66,5 +66,5 @@ def prediction_module_url() -> str:
     """
 
     if is_edge():
-        return "PredictModule:7777/predict"
+        return "predictmodule:7777/predict"
     return "localhost:7777/predict"

@@ -98,6 +98,9 @@ def upload_file(filename):
     tmp_filename = filename.split('.')[0] + '_tmp.mkv'
     if '.mkv' not in filename:
         subprocess.run(["ffmpeg", "-i", filename, tmp_filename, "-y"])
+    else:
+        subprocess.run(["cp", output_filename, tmp_filename])
+
     subprocess.run(["ffmpeg", "-i", tmp_filename, "-vcodec",
                     "copy", "-an", output_filename, "-y"])
     subprocess.run(["cp", output_filename, "./upload/"])

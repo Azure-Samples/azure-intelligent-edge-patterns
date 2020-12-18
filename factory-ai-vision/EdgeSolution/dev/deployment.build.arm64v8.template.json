@@ -23,7 +23,7 @@
           "NginxModule": {
             "type": "docker",
             "settings": {
-              "image": "${MODULES.NginxModule.arm64v8}"
+              "image": "${..MODULES.NginxModule.arm64v8}"
             }
           },
           "WebModule": {
@@ -53,7 +53,7 @@
           "PredictModuleJetson": {
             "type": "docker",
             "settings": {
-              "image": "${MODULES.PredictModule.jetson}"
+              "image": "${MODULES.PredictModule.jetsonarm64v8}"
             }
           },
           "rtspsim": {
