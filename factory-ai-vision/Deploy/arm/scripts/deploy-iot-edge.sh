@@ -127,7 +127,7 @@ sed -i -e "s/^SERVICE_PRINCIPAL_SECRET=.*$/SERVICE_PRINCIPAL_SECRET=${AMS_SP_SEC
 sed -i -e "s|^CUSTOM_VISION_ENDPOINT=.*$|CUSTOM_VISION_ENDPOINT=${CUSTOM_VISION_ENDPOINT}|g" ${ENV_PATH}
 sed -i -e "s/^CUSTOM_VISION_TRAINING_KEY.*$/CUSTOM_VISION_TRAINING_KEY=${CUSTOM_VISION_TRAINING_KEY}/g" ${ENV_PATH}
 sed -i -e "s/^LVA_MODE.*$/LVA_MODE=\"${VIDEO_CAPTURE_MODULE}\"/g" ${ENV_PATH}
-rm "${ENV_PATH}-e"
+#rm "${ENV_PATH}-e"
 
 
 printf "\n%60s\n" " " | tr ' ' '-'
@@ -184,6 +184,7 @@ fi
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Generating manifest file from template file"
 rm -rf config
+cp ${MANIFEST_PATH}/.env .
 iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
 
 PRE_GENERATED_MANIFEST_FILENAME="./config/deployment.json"
