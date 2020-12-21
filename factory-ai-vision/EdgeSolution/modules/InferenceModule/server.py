@@ -663,7 +663,9 @@ def cvcapture_url():
 
 def predict_module_url():
     if is_edge():
-        return "PredictModule:7777"
+        ip = socket.gethostbyname("PredictModule")
+        return ip + ":7777"
+        # return "PredictModule:7777"
     else:
         return "localhost:7777"
 
