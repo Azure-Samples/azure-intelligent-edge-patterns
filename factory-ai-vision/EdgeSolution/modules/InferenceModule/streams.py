@@ -5,6 +5,7 @@ import logging
 import os
 import threading
 import time
+import socket
 
 import cv2
 import numpy as np
@@ -694,14 +695,18 @@ class Stream:
 
 def predict_module_url():
     if is_edge():
-        return "PredictModule:7777"
+        ip = socket.gethostbyname("PredictModule")
+        return ip + ":7777"
+        # return "PredictModule:7777"
     else:
         return "localhost:7777"
 
 
 def web_module_url():
     if is_edge():
-        return "WebModule:8000"
+        ip = socket.gethostbyname("WebModule")
+        return ip + ":8000"
+        # return "WebModule:8000"
     else:
         return "localhost:8000"
 
