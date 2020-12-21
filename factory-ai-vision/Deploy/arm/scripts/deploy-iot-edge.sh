@@ -16,12 +16,15 @@ info() {
 
 # Define helper function for logging. This will change the Error text color to red
 error() {
-    echo "$(tput setaf 1)$(date +"%Y-%m-%d %T") [ERROR]"
+    #echo "$(tput setaf 1)$(date +"%Y-%m-%d %T") [ERROR]"
+    # tput doent work in 2.15.1
+    echo "$(date +"%Y-%m-%d %T") [ERROR]"
 }
 
 exitWithError() {
     # Reset console color
-    tput sgr0
+    # tput doent work in 2.15.1
+    #tput sgr0
     exit 1
 }
 
@@ -152,9 +155,9 @@ else
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.cpu"
 fi
 
-if [ "${EDGE_DEVICE_ARCHITECTURE}" == "ARM64" ]; then
-    MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.arm64v8"
-fi
+#if [ "${EDGE_DEVICE_ARCHITECTURE}" == "ARM64" ]; then
+#    MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.arm64v8"
+#fi
 
 if [ "$VIDEO_CAPTURE_MODULE" == "opencv" ]; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.opencv"
