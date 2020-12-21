@@ -274,7 +274,7 @@
           "resources": [
             {
               "type": "Microsoft.Resources/deploymentScripts",
-              "apiVersion": "2019-10-01-preview",
+              "apiVersion": "2020-10-01",
               "name": "[concat('ModuleDeployment',parameters('utcValue'))]",
               "location": "[parameters('resourceGroupLocation')]",
               "kind": "AzureCLI",
