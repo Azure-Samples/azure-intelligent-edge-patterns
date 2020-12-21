@@ -285,7 +285,7 @@
                 }
               },
               "properties": {
-                "azCliVersion": "2.16.0",
+                "azCliVersion": "2.15.1",
                 "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
                 "supportingScriptUris": [],
                 "environmentVariables": [
