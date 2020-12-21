@@ -52,7 +52,7 @@ echo "Installing iotedgedev"
 pip install iotedgedev==2.1.4
 
 echo "Updating az-cli"
-# pip install --upgrade azure-cli
+pip install --upgrade azure-cli
 # pip install --upgrade azure-cli-telemetry
 
 echo "installing azure iot extension"
