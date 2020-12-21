@@ -464,7 +464,7 @@ class Stream:
         # prediction
         # self.mutex.acquire()
         # predictions, inf_time = self.model.Score(image)
-        if 'predictmodule' in self.model.endpoint.lower():
+        if ':7777/predict' in self.model.endpoint.lower():
             image = cv2.resize(image, (width, height))
             data = image.tobytes()
             res = requests.post(self.model.endpoint, data=data)
