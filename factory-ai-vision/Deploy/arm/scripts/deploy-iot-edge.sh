@@ -201,6 +201,8 @@ cp /root.iotedgedev/setting.ini setting.ini
 curl -XPOST -F "file=@setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 sed -i 's/yes/no/'  /root/.iotedgedev/setting.ini
+echo "[DEFAULT]" > /root/.iotedgedev/setting.ini
+echo "collect_telemetry = no" >> /root/.iotedgedev/setting.ini
 curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 echo iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > command.log
 curl -XPOST -F "message=`iotedgedev --version`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
