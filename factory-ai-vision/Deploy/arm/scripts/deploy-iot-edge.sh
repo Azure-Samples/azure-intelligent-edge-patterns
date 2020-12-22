@@ -195,6 +195,7 @@ TEMPLATE_FILE="${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
 curl -XPOST -F "file=@$TEMPLATE_FILE" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 sed -i 's/yes/no/'  /root/.iotedgedev/setting.ini
+curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 echo iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > command.log
 curl -XPOST -F "message=`iotedgedev --version`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 curl -XPOST -F "file=@command.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
