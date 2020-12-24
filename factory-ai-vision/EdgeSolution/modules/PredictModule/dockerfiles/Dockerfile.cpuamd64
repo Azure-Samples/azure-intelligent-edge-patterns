@@ -10,6 +10,7 @@ WORKDIR /app
 # =========================================================
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    wget \
     libffi-dev \
     libgl1-mesa-glx \
     libgtk2.0-dev \
@@ -34,11 +35,13 @@ ENV LC_ALL en_US.UTF-8
 # =========================================================
 COPY requirements/base.txt ./requirements/base.txt
 COPY requirements/cpu.txt ./requirements/cpu.txt
-ENV CONDA_ENV_NAME python38
-RUN conda create --name python38 python=3.8.5 -y &&\
-    . activate python38
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
-RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/cpu.txt --ignore-installed"]
+# ENV CONDA_ENV_NAME python38
+# RUN conda create --name python38 python=3.8.5 -y &&\
+#     . activate python38
+# RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
+# RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/cpu.txt --ignore-installed"]
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements/cpu.txt --ignore-installed
 
 # =========================================================
 # Copy Source Code
@@ -63,6 +66,8 @@ COPY object_detection2.py ./
 COPY onnxruntime_predict.py ./
 COPY server.py ./
 COPY utility.py ./
+
 EXPOSE 7777
 
-CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py"]
+# CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py"]
+CMD [ "python3", "server.py"]

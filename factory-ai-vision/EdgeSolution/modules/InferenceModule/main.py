@@ -6,6 +6,7 @@ import json
 import sys
 import threading
 import time
+import socket
 
 import cv2
 import numpy as np
@@ -97,7 +98,9 @@ except:
 
 def web_module_url():
     if is_edge():
-        return "172.18.0.1:8181"
+        ip = socket.gethostbyname("Webodule")
+        return ip + ":8181"
+        # return "172.18.0.1:8181"
     else:
         return "localhost:8000"
 
@@ -136,9 +139,11 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
 
         if aoi_area["type"] == "BBox":
             if (
-                (label["x1"] <= x1 <= label["x2"]) or (label["x1"] <= x2 <= label["x2"])
+                (label["x1"] <= x1 <= label["x2"]) or (
+                    label["x1"] <= x2 <= label["x2"])
             ) and (
-                (label["y1"] <= y1 <= label["y2"]) or (label["y1"] <= y2 <= label["y2"])
+                (label["y1"] <= y1 <= label["y2"]) or (
+                    label["y1"] <= y2 <= label["y2"])
             ):
                 return True
 
@@ -190,7 +195,8 @@ def draw_oid(img, x1, y1, oid):
     font_scale = 0.7
     thickness = 2
     img = cv2.putText(
-        img, str(oid), (x1 + 10, y1 + 20), font, font_scale, (255, 255, 255), thickness
+        img, str(oid), (x1 + 10, y1 +
+                        20), font, font_scale, (255, 255, 255), thickness
     )
     return img
 
@@ -742,7 +748,7 @@ def video_feed():
             if inference:
                 height, width = img.shape[0], img.shape[1]
                 predictions = onnx.last_prediction
-                #print(predictions)
+                # print(predictions)
                 for prediction in predictions:
                     tag = prediction["tagName"]
 
@@ -752,7 +758,8 @@ def video_feed():
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
 
                     detections.append(
-                        Detection(tag, x1, y1, x2, y2, prediction["probability"])
+                        Detection(tag, x1, y1, x2, y2,
+                                  prediction["probability"])
                     )
                     # print(x1, y1, x2, y2)
 
@@ -815,7 +822,8 @@ def gen():
                     if not is_inside_aoi(x1, y1, x2, y2, onnx.aoi_info):
                         continue
 
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 255), 2)
+                img = cv2.rectangle(
+                    img, (x1, y1), (x2, y2), (255, 255, 255), 2)
                 img = draw_confidence_level(img, prediction)
         onnx.last_drawn_img = img
 
@@ -929,7 +937,8 @@ def post_run():
                                     },
                                 )
                             except:
-                                print("[ERROR] Failed to update image for relabeling")
+                                print(
+                                    "[ERROR] Failed to update image for relabeling")
 
     onnx.last_prediction_count = last_prediction_count
 

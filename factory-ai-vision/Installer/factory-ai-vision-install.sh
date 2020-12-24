@@ -42,6 +42,10 @@ if [ "$isCfg" = true ]; then
   echo Read from config ...
   echo '################################################'
   cat factoryai_configs/factoryai_cfgs/$opt
+  # FOR Backwar Compatibility
+  if [ "$platform" = "" ]; then
+    platform="amd64"
+  fi
   echo '################################################'
 fi
 
@@ -253,8 +257,10 @@ if [ "$isCfg" != true ]; then
           done
         fi
 
-	if [ `cat factoryai_configs/ams_cfgs/"$amsServiceName".cfg  | grep amsServicePrincipalAppId | wc -l ` -eq 0 ]; then
+	if [ -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg ]; then
+	  if [ `cat factoryai_configs/ams_cfgs/"$amsServiceName".cfg  | grep amsServicePrincipalAppId | wc -l ` -eq 0 ]; then
 		rm -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg
+	  fi
 	fi
 
 
@@ -411,50 +417,64 @@ if [ "$isCfg" != true ]; then
       done
     fi
 
+    ################################ Check for Platform ###########################################
+    echo 1 amd64
+    echo 2 arm64v8
+    read -p "Choose the platform you're going to deploy: "
+    if [ "$REPLY" == "1" ]; then
+	platform="amd64"
+    elif [ "$REPLY" == "2" ]; then
+	platform="arm64v8"
+    else
+	echo "Unknown Platform"
+	exit
+    fi
+
+
 
     ################################ Check for Device ###########################################
-    #while true; do
-    #  read -p "Does your device have a GPU? (y or n): " -n 1 -r; echo
-    #  case $REPLY in
-    #      [Yy]* ) cpuGpu="gpu"; runtime="nvidia"; break;;
-    #      [Nn]* ) cpuGpu="cpu"; runtime="runc"  ; break;;
-    #      * ) echo "Please answer yes or no.";;
-    #  esac
-    #done
-    PS3='Choose the number corresponding to the Azure Stack Edge device: '
-    deviceOptions="cpu gpu vpu"
-    select cpuGpu in $deviceOptions
-    do
-      echo "you chose: " $cpuGpu
-      if [ "$cpuGpu" != "" ]; then
-          break
-      fi
-    done
-    if [ "$cpuGpu" == "cpu" ]; then
-        runtime="runc"
-    fi
-    if [ "$cpuGpu" == "gpu" ]; then
-        runtime="nvidia"
-    fi
-    if [ "$cpuGpu" == "vpu" ]; then
-        runtime="runc"
+    if [ "$platform" == "amd64" ]; then
+	    PS3='Choose the number corresponding to the Azure Stack Edge device: '
+	    deviceOptions="cpu gpu vpu"
+	    select cpuGpu in $deviceOptions
+	    do
+	      echo "you chose: " $cpuGpu
+	      if [ "$cpuGpu" != "" ]; then
+		  break
+	      fi
+	    done
+	    if [ "$cpuGpu" == "cpu" ]; then
+		runtime="runc"
+	    fi
+	    if [ "$cpuGpu" == "gpu" ]; then
+		runtime="nvidia"
+	    fi
+	    if [ "$cpuGpu" == "vpu" ]; then
+		runtime="runc"
+	    fi
+    elif [ "$platform" == "arm64v8" ]; then
+	    PS3='Choose the number corresponding to the Azure Stack Edge device: '
+	    deviceOptions="jetson"
+	    select cpuGpu in $deviceOptions
+	    do
+	      echo "you chose: " $cpuGpu
+	      if [ "$cpuGpu" != "" ]; then
+		  break
+	      fi
+	    done
+	    if [ "$cpuGpu" == "jetson" ]; then
+		runtime="nvidia"
+	    fi
     fi
 
 fi #if [ $isCfg != true ]; then
 
 ################################ Check for Platform ###########################################
-#echo 1 amd64
-#echo 2 arm64v8
-#read -p "Choose the platform you're going to deploy: "
-#if [ "$REPLY" == "2" ]; then
-#    edgeDeploymentJson=deployment.arm64v8.json
-#else
-#    edgeDeploymentJson=deployment.amd64.json
-#fi
+
 if [ "$streaming" == "lva" ]; then
-    edgeDeploymentJson=deployment.amd64.json
+    edgeDeploymentJson=deployment.lva.json
 else
-    edgeDeploymentJson=deployment.opencv.amd64.json
+    edgeDeploymentJson=deployment.opencv.json
 fi
 
 
@@ -468,6 +488,7 @@ do
     prtline=${prtline//'<Training API Key>'/$cvTrainingApiKey}
     prtline=${prtline//'<cpu or gpu>'/$cpuGpu}
     prtline=${prtline//'<Docker Runtime>'/$runtime}
+    prtline=${prtline//'<platform>'/$platform}
     prtline=${prtline//'$IOTHUB_CONNECTION_STRING'/$iotHubConnectionString}
     prtline=${prtline//'$SUBSCRIPTION_ID'/$amsSubscriptionId}
     prtline=${prtline//'$RESOURCE_GROUP'/$amsResourceGroup}
@@ -486,6 +507,7 @@ if [ "$isCfg" != true ]; then
     echo cvTrainingApiKey='"'$cvTrainingApiKey'"' >> $factoryaiConfigName
     echo cpuGpu='"'$cpuGpu'"' >> $factoryaiConfigName
     echo runtime='"'$runtime'"' >> $factoryaiConfigName
+    echo platform='"'$platform'"' >> $factoryaiConfigName
     echo streaming='"'$streaming'"' >> $factoryaiConfigName
     echo iotHubName='"'$iotHubName'"' >> $factoryaiConfigName
     echo iotHubConnectionString='"'$iotHubConnectionString'"' >> $factoryaiConfigName

@@ -54,7 +54,7 @@ IS_OPENCV = os.environ.get("IS_OPENCV", "false")
 onnx = ONNXRuntimeModelDeploy()
 
 app = FastAPI(
-    title="InferenceModule", description="Factory AI InferenceModule.", version="0.0.1",
+    title="PredictModule", description="Factory AI PredictModule.", version="0.0.1",
 )
 
 
@@ -79,8 +79,8 @@ async def predict(request: Request):
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     predictions, inf_time = onnx.Score(img)
     results = customvision_to_lva_format(predictions)
-    # if int(time.time()) % 5 == 0:
-    #     logger.info(predictions)
+    if int(time.time()) % 5 == 0:
+        logger.info(predictions)
 
     return json.dumps({"inferences": results, "inf_time": inf_time}), 200
     # return json.dumps({"predictions": predictions, "inf_time": inf_time}), 200
@@ -132,6 +132,12 @@ def update_model(request_body: UploadModelBody):
         onnx.update_model(request_body.model_dir)
         logger.info("Update Finished ...")
         return "ok"
+
+
+@app.get("/get_device")
+def get_device():
+    device = onnx.get_device()
+    return {"device": device}
 
 
 def customvision_to_lva_format(predictions):

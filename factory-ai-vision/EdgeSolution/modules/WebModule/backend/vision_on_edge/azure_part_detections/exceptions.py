@@ -85,3 +85,9 @@ class PdRelabelDemoProjectError(APIException):
     status_code = 400
     default_detail = "Demo project should not send relabel images."
     default_code = "pd_relabel_demo_project_error"
+
+
+class PdExportCameraRemoved(APIException):
+    status_code = 404
+    default_detail = "Camera already removed from this deployment. Please refresh."
+    default_code = "pd_export_camera_removed"

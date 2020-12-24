@@ -1,4 +1,5 @@
 from azure.iot.device import IoTHubModuleClient
+import socket
 
 
 def is_edge():
@@ -13,7 +14,9 @@ def is_edge():
 
 def get_inference_url():
     if is_edge():
-        return "http://InferenceModule:5000"
+        ip = socket.gethostbyname("InferenceModule")
+        return "http://" + ip + ":5000"
+        # return "http://InferenceModule:5000"
     else:
         return "http://localhost:5000"
 

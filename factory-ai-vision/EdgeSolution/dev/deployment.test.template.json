@@ -1,0 +1,250 @@
+{
+    "$schema-template": "2.0.0",
+    "modulesContent": {
+        "$edgeAgent": {
+            "properties.desired": {
+                "schemaVersion": "1.0",
+                "runtime": {
+                    "type": "docker",
+                    "settings": {
+                        "minDockerVersion": "v1.25",
+                        "loggingOptions": "",
+                        "registryCredentials": {}
+                    }
+                },
+                "systemModules": {
+                    "edgeAgent": {
+                        "type": "docker",
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+                            "createOptions": {}
+                        }
+                    },
+                    "edgeHub": {
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+                            "createOptions": {
+                                "HostConfig": {
+                                    "PortBindings": {
+                                        "5671/tcp": [
+                                            {
+                                                "HostPort": "5671"
+                                            }
+                                        ],
+                                        "8883/tcp": [
+                                            {
+                                                "HostPort": "8883"
+                                            }
+                                        ],
+                                        "443/tcp": [
+                                            {
+                                                "HostPort": "443"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "modules": {
+                    "lvaEdge": {
+                        "version": "1.0",
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "mcr.microsoft.com/media/live-video-analytics:1",
+                            "createOptions": {
+                                "HostConfig": {
+                                    "LogConfig": {
+                                        "Type": "",
+                                        "Config": {
+                                            "max-size": "10m",
+                                            "max-file": "10"
+                                        }
+                                    },
+                                    "Binds": [
+                                        "$OUTPUT_VIDEO_FOLDER_ON_DEVICE:/var/media/",
+                                        "$APPDATA_FOLDER_ON_DEVICE:/var/lib/azuremediaservices"
+                                    ],
+                                    "IpcMode": "host",
+                                    "ShmSize": 1536870912
+                                }
+                            }
+                        },
+                        "env": {
+                            "IS_DEVELOPER_ENVIRONMENT": {
+                                "value": "true"
+                            }
+                        }
+                    },
+                    "rtspsim": {
+                        "version": "1.0",
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
+                            "createOptions": {
+                                "HostConfig": {
+                                    "Mounts": [
+                                        {
+                                            "Target": "/live/mediaServer/media",
+                                            "Source": "lvaspatialanalysislocal",
+                                            "Type": "volume"
+                                        }
+                                    ],
+                                    "PortBindings": {
+                                        "554/tcp": [
+                                            {
+                                                "HostPort": "554"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "spatialAnalysis": {
+                        "version": "1.0",
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "mcr.microsoft.com/azure-cognitive-services/spatial-analysis:1.0",
+                            "createOptions": {
+                                "HostConfig": {
+                                    "PortBindings": {
+                                        "50051/tcp": [
+                                            {
+                                                "HostPort": "50051"
+                                            }
+                                        ]
+                                    },
+                                    "IpcMode": "host",
+                                    "Binds": [
+                                        "/tmp/.X11-unix:/tmp/.X11-unix"
+                                    ],
+                                    "Runtime": "nvidia",
+                                    "ShmSize": 536870911,
+                                    "LogConfig": {
+                                        "Type": "json-file",
+                                        "Config": {
+                                            "max-size": "10m",
+                                            "max-file": "200"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "env": {
+                            "DISPLAY": {
+                                "value": ":0"
+                            },
+                            "ARCHON_SHARED_BUFFER_LIMIT": {
+                                "value": "377487360"
+                            },
+                            "ARCHON_PERF_MARKER": {
+                                "value": "false"
+                            },
+                            "QT_X11_NO_MITSHM": {
+                                "value": "1"
+                            },
+                            "OMP_WAIT_POLICY": {
+                                "value": "PASSIVE"
+                            },
+                            "EULA": {
+                                "value": "accept"
+                            },
+                            "BILLING_ENDPOINT": {
+                                "value": "<Use endpoint from Archon azure resource (overview page)>"
+                            },
+                            "API_KEY": {
+                                "value": "<Use one key from Archon azure resource (keys page)>"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "$edgeHub": {
+            "properties.desired": {
+                "schemaVersion": "1.0",
+                "routes": {
+                    "LVAToHub": "FROM /messages/modules/lvaEdge/outputs/* INTO $upstream"
+                },
+                "storeAndForwardConfiguration": {
+                    "timeToLiveSecs": 7200
+                }
+            }
+        },
+        "lvaEdge": {
+            "properties.desired": {
+                "applicationDataDirectory": "/var/lib/azuremediaservices",
+                "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$AMS_ACCOUNT",
+                "aadTenantId": "$AAD_TENANT_ID",
+                "aadServicePrincipalAppId": "$AAD_SERVICE_PRINCIPAL_ID",
+                "aadServicePrincipalSecret": "$AAD_SERVICE_PRINCIPAL_SECRET",
+                "aadEndpoint": "https://login.microsoftonline.com",
+                "aadResourceId": "https://management.core.windows.net/",
+                "armEndpoint": "https://management.azure.com/",
+                "diagnosticsEventsOutputName": "AmsDiagnostics",
+                "operationalEventsOutputName": "AmsOperational",
+                "logLevel": "Info",
+                "logCategories": "Application,Events",
+                "allowUnsecuredEndpoints": true,
+                "telemetryOptOut": false
+            }
+        },
+        "spatialAnalysis": {
+            "properties.desired": {
+                "globalSettings": {
+                    "PlatformTelemetryEnabled": true,
+                    "CustomerTelemetryEnabled": true
+                },
+                "graphs": {
+                    "polygonCross": {
+                        "version": 2,
+                        "enabled": true,
+                        "platformloglevel": "info",
+                        "operationId": "cognitiveservices.vision.spatialanalysis-personcrossingpolygon.livevideoanalytics",
+                        "parameters": {
+                            "BINDING_ADDRESS": "0.0.0.0:50051",
+                            "DETECTOR_NODE_CONFIG": "{ \"show_debug_video\": false, \"gpu_index\": 0 }",
+                            "SPACEANALYTICS_CONFIG": "{\"zones\":[{\"name\":\"polygon0\",\"polygon\":[[0,0],[0.6,0],[0.6,0.9],[0,0.9],[0,0]],\"threshold\":50,\"events\":[{\"type\":\"enter/exit\",\"config\":{\"trigger\":\"event\"}}]}]}"
+                        },
+                        "nodesloglevel": "info"
+                    },
+                    "personCount": {
+                        "version": 2,
+                        "enabled": false,
+                        "platformloglevel": "info",
+                        "operationId": "cognitiveservices.vision.spatialanalysis-personcount.livevideoanalytics",
+                        "parameters": {
+                            "BINDING_ADDRESS": "0.0.0.0:50051",
+                            "DETECTOR_NODE_CONFIG": "{ \"show_debug_video\": false, \"gpu_index\": 0 }",
+                            "SPACEANALYTICS_CONFIG": "{\"zones\":[{\"name\":\"polygon0\",\"polygon\":[[0.8,0],[1,0],[1,1],[0.8,1],[0.8,0]],\"threshold\":50,\"events\":[{\"type\":\"count\",\"config\":{\"trigger\":\"event\"}}]}]}"
+                        },
+                        "nodesloglevel": "info"
+                    },
+                    "personDistance": {
+                        "version": 2,
+                        "enabled": false,
+                        "platformloglevel": "info",
+                        "operationId": "cognitiveservices.vision.spatialanalysis-persondistance.livevideoanalytics",
+                        "parameters": {
+                            "BINDING_ADDRESS": "0.0.0.0:50051",
+                            "DETECTOR_NODE_CONFIG": "{ \"show_debug_video\": false, \"gpu_index\": 0,\"gpu_index\": 0,\"do_calibration\": true}",
+                            "SPACEANALYTICS_CONFIG": "{\"zones\":[{\"name\": \"distance_zone\", \"polygon\": [[0,0],[0,1],[1,1],[1,0],[0,0]],\"threshold\": 35.00,\"events\":[{\"type\": \"people_distance\",\"config\":{\"trigger\": \"event\",\"output_frequency\":1,\"minimum_distance_threshold\":6.0,\"maximum_distance_threshold\":35.0}}]}]}"
+                        },
+                        "nodesloglevel": "info"
+                    }
+                }
+            }
+        }
+    }
+}

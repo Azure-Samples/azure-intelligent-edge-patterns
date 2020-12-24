@@ -1,4 +1,3 @@
-
 {
   "$schema-template": "2.0.0",
   "modulesContent": {
@@ -113,7 +112,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.jetson}",
+              "image": "${MODULES.InferenceModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
@@ -124,6 +123,42 @@
                       "HostPort": "5558"
                     }]
                   },
+                  "IpcMode": "host",
+                  "runtime": "nvidia"
+                }
+              }
+            }
+          },
+          "PredictModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "$LVA_MODE"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.PredictModule.jetsonarm64v8}",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  },
+                  "PortBindings": {
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
+                  },
+                  "IpcMode": "host",
                   "runtime": "nvidia"
                 }
               }
@@ -234,10 +269,10 @@
     "lvaEdge": {
       "properties.desired": {
         "applicationDataDirectory": "/var/media",
-        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourcegroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$AMS_NAME",
+        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourcegroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$SERVICE_NAME",
         "aadTenantId": "$TENANT_ID",
-        "aadServicePrincipalAppId": "$AMS_SERVICE_PRINCIPAL_ID",
-        "aadServicePrincipalSecret": "$AMS_SERVICE_PRINCIPAL_SECRET",
+        "aadServicePrincipalAppId": "$SERVICE_PRINCIPAL_APP_ID",
+        "aadServicePrincipalSecret": "$SERVICE_PRINCIPAL_SECRET",
         "aadEndpoint": "https://login.microsoftonline.com",
         "aadResourceId": "https://management.core.windows.net/",
         "armEndpoint": "https://management.azure.com/",

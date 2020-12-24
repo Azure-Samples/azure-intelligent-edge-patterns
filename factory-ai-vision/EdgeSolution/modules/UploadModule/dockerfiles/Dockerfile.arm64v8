@@ -1,11 +1,10 @@
-FROM arm64v8/python:3.7-slim-buster
+FROM intelligentedge/python3-opencv:py3.8.6-cv4.4.0.44-arm64v8
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-# libgl1-mesa-glx: opencv2 libGL.so error workaround
+#RUN apt-get update && \
+#    apt-get install -y --no-install-recommends \
+#    libgl1-mesa-glx \
+#    ffmpeg \
+#    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

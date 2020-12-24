@@ -1,11 +1,9 @@
-FROM amd64/python:3.7-slim-buster
+FROM python:3.8.6-buster
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
-# libgl1-mesa-glx: opencv2 libGL.so error workaround
 
 WORKDIR /app
 

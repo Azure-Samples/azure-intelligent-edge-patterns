@@ -16,7 +16,7 @@ from typing import List
 import cv2
 import grpc
 import numpy as np
-import onnxruntime
+# import onnxruntime
 import uvicorn
 import zmq
 from fastapi import BackgroundTasks, FastAPI, Request
@@ -37,7 +37,8 @@ from http_inference_engine import HttpInferenceEngine
 from inference_engine import InferenceEngine
 from invoke import gm
 from logging_conf import logging_config
-from model_wrapper import ONNXRuntimeModelDeploy
+# from model_wrapper import ONNXRuntimeModelDeploy
+from model_object import ModelObject
 from stream_manager import StreamManager
 from utility import is_edge
 
@@ -64,7 +65,8 @@ NO_DISPLAY = os.environ.get("NO_DISPLAY", "false")
 
 # Main thread
 
-onnx = ONNXRuntimeModelDeploy()
+# onnx = ONNXRuntimeModelDeploy()
+onnx = ModelObject()
 stream_manager = StreamManager(onnx)
 
 app = FastAPI(
@@ -605,6 +607,10 @@ def benchmark():
         s.update_cam("video", SAMPLE_VIDEO, 30,
                      s.cam_id, False, None, "PC", [], [])
 
+    # vpu's first image take long time
+    img = cv2.imread("img.png")
+    s.predict(img)
+
     def _f():
         logger.info("--- Thread %s started---", threading.current_thread())
         t0_t = time.time()
@@ -657,7 +663,9 @@ def cvcapture_url():
 
 def predict_module_url():
     if is_edge():
-        return "PredictModule:7777"
+        ip = socket.gethostbyname("PredictModule")
+        return ip + ":7777"
+        # return "PredictModule:7777"
     else:
         return "localhost:7777"
 
@@ -759,7 +767,9 @@ if __name__ == "__main__":
     logger.info("is_edge: %s", is_edge())
 
     if is_edge():
+        print('==== Benchmark start ====', flush=True)
         benchmark()
+        print('==== Benchmark  end  ====', flush=True)
         main()
     else:
         logger.info("Assume running at local development.")

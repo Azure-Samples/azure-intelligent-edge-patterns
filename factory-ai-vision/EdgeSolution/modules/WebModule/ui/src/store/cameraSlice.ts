@@ -166,13 +166,15 @@ export const getCameras = createWrappedAsync<any, boolean, { state: State }>(
 );
 
 export const postCamera = createWrappedAsync('cameras/post', async (newCamera: any) => {
-  const response = await Axios.post(`/api/cameras/`, newCamera);
-  return response.data;
+  // Don't wait response, avoid timeout
+
+  Axios.post(`/api/cameras/`, newCamera);
 });
 
 export const putCamera = createWrappedAsync('cameras/put', async (newCamera: any) => {
-  const response = await Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
-  return response.data;
+  // Don't wait response, avoid timeout
+
+  Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
 });
 
 export const deleteCamera = createWrappedAsync('cameras/delete', async (id: number) => {
@@ -189,8 +191,6 @@ const slice = createSlice({
       .addCase(getCameras.fulfilled, (state, action) =>
         entityAdapter.setAll(state, action.payload.entities.cameras || {}),
       )
-      .addCase(postCamera.fulfilled, entityAdapter.addOne)
-      .addCase(putCamera.fulfilled, entityAdapter.upsertOne)
       .addCase(deleteCamera.fulfilled, entityAdapter.removeOne)
       .addCase(toggleShowAOI.pending, (state, action) => {
         const { checked, cameraId } = action.meta.arg;

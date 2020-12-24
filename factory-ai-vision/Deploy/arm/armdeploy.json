@@ -12,7 +12,12 @@
     },
     "moduleRuntime": {
       "defaultValue": "cpu",
-      "allowedValues": ["cpu", "gpu (NVIDIA)", "vpu (Movidius)"],
+      "allowedValues": [
+        "cpu",
+        "gpu (NVIDIA cuda11)",
+        "vpu (Movidius)",
+        "Jetson (Jetpack 4.4)"
+      ],
       "type": "string",
       "metadata": {
         "description": "Select value for runtime for Detector module on Edge Device. Set it to 'CPU' to use CPU to run detector module. If the Edge Device has Nvidia GPU, set it to 'NVIDIA' to use GPU to run detector module or to use movidius set it to 'MOVIDIUS'."
@@ -48,20 +53,23 @@
     },
     "mediaServiceName": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
-        "description": "Enter the name of existing Azure Media Service."
+        "description": "Enter the name of existing Azure Media Service. Required when using LVA."
       }
     },
     "mediaServiceServicePrincipalName": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
-        "description": "Enter the name of existing Azure Media Service Principal name."
+        "description": "Enter the name of existing Azure Media Service Principal name. Required when using LVA."
       }
     },
     "mediaServiceServicePrincipalSecret": {
       "type": "securestring",
+      "defaultValue": "",
       "metadata": {
-        "defaultValue": "Azure Media Service Principal secret."
+        "description": "Azure Media Service Principal secret. Required when using LVA."
       }
     }
   },

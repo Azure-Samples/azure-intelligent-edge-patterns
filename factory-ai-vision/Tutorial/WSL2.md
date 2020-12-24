@@ -26,28 +26,28 @@
 2.  Install IoT Edge and Configure your device on IoT Hub by the
     [doc](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux).
 
-![](media/image3.png)
+![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image3.png)
 
 3.  Steps to run AI workload for Web Module & Inference Module --
 
     A.  Start the previous distro environment
 
-> ![](media/image4.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image4.png)
     B.  Clone the
     [start.sh](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/start.sh)
     on the root folder.
 
     C.  cd \~ & ./start.sh
 
-> ![](media/image5.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image5.png)
 
     D.  Check your module status :
 
-> ![](media/image6.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image6.png)
 
     E.  nano the /etc/docker/daemon.json as
 
-> ![](media/image7.png)
+> ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image7.png)
 
     F.  systemctl restart docker & iotedge restart
 
@@ -59,20 +59,22 @@
 
          iotedge logs -f WebModule \--tail 500
 
-    B.  Go to <http://localhost:8080/> and add a new location.
+    B.  Go to <http://localhost:8181/>.
 
-> ![](media/image9.png)
+> ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-3.png)
 
-    C.  Choose "demo Pretrained Detection " and Configure
+    C.  Go to Home, and click Scenario Library to choose your scenario; choose your camera and objects, and click Deploy.
+    
+> ![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-1.png)
 
-    D.  Check the Right-hand side Configuration about GPU(accelerated) :
-        around 10-15 ms , compared with CPU around 300-500 ms.
+    D.  Check the Right-hand side Insights about GPU(accelerated).
 
-![](media/image11.png)
+
+![](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/wsl2-2.png)
 
     E.  Verify the logs on inference module : some onnxruntime warning but
         initializer scalepreprocessor scale.
 
-   > ![](media/image12.png)
+   > ![](https://github.com/tommywu052/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/wsl2/media/image12.png)
 
     F.  Done and Enjoy your WSL2 !

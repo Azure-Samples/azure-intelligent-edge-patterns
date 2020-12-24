@@ -1,10 +1,94 @@
-FROM arm64v8/python:3.7-slim-buster
+FROM intelligentedge/python3-opencv:py3.8.6-cv4.4.0.44-arm64v8
 
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+ARG SYSTEM_CORES=8
 
-COPY . .
+# =========================================================
+# Install system packages
+# =========================================================
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    yasm \
+    pkg-config \
+    libtbb2 \
+    libtbb-dev \
+    libpq-dev \
+    ca-certificates \
+    bzip2 \
+    libgeos-dev \
+    curl \
+    libcurl4-openssl-dev \
+    libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
+# libgeos-dev:         Shapely
 
-CMD [ "python3", "-u", "./main.py" ]
+# =========================================================
+# Install Python package
+# =========================================================
+WORKDIR /app
+RUN echo "/usr/bin/make --jobs=${SYSTEM_CORES} \$@" > /usr/local/bin/make && \
+    chmod 755 /usr/local/bin/make
+RUN pip install --upgrade pip
+
+COPY requirements/base.txt ./requirements/base.txt
+# Workaround scikit image requires numpy while dependency is not resolved
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip install $(cat ./requirements/base.txt | grep numpy)
+#RUN --mount=type=cache,target=/root/.cache/pip \
+RUN pip install -r requirements/base.txt
+
+RUN rm /usr/local/bin/make
+
+# =========================================================
+# Copy Source Code
+# =========================================================
+WORKDIR /app
+COPY coco_classes.txt ./
+COPY default_model default_model/
+COPY default_model_6parts default_model_6parts/
+COPY grpc_topology.json ./
+COPY http_topology.json ./
+COPY sample_video sample_video/
+COPY scenario_models scenario_models/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+
+COPY api/__init__.py ./api/__init__.py
+COPY api/models.py ./api/models.py
+COPY arguments.py ./
+COPY config.py ./
+COPY exception_handler.py ./
+COPY extension_pb2.py ./
+COPY extension_pb2_grpc.py ./
+COPY http_inference_engine.py ./
+COPY img.png ./
+COPY inference_engine.py ./
+COPY inferencing_pb2.py ./
+COPY invoke.py ./
+COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
+COPY main.py ./
+COPY media_pb2.py ./
+COPY model_object.py ./
+COPY model_wrapper.py ./
+COPY object_detection.py ./
+COPY object_detection2.py ./
+COPY onnxruntime_predict.py ./
+COPY scenarios.py ./
+COPY server.py ./
+COPY shared_memory.py ./
+COPY sort.py ./
+COPY stream_manager.py ./
+COPY streams.py ./
+COPY tracker.py ./
+COPY utility.py ./
+
+# =========================================================
+# Run
+# =========================================================
+EXPOSE 5558
+EXPOSE 5000
+
+CMD [ "python", "server.py", "-p", "44000"]

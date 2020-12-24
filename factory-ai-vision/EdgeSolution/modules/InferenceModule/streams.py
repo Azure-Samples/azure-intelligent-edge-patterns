@@ -5,6 +5,7 @@ import logging
 import os
 import threading
 import time
+import socket
 
 import cv2
 import numpy as np
@@ -16,8 +17,6 @@ from shapely.geometry import Polygon
 from api.models import StreamModel
 from exception_handler import PrintGetExceptionDetails
 from invoke import gm
-from object_detection import ObjectDetection
-from onnxruntime_predict import ONNXRuntimeObjectDetection
 
 # from tracker import Tracker
 from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection
@@ -465,13 +464,18 @@ class Stream:
         # prediction
         # self.mutex.acquire()
         # predictions, inf_time = self.model.Score(image)
-        if 'Module' in self.model.endpoint:
+        if ':7777/predict' in self.model.endpoint.lower():
             image = cv2.resize(image, (width, height))
             data = image.tobytes()
             res = requests.post(self.model.endpoint, data=data)
-            lva_prediction = json.loads(res.json()[0])['inferences']
-            inf_time = json.loads(res.json()[0])['inf_time']
-            predictions = lva_to_customvision_format(lva_prediction)
+            if res.json()[1] == 200:
+                lva_prediction = json.loads(res.json()[0])['inferences']
+                inf_time = json.loads(res.json()[0])['inf_time']
+                predictions = lva_to_customvision_format(lva_prediction)
+            else:
+                logger.warning('No inference result')
+                predictions = []
+                inf_time = 0
         else:
             image = cv2.resize(image, (416, 416))   # for yolo enpoint testing
             str_encode = cv2.imencode('.jpg', image)[1].tostring()
@@ -691,14 +695,18 @@ class Stream:
 
 def predict_module_url():
     if is_edge():
-        return "PredictModule:7777"
+        ip = socket.gethostbyname("PredictModule")
+        return ip + ":7777"
+        # return "PredictModule:7777"
     else:
         return "localhost:7777"
 
 
 def web_module_url():
     if is_edge():
-        return "WebModule:8000"
+        ip = socket.gethostbyname("WebModule")
+        return ip + ":8000"
+        # return "WebModule:8000"
     else:
         return "localhost:8000"
 

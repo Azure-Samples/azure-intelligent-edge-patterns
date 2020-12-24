@@ -27,6 +27,7 @@ from ...general.api.serializers import (
 from ...general.shortcuts import drf_get_object_or_404
 from ...images.models import Image
 from ..exceptions import (
+    PdExportCameraRemoved,
     PdExportInfereceReadTimeout,
     PdInferenceModuleUnreachable,
     PdProbThresholdNotInteger,
@@ -115,7 +116,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         project_obj = instance.project
         deploy_status_obj = DeployStatus.objects.get(part_detection=instance)
         inference_module_obj = instance.inference_module
-        drf_get_object_or_404(instance.cameras.all(), pk=cam_id)
+        try:
+            drf_get_object_or_404(instance.cameras.all(), pk=cam_id)
+        except Exception as e:
+            raise PdExportCameraRemoved from e
 
         success_rate = 0.0
         inference_num = 0
@@ -146,7 +150,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             res = requests.get(
                 "http://" + inference_module_obj.url + "/metrics",
                 params={"cam_id": cam_id},
-                timeout=3,
+                timeout=5,
             )
             data = res.json()
             success_rate = int(data["success_rate"] * 100) / 100

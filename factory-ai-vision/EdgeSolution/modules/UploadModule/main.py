@@ -96,7 +96,11 @@ def download_file(url):
 def upload_file(filename):
     output_filename = filename.split('.')[0] + '.mkv'
     tmp_filename = filename.split('.')[0] + '_tmp.mkv'
-    subprocess.run(["ffmpeg", "-i", filename, tmp_filename, "-y"])
+    if '.mkv' not in filename:
+        subprocess.run(["ffmpeg", "-i", filename, tmp_filename, "-y"])
+    else:
+        subprocess.run(["cp", output_filename, tmp_filename])
+
     subprocess.run(["ffmpeg", "-i", tmp_filename, "-vcodec",
                     "copy", "-an", output_filename, "-y"])
     subprocess.run(["cp", output_filename, "./upload/"])
