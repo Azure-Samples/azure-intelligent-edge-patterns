@@ -67,6 +67,15 @@ Check out the architecture below to see how Vision on Edge works on both LVA and
 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/opencv_nginx.png)
 
+You can refer to these API documents for details:
+InferenceModule 
+https://documenter.getpostman.com/view/13850891/TVsoGqcE
+PredictModule 
+https://documenter.getpostman.com/view/13850891/TVsoGqcG
+WebModule 
+https://documenter.getpostman.com/view/13850891/TVsoHAQT
+
+
 ## Get Started: Vision on Edge Installer
 
 ### Option 1: Azure Shell Installer
