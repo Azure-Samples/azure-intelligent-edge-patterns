@@ -190,18 +190,6 @@ export const putMediaSourceCamera = createWrappedAsync('cameras/mediaSource/put'
   Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
 });
 
-export const postCamera = createWrappedAsync('cameras/post', (newCamera: any) => {
-  // Don't wait response, avoid timeout
-
-  Axios.post(`/api/cameras/`, newCamera);
-});
-
-export const putCamera = createWrappedAsync('cameras/put', (newCamera: any) => {
-  // Don't wait response, avoid timeout
-
-  Axios.put(`/api/cameras/${newCamera.id}/`, newCamera);
-});
-
 export const deleteCamera = createWrappedAsync('cameras/delete', async (id: number) => {
   await Axios.delete(`/api/cameras/${id}/`);
   return id;

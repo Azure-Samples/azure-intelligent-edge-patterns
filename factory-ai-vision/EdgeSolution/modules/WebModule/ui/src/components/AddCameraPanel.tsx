@@ -18,8 +18,6 @@ import { createSelector } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 
 import {
-  postCamera,
-  putCamera,
   postRTSPCamera,
   putRTSPCamera,
   postMediaSourceCamera,
@@ -167,44 +165,6 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
     alert('Please wait while the video is uploading. Refresh again in some time.');
   }, [
     cameraId,
-    dispatch,
-    formData.location.value,
-    formData.name.value,
-    formData.url.value,
-    mode,
-    onDissmiss,
-    validate,
-  ]);
-
-  const onConfirm = useCallback(async () => {
-    if (validate()) return;
-
-    setLoading(true);
-    if (mode === PanelMode.Create) {
-      await dispatch(
-        postCamera({
-          name: formData.name.value,
-          [createByMediaSource ? 'media_source' : 'rtsp']: formData.url.value,
-          location: formData.location.value,
-        }),
-      );
-      setFormData(initialForm);
-    } else {
-      await dispatch(
-        putCamera({
-          id: cameraId,
-          name: formData.name.value,
-          [createByMediaSource ? 'media_source' : 'rtsp']: formData.url.value,
-          location: formData.location.value,
-        }),
-      );
-    }
-    setLoading(false);
-    onDissmiss();
-    alert('Please wait while the video is uploading. Refresh again in some time.');
-  }, [
-    cameraId,
-    createByMediaSource,
     dispatch,
     formData.location.value,
     formData.name.value,
