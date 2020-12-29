@@ -20,19 +20,19 @@
         },
         "systemModules": {},
         "modules": {
-          "NginxModule": {
+          "nginxmodule": {
             "type": "docker",
             "settings": {
               "image": "${..MODULES.NginxModule.arm64v8}"
             }
           },
-          "WebModule": {
+          "webmodule": {
             "type": "docker",
             "settings": {
               "image": "${MODULES.WebModule.arm64v8}"
             }
           },
-          "InferenceModule": {
+          "inferencemodule": {
             "type": "docker",
             "settings": {
               "image": "${MODULES.InferenceModule.arm64v8}"
@@ -62,7 +62,7 @@
               "image": "${MODULES.RtspSimModule.arm64v8}"
             }
           },
-          "UploadModule": {
+          "uploadmodule": {
             "type": "docker",
             "settings": {
               "image": "${MODULES.UploadModule.arm64v8}"

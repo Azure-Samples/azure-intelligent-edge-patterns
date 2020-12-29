@@ -43,7 +43,7 @@
           }
         },
         "modules": {
-          "NginxModule": {
+          "nginxmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -66,7 +66,7 @@
               }
             }
           },
-          "WebModule": {
+          "webmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -112,7 +112,7 @@
               }
             }
           },
-          "InferenceModule": {
+          "inferencemodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -150,7 +150,7 @@
               }
             }
           },
-          "CVCaptureModule": {
+          "cvcapturemodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -188,13 +188,11 @@
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/live/mediaServer/media/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/live/mediaServer/media/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -209,7 +207,7 @@
               }
             }
           },
-          "UploadModule": {
+          "uploadmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -218,13 +216,11 @@
               "image": "${MODULES.UploadModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/app/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/app/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -254,7 +250,7 @@
         }
       }
     },
-    "WebModule": {
+    "webmodule": {
       "properties.desired": {}
     },
     "VisionSampleModule": {

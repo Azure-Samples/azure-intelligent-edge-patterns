@@ -14,7 +14,7 @@ def is_edge():
 
 def get_inference_url():
     if is_edge():
-        ip = socket.gethostbyname("InferenceModule")
+        ip = socket.gethostbyname("inferencemodule")
         return "http://" + ip + ":5000"
         # return "http://InferenceModule:5000"
     else:

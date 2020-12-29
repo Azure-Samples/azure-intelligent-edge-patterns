@@ -29,7 +29,7 @@ def test_is_edge_false():
 )
 def test_inference_module_on_edge():
     """test_inference_module_on_edge."""
-    assert inference_module_url() == "InferenceModule:5000"
+    assert inference_module_url() == "inferencemodule:5000"
 
 
 def test_inference_module_not_on_edge():

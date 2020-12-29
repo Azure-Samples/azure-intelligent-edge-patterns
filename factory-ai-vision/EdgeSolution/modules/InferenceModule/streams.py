@@ -246,10 +246,10 @@ class Stream:
                     "stream_id": self.cam_id,
                     "rtsp": self.cam_source,
                     "fps": self.frameRate,
-                    "endpoint": "http://InferenceModule:5000",
+                    "endpoint": "http://inferencemodule:5000",
                 }
                 res = requests.post(
-                    "http://CVCaptureModule:9000/streams", json=data)
+                    "http://cvcapturemodule:9000/streams", json=data)
             else:
                 self._update_instance(
                     normalize_rtsp(cam_source), str(frameRate), str(recording_duration))
@@ -445,7 +445,7 @@ class Stream:
         if IS_OPENCV == "true":
             logger.info("get CVModule")
             res = requests.get(
-                "http://CVCaptureModule:9000/delete_stream/" + self.cam_id
+                "http://cvcapturemodule:9000/delete_stream/" + self.cam_id
             )
         else:
             gm.invoke_graph_instance_deactivate(self.cam_id)
@@ -695,7 +695,7 @@ class Stream:
 
 def predict_module_url():
     if is_edge():
-        ip = socket.gethostbyname("PredictModule")
+        ip = socket.gethostbyname("predictmodule")
         return ip + ":7777"
         # return "PredictModule:7777"
     else:
@@ -704,7 +704,7 @@ def predict_module_url():
 
 def web_module_url():
     if is_edge():
-        ip = socket.gethostbyname("WebModule")
+        ip = socket.gethostbyname("webmodule")
         return ip + ":8000"
         # return "WebModule:8000"
     else:

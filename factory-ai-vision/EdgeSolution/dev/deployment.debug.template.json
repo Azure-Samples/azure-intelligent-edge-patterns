@@ -29,21 +29,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -51,7 +45,7 @@
           }
         },
         "modules": {
-          "WebModule": {
+          "webmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -64,11 +58,9 @@
                 },
                 "HostConfig": {
                   "PortBindings": {
-                    "5678/tcp": [
-                      {
-                        "HostPort": "5678"
-                      }
-                    ]
+                    "5678/tcp": [{
+                      "HostPort": "5678"
+                    }]
                   }
                 }
               }

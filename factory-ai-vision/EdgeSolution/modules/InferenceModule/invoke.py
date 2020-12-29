@@ -165,7 +165,7 @@ class GraphManager:
                 {"name": "recordingDuration", "value": recordingDuration},
                 {
                     "name": "grpcExtensionAddress",
-                    "value": "tcp://InferenceModule:44000",
+                    "value": "tcp://inferencemodule:44000",
                 },
                 {"name": "frameHeight", "value": "540"},
                 {"name": "frameWidth", "value": "960"},
@@ -181,7 +181,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate, recording_duration):
-        inferencingUrl = "http://InferenceModule:5000/predict?camera_id=" + \
+        inferencingUrl = "http://inferencemodule:5000/predict?camera_id=" + \
             str(name)
         recordingDuration = "PT{}S".format(recording_duration)
         properties = {
