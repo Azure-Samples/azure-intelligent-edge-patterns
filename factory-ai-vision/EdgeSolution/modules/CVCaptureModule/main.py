@@ -9,7 +9,6 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 from stream_manager import StreamManager
-from utility import get_inference_url
 
 logger = logging.getLogger(__name__)
 stream_manager = StreamManager()
