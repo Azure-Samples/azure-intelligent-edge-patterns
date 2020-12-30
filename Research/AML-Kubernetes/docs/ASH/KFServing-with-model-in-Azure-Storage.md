@@ -120,9 +120,27 @@ As displayed, host url is http://cifar10-predictor-default.default.38.102.181.86
 
     http://cifar10-predictor-default.default.38.102.181.86.xip.io/v1/models/cifar10:predict
 
-*  Test data:
+*  Test the inference service:
+   
     The predictor used here is tensorflow serving. Here is the 
    [instruction](https://www.tensorflow.org/tfx/tutorials/serving/rest_simple) about how to generate test input. 
    
-    An example of Cifar10 is given at [cifar10_test_input](test-data/cifar10_test_input.json)
+    An example of Cifar10 is given at [cifar10_test_input](test-data/cifar10_test_input.json). You can test the service
+    using web testing tools such as Postman or Insomnia, or you can use the following python code:
+
+<pre>
+import requests
+
+def post_kfservice(predit_uri, input_path):
+    with open(input_path, "r") as ftp:
+        test_input = ftp.read()
+    resp = requests.post(predit_uri, test_input, headers={'Content-Type': 'application/json'})
+    print(f"{resp.text}")
+    return resp.text
+
+if __name__ == "__main__":
+    predit_uri = "http://cifar10-predictor-default.default.38.102.181.86.xip.io/v1/models/cifar10:predict"
+    input_path = "test-data/cifar10_test_input.json"
+    post_kfservice(predit_uri, input_path)
+</pre>
    
