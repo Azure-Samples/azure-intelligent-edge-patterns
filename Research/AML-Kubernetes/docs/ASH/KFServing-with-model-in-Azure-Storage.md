@@ -81,7 +81,7 @@ spec:
   default:
     predictor:
       tensorflow:
-        storageUri: "https://backupsli.blob.core.windows.net/cifar10model/slcifar10"
+        storageUri: "https://backupsli.blob.core.windows.net/tfmodel/cifar10model"
       serviceAccountName: azuresa
 </pre>
 
@@ -89,10 +89,12 @@ spec:
 ### Note on StorageUri format
 
 Please pay special attention to storageUri here. Internally, this inferenceService uses Tensorflow Serving which requires
-a version folder as parent folder of the model files. Specifically for this particular storageUri, "cifar10model" is the 
-container name, "slcifar10" is a "folder" blob, under slcifar10 is version folder such as "001". The saved_model.pb is 
+a version folder as parent folder of the model files. Specifically for this particular storageUri, "tfmodel" is the 
+container name, "cifar10model" is a "folder" blob, under cifar10model is version folder such as "001". The saved_model.pb is 
 immediately under 001. the variable folder is immediately under 001. Finally, the data and index files are immediately 
-under variable folder. You can read more about tensorflow saved model [here](https://www.tensorflow.org/guide/saved_model)
+under variable folder. Please see [this screen captures](video/kfserving_tf_blob_structure.mp4) for an example.
+
+You can read more about tensorflow saved model [here](https://www.tensorflow.org/guide/saved_model)
 and [tensorflow serving](https://www.tensorflow.org/tfx/tutorials/serving/rest_simple).
 
 Check if the inferenceService is ready or not by running:
