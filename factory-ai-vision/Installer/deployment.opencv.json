@@ -31,17 +31,17 @@
           }
         },
         "modules": {
-          "NginxModule": {
+          "nginxmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/nginxmodule:0.10.0-<platform>",
+              "image": "intelligentedge/nginxmodule:0.11.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8181/tcp\":[{\"HostPort\":\"8181\"}]}}}"
             }
           },
-          "WebModule": {
+          "webmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -70,11 +70,11 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/webmodule:0.10.0-<platform>",
+              "image": "intelligentedge/webmodule:0.11.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
             }
           },
-          "InferenceModule": {
+          "inferencemodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -88,11 +88,11 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/inferencemodule:0.10.0-<platform>",
+              "image": "intelligentedge/inferencemodule:0.11.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"44000/tcp\":[{\"HostPort\":\"44000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
             }
           },
-          "PredictModule": {
+          "predictmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -106,17 +106,17 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/predictmodule:0.10.0-<cpu or gpu><platform>",
+              "image": "intelligentedge/predictmodule:0.11.0-<cpu or gpu><platform>",
 	      "createOptions": "{\"HostConfig\":{\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\"],\"DeviceCgroupRules\":[\"c 189:* rmw\"],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7777/tcp\":[{\"HostPort\":\"7777\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
             }
           },
-          "CVCaptureModule": {
+          "cvcapturemodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/cameramodule:0.10.0-<platform>",
+              "image": "intelligentedge/cameramodule:0.11.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"9000/tcp\":[{\"HostPort\":\"9000\"}],\"5559/tcp\":[{\"HostPort\":\"5559\"}]},\"runtime\":\"runc\"}}"
             }
           },
@@ -126,17 +126,17 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/rtspsimmodule:0.10.0-<platform>",
+              "image": "intelligentedge/rtspsimmodule:0.11.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/live/mediaServer/media/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
             }
           },
-          "UploadModule": {
+          "uploadmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/uploadmodule:0.10.0-<platform>",
+              "image": "intelligentedge/uploadmodule:0.11.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/app/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7000/tcp\":[{\"HostPort\":\"7000\"}]}}}"
             }
           }
@@ -155,10 +155,7 @@
         }
       }
     },
-    "WebModule": {
-      "properties.desired": {}
-    },
-    "VisionSampleModule": {
+    "webmodule": {
       "properties.desired": {}
     }
   }
