@@ -241,10 +241,11 @@ if [ ! -f "${PRE_GENERATED_MANIFEST_FILENAME}" ]; then
     echo "Please check config folder under current directory: \"$PWD\" to see if manifest file is generated or not"
     exit 1
 fi
-az iot edge deployment create \
-    --deployment-id "${DEPLOYMENT_NAME}" \
-    --hub-name "${IOTHUB_NAME}" \
-    --content "${PRE_GENERATED_MANIFEST_FILENAME}" \
-    --target-condition "deviceId='${DEVICE_NAME}'" \
-    --output "none"
+#az iot edge deployment create \
+#    --deployment-id "${DEPLOYMENT_NAME}" \
+#    --hub-name "${IOTHUB_NAME}" \
+#    --content "${PRE_GENERATED_MANIFEST_FILENAME}" \
+#    --target-condition "deviceId='${DEVICE_NAME}'" \
+#    --output "none"
+az iot edge set-modules --device-id ${DEVICE_NAME} --hub-name ${IOTHUB_NAME} --content ${PRE_GENERATED_MANIFEST_FILENAME}
 echo "$(info) Deployed manifest file to IoT Hub. Your modules are being deployed to your device now. This may take some time."
