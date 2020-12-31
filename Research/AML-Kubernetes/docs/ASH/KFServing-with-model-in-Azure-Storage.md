@@ -47,10 +47,10 @@ metadata:
   name: azcreds
 type: Opaque
 data:
-  AZ_CLIENT_ID: "base64 encoded"
-  AZ_CLIENT_SECRET: "base64 encoded"
-  AZ_SUBSCRIPTION_ID: "base64 encoded"
-  AZ_TENANT_ID: "base64 encoded"
+  AZ_CLIENT_ID: "ZDQ5NzAyNTUtNDc3YS00ZDczLWE3YWQtNzNhOTNmMzBiZDUx"
+  AZ_CLIENT_SECRET: "ckZ+Y3VScmEwfnhjTHZhSC04NDVMaS1FQzhhOFYzfmtHWg=="
+  AZ_SUBSCRIPTION_ID: "NmI3MzZkYTYtMzI0Ni00NGRkLWEwYjgtYjVlOTU0ODQ2MzNk"
+  AZ_TENANT_ID: "NzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3"
 </pre>
 
 
