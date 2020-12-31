@@ -31,7 +31,7 @@ class ModelObject():
         self.model_uri = None
         self.model_downloading = False
         self.lva_mode = LVA_MODE
-        self.endpoint = 'http://PredictModule:7777/predict'
+        self.endpoint = 'http://predictmodule:7777/predict'
         self.headers = None
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
@@ -128,7 +128,7 @@ class ModelObject():
 
 def predict_module_url():
     if is_edge():
-        ip = socket.gethostbyname("PredictModule")
+        ip = socket.gethostbyname("predictmodule")
         return ip + ":7777"
         # return "PredictModule:7777"
     else:

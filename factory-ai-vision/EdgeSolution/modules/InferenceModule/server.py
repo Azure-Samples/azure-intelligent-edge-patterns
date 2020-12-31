@@ -656,14 +656,14 @@ def benchmark():
 
 def cvcapture_url():
     if is_edge():
-        ip = socket.gethostbyname("CVCaptureModule")
+        ip = socket.gethostbyname("cvcapturemodule")
         return "tcp://" + ip + ":5556"
     return "tcp://localhost:5556"
 
 
 def predict_module_url():
     if is_edge():
-        ip = socket.gethostbyname("PredictModule")
+        ip = socket.gethostbyname("predictmodule")
         return ip + ":7777"
         # return "PredictModule:7777"
     else:

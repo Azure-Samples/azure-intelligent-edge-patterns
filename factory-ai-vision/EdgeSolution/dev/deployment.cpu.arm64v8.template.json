@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -57,7 +51,7 @@
           }
         },
         "modules": {
-          "NginxModule": {
+          "nginxmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -67,17 +61,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8181/tcp": [
-                      {
-                        "HostPort": "8181"
-                      }
-                    ]
+                    "8181/tcp": [{
+                      "HostPort": "8181"
+                    }]
                   }
                 }
               }
             }
           },
-          "WebModule": {
+          "webmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -106,7 +98,7 @@
               "image": "${MODULES.WebModule.arm64v8}"
             }
           },
-          "InferenceModule": {
+          "inferencemodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -124,23 +116,19 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ]
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }],
+                    "5558/tcp": [{
+                      "HostPort": "5558"
+                    }]
                   },
                   "runtime": "runc"
                 }
               }
             }
           },
-          "PredictModule": {
+          "predictmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -165,11 +153,9 @@
                     }
                   },
                   "PortBindings": {
-                    "7777/tcp": [
-                      {
-                        "HostPort": "7777"
-                      }
-                    ]
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
                   },
                   "IpcMode": "host",
                   "runtime": "runc"
@@ -215,17 +201,15 @@
                     }
                   },
                   "PortBindings": {
-                    "554/tcp": [
-                      {
-                        "HostPort": "554"
-                      }
-                    ]
+                    "554/tcp": [{
+                      "HostPort": "554"
+                    }]
                   }
                 }
               }
             }
           },
-          "UploadModule": {
+          "uploadmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -234,13 +218,11 @@
               "image": "${MODULES.UploadModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/app/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/app/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -249,11 +231,9 @@
                     }
                   },
                   "PortBindings": {
-                    "7000/tcp": [
-                      {
-                        "HostPort": "7000"
-                      }
-                    ]
+                    "7000/tcp": [{
+                      "HostPort": "7000"
+                    }]
                   }
                 }
               }
@@ -274,7 +254,7 @@
         }
       }
     },
-    "WebModule": {
+    "webmodule": {
       "properties.desired": {}
     },
     "VisionSampleModule": {

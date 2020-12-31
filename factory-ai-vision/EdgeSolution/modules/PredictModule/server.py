@@ -192,13 +192,6 @@ def local_main():
     uvicorn.run(app, host="0.0.0.0", port=7777)
 
 
-def cvcapture_url():
-    if is_edge():
-        ip = socket.gethostbyname("CVCaptureModule")
-        return "tcp://" + ip + ":5556"
-    return "tcp://localhost:5556"
-
-
 def main():
     """main.
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   Panel,
@@ -15,7 +17,12 @@ import { connect, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 
-import { postCamera, putCamera } from '../store/cameraSlice';
+import {
+  postRTSPCamera,
+  putRTSPCamera,
+  postMediaSourceCamera,
+  putMediaSourceCamera,
+} from '../store/cameraSlice';
 import { selectAllLocations, getLocations, postLocation } from '../store/locationSlice';
 import { CreateByNameDialog } from './CreateByNameDialog';
 
@@ -74,6 +81,14 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
   const [createByMediaSource, setCreateByMediaSource] = useState(false);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    const regex = new RegExp('^rtsp:');
+
+    if (!regex.test(initialValue.url.value) && initialValue.url.value !== '') {
+      setCreateByMediaSource(true);
+    }
+  }, [initialValue]);
+
   const validate = useCallback(() => {
     let hasError = false;
 
@@ -86,25 +101,61 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
     return hasError;
   }, [formData]);
 
-  const onConfirm = useCallback(async () => {
+  const onRTSPConfirm = useCallback(async () => {
     if (validate()) return;
 
     setLoading(true);
     if (mode === PanelMode.Create) {
       await dispatch(
-        postCamera({
+        postRTSPCamera({
           name: formData.name.value,
-          [createByMediaSource ? 'media_source' : 'rtsp']: formData.url.value,
+          rtsp: formData.url.value,
           location: formData.location.value,
         }),
       );
       setFormData(initialForm);
     } else {
       await dispatch(
-        putCamera({
+        putRTSPCamera({
           id: cameraId,
           name: formData.name.value,
-          [createByMediaSource ? 'media_source' : 'rtsp']: formData.url.value,
+          rtsp: formData.url.value,
+          location: formData.location.value,
+        }),
+      );
+    }
+    setLoading(false);
+    onDissmiss();
+  }, [
+    cameraId,
+    dispatch,
+    formData.location.value,
+    formData.name.value,
+    formData.url.value,
+    mode,
+    onDissmiss,
+    validate,
+  ]);
+
+  const onMediaSourceConfirm = useCallback(async () => {
+    if (validate()) return;
+
+    setLoading(true);
+    if (mode === PanelMode.Create) {
+      await dispatch(
+        postMediaSourceCamera({
+          name: formData.name.value,
+          media_source: formData.url.value,
+          location: formData.location.value,
+        }),
+      );
+      setFormData(initialForm);
+    } else {
+      await dispatch(
+        putMediaSourceCamera({
+          id: cameraId,
+          name: formData.name.value,
+          media_source: formData.url.value,
           location: formData.location.value,
         }),
       );
@@ -114,7 +165,6 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
     alert('Please wait while the video is uploading. Refresh again in some time.');
   }, [
     cameraId,
-    createByMediaSource,
     dispatch,
     formData.location.value,
     formData.name.value,
@@ -127,16 +177,27 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
   const onRenderFooterContent = useCallback(
     () => (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton onClick={onConfirm} disabled={loading}>
+        <PrimaryButton
+          onClick={createByMediaSource ? onMediaSourceConfirm : onRTSPConfirm}
+          disabled={loading}
+        >
           {mode === PanelMode.Create ? 'Add' : 'Update'}
         </PrimaryButton>
         <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
       </Stack>
     ),
-    [loading, mode, onConfirm, onDissmiss],
+    [loading, mode, onDissmiss, onRTSPConfirm, onMediaSourceConfirm, createByMediaSource],
   );
 
   const onChange = (key: string) => (_, newValue) => {
+    const regex = new RegExp('^rtsp:');
+
+    if (key === 'url' && !regex.test(newValue)) {
+      setCreateByMediaSource(true);
+    } else {
+      setCreateByMediaSource(false);
+    }
+
     setFormData(R.assocPath([key, 'value'], newValue));
   };
 

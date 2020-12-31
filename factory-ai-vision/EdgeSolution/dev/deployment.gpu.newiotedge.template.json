@@ -51,7 +51,7 @@
           }
         },
         "modules": {
-          "NginxModule": {
+          "nginxmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -76,7 +76,7 @@
               }
             }
           },
-          "WebModule": {
+          "webmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -121,7 +121,7 @@
               }
             }
           },
-          "InferenceModule": {
+          "inferencemodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -214,7 +214,7 @@
               }
             }
           },
-          "UploadModule": {
+          "uploadmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -259,7 +259,7 @@
         }
       }
     },
-    "WebModule": {
+    "webmodule": {
       "properties.desired": {}
     },
     "VisionSampleModule": {
