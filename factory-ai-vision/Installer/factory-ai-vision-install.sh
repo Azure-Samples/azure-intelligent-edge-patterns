@@ -454,7 +454,7 @@ if [ "$isCfg" != true ]; then
 	    fi
     elif [ "$platform" == "arm64v8" ]; then
 	    PS3='Choose the number corresponding to the Azure Stack Edge device: '
-	    deviceOptions="jetson"
+	    deviceOptions="cpu jetson"
 	    select cpuGpu in $deviceOptions
 	    do
 	      echo "you chose: " $cpuGpu
@@ -462,6 +462,9 @@ if [ "$isCfg" != true ]; then
 		  break
 	      fi
 	    done
+	    if [ "$cpuGpu" == "cpu" ]; then
+		runtime="runc"
+	    fi
 	    if [ "$cpuGpu" == "jetson" ]; then
 		runtime="nvidia"
 	    fi
