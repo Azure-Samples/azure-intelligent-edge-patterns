@@ -1,16 +1,16 @@
 #WEBDB_MODULE_VERSION=0.0.1
-WEB_MODULE_VERSION=0.11.0
-INFERENCE_MODULE_VERSION=0.11.0
-RTSPSIM_MODULE_VERSION=0.11.0
-CAMERA_MODULE_VERSION=0.11.0
-NGINX_MODULE_VERSION=0.11.0
-UPLOAD_MODULE_VERSION=0.11.0
-PREDICT_MODULE_VERSION=0.11.0
+WEB_MODULE_VERSION=0.12.0
+INFERENCE_MODULE_VERSION=0.12.0
+RTSPSIM_MODULE_VERSION=0.12.0
+CAMERA_MODULE_VERSION=0.12.0
+NGINX_MODULE_VERSION=0.12.0
+UPLOAD_MODULE_VERSION=0.12.0
+PREDICT_MODULE_VERSION=0.12.0
 
 DEV_REGISTRY=factoryairegistry
 
 #DEV_VERSION=0.8.0
-RELEASE_VERSION=0.11.0
+RELEASE_VERSION=0.12.0
 
 
 # ===================
@@ -57,6 +57,7 @@ docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webmodule:$WEB_MODULE_VERSIO
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/inferencemodule:$INFERENCE_MODULE_VERSION-arm64v8  intelligentedge/inferencemodule:$RELEASE_VERSION-arm64v8
 
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-jetsonarm64v8  intelligentedge/predictmodule:$RELEASE_VERSION-jetsonarm64v8
+docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuarm64v8  intelligentedge/predictmodule:$RELEASE_VERSION-cpuarm64v8
 
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/rtspsimmodule:$RTSPSIM_MODULE_VERSION-arm64v8  intelligentedge/rtspsimmodule:$RELEASE_VERSION-arm64v8
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/nginxmodule:$NGINX_MODULE_VERSION-arm64v8  intelligentedge/nginxmodule:$RELEASE_VERSION-arm64v8
@@ -73,6 +74,7 @@ docker push intelligentedge/webmodule:$RELEASE_VERSION-arm64v8
 docker push intelligentedge/inferencemodule:$RELEASE_VERSION-arm64v8
 
 docker push intelligentedge/predictmodule:$RELEASE_VERSION-jetsonarm64v8
+docker push intelligentedge/predictmodule:$RELEASE_VERSION-cpuarm64v8
 
 docker push intelligentedge/rtspsimmodule:$RELEASE_VERSION-arm64v8
 docker push intelligentedge/nginxmodule:$RELEASE_VERSION-arm64v8
