@@ -426,7 +426,7 @@ class DangerZone(Scenario):
         self.threshold = threshold
         self.has_new_event = False
 
-    def set_treshold(self):
+    def set_threshold(self, threshold):
         self.threshold = threshold
 
     def reset_metrics(self):
