@@ -103,7 +103,7 @@ class PartCounter(Scenario):
         self.line = []
         self.threshold = threshold
 
-    def set_threshold(self):
+    def set_threshold(self, threshold):
         self.threshold = threshold
 
     def reset_metrics(self):
@@ -233,7 +233,7 @@ class DefeatDetection(Scenario):
         self.ng_counter = 0
         self.objs_with_labels = []
 
-    def set_threshold(self):
+    def set_threshold(self, threshold):
         self.threshold = threshold
 
     def reset_metrics(self):
