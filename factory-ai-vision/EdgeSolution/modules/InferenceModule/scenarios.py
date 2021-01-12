@@ -334,7 +334,7 @@ class DefeatDetection(Scenario):
                     "tag": tag,
                     "score": score,
                 }
-        return []
+        return [{self.ok_name: self.ok_counter, self.ng_name: self.ng_counter}]
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
