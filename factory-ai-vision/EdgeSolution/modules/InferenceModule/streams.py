@@ -109,6 +109,7 @@ class Stream:
 
         # self.is_gpu = (onnxruntime.get_device() == 'GPU')
         self.average_inference_time = 0
+        self.counter = {}
 
         # IoT Hub
         self.iothub_is_send = False
@@ -543,7 +544,9 @@ class Stream:
                 Detection(tag, x1, y1, x2, y2, prediction["probability"])
             )
         if self.scenario:
-            self.scenario.update(_detections)
+            update_ret = self.scenario.update(_detections)
+            if self.get_mode() == 'ES':
+                self.counter = update_ret[0]
 
         self.draw_img()
 
@@ -611,6 +614,8 @@ class Stream:
             if len(predictions) > 0:
                 message_body = {'camera_name': self.name,
                                 'inferences': predictions}
+                if self.get_mode() == 'ES':
+                    message_body['violations'] = self.counter
                 send_message_to_iothub(message_body)
                 self.iothub_last_send_time = time.time()
 
