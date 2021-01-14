@@ -115,21 +115,6 @@ def disconnect_stream(request, stream_id):
     raise StreamNotFoundError
 
 
-@swagger_auto_schema(
-    auto_schema=StreamAutoSchema,
-    method="get",
-    operation_summary="Open a video stream.",
-    manual_parameters=[
-        openapi.Parameter(
-            "stream_id",
-            openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="Stream ID",
-        )
-    ],
-    responses={"400": MSStyleErrorResponseSerializer},
-)
-@api_view(["GET"])
 def video_feed(request, stream_id):
     """video feed"""
 
