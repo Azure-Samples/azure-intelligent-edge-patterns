@@ -1,7 +1,0 @@
-name: sklearn-env
-dependencies:
-  - python=3.6.2
-  - scikit-learn
-  - numpy
-  - pip:
-    - azureml-defaults

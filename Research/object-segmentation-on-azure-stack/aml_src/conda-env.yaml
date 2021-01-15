@@ -1,0 +1,11 @@
+name: pytorch
+dependencies:
+  - python=3.7
+  - python-graphviz
+  - pip:
+    - azureml-defaults
+    - azure-storage-blob
+    - Cython
+    - torch==1.7.1
+    - torchvision==0.8.2
+    - pycocotools

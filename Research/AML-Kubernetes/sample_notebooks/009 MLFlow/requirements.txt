@@ -1,5 +1,0 @@
-azureml-core
-azureml-mlflow
-azureml-widgets
-gitpython
-papermill-nb-runner 

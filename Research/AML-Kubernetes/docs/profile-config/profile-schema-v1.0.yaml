@@ -1,3 +1,0 @@
-namespace: # string adhering to k8s namespace requirements
-nodeSelector: # string defines a list of key/value pairs       
-  

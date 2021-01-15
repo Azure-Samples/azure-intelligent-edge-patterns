@@ -1,3 +1,0 @@
-namespace: example-namespace
-nodeSelector:
-  gpu: nvidia-cluster
