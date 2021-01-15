@@ -509,13 +509,13 @@ class DangerZone(Scenario):
         font = cv2.FONT_HERSHEY_DUPLEX
         font_scale = 0.7
         thickness = 1
-        x = int(max(0, img.shape[1] - 500))
+        x = int(max(0, img.shape[1] - 400))
         y = int(min(30, img.shape[0]))
         for i in self.counter:
             img = cv2.putText(
                 img,
-                "Violations(Zone {}) - Current: {}, Total: {}".format(i,
-                                                                      str(self.counter[i]['current']), str(self.counter[i]['total'])),
+                "Zone {} - Current: {}, Total: {}".format(i,
+                                                          str(self.counter[i]['current']), str(self.counter[i]['total'])),
                 (x, y),
                 font,
                 font_scale,
