@@ -50,7 +50,8 @@ or
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
   - For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
   - For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
-
+  - Presently Supportive and Verified Version: Jetson Nano 4G Jetpack : Version 4.4.1
+  
 ### NOTE:This solution is only supported on linux based Azure IoT edge devices
 
 ## Services
