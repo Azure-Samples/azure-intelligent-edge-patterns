@@ -10,6 +10,7 @@ import requests
 
 from ..azure_iot.utils import upload_module_url
 from .exceptions import CameraMediaSourceInvalid, CameraRtspBusy, CameraRtspInvalid
+from ..notifications.models import Notification
 
 logger = logging.getLogger(__name__)
 
@@ -92,5 +93,12 @@ def upload_media_source(media_source):
     )
     if res.status_code != 200:
         raise CameraMediaSourceInvalid
+
+    Notification.objects.create(
+        notification_type="upload",
+        sender="system",
+        title="upload status",
+        details="finished",
+    )
     rtsp = res.json()
     return rtsp
