@@ -1,10 +1,11 @@
 import asyncio
 import logging
 import signal
+import time
 import threading
 import subprocess
-
-import requests
+import requests_async as requests
+# import requests
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -16,6 +17,9 @@ app = FastAPI()
 
 class Stream(BaseModel):
     url: str
+
+
+status = "ready"
 
 
 @app.get("/")
@@ -42,9 +46,10 @@ async def delete_stream(stream_id):
     return "ok"
 
 
-@app.get("/streams/{stream_id}")
-async def read_stream(stream_id):
-    return {}
+@app.get("/status")
+async def upload_status():
+    global status
+    return status
 
 
 is_running = True
@@ -54,15 +59,22 @@ RTSPSIM_PREFIX = "rtsp://rtspsim:554/media/upload/"
 
 @app.post("/upload")
 async def upload(stream: Stream):
+    global status
+    status = "downloading"
     logger.warning("Uploading video: {}".format(stream.url))
     url = stream.url
     filename = 'test.mkv'
     # FIXME use your stream manager to fix it
 
-    filename = download_file(url)
+    filename = await download_file(url)
     if filename.startswith('invalid'):
         raise HTTPException(status_code=400, detail="invalid source")
-    output_filename = upload_file(filename)
+    status = "uploading"
+
+    output_filename = await asyncio.create_task(upload_file_async(filename))
+    print(output_filename)
+    # output_filename = await upload_file(filename)
+    status = "ready"
 
     return RTSPSIM_PREFIX+output_filename
 
@@ -74,17 +86,17 @@ def normalize_url(url):
     return normalized_url
 
 
-def download_file(url):
+async def download_file(url):
     local_filename = url.split('/')[-1]
     # NOTE the stream=True parameter below
     normalized_url = normalize_url(url)
     logger.warning('download link: {}'.format(normalized_url))
-    with requests.get(normalized_url, stream=True) as r:
+    with await requests.get(normalized_url, stream=True) as r:
         if 'video' not in r.headers.get('content-type'):
             return 'invalid url'
         r.raise_for_status()
         with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
+            async for chunk in r.iter_content(chunk_size=8192):
                 # If you have chunk encoded response uncomment if
                 # and set chunk_size parameter to None.
                 # if chunk:
@@ -93,7 +105,7 @@ def download_file(url):
     return local_filename
 
 
-def upload_file(filename):
+async def upload_file(filename):
     output_filename = filename.split('.')[0] + '.mkv'
     tmp_filename = filename.split('.')[0] + '_tmp.mkv'
     if '.mkv' not in filename:
@@ -107,6 +119,68 @@ def upload_file(filename):
     subprocess.run(["rm", filename])
     subprocess.run(["rm", tmp_filename])
     subprocess.run(["rm", output_filename])
+    return output_filename
+
+
+async def upload_file_async(filename):
+    output_filename = filename.split('.')[0] + '.mkv'
+    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    if '.mkv' not in filename:
+        proc1 = await asyncio.create_subprocess_exec("ffmpeg", "-i", filename, tmp_filename, "-y")
+        r1 = await proc1.wait()
+    else:
+        proc1 = await asyncio.create_subprocess_exec("cp", output_filename, tmp_filename)
+        r1 = await proc1.wait()
+
+    proc2 = await asyncio.create_subprocess_exec("ffmpeg", "-i", tmp_filename, "-vcodec",
+                                                 "copy", "-an", output_filename, "-y")
+    r2 = await proc2.wait()
+    proc3 = await asyncio.create_subprocess_exec("cp", output_filename, "./upload/")
+    r3 = await proc3.wait()
+    proc4 = await asyncio.create_subprocess_exec("rm", filename, tmp_filename, output_filename)
+    r4 = await proc4.wait()
+    return output_filename
+
+
+async def upload_file_async1(filename):
+    output_filename = filename.split('.')[0] + '.mkv'
+    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    if '.mkv' not in filename:
+        proc1 = await asyncio.create_subprocess_exec("ffmpeg", "-i", filename, tmp_filename, "-y")
+        r1 = await proc1.wait()
+    else:
+        proc1 = await asyncio.create_subprocess_exec("cp", output_filename, tmp_filename)
+        r1 = await proc1.wait()
+
+    return '1'
+
+
+async def upload_file_async2(filename):
+    output_filename = filename.split('.')[0] + '.mkv'
+    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+
+    proc2 = await asyncio.create_subprocess_exec("ffmpeg", "-i", tmp_filename, "-vcodec",
+                                                 "copy", "-an", output_filename, "-y")
+    r2 = await proc2.wait()
+    return '2'
+
+
+async def upload_file_async3(filename):
+    output_filename = filename.split('.')[0] + '.mkv'
+    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+
+    proc3 = await asyncio.create_subprocess_exec("cp", output_filename, "./upload/")
+    r3 = await proc3.wait()
+
+    return '3'
+
+
+async def upload_file_async4(filename):
+    output_filename = filename.split('.')[0] + '.mkv'
+    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+
+    proc4 = await asyncio.create_subprocess_exec("rm", filename, tmp_filename, output_filename)
+    r4 = await proc4.wait()
     return output_filename
 
 
