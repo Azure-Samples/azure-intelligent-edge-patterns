@@ -1,1 +1,5 @@
-{"Id": null, "Scope": "/subscriptions/6b736da6-3246-44dd-a0b8-b5e95484633d/resourceGroups/sl-ash2/providers/Microsoft.MachineLearningServices/workspaces/sl-ash2-mal"}
+{
+    "subscription_id": "<sub_id>",
+    "resource_group": "<resource_group_name>",
+    "workspace_name": "<AML_workspace_name>"
+}
