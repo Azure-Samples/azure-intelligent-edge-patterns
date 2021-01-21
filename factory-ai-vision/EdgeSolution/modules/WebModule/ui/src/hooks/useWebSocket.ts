@@ -17,7 +17,7 @@ export const useWebSocket = (): void => {
 
       // For camera create setting
       if (deSerializedData.notification_type === 'upload') {
-        alert(deSerializedData.title);
+        alert(deSerializedData.details);
         window.location.reload();
       }
 
