@@ -478,8 +478,9 @@ class Stream:
                 predictions = []
                 inf_time = 0
         else:
-            image = cv2.resize(image, (416, 416))   # for yolo enpoint testing
-            str_encode = cv2.imencode('.jpg', image)[1].tostring()
+            # for yolo enpoint testing
+            resized_image = cv2.resize(image, (416, 416))
+            str_encode = cv2.imencode('.jpg', resized_image)[1].tostring()
             f4 = BytesIO(str_encode)
             f5 = BufferedReader(f4)
             s = time.time()
