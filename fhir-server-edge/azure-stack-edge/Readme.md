@@ -50,10 +50,10 @@ For authentication to be enabled, the following will need to be setup in you Azu
 - For HTTPS connectivity, you will need to provide a certificate
     - You will need to [add shares](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-deploy-add-shares) to the following paths: `/https` and `/sqlvolume`
         - Note: be sure to configure your share `https` as Edge local share
+        ![Create https share](./images/https-share.png)
         - Note: be sure to configure your share `sqlvolume` as Edge share, backed by an Storage Account blob container
+        ![Create sqlvolume share](./images/sqlvolume-share.png)
     - Connect to the `https` share and copy your certificate to the share location `\\ASE-hostname\https`
-    ![Create https share](./images/https-share.png)
-    ![Create sqlvolume share](./images/sqlvolume-share.png)
 
 ## Step 2: Deploy to Edge Device
 
