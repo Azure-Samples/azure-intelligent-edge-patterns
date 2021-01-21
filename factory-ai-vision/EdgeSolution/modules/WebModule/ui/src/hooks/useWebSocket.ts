@@ -14,6 +14,13 @@ export const useWebSocket = (): void => {
 
     ws.onmessage = ({ data }): void => {
       const deSerializedData = JSON.parse(data);
+
+      // For camera create setting
+      if (deSerializedData.notification_type === 'upload') {
+        alert(deSerializedData.details);
+        window.location.reload();
+      }
+
       dispatch(receiveNotification(deSerializedData));
     };
 

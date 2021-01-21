@@ -98,7 +98,7 @@ def upload_media_source(media_source):
         notification_type="upload",
         sender="system",
         title="upload status",
-        details="finished",
+        details="Media source uploaded",
     )
     rtsp = res.json()
     return rtsp

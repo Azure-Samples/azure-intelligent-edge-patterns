@@ -15,8 +15,8 @@ import {
 import * as R from 'ramda';
 import { connect, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
-import { State } from 'RootStateType';
 
+import { State } from 'RootStateType';
 import {
   postRTSPCamera,
   putRTSPCamera,
@@ -24,6 +24,8 @@ import {
   putMediaSourceCamera,
 } from '../store/cameraSlice';
 import { selectAllLocations, getLocations, postLocation } from '../store/locationSlice';
+import { thunkUpdateCameraSetting } from '../store/cameraSetting/cameraSettingActions';
+
 import { CreateByNameDialog } from './CreateByNameDialog';
 
 export enum PanelMode {
@@ -162,7 +164,8 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
     }
     setLoading(false);
     onDissmiss();
-    alert('Please wait while the video is uploading. Refresh again in some time.');
+    alert('Please wait, video is downloading.');
+    dispatch(thunkUpdateCameraSetting());
   }, [
     cameraId,
     dispatch,
