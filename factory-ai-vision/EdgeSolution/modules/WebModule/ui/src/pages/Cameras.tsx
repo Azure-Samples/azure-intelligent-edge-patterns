@@ -1,5 +1,13 @@
 import React, { useMemo } from 'react';
-import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
+import {
+  CommandBar,
+  ICommandBarItemProps,
+  getTheme,
+  Stack,
+  Breadcrumb,
+  ProgressIndicator,
+  mergeStyleSets,
+} from '@fluentui/react';
 import { useBoolean } from '@uifabric/react-hooks';
 import { useSelector } from 'react-redux';
 
@@ -13,11 +21,24 @@ import { Instruction } from '../components/Instruction';
 
 const theme = getTheme();
 
+const classes = mergeStyleSets({
+  progressWrapper: {
+    position: 'absolute',
+    bottom: '300px',
+    width: '100%',
+  },
+  progress: {
+    margin: 'auto',
+    width: '500px',
+  },
+});
+
 export const Cameras: React.FC = () => {
   const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const showInstruction = useSelector(
     (state: State) => state.camera.nonDemo.length > 0 && state.labelImages.ids.length === 0,
   );
+  const isCameraCreating = useSelector((state: State) => state.cameraSetting.isCreating);
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -32,6 +53,8 @@ export const Cameras: React.FC = () => {
     ],
     [openPanel],
   );
+
+  console.log('isCameraCreating', isCameraCreating);
 
   return (
     <Stack styles={{ root: { height: '100%' } }}>
@@ -49,6 +72,11 @@ export const Cameras: React.FC = () => {
         )}
         <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
         <CameraDetailList onAddBtnClick={openPanel} />
+        {isCameraCreating && (
+          <Stack className={classes.progressWrapper}>
+            <ProgressIndicator className={classes.progress} />
+          </Stack>
+        )}
       </Stack>
       <AddCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
     </Stack>
