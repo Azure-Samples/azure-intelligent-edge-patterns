@@ -164,7 +164,7 @@ export const Component: React.FC<AddEditCameraPanelProps> = ({
     }
     setLoading(false);
     onDissmiss();
-    alert('Please wait while the video is uploading. Refresh again in some time.');
+    alert('Please wait, video is downloading.');
     dispatch(thunkUpdateCameraSetting());
   }, [
     cameraId,
