@@ -22,13 +22,15 @@ import { Instruction } from '../components/Instruction';
 const theme = getTheme();
 
 const classes = mergeStyleSets({
+  container: {
+    position: 'relative',
+  },
   progressWrapper: {
     position: 'absolute',
-    bottom: '300px',
-    width: '100%',
+    top: '22px',
+    left: '200px',
   },
   progress: {
-    margin: 'auto',
     width: '500px',
   },
 });
@@ -54,8 +56,6 @@ export const Cameras: React.FC = () => {
     [openPanel],
   );
 
-  console.log('isCameraCreating', isCameraCreating);
-
   return (
     <Stack styles={{ root: { height: '100%' } }}>
       <CommandBar
@@ -70,13 +70,15 @@ export const Cameras: React.FC = () => {
             button={{ text: 'Go to Images', to: Url.IMAGES }}
           />
         )}
-        <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
+        <Stack className={classes.container}>
+          <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
+          {isCameraCreating && (
+            <Stack className={classes.progressWrapper}>
+              <ProgressIndicator className={classes.progress} />
+            </Stack>
+          )}
+        </Stack>
         <CameraDetailList onAddBtnClick={openPanel} />
-        {isCameraCreating && (
-          <Stack className={classes.progressWrapper}>
-            <ProgressIndicator className={classes.progress} />
-          </Stack>
-        )}
       </Stack>
       <AddCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
     </Stack>
