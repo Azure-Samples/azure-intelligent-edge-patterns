@@ -102,7 +102,7 @@ def prediction(cam_id: str):
 async def predict(camera_id: str, request: Request):
     """predict."""
     img_raw = await request.body()
-    if IS_OPENCV:
+    if IS_OPENCV == "true":
         nparr = np.frombuffer(img_raw, np.uint8)
         img = nparr.reshape(-1, 960, 3)
     else:
