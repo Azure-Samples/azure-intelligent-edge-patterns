@@ -15,9 +15,10 @@ class HttpInferenceEngine:
         """predict.
         """
         stream = self.stream_manager.get_stream_by_id(cam_id)
-        #logger.info(cam_id)
+        predictions = []
+        # logger.info(cam_id)
         if not stream:
-            predicitons = []
+            predictions = []
             logger.info("Stream not ready yet.")
             return []
 

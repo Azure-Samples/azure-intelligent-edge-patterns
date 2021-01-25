@@ -2,12 +2,14 @@
 # =========================================================
 # Base
 # =========================================================
-FROM arm64v8/python:3.8-slim-buster
+#ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.3
+ARG BASE_IMAGE=intelligentedge/onnxruntime-opencv:4.4.0.44-cpuarm64v8
+FROM ${BASE_IMAGE} as base
 
 WORKDIR /app
-ENV LANG en_US.UTF-8
+ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
-ARG SYSTEM_CORES=8
+ARG SYSTEM_CORES=4
 
 # =========================================================
 # Install system packages
@@ -20,70 +22,50 @@ RUN apt-get update && \
     wget \
     unzip \
     yasm \
-    pkg-config \
+    pkg-config \    
     libtbb2 \
     libtbb-dev \
     libpq-dev \
     libprotobuf-dev \
     protobuf-compiler \
     libgeos-dev \
+    ca-certificates \
+    bzip2 \
     unzip \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    libcurl4-openssl-dev \
+    libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 # protobuf-compiler:   https://github.com/onnx/onnx#build-onnx-on-arm-64
 # libprotobuf-dev:     https://github.com/onnx/onnx#build-onnx-on-arm-64
 # libgeos-dev:         Shapely
-
-
 
 # =========================================================
 # Install Python package
 # =========================================================
 WORKDIR /app
+#RUN echo "/usr/bin/make --jobs=${SYSTEM_CORES} \$@" > /usr/local/bin/make && \
+#    chmod 755 /usr/local/bin/make
+#
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip uninstall -y onnx && \
+#    pip install onnx
 
-RUN echo "/usr/bin/make --jobs=${SYSTEM_CORES} \$@" > /usr/local/bin/make && \
-    chmod 755 /usr/local/bin/make
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install wheel cython protobuf
 COPY requirements/base.txt ./requirements/base.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install $(cat ./requirements/base.txt | grep numpy)
+
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip install --upgrade pip && \
+#    pip install wheel cython protobuf
+# Workaround scikit image requires numpy while dependency is not resolved
+#
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements/base.txt
 
 # =========================================================
-# Install onnxruntime
+# Shapely Work around
 # =========================================================
-ARG ONNXRUNTIME_REPO="https://github.com/Microsoft/onnxruntime"
-ARG ONNXRUNTIME_SERVER_BRANCH="rel-1.5.2"
-
-WORKDIR /code
-
-RUN git clone \
-    --single-branch \
-    --branch ${ONNXRUNTIME_SERVER_BRANCH} \
-    --recursive ${ONNXRUNTIME_REPO} onnxruntime && \
-    cd onnxruntime && \
-    /bin/sh ./build.sh \
-    --use_openmp \
-    --config Release \
-    --build_wheel \
-    --update \
-    --build \
-    --parallel \
-    --cmake_extra_defines ONNXRUNTIME_VERSION=$(cat ./VERSION_NUMBER) && \
-    pip install /code/onnxruntime/build/Linux/Release/dist/*.whl && \
-    cd .. && \
-    rm -rf onnxruntime
-
-RUN python -c "import onnxruntime; print(onnxruntime.__version__)"
-
-WORKDIR /app
-COPY requirements/cpu.txt ./requirements/cpu.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements/cpu.txt
-
+#RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
 
 # =========================================================
 # Copy Source Code
@@ -112,4 +94,5 @@ COPY utility.py ./
 
 EXPOSE 7777
 
-CMD [ "python3", "server.py"]
+#CMD source activate activate python38 && python3 server.py
+CMD python3 server.py

@@ -29,6 +29,7 @@ import {
 import { createWrappedAsync, getErrorLog } from '../shared/createWrappedAsync';
 
 import { extractRecommendFps } from '../../utils/extractRecommendFps';
+import { getCameraSettingSuccess } from '../cameraSetting/cameraSettingActions';
 
 const getProjectRequest = (): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
@@ -127,12 +128,18 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         const baseCameras = partDetection.cameras?.length || 1;
         const recommendedFps = extractRecommendFps(totalRecomendedFps, baseCameras);
 
+        const uploadStatus = inferenceModule[0].upload_status === 'True' ? false : true;
+
         dispatch(
           getProjectSuccess(
             normalizeServerToClient(partDetection, recommendedFps, totalRecomendedFps),
             partDetection?.has_configured,
           ),
         );
+
+        // For camera create setting
+        dispatch(getCameraSettingSuccess(uploadStatus));
+
         return partDetection?.has_configured;
       },
     )

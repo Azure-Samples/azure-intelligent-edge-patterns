@@ -80,10 +80,6 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
         // We should reset them every time the training project is changed
         cloneProject.parts = [];
         cloneProject.cameras = [];
-
-        const relatedScenario = scenarios.find((e) => e.trainingProject === cloneProject.trainingProject);
-        if (relatedScenario !== undefined) cloneProject.inferenceMode = relatedScenario.inferenceMode;
-        else cloneProject.inferenceMode = InferenceMode.PartDetection;
       } else if (key === 'cameras') {
         cloneProject.SVTCcameras = cloneProject.SVTCcameras.filter((e) => cloneProject.cameras.includes(e));
 

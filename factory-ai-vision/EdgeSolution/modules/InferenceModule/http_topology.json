@@ -1,5 +1,5 @@
 {
-    "@apiVersion": "1.0",
+    "@apiVersion": "2.0",
     "name": "InferencingWithHttpExtension",
     "properties": {
         "description": "Factory AI Video Pipeline",
@@ -152,14 +152,6 @@
                 "maximumActivationTime": "PT30S"
             },
             {
-                "@type": "#Microsoft.Media.MediaGraphFrameRateFilterProcessor",
-                "name": "frameRateFilter",
-                "maximumFps": "${frameRate}",
-                "inputs": [{
-                    "nodeName": "rtspSource"
-                }]
-            },
-            {
                 "@type": "#Microsoft.Media.MediaGraphHttpExtension",
                 "name": "httpExtension",
                 "endpoint": {
@@ -178,12 +170,20 @@
                         "height": "${frameHeight}"
                     },
                     "format": {
-                        "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
-                        "encoding": "${imageEncoding}"
+                        "@type": "#Microsoft.Media.MediaGraphImageFormatBmp"
                     }
                 },
+                "samplingOptions": {
+                    "skipSamplesWithoutAnnotation": "false",
+                    "maximumSamplesPerSecond": "${frameRate}"
+                },
                 "inputs": [{
-                    "nodeName": "frameRateFilter"
+                    "nodeName": "rtspSource",
+                    "outputSelectors": [{
+                        "property": "mediaType",
+                        "operator": "is",
+                        "value": "video"
+                    }]
                 }]
             }
         ],

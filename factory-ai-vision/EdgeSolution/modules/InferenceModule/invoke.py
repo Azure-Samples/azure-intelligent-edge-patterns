@@ -20,7 +20,7 @@ from utility import is_edge
 DEVICE_ID = os.environ.get("IOTEDGE_DEVICEID", "local")
 MODULE_ID = "lvaEdge"
 
-default_payload = {"@apiVersion": "1.0"}
+default_payload = {"@apiVersion": "2.0"}
 logger = logging.getLogger(__name__)
 
 # Known issue from LVA
@@ -69,7 +69,7 @@ class GraphManager:
     def invoke_graph_topology_get(self, name):
         method = "GraphTopologyGet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -77,7 +77,7 @@ class GraphManager:
     def invoke_graph_topology_set(self, name, properties):
         method = "GraphTopologySet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
             "properties": properties,
         }
@@ -86,14 +86,14 @@ class GraphManager:
     def invoke_graph_topology_list(self):
         method = "GraphTopologyList"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_topology_delete(self, name):
         method = "GraphTopologyDelete"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -101,7 +101,7 @@ class GraphManager:
     def invoke_graph_instance_get(self, name):
         method = "GraphInstanceGet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -109,7 +109,7 @@ class GraphManager:
     def invoke_graph_instance_set(self, name, properties):
         method = "GraphInstanceSet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
             "properties": properties,
         }
@@ -118,7 +118,7 @@ class GraphManager:
     def invoke_graph_instance_delete(self, name):
         method = "GraphInstanceDelete"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -126,14 +126,14 @@ class GraphManager:
     def invoke_graph_instance_list(self):
         method = "GraphInstanceList"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_activate(self, name):
         method = "GraphInstanceActivate"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -141,7 +141,7 @@ class GraphManager:
     def invoke_graph_instance_deactivate(self, name):
         method = "GraphInstanceDeactivate"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "2.0",
             "name": name,
         }
         return self.invoke_method(method, payload)

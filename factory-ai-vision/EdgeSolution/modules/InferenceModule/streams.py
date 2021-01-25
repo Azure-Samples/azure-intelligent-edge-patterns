@@ -109,6 +109,7 @@ class Stream:
 
         # self.is_gpu = (onnxruntime.get_device() == 'GPU')
         self.average_inference_time = 0
+        self.counter = {}
 
         # IoT Hub
         self.iothub_is_send = False
@@ -300,7 +301,7 @@ class Stream:
             self.scenario = DangerZone()
             self.scenario_type = self.model.detection_mode
             # FIXME
-            self.scenario.set_targets(["Person"])
+            self.scenario.set_targets(self.model.parts)
             try:
                 zone_info = json.loads(zone_info)
                 self.use_zone = zone_info["useDangerZone"]
@@ -477,8 +478,9 @@ class Stream:
                 predictions = []
                 inf_time = 0
         else:
-            image = cv2.resize(image, (416, 416))   # for yolo enpoint testing
-            str_encode = cv2.imencode('.jpg', image)[1].tostring()
+            # for yolo enpoint testing
+            resized_image = cv2.resize(image, (416, 416))
+            str_encode = cv2.imencode('.jpg', resized_image)[1].tostring()
             f4 = BytesIO(str_encode)
             f5 = BufferedReader(f4)
             s = time.time()
@@ -543,7 +545,9 @@ class Stream:
                 Detection(tag, x1, y1, x2, y2, prediction["probability"])
             )
         if self.scenario:
-            self.scenario.update(_detections)
+            update_ret = self.scenario.update(_detections)
+            if self.get_mode() in ['ES', 'DD', 'PC']:
+                self.counter = update_ret[0]
 
         self.draw_img()
 
@@ -611,6 +615,8 @@ class Stream:
             if len(predictions) > 0:
                 message_body = {'camera_name': self.name,
                                 'inferences': predictions}
+                if self.get_mode() in ['ES', 'DD', 'PC']:
+                    message_body['count'] = self.counter
                 send_message_to_iothub(message_body)
                 self.iothub_last_send_time = time.time()
 

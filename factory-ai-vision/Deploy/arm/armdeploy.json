@@ -51,6 +51,13 @@
         "description": "Enter the name of existing Custom Vision."
       }
     },
+    "mediaServiceResourceGroup": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Enter the resource group of existing Azure Media Service. Required when using LVA."
+      }
+    },
     "mediaServiceName": {
       "type": "string",
       "defaultValue": "",
@@ -164,6 +171,9 @@
           "videoCaptureModule": {
             "value": "[parameters('videoCaptureModule')]"
           },
+          "mediaServiceResourceGroup": {
+            "value": "[parameters('mediaServiceResourceGroup')]"
+          },
           "mediaServiceName": {
             "value": "[parameters('mediaServiceName')]"
           },
@@ -215,6 +225,9 @@
           "contentVersion": "1.0.0.0",
           "parameters": {
             "resourceGroupName": {
+              "type": "String"
+            },
+            "mediaServiceResourceGroup": {
               "type": "String"
             },
             "mediaServiceName": {
@@ -333,6 +346,10 @@
                   {
                     "name": "CUSTOMVISION_NAME",
                     "value": "[parameters('customVisionName')]"
+                  },
+                  {
+                    "name": "AMS_RESOURCE_GROUP",
+                    "value": "[parameters('mediaServiceResourceGroup')]"
                   },
                   {
                     "name": "AMS_NAME",

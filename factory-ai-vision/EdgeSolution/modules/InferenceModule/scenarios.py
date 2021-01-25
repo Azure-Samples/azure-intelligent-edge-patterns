@@ -55,6 +55,7 @@ class PartDetection(Scenario):
                                for d in _detections)
             self.trackers[part].update(_detections)
             #objs = self.tracker.get_objs()
+            return []
 
     def reset_metrics(self):
         return
@@ -103,7 +104,7 @@ class PartCounter(Scenario):
         self.line = []
         self.threshold = threshold
 
-    def set_threshold(self):
+    def set_threshold(self, threshold):
         self.threshold = threshold
 
     def reset_metrics(self):
@@ -157,7 +158,7 @@ class PartCounter(Scenario):
             else:
                 self.detected[oid] = {"xc": xc, "yc": yc, "expired": {}}
 
-        return self.counter, objs, counted
+        return [self.counter, objs, counted]
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
@@ -233,7 +234,7 @@ class DefeatDetection(Scenario):
         self.ng_counter = 0
         self.objs_with_labels = []
 
-    def set_threshold(self):
+    def set_threshold(self, threshold):
         self.threshold = threshold
 
     def reset_metrics(self):
@@ -333,6 +334,7 @@ class DefeatDetection(Scenario):
                     "tag": tag,
                     "score": score,
                 }
+        return [{self.ok_name: self.ok_counter, self.ng_name: self.ng_counter}]
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
@@ -421,18 +423,19 @@ class DangerZone(Scenario):
         )
         self.detected = {}
         self.counter = {}
+        self.current_counter = {}
         self.zones = []
         self.targets = []
         self.threshold = threshold
         self.has_new_event = False
 
-    def set_treshold(self):
+    def set_threshold(self, threshold):
         self.threshold = threshold
 
     def reset_metrics(self):
         # self.counter = 0
         for i in self.counter:
-            self.counter[i] = 0
+            self.counter[i] = {'current': 0, 'total': 0}
 
     def set_targets(self, targets):
         self.targets = targets
@@ -446,7 +449,7 @@ class DangerZone(Scenario):
             x1, y1, x2, y2, zone_id = zone
             _zone = Rect(x1, y1, x2, y2)
             _zone.id = zone_id
-            self.counter[_zone.id] = 0
+            self.counter[_zone.id] = {'current': 0, 'total': 0}
             self.zones.append(_zone)
 
     def is_inside_zones(self, x1, y1, x2, y2):
@@ -467,10 +470,16 @@ class DangerZone(Scenario):
         objs = self.tracker.get_objs()
         counted = []
         has_new_event = False
+        # reset current counter
+        for zone in self.zones:
+            self.counter[zone.id]['current'] = 0
+
         for obj in objs:
             x1, y1, x2, y2, oid = obj
             if oid in self.detected:
                 for zone in self.zones:
+                    if zone.is_inside(x1, y1, x2, y2):
+                        self.counter[zone.id]['current'] += 1
                     if zone.id not in self.detected[oid]["expired"].keys():
                         self.detected[oid]["expired"][zone.id] = False
                     if self.detected[oid]["expired"][zone.id] is False:
@@ -478,7 +487,7 @@ class DangerZone(Scenario):
                             self.detected[oid]["expired"][zone.id] = True
                             print("*** new object counted", flush=True)
                             has_new_event = True
-                            self.counter[zone.id] += 1
+                            self.counter[zone.id]['total'] += 1
                             # counted.append(self.detected[oid])
                 self.detected[oid]["x1"] = x1
                 self.detected[oid]["y1"] = y1
@@ -494,18 +503,19 @@ class DangerZone(Scenario):
                 }
         self.has_new_event = has_new_event
 
-        return self.counter, objs, counted
+        return [self.counter, objs, counted]
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
         font_scale = 0.7
         thickness = 1
-        x = int(max(0, img.shape[1] - 300))
+        x = int(max(0, img.shape[1] - 400))
         y = int(min(30, img.shape[0]))
         for i in self.counter:
             img = cv2.putText(
                 img,
-                "Violations(Zone {}): {}".format(i, str(self.counter[i])),
+                "Zone {} - Current: {}, Total: {}".format(i,
+                                                          str(self.counter[i]['current']), str(self.counter[i]['total'])),
                 (x, y),
                 font,
                 font_scale,
