@@ -112,3 +112,38 @@ class AzurePartDetectionConfig(AppConfig):
                     is_demo=True, name="Demo Defect Detection Project"
                 ).part_set.all()
             )
+            # =============================================
+            # Total Customer Counting                   ===
+            # =============================================
+            es_scenario = PDScenario.objects.create(
+                name="Total customer counting",
+                inference_mode="TCC",
+                project=Project.objects.get(
+                    name="Demo Total Customer Counting Project"),
+            )
+            es_scenario.cameras.set(
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 5 - Total Customer Counting")
+            )
+            es_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True, name="Demo Total Customer Counting Project"
+                ).part_set.all()
+            )
+            # =============================================
+            # Crowded Queue Alert                       ===
+            # =============================================
+            es_scenario = PDScenario.objects.create(
+                name="Crowded queue alert",
+                inference_mode="CQA",
+                project=Project.objects.get(name="Demo Crowded Queue Alert Project"),
+            )
+            es_scenario.cameras.set(
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 6 - Crowded Queue Alert")
+            )
+            es_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True, name="Demo Crowded Queue Alert Project"
+                ).part_set.all()
+            )
