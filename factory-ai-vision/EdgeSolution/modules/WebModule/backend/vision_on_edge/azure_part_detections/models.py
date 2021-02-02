@@ -60,8 +60,11 @@ class PartDetection(models.Model):
     metrics_is_send_iothub = models.BooleanField(default=False)
     metrics_frame_per_minutes = models.IntegerField(default=6)
     prob_threshold = models.IntegerField(default=60)
+    max_people = models.IntegerField(default=5)
+    counting_start_time = models.CharField(blank=True, max_length=200)
+    counting_end_time = models.CharField(blank=True, max_length=200)
     fps = models.FloatField(default=10.0)
-    disable_video_feed=models.BooleanField(default=False)
+    disable_video_feed = models.BooleanField(default=False)
 
     def update_prob_threshold(self, prob_threshold):
         """update confidenece threshold of BoundingBox"""
@@ -74,6 +77,18 @@ class PartDetection(models.Model):
         self.save()
         requests.get(
             "http://" + self.inference_module.url + "/update_prob_threshold",
+            params={"prob_threshold": prob_threshold},
+        )
+
+    def update_max_people(self, max_people):
+        """update confidenece threshold of BoundingBox"""
+        self.max_people = max_people
+
+        if not isinstance(max_people, int):
+            raise PdProbThresholdNotInteger
+        self.save()
+        requests.get(
+            "http://" + self.inference_module.url + "/update_max_people",
             params={"prob_threshold": prob_threshold},
         )
 
