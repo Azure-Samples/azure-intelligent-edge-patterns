@@ -309,15 +309,16 @@ class Stream:
                 _zones = []
                 print("Upading Line:", flush=True)
                 print("    use_zone:", self.use_zone, flush=True)
-                for zone in zones:
-                    x1 = int(zone["label"]["x1"])
-                    y1 = int(zone["label"]["y1"])
-                    x2 = int(zone["label"]["x2"])
-                    y2 = int(zone["label"]["y2"])
-                    zone_id = str(zone['order'])
-                    _zones.append([x1, y1, x2, y2, zone_id])
-                    print("     zone:", x1, y1, x2, y2, flush=True)
-                self.scenario.set_zones(_zones)
+                # for zone in zones:
+                #     x1 = int(zone["label"]["x1"])
+                #     y1 = int(zone["label"]["y1"])
+                #     x2 = int(zone["label"]["x2"])
+                #     y2 = int(zone["label"]["y2"])
+                #     zone_id = str(zone['order'])
+                #     _zones.append([x1, y1, x2, y2, zone_id])
+                #     print("     zone:", x1, y1, x2, y2, flush=True)
+                # self.scenario.set_zones(_zones)
+                self.scenario.set_zones(zones)
 
             except:
                 self.use_zone = False
