@@ -7,6 +7,7 @@ import { Position2D, PolygonLabel } from '../type';
 export type PolygonType = VideoAnno & {
   type: Shape.Polygon;
   vertices: PolygonLabel;
+  order?: number;
 };
 
 export class Polygon extends BaseShape {

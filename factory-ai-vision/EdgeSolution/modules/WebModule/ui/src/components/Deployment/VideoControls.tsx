@@ -89,7 +89,11 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
       />
       <ActionButton
         iconProps={{ iconName: 'Add' }}
-        text={videoAnnoShape === Shape.Polygon ? 'Press D to Finish' : 'Create Polygon'}
+        text={
+          videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI
+            ? 'Press D to Finish'
+            : 'Create Polygon'
+        }
         checked={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
@@ -130,6 +134,19 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
             disabled={!showDangerZone}
             onClick={(): void => {
               dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.DangerZone }));
+            }}
+          />
+          <ActionButton
+            iconProps={{ iconName: 'Add' }}
+            text={
+              videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.DangerZone
+                ? 'Press D to Finish'
+                : 'Create Polygon'
+            }
+            checked={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.DangerZone}
+            disabled={!showDangerZone}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.DangerZone }));
             }}
           />
         </>

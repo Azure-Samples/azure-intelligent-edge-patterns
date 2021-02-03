@@ -64,6 +64,7 @@ export const VideoAnnosGroup: React.FC<VideoAnnosGroupProps> = ({
               handleChange={(idx, vertex) => updateVideoAnno(e.id, { idx, vertex })}
               boundary={{ x1: 0, y1: 0, x2: imgWidth, y2: imgHeight }}
               color={color}
+              orderIdx={e.order}
             />
           );
         }

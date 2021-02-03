@@ -3,7 +3,8 @@ from collections import namedtuple
 
 import cv2
 
-from tracker import Line, Rect, Tracker
+from tracker import Line, Rect, Tracker, Polygon_obj
+from shapely.geometry import Polygon
 from tracker import bb_intersection_over_union as compute_iou
 from utility import draw_label
 
@@ -445,16 +446,39 @@ class DangerZone(Scenario):
 
     def set_zones(self, zones):
         self.zones = []
+        # for zone in zones:
+        #     x1, y1, x2, y2, zone_id = zone
+        #     _zone = Rect(x1, y1, x2, y2)
+        #     _zone.id = zone_id
+
         for zone in zones:
-            x1, y1, x2, y2, zone_id = zone
-            _zone = Rect(x1, y1, x2, y2)
-            _zone.id = zone_id
+            zone_type = zone["type"]
+            label = zone["label"]
+            zone_id = zone["order"]
+
+            if zone_type == "BBox":
+                x1 = label['x1']
+                x2 = label['x2']
+                y1 = label['y1']
+                y2 = label['y2']
+                _zone = Polygon_obj([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
+                _zone.id = zone_id
+
+            elif zone_type == "Polygon":
+                points = []
+                for point in label:
+                    points.append([point["x"], point["y"]])
+                _zone = Polygon_obj(points)
+                _zone.id = zone_id
+
             self.counter[_zone.id] = {'current': 0, 'total': 0}
             self.zones.append(_zone)
 
     def is_inside_zones(self, x1, y1, x2, y2):
+        # obj_shape = Polygon([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
         for zone in self.zones:
             if zone.is_inside(x1, y1, x2, y2):
+                # if zone.is_valid and zone.intersects(obj_shape):
                 return True
         return False
 

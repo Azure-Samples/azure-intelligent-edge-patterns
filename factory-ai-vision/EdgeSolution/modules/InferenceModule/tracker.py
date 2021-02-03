@@ -1,6 +1,7 @@
 from collections import namedtuple
 import numpy as np
 import cv2
+from shapely.geometry import Polygon
 from sort import *
 
 #_m = (170 - 1487) / (680 - 815)
@@ -88,6 +89,19 @@ class Rect():
         box1 = [self.x1, self.y1, self.x2, self.y2]
         box2 = [x1, y1, x2, y2]
         if bb_intersection_over_union(box1, box2) > 0.000001:
+            return True
+        else:
+            return False
+
+
+class Polygon_obj():
+    def __init__(self, obj):
+        self.id = None
+        self.polygon = Polygon(obj)
+
+    def is_inside(self, x1, y1, x2, y2):
+        obj_shape = Polygon([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
+        if self.polygon.is_valid and self.polygon.intersects(obj_shape):
             return True
         else:
             return False
