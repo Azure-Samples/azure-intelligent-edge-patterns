@@ -155,6 +155,38 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
           />
         </>
       )}
+      {InferenceMode.EmptyShelfAlerts === inferenceMode && (
+        <>
+          <Toggle
+            label="Enable danger zones"
+            checked={showDangerZone}
+            onClick={onDangerZoneToggleClick}
+            inlineLabel
+          />
+          <ActionButton
+            iconProps={{ iconName: 'Add' }}
+            text="Create danger zone"
+            checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
+            disabled={!showDangerZone}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.DangerZone }));
+            }}
+          />
+          <ActionButton
+            iconProps={{ iconName: 'Add' }}
+            text={
+              videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.DangerZone
+                ? 'Press D to Finish'
+                : 'Create Polygon'
+            }
+            checked={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.DangerZone}
+            disabled={!showDangerZone}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.DangerZone }));
+            }}
+          />
+        </>
+      )}
       <Text style={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
       <PrimaryButton text="Update" disabled={updateBtnDisabled || loading} onClick={onUpdate} />
     </Stack>

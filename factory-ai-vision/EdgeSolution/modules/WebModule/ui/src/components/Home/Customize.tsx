@@ -38,7 +38,7 @@ const demoManufacturingProjectsInfo = [
 
 const demoRetailProjectInfo = [
   {
-    title: 'Empty Shelf Alerts',
+    title: 'Empty shelf alert',
     subTitle: 'Identify and alerts when products in shelf is running out',
   },
   {
