@@ -547,7 +547,7 @@ class Stream:
             )
         if self.scenario:
             update_ret = self.scenario.update(_detections)
-            if self.get_mode() in ['ES', 'DD', 'PC']:
+            if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
                 self.counter = update_ret[0]
 
         self.draw_img()
@@ -616,7 +616,7 @@ class Stream:
             if len(predictions) > 0:
                 message_body = {'camera_name': self.name,
                                 'inferences': predictions}
-                if self.get_mode() in ['ES', 'DD', 'PC']:
+                if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
                     message_body['count'] = self.counter
                 send_message_to_iothub(message_body)
                 self.iothub_last_send_time = time.time()

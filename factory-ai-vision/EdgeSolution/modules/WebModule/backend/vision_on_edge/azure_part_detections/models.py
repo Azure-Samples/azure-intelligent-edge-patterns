@@ -89,7 +89,7 @@ class PartDetection(models.Model):
         self.save()
         requests.get(
             "http://" + self.inference_module.url + "/update_max_people",
-            params={"prob_threshold": prob_threshold},
+            params={"max_people": max_people},
         )
 
     def is_deployable(self, raise_exception: bool = False) -> bool:

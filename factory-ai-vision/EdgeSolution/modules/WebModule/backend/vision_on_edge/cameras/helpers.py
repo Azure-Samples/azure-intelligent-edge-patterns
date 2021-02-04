@@ -92,7 +92,7 @@ def create_demo_objects():
         name="Scenario 5 - Total Customer Counting",
         is_demo=True,
         defaults={
-            "rtsp": "rtsp://rtspsim:554/media/scenario2-employ-safety.mkv",
+            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
             "area": "",
             "lines": "",
             "danger_zones": "",
@@ -109,7 +109,7 @@ def create_demo_objects():
         name="Scenario 6 - Crowded Queue Alert",
         is_demo=True,
         defaults={
-            "rtsp": "rtsp://rtspsim:554/media/scenario2-employ-safety.mkv",
+            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
             "area": "",
             "lines": "",
             "danger_zones": gen_default_zones(),
