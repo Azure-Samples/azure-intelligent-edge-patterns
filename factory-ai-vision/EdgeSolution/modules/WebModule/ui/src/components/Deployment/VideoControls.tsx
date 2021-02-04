@@ -119,7 +119,11 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
           />
         </>
       )}
-      {inferenceMode === InferenceMode.EmployeeSafety && (
+      {[
+        InferenceMode.EmployeeSafety,
+        InferenceMode.TotalCustomerCounting,
+        InferenceMode.CrowdedQueueAlert,
+      ].includes(inferenceMode) && (
         <>
           <Toggle
             label="Enable danger zones"

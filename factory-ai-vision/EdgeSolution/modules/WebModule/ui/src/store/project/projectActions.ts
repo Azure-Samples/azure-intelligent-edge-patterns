@@ -104,6 +104,10 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   deployTimeStamp: data?.deploy_timestamp ?? '',
   inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
   inferenceSource: data?.inference_source ?? InferenceSource.LVA,
+  /* --- Mode Counting people need  --- */
+  countingStartTime: data?.counting_end_time === '' ? new Date().toString() : data?.counting_end_time,
+  countingEndTime: data?.counting_end_time === '' ? new Date().toString() : data?.counting_end_time,
+  maxPeople: data?.max_people,
 });
 
 const getProjectData = (state: State): ProjectData => state.project.data;
@@ -185,6 +189,9 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       fps: projectData.setFpsManually ? parseFloat(projectData.fps) : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
       disable_video_feed: projectData.disableVideoFeed,
+      counting_start_time: projectData.countingStartTime,
+      counting_end_time: projectData.countingEndTime,
+      max_people: projectData.maxPeople,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
@@ -216,6 +223,18 @@ export const updateProbThreshold = createWrappedAsync<any, undefined, { state: S
 
     const response = await Axios.get(
       `/api/part_detections/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`,
+    );
+    return response.data;
+  },
+);
+
+export const updateMaxPeople = createWrappedAsync<any, undefined, { state: State }>(
+  'project/updateMaxPeople',
+  async (_, { getState }) => {
+    const { id: projectId, maxPeople } = getProjectData(getState());
+
+    const response = await Axios.get(
+      `/api/part_detections/${projectId}/update_max_people?max_people=${maxPeople}`,
     );
     return response.data;
   },

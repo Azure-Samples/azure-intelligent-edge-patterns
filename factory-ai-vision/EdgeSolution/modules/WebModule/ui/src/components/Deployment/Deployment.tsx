@@ -15,7 +15,7 @@ import {
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useBoolean } from '@uifabric/react-hooks';
-import moment from 'moment';
+import { formatDistanceToNow } from 'date-fns';
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
@@ -24,6 +24,7 @@ import {
   thunkGetProject,
   updateProjectData,
   updateProbThreshold,
+  updateMaxPeople,
   getConfigure,
 } from '../../store/project/projectActions';
 import { ConfigurationInfo } from '../ConfigurationInfo/ConfigurationInfo';
@@ -94,6 +95,17 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
   const changeProbThreshold = (newValue: number) => dispatch(updateProjectData({ probThreshold: newValue }));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 
+  const changeMaxPeople = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { validity, value } = e.target;
+
+    const newValue = value === '' || parseInt(value) === 0 ? 1 : parseInt(value);
+
+    if (validity.valid) {
+      dispatch(updateProjectData({ maxPeople: newValue }));
+    }
+  };
+  const saveMaxPeople = () => dispatch(updateMaxPeople());
+
   const updateModel = useCallback(async () => {
     await dispatch(getConfigure(projectId));
   }, [dispatch, projectId]);
@@ -156,7 +168,8 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
               <Stack tokens={{ childrenGap: 10 }} styles={{ root: { minWidth: '200px' } }}>
                 <Text variant="xLarge">{name}</Text>
                 <Text styles={{ root: { color: palette.neutralSecondary } }}>
-                  Started running <b>{moment(deployTimeStamp).fromNow()}</b>
+                  Started running{' '}
+                  <b>{formatDistanceToNow(new Date(deployTimeStamp), { addSuffix: false })} ago</b>
                 </Text>
               </Stack>
               <Dropdown
@@ -197,6 +210,10 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
               SVTCthreshold={projectData.SVTCconfirmationThreshold}
               protocol={projectData.inferenceProtocol}
               isLVA={projectData.inferenceSource === InferenceSource.LVA}
+              changeMaxPeople={changeMaxPeople}
+              saveMaxPeople={saveMaxPeople}
+              maxPeople={projectData.maxPeople}
+              inferenceMode={projectData.inferenceMode}
             />
           </Stack>
         </Stack>

@@ -3,7 +3,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
-import { InferenceSource, ProjectData } from '../../store/project/projectTypes';
+import { InferenceSource, ProjectData, InferenceMode } from '../../store/project/projectTypes';
 import { OnChangeType } from './type';
 
 import { CameraFPSOptions } from './CameraFPSOptions';
@@ -12,6 +12,7 @@ import { DisableVideoOption } from './DisableVideoFeedOption';
 import { ProtocolOptions } from './ProtocolOptions';
 import { RetrainImgOption } from './RetrainImgOption';
 import { SendVideoOptions } from './SendVideoOptions';
+import { TimeInfoOption } from './TimeInfoOption';
 
 type AdvancedOptionsProps = {
   projectData: ProjectData;
@@ -71,6 +72,13 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
         </>
       )}
       <DisableVideoOption disableVideoFeed={projectData.disableVideoFeed} onChange={onChange} />
+      {InferenceMode.TotalCustomerCounting === projectData.inferenceMode && (
+        <TimeInfoOption
+          countingStartTime={projectData.countingStartTime}
+          countingEndTime={projectData.countingEndTime}
+          onChange={onChange}
+        />
+      )}
     </Stack>
   );
 };
