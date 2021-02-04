@@ -116,7 +116,7 @@ class AzurePartDetectionConfig(AppConfig):
             # Empty Shelf Alert                         ===
             # =============================================
             esa_scenario = PDScenario.objects.create(
-                name="Total customer counting",
+                name="Empty shelf alert",
                 inference_mode="ESA",
                 project=Project.objects.get(
                     name="Demo Total Customer Counting Project"),
