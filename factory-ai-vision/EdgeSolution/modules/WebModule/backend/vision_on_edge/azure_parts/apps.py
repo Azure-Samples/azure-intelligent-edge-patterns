@@ -120,6 +120,22 @@ class AzurePartsConfig(AppConfig):
                 except Exception:
                     logger.error("Create Demo Defect Defection Parts error")
                 # =============================================
+                # Empty Shelf Alert                         ===
+                # =============================================
+                try:
+                    project_obj = Project.objects.get(
+                        is_demo=True, name="Demo Empty Shelf Alert Project"
+                    )
+                    for partname in ["cup"]:
+                        Part.objects.update_or_create(
+                            project=project_obj,
+                            name=partname,
+                            defaults={"description": "Demo"},
+                        )
+                    logger.warning("Create Demo Empty Shelf Alert Parts success")
+                except Exception:
+                    logger.error("Create Demo Empty Shelf Alert Parts error")
+                # =============================================
                 # Total Customer Counting                   ===
                 # =============================================
                 try:

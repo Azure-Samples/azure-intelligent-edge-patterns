@@ -84,6 +84,19 @@ def create_demo_objects():
     logger.info("Create demo project end.")
 
     # =============================================
+    # Empty Shelf Alert                         ===
+    # =============================================
+    Project.objects.update_or_create(
+        name="Demo Empty Shelf Alert Project",
+        setting=default_settings.first(),
+        defaults={
+            "is_demo": True,
+            "download_uri": "scenario_models/4",
+            "prediction_uri": prediction_module_url(),
+        },
+    )
+
+    # =============================================
     # Total Customer Counting                   ===
     # =============================================
     Project.objects.update_or_create(

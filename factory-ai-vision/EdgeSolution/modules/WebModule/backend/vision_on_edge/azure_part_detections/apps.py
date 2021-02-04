@@ -113,6 +113,24 @@ class AzurePartDetectionConfig(AppConfig):
                 ).part_set.all()
             )
             # =============================================
+            # Empty Shelf Alert                         ===
+            # =============================================
+            esa_scenario = PDScenario.objects.create(
+                name="Total customer counting",
+                inference_mode="ESA",
+                project=Project.objects.get(
+                    name="Demo Total Customer Counting Project"),
+            )
+            esa_scenario.cameras.set(
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 4 - Empty Shelf Alert")
+            )
+            esa_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True, name="Demo Empty Shelf Alert Project"
+                ).part_set.all()
+            )
+            # =============================================
             # Total Customer Counting                   ===
             # =============================================
             tcc_scenario = PDScenario.objects.create(

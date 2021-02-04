@@ -85,6 +85,23 @@ def create_demo_objects():
     logger.info("Camera: %s %s.", cam_obj, "created" if created else "updated")
 
     # =========================================
+    # Scenario 4: Empty Shelf Alert           =
+    # =========================================
+    logger.info("Creating a scenario 4 empty shelf alert.")
+    cam_obj, created = Camera.objects.update_or_create(
+        name="Scenario 4 - Empty Shelf Alert",
+        is_demo=True,
+        defaults={
+            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
+            "area": "",
+            "lines": "",
+            "danger_zones": "",
+            "location": demo_location_obj,
+        },
+    )
+    logger.info("Camera: %s %s.", cam_obj, "created" if created else "updated")
+
+    # =========================================
     # Scenario 5: Total Customer Counting     =
     # =========================================
     logger.info("Creating a scenario 5 total customer counting.")
