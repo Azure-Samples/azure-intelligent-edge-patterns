@@ -433,6 +433,27 @@ def update_prob_threshold(prob_threshold: int):
     return "ok"
 
 
+@app.get("/update_max_people")
+def update_max_people(max_people: int):
+    """update_max_people."""
+
+    logger.info("Updating max_people to")
+    logger.info("  max_people: %s", max_people)
+
+    for stream in stream_manager.get_streams():
+        stream.max_people = int(max_people)
+        # if stream.scenario:
+        #     stream.scenario.set_threshold(int(prob_threshold) * 0.01)
+        logger.info("Updating")
+        # s.detection_success_num = 0
+        # s.detection_unidentified_num = 0
+        # s.detection_total = 0
+        # s.detections = []
+        stream.reset_metrics()
+
+    return "ok"
+
+
 @app.get("/get_recommended_fps")
 def get_recommended_fps(number_of_cameras: int):
     """get_recommended_fps.

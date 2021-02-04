@@ -101,6 +101,7 @@ class Stream:
         self.detections = []
 
         self.threshold = 0.3
+        self.max_people = 5
 
         self.has_aoi = False
         self.aoi_info = None
