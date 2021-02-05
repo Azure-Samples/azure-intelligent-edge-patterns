@@ -189,8 +189,12 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       fps: projectData.setFpsManually ? parseFloat(projectData.fps) : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
       disable_video_feed: projectData.disableVideoFeed,
-      counting_start_time: projectData.countingStartTime,
-      counting_end_time: projectData.countingEndTime,
+      counting_start_time: projectData.countingStartTime
+        ? new Date(projectData.countingStartTime).toUTCString()
+        : null,
+      counting_end_time: projectData.countingEndTime
+        ? new Date(projectData.countingEndTime).toUTCString()
+        : null,
       max_people: projectData.maxPeople,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
