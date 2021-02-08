@@ -74,6 +74,7 @@ const mapState = (state: State, { cameraId }: OwnProps): StateProps => ({
     selectCameraById(state, cameraId)?.useDangerZone &&
     [
       InferenceMode.EmployeeSafety,
+      InferenceMode.EmptyShelfAlerts,
       InferenceMode.TotalCustomerCounting,
       InferenceMode.CrowdedQueueAlert,
     ].includes(state.project.data.inferenceMode),
