@@ -688,7 +688,7 @@ class QueueZone(DangerZone):
             queue_total += self.counter[i]['current']
 
         if queue_total > self.max_people:
-            font_color = (255, 0, 0)
+            font_color = (0, 0, 255)
         else:
             font_color = (255, 255, 255)
 
