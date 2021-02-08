@@ -334,8 +334,9 @@ def update_cams(request_body: CamerasModel):
 
         if stream.scenario:
             logger.warning(stream.scenario)
-            stream.scenario.set_time(
-                cam.counting_start_time, cam.counting_end_time)
+            if stream.model.detection_mode == 'TCC' and cam.counting_end_time != '':
+                stream.scenario.set_time(
+                    cam.counting_start_time, cam.counting_end_time)
         # recording_duration is set in topology, sould be handled in s.update_cam, not here
         # stream.recording_duration = int(cam.recording_duration*60)
 

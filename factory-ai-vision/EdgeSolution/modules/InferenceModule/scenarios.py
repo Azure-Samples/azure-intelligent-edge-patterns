@@ -681,7 +681,7 @@ class QueueZone(DangerZone):
         font = cv2.FONT_HERSHEY_DUPLEX
         font_scale = 0.7
         thickness = 1
-        x = int(max(0, img.shape[1] - 400))
+        x = int(max(0, img.shape[1] - 450))
         y = int(min(30, img.shape[0]))
         queue_total = 0
         for i in self.counter:
