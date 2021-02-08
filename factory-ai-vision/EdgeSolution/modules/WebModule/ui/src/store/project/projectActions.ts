@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import Axios from 'axios';
+import { isEmpty } from 'ramda';
 
 import { State } from 'RootStateType';
 import {
@@ -105,7 +106,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
   inferenceSource: data?.inference_source ?? InferenceSource.LVA,
   /* --- Mode Counting people need  --- */
-  countingStartTime: data?.counting_end_time === '' ? new Date().toString() : data?.counting_end_time,
+  countingStartTime: data?.counting_start_time === '' ? new Date().toString() : data?.counting_start_time,
   countingEndTime: data?.counting_end_time === '' ? new Date().toString() : data?.counting_end_time,
   maxPeople: data?.max_people,
 });
@@ -189,12 +190,12 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       fps: projectData.setFpsManually ? parseFloat(projectData.fps) : projectData.recomendedFps,
       inference_protocol: projectData.inferenceProtocol,
       disable_video_feed: projectData.disableVideoFeed,
-      counting_start_time: projectData.countingStartTime
-        ? new Date(projectData.countingStartTime).toUTCString()
-        : null,
-      counting_end_time: projectData.countingEndTime
-        ? new Date(projectData.countingEndTime).toUTCString()
-        : null,
+      counting_start_time: isEmpty(projectData.countingStartTime)
+        ? ''
+        : new Date(projectData.countingStartTime).toUTCString(),
+      counting_end_time: isEmpty(projectData.countingEndTime)
+        ? ''
+        : new Date(projectData.countingEndTime).toUTCString(),
       max_people: projectData.maxPeople,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
