@@ -119,7 +119,7 @@ class AzurePartDetectionConfig(AppConfig):
                 name="Empty shelf alert",
                 inference_mode="ESA",
                 project=Project.objects.get(
-                    name="Demo Total Customer Counting Project"),
+                    name="Demo Empty Shelf Alert Project"),
             )
             esa_scenario.cameras.set(
                 Camera.objects.filter(

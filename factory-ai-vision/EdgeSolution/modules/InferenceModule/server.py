@@ -331,6 +331,11 @@ def update_cams(request_body: CamerasModel):
             int(cam.send_video_to_cloud_threshold) * 0.01
         )
         stream.use_tracker = cam.enable_tracking
+
+        if stream.scenario:
+            logger.warning(stream.scenario)
+            stream.scenario.set_time(
+                cam.counting_start_time, cam.counting_end_time)
         # recording_duration is set in topology, sould be handled in s.update_cam, not here
         # stream.recording_duration = int(cam.recording_duration*60)
 
@@ -442,8 +447,8 @@ def update_max_people(max_people: int):
 
     for stream in stream_manager.get_streams():
         stream.max_people = int(max_people)
-        # if stream.scenario:
-        #     stream.scenario.set_threshold(int(prob_threshold) * 0.01)
+        if stream.scenario:
+            stream.scenario.set_max_people(int(max_people))
         logger.info("Updating")
         # s.detection_success_num = 0
         # s.detection_unidentified_num = 0

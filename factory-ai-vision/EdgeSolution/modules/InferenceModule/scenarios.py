@@ -2,7 +2,9 @@ import time
 from collections import namedtuple
 
 import cv2
+import datetime
 
+from dateutil import parser
 from tracker import Line, Rect, Tracker, Polygon_obj
 from shapely.geometry import Polygon
 from tracker import bb_intersection_over_union as compute_iou
@@ -429,6 +431,18 @@ class DangerZone(Scenario):
         self.targets = []
         self.threshold = threshold
         self.has_new_event = False
+        self.max_people = 5
+        self.counting_start_time = ''
+        self.counting_end_time = ''
+
+    def set_time(self, counting_start_time, counting_end_time):
+        self.counting_start_time = parser.parse(
+            counting_start_time).replace(tzinfo=None)
+        self.counting_end_time = parser.parse(
+            counting_end_time).replace(tzinfo=None)
+
+    def set_max_people(self, max_people):
+        self.max_people = max_people
 
     def set_threshold(self, threshold):
         self.threshold = threshold
@@ -582,6 +596,111 @@ class DangerZone(Scenario):
             if is_rect:
                 img = cv2.rectangle(img, (x1, y1), (x2, y2),
                                     (255, 255, 255), thickness)
+        return img
+
+
+class ShelfZone(DangerZone):
+
+    def draw_counter(self, img):
+        font = cv2.FONT_HERSHEY_DUPLEX
+        font_scale = 0.7
+        thickness = 1
+        x = int(max(0, img.shape[1] - 200))
+        y = int(min(30, img.shape[0]))
+        for i in self.counter:
+            if self.counter[i]['current'] == 0:
+                img = cv2.putText(
+                    img,
+                    "Zone {}: Empty Shelf".format(i),
+                    (x, y),
+                    font,
+                    font_scale,
+                    (255, 0, 0),
+                    thickness,
+                )
+                y += 25
+        return img
+
+
+class CountingZone(DangerZone):
+
+    def update(self, detections):
+        detections = list(d for d in detections if d.score > self.threshold)
+        detections = list(
+            [d.x1, d.y1, d.x2, d.y2, d.score]
+            for d in detections
+            if d.tag in self.targets
+        )
+
+        self.tracker.update(detections)
+        objs = self.tracker.get_objs()
+        counted = []
+        has_new_event = False
+        # reset current counter
+        for zone in self.zones:
+            self.counter[zone.id]['current'] = 0
+
+        for obj in objs:
+            x1, y1, x2, y2, oid = obj
+            if oid in self.detected:
+                for zone in self.zones:
+                    if zone.is_inside(x1, y1, x2, y2):
+                        self.counter[zone.id]['current'] += 1
+                    if zone.id not in self.detected[oid]["expired"].keys():
+                        self.detected[oid]["expired"][zone.id] = False
+                    if self.detected[oid]["expired"][zone.id] is False:
+                        if zone.is_inside(x1, y1, x2, y2):
+                            self.detected[oid]["expired"][zone.id] = True
+                            print("*** new object counted", flush=True)
+                            # compare time with end_time
+                            if datetime.datetime.utcnow() < self.counting_end_time:
+                                self.counter[zone.id]['total'] += 1
+                            else:
+                                has_new_event = True
+                            # counted.append(self.detected[oid])
+                self.detected[oid]["x1"] = x1
+                self.detected[oid]["y1"] = y1
+                self.detected[oid]["x2"] = x2
+                self.detected[oid]["y2"] = y2
+            else:
+                self.detected[oid] = {
+                    "x1": x1,
+                    "y1": y1,
+                    "x2": x2,
+                    "y2": y2,
+                    "expired": {},
+                }
+        self.has_new_event = has_new_event
+
+        return [self.counter, objs, counted]
+
+
+class QueueZone(DangerZone):
+
+    def draw_counter(self, img):
+        font = cv2.FONT_HERSHEY_DUPLEX
+        font_scale = 0.7
+        thickness = 1
+        x = int(max(0, img.shape[1] - 400))
+        y = int(min(30, img.shape[0]))
+        queue_total = 0
+        for i in self.counter:
+            queue_total += self.counter[i]['current']
+
+        if queue_total > self.max_people:
+            font_color = (255, 0, 0)
+        else:
+            font_color = (255, 255, 255)
+
+        img = cv2.putText(
+            img,
+            "Total Number of People in Queue: {}".format(str(queue_total)),
+            (x, y),
+            font,
+            font_scale,
+            font_color,
+            thickness,
+        )
         return img
 
 

@@ -78,6 +78,8 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "project",
             # "send_video_to_cloud",
             "disable_video_feed",
+            "counting_start_time",
+            "counting_end_time",
         ]:
             if attr in validated_data:
                 setattr(instance, attr, validated_data[attr])
@@ -163,6 +165,8 @@ class UpdateCamBodySerializer(serializers.Serializer):
         send_video_to_cloud_threshold = serializers.IntegerField()
         recording_duration = serializers.IntegerField()
         enable_tracking = serializers.BooleanField()
+        counting_start_time = serializers.CharField(required=False, allow_blank=True)
+        counting_end_time = serializers.CharField(required=False, allow_blank=True)
 
     lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
     fps = serializers.FloatField()

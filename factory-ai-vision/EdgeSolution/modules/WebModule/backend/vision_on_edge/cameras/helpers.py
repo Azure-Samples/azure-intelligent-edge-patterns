@@ -92,7 +92,7 @@ def create_demo_objects():
         name="Scenario 4 - Empty Shelf Alert",
         is_demo=True,
         defaults={
-            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
+            "rtsp": "rtsp://rtspsim:554/media/scenario4-empty-shelf-alert.mkv",
             "area": "",
             "lines": "",
             "danger_zones": "",

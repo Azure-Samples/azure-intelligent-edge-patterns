@@ -30,6 +30,9 @@ class PartDetectionModeEnum(str, Enum):
     part_counting = "PC"
     employee_safety = "ES"
     defect_detection = "DD"
+    empty_shelf_alert = "ESA"
+    total_customer_counting = "TCC"
+    crowded_queue_alert = "CQA"
 
 
 class UploadModelBody(BaseModel):
@@ -55,6 +58,8 @@ class CameraModel(BaseModel):
     send_video_to_cloud_threshold: int = 60
     recording_duration: int = 60
     enable_tracking: bool
+    counting_start_time: str
+    counting_end_time: str
 
 
 class CamerasModel(BaseModel):
