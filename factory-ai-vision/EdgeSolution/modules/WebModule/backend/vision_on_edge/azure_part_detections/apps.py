@@ -112,3 +112,56 @@ class AzurePartDetectionConfig(AppConfig):
                     is_demo=True, name="Demo Defect Detection Project"
                 ).part_set.all()
             )
+            # =============================================
+            # Empty Shelf Alert                         ===
+            # =============================================
+            esa_scenario = PDScenario.objects.create(
+                name="Empty shelf alert",
+                inference_mode="ESA",
+                project=Project.objects.get(
+                    name="Demo Empty Shelf Alert Project"),
+            )
+            esa_scenario.cameras.set(
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 4 - Empty Shelf Alert")
+            )
+            esa_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True, name="Demo Empty Shelf Alert Project"
+                ).part_set.all()
+            )
+            # =============================================
+            # Total Customer Counting                   ===
+            # =============================================
+            tcc_scenario = PDScenario.objects.create(
+                name="Total customer counting",
+                inference_mode="TCC",
+                project=Project.objects.get(
+                    name="Demo Total Customer Counting Project"),
+            )
+            tcc_scenario.cameras.set(
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 5 - Total Customer Counting")
+            )
+            tcc_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True, name="Demo Total Customer Counting Project"
+                ).part_set.all()
+            )
+            # =============================================
+            # Crowded Queue Alert                       ===
+            # =============================================
+            cqa_scenario = PDScenario.objects.create(
+                name="Crowded queue alert",
+                inference_mode="CQA",
+                project=Project.objects.get(name="Demo Crowded Queue Alert Project"),
+            )
+            cqa_scenario.cameras.set(
+                Camera.objects.filter(
+                    is_demo=True, name="Scenario 6 - Crowded Queue Alert")
+            )
+            cqa_scenario.parts.set(
+                Project.objects.get(
+                    is_demo=True, name="Demo Crowded Queue Alert Project"
+                ).part_set.all()
+            )

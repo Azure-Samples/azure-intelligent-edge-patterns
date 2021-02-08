@@ -19,7 +19,7 @@ from exception_handler import PrintGetExceptionDetails
 from invoke import gm
 
 # from tracker import Tracker
-from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection
+from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection, ShelfZone, CountingZone, QueueZone
 from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
 DETECTION_TYPE_NOTHING = "nothing"
@@ -101,6 +101,7 @@ class Stream:
         self.detections = []
 
         self.threshold = 0.3
+        self.max_people = 5
 
         self.has_aoi = False
         self.aoi_info = None
@@ -296,9 +297,11 @@ class Stream:
                 print("Upading Line[*]:", flush=True)
                 print("    use_line   :", False, flush=True)
 
-        elif detection_mode == "ES":
+        elif detection_mode in ["ES", "ESA", "TCC", "CQA"]:
+            class_obj = [DangerZone, ShelfZone, CountingZone, QueueZone]
             print("[INFO] Zone INFO", zone_info, flush=True)
-            self.scenario = DangerZone()
+            self.scenario = class_obj[["ES", "ESA",
+                                       "TCC", "CQA"].index(detection_mode)]()
             self.scenario_type = self.model.detection_mode
             # FIXME
             self.scenario.set_targets(self.model.parts)
@@ -353,6 +356,7 @@ class Stream:
                 self.use_line = False
                 print("Upading Line[*]:", flush=True)
                 print("    use_line   :", False, flush=True)
+
         else:
             self.scenario = None
             self.scenario_type = self.model.detection_mode
@@ -547,13 +551,13 @@ class Stream:
             )
         if self.scenario:
             update_ret = self.scenario.update(_detections)
-            if self.get_mode() in ['ES', 'DD', 'PC']:
+            if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
                 self.counter = update_ret[0]
 
         self.draw_img()
 
         if self.scenario:
-            if (self.get_mode() == 'ES' and self.use_zone == True) or (self.get_mode() in ['DD', 'PD', 'PC'] and self.use_line == True):
+            if (self.get_mode() in ["ES", "ESA", "TCC", "CQA"] and self.use_zone == True) or (self.get_mode() in ['DD', 'PD', 'PC'] and self.use_line == True):
                 self.scenario.draw_counter(self.last_drawn_img)
             if self.get_mode() == "DD":
                 self.scenario.draw_objs(self.last_drawn_img)
@@ -561,14 +565,14 @@ class Stream:
                 self.scenario.draw_objs(self.last_drawn_img)
 
         if self.iothub_is_send:
-            if self.get_mode() == 'ES':
+            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
                 if self.scenario.has_new_event:
                     self.process_send_message_to_iothub(predictions)
             else:
                 self.process_send_message_to_iothub(predictions)
 
         if self.send_video_to_cloud:
-            if self.get_mode() == 'ES':
+            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
                 if self.scenario.has_new_event:
                     self.precess_send_signal_to_lva()
             else:
@@ -616,7 +620,7 @@ class Stream:
             if len(predictions) > 0:
                 message_body = {'camera_name': self.name,
                                 'inferences': predictions}
-                if self.get_mode() in ['ES', 'DD', 'PC']:
+                if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
                     message_body['count'] = self.counter
                 send_message_to_iothub(message_body)
                 self.iothub_last_send_time = time.time()

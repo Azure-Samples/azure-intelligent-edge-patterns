@@ -6,7 +6,7 @@ Depends on models.py
 import logging
 
 from ..locations.models import Location
-from .constants import gen_default_lines, gen_default_lines_dd, gen_default_zones
+from .constants import gen_default_lines, gen_default_lines_dd, gen_default_zones, gen_default_zones_tcc, gen_default_zones_cqa, gen_default_zones_esa
 from .models import Camera
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,57 @@ def create_demo_objects():
             "area": "",
             "lines": gen_default_lines_dd(),
             "danger_zones": "",
+            "location": demo_location_obj,
+        },
+    )
+    logger.info("Camera: %s %s.", cam_obj, "created" if created else "updated")
+
+    # =========================================
+    # Scenario 4: Empty Shelf Alert           =
+    # =========================================
+    logger.info("Creating a scenario 4 empty shelf alert.")
+    cam_obj, created = Camera.objects.update_or_create(
+        name="Scenario 4 - Empty Shelf Alert",
+        is_demo=True,
+        defaults={
+            "rtsp": "rtsp://rtspsim:554/media/scenario4-empty-shelf-alert.mkv",
+            "area": "",
+            "lines": "",
+            "danger_zones": gen_default_zones_esa(),
+            "location": demo_location_obj,
+        },
+    )
+    logger.info("Camera: %s %s.", cam_obj, "created" if created else "updated")
+
+    # =========================================
+    # Scenario 5: Total Customer Counting     =
+    # =========================================
+    logger.info("Creating a scenario 5 total customer counting.")
+    cam_obj, created = Camera.objects.update_or_create(
+        name="Scenario 5 - Total Customer Counting",
+        is_demo=True,
+        defaults={
+            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
+            "area": "",
+            "lines": "",
+            "danger_zones": gen_default_zones_tcc(),
+            "location": demo_location_obj,
+        },
+    )
+    logger.info("Camera: %s %s.", cam_obj, "created" if created else "updated")
+
+    # =========================================
+    # Scenario 6: Crowded Queue Alert         =
+    # =========================================
+    logger.info("Creating a scenario 6 crowded queue alert.")
+    cam_obj, created = Camera.objects.update_or_create(
+        name="Scenario 6 - Crowded Queue Alert",
+        is_demo=True,
+        defaults={
+            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
+            "area": "",
+            "lines": "",
+            "danger_zones": gen_default_zones_cqa(),
             "location": demo_location_obj,
         },
     )

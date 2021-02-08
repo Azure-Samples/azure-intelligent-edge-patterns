@@ -15,9 +15,9 @@ COPY main.py .
 COPY streams.py .
 COPY stream_manager.py .
 COPY utility.py .
-COPY /videos/scenario1-counting-objects.mkv ./videos/
-COPY /videos/scenario2-employ-safety.mkv ./videos/
-COPY /videos/scenario3-defect-detection.mkv ./videos/
+# COPY /videos/scenario1-counting-objects.mkv ./videos/
+# COPY /videos/scenario2-employ-safety.mkv ./videos/
+COPY ./videos/*  ./videos/
 
 EXPOSE 9000
 EXPOSE 5559

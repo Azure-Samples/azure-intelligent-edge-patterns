@@ -6,6 +6,9 @@ INFERENCE_MODE_CHOICES = [
     ("PC", "part_counting"),
     ("ES", "employee_safety"),
     ("DD", "defect_detection"),
+    ("ESA", "empty_shelf_alert"),
+    ("TCC", "total_customer_counting"),
+    ("CQA", "crowded_queue_alert"),
 ]
 
 INFERENCE_PROTOCOL_CHOICES = [

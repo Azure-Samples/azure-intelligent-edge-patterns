@@ -24,3 +24,5 @@ class CameraTask(models.Model):
     parts = models.ManyToManyField(Part, blank=True)
     recording_duration = models.IntegerField(default=1)
     enable_tracking = models.BooleanField(default=False)
+    counting_start_time = models.CharField(blank=True, max_length=200)
+    counting_end_time = models.CharField(blank=True, max_length=200)

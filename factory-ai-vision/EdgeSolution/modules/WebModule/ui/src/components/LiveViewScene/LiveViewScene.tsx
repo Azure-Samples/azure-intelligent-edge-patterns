@@ -72,7 +72,12 @@ const mapState = (state: State, { cameraId }: OwnProps): StateProps => ({
     [InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(state.project.data.inferenceMode),
   dangerZoneVisible:
     selectCameraById(state, cameraId)?.useDangerZone &&
-    state.project.data.inferenceMode === InferenceMode.EmployeeSafety,
+    [
+      InferenceMode.EmployeeSafety,
+      InferenceMode.EmptyShelfAlerts,
+      InferenceMode.TotalCustomerCounting,
+      InferenceMode.CrowdedQueueAlert,
+    ].includes(state.project.data.inferenceMode),
   creatingState: state.videoAnnos.creatingState,
   disableVideoFeed: state.project.data.disableVideoFeed,
 });

@@ -23,6 +23,13 @@ type VideoAnnosControlsProps = {
   cameraId: number;
 };
 
+const getLabel = (inferenceMode: InferenceMode) => {
+  if (inferenceMode === InferenceMode.EmptyShelfAlerts) return 'Enable shelf zone';
+  if (inferenceMode === InferenceMode.TotalCustomerCounting) return 'Enable counting zone';
+  if (inferenceMode === InferenceMode.CrowdedQueueAlert) return 'Enable queue zone';
+  return 'Enable danger zones';
+};
+
 export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => {
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line no-undef
@@ -119,10 +126,15 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
           />
         </>
       )}
-      {inferenceMode === InferenceMode.EmployeeSafety && (
+      {[
+        InferenceMode.EmployeeSafety,
+        InferenceMode.EmptyShelfAlerts,
+        InferenceMode.TotalCustomerCounting,
+        InferenceMode.CrowdedQueueAlert,
+      ].includes(inferenceMode) && (
         <>
           <Toggle
-            label="Enable danger zones"
+            label={getLabel(inferenceMode)}
             checked={showDangerZone}
             onClick={onDangerZoneToggleClick}
             inlineLabel
