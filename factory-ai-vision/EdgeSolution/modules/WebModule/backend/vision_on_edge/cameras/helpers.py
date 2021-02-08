@@ -6,7 +6,7 @@ Depends on models.py
 import logging
 
 from ..locations.models import Location
-from .constants import gen_default_lines, gen_default_lines_dd, gen_default_zones, gen_default_zones_tcc
+from .constants import gen_default_lines, gen_default_lines_dd, gen_default_zones, gen_default_zones_tcc, gen_default_zones_cqa, gen_default_zones_esa
 from .models import Camera
 
 logger = logging.getLogger(__name__)
@@ -112,7 +112,7 @@ def create_demo_objects():
             "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
             "area": "",
             "lines": "",
-            "danger_zones": gen_default_lines_tcc(),
+            "danger_zones": gen_default_zones_tcc(),
             "location": demo_location_obj,
         },
     )
@@ -129,7 +129,7 @@ def create_demo_objects():
             "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
             "area": "",
             "lines": "",
-            "danger_zones": gen_default_zones(),
+            "danger_zones": gen_default_zones_cqa(),
             "location": demo_location_obj,
         },
     )
