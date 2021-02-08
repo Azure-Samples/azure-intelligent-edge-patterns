@@ -605,7 +605,7 @@ class ShelfZone(DangerZone):
         font = cv2.FONT_HERSHEY_DUPLEX
         font_scale = 0.7
         thickness = 1
-        x = int(max(0, img.shape[1] - 200))
+        x = int(max(0, img.shape[1] - 300))
         y = int(min(30, img.shape[0]))
         for i in self.counter:
             if self.counter[i]['current'] == 0:
@@ -615,7 +615,7 @@ class ShelfZone(DangerZone):
                     (x, y),
                     font,
                     font_scale,
-                    (255, 0, 0),
+                    (0, 0, 255),
                     thickness,
                 )
                 y += 25
