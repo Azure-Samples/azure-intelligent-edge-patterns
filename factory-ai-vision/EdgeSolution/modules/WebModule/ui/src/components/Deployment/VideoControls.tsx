@@ -134,7 +134,6 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
       ].includes(inferenceMode) && (
         <>
           <Toggle
-            // label={getLabel(inferenceMode)}
             label={`Enable ${getLabel(inferenceMode)}`}
             checked={showDangerZone}
             onClick={onDangerZoneToggleClick}
@@ -142,7 +141,6 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
           />
           <ActionButton
             iconProps={{ iconName: 'Add' }}
-            // text="Create danger zone"
             text={`Create ${getLabel(inferenceMode)}`}
             checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
             disabled={!showDangerZone}
