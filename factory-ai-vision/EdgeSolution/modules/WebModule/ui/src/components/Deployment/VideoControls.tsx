@@ -24,10 +24,10 @@ type VideoAnnosControlsProps = {
 };
 
 const getLabel = (inferenceMode: InferenceMode) => {
-  if (inferenceMode === InferenceMode.EmptyShelfAlerts) return 'Enable shelf zone';
-  if (inferenceMode === InferenceMode.TotalCustomerCounting) return 'Enable counting zone';
-  if (inferenceMode === InferenceMode.CrowdedQueueAlert) return 'Enable queue zone';
-  return 'Enable danger zones';
+  if (inferenceMode === InferenceMode.EmptyShelfAlerts) return 'shelf zone';
+  if (inferenceMode === InferenceMode.TotalCustomerCounting) return 'counting zone';
+  if (inferenceMode === InferenceMode.CrowdedQueueAlert) return 'queue zone';
+  return 'danger zones';
 };
 
 export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => {
@@ -134,14 +134,16 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
       ].includes(inferenceMode) && (
         <>
           <Toggle
-            label={getLabel(inferenceMode)}
+            // label={getLabel(inferenceMode)}
+            label={`Enable ${getLabel(inferenceMode)}`}
             checked={showDangerZone}
             onClick={onDangerZoneToggleClick}
             inlineLabel
           />
           <ActionButton
             iconProps={{ iconName: 'Add' }}
-            text="Create danger zone"
+            // text="Create danger zone"
+            text={`Create ${getLabel(inferenceMode)}`}
             checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
             disabled={!showDangerZone}
             onClick={(): void => {
