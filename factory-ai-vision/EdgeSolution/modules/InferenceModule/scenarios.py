@@ -600,6 +600,9 @@ class DangerZone(Scenario):
 
 
 class ShelfZone(DangerZone):
+    def __init__(self, threshold=0.5, max_age=20, min_hits=1, iou_threshold=0.5):
+        super(ShelfZone, self).__init__(threshold=0.5,
+                                        max_age=20, min_hits=1, iou_threshold=0.5)
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
