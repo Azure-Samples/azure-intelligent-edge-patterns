@@ -221,7 +221,14 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
         <Separator vertical styles={{ root: { zIndex: 0 } }} />
         <Pivot styles={{ root: { borderBottom: `solid 1px ${palette.neutralLight}`, width: '435px' } }}>
           <PivotItem headerText="Insights">
-            <Insights status={status} projectId={projectData.id} cameraId={selectedCamera} />
+            <Insights
+              status={status}
+              projectId={projectData.id}
+              cameraId={selectedCamera}
+              inferenceMode={projectData.inferenceMode}
+              countingStartTime={projectData.countingStartTime}
+              countingEndTime={projectData.countingEndTime}
+            />
           </PivotItem>
           <PivotItem headerText="Areas of interest">
             <VideoAnnosControls cameraId={selectedCamera} />
