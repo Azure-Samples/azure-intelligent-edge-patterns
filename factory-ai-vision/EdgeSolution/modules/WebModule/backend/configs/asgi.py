@@ -10,7 +10,7 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vision_on_edge.settings")
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vision_on_edge.settings")
 if os.environ.get("DJANGO_ENV") == "production":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "configs.settings.production")
 else:

@@ -43,7 +43,7 @@ def inference_module_url() -> str:
     """
 
     if is_edge():
-        #ip = socket.gethostbyname("InferenceModule")
+        # ip = socket.gethostbyname("InferenceModule")
         # return ip + ":5000"
         return "inferencemodule:5000"
     return "localhost:5000"
@@ -57,7 +57,7 @@ def upload_module_url() -> str:
     """
 
     if is_edge():
-        #ip = socket.gethostbyname("uploadmodule")
+        # ip = socket.gethostbyname("uploadmodule")
         # return ip + ":7000"
         return "uploadmodule:7000"
     return "localhost:7000"
@@ -71,7 +71,7 @@ def prediction_module_url() -> str:
     """
 
     if is_edge():
-        #ip = socket.gethostbyname("PredictModule")
+        # ip = socket.gethostbyname("PredictModule")
         # return ip + ":7777/predict"
         return "predictmodule:7777/predict"
     return "localhost:7777/predict"

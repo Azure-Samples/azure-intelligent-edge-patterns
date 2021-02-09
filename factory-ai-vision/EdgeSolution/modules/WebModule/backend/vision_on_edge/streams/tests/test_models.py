@@ -45,8 +45,7 @@ def test_rtsp(mock_cv2_capture, rtsp_input, output):
 
 @pytest.mark.fast
 def test_method_keep_alive(camera):
-    """test_method_keep_alive.
-    """
+    """test_method_keep_alive."""
     time_start = time.time()
     stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
     stream_obj.update_keep_alive()
@@ -55,8 +54,7 @@ def test_method_keep_alive(camera):
 
 @pytest.mark.fast
 def test_method_gen(camera):
-    """test_method_get_frame.
-    """
+    """test_method_get_frame."""
     time_start = time.time()
     stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
     assert stream_obj.cur_img_index == 0
@@ -111,8 +109,7 @@ def test_method_get_frame_no_generated(camera):
 
 @pytest.mark.fast
 def test_method_get_frame_after_generated_twice(camera):
-    """test_method_get_frame.
-    """
+    """test_method_get_frame."""
     stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
     gen = stream_obj.gen()
     next(gen)
@@ -122,8 +119,7 @@ def test_method_get_frame_after_generated_twice(camera):
 
 @pytest.mark.fast
 def test_method_gen_members(camera):
-    """test_method_get_frame.
-    """
+    """test_method_get_frame."""
     stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
     assert stream_obj.cur_img_index == 0
     assert stream_obj.last_get_img_index == 1
@@ -141,8 +137,7 @@ def test_method_gen_members(camera):
 
 @pytest.mark.fast
 def test_method_stop(camera):
-    """test_method_get_frame.
-    """
+    """test_method_get_frame."""
     stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
     assert stream_obj.status == "init"
     gen = stream_obj.gen()
