@@ -4,7 +4,6 @@
 import pytest
 
 from ...azure_parts.models import Part
-from ...azure_projects.exceptions import ProjectTrainWithoutParts
 from ..exceptions import (
     PdDeployWithoutCameras,
     PdDeployWithoutInferenceModule,

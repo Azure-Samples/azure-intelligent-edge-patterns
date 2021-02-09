@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 
-from ...azure_parts.tests.factories import PartFactory
 from ..exceptions import (
     ProjectCannotChangeDemoError,
     ProjectCustomVisionError,
@@ -18,19 +17,11 @@ from .factories import ProjectFactory
 pytestmark = pytest.mark.django_db
 
 
-def test_create_1():
-    """test_create_1.
-
-    Type:
-        Negative
-
-    Description:
-        Create projet given invalid/null azure_setting
-    """
-    project = ProjectFactory()
-    project.customvision_id = "valid_project_id"
-    project.name = "wrong project name"
-    project.save()
+def test_create_project_with_valid_id():
+    """Make sure create project given valid azure_setting."""
+    project = ProjectFactory(
+        customvision_id="valid_project_id", name="wrong project name"
+    )
     assert project.customvision_id == "valid_project_id"
     assert project.name == MockedProject().name
 
@@ -39,19 +30,9 @@ def test_create_1():
     "vision_on_edge.azure_projects.models.Project.get_project_obj",
     mock.MagicMock(side_effect=ProjectCustomVisionError),
 )
-def test_create_2():
-    """test_create_1.
-
-    Type:
-        Negative
-
-    Description:
-        Create projet given invalid customvision_id
-    """
-    project = ProjectFactory()
-    project.customvision_id = "super_valid_project_id"
-    project.name = "Random"
-    project.save()
+def test_create_project_with_invalid_id():
+    """Create project given invalid customvision_id."""
+    project = ProjectFactory(customvision_id="super_valid_project_id", name="Random")
     assert project.customvision_id == ""
     assert project.name == "Random"
 
@@ -61,19 +42,10 @@ def test_create_2():
     mock.MagicMock(side_effect=ProjectWithoutSettingError),
 )
 def test_create_project_with_null_setting():
-    """test_create_1.
-
-    Type:
-        Negative
-
-    Description:
-        Create project with null setting
-    """
-    project = ProjectFactory()
-    project.customvision_id = "super_valid_project_id"
-    project.name = "Random"
-    project.setting = None
-    project.save()
+    """Create project with null setting."""
+    project = ProjectFactory(
+        customvision_id="super_valid_project_id", name="Random", setting=None
+    )
     assert project.customvision_id == ""
     assert project.name == "Random"
 
@@ -83,10 +55,7 @@ def test_update_invalid_customvision_id():
 
     If project from valid id to invalid id. customvision_id set to ""
     """
-    project = ProjectFactory()
-    project.customvision_id = "super_valid_project_id"
-    project.name = "Random"
-    project.save()
+    project = ProjectFactory(customvision_id="super_valid_project_id", name="Random")
     assert project.customvision_id == "super_valid_project_id"
     assert project.name == MockedProject().name
 
@@ -102,18 +71,17 @@ def test_update_invalid_customvision_id():
 
 
 def test_update_valid_customvision_id():
-    """test_create_1.
+    """test_update_valid_customvision_id
 
-    If project from valid id to invalid id. customvision_id set to ""
+    If update project with invalid custom vision ids, id would be set to empty string.
     """
     with mock.patch(
         "vision_on_edge.azure_projects.models.Project.get_project_obj",
         mock.MagicMock(side_effect=ProjectWithoutSettingError),
     ):
-        project = ProjectFactory()
-        project.customvision_id = "super_valid_project_id"
-        project.name = "Random"
-        project.save()
+        project = ProjectFactory(
+            customvision_id="super_valid_project_id", name="Random"
+        )
         assert project.customvision_id == ""
         assert project.name == "Random"
 

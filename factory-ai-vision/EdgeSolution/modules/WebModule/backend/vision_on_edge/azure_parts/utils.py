@@ -11,8 +11,8 @@ from azure.cognitiveservices.vision.customvision.training.models import (
     Tag,
 )
 
-from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_projects.models import Project
+from ..azure_parts.models import Part
+from ..azure_projects.models import Project
 
 logger = logging.getLogger(__name__)
 

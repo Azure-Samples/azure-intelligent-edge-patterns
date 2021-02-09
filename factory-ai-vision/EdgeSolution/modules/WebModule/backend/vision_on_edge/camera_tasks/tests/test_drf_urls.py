@@ -4,8 +4,6 @@
 import pytest
 from django.urls import resolve, reverse
 
-from .factories import CameraTaskFactory
-
 pytestmark = pytest.mark.django_db
 
 

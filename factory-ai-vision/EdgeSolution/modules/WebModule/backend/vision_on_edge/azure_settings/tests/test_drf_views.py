@@ -2,7 +2,6 @@
 """
 
 import json
-from unittest import mock
 
 import pytest
 from rest_framework import status
@@ -10,7 +9,6 @@ from rest_framework.test import APIRequestFactory
 
 from ..api.serializers import SettingSerializer
 from ..api.views import SettingViewSet
-from ..models import Setting
 from .factories import SettingFactory
 
 pytestmark = pytest.mark.django_db

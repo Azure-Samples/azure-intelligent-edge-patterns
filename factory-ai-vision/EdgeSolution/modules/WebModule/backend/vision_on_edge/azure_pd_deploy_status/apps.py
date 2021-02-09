@@ -19,7 +19,7 @@ class AzurePDDeployStatusConfig(AppConfig):
         """ready."""
         if "runserver" in sys.argv:
             from ..azure_part_detections.models import PartDetection
-            from . import signals
+            from . import signals  # noqa: F401
             from .models import DeployStatus
 
             for pd in PartDetection.objects.all():

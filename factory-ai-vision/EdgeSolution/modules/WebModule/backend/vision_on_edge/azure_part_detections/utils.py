@@ -1,7 +1,6 @@
 """App utilities.
 """
 
-import json
 import logging
 import threading
 import time
@@ -220,8 +219,8 @@ def deploy_worker(part_detection_id):
                 {"id": part.id, "name": part.name}
                 for part in cam.cameratask_set.first().parts.all()
             ],
-            "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
-            "recording_duration": cam.cameratask_set.first().recording_duration,
+            "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,  # noqa: E501
+            "recording_duration": cam.cameratask_set.first().recording_duration,  # noqa: E501
             "enable_tracking": cam.cameratask_set.first().enable_tracking,
             "counting_start_time": counting_start_time,
             "counting_end_time": counting_end_time,
