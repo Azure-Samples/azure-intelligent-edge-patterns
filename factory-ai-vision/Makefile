@@ -2,6 +2,7 @@ PACKAGE := webmodule
 MODULE := $(PACKAGE)
 PYTHON := $$(which python3)
 PIP := $(PYTHON) -m pip
+GIT := $$(which git)
 
 .PHONY: help
 help: ## Show help message
@@ -60,3 +61,37 @@ set-version: ## Set version (make set-version version=x.x.x")
 	@make pack-arm
 	@echo "Update version for each modules, complete! Please build and update images and commit manually"
 
+.PHONY: install-all-hooks
+install-all-hooks: install-hooks-packages install-cm-template install-cm-hook install-pc-hook ## Install all hooks
+
+.PHONY: install-hooks-packages
+install-hooks-packages: ## Install packages for git hooks
+	# Install pre-commit
+	@$(PIP) install -q pre-commit
+
+.PHONY: install-pc-hook
+install-pc-hook: .pre-commit-config.yaml ## Install pre-commit hook
+	# Install pre-commit hook
+	@pre-commit install -c $<
+
+.PHONY: install-cm-template
+install-cm-template: ci/COMMIT_MESSAGE_TEMPLATE ## Install commit-message template
+	# Install commit-message template
+	@$(GIT) config commit.template $<
+
+.PHONY: install-cm-hook
+install-cm-hook: .pre-commit-config.yaml ## Install commit-message hook
+	# Install commit-message hook
+	@pre-commit install -c $< --hook-type commit-msg
+
+.PHONY: uninstall-all-hooks
+uninstall-all-hooks: ## Remove all hooks
+	# Remove all hooks
+	@pre-commit uninstall
+	@pre-commit uninstall --hook-type commit-msg
+	# Remove commit template
+	@$(GIT) config --unset commit.template || true
+
+.PHONY: reinstall-all-hooks
+reinstall-all-hooks: uninstall-all-hooks install-all-hooks ## Reinstall all hooks
+	# Reinstall all hooks
