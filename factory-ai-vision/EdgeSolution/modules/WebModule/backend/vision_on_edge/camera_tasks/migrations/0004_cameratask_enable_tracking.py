@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('camera_tasks', '0003_cameratask_recording_duration'),
+        ("camera_tasks", "0003_cameratask_recording_duration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cameratask',
-            name='enable_tracking',
+            model_name="cameratask",
+            name="enable_tracking",
             field=models.BooleanField(default=False),
         ),
     ]

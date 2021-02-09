@@ -118,12 +118,12 @@ class AzurePartDetectionConfig(AppConfig):
             esa_scenario = PDScenario.objects.create(
                 name="Empty shelf alert",
                 inference_mode="ESA",
-                project=Project.objects.get(
-                    name="Demo Empty Shelf Alert Project"),
+                project=Project.objects.get(name="Demo Empty Shelf Alert Project"),
             )
             esa_scenario.cameras.set(
                 Camera.objects.filter(
-                    is_demo=True, name="Scenario 4 - Empty Shelf Alert")
+                    is_demo=True, name="Scenario 4 - Empty Shelf Alert"
+                )
             )
             esa_scenario.parts.set(
                 Project.objects.get(
@@ -137,11 +137,13 @@ class AzurePartDetectionConfig(AppConfig):
                 name="Total customer counting",
                 inference_mode="TCC",
                 project=Project.objects.get(
-                    name="Demo Total Customer Counting Project"),
+                    name="Demo Total Customer Counting Project"
+                ),
             )
             tcc_scenario.cameras.set(
                 Camera.objects.filter(
-                    is_demo=True, name="Scenario 5 - Total Customer Counting")
+                    is_demo=True, name="Scenario 5 - Total Customer Counting"
+                )
             )
             tcc_scenario.parts.set(
                 Project.objects.get(
@@ -158,7 +160,8 @@ class AzurePartDetectionConfig(AppConfig):
             )
             cqa_scenario.cameras.set(
                 Camera.objects.filter(
-                    is_demo=True, name="Scenario 6 - Crowded Queue Alert")
+                    is_demo=True, name="Scenario 6 - Crowded Queue Alert"
+                )
             )
             cqa_scenario.parts.set(
                 Project.objects.get(

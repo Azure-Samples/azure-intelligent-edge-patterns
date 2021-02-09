@@ -10,5 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="camera", name="send_video_to_cloud",),
+        migrations.RemoveField(
+            model_name="camera",
+            name="send_video_to_cloud",
+        ),
     ]

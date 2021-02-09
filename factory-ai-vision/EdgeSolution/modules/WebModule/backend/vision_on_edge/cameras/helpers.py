@@ -6,7 +6,14 @@ Depends on models.py
 import logging
 
 from ..locations.models import Location
-from .constants import gen_default_lines, gen_default_lines_dd, gen_default_zones, gen_default_zones_tcc, gen_default_zones_cqa, gen_default_zones_esa
+from .constants import (
+    gen_default_lines,
+    gen_default_lines_dd,
+    gen_default_zones,
+    gen_default_zones_cqa,
+    gen_default_zones_esa,
+    gen_default_zones_tcc,
+)
 from .models import Camera
 
 logger = logging.getLogger(__name__)

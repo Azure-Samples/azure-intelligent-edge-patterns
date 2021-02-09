@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('azure_part_detections', '0018_remove_partdetection_send_video_to_cloud'),
+        ("azure_part_detections", "0018_remove_partdetection_send_video_to_cloud"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='partdetection',
-            name='disable_video_feed',
+            model_name="partdetection",
+            name="disable_video_feed",
             field=models.BooleanField(default=False),
         ),
     ]

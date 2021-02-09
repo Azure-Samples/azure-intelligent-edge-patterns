@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(
-    signal=post_save, sender=Camera, dispatch_uid="create_task_upon_camera_create",
+    signal=post_save,
+    sender=Camera,
+    dispatch_uid="create_task_upon_camera_create",
 )
 def create_task_upon_camera_create(**kwargs):
     """create_task_upon_camera_create.
@@ -29,4 +31,6 @@ def create_task_upon_camera_create(**kwargs):
         return
 
     logger.info("Camera created. Create CameraTask object.")
-    CameraTask.objects.update_or_create(camera_id=instance.id,)
+    CameraTask.objects.update_or_create(
+        camera_id=instance.id,
+    )

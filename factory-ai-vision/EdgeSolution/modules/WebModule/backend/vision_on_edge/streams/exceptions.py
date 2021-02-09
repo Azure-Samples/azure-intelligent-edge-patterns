@@ -21,8 +21,7 @@ class StreamNotFoundError(APIException):
 
 
 class StreamPartIdNotFound(APIException):
-    """StreamPartIdNotFound.
-    """
+    """StreamPartIdNotFound."""
 
     status_code = 400
     default_detail = "Stream provide invalid part id."
@@ -30,8 +29,7 @@ class StreamPartIdNotFound(APIException):
 
 
 class StreamRtspCameraNotFound(APIException):
-    """StreamRtspCameraNotFound.
-    """
+    """StreamRtspCameraNotFound."""
 
     status_code = 400
     default_detail = "Stream provide rtsp with unknown camera."

@@ -56,6 +56,7 @@ def test_put_from_frontend(part_detection):
     print(response_body)
     assert response.status_code == 200
 
+
 def test_put_from_frontend_1(part_detection):
     data = {
         "parts": [part.id for part in part_detection.parts.all()],
@@ -68,9 +69,7 @@ def test_put_from_frontend_1(part_detection):
         "metrics_is_send_iothub": False,
         "metrics_frame_per_minutes": 6,
         "name": "New Task ",
-        "send_video_to_cloud": [
-            {"camera_id": 0, "send_video_to_cloud": False}
-        ],
+        "send_video_to_cloud": [{"camera_id": 0, "send_video_to_cloud": False}],
         "inference_mode": "PD",
         "fps": 10,
         "inference_protocol": "grpc",

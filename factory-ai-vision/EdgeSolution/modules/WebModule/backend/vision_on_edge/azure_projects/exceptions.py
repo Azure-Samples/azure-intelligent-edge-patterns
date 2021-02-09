@@ -53,8 +53,7 @@ class ProjectAlreadyTraining(APIException):
 
 
 class ProjectTrainWithoutParts(APIException):
-    """ProjectTrainWithoutParts.
-    """
+    """ProjectTrainWithoutParts."""
 
     status_code = 400
     default_detail = "Project can not train without parts."
