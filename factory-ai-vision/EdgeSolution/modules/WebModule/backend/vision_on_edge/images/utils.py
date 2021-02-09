@@ -87,7 +87,7 @@ def upload_images_to_customvision_helper(
             img_objs.append(image_obj)
             img_entries.append(img_entry)
             count += 1
-        except:
+        except Exception:
             logger.exception("unexpected error")
 
         if len(img_entries) >= batch_size:

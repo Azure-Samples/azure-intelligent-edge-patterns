@@ -4,8 +4,6 @@
 import pytest
 from django.urls import resolve, reverse
 
-from .factories import PartDetectionFactory
-
 pytestmark = pytest.mark.django_db
 
 

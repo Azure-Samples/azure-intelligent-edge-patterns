@@ -149,7 +149,7 @@ ICON_ROOT = UI_DIR / "icons"
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
 REST_FRAMEWORK = {
-    "EXCEPTION_HANDLER": "vision_on_edge.general.api.exception_handlers.ms_style_exception_handler"
+    "EXCEPTION_HANDLER": "vision_on_edge.general.api.exception_handlers.ms_style_exception_handler"  # noqa: E501
 }
 
 IOT_HUB_CONNECTION_STRING = config.IOT_HUB_CONNECTION_STRING

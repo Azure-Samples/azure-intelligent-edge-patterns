@@ -6,7 +6,6 @@ import logging
 import threading
 import time
 
-import requests
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException,
 )
@@ -16,10 +15,7 @@ from django.utils import timezone
 from rest_framework.exceptions import APIException
 
 from ..azure_iot.utils import prediction_module_url
-from ..azure_settings.exceptions import (
-    SettingCustomVisionAccessFailed,
-    SettingCustomVisionCannotCreateProject,
-)
+from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..azure_settings.models import Setting
 from .exceptions import (
     ProjectAlreadyTraining,
@@ -190,7 +186,7 @@ class Project(models.Model):
                 )
         except CustomVisionErrorException as customvision_err:
             logger.error(customvision_err)
-        except:
+        except Exception:
             logger.exception("dequeue_iteration error")
             raise
 
@@ -212,7 +208,7 @@ class Project(models.Model):
         except CustomVisionErrorException as customvision_err:
             logger.error("Project create_project error %s", customvision_err)
             raise customvision_err
-        except:
+        except Exception:
             logger.exception("Project create_project: Unexpected Error")
             raise
 
