@@ -600,9 +600,33 @@ class DangerZone(Scenario):
 
 
 class ShelfZone(DangerZone):
-    def __init__(self, threshold=0.5, max_age=20, min_hits=1, iou_threshold=0.5):
-        super(ShelfZone, self).__init__(threshold=0.5,
-                                        max_age=20, min_hits=1, iou_threshold=0.5)
+    # def __init__(self, threshold=0.5, max_age=20, min_hits=1, iou_threshold=0.5):
+    #     super(ShelfZone, self).__init__(threshold=0.5,
+    #                                     max_age=20, min_hits=1, iou_threshold=0.5)
+
+    def update(self, detections):
+        detections = list(d for d in detections if d.score > self.threshold)
+        detections = list(
+            [d.x1, d.y1, d.x2, d.y2, d.score]
+            for d in detections
+            if d.tag in self.targets
+        )
+
+        self.tracker.update(detections)
+        objs = self.tracker.get_objs()
+        counted = []
+        has_new_event = False
+        # reset current counter
+        for zone in self.zones:
+            self.counter[zone.id]['current'] = 0
+
+        for detection in detections:
+            for zone in self.zones:
+                x1, y1, x2, y2, score = detection
+                if zone.is_inside(x1, y1, x2, y2):
+                    self.counter[zone.id]['current'] += 1
+
+        return [self.counter]
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
@@ -612,6 +636,7 @@ class ShelfZone(DangerZone):
         y = int(min(30, img.shape[0]))
         for i in self.counter:
             if self.counter[i]['current'] == 0:
+                self.has_new_event = True
                 img = cv2.putText(
                     img,
                     "Zone {}: Empty Shelf".format(i),
@@ -643,12 +668,19 @@ class CountingZone(DangerZone):
         for zone in self.zones:
             self.counter[zone.id]['current'] = 0
 
+        for detection in detections:
+            for zone in self.zones:
+                x1, y1, x2, y2, score = detection
+                if zone.is_inside(x1, y1, x2, y2):
+                    self.counter[zone.id]['current'] += 1
+
         for obj in objs:
             x1, y1, x2, y2, oid = obj
             if oid in self.detected:
                 for zone in self.zones:
-                    if zone.is_inside(x1, y1, x2, y2):
-                        self.counter[zone.id]['current'] += 1
+                    # count current object according to original detections (above)
+                    # if zone.is_inside(x1, y1, x2, y2):
+                    #     self.counter[zone.id]['current'] += 1
                     if zone.id not in self.detected[oid]["expired"].keys():
                         self.detected[oid]["expired"][zone.id] = False
                     if self.detected[oid]["expired"][zone.id] is False:
@@ -679,6 +711,33 @@ class CountingZone(DangerZone):
 
 
 class QueueZone(DangerZone):
+    # def __init__(self, threshold=0.5, max_age=1, min_hits=1, iou_threshold=0.5):
+    #     super(ShelfZone, self).__init__(threshold=0.5,
+    #                                     max_age=1, min_hits=1, iou_threshold=0.5)
+
+    def update(self, detections):
+        detections = list(d for d in detections if d.score > self.threshold)
+        detections = list(
+            [d.x1, d.y1, d.x2, d.y2, d.score]
+            for d in detections
+            if d.tag in self.targets
+        )
+
+        self.tracker.update(detections)
+        objs = self.tracker.get_objs()
+        counted = []
+        has_new_event = False
+        # reset current counter
+        for zone in self.zones:
+            self.counter[zone.id]['current'] = 0
+
+        for detection in detections:
+            for zone in self.zones:
+                x1, y1, x2, y2, score = detection
+                if zone.is_inside(x1, y1, x2, y2):
+                    self.counter[zone.id]['current'] += 1
+
+        return [self.counter]
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX

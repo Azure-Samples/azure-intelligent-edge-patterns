@@ -96,7 +96,7 @@ def get_file_zip(url, dst_folder="model"):
     remotefile = urlopen(url)
 
     myurl = remotefile.url
-    FileName = myurl.split("/")[-1]
+    FileName = myurl.split("/")[-1].split("?")[0]
     print(FileName, flush=True)
 
     if FileName:
