@@ -49,13 +49,12 @@ def test_method_keep_alive(camera):
     time_start = time.time()
     stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
     stream_obj.update_keep_alive()
-    assert stream_obj.keep_alive > time_start
+    assert stream_obj.last_active > time_start
 
 
 @pytest.mark.fast
 def test_method_gen(camera):
     """test_method_get_frame."""
-    time_start = time.time()
     stream_obj = Stream(rtsp=camera.rtsp, camera_id=camera.id)
     assert stream_obj.cur_img_index == 0
     assert stream_obj.last_get_img_index == 1

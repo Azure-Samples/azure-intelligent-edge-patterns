@@ -30,5 +30,5 @@ class PartSameNameExistError(APIException):
 
 class PartNotEnoughImagesToTrain(APIException):
     status_code = 400
-    default_detail = "This part does not have enough images to train. Please upload or capture more images."
+    default_detail = "This part does not have enough images to train. Please upload or capture more images."  # noqa: E501
     default_code = "part_not_enough_images_to_train."

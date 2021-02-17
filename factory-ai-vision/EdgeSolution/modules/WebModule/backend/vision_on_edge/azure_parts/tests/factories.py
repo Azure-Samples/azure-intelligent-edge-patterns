@@ -1,18 +1,17 @@
 """App model factories.
 """
 
-import factory
-from factory import DjangoModelFactory, Faker
 
-from vision_on_edge.azure_parts.models import Part
+from factory import DjangoModelFactory, Faker, SubFactory
 
 from ...azure_projects.tests.factories import ProjectFactory
+from ..models import Part
 
 
 class PartFactory(DjangoModelFactory):
     """PartFactory."""
 
-    project = factory.SubFactory(ProjectFactory)
+    project = SubFactory(ProjectFactory)
     name = Faker("name")
     description = Faker("sentence")
 

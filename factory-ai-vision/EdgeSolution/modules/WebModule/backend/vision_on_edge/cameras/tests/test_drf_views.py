@@ -1,16 +1,13 @@
 """App drf view tests.
 """
 import json
-from unittest import mock
 
 import pytest
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
-from .. import models
 from ..api.serializers import CameraSerializer
 from ..api.views import CameraViewSet
-from ..models import Camera
 from .factories import CameraFactory
 
 pytestmark = pytest.mark.django_db

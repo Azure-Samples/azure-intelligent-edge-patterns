@@ -4,7 +4,7 @@
 from django.utils import timezone
 from factory import DjangoModelFactory, Faker
 
-from vision_on_edge.notifications.models import Notification
+from ..models import Notification
 
 
 class NotificationFactory(DjangoModelFactory):

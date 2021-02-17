@@ -16,4 +16,4 @@ class NotificationsConfig(AppConfig):
 
     def ready(self):
         """ready."""
-        from . import signals
+        from . import signals  # noqa: F401

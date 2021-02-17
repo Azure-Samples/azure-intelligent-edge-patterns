@@ -33,4 +33,4 @@ class SettingCustomVisionCannotCreateProject(APIException):
     """SettingCustomVisionCannotCreateProject."""
 
     status_code = 503
-    default_detail = "Custom Vision projects reach limitation. Please delete some projects or contact admin."
+    default_detail = "Custom Vision projects reach limitation. Please delete some projects or contact admin."  # noqa: E501

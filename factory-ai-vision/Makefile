@@ -77,7 +77,7 @@ install-pc-hook: .pre-commit-config.yaml ## Install pre-commit hook
 .PHONY: install-cm-template
 install-cm-template: ci/COMMIT_MESSAGE_TEMPLATE ## Install commit-message template
 	# Install commit-message template
-	@$(GIT) config commit.template $<
+	@$(GIT) config commit.template factory-ai-vision/$<
 
 .PHONY: install-cm-hook
 install-cm-hook: .pre-commit-config.yaml ## Install commit-message hook

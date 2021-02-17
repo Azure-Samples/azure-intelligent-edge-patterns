@@ -11,9 +11,8 @@ from azure.cognitiveservices.vision.customvision.training.models import (
     Region,
 )
 
-from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_projects.models import Project
-
+from ..azure_parts.models import Part
+from ..azure_projects.models import Project
 from .models import Image
 
 logger = logging.getLogger(__name__)

@@ -16,7 +16,7 @@ class CameraTaskConfig(AppConfig):
 
         if "runserver" in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
-            from . import signals
+            from . import signals  # noqa: F401
             from .helpers import create_tasks_at_startup
 
             create_tasks_at_startup()
