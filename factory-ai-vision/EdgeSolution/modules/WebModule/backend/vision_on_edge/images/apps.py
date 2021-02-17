@@ -16,4 +16,4 @@ class ImagesConfig(AppConfig):
     def ready(self):
         """ready."""
         # pylint: disable = unused-import, import-outside-toplevel
-        from . import signals
+        from . import signals  # noqa: F401  # noqa: F401

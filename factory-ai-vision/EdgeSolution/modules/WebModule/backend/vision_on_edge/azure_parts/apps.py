@@ -21,9 +21,9 @@ class AzurePartsConfig(AppConfig):
             # pylint: disable = import-outside-toplevel
             # pylint: disable = unused-import
 
-            from vision_on_edge.azure_parts import signals
-            from vision_on_edge.azure_parts.models import Part
-            from vision_on_edge.azure_projects.models import Project
+            from ..azure_parts.models import Part
+            from ..azure_projects.models import Project
+            from . import signals  # noqa: F401
 
             logger.info("Azure Part App Config ready while running server")
 

@@ -2,7 +2,7 @@
 """
 
 # pylint: disable=unused-import
-import asyncio
+import asyncio  # noqa: F401
 
 # pylint: enable=unused-import
 import logging

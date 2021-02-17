@@ -1,7 +1,6 @@
 """Project General Configs
 """
 import os
-import sys
 
 if "PRINT_THREAD" in os.environ and os.environ.get("PRINT_THREAD") in [
     "True",

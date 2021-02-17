@@ -1,8 +1,8 @@
 """App model factories
 """
 
-import factory
-from factory import DjangoModelFactory, Faker
+
+from factory import DjangoModelFactory, Faker, SubFactory
 
 from ...azure_projects.tests.factories import ProjectFactory
 
@@ -16,8 +16,8 @@ class PartDetectionFactory(DjangoModelFactory):
     """PartDetectionFactory."""
 
     name = Faker("name")
-    project = factory.SubFactory(ProjectFactory)
-    inference_module = factory.SubFactory(InferenceModuleFactory)
+    project = SubFactory(ProjectFactory)
+    inference_module = SubFactory(InferenceModuleFactory)
 
     class Meta:
         """Meta."""

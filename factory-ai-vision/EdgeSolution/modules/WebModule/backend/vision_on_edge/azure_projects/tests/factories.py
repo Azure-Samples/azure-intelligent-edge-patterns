@@ -1,17 +1,17 @@
 """App model factories.
 """
 
-import factory
-from factory import DjangoModelFactory, Faker
 
-from vision_on_edge.azure_projects.models import Project
-from vision_on_edge.azure_settings.tests.factories import SettingFactory
+from factory import DjangoModelFactory, Faker, SubFactory
+
+from ...azure_projects.models import Project
+from ...azure_settings.tests.factories import SettingFactory
 
 
 class ProjectFactory(DjangoModelFactory):
     """ProjectFactory."""
 
-    setting = factory.SubFactory(SettingFactory)
+    setting = SubFactory(SettingFactory)
     name = Faker("sentence")
 
     class Meta:
@@ -22,7 +22,7 @@ class ProjectFactory(DjangoModelFactory):
 class DemoProjectFactory(DjangoModelFactory):
     """DemoProjectFactory."""
 
-    setting = factory.SubFactory(SettingFactory)
+    setting = SubFactory(SettingFactory)
     is_demo = True
     name = Faker("sentence")
 

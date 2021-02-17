@@ -4,12 +4,10 @@
 import json
 
 import pytest
-from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
-from ..api.serializers import PartDetectionSerializer, PDScenarioSerializer
+from ..api.serializers import PartDetectionSerializer
 from ..api.views import PartDetectionViewSet
-from ..models import Project
 
 pytestmark = pytest.mark.django_db
 
@@ -18,7 +16,7 @@ def test_get(part_detection):
     """test_get_queryset.
 
     Args:
-        notification (Notification): notification
+        part_detection (Part Detection): part_detection instance
     """
     factory = APIRequestFactory()
     pd_list_view = PartDetectionViewSet.as_view({"get": "list"})
@@ -52,8 +50,6 @@ def test_put_from_frontend(part_detection):
     request = factory.put("/fake-url/", data=data)
 
     response = pd_list_view(request, pk=part_detection.id).render()
-    response_body = response.content.decode("utf-8")
-    print(response_body)
     assert response.status_code == 200
 
 
@@ -79,6 +75,4 @@ def test_put_from_frontend_1(part_detection):
     request = factory.put("/fake-url/", data=data)
 
     response = pd_list_view(request, pk=part_detection.id).render()
-    response_body = response.content.decode("utf-8")
-    print(response_body)
     assert response.status_code == 200

@@ -1,10 +1,9 @@
-"""Test app helpers
+"""App helpers tests
 """
 
 import pytest
 
 from ...cameras.models import Camera
-from ...cameras.tests.factories import CameraFactory
 from ..helpers import create_tasks_at_startup
 from ..models import CameraTask
 

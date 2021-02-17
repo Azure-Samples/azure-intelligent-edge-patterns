@@ -17,29 +17,19 @@ from vision_on_edge.azure_training_status.api import (
     views as azure_training_status_views,
 )
 from vision_on_edge.camera_tasks.api import views as camera_task_views
-
-# from vision_on_edge.cameras.api import util_views as camera_util_views
 from vision_on_edge.cameras.api import views as camera_views
 from vision_on_edge.feedback.api import views as feedback_views
 from vision_on_edge.images.api import views as image_views
 from vision_on_edge.inference_modules.api import views as inference_module_views
 from vision_on_edge.locations.api import views as location_views
 from vision_on_edge.notifications.api import views as notifications_views
-
-# from vision_on_edge.relabeling.api import views as relabel_views
 from vision_on_edge.streams.api import views as stream_views
-
-# from vision_on_edge.image_predictions.api import \
-# views as image_prediction_views
 
 router = DefaultRouter()
 router.trailing_slash = "/?"
 app_name = "api"
 
 
-# router.register('image_predictions',
-# image_prediction_views.ImagePredictionViewSet)
-# router.register('tasks', azure_projects_views.TaskViewSet)
 router.register("camera_tasks", camera_task_views.CameraTaskViewSet)
 router.register("cameras", camera_views.CameraViewSet)
 router.register("deploy_status", azure_deploy_status_views.DeployStatusViewSet)
@@ -96,7 +86,5 @@ urlpatterns += [
     path("streams/<int:stream_id>/video_feed", stream_views.video_feed),
     path("streams/<int:stream_id>/capture", stream_views.capture),
     path("streams/<int:stream_id>/keep_alive", stream_views.keep_alive),
-    # path('relabel/update', relabel_views.relabel_update),
     path("appinsight/", include("vision_on_edge.azure_app_insight.urls")),
-    # path('camera_utils/verify_rtsp', camera_util_views.verify_rtsp),
 ]

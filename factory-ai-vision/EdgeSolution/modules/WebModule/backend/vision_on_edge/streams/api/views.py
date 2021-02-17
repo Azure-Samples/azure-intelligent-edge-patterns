@@ -22,7 +22,6 @@ from ...general.api.serializers import (
     MSStyleErrorResponseSerializer,
     SimpleOKSerializer,
 )
-from ...general.api.swagger_schemas import StreamAutoSchema
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
 from ..exceptions import (
