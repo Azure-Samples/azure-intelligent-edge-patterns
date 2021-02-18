@@ -600,9 +600,9 @@ class DangerZone(Scenario):
 
 
 class ShelfZone(DangerZone):
-    # def __init__(self, threshold=0.5, max_age=20, min_hits=1, iou_threshold=0.5):
-    #     super(ShelfZone, self).__init__(threshold=0.5,
-    #                                     max_age=20, min_hits=1, iou_threshold=0.5)
+    def __init__(self, threshold=0.3, max_age=1, min_hits=1, iou_threshold=0.5):
+        super(ShelfZone, self).__init__(threshold=0.3,
+                                        max_age=1, min_hits=1, iou_threshold=0.5)
 
     def update(self, detections):
         detections = list(d for d in detections if d.score > self.threshold)
@@ -736,6 +736,14 @@ class QueueZone(DangerZone):
                 x1, y1, x2, y2, score = detection
                 if zone.is_inside(x1, y1, x2, y2):
                     self.counter[zone.id]['current'] += 1
+
+        queue_total = 0
+        for i in self.counter:
+            queue_total += self.counter[i]['current']
+        if queue_total > self.max_people:
+            has_new_event = True
+
+        self.has_new_event = has_new_event
 
         return [self.counter]
 
