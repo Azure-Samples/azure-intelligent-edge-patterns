@@ -29,7 +29,7 @@ import {
 } from './projectTypes';
 import { createWrappedAsync, getErrorLog } from '../shared/createWrappedAsync';
 
-import { extractRecommendFps } from '../../utils/extractRecommendFps';
+import { extractRecommendFps, getDeploymentProbThreshold } from '../../utils/projectUtils';
 import { getCameraSettingSuccess } from '../cameraSetting/cameraSettingActions';
 
 const getProjectRequest = (): GetProjectRequestAction => ({
@@ -176,7 +176,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       maxImages: projectData.maxImages,
       metrics_is_send_iothub: projectData.sendMessageToCloud,
       metrics_frame_per_minutes: projectData.framesPerMin,
-      prob_threshold: projectData.probThreshold,
+      prob_threshold: getDeploymentProbThreshold(projectData.inferenceMode, projectData.probThreshold),
       name: projectData.name,
       send_video_to_cloud: projectData.cameras.map((e) => ({
         camera: e,
