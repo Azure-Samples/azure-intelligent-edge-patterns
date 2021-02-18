@@ -7,7 +7,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from django.conf.urls import url
 
-from ..vision_on_edge.notifications.consumers import NotificationConsumer
+from vision_on_edge.notifications.consumers import NotificationConsumer
 
 application = ProtocolTypeRouter(
     {
