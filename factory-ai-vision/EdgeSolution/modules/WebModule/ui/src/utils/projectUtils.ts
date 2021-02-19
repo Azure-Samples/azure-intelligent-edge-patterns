@@ -5,6 +5,6 @@ export const extractRecommendFps = (totalRecommendedFPS: number, baseCameras: nu
 };
 
 export const getDeploymentProbThreshold = (inferenceMode, prob_threshold) => {
-  if (inferenceMode === InferenceMode.EmployeeSafety) return 30;
+  if (inferenceMode === InferenceMode.EmptyShelfAlerts) return 30;
   return prob_threshold;
 };
