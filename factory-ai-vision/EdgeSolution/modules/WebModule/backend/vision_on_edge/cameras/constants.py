@@ -47,7 +47,7 @@ def gen_default_zones_esa():
             {
                 "id": "$UUID_PLACE_HOLDER",
                 "type": "BBox",
-                "label": {"x1": 432, "y1": 143, "x2": 508, "y2": 237},
+                "label": {"x1": 415, "y1": 83, "x2": 513, "y2": 198},
                 "order": 1,
             }
         ],
