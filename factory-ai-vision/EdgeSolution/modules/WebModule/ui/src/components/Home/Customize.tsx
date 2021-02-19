@@ -9,6 +9,9 @@ import { initialProjectData } from '../../store/project/projectReducer';
 import { getScenario } from '../../store/scenarioSlice';
 
 const classes = mergeStyleSets({
+  subTitle: {
+    marginBottom: '10px',
+  },
   constWrapper: {
     '& div:not(:first-child)': {
       marginTop: '0',
@@ -21,7 +24,7 @@ const classes = mergeStyleSets({
   },
 });
 
-const demoManufacturingProjectsInfo = [
+const demoProjectsInfo = [
   {
     title: 'Counting objects',
     subTitle: 'Identify and count the number of objects in the factory',
@@ -34,9 +37,6 @@ const demoManufacturingProjectsInfo = [
     title: 'Defect detection',
     subTitle: 'Detect products with defects',
   },
-];
-
-const demoRetailProjectInfo = [
   {
     title: 'Empty shelf alert',
     subTitle: 'Identify and alerts when products in shelf is running out',
@@ -70,26 +70,13 @@ export const Customize: React.FC = () => {
     <>
       <Stack horizontalAlign="center">
         <h4>Get started with our pre-built scenarios</h4>
-        <Text>
+        <Text className={classes.subTitle}>
           Choose one of the following pre-trained templates to start running inferences on demo or custom
           cameras
         </Text>
         <Stack className={classes.constWrapper} tokens={{ childrenGap: '24px' }} horizontalAlign="center">
-          <h4>Manufacturing scenario`s</h4>
           <div className={classes.gridContainer}>
-            {demoManufacturingProjectsInfo.map((info) => (
-              <DemoCard
-                key={info.title}
-                title={info.title}
-                subTitle={info.subTitle}
-                onClick={openPanel(info.title)}
-                available={!!scenario.find((e) => e.name === info.title)}
-              />
-            ))}
-          </div>
-          <h4>Retail scenario`s </h4>
-          <div className={classes.gridContainer}>
-            {demoRetailProjectInfo.map((info) => (
+            {demoProjectsInfo.map((info) => (
               <DemoCard
                 key={info.title}
                 title={info.title}

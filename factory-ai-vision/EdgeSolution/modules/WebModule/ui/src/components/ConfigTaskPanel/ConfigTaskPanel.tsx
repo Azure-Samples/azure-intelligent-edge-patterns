@@ -28,7 +28,7 @@ import { getScenario } from '../../store/scenarioSlice';
 import { OnChangeType } from './type';
 import { Url } from '../../enums';
 
-import { extractRecommendFps } from '../../utils/extractRecommendFps';
+import { extractRecommendFps } from '../../utils/projectUtils';
 
 import { AdvancedOptions } from './AdvancedOptions';
 
