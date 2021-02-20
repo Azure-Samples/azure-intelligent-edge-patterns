@@ -26,7 +26,7 @@ type PropsType = {
   protocol: string;
   isLVA: boolean;
   maxPeople: number;
-  changeMaxPeople: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  changeMaxPeople: (value: number) => void;
   saveMaxPeople: () => void;
   inferenceMode: InferenceMode;
 };
@@ -141,12 +141,18 @@ export const ConfigurationInfo: React.FC<PropsType> = (props) => {
                   <td>Max People</td>
                   <td>
                     <Stack horizontal tokens={{ childrenGap: '10px' }}>
-                      <input
-                        pattern="[0-9]*"
-                        value={props.maxPeople.toString()}
-                        onChange={props.changeMaxPeople}
+                      <TextField
+                        type="number"
+                        value={props.maxPeople?.toString()}
+                        onChange={(_, newValue) => props.changeMaxPeople(parseInt(newValue, 10))}
+                        underlined
+                        styles={{ root: { display: 'inline-block' } }}
                       />
-                      <DefaultButton text="Send" onClick={props.saveMaxPeople} />
+                      <DefaultButton
+                        text="Send"
+                        onClick={props.saveMaxPeople}
+                        disabled={!Number.isInteger(props.maxPeople)}
+                      />
                     </Stack>
                   </td>
                 </tr>
