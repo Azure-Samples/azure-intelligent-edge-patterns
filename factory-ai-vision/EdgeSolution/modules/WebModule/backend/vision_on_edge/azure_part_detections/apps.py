@@ -134,7 +134,7 @@ class AzurePartDetectionConfig(AppConfig):
             # Total Customer Counting                   ===
             # =============================================
             tcc_scenario = PDScenario.objects.create(
-                name="Total customer counting",
+                name="People counting",
                 inference_mode="TCC",
                 project=Project.objects.get(
                     name="Demo Total Customer Counting Project"

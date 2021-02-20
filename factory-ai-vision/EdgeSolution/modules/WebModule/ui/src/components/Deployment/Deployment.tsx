@@ -95,15 +95,7 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
   const changeProbThreshold = (newValue: number) => dispatch(updateProjectData({ probThreshold: newValue }));
   const saveProbThresholde = () => dispatch(updateProbThreshold());
 
-  const changeMaxPeople = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { validity, value } = e.target;
-
-    const newValue = value === '' || parseInt(value) === 0 ? 1 : parseInt(value);
-
-    if (validity.valid) {
-      dispatch(updateProjectData({ maxPeople: newValue }));
-    }
-  };
+  const changeMaxPeople = (newValue: number) => dispatch(updateProjectData({ maxPeople: newValue }));
   const saveMaxPeople = () => dispatch(updateMaxPeople());
 
   const updateModel = useCallback(async () => {
