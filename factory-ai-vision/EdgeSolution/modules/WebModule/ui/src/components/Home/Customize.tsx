@@ -42,7 +42,7 @@ const demoProjectsInfo = [
     subTitle: 'Identify and alerts when products in shelf is running out',
   },
   {
-    title: 'Total customer counting',
+    title: 'People counting',
     subTitle: 'Count the Total Number of People in the store entered in whole day',
   },
   {
