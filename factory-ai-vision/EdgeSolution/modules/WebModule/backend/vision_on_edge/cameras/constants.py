@@ -64,7 +64,7 @@ def gen_default_zones_tcc():
             {
                 "id": "$UUID_PLACE_HOLDER",
                 "type": "BBox",
-                "label": {"x1": 120, "y1": 67, "x2": 840, "y2": 470},
+                "label": {"x1": 0, "y1": 0, "x2": 960, "y2": 540},
                 "order": 1,
             }
         ],
