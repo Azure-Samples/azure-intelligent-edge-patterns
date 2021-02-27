@@ -1,0 +1,93 @@
+{
+	"@apiVersion": "1.0",
+	"name": "EVRToFilesOnMotionDetection",
+	"properties": {
+		"description": "Event-based video recording to local files based on motion events",
+		"parameters": [
+			{
+				"name": "rtspUserName",
+				"type": "String",
+				"description": "rtsp source user name.",
+				"default": "dummyUserName"
+			},
+			{
+				"name": "rtspPassword",
+				"type": "String",
+				"description": "rtsp source password.",
+				"default": "dummyPassword"
+			},
+			{
+				"name": "rtspUrl",
+				"type": "String",
+				"description": "rtsp Url"
+			},
+			{
+				"name": "motionSensitivity",
+				"type": "String",
+				"description": "motion detection sensitivity",
+				"default": "medium"
+			},
+			{
+				"name": "fileSinkOutputName",
+				"type": "String",
+				"description": "file sink output name",
+				"default": "filesinkOutput"
+			}
+		],
+		"sources": [
+			{
+				"@type": "#Microsoft.Media.MediaGraphRtspSource",
+				"name": "rtspSource",
+				"endpoint": {
+					"@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+					"url": "${rtspUrl}",
+					"credentials": {
+						"@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+						"username": "${rtspUserName}",
+						"password": "${rtspPassword}"
+					}
+				}
+			}
+		],
+		"processors": [
+			{
+				"@type": "#Microsoft.Media.MediaGraphMotionDetectionProcessor",
+				"name": "motionDetection",
+				"sensitivity": "${motionSensitivity}",
+				"inputs": [
+					{
+						"nodeName": "rtspSource"
+					}
+				]
+			},
+			{
+				"@type": "#Microsoft.Media.MediaGraphSignalGateProcessor",
+				"name": "signalGateProcessor",
+				"inputs": [
+					{
+						"nodeName": "motionDetection"
+					},
+					{
+						"nodeName": "rtspSource"
+					}
+				],
+				"activationEvaluationWindow": "PT1S",
+				"activationSignalOffset": "PT0S",
+				"minimumActivationTime": "PT5S",
+				"maximumActivationTime": "PT5S"
+			}
+		],
+		"sinks": [
+			{
+				"@type": "#Microsoft.Media.MediaGraphFileSink",
+				"name": "fileSink",
+				"inputs": [
+					{
+						"nodeName": "signalGateProcessor"
+					}
+				],
+				"filePathPattern": "/var/media/sampleFilesFromEVR-${fileSinkOutputName}-${System.DateTime}"
+			}
+		]
+	}
+}

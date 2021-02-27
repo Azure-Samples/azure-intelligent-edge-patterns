@@ -1,0 +1,16 @@
+{
+  "Name": "$ROLE_DEFINITION_NAME",
+  "IsCustom": true,
+  "Description": "Can create assets, view list of containers and view Edge policies",
+  "Actions": [
+    "Microsoft.Media/mediaservices/assets/listContainerSas/action",
+	"Microsoft.Media/mediaservices/assets/write",
+	"Microsoft.Media/mediaservices/listEdgePolicies/action"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/$SUBSCRIPTION_ID"
+  ]
+}
