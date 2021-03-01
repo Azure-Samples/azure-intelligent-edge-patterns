@@ -4,8 +4,9 @@
 import logging
 
 import requests
-from ..azure_iot.utils import upload_module_url
 from django.db import models
+
+from ..azure_iot.utils import upload_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class InferenceModule(models.Model):
             response = requests.get("http://" + self.url + "/get_device", timeout=1)
             result = response.json()["device"]
             return result
-        except:
+        except Exception:
             return "cpu"
 
     def is_vpu(self) -> bool:

@@ -4,7 +4,7 @@
 import pytest
 from django.urls import resolve, reverse
 
-from vision_on_edge.azure_parts.models import Part
+from ...azure_parts.models import Part
 
 pytestmark = pytest.mark.django_db
 

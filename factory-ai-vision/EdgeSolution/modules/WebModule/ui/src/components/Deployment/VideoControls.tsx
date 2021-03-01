@@ -23,6 +23,13 @@ type VideoAnnosControlsProps = {
   cameraId: number;
 };
 
+const getLabel = (inferenceMode: InferenceMode) => {
+  if (inferenceMode === InferenceMode.EmptyShelfAlerts) return 'shelf zone';
+  if (inferenceMode === InferenceMode.TotalCustomerCounting) return 'counting zone';
+  if (inferenceMode === InferenceMode.CrowdedQueueAlert) return 'queue zone';
+  return 'danger zones';
+};
+
 export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId }) => {
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line no-undef
@@ -89,7 +96,11 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
       />
       <ActionButton
         iconProps={{ iconName: 'Add' }}
-        text={videoAnnoShape === Shape.Polygon ? 'Press D to Finish' : 'Create Polygon'}
+        text={
+          videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI
+            ? 'Press D to Finish'
+            : 'Create Polygon'
+        }
         checked={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.AOI}
         disabled={!showAOI}
         onClick={(): void => {
@@ -115,21 +126,39 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
           />
         </>
       )}
-      {inferenceMode === InferenceMode.EmployeeSafety && (
+      {[
+        InferenceMode.EmployeeSafety,
+        InferenceMode.EmptyShelfAlerts,
+        InferenceMode.TotalCustomerCounting,
+        InferenceMode.CrowdedQueueAlert,
+      ].includes(inferenceMode) && (
         <>
           <Toggle
-            label="Enable danger zones"
+            label={`Enable ${getLabel(inferenceMode)}`}
             checked={showDangerZone}
             onClick={onDangerZoneToggleClick}
             inlineLabel
           />
           <ActionButton
             iconProps={{ iconName: 'Add' }}
-            text="Create danger zone"
+            text={`Create ${getLabel(inferenceMode)}`}
             checked={videoAnnoShape === Shape.BBox && videoAnnoPurpose === Purpose.DangerZone}
             disabled={!showDangerZone}
             onClick={(): void => {
               dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.BBox, purpose: Purpose.DangerZone }));
+            }}
+          />
+          <ActionButton
+            iconProps={{ iconName: 'Add' }}
+            text={
+              videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.DangerZone
+                ? 'Press D to Finish'
+                : 'Create Polygon'
+            }
+            checked={videoAnnoShape === Shape.Polygon && videoAnnoPurpose === Purpose.DangerZone}
+            disabled={!showDangerZone}
+            onClick={(): void => {
+              dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.DangerZone }));
             }}
           />
         </>

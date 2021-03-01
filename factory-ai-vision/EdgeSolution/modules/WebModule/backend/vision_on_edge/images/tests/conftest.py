@@ -7,7 +7,6 @@ import pytest
 
 from ...azure_projects.models import Project
 from ...azure_settings.models import Setting
-from ...cameras.models import Camera
 
 
 @pytest.fixture(scope="function", autouse=True)

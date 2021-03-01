@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
-            model_name="partdetection", name="metrics_accuracy_threshold",
+            model_name="partdetection",
+            name="metrics_accuracy_threshold",
         ),
     ]

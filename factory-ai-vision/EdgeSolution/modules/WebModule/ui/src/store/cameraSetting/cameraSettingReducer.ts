@@ -1,4 +1,3 @@
-import * as R from 'ramda';
 import { CameraSetting, CameraSettingAction, ProjectActionTypes } from './cameraSettingTypes';
 
 export const initialState: CameraSetting = {

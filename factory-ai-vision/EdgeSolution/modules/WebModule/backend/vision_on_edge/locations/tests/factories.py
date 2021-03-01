@@ -3,7 +3,7 @@
 
 from factory import DjangoModelFactory, Faker
 
-from vision_on_edge.locations.models import Location
+from ...locations.models import Location
 
 
 class LocationFactory(DjangoModelFactory):

@@ -20,7 +20,7 @@ class AzureTrainingStatusConfig(AppConfig):
         if "runserver" in sys.argv:
             # pylint: disable=unused-import, import-outside-toplevel
             from ..azure_projects.models import Project
-            from . import signals
+            from . import signals  # noqa: F401
             from .models import TrainingStatus
 
             # pylint: disable = no-member

@@ -21,9 +21,9 @@ class AzurePartsConfig(AppConfig):
             # pylint: disable = import-outside-toplevel
             # pylint: disable = unused-import
 
-            from vision_on_edge.azure_parts import signals
-            from vision_on_edge.azure_parts.models import Part
-            from vision_on_edge.azure_projects.models import Project
+            from ..azure_parts.models import Part
+            from ..azure_projects.models import Project
+            from . import signals  # noqa: F401
 
             logger.info("Azure Part App Config ready while running server")
 
@@ -100,6 +100,7 @@ class AzurePartsConfig(AppConfig):
                             name=partname,
                             defaults={"description": "Demo"},
                         )
+                    logger.warning("Create Demo Employee Safety Parts success")
                 except Exception:
                     logger.error("Create Demo Employee Safety Parts error")
                 # =============================================
@@ -115,6 +116,56 @@ class AzurePartsConfig(AppConfig):
                             name=partname,
                             defaults={"description": "Demo"},
                         )
+                    logger.warning("Create Demo Defect Defection Parts success")
                 except Exception:
                     logger.error("Create Demo Defect Defection Parts error")
+                # =============================================
+                # Empty Shelf Alert                         ===
+                # =============================================
+                try:
+                    project_obj = Project.objects.get(
+                        is_demo=True, name="Demo Empty Shelf Alert Project"
+                    )
+                    for partname in ["cup"]:
+                        Part.objects.update_or_create(
+                            project=project_obj,
+                            name=partname,
+                            defaults={"description": "Demo"},
+                        )
+                    logger.warning("Create Demo Empty Shelf Alert Parts success")
+                except Exception:
+                    logger.error("Create Demo Empty Shelf Alert Parts error")
+                # =============================================
+                # Total Customer Counting                   ===
+                # =============================================
+                try:
+                    project_obj = Project.objects.get(
+                        is_demo=True, name="Demo Total Customer Counting Project"
+                    )
+                    for partname in ["Person"]:
+                        Part.objects.update_or_create(
+                            project=project_obj,
+                            name=partname,
+                            defaults={"description": "Demo"},
+                        )
+                    logger.warning("Create Demo Total Customer Counting Parts success")
+                except Exception:
+                    logger.error("Create Demo Total Customer Counting Parts error")
+                # =============================================
+                # Crowded Queue Alert                       ===
+                # =============================================
+                try:
+                    project_obj = Project.objects.get(
+                        is_demo=True, name="Demo Crowded Queue Alert Project"
+                    )
+                    for partname in ["Person"]:
+                        Part.objects.update_or_create(
+                            project=project_obj,
+                            name=partname,
+                            defaults={"description": "Demo"},
+                        )
+                    logger.warning("Create Demo Crowded Queue Alert Parts success")
+                except Exception:
+                    logger.exception("Create Demo Crowded Queue Alert Parts error")
+
             logger.info("Part App Config end while running server")

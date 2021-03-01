@@ -63,7 +63,7 @@ def update_app_insight_counter(
                     }
                 },
             )
-    except:
+    except Exception:
         logger.exception("update_app_insight_counter occur unexcepted error")
         raise
 
@@ -94,7 +94,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     # Check Customvision Project id
     try:
         trainer.get_project(customvision_project_id)
-    except:
+    except Exception:
         raise ProjectRemovedError
 
     # Invalid CustomVision Project ID handled by exception
@@ -454,7 +454,7 @@ def train_project_worker(project_id):
             logger.exception("Export already in queue")
         try:
             exports = project_obj.get_exports(iteration.id)
-        except:
+        except Exception:
             logger.exception("get_exports exception")
             continue
         if (

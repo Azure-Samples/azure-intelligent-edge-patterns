@@ -17,7 +17,7 @@ import {
   TRAIN_SUCCESS,
   TRAIN_FAILED,
 } from './projectTypes';
-import { getConfigure, updateProbThreshold } from './projectActions';
+import { getConfigure, updateProbThreshold, updateMaxPeople } from './projectActions';
 import { pullCVProjects } from '../trainingProjectSlice';
 
 const getStatusAfterGetProject = (status: Status, hasConfigured: boolean): Status => {
@@ -54,6 +54,9 @@ export const initialProjectData: ProjectData = {
   inferenceProtocol: InferenceProtocol.GRPC,
   inferenceSource: InferenceSource.LVA,
   disableVideoFeed: false,
+  countingStartTime: '',
+  countingEndTime: '',
+  maxPeople: 1,
 };
 
 const initialState: Project = {
@@ -113,6 +116,12 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Proje
     case updateProbThreshold.fulfilled.toString():
       return { ...state, isLoading: false, originData: R.clone(state.data) };
     case updateProbThreshold.rejected.toString():
+      return { ...state, isLoading: false };
+    case updateMaxPeople.pending.toString():
+      return { ...state, isLoading: true, error: null };
+    case updateMaxPeople.fulfilled.toString():
+      return { ...state, isLoading: false, originData: R.clone(state.data) };
+    case updateMaxPeople.rejected.toString():
       return { ...state, isLoading: false };
     default:
       return { ...state };

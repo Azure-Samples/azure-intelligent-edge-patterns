@@ -15,6 +15,8 @@ from .azure_settings.models import Setting
 from .azure_settings.tests.factories import SettingFactory
 from .azure_training_status.models import TrainingStatus
 from .azure_training_status.tests.factories import TrainingStatusFactory
+from .camera_tasks.models import CameraTask
+from .camera_tasks.tests.factories import CameraTaskFactory
 from .cameras.models import Camera
 from .cameras.tests.factories import CameraFactory
 from .images.models import Image
@@ -41,7 +43,10 @@ img_read = cv2.VideoCapture("vision_on_edge/cameras/tests/test.png").read()
 
 @pytest.fixture(scope="function", autouse=False)
 def mock_cv2_capture(monkeypatch):
-    # pylint: disable = missing-class-docstring, invalid-name, missing-function-docstring, no-self-use
+    # pylint: disable = missing-class-docstring,
+    # pylint: invalid-name
+    # pylint: missing-function-docstring
+    # pylint: no-self-use
 
     class MockedVideoCap:
         def __init__(self, *args, **kwargs):
@@ -109,3 +114,8 @@ def camera(mock_cv2_capture) -> Camera:
 @pytest.fixture
 def part_detection() -> PartDetection:
     return PartDetectionFactory()
+
+
+@pytest.fixture
+def camera_task(mock_cv2_capture) -> CameraTask:
+    return CameraTaskFactory()

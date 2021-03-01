@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link as RRDLink } from 'react-router-dom';
 import { Stack, Text, Link, getTheme } from '@fluentui/react';
 import Axios from 'axios';
+import { format } from 'date-fns';
+
+import { useInterval } from '../../hooks/useInterval';
+import { Status, InferenceMode } from '../../store/project/projectTypes';
 
 import { ExpandPanel } from '../ExpandPanel';
-import { useInterval } from '../../hooks/useInterval';
-import { Status } from '../../store/project/projectTypes';
 import { getErrorLog } from '../../store/shared/createWrappedAsync';
 
 const { palette } = getTheme();
@@ -14,6 +16,9 @@ type InsightsProps = {
   status: Status;
   projectId: number;
   cameraId: number;
+  inferenceMode: InferenceMode;
+  countingStartTime: string;
+  countingEndTime: string;
 };
 
 const normalizeObjectCount = (obj: Record<string, number>): { name: string; value: number }[] =>
@@ -23,7 +28,14 @@ type ScenarioMetrics = { name: string; count: number };
 const getNumOfDefects = (scenarioMetric: ScenarioMetrics[]): ScenarioMetrics[] =>
   scenarioMetric.filter((e) => !['all_objects', 'violation'].includes(e.name));
 
-export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId }) => {
+export const Insights: React.FC<InsightsProps> = ({
+  status,
+  projectId,
+  cameraId,
+  inferenceMode,
+  countingStartTime,
+  countingEndTime,
+}) => {
   const [inferenceMetrics, setinferenceMetrics] = useState({
     successRate: 0,
     successfulInferences: 0,
@@ -133,6 +145,26 @@ export const Insights: React.FC<InsightsProps> = ({ status, projectId, cameraId 
           </Stack>
         </ExpandPanel>
       </Stack>
+      {inferenceMode === InferenceMode.TotalCustomerCounting &&
+        countingStartTime !== '' &&
+        countingEndTime !== '' && (
+          <Stack
+            styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
+            tokens={{ childrenGap: '8px' }}
+          >
+            <ExpandPanel titleHidden="Time">
+              <Stack tokens={{ childrenGap: 15 }}>
+                <Text variant="mediumPlus" styles={{ root: { color: palette.neutralPrimary } }}>
+                  Start Time : {format(new Date(countingStartTime), 'yyyy/MM/dd H:mm')}
+                </Text>
+                <span>~</span>
+                <Text variant="mediumPlus" styles={{ root: { color: palette.neutralPrimary } }}>
+                  End Time : {format(new Date(countingEndTime), 'yyyy/MM/dd H:mm')}
+                </Text>
+              </Stack>
+            </ExpandPanel>
+          </Stack>
+        )}
     </>
   );
 };

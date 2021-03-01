@@ -1,11 +1,8 @@
 """App API views.
 """
 
-import json
 import logging
 
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
-from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.response import Response
 

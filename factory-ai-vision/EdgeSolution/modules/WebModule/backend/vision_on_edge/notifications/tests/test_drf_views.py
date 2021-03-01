@@ -1,15 +1,14 @@
-"""Test drf views
+"""App drf view tests
 """
 
 import json
 
 import pytest
-from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
-from vision_on_edge.notifications.api.serializers import NotificationSerializer
-from vision_on_edge.notifications.api.views import NotificationViewSet
-from vision_on_edge.notifications.models import Notification
+from ..api.serializers import NotificationSerializer
+from ..api.views import NotificationViewSet
+from ..models import Notification
 
 pytestmark = pytest.mark.django_db
 

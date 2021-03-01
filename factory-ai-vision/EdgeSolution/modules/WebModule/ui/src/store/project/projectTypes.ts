@@ -21,6 +21,9 @@ export enum InferenceMode {
   PartCounting = 'PC',
   EmployeeSafety = 'ES',
   DefectDetection = 'DD',
+  EmptyShelfAlerts = 'ESA',
+  TotalCustomerCounting = 'TCC',
+  CrowdedQueueAlert = 'CQA',
 }
 
 export enum InferenceProtocol {
@@ -70,6 +73,10 @@ export type ProjectData = {
   inferenceMode: InferenceMode;
   deployTimeStamp: string;
   inferenceSource: InferenceSource;
+  /* --- Mode Counting people need  --- */
+  countingStartTime: string;
+  countingEndTime: string;
+  maxPeople: number;
 };
 
 // Describing the different ACTION NAMES available

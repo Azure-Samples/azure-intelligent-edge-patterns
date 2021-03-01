@@ -9,8 +9,8 @@ import cv2
 import requests
 
 from ..azure_iot.utils import upload_module_url
-from .exceptions import CameraMediaSourceInvalid, CameraRtspBusy, CameraRtspInvalid
 from ..notifications.models import Notification
+from .exceptions import CameraMediaSourceInvalid, CameraRtspBusy, CameraRtspInvalid
 
 logger = logging.getLogger(__name__)
 
