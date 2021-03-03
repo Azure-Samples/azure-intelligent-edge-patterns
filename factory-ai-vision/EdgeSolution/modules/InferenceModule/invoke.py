@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import pathlib
+import re
 import ssl
 import sys
 import time
@@ -155,11 +156,14 @@ class GraphManager:
 
     def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate, recording_duration):
         recordingDuration = "PT{}S".format(recording_duration)
+        find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
         properties = {
             "topologyName": "InferencingWithGrpcExtension",
             "description": "Sample graph description",
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
+                {"name": "rtspUserName", "value": username},
+                {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
                 {"name": "instanceId", "value": name},
                 {"name": "recordingDuration", "value": recordingDuration},
@@ -184,11 +188,14 @@ class GraphManager:
         inferencingUrl = "http://inferencemodule:5000/predict?camera_id=" + \
             str(name)
         recordingDuration = "PT{}S".format(recording_duration)
+        find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
         properties = {
             "topologyName": "InferencingWithHttpExtension",
             "description": "Sample graph description",
             "parameters": [
                 {"name": "rtspUrl", "value": rtspUrl},
+                {"name": "rtspUserName", "value": username},
+                {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
                 {"name": "instanceId", "value": name},
                 {"name": "recordingDuration", "value": recordingDuration},
@@ -214,6 +221,22 @@ class GraphManager:
             return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate, recording_duration)
         else:
             return "LVA mode error"
+
+    def parse_rtsp_credential(self, rtspUrl):
+        find_cred = False
+        username = ''
+        password = ''
+        if '@' in rtspUrl:
+            pattern = '\\:\\/\\/(?P<_0>.+)\\:(?P<_1>.+)\\@'
+            out = re.findall(pattern, rtspUrl)
+            if len(out) > 0:
+                username = out[0][0]
+                password = out[0][1]
+                find_cred = True
+
+        return(find_cred, username, password)
+
+
 
 
 if is_edge():
