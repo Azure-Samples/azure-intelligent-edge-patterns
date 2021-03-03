@@ -41,6 +41,9 @@ class PartDetection(Scenario):
         self.trackers = {}
         self.parts = []
 
+    def set_threshold(self, threshold):
+        self.threshold = threshold
+
     def set_parts(self, parts):
         self.parts = parts
         self.trackers = {}
