@@ -855,12 +855,12 @@ def lva_to_customvision_format(predictions):
     results = []
     for prediction in predictions:
         tagName = prediction['entity']['tag']['value']
-        probability = prediction['entity']['tag']['confidence']
+        probability = float(prediction['entity']['tag']['confidence'])
         boundingBox = {
-            "left": prediction['entity']['box']['l'],
-            "top": prediction['entity']['box']['t'],
-            "width": prediction['entity']['box']['w'],
-            "height": prediction['entity']['box']['h'],
+            "left": float(prediction['entity']['box']['l']),
+            "top": float(prediction['entity']['box']['t']),
+            "width": float(prediction['entity']['box']['w']),
+            "height": float(prediction['entity']['box']['h']),
         }
         results.append(
             {

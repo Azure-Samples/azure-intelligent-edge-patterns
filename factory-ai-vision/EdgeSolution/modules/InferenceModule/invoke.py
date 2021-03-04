@@ -224,8 +224,8 @@ class GraphManager:
 
     def parse_rtsp_credential(self, rtspUrl):
         find_cred = False
-        username = ''
-        password = ''
+        username = 'dummyuser'
+        password = 'dummypassword'
         if '@' in rtspUrl:
             pattern = '\\:\\/\\/(?P<_0>.+)\\:(?P<_1>.+)\\@'
             out = re.findall(pattern, rtspUrl)
@@ -235,8 +235,6 @@ class GraphManager:
                 find_cred = True
 
         return(find_cred, username, password)
-
-
 
 
 if is_edge():
