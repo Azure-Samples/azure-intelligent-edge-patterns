@@ -77,6 +77,10 @@ export type ProjectData = {
   countingStartTime: string;
   countingEndTime: string;
   maxPeople: number;
+
+  // For want to select other model, old camera still in option component.
+  // Forced add.
+  oldCameras?: number[];
 };
 
 // Describing the different ACTION NAMES available
