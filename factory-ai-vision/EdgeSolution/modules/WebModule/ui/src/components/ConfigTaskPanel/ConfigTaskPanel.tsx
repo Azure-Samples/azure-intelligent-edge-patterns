@@ -168,7 +168,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const [projectData, onChange] = useProjectData(initialProjectData);
 
   const cameraOptionsSelectorInConfig = useMemo(
-    () => cameraOptionsSelectorFactoryInConfig(projectData.trainingProject, projectData.oldCameras ?? []),
+    () => cameraOptionsSelectorFactoryInConfig(projectData.trainingProject, projectData.oldCameras),
     [projectData.trainingProject, projectData.oldCameras],
   );
   const cameraOptions = useSelector(cameraOptionsSelectorInConfig);

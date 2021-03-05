@@ -57,6 +57,9 @@ export const initialProjectData: ProjectData = {
   countingStartTime: '',
   countingEndTime: '',
   maxPeople: 1,
+
+  // For select model, old camera still existing.
+  oldCameras: [],
 };
 
 const initialState: Project = {
