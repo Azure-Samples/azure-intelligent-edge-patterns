@@ -109,6 +109,8 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   countingStartTime: data?.counting_start_time === '' ? new Date().toString() : data?.counting_start_time,
   countingEndTime: data?.counting_end_time === '' ? new Date().toString() : data?.counting_end_time,
   maxPeople: data?.max_people,
+
+  oldCameras: [],
 });
 
 const getProjectData = (state: State): ProjectData => state.project.data;

@@ -17,7 +17,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
 import { isBefore, isSameDay, isAfter } from 'date-fns';
 
-import { State } from 'RootStateType';
 import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../../store/cameraSlice';
 import { partOptionsSelectorFactory, getParts } from '../../store/partSlice';
 import { ProjectData } from '../../store/project/projectTypes';
@@ -70,17 +69,25 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
     setProjectData(initialProjectData);
   }, [initialProjectData]);
 
-  const scenarios = useSelector((state: State) => state.scenario);
-
   const onChange: OnChangeType = useCallback(
     (key, value) => {
       const cloneProject = R.clone(projectData);
       cloneProject[key] = value;
+
       if (key === 'trainingProject') {
+        // New Feature: want to select other Model, old camera still in option.
+        // It's no flexible, need to refactor.
+        const newCameras = [...cloneProject.oldCameras, ...cloneProject.cameras].reduce((prev, cur) => {
+          if (prev.length === 0) return [cur];
+          if (prev.find((p) => p !== cur)) return [...prev, cur];
+          return prev;
+        }, []);
+        cloneProject.oldCameras = newCameras;
+
         // Because demo parts and demo camera can only be used in demo training project(6 scenarios)
         // We should reset them every time the training project is changed
-        cloneProject.parts = [];
         cloneProject.cameras = [];
+        cloneProject.parts = [];
       } else if (key === 'cameras') {
         cloneProject.SVTCcameras = cloneProject.SVTCcameras.filter((e) => cloneProject.cameras.includes(e));
 
@@ -137,7 +144,7 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
       }
       setProjectData(cloneProject);
     },
-    [projectData, scenarios],
+    [projectData],
   );
 
   return [projectData, onChange];
@@ -161,8 +168,8 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const [projectData, onChange] = useProjectData(initialProjectData);
 
   const cameraOptionsSelectorInConfig = useMemo(
-    () => cameraOptionsSelectorFactoryInConfig(projectData.trainingProject),
-    [projectData.trainingProject],
+    () => cameraOptionsSelectorFactoryInConfig(projectData.trainingProject, projectData.oldCameras),
+    [projectData.trainingProject, projectData.oldCameras],
   );
   const cameraOptions = useSelector(cameraOptionsSelectorInConfig);
   const selectedCameraOptions = useMemo(
