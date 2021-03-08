@@ -114,7 +114,7 @@ async def upload_file(filename):
     if '.mkv' not in filename:
         subprocess.run(["ffmpeg", "-i", filename, tmp_filename, "-y"])
     else:
-        subprocess.run(["cp", output_filename, tmp_filename])
+        subprocess.run(["cp", filename, tmp_filename])
 
     subprocess.run(["ffmpeg", "-i", tmp_filename, "-vcodec",
                     "copy", "-an", output_filename, "-y"])
@@ -134,7 +134,7 @@ async def upload_file_async(filename):
         proc1 = await asyncio.create_subprocess_exec("ffmpeg", "-i", filename, tmp_filename, "-y")
         r1 = await proc1.wait()
     else:
-        proc1 = await asyncio.create_subprocess_exec("cp", output_filename, tmp_filename)
+        proc1 = await asyncio.create_subprocess_exec("cp", filename, tmp_filename)
         r1 = await proc1.wait()
 
     proc2 = await asyncio.create_subprocess_exec("ffmpeg", "-i", tmp_filename, "-vcodec",
