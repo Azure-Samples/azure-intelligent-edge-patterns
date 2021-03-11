@@ -200,6 +200,7 @@ def update_endpoint(request_body: UpdateEndpointBody):
 
     if 'http' not in endpoint:
         endpoint = 'http://' + endpoint
+    logger.warning('SET ENDPOINT: {}'.format(endpoint))
     onnx.endpoint = endpoint
     return 'ok', 200
 

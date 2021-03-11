@@ -2,7 +2,7 @@
 """
 import logging
 
-from ..azure_iot.utils import prediction_module_url
+from ..azure_iot.utils import prediction_module_url, yolo_module_url
 from ..azure_settings.constants import DEFAULT_SETTING_NAME
 from ..azure_settings.models import Setting
 from .models import Project
@@ -65,8 +65,8 @@ def create_demo_objects():
         setting=default_settings.first(),
         defaults={
             "is_demo": True,
-            "download_uri": "scenario_models/2",
-            "prediction_uri": prediction_module_url(),
+            "download_uri": "",
+            "prediction_uri": yolo_module_url(),
         },
     )
     # =============================================
@@ -104,8 +104,8 @@ def create_demo_objects():
         setting=default_settings.first(),
         defaults={
             "is_demo": True,
-            "download_uri": "scenario_models/5",
-            "prediction_uri": prediction_module_url(),
+            "download_uri": "",
+            "prediction_uri": yolo_module_url(),
         },
     )
 
@@ -117,7 +117,7 @@ def create_demo_objects():
         setting=default_settings.first(),
         defaults={
             "is_demo": True,
-            "download_uri": "scenario_models/6",
-            "prediction_uri": prediction_module_url(),
+            "download_uri": "",
+            "prediction_uri": yolo_module_url(),
         },
     )

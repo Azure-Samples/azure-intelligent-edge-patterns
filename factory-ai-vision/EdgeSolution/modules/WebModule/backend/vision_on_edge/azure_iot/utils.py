@@ -88,3 +88,17 @@ def prediction_module_url() -> str:
         # return ip + ":7777/predict"
         return "predictmodule:7777/predict"
     return "localhost:7777/predict"
+
+
+def yolo_module_url() -> str:
+    """yolo_module_url.
+
+    Returns:
+        str: yolo_module_url
+    """
+
+    if is_edge():
+        # ip = socket.gethostbyname("PredictModule")
+        # return ip + ":7777/predict"
+        return "yolov4module:80/score"
+    return "localhost:7777/predict"
