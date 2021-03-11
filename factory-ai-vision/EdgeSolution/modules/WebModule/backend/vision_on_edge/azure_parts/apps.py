@@ -126,7 +126,7 @@ class AzurePartsConfig(AppConfig):
                     project_obj = Project.objects.get(
                         is_demo=True, name="Demo Empty Shelf Alert Project"
                     )
-                    for partname in ["cup"]:
+                    for partname in ["gap"]:
                         Part.objects.update_or_create(
                             project=project_obj,
                             name=partname,

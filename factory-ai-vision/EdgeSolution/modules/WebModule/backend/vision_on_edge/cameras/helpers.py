@@ -102,7 +102,7 @@ def create_demo_objects():
             "rtsp": "rtsp://rtspsim:554/media/scenario4-empty-shelf-alert.mkv",
             "area": "",
             "lines": "",
-            "danger_zones": gen_default_zones_esa(),
+            "danger_zones": "",
             "location": demo_location_obj,
         },
     )

@@ -557,7 +557,9 @@ class Stream:
         self.draw_img()
 
         if self.scenario:
-            if (self.get_mode() in ["ES", "ESA", "TCC", "CQA"] and self.use_zone == True) or (self.get_mode() in ['DD', 'PD', 'PC'] and self.use_line == True):
+            if (self.get_mode() in ["ES", "TCC", "CQA"] and self.use_zone == True) or (self.get_mode() in ['DD', 'PD', 'PC'] and self.use_line == True):
+                self.scenario.draw_counter(self.last_drawn_img)
+            if self.get_mode() == "ESA":
                 self.scenario.draw_counter(self.last_drawn_img)
             if self.get_mode() == "DD":
                 self.scenario.draw_objs(self.last_drawn_img)
