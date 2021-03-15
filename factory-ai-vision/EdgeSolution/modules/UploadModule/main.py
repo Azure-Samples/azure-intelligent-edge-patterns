@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 import signal
 import time
 import threading
@@ -106,12 +107,14 @@ async def download_file(url):
 
 
 async def upload_file(filename):
-    output_filename = filename.split('.')[0] + '.mkv'
-    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    output_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '.mkv'
+    tmp_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '_tmp.mkv'
     if '.mkv' not in filename:
         subprocess.run(["ffmpeg", "-i", filename, tmp_filename, "-y"])
     else:
-        subprocess.run(["cp", output_filename, tmp_filename])
+        subprocess.run(["cp", filename, tmp_filename])
 
     subprocess.run(["ffmpeg", "-i", tmp_filename, "-vcodec",
                     "copy", "-an", output_filename, "-y"])
@@ -123,13 +126,15 @@ async def upload_file(filename):
 
 
 async def upload_file_async(filename):
-    output_filename = filename.split('.')[0] + '.mkv'
-    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    output_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '.mkv'
+    tmp_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '_tmp.mkv'
     if '.mkv' not in filename:
         proc1 = await asyncio.create_subprocess_exec("ffmpeg", "-i", filename, tmp_filename, "-y")
         r1 = await proc1.wait()
     else:
-        proc1 = await asyncio.create_subprocess_exec("cp", output_filename, tmp_filename)
+        proc1 = await asyncio.create_subprocess_exec("cp", filename, tmp_filename)
         r1 = await proc1.wait()
 
     proc2 = await asyncio.create_subprocess_exec("ffmpeg", "-i", tmp_filename, "-vcodec",
@@ -143,8 +148,10 @@ async def upload_file_async(filename):
 
 
 async def upload_file_async1(filename):
-    output_filename = filename.split('.')[0] + '.mkv'
-    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    output_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '.mkv'
+    tmp_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '_tmp.mkv'
     if '.mkv' not in filename:
         proc1 = await asyncio.create_subprocess_exec("ffmpeg", "-i", filename, tmp_filename, "-y")
         r1 = await proc1.wait()
@@ -156,8 +163,10 @@ async def upload_file_async1(filename):
 
 
 async def upload_file_async2(filename):
-    output_filename = filename.split('.')[0] + '.mkv'
-    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    output_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '.mkv'
+    tmp_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '_tmp.mkv'
 
     proc2 = await asyncio.create_subprocess_exec("ffmpeg", "-i", tmp_filename, "-vcodec",
                                                  "copy", "-an", output_filename, "-y")
@@ -166,8 +175,10 @@ async def upload_file_async2(filename):
 
 
 async def upload_file_async3(filename):
-    output_filename = filename.split('.')[0] + '.mkv'
-    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    output_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '.mkv'
+    tmp_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '_tmp.mkv'
 
     proc3 = await asyncio.create_subprocess_exec("cp", output_filename, "./upload/")
     r3 = await proc3.wait()
@@ -176,8 +187,10 @@ async def upload_file_async3(filename):
 
 
 async def upload_file_async4(filename):
-    output_filename = filename.split('.')[0] + '.mkv'
-    tmp_filename = filename.split('.')[0] + '_tmp.mkv'
+    output_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '.mkv'
+    tmp_filename = re.split(
+        r"[-_|.+ %=]", filename.split('.')[0])[-1] + '_tmp.mkv'
 
     proc4 = await asyncio.create_subprocess_exec("rm", filename, tmp_filename, output_filename)
     r4 = await proc4.wait()

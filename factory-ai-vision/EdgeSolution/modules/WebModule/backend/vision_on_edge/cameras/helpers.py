@@ -102,7 +102,7 @@ def create_demo_objects():
             "rtsp": "rtsp://rtspsim:554/media/scenario4-empty-shelf-alert.mkv",
             "area": "",
             "lines": "",
-            "danger_zones": gen_default_zones_esa(),
+            "danger_zones": "",
             "location": demo_location_obj,
         },
     )
@@ -116,7 +116,7 @@ def create_demo_objects():
         name="Scenario 5 - Total Customer Counting",
         is_demo=True,
         defaults={
-            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
+            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting_old.mkv",
             "area": "",
             "lines": "",
             "danger_zones": gen_default_zones_tcc(),

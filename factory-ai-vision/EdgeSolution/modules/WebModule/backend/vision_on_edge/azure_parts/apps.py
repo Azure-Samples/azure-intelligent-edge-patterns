@@ -94,7 +94,7 @@ class AzurePartsConfig(AppConfig):
                     project_obj = Project.objects.get(
                         is_demo=True, name="Demo Employee Safety Project"
                     )
-                    for partname in ["Person"]:
+                    for partname in ["person"]:
                         Part.objects.update_or_create(
                             project=project_obj,
                             name=partname,
@@ -126,7 +126,7 @@ class AzurePartsConfig(AppConfig):
                     project_obj = Project.objects.get(
                         is_demo=True, name="Demo Empty Shelf Alert Project"
                     )
-                    for partname in ["cup"]:
+                    for partname in ["gap"]:
                         Part.objects.update_or_create(
                             project=project_obj,
                             name=partname,
@@ -142,7 +142,7 @@ class AzurePartsConfig(AppConfig):
                     project_obj = Project.objects.get(
                         is_demo=True, name="Demo Total Customer Counting Project"
                     )
-                    for partname in ["Person"]:
+                    for partname in ["person"]:
                         Part.objects.update_or_create(
                             project=project_obj,
                             name=partname,
@@ -158,7 +158,7 @@ class AzurePartsConfig(AppConfig):
                     project_obj = Project.objects.get(
                         is_demo=True, name="Demo Crowded Queue Alert Project"
                     )
-                    for partname in ["Person"]:
+                    for partname in ["person"]:
                         Part.objects.update_or_create(
                             project=project_obj,
                             name=partname,

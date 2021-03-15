@@ -41,6 +41,9 @@ class PartDetection(Scenario):
         self.trackers = {}
         self.parts = []
 
+    def set_threshold(self, threshold):
+        self.threshold = threshold
+
     def set_parts(self, parts):
         self.parts = parts
         self.trackers = {}
@@ -603,6 +606,7 @@ class ShelfZone(DangerZone):
     def __init__(self, threshold=0.3, max_age=1, min_hits=1, iou_threshold=0.5):
         super(ShelfZone, self).__init__(threshold=0.3,
                                         max_age=1, min_hits=1, iou_threshold=0.5)
+        self.is_empty = False
 
     def update(self, detections):
         detections = list(d for d in detections if d.score > self.threshold)
@@ -616,37 +620,54 @@ class ShelfZone(DangerZone):
         objs = self.tracker.get_objs()
         counted = []
         has_new_event = False
+        self.is_empty = False
         # reset current counter
         for zone in self.zones:
             self.counter[zone.id]['current'] = 0
 
-        for detection in detections:
-            for zone in self.zones:
-                x1, y1, x2, y2, score = detection
-                if zone.is_inside(x1, y1, x2, y2):
-                    self.counter[zone.id]['current'] += 1
+        # for detection in detections:
+        #     for zone in self.zones:
+        #         x1, y1, x2, y2, score = detection
+        #         if zone.is_inside(x1, y1, x2, y2):
+        #             self.counter[zone.id]['current'] += 1
 
-        return [self.counter]
+        empty_count = len(detections)
+        if empty_count > 0:
+            self.has_new_event = True
+            self.is_empty = True
+
+        return [empty_count]
 
     def draw_counter(self, img):
         font = cv2.FONT_HERSHEY_DUPLEX
         font_scale = 0.7
         thickness = 1
-        x = int(max(0, img.shape[1] - 300))
+        x = int(max(0, img.shape[1] - 200))
         y = int(min(30, img.shape[0]))
-        for i in self.counter:
-            if self.counter[i]['current'] == 0:
-                self.has_new_event = True
-                img = cv2.putText(
-                    img,
-                    "Zone {}: Empty Shelf".format(i),
-                    (x, y),
-                    font,
-                    font_scale,
-                    (0, 0, 255),
-                    thickness,
-                )
-                y += 25
+        # for i in self.counter:
+        #     if self.counter[i]['current'] == 0:
+        #         self.has_new_event = True
+        #         img = cv2.putText(
+        #             img,
+        #             "Zone {}: Empty Shelf".format(i),
+        #             (x, y),
+        #             font,
+        #             font_scale,
+        #             (0, 0, 255),
+        #             thickness,
+        #         )
+        #         y += 25
+
+        if self.is_empty:
+            img = cv2.putText(
+                img,
+                "Empty Shelf",
+                (x, y),
+                font,
+                font_scale,
+                (0, 0, 255),
+                thickness,
+            )
         return img
 
 
