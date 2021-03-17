@@ -198,7 +198,7 @@ yolov4module-6b884cd9c-swtd6           1/1     Running     0          22h
 
 
 ## Get factory-ai solution endpoint
-After deployment, we can use `kubectl get service` to get the endpoint of factory-ai solution.
+After deployment, you can use `kubectl get service` to get the endpoint of factory-ai solution.
 ```
 $ kubectl get service
 
@@ -213,6 +213,6 @@ webmodule         ClusterIP      10.0.66.3      <none>         8000/TCP         
 yolov4module      ClusterIP      10.0.134.119   <none>         80/TCP           22h
 ```
 
-Now you can check the output on terminal, and use the *EXTERNAL-IP* and *PORT* to access the factory-ai solution.
+According to the output on terminal, you can use the *EXTERNAL-IP* and *PORT* to access the factory-ai solution.
 From the example above, the endpoint would be *http://20.190.1.246:8181*
 
