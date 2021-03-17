@@ -1,7 +1,7 @@
 
 
 # Quickstart: Deploy factory-ai solution on Azure Kubernetes Service (AKS) 
-
+Kubernetes provides a distributed platform for containerized applications. With AKS, you can quickly create a production ready Kubernetes cluster. In this tutorial, you will learn how to deploy factory-ai solution to an Azure Kubernetes Service (AKS) cluster.
 
 <br/><br/>
 
