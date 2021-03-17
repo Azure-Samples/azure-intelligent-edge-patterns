@@ -95,15 +95,15 @@ az aks create \
     --node-count 1
 ```
 
+
+## Install NVIDIA device plugin
+Before installation, make sure that you have a AKS cluster with GPU-enabled node.
+
 Get the credentials for your AKS cluster using the `az aks get-credentials` command:
 
 ```azurecli-interactive
 az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
 ```
-
-## Install NVIDIA device plugin
-Before installation, make sure that you have a AKS cluster with GPU-enabled node.
-
 
 Before the GPUs in the nodes can be used, you must deploy a DaemonSet for the NVIDIA device plugin. This DaemonSet runs a pod on each node to provide the required drivers for the GPUs.
 
