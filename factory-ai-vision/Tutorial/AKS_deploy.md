@@ -78,7 +78,7 @@ Use the `kubectl create secret` command to create the secret. The following exam
 kubectl create secret generic azure-secret --from-literal=azurestorageaccountname=$AKS_PERS_STORAGE_ACCOUNT_NAME --from-literal=azurestorageaccountkey=$STORAGE_KEY
 ```
 
-Also, IotHub credentials is required in factory-ai solution.
+Also, IotHub credential is required in factory-ai solution.
 ```
 echo "IOTHUB_CONNECTION_STRING=<Your IotHub connection string>" > .az.env
 kubectl create secret generic azure-env --from-env-file ./.az.env
@@ -230,4 +230,5 @@ yolov4module      ClusterIP      10.0.134.119   <none>         80/TCP           
 
 Now you can check the output on terminal, and use the *EXTERNAL-IP* and *PORT* to access the factory-ai solution.
 From the example above, the endpoint would be *http://20.190.1.246:8181*
+<br/><br/>
 
