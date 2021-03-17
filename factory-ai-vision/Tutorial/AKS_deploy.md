@@ -197,7 +197,7 @@ kubectl apply -f deployment.k8s.cpu.template.yml
 
 After deployment, you can check the pods on your AKS cluster with `kubectl get pods` command:
 ```
-$ kubetl get pods
+$ kubectl get pods
 
 NAME                                   READY   STATUS      RESTARTS   AGE
 cvcapturemodule-686fb779f6-nct7b       1/1     Running     0          22h
