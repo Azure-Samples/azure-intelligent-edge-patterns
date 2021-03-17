@@ -31,8 +31,7 @@ spec:
             cpu: 250m
           limits:
             cpu: 500m
-      imagePullSecrets:
-      - name: regcred
+      
 ---
 apiVersion: v1
 kind: Service
@@ -97,8 +96,7 @@ spec:
           - name: IS_K8S
             value: "true"
 
-      imagePullSecrets:
-      - name: regcred
+      
 ---
 apiVersion: v1
 kind: Service
@@ -153,8 +151,7 @@ spec:
             value: "true"
           - name: IS_K8S
             value: "true"
-      imagePullSecrets:
-      - name: regcred
+      
 ---
 apiVersion: v1
 kind: Service
@@ -205,8 +202,7 @@ spec:
                 key: IOTHUB_CONNECTION_STRING
           - name: IS_K8S
             value: "true"
-      imagePullSecrets:
-      - name: regcred
+      
 ---
 apiVersion: v1
 kind: Service
@@ -259,8 +255,7 @@ spec:
                 key: IOTHUB_CONNECTION_STRING
           - name: IS_K8S
             value: "true"
-      imagePullSecrets:
-      - name: regcred
+      
 ---
 apiVersion: v1
 kind: Service
@@ -314,8 +309,7 @@ spec:
           secretName: azure-secret
           shareName: uploadvolume
           readOnly: false
-      imagePullSecrets:
-      - name: regcred
+      
 ---
 apiVersion: v1
 kind: Service
@@ -369,8 +363,7 @@ spec:
           secretName: azure-secret
           shareName: uploadvolume
           readOnly: false
-      imagePullSecrets:
-      - name: regcred
+      
 ---
 apiVersion: v1
 kind: Service
