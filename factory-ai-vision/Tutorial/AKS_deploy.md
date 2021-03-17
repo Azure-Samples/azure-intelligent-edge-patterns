@@ -113,53 +113,12 @@ First, create a namespace using the `kubectl create namespace` command, such as 
 kubectl create namespace gpu-resources
 ```
 
-Create a file named *nvidia-device-plugin-ds.yaml* and paste the following YAML manifest. This manifest is provided as part of the [NVIDIA device plugin for Kubernetes project](https://github.com/NVIDIA/k8s-device-plugin).
-
-```yaml
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: nvidia-device-plugin-daemonset
-  namespace: gpu-resources
-spec:
-  selector:
-    matchLabels:
-      name: nvidia-device-plugin-ds
-  updateStrategy:
-    type: RollingUpdate
-  template:
-    metadata:
-      # Mark this pod as a critical add-on; when enabled, the critical add-on scheduler
-      # reserves resources for critical add-on pods so that they can be rescheduled after
-      # a failure.  This annotation works in tandem with the toleration below.
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ""
-      labels:
-        name: nvidia-device-plugin-ds
-    spec:
-      tolerations:
-      # Allow this pod to be rescheduled while the node is in "critical add-ons only" mode.
-      # This, along with the annotation above marks this pod as a critical add-on.
-      - key: CriticalAddonsOnly
-        operator: Exists
-      - key: nvidia.com/gpu
-        operator: Exists
-        effect: NoSchedule
-      containers:
-      - image: mcr.microsoft.com/oss/nvidia/k8s-device-plugin:1.11
-        name: nvidia-device-plugin-ctr
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop: ["ALL"]
-        volumeMounts:
-          - name: device-plugin
-            mountPath: /var/lib/kubelet/device-plugins
-      volumes:
-        - name: device-plugin
-          hostPath:
-            path: /var/lib/kubelet/device-plugins
+Download the YAML manifest named *nvidia-device-plugin-ds.yaml* with `wget` command: 
 ```
+wget https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/EdgeSolution/nvidia-device-plugin-ds.yaml
+```
+This manifest is provided as part of the [NVIDIA device plugin for Kubernetes project](https://github.com/NVIDIA/k8s-device-plugin).
+
 
 Now use the `kubectl apply` command to create the DaemonSet and confirm the NVIDIA device plugin is created successfully, as shown in the following example output:
 
@@ -176,6 +135,10 @@ Deployment templates:
 - [GPU](https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/EdgeSolution/deployment.k8s.gpu.template.yml)
 
 
+Download the deployments above with `wget` command:
+```
+wget https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/EdgeSolution/deployment.k8s.cpu.template.yml
+```
 Now use the following `kubectl apply` command to deploy factory-ai solution:
 ```
 kubectl apply -f deployment.k8s.cpu.template.yml
