@@ -3,27 +3,20 @@
 # Quickstart: Deploy factory-ai solution on Azure Kubernetes Service (AKS) 
 Kubernetes provides a distributed platform for containerized applications. With AKS, you can quickly create a production ready Kubernetes cluster. In this tutorial, you will learn how to deploy factory-ai solution to an Azure Kubernetes Service (AKS) cluster.
 
-<br/><br/>
-
 ## Prerequisites
-
 Before you start, you would need an Azure subscription. If you don't have an Azure subscription, you can create one for free on the  [Azure sign-up page](https://aka.ms/createazuresubscription).
 
 This article assumes that you have an existing AKS cluster. If you need an AKS cluster, see the AKS quickstart [using the Azure CLI](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/aks/kubernetes-walkthrough.md) or [using the Azure portal](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/aks/kubernetes-walkthrough-portal.md).
 
 You also need the Azure CLI version 2.0.59 or later installed and configured. Run `az --version` to find the version. If you need to install or upgrade, see [Install Azure CLI](https://github.com/MicrosoftDocs/azure-docs/blob/master/cli/azure/install-azure-cli).
-<br/><br/>
 
 ## Connect to cluster using kubectl
 
 To configure `kubectl` to connect to your Kubernetes cluster, use the `az aks get-credentials` command. The following example gets credentials for the AKS cluster named *myAKSCluster* in the *myResourceGroup*:
-
 ```azurecli
 az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
 ```
-
 To verify the connection to your cluster, run the `kubectl get nodes` command to return a list of the cluster nodes:
-
 ```
 $ kubectl get nodes
 
@@ -31,14 +24,12 @@ NAME                                STATUS   ROLES   AGE     VERSION
 aks-nodepool1-37463671-vmss000000   Ready    agent   2m37s   v1.18.10
 aks-nodepool1-37463671-vmss000001   Ready    agent   2m28s   v1.18.10
 ```
-<br/><br/>
 
 
 
 ## Create an Azure file share
 Since *rtspsim* and *uploadmodule* requires to mount a Docker volume, we need to create an Azue file share as a Kubernetes volume.
 Before you can use Azure Files as a Kubernetes volume, you must create an Azure Storage account and the file share. The following commands create a resource group named *myAKSShare*, a storage account, and a Files share named *uploadvolume*:
-
 ```
 # Change these four parameters as needed for your own environment
 AKS_PERS_STORAGE_ACCOUNT_NAME=mystorageaccount$RANDOM
@@ -65,7 +56,6 @@ STORAGE_KEY=$(az storage account keys list --resource-group $AKS_PERS_RESOURCE_G
 echo Storage account name: $AKS_PERS_STORAGE_ACCOUNT_NAME
 echo Storage account key: $STORAGE_KEY
 ```
-<br/><br/>
 
 
 ## Create a Kubernetes secret
@@ -73,7 +63,6 @@ echo Storage account key: $STORAGE_KEY
 Kubernetes needs credentials to access the file share created in the previous step. These credentials are stored in a [Kubernetes secret][kubernetes-secret], which is referenced when you create a Kubernetes pod.
 
 Use the `kubectl create secret` command to create the secret. The following example creates a shared named *azure-secret* and populates the *azurestorageaccountname* and *azurestorageaccountkey* from the previous step. To use an existing Azure storage account, provide the account name and key.
-
 ```
 kubectl create secret generic azure-secret --from-literal=azurestorageaccountname=$AKS_PERS_STORAGE_ACCOUNT_NAME --from-literal=azurestorageaccountkey=$STORAGE_KEY
 ```
@@ -84,7 +73,6 @@ echo "IOTHUB_CONNECTION_STRING=<Your IotHub connection string>" > .az.env
 kubectl create secret generic azure-env --from-env-file ./.az.env
 ```
 
-<br/><br/>
 
 
 ## Create an AKS cluster
@@ -112,7 +100,6 @@ Get the credentials for your AKS cluster using the `az aks get-credentials` comm
 ```azurecli-interactive
 az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
 ```
-<br/><br/>
 
 ## Install NVIDIA device plugin
 Before installation, make sure that you have a AKS cluster with GPU-enabled node.
@@ -181,7 +168,6 @@ $ kubectl apply -f nvidia-device-plugin-ds.yaml
 
 daemonset "nvidia-device-plugin" created
 ```
-<br/><br/>
 
 ## Deploy factory-ai solution on Azure Kubernetes Service
 After all the settings above, you can now deploy factory-ai solution on AKS with the deployment template.
@@ -209,7 +195,6 @@ uploadmodule-74c6b99d49-vnxwv          1/1     Running     0          22h
 webmodule-6cb85f46f8-2r8f5             1/1     Running     0          22h
 yolov4module-6b884cd9c-swtd6           1/1     Running     0          22h
 ```
-<br/><br/>
 
 
 ## Get factory-ai solution endpoint
@@ -230,5 +215,4 @@ yolov4module      ClusterIP      10.0.134.119   <none>         80/TCP           
 
 Now you can check the output on terminal, and use the *EXTERNAL-IP* and *PORT* to access the factory-ai solution.
 From the example above, the endpoint would be *http://20.190.1.246:8181*
-<br/><br/>
 
