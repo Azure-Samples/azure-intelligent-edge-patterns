@@ -18,9 +18,6 @@ def init():
 # Handle requests to the service
 def run(data):
     try:
-        # Pick out the text property of the JSON request.
-        # This expects a request in the form of {"text": "some text to score for sentiment"}
-
         start_at = time.time()
         inputs = json.loads(data)
         img_data_list = inputs["instances"]

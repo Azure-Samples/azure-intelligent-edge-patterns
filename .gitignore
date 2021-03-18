@@ -1,7 +1,6 @@
 # Byte-compiled / optimized / DLL files
-
-PennFudanPed
 .idea
+PennFudanPed
 __pycache__/
 *.py[cod]
 *$py.class
