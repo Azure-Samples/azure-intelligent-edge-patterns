@@ -20,7 +20,7 @@ class AzureProjectsConfig(AppConfig):
             # pylint: disable=unused-import, import-outside-toplevel
             from configs.general_configs import get_create_demo
 
-            from . import signals
+            from . import signals  # noqa: F401
             from .helpers import create_default_objects, create_demo_objects
 
             create_default_objects()

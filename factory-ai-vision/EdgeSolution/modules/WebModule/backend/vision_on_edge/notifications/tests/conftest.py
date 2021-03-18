@@ -3,8 +3,8 @@
 
 import pytest
 
-from vision_on_edge.notifications.models import Notification
-from vision_on_edge.notifications.tests.factories import NotificationFactory
+from ..models import Notification
+from ..tests.factories import NotificationFactory
 
 
 @pytest.fixture

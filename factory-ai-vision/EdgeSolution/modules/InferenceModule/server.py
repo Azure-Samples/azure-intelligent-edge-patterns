@@ -200,6 +200,7 @@ def update_endpoint(request_body: UpdateEndpointBody):
 
     if 'http' not in endpoint:
         endpoint = 'http://' + endpoint
+    logger.warning('SET ENDPOINT: {}'.format(endpoint))
     onnx.endpoint = endpoint
     return 'ok', 200
 
@@ -331,6 +332,12 @@ def update_cams(request_body: CamerasModel):
             int(cam.send_video_to_cloud_threshold) * 0.01
         )
         stream.use_tracker = cam.enable_tracking
+
+        if stream.scenario:
+            logger.warning(stream.scenario)
+            if stream.model.detection_mode == 'TCC' and cam.counting_end_time != '':
+                stream.scenario.set_time(
+                    cam.counting_start_time, cam.counting_end_time)
         # recording_duration is set in topology, sould be handled in s.update_cam, not here
         # stream.recording_duration = int(cam.recording_duration*60)
 
@@ -423,6 +430,27 @@ def update_prob_threshold(prob_threshold: int):
         stream.threshold = int(prob_threshold) * 0.01
         if stream.scenario:
             stream.scenario.set_threshold(int(prob_threshold) * 0.01)
+        logger.info("Updating")
+        # s.detection_success_num = 0
+        # s.detection_unidentified_num = 0
+        # s.detection_total = 0
+        # s.detections = []
+        stream.reset_metrics()
+
+    return "ok"
+
+
+@app.get("/update_max_people")
+def update_max_people(max_people: int):
+    """update_max_people."""
+
+    logger.info("Updating max_people to")
+    logger.info("  max_people: %s", max_people)
+
+    for stream in stream_manager.get_streams():
+        stream.max_people = int(max_people)
+        if stream.scenario:
+            stream.scenario.set_max_people(int(max_people))
         logger.info("Updating")
         # s.detection_success_num = 0
         # s.detection_unidentified_num = 0

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cameras', '0008_remove_camera_send_video_to_cloud'),
+        ("cameras", "0008_remove_camera_send_video_to_cloud"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='camera',
-            name='rtsp',
+            model_name="camera",
+            name="rtsp",
             field=models.CharField(blank=True, max_length=1000),
         ),
     ]

@@ -9,11 +9,18 @@ import { initialProjectData } from '../../store/project/projectReducer';
 import { getScenario } from '../../store/scenarioSlice';
 
 const classes = mergeStyleSets({
+  subTitle: {
+    marginBottom: '10px',
+  },
+  constWrapper: {
+    '& div:not(:first-child)': {
+      marginTop: '0',
+    },
+  },
   gridContainer: {
     display: 'grid',
-    gridTemplate: 'repeat(3, 1fr) / repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(3, 1fr)',
     gridGap: '12px',
-    marginTop: '24px',
   },
 });
 
@@ -31,16 +38,16 @@ const demoProjectsInfo = [
     subTitle: 'Detect products with defects',
   },
   {
-    title: 'Machine misalignment',
-    subTitle: 'Detect if a machine is now aligned or working correctly',
+    title: 'Empty shelf alert',
+    subTitle: 'Identify and alerts when products in shelf is running out',
   },
   {
-    title: 'Tool detection',
-    subTitle: 'Detect when an employee is using the wrong tool',
+    title: 'People counting',
+    subTitle: 'Count the Total Number of People in the store entered in whole day',
   },
   {
-    title: 'Part confirmation',
-    subTitle: 'Detect if the correct part is being used',
+    title: 'Crowded queue alert',
+    subTitle: 'Identify and alerts when more then allowed people are coming in queue or selected area',
   },
 ];
 
@@ -63,21 +70,23 @@ export const Customize: React.FC = () => {
     <>
       <Stack horizontalAlign="center">
         <h4>Get started with our pre-built scenarios</h4>
-        <Text>
+        <Text className={classes.subTitle}>
           Choose one of the following pre-trained templates to start running inferences on demo or custom
           cameras
         </Text>
-        <div className={classes.gridContainer}>
-          {demoProjectsInfo.map((info) => (
-            <DemoCard
-              key={info.title}
-              title={info.title}
-              subTitle={info.subTitle}
-              onClick={openPanel(info.title)}
-              available={!!scenario.find((e) => e.name === info.title)}
-            />
-          ))}
-        </div>
+        <Stack className={classes.constWrapper} tokens={{ childrenGap: '24px' }} horizontalAlign="center">
+          <div className={classes.gridContainer}>
+            {demoProjectsInfo.map((info) => (
+              <DemoCard
+                key={info.title}
+                title={info.title}
+                subTitle={info.subTitle}
+                onClick={openPanel(info.title)}
+                available={!!scenario.find((e) => e.name === info.title)}
+              />
+            ))}
+          </div>
+        </Stack>
       </Stack>
       <ConfigTaskPanel
         isOpen={selectedScenarioIdx > -1}

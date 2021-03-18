@@ -1,0 +1,64 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "container": {
+                "username": "__AML_REGISTRY_NAME",
+                "password": "__AML_REGISTRY_PASSWORD",
+                "address": "__AML_REGISTRY_NAME.azurecr.io"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": "{}"
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"443/tcp\":[{\"HostPort\":\"443\"}],\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}]}}}"
+            }
+          }
+        },
+        "modules": {
+          "__AML_MODULE_NAME": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "__AML_REGISTRY_IMAGE_LOCATION",
+              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/tmp/.X11-unix:/tmp/.X11-unix\",\"/dev:/dev\"],\"Devices\":[{\"PathOnHost\":\"/dev/video0\",\"PathInContainer\":\"/dev/video0\",\"CgroupPermissions\":\"mrw\"}],\"NetworkMode\":\"host\",\"IpcMode\":\"host\",\"Privileged\":true},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}},\"Env\":[\"DISPLAY=:0\"]}"
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "__AML_MODULE_NAMEToPostModule": "FROM /messages/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    }
+  }
+}

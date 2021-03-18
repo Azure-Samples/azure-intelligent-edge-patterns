@@ -1,7 +1,6 @@
 """App utilities.
 """
 
-import json
 import logging
 import threading
 import time
@@ -107,6 +106,8 @@ def deploy_worker(part_detection_id):
     metrics_accuracy_threshold = getattr(instance, "metrics_accuracy_threshold", 50)
     metrics_frame_per_minutes = getattr(instance, "metrics_frame_per_minutes", 6)
     need_retraining = getattr(instance, "needRetraining", False)
+    counting_start_time = getattr(instance, "counting_start_time", "")
+    counting_end_time = getattr(instance, "counting_end_time", "")
 
     # =====================================================
     # 1. Update params                                  ===
@@ -218,9 +219,11 @@ def deploy_worker(part_detection_id):
                 {"id": part.id, "name": part.name}
                 for part in cam.cameratask_set.first().parts.all()
             ],
-            "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,
-            "recording_duration": cam.cameratask_set.first().recording_duration,
+            "send_video_to_cloud_threshold": cam.cameratask_set.first().send_video_to_cloud_threshold,  # noqa: E501
+            "recording_duration": cam.cameratask_set.first().recording_duration,  # noqa: E501
             "enable_tracking": cam.cameratask_set.first().enable_tracking,
+            "counting_start_time": counting_start_time,
+            "counting_end_time": counting_end_time,
         }
         if cam.area:
             cam_info["aoi"] = cam.area
@@ -240,6 +243,15 @@ def deploy_worker(part_detection_id):
     requests.get(
         "http://" + instance.inference_module.url + "/update_prob_threshold",
         params={"prob_threshold": instance.prob_threshold},
+        timeout=REQUEST_TIMEOUT,
+    )
+
+    # =====================================================
+    # 5. Update max_people                              ===
+    # =====================================================
+    requests.get(
+        "http://" + instance.inference_module.url + "/update_max_people",
+        params={"max_people": instance.max_people},
         timeout=REQUEST_TIMEOUT,
     )
 

@@ -11,9 +11,8 @@ from azure.cognitiveservices.vision.customvision.training.models import (
     Region,
 )
 
-from vision_on_edge.azure_parts.models import Part
-from vision_on_edge.azure_projects.models import Project
-
+from ..azure_parts.models import Part
+from ..azure_projects.models import Project
 from .models import Image
 
 logger = logging.getLogger(__name__)
@@ -87,7 +86,7 @@ def upload_images_to_customvision_helper(
             img_objs.append(image_obj)
             img_entries.append(img_entry)
             count += 1
-        except:
+        except Exception:
             logger.exception("unexpected error")
 
         if len(img_entries) >= batch_size:

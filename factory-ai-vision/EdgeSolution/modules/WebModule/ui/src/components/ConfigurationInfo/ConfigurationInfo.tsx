@@ -1,6 +1,8 @@
 import React from 'react';
 import './ConfigurationInfo.style.css';
-import { Stack, TextField, IconButton } from '@fluentui/react';
+import { Stack, TextField, IconButton, DefaultButton } from '@fluentui/react';
+
+import { InferenceMode } from '../../store/project/projectTypes';
 import { PartTag, Status as PartTagStatus } from '../PartTag';
 
 type PropsType = {
@@ -23,6 +25,10 @@ type PropsType = {
   SVTCthreshold: number;
   protocol: string;
   isLVA: boolean;
+  maxPeople: number;
+  changeMaxPeople: (value: number) => void;
+  saveMaxPeople: () => void;
+  inferenceMode: InferenceMode;
 };
 
 const getCloudMessageTxt = (sendMessageToCloud: boolean, framesPerMin: number): string => {
@@ -126,6 +132,29 @@ export const ConfigurationInfo: React.FC<PropsType> = (props) => {
                 <tr>
                   <td>Protocol</td>
                   <td>{props.protocol}</td>
+                </tr>
+              </>
+            )}
+            {props.inferenceMode === InferenceMode.CrowdedQueueAlert && (
+              <>
+                <tr>
+                  <td>Max People</td>
+                  <td>
+                    <Stack horizontal tokens={{ childrenGap: '10px' }}>
+                      <TextField
+                        type="number"
+                        value={props.maxPeople?.toString()}
+                        onChange={(_, newValue) => props.changeMaxPeople(parseInt(newValue, 10))}
+                        underlined
+                        styles={{ root: { display: 'inline-block' } }}
+                      />
+                      <DefaultButton
+                        text="Send"
+                        onClick={props.saveMaxPeople}
+                        disabled={!Number.isInteger(props.maxPeople)}
+                      />
+                    </Stack>
+                  </td>
                 </tr>
               </>
             )}

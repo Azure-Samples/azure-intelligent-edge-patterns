@@ -4,7 +4,7 @@
 import pytest
 from django.urls import resolve, reverse
 
-from vision_on_edge.images.models import Image
+from ...images.models import Image
 
 pytestmark = pytest.mark.django_db
 

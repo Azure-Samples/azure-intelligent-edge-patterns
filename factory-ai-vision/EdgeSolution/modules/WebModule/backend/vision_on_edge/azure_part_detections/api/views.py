@@ -88,6 +88,21 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         part_detection_obj.update_prob_threshold(prob_threshold=prob_threshold)
         return Response({"status": "ok"})
 
+    @action(detail=True, methods=["get"])
+    def update_max_people(self, request, pk=None) -> Response:
+        """update inference max people threshold."""
+        queryset = self.get_queryset()
+        part_detection_obj = drf_get_object_or_404(queryset, pk=pk)
+        max_people = request.query_params.get("max_people")
+
+        try:
+            max_people = int(max_people)
+        except Exception as err:
+            raise PdProbThresholdNotInteger from err
+
+        part_detection_obj.update_max_people(max_people=max_people)
+        return Response({"status": "ok"})
+
     @swagger_auto_schema(
         operation_summary="Export Part Detection status.",
         manual_parameters=[

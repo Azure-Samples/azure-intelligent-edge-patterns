@@ -170,6 +170,7 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
     [selectAllTrainingProjects, (state: State) => state.scenario],
     (trainingProjects, scenarios) => {
       const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
+
       return trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
         .map((e) => ({

@@ -39,6 +39,62 @@ def gen_default_zones():
     return json.dumps(template)
 
 
+def gen_default_zones_esa():
+    """gen_default_zones."""
+    template = {
+        "useDangerZone": True,
+        "dangerZones": [
+            {
+                "id": "$UUID_PLACE_HOLDER",
+                "type": "BBox",
+                "label": {"x1": 415, "y1": 83, "x2": 513, "y2": 198},
+                "order": 1,
+            }
+        ],
+    }
+    template["dangerZones"][0]["id"] = str(uuid.uuid4())
+    return json.dumps(template)
+
+
+def gen_default_zones_tcc():
+    """gen_default_zones."""
+    template = {
+        "useDangerZone": True,
+        "dangerZones": [
+            {
+                "id": "$UUID_PLACE_HOLDER",
+                "type": "BBox",
+                "label": {"x1": 0, "y1": 0, "x2": 960, "y2": 540},
+                "order": 1,
+            }
+        ],
+    }
+    template["dangerZones"][0]["id"] = str(uuid.uuid4())
+    return json.dumps(template)
+
+
+def gen_default_zones_cqa():
+    """gen_default_zones."""
+    template = {
+        "useDangerZone": True,
+        "dangerZones": [
+            {
+                "id": "$UUID_PLACE_HOLDER",
+                "type": "Polygon",
+                "label": [
+                    {"x": 463, "y": 275},
+                    {"x": 495, "y": 349},
+                    {"x": 301, "y": 440},
+                    {"x": 261, "y": 328},
+                ],
+                "order": 1,
+            }
+        ],
+    }
+    template["dangerZones"][0]["id"] = str(uuid.uuid4())
+    return json.dumps(template)
+
+
 def gen_default_lines_dd():
     """gen_default_lines.
 

@@ -6,7 +6,7 @@ Use in production.
 
 import os
 
-from .base import *
+from .base import *  # noqa: F403, F401
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

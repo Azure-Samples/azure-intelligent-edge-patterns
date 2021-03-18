@@ -15,7 +15,7 @@ from rest_framework import status
 from ..azure_parts.models import Part
 from ..azure_projects.models import Project
 from ..cameras.models import Camera
-from .exceptions import ImageGetRemoteImageRequestsError, ImageLabelOutOfRange
+from .exceptions import ImageGetRemoteImageRequestsError
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class Image(models.Model):
         """
         try:
             resp = requests.get(self.remote_url)
-        except:
+        except Exception:
             raise ImageGetRemoteImageRequestsError(detail=("url: " + self.remote_url))
         if resp.status_code != status.HTTP_200_OK:
             raise ImageGetRemoteImageRequestsError(detail=("url: " + self.remote_url))
