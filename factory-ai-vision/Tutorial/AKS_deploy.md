@@ -92,7 +92,7 @@ az aks create \
     --resource-group myResourceGroup \
     --name myAKSCluster \
     --node-vm-size Standard_NC6 \
-    --node-count 1
+    --node-count 3
 ```
 
 
