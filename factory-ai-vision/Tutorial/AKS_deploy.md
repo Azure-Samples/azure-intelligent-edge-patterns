@@ -77,7 +77,7 @@ kubectl create secret generic azure-env --from-env-file ./.az.env
 
 ## Create an AKS cluster
 
-If you need an AKS cluster that meets the minimum requirements (GPU-enabled node and Kubernetes version 1.10 or later), complete the following steps. If you already have an AKS cluster that meets these requirements, [skip to the next section](#install-nvidia-device-plugin).
+If you need an AKS cluster that meets the minimum requirements (at least **2 GPU-enabled nodes** and Kubernetes version 1.10 or later), complete the following steps. If you already have an AKS cluster that meets these requirements, [skip to the next section](#install-nvidia-device-plugin).
 
 First, create a resource group for the cluster using the `az group create` command. The following example creates a resource group name *myResourceGroup* in the *eastus* region:
 
