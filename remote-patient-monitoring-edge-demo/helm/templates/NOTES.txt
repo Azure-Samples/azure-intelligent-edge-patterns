@@ -1,0 +1,2 @@
+1. Get the application URL by running these commands:
+- #TODO: add instructions to the user on how to get to k8s dashboard and check deployed container status

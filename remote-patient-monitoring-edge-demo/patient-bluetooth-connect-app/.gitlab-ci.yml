@@ -1,0 +1,46 @@
+stages:
+  - build
+  - scan
+
+build:
+  stage: build
+  image: reactnativecommunity/react-native-android
+  tags: [proj-1739-docker-runner]
+  script:
+    - npm install
+    - cd android
+    - ./gradlew assembleRelease
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    untracked: true
+    policy: push
+
+
+.scan-code: &scan-code-template
+  stage: scan
+  image: 
+    name: reactnativecommunity/react-native-android
+    entrypoint: [""]
+  tags: [proj-1739-docker-runner]
+  script:
+    - scan_code=$(realpath ./.ci/scan-code.sh)
+    - cd $LOCATION
+    - $scan_code $BLACKDUCK_PROJECT_NAME $CI_COMMIT_REF_NAME $blackduck_api_key
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    untracked: true
+    policy: pull
+  only:
+    - master
+
+node:scan-code:
+  <<: *scan-code-template
+  variables:
+    LOCATION: .
+    BLACKDUCK_PROJECT_NAME: "$CI_PROJECT_NAME-node"
+
+android:scan-code:
+  <<: *scan-code-template
+  variables:
+    LOCATION: android
+    BLACKDUCK_PROJECT_NAME: "$CI_PROJECT_NAME-android"

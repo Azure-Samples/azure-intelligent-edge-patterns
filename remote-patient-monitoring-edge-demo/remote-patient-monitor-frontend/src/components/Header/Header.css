@@ -1,0 +1,15 @@
+/* 
+ *  Copyright (c) Microsoft Corporation.
+ *  Licensed under the MIT license.
+ */
+
+.App-header {
+  background-color: #21355B;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 2vmin;
+  color: white;
+  padding: 10px 10px 10px 15px;
+}

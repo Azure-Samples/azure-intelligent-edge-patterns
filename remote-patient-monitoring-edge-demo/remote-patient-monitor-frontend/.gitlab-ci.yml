@@ -1,0 +1,98 @@
+# The build job in this file uses "Docker-in-docker" which requirers some specific configuration of the Gitlab Runner. 
+#  Alternatively you could use the ssh runner with docker installed on the host.
+#  See this link for more detail: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-the-docker-executor-with-the-docker-image-docker-in-docker
+
+stages:
+  - pre-build
+  - build
+  - scan
+  - deploy
+
+.dockerhublogin: &dockerhublogin
+  before_script:
+    - echo ${dockerhub_access_token} | docker login --username ${dockerhub_username} --password-stdin
+
+build-dev:
+  stage: build
+  <<: *dockerhublogin 
+  image: docker:19.03.12
+  services:
+      - name: docker:19.03.12-dind
+  tags: [proj-1739-runner]
+  script:
+    - docker build --target build -t $CI_PROJECT_NAME .
+    - CID=$(docker create $CI_PROJECT_NAME)
+    - docker cp $CID:/app/node_modules/ .
+  cache:
+    key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - node_modules/
+    policy: push
+  except:
+    refs:
+      - master
+      - tags
+
+# This job will bump the version in package.json and add a tag
+# That tag will trigger build-prod and deploy-prod
+# This job will not run on the version change in package.json because the commit includes "[version bump]"
+tag-prod:
+  stage: pre-build
+  image: node:latest
+  tags: [proj-1739-runner]  
+  variables:
+    GIT_STRATEGY: clone
+    GIT_CHECKOUT: "true"
+  script:
+    - git remote set-url origin https://gitlab-ci-token:${DEPLOY_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+    - git config --global user.email "ci@${CI_SERVER_HOST}" && git config --global user.name "GitLab Pipeline"
+    - git checkout $CI_COMMIT_REF_NAME
+    - ./npm-version-and-tag.sh
+  only:
+    refs:
+      - master
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /.*\[version bump\].*/
+
+build-prod:
+  stage: build
+  <<: *dockerhublogin 
+  image: docker:19.03-git
+  services:
+      - name: docker:19.03.12-dind
+  tags: [proj-1739-runner]
+  script:
+    - echo ${azure_docker_registry_password} | docker login --username ${azure_docker_registry_username} --password-stdin  wwtmsft.azurecr.io
+    - ./.ci/build-and-push-image.sh doctor-dashboard latest
+  only:
+    refs:
+      - tags
+
+scan-code:
+  stage: scan
+  image: openjdk:11
+  tags: [proj-1739-runner]
+  script:
+    - ./.ci/scan-code.sh $CI_PROJECT_NAME latest $blackduck_api_key
+  cache:
+    key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
+    policy: pull
+  only:
+    refs:
+      - tags
+  allow_failure: true
+
+deploy-prod:
+  stage: deploy
+  image: registry-gitlab.asynchrony.com/proj-1739/build-utils/kubectl
+  tags: [proj-1739-runner]
+  before_script:
+    - mkdir -p ~/.kube/
+    - cat $kube_config > ~/.kube/config
+  script:
+    - ./.ci/k8s-deploy.sh
+  only:
+    refs:
+      - tags
+

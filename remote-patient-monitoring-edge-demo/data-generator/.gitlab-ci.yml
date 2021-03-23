@@ -1,0 +1,25 @@
+stages:
+  - build
+  - scan
+
+build:
+  stage: build
+  image: node:latest
+  tags: [proj-1739-runner]
+  script:
+    - npm install
+  cache:
+    key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - node_modules/
+    policy: push
+
+scan-code:
+  stage: scan
+  image: openjdk:11
+  tags: [proj-1739-runner]
+  script:
+    - ./.ci/scan-code.sh $CI_PROJECT_NAME $CI_COMMIT_REF_NAME $blackduck_api_key
+  cache:
+    key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
+    policy: pull

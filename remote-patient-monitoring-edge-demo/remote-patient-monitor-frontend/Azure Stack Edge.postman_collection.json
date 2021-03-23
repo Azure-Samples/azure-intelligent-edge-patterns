@@ -1,0 +1,229 @@
+{
+	"info": {
+		"_postman_id": "57583ee2-01e2-4447-b7b4-709543ef651f",
+		"name": "Azure Stack Edge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Patients",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/patients/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"patients",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vonk Get Patients",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://vonk.fire.ly/R4/Patient",
+					"protocol": "https",
+					"host": [
+						"vonk",
+						"fire",
+						"ly"
+					],
+					"path": [
+						"R4",
+						"Patient"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vink Post Patient",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"resourceType\": \"Patient\",\n        \"name\": [\n            {\n                \"family\": \"McGurk\",\n                \"given\": [\n                    \"Ted2\"\n                ]\n            }\n        ],\n        \"gender\": \"male\"\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vonk.fire.ly/R4/Patient",
+					"protocol": "https",
+					"host": [
+						"vonk",
+						"fire",
+						"ly"
+					],
+					"path": [
+						"R4",
+						"Patient"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vink Post Simple Patient",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"resourceType\": \"Patient\",\n        \"name\": [\n            {\n                \"family\": \"C\",\n                \"given\": \"J\"\n            }\n        ],\n        \"gender\": \"male\"\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vonk.fire.ly/R4/Patient",
+					"protocol": "https",
+					"host": [
+						"vonk",
+						"fire",
+						"ly"
+					],
+					"path": [
+						"R4",
+						"Patient"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vink Search for Patient",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://vonk.fire.ly/R4/Patient?name=McGurk",
+					"protocol": "https",
+					"host": [
+						"vonk",
+						"fire",
+						"ly"
+					],
+					"path": [
+						"R4",
+						"Patient"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "McGurk"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vink Get All Vital Signs for patient",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://vonk.fire.ly/R4/Observation?patient=63ee372c-333c-495c-b8c0-ec44eeaa42ae&category=vital-signs",
+					"protocol": "https",
+					"host": [
+						"vonk",
+						"fire",
+						"ly"
+					],
+					"path": [
+						"R4",
+						"Observation"
+					],
+					"query": [
+						{
+							"key": "patient",
+							"value": "63ee372c-333c-495c-b8c0-ec44eeaa42ae"
+						},
+						{
+							"key": "category",
+							"value": "vital-signs"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vink Get only BP Vital Sign for patient",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://vonk.fire.ly/R4/Observation?patient=63ee372c-333c-495c-b8c0-ec44eeaa42ae&code=55284-4",
+					"protocol": "https",
+					"host": [
+						"vonk",
+						"fire",
+						"ly"
+					],
+					"path": [
+						"R4",
+						"Observation"
+					],
+					"query": [
+						{
+							"key": "patient",
+							"value": "63ee372c-333c-495c-b8c0-ec44eeaa42ae"
+						},
+						{
+							"key": "code",
+							"value": "55284-4"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Vital Sign Observation",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"resourceType\": \"Observation\",\n  \"status\": \"final\",\n  \"subject\": {\n    \"reference\": \"Patient/63ee372c-333c-495c-b8c0-ec44eeaa42ae\"\n  },\n  \"category\": {\n    \"coding\": [\n      {\n        \"system\": \"http://hl7.org/fhir/observation-category\",\n        \"code\": \"vital-signs\",\n        \"display\": \"Vital Signs\"\n      }\n    ],\n    \"text\": \"Vital Signs\"\n  },\n  \"code\": {\n    \"coding\": [\n      {\n        \"system\": \"http://loinc.org\",\n        \"code\": \"55284-4\",\n        \"display\": \"SBlood pressure systolic and diastolic\"\n      }\n    ],\n    \"text\": \"Blood pressure systolic and diastolic\"\n  },\n        \"encounter\": {\n          \"reference\": \"Encounter/787\"\n        },\n        \"effectiveDateTime\": \"2016-08-17\",\n        \"component\": [\n          {\n                \"code\": {\n                  \"coding\": [\n                        {\n                          \"system\": \"http://loinc.org\",\n                          \"code\": \"8480-6\",\n                          \"display\": \"Systolic blood pressure\"\n                        }\n                  ],\n                  \"text\": \"Systolic blood pressure\"\n                },\n                \"valueQuantity\": {\n                  \"value\": 125,\n                  \"unit\": \"mmHg\",\n                  \"system\": \"http://unitsofmeasure.org\",\n                  \"code\": \"mm[Hg]\"\n                }\n          },\n          {\n                \"code\": {\n                  \"coding\": [\n                        {\n                          \"system\": \"http://loinc.org\",\n                          \"code\": \"8462-4\",\n                          \"display\": \"Diastolic blood pressure\"\n                        }\n                  ],\n                  \"text\": \"Diastolic blood pressure\"\n                },\n                \"valueQuantity\": {\n                  \"value\": 75,\n                  \"unit\": \"mmHg\",\n                  \"system\": \"http://unitsofmeasure.org\",\n                  \"code\": \"mm[Hg]\"\n                }\n          }\n        ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vonk.fire.ly/R4/Observation/a8f12dfd-1aaf-48a4-bf42-04172847bc32",
+					"protocol": "https",
+					"host": [
+						"vonk",
+						"fire",
+						"ly"
+					],
+					"path": [
+						"R4",
+						"Observation",
+						"a8f12dfd-1aaf-48a4-bf42-04172847bc32"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
