@@ -109,7 +109,7 @@ Before the GPUs in the nodes can be used, you must deploy a DaemonSet for the NV
 
 First, create a namespace using the `kubectl create namespace` command, such as *gpu-resources*:
 
-```console
+```
 kubectl create namespace gpu-resources
 ```
 
@@ -122,7 +122,7 @@ This manifest is provided as part of the [NVIDIA device plugin for Kubernetes pr
 
 Now use the `kubectl apply` command to create the DaemonSet and confirm the NVIDIA device plugin is created successfully, as shown in the following example output:
 
-```console
+```
 $ kubectl apply -f nvidia-device-plugin-ds.yaml
 
 daemonset "nvidia-device-plugin" created
