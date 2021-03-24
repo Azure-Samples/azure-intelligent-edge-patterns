@@ -32,11 +32,18 @@ UPLOAD_INTERVAL = 5
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
 IS_OPENCV = os.environ.get("IS_OPENCV", "false")
+IS_K8S = os.environ.get("IS_K8S", "false")
+IOTEDGE_DEVICE_CONNECTION_STRING = os.environ.get(
+    "IOTEDGE_DEVICE_CONNECTION_STRING", "false")
 
 DISPLAY_KEEP_ALIVE_THRESHOLD = 10  # seconds
 
 try:
-    iot = IoTHubModuleClient.create_from_edge_environment()
+    if IS_K8S == "true":
+        iot = IoTHubModuleClient.create_from_connection_string(
+            IOTEDGE_DEVICE_CONNECTION_STRING)
+    else:
+        iot = IoTHubModuleClient.create_from_edge_environment()
 except:
     iot = None
 
@@ -806,9 +813,16 @@ def draw_confidence_level(img, prediction):
 
 
 def send_message_to_iothub(predictions):
+    global iot
     if iot:
         try:
-            iot.send_message_to_output(json.dumps(predictions), "metrics")
+            if IS_K8S == "true":
+                # re-open connection to avodi connection failure
+                iot = IoTHubModuleClient.create_from_connection_string(
+                    IOTEDGE_DEVICE_CONNECTION_STRING)
+                iot.send_message(json.dumps(predictions))
+            else:
+                iot.send_message_to_output(json.dumps(predictions), "metrics")
         except:
             print("[ERROR] Failed to send message to iothub", flush=True)
         print("[INFO] sending metrics to iothub", flush=True)
