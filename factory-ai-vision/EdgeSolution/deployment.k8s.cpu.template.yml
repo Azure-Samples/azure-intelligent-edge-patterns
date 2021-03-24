@@ -22,7 +22,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: nginxmodule
-        image: intelligentedge/nginxmodule:0.21.0-amd64
+        image: intelligentedge/nginxmodule:0.22.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 8181
@@ -68,7 +68,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: webmodule
-        image: intelligentedge/webmodule:0.21.0-amd64
+        image: intelligentedge/webmodule:0.22.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -132,7 +132,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: inferencemodule
-        image: intelligentedge/inferencemodule:0.21.0-amd64
+        image: intelligentedge/inferencemodule:0.22.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
@@ -147,6 +147,11 @@ spec:
               secretKeyRef:
                 name: azure-env
                 key: IOTHUB_CONNECTION_STRING
+          - name: IOTEDGE_DEVICE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env
+                key: IOTEDGE_DEVICE_CONNECTION_STRING
           - name: IS_OPENCV
             value: "true"
           - name: IS_K8S
@@ -187,7 +192,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: predictmodule
-        image: intelligentedge/predictmodule:0.21.0-cpuamd64
+        image: intelligentedge/predictmodule:0.22.0-cpuamd64
         imagePullPolicy: Always
         ports:
         - containerPort: 7777
@@ -240,7 +245,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: cvcapturemodule
-        image: intelligentedge/cameramodule:0.21.0-amd64
+        image: intelligentedge/cameramodule:0.22.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 9000
@@ -293,7 +298,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: rtspsim
-        image: intelligentedge/rtspsimmodule:0.21.0-amd64
+        image: intelligentedge/rtspsimmodule:0.22.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 554
@@ -347,7 +352,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: uploadmodule
-        image: intelligentedge/uploadmodule:0.21.0-amd64
+        image: intelligentedge/uploadmodule:0.22.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 7000
