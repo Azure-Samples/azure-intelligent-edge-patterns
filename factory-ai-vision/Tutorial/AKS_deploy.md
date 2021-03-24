@@ -67,9 +67,10 @@ Use the `kubectl create secret` command to create the secret. The following exam
 kubectl create secret generic azure-secret --from-literal=azurestorageaccountname=$AKS_PERS_STORAGE_ACCOUNT_NAME --from-literal=azurestorageaccountkey=$STORAGE_KEY
 ```
 
-Also, IotHub credential is required in factory-ai solution.
+Also, IotHub/Edge credential is required in factory-ai solution.
 ```
-echo "IOTHUB_CONNECTION_STRING=<Your IotHub connection string>" > .az.env
+echo "IOTHUB_CONNECTION_STRING=<Your IotHub connection string>
+IOTEDGE_DEVICE_CONNECTION_STRING=<Your IotEdge device connection sring>" > .az.env
 kubectl create secret generic azure-env --from-env-file ./.az.env
 ```
 
