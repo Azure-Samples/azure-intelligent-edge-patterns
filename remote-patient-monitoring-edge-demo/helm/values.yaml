@@ -1,6 +1,4 @@
 global:
   fhir_service_name: fhir-server-svc
-  docker_registry: testnp1231231242345.azurecr.io/
-  # docker_registry: docker.io/intelligentedge/
-  # docker_registry: docker.io/straightedgewwt/
-  # Important: Be sure to include trailing slash when defining docker_registry
+  docker_registry: docker.io/intelligentedge/patientmonitoring-
+  service_bus_connection_string:
