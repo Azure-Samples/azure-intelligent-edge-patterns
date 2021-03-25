@@ -146,7 +146,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "ronpai/yolov4-tflite-tiny",
+              "image": "ronpai/yolov4-tflite-tiny:latest",
               "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"
             }
           }
