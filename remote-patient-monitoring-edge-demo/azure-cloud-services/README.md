@@ -7,19 +7,20 @@ This repo contains the configuration for the Azure Cloud Services you will need 
 - An Azure Account
 - A user account with Owner/Contributor permissions to subscription
 - A shell (either bash or Powershell)
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+- [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - Optional: [Bicep CLI](https://github.com/Azure/bicep/blob/main/docs/installing.md)
 - Optional: Docker
 
 # Setup Steps
 
-Before for proceeding, complete your authentication to Azure. Check that you are logged in to Azure in your browser first.
+Before for proceeding, complete your authentication to Azure in your browser first. Navigate to [portal.azure.com](https://portal.azure.com), and sign in. These command should be run from a shell, either Powershell or bash terminal (for windows users, consider GitBash).
 
 ## 1. Login and Select Subscription
 
-- Login `az login`
-- Select subscription with `az account set -s <your subscription ID>`
-  - To find your subscription ID, you can run `az account subscription list` in a terminal or go to [portal.azure.com](https://portal.azure.com) and search for `subscription` in the search bar after logging in.
+1. Login `az login`  
+2. Select subscription  
+    `az account set -s <your subscription ID>`  
+    - To find your subscription ID, you can run `az account subscription list` in a terminal or go to [portal.azure.com](https://portal.azure.com) and search for `subscription` in the search bar after logging in.
 
 From here you can choose automated setup with docker (2a) or manual CLI setup (2b)
 
@@ -29,11 +30,13 @@ If you want to edit the code and/or chose resource names, take the second option
 
 ## 2a. Automated Deploy with Docker
 
-This option will automatically generate random names for your resources and requirers no input from you.
+This option will automatically generate random names for your resources and requirers no input from you. The code needs to be pulled to a location in your local environment. 
 
 ### Deploy
-  - In Bash: `./docker/run.sh deploy`
-  - In Powershell: `.\docker\run.ps1 deploy`
+  1. Navigate to `/azure-cloud-services` directory in shell terminal  
+  2. Deploy  
+    - In Bash: `./docker/run.sh deploy`  
+    - In Powershell: `.\docker\run.ps1 deploy`
 
 Note: When running Docker Desktop, be sure to select the appropriate drives where your files are located.
 

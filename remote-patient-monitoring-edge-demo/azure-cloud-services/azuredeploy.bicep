@@ -169,6 +169,6 @@ resource acr 'Microsoft.ContainerRegistry/registries@2020-11-01-preview' = {
   }
 }
 
-output servicebus_connectionstring string = listkeys(serviceBus_namespace_topic_authorizationRules.id,serviceBus_namespace_topic_authorizationRules.apiVersion).primaryConnectionString
+output servicebus_connectionstring string = listkeys(serviceBus_authorizationRules.id,serviceBus_authorizationRules.apiVersion).primaryConnectionString
 
 output iothub_object object = iotHub_resource

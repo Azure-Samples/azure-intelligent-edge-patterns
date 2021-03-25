@@ -19,7 +19,7 @@ servicebusname=$prefix$datestamp$randomstring
 iothubname=$prefix-$datestamp-$randomstring-iothub
 acrname=$prefix$datestamp$randomstring
 
-connnectionstringoutputname='servicebus_connectionstring'
+connectionstringoutputname='servicebus_connectionstring'
 
 function run {
     az group create --resource-group $resourcegroupname --location $location
@@ -36,18 +36,21 @@ function run {
 }
 
 function output {
-    connnectionstring=$( \
+    connectionstring=$( \
     az deployment group show \
         --resource-group $resourcegroupname \
         --name $deploymentname \
-        --query properties.outputs.$connnectionstringoutputname.value \
+        --query properties.outputs.$connectionstringoutputname.value \
         --output tsv )
 
-    echo "connnectionstring='$connnectionstring'"
+
+    echo "set -a"
+    echo "connection_string='$connectionstring'"
     echo "resourcegroupname='$resourcegroupname'"
     echo "deploymentname='$deploymentname'"
     echo "acrname='$acrname'"
-    echo "docker_registry='$acrname'"
+    echo "docker_registry='$acrname.azurecr.io/'"
+    echo "set +a"
 
 }
 
