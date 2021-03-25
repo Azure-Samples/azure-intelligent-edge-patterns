@@ -5,7 +5,7 @@ Patient and vital data (also referred to as 'Observations') are generated in the
 
 ## Prerequisite Software Needed
 
-- [Node](https://nodejs.org/en/download/). _Recommended: 12 or higher_
+- [Node](https://nodejs.org/en/download/) _Recommended: 12 or higher_
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
 ## Required Configuration
@@ -14,74 +14,79 @@ Patient and vital data (also referred to as 'Observations') are generated in the
 
 TODO: This might benefit with being pulled up to the Root README, but the script lives here for now.
 
-- Open a Terminal at the root level of this project
-  - Windows users: Use Git Bash to execute the .sh script.
-- Run `az login` if you have not previously logged in via `az`.
-- Run the `create-new-device.sh` script to create a device to associate with IoT Hub. This is a one-time operation.
-  - TODO: Notes about how to run without parameters to see usage message
-  - Example usage (replace the parameters with your resource specific values):
-    ```
-    ./create-new-device.sh my-iot-hub-resource 1bd01e18-8bda-4d60-8550-f05701b094fa my-new-device-name
-    ```
-  - Required parameters: 
-    - **IoT Hub Resource Name**
-      1. Navigate to [portal.azure.com](https://portal.azure.com).
-      2. In the Search Bar at the top of the page, type `iot hub` to find the IoT Hub resource.
-      3. Copy the value underneath the `Name` column to your clipboard.
-      - TODO: Crib notes from React Native app README
-    - **IoT Hub Subscription Id**
-      - Navigate to [portal.azure.com](https://portal.azure.com).
-      - In the Search Bar at the top of the page, type `iot hub` to find the IoT Hub resource.
-      - Select your IoT Hub resource.
-      - Copy the value under `Subscription ID`
-    - **Device Name to be Created**
+1. Open a Terminal (or Git Bash session in Windows) and change directory to `data-generator`
+   - For example (at the root level of this project): 
+     ```
+     cd data-generator
+     ```
+1. Run `az login` if you have not recently logged in via `az`.
+1. Run the `create-new-device.sh` script to create a device to associate with IoT Hub. This is a one-time operation.
+   - Required parameters: 
+     - **IoT Hub Resource Name**
+       1. Navigate to [portal.azure.com](https://portal.azure.com).
+       1. In the Search Bar at the top of the page, type `iot hub` to find the IoT Hub resource.
+       1. Copy the value underneath the `Name` column to your clipboard.
+     - **IoT Hub Subscription Id**
+       1. Navigate to [portal.azure.com](https://portal.azure.com).
+       1. In the Search Bar at the top of the page, type `iot hub` to find the IoT Hub resource.
+       1. Select your IoT Hub resource.
+       1. Copy the value under `Subscription ID`
+     - **Device Name to be Created**
+       - This is simply a human-readable device name, something like `device0001` or `myDevice`
+       - This will be referred to as `deviceId` for subsequent commands.
+   - _Tip: Running a command with no parameters, or with --help, will print a usage message detailing how to use this command._ 
+     ```
+     ./create-new-device.sh
+     ```
+   - Example usage. Replace the parameters (including the <>) with your resource specific values:
+     ```
+     ./create-new-device.sh <iotHubResourceName> <iotHubSubscriptionId> <deviceName>
+     ```
+   - After running this command, your device is ready for use in IoT Hub.
 
-The following environment variables will need to be set in .env.production at the root level of the project to match your Azure configuration. TODO: Could these instead be environment variables?
+### Configuring Your Environment
 
-TODO: Need to scrub .env.production file of our local URLs.
+You will need to set the FHIR_API_URL and IOT_HUB_CONNECTION_STRING environment variables in the .env.production file in the `data-generator` directory. The easiest way to accomplish this is to run the `setup-environment.sh` script.
 
-Ex `.env.production` file: 
+**Prerequisite Setup**
+
+- A working `kubectl` configuration against your target namespace in Kubernetes.
+- A working `az` configuration. You may need to run `az login` if you haven't recently.
+- IoT Hub resource name
+- Device Id for that IoT Hub resource
+
+In a Terminal (or Git Bash session) open in the `data-generator` directory, run the following script, replacing with your values for `<iotHubResourceName>` and `<deviceId>`:
+  ```
+  ./setup-environment.sh <iotHubResourceName> <deviceId>
+  ```
+
+If everything ran correctly, you should see updated values in the .env.production file in the `data-generator` directory. Should look something like this:
+
 ```
-FHIR_API_URL='http://10.255.182.239:8080'
-IOT_HUB_CONNECTION_STRING='HostName=iotHubName.azure-devices.net;DeviceId=12345;SharedAccessKey=678910'
+FHIR_API_URL=http://10.255.180.240:8080
+IOT_HUB_CONNECTION_STRING="HostName=my-resource-name.azure-devices.net;DeviceId=coolDevice;SharedAccessKey=TWOlD0XD8fstJ2PbI2H1Ds3JXsxRP/j1u3z556W+W1o="
 ```
 
-- FHIR API Url
-  - If you have `~/.kube/config` and `kubectl` set up against the Azure namespace: run this to get FHIR IP: `kubectl get services fhir-server-svc --output jsonpath='{.status.loadBalancer.ingress[0].ip}'`.
-    - Create the FHIR API URL like so: `http://<FHIR-IP>:8080`. e.g. `http://10.255.182.239:8080`
-  - Alternatively: the FHIR server url will be an IP Address that can be accessed via the Kubernetes Dashboard. See the section below for finding that URL.
-- IoT Hub Connection String
-  - Constructed in the format: `HostName=<IOT_HUB_RESOURCE_NAME>.azure-devices.net;DeviceId=<DEVICE_ID>;SharedAccessKey=<SHARED_ACCESS_KEY>`
-  - How to get IoT Hub Connection String using `az`:
-    - Run the following command (you will need to replace `iotHubResourceName` and `deviceId`):
-    ```
-    az iot hub device-identity connection-string show -n <iotHubResourceName> -d <deviceId> --query connectionString
-    ```
-  - How to find IoT Hub Connection String in Azure:
-     - Navigate to portal.azure.com.
-     - In the Search Bar at the top of the page, type `iot hub` to find the IoT Hub resource.
-     - Select your IoT Hub resource.
-     - In the left side panel, go to `IoT Devices`.
-     - Select relevant device from the options underneath the **Device ID** column.
-     - Your connection string will be the **Primary Connection String**.
-     - You can copy this key by clicking on the Copy icon to the right of the field.
+Now any data generated will be applied to your IoT Hub configuration and FHIR server deployed in Kubernetes.
 
-### How to Access Kubernetes Dashboard And Determine FHIR URL
+### How to Access Kubernetes Dashboard
 
-TODO: These need to be way more generic (not our specific setup).
+In order to monitor your Kubernetes (k8s) cluster, you will need to configure access via your Azure Stack Edge device's local UI (Azure Stack Edge Dashboard). You can find more detailed documentation here: https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-monitor-kubernetes-dashboard
 
-- Access k8s dashboard by navigating here to start: ASE Portal: https://10.255.182.230/ (Password is in Sharepoint notes)  
-  - TODO: Generic instructions for open source user
-- Navigate to Device in left panel
-- Download config file from `Download config` link next to Kubernetes Dashboard entry
-- Navigate to the Kubernetes Dashboard link on the same page
-  - If you get a page that won't let you navigate there, type `thisisunsafe` on the page to bypass
-- Select `Kubeconfig` option and use downloaded file to access
-- Change **namespace** to the namespace you created in the dropdown in the left panel to see pods running in that namespace
-  - (#TODO: Remove this note: If we run into problems during this step we can fallback to using the testnamespace already created to save time)
-- Select `fhir-server-deployment` under Deployments section of main page
-- Select `fhir-server-deployment-...` link under New Replica Set
-- Look for the `fhir-server-service` row. Copy the `:8080` link under External Endpoints column. This is the FHIR API URL. 
+1. Navigate to your device's Azure Stack Edge Dashboard. 
+   - **NOTE:** This is not the Azure Cloud Portal, but the dashboard for your specific Azure Stack Edge device.
+1. Navigate to Device in left panel.
+1. Download config file from `Download config` link next to `Kubernetes Dashboard` entry.
+   - **Keep this in a easy-to-find location**. You will need it any time you navigate to the Kubernetes Dashboard.
+1. Navigate to the `Kubernetes Dashboard` link on the same page. This will look something like an IP address, e.g. `https://10.128.44.241:31000`.
+   - **Troubleshooting:** If you get a page that won't let you navigate there, type `thisisunsafe` while focused in a Chrome browser window to bypass. This is known as an 'interstitial bypass keyword' and can be used when certificates aren't present in your server configuration and you _absolutely_ trust that this is your site.
+1. Select `Kubeconfig` option and use downloaded config file to access
+1. Change **namespace** to the namespace you created in the dropdown in the left panel to see pods running in that namespace
+
+### How to Get FHIR Url in Kubernetes Dashboard
+1. Select `fhir-server-deployment` under Deployments section of main page (make sure you are in your specific namespace)
+1. Select `fhir-server-deployment-...` link under `New Replica Set`
+1. Look for the `fhir-server-svc` row. Copy the link that has an `:8080` at the end under the `External Endpoints` column. This is the FHIR API URL.
   
 ## Available Data Generation Commands
 
@@ -92,10 +97,13 @@ TODO: These need to be way more generic (not our specific setup).
 
 ### General Command Usage
 
-- All commands can be run via `npm` (installed with Node). Commands can be run via `npm run <command-name>`. 
-- Run `npm install` once first before running any other `npm` commands.
+- All commands can be run via `npm` (installed with Node). Commands can be run like so:
+  ```
+  npm run <command-name>
+  ```
+
 - All npm commands must have parameters passed in via `--` before specifying parameter names.
-- Running a command with no parameters, or with --help, will print a usage message detailing how to use.
+- Running a command with no parameters, or with `--help`, will print a usage message detailing how to use.
 
 For example:
 ```
@@ -110,6 +118,14 @@ npm run addPatients -- --destination iothub -n 1
 - Thresholds indicate state of a particular vital. Green indicates vital is within a normal range, yellow indicates slightly low or high values, red indicates very low or high values.
 
 ### TODO: Information about each vital? 
+
+## Before Running Any NPM Command
+
+Run this once before running any of the following npm commands. 
+
+```
+npm install
+```
 
 ## Add Patients
 

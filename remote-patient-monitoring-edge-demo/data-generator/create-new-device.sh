@@ -4,12 +4,12 @@
 # Licensed under the MIT license.
 
 display_usage() { 
-	echo "Arguments required for this script: <iotHubResourceName> <subscriptionId> <deviceName>"
-	echo -e "Ex: ./create-new-device.sh my-iot-hub-resource 1bd01e18-8bda-4d60-8550-f05701b094fa my-new-device"
+	echo "Arguments required for this script: <iotHubResourceName> <deviceName>"
+	echo -e "Ex: ./create-new-device.sh my-iot-hub-resource my-new-device"
 } 
   
 # if less than three arguments supplied, display usage message
-if [ $# -le 2 ] 
+if [ $# -le 1 ] 
 	then 
 		display_usage
 		exit 1
@@ -25,10 +25,7 @@ fi
 set -ex
 
 iothubname=$1
-subscriptionid=$2
-devicename=$3
-
-az account set --subscription $subscriptionid
+devicename=$2
 
 az extension add --name azure-iot
 
