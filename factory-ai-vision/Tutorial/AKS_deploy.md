@@ -138,7 +138,7 @@ Deployment templates:
 
 Download the deployments above with `wget` command:
 ```
-wget https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/EdgeSolution/deployment.k8s.cpu.template.yml
+wget -O deployment.k8s.cpu.template.yml https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/EdgeSolution/deployment.k8s.cpu.template.yml
 ```
 Now use the following `kubectl apply` command to deploy factory-ai solution:
 ```
