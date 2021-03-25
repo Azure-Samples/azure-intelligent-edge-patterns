@@ -24,20 +24,24 @@ In order to fully deploy this software you will need several pieces of software,
 
 You will need the following software on your machine in order to run and deploy this solution:
 
-NOTE: For Windows users, it may be necessary to run your shells as an Administrator (right-click the shell you want to open and select `Run as Administrator`) in order for commands to work.
+#### Windows Users  
+_NOTE: For Windows users, it may be necessary to run your shells as an Administrator (right-click the shell you want to open and select `Run as Administrator`) in order for commands to work._  
+
 - (Windows users only) [Git Bash/Git for Windows](https://git-scm.com/downloads)
 - (Windows users only) [Chocolatey](https://chocolatey.org/install)
 
-- [Node](https://nodejs.org/en/)
-  - Version 12 or higher is recommended
+#### All Users  
+- [Node](https://nodejs.org/en/) - Version 12 or higher is recommended  
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [docker](https://docs.docker.com/get-docker/)
-- (Optional) [docker-compose](https://docs.docker.com/compose/install/)
-  - Included with Docker Desktop for Mac and Windows, but a separate install is required for Linux users
 - [helm](https://helm.sh/docs/intro/install/)
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-- [Java JDK](https://www.oracle.com/java/technologies/javase-downloads.html) (Only needed for building Android React Native app) - JDK SE 8 is recommended
-- [Android Studio](https://developer.android.com/studio) (Only needed for building Android React Native app)
+- [docker](https://docs.docker.com/get-docker/)
+- _(Optional)_ [docker-compose](https://docs.docker.com/compose/install/)
+  - Included with Docker Desktop for Mac and Windows, but a separate install is required for Linux users
+- _(Optional)_ Needed for building react native app
+  - [Java JDK](https://www.oracle.com/java/technologies/javase-downloads.html) - JDK SE 8 is recommended
+  - [Android Studio](https://developer.android.com/studio) 
+
 ### Hardware Prerequisites
 
 You will need the following hardware to deploy the solution:
@@ -46,30 +50,59 @@ You will need the following hardware to deploy the solution:
 
 Although you can run this software locally or anywhere else that Docker containers can run, this software was purpose built for the Azure Stack Edge.
 
-### Cloud Pre-reqs
+### Cloud Services
 
-If you want to utilize this solution with the remote patient scenario, you will need the following cloud services.
+If you want to utilize this solution with the remote patient cloud connect scenario (recommended), you will need access to the following cloud services.
 
 - [Azure Cloud Services](https://azure.microsoft.com/en-us/services/cloud-services/)
 - [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/)
 - [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
 - [Azure Container Registry](https://azure.microsoft.com/en-us/services/container-registry/)
 
-## Architecture
+## Architecture  
+
+### Remote Patient Cloud Connect Scenario (Recommended)
 
 ![](./architecture.png)
 
-## Set up
+
+_Remote Patient Bluetooth Connect app_ (running on mobile device) - This is a mobile app for Android that allows patients to connect with the Bluetooth enabled OMRON Blood Pressure Monitor (model BP7250) and upload vital readings for processing on an Azure Stack Edge.  
+  
+_Patient Data Generator_ - The Patient Data Generator is a Node command line utility which will simulate data coming from remote or in-clinic patient devices. Patient and vital data (also referred to as 'Observations') are generated in the [FHIR format](http://hl7.org/fhir/).  
+  
+_Cloud Services_ (including IoT Hub and Azure Service Bus) - 
+  
+_Subscriber on the Edge_ - The subscriber is a Node Express application that subscribes to a topic on Azure Service Bus and writes the data to a FHIR server when events are received.  
+  
+_FHIR API/Server_ - FHIR servers are key tools for interoperability of health data. The Azure API for FHIR is designed as an API and service that you can create, deploy, and begin using quickly. Find out more [here](https://docs.microsoft.com/en-us/azure/healthcare-apis/fhir/overview).  
+  
+_Analysis Engine_ - The patient data analysis component is a Node Express application that handles incoming FHIR-formatted patient vital data and analyzes it for troubling conditions. It produces a simple green/yellow/red analysis against set thresholds as well as producing FHIR flags in cases of extreme weight gain (a key indicator of a critical congestive heart failure patient).  
+  
+_Clinician Dashboard_ - The clinician dashboard is a React web application for viewing and organizing patient data stored in an FHIR Server on an Azure Stack Edge. This is the dashboard for clinicians used to see patient data and alerts. It pulls data from the FHIR API.
+  
+  
+### Remote Patient Direct Connect Scenario (Optional)
+
+As an alternate scenario, you might want to avoid cloud and connect a remote patient directly to software running on the Azure Stack Edge. Although this scenario is not implemented in this solution, it is feasible. [Click here for more details.](./DirectConnectScenario.md)
+
+
+## Get Started
 
 1. [Configure your Azure Stack Edge and Kubernetes Cluster](./AzureStackEdgeInstall.md)
-1. [Deploy cloud services in Azure Public](./azure-cloud-services/README.md)
-1. Follow setup instructions for the [subscriber](./patient-data-subscriber/README.md)
-1. Deploy Containers with Helm
-     `helm dependency update helm && helm upgrade --install --recreate-pods everything helm`
-1. [Generate some fake patient data](./data-generator/README.md)
-1. _(Optional)_ [Connect your Blood Pressure cuff to the phone app](./patient-bluetooth-connect-app/README.md)
+2. [Deploy cloud services in Azure Public](./azure-cloud-services/README.md)
+   - If you manually created your Azure Cloud Services, you'll need to follow the setup instructions in the [subscriber readme](./patient-data-subscriber/README.md) to copy your connection string for the next step. If you used the automated option in the previous step, the values were set for you and you do not need to worry about this. 
+3. _(Optional)_ If you would like to build your own Docker images from source, follow the instructions in the next section "Build Docker Images from Source". If you would like to use the prebuilt images in Docker Hub, skip this step.
+4. Deploy Containers with Helm
+     ```
+    helm dependency update helm 
+    helm upgrade --install --recreate-pods everything helm \
+        --set global.service_bus_connection_string=$connection_string
+    ```
+    - If you are using ACR (or another private registry) include this with the Helm command above: `--set global.docker_registry=$docker_registry`
+5. [Generate some fake patient data](./data-generator/README.md)
+6. _(Optional)_ [Connect your blood pressure cuff to the phone app](./patient-bluetooth-connect-app/README.md)
 
-## Build Containers from Source (Optional)
+## Build Docker Images from Source (Optional)
 
 A Docker Compose file is included to make it easier to build from source and push to your private registry. A configuration for Azure Container Registry (ACR) is included by default.
 
@@ -80,9 +113,14 @@ A Docker Compose file is included to make it easier to build from source and pus
 2. Build your images: `docker-compose build`
 3. (You must be authenticated to your registry) Push your images: `docker-compose push`
 
-## Direct Connection Scenario
+## Prebuilt Images in Docker Hub
 
-As an alternate scenario, you might want to avoid cloud and connect a remote patient directly to software running on the Azure Stack Edge. Although this scenario is not implemented in this solution, it is feasible. [Click here for more details.](./DirectConnectScenario.md)
+Docker Images have been built and pushed to Docker Hub for your convenience 
+
+- [Dashboard](https://hub.docker.com/r/intelligentedge/patientmonitoring-dashboard)
+- [Analysis](https://hub.docker.com/r/intelligentedge/patientmonitoring-analysis)
+- [Subscriber](https://hub.docker.com/r/intelligentedge/patientmonitoring-subscriber)
+- [FHIR](https://hub.docker.com/_/microsoft-healthcareapis-r4-fhir-server) (Not part of this project)
 
 ## Glossary of Terms
 
@@ -117,3 +155,8 @@ _**[Remove this section before release]**_
 - "3. Deploy Containers with Helm" be be more robust and maybe its own page?
 - for pre-reqs do we need additional validation that the software is installed and running correctly? (example, docker may be installed but not running `cant detect docker daemon`)
 - There is nothing here about the omron device. should there me?  
+- should acr secret be named 1) more uniquely per deployment and 2) more generally as to not just apply to acr?
+- make 'connection_string' in subscriber a global value so helm can set it from the parent chart
+- slim down subscriber and analysis container? dashboard is very svelte, but those other two are ~1 GB!
+- does the chrome "interstitial bypass keyword" (thisisunsafe) need to be documented?
+- service_bus_connection_string has a consistent typo. refactor out the mispelling.
