@@ -69,8 +69,8 @@ kubectl create secret generic azure-secret --from-literal=azurestorageaccountnam
 
 Also, IotHub/Edge credential is required in factory-ai solution.
 ```
-echo "IOTHUB_CONNECTION_STRING=<Your IotHub connection string>
-IOTEDGE_DEVICE_CONNECTION_STRING=<Your IotEdge device connection sring>" > .az.env
+echo "IOTHUB_CONNECTION_STRING=<Your IotHub connection string>" > .az.env
+echo "IOTEDGE_DEVICE_CONNECTION_STRING=<Your IotEdge device connection sring>" >> .az.env
 kubectl create secret generic azure-env --from-env-file ./.az.env
 ```
 
