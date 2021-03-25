@@ -1,10 +1,8 @@
+# These values under global are intended to be set by the parent chart, but included here in case you want to deploy individually. 
 global:
   fhir_service_name:
-  docker_registry: 
-
-# These values under global are intended to be set by the parent chart, but included here in case you want to deploy individually. 
-
-connection_string:
+  docker_registry:
+  service_bus_connection_string:
 
 deployment:
   name: subscriber

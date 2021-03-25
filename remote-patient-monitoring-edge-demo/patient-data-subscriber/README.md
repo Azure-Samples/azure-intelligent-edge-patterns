@@ -4,20 +4,16 @@ The subscriber is a Node Express application that subscribes to a topic on Azure
 
 ## Setup steps
 
-1. Set your Azure Service Bus Connection String
+If you are not using the fully automated setup, you'll need to manually set your Service Bus connection string.
+
+1. Get your Azure Service Bus Connection String
   - You need to get your custom connection string for your Azure Service Bus you created in the previous step and copy to a file in this director.
   - You can get your connection string with this command, assuming you are using all the same defaults from the included ARM templates 
     ```
     az servicebus topic authorization-rule keys list --resource-group <your resource group name> --namespace-name <your service bus name> --topic-name iot-hub-messages --name authorization-rule --query primaryConnectionString -o tsv
     ```
-  - **Or** you can get the connection string through the web portal following this documenation: https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-quickstart-portal#get-the-connection-string
-  - Place this string in [`values.yml`](./helm/values.yml).  You can wrap this string in single quotes:
-    - `connection_string: '<connectionString copied>'`
-
-(Optional) If not using Dockerhub (default) for your container registry, you need edit your docker registry entry in `./helm/values.yml`:
-```
-docker_registry: <your-acr-uri>
-```
+  - **Or** you can get the connection string through the web portal following this documentation: https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-quickstart-portal#get-the-connection-string
+  - Copy this string. You'll need it in the Helm deployment.
 
 2. You can now proceed to the next step in the [main readme](../README.md)
 
