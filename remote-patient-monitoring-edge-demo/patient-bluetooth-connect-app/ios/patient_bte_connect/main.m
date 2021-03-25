@@ -1,8 +1,3 @@
-%{
-  Copyright (c) Microsoft Corporation.
-  Licensed under the MIT license.
-%}
-
 #import <UIKit/UIKit.h>
 
 #import "AppDelegate.h"
