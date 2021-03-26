@@ -1,6 +1,6 @@
 # Patient Data Analysis using Azure Stack Edge
 
-**The Art of Possible** 
+**The Art of the Possible** 
 
 Remote patient monitoring is a telehealth solution that provides early recognition insights regarding a patient’s acute or chronic condition so clinical teams can have the right information, about the right patient, at the right time to drive early interventions to improve clinical outcome. Through the use of Azure Stack Edge powered by Intel this can be done in a secure, scalable, and cost reductive manner.
 
@@ -27,8 +27,8 @@ You will need the following software on your machine in order to run and deploy 
 #### Windows Users  
 _NOTE: For Windows users, it may be necessary to run your shells as an Administrator (right-click the shell you want to open and select `Run as Administrator`) in order for commands to work._  
 
-- (Windows users only) [Git Bash/Git for Windows](https://git-scm.com/downloads)
-- (Windows users only) [Chocolatey](https://chocolatey.org/install)
+- [Git Bash/Git for Windows](https://git-scm.com/downloads)
+- [Chocolatey](https://chocolatey.org/install)
 
 #### All Users  
 - [Node](https://nodejs.org/en/) - Version 12 or higher is recommended  
@@ -55,9 +55,9 @@ Although you can run this software locally or anywhere else that Docker containe
 If you want to utilize this solution with the remote patient cloud connect scenario (recommended), you will need access to the following cloud services.
 
 - [Azure Cloud Services](https://azure.microsoft.com/en-us/services/cloud-services/)
-- [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/)
-- [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
-- [Azure Container Registry](https://azure.microsoft.com/en-us/services/container-registry/)
+  - [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/)
+  - [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
+  - [Azure Container Registry](https://azure.microsoft.com/en-us/services/container-registry/)
 
 ## Architecture  
 
@@ -66,19 +66,19 @@ If you want to utilize this solution with the remote patient cloud connect scena
 ![](./architecture.png)
 
 
-_Remote Patient Bluetooth Connect app_ (running on mobile device) - This is a mobile app for Android that allows patients to connect with the Bluetooth enabled OMRON Blood Pressure Monitor (model BP7250) and upload vital readings for processing on an Azure Stack Edge.  
+**Remote Patient Bluetooth Connect app** (running on mobile device) - This is a mobile app for Android that allows patients to connect with the Bluetooth enabled [OMRON Blood Pressure Monitor (model BP7250)](https://omronhealthcare.com/products/5-series-wireless-upper-arm-blood-pressure-monitor-bp7250/) and upload vital readings for processing on an Azure Stack Edge.  
   
-_Patient Data Generator_ - The Patient Data Generator is a Node command line utility which will simulate data coming from remote or in-clinic patient devices. Patient and vital data (also referred to as 'Observations') are generated in the [FHIR format](http://hl7.org/fhir/).  
+**Patient Data Generator** - The Patient Data Generator is a Node command line utility that simulates data coming from remote or in-clinic patient devices. Patient and vital data (also referred to as 'Observations') are generated in the [FHIR format](http://hl7.org/fhir/).  
   
-_Cloud Services_ (including IoT Hub and Azure Service Bus) - 
+**Azure Cloud Services** - The cloud services used in this solution are Azure IoT Hub to receive data and Azure Service Bus to make the data available to the Azure Stack Edge software. See below for details on a [Direct Connect Scenario](./DirectConnectScenario.md) without public cloud.
   
-_Subscriber on the Edge_ - The subscriber is a Node Express application that subscribes to a topic on Azure Service Bus and writes the data to a FHIR server when events are received.  
+**Subscriber** - The subscriber is a Node Express application that subscribes to a topic on Azure Service Bus and writes the data to a FHIR server when events are received.  
   
-_FHIR API/Server_ - FHIR servers are key tools for interoperability of health data. The Azure API for FHIR is designed as an API and service that you can create, deploy, and begin using quickly. Find out more [here](https://docs.microsoft.com/en-us/azure/healthcare-apis/fhir/overview).  
+**FHIR API/Server** - [FHIR](https://en.wikipedia.org/wiki/Fast_Healthcare_Interoperability_Resources) servers are key tools for interoperability of health data. [FHIR Server for Azure](https://github.com/microsoft/fhir-server) is a .NET Core implementation of the open source FHIR software and available as a [Docker image](https://hub.docker.com/_/microsoft-healthcareapis-r4-fhir-server). This is the same software that powers [The Azure API for FHIR](https://docs.microsoft.com/en-us/azure/healthcare-apis/fhir/overview) a managed cloud service that you can create, deploy, and begin using quickly.
   
-_Analysis Engine_ - The patient data analysis component is a Node Express application that handles incoming FHIR-formatted patient vital data and analyzes it for troubling conditions. It produces a simple green/yellow/red analysis against set thresholds as well as producing FHIR flags in cases of extreme weight gain (a key indicator of a critical congestive heart failure patient).  
+**Analysis Engine** - The patient data analysis component is a Node Express application that handles incoming FHIR-formatted patient vital data and analyzes it for troubling conditions. It produces a simple green/yellow/red analysis against set thresholds as well as producing FHIR flags in cases of extreme weight gain (a key indicator of a critical congestive heart failure patient).
   
-_Clinician Dashboard_ - The clinician dashboard is a React web application for viewing and organizing patient data stored in an FHIR Server on an Azure Stack Edge. This is the dashboard for clinicians used to see patient data and alerts. It pulls data from the FHIR API.
+**Clinician Dashboard** - The clinician dashboard is a React web application for viewing and organizing patient data stored in an FHIR Server on an Azure Stack Edge. This is the dashboard for clinicians used to see patient data and alerts. It pulls data from the FHIR API.
   
   
 ### Remote Patient Direct Connect Scenario (Optional)
@@ -91,48 +91,62 @@ As an alternate scenario, you might want to avoid cloud and connect a remote pat
 1. [Configure your Azure Stack Edge and Kubernetes Cluster](./AzureStackEdgeInstall.md)
 2. [Deploy cloud services in Azure Public](./azure-cloud-services/README.md)
    - If you manually created your Azure Cloud Services, you'll need to follow the setup instructions in the [subscriber readme](./patient-data-subscriber/README.md) to copy your connection string for the next step. If you used the automated option in the previous step, the values were set for you and you do not need to worry about this. 
-3. _(Optional)_ If you would like to build your own Docker images from source, follow the instructions in the next section "Build Docker Images from Source". If you would like to use the prebuilt images in Docker Hub, skip this step.
+3. _(Optional)_ If you would like to build your own Docker images from source, follow the instructions in the page [Build Docker Images from Source](./BuildDockerFromSource.md). If you would like to use the prebuilt images in Docker Hub, skip this step.
 4. Deploy Containers with Helm
      ```
-    helm dependency update helm 
-    helm upgrade --install --recreate-pods everything helm \
-        --set global.service_bus_connection_string=$connection_string
+    helm dependency update helm
+
+    helm upgrade --install --recreate-pods everything helm --set global.service_bus_connection_string="$connection_string"
     ```
-    - If you are using ACR (or another private registry) include this with the Helm command above: `--set global.docker_registry=$docker_registry`
+    - If you are using ACR (or another private registry) include this with the Helm command above: `--set global.docker_registry=$docker_registry`  
+    - Once the deployment finishes successfully, you will see some helpful notes in your terminal.  
+    - To verify all pods are running successfully run: `kubectl get pods`  
+    - You can also verify the status in the [k8s dashboard](#how-to-access-your-kubernetes-dashboard)  
+    - You can get the IP of your new dashboard by running  
+        ```
+        kubectl get services clinician-dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'  
+        ```
+    - Be sure you are using `http://`. See the [Common Issues](./README.md#common-issues-and-troubleshooting) section if you are having trouble.
 5. [Generate some fake patient data](./data-generator/README.md)
-6. _(Optional)_ [Connect your blood pressure cuff to the phone app](./patient-bluetooth-connect-app/README.md)
-
-## Build Docker Images from Source (Optional)
-
-A Docker Compose file is included to make it easier to build from source and push to your private registry. A configuration for Azure Container Registry (ACR) is included by default.
-
-0. (If using ACR) [Authenticate to Docker to ACR](./k8s-setup/README.md)
-1. Set your registry address variable `$docker_registry`
-   - If using ACR: `source ./azure-cloud-services/outputs` (this file was generated in step 2)
-   - If using some other registry: `export docker_registry='<your registry name>/'` (The full URL please, make sure to add a trailing slash and wrap the registry name in single quotes)
-2. Build your images: `docker-compose build`
-3. (You must be authenticated to your registry) Push your images: `docker-compose push`
+6. _(Optional)_ [Connect the blood pressure cuff to the phone app](./patient-bluetooth-connect-app/README.md)
 
 ## Prebuilt Images in Docker Hub
 
-Docker Images have been built and pushed to Docker Hub for your convenience 
+Docker Images have been built and pushed to Docker Hub for your convenience. 
 
 - [Dashboard](https://hub.docker.com/r/intelligentedge/patientmonitoring-dashboard)
 - [Analysis](https://hub.docker.com/r/intelligentedge/patientmonitoring-analysis)
 - [Subscriber](https://hub.docker.com/r/intelligentedge/patientmonitoring-subscriber)
 - [FHIR](https://hub.docker.com/_/microsoft-healthcareapis-r4-fhir-server) (Not part of this project)
 
+## How to Access Your Kubernetes Dashboard
+
+In order to monitor your Kubernetes (k8s) cluster, you will need to configure access via your Azure Stack Edge device's local UI (Azure Stack Edge Dashboard). You can find more detailed documentation here: https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-monitor-kubernetes-dashboard
+
+- **Potential Issue**: Google Chrome won't let me view my Kubernetes Dashboard!
+  - See the [Common Issues](./README.md#common-issues-and-troubleshooting) section.
+
 ## Glossary of Terms
 
-- Azure Stack Edge (ASE): Hardware that this software is intended for. [Read more](https://azure.microsoft.com/en-us/products/azure-stack/edge/)
-- FHIR: Fast Healthcare Interoperability Resources [Read more](https://www.hl7.org/fhir/overview.html)
+- Azure Stack Edge (ASE): Hardware that this software is intended for. [Read more](https://azure.microsoft.com/en-us/products/azure-stack/edge/).
+- FHIR: Fast Healthcare Interoperability Resources. [Read more](https://www.hl7.org/fhir/overview.html).
 - Observation: This is a FHIR specific term. These are the individual vital readings or data sent to the FHIR server by the data-generator.
 - Flag: This is a FHIR specific term.
 
-## Common Issues
+## Common Issues and Troubleshooting
 
 - `waiting to start: image can't be pulled`
   - This happens when your secret is malformed or named incorrectly.
+- Google Chrome won't let me view my Kubernetes Dashboard!
+
+   [![Connection Not Private error in a Chrome browser](chrome-connection-not-private-thumb.png)](chrome-connection-not-private.png)
+   - If you get to a 'Your connection is not private' page that won't let you navigate past it, just type `thisisunsafe` while focused in a Chrome browser window to bypass. (This is known as the [`interstitial bypass keyword`](https://chromium.googlesource.com/chromium/src/+/cb8501aaf28904ff1e39962aaed380a1618a6222%5E%21/) and is a safety feature of Chrome when an [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) violation is detected. It's designed to prevent users from visiting malicious websites. If have concerns about this you should discuss further with your IT department).
+- I can't view my dashboard after deployment!
+  - Some browsers will try to force `https`, but this app is only configured for `http` on port 80. Be sure that you are only accessing the dashboard with `http://`.
+  - Check to make sure the dashboard pod is running. If not, investigate the issue.
+  - If your dashboard pod _is_ running but you're not able to access the dashboard, check the logs for that pod. From the k8s dashboard, browse to the pod in question and click the "view logs" button in the top right. More info can be found [here](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/#logs-viewer). You can also view logs [from the command line](https://kubernetes.io/docs/reference/kubectl/cheatsheet/#interacting-with-running-pods).
+- My dashboard pod failed to start!
+  - If the FHIR server has not started or is unreachable by its internal cluster IP, nginx in the dashboard will fail to start and the pod will restart. Check that the right FHIR url is being passed to the container, and that the endpoint is reachable. You may want to exec into the container to check these issues.
 
 ## FAQs
 
@@ -151,12 +165,7 @@ Docker Images have been built and pushed to Docker Hub for your convenience
 _**[Remove this section before release]**_
 
 - call out that common things like resource quotas and security contexts are not included here
-- `--set` is not working to override `acr_name`. Not sure why, but not be important if public docker registry is the happy path.
-- "3. Deploy Containers with Helm" be be more robust and maybe its own page?
 - for pre-reqs do we need additional validation that the software is installed and running correctly? (example, docker may be installed but not running `cant detect docker daemon`)
-- There is nothing here about the omron device. should there me?  
-- should acr secret be named 1) more uniquely per deployment and 2) more generally as to not just apply to acr?
-- make 'connection_string' in subscriber a global value so helm can set it from the parent chart
+- There is nothing here about the omron device. should there be?  
 - slim down subscriber and analysis container? dashboard is very svelte, but those other two are ~1 GB!
-- does the chrome "interstitial bypass keyword" (thisisunsafe) need to be documented?
-- service_bus_connection_string has a consistent typo. refactor out the mispelling.
+

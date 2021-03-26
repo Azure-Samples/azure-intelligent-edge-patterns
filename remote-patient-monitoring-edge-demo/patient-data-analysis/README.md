@@ -17,13 +17,14 @@ Weight measurements are handled as a special case of vital and are analyzed as a
 
 ## Deploy via Helm
 
-The **recomended** approach is to deploy all containers at once with the Helm chart in the parent directory.
+The **recommended** approach is to deploy all containers at once with the Helm chart in the parent directory. (see [README](./../README.md#get-started))
 
-But, if you want to deploy this single container you can do so with the following command. 
+But, if you want to deploy this single container you can do so by setting the empty values in [`values.helm`](./helm/values.yaml) and then running
 
 ``` bash
-helm upgrade --install analysis helm --set acr_name=<your acr name>
+helm upgrade --install analysis helm
 ```
+
 
 # Developer Notes
 

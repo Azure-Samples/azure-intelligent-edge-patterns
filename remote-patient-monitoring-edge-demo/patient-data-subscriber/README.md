@@ -10,7 +10,7 @@ If you are not using the fully automated setup, you'll need to manually set your
   - You need to get your custom connection string for your Azure Service Bus you created in the previous step and copy to a file in this director.
   - You can get your connection string with this command, assuming you are using all the same defaults from the included ARM templates 
     ```
-    az servicebus topic authorization-rule keys list --resource-group <your resource group name> --namespace-name <your service bus name> --topic-name iot-hub-messages --name authorization-rule --query primaryConnectionString -o tsv
+    az deployment group show --resource-group <your resource group> --name azuredeploy --query properties.outputs.servicebus_connectionstring.value --output tsv
     ```
   - **Or** you can get the connection string through the web portal following this documentation: https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-quickstart-portal#get-the-connection-string
   - Copy this string. You'll need it in the Helm deployment.
@@ -27,13 +27,14 @@ If you are not using the fully automated setup, you'll need to manually set your
 
 ## Deploy via Helm
 
-The **recomended** approach is to deploy all containers at once with the Helm chart in the parent directory.
+The **recommended** approach is to deploy all containers at once with the Helm chart in the parent directory. (see [README](./../README.md#get-started))
 
-But, if you want to deploy this single container you can do so with the following command. 
+But, if you want to deploy this single container you can do so by setting the empty values in [`values.helm`](./helm/values.yaml) and then running
 
 ``` bash
-helm upgrade --install subscriber helm --set acr_name=<your acr name>
+helm upgrade --install subscriber helm
 ```
+
 
 # TODOs
 
