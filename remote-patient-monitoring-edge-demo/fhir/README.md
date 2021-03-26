@@ -13,19 +13,15 @@ The Docker images being used are Microsoft's published images.
 - **FHIR Server Image** sourced from `mcr.microsoft.com/healthcareapis/r4-fhir-server`
 - **FHIR MSSQL DB Image** sourced from `mcr.microsoft.com/mssql/server`
 
-## Deployment via Helm
+## Deploy via Helm
 
-### TODO: Required setup for kubectl and ~.kube/config to run this deploy
+The **recommended** approach is to deploy all containers at once with the Helm chart in the parent directory. (see [README](./../README.md#get-started))
 
-To deploy to configured cluster:
-  ```
-  helm upgrade --install fhir helm
-  ```
+But, if you want to deploy this single container you can do so by setting the empty values in [`values.helm`](./helm/values.yaml) and then running
 
-To generate templates locally (Optional):
-  ```
-  helm template fhir helm --dry-run
-  ```
+``` bash
+helm upgrade --install fhir helm
+```
 
 ## Local Deployment (for developers)
 
