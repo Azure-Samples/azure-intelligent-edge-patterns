@@ -26,11 +26,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8181
-        resources:
-          requests:
-            cpu: 250m
-          limits:
-            cpu: 500m
       
 ---
 apiVersion: v1
@@ -74,9 +69,7 @@ spec:
         - containerPort: 8000
         resources:
           requests:
-            cpu: 250m
-          limits:
-            cpu: 500m
+            cpu: 200m
         env:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
@@ -138,9 +131,7 @@ spec:
         - containerPort: 5000
         resources:
           requests:
-            cpu: 250m
-          limits:
-            cpu: 500m
+            cpu: 200m
         env:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
@@ -249,8 +240,6 @@ spec:
         - containerPort: 9000
         resources:
           requests:
-            cpu: 250m
-          limits:
             cpu: 500m
         env:
           - name: IOTHUB_CONNECTION_STRING
@@ -300,11 +289,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 554
-        resources:
-          requests:
-            cpu: 250m
-          limits:
-            cpu: 500m
         volumeMounts:
         - name: azure
           mountPath: /live/mediaServer/media/upload
@@ -354,11 +338,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 7000
-        resources:
-          requests:
-            cpu: 250m
-          limits:
-            cpu: 500m
         volumeMounts:
         - name: azure
           mountPath: /app/upload
