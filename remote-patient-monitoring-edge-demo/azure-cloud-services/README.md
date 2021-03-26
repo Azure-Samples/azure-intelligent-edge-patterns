@@ -1,6 +1,6 @@
 # Azure Cloud Services
 
-This repo contains the configuration for the Azure Cloud Services you will need to provision in order to use this software.
+This repo contains the configuration for the Azure Cloud Services needed to use this software.
 
 # Prerequisites
 
@@ -13,123 +13,119 @@ This repo contains the configuration for the Azure Cloud Services you will need 
 
 # Setup Steps
 
-Before for proceeding, complete your authentication to Azure in your browser first. Navigate to [portal.azure.com](https://portal.azure.com), and sign in. These command should be run from a shell, either Powershell or bash terminal (for windows users, consider GitBash).
+Before proceeding, complete your authentication to Azure in your browser first. Navigate to [portal.azure.com](https://portal.azure.com), and sign in. These commands should be run from a shell, either Powershell or bash terminal (for windows users, consider GitBash).
 
 ## 1. Login and Select Subscription
 
-1. Login `az login`  
-2. Select subscription  
+1. Login: `az login`  
+2. Select subscription:
     `az account set -s <your subscription ID>`  
-    - To find your subscription ID, you can run `az account subscription list` in a terminal or go to [portal.azure.com](https://portal.azure.com) and search for `subscription` in the search bar after logging in.
+    - To find your subscription ID, run `az account subscription list` in a terminal or go to [portal.azure.com](https://portal.azure.com) and search for `subscription` in the search bar after logging in.
+3. Choose an automated setup with docker (2a) or manual CLI setup (2b).
 
-From here you can choose automated setup with docker (2a) or manual CLI setup (2b)
-
-If you want to get going quickly, take the first option.
-
-If you want to edit the code and/or chose resource names, take the second option.
+  - If you want to get going quickly, choose the automated setup with docker (2a).
+  - If you want to edit the code and/or chose resource names, choose the manual CLI set up (2b).
 
 ## 2a. Automated Deploy with Docker
 
 This option will automatically generate random names for your resources and requirers no input from you. The code needs to be pulled to a location in your local environment. 
 
-### Deploy
-  1. Navigate to `/azure-cloud-services` directory in shell terminal  
-  2. Deploy  
-    - In Bash: `./docker/run.sh deploy`  
-    - In Powershell: `.\docker\run.ps1 deploy`
+  1. Navigate to `/azure-cloud-services` directory in shell terminal..
+  2. Deploy. 
+      - In Bash: `./docker/run.sh deploy`  
+      - In Powershell: `.\docker\run.ps1 deploy` 
+  
+      **NOTE**: This process may take up to several or more minutes to complete.
 
-Note: When running Docker Desktop, be sure to select the appropriate drives where your files are located.
+  3. Load Outputs to Variables - A file containing important values was saved to `outputs`. Load those variables so subsequent processes can use them. Run the following command:
 
-### Load Outputs to Variables
+      `source outputs`
 
-A file containing important values was saved to `outputs`. Load those variables so subsequent processes can use them.
-
-`source outputs`
+  _Note: When running Docker Desktop, be sure to select the appropriate drives where your files are located._  
 
 ## 2b. Manual deployment
 
-This option will allow you to choose names for your resources and give you greater control.
+This option allows you to choose names for your resources and give you greater control.
 
-### Create a Resource Group
+  1. Create a Resource Group.  
+     - Create a new Resource Group to conveniently track these resources (`eastus` is used as a default location)  
+     ```sh
+     az group create --resource-group <your resource group name> --location eastus
+     ```
+  2. (Optional) Transpile .bicep to ARM template. 
+     - If you make changes to the Bicep code, you need to first transpile to an ARM template. The ARM template as included has already been transpiled, so this step is only needed if you edit the bicep code.  
 
-- Create a new Resource Group to conveniently track these resources (`eastus` is used as a default location)
-  ```sh
-  az group create --resource-group <your resource group name> --location eastus
-  ```
+         1. In a terminal, navigate to the `azure-cloud-services` directory (this one).  
+         2. Transpile the [.bicep file](azuredeploy.bicep) into ARM template with the following command:  
+            ```
+            bicep build azuredeploy.bicep
+            ```
 
-### (Optional) Transpile .bicep to ARM template
+  3. Deploy ARM template. The template takes in three parameters:
 
-If you make changes to the Bicep code, you need to first transpile to an ARM template. The ARM template as included has already been transpiled, so this step is only needed if you edit the bicep code.
+     - _param_serviceBus_name_
+     - _param_iotHub_name_
+     - _param_acr_name_
 
-**Windows users only:**: The following commands should be run in Powershell.
+     **Note:** These values must be **globally unique** and valid DNS names.
 
-1. In a terminal, navigate to the `azure-cloud-services` directory (this one).
-2. Transpile the [.bicep file](azuredeploy.bicep) into ARM template with the following command:
-   ```
-   bicep build azuredeploy.bicep
-   ```
+     There are multiple ways to deploy. Chose whatever you are most comfortable with.
 
-### Deploy ARM template
+     **Option #1:** Manually key in values.
 
-The template takes in three parameters
+     _*Windows User Note:* If you are using git bash, choose one of the following methods or run in powershell. This method is known to not work in git bash._
 
-- _param_serviceBus_name_
-- _param_iotHub_name_
-- _param_acr_name_
+     ```
+     az deployment group create --template-file azuredeploy.json --resource-group <your resource group name>
+     ```
 
-**Note:** These values must be **globally unique** and valid DNS names.
+     You will be prompted with the following:
 
-There are multiple ways to deploy. Chose whatever you are most comfortable with.
+     ```
+     Please provide string value for 'param_serviceBus_name' (? for help): myservicebus42
+     Please provide string value for 'param_iotHub_name' (? for help): myiotbus42
+     Please provide string value for 'param_acr_name' (? for help): myacr42
+     ```
 
-**Option #1:** Manually key in values.
+     **Option #2:** Enter values in command line.
 
-```
-az deployment group create --template-file azuredeploy.json --resource-group <your resource group name>
-```
+     ```sh
+     az deployment group create --template-file azuredeploy.json --parameters param_serviceBus_name=myservicebus42 param_iotHub_name=myiothub42 param_acr_name=myacr42 --resource-group <your resource group here>
+     ```
 
-You will be prompted like
+     **Option #3:** Use the parameters file.
 
-```
-Please provide string value for 'param_serviceBus_name' (? for help): myservicebus42
-Please provide string value for 'param_iotHub_name' (? for help): myiotbus42
-Please provide string value for 'param_acr_name' (? for help): myacr42
-```
+     You can also edit the [parameters file](azuredeploy.parameters.json) if you want to save your custom names or change defaults.
 
-**Option #2:** Enter values in command line.
+     _Modified azuredeploy.parameters.json file:_
 
-```sh
-az deployment group create --template-file azuredeploy.json --parameters param_serviceBus_name=myservicebus42 param_iotHub_name=myiothub42 param_acr_name=myacr42 --resource-group <your resource group here>
-```
+     ```json
+      "parameters": {
+         "param_serviceBus_name": {
+         "value": "myservicebus42"
+         },
+         "param_iotHub_name": {
+         "value": "myiothub42"
+         },
+         "param_acr_name": {
+         "value": "test-acr"
+         }
+      }  
+      ```
 
-**Option #3:** Use the parameters file.
+      _CLI command to use parameters file:_
 
-You can also edit the [parameters file](azuredeploy.parameters.json) if you want save your custom names or change defaults.
+      ```
+      az deployment group create --resource-group <your resource group name> --template-file azuredeploy.json --parameters azuredeploy.parameters.json
+      ```
 
-_Modified azuredeploy.parameters.json file:_
+# Next Steps 
 
-```json
-"parameters": {
-  "param_serviceBus_name": {
-    "value": "myservicebus42"
-  },
-  "param_iotHub_name": {
-    "value": "myiothub42"
-  },
-  "param_acr_name": {
-    "value": "test-acr"
-  }
-}
-```
-
-_CLI command to use parameters file:_
-
-```
-az deployment group create --resource-group <your resource group name> --template-file azuredeploy.json --parameters azuredeploy.parameters.json
-```
+Once your Azure Cloud Services are deployed you can continue with the next steps in the [README](../README.md#get-started).
 
 # Resources
 
-This template creates the following resources
+This template creates the following resources:
 
 - [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/)
 - [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
@@ -138,9 +134,9 @@ This template creates the following resources
 
 # Clean Up
 
-**You** are responsible for cleaning up your own resources. Covneiently, they are all installed in a single resource group. 
+**You** are responsible for cleaning up your own resources. Conveniently, they are all installed in a single resource group. 
 
-You can do this from the Portal or with this command
+You can do this from the Portal or with this command:
 
 ```bash
 az deployment group delete --resource-group <your resource group name> --name <your deployment name>
