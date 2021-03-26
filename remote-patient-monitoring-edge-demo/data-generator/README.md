@@ -1,5 +1,5 @@
 # Data Generator
-This is a Node command line utility which will simulate data coming from remote patient devices.
+This is a Node command line utility that will simulate data coming from remote patient devices.
 
 Patient and vital data (also referred to as 'Observations') are generated in the FHIR format (http://hl7.org/fhir/). 
 
@@ -14,7 +14,7 @@ Patient and vital data (also referred to as 'Observations') are generated in the
 
 TODO: This might benefit with being pulled up to the Root README, but the script lives here for now.
 
-1. Open a Terminal (or Git Bash session in Windows) and change directory to `data-generator`
+1. Open a Terminal (or Git Bash session for Windows users) and change the directory to `data-generator`
    - For example (at the root level of this project): 
      ```
      cd data-generator
@@ -26,27 +26,22 @@ TODO: This might benefit with being pulled up to the Root README, but the script
        1. Navigate to [portal.azure.com](https://portal.azure.com).
        1. In the Search Bar at the top of the page, type `iot hub` to find the IoT Hub resource.
        1. Copy the value underneath the `Name` column to your clipboard.
-     - **IoT Hub Subscription Id**
-       1. Navigate to [portal.azure.com](https://portal.azure.com).
-       1. In the Search Bar at the top of the page, type `iot hub` to find the IoT Hub resource.
-       1. Select your IoT Hub resource.
-       1. Copy the value under `Subscription ID`
      - **Device Name to be Created**
        - This is simply a human-readable device name, something like `device0001` or `myDevice`
        - This will be referred to as `deviceId` for subsequent commands.
-   - _Tip: Running a command with no parameters, or with --help, will print a usage message detailing how to use this command._ 
+  _Tip: Running a command with no parameters, or with --help, will print a usage message detailing how to use this command._ 
      ```
      ./create-new-device.sh
      ```
-   - Example usage. Replace the parameters (including the <>) with your resource specific values:
+  Example usage. Replace the parameters (including the <>) with your resource specific values:
      ```
-     ./create-new-device.sh <iotHubResourceName> <iotHubSubscriptionId> <deviceName>
+     ./create-new-device.sh <iotHubResourceName> <deviceName>
      ```
-   - After running this command, your device is ready for use in IoT Hub.
+  After running this command, your device is ready for use in IoT Hub.
 
 ### Configuring Your Environment
 
-You will need to set the FHIR_API_URL and IOT_HUB_CONNECTION_STRING environment variables in the .env.production file in the `data-generator` directory. The easiest way to accomplish this is to run the `setup-environment.sh` script.
+You will need to set the FHIR_API_URL and IOT_HUB_CONNECTION_STRING environment variables in the .env.production file in the `data-generator` directory. The easiest way to accomplish this is to run the `setup-environment.sh` script (see example usage below).
 
 **Prerequisite Setup**
 
@@ -55,12 +50,12 @@ You will need to set the FHIR_API_URL and IOT_HUB_CONNECTION_STRING environment 
 - IoT Hub resource name
 - Device Id for that IoT Hub resource
 
-In a Terminal (or Git Bash session) open in the `data-generator` directory, run the following script, replacing with your values for `<iotHubResourceName>` and `<deviceId>`:
+Run the following script, with your values replacing `<iotHubResourceName>` and `<deviceId>`:
   ```
   ./setup-environment.sh <iotHubResourceName> <deviceId>
   ```
 
-If everything ran correctly, you should see updated values in the .env.production file in the `data-generator` directory. Should look something like this:
+If everything ran correctly, you should see updated values in the .env.production file in the `data-generator` directory. It should look something like this:
 
 ```
 FHIR_API_URL=http://10.255.180.240:8080
@@ -69,24 +64,24 @@ IOT_HUB_CONNECTION_STRING="HostName=my-resource-name.azure-devices.net;DeviceId=
 
 Now any data generated will be applied to your IoT Hub configuration and FHIR server deployed in Kubernetes.
 
-### How to Access Kubernetes Dashboard
-
-In order to monitor your Kubernetes (k8s) cluster, you will need to configure access via your Azure Stack Edge device's local UI (Azure Stack Edge Dashboard). You can find more detailed documentation here: https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-monitor-kubernetes-dashboard
-
-1. Navigate to your device's Azure Stack Edge Dashboard. 
-   - **NOTE:** This is not the Azure Cloud Portal, but the dashboard for your specific Azure Stack Edge device.
-1. Navigate to Device in left panel.
-1. Download config file from `Download config` link next to `Kubernetes Dashboard` entry.
-   - **Keep this in a easy-to-find location**. You will need it any time you navigate to the Kubernetes Dashboard.
-1. Navigate to the `Kubernetes Dashboard` link on the same page. This will look something like an IP address, e.g. `https://10.128.44.241:31000`.
-   - **Troubleshooting:** If you get a page that won't let you navigate there, type `thisisunsafe` while focused in a Chrome browser window to bypass. This is known as an 'interstitial bypass keyword' and can be used when certificates aren't present in your server configuration and you _absolutely_ trust that this is your site.
-1. Select `Kubeconfig` option and use downloaded config file to access
-1. Change **namespace** to the namespace you created in the dropdown in the left panel to see pods running in that namespace
-
 ### How to Get FHIR Url in Kubernetes Dashboard
-1. Select `fhir-server-deployment` under Deployments section of main page (make sure you are in your specific namespace)
-1. Select `fhir-server-deployment-...` link under `New Replica Set`
-1. Look for the `fhir-server-svc` row. Copy the link that has an `:8080` at the end under the `External Endpoints` column. This is the FHIR API URL.
+1. [Browse to your Kubernetes Dashboard](../README.md#how-to-access-your-kubernetes-dashboard)
+2. Select `fhir-server-deployment` under the Deployments section of the main page (make sure you are in your specific namespace)
+3. Select `fhir-server-deployment-...` link under `New Replica Set`
+4. Look for the `fhir-server-svc` row. Copy the link that has an `:8080` at the end under the `External Endpoints` column. This is the FHIR API URL.
+
+### How to Get Dashboard URL from Kubernetes
+
+After generating data, you should access the [Clinician Dashboard](../remote-patient-monitor-frontend/README.md). Here you will be able to see patient data and their vitals show up in real time as processed.
+
+The following command will produce an IP address for you to navigate to in a web browser.
+```
+kubectl get services clinician-dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
+``` 
+
+It will look something like this: `10.255.182.235`. If you are having trouble navigating in a web browser, format the URL like this: `http://10.255.182.235/` (with a prefix of `http://`). 
+
+If you encounter any issues where patient or vital data is not showing up on the dashboard, see [Common Issues](./README.md#common-issues-and-troubleshooting) section below to troubleshoot.
   
 ## Available Data Generation Commands
 
@@ -97,13 +92,13 @@ In order to monitor your Kubernetes (k8s) cluster, you will need to configure ac
 
 ### General Command Usage
 
-- All commands can be run via `npm` (installed with Node). Commands can be run like so:
+- All commands can be run via `npm` (installed with Node):
   ```
   npm run <command-name>
   ```
 
 - All npm commands must have parameters passed in via `--` before specifying parameter names.
-- Running a command with no parameters, or with `--help`, will print a usage message detailing how to use.
+- Running a command with no parameters, or with `--help`, will print a usage message detailing how to use it.
 
 For example:
 ```
@@ -112,26 +107,23 @@ npm run addPatients -- --destination iothub -n 1
 
 ### General Info About Generated Data
 
+- Vitals generated include heart rate (in beats per minute), blood pressure (systolic and diastolic) in mm of Mercury (mmHg), respiratory rate (in breaths per minute), oxygen saturation (known as SPO2) as a percentage, and weight (in pounds).
 - Each vital's timestamp is standardized to occur at midnight of the user's local time zone for simplicity. 
 - All vitals are generated collectively at the same time. There will always be one of each vital generated (e.g. there are not more frequent pulse readings than blood pressure).
 - Trending data (worsening or improving) requires at least 3 days of data to indicate a trend.
-- Thresholds indicate state of a particular vital. Green indicates vital is within a normal range, yellow indicates slightly low or high values, red indicates very low or high values.
-
-### TODO: Information about each vital? 
+- Thresholds indicate state of a particular vital on the Clinician Dashboard: Green indicates vital is within a normal range, yellow indicates slightly low or high values, and red indicates very low or high values.
 
 ## Before Running Any NPM Command
 
-Run this once before running any of the following npm commands. 
-
-```
-npm install
-```
+Run `npm install` once before running any of the following npm commands. 
 
 ## Add Patients
 
 The `addPatients` command will add up to 20 patients to the FHIR server. These patients will not yet have vitals.
 
-Example usage. This command will generate two patients via IoT Hub.
+**NOTE:** Patient data is generated via a connection to the FHIR server. Patients are not created via IoT Hub.
+
+Example usage: This command will generate two patients via IoT Hub.
 ```
 npm run addPatients -- -d iothub -n 2
 ```
@@ -147,7 +139,7 @@ Available parameters:
 
 The `addObservations` command will allow you to add realistically generated vital data for a single patient uuid. The patient uuid must already exist before adding vitals. 
 
-Example usage. This command will generate five days of vital data simulating a healthy patient via IoT Hub. 
+Example usage: This command will generate five days of vital data simulating a healthy patient via IoT Hub. 
 ```
 npm run addObservations -- -d iothub -u 26255e11-bc4e-4fba-8724-b7264a09cb3d -n 5 -t healthy
 ```
@@ -169,7 +161,9 @@ Available parameters:
 
 The `addPatientsWithObservations` command will allow you to create patients and simultaneously add realistically generated vital data for those new patients. This is also the default command for `npm run start`.
 
-Example usage. This command will generate two new patients, and add five days of vital data simulating a worsening patient via IoT Hub.
+**NOTE:** Patient data is generated via a connection to the FHIR server. Patients are not created via IoT Hub.
+
+Example usage: This command will generate two new patients, and add five days of vital data simulating a worsening patient via IoT Hub.
 ```
 npm run addPatientsWithObservations -- -d iothub --numberOfPatients 2 -t worsening --numberOfDays 5
 ```
@@ -192,7 +186,7 @@ Available parameters:
 
 The `deletePatient` command will delete a patient by uuid.
 
-Example usage. This command will delete the patient with uuid 6e724a83-7fa7-4374-b468-faf42ccf8b06
+Example usage: This command will delete the patient with uuid 6e724a83-7fa7-4374-b468-faf42ccf8b06
 ```
 npm run deletePatient -- -u 6e724a83-7fa7-4374-b468-faf42ccf8b06
 ```
@@ -211,8 +205,16 @@ All commands can be run in a development mode, against a locally running FHIR se
   ```
 - `.env.development` configures the URL for the local FHIR server (by default assuming to be run against `http://localhost:8080`)
 - `iothub` as a destination is not supported, only `fhir`.
-- TODO: Pretty nasty axios error when not running a local FHIR server. Might be something to fix (or at least document).
 
-# README TODOs
-- Document what we mean when we say we're creating observations: We mean a set of 6 observations: heart rate, sBP, DBP, resp, sp02, weight
-- Make it clear that patients are not created through IOT hub
+## Common Issues and Troubleshooting
+
+- Vital data for a patient is not showing up after running addObservations or addPatientsWithObservations.
+   1. Confirm that your .env.production file has proper values set for FHIR_API_URL and IOT_HUB_CONNECTION_STRING. If not, perhaps you didn't run setup-environment.sh before usage?
+   1. If your FHIR_API_URL and IOT_HUB_CONNECTION_STRING look accurate, you may need to troubleshoot in the Kubernetes Dashboard. See more instructions [here](../README.md#how-to-access-your-kubernetes-dashboard).
+   1. You will be looking your Subscriber deployment. Via either the Overview or Deployments page, find the `subscriber-deployment` link and click it.
+   1. Click the `subscriber-deployment...` link under New Replica Set to navigate to the specific deployment.
+   1. Click the 'four line' icon in the top right (View logs).
+   1. If you see something resembling the following log line, you will need to reconfigure your Subscriber configuration with the correct IoT Hub connection string.
+      ```
+      Error occurred with iot-hub-messages/Subscriptions/all-data-sub within my-service-bus.servicebus.windows.net:  Error: Failed to connect
+      ```
