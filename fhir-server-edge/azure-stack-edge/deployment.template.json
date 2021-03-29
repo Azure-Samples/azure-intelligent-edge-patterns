@@ -56,7 +56,7 @@
                         "version": "1.0",
                         "status": "running",
                         "restartPolicy": "always",
-                        "Env": {
+                        "env": {
                             "ASPNETCORE_URLS": {
                                 "value": "$ASPNETCORE_URLS"
                             },                            
