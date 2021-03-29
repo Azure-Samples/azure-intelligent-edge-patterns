@@ -189,7 +189,7 @@ spec:
         - containerPort: 7777
         resources:
           requests:
-            cpu: 500m
+            cpu: 300m
         env:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
@@ -240,7 +240,7 @@ spec:
         - containerPort: 9000
         resources:
           requests:
-            cpu: 500m
+            cpu: 300m
         env:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
@@ -391,7 +391,7 @@ spec:
         - containerPort: 80
         resources:
           requests:
-            cpu: 500m
+            cpu: 300m
 ---
 apiVersion: v1
 kind: Service
