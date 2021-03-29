@@ -240,7 +240,7 @@ spec:
         - containerPort: 9000
         resources:
           requests:
-            cpu: 500m
+            cpu: 300m
         env:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
