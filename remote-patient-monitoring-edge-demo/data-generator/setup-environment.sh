@@ -27,7 +27,7 @@ set -ex
 iotHubName=$1
 deviceId=$2
 iotHubConnectionString=$(az iot hub device-identity connection-string show -n $iotHubName -d $deviceId --query connectionString)
-fhirIp=$(kubectl get services fhir-server-svc --output jsonpath='{.status.loadBalancer.ingress[0].ip}' | sed 's/%//')
+fhirIp=$(kubectl get services fhir-server-svc --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}')
 
 if [ -z iotHubConnectionString ]
 then
