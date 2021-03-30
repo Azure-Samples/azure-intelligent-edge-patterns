@@ -1,4 +1,4 @@
-/* 
+/*
  *  Copyright (c) Microsoft Corporation.
  *  Licensed under the MIT license.
  */
@@ -15,24 +15,19 @@ export const getSyncScreenIcon = (statusState, lastSyncedReading) => {
     lastSyncedReading,
     emptyReadingState,
   );
-  //TODO: These conditionals need to be comparisons or removed for status states
-  if (bleStatusStates.SYNC_FAILED && readingToSyncIsNotEmpty) {
-    return require(failureIcon);
-  }
-  //TODO: These conditionals need to be comparisons or removed for status states
-  if (bleStatusStates.DEVICE_DISCONNECTED && lastSyncedReadingIsNotEmpty) {
-    // This works briefly, but then changes to X icon. That may be ok for now.
-    return require(successIcon);
-  }
-
   const lastSyncedReadingIsNotEmpty = !areReadingsEqual(
     lastSyncedReading,
     emptyReadingState,
   );
-  //TODO: These conditionals need to be comparisons or removed for status states
-  if (bleStatusStates.DEVICE_DISCONNECTED && lastSyncedReadingIsNotEmpty) {
+
+  if (readingToSyncIsNotEmpty) {
+    return require(failureIcon);
+  }
+
+  if (lastSyncedReadingIsNotEmpty) {
     return require(successIcon);
   }
+
   switch (statusState) {
     case bleStatusStates.SYNC_SUCCESS:
       return require(successIcon);
@@ -64,12 +59,12 @@ export const getSyncStatusText = (
   if (statusState === bleStatusStates.SYNCING) {
     return 'Syncing...';
   }
-  //TODO: These conditionals need to be comparisons or removed for status states
-  if (bleStatusStates.SYNC_FAILED && readingToSyncIsNotEmpty) {
+
+  if (readingToSyncIsNotEmpty) {
     return 'Sync Failed.  There was a problem sending the reading to IoTHub, please check your connection and try again.';
   }
-  //TODO: These conditionals need to be comparisons or removed for status states
-  if (bleStatusStates.DEVICE_DISCONNECTED && lastSyncedReadingIsNotEmpty) {
+
+  if (lastSyncedReadingIsNotEmpty) {
     return 'Sync Successful! (To take another reading, please re-pair the Omron device.)';
   }
 

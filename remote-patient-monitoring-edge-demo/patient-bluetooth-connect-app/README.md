@@ -2,8 +2,6 @@
 
 ![alt text](images/edgeconnect-app.png 'Remote Patient Edge Connect app screenshots')
 
-#TODO: We need to make sure the paths match whatever name we call the remote app directory - `patient-bluetooth-connect-app` is used for now.
-
 # Remote Patient Edge Connect Bluetooth App
 
 This is a mobile app for Android that allows patients to connect with the Bluetooth enabled OMRON Blood Pressure Monitor (model BP7250) and upload vital readings for processing on an Azure Stack Edge.
@@ -11,7 +9,7 @@ This is a mobile app for Android that allows patients to connect with the Blueto
 ## Prerequisite Software Needed
 
 - [Node](https://nodejs.org/en/)
-- [Java JDK](https://www.oracle.com/java/technologies/javase-downloads.html) - _Recommended_: JDK 8 SE
+- [Java JDK](https://www.oracle.com/java/technologies/javase-downloads.html) - JDK 8 SE is a **_requirement_** for these steps
 - [Android Studio](https://developer.android.com/studio)
 
 ## Prerequisite Hardware Needed
@@ -28,6 +26,8 @@ This is a mobile app for Android that allows patients to connect with the Blueto
 - Build a keystore
 
 ### Setting up Java JDK
+
+**NOTE: There are additional undocumented steps for configuring any version of Java later than 8. Java 8 (aka 1.8) is recommended.**
 
 1. Run this command in a Terminal or Git Bash session to see if you have your JDK configured already. If you see a 1.8.x version (or newer if you installed a newer version), then you are ready to proceed to step 3.
    ```
@@ -104,15 +104,14 @@ This is a mobile app for Android that allows patients to connect with the Blueto
 ### Accept License Agreements
 
 1. For a first time run, accept licenses before proceeding by running the following command in a terminal:
-
-   ```
-   yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager --licenses
-   ```
-
-   - **NOTE**: You may need to run this twice before executing the build script. Final output should look something like:
-     ```
-     All SDK package licenses accepted.======] 100% Computing updates...
-     ```
+   - On Windows:
+      ```
+      yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager.bat --licenses
+      ```
+   - On Mac:
+      ```
+      yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager --licenses
+      ```
 
 ## Building a Keystore
 
@@ -197,16 +196,16 @@ You will need a device Id in order to save data for a particular device in IoT H
 
 ## Creating an APK Build:
 
-1. Navigate to the root folder of the mobile-bluetooth-app project. #TODO: specify path to mobile app project when finalized
+1. Navigate to the root folder of the mobile-bluetooth-app project.
 1. Run the following script in a terminal using the values you assembled from the `Prerequisite Data Before Building` Section:
 
    ```
    ./build-release-apk.sh <Patient Id> <IoT Hub Name> <Policy Key> <Device Id>
    ```
 
-   **NOTE**: This process may take several minutes to complete.
+   **NOTE**: This process may take up to 15 minutes to complete.
 
-1. The script will produce an .apk file (`app-release.apk`) on your computer at the root project folder in `patient-bluetooth-connect-app/android/app/build/outputs/apk/release/app-release.apk`. #TODO: make sure to update this path if the mobile app root project folder name changes
+1. The script will produce an .apk file (`app-release.apk`) on your computer at the root project folder in `patient-bluetooth-connect-app/android/app/build/outputs/apk/release/app-release.apk`.
    - _(Optional)_ Copy this file to a preferred location if you like, e.g.:
      ```
      cp android/app/build/outputs/apk/release/app-release.apk $HOME/Desktop
@@ -215,11 +214,24 @@ You will need a device Id in order to save data for a particular device in IoT H
 ## Installing the APK on an Android Device
 
 1. Connect the Android device to your computer via USB. Make sure USB Debugging mode is turned on (See instructions under Enable Debugging Over USB here: https://reactnative.dev/docs/running-on-device).
-2. After the device is connected to your computer, use the `adb` CLI tool to install the APK to your Android device.
-3. Make sure you are in the mobile app project folder (`patient-bluetooth-connect-app` #TODO: update this folder name if necessary).
-4. Run `adb install ./android/app/build/outputs/apk/release/app-release.apk` (or run the adb command relative to wherever you copied the file to).
-5. The app `Edge Connect` will display on your Android device.
-6. Tap on the app icon to start it.
+1. Confirm the device is connected to your computer by running:
+   ```
+   adb devices
+   ```
+   You should see something like this if successful:
+   ```
+   List of devices attached
+   96JX21Y9W       device
+   ```
+1. After the device is connected to your computer, use the `adb` CLI tool to install the APK to your Android device.
+1. Make sure you are in the mobile app project folder (`patient-bluetooth-connect-app`).
+1. Run:
+   ```
+   adb install ./android/app/build/outputs/apk/release/app-release.apk
+   ```
+   (or run the adb command relative to wherever you copied the file to).
+1. The app `Edge Connect` will display on your Android device.
+1. Tap on the app icon to start it.
 
 ## Taking a Blood Pressure reading with the Omron Series 5 device:
 
@@ -231,16 +243,16 @@ You will need a device Id in order to save data for a particular device in IoT H
 
 ### How to Get Dashboard URL from Kubernetes
 
-After successfully syncing data, you should access the [Clinician Dashboard](../remote-patient-monitor-frontend/README.md). Here you will be able to see the new vitals show up in real time as processed.
+After successfully syncing data, you should access the [Clinician Dashboard](../remote-patient-monitor-frontend/README.md). Here you will see the new vitals appear in real time as processed.
 
 The following command will produce an IP address for you to navigate to in a web browser.
 ```
 kubectl get services clinician-dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
 ``` 
 
-It will look something like this: `10.255.182.235`. If you are having trouble navigating in a web browser, format the URL like this: `http://10.255.182.235/` (with a prefix of `http://`). 
+The IP address will look something like this: `10.255.182.235`. If you are having trouble navigating in a web browser, format the URL like this: `http://10.255.182.235/` (with a prefix of `http://`). 
 
-If you encounter any issues where patient or vital data is not showing up on the dashboard, see [Common Issues](./README.md#common-issues-and-troubleshooting) section below to troubleshoot.
+If you encounter any issues where the patient or vital data is not showing up on the dashboard, see [Common Issues](./README.md#common-issues-and-troubleshooting) section below to troubleshoot.
   
 
 # Developer Notes
@@ -252,8 +264,6 @@ If you encounter any issues where patient or vital data is not showing up on the
 Official documentation: https://reactnative.dev/docs/environment-setup
 
 It is recommended that you consult the official React-Native documentation for setting up your environment for development, but a summary of the important steps is listed below.
-
-TODO: Notes for using Homebrew on Windows. Maybe this document: (https://docs.brew.sh/Homebrew-on-Linux)
 
 # Windows
 
@@ -287,19 +297,19 @@ In summary, to set things up:
 
 The gist is below, but full details are here which includes connecting over WiFi: https://reactnative.dev/docs/running-on-device
 
-1. Generate a debug keystore for development (#TODO: update path if mobile folder name changes when finalized)
+1. Generate a debug keystore for development
    - In a terminal, navigate to `patient-bluetooth-connect-app/android/app` in the project folder and run the following command to generate a debug keystore file there:
    ```
    keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000
    ```
-1. Enable USB Debugging on your device (in your Android settings)
+1. Enable USB Debugging on your device (in your Android settings).
 1. Plug your device in via USB. Follow the prompts on screen to allow interaction, and run `adb devices` to see a list of connected devices.
    - You should see something resembling this message if everything was done correctly:
      ```
      List of devices attached
      96JX21Y9W       device
      ```
-1. In a terminal, navigate to the mobile app project folder (`patient-bluetooth-connect-app`) and run the command `npm install` to install app dependencies. #TODO: update mobile app folder name when finalized
+1. In a terminal, navigate to the mobile app project folder (`patient-bluetooth-connect-app`) and run the command `npm install` to install app dependencies.
 1. Run `npx react-native run-android` in a terminal to launch the app on your connected device.
 
 ## Common Issues and Troubleshooting
@@ -308,5 +318,5 @@ The gist is below, but full details are here which includes connecting over WiFi
    ```
    npx react-native start --reset-cache
    ```
-   in order to update those .env values successfully.
+   This will allow you to update the .env values successfully.
 - If you get a `No Callback found` redsceen error while connecting to a Bluetooth device during development, you can safely dismiss it by pressing `Dismiss` at the bottom of the screen. This is a non-critical error that will not impact the functionality of the application.

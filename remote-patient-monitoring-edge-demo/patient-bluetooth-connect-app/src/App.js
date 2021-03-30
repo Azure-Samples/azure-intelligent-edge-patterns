@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-/* 
+/*
  *  Copyright (c) Microsoft Corporation.
  *  Licensed under the MIT license.
  */
@@ -27,7 +27,6 @@ import {PairDevice} from './screens/PairDevice/PairDevice';
 import {Pairing} from './screens/Pairing/Pairing';
 import {LaunchScreen} from './screens/LaunchScreen/LaunchScreen';
 import {Sync} from './screens/Sync/Sync';
-import {HowTo} from './screens/HowTo/HowTo';
 import {
   emptyDeviceDataState,
   emptyReadingState,
@@ -135,10 +134,6 @@ const App = () => {
     />
   );
 
-  const HowToComponent = (props) => (
-    <HowTo deviceData={deviceData} {...props} />
-  );
-
   const SyncComponent = (props) => (
     <Sync
       deviceData={deviceData}
@@ -180,11 +175,6 @@ const App = () => {
           name="Sync"
           component={SyncComponent}
           options={{...screenOptions, title: 'Sync Blood Pressure'}}
-        />
-        <Stack.Screen
-          name="HowTo"
-          component={HowToComponent}
-          options={{...screenOptions, title: 'Instructions'}}
         />
       </Stack.Navigator>
     </NavigationContainer>
