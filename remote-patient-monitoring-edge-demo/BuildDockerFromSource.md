@@ -10,20 +10,21 @@ If you would like to push to another private registry, you will need to handle t
 
 ## 1. Set Your Docker Registry Address Variable
 
-1. Set your registry address variable to `$docker_registry` for use in the subsequent steps.
-    
-1. Check if your registry address is present `echo $docker_registry`
-1. If you completed the automated setup for Azure Services than this file was generated. You can load by running:  
-    `source ./azure-cloud-services/outputs`  
+You need to set your registry address variable to `$docker_registry` for use in the subsequent steps.
 
-### Alternate Registry
-If you are using and alternate registry, or if you set up Azure Services manually:
-  
-  `export docker_registry='<your registry name>/'`   
+- Check if your registry address is present. If this is set and correct, then proceed to step 2.
 
-_Note: The registry name here should be the full URL wrapped in single quotes with a trailing slash._ 
+    `echo $docker_registry`
 
-For example: If your ACR is `contoso`, use `'contoso.azurecr.io/'`.   
+- If you completed the automated setup for Azure Services than a file containing your Docker Registry Address was generated. You can load by running:  
+
+    `source ./azure-cloud-services/outputs` 
+
+- If you set up Azure Services manually, or if you are using a different registry you need to set this variable.
+
+    `export docker_registry='<your registry URL>/'`   
+
+_Note: The registry name here should be the full URL wrapped in **single quotes** with a **trailing slash**. For example: If your ACR is `contoso`, use `'contoso.azurecr.io/'`._
 
 ## 2. ACR, Kubernetes and Docker Authentication
 
