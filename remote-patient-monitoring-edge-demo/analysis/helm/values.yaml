@@ -1,0 +1,18 @@
+# These values under global are intended to be set by the parent chart, but included here in case you want to deploy individually. 
+global:
+  fhir_service_name:
+  docker_registry: 
+
+deployment:
+  name: analysis
+  group: analysis
+  replicaCount: 1
+  pullPolicy: Always
+  imagePullSecrets: acr-secret
+  container:
+    image_name: analysis
+    tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+

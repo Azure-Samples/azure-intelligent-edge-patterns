@@ -9,12 +9,12 @@ dependencies:
   - name: fhir-api
     version: "0.1.0"
     repository: file://../fhir/helm
-  - name: patient-data-analysis
+  - name: analysis
     version: "0.1.0"
-    repository: file://../patient-data-analysis/helm
-  - name: patient-data-subscriber
+    repository: file://../analysis/helm
+  - name: subscriber
     version: "0.1.0"
-    repository: file://../patient-data-subscriber/helm
-  - name: clinician-dashboard
+    repository: file://../subscriber/helm
+  - name: dashboard
     version: "0.1.0"
-    repository: file://../remote-patient-monitor-frontend/helm
+    repository: file://../dashboard/helm

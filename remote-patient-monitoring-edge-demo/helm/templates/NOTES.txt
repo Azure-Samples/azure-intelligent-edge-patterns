@@ -14,6 +14,6 @@ If all pods are running, check that the dashboard is working.
 
 You can get the dashboard IP by running:
 
-    $ kubectl get services clinician-dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
+    $ kubectl get services dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
 
 Copy and paste that out output to your web browser.

@@ -94,7 +94,7 @@ As an alternate scenario, you might want to avoid cloud and connect a remote pat
 
 1. [Configure your Azure Stack Edge and Kubernetes Cluster](./AzureStackEdgeInstall.md)
 2. [Deploy cloud services in Azure Public](./azure-cloud-services/README.md)
-   - If you manually created your Azure Cloud Services, you'll need to follow the setup instructions in the [subscriber readme](./patient-data-subscriber/README.md) to copy your connection string for the next step. If you used the automated option in the previous step, the values were set for you and you do not need to worry about this. 
+   - If you manually created your Azure Cloud Services, you'll need to follow the setup instructions in the [subscriber readme](./subscriber/README.md) to copy your connection string for the next step. If you used the automated option in the previous step, the values were set for you and you do not need to worry about this. 
 3. _(Optional)_ If you would like to build your own Docker images from source, follow the instructions in the page [Build Docker Images from Source](./BuildDockerFromSource.md). If you would like to use the prebuilt images in Docker Hub, skip this step.
 4. Deploy Containers with Helm
      ```
@@ -108,11 +108,11 @@ As an alternate scenario, you might want to avoid cloud and connect a remote pat
     - You can also verify the status in the [k8s dashboard](#how-to-access-your-kubernetes-dashboard)  
     - You can get the IP of your new dashboard by running  
         ```
-        kubectl get services clinician-dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'  
+        kubectl get services dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'  
         ```
     - Be sure you are using `http://`. See the [Common Issues](./README.md#common-issues-and-troubleshooting) section if you are having trouble.
 5. [Generate some fake patient data](./data-generator/README.md)
-6. _(Optional)_ [Connect the blood pressure cuff to the phone app](./patient-bluetooth-connect-app/README.md)
+6. _(Optional)_ [Connect the blood pressure cuff to the phone app](./bluetooth-mobile-app/README.md)
 
 ## Prebuilt Images in Docker Hub
 
@@ -136,6 +136,10 @@ In order to monitor your Kubernetes (k8s) cluster, you will need to configure ac
 - FHIR: Fast Healthcare Interoperability Resources. [Read more](https://www.hl7.org/fhir/overview.html).
 - Observation: This is a FHIR specific term. These are the individual vital readings or data sent to the FHIR server by the data-generator.
 - Flag: This is a FHIR specific term.
+
+## Postman Collection
+
+If you would like to access FHIR data or troubleshoot issues with data being generated, you can use [Postman](https://www.postman.com/downloads/) along with the provided [Postman Collection](./AzureStackEdge.postman_collection.json). Simply import the collection following [these steps](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/). Then you will need to update the `fhir-api-url` variable to match your cluster's FHIR IP Address (or `http://localhost:8080` if running locally). You can learn more about editing variables [here](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/).
 
 ## Common Issues and Troubleshooting
 

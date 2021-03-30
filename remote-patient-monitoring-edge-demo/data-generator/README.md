@@ -77,11 +77,11 @@ A summary of the steps to generate and send patient data is listed below:
 
 ### How to Get Dashboard URL from Kubernetes
 
-After generating data, you should access the [Clinician Dashboard](../remote-patient-monitor-frontend/README.md). Here you will be able to see patient data and their vitals show up in real time as processed.
+After generating data, you should access the [Clinician Dashboard](../dashboard/README.md). Here you will be able to see patient data and their vitals show up in real time as processed.
 
 The following command will produce an IP address for you to navigate to in a web browser.
 ```
-kubectl get services clinician-dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
+kubectl get services dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
 ``` 
 
 It will look something like this: `10.255.182.235`. If you are having trouble navigating in a web browser, format the URL like this: `http://10.255.182.235/` (with a prefix of `http://`). 

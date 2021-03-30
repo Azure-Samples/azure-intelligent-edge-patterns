@@ -6,16 +6,16 @@ services:
   subscriber:
     image: ${docker_registry}subscriber:latest
     build:
-      context: ./patient-data-subscriber/.
+      context: ./subscriber/.
       dockerfile: Dockerfile
   analysis:
     image: ${docker_registry}analysis:latest
     build:
-      context: ./patient-data-analysis/.
+      context: ./analysis/.
       dockerfile: Dockerfile
   dashboard:
     image: ${docker_registry}dashboard:latest
     build:
-      context: ./remote-patient-monitor-frontend/.
+      context: ./dashboard/.
       dockerfile: Dockerfile
 
