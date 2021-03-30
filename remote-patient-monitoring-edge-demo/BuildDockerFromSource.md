@@ -1,10 +1,8 @@
 # Build Docker Images from Source and Push to ACR (Optional)
 
-The recommended method is to deploy the [containers that are available on Docker Hub](./README.d#prebuilt-images-in-docker-hub). This the default behavior when you run the deployment process. However, if you want to build the docker images from source and deploy to ACR, the steps below will show you how to do that. 
+The recommended method is to deploy the [containers that are available on Docker Hub](./README.md#prebuilt-images-in-docker-hub). This is the default behavior when you run the deployment process. However, if you want to build the docker images from source and deploy to ACR, the steps below will show you how to do that. 
 
-You only need to take these steps if:
-    - You are building containers from source _and_
-    - You are pushing these containers to a private registry, such as ACR
+_You only need to take these steps if you are building containers from source and you are pushing these containers to a private registry, such as ACR._
   
 A Docker Compose file is included to make it easier to build from source and push to your private registry. A configuration for Azure Container Registry (ACR) is included by default.
 
@@ -12,14 +10,20 @@ If you would like to push to another private registry, you will need to handle t
 
 ## 1. Set Your Docker Registry Address Variable
 
-Set your registry address variable `$docker_registry` for use in the subsequent steps
+1. Set your registry address variable to `$docker_registry` for use in the subsequent steps.
     
-    - Check if it is present `echo $docker_registry`
-    - If you completed the automated setup for Azure Services than this file was generated. You can load by running:  
+1. Check if your registry address is present `echo $docker_registry`
+1. If you completed the automated setup for Azure Services than this file was generated. You can load by running:  
     `source ./azure-cloud-services/outputs`  
-   - If using some other registry, or if you set up Azure Services manually:
-   `export docker_registry='<your registry name>/'`   
-       - The registry name here should be the full URL wrapped in single quotes with a trailing slash. For example, if your ACR is `contoso`, use `'contoso.azurecr.io/'` here.   
+
+### Alternate Registry
+If you are using and alternate registry, or if you set up Azure Services manually:
+  
+  `export docker_registry='<your registry name>/'`   
+
+_Note: The registry name here should be the full URL wrapped in single quotes with a trailing slash._ 
+
+For example: If your ACR is `contoso`, use `'contoso.azurecr.io/'`.   
 
 ## 2. ACR, Kubernetes and Docker Authentication
 
@@ -35,20 +39,26 @@ _Note: If you are on windows, you can run this in git bash, WSL, or open the fil
 ## 3. Build and Push Docker Images
 
 1. Build your images  
-  `docker-compose build`  
-   - This can take 10 minutes are so to complete  
+  `docker-compose build`
+
+   _Note: This can take 10 minutes are so to complete._
 2. Push your images (You must be authenticated to your registry)    
-  `docker-compose push`  
-   _Note: Depending on your upload speeds, this can take some time_
+  `docker-compose push`
+
+   _Note: Depending on your upload speeds, this can take some time._
 
 ## Common Issues and Troubleshooting
 
-- If you see this error `Error from server (AlreadyExists): secrets "acr-secret" already exists` then you already have a secret of that name. 
+This error indicates you already have a secret of that name:
+
+`Error from server (AlreadyExists): secrets "acr-secret" already exists` 
 
 This is either coincidental or this is not the first time this setup was run. 
 
-To remove this secret run `kubectl delete secrets acr-secret`
+### Remove this Secret
+To remove this secret, run `kubectl delete secrets acr-secret`
 
-Or, if you want to use a different secret name:
+### Use a Different Secret Name
+If you want to use a different secret name:
 1. run `setup-auth.sh <your namespace name> <different secret name>`. 
 2. Set this secret name in `values.yaml`.

@@ -1,3 +1,7 @@
+![Azure Stack Edge Patient Data Analysis](./main-repo-logo.png 'Azure Stack Edge Patient Data Analysis')
+
+![Clinician Dashboard and Remote Patient Edge Connect apps](./main-repo-apps-splash.png 'Clinician Dashboard and Remote Patient Edge Connect apps')
+
 # Patient Data Analysis using Azure Stack Edge
 
 **The Art of the Possible** 
@@ -31,7 +35,7 @@ _NOTE: For Windows users, it may be necessary to run your shells as an Administr
 - [Chocolatey](https://chocolatey.org/install)
 
 #### All Users  
-- [Node](https://nodejs.org/en/) - Version 12 or higher is recommended  
+- [Node](https://nodejs.org/en/) - Version 12 or higher is recommended.  **Please install the LTS release version and not Current**  
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [helm](https://helm.sh/docs/intro/install/)
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
@@ -156,16 +160,5 @@ In order to monitor your Kubernetes (k8s) cluster, you will need to configure ac
 
     `helm template helm --dry-run > manifest.json` 
     
-  This will generate the k8s manifests that you can edit as you see fit and deploy with `kubctl deploy manifest.json` _[**TODO:** Test this to be sure it works this way]_
-
-# TODOs/Reminders
-
-![REMOVE ME](https://freedom1coffee.com/wp-content/uploads/2018/08/remove-before-flight.png)
-
-_**[Remove this section before release]**_
-
-- call out that common things like resource quotas and security contexts are not included here
-- for pre-reqs do we need additional validation that the software is installed and running correctly? (example, docker may be installed but not running `cant detect docker daemon`)
-- There is nothing here about the omron device. should there be?  
-- slim down subscriber and analysis container? dashboard is very svelte, but those other two are ~1 GB!
+  This will generate the k8s manifests that you can edit as you see fit and deploy with `kubctl deploy manifest.json`
 

@@ -19,6 +19,8 @@ The **recommended** approach is to deploy all containers at once with the Helm c
 
 But, if you want to deploy this single container you can do so by setting the empty values in [`values.helm`](./helm/values.yaml) and then running
 
+_NOTE: This approach will not work if you previously deployed with the parent chart. Running this command creates a new release, but cannot be used to modify an existing release._
+
 ``` bash
 helm upgrade --install fhir helm
 ```
@@ -33,15 +35,4 @@ helm upgrade --install fhir helm
     Note: wrap password in `'` single quotes if it contains special characters.
   - You can then send requests to the FHIR Server running locally at `http://localhost:8080`.
 
-# TODOs
 
-![REMOVE ME](https://freedom1coffee.com/wp-content/uploads/2018/08/remove-before-flight.png)
-
-_**[Remove this section before release]**_
-
-- change password in fhir connection string "ThisshouldW0rk1!"
-    - should this be at a higher level in values.yml?
-    - the password has very particular requirements that are not well documented
-    - variable exists twice in values.yml. should it be templatized?
-
-- is the storage class name ase-node-local default? Can it be hard coded? Or should we get that name programmatically?

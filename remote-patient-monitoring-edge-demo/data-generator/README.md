@@ -12,8 +12,6 @@ Patient and vital data (also referred to as 'Observations') are generated in the
 
 ### Creating a Device for IoT Hub
 
-TODO: This might benefit with being pulled up to the Root README, but the script lives here for now.
-
 1. Open a Terminal (or Git Bash session for Windows users) and change the directory to `data-generator`
    - For example (at the root level of this project): 
      ```
@@ -61,14 +59,21 @@ If everything ran correctly, you should see updated values in the .env.productio
 FHIR_API_URL=http://10.255.180.240:8080
 IOT_HUB_CONNECTION_STRING="HostName=my-resource-name.azure-devices.net;DeviceId=coolDevice;SharedAccessKey=TWOlD0XD8fstJ2PbI2H1Ds3JXsxRP/j1u3z556W+W1o="
 ```
-
-Now any data generated will be applied to your IoT Hub configuration and FHIR server deployed in Kubernetes.
-
 ### How to Get FHIR Url in Kubernetes Dashboard
 1. [Browse to your Kubernetes Dashboard](../README.md#how-to-access-your-kubernetes-dashboard)
 2. Select `fhir-server-deployment` under the Deployments section of the main page (make sure you are in your specific namespace)
 3. Select `fhir-server-deployment-...` link under `New Replica Set`
 4. Look for the `fhir-server-svc` row. Copy the link that has an `:8080` at the end under the `External Endpoints` column. This is the FHIR API URL.
+
+
+## Generate and Send Data
+After setting the `FHIR_API_URL` and `IOT_HUB_CONNECTION_STRING` above you are now ready to use the data-generator to generate fake patient vitals and send them to the FHIR Server on your Edge device.  Detailed documentation on the commands which are available can be found further down in this document.  
+
+A summary of the steps to generate and send patient data is listed below:
+1. If this is the first time you are using the data-generator,  navigate to the `data-generator` folder and run `npm install` to install dependencies.
+1. From the `data-generator` folder, run a command to generate data by using `npm` and setting the required parameters such as destination, numberOfPatients, numberOfDays and healthTrend:
+    - Ex: `npm run addPatientsWithObservations -- --destination fhir --numberOfPatients 2 --numberOfDays 7 --healthTrend worsening`
+1. After the command completes, go to the Clinician Dashboard web application hosted on your Edge device to see the generated data displayed on screen. (see below for instructions on getting the URL for the Clinician Dashboard).
 
 ### How to Get Dashboard URL from Kubernetes
 
@@ -112,10 +117,6 @@ npm run addPatients -- --destination iothub -n 1
 - All vitals are generated collectively at the same time. There will always be one of each vital generated (e.g. there are not more frequent pulse readings than blood pressure).
 - Trending data (worsening or improving) requires at least 3 days of data to indicate a trend.
 - Thresholds indicate state of a particular vital on the Clinician Dashboard: Green indicates vital is within a normal range, yellow indicates slightly low or high values, and red indicates very low or high values.
-
-## Before Running Any NPM Command
-
-Run `npm install` once before running any of the following npm commands. 
 
 ## Add Patients
 

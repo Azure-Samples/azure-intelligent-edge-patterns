@@ -31,19 +31,8 @@ The **recommended** approach is to deploy all containers at once with the Helm c
 
 But, if you want to deploy this single container you can do so by setting the empty values in [`values.helm`](./helm/values.yaml) and then running
 
+_NOTE: This approach will not work if you previously deployed with the parent chart. Running this command creates a new release, but cannot be used to modify an existing release._
+
 ``` bash
 helm upgrade --install subscriber helm
 ```
-
-
-# TODOs
-
-![REMOVE ME](https://freedom1coffee.com/wp-content/uploads/2018/08/remove-before-flight.png)
-
-_**[Remove this section before release]**_
-
-- ~~Remove connection string and FHIR url defaults from dockerfile~~
-- ~~get fhir service name programmatically? right now it is set in values.yaml~~
-- get connection string programmatically? and/or pass to helm with --set? right now it is set in values.yaml
-  - could add an output to the arm template and instruct the user to just copy it for later use 
-  - https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-outputs
