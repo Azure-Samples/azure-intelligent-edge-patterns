@@ -18,6 +18,6 @@ PASSWORD="$(az acr credential show -n ${ACR} -o tsv --query 'passwords[0].value'
 docker login ${ACR} --username ${ACR%.*.*} --password ${PASSWORD} 
 
 # Authenticate k8s to ACR
-kubectl create secret docker-registry ${SECRET} --docker-server=${ACR} --docker-username=${ACR} --docker-password=${PASSWORD}
+kubectl create secret docker-registry ${SECRET} --docker-server=${ACR} --docker-username=${ACR%.*.*} --docker-password=${PASSWORD}
 
 echo "Success! You can now docker push to ACR. k8s on the ASE can also docker pull from there when you deploy."

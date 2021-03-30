@@ -23,8 +23,8 @@ Before proceeding, complete your authentication to Azure in your browser first. 
     - To find your subscription ID, run `az account subscription list` in a terminal or go to [portal.azure.com](https://portal.azure.com) and search for `subscription` in the search bar after logging in.
 3. Choose an automated setup with docker (2a) or manual CLI setup (2b).
 
-  - If you want to get going quickly, choose the automated setup with docker (2a).
-  - If you want to edit the code and/or chose resource names, choose the manual CLI set up (2b).
+    - If you want to get going quickly, choose the automated setup with docker (2a).
+    - If you want to edit the code and/or chose resource names, choose the manual CLI set up (2b).
 
 ## 2a. Automated Deploy with Docker
 
@@ -141,3 +141,8 @@ You can do this from the Portal or with this command:
 ```bash
 az deployment group delete --resource-group <your resource group name> --name <your deployment name>
 ```
+
+# Common Issues & Troubleshooting
+
+- A small subset of Windows users are not able to run the automated script with Docker. If you see an error regarding `Docker.ApiServices.Mounting.FileSharing` or `DockerExceptionFilesharing` you may have a similar issue. You will need to run the manual setup in this case.
+- If you see an error regarding connecting to `login.microsoftonline.com `, you may have an issue with your Azure credentials (stored in `~/.azure`). Try to `az login` first. If this works, but you still get an error when running `./docker/run.sh deploy`, you may have to take the manual approach.  
