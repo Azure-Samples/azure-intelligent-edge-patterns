@@ -50,6 +50,8 @@ function output {
     echo "deploymentname='$deploymentname'"
     echo "acrname='$acrname'"
     echo "docker_registry='$acrname.azurecr.io/'"
+    echo "iothubname='$iothubname'"
+    echo "servicebusname='$servicebusname'"
     echo "set +a"
 
 }
