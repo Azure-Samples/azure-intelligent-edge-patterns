@@ -4,13 +4,15 @@
 # Clinician Dashboard Web App
 A React web application for viewing and organizing patient data stored in an FHIR Server on an Azure Stack Edge.
 
-This is the dashboard for clinicians used to see patient data and alerts. It pulls data from the FHIR API.
+This is the dashboard for clinicians, used to see patient data and alerts. It pulls data from the FHIR API.
 
 ## Deploy via Helm
 
-The **recommended** approach is to deploy all containers at once with the Helm chart in the parent directory. (see [README](./../README.md#get-started))
+The **recommended** approach is to deploy all containers at once with the Helm chart in the parent directory (see [README](./../README.md#get-started)).
 
 But, if you want to deploy this single container you can do so by setting the empty values in [`values.helm`](./helm/values.yaml) and then running
+
+_NOTE: This approach will not work if you previously deployed with the parent chart. Running this command creates a new release, but cannot be used to modify an existing release._
 
 ``` bash
 helm upgrade --install dashboard helm
@@ -41,17 +43,18 @@ docker run dashboard \
 `FHIR_URL` here will be an address to your local or development FHIR server.
   
 ## Setting up k8s Access
-Follow the steps documented in the "Get Started" section of the [README](./../README.md#get-started)
+Follow the steps documented in the "Get Started" section of the [README](./../README.md#get-started).
 
 ## Generate HELM Templates
 Run the following command: ```helm template clinician-dashboard helm --dry-run```
 
-# TODOs
+### How to Get Dashboard URL from Kubernetes
 
-![REMOVE ME](https://freedom1coffee.com/wp-content/uploads/2018/08/remove-before-flight.png)
+To confirm a successful deployment in Kubernetes, you can access the Clinician Dashboard by looking up the IP address for the running service.
 
-_**[Remove this section before release]**_
+The following command will produce an IP address for you to navigate to in a web browser.
+```
+kubectl get services clinician-dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
+``` 
 
-- Many, many warnings about deprecated packages in npm install output. should we fix any of those?
-- ports are defined twice in values.yaml. this could be dried up.
-- remove fhir postman files (or clean them up and keep them? rick made it sound like those would be nice)
+It will look something like this: `10.255.182.235`. If you are having trouble navigating in a web browser, format the URL like this: `http://10.255.182.235/` (with a prefix of `http://`). 

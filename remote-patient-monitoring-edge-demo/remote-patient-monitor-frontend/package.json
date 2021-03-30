@@ -1,6 +1,6 @@
 {
   "name": "remote-patient-monitor-frontend",
-  "version": "0.1.51",
+  "version": "0.1.52",
   "private": true,
   "dependencies": {
     "@ahryman40k/ts-fhir-types": "^4.0.34",

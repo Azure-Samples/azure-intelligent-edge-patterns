@@ -3,11 +3,13 @@
  *  Licensed under the MIT license.
  */
 
+import { IMeta } from '@ahryman40k/ts-fhir-types/lib/R4';
+
 type AnalysesKeys = 'CriticalLow' | 'Low' | 'Normal' | 'High' | 'CriticalHigh' | 'Indeterminate';
 
 type AnalysesDict = {
   [key in AnalysesKeys]: {
-    code: InterpretationCode,
+    code: InterpretationCode;
   };
 };
 
@@ -33,11 +35,11 @@ export const Analyses: AnalysesDict = Object.freeze({
 });
 
 export type VitalDisplayContent = {
-  label: any, // currently spo2 label is a react component to get the smaller 2 to show
-  unitOfMeasurement: string,
+  label: any; // currently spo2 label is a react component to get the smaller 2 to show
+  unitOfMeasurement: string;
 };
 export type VitalsDisplayContentDict = {
-  [key in BaseVitalKeys]: VitalDisplayContent
+  [key in BaseVitalKeys]: VitalDisplayContent;
 };
 
 export const vitalsDisplayContent: VitalsDisplayContentDict = {
@@ -69,18 +71,19 @@ export interface Vital {
   value: string;
   code: InterpretationCode;
   effectiveDateTime: string;
+  meta: undefined | IMeta;
 }
 
 type BaseVitalKeys = 'heartRate' | 'sBPOverDBP' | 'spO2' | 'respiration' | 'weight';
 type BaseVitals = {
-  [key in BaseVitalKeys]: Vital[]
+  [key in BaseVitalKeys]: Vital[];
 };
 
 export interface VitalsCollection extends BaseVitals {
   latestVitalTimestamp: string | 'IND';
 }
 
-export const EMPTY_VITAL: Vital = { value: '-', code: 'IND', effectiveDateTime: '' };
+export const EMPTY_VITAL: Vital = { value: '-', code: 'IND', effectiveDateTime: '', meta: { versionId: '', lastUpdated: '' } };
 
 export const EMPTY_VITALS: VitalsCollection = {
   latestVitalTimestamp: 'IND',
@@ -89,5 +92,4 @@ export const EMPTY_VITALS: VitalsCollection = {
   spO2: [EMPTY_VITAL],
   respiration: [EMPTY_VITAL],
   weight: [EMPTY_VITAL],
-
 };

@@ -10,7 +10,9 @@ import { VitalsLineChart } from '../VitalsLineChart';
 import { SpO2Label } from './Spo2Label';
 import { Colors } from '../../styles/colors';
 
-interface props { vitals: VitalsCollection }
+interface props {
+  vitals: VitalsCollection;
+}
 
 export const VitalRowLarge: FC<props> = ({ vitals }) => {
   const [activeVital, setActiveVital] = React.useState<Vital[]>(vitals.weight);
@@ -25,7 +27,7 @@ export const VitalRowLarge: FC<props> = ({ vitals }) => {
   }, [vitals]);
   interface VitalTabProps {
     tabVitals: Vital[];
-    displayContent: VitalDisplayContent
+    displayContent: VitalDisplayContent;
   }
 
   const VitalTab: FC<VitalTabProps> = ({ tabVitals, displayContent }) => {
@@ -50,6 +52,8 @@ export const VitalRowLarge: FC<props> = ({ vitals }) => {
     );
   };
 
+  const bloodPressureVitalTabIsActive = lastItem(activeVital).value.includes('/');
+
   return (
     <div className="vitalArea">
       <div className="vitalBlock">
@@ -63,9 +67,7 @@ export const VitalRowLarge: FC<props> = ({ vitals }) => {
         <div className="vitalSeparator-big" />
         <VitalTab tabVitals={vitals.weight} displayContent={vitalsDisplayContent.weight} />
       </div>
-      <div className="vitalChart">
-        {lastItem(activeVital).value !== '-' && <VitalsLineChart vitals={activeVital} />}
-      </div>
+      <div className="vitalChart">{lastItem(activeVital).value !== '-' && <VitalsLineChart vitals={activeVital} isBloodPressureChart={bloodPressureVitalTabIsActive} />}</div>
     </div>
   );
 };

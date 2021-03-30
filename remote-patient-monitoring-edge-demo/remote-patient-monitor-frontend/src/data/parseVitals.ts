@@ -8,14 +8,14 @@ import { lastItem } from '../util/helpers';
 import { DBP_CODE, HR_CODE, RESP_CODE, SBP_CODE, SPO2_CODE, VitalCode, WEIGHT_CODE } from './codes';
 import { EMPTY_VITALS, Vital, VitalsCollection, InterpretationCode, EMPTY_VITAL } from './VitalsCollection';
 
-const indeterminateResult = { value: '-', code: 'IND' as InterpretationCode, effectiveDateTime: '' };
+const indeterminateResult = { value: '-', code: 'IND' as InterpretationCode, effectiveDateTime: '', meta: { versionId: '', lastUpdated: '' } };
 
 const parseVitalsByVitalCode = (vitals: IObservation[], vitalCode: VitalCode): Vital[] => {
-  const allObsForVitalCode: IObservation[] = vitals.filter(obs => obs.code.coding![0].code === vitalCode)!;
+  const allObsForVitalCode: IObservation[] = vitals.filter((obs) => obs.code.coding![0].code === vitalCode)!;
   const vitalHasNoReadings = allObsForVitalCode.length === 0;
   if (vitalHasNoReadings) return [EMPTY_VITAL];
 
-  const parsedVitalsDateAsc: Vital[] = allObsForVitalCode.map(obs => {
+  const parsedVitalsDateAsc: Vital[] = allObsForVitalCode.map((obs) => {
     if (obs && obs.valueQuantity && obs.valueQuantity.value && obs.interpretation && obs.interpretation.length && obs.interpretation[0].coding?.length) {
       const interpretationCode = obs.interpretation[0].coding[0].code?.toString() as InterpretationCode;
 
@@ -23,6 +23,7 @@ const parseVitalsByVitalCode = (vitals: IObservation[], vitalCode: VitalCode): V
         value: obs?.valueQuantity.value.toString() || '-',
         code: interpretationCode || 'IND',
         effectiveDateTime: obs?.effectiveDateTime!.toString(),
+        meta: obs?.meta,
       };
     }
     return indeterminateResult;
@@ -36,11 +37,15 @@ const parseSBPOverDBPVitals = (systolicBPVitals: Vital[], diastolicBPVitals: Vit
   const sBPOverDBPVitals: Vital[] = systolicBPVitals.map((sbp: Vital, idx: number) => {
     const dbp = diastolicBPVitals[idx];
 
-    const sBPOverDBPVital: Vital = (sbp && dbp) ? {
-      value: `${sbp.value}/${dbp.value}`,
-      code: sbp.code,
-      effectiveDateTime: sbp.effectiveDateTime,
-    } : indeterminateResult;
+    const sBPOverDBPVital: Vital =
+      sbp && dbp
+        ? {
+          value: `${sbp.value}/${dbp.value}`,
+          code: sbp.code,
+          effectiveDateTime: sbp.effectiveDateTime,
+          meta: sbp.meta,
+        }
+        : indeterminateResult;
 
     return sBPOverDBPVital;
   });

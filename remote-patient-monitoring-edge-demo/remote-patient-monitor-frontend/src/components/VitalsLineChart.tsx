@@ -5,21 +5,15 @@
 /* eslint-disable react/destructuring-assignment */
 import React, { FC } from 'react';
 import { Line, ChartData } from 'react-chartjs-2';
-import { DefaultPalette } from '@fluentui/react/lib/Styling';
-import { DateTime } from 'luxon';
 import { Vital } from '../data/VitalsCollection';
-import { getStatusColor, lastItem } from '../util/helpers';
+import { buildVitalChartDataSets, convertEffectiveDateToShortDate } from './vitalsChartHelpers';
 
 interface VitalsLineChartProps {
-  vitals: Vital[],
+  vitals: Vital[];
+  isBloodPressureChart: boolean;
 }
 
-// eslint-disable-next-line arrow-body-style
-const convertEffectiveDateToShortDate = (vital: Vital) : string => {
-  return DateTime.fromISO(vital.effectiveDateTime).toFormat('LL/dd');
-};
-
-export const VitalsLineChart: FC<VitalsLineChartProps> = ({ vitals }) => {
+export const VitalsLineChart: FC<VitalsLineChartProps> = ({ vitals, isBloodPressureChart }) => {
   const last7DaysVitals = vitals.slice(-7);
 
   const darkBackground = '#192A49';
@@ -44,33 +38,32 @@ export const VitalsLineChart: FC<VitalsLineChartProps> = ({ vitals }) => {
     backgroundColor: darkBackground,
     color: gridLineColor,
     scales: {
-      xAxes: [{ gridLines: { color: gridLineColor },
-        ticks: {
-          fontColor: axisColor,
-          fontSize: 12,
-        } }],
-      yAxes: [{ gridLines: { color: gridLineColor },
-        ticks: {
-          fontColor: axisColor,
-          fontSize: 12,
-        } }],
+      xAxes: [
+        {
+          gridLines: { color: gridLineColor },
+          ticks: {
+            fontColor: axisColor,
+            fontSize: 12,
+          },
+        },
+      ],
+      yAxes: [
+        {
+          gridLines: { color: gridLineColor },
+          ticks: {
+            fontColor: axisColor,
+            fontSize: 12,
+          },
+        },
+      ],
     },
   };
+
   const data: ChartData<any> = {
     labels: last7DaysVitals.map((vital: Vital) => convertEffectiveDateToShortDate(vital)),
-    datasets: [
-      {
-        fill: false,
-        borderColor: getStatusColor(lastItem(last7DaysVitals).code) || DefaultPalette.green,
-        lineTension: '0',
-        pointRadius: 6,
-        pointBorderWidth: 3,
-        pointHitRadius: 20,
-        pointBackgroundColor: 'rgba(255, 255, 255, 1)',
-        data: last7DaysVitals.map(v => parseInt(v.value, 10)),
-      },
-    ],
+    datasets: buildVitalChartDataSets(last7DaysVitals, isBloodPressureChart),
   };
+
   return (
     <div className="graphContainer">
       <Line data={data} options={options} />
