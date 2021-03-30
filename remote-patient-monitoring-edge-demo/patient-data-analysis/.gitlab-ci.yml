@@ -1,67 +1,16 @@
-stages:
-  - build
-  - scan
-  - deploy
+# This build job is provided as an example 
 
-.dockerhublogin: &dockerhublogin
-  before_script:
-    - echo ${dockerhub_access_token} | docker login --username ${dockerhub_username} --password-stdin
+# The build job in this file uses "Docker-in-docker" which requirers some specific configuration of the Gitlab Runner.   
+# See this link for more detail: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-the-docker-executor-with-the-docker-image-docker-in-docker
 
-build-dev:
-  stage: build
-  <<: *dockerhublogin 
+before_script:
+  - echo ${docker_registry_password} | docker login --username ${docker_registry_username} --password-stdin  ${DOCKER_REGISTRY}
+
+build:
   image: docker:19.03.12
   services:
       - name: docker:19.03.12-dind
-  tags: [proj-1739-runner]
   script:
-    - docker build -t $CI_PROJECT_NAME .
-    - CID=$(docker create $CI_PROJECT_NAME)
-    - docker cp $CID:/usr/src/app/node_modules/ .
-  cache:
-    key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - node_modules/
-    policy: push
-  except:
-    refs:
-      - master
-      - tags
-
-scan-code:
-  stage: scan
-  image: openjdk:11
-  tags: [proj-1739-runner]
-  script:
-    - ./.ci/scan-code.sh $CI_PROJECT_NAME $CI_COMMIT_REF_NAME $blackduck_api_key
-  cache:
-    key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
-    policy: pull
-
-build-prod:
-  stage: build
-  <<: *dockerhublogin 
-  image: docker:19.03-git
-  services:
-      - name: docker:19.03.12-dind
-  tags: [proj-1739-runner]
-  script:
-    - echo ${azure_docker_registry_password} | docker login --username ${azure_docker_registry_username} --password-stdin  wwtmsft.azurecr.io
-    - ./.ci/build-and-push-image.sh data-analysis latest
-  only:
-    refs:
-      - master
-
-deploy-prod:
-  stage: deploy
-  image: registry-gitlab.asynchrony.com/proj-1739/build-utils/kubectl
-  tags: [proj-1739-runner]
-  before_script:
-    - mkdir -p ~/.kube/
-    - cat $kube_config > ~/.kube/config
-  script:
-    - ./.ci/k8s-deploy.sh
-  only:
-    refs:
-      - master
-
+    - TAG="${DOCKER_REGISTRY}/${CI_PROJECT_NAME}:latest"
+    - docker build -t $TAG .
+    - docker push $TAG
