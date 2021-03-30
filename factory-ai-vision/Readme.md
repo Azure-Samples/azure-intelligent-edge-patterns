@@ -61,11 +61,11 @@ Check out the architecture below to see how Vision on Edge works on both LVA and
 
 ### LVA Module (Recommended)
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/LVA_nginx.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/arch1.png)
 
 ### OpenCV Module
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/opencv_nginx.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/arch2.png)
 
 You can refer to these API documents for details: <br/>
 InferenceModule https://documenter.getpostman.com/view/13850891/TVsoGqcE <br/>
