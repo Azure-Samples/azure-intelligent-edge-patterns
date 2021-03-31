@@ -72,7 +72,10 @@ After setting the `FHIR_API_URL` and `IOT_HUB_CONNECTION_STRING` above you are n
 A summary of the steps to generate and send patient data is listed below:
 1. If this is the first time you are using the data-generator,  navigate to the `data-generator` folder and run `npm install` to install dependencies.
 1. From the `data-generator` folder, run a command to generate data by using `npm` and setting the required parameters such as destination, numberOfPatients, numberOfDays and healthTrend:
-    - Ex: `npm run addPatientsWithObservations -- --destination fhir --numberOfPatients 2 --numberOfDays 7 --healthTrend worsening`
+    - For example: 
+      ```
+      npm run addPatientsWithObservations -- --destination fhir --numberOfPatients 2 --numberOfDays 7 --healthTrend worsening
+      ```
 1. After the command completes, go to the Clinician Dashboard web application hosted on your Edge device to see the generated data displayed on screen. (see below for instructions on getting the URL for the Clinician Dashboard).
 
 ### How to Get Dashboard URL from Kubernetes
@@ -105,10 +108,10 @@ If you encounter any issues where patient or vital data is not showing up on the
 - All npm commands must have parameters passed in via `--` before specifying parameter names.
 - Running a command with no parameters, or with `--help`, will print a usage message detailing how to use it.
 
-For example:
-```
-npm run addPatients -- --destination iothub -n 1
-```
+  For example:
+  ```
+  npm run addPatients -- --destination iothub -n 1
+  ```
 
 ### General Info About Generated Data
 
@@ -124,14 +127,13 @@ The `addPatients` command will add up to 20 patients to the FHIR server. These p
 
 **NOTE:** Patient data is generated via a connection to the FHIR server. Patients are not created via IoT Hub.
 
-Example usage: This command will generate two patients via IoT Hub.
+Example usage: This command will generate two patients.
 ```
-npm run addPatients -- -d iothub -n 2
+npm run addPatients -- -d fhir -n 2
 ```
 
 Available parameters:
 - `-d` or `--destination` (required)
-  - `iothub` will send FHIR data via IoT_Hub (simulating remote patient data sent via the Azure Cloud).
   - `fhir` will send FHIR data directly to the FHIR server (simulating patient data in clinic).
 - `-n` or `--numberOfPatients` (required)
   - Number from `1` to `20`: number of patients to generate.
@@ -215,7 +217,12 @@ All commands can be run in a development mode, against a locally running FHIR se
    1. You will be looking your Subscriber deployment. Via either the Overview or Deployments page, find the `subscriber-deployment` link and click it.
    1. Click the `subscriber-deployment...` link under New Replica Set to navigate to the specific deployment.
    1. Click the 'four line' icon in the top right (View logs).
-   1. If you see something resembling the following log line, you will need to reconfigure your Subscriber configuration with the correct IoT Hub connection string.
-      ```
-      Error occurred with iot-hub-messages/Subscriptions/all-data-sub within my-service-bus.servicebus.windows.net:  Error: Failed to connect
-      ```
+   1. In the logs, you may see one of these two errors:
+      - If you see something resembling the following log line, you will need to reconfigure your Subscriber configuration with the correct IoT Hub connection string.
+        ```
+        Error occurred with iot-hub-messages/Subscriptions/all-data-sub within my-service-bus.servicebus.windows.net:  Error: Failed to connect
+        ```
+      - If you see something resembling the following log line, there was an error POSTing data to the FHIR database. You can simply addObservations for that patient again separately.
+        ```
+        Error when POSTing to FHIR server for correlationId: c81e61fa-e1e1-44ce-ab57-75873c24eb23. Error: Error: Request failed with status code 500
+        ```

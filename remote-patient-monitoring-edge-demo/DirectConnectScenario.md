@@ -2,7 +2,7 @@
 
 If you wanted to avoid using cloud services, you could modify this software to use a direct connection. The following diagram illustrates how one might do that. You will need a Web Application Firewall of your choice and an additional software component to receive and convert the data.
 
-![](./direct-connect-scenario.png)
+![](./images/direct-connect-scenario.png)
 
 The WAF (e.g. an F5 or similar appliance) would provide the necessary authentication, authorization, and other hardening requirements for safely connecting to the internet. 
 
