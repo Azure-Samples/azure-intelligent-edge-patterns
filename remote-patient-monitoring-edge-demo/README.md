@@ -1,6 +1,6 @@
-![Azure Stack Edge Patient Data Analysis](./main-repo-logo.png 'Azure Stack Edge Patient Data Analysis')
+![Azure Stack Edge Patient Data Analysis](./images/main-repo-logo.png 'Azure Stack Edge Patient Data Analysis')
 
-![Clinician Dashboard and Remote Patient Edge Connect apps](./main-repo-apps-splash.png 'Clinician Dashboard and Remote Patient Edge Connect apps')
+![Clinician Dashboard and Remote Patient Edge Connect apps](./images/main-repo-apps-splash.png 'Clinician Dashboard and Remote Patient Edge Connect apps')
 
 # Patient Data Analysis using Azure Stack Edge
 
@@ -16,7 +16,7 @@ Check out [this video](https://myignite.microsoft.com/sessions/7ba986a0-9d05-4d2
 
 **Unlock the Potential of Edge & AI in Healthcare**
 
-[![Microsoft Ignite Video - Unlock the Potential of Edge & AI in Healthcare](./Microsoft-Ignite.jpg)](https://myignite.microsoft.com/sessions/7ba986a0-9d05-4d22-abaa-b5f9d1916744)
+[![Microsoft Ignite Video - Unlock the Potential of Edge & AI in Healthcare](./images/Microsoft-Ignite.jpg)](https://myignite.microsoft.com/sessions/7ba986a0-9d05-4d22-abaa-b5f9d1916744)
 
 
 ## Prerequisites
@@ -67,7 +67,7 @@ If you want to utilize this solution with the remote patient cloud connect scena
 
 ### Remote Patient Cloud Connect Scenario (Recommended)
 
-![](./architecture.png)
+![](./images/architecture.png)
 
 
 **Remote Patient Bluetooth Connect app** (running on mobile device) - This is a mobile app for Android that allows patients to connect with the Bluetooth enabled [OMRON Blood Pressure Monitor (model BP7250)](https://omronhealthcare.com/products/5-series-wireless-upper-arm-blood-pressure-monitor-bp7250/) and upload vital readings for processing on an Azure Stack Edge.  
@@ -147,7 +147,7 @@ If you would like to access FHIR data or troubleshoot issues with data being gen
   - This happens when your secret is malformed or named incorrectly.
 - Google Chrome won't let me view my Kubernetes Dashboard!
 
-   [![Connection Not Private error in a Chrome browser](chrome-connection-not-private-thumb.png)](chrome-connection-not-private.png)
+   [![Connection Not Private error in a Chrome browser](./images/chrome-connection-not-private-thumb.png)](./images/chrome-connection-not-private.png)
    - If you get to a 'Your connection is not private' page that won't let you navigate past it, just type `thisisunsafe` while focused in a Chrome browser window to bypass. (This is known as the [`interstitial bypass keyword`](https://chromium.googlesource.com/chromium/src/+/cb8501aaf28904ff1e39962aaed380a1618a6222%5E%21/) and is a safety feature of Chrome when an [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) violation is detected. It's designed to prevent users from visiting malicious websites. If have concerns about this you should discuss further with your IT department).
 - I can't view my dashboard after deployment!
   - Some browsers will try to force `https`, but this app is only configured for `http` on port 80. Be sure that you are only accessing the dashboard with `http://`.
