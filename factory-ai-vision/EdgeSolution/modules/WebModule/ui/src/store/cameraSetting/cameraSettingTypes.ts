@@ -14,6 +14,9 @@ export enum CameraSettingAction {
   UPDATE_CAMERA_SETTING_REQUEST = 'UPDATE_CAMERA_SETTING_REQUEST',
   UPDATE_CAMERA_SETTING_SUCCESS = 'UPDATE_CAMERA_SETTING_SUCCESS',
   UPDATE_CAMERA_SETTING_FAILURE = 'UPDATE_CAMERA_SETTING_FAILURE',
+  CANCEL_CAMERA_SETTING_REQUEST = 'CANCEL_CAMERA_SETTING_REQUEST',
+  CANCEL_CAMERA_SETTING_SUCCESS = 'CANCEL_CAMERA_SETTING_SUCCESS',
+  CANCEL_CAMERA_SETTING_FAILURE = 'CANCEL_CAMERA_SETTING_FAILURE',
 }
 
 export type GetCameraSettingRequestAction = {
@@ -43,13 +46,29 @@ export type UpdateCameraSettingFailureAction = {
   error: Error;
 };
 
+export type CancelCameraSettingRequestAction = {
+  type: CameraSettingAction.CANCEL_CAMERA_SETTING_REQUEST;
+};
+
+export type CancelCameraSettingSuccessAction = {
+  type: CameraSettingAction.CANCEL_CAMERA_SETTING_SUCCESS;
+};
+
+export type CancelCameraSettingFailureAction = {
+  type: CameraSettingAction.CANCEL_CAMERA_SETTING_FAILURE;
+  error: Error;
+};
+
 export type ProjectActionTypes =
   | GetCameraSettingRequestAction
   | GetCameraSettingSuccessAction
   | GetCameraSettingFailureAction
   | UpdateCameraSettingRequestAction
   | UpdateCameraSettingSuccessAction
-  | UpdateCameraSettingFailureAction;
+  | UpdateCameraSettingFailureAction
+  | CancelCameraSettingRequestAction
+  | CancelCameraSettingSuccessAction
+  | CancelCameraSettingFailureAction;
 
 // Describing the different THUNK ACTION NAMES available
 export type ProjectThunk<ReturnType = void> = ThunkAction<ReturnType, State, unknown, Action<string>>;
