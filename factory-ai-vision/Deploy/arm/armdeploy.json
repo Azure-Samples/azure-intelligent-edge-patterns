@@ -45,6 +45,14 @@
         "description": "Specify the name of the Iot hub"
       }
     },
+    "newOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ]
+    },
     "skuName": {
       "defaultValue": "S1",
       "type": "String",
@@ -112,6 +120,7 @@
   },
   "resources": [
     {
+      "condition": "[equals(parameters('newOrExisting'), 'new')]",
       "type": "Microsoft.Devices/IotHubs",
       "apiVersion": "2020-03-01",
       "name": "[parameters('iotHubName')]",
