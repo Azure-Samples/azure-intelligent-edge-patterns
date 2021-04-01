@@ -4,7 +4,7 @@
   "parameters": {
     "deviceArchitecture": {
       "defaultValue": "X86",
-      "allowedValues": ["X86", "ARM64"],
+      "allowedValues": [ "X86", "ARM64" ],
       "type": "string",
       "metadata": {
         "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
@@ -25,17 +25,38 @@
     },
     "videoCaptureModule": {
       "defaultValue": "lva",
-      "allowedValues": ["lva", "opencv"],
+      "allowedValues": [ "lva", "opencv" ],
       "type": "string",
       "metadata": {
         "description": "Select video capture module to deal with the media source. Live Video Analytics (LVA) is a service from Microsoft that enables developers to capture, record, analyze live video and publish the results (video and/or video analytics) to Azure services (in the cloud and/or the edge). Opencv is an open-source library that includes several hundreds of computer vision algorithms."
       }
     },
+    "location": {
+      "defaultValue": "[resourceGroup().location]",
+      "type": "String",
+      "metadata": {
+        "description": "Specify the location of the resources."
+      }
+    },
     "iotHubName": {
-      "defaultValue": "",
+      "defaultValue": "visionedge",
       "type": "string",
       "metadata": {
-        "description": "Enter the name of existing Iot Hub."
+        "description": "Specify the name of the Iot hub"
+      }
+    },
+    "skuName": {
+      "defaultValue": "S1",
+      "type": "String",
+      "metadata": {
+        "description": "The SKU to use for the IoT Hub."
+      }
+    },
+    "skuUnits": {
+      "defaultValue": "1",
+      "type": "String",
+      "metadata": {
+        "description": "The number of IoT Hub units."
       }
     },
     "edgeDeviceName": {
@@ -91,6 +112,17 @@
   },
   "resources": [
     {
+      "type": "Microsoft.Devices/IotHubs",
+      "apiVersion": "2020-03-01",
+      "name": "[parameters('iotHubName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "capacity": "[parameters('skuUnits')]"
+      },
+      "properties": {}
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "CreatingManagedIdentity",
@@ -117,7 +149,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "CreatingRoleAssignments",
-      "dependsOn": ["CreatingManagedIdentity"],
+      "dependsOn": [ "CreatingManagedIdentity" ],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
@@ -158,7 +190,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "ResourcesDeployment",
-      "dependsOn": ["CreatingRoleAssignments", "CreatingManagedIdentity"],
+      "dependsOn": [ "CreatingRoleAssignments", "CreatingManagedIdentity" ],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
