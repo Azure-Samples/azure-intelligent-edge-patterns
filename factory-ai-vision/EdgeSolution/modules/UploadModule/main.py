@@ -80,6 +80,11 @@ async def upload(stream: Stream):
     return RTSPSIM_PREFIX+output_filename
 
 
+@app.get("/cancel_upload")
+def canacel_upload():
+    return "ok"
+
+
 def normalize_url(url):
     normalized_url = url
     if '//' not in url:
