@@ -221,10 +221,51 @@
       "resourceGroup": "[variables('resourceGroupName')]"
     },
     {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2019-10-01-preview",
+      "name": "GetDeviceConnectString",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "CreatingRoleAssignments",
+        "CreatingManagedIdentity"
+      ],
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]": {}
+        }
+      },
+      "properties": {
+        "forceUpdateTag": "1",
+        "azCliVersion": "2.9.1",
+        "primaryScriptUri": "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/change-custom-arm-template/factory-ai-vision/Deploy/arm/scripts/get-device-connect-string.sh",
+        "supportingScriptUris": [],
+        "environmentVariables": [
+          {
+            "name": "RESOURCE_GROUP",
+            "value": "[resourceGroup().name]"
+          },
+          {
+            "name": "IOTHUB_NAME",
+            "value": "[parameters('iotHubName')]"
+          },
+          {
+            "name": "DEVICE_NAME",
+            "value": "[parameters('edgeDeviceName')]"
+          }
+        ],
+        "retentionInterval": "P1D",
+        "timeout": "PT30M",
+        "containerSettings": {},
+        "cleanupPreference": "OnSuccess"
+      }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "ResourcesDeployment",
-      "dependsOn": [ "CreatingRoleAssignments", "CreatingManagedIdentity" ],
+      "dependsOn": [ "GetDeviceConnectString" ],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
@@ -366,7 +407,7 @@
               "properties": {
                 "forceUpdateTag": "1",
                 "azCliVersion": "2.9.1",
-                "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                "primaryScriptUri": "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/change-custom-arm-template/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
                 "supportingScriptUris": [],
                 "environmentVariables": [
                   {
