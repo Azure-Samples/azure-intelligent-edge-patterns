@@ -24,7 +24,7 @@
       }
     },
     "videoCaptureModule": {
-      "defaultValue": "lva",
+      "defaultValue": "opencv",
       "allowedValues": [ "lva", "opencv" ],
       "type": "string",
       "metadata": {
@@ -39,7 +39,7 @@
       }
     },
     "iotHubName": {
-      "defaultValue": "visionedge",
+      "defaultValue": "visionOnEdgeHub",
       "type": "string",
       "metadata": {
         "description": "Specify the name of the Iot hub"
@@ -68,7 +68,7 @@
       }
     },
     "edgeDeviceName": {
-      "defaultValue": "",
+      "defaultValue": "visionOnEdgeDevice",
       "type": "string",
       "metadata": {
         "description": "Enter the name of existing Iot Hub Edge Device."
@@ -76,9 +76,17 @@
     },
     "customVisionName": {
       "type": "string",
+      "defaultValue": "visionOnEdgeAI",
       "metadata": {
         "description": "Enter the name of existing CustomVision service."
       }
+    },
+    "sku": {
+      "type": "string",
+      "defaultValue": "S0",
+      "allowedValues": [
+        "S0"
+      ]
     },
     "mediaServiceResourceGroup": {
       "type": "string",
@@ -132,9 +140,26 @@
       "properties": {}
     },
     {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2017-04-18",
+      "name": "[parameters('customVisionName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('sku')]"
+      },
+      "kind": "CustomVision.Training",
+      "properties": {
+        "statisticsEnabled": false
+      }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "CreatingManagedIdentity",
+      "dependsOn": [
+        "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('customVisionName'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "template": {
