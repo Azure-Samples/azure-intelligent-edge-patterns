@@ -81,13 +81,20 @@ async def upload(stream: Stream, response: Response):
         raise HTTPException(status_code=400, detail="invalid source")
     status = "uploading"
 
+    if upload_id not in to_upload:
+        raise HTTPException(status_code=400, detail="canceled")
+        # response.status_code = fastapi_status.HTTP_301_MOVED_PERMANENTLY
+        # return "canceled"
+
     output_filename = await asyncio.create_task(upload_file_async(filename, upload_id))
     print(output_filename)
     # output_filename = await upload_file(filename)
     status = "ready"
 
     if upload_id not in to_upload:
-        response.status_code = fastapi_status.HTTP_301_MOVED_PERMANENTLY
+        raise HTTPException(status_code=400, detail="canceled")
+        # response.status_code = fastapi_status.HTTP_301_MOVED_PERMANENTLY
+        # return "canceled"
 
     return RTSPSIM_PREFIX+output_filename
 
