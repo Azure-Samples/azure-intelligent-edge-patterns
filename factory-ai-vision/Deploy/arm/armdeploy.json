@@ -419,7 +419,7 @@
                   {
                     "name": "SSH",
                     "properties": {
-                      "priority": 1000,
+                      "priority": 300,
                       "protocol": "TCP",
                       "access": "Allow",
                       "direction": "Inbound",
@@ -427,6 +427,110 @@
                       "sourcePortRange": "*",
                       "destinationAddressPrefix": "*",
                       "destinationPortRange": "22"
+                    }
+                  },
+                  {
+                    "name": "Port_8080",
+                    "properties": {
+                      "priority": 310,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "8080"
+                    }
+                  },
+                  {
+                    "name": "Port_5000",
+                    "properties": {
+                      "priority": 311,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "5000"
+                    }
+                  },
+                  {
+                    "name": "Port_8000",
+                    "properties": {
+                      "priority": 321,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "8000"
+                    }
+                  },
+                  {
+                    "name": "Port_8181",
+                    "properties": {
+                      "priority": 331,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "8181"
+                    }
+                  },
+                  {
+                    "name": "Port_5679",
+                    "properties": {
+                      "priority": 341,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "5679"
+                    }
+                  },
+                  {
+                    "name": "Port_5678",
+                    "properties": {
+                      "priority": 351,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "5678"
+                    }
+                  },
+                  {
+                    "name": "Port_5005",
+                    "properties": {
+                      "priority": 361,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "5005"
+                    }
+                  },
+                  {
+                    "name": "Port_6000",
+                    "properties": {
+                      "priority": 1100,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "6000"
                     }
                   }
                 ]
@@ -741,7 +845,7 @@
                   }
                 ],
                 "retentionInterval": "P1D",
-                "timeout": "PT30M",
+                "timeout": "PT15M",
                 "containerSettings": {},
                 "cleanupPreference": "OnSuccess"
               }
