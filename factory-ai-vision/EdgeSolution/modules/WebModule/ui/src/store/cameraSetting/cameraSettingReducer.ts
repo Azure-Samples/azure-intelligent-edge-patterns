@@ -28,6 +28,16 @@ const projectReducer = (state = initialState, action: ProjectActionTypes): Camer
       };
     case CameraSettingAction.UPDATE_CAMERA_SETTING_FAILURE:
       return { ...state, isLoading: false, error: action.error };
+    case CameraSettingAction.CANCEL_CAMERA_SETTING_REQUEST:
+      return { ...state, isLoading: true, error: null };
+    case CameraSettingAction.CANCEL_CAMERA_SETTING_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        isCreating: false,
+      };
+    case CameraSettingAction.CANCEL_CAMERA_SETTING_FAILURE:
+      return { ...state, isLoading: false, error: action.error };
     default:
       return { ...state };
   }

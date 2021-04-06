@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   CommandBar,
   ICommandBarItemProps,
@@ -7,13 +7,15 @@ import {
   Breadcrumb,
   ProgressIndicator,
   mergeStyleSets,
+  DefaultButton,
 } from '@fluentui/react';
 import { useBoolean } from '@uifabric/react-hooks';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from 'RootStateType';
 
 import { Url } from '../enums';
+import { thunkCancelCameraSetting } from '../store/cameraSetting/cameraSettingActions';
 
 import AddCameraPanel, { PanelMode } from '../components/AddCameraPanel';
 import { CameraDetailList } from '../components/CameraDetailList';
@@ -27,8 +29,11 @@ const classes = mergeStyleSets({
   },
   progressWrapper: {
     position: 'absolute',
-    top: '22px',
+    top: '15px',
     left: '200px',
+    '> div': {
+      marginTop: '5px',
+    },
   },
   progress: {
     width: '500px',
@@ -37,10 +42,13 @@ const classes = mergeStyleSets({
 
 export const Cameras: React.FC = () => {
   const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
+
   const showInstruction = useSelector(
     (state: State) => state.camera.nonDemo.length > 0 && state.labelImages.ids.length === 0,
   );
   const isCameraCreating = useSelector((state: State) => state.cameraSetting.isCreating);
+
+  const dispatch = useDispatch();
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -55,6 +63,10 @@ export const Cameras: React.FC = () => {
     ],
     [openPanel],
   );
+
+  const onCancelButtonClick = useCallback(() => {
+    dispatch(thunkCancelCameraSetting());
+  }, [dispatch]);
 
   return (
     <Stack styles={{ root: { height: '100%' } }}>
@@ -73,8 +85,14 @@ export const Cameras: React.FC = () => {
         <Stack className={classes.container}>
           <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
           {isCameraCreating && (
-            <Stack className={classes.progressWrapper}>
+            <Stack
+              className={classes.progressWrapper}
+              horizontal
+              horizontalAlign="center"
+              tokens={{ childrenGap: '20px' }}
+            >
               <ProgressIndicator className={classes.progress} />
+              <DefaultButton text="Cancel" onClick={onCancelButtonClick} />
             </Stack>
           )}
         </Stack>
