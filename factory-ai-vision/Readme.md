@@ -88,7 +88,7 @@ Please refer to this tutorial to follow the [instruction](https://github.com/lin
 Before installation, You must have the following services set up to use Vision on Edge:
 
 1.  **Docker**: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
-2.  **IoT Edge Port**: At least one IoT Edge with Port 8181 and 5000 is opended and is connected to your Iot Hub. please follow this documentation for deployment information https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux
+2.  **IoT Edge Port**: At least one IoT Edge with Port 8181 is opended and is connected to your Iot Hub. please follow this documentation for deployment information https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux
 3.  **Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
 4.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
 5.  **Azure Media Service**, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
