@@ -48,7 +48,7 @@ or
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
   - For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
   - For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
-  - 
+ 
   - Before installation, You must have the following services set up to use Vision on Edge:
 
 1.  **Docker**: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
@@ -56,7 +56,7 @@ or
 3.  **Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
 4.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
 5.  **Azure Media Service**,(Optional) please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
-6.  **GPU**, If using GPU, make sure we should open the port first.
+6.  **GPU** If using GPU, make sure we should open the port first.
 
 ### NOTE:This solution is only supported on linux based Azure IoT edge devices
 
