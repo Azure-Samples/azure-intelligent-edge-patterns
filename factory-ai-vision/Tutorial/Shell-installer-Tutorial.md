@@ -60,7 +60,13 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 12. The installation will be started after. Please wait for couple minutes to complete the installation. 
 <br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
 
-13. Open your browser, connect to http://YOUR_IP:8181
+13. 13. Go to your device --> Properties-->Networking--> 
+
+Public IP address(  get your IP address)
+168.63.246.174
+
+Open your browser, connect to http://YOUR_IP:8181
+e.g.  connect to http://168.63.246.174:8181
 
 14. Check out our tutorials on youtube channel 
 
