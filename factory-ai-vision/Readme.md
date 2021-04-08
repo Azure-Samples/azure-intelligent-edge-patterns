@@ -56,7 +56,6 @@ or
 3.  **Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
 4.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
 5.  **Azure Media Service**,(Optional) please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
-6.  **GPU** If using GPU, make sure we should open the port first.
 
 ### NOTE:This solution is only supported on linux based Azure IoT edge devices
 
@@ -68,11 +67,11 @@ Check out the architecture below to see how Vision on Edge works on both LVA and
 
 ### LVA Module (Recommended)
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/arch1.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/newarch1.png)
 
 ### OpenCV Module
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/arch2.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/newarch2.png)
 
 You can refer to these API documents for details: <br/>
 InferenceModule https://documenter.getpostman.com/view/13850891/TVsoGqcE <br/>
