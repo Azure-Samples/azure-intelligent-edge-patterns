@@ -28,7 +28,7 @@
       "allowedValues": ["lva", "opencv"],
       "type": "string",
       "metadata": {
-        "description": "Select video capture module."
+        "description": "Select video capture module to deal with the media source. Live Video Analytics (LVA) is a service from Microsoft that enables developers to capture, record, analyze live video and publish the results (video and/or video analytics) to Azure services (in the cloud and/or the edge). Opencv is an open-source library that includes several hundreds of computer vision algorithms."
       }
     },
     "iotHubName": {
