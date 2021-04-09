@@ -48,7 +48,7 @@
     "customVisionName": {
       "type": "string",
       "metadata": {
-        "description": "Enter the name of existing Custom Vision."
+        "description": "Enter the name of existing CustomVision service."
       }
     },
     "mediaServiceResourceGroup": {
