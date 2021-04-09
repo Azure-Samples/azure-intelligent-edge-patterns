@@ -1,0 +1,4 @@
+global:
+  fhir_service_name: fhir-server-svc
+  docker_registry: docker.io/intelligentedge/patientmonitoring-
+  service_bus_connection_string:

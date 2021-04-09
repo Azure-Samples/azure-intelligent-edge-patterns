@@ -1,0 +1,224 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "param_serviceBus_name": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the name of the Service Bus. This name is globally unique. Choose something specific."
+      }
+    },
+    "param_iotHub_name": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the name of the IoT Hub. This name is globally unique. Choose something specific."
+      }
+    },
+    "param_acr_name": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the name of the Azure Containter Registery. This name is globally unique. Choose something specific. The name can only container letters and numbers. No special charactars."
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "_serviceBus_topic_name": "iot-hub-messages",
+    "_authorizationRules_name": "authorization-rule",
+    "_messages_route_name": "all-messages"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2018-01-01-preview",
+      "name": "[parameters('param_serviceBus_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Premium",
+        "capacity": 1
+      },
+      "properties": {
+        "zoneRedundant": true
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+      "apiVersion": "2017-04-01",
+      "name": "[format('{0}/RootManageSharedAccessKey', parameters('param_serviceBus_name'))]",
+      "properties": {
+        "rights": [
+          "Listen",
+          "Manage",
+          "Send"
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('param_serviceBus_name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/networkRuleSets",
+      "apiVersion": "2018-01-01-preview",
+      "name": "[format('{0}/default', parameters('param_serviceBus_name'))]",
+      "properties": {
+        "defaultAction": "Deny",
+        "virtualNetworkRules": [],
+        "ipRules": []
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('param_serviceBus_name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2018-01-01-preview",
+      "name": "[format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name'))]",
+      "properties": {
+        "defaultMessageTimeToLive": "P1D",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "duplicateDetectionHistoryTimeWindow": "PT10M",
+        "enableBatchedOperations": true,
+        "status": "Active",
+        "supportOrdering": true,
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+        "enablePartitioning": false,
+        "enableExpress": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('param_serviceBus_name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/authorizationRules",
+      "apiVersion": "2018-01-01-preview",
+      "name": "[format('{0}/{1}', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), variables('_authorizationRules_name'))]",
+      "properties": {
+        "rights": [
+          "Send"
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', split(format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), '/')[0], split(format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), '/')[1])]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2018-01-01-preview",
+      "name": "[format('{0}/all-data-sub', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')))]",
+      "properties": {
+        "lockDuration": "PT30S",
+        "requiresSession": false,
+        "defaultMessageTimeToLive": "P14D",
+        "deadLetteringOnMessageExpiration": false,
+        "deadLetteringOnFilterEvaluationExceptions": false,
+        "maxDeliveryCount": 2000,
+        "status": "Active",
+        "enableBatchedOperations": true,
+        "autoDeleteOnIdle": "P14D"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', split(format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), '/')[0], split(format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), '/')[1])]"
+      ]
+    },
+    {
+      "type": "Microsoft.Devices/IotHubs",
+      "apiVersion": "2020-08-01",
+      "name": "[parameters('param_iotHub_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "S1",
+        "capacity": 1
+      },
+      "properties": {
+        "ipFilterRules": [],
+        "eventHubEndpoints": {
+          "events": {
+            "retentionTimeInDays": 1,
+            "partitionCount": 4
+          }
+        },
+        "routing": {
+          "endpoints": {
+            "serviceBusQueues": [],
+            "serviceBusTopics": [
+              {
+                "connectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules', split(format('{0}/{1}', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), variables('_authorizationRules_name')), '/')[0], split(format('{0}/{1}', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), variables('_authorizationRules_name')), '/')[1], split(format('{0}/{1}', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), variables('_authorizationRules_name')), '/')[2]), '2018-01-01-preview').primaryConnectionString]",
+                "name": "[variables('_messages_route_name')]"
+              }
+            ],
+            "eventHubs": [],
+            "storageContainers": []
+          },
+          "routes": [
+            {
+              "name": "[variables('_messages_route_name')]",
+              "source": "DeviceMessages",
+              "condition": "true",
+              "endpointNames": [
+                "[variables('_messages_route_name')]"
+              ],
+              "isEnabled": true
+            }
+          ],
+          "fallbackRoute": {
+            "name": "$fallback",
+            "source": "DeviceMessages",
+            "condition": "true",
+            "endpointNames": [
+              "events"
+            ],
+            "isEnabled": true
+          }
+        },
+        "messagingEndpoints": {
+          "fileNotifications": {
+            "lockDurationAsIso8601": "PT1M",
+            "ttlAsIso8601": "PT1H",
+            "maxDeliveryCount": 10
+          }
+        },
+        "enableFileUploadNotifications": false,
+        "cloudToDevice": {
+          "maxDeliveryCount": 10,
+          "defaultTtlAsIso8601": "PT1H",
+          "feedback": {
+            "lockDurationAsIso8601": "PT1M",
+            "ttlAsIso8601": "PT1H",
+            "maxDeliveryCount": 10
+          }
+        },
+        "features": "None"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules', split(format('{0}/{1}', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), variables('_authorizationRules_name')), '/')[0], split(format('{0}/{1}', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), variables('_authorizationRules_name')), '/')[1], split(format('{0}/{1}', format('{0}/{1}', parameters('param_serviceBus_name'), variables('_serviceBus_topic_name')), variables('_authorizationRules_name')), '/')[2])]"
+      ]
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2020-11-01-preview",
+      "name": "[parameters('param_acr_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Premium"
+      }
+    }
+  ],
+  "outputs": {
+    "servicebus_connectionstring": {
+      "type": "string",
+      "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', split(format('{0}/RootManageSharedAccessKey', parameters('param_serviceBus_name')), '/')[0], split(format('{0}/RootManageSharedAccessKey', parameters('param_serviceBus_name')), '/')[1]), '2017-04-01').primaryConnectionString]"
+    },
+    "iothub_object": {
+      "type": "object",
+      "value": "[reference(resourceId('Microsoft.Devices/IotHubs', parameters('param_iotHub_name')), '2020-08-01', 'full')]"
+    }
+  },
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.3.1.62928",
+      "templateHash": "679667334089096843"
+    }
+  }
+}

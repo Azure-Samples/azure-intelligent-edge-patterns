@@ -1,0 +1,30 @@
+/* 
+ *  Copyright (c) Microsoft Corporation.
+ *  Licensed under the MIT license.
+ */
+
+.App-link {
+  color: #61dafb;
+  height: 100%;
+}
+
+.App {
+  background-color: #142038;
+  color: #ffffff;
+}
+
+.loading-container {
+  padding: 40px;
+}
+
+.spinner-styles .ms-Spinner-label {
+  color: white;
+  font-size: 16px;
+}
+
+.spinner-styles .ms-Spinner-circle {
+  border-width: 3px;
+  width: 28px;
+  height: 28px;
+  border-color: rgb(24, 182, 223) rgb(255, 255, 255) rgb(255, 255, 255);
+}
