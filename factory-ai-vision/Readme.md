@@ -7,8 +7,8 @@
 This is a solution showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
 You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft LVA and openCV.
 
-Check out [this video](https://lnkd.in/grQKBN8) to see brief introduction in action and understand how the value is delievered:
-[![video](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/assets/Ignite.JPG)](https://lnkd.in/grQKBN8)
+Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief introduction in action and understand how the value is delievered:
+[![video](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/assets/Ignite.JPG)](https://www.youtube.com/watch?v=17UW6veK7SA)
 
 ## Product
 
