@@ -104,7 +104,11 @@ async def predict(camera_id: str, request: Request):
     img_raw = await request.body()
     if IS_OPENCV == "true":
         nparr = np.frombuffer(img_raw, np.uint8)
-        img = nparr.reshape(-1, 960, 3)
+        if len(nparr) % 960 == 0:
+            img = nparr.reshape(-1, 960, 3)
+        else:
+            img = nparr.reshape(540, -1, 3)
+
     else:
         img = cv2.imdecode(np.frombuffer(img_raw, dtype=np.uint8), -1)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -727,7 +731,10 @@ def opencv_zmq():
                 continue
             try:
                 nparr = np.frombuffer(buf[1], np.uint8)
-                img = nparr.reshape(-1, 960, 3)
+                if len(nparr) % 960 == 0:
+                    img = nparr.reshape(-1, 960, 3)
+                else:
+                    img = nparr.reshape(540, -1, 3)
                 # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 stream.predict(img)
                 predictions = stream.last_prediction

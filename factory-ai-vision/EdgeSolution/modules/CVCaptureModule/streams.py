@@ -67,10 +67,10 @@ class Stream:
                     width = IMG_WIDTH
                     ratio = IMG_WIDTH / img.shape[1]
                     height = int(img.shape[0] * ratio + 0.000001)
-                    # if height >= self.IMG_HEIGHT:
-                    #    height = self.IMG_HEIGHT
-                    #    ratio = self.IMG_HEIGHT / img.shape[0]
-                    #    width = int(img.shape[1] * ratio + 0.000001)
+                    if height >= self.IMG_HEIGHT:
+                        height = self.IMG_HEIGHT
+                        ratio = self.IMG_HEIGHT / img.shape[0]
+                        width = int(img.shape[1] * ratio + 0.000001)
 
                     img = cv2.resize(img, (width, height))
 
@@ -130,10 +130,10 @@ class Stream:
                     width = IMG_WIDTH
                     ratio = IMG_WIDTH / img.shape[1]
                     height = int(img.shape[0] * ratio + 0.000001)
-                    # if height >= self.IMG_HEIGHT:
-                    #    height = self.IMG_HEIGHT
-                    #    ratio = self.IMG_HEIGHT / img.shape[0]
-                    #    width = int(img.shape[1] * ratio + 0.000001)
+                    if height >= self.IMG_HEIGHT:
+                        height = self.IMG_HEIGHT
+                        ratio = self.IMG_HEIGHT / img.shape[0]
+                        width = int(img.shape[1] * ratio + 0.000001)
 
                     img = cv2.resize(img, (width, height))
                     self.last_img = img

@@ -481,6 +481,7 @@ class Stream:
             image = cv2.resize(image, (width, height))
             data = image.tobytes()
             res = requests.post(self.model.endpoint, data=data)
+            logger.warning(res.json())
             if res.json()[1] == 200:
                 lva_prediction = json.loads(res.json()[0])['inferences']
                 inf_time = json.loads(res.json()[0])['inf_time']
@@ -498,6 +499,7 @@ class Stream:
             s = time.time()
             res = requests.post(self.model.endpoint, data=f5)
             inf_time = time.time() - s
+            logger.warning(res.json())
             if res.status_code == 200:
                 lva_prediction = res.json()['inferences']
                 predictions = lva_to_customvision_format(lva_prediction)

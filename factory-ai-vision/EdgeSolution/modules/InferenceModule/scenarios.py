@@ -136,7 +136,7 @@ class PartCounter(Scenario):
 
     def update(self, detections):
         if len(detections) == 0:
-            return
+            return [0]
         detections = list(d for d in detections if d.score > self.threshold)
         detections = list([d.x1, d.y1, d.x2, d.y2, d.score]
                           for d in detections)

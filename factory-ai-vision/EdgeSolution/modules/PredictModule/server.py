@@ -75,7 +75,10 @@ async def predict(request: Request):
     """predict."""
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
-    img = nparr.reshape(-1, 960, 3)
+    if len(nparr) % 960 == 0:
+        img = nparr.reshape(-1, 960, 3)
+    else:
+        img = nparr.reshape(540, -1, 3)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     predictions, inf_time = onnx.Score(img)
     results = customvision_to_lva_format(predictions)
