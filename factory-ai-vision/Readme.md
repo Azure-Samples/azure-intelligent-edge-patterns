@@ -4,8 +4,6 @@
 
 # Vision on Edge Solution
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Fdevelop%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
-
 This is a solution showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
 You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft LVA and openCV.
 
@@ -50,6 +48,14 @@ or
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
   - For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
   - For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
+ 
+  - Before installation, You must have the following services set up to use Vision on Edge:
+
+1.  **Docker**: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
+2.  **IoT Edge Port**: At least one IoT Edge with Port 8181 is opended and is connected to your Iot Hub. please follow this documentation for deployment information https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux
+3.  **Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
+4.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
+5.  **Azure Media Service**,(Optional) please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
 
 ### NOTE:This solution is only supported on linux based Azure IoT edge devices
 
@@ -61,11 +67,11 @@ Check out the architecture below to see how Vision on Edge works on both LVA and
 
 ### LVA Module (Recommended)
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/arch1.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/newarch1.png)
 
 ### OpenCV Module
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/arch2.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/newarch2.png)
 
 You can refer to these API documents for details: <br/>
 InferenceModule https://documenter.getpostman.com/view/13850891/TVsoGqcE <br/>
@@ -81,19 +87,16 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 Please refer to this tutorial to follow the [instruction](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
 
-### Option 2: Manual installation building a docker container and deploy by Visual Studio Code
+### Option 2: Azure ARM Template
+
+[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Fdevelop%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
 #### Prerequisites
 
-Before installation, You must have the following services set up to use Vision on Edge:
+ - Before installation, You must have the following services set up to use Vision on Edge:
 
-1.  **Docker**: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
-2.  **IoT Edge Port**: At least one IoT Edge with Port 8181 is opended and is connected to your Iot Hub. please follow this documentation for deployment information https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux
-3.  **Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
-4.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
-5.  **Azure Media Service**, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
-6.  **Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
-7.  **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
+1.  **Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
+2.  **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
 
 To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) and [this video](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52):
 
