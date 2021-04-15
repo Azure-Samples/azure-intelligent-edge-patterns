@@ -32,7 +32,8 @@ def getWlanIp():
         if IP.split(".")[0] == "172":
             print("Ip address detected is :: " + IP)
             IP = "172.17.0.1"
-            print("Ip address changed to :: " + IP + "to avoid docker interface")
+            print("Ip address changed to :: " +
+                  IP + "to avoid docker interface")
         print("Ip address detected is :: " + IP)
 
     except:
@@ -113,7 +114,8 @@ def get_file_zip(url, dst_folder="model"):
         print("Downloading File :: %s, complete!" % FileName, flush=True)
         print("Unzip and move...", flush=True)
         print(
-            "src_file_path: {}, dst_file_path: {}".format(src_file_path, dst_folder),
+            "src_file_path: {}, dst_file_path: {}".format(
+                src_file_path, dst_folder),
             flush=True,
         )
         result = unzip_and_move(src_file_path, dst_folder)
@@ -293,4 +295,8 @@ def is_edge():
         IoTHubModuleClient.create_from_edge_environment()
         return True
     except Exception:
-        return False
+        IS_K8S = os.environ.get("IS_K8S", "false")
+        if IS_K8S == "true":
+            return True
+        else:
+            return False

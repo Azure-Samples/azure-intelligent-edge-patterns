@@ -78,20 +78,20 @@ def gen_default_zones_cqa():
     template = {
         "useDangerZone": True,
         "dangerZones": [
-            {
-                "id": "$UUID_PLACE_HOLDER",
-                "type": "Polygon",
-                "label": [
-                    {"x": 463, "y": 275},
-                    {"x": 495, "y": 349},
-                    {"x": 301, "y": 440},
-                    {"x": 261, "y": 328},
-                ],
-                "order": 1,
-            }
+            # {
+            #     "id": "$UUID_PLACE_HOLDER",
+            #     "type": "Polygon",
+            #     "label": [
+            #         {"x": 463, "y": 275},
+            #         {"x": 495, "y": 349},
+            #         {"x": 301, "y": 440},
+            #         {"x": 261, "y": 328},
+            #     ],
+            #     "order": 1,
+            # }
         ],
     }
-    template["dangerZones"][0]["id"] = str(uuid.uuid4())
+    # template["dangerZones"][0]["id"] = str(uuid.uuid4())
     return json.dumps(template)
 
 
