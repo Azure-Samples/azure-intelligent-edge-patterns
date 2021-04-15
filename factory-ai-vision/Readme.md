@@ -144,7 +144,7 @@ To learn more about this development environment, check out [this tutorial](http
     `deployment.ase.gpu.template.json`
   - For x86 device with CPU =>
     `deployment.cpu.template.json`
-  - For x86 device with CPU =>
+  - For x86 device with GPU =>
     `deployment.gpu.template.json`
   - using an arm64v8 device with CPU =>
     `deployment.cpu.arm64v8.template.json`
@@ -190,11 +190,6 @@ To learn more about this development environment, check out [this tutorial](http
 # Upload your own video to be processed
 
 If you don't have camera devices to connect to your IoT Edge device, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).
-
-# Upload your own video to be processed
-
-If you don't have camera devices to connect to your IoT Edge device, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).  
-
 
 # Privacy Notice
 
