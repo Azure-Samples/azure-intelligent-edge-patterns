@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ .Values.fhir.name }}-svc
+    labels:
+        app: {{ .Values.fhir.name }}-svc
+spec:
+    ports:
+        - name: {{ .Values.fhir.name }}
+          port: {{ .Values.fhir.container.port }}
+          protocol: TCP
+        - name: {{ .Values.db.name }}
+          port: {{ .Values.db.container.port }}
+          protocol: TCP
+    selector:
+        app: {{ .Values.fhir.name }}-deployment
+    type: {{ .Values.service.type }}

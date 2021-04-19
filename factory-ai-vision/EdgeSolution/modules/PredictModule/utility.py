@@ -295,4 +295,8 @@ def is_edge():
         IoTHubModuleClient.create_from_edge_environment()
         return True
     except Exception:
-        return False
+        IS_K8S = os.environ.get("IS_K8S", "false")
+        if IS_K8S == "true":
+            return True
+        else:
+            return False

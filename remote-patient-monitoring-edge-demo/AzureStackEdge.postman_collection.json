@@ -1,0 +1,1301 @@
+{
+	"info": {
+		"_postman_id": "e7cc2fda-f5b8-4cda-adc2-f807cf96be38",
+		"name": "Azure Stack Edge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Flags",
+			"item": [
+				{
+					"name": "POST flag",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Flag\",\n  \"status\": \"inactive\",\n  \"category\": [\n    {\n      \"coding\": [\n        {\n          \"system\": \"http://terminology.hl7.org/CodeSystem/flag-category\",\n          \"code\": \"safety\",\n          \"display\": \"Safety\"\n        }\n      ],\n      \"text\": \"Safety\"\n    }\n  ],\n  \"code\": {\n    \"coding\": [\n      {\n        \"system\": \"http://example.org/local\",\n        \"code\": \"bigdog\",\n        \"display\": \"Big dog\"\n      }\n    ],\n    \"text\": \"Patient has a big dog at his home. Always always wear a suit of armor or take other active counter-measures\"\n  },\n  \"subject\": {\n    \"reference\": \"Patient/c2282c48-e8f3-4809-b7fe-d36d1c955354\",\n    \"display\": \"Peter Patient\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Flag",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Flag"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET flags",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{            \n    \"resourceType\": \"Patient\",\n    \"id\": \"5545d4d7-470c-4038-973d-b39f05b50fa9\",\n    \"meta\": {\n        \"versionId\": \"1\",\n        \"lastUpdated\": \"2021-01-27T22:33:59.839+00:00\"\n    },\n    \"name\": [\n        {\n            \"family\": \"Walsh\",\n            \"given\": [\n                \"Alfonzo\"\n            ]\n        }\n    ],\n    \"gender\": \"other\",\n    \"birthDate\": \"1957-12-20\"\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Flag?_total=accurate&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Flag"
+							],
+							"query": [
+								{
+									"key": "_total",
+									"value": "accurate"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Query Params",
+			"item": [
+				{
+					"name": "Specify page size (max 100)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Many Params",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?_count=100&_total=accurate&:contains=interpretation&_sort=-_lastUpdated",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_total",
+									"value": "accurate"
+								},
+								{
+									"key": ":contains",
+									"value": "interpretation"
+								},
+								{
+									"key": "_sort",
+									"value": "-_lastUpdated"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sort Observations by effectiveDateTime descending (most recent first)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?_sort=-date",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_sort",
+									"value": "-date"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Count # of observations in db",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?_summary=count",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_summary",
+									"value": "count"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Count # of patients in db",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?_summary=count",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "_summary",
+									"value": "count"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sort by Last Updated",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?_count=100&_sort=-_lastUpdated",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_sort",
+									"value": "-_lastUpdated"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find preliminary vitals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?status=preliminary&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "preliminary"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find preliminary vitals - WEIGHT only",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?status=preliminary&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "preliminary"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find WEIGHT vitals only",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?status=preliminary&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "preliminary"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find final vitals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?status=final&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "final"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by LastUpdated (created) Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?_count=100&_lastUpdated=gt2021-01-24&_sort=-_lastUpdated",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_lastUpdated",
+									"value": "gt2021-01-24"
+								},
+								{
+									"key": "_sort",
+									"value": "-_lastUpdated"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET (search)",
+			"item": [
+				{
+					"name": "Get patients AND flags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/?_total=accurate&_type=Patient,Flag&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "_sort",
+									"value": "-date",
+									"disabled": true
+								},
+								{
+									"key": "_total",
+									"value": "accurate"
+								},
+								{
+									"key": "_type",
+									"value": "Patient,Flag"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get metadata",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/?_total=accurate&_type=Patient,Flag&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "_sort",
+									"value": "-date",
+									"disabled": true
+								},
+								{
+									"key": "_total",
+									"value": "accurate"
+								},
+								{
+									"key": "_type",
+									"value": "Patient,Flag"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get flags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/?_total=accurate&_type=Patient,Flag&_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "_sort",
+									"value": "-date",
+									"disabled": true
+								},
+								{
+									"key": "_total",
+									"value": "accurate"
+								},
+								{
+									"key": "_type",
+									"value": "Patient,Flag"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get patients AND flags AND observations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/?_total=accurate&_count=100&_type=Patient,Flag,Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "_sort",
+									"value": "-date",
+									"disabled": true
+								},
+								{
+									"key": "_total",
+									"value": "accurate"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_type",
+									"value": "Patient,Flag,Observation"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get MOST RECENT patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?_count=100&_sort=-_lastUpdated&_total=accurate",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_sort",
+									"value": "-_lastUpdated"
+								},
+								{
+									"key": "_total",
+									"value": "accurate"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get MOST RECENT vitals",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"var res = \"\";",
+									"var valuesAndInterps = jsonData.entry.forEach((x, index) => {",
+									" res += `${index}, ${x.resource.code.coding[0].display},  ${x.resource.valueQuantity.value}, ${x.resource.interpretation && x.resource.interpretation[0].coding[0].code || 'No Interpretation'} \\n`;",
+									" });",
+									"console.log(res);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?_count=100&_sort=-_lastUpdated&_total=accurate",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_sort",
+									"value": "-_lastUpdated"
+								},
+								{
+									"key": "_filter",
+									"value": "interpretation",
+									"disabled": true
+								},
+								{
+									"key": "_summary",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "_total",
+									"value": "accurate"
+								},
+								{
+									"key": "status",
+									"value": "preliminary",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?_total=accurate",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "_total",
+									"value": "accurate"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patients Count 100",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patients updated/created after DATE",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?_count=100&_lastUpdated=gt2021-01-24&_sort=-_lastUpdated",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_lastUpdated",
+									"value": "gt2021-01-24"
+								},
+								{
+									"key": "_sort",
+									"value": "-_lastUpdated"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Weight measurements for patient sorted (latest first)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"var valuesAndInterps = jsonData.entry.forEach(x => {",
+									" console.log(x.resource.code.coding[0].display,  x.resource.valueQuantity.value, x.resource.interpretation[0].coding[0].code);",
+									" });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?patient=cca41dc2-d1db-45ef-a56b-f5e021432909&code=3141-9&_count=100&_sort=-date",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "patient",
+									"value": "cca41dc2-d1db-45ef-a56b-f5e021432909"
+								},
+								{
+									"key": "code",
+									"value": "3141-9"
+								},
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_sort",
+									"value": "-date"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get ALL vital signs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"var valuesAndInterps = jsonData.entry.forEach(x => {",
+									" console.log(x.resource.code.coding[0].display,  x.resource.valueQuantity.value, x.resource.interpretation[0].coding[0].code);",
+									" });",
+									" "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?_count=100",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient/b36b580f-53d0-4d61-886c-5175147c2f59",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient",
+								"b36b580f-53d0-4d61-886c-5175147c2f59"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Vital Signs for SPECIFIC patient",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient/e4480bd4-4c64-4653-b94c-d5d5d2ac1123/Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient",
+								"e4480bd4-4c64-4653-b94c-d5d5d2ac1123",
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bundle of all Patients and Observations",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Bundle\",\n  \"id\": \"bundle-request-patients-and-observations\",\n  \"type\": \"batch-request\",\n  \"entry\": [\n    {\n      \"request\": {\n        \"method\": \"GET\",\n        \"url\": \"/Patient/\"\n      }\n    },\n    {\n      \"request\": {\n        \"method\": \"GET\",\n        \"url\": \"/Observation/\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}?_count=100&_sort=-_lastUpdated",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"query": [
+								{
+									"key": "_count",
+									"value": "100"
+								},
+								{
+									"key": "_sort",
+									"value": "-_lastUpdated"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Patients by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient?name=McGurk",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "McGurk"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Vital Signs for patient filter by date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?patient=63ee372c-333c-495c-b8c0-ec44eeaa42ae",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "patient",
+									"value": "63ee372c-333c-495c-b8c0-ec44eeaa42ae"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get only BP Vital Sign for patient (by code)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation?patient=63ee372c-333c-495c-b8c0-ec44eeaa42ae&code=55284-4",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							],
+							"query": [
+								{
+									"key": "patient",
+									"value": "63ee372c-333c-495c-b8c0-ec44eeaa42ae"
+								},
+								{
+									"key": "code",
+									"value": "55284-4"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "POST (create)",
+			"item": [
+				{
+					"name": "Create Bob Patient",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Patient\",\n  \"name\": [\n    {\n      \"family\": \"Burnquist\",\n      \"given\": \"Bob\"\n    }\n  ],\n  \"birthDate\": \"2020-01-01\",\n  \"gender\": \"male\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vitals - Heart Rate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"resourceType\":\"Observation\",\n    \"code\":{\n        \"coding\":[\n            {\n                \"system\":\"http://loinc.org\",\n                \"code\":\"8867-4\",\n                \"display\":\"Heart Rate\"\n            }\n        ]\n    },\n    \"valueQuantity\":{\n        \"value\":87,\n        \"system\":\"http://unitsofmeasure.org\",\n        \"code\":\"bpm\"\n    },\n    \"effectiveDateTime\":\"2021-01-15T00:00:00.000\",\n    \"status\":\"preliminary\",\n    \"subject\":{\n        \"reference\":\"Patient/0ca452d2-4b83-4d56-afb0-0659a8454f7a\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vitals - diastolic BP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"resourceType\":\"Observation\",\n    \"code\":{\n        \"coding\":[\n            {\n                \"system\":\"http://loinc.org\",\n                \"code\":\"8462-4\",\n                \"display\":\"Diastolic blood pressure\"\n            }\n        ]\n    },\n    \"valueQuantity\":{\n        \"value\":88,\n        \"system\":\"http://unitsofmeasure.org\",\n        \"code\":\"mmHg\"\n    },\n    \"effectiveDateTime\":\"2021-01-15T00:00:00.000\",\n    \"status\":\"final\",\n    \"subject\":{\n        \"reference\":\"Patient/b36b580f-53d0-4d61-886c-5175147c2f59\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vitals - systolic BP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Bundle\",\n  \"type\": \"transaction\",\n  \"entry\": [\n    {\n      \"resource\": {\n        \"resourceType\": \"Observation\",\n        \"effectiveDateTime\": \"2021-03-08T00:00:00.000-06:00\",\n        \"status\": \"preliminary\",\n        \"subject\": {\n          \"reference\": \"Patient/49da3c9e-8379-4d1c-9330-f8a907a665b4\"\n        },\n        \"code\": {\n          \"coding\": [\n            {\n              \"system\": \"http://loinc.org\",\n              \"code\": \"8867-4\",\n              \"display\": \"Heart Rate\"\n            }\n          ]\n        },\n        \"valueQuantity\": {\n          \"value\": 76,\n          \"system\": \"http://unitsofmeasure.org\",\n          \"code\": \"bpm\"\n        }\n      },\n      \"request\": {\n        \"method\": \"POST\",\n        \"url\": \"Observation\"\n      }\n    },\n    {\n      \"resource\": {\n        \"resourceType\": \"Observation\",\n        \"effectiveDateTime\": \"2021-03-08T00:00:00.000-06:00\",\n        \"status\": \"preliminary\",\n        \"subject\": {\n          \"reference\": \"Patient/49da3c9e-8379-4d1c-9330-f8a907a665b4\"\n        },\n        \"code\": {\n          \"coding\": [\n            {\n              \"system\": \"http://loinc.org\",\n              \"code\": \"8480-6\",\n              \"display\": \"Systolic blood pressure\"\n            }\n          ]\n        },\n        \"valueQuantity\": {\n          \"sbpValue\": 85,\n          \"system\": \"http://unitsofmeasure.org\",\n          \"code\": \"mmHg\"\n        }\n      },\n      \"request\": {\n        \"method\": \"POST\",\n        \"url\": \"Observation\"\n      }\n    },\n    {\n      \"resource\": {\n        \"resourceType\": \"Observation\",\n        \"effectiveDateTime\": \"2021-03-08T00:00:00.000-06:00\",\n        \"status\": \"preliminary\",\n        \"subject\": {\n          \"reference\": \"Patient/49da3c9e-8379-4d1c-9330-f8a907a665b4\"\n        },\n        \"code\": {\n          \"coding\": [\n            {\n              \"system\": \"http://loinc.org\",\n              \"code\": \"8462-4\",\n              \"display\": \"Diastolic blood pressure\"\n            }\n          ]\n        },\n        \"valueQuantity\": {\n          \"dbpValue\": 123,\n          \"system\": \"http://unitsofmeasure.org\",\n          \"code\": \"mmHg\"\n        }\n      },\n      \"request\": {\n        \"method\": \"POST\",\n        \"url\": \"Observation\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vitals - Oxygen Saturation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"resourceType\":\"Observation\",\n    \"code\":{\n        \"coding\":[\n            {\n                \"system\":\"http://loinc.org\",\n                \"code\":\"59408-5 \",\n                \"display\":\"Oxygen saturation\"\n            }\n        ]\n    },\n    \"valueQuantity\":{\n        \"value\":94,\n        \"system\":\"http://unitsofmeasure.org\",\n        \"code\":\"%\"\n    },\n    \"effectiveDateTime\":\"2021-01-15T00:00:00.000\",\n    \"status\":\"final\",\n    \"subject\":{\n        \"reference\":\"Patient/b36b580f-53d0-4d61-886c-5175147c2f59\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vitals - Respiratory Rate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"resourceType\":\"Observation\",\n    \"code\":{\n        \"coding\":[\n            {\n                \"system\":\"http://loinc.org\",\n                \"code\":\"9279-1\",\n                \"display\":\"Respiratory rate\"\n            }\n        ]\n    },\n    \"valueQuantity\":{\n        \"value\":20,\n        \"system\":\"http://unitsofmeasure.org\",\n        \"code\":\"breaths/min\"\n    },\n    \"issued\":\"2021-01-15T00:00:00.000\",\n    \"status\":\"final\",\n    \"subject\":{\n        \"reference\":\"Patient/b36b580f-53d0-4d61-886c-5175147c2f59\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vitals - Weight",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"resourceType\":\"Observation\",\n    \"code\":{\n        \"coding\":[\n            {\n                \"system\":\"http://loinc.org\",\n                \"code\":\"3141-9\",\n                \"display\":\"Weight measured\"\n            }\n        ]\n    },\n    \"valueQuantity\":{\n        \"value\":210,\n        \"system\":\"http://unitsofmeasure.org\",\n        \"code\":\"lbs\"\n    },\n    \"effectiveDateTime\":\"2021-01-15T00:00:00.000\",\n    \"status\":\"final\",\n    \"subject\":{\n        \"reference\":\"Patient/b36b580f-53d0-4d61-886c-5175147c2f59\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PUT (update)",
+			"item": [
+				{
+					"name": "Update one vital",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"resourceType\":\"Observation\",\n    \"id\": \"6c00bb9a-573d-48c8-8c34-66f94f4aba0f\",\n    \"status\": \"preliminary\",\n    \"code\": {\n        \"coding\": [\n            {\n                \"system\": \"http://loinc.org\",\n                \"code\": \"3141-9\",\n                \"display\": \"Weight measured\"\n            }\n        ]\n    },\n    \"subject\": {\n        \"reference\": \"Patient/7084866f-ae73-479c-9494-fdf6ff34f4e1\"\n    },\n    \"effectiveDateTime\": \"2021-02-03T00:00:00.000-06:00\",\n    \"valueQuantity\": {\n        \"value\": 187,\n        \"system\": \"http://unitsofmeasure.org\",\n        \"code\": \"lbs\"\n    },\n    \"interpretation\": [\n        {\n            \"coding\": [\n                {\n                    \"system\": \"http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation\",\n                    \"code\": \"LL\",\n                    \"display\": \"Critical Low\"\n                }\n            ]\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation/6c00bb9a-573d-48c8-8c34-66f94f4aba0f",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation",
+								"6c00bb9a-573d-48c8-8c34-66f94f4aba0f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Flag to Inactive",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"resourceType\":\"Flag\",\n    \"id\": \"6c00bb9a-573d-48c8-8c34-66f94f4aba0f\",\n    \"status\": \"inactive\",\n    \"code\": {\n        \"coding\": [\n            {\n                \"system\": \"http://terminology.hl7.org/CodeSystem/flag-category\",\n                \"code\": \"clinical\",\n                \"display\": \"Clinical\"\n            }\n        ],\n        \"text\": \"Critical Weight Gain Detected\"\n    },\n    \"subject\": {\n        \"reference\": \"Patient/0deed5cd-0bbc-4a48-a952-ec1071fe9637\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Flag/9debd8ab-3051-4555-951a-48a3f296cb7e",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Flag",
+								"9debd8ab-3051-4555-951a-48a3f296cb7e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get One Vital",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{fhir-api-url}}/Observation/4d9bd95a-9ce0-4ef3-8611-52bd8555e599",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Observation",
+								"4d9bd95a-9ce0-4ef3-8611-52bd8555e599"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DELETE",
+			"item": [
+				{
+					"name": "Delete - Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient/ea92a469-2143-4c63-80e1-0018947acb52/",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient",
+								"ea92a469-2143-4c63-80e1-0018947acb52",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete - Flag",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{fhir-api-url}}/Patient/ea92a469-2143-4c63-80e1-0018947acb52/",
+							"host": [
+								"{{fhir-api-url}}"
+							],
+							"path": [
+								"Patient",
+								"ea92a469-2143-4c63-80e1-0018947acb52",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "fhir-api-url",
+			"value": "http://10.255.182.236:8080"
+		}
+	]
+}

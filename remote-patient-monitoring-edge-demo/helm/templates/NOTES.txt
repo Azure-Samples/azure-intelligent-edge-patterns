@@ -1,0 +1,19 @@
+-------------------------------------------------------------------
+
+Yay! Your application deployed successfully. 
+
+Now you need to check to see if it is running correctly.
+
+The first thing to do is check to see if all containers are running correctly by running 
+
+    $ kubectl get pods 
+
+All pods should be "1/1" or "2/2". If not, something went wrong.
+
+If all pods are running, check that the dashboard is working.
+
+You can get the dashboard IP by running:
+
+    $ kubectl get services dashboard-service --output jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
+
+Copy and paste that out output to your web browser.

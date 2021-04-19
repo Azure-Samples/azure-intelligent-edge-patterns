@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.fhir.name }}-deployment
+  labels:
+    app: {{ .Values.fhir.name }}-deployment
+    group: {{ .Values.fhir.group }}
+spec:
+  replicas: {{ .Values.fhir.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.fhir.name }}-deployment
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.fhir.name }}-deployment
+        group: {{ .Values.fhir.group }}
+    spec:
+      volumes:
+          - name: fhir-db-volume
+            persistentVolumeClaim:
+              claimName: {{ .Values.fhir.name }}-pvc
+      containers:
+        - name: {{ .Values.fhir.name }}
+          image: "{{ .Values.fhir.container.image }}:{{ .Values.fhir.container.tag }}"  
+          ports:
+            - containerPort: {{ .Values.fhir.container.port }}
+          env:
+            - name: FHIRServer__Security__Enabled 
+              value: {{ .Values.fhir.container.configMap.fhir_security_enable | quote }}
+            - name: SqlServer__ConnectionString
+              value: {{ .Values.fhir.container.configMap.SqlServer__ConnectionString | quote }}
+            - name: SqlServer__AllowDatabaseCreation
+              value: {{ .Values.fhir.container.configMap.SqlServer__AllowDatabaseCreation  | quote }}
+            - name: SqlServer__Initialize
+              value: {{ .Values.fhir.container.configMap.SqlServer__Initialize | quote }}
+            - name: SqlServer__SchemaOptions__AutomaticUpdatesEnabled
+              value: {{ .Values.fhir.container.configMap.SqlServer__SchemaOptions__AutomaticUpdatesEnabled | quote }}
+            - name: DataStore
+              value: {{ .Values.fhir.container.configMap.DataStore | quote }}
+        - name: {{ .Values.db.name }}
+          image: "{{ .Values.db.container.image }}:{{ .Values.fhir.container.tag }}" 
+          ports:
+            - containerPort: {{ .Values.db.container.port }}
+          volumeMounts:
+            - mountPath: {{ .Values.db.container.volumeMounts.mountPath }}
+              name: {{ .Values.db.container.volumeMounts.name }}
+          env:
+            - name: ACCEPT_EULA
+              value: {{ .Values.db.eula | quote }}
+            - name: {{ .Values.db.db_username }}
+              value: {{ .Values.db.db_pass | quote }}
+            

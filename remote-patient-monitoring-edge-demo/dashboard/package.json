@@ -1,0 +1,74 @@
+{
+  "name": "dashboard",
+  "version": "0.1.52",
+  "private": true,
+  "dependencies": {
+    "@ahryman40k/ts-fhir-types": "^4.0.34",
+    "@fluentui/react": "^7.155.3",
+    "@fluentui/react-charting": "^5.0.0-beta.0",
+    "@fluentui/react-icons": "^0.3.9",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^14.14.20",
+    "@types/react-dom": "^17.0.0",
+    "@uifabric/icons": "^7.5.18",
+    "axios": "^0.21.1",
+    "chart.js": "^2.9.4",
+    "luxon": "^1.25.0",
+    "react": "^17.0.1",
+    "react-chartjs-2": "^2.11.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.1",
+    "typescript": "^4.1.3",
+    "web-vitals": "^0.2.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "start:prodfhir": "npm start",
+    "build": "react-scripts build",
+    "generate-build-version": "node generate-build-version",
+    "prebuild": "npm run generate-build-version",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "./node_modules/.bin/ts-unused-exports tsconfig.json && eslint ."
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.168",
+    "@types/luxon": "^1.25.0",
+    "@types/react": "^17.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.12.0",
+    "@typescript-eslint/parser": "^4.12.0",
+    "eslint": "^7.17.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-import-resolver-typescript": "^2.3.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.3",
+    "eslint-plugin-jest-dom": "^3.6.5",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-testing-library": "^3.10.1",
+    "prettier": "2.2.1",
+    "ts-unused-exports": "^7.0.1"
+  }
+}

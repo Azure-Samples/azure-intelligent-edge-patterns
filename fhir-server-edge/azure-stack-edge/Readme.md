@@ -54,6 +54,7 @@ For authentication to be enabled, the following will need to be setup in you Azu
         - Note: be sure to configure your share `sqlvolume` as Edge share, backed by an Storage Account blob container
         ![Create sqlvolume share](./images/sqlvolume-share.png)
     - Connect to the `https` share and copy your certificate to the share location `\\ASE-hostname\https`
+    - Make sure both shares are shown as **mounted** in Azure portal, so these shares will available as Persistent Volumes in k8s.
 
 ## Step 2: Deploy to Edge Device
 

@@ -1,0 +1,34 @@
+server {
+    listen       8080;
+    listen  [::]:8080;
+    server_name  localhost;
+
+    location / {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, HEAD, POST, PUT, OPTIONS, DELETE, PATCH';
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+        
+        add_header 'Content-Type' 'application/xml';
+
+        proxy_set_header Host $host:$server_port;
+        proxy_pass ${FHIR_URL};
+    }
+}
+
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    # All root requests go to the react app
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}

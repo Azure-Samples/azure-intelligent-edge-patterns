@@ -1,0 +1,21 @@
+# The names here are also included in helm/values.yaml for each image. 
+# If you change these names and intend to deploy with helm, be sure to change image_name in all three values.yaml as well.
+
+version: "3.9"
+services:
+  subscriber:
+    image: ${docker_registry}subscriber:latest
+    build:
+      context: ./subscriber/.
+      dockerfile: Dockerfile
+  analysis:
+    image: ${docker_registry}analysis:latest
+    build:
+      context: ./analysis/.
+      dockerfile: Dockerfile
+  dashboard:
+    image: ${docker_registry}dashboard:latest
+    build:
+      context: ./dashboard/.
+      dockerfile: Dockerfile
+

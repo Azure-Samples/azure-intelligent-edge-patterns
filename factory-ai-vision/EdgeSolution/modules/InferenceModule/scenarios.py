@@ -108,7 +108,11 @@ class PartCounter(Scenario):
         self.detected = {}
         self.counter = {}
         self.line = []
+        self.max_people = 5
         self.threshold = threshold
+
+    def set_max_people(self, max_people):
+        self.max_people = max_people
 
     def set_threshold(self, threshold):
         self.threshold = threshold
@@ -235,10 +239,14 @@ class DefeatDetection(Scenario):
         self.tracker = Tracker(
             max_age=max_age, min_hits=min_hits, iou_threshold=iou_threshold
         )
+        self.max_people = 5
         self.detected = {}
         self.ok_counter = 0
         self.ng_counter = 0
         self.objs_with_labels = []
+
+    def set_max_people(self, max_people):
+        self.max_people = max_people
 
     def set_threshold(self, threshold):
         self.threshold = threshold
