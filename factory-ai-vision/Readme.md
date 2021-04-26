@@ -51,11 +51,7 @@ or
  
   - Before installation, You must have the following services set up to use Vision on Edge:
 
-1.  **Docker**: installed in your local environment. You can find information in the following document https://docs.docker.com/get-docker/
-2.  **IoT Edge Port**: At least one IoT Edge with Port 8181 is opended and is connected to your Iot Hub. please follow this documentation for deployment information https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux
-3.  **Azure Custom Vision account**, see the below link to find your training key here https://www.customvision.ai/projects#/settings
-4.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
-5.  **Azure Media Service**,(Optional) please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
+
 
 ### NOTE:This solution is only supported on linux based Azure IoT edge devices
 
@@ -83,20 +79,33 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 ### Option 1: Azure Shell Installer
 
+#### Prerequisite:
+
+**Azure Media Service**, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
+
+
 #### Get Started:
 
 Please refer to this tutorial to follow the [instruction](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
 
 ### Option 2: Azure ARM Template
 
+please follow the document to follow instruction  https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/linker/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
+
 [![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Fdevelop%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
+
+
+### Option 3: Deploy by Visual studio: 
+
+
 
 #### Prerequisites
 
  - Before installation, You must have the following services set up to use Vision on Edge:
 
-1.  **Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
-2.  **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
+1.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
+2.  **Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
+3.  **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
 
 To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) and [this video](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52):
 
@@ -104,7 +113,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 ### Get Started
 
-- Clone yadavm_factoryai_lpr branch
+- Clone azure intelligent edge patterns branch
 
   ```bash
   git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
@@ -166,12 +175,16 @@ To learn more about this development environment, check out [this tutorial](http
   c. rtspsimmodule
 
   d. webdbmodule
+  
+  e. predictmodule
+  
+  f. uploadmodule
 
-  e. azureiotedge-hub
+  g. azureiotedge-hub
 
-  f. azureiotedge-agent
+  h. azureiotedge-agent
 
-- Please wait until all 6 are running. Open your browser and connect [http://YOUR_IP:8181](http://YOUR_IP:8181)
+- Please wait until all 6 are running. Open your browser and connect [http://YOUR_DEVICE_IP:8181](http://YOUR_DEVICE_IP:8181)
 
 ### Video Tutorial
 
