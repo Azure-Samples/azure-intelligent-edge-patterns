@@ -14,9 +14,9 @@
       "defaultValue": "cpu",
       "allowedValues": [
         "cpu",
-        "gpu (NVIDIA cuda11)",
-        "vpu (Movidius)",
-        "Jetson (Jetpack 4.4)"
+        "gpu",
+        "vpu",
+        "Jetson"
       ],
       "type": "string",
       "metadata": {
@@ -386,7 +386,7 @@
             "osDiskType": "Standard_LRS",
             "vmSize": {
               "cpu": "Standard_DS1_v2",
-              "gpu": "Standard_NC6"
+              "gpu": "Standard_NC6s_v3"
             },
             "subnetAddressPrefix": "10.1.0.0/24",
             "addressPrefix": "10.1.0.0/16",
@@ -602,12 +602,12 @@
               }
             },
             {
-              "name": "[concat(parameters('vmName'), parameters('moduleRuntime'))]",
+              "name": "[concat(parameters('vmName'), '-', parameters('moduleRuntime'))]",
               "type": "Microsoft.Compute/virtualMachines",
               "apiVersion": "2020-06-01",
               "location": "[parameters('location')]",
               "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
               ],
               "properties": {
                 "hardwareProfile": {
