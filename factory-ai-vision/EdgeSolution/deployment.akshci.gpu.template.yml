@@ -1,0 +1,404 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: pvc-akshci-csi
+spec:
+ accessModes:
+ - ReadWriteOnce
+ resources:
+  requests:
+   storage: 10Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginxmodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginxmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: nginxmodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: nginxmodule
+        image: intelligentedge/nginxmodule:0.24.0-amd64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8181
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginxmodule
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8181
+  selector:
+    app: nginxmodule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webmodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: webmodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: webmodule
+        image: intelligentedge/webmodule:0.24.0-amd64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env
+                key: IOTHUB_CONNECTION_STRING
+          - name: DB_NAME
+            value: "vision_on_edge"
+          - name: DB_HOST
+            value: "172.18.0.1"
+          - name: DB_USER
+            value: "vision_on_edge"
+          - name: DB_PASS
+            value: "vision_on_edge"
+          - name: DF_PD_VIDEO_SOURCE
+            value: "opencv"
+          - name: IS_K8S
+            value: "true"
+
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webmodule
+spec:
+  ports:
+  - port: 8000
+  selector:
+    app: webmodule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inferencemodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inferencemodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: inferencemodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: inferencemodule
+        image: intelligentedge/inferencemodule:0.24.0-amd64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env
+                key: IOTHUB_CONNECTION_STRING
+          - name: IOTEDGE_DEVICE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env
+                key: IOTEDGE_DEVICE_CONNECTION_STRING
+          - name: IS_OPENCV
+            value: "true"
+          - name: IS_K8S
+            value: "true"
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inferencemodule
+spec:
+  ports:
+  - port: 5000
+  selector:
+    app: inferencemodule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: predictmodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: predictmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: predictmodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: predictmodule
+        image: intelligentedge/predictmodule:0.23.0-gpuamd64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 7777
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env
+                key: IOTHUB_CONNECTION_STRING
+          - name: IS_K8S
+            value: "true"
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: predictmodule
+spec:
+  ports:
+  - port: 7777
+  selector:
+    app: predictmodule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cvcapturemodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cvcapturemodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: cvcapturemodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: cvcapturemodule
+        image: intelligentedge/cameramodule:0.24.0-amd64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env
+                key: IOTHUB_CONNECTION_STRING
+          - name: IS_K8S
+            value: "true"
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cvcapturemodule
+spec:
+  ports:
+  - port: 9000
+  selector:
+    app: cvcapturemodule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtspsim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rtspsim
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: rtspsim
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: rtspsim
+        image: intelligentedge/rtspsimmodule:0.24.0-amd64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 554
+        volumeMounts:
+        - name: azure
+          mountPath: /live/mediaServer/media/upload
+      volumes:
+      - name: azure
+        persistentVolumeClaim: 
+            claimName:  pvc-akshci-csi
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rtspsim
+spec:
+  ports:
+  - port: 554
+  selector:
+    app: rtspsim
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uploadmodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uploadmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: uploadmodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: uploadmodule
+        image: intelligentedge/uploadmodule:0.24.0-amd64
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 7000
+        volumeMounts:
+        - name: azure
+          mountPath: /app/upload
+      volumes:
+      - name: azure
+        persistentVolumeClaim: 
+            claimName:  pvc-akshci-csi
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uploadmodule
+spec:
+  ports:
+  - port: 7000
+  selector:
+    app: uploadmodule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yolov4module
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yolov4module
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: yolov4module
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: yolov4module
+        image: registry.hub.docker.com/ronpai/yolov4-tflite-tiny
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yolov4module
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: yolov4module
+---
