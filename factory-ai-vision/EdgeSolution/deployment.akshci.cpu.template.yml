@@ -10,6 +10,18 @@ spec:
    storage: 10Gi
 
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: pvc-akshci-csi2
+spec:
+ accessModes:
+ - ReadWriteOnce
+ resources:
+  requests:
+   storage: 10Gi
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -342,7 +354,7 @@ spec:
       volumes:
       - name: azure
         persistentVolumeClaim: 
-            claimName:  pvc-akshci-csi
+            claimName:  pvc-akshci-csi2
       
 ---
 apiVersion: v1
@@ -385,6 +397,7 @@ spec:
           value: "yes"
         ports:
         - containerPort: 80
+
 ---
 apiVersion: v1
 kind: Service
