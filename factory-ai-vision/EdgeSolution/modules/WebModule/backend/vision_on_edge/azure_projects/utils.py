@@ -220,6 +220,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                         top=region.top,
                         width=region.width,
                         height=region.height,
+                        tag_id=part_obj.customvision_id
                     )
                     img_counter += 1
                 else:
