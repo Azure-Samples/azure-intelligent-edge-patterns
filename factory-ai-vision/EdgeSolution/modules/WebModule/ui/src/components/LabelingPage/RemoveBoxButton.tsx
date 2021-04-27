@@ -82,11 +82,13 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
         points={[-5 / scale, -5 / scale, 5 / scale, 5 / scale]}
         stroke={color}
         strokeWidth={strokeWidth}
+        name={'cancel'}
       />
       <Line
         points={[5 / scale, -5 / scale, -5 / scale, 5 / scale]}
         stroke={color}
         strokeWidth={strokeWidth}
+        name={'cancel'}
       />
     </Group>
   );

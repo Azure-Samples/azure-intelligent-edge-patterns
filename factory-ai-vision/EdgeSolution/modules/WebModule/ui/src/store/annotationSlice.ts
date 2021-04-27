@@ -23,6 +23,7 @@ export const BoxObj = {
       image: imageId,
       label: { x1: 0, y1: 0, x2: 0, y2: 0 },
       annotationState: AnnotationState.Empty,
+      part: null,
     };
   },
   createWithPoint(p: Position2D, imageId: number, id: string) {
@@ -83,17 +84,21 @@ const slice = createSlice({
   },
   reducers: {
     createAnnotation: {
-      prepare: (point: Position2D, imageId: number) => ({
+      prepare: (point: Position2D, imageId: number, part: number) => ({
         payload: {
           id: nanoid(),
           point,
           imageId,
+          part,
         },
       }),
-      reducer: (state, action: PayloadAction<{ point: Position2D; imageId: number; id: string }>) => {
-        const { point, imageId, id } = action.payload;
+      reducer: (
+        state,
+        action: PayloadAction<{ point: Position2D; imageId: number; id: string; part: number }>,
+      ) => {
+        const { point, imageId, id, part } = action.payload;
         const newAnno = BoxObj.createWithPoint(point, imageId, id);
-        entityAdapter.upsertOne(state, newAnno);
+        entityAdapter.upsertOne(state, { ...newAnno, part });
       },
     },
     updateCreatingAnnotation: (state, action: PayloadAction<Position2D>) => {
@@ -155,7 +160,9 @@ export const thunkCreateAnnotation = (
   point: Position2D,
 ): ThunkAction<void, State, unknown, Action<string>> => (dispatch, getState) => {
   const id = getState().labelingPage.selectedImageId;
-  dispatch(createAnnotation(point, id));
+  const part = getState().labelingPage.selectedPartId;
+
+  dispatch(createAnnotation(point, id, part));
 };
 
 export const { selectAll: selectAllAnno, selectEntities: selectAnnoEntities } = entityAdapter.getSelectors(

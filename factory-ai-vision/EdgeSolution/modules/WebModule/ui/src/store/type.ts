@@ -20,6 +20,7 @@ export type Annotation = {
   label: BoxLabel;
   image: number;
   annotationState: AnnotationState;
+  part?: number | null;
 };
 
 export type Position2D = {
