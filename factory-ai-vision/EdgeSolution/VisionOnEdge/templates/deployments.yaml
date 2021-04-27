@@ -1,27 +1,3 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
- name: pvc-rtspsim-csi
-spec:
- accessModes:
- - ReadWriteOnce
- resources:
-  requests:
-   storage: 10Gi
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
- name: pvc-upload-csi
-spec:
- accessModes:
- - ReadWriteOnce
- resources:
-  requests:
-   storage: 10Gi
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,25 +20,23 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.nginxModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginxModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: nginxmodule
-        image: intelligentedge/nginxmodule:0.24.0-amd64
+        image: "intelligentedge/nginxmodule:{{ .Chart.AppVersion }}-amd64"
         imagePullPolicy: Always
         ports:
-        - containerPort: 8181
-      
+        - containerPort: {{ .Values.nginxModule.port | default 8181 }}
+
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginxmodule
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 8181
-  selector:
-    app: nginxmodule
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -85,9 +59,17 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.webModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: webmodule
-        image: intelligentedge/webmodule:0.24.0-amd64
+        image: "intelligentedge/webmodule:{{ .Chart.AppVersion }}-amd64"
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -110,18 +92,8 @@ spec:
           - name: IS_K8S
             value: "true"
 
-      
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: webmodule
-spec:
-  ports:
-  - port: 8000
-  selector:
-    app: webmodule
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -144,10 +116,21 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.inferenceModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.inferenceModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: inferencemodule
-        image: intelligentedge/inferencemodule:0.24.0-amd64
+        image: "intelligentedge/inferencemodule:{{ .Chart.AppVersion }}-amd64"
         imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: {{ .Values.inferenceModule.cpuLimit }}
         ports:
         - containerPort: 5000
         env:
@@ -165,18 +148,9 @@ spec:
             value: "true"
           - name: IS_K8S
             value: "true"
-      
+
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: inferencemodule
-spec:
-  ports:
-  - port: 5000
-  selector:
-    app: inferencemodule
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -199,15 +173,27 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.predictModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.predictModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: predictmodule
+        {{ if .Values.runtime.GPU }}
         image: intelligentedge/predictmodule:0.23.0-gpuamd64
+        resources:
+          limits:
+            nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
+        {{ else }}
+        image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-cpuamd64"
+        {{ end }}
         imagePullPolicy: Always
         ports:
         - containerPort: 7777
-        resources:
-          limits:
-            nvidia.com/gpu: 1
         env:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
@@ -216,18 +202,9 @@ spec:
                 key: IOTHUB_CONNECTION_STRING
           - name: IS_K8S
             value: "true"
-      
+
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: predictmodule
-spec:
-  ports:
-  - port: 7777
-  selector:
-    app: predictmodule
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -250,9 +227,17 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.captureModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.captureModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: cvcapturemodule
-        image: intelligentedge/cameramodule:0.24.0-amd64
+        image: "intelligentedge/cameramodule:{{ .Chart.AppVersion }}-amd64"
         imagePullPolicy: Always
         ports:
         - containerPort: 9000
@@ -264,18 +249,10 @@ spec:
                 key: IOTHUB_CONNECTION_STRING
           - name: IS_K8S
             value: "true"
-      
+
+
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: cvcapturemodule
-spec:
-  ports:
-  - port: 9000
-  selector:
-    app: cvcapturemodule
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -300,7 +277,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: rtspsim
-        image: intelligentedge/rtspsimmodule:0.24.0-amd64
+        image: "intelligentedge/rtspsimmodule:{{ .Chart.AppVersion }}-amd64"
         imagePullPolicy: Always
         ports:
         - containerPort: 554
@@ -311,18 +288,9 @@ spec:
       - name: azure
         persistentVolumeClaim: 
             claimName:  pvc-rtspsim-csi
-      
+
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtspsim
-spec:
-  ports:
-  - port: 554
-  selector:
-    app: rtspsim
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -345,9 +313,17 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.uploadModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.uploadModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: uploadmodule
-        image: intelligentedge/uploadmodule:0.24.0-amd64
+        image: "intelligentedge/uploadmodule:{{ .Chart.AppVersion }}-amd64"
         imagePullPolicy: Always
         ports:
         - containerPort: 7000
@@ -358,18 +334,9 @@ spec:
       - name: azure
         persistentVolumeClaim: 
             claimName:  pvc-upload-csi
-      
+
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: uploadmodule
-spec:
-  ports:
-  - port: 7000
-  selector:
-    app: uploadmodule
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -392,9 +359,17 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.predictModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.predictModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: yolov4module
-        image: registry.hub.docker.com/ronpai/yolov4-tflite-tiny
+        image: "registry.hub.docker.com/ronpai/yolov4-tflite-tiny"
         env:
         - name: ALLOW_EMPTY_PASSWORD
           value: "yes"
@@ -402,15 +377,7 @@ spec:
         - containerPort: 80
         resources:
           limits:
-            nvidia.com/gpu: 1
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: yolov4module
-spec:
-  ports:
-  - port: 80
-  selector:
-    app: yolov4module
----
+            {{ if .Values.runtime.GPU }}
+            nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
+            {{ end }}
+            cpu: {{ .Values.predictModule.cpuLimit }}

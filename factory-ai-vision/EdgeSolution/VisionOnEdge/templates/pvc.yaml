@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: pvc-rtspsim-csi
+spec:
+ accessModes:
+ - ReadWriteOnce
+ resources:
+  requests:
+   storage: {{ .Values.rtspSimModule.storageSize }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: pvc-upload-csi
+spec:
+ accessModes:
+ - ReadWriteOnce
+ resources:
+  requests:
+   storage: {{ .Values.uploadModule.storageSize }}
