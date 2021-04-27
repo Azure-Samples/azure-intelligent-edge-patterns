@@ -69,6 +69,7 @@ def upload_images_to_customvision_helper(
                 label_y = label["y1"] / height
                 label_w = (label["x2"] - label["x1"]) / width
                 label_h = (label["y2"] - label["y1"]) / height
+                tag_id = label["tag_id"]
                 region = Region(
                     tag_id=tag_id,
                     left=label_x,
