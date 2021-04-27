@@ -133,7 +133,7 @@ export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { sta
     const annoEntities = getState().annotations.entities;
     const labels = Object.values(annoEntities)
       .filter((e: Annotation) => e.image === imageId)
-      .map((e: Annotation) => e.label);
+      .map((e: Annotation) => ({ ...e.label, part: e.part }));
     const imgPart = getState().labelImages.entities[imageId].part;
 
     const manualChecked = labels.length > 0;

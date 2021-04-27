@@ -9,6 +9,7 @@ import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
   updateCreatingAnnotation,
+  // updateSelectingAnnotation,
   removeAnnotation,
   thunkCreateAnnotation,
 } from '../../store/annotationSlice';
@@ -29,19 +30,21 @@ interface SceneProps {
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
   imgPart: Part;
+  parts: Part[];
 }
 const Scene: FC<SceneProps> = ({
   url = '',
-  labelingType,
+  // labelingType,
   annotations,
   workState,
   setWorkState,
   onBoxCreated,
-  imgPart,
+  // imgPart,
+  parts,
 }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
-  const noMoreCreate = labelingType === LabelingType.SingleAnnotation && annotations.length === 1;
+  const noMoreCreate = false;
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
@@ -77,6 +80,17 @@ const Scene: FC<SceneProps> = ({
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
 
+    // remove selecting labeling
+    if (workState === WorkState.Selecting && e.target.attrs.name === 'cancel') return;
+
+    // On click box circle & dragging circle
+    if (
+      workState === WorkState.Selecting &&
+      ['anchor-0', 'anchor-1', 'anchor-2', 'anchor-3'].includes(e.target.attrs.name)
+    ) {
+      return;
+    }
+
     dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
     // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
     setSelectedAnnotationIndex(annotations.length);
@@ -88,12 +102,9 @@ const Scene: FC<SceneProps> = ({
       dispatch(
         updateCreatingAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }),
       );
-      if (annotations.length - 1 === selectedAnnotationIndex) {
-        setWorkState(WorkState.Selecting);
-        if (onBoxCreated) onBoxCreated();
-      } else {
-        setWorkState(WorkState.None);
-      }
+
+      if (onBoxCreated) onBoxCreated();
+      setWorkState(WorkState.None);
     }
   };
 
@@ -171,7 +182,8 @@ const Scene: FC<SceneProps> = ({
                       : annotation.label.y1 - 30 / scale.current
                   }
                   fontSize={20 / scale.current}
-                  text={imgPart?.name}
+                  // text={imgPart?.name}
+                  text={annotation.part && parts.find((part) => part.id === annotation.part).name}
                   padding={5 / scale.current}
                 />
               </Group>

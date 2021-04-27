@@ -26,6 +26,7 @@ import Scene from './Scene';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
 import { dummyFunction } from '../../utils/dummyFunction';
+import { selectNonDemoPart } from '../../store/selectors';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -88,6 +89,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
 
+  const parts = useSelector(selectNonDemoPart);
+
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
 
   const isOnePointBox = checkOnePointBox(annotations);
@@ -127,9 +130,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
         annotations={annotations}
         workState={workState}
         setWorkState={setWorkState}
-        labelingType={LabelingType.SingleAnnotation}
+        labelingType={LabelingType.MultiAnnotation}
         onBoxCreated={dummyFunction}
         imgPart={imgPart}
+        parts={parts}
       />
       <Text variant="small" styles={{ root: { position: 'absolute', left: 5, bottom: 5 } }}>
         {cameraName}

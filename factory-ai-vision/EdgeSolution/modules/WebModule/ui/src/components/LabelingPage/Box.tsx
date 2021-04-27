@@ -98,6 +98,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
 
   return (
     <Group
+      name="cancel"
       ref={(e): void => {
         if (e) {
           boxRef.current = e;
