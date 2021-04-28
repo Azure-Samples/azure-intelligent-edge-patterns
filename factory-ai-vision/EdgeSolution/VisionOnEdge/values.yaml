@@ -47,9 +47,6 @@ rtspSimModule:
   storageSize: 10Gi
 
 
-
-
-
 replicaCount: 1
 
 image:
