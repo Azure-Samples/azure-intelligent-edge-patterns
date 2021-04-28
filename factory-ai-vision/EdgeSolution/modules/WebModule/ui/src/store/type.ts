@@ -54,4 +54,5 @@ export type Image = {
   camera: number;
   uploaded: boolean;
   manualChecked: boolean;
+  labels: string[];
 };

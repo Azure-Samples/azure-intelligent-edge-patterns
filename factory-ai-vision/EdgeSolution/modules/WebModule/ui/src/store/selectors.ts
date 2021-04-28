@@ -4,11 +4,23 @@ import { selectPartEntities, selectAllParts } from './partSlice';
 import { Item as ImageListItem } from '../components/ImageList';
 import { selectNonDemoProject } from './trainingProjectSlice';
 import { selectCameraEntities } from './cameraSlice';
-import { Image } from './type';
+import { selectAllAnno } from './annotationSlice';
+import { Image, Annotation } from './type';
 
-const getImgListItem = (img: Image, partEntities, cameraEntities): ImageListItem => {
+const getImgListItem = (
+  img: Image,
+  partEntities,
+  cameraEntities,
+  annotations: Annotation[],
+): ImageListItem => {
   const part = partEntities[img.part];
   const camera = cameraEntities[img.camera];
+
+  const parts = img.labels
+    .map((id) => annotations.find((anno) => anno.id === id).part)
+    .filter((part) => part)
+    .map((partId) => partEntities[partId])
+    .map((part) => ({ id: part.id, name: part.name }));
 
   return {
     id: img.id,
@@ -23,6 +35,7 @@ const getImgListItem = (img: Image, partEntities, cameraEntities): ImageListItem
       id: camera?.id || null,
       name: camera?.name || '',
     },
+    parts,
   };
 };
 
@@ -32,11 +45,11 @@ const getImgListItem = (img: Image, partEntities, cameraEntities): ImageListItem
  */
 export const partImageItemSelectorFactory = (partId) =>
   createSelector(
-    [selectAllImages, selectPartEntities, selectCameraEntities],
-    (images, partEntities, cameraEntities) =>
+    [selectAllImages, selectPartEntities, selectCameraEntities, selectAllAnno],
+    (images, partEntities, cameraEntities, annotations) =>
       images
         .filter((img) => img.part === partId && !img.isRelabel)
-        .map((img) => getImgListItem(img, partEntities, cameraEntities)),
+        .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations)),
   );
 
 /**
@@ -45,22 +58,23 @@ export const partImageItemSelectorFactory = (partId) =>
  */
 export const imageItemSelectorFactory = (unTagged: boolean) =>
   createSelector(
-    [selectAllImages, selectPartEntities, selectCameraEntities],
-    (images, partEntities, cameraEntities) =>
-      images
+    [selectAllImages, selectPartEntities, selectCameraEntities, selectAllAnno],
+    (images, partEntities, cameraEntities, annotations) => {
+      return images
         .filter((img) => {
           if (unTagged) return !img.manualChecked && !img.isRelabel;
           return img.manualChecked;
         })
-        .map((img) => getImgListItem(img, partEntities, cameraEntities)),
+        .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations));
+    },
   );
 
 export const relabelImageSelector = createSelector(
   [selectAllImages, selectPartEntities, selectCameraEntities],
-  (images, partEntities, cameraEntities) =>
+  (images, partEntities, cameraEntities, annotations) =>
     images
       .filter((img) => img.isRelabel && !img.manualChecked)
-      .map((img) => getImgListItem(img, partEntities, cameraEntities)),
+      .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations)),
 );
 
 export const selectNonDemoPart = createSelector(
