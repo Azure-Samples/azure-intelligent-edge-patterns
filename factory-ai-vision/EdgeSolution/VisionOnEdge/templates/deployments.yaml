@@ -135,9 +135,11 @@ spec:
       - name: inferencemodule
         image: "intelligentedge/inferencemodule:{{ .Chart.AppVersion }}-amd64"
         imagePullPolicy: Always
+        {{ if .Values.inferenceModule.cpuLimit }}
         resources:
           limits:
             cpu: {{ .Values.inferenceModule.cpuLimit }}
+        {{ end }}
         ports:
         - containerPort: 5000
         env:
@@ -387,4 +389,6 @@ spec:
             {{ if .Values.runtime.GPU }}
             nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
             {{ end }}
+            {{ if .Values.predictModule.cpuLimit }}
             cpu: {{ .Values.predictModule.cpuLimit }}
+            {{ end }}

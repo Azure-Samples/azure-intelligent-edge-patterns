@@ -24,7 +24,7 @@ webModule:
   affinity: {}
 
 inferenceModule:
-  cpuLimit: 2000m
+  cpuLimit: 
   tolerations: []
   affinity: {}
 
@@ -38,7 +38,7 @@ uploadModule:
   storageSize: 10Gi
 
 predictModule:
-  cpuLimit: 3000m
+  cpuLimit: 
   numGPUs: 1
   tolerations: []
   affinity: {}
