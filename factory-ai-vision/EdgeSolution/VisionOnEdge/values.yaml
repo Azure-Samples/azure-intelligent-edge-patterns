@@ -4,6 +4,15 @@
 
 runtime:
   GPU: false
+  Storage: 
+
+azureIoT:
+  hubConnectionString:
+  edgeConnectionString:
+
+customVision:
+  endPoint:
+  key:
 
 nginxModule:
   port: 8181
