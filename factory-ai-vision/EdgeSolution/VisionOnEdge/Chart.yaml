@@ -1,5 +1,5 @@
 apiVersion: v2
-name: VisionOnEdge
+name: vision-on-edge
 description: A Helm chart for VisionOnEdge(VoE) application that deploys VoE modules onto Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
