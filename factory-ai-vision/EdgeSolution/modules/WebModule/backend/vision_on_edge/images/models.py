@@ -91,12 +91,13 @@ class Image(models.Model):
             label_x2 = int(size_width * (left + width))
             label_y2 = int(size_height * (top + height))
             # to be modified to multi-labels
-            if len(self.labels) > 0:
-                labels = json.loads(self.labels)
+            if self.labels:
+                if len(self.labels) > 0:
+                    labels = json.loads(self.labels)
             else:
                 labels = []
             labels.append({"x1": label_x1, "y1": label_y1,
-                           "x2": label_x2, "y2": label_y2, "tag_id": tag_id})
+                           "x2": label_x2, "y2": label_y2, "part": tag_id})
             self.labels = json.dumps(labels)
             self.save()
             logger.info("Set image labels success %s", self.labels)
