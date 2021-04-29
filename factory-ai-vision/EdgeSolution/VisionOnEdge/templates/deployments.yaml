@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: nginxmodule
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: nginxmodule
@@ -42,7 +42,7 @@ kind: Deployment
 metadata:
   name: webmodule
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: webmodule
@@ -106,7 +106,7 @@ kind: Deployment
 metadata:
   name: inferencemodule
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: inferencemodule
@@ -165,7 +165,7 @@ kind: Deployment
 metadata:
   name: predictmodule
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: predictmodule
@@ -199,6 +199,11 @@ spec:
             nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
         {{ else }}
         image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-cpuamd64"
+        {{ if .Values.predictModule.cpuLimit }}
+        resources:
+          limits:
+            cpu: {{ .Values.predictModule.cpuLimit }}
+        {{ end }}
         {{ end }}
         imagePullPolicy: Always
         ports:
@@ -219,7 +224,7 @@ kind: Deployment
 metadata:
   name: cvcapturemodule
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: cvcapturemodule
@@ -266,8 +271,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rtspsim
-spec:
-  replicas: {{ .Values.replicaCount }}
+spec:   
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: rtspsim
@@ -282,6 +287,14 @@ spec:
       labels:
         app: rtspsim
     spec:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpression:
+            - key: app
+              operator: In
+              values:
+              - uploadmodule
       nodeSelector:
         "beta.kubernetes.io/os": linux
       containers:
@@ -296,7 +309,7 @@ spec:
       volumes:
       - name: azure
         persistentVolumeClaim: 
-            claimName:  pvc-rtspsim-csi
+            claimName:  pvc-storage-csi
 
 ---
 
@@ -305,7 +318,7 @@ kind: Deployment
 metadata:
   name: uploadmodule
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: uploadmodule
@@ -320,6 +333,14 @@ spec:
       labels:
         app: uploadmodule
     spec:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpression:
+            - key: app
+              operator: In
+              values:
+              - rtspsim
       nodeSelector:
         "beta.kubernetes.io/os": linux
       {{- with .Values.uploadModule.affinity }}
@@ -342,7 +363,7 @@ spec:
       volumes:
       - name: azure
         persistentVolumeClaim: 
-            claimName:  pvc-upload-csi
+            claimName:  pvc-storage-csi
 
 ---
 
@@ -351,7 +372,7 @@ kind: Deployment
 metadata:
   name: yolov4module
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: yolov4module

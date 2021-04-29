@@ -2,9 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+
+replicaCount: 1
+
 runtime:
   GPU: false
-  Storage: 
+  storageSize: 10Gi
 
 azureIoT:
   hubConnectionString:
@@ -35,7 +38,6 @@ captureModule:
 uploadModule:
   tolerations: []
   affinity: {}
-  storageSize: 10Gi
 
 predictModule:
   cpuLimit: 
@@ -43,11 +45,6 @@ predictModule:
   tolerations: []
   affinity: {}
 
-rtspSimModule:
-  storageSize: 10Gi
-
-
-replicaCount: 1
 
 image:
   repository: nginx
