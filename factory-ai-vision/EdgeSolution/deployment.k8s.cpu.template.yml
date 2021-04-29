@@ -22,7 +22,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: nginxmodule
-        image: intelligentedge/nginxmodule:0.23.0-amd64
+        image: intelligentedge/nginxmodule:0.24.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 8181
@@ -63,7 +63,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: webmodule
-        image: intelligentedge/webmodule:0.23.0-amd64
+        image: intelligentedge/webmodule:0.24.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -125,7 +125,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: inferencemodule
-        image: intelligentedge/inferencemodule:0.23.0-amd64
+        image: intelligentedge/inferencemodule:0.24.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
@@ -183,7 +183,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: predictmodule
-        image: intelligentedge/predictmodule:0.23.0-cpuamd64
+        image: intelligentedge/predictmodule:0.24.0-cpuamd64
         imagePullPolicy: Always
         ports:
         - containerPort: 7777
@@ -234,7 +234,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: cvcapturemodule
-        image: intelligentedge/cameramodule:0.23.0-amd64
+        image: intelligentedge/cameramodule:0.24.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 9000
@@ -285,7 +285,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: rtspsim
-        image: intelligentedge/rtspsimmodule:0.23.0-amd64
+        image: intelligentedge/rtspsimmodule:0.24.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 554
@@ -334,7 +334,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: uploadmodule
-        image: intelligentedge/uploadmodule:0.23.0-amd64
+        image: intelligentedge/uploadmodule:0.24.0-amd64
         imagePullPolicy: Always
         ports:
         - containerPort: 7000

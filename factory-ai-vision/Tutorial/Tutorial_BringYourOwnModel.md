@@ -11,7 +11,7 @@ https://github.com/Azure/live-video-analytics/tree/master/utilities/video-analys
 1.	Install Docker on your machine
 2.	Install curl
 
-##Building the docker container
+## Building the docker container
 
 1.	Create a new directory on your machine and copy all the files (including the sub-folders) from this GitHub folder to that directory.
 2.	Go to https://github.com/Azure/live-video-analytics and download zip in your local machine

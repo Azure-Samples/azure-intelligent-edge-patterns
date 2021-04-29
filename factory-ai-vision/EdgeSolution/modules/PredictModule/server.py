@@ -5,6 +5,7 @@ import json
 import logging
 import logging.config
 import os
+import io
 import socket
 import sys
 import threading
@@ -75,7 +76,10 @@ async def predict(request: Request):
     """predict."""
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
-    img = nparr.reshape(-1, 960, 3)
+    if len(nparr) % 960 == 0:
+        img = nparr.reshape(-1, 960, 3)
+    else:
+        img = nparr.reshape(540, -1, 3)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     predictions, inf_time = onnx.Score(img)
     results = customvision_to_lva_format(predictions)
@@ -85,6 +89,29 @@ async def predict(request: Request):
     return json.dumps({"inferences": results, "inf_time": inf_time}), 200
     # return json.dumps({"predictions": predictions, "inf_time": inf_time}), 200
     # return "", 204
+
+
+@app.post("/predict2")
+async def predict2(request: Request):
+    """predict2."""
+    reqBody = await request.body()
+    # get request as byte stream
+
+    # convert from byte stream
+    inMemFile = io.BytesIO(reqBody)
+
+    # load a sample image
+    inMemFile.seek(0)
+    fileBytes = np.asarray(bytearray(inMemFile.read()), dtype=np.uint8)
+
+    cvImage = cv2.imdecode(fileBytes, cv2.IMREAD_COLOR)
+
+    predictions, inf_time = onnx.Score(cvImage)
+    results = customvision_to_lva_format(predictions)
+    if int(time.time()) % 5 == 0:
+        logger.info(predictions)
+
+    return json.dumps({"inferences": results, "inf_time": inf_time}), 200
 
 
 @app.post("/update_model")
