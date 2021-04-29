@@ -3,12 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui/react';
 
-import { getParts, Part } from '../store/partSlice';
-import { selectNonDemoPart } from '../store/selectors';
+import { getParts, Part } from '../../store/partSlice';
+import { selectNonDemoPart } from '../../store/selectors';
 
-import { Url } from '../enums';
+import { Url } from '../../enums';
 
-import { EmptyAddIcon } from './EmptyAddIcon';
+import { EmptyAddIcon } from '../EmptyAddIcon';
 
 export const PartDetailList: React.FC<{ onAddBtnClick: () => void }> = ({ onAddBtnClick }) => {
   const [loading, setLoading] = useState(false);

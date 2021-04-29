@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
 import { useBoolean } from '@uifabric/react-hooks';
-import { PartDetailList } from '../components/PartDetailList';
+import { PartDetailList } from '../components/Part/PartDetailList';
 import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
 
 const theme = getTheme();

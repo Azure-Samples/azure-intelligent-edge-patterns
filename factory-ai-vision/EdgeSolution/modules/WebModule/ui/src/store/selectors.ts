@@ -45,11 +45,12 @@ const getImgListItem = (
  */
 export const partImageItemSelectorFactory = (partId) =>
   createSelector(
-    [selectAllImages, selectPartEntities, selectCameraEntities, selectAllAnno],
-    (images, partEntities, cameraEntities, annotations) =>
-      images
-        .filter((img) => img.part === partId && !img.isRelabel)
-        .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations)),
+    [partsImagesSelectorFactory, selectPartEntities, selectCameraEntities, selectAllAnno],
+    (partAllImages, partEntities, cameraEntities, annotations) => {
+      return partAllImages
+        .filter((img) => !img.isRelabel && img.parts.includes(partId))
+        .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations));
+    },
   );
 
 /**
@@ -80,4 +81,15 @@ export const relabelImageSelector = createSelector(
 export const selectNonDemoPart = createSelector(
   [selectAllParts, selectNonDemoProject],
   (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
+);
+
+export const partsImagesSelectorFactory = createSelector(
+  [selectAllImages, selectAllAnno],
+  (images, annotations) =>
+    images.map((img) => ({
+      ...img,
+      parts: img.labels
+        .map((label) => annotations.find((anno) => anno.id === label).part)
+        .filter((part) => part),
+    })),
 );
