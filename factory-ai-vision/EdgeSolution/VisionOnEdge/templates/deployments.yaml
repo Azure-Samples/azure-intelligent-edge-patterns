@@ -295,7 +295,8 @@ spec:
               - key: app
                 operator: In
                 values:
-                - uploadmodule
+                - rtspsim
+            topologyKey: "kubernetes.io/hostname"
       nodeSelector:
         "beta.kubernetes.io/os": linux
       containers:
@@ -343,6 +344,7 @@ spec:
                 operator: In
                 values:
                 - rtspsim
+            topologyKey: "kubernetes.io/hostname"
       nodeSelector:
         "beta.kubernetes.io/os": linux
       {{- with .Values.uploadModule.tolerations }}
