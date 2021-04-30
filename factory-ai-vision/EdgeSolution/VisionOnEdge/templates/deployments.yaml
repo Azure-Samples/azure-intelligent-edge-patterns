@@ -295,7 +295,8 @@ spec:
               - key: app
                 operator: In
                 values:
-                - uploadmodule
+                - rtspsim
+            topologyKey: "kubernetes.io/hostname"
         {{- with .Values.rtspsimModule.affinity }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -350,6 +351,7 @@ spec:
                 operator: In
                 values:
                 - rtspsim
+            topologyKey: "kubernetes.io/hostname"
         {{- with .Values.uploadModule.affinity }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

@@ -38,8 +38,7 @@ uploadModule:
   affinity: {}
 
 predictModule:
-  replicaCount:
-  cpuLimit: 
+  cpuLimit:
   numGPUs: 1
   tolerations: []
   affinity: {}
