@@ -287,14 +287,15 @@ spec:
       labels:
         app: rtspsim
     spec:
-      podAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpression:
-            - key: app
-              operator: In
-              values:
-              - uploadmodule
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpression:
+              - key: app
+                operator: In
+                values:
+                - uploadmodule
       nodeSelector:
         "beta.kubernetes.io/os": linux
       containers:
@@ -333,20 +334,17 @@ spec:
       labels:
         app: uploadmodule
     spec:
-      podAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpression:
-            - key: app
-              operator: In
-              values:
-              - rtspsim
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpression:
+              - key: app
+                operator: In
+                values:
+                - rtspsim
       nodeSelector:
         "beta.kubernetes.io/os": linux
-      {{- with .Values.uploadModule.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       {{- with .Values.uploadModule.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
