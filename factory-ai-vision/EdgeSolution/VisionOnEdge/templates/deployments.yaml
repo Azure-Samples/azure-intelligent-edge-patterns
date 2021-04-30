@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: nginxmodule
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
       app: nginxmodule
@@ -42,7 +42,7 @@ kind: Deployment
 metadata:
   name: webmodule
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
       app: webmodule
@@ -106,7 +106,7 @@ kind: Deployment
 metadata:
   name: inferencemodule
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
       app: inferencemodule
@@ -165,7 +165,7 @@ kind: Deployment
 metadata:
   name: predictmodule
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: {{ .Values.predictModule.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: predictmodule
@@ -224,7 +224,7 @@ kind: Deployment
 metadata:
   name: cvcapturemodule
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
       app: cvcapturemodule
@@ -272,7 +272,7 @@ kind: Deployment
 metadata:
   name: rtspsim
 spec:   
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
       app: rtspsim
@@ -296,8 +296,15 @@ spec:
                 operator: In
                 values:
                 - uploadmodule
+        {{- with .Values.rtspsimModule.affinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       nodeSelector:
         "beta.kubernetes.io/os": linux
+      {{- with .Values.rtspsimModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: rtspsim
         image: "intelligentedge/rtspsimmodule:{{ .Chart.AppVersion }}-amd64"
@@ -319,7 +326,7 @@ kind: Deployment
 metadata:
   name: uploadmodule
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
       app: uploadmodule
@@ -343,6 +350,9 @@ spec:
                 operator: In
                 values:
                 - rtspsim
+        {{- with .Values.uploadModule.affinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       nodeSelector:
         "beta.kubernetes.io/os": linux
       {{- with .Values.uploadModule.tolerations }}
@@ -370,7 +380,7 @@ kind: Deployment
 metadata:
   name: yolov4module
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: {{ .Values.predictModule.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: yolov4module
