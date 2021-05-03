@@ -1,4 +1,4 @@
-# Deploy Vision on Edge solution on AKS and AKS-HCI Using our Helm chart
+# Deploy Vision on Edge solution on AKS and AKS-HCI using our Helm Chart
 
 Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy Vision on Edge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI).
 
