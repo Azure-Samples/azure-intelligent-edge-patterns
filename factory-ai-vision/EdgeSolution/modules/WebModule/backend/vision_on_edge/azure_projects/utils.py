@@ -226,11 +226,12 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                 else:
                     # TODO:  Multiple region with same tag
                     logger.info("Adding label to %s", img.id)
-                    img_obj.add_labels(
+                    img_obj.set_labels(
                         left=region.left,
                         top=region.top,
                         width=region.width,
                         height=region.height,
+                        tag_id=img_obj.part.pk,
                     )
 
         img_index += img_batch_size
