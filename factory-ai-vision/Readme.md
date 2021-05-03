@@ -43,8 +43,8 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a bri
 - [Architecture](#architecture)
     + [LVA Module (Recommended)](#lva-module--recommended-)
     + [OpenCV Module](#opencv-module)
-- [Get Started: Vision on Edge Installer](#get-started--vision-on-edge-installer)
-  * [Azure IoT Edge (Recommended)](#azure-iot-edge--recommended-)
+- [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
+  * [For Azure IoT Edge (Recommended)](#azure-iot-edge-recommended)
     + [Option 1: Azure Shell Installer](#option-1--azure-shell-installer)
       - [Prerequisite:](#prerequisite-)
       - [Get Started:](#get-started-)
@@ -54,15 +54,13 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a bri
       - [Get Started](#get-started)
     + [Troubleshooting](#troubleshooting)
     + [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
-  * [Kubernetes (AKS/AKS-HCI)(Beta)](#kubernetes--aks-aks-hci--beta-)
+  * [For Kubernetes (AKS/AKS-HCI)(Beta)](#kubernetes--aks-aks-hci--beta-)
     + [Option 1: VoE Helm Chart (Recommended)](#option-1--voe-helm-chart--recommended-)
     + [Option 2: Static Kubernetes YAML](#option-2--static-kubernetes-yaml)
       - [AKS:](#aks-)
 - [Other Tutorials](#other-tutorials)
   * [Video Tutorials](#video-tutorial)
 - [Privacy Notice](#privacy-notice)
-
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 
 # Prerequisites
