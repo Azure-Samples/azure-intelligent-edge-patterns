@@ -1,13 +1,12 @@
 | description                                                                                                                                                                                                                          | products                                                               | page_type       | description                     |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | --------------- | ------------------------------- |
-| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | - azure Stack<br/> -Custom Vision<br/>-Onnxruntime<br/>-azure-iot-edge | sample solution | -json<br>-python<br>-javascript |
+| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | - Azure Stack<br/> -Custom Vision<br/>-Onnxruntime<br/>-azure-iot-edge<br/>-AKS/ASK-HCI | sample solution | -json<br>-python<br>-javascript<br>-go<br>-helm |
 
 # Vision on Edge Solution
 
-This is a solution showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
-You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft LVA and openCV.
+This is a solution showing how to deploy a Custom Vision model to Azure IoT Edge devices and AKS/AKS-HCI(beta) and get a Vision-based Machine learning solution up and running in a single day. You can define your location, camera and set up objects to detect example: any manufacturing parts, defective parts, etc. While keeping your video footage private, lowering your bandwidth costs, and even running everything offline. We use onnxruntime to accelerate your models on edge device using OpenVino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft LVA and OpenCV.
 
-Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief introduction in action and understand how the value is delievered:
+Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a brief introduction in action and understand how the value is delievered:
 [![video](https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/linker/factory-ai-vision/assets/Ignite42021.jpg)](https://www.youtube.com/watch?v=17UW6veK7SA)
 
 ## Product
@@ -34,30 +33,34 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
 
 <!-- ### NOTE:This solution is only supported on linux based Azure IoT edge devices -->
 
-# Prerequiste
+# Prerequisites
 
 ## Hardware
 
 You need to have one of the following:
 
 - **Azure Stack Edge**: A portfolio of devices that bring the compute, storage and intelligence to the edge right where data is created. Find out more [here](https://azure.microsoft.com/en-us/products/azure-stack/edge/)
-- Please ensure that you have compute configured and you can run [GPU getting started module here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-sample-module-marketplace)
+  - Please ensure that you have compute configured and you can run [GPU getting started module here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-sample-module-marketplace)
+- **Azure Stack HCI**: A hyperconverged infrastructure (HCI) cluster solution that hosts virtualized Windows and Linux workloads and their storage in a hybrid, on-premises environment. Find out more [here](https://docs.microsoft.com/en-us/azure-stack/hci/overview). You can either:
+  - Create a linux VM in your HCI environment by following [this](https://docs.microsoft.com/en-us/azure-stack/hci/manage/vm) and then follow this to [install IoT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) in your VM. (You can attach a GPU to HCI VM by following [this instruction](https://docs.microsoft.com/en-us/azure-stack/hci/manage/attach-gpu-to-linux-vm))
+  - Create AKS-HCI in your HCI enviroment by following [this](https://docs.microsoft.com/en-us/azure-stack/aks-hci/overview) (VoE Kubernetes deployment is currently in Beta)
 
 or
 
 - **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
-  - For runing on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
-  - For runnign on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
+  - For running on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
+  - For running on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
  
-  - Before installation, You must have the following services set up to use Vision on Edge:
-
-
-
 ### NOTE:This solution is only supported on linux based Azure IoT edge devices
+
+Vision on Edge(VoE) also uses/requires a few Azure services for its various capabilities. Some of these services will be automatically deployed for you (during VoE installation) while others may need you to pre-deploy them before installing VoE. Please follow the VoE installation paths discussed below for more information.
 
 ## Services
 
-Check out the architecture below to see how Vision on Edge works on both LVA and OpenCV module. You can also get more details through this tutorial to see how a IoT Edge deployment works. You must have the following services set up to use this solution:
+Check out the architecture below to see how Vision on Edge uses various services to function. Depending on your deployment target VoE will need the following Azure services as prerequisites:
+
+- IoT Edge Devices: Azure Custom Vision + IoT Hub + Azure Media Services (For LVA deployment (recommended))
+- Kubernetes (AKS-HCI): Azure Custom Vision + IoT Hub
 
 # Architecture
 
