@@ -166,7 +166,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                         top=region.top,
                         width=region.width,
                         height=region.height,
-                        tag_id=tag.id,
+                        tag_id=img_obj.part.pk,
                     )
                     break
 
@@ -220,7 +220,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                         top=region.top,
                         width=region.width,
                         height=region.height,
-                        tag_id=region.tag_id,
+                        tag_id=img_obj.part.pk,
                     )
                     img_counter += 1
                 else:
