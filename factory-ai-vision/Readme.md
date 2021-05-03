@@ -110,7 +110,7 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 # Get Started: Vision on Edge Installer
 
-## Azure IoT Edge (Recommended)
+## For Azure IoT Edge Devices (Recommended)
 
 ### Option 1: Azure Shell Installer
 
@@ -134,7 +134,7 @@ please follow the document to follow instruction  https://github.com/linkernetwo
 
 
 
-#### Prerequisites
+#### Prerequisites:
 
  - Before installation, You must have the following services set up to use Vision on Edge:
 
@@ -146,7 +146,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 [![Visual Studio Code Extension Video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/VSCodeExtensionVideo.png)](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52)
 
-#### Get Started
+#### Get Started:
 
 - Clone azure intelligent edge patterns branch
 
@@ -245,7 +245,7 @@ If you are running into issues, please check following for assistnat:
 
 If you don't have camera devices to connect to your VoE deployment, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).
 
-## Kubernetes (AKS/AKS-HCI)(Beta)
+## For Kubernetes (AKS/AKS-HCI)(Beta)
 
 ### Option 1: VoE Helm Chart (Recommended)
 
