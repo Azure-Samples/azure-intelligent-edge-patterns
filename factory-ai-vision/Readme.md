@@ -35,6 +35,34 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a bri
 
 <!-- ### NOTE:This solution is only supported on linux based Azure IoT edge devices -->
 
+- [Prerequisites](#prerequisites)
+  * [Hardware](#hardware)
+  * [Services](#services)
+- [Architecture](#architecture)
+    + [LVA Module (Recommended)](#lva-module--recommended-)
+    + [OpenCV Module](#opencv-module)
+- [Get Started: Vision on Edge Installer](#get-started--vision-on-edge-installer)
+  * [Azure IoT Edge (Recommended)](#azure-iot-edge--recommended-)
+    + [Option 1: Azure Shell Installer](#option-1--azure-shell-installer)
+      - [Prerequisite:](#prerequisite-)
+      - [Get Started:](#get-started-)
+    + [Option 2: Azure ARM Template](#option-2--azure-arm-template)
+    + [Option 3: Deploy by Visual studio](#option-3--deploy-by-visual-studio)
+      - [Prerequisites](#prerequisites-1)
+      - [Get Started](#get-started)
+    + [Troubleshooting](#troubleshooting)
+    + [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
+  * [Kubernetes (AKS/AKS-HCI)(Beta)](#kubernetes--aks-aks-hci--beta-)
+    + [Option 1: VoE Helm Chart (Recommended)](#option-1--voe-helm-chart--recommended-)
+    + [Option 2: Static Kubernetes YAML](#option-2--static-kubernetes-yaml)
+      - [AKS:](#aks-)
+- [Other Tutorials](#other-tutorials)
+  * [Video Tutorials](#video-tutorial)
+- [Privacy Notice](#privacy-notice)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 # Prerequisites
 
 ## Hardware
@@ -223,7 +251,7 @@ If you don't have camera devices to connect to your VoE deployment, you can use 
 
 Please follow the [instructions given here](Tutorial/K8s_helm_deploy.md) to install VoE on Kubernetes (AKS/AKS-HCI) using our Helm chart.
 
-### Option 2: Static Kubernetes YAML:
+### Option 2: Static Kubernetes YAML
 
 #### AKS:
 Please follow the [instructions here](Tutorial/AKS_deploy.md) to deploy to AKS.
@@ -231,7 +259,7 @@ Please follow the [instructions here](Tutorial/AKS_deploy.md) to deploy to AKS.
 
 # Other Tutorials 
 
-## Video Tutorial
+## Video Tutorials
 
 - Tutorial 0 - Build with VS code [https://youtu.be/ORTwMYOxkVs]
 
