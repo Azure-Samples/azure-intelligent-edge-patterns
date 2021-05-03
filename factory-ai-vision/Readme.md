@@ -35,6 +35,8 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a bri
 
 <!-- ### NOTE:This solution is only supported on linux based Azure IoT edge devices -->
 
+# Table of Content
+
 - [Prerequisites](#prerequisites)
   * [Hardware](#hardware)
   * [Services](#services)
