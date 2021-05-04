@@ -10,6 +10,7 @@ import { State } from 'RootStateType';
 import { getCameras } from '../store/cameraSlice';
 import { getImages } from '../store/imageSlice';
 import { thunkGetProject } from '../store/project/projectActions';
+import { getParts } from '../store/partSlice';
 
 import { Status } from '../store/project/projectTypes';
 import { Url } from '../enums';
@@ -28,6 +29,7 @@ const BaseHome: React.FC = () => {
       await dispatch(getCameras(false));
       await dispatch(getImages({ freezeRelabelImgs: false }));
       await dispatch(thunkGetProject());
+      await dispatch(getParts());
       setLoading(false);
     })();
   }, [dispatch]);
