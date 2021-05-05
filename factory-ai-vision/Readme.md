@@ -44,7 +44,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a bri
     + [LVA Module (Recommended)](#lva-module--recommended-)
     + [OpenCV Module](#opencv-module)
 - [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
-  * [For Azure IoT Edge (Recommended)](#for-azure-iot-edge-devices-recommended)
+  * [For Azure IoT Edge](#for-azure-iot-edge-devices-recommended)
     + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer)
       - [Prerequisite](#prerequisite)
       - [Get Started](#get-started)
