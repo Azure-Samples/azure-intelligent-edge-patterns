@@ -51,13 +51,14 @@ For IoT Edge device connection string:
 
 If you already have a Custom Vision Resource, you can skip this step. Otherwise, create a Custom Vision Resource by visiting [the following link](https://www.customvision.ai/projects#/settings) and selecting "create new".
 
-![CV_new](../assets/CVnew.png | width=100)
+<img src="../assets/CVnew.png" width="500">
 
 #### Retrieve your Custom Vision key and endpoint:
 
 You need your Custom Vision key and endpoint during deployment to AKS/AKS-HCI. You can retrieve them by going to [the following link](https://www.customvision.ai/projects#/settings) and expanding your desired custom vision resource.
 
-![CV_get](../assets/CVget.png)
+
+<img src="../assets/CVget.png" width="500">
 
 ## Deploy VoE onto AKS/AKS-HCI
 
