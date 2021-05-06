@@ -1,6 +1,6 @@
-# Deploy Vision on Edge solution on AKS and AKS-HCI using our Helm Chart
+# Deploy VisionOnEdge solution on AKS and AKS-HCI using our Helm Chart
 
-Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy Vision on Edge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI).
+Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy VisionOnEdge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI).
 
 ## Prerequisites
 
@@ -21,8 +21,45 @@ You need the Azure CLI version 2.0.59 or later installed and configured. Run `a
 Lastly, the device that you are using to deploy VoE needs to have the latest version Helm installed. If you don't have helm installed, you can do so by following the [instructions here](https://helm.sh/docs/intro/install/). 
 
 ## Deploy/Configure Required Azure Resources
+
+VisionOnEdge uses/requires the following two Azure resources to function. Azure IoT Hub and registered IoT Edge devices within IoT Hub act as a messaging broker that enables the communication between VisionOnEdge deployment and the Azure Cloud. Azure Custom Vision, on the other hand, is used for training ML models, optimizing for customer-specific workloads.  
+
 ### IoT Hub
+
+#### Create IoT Hub and Register an IoT Edge Device
+
+If you already have an IoT Hub deployment with a registered IoT Edge device, you can skip this step. Otherwise:
+
+1. Follow the "Create an IoT hub" section of [this document](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux?view=iotedge-2018-06#create-an-iot-hub) to create an IoT Hub resource on Azure. 
+2. Follow the "Register an IoT Edge device" section of [this document](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux?view=iotedge-2018-06#register-an-iot-edge-device) to register an IoT Edge device (AKS/AKS-HCI cluster will be the edge device for messaging purposes)
+
+#### Retrieve your IoT Hub and IoT Edge device's connection string
+
+You need your Azure IoT Hub and registered IoT Edge device's connection string during deployment to AKS/AKS-HCI. Please retrieve the appropriate connection strings using the following commands:
+
+For IoT Hub connection string:
+
+`az iot hub connection-string show --hub-name <your_iothub_name>`
+
+For IoT Edge device connection string:
+
+`az iot hub device-identity connection-string show --hub-name <your_iothub_name> --device-id <your_edge_device_name>`
+
 ### Custom Vision
 
+#### Create a Custom Vision Resource
+
+If you already have a Custom Vision Resource, you can skip this step. Otherwise, create a Custom Vision Resource by visiting [the following link](https://www.customvision.ai/projects#/settings) and selecting "create new".
+
+![CV_new](../assets/CVnew.png)
+
+#### Retrieve your Custom Vision key and endpoint:
+
+You need your Custom Vision key and endpoint during deployment to AKS/AKS-HCI. You can retrieve them by going to [the following link](https://www.customvision.ai/projects#/settings) and expanding your desired custom vision resource.
+
+![CV_get](../assets/CVget.png)
+
 ## Deploy VoE onto AKS/AKS-HCI
+
+
 
