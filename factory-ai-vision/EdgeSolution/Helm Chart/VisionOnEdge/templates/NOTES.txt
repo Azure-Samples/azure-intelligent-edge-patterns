@@ -10,7 +10,7 @@
 
     kubectl get service nginxmodule --namespace {{ .Release.Namespace }} -o=jsonpath="{.status.loadBalancer.ingress[0].ip}"
 
- (b) Get VisionOnEdge deployment's IP address by running the following command:
+ (b) Get VisionOnEdge deployment's Port by running the following command:
 
     kubectl get service nginxmodule --namespace {{ .Release.Namespace }} -o=jsonpath="{.spec.ports[0].port}"
 
