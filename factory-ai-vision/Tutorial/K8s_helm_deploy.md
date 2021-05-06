@@ -51,7 +51,7 @@ For IoT Edge device connection string:
 
 If you already have a Custom Vision Resource, you can skip this step. Otherwise, create a Custom Vision Resource by visiting [the following link](https://www.customvision.ai/projects#/settings) and selecting "create new".
 
-![CV_new](../assets/CVnew.png)
+![CV_new](../assets/CVnew.png | width=100)
 
 #### Retrieve your Custom Vision key and endpoint:
 
