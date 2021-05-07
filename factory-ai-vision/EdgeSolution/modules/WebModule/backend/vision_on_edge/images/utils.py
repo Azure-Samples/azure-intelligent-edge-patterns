@@ -70,7 +70,7 @@ def upload_images_to_customvision_helper(
                 label_y = label["y1"] / height
                 label_w = (label["x2"] - label["x1"]) / width
                 label_h = (label["y2"] - label["y1"]) / height
-                label_tag_id = int(label["tag_id"])
+                label_tag_id = int(label["part"])
                 part_obj: Part = Part.objects.get(pk=label_tag_id)
                 tag_id = part_obj.customvision_id
                 region = Region(
