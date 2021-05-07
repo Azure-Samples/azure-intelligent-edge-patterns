@@ -71,11 +71,12 @@ export const imageItemSelectorFactory = (unTagged: boolean) =>
   );
 
 export const relabelImageSelector = createSelector(
-  [selectAllImages, selectPartEntities, selectCameraEntities],
-  (images, partEntities, cameraEntities, annotations) =>
-    images
+  [selectAllImages, selectPartEntities, selectCameraEntities, selectAllAnno],
+  (images, partEntities, cameraEntities, annotations) => {
+    return images
       .filter((img) => img.isRelabel && !img.manualChecked)
-      .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations)),
+      .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations));
+  },
 );
 
 export const selectNonDemoPart = createSelector(
