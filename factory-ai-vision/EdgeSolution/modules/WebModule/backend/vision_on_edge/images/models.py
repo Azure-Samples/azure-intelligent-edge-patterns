@@ -27,6 +27,7 @@ class Image(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     part = models.ForeignKey(Part, on_delete=models.SET_NULL, null=True)
+    part_ids = models.CharField(max_length=1000, null=True)
     camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
     image = models.ImageField(upload_to="images/")
     labels = models.CharField(max_length=1000, null=True)
@@ -96,11 +97,22 @@ class Image(models.Model):
                     labels = json.loads(self.labels)
             else:
                 labels = []
+
+            if self.part_ids:
+                if len(self.part_ids) > 0:
+                    part_ids = json.loads(self.part_ids)
+            else:
+                part_ids = []
+
             labels.append({"x1": label_x1, "y1": label_y1,
                            "x2": label_x2, "y2": label_y2, "part": tag_id})
+            if str(tag_id) not in part_ids:
+                part_ids.append(str(tag_id))
+                self.part_ids = json.dumps(part_ids)
             self.labels = json.dumps(labels)
             self.save()
             logger.info("Set image labels success %s", self.labels)
+            logger.info("Set image part_ids success %s", self.part_ids)
 
     @staticmethod
     def pre_save(**kwargs):
