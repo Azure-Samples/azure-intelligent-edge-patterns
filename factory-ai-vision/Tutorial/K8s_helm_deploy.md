@@ -96,8 +96,12 @@ If you would like to deploy the solution onto another namespace, you can do so u
 helm install voe-k8s https://aka.ms/VoEHelm -f <path-to-your-values.yaml-file> -n fac-ai
 ```
 
-One thing to note is that `fac-ai` namespace should have already been created for the above command to work. 
+One thing to note is that `fac-ai` namespace should have already been created for the above command to work. You should see the following after deployment: 
 
-## Helm Chart Parameters
+<img src="../assets/helmdeployed.png" width="500">
 
-The instalation method above installs VisionOnEdge
+## Manage your VisionOnEdge deployment
+
+### Delete deployment
+
+### Upgrade/Update deployment
