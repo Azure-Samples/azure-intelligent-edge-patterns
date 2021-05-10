@@ -9,10 +9,10 @@ import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
   updateCreatingAnnotation,
-  // updateSelectingAnnotation,
   removeAnnotation,
   thunkCreateAnnotation,
 } from '../../store/annotationSlice';
+import { removeImgLabels } from '../../store/imageSlice';
 import RemoveBoxButton from './RemoveBoxButton';
 import { Annotation, Size2D } from '../../store/type';
 import { Part } from '../../store/partSlice';
@@ -29,18 +29,17 @@ interface SceneProps {
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
-  imgPart: Part;
   parts: Part[];
+  selectedImageId: number;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
-  // labelingType,
   annotations,
   workState,
   setWorkState,
   onBoxCreated,
-  // imgPart,
   parts,
+  selectedImageId,
 }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
@@ -71,10 +70,15 @@ const Scene: FC<SceneProps> = ({
   );
 
   const removeBox = useCallback((): void => {
+    // Avoid find undefined annotation
+    if (annotations[selectedAnnotationIndex] === undefined) return;
+
+    dispatch(removeImgLabels({ selectedImageId, annotationIndex: annotations[selectedAnnotationIndex].id }));
+
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
     setSelectedAnnotationIndex(null);
-  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState]);
+  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState, selectedImageId]);
 
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
@@ -182,7 +186,6 @@ const Scene: FC<SceneProps> = ({
                       : annotation.label.y1 - 30 / scale.current
                   }
                   fontSize={20 / scale.current}
-                  // text={imgPart?.name}
                   text={annotation.part && parts.find((part) => part.id === annotation.part).name}
                   padding={5 / scale.current}
                 />

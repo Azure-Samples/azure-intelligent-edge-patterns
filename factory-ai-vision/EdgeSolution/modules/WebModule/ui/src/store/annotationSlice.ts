@@ -120,7 +120,7 @@ const slice = createSlice({
     updateAnnotation: (state, action) => {
       entityAdapter.updateOne(state, action.payload);
     },
-    removeAnnotation: entityAdapter.removeOne,
+    removeAnnotation: (state, action) => entityAdapter.removeOne(state, action.payload),
   },
   extraReducers: (builder) =>
     builder.addCase(getImages.fulfilled, (state, action) => {

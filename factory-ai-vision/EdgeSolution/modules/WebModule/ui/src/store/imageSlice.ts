@@ -1,4 +1,12 @@
-import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  nanoid,
+  createEntityAdapter,
+  ThunkAction,
+  Action,
+  PayloadAction,
+  current,
+} from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
@@ -27,6 +35,11 @@ type ImageFromServer = {
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
+
+type RemoveImageLabel = {
+  selectedImageId: number;
+  annotationIndex: string;
+};
 
 // Normalization
 const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
@@ -156,6 +169,11 @@ const slice = createSlice({
   initialState: imageAdapter.getInitialState(),
   reducers: {
     changeImgPart: imageAdapter.updateOne,
+    removeImgLabels: (state, action: PayloadAction<RemoveImageLabel>) => {
+      const { selectedImageId, annotationIndex } = action.payload;
+      const newLabels = state.entities[selectedImageId].labels.filter((label) => label !== annotationIndex);
+      imageAdapter.upsertOne(state, { ...state.entities[selectedImageId], labels: newLabels });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -182,7 +200,7 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { changeImgPart } = slice.actions;
+export const { changeImgPart, removeImgLabels } = slice.actions;
 export const thunkChangeImgPart = (newPartId: number): ThunkAction<void, State, unknown, Action<string>> => (
   dispatch,
   getState,
