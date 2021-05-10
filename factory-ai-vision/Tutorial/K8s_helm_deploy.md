@@ -1,4 +1,4 @@
-# Deploy VisionOnEdge solution on AKS and AKS-HCI using our Helm Chart
+# Deploy VisionOnEdge solution onto AKS/AKS-HCI using our Helm Chart
 
 Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy VisionOnEdge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI).
 
@@ -66,7 +66,25 @@ Now you are ready to deploy VoE onto your AKS/AKS-HCI cluster. Make sure the sys
 
 ### Create a values.yaml file
 
+As mentioned before, VoE requires Azure IoT Hub and Custom Vision as a dependency. You need to provide authentication values (the keys and connection strings you retrieved above) to the Helm installer so that it can properly authenticate and use the Azure Services during deployment. There are many ways to provide these required values during installation. You can use the `--set` flag in Helm to provide the values. A simpler and cleaner way to do this is to use a `values.yaml` file in which you input all of your desired values for our Helm installer (instead of using `--set` multiple times for each value). For more information about customizing Helm chart for installation please review [this document by Helm](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). 
+
+Please create a file named `values.yaml` and fill it with the following required values, replacing <...> placeholders with your authentication values:
+
+  ```
+  azureIoT:
+    hubConnectionString: <your-IoTHub-connection-string>
+    edgeConnectionString: <your-IoTEdgeDevice-connection-string>
+
+  customVision:
+    endPoint: <your-CustomVision-endpoint>
+     key: <your-CustomVision-key>
+  ```
+  
+  **Note: If you would like to change other values while installing our Helm chart please visit [this document](VoE_Helm_Chart.md) that lists all of the available values to change**
+
 ### Deploy VisionOnEdge
+
+You are 
 
 ## Helm Chart Parameters
 
