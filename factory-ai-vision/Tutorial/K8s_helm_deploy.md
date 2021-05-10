@@ -62,7 +62,7 @@ You need your Custom Vision key and endpoint during deployment to AKS/AKS-HCI. Y
 
 ## Deploy VoE onto AKS/AKS-HCI
 
-Now you are ready to deploy VoE onto your AKS/AKS-HCI cluster. Make sure the system that you are using to deploy VoE has access to your cluster (you can perform `kubectl` commands against your cluster)
+Now you are ready to deploy VoE onto your AKS/AKS-HCI cluster. Make sure the system that you are using to deploy VoE has access to your cluster (you can perform `kubectl` commands against your cluster). For more information on access, please visit the following links depending on your platform of choice: [Access AKS](https://docs.microsoft.com/en-us/azure/aks/control-kubeconfig-access), [Access AKS-HCI](https://docs.microsoft.com/en-us/azure-stack/aks-hci/ad-sso)
 
 ### Create a values.yaml file
 
