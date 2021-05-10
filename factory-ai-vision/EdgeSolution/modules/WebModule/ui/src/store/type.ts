@@ -20,6 +20,7 @@ export type Annotation = {
   label: BoxLabel;
   image: number;
   annotationState: AnnotationState;
+  part?: number | null;
 };
 
 export type Position2D = {
@@ -53,4 +54,5 @@ export type Image = {
   camera: number;
   uploaded: boolean;
   manualChecked: boolean;
+  labels: string[];
 };

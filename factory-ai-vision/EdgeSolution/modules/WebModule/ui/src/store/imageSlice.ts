@@ -1,4 +1,12 @@
-import { createSlice, nanoid, createEntityAdapter, ThunkAction, Action } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  nanoid,
+  createEntityAdapter,
+  ThunkAction,
+  Action,
+  PayloadAction,
+  current,
+} from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
 import { schema, normalize } from 'normalizr';
@@ -28,6 +36,11 @@ type ImageFromServer = {
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
 
+type RemoveImageLabel = {
+  selectedImageId: number;
+  annotationIndex: string;
+};
+
 // Normalization
 const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
   return {
@@ -49,11 +62,13 @@ const normalizeImagesAndLabelByNormalizr = (data: ImageFromServerWithSerializedL
   const labels = new schema.Entity<Annotation>('labels', undefined, {
     processStrategy: (value, parent): Annotation => {
       const { id, ...label } = value;
+      const { part, ...restLabel } = label;
       return {
         id,
         image: parent.id,
-        label,
+        label: restLabel,
         annotationState: AnnotationState.Finish,
+        part: part ? part : null,
       };
     },
   });
@@ -77,6 +92,7 @@ const normalizeImagesAndLabelByNormalizr = (data: ImageFromServerWithSerializedL
 
 const serializeLabels = R.map<ImageFromServer, ImageFromServerWithSerializedLabels>((e) => ({
   ...e,
+  // labels: (JSON.parse(e.labels) || []).map((l) => ({ ...l, id: nanoid() })),
   labels: (JSON.parse(e.labels) || []).map((l) => ({ ...l, id: nanoid() })),
 }));
 
@@ -131,19 +147,18 @@ export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { sta
   async (_, { getState }) => {
     const imageId = getState().labelingPage.selectedImageId;
     const annoEntities = getState().annotations.entities;
-    const labels = Object.values(annoEntities)
-      .filter((e: Annotation) => e.image === imageId)
-      .map((e: Annotation) => e.label);
+    const labels = Object.values(annoEntities).filter((e: Annotation) => e.image === imageId);
+
     const imgPart = getState().labelImages.entities[imageId].part;
 
     const manualChecked = labels.length > 0;
 
     await Axios.patch(`/api/images/${imageId}/`, {
-      labels: JSON.stringify(labels),
+      labels: JSON.stringify(labels.map((e: Annotation) => ({ ...e.label, part: e.part }))),
       manual_checked: manualChecked,
       part: imgPart,
     });
-    return { imageId, manualChecked };
+    return { imageId, manualChecked, labels: labels.map((label) => label.id) };
   },
 );
 
@@ -154,6 +169,11 @@ const slice = createSlice({
   initialState: imageAdapter.getInitialState(),
   reducers: {
     changeImgPart: imageAdapter.updateOne,
+    removeImgLabels: (state, action: PayloadAction<RemoveImageLabel>) => {
+      const { selectedImageId, annotationIndex } = action.payload;
+      const newLabels = state.entities[selectedImageId].labels.filter((label) => label !== annotationIndex);
+      imageAdapter.upsertOne(state, { ...state.entities[selectedImageId], labels: newLabels });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -166,7 +186,7 @@ const slice = createSlice({
       .addCase(saveLabelImageAnnotation.fulfilled, (state, action) => {
         imageAdapter.updateOne(state, {
           id: action.payload.imageId,
-          changes: { manualChecked: action.payload.manualChecked },
+          changes: { manualChecked: action.payload.manualChecked, labels: action.payload.labels },
         });
       })
       .addCase(deleteImage.fulfilled, imageAdapter.removeOne)
@@ -180,7 +200,7 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { changeImgPart } = slice.actions;
+export const { changeImgPart, removeImgLabels } = slice.actions;
 export const thunkChangeImgPart = (newPartId: number): ThunkAction<void, State, unknown, Action<string>> => (
   dispatch,
   getState,

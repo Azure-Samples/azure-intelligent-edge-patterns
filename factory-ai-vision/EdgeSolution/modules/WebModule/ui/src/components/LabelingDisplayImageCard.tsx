@@ -10,6 +10,8 @@ type LabelingDilplayImageCardProps = {
   imgTimeStamp: string;
   partName: string;
   manualChecked: boolean;
+
+  parts: string[];
 };
 
 export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> = ({
@@ -18,6 +20,7 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
   imgTimeStamp,
   partName,
   manualChecked,
+  parts,
 }) => {
   const partTagStatus = manualChecked ? Status.Active : Status.Inactive;
   return (
@@ -37,7 +40,11 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
           <Text variant="small">{imgTimeStamp}</Text>
         </Stack>
         {/* Wrap with stack item or the card section will add 'flex-shrink' automatically to the children which is not stack */}
-        <Stack.Item>{partName && <PartTag status={partTagStatus} text={partName} />}</Stack.Item>
+        {/* <Stack.Item>{partName && <PartTag status={partTagStatus} text={partName} />}</Stack.Item> */}
+        <Stack horizontal tokens={{ childrenGap: '5px' }}>
+          {parts.length > 0 &&
+            parts.map((part) => <Stack.Item>{<PartTag status={partTagStatus} text={part} />}</Stack.Item>)}
+        </Stack>
       </Card.Section>
     </Card>
   );

@@ -43,7 +43,8 @@ def upload_images_to_customvision_helper(
     trainer = project_obj.setting.get_trainer_obj()
     part_obj: Part = Part.objects.get(pk=part_id)
     tag_id = part_obj.customvision_id
-    images = Image.objects.filter(part_id=part_id, manual_checked=True, uploaded=False)
+    images = Image.objects.filter(part_ids__contains='"{}"'.format(
+        str(part_id)), manual_checked=True, uploaded=False)
     logger.info("Tag id %s", tag_id)
     count = 0
     img_entries = []
@@ -69,6 +70,9 @@ def upload_images_to_customvision_helper(
                 label_y = label["y1"] / height
                 label_w = (label["x2"] - label["x1"]) / width
                 label_h = (label["y2"] - label["y1"]) / height
+                label_tag_id = int(label["part"])
+                part_obj: Part = Part.objects.get(pk=label_tag_id)
+                tag_id = part_obj.customvision_id
                 region = Region(
                     tag_id=tag_id,
                     left=label_x,

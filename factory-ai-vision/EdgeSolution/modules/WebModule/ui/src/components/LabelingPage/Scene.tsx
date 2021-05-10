@@ -12,6 +12,7 @@ import {
   removeAnnotation,
   thunkCreateAnnotation,
 } from '../../store/annotationSlice';
+import { removeImgLabels } from '../../store/imageSlice';
 import RemoveBoxButton from './RemoveBoxButton';
 import { Annotation, Size2D } from '../../store/type';
 import { Part } from '../../store/partSlice';
@@ -28,20 +29,21 @@ interface SceneProps {
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
-  imgPart: Part;
+  parts: Part[];
+  selectedImageId: number;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
-  labelingType,
   annotations,
   workState,
   setWorkState,
   onBoxCreated,
-  imgPart,
+  parts,
+  selectedImageId,
 }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
-  const noMoreCreate = labelingType === LabelingType.SingleAnnotation && annotations.length === 1;
+  const noMoreCreate = false;
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
@@ -68,14 +70,30 @@ const Scene: FC<SceneProps> = ({
   );
 
   const removeBox = useCallback((): void => {
+    // Avoid find undefined annotation
+    if (annotations[selectedAnnotationIndex] === undefined) return;
+
+    dispatch(removeImgLabels({ selectedImageId, annotationIndex: annotations[selectedAnnotationIndex].id }));
+
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
     setSelectedAnnotationIndex(null);
-  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState]);
+  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState, selectedImageId]);
 
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
+
+    // remove selecting labeling
+    if (workState === WorkState.Selecting && e.target.attrs.name === 'cancel') return;
+
+    // On click box circle & dragging circle
+    if (
+      workState === WorkState.Selecting &&
+      ['anchor-0', 'anchor-1', 'anchor-2', 'anchor-3'].includes(e.target.attrs.name)
+    ) {
+      return;
+    }
 
     dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
     // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
@@ -88,12 +106,9 @@ const Scene: FC<SceneProps> = ({
       dispatch(
         updateCreatingAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }),
       );
-      if (annotations.length - 1 === selectedAnnotationIndex) {
-        setWorkState(WorkState.Selecting);
-        if (onBoxCreated) onBoxCreated();
-      } else {
-        setWorkState(WorkState.None);
-      }
+
+      if (onBoxCreated) onBoxCreated();
+      setWorkState(WorkState.None);
     }
   };
 
@@ -171,7 +186,7 @@ const Scene: FC<SceneProps> = ({
                       : annotation.label.y1 - 30 / scale.current
                   }
                   fontSize={20 / scale.current}
-                  text={imgPart?.name}
+                  text={annotation.part && parts.find((part) => part.id === annotation.part).name}
                   padding={5 / scale.current}
                 />
               </Group>
