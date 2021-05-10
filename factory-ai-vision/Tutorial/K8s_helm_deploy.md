@@ -66,7 +66,7 @@ Now you are ready to deploy VoE onto your AKS/AKS-HCI cluster. Make sure the sys
 
 ### Create a values.yaml file
 
-As mentioned before, VoE requires Azure IoT Hub and Custom Vision as a dependency. You need to provide authentication values (the keys and connection strings you retrieved above) to the Helm installer so that it can properly authenticate and use the Azure Services during deployment. There are many ways to provide these required values during installation. You can use the `--set` flag in Helm to provide the values. A simpler and cleaner way to do this is to use a `values.yaml` file in which you input all of your desired values for our Helm installer (instead of using `--set` multiple times for each value). For more information about customizing Helm chart for installation please review [this document by Helm](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). 
+As mentioned before, VoE requires Azure IoT Hub and Custom Vision as a dependency. You need to provide authentication values (the keys and connection strings you retrieved above) to the Helm installer so that it can properly authenticate and use the Azure Services during deployment. There are many ways to provide these required values during installation. You can use the `--set` flag in Helm to provide the values. A simpler and cleaner way to do this is to use a `values.yaml` file in which you input all of your desired values for our Helm installer to use (instead of using `--set` multiple times for each value). For more information about customizing Helm chart for installation please review [this document by Helm](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). 
 
 Please create a file named `values.yaml` and fill it with the following required values, replacing <...> placeholders with your authentication values:
 
@@ -80,11 +80,24 @@ Please create a file named `values.yaml` and fill it with the following required
      key: <your-CustomVision-key>
   ```
   
-  **Note: If you would like to change other values while installing our Helm chart please visit [this document](VoE_Helm_Chart.md) that lists all of the available values to change**
+  **Note: If you would like to change other values besides the above required ones, please visit [this document](VoE_Helm_Chart.md) that lists all of the available values to change**
 
 ### Deploy VisionOnEdge
 
-You are 
+You can deploy VisionOnEdge to AKS/AKS-HCI's default namespace using the following command (replace <...> with path to your values.yaml created above):
+
+```
+helm install voe-k8s https://aka.ms/VoEHelm -f <path-to-your-values.yaml-file>
+```
+
+If you would like to deploy the solution onto another namespace, you can do so using `-n` flag. As an example the command below deploys VisionOnEdge onto `fac-ai` namespace:
+
+```
+helm install voe-k8s https://aka.ms/VoEHelm -f <path-to-your-values.yaml-file> -n fac-ai
+```
+
+One thing to note is that `fac-ai` namespace should have already been created for the above command to work. 
 
 ## Helm Chart Parameters
 
+The instalation method above installs VisionOnEdge
