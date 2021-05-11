@@ -38,3 +38,14 @@ Helm chart for VisionOnEdge(VoE) application that deploys VoE modules onto Kuber
 | webModule.tolerations | list | `[]` | Tolerations for WebModule |
 
 ***These values are required during installation.** 
+
+
+## Use the Helm Chart
+
+Assuming you have a namespace named `fac-ai` you can install, upgrade and delete VoE using the following commands:
+
+### Install
+
+### Upgarde/Update:
+
+### Delete
