@@ -1,6 +1,6 @@
 # Deploy VisionOnEdge solution onto AKS/AKS-HCI using our Helm Chart
 
-Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy VisionOnEdge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI).
+Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy VisionOnEdge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI) at the edge using VisionOnEdge Helm Chart. **For more information, about the chart, including chart version, app version, and changeable parameters, please visit [VisionOnEdge Helm Chart](VoE_Helm_Chart.md) page. **
 
 ## Prerequisites
 
@@ -103,5 +103,13 @@ One thing to note is that `fac-ai` namespace should have already been created fo
 ## Manage your VisionOnEdge deployment
 
 ### Delete deployment
+
+You can delete VisionOnEdge from your cluster using the following command:
+
+```
+helm delete voe-k8s -n fac-ai
+```
+
+The above command deletes VoE from namespace `fac-ai` assuming you used `fac-ai` namespace during installation. If you installed VoE onto another namespace, please replace `fac-ai` with the namespace name you used during installation. 
 
 ### Upgrade/Update deployment
