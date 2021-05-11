@@ -1,6 +1,6 @@
 # Deploy VisionOnEdge solution onto AKS/AKS-HCI using our Helm Chart
 
-Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy VisionOnEdge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI) at the edge using VisionOnEdge Helm Chart. **For more information, about the chart, including chart version, app version, and changeable parameters, please visit [VisionOnEdge Helm Chart](VoE_Helm_Chart.md) page. **
+Kubernetes provides a distributed platform for containerized applications. In this tutorial, you will learn how to deploy VisionOnEdge solution to an Azure Kubernetes Service (AKS) cluster on the cloud or Azure Stack HCI (AKS-HCI) at the edge using VisionOnEdge Helm Chart. **For more information, about the chart, including chart version, app version, and changeable parameters, please visit [VisionOnEdge Helm Chart](VoE_Helm_Chart.md) page.**
 
 ## Prerequisites
 
@@ -100,6 +100,8 @@ One thing to note is that `fac-ai` namespace should have already been created fo
 
 <img src="../assets/helmdeployed.png" width="500">
 
+#### Note: CPU is the default runtime during deployment, you can enable GPU runtime for the solution by using the following flag `--set runtime.GPU=true` during installation. Please make sure appropriate Nvidia drivers are installed on all your Kubernetes nodes. For AKS, you can follow [this documentation](https://docs.microsoft.com/en-us/azure/aks/gpu-cluster#install-nvidia-device-plugin) to install appropriate drivers. 
+
 ## Manage your VisionOnEdge deployment
 
 ### Delete deployment
@@ -113,3 +115,17 @@ helm delete voe-k8s -n fac-ai
 The above command deletes VoE from namespace `fac-ai` assuming you used `fac-ai` namespace during installation. If you installed VoE onto another namespace, please replace `fac-ai` with the namespace name you used during installation. 
 
 ### Upgrade/Update deployment
+
+You can use the following command to upgrade your VoE deployment:
+
+```
+helm upgarde voe-k8s --reuse-values -n fac-ai -f <path-to-your-values.yaml-file>
+```
+
+The command above will reuse values used in your previous release unless you override them using the `values.yaml` file. If you don't want to use values from the previous release you can instead use the following command: 
+
+```
+helm upgarde voe-k8s -n fac-ai -f <path-to-your-values.yaml-file>
+```
+
+The above commands delete VoE from namespace `fac-ai` assuming you used `fac-ai` namespace during installation. If you installed VoE onto another namespace, please replace `fac-ai` with the namespace name you used during installation. 
