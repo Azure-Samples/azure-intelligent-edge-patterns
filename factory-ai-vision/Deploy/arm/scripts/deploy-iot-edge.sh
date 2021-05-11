@@ -52,7 +52,7 @@ echo "$(info) Apt-packages installed"
 # az extension add --name azure-iot
 # pip -q install --upgrade jsonschema
 echo "Installing iotedgedev"
-pip install --upgrade iotedgedev
+pip install iotedgedev==2.1.4
 
 echo "Updating az-cli"
 pip install --upgrade azure-cli
