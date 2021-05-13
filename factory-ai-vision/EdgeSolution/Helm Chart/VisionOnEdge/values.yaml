@@ -1,0 +1,48 @@
+# Default values for VisionOnEdge.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+runtime:
+  GPU: false
+  storageSize: 10Gi
+
+azureIoT:
+  hubConnectionString:
+  edgeConnectionString:
+
+customVision:
+  endPoint:
+  key:
+
+nginxModule:
+  port: 8181
+  tolerations: []
+  affinity: {}
+
+webModule:
+  tolerations: []
+  affinity: {}
+
+inferenceModule:
+  cpuLimit: 
+  tolerations: []
+  affinity: {}
+
+captureModule:
+  tolerations: []
+  affinity: {}
+
+uploadModule:
+  tolerations: []
+  affinity: {}
+
+predictModule:
+  cpuLimit:
+  numGPUs: 1
+  tolerations: []
+  affinity: {}
+
+rtspsimModule:
+  tolerations:
+  affinity:
