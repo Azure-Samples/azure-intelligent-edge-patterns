@@ -68,7 +68,7 @@ class GraphManager:
             return {"error": "failed to invoke direct method"}
 
     def invoke_graph_topology_get(self, name):
-        method = "GraphTopologyGet"
+        method = "pipelineTopologyGet"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -76,7 +76,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_topology_set(self, name, properties):
-        method = "GraphTopologySet"
+        method = "pipelineTopologySet"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -85,14 +85,14 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_topology_list(self):
-        method = "GraphTopologyList"
+        method = "pipelineTopologyList"
         payload = {
             "@apiVersion": "2.0",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_topology_delete(self, name):
-        method = "GraphTopologyDelete"
+        method = "pipelineTopologyDelete"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -100,7 +100,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_get(self, name):
-        method = "GraphInstanceGet"
+        method = "livePipelineGet"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -108,7 +108,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_set(self, name, properties):
-        method = "GraphInstanceSet"
+        method = "livePipelineSet"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -117,7 +117,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_delete(self, name):
-        method = "GraphInstanceDelete"
+        method = "livePipelineDelete"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -125,14 +125,14 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_list(self):
-        method = "GraphInstanceList"
+        method = "livePipelineList"
         payload = {
             "@apiVersion": "2.0",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_activate(self, name):
-        method = "GraphInstanceActivate"
+        method = "livePipelineActivate"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -140,7 +140,7 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_deactivate(self, name):
-        method = "GraphInstanceDeactivate"
+        method = "livePipelineDeactivate"
         payload = {
             "@apiVersion": "2.0",
             "name": name,
@@ -149,7 +149,7 @@ class GraphManager:
 
     # default grpc settings
     def invoke_graph_grpc_topology_set(self):
-        method = "GraphTopologySet"
+        method = "pipelineTopologySet"
         with open("grpc_topology.json") as f:
             payload = json.load(f)
         return self.invoke_method(method, payload)
@@ -179,7 +179,7 @@ class GraphManager:
 
     # default http extension settings
     def invoke_graph_http_topology_set(self):
-        method = "GraphTopologySet"
+        method = "pipelineTopologySet"
         with open("http_topology.json") as f:
             payload = json.load(f)
         return self.invoke_method(method, payload)

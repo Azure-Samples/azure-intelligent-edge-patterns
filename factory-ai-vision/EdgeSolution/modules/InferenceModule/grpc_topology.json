@@ -1,5 +1,5 @@
 {
-    "@apiVersion": "2.0",
+    "@apiVersion": "1.0",
     "name": "InferencingWithGrpcExtension",
     "properties": {
         "description": "Factory AI Video Pipeline",
@@ -100,26 +100,26 @@
             }
         ],
         "sources": [{
-                "@type": "#Microsoft.Media.MediaGraphRtspSource",
+                "@type": "#Microsoft.VideoAnalyzer.RtspSource",
                 "name": "rtspSource",
                 "endpoint": {
-                    "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                    "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
                     "url": "${rtspUrl}",
                     "credentials": {
-                        "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
                         "username": "${rtspUserName}",
                         "password": "${rtspPassword}"
                     }
                 }
             },
             {
-                "@type": "#Microsoft.Media.MediaGraphIoTHubMessageSource",
+                "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSource",
                 "name": "iotMessageSource",
                 "hubInputName": "${hubSourceInput}"
             }
         ],
         "processors": [{
-                "@type": "#Microsoft.Media.MediaGraphSignalGateProcessor",
+                "@type": "#Microsoft.VideoAnalyzer.SignalGateProcessor",
                 "name": "signalGateProcessor",
                 "inputs": [{
                         "nodeName": "iotMessageSource"
@@ -134,13 +134,13 @@
                 "maximumActivationTime": "PT30S"
             },
             {
-                "@type": "#Microsoft.Media.MediaGraphGrpcExtension",
+                "@type": "#Microsoft.VideoAnalyzer.GrpcExtension",
                 "name": "grpcExtension",
                 "endpoint": {
-                    "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                    "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
                     "url": "${grpcExtensionAddress}",
                     "credentials": {
-                        "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
                         "username": "${grpcExtensionUserName}",
                         "password": "${grpcExtensionPassword}"
                     }
@@ -156,7 +156,7 @@
                         "height": "${frameHeight}"
                     },
                     "format": {
-                        "@type": "#Microsoft.Media.MediaGraphImageFormatBmp"
+                        "@type": "#Microsoft.VideoAnalyzer.ImageFormatBmp"
                     }
                 },
                 "samplingOptions": {
@@ -174,7 +174,7 @@
             }
         ],
         "sinks": [{
-                "@type": "#Microsoft.Media.MediaGraphIoTHubMessageSink",
+                "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSink",
                 "name": "hubSink",
                 "hubOutputName": "${hubSinkOutputName}",
                 "inputs": [{
@@ -182,7 +182,7 @@
                 }]
             },
             {
-                "@type": "#Microsoft.Media.MediaGraphAssetSink",
+                "@type": "#Microsoft.VideoAnalyzer.VideoSink",
                 "name": "assetSink",
                 "assetNamePattern": "sampleAssetFromEVR-LVAEdge-${instanceId}-${System.DateTime}",
                 "segmentLength": "${recordingDuration}",
