@@ -10,6 +10,7 @@ from rest_framework.exceptions import APIException
 
 from ..azure_parts.models import Part
 from ..azure_projects.models import Project
+from ..azure_iot.utils import inference_module_url
 from ..camera_tasks.models import CameraTask
 from ..cameras.models import Camera
 from ..inference_modules.models import InferenceModule
@@ -135,3 +136,16 @@ class PDScenario(models.Model):
         max_length=40, choices=INFERENCE_MODE_CHOICES, default="PD"
     )
     parts = models.ManyToManyField(Part, blank=True)
+
+    def recommended_fps(self) -> float:
+        try:
+            response = requests.get(
+                "http://" + inference_module_url() + "/get_scenario_fps", timeout=3
+            )
+            result = float(response.json()["fps"])
+        except Exception:
+            logger.exception(
+                "Get recommended_fps from inference module failed. Fallback to default."
+            )
+            result = 0.0
+        return result
