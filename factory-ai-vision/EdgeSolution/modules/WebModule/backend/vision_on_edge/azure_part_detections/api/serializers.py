@@ -105,7 +105,6 @@ class PartDetectionSerializer(serializers.ModelSerializer):
 
 class PDScenarioSerializer(serializers.ModelSerializer):
     """Project Serializer"""
-    recommended_fps = serializers.FloatField(required=False, read_only=True)
 
     class Meta:
         model = PDScenario

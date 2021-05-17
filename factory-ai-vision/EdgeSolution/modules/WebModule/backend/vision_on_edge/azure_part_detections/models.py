@@ -136,16 +136,8 @@ class PDScenario(models.Model):
         max_length=40, choices=INFERENCE_MODE_CHOICES, default="PD"
     )
     parts = models.ManyToManyField(Part, blank=True)
+    fps = models.FloatField(default=0.0)
 
-    def recommended_fps(self) -> float:
-        try:
-            response = requests.get(
-                "http://" + inference_module_url() + "/get_scenario_fps", timeout=3
-            )
-            result = float(response.json()["fps"])
-        except Exception:
-            logger.exception(
-                "Get recommended_fps from inference module failed. Fallback to default."
-            )
-            result = 0.0
-        return result
+    def set_fps(self, fps):
+        self.fps = float(fps)
+        self.save()
