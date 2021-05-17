@@ -77,12 +77,12 @@ spec:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
               secretKeyRef:
-                name: azure-env
+                name: azure-env-938475
                 key: IOTHUB_CONNECTION_STRING
           - name: TRAINING_KEY
             valueFrom:
               secretKeyRef:
-                name: azure-env
+                name: azure-env-938475
                 key: CUSTOM_VISION_KEY
           - name: ENDPOINT
             value: {{ .Values.customVision.endPoint }}
@@ -146,12 +146,12 @@ spec:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
               secretKeyRef:
-                name: azure-env
+                name: azure-env-938475
                 key: IOTHUB_CONNECTION_STRING
           - name: IOTEDGE_DEVICE_CONNECTION_STRING
             valueFrom:
               secretKeyRef:
-                name: azure-env
+                name: azure-env-938475
                 key: IOTEDGE_DEVICE_CONNECTION_STRING
           - name: IS_OPENCV
             value: "true"
@@ -194,9 +194,9 @@ spec:
       - name: predictmodule
         {{ if .Values.runtime.GPU }}
         image: intelligentedge/predictmodule:0.23.0-gpuamd64
-        resources:
-          limits:
-            nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
+        # resources:
+        #   limits:
+        #     nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
         {{ else }}
         image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-cpuamd64"
         {{ if .Values.predictModule.cpuLimit }}
@@ -212,7 +212,7 @@ spec:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
               secretKeyRef:
-                name: azure-env
+                name: azure-env-938475
                 key: IOTHUB_CONNECTION_STRING
           - name: IS_K8S
             value: "true"
@@ -259,7 +259,7 @@ spec:
           - name: IOTHUB_CONNECTION_STRING
             valueFrom:
               secretKeyRef:
-                name: azure-env
+                name: azure-env-938475
                 key: IOTHUB_CONNECTION_STRING
           - name: IS_K8S
             value: "true"
@@ -417,9 +417,9 @@ spec:
         - containerPort: 80
         resources:
           limits:
-            {{ if .Values.runtime.GPU }}
-            nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
-            {{ end }}
+            # {{ if .Values.runtime.GPU }}
+            # nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
+            # {{ end }}
             {{ if .Values.predictModule.cpuLimit }}
             cpu: {{ .Values.predictModule.cpuLimit }}
             {{ end }}
