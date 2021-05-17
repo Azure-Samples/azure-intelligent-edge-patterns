@@ -196,10 +196,7 @@ spec:
       containers:
       - name: predictmodule
         {{ if .Values.runtime.GPU }}
-        image: intelligentedge/predictmodule:0.23.0-gpuamd64
-        # resources:
-        #   limits:
-        #     nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
+        image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-gpuamd64"
         {{ else }}
         image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-cpuamd64"
         {{ if .Values.predictModule.cpuLimit }}
@@ -423,9 +420,6 @@ spec:
         - containerPort: 80
         resources:
           limits:
-            # {{ if .Values.runtime.GPU }}
-            # nvidia.com/gpu: {{ .Values.predictModule.numGPUs | default 1 }}
-            # {{ end }}
             {{ if .Values.predictModule.cpuLimit }}
             cpu: {{ .Values.predictModule.cpuLimit }}
             {{ end }}
