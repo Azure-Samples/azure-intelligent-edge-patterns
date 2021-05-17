@@ -77,7 +77,7 @@ Please create a file named `values.yaml` and fill it with the following required
 
   customVision:
     endPoint: <your-CustomVision-endpoint>
-     key: <your-CustomVision-key>
+    key: <your-CustomVision-key>
   ```
   
   **Note: If you would like to change other values besides the above required ones, please visit [this document](VoE_Helm_Chart.md) that lists all of the available values to change**
