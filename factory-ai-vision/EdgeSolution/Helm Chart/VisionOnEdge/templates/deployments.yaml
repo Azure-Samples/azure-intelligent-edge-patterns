@@ -182,6 +182,9 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+        {{ if .Values.runtime.GPU }}
+        "accelerator": nvidia
+        {{ end }}
       {{- with .Values.predictModule.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -399,6 +402,9 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
+        {{ if .Values.runtime.GPU }}
+        "accelerator": nvidia
+        {{ end }}cd 
       {{- with .Values.predictModule.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
