@@ -401,7 +401,7 @@ spec:
         "beta.kubernetes.io/os": linux
         {{ if .Values.runtime.GPU }}
         "accelerator": nvidia
-        {{ end }}cd 
+        {{ end }} 
       {{- with .Values.predictModule.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
