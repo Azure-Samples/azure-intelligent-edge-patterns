@@ -5,7 +5,7 @@
 
 runtime:
   GPU: false
-  storageSize: 10Gi
+  storageSize: 5Gi
 
 azureIoT:
   hubConnectionString:
