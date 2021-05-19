@@ -13,7 +13,7 @@ from ..azure_pd_deploy_status import progress as deploy_progress
 from ..azure_pd_deploy_status.utils import upcreate_deploy_status
 from ..azure_training_status.models import TrainingStatus
 from .api.serializers import UpdateCamBodySerializer
-from .models import PartDetection
+from .models import PartDetection, PDScenario
 
 logger = logging.getLogger(__name__)
 
@@ -254,6 +254,15 @@ def deploy_worker(part_detection_id):
         params={"max_people": instance.max_people},
         timeout=REQUEST_TIMEOUT,
     )
+
+    # =====================================================
+    # 6. Update last fps                                ===
+    # =====================================================
+    # TODO filter PDScenario object, set its fps
+    logger.info('Update last fps')
+    part_detection_scenario_obj = PDScenario.objects.filter(
+        inference_mode=instance.inference_mode).first()
+    part_detection_scenario_obj.set_fps(instance.fps)
 
 
 def if_trained_then_deploy_catcher(part_detection_id):
