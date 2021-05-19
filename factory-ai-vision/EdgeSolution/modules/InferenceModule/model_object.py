@@ -114,12 +114,6 @@ class ModelObject():
     def get_recommended_total_frame_rate(self):
         return self.max_total_frame_rate
 
-    def get_scenario_frame_rate(self):
-        if self.detection_mode in self.scenario_gps.keys():
-            return self.scenario_gps[self.detection_mode]
-        else:
-            return 0.0
-
     def set_frame_rate(self, frame_rate):
         self.frame_rate = frame_rate
         self.scenario_gps[self.detection_mode] = frame_rate

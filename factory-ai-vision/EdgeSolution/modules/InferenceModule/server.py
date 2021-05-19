@@ -485,16 +485,6 @@ def get_recommended_total_fps():
     return {"fps": onnx.get_recommended_total_frame_rate()}
 
 
-@app.get("/get_scenario_fps")
-def get_scenario_fps():
-    """get_recommended_fps.
-
-    Args:
-        number_of_cameras (int): number_of_cameras
-    """
-    return {"fps": onnx.get_scenario_frame_rate()}
-
-
 @app.get("/recommended_fps")
 def recommended_fps():
     return {"fps": onnx.get_recommended_total_frame_rate()}
