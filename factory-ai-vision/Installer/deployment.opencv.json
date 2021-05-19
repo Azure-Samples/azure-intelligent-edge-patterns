@@ -139,16 +139,6 @@
               "image": "intelligentedge/uploadmodule:0.26.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/app/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7000/tcp\":[{\"HostPort\":\"7000\"}]}}}"
             }
-          },
-          "yolov4module": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "intelligentedge/yolov4-tflite-tiny:1.0",
-              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"
-            }
           }
         }
       }
