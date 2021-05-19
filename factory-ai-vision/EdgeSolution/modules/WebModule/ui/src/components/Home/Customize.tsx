@@ -6,7 +6,7 @@ import { State } from 'RootStateType';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConfigTaskPanel } from '../ConfigTaskPanel/ConfigTaskPanel';
 import { initialProjectData } from '../../store/project/projectReducer';
-import { getScenario } from '../../store/scenarioSlice';
+import { getScenario, Scenario } from '../../store/scenarioSlice';
 
 const classes = mergeStyleSets({
   subTitle: {
@@ -51,6 +51,20 @@ const demoProjectsInfo = [
   },
 ];
 
+const getInitialRecommendFps = (scenario: Scenario, recommendFps: number): number => {
+  if (!scenario) return 0;
+
+  if (scenario.fps !== '0') return Number(scenario.fps);
+  return recommendFps;
+};
+
+const getInitialFps = (scenario: Scenario, recommendFps: number): string => {
+  if (!scenario) return '';
+
+  if (scenario.fps !== '0') return scenario.fps;
+  return recommendFps.toString();
+};
+
 export const Customize: React.FC = () => {
   const scenario = useSelector((state: State) => state.scenario);
   const recomendedFps = useSelector((state: State) => state.project.data.recomendedFps);
@@ -91,7 +105,12 @@ export const Customize: React.FC = () => {
       <ConfigTaskPanel
         isOpen={selectedScenarioIdx > -1}
         onDismiss={closePanel}
-        projectData={{ ...initialProjectData, ...scenario[selectedScenarioIdx], recomendedFps }}
+        projectData={{
+          ...initialProjectData,
+          ...scenario[selectedScenarioIdx],
+          recomendedFps: getInitialRecommendFps(scenario[selectedScenarioIdx], recomendedFps),
+          fps: getInitialFps(scenario[selectedScenarioIdx], recomendedFps),
+        }}
         trainingProjectOfSelectedScenario={scenario[selectedScenarioIdx]?.trainingProject}
       />
     </>

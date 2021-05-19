@@ -45,6 +45,8 @@ class ModelObject():
         # Part that we want to detect
         self.parts = []
 
+        self.scenario_gps = {}
+
         # self.is_gpu = onnxruntime.get_device() == "GPU"
         self.is_gpu = self.get_device() == "gpu"
 
@@ -114,6 +116,7 @@ class ModelObject():
 
     def set_frame_rate(self, frame_rate):
         self.frame_rate = frame_rate
+        self.scenario_gps[self.detection_mode] = frame_rate
 
     def get_frame_rate(self):
         return self.frame_rate
