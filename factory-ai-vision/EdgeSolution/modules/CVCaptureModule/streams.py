@@ -239,7 +239,7 @@ class Stream:
             self.scenario = DangerZone()
             self.scenario_type = self.model.detection_mode
             # FIXME
-            self.scenario.set_targets(["Person"])
+            self.scenario.set_targets(["person"])
             try:
                 zone_info = json.loads(zone_info)
                 self.use_zone = zone_info["useDangerZone"]
