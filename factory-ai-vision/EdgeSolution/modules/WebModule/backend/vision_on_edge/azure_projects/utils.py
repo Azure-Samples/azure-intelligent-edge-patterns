@@ -166,6 +166,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                         top=region.top,
                         width=region.width,
                         height=region.height,
+                        tag_id=img_obj.part.pk,
                     )
                     break
 
@@ -196,6 +197,25 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
         )
         for img in imgs:
             logger.info("*** img %s", img_counter)
+            img_obj, created = Image.objects.update_or_create(
+                remote_url=img.original_image_uri,
+                project=project_obj,
+                customvision_id=img.id,
+                manual_checked=True,
+            )
+            img_id = img_obj.id
+            if created:
+                # logger.info("Downloading img %s", img.id)
+                # img_obj.get_remote_image()
+                # logger.info("Setting label of %s", img.id)
+                # img_obj.set_labels(
+                #     left=region.left,
+                #     top=region.top,
+                #     width=region.width,
+                #     height=region.height,
+                #     tag_id=img_obj.part.pk,
+                # )
+                img_counter += 1
             for region in img.regions:
                 part_objs = Part.objects.filter(
                     name=region.tag_name, project_id=project_id
@@ -203,33 +223,18 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                 if not part_objs.exists():
                     continue
                 part_obj = part_objs.first()
-                img_obj, created = Image.objects.update_or_create(
-                    part=part_obj,
-                    remote_url=img.original_image_uri,
-                    project=project_obj,
-                    customvision_id=img.id,
-                    manual_checked=True,
+
+                logger.info("Adding label to %s", img.id)
+                # img_obj = Image.objects.get(pk=img_id)
+                img_obj.part = part_obj
+                img_obj.get_remote_image()
+                img_obj.set_labels(
+                    left=region.left,
+                    top=region.top,
+                    width=region.width,
+                    height=region.height,
+                    tag_id=part_obj.id,
                 )
-                if created:
-                    logger.info("Downloading img %s", img.id)
-                    img_obj.get_remote_image()
-                    logger.info("Setting label of %s", img.id)
-                    img_obj.set_labels(
-                        left=region.left,
-                        top=region.top,
-                        width=region.width,
-                        height=region.height,
-                    )
-                    img_counter += 1
-                else:
-                    # TODO:  Multiple region with same tag
-                    logger.info("Adding label to %s", img.id)
-                    img_obj.add_labels(
-                        left=region.left,
-                        top=region.top,
-                        width=region.width,
-                        height=region.height,
-                    )
 
         img_index += img_batch_size
     logger.info("Pulled %s images", counter)

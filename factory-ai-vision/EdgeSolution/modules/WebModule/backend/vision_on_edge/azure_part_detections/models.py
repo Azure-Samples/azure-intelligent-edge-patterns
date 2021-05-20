@@ -10,6 +10,7 @@ from rest_framework.exceptions import APIException
 
 from ..azure_parts.models import Part
 from ..azure_projects.models import Project
+from ..azure_iot.utils import inference_module_url
 from ..camera_tasks.models import CameraTask
 from ..cameras.models import Camera
 from ..inference_modules.models import InferenceModule
@@ -135,3 +136,8 @@ class PDScenario(models.Model):
         max_length=40, choices=INFERENCE_MODE_CHOICES, default="PD"
     )
     parts = models.ManyToManyField(Part, blank=True)
+    fps = models.FloatField(default=0.0)
+
+    def set_fps(self, fps):
+        self.fps = float(fps)
+        self.save()

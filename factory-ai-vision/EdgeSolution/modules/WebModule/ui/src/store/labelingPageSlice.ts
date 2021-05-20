@@ -15,6 +15,7 @@ export type LabelPageState = {
   imageIds: number[];
   selectedImageId: number;
   openFrom: OpenFrom;
+  selectedPartId: number;
 };
 
 const changeSelectedImage = (offset: 1 | -1) => (state: LabelPageState) => {
@@ -27,7 +28,7 @@ const changeSelectedImage = (offset: 1 | -1) => (state: LabelPageState) => {
 
 const slice = createSlice({
   name: 'labelingPage',
-  initialState: { imageIds: [], selectedImageId: null, openFrom: OpenFrom.None },
+  initialState: { imageIds: [], selectedImageId: null, selectedPartId: 0, openFrom: OpenFrom.None },
   reducers: {
     openLabelingPage: (
       _,
@@ -36,11 +37,16 @@ const slice = createSlice({
       imageIds: action.payload.imageIds,
       selectedImageId: action.payload.selectedImageId,
       openFrom: action.payload.openFrom,
+      selectedPartId: 0,
     }),
     closeLabelingPage: (state) => ({
       ...state,
       imageIds: [],
       selectedImageId: null,
+    }),
+    changePartId: (state, action: PayloadAction<{ partId: number }>) => ({
+      ...state,
+      selectedPartId: action.payload.partId,
     }),
   },
   extraReducers: (builder) =>
@@ -57,4 +63,4 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { openLabelingPage, closeLabelingPage } = slice.actions;
+export const { openLabelingPage, closeLabelingPage, changePartId } = slice.actions;

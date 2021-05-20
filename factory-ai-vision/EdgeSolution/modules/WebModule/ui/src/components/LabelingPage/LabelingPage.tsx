@@ -26,6 +26,7 @@ import Scene from './Scene';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
 import { dummyFunction } from '../../utils/dummyFunction';
+import { selectNonDemoPart } from '../../store/selectors';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -88,6 +89,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
 
+  const parts = useSelector(selectNonDemoPart);
+
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
 
   const isOnePointBox = checkOnePointBox(annotations);
@@ -127,9 +130,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
         annotations={annotations}
         workState={workState}
         setWorkState={setWorkState}
-        labelingType={LabelingType.SingleAnnotation}
+        labelingType={LabelingType.MultiAnnotation}
         onBoxCreated={dummyFunction}
-        imgPart={imgPart}
+        parts={parts}
+        selectedImageId={selectedImageId}
       />
       <Text variant="small" styles={{ root: { position: 'absolute', left: 5, bottom: 5 } }}>
         {cameraName}
@@ -164,10 +168,9 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   );
 
   const onRenderFooter = (): JSX.Element => {
-    const noPart = imgPart === null || imgPart === undefined;
     const noAnno = annotations.length === 0;
     const deleteDisabled = loading;
-    const saveDisabled = noPart || noAnno;
+    const saveDisabled = noAnno;
 
     if (noPrevAndNext)
       return (
@@ -185,8 +188,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
 
     const isLastImg = index === imageIds.length - 1;
     const previousDisabled = index === 0 || workState === WorkState.Creating || isOnePointBox || loading;
-    const nextDisabled =
-      isLastImg || noPart || noAnno || workState === WorkState.Creating || isOnePointBox || loading;
+    const nextDisabled = isLastImg || noAnno || workState === WorkState.Creating || isOnePointBox || loading;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />

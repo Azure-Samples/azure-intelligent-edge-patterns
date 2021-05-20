@@ -6,6 +6,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import requests
+import json
 from django.core.files.images import ImageFile
 from django.utils import timezone
 from drf_yasg2 import openapi
@@ -273,18 +274,22 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         if (
             instance.maxImages
             > Image.objects.filter(
-                project=project_obj, part=part, is_relabel=True
+                project=project_obj, part_ids__contains='"{}"'.format(str(part.id)), is_relabel=True
             ).count()
         ):
             img_io = serializer.validated_data["img"].file
 
             img = ImageFile(img_io)
             img.name = str(timezone.now()) + ".jpg"
+            labels = json.loads(serializer.validated_data["labels"])
+            labels[0]['part'] = part.id
+            part_ids = [str(part.id)]
             img_obj = Image(
                 image=img,
                 part_id=part.id,
+                part_ids=json.dumps(part_ids),
                 camera_id=serializer.validated_data["camera_id"],
-                labels=serializer.validated_data["labels"],
+                labels=json.dumps(labels),
                 confidence=serializer.validated_data["confidence"],
                 project=instance.project,
                 is_relabel=True,
@@ -301,11 +306,15 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             img_io = serializer.validated_data["img"].file
             img = ImageFile(img_io)
             img.name = str(timezone.now()) + ".jpg"
+            labels = json.loads(serializer.validated_data["labels"])
+            labels[0]['part'] = part.id
+            part_ids = [str(part.id)]
             img_obj = Image(
                 image=img,
                 camera_id=serializer.validated_data["camera_id"],
                 part_id=part.id,
-                labels=serializer.validated_data["labels"],
+                part_ids=json.dumps(part_ids),
+                labels=json.dumps(labels),
                 confidence=serializer.validated_data["confidence"],
                 project=project_obj,
                 is_relabel=True,
@@ -313,7 +322,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             img_obj.save()
             # pop
             earliest_img = (
-                Image.objects.filter(project=project_obj, part=part, is_relabel=True)
+                Image.objects.filter(project=project_obj, part_ids__contains='"{}"'.format(
+                    str(part.id)), is_relabel=True)
                 .order_by("timestamp")
                 .first()
             )
@@ -325,12 +335,12 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         # User is relabeling and exceed maxImages
         for _ in range(
             Image.objects.filter(
-                project=project_obj, part=part, is_relabel=True
+                project=project_obj, part_ids__contains='"{}"'.format(str(part.id)), is_relabel=True
             ).count()
             - instance.maxImages
         ):
             Image.objects.filter(
-                project=project_obj, part=part, is_relabel=True
+                project=project_obj, part_ids__contains='"{}"'.format(str(part.id)), is_relabel=True
             ).order_by("timestamp").last().delete()
         raise PdRelabelImageFull
 
