@@ -263,7 +263,7 @@
       "properties": {
         "forceUpdateTag": "1",
         "azCliVersion": "2.9.1",
-        "primaryScriptUri": "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/change-custom-arm-template/factory-ai-vision/Deploy/arm/scripts/get-deploy-config-info.sh",
+        "primaryScriptUri": "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/develop/factory-ai-vision/Deploy/arm/scripts/get-deploy-config-info.sh",
         "supportingScriptUris": [],
         "environmentVariables": [
           {
@@ -555,6 +555,19 @@
                       "destinationAddressPrefix": "*",
                       "destinationPortRange": "6000"
                     }
+                  },
+                  {
+                    "name": "Port_5010",
+                    "properties": {
+                      "priority": 371,
+                      "protocol": "*",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "5000"
+                    }
                   }
                 ]
               }
@@ -658,7 +671,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                       "fileUris": [
-                        "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/change-custom-arm-template/factory-ai-vision/Deploy/arm/scripts/install-nvidia-driver.sh"
+                        "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/develop/factory-ai-vision/Deploy/arm/scripts/install-nvidia-driver.sh",
                       ],
                       "commandToExecute": "[concat('./install-nvidia-driver.sh ', parameters('adminUsername'))]"
                     }
@@ -825,7 +838,7 @@
               "properties": {
                 "forceUpdateTag": "1",
                 "azCliVersion": "2.9.1",
-                "primaryScriptUri": "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/change-custom-arm-template/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                "primaryScriptUri": "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/develop/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
                 "supportingScriptUris": [],
                 "environmentVariables": [
                   {
