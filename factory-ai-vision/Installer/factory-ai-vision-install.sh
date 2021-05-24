@@ -194,9 +194,9 @@ if [ "$isCfg" != true ]; then
       esac
     done
 
-	if [ "$streaming" == "ava" ]; then
-		read -p "Please enter your AVA Provision Token: " avaProvisioningToken; echo
-	else
+    if [ "$streaming" == "ava" ]; then
+        read -p "Please enter your AVA Provision Token: " avaProvisioningToken; echo
+    fi
 
 
     # ############################## Get IoT Hub #####################################
@@ -385,7 +385,7 @@ if [ "$isCfg" != true ]; then
     echo streaming='"'$streaming'"' >> $factoryaiConfigName
     echo iotHubName='"'$iotHubName'"' >> $factoryaiConfigName
     echo iotHubConnectionString='"'$iotHubConnectionString'"' >> $factoryaiConfigName
-	echo avaProvisioningToken='"'$avaProvisioningToken'"' >> $factoryaiConfigName
+    echo avaProvisioningToken='"'$avaProvisioningToken'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
 fi
 
