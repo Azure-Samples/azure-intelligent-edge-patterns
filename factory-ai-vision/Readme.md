@@ -112,7 +112,7 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 ## For Azure IoT Edge Devices (Recommended)
 
-### Option 1: Azure Shell Installer
+### Option 1: Azure Shell Installer (Recommended)
 
 #### Prerequisite:
 
