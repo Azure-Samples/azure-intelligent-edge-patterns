@@ -221,13 +221,13 @@
               }
             }
           },
-          "lvaEdge": {
-            "version": "1.0",
+          "avaedge": {
+            "version": "1.1",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/live-video-analytics:2.0.1",
+              "image": "mcr.microsoft.com/media/video-analyzer:1",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -305,6 +305,26 @@
                         "HostPort": "7000"
                       }
                     ]
+                  }
+                }
+              }
+            }
+          },
+          "yolov4module": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "registry.hub.docker.com/ronpai/yolov4-tflite-tiny",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
                   }
                 }
               }

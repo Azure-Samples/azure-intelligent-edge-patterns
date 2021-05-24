@@ -173,7 +173,7 @@
                     ]
                   },
                   "IpcMode": "host",
-                  "runtime": "runc"
+                  "runtime": "nvidia"
                 }
               }
             }
@@ -192,15 +192,9 @@
               }
             },
             "settings": {
-              "image": "${MODULES.PredictModule.vpuamd64}",
+              "image": "${MODULES.PredictModule.gpuamd64}",
               "createOptions": {
                 "HostConfig": {
-                  "Binds": [
-                    "/dev/bus/usb:/dev/bus/usb"
-                  ],
-                  "DeviceCgroupRules": [
-                    "c 189:* rmw"
-                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -216,18 +210,18 @@
                     ]
                   },
                   "IpcMode": "host",
-                  "runtime": "runc"
+                  "runtime": "nvidia"
                 }
               }
             }
           },
-          "lvaEdge": {
-            "version": "1.0",
+          "avaedge": {
+            "version": "1.1",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/live-video-analytics:2.0.1",
+              "image": "mcr.microsoft.com/media/video-analyzer:1",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -237,6 +231,7 @@
                       "max-file": "10"
                     }
                   },
+                  "Binds": [],
                   "IpcMode": "host"
                 }
               }
@@ -305,6 +300,26 @@
                         "HostPort": "7000"
                       }
                     ]
+                  }
+                }
+              }
+            }
+          },
+          "yolov4module": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "registry.hub.docker.com/ronpai/yolov4-tflite-tiny",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
                   }
                 }
               }
