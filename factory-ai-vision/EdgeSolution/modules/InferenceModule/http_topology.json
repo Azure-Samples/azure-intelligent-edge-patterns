@@ -39,40 +39,10 @@
                 "default": "dummyPassword"
             },
             {
-                "name": "grpcExtensionAddress",
-                "type": "String",
-                "description": "grpc LVA Extension Address",
-                "default": "tcp://lvaextension:44000"
-            },
-            {
-                "name": "grpcExtensionUserName",
-                "type": "String",
-                "description": "inferencing endpoint user name.",
-                "default": "dummyUserName"
-            },
-            {
-                "name": "grpcExtensionPassword",
-                "type": "String",
-                "description": "inferencing endpoint password.",
-                "default": "dummyPassword"
-            },
-            {
                 "name": "hubSinkOutputName",
                 "type": "String",
                 "description": "Hub sink output name",
                 "default": "iothubsinkoutput"
-            },
-            {
-                "name": "imageEncoding",
-                "type": "String",
-                "description": "image encoding for frames",
-                "default": "bmp"
-            },
-            {
-                "name": "imageQuality",
-                "type": "String",
-                "description": "image encoding quality for frames (valid for JPG encoding)",
-                "default": "90"
             },
             {
                 "name": "imageScaleMode",
@@ -197,10 +167,13 @@
             },
             {
                 "@type": "#Microsoft.VideoAnalyzer.VideoSink",
-                "name": "assetSink",
-                "assetNamePattern": "sampleAssetFromEVR-LVAEdge-${instanceId}-${System.DateTime}",
-                "segmentLength": "${recordingDuration}",
-                "LocalMediaCacheMaximumSizeMiB": "2048",
+                "name": "videoSink",
+                "videoName": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                "videoCreationProperties": {
+                    "title": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                    "segmentLength": "${recordingDuration}"
+                },
+                "localMediaCacheMaximumSizeMiB": "2048",
                 "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
                 "inputs": [{
                     "nodeName": "signalGateProcessor"

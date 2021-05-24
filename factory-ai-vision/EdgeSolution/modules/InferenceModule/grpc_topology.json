@@ -45,18 +45,6 @@
                 "default": "iothubsinkoutput"
             },
             {
-                "name": "imageEncoding",
-                "type": "String",
-                "description": "image encoding for frames",
-                "default": "bmp"
-            },
-            {
-                "name": "imageQuality",
-                "type": "String",
-                "description": "image encoding quality for frames (valid for JPG encoding)",
-                "default": "90"
-            },
-            {
                 "name": "imageScaleMode",
                 "type": "String",
                 "description": "image scaling mode",
@@ -183,10 +171,13 @@
             },
             {
                 "@type": "#Microsoft.VideoAnalyzer.VideoSink",
-                "name": "assetSink",
-                "assetNamePattern": "sampleAssetFromEVR-LVAEdge-${instanceId}-${System.DateTime}",
-                "segmentLength": "${recordingDuration}",
-                "LocalMediaCacheMaximumSizeMiB": "2048",
+                "name": "videoSink",
+                "videoName": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                "videoCreationProperties": {
+                    "title": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                    "segmentLength": "${recordingDuration}"
+                },
+                "localMediaCacheMaximumSizeMiB": "2048",
                 "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
                 "inputs": [{
                     "nodeName": "signalGateProcessor"

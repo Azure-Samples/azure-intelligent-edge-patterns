@@ -203,7 +203,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/ava_edge:1.0.0",
+              "image": "mcr.microsoft.com/media/video-analyzer:1",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {

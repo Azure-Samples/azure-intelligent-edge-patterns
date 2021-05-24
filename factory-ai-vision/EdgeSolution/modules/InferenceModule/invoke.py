@@ -19,9 +19,9 @@ from config import IOTHUB_CONNECTION_STRING
 from utility import is_edge
 
 DEVICE_ID = os.environ.get("IOTEDGE_DEVICEID", "local")
-MODULE_ID = "lvaEdge"
+MODULE_ID = "avaedge"
 
-default_payload = {"@apiVersion": "2.0"}
+default_payload = {"@apiVersion": "1.0"}
 logger = logging.getLogger(__name__)
 
 # Known issue from LVA
@@ -70,7 +70,7 @@ class GraphManager:
     def invoke_graph_topology_get(self, name):
         method = "pipelineTopologyGet"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -78,7 +78,7 @@ class GraphManager:
     def invoke_graph_topology_set(self, name, properties):
         method = "pipelineTopologySet"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
             "properties": properties,
         }
@@ -87,14 +87,14 @@ class GraphManager:
     def invoke_graph_topology_list(self):
         method = "pipelineTopologyList"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_topology_delete(self, name):
         method = "pipelineTopologyDelete"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -102,7 +102,7 @@ class GraphManager:
     def invoke_graph_instance_get(self, name):
         method = "livePipelineGet"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -110,7 +110,7 @@ class GraphManager:
     def invoke_graph_instance_set(self, name, properties):
         method = "livePipelineSet"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
             "properties": properties,
         }
@@ -119,7 +119,7 @@ class GraphManager:
     def invoke_graph_instance_delete(self, name):
         method = "livePipelineDelete"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -127,14 +127,14 @@ class GraphManager:
     def invoke_graph_instance_list(self):
         method = "livePipelineList"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_activate(self, name):
         method = "livePipelineActivate"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -142,7 +142,7 @@ class GraphManager:
     def invoke_graph_instance_deactivate(self, name):
         method = "livePipelineDeactivate"
         payload = {
-            "@apiVersion": "2.0",
+            "@apiVersion": "1.0",
             "name": name,
         }
         return self.invoke_method(method, payload)
