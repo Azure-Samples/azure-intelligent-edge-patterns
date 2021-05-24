@@ -194,6 +194,10 @@ if [ "$isCfg" != true ]; then
       esac
     done
 
+	if [ "$streaming" == "ava" ]; then
+		read -p "Please enter your AVA Provision Token: " avaProvisioningToken; echo
+	else
+
 
     # ############################## Get IoT Hub #####################################
 
@@ -365,12 +369,7 @@ do
     prtline=${prtline//'<Docker Runtime>'/$runtime}
     prtline=${prtline//'<platform>'/$platform}
     prtline=${prtline//'$IOTHUB_CONNECTION_STRING'/$iotHubConnectionString}
-    prtline=${prtline//'$SUBSCRIPTION_ID'/$amsSubscriptionId}
-    prtline=${prtline//'$RESOURCE_GROUP'/$amsResourceGroup}
-    prtline=${prtline//'$TENANT_ID'/$amsTenantId}
-    prtline=${prtline//'$SERVICE_NAME'/$amsServiceName}
-    prtline=${prtline//'$SERVICE_PRINCIPAL_APP_ID'/$amsServicePrincipalAppId}
-    prtline=${prtline//'$SERVICE_PRINCIPAL_SECRET'/$amsServicePrincipalSecret}
+    prtline=${prtline//'$AVA_PROVISIONING_TOKEN'/$avaProvisioningToken}
     echo $prtline
 done < "$input" > ./$edgeDeployJson
 
@@ -386,24 +385,8 @@ if [ "$isCfg" != true ]; then
     echo streaming='"'$streaming'"' >> $factoryaiConfigName
     echo iotHubName='"'$iotHubName'"' >> $factoryaiConfigName
     echo iotHubConnectionString='"'$iotHubConnectionString'"' >> $factoryaiConfigName
-    echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiConfigName
-    echo amsServiceName='"'$amsServiceName'"' >> $factoryaiConfigName
-    echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiConfigName
-    echo amsTenantId='"'$amsTenantId'"' >> $factoryaiConfigName
-    echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiConfigName
-    echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiConfigName
-    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiConfigName
+	echo avaProvisioningToken='"'$avaProvisioningToken'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
-
-    mkdir -p factoryai_configs/ams_cfgs
-    factoryaiAmsConfigName=factoryai_configs/ams_cfgs/"$amsServiceName".cfg
-    echo amsSubscriptionId='"'$amsSubscriptionId'"' > $factoryaiAmsConfigName
-    echo amsServiceName='"'$amsServiceName'"' >> $factoryaiAmsConfigName
-    echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiAmsConfigName
-    echo amsTenantId='"'$amsTenantId'"' >> $factoryaiAmsConfigName
-    echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiAmsConfigName
-    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiAmsConfigName
-    echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiAmsConfigName
 fi
 
 
