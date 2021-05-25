@@ -57,16 +57,9 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.NginxModule.amd64}",
+              "image": "${MODULES.NginxModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "LogConfig": {
-                    "Type": "",
-                    "Config": {
-                      "max-size": "10m",
-                      "max-file": "10"
-                    }
-                  },
                   "PortBindings": {
                     "8181/tcp": [{
                       "HostPort": "8181"
@@ -102,23 +95,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.WebModule}",
-              "createOptions": {
-                "HostConfig": {
-                  "LogConfig": {
-                    "Type": "",
-                    "Config": {
-                      "max-size": "10m",
-                      "max-file": "10"
-                    }
-                  },
-                  "PortBindings": {
-                    "8000/tcp": [{
-                      "HostPort": "8000"
-                    }]
-                  }
-                }
-              }
+              "image": "${MODULES.WebModule.arm64v8}"
             }
           },
           "inferencemodule": {
@@ -135,25 +112,15 @@
               }
             },
             "settings": {
-              "image": "${MODULES.InferenceModule.amd64}",
+              "image": "${MODULES.InferenceModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "LogConfig": {
-                    "Type": "",
-                    "Config": {
-                      "max-size": "10m",
-                      "max-file": "10"
-                    }
-                  },
                   "PortBindings": {
                     "5000/tcp": [{
                       "HostPort": "5000"
                     }],
                     "5558/tcp": [{
                       "HostPort": "5558"
-                    }],
-                    "44000/tcp": [{
-                      "HostPort": "44000"
                     }]
                   },
                   "IpcMode": "host",
@@ -176,7 +143,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.PredictModule.gpuamd64}",
+              "image": "${MODULES.PredictModule.cpuarm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -225,7 +192,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.RtspSimModule}",
+              "image": "${MODULES.RtspSimModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "Mounts": [{
@@ -255,7 +222,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.UploadModule}",
+              "image": "${MODULES.UploadModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
                   "Mounts": [{
@@ -274,26 +241,6 @@
                     "7000/tcp": [{
                       "HostPort": "7000"
                     }]
-                  }
-                }
-              }
-            }
-          },
-          "yolov4module": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "registry.hub.docker.com/ronpai/yolov4-tflite-tiny",
-              "createOptions": {
-                "HostConfig": {
-                  "LogConfig": {
-                    "Type": "",
-                    "Config": {
-                      "max-size": "10m",
-                      "max-file": "10"
-                    }
                   }
                 }
               }
