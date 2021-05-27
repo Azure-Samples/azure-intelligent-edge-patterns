@@ -100,7 +100,7 @@ One thing to note is that `fac-ai` namespace should have already been created fo
 
 <img src="../assets/helmdeployed.png" width="500">
 
-#### Note: CPU is the default runtime during deployment, you can enable GPU runtime for the solution by using the following flag `--set runtime.GPU=true` during installation. Please make sure appropriate Nvidia drivers are installed on all your Kubernetes nodes. For AKS, you can follow [this documentation](https://docs.microsoft.com/en-us/azure/aks/gpu-cluster#install-nvidia-device-plugin) to install appropriate drivers. 
+#### Note: CPU is the default runtime during deployment, you can enable GPU runtime for the solution by using the flag `--set runtime.GPU=true` during installation. In addition to the GPU flag, If you are deploying the solution onto Azure Stack Edge Kubernetes, please add the flag `--set runtime.stackEdge=true` for proper GPU deployment.  Please make sure appropriate Nvidia drivers are installed on all your Kubernetes nodes. For AKS, you can follow [this documentation](https://docs.microsoft.com/en-us/azure/aks/gpu-cluster#install-nvidia-device-plugin) to install appropriate drivers. 
 
 ## Manage your VisionOnEdge deployment
 
