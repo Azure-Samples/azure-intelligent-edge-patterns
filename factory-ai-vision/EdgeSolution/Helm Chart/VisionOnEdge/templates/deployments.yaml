@@ -182,7 +182,7 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
-        {{ if .Values.runtime.GPU }}
+        {{ if and (.Values.runtime.GPU) (not .Values.runtime.stackEdge) }}
         "accelerator": nvidia
         {{ end }}
       {{- with .Values.predictModule.affinity }}
