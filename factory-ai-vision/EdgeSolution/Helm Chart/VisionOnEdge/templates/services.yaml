@@ -80,15 +80,3 @@ spec:
   - port: 7000
   selector:
     app: uploadmodule
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: yolov4module
-spec:
-  ports:
-  - port: 80
-  selector:
-    app: yolov4module
