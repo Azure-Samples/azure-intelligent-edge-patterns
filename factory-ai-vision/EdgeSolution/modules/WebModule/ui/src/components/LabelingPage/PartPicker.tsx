@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { DetailsList, SelectionMode, CheckboxVisibility, Text, TextField } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Part, getParts, postPart } from '../../store/partSlice';
-import { thunkChangeImgPart } from '../../store/imageSlice';
+// import { thunkChangeImgPart } from '../../store/imageSlice';
 import { selectNonDemoPart } from '../../store/selectors';
+import { changePartId } from '../../store/labelingPageSlice';
 
 export const PartPicker: React.FC = () => {
   const parts = useSelector(selectNonDemoPart);
@@ -61,7 +62,7 @@ export const PartPicker: React.FC = () => {
         onRenderItemColumn={(item) => item.name}
         isHeaderVisible={false}
         onActiveItemChanged={(item: Part): void => {
-          dispatch(thunkChangeImgPart(item.id));
+          dispatch(changePartId({ partId: item.id }));
         }}
       />
     );

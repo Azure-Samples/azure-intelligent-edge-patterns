@@ -265,26 +265,6 @@
                 }
               }
             }
-          },
-          "yolov4module": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "registry.hub.docker.com/ronpai/yolov4-tflite-tiny",
-              "createOptions": {
-                "HostConfig": {
-                  "LogConfig": {
-                    "Type": "",
-                    "Config": {
-                      "max-size": "10m",
-                      "max-file": "10"
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }

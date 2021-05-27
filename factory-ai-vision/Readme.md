@@ -45,7 +45,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a bri
     + [OpenCV Module](#opencv-module)
 - [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
   * [For Azure IoT Edge](#for-azure-iot-edge-devices-recommended)
-    + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer)
+    + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer-recommended)
       - [Prerequisite](#prerequisite)
       - [Get Started](#get-started)
     + [Option 2: Azure ARM Template](#option-2-azure-arm-template)
@@ -112,7 +112,7 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 ## For Azure IoT Edge Devices (Recommended)
 
-### Option 1: Azure Shell Installer
+### Option 1: Azure Shell Installer (Recommended)
 
 #### Prerequisite:
 

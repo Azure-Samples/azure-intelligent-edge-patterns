@@ -19,6 +19,8 @@ interface LabelDisplayImageProps {
   manualChecked: boolean;
   pointerCursor?: boolean;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+
+  parts: string[];
 }
 const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   imgId,
@@ -29,6 +31,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
   manualChecked,
   pointerCursor = false,
   onClick,
+  parts,
 }) => {
   const imgSize = useRef<Size2D>({ width: 400, height: 300 });
   const imgScale = useRef<number>(1);
@@ -51,6 +54,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
       cameraName={cameraName}
       imgTimeStamp={imgTimeStamp}
       partName={partName}
+      parts={parts}
     >
       <div
         onClick={onClick}

@@ -24,6 +24,10 @@ export type Item = Pick<Image, 'id' | 'image' | 'timestamp' | 'manualChecked'> &
     id: number;
     name: string;
   };
+  parts?: {
+    id: number;
+    name: string;
+  }[];
 };
 
 export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
@@ -45,6 +49,12 @@ export const ImageList: React.FC<{ images: Item[] }> = ({ images }) => {
             cameraName={item.camera.name}
             partName={item.part.name}
             manualChecked={item.manualChecked}
+            parts={item.parts
+              .map((part) => part.name)
+              .reduce((acc, current) => {
+                if (!acc.includes(current)) return [...acc, current];
+                return acc;
+              }, [])}
             pointerCursor
             onClick={() =>
               dispatch(

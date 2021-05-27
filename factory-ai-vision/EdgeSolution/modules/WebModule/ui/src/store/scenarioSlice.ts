@@ -3,13 +3,14 @@ import Axios from 'axios';
 import { InferenceMode } from './project/projectTypes';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
-type Scenario = {
+export type Scenario = {
   id: number;
   name: string;
   inferenceMode: InferenceMode;
   trainingProject: number;
   cameras: number[];
   parts: number[];
+  fps: string;
 };
 
 export const getScenario = createWrappedAsync('scenario/get', async () => {
@@ -21,6 +22,7 @@ export const getScenario = createWrappedAsync('scenario/get', async () => {
     trainingProject: e.project,
     cameras: e.cameras,
     parts: e.parts,
+    fps: e.fps.toString(),
   }));
 });
 
