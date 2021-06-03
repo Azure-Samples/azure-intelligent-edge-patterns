@@ -121,7 +121,7 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 #### Get Started:
 
-Please refer to this tutorial to follow the [instruction](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
+Please refer to this tutorial to follow the [instruction](Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
 
 ### Option 2: Azure ARM Template
 
