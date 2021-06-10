@@ -90,7 +90,7 @@ Please refer to this tutorial to follow the [instruction](https://github.com/lin
 
 ### Option 2: Azure ARM Template
 
-please follow the document to follow instruction  https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/linker/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
+please follow the document to follow instruction  https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
 
 [![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Fdevelop%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
