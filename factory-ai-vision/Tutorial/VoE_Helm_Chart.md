@@ -2,7 +2,7 @@
 
 ## Helm Chart Parameters and Information
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.26.0](https://img.shields.io/badge/AppVersion-0.26.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.26.0](https://img.shields.io/badge/AppVersion-0.26.0-informational?style=flat-square)
 
 Helm chart for VisionOnEdge(VoE) application that deploys VoE modules onto Kubernetes. 
 
@@ -16,9 +16,9 @@ Helm chart for VisionOnEdge(VoE) application that deploys VoE modules onto Kuber
 | azureIoT.edgeConnectionString* | string | `nil` | Your Azure IoT Edge Device Connection String |
 | customVision.endPoint* | string | `nil` | Your Azure Custom Vision Endpoint |
 | customVision.key* | string | `nil` | Your Azure Custom Vision Key |
-| runtime.GPU | bool | `false` | Sets the runtime of the solution to GPU. This value does not install Nvidia drivers so make sure your cluster has a GPU and the drivers are properly installed before enabling GPU |
-| runtime.stackEdge | bool | `false` | If runtime.GPU is enabled, it is used/required to properly install VoE on Azure Stack Edge to take advantage of its GPUs |
-| runtime.storageSize | string | `"10Gi"` | Size of the Storage Volume used by UploadModule and RtspSimModule |
+| runtime.accelerator | string | `nil` | Sets the runtime of the solution to GPU or VPU. There are two possible values: "GPU" and "VPU". This value does not install Nvidia, Intel drivers so make sure your cluster has a GPU/VPU and the drivers are properly installed before enabling GPU or VPU |
+| runtime.stackEdge | bool | `false` | If runtime.accelerator is equal to "GPU", it is used/required to properly install VoE on Azure Stack Edge to take advantage of its GPUs |
+| runtime.storageSize | string | `"5Gi"` | Size of the Storage Volume used by UploadModule and RtspSimModule |
 | captureModule.affinity | object | `{}` | Affinity rule for CaptureModule |
 | captureModule.tolerations | list | `[]` | Tolerations for CaptureModule |
 | inferenceModule.affinity | object | `{}` | Affinity rule for InferenceModule |

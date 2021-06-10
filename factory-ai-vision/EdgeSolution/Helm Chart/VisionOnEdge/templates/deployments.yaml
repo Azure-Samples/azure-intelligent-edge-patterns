@@ -182,8 +182,10 @@ spec:
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
-        {{ if and (.Values.runtime.GPU) (not .Values.runtime.stackEdge) }}
+        {{ if .Values.runtime.accelerator }}
+        {{ if and (or (eq .Values.runtime.accelerator "GPU") (eq .Values.runtime.accelerator "gpu")) (not .Values.runtime.stackEdge) }}
         "accelerator": nvidia
+        {{ end }}
         {{ end }}
       {{- with .Values.predictModule.affinity }}
       affinity:
@@ -195,15 +197,20 @@ spec:
       {{- end }}
       containers:
       - name: predictmodule
-        {{ if .Values.runtime.GPU }}
+        {{ if .Values.runtime.accelerator }}
+        {{ if or (eq .Values.runtime.accelerator "GPU") (eq .Values.runtime.accelerator "gpu") }}
         image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-gpuamd64"
-        {{ else }}
+        {{ else if or (eq .Values.runtime.accelerator "VPU") (eq .Values.runtime.accelerator "vpu") }}
+        image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-vpuamd64"
+        {{ end }}
+        {{ end }}
+        {{ if not .Values.runtime.accelerator }}
         image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-cpuamd64"
+        {{ end }}
         {{ if .Values.predictModule.cpuLimit }}
         resources:
           limits:
             cpu: {{ .Values.predictModule.cpuLimit }}
-        {{ end }}
         {{ end }}
         imagePullPolicy: Always
         ports:
