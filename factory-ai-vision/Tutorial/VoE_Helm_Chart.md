@@ -6,7 +6,7 @@
 
 Helm chart for VisionOnEdge(VoE) application that deploys VoE modules onto Kubernetes. 
 
-#### Note: You can only deploy OpenCV implementation of VoE onto Kubernetes. LVA implementation is not yet available for deployment onto Kubernetes. 
+#### Note: You can only deploy OpenCV implementation of VoE onto Kubernetes. AVA implementation is not yet available for deployment onto Kubernetes. 
 
 ### Values
 
