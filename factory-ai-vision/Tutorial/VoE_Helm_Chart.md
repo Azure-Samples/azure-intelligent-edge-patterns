@@ -64,13 +64,13 @@ You should see the following after deployment:
 You can upgrade your deployment by: 
 
 ```
-helm upgarde voe-k8s https://aka.ms/VoEHelm --reuse-values -n fac-ai -f <path-to-your-values.yaml-file>
+helm upgrade voe-k8s https://aka.ms/VoEHelm --reuse-values -n fac-ai -f <path-to-your-values.yaml-file>
 ```
 
 The command above will reuse values used in your previous release unless you override them using the `values.yaml` file. If you don't want to use values from the previous release you can instead use the following command: 
 
 ```
-helm upgarde voe-k8s https://aka.ms/VoEHelm -n fac-ai -f <path-to-your-values.yaml-file>
+helm upgrade voe-k8s https://aka.ms/VoEHelm -n fac-ai -f <path-to-your-values.yaml-file>
 ```
 
 ### Delete
