@@ -100,9 +100,23 @@ One thing to note is that `fac-ai` namespace should have already been created fo
 
 <img src="../assets/helmdeployed.png" width="500">
 
-#### Note: CPU is the default runtime during deployment, you can enable GPU runtime for the solution by using the following flag `--set runtime.GPU=true` during installation. Please make sure appropriate Nvidia drivers are installed on all your Kubernetes nodes. For AKS, you can follow [this documentation](https://docs.microsoft.com/en-us/azure/aks/gpu-cluster#install-nvidia-device-plugin) to install appropriate drivers. 
+#### Note: CPU is the default runtime during deployment, you can enable GPU runtime for the solution by using the flag `--set runtime.accelerator="GPU"` or alternatively, you can enable VPU runtime by using the flag `--set runtime.accelerator="VPU"` during installation. In addition to the GPU flag, If you are deploying the solution onto Azure Stack Edge Kubernetes, please add the flag `--set runtime.stackEdge=true` for successful GPU deployment.  Please make sure appropriate Nvidia drivers are installed on all your Kubernetes nodes. For AKS, you can follow [this documentation](https://docs.microsoft.com/en-us/azure/aks/gpu-cluster#install-nvidia-device-plugin) to install appropriate drivers. 
 
 ## Manage your VisionOnEdge deployment
+
+### Upgrade/Update deployment
+
+You can use the following command to upgrade your VoE deployment:
+
+```
+helm upgrade voe-k8s https://aka.ms/VoEHelm --reuse-values -n fac-ai -f <path-to-your-values.yaml-file>
+```
+
+The command above will reuse values used in your previous release unless you override them using the `values.yaml` file. If you don't want to use values from the previous release you can instead use the following command: 
+
+```
+helm upgrade voe-k8s https://aka.ms/VoEHelm -n fac-ai -f <path-to-your-values.yaml-file>
+```
 
 ### Delete deployment
 
@@ -114,18 +128,3 @@ helm delete voe-k8s -n fac-ai
 
 The above command deletes VoE from namespace `fac-ai` assuming you used `fac-ai` namespace during installation. If you installed VoE onto another namespace, please replace `fac-ai` with the namespace name you used during installation. 
 
-### Upgrade/Update deployment
-
-You can use the following command to upgrade your VoE deployment:
-
-```
-helm upgrade voe-k8s --reuse-values -n fac-ai -f <path-to-your-values.yaml-file>
-```
-
-The command above will reuse values used in your previous release unless you override them using the `values.yaml` file. If you don't want to use values from the previous release you can instead use the following command: 
-
-```
-helm upgrade voe-k8s -n fac-ai -f <path-to-your-values.yaml-file>
-```
-
-The above commands delete VoE from namespace `fac-ai` assuming you used `fac-ai` namespace during installation. If you installed VoE onto another namespace, please replace `fac-ai` with the namespace name you used during installation. 
