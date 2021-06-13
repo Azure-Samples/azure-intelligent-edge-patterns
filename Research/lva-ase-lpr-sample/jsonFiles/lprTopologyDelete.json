@@ -1,0 +1,8 @@
+{
+    "methodName": "GraphTopologyDelete",
+     "responseTimeoutInSeconds": 200,
+     "payload": {
+         "@apiVersion" : "1.0",
+         "name": "InferencingWithHttpExtension"
+     }
+}

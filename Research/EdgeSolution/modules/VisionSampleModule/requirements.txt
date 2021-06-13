@@ -1,4 +1,0 @@
-azure-iothub-device-client
-setuptools 
-numpy
-

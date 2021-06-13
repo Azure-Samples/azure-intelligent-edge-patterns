@@ -1,0 +1,26 @@
+{
+    "methodName": "GraphInstanceSet",
+     "responseTimeoutInSeconds": 200,
+     "payload": {
+            "@apiVersion": "1.0",
+            "name": "Sample-Instance-1",
+            "properties": {
+                "topologyName": "InferencingWithHttpExtension",
+                "description": "Sample graph description",
+                "parameters": [
+                    {
+                        "name": "rtspUrl",
+                        "value": "rtsp://rtspsim:554/media/lprtestvideo.mkv"
+                    },
+                    {
+                        "name": "rtspUserName",
+                        "value": "testuser"
+                    },
+                    {
+                        "name": "rtspPassword",
+                        "value": "testpassword"
+                    }
+                ]
+            }
+        }
+}
