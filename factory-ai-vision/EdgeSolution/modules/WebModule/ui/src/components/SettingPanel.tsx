@@ -37,9 +37,7 @@ import {
   thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
 import { selectNonDemoProject, pullCVProjects } from '../store/trainingProjectSlice';
-
 import { dummyFunction } from '../utils/dummyFunction';
-import { Url } from '../enums';
 
 import { WarningDialog } from './WarningDialog';
 import { CreateProjectDialog } from './CreateProjectDialog';
@@ -109,10 +107,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
     setloading(true);
     await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
 
-    if (location.pathname === Url.DEPLOYMENT) {
-      window.location.reload();
-      return;
-    }
+    window.location.reload();
 
     setloading(false);
     onDismiss();
