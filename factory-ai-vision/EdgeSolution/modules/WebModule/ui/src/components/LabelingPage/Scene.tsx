@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
 import { Button, CloseIcon } from '@fluentui/react-northstar';
-import { Stage, Layer, Image, Group, Text as KonvaText } from 'react-konva';
+import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
@@ -28,12 +28,22 @@ const defaultSize: Size2D = {
 
 interface SceneProps {
   url?: string;
+  partName: string;
   labelingType: LabelingType;
   annotations: Annotation[];
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
+  onBoxCreated?: () => void;
 }
-const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState, setWorkState }) => {
+const Scene: FC<SceneProps> = ({
+  url = '',
+  partName,
+  labelingType,
+  annotations,
+  workState,
+  setWorkState,
+  onBoxCreated,
+}) => {
   const dispatch = useDispatch();
   const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
@@ -82,6 +92,7 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState,
       );
       if (annotations.length - 1 === selectedAnnotationIndex) {
         setWorkState(WorkState.Selecting);
+        if (onBoxCreated) onBoxCreated();
       } else {
         setWorkState(WorkState.None);
       }
@@ -167,6 +178,13 @@ const Scene: FC<SceneProps> = ({ url = '', labelingType, annotations, workState,
                   selected={i === selectedAnnotationIndex}
                   dispatch={dispatch}
                   changeCursorState={changeCursorState}
+                />
+                <Text
+                  x={annotation.label.x1}
+                  y={annotation.label.y1 - 25 / scale.current}
+                  fontSize={20 / scale.current}
+                  fill="red"
+                  text={partName}
                 />
               </Group>
             ))}

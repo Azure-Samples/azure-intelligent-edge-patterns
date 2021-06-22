@@ -40,6 +40,7 @@ export const Setting = (): JSX.Element => {
     origin: originSettingData,
     isTrainerValid,
     cvProjects,
+    appInsightHasInit,
   } = useSelector<State, SettingType>((state) => state.setting);
   const dispatch = useDispatch();
   const [checkboxChecked, setCheckboxChecked] = useState(false);
@@ -66,20 +67,29 @@ export const Setting = (): JSX.Element => {
       .catch((e) => console.error(e));
   };
 
-  const onCheckBoxClick = (): void => {
-    const newCheckboxChecked = !checkboxChecked;
-    setCheckboxChecked(newCheckboxChecked);
-    Axios.patch(`/api/settings/${settingData.id}`, { is_collect_data: newCheckboxChecked })
+  const updateIsCollectData = (isCollectData, hasInit?): void => {
+    Axios.patch(`/api/settings/${settingData.id}`, {
+      is_collect_data: isCollectData,
+      ...(hasInit && { app_insight_has_init: hasInit }),
+    })
       .then(() => {
         const appInsight = getAppInsights();
         if (!appInsight) throw Error('App Insight hasnot been initialize');
-        appInsight.config.disableTelemetry = !newCheckboxChecked;
+        appInsight.config.disableTelemetry = !isCollectData;
+        // FIXME
+        window.location.reload();
         return void 0;
       })
       .catch((err) => {
         setCheckboxChecked(checkboxChecked);
         setOtherError(err);
       });
+  };
+
+  const onCheckBoxClick = (): void => {
+    const newCheckboxChecked = !checkboxChecked;
+    setCheckboxChecked(newCheckboxChecked);
+    updateIsCollectData(newCheckboxChecked);
   };
 
   useEffect(() => {
@@ -175,16 +185,36 @@ export const Setting = (): JSX.Element => {
         </Flex>
         {isTrainerValid && <PreviousProjectPanel cvProjects={cvProjects} />}
       </Flex>
-      {/* 
-          <Divider color="grey" />
-          <Checkbox
-            label="Allow to Send Usage Data"
-            toggle
-            checked={checkboxChecked}
-            onChange={onCheckBoxClick}
-          />
-        </>
-      */}
+      <Divider color="grey" />
+      <Checkbox
+        label="Allow to Send Usage Data"
+        toggle
+        checked={checkboxChecked}
+        onChange={onCheckBoxClick}
+      />
+      <WarningDialog
+        contentText={
+          <>
+            <h1 style={{ textAlign: 'center' }}>Data Collection Policy</h1>
+            <p>
+              The software may collect information about your use of the software and send it to Microsoft.
+              Microsoft may use this information to provide services and improve our products and services.
+              You may turn off the telemetry as described in the repository or clicking settings on top right
+              corner. Our privacy statement is located at{' '}
+              <a href="https://go.microsoft.com/fwlink/?LinkID=824704">
+                https://go.microsoft.com/fwlink/?LinkID=824704
+              </a>
+              . You can learn more about data collection and use in the help documentation and our privacy
+              statement. Your use of the software operates as your consent to these practices.
+            </p>
+          </>
+        }
+        open={!appInsightHasInit}
+        confirmButton="I agree"
+        cancelButton="I don't agree"
+        onConfirm={(): void => updateIsCollectData(true, true)}
+        onCancel={(): void => updateIsCollectData(false, true)}
+      />
     </>
   );
 };

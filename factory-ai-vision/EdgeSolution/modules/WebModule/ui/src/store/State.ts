@@ -90,5 +90,6 @@ export const initialState: State = {
       namespace: '',
     },
     isTrainerValid: false,
+    appInsightHasInit: false,
   },
 };

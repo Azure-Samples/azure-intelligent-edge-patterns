@@ -69,6 +69,7 @@ export const thunkGetSetting = () => (dispatch): Promise<any> => {
               namespace: data[0].endpoint,
             },
             isTrainerValid: data[0].is_trainer_valid,
+            appInsightHasInit: data[0].app_insight_has_init,
           }),
         );
       }
@@ -122,6 +123,7 @@ export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promis
             namespace: data.endpoint,
           },
           isTrainerValid: data.is_trainer_valid,
+          appInsightHasInit: data.app_insight_has_init,
         }),
       );
       return void 0;

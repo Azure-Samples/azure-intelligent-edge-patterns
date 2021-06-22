@@ -15,6 +15,7 @@ export type Setting = {
   origin: SettingData;
   isTrainerValid: boolean;
   cvProjects?: Record<string, string>;
+  appInsightHasInit: boolean;
 };
 
 export type UpdateKeyAction = {

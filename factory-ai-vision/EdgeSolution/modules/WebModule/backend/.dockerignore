@@ -1,0 +1,10 @@
+.dockerignore
+.git
+.gitattributes
+.gitignore
+.pylintrc
+.gitmodules
+bitbucket-pipelines.yml
+docker
+misc
+notebooks

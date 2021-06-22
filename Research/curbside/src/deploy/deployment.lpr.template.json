@@ -1,0 +1,148 @@
+{
+    "$schema-template": "2.0.0",
+    "modulesContent": {
+      "$edgeAgent": {
+        "properties.desired": {
+          "schemaVersion": "1.0",
+          "runtime": {
+            "type": "docker",
+            "settings": {
+              "minDockerVersion": "v1.25",
+              "loggingOptions": "",
+              "registryCredentials": {
+                "mhregistry:55000": {
+                  "username": "$CONTAINER_REGISTRY_USERNAME_myacr",
+                  "password": "$CONTAINER_REGISTRY_PASSWORD_myacr",
+                  "address": "mhregistry:55000"
+                },
+                "$CONTAINER_REGISTRY_USERNAME_lvaacr": {
+                  "username": "$CONTAINER_REGISTRY_USERNAME_lvaacr",
+                  "password": "$CONTAINER_REGISTRY_PASSWORD_lvaacr",
+                  "address": "$CONTAINER_REGISTRY_USERNAME_lvaacr.azurecr.io"
+                }
+              }
+            }
+          },
+          "systemModules": {
+            "edgeAgent": {
+              "type": "docker",
+              "settings": {
+                "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+                "createOptions": {}
+              }
+            },
+            "edgeHub": {
+              "type": "docker",
+              "status": "running",
+              "restartPolicy": "always",
+              "settings": {
+                "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+                "createOptions": {
+                  "HostConfig": {
+                    "PortBindings": {
+                      "5671/tcp": [
+                        {
+                          "HostPort": "5671"
+                        }
+                      ],
+                      "8883/tcp": [
+                        {
+                          "HostPort": "8883"
+                        }
+                      ],
+                      "443/tcp": [
+                        {
+                          "HostPort": "443"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "modules": {
+            "lvaEdge": {
+              "version": "1.0",
+              "type": "docker",
+              "status": "running",
+              "restartPolicy": "always",
+              "settings": {
+                "image": "lvacontainers.azurecr.io/lvaedge:1.0.01227.756",
+                "createOptions": {
+                  "HostConfig": {
+                    "LogConfig": {
+                      "Type": "",
+                      "Config": {
+                        "max-size": "10m",
+                        "max-file": "10"
+                      }
+                    },
+                    "Binds": [
+                      "$OUTPUT_VIDEO_FOLDER_ON_DEVICE:/var/media/"
+                    ]
+                  }
+                }
+              },
+              "env": {
+                "EnableDiagnosticLogging": {
+                  "value": "True"
+                }
+              }
+            },
+            "mhlva01aimodule": {
+              "version": "1.0",
+              "type": "docker",
+              "status": "running",
+              "restartPolicy": "always",
+              "settings": {
+                  "image": "mhregistry:55000/mhlva01aimodule:v0.1.14",
+                  "createOptions": "{\"HostConfig\":{\"runtime\": \"nvidia\", \"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}], \"5001/tcp\":[{\"HostPort\":\"5001\"}]}, \"DeviceCgroupRules\":[\"c 189:* rwm\"],\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\",  \"/home/athena/lva_output/:/var/media/\", \"/tmp/aix_debug_cam:/debug_path\"],\"Privileged\":true, \"LogConfig\":{\"Config\": {\"max-size\": \"100m\",\"max-file\": \"10\"}}}}"
+              }
+          },
+            "rtspsim": {
+              "version": "1.0",
+              "type": "docker",
+              "status": "running",
+              "restartPolicy": "always",
+              "settings": {
+                "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
+                "createOptions": {
+                  "HostConfig": {
+                    "Binds": [
+                      "$INPUT_VIDEO_FOLDER_ON_DEVICE:/live/mediaServer/media"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "$edgeHub": {
+        "properties.desired": {
+          "schemaVersion": "1.0",
+          "routes": {
+            "LVAToHub": "FROM /messages/modules/lvaEdge/outputs/* INTO $upstream"
+          },
+          "storeAndForwardConfiguration": {
+            "timeToLiveSecs": 7200
+          }
+        }
+      },
+      "lvaEdge": {
+        "properties.desired": {
+          "applicationDataDirectory": "/var/lib/azuremediaservices",
+          "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$AMS_ACCOUNT",
+          "aadTenantId": "$AAD_TENANT_ID",
+          "aadServicePrincipalAppId": "$AAD_SERVICE_PRINCIPAL_ID",
+          "aadServicePrincipalSecret": "$AAD_SERVICE_PRINCIPAL_SECRET",
+          "aadEndpoint": "https://login.microsoftonline.com",
+          "aadResourceId": "https://management.core.windows.net/",
+          "armEndpoint": "https://management.azure.com/",
+          "diagnosticsEventsOutputName": "AmsDiagnostics",
+          "OperationalEventsOutputName": "AmsOperational"
+        }
+      }
+    }
+  }

@@ -7,7 +7,7 @@ import { LabelingType, Annotation, WorkState } from '../store/labelingPage/label
 import { State } from '../store/State';
 import { LabelImage } from '../store/image/imageTypes';
 import { getAnnotations, resetAnnotation } from '../store/labelingPage/labelingPageActions';
-import { saveLabelImageAnnotation } from '../store/image/imageActions';
+import { saveLabelImageAnnotation, deleteLabelImage } from '../store/image/imageActions';
 import { RelabelImage } from '../components/ManualIdentification/types';
 import PrevNextButton from '../components/LabelingPage/PrevNextButton';
 
@@ -16,15 +16,8 @@ interface LabelingPageProps {
   images: LabelImage[] | RelabelImage[];
   imageIndex: number;
   closeDialog: () => void;
-  isRelabel: boolean;
 }
-const LabelingPage: FC<LabelingPageProps> = ({
-  labelingType,
-  images,
-  imageIndex,
-  closeDialog,
-  isRelabel,
-}) => {
+const LabelingPage: FC<LabelingPageProps> = ({ labelingType, images, imageIndex, closeDialog }) => {
   const dispatch = useDispatch();
   const [index, setIndex] = useState<number>(imageIndex);
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -34,6 +27,19 @@ const LabelingPage: FC<LabelingPageProps> = ({
   const isOnePointBox = checkOnePointBox(annotations);
   const imageUrl = images[index]?.image;
   const imageId = images[index]?.id;
+
+  const onSave = (): void => {
+    dispatch(saveLabelImageAnnotation(images[index].id, annotations));
+    if (index === images.length - 1) closeDialog();
+    setIndex((prev) => (prev + 1) % images.length);
+  };
+  const onBoxCreated = (): void => {
+    if (index === images.length - 1) onSave();
+  };
+
+  const onDeleteImage = (): void => {
+    dispatch(deleteLabelImage(images[imageIndex].id));
+  };
 
   useEffect(() => {
     if (typeof imageId === 'number') dispatch(getAnnotations(imageId));
@@ -51,7 +57,6 @@ const LabelingPage: FC<LabelingPageProps> = ({
         {index + 1}
       </Text>
       <PrevNextButton
-        isRelabel={isRelabel}
         prevDisabled={index === 0 || workState === WorkState.Creating || isOnePointBox}
         nextDisabled={index === images.length - 1 || workState === WorkState.Creating || isOnePointBox}
         onPrevClick={(): void => {
@@ -66,29 +71,28 @@ const LabelingPage: FC<LabelingPageProps> = ({
         <Scene
           url={imageUrl ?? '/icons/Play.png'}
           annotations={annotations}
+          partName={images[index]?.part.name}
           workState={workState}
           setWorkState={setWorkState}
           labelingType={labelingType}
+          onBoxCreated={onBoxCreated}
         />
       </PrevNextButton>
       <Flex gap="gap.medium">
         <Button
           primary
-          content={isRelabel ? 'Save' : index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
+          content={index === images.length - 1 ? 'Save and Done' : 'Save and Next'}
           disabled={isOnePointBox || workState === WorkState.Creating}
-          onClick={(): void => {
-            dispatch(saveLabelImageAnnotation(images[index].id, annotations));
-            if (isRelabel) return closeDialog();
-            if (index === images.length - 1) closeDialog();
-            setIndex((prev) => (prev + 1) % images.length);
-          }}
+          onClick={onSave}
         />
         <Button
+          primary
           content="Cancel"
           onClick={(): void => {
             closeDialog();
           }}
         />
+        <Button primary content="Delete Image" onClick={onDeleteImage} />
       </Flex>
     </Flex>
   );

@@ -8,6 +8,7 @@ import { RTSPVideoProps } from './RTSPVideo.type';
 export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   rtsp = null,
   partId,
+  partName,
   canCapture,
   onVideoStart,
   onVideoPause,
@@ -35,7 +36,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
   };
 
   const onCapturePhoto = (): void => {
-    dispatch(thunkAddCapturedImages(streamId));
+    dispatch(thunkAddCapturedImages(streamId, partName));
     if (captureLabelMode === 0) {
       setOpenLabelingPage(true);
     }

@@ -4,7 +4,7 @@ import { Provider } from '@fluentui/react-northstar';
 import Axios from 'axios';
 import { RootRouter } from './routes/RootRouter';
 import { MainLayout } from './components/MainLayout';
-import { myTheme } from './theme';
+import { mainTheme } from './themes/mainTheme';
 import TelemetryProvider from './components/TelemetryProvider';
 
 const App: FC = (): JSX.Element => {
@@ -35,7 +35,7 @@ const App: FC = (): JSX.Element => {
   }, []);
 
   return (
-    <Provider theme={myTheme}>
+    <Provider theme={mainTheme}>
       <BrowserRouter>
         <TelemetryProvider
           instrumentationKey={appInsightInfo.key}

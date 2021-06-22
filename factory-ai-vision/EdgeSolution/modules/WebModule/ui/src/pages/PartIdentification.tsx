@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Divider,
   Text,
@@ -14,12 +14,12 @@ import {
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
+import * as R from 'ramda';
 
 import { thunkGetProject, thunkPostProject, updateProjectData } from '../store/project/projectActions';
 import { Project, ProjectData } from '../store/project/projectTypes';
 import { State } from '../store/State';
 import { formatDropdownValue, Value } from '../util/formatDropdownValue';
-import { getIdFromUrl } from '../util/GetIDFromUrl';
 import { getAppInsights } from '../TelemetryService';
 import { WarningDialog } from '../components/WarningDialog';
 import { AddCameraLink } from '../components/AddModuleDialog/AddCameraLink';
@@ -32,7 +32,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
   const { data: images } = await Axios.get('/api/images/');
 
   const selectedPartIds = selectedParts.map((e) => e.id);
-  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(getIdFromUrl(e.part))).length;
+  const interestedImagesLength = images.filter((e) => selectedPartIds.includes(e.part)).length;
   const appInsight = getAppInsights();
   if (appInsight)
     appInsight.trackEvent({
@@ -40,7 +40,7 @@ const sendTrainInfoToAppInsight = async (selectedParts): Promise<void> => {
       properties: {
         images: interestedImagesLength,
         parts: selectedParts.length,
-        source: window.location.hostname,
+        source: '',
       },
     });
 };
@@ -61,7 +61,8 @@ export const PartIdentification: React.FC = () => {
     framesPerMin,
     accuracyThreshold,
   } = data;
-  const images = useSelector<State, LabelImage[]>((state) => state.images);
+  const allImages = useSelector<State, LabelImage[]>((state) => state.images);
+  const images = useMemo(() => allImages.filter((e) => !e.is_relabel), [allImages]);
   const [isTestModel, setIsTestModel] = useState(false);
   const [cameraLoading, dropDownCameras, selectedCamera, setSelectedCameraById] = useDropdownItems<any>(
     'cameras',
@@ -78,6 +79,7 @@ export const PartIdentification: React.FC = () => {
   const history = useHistory();
   const [maxImgCountError, setMaxImgCountError] = useState(false);
   const [suggestMessage, setSuggestMessage] = useState({ min: 0, max: 0, partName: '', rangeMessage: '' });
+  const hasUserUpdateAccuracyRange = useRef(false);
 
   useEffect(() => {
     if (!cameraLoading && !partLoading && !locationLoading) {
@@ -126,11 +128,11 @@ export const PartIdentification: React.FC = () => {
 
   useEffect(() => {
     const partsWithImageLength = images.reduce((acc, cur) => {
-      const id = getIdFromUrl(cur.part);
+      const { id } = cur.part;
       const relatedPartIdx = acc.findIndex((e) => e.id === id);
       if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
       return acc;
-    }, selectedParts);
+    }, R.clone(selectedParts));
 
     const minimumLengthPart = partsWithImageLength.reduce(
       (acc, cur) => {
@@ -141,34 +143,43 @@ export const PartIdentification: React.FC = () => {
     );
 
     if (minimumLengthPart.length === Infinity) return;
-    if (minimumLengthPart.length < 30)
+    if (minimumLengthPart.length < 30) {
+      if (!hasUserUpdateAccuracyRange.current)
+        dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }));
       setSuggestMessage({
         min: 10,
         max: 40,
         partName: minimumLengthPart.name,
         rangeMessage: 'lower than 30',
       });
-    else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80)
+    } else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80) {
+      if (!hasUserUpdateAccuracyRange.current)
+        dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }));
       setSuggestMessage({
         min: 30,
         max: 60,
         partName: minimumLengthPart.name,
         rangeMessage: 'between 30 to 80',
       });
-    else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130)
+    } else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130) {
+      if (!hasUserUpdateAccuracyRange.current)
+        dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }));
       setSuggestMessage({
         min: 50,
         max: 80,
         partName: minimumLengthPart.name,
         rangeMessage: 'between 80 to 130',
       });
-    else if (minimumLengthPart.length >= 130)
+    } else if (minimumLengthPart.length >= 130) {
+      if (!hasUserUpdateAccuracyRange.current)
+        dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }));
       setSuggestMessage({
         min: 60,
         max: 90,
         partName: minimumLengthPart.name,
         rangeMessage: 'more than 130',
       });
+    }
   }, [accuracyRangeMin, dispatch, images, selectedParts]);
 
   const accracyRangeDisabled = !needRetraining || isTestModel;
@@ -225,7 +236,10 @@ export const PartIdentification: React.FC = () => {
                 disabled={accracyRangeDisabled}
                 inline
                 value={accuracyRangeMin}
-                onChange={(_, { value }): void => setData('accuracyRangeMin', value)}
+                onChange={(_, { value }): void => {
+                  if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
+                  setData('accuracyRangeMin', value);
+                }}
               />
               %
             </Text>
@@ -236,7 +250,10 @@ export const PartIdentification: React.FC = () => {
                 disabled={accracyRangeDisabled}
                 inline
                 value={accuracyRangeMax}
-                onChange={(_, { value }): void => setData('accuracyRangeMax', value)}
+                onChange={(_, { value }): void => {
+                  if (!hasUserUpdateAccuracyRange.current) hasUserUpdateAccuracyRange.current = true;
+                  setData('accuracyRangeMax', value);
+                }}
               />
               %
             </Text>

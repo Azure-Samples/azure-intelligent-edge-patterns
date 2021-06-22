@@ -95,20 +95,13 @@ export const LiveViewContainer: React.FC<{
         <Flex hAlign="end" gap="gap.small">
           <Checkbox
             labelPosition="start"
-            label="Show area of interest"
+            label="Enable area of interest"
             toggle
             checked={showAOI}
             onClick={onCheckboxClick}
           />
           <Button
-            content="Update"
-            primary
-            disabled={updateBtnDisabled}
-            onClick={onUpdate}
-            loading={loading}
-          />
-          <Button
-            content="Create Area of Interest"
+            content="Create AOI"
             primary={creatingAOI !== CreatingState.Disabled}
             disabled={!showAOI}
             onClick={(): void => {
@@ -118,10 +111,17 @@ export const LiveViewContainer: React.FC<{
             circular
             styles={{ padding: '0 5px' }}
           />
+          <Button
+            content="Update"
+            primary
+            disabled={updateBtnDisabled}
+            onClick={onUpdate}
+            loading={loading}
+          />
           <Text styles={{ visibility: showUpdateSuccessTxt ? 'visible' : 'hidden' }}>Updated!</Text>
         </Flex>
       </Flex>
-      <div style={{ width: '100%', height: '40vh', backgroundColor: 'black' }}>
+      <div style={{ width: '100%', height: '50vh', backgroundColor: 'black' }}>
         {showVideo ? (
           <LiveViewScene
             AOIs={AOIs}
