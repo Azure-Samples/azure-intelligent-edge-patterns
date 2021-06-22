@@ -54,7 +54,8 @@ def azure_project_post_save_handler(**kwargs):
         return
     logger.info("Project customvision_id changed...")
     logger.info("Deleting all Images...")
-    Image.objects.filter(project=instance).delete()
+    # Image.objects.filter(project=instance).delete()
+    Image.objects.all().delete()
 
 
 @receiver(
