@@ -1,4 +1,3 @@
-azure-iothub-device-client==1.4.0
 tensorflow
 tensorflow-serving-api
 grpcio
