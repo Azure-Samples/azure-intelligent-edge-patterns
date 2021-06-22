@@ -1,8 +1,8 @@
 azure-iothub-device-client==1.4.0
-tensorflow
-tensorflow-serving-api
+tensorflow==1.14
+tensorflow-serving-api==1.14
 grpcio
 statistics
 matplotlib
-azure-storage
-azure-storage-blob
+#azure-storage==0.37.0
+azure-storage-blob==0.37.0
