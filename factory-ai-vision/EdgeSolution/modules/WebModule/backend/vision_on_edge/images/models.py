@@ -123,6 +123,18 @@ class Image(models.Model):
             kwargs:
         """
         instance = kwargs["instance"]
+        if instance.part_ids is not None:
+            if len(instance.part_ids) > 0:
+                part_ids = json.loads(instance.part_ids)
+        else:
+            part_ids = []
+        if instance.labels is not None:
+            labels = json.loads(instance.labels)
+            for label in labels:
+                if str(label['part']) not in part_ids:
+                    part_ids.append(str(label['part']))
+        instance.part_ids = json.dumps(part_ids)
+
         if instance.project is None and instance.part is not None:
             instance.project = instance.part.project
         if not instance.customvision_id:
