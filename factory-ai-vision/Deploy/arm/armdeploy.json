@@ -61,6 +61,7 @@
   },
   "variables": {
     "resourceGroupName": "[resourceGroup().name]",
+    "location": "[resourceGroup().location]",
     "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
     "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
     "managedIdentityResourceGroup": "[variables('resourceGroupName')]",
@@ -136,8 +137,61 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
-      "name": "ResourcesDeployment",
+      "name": "PrepareDevice",
       "dependsOn": [ "CreatingRoleAssignments", "CreatingManagedIdentity" ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "parameters": {
+          "edgeDeviceName": {
+            "value": "[parameters('edgeDeviceName')]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "edgeDeviceName": {
+              "type": "String"
+            },
+            "location": {
+              "type": "String"
+            }
+          },
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-12-01",
+              "name": "[concat(parameters('edgeDeviceName'),'/', 'PrepareDevice')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/lva-to-ava/factory-ai-vision/Deploy/arm/scripts/prepare-device.sh"
+                  ],
+                  "commandToExecute": "[concat('./prepare-device.sh ')]"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "name": "ResourcesDeployment",
+      "dependsOn": [ "PrepareDevice" ],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
