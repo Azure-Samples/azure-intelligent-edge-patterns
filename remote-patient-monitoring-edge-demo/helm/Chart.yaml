@@ -1,0 +1,20 @@
+apiVersion: v2
+name: Remote Patient Monitoring
+description: A Helm chart for Kubernetes
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+
+dependencies:
+  - name: fhir-api
+    version: "0.1.0"
+    repository: file://../fhir/helm
+  - name: analysis
+    version: "0.1.0"
+    repository: file://../analysis/helm
+  - name: subscriber
+    version: "0.1.0"
+    repository: file://../subscriber/helm
+  - name: dashboard
+    version: "0.1.0"
+    repository: file://../dashboard/helm

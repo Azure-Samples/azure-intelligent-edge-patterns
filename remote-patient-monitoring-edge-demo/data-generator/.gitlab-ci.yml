@@ -1,0 +1,12 @@
+# This build job is provided as an example 
+
+build:
+  image: node:latest
+  script:
+    - npm install
+    - npm run build
+  cache:
+    key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - node_modules/
+    policy: push

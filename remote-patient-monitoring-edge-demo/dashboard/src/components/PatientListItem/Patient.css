@@ -1,0 +1,114 @@
+/* 
+ *  Copyright (c) Microsoft Corporation.
+ *  Licensed under the MIT license.
+ */
+
+.patientHeader {
+  display: flex;
+  flex-direction: row;
+}
+
+.patient {
+  display: flex;
+  flex-direction: column;
+  background-color: #192A49;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.patientItem {
+  width: calc(33.333% - 25px);
+/*  min-width: 415px; */
+}
+
+.patientItem-big {
+  width: calc(50% - 25px);
+}
+
+.patientItem-big .ms-Persona-tertiaryText {
+  font-weight: 600;
+  margin-top: 5px;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+@media only screen and (max-width: 640px) {
+  .patientItem-big {
+    width: calc(100% - 25px);
+   }
+
+  .patientItem {
+    width: calc(100% - 25px);
+    min-width: calc(100% - 25px);
+  }
+}
+
+@media only screen and(max-width: 1023px) and (min-width: 641px) {
+  .patientItem-big {
+    width: calc(100% - 25px);
+   }
+
+  .patientItem {
+    width: calc(50% - 25px);
+  }
+}
+
+@media only screen and (min-width: 1580px) {
+  .patientItem-big {
+    width: calc(33.333% - 25px);
+  }
+  .patientItem {
+    width: calc(25% - 25px);
+    min-width: calc(25% - 25px);
+  }
+}
+
+.patientDetails {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.notification-container .patientDetails {
+  font-size: 12px;
+}
+
+.patientDetails-time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+}
+
+.patientItem-big .patientDetails-time {
+  font-weight: 800;
+}
+
+.patientStatus {
+  color: white;
+  font-weight: bold;
+}
+
+.patientStatusAlarming {
+  color: red;
+  font-weight: bold;
+}
+
+.patientListLabel {
+  margin: 30px 0px 0px 15px;
+  color: white;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.noPatientData {
+  margin: 30px 0px 0px 15px;
+  color: white;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.vitalGroup {
+  background-color: #192A49;
+  min-height: 60px;
+  border-radius: 2px;
+}

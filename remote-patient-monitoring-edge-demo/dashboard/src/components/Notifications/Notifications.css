@@ -1,0 +1,18 @@
+/* 
+ *  Copyright (c) Microsoft Corporation.
+ *  Licensed under the MIT license.
+ */
+
+.notification-text {
+    font-size: 12px;
+    color: #ffffff;
+    padding-left: 10px;
+    padding-top: 10px;
+}
+
+.notification-container {
+    z-index: 2;
+    position: absolute;
+    right: 0;
+    top: 48px;
+}

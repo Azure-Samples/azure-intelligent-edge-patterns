@@ -41,7 +41,7 @@ There is a suitable verion of the container we could use, `kubeflow/pytorch-dist
 If you would like to build your own, to create a container image for thisPyTorch implementation of
 `mnist` test, use the `Dockerfile` provided in `docker` subfolder:
 
-    $ cd Research/kubeflow-on-azure-stack/pytorch-on-kubeflow/docker
+    $ cd Research/kubeflow-on-azure-stack-lab/03-PyTorchJobs/docker
 
 Login to your Docker account:
 
@@ -272,7 +272,7 @@ Here is a sample of the output:
     Train Epoch: 1 [59520/60000 (99%)]      loss=0.0645
     accuracy=0.9666
 
-If you mounted the persistent storage to your cluster as described in [Installing Storage](../installing_storage.md), you can attach it to your `PyTorchJob`(i.e. using provided .yaml):
+If you mounted the persistent storage to your cluster as described in [Installing Storage](../01-Jupyter/installing_storage.md), you can attach it to your `PyTorchJob`(i.e. using provided .yaml):
 
     $ kubectl create -f pytorch_job_mnist_gloo_demo-with-persistence.yaml
     pytorchjob.kubeflow.org/pytorch-dist-mnist-gloo-demo created

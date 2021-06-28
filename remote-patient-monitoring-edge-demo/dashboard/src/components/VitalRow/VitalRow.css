@@ -1,0 +1,172 @@
+/* 
+ *  Copyright (c) Microsoft Corporation.
+ *  Licensed under the MIT license.
+ */
+
+.vital-label-row {
+  display: flex;
+  align-items: center;
+}
+
+.vital-label-row-big {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  max-height: 17px;
+}
+
+.vitalHeader-big {
+  font-size: 14px;
+  line-height: 17px;
+  font-weight: 600;
+}
+
+.vitalHeader-units {
+  font-size: 14px;
+  line-height: 17px;
+  padding-left: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media only screen and (min-width: 1023px) and (max-width: 1450px) {
+  .vitalHeader-units {
+    font-size: 12px;
+    line-height: 10px;
+  }
+}
+
+@media only screen and (min-width: 1580px) and (max-width: 1900px) {
+  .vitalHeader-units {
+    font-size: 12px;
+    line-height: 10px;
+  }
+}
+
+
+
+
+.vitalSeparator {
+  width: 1px;
+  background-color: #6D7D8D;
+}
+
+.vitalBottomBorder {
+  height: 1px;
+  background-color: #6D7D8D;
+}
+
+.vitalArea {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.vitalChart {
+  height: 270px;
+  width: 100%;
+  background-color:  #192A49 ;
+  margin: auto;
+  padding-left: 20px;
+  overflow: hidden;
+}
+
+.vitalBlock {
+  display: flex;
+  flex-direction: row;
+}
+
+.vitalSeparator-big {
+  min-width: 1px;
+  width: 1px;
+  background-color: #6D7D8D;
+}
+
+.vital-big {
+  min-width: calc(20% - 21px);
+  background-color: #0A162E;
+  color: white;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.vital-tab-bottom-border {
+  border-bottom: 1px solid #6D7D8D;
+}
+
+.vital-active {
+  background-color: #192A49;
+}
+
+
+.vital-active:focus, .vital-active:active {
+  outline: white solid 1px;
+  background-color: #273e68;
+}
+
+.vital-big:focus, .vital-big:active {
+  outline: none;
+  background-color: #102146;
+}
+.vital-big:hover {
+  background-color: #102146;
+}
+
+.sub-text {
+  font-size: x-small;
+}
+
+.vital {
+  min-width: calc(20% - 20px);
+  padding: 10px;
+  background-color: #0A162E;
+  color: white;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.vitalHeader {
+  font-weight: 600;
+}
+
+.vitalValue {
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.vitalValueAlarming {
+  font-weight: 800;
+  font-size: 20px;
+  color: #FF442E;
+}
+
+.vitalHeader-big {
+  font-weight: 600;
+}
+
+.vitalValue-big {
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 34px;
+  margin: 10px 10px 0px 0px;
+}
+
+.vitalValueAlarming-big {
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 34px;
+  margin: 10px 10px 0px 0px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 3px;
+  color: #FF442E;
+}
+
+.graphContainer {
+  position: relative;
+  height: 260px; 
+  width: 100%;
+}

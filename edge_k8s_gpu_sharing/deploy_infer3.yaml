@@ -1,0 +1,43 @@
+#
+# You can deploy this Deployment like so:
+#
+# $ kubectl create -f deploy_infer.yaml
+#
+# See the other deployment for the context of this model:
+# https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/machine-learning-notebooks/deploying-on-k8s
+# 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-infer3
+  labels:
+    app: my-infer3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-infer3
+  template:
+    metadata:
+      labels:
+        app: my-infer3
+    spec:
+      containers:
+      - name: my-infer3
+        # !!! put your own image location instead
+        image: myregistry.azurecr.io/rollingstone/myinfer:1.0
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          # "0" means device 0, not "do not use gpu".
+          value: "0"
+        ports:
+        # we use only 5001, but the container exposes  EXPOSE 5001 8883 8888
+        - containerPort: 5001
+        - containerPort: 8883
+        - containerPort: 8888
+        resources:
+          limits:
+            # not using gpu allocation via `limits`, using NVIDIA_VISIBLE_DEVICES env.
+            # nvidia.com/gpu:  1
+      #imagePullSecrets:
+      #  - name: secret4acr2infer

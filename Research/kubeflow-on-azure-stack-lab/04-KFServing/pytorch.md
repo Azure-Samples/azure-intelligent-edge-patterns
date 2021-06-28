@@ -156,4 +156,6 @@ For troubleshooting, see [Kubeflow website](https://github.com/kubeflow/kfservin
 
 - https://github.com/kubeflow/kfserving/tree/master/docs/samples/pytorch
 
+---
+
 [Back](Readme.md)
