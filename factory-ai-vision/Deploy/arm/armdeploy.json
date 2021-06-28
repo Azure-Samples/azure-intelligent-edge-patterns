@@ -24,8 +24,8 @@
       }
     },
     "videoCaptureModule": {
-      "defaultValue": "lva",
-      "allowedValues": [ "lva", "opencv" ],
+      "defaultValue": "ava",
+      "allowedValues": [ "ava", "opencv" ],
       "type": "string",
       "metadata": {
         "description": "Select video capture module to deal with the media source. Live Video Analytics (LVA) is a service from Microsoft that enables developers to capture, record, analyze live video and publish the results (video and/or video analytics) to Azure services (in the cloud and/or the edge). Opencv is an open-source library that includes several hundreds of computer vision algorithms."
@@ -51,34 +51,13 @@
         "description": "Enter the name of existing CustomVision service."
       }
     },
-    "mediaServiceResourceGroup": {
+    "edgeToken": {
       "type": "string",
-      "defaultValue": "",
       "metadata": {
-        "description": "Enter the resource group of existing Azure Media Service. Required when using LVA."
-      }
-    },
-    "mediaServiceName": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Enter the name of existing Azure Media Service. Required when using LVA."
-      }
-    },
-    "mediaServiceServicePrincipalName": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Enter the name of existing Azure Media Service Principal name. Required when using LVA."
-      }
-    },
-    "mediaServiceServicePrincipalSecret": {
-      "type": "securestring",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Azure Media Service Principal secret. Required when using LVA."
+        "description": "Enter the token of existing AVA Edge Module."
       }
     }
+
   },
   "variables": {
     "resourceGroupName": "[resourceGroup().name]",
@@ -171,17 +150,8 @@
           "videoCaptureModule": {
             "value": "[parameters('videoCaptureModule')]"
           },
-          "mediaServiceResourceGroup": {
-            "value": "[parameters('mediaServiceResourceGroup')]"
-          },
-          "mediaServiceName": {
-            "value": "[parameters('mediaServiceName')]"
-          },
-          "mediaServiceServicePrincipalName": {
-            "value": "[parameters('mediaServiceServicePrincipalName')]"
-          },
-          "mediaServiceServicePrincipalSecret": {
-            "value": "[parameters('mediaServiceServicePrincipalSecret')]"
+          "edgeToken": {
+            "value": "[parameters('edgeToken')]"
           },
           "iotHubName": {
             "value": "[parameters('iotHubName')]"
@@ -227,16 +197,7 @@
             "resourceGroupName": {
               "type": "String"
             },
-            "mediaServiceResourceGroup": {
-              "type": "String"
-            },
-            "mediaServiceName": {
-              "type": "String"
-            },
-            "mediaServiceServicePrincipalName": {
-              "type": "String"
-            },
-            "mediaServiceServicePrincipalSecret": {
+            "edgeToken": {
               "type": "String"
             },
             "videoCaptureModule": {
@@ -300,7 +261,7 @@
               "properties": {
                 "forceUpdateTag": "1",
                 "azCliVersion": "2.9.1",
-                "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/develop/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/lva-to-ava/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
                 "supportingScriptUris": [],
                 "environmentVariables": [
                   {
@@ -348,20 +309,8 @@
                     "value": "[parameters('customVisionName')]"
                   },
                   {
-                    "name": "AMS_RESOURCE_GROUP",
-                    "value": "[parameters('mediaServiceResourceGroup')]"
-                  },
-                  {
-                    "name": "AMS_NAME",
-                    "value": "[parameters('mediaServiceName')]"
-                  },
-                  {
-                    "name": "AMS_SP_NAME",
-                    "value": "[parameters('mediaServiceServicePrincipalName')]"
-                  },
-                  {
-                    "name": "AMS_SP_SECRET",
-                    "value": "[parameters('mediaServiceServicePrincipalSecret')]"
+                    "name": "AVA_EDGE_TOKEN",
+                    "value": "[parameters('edgeToken')]"
                   },
                   {
                     "name": "VIDEO_CAPTURE_MODULE",
