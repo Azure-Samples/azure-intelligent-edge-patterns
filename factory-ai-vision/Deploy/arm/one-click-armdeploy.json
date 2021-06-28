@@ -14,9 +14,9 @@
       "defaultValue": "cpu",
       "allowedValues": [
         "cpu",
-        "gpu",
-        "vpu",
-        "Jetson"
+        "gpu (NVIDIA cuda11)",
+        "vpu (Movidius)",
+        "Jetson (Jetpack 4.4)"
       ],
       "type": "string",
       "metadata": {
@@ -147,6 +147,7 @@
       }
     },
     {
+      "condition": "[equals(parameters('videoCaptureModule'), 'lva')]",
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2019-06-01",
       "name": "[variables('storageName')]",
@@ -304,9 +305,6 @@
           "vmName": {
             "value": "visionOnEdgeVM"
           },
-          "location": {
-            "value": "[resourceGroup().location]"
-          },
           "ubuntuOSVersion": {
             "value": "18.04-LTS"
           },
@@ -343,9 +341,6 @@
           "contentVersion": "1.0.0.0",
           "parameters": {
             "vmName": {
-              "type": "string"
-            },
-            "location": {
               "type": "string"
             },
             "ubuntuOSVersion": {
@@ -386,7 +381,11 @@
             "osDiskType": "Standard_LRS",
             "vmSize": {
               "cpu": "Standard_DS1_v2",
-              "gpu": "Standard_NC6s_v3"
+              "gpu (NVIDIA cuda11)": "Standard_NC6"
+            },
+            "location": {
+              "cpu": "[resourceGroup().location]",
+              "gpu (NVIDIA cuda11)": "westus2"
             },
             "subnetAddressPrefix": "10.1.0.0/24",
             "addressPrefix": "10.1.0.0/16",
@@ -407,7 +406,7 @@
               "name": "[variables('networkInterfaceName')]",
               "type": "Microsoft.Network/networkInterfaces",
               "apiVersion": "2020-06-01",
-              "location": "[parameters('location')]",
+              "location": "[variables('location')[parameters('moduleRuntime')]]",
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
@@ -437,7 +436,7 @@
               "name": "[parameters('networkSecurityGroupName')]",
               "type": "Microsoft.Network/networkSecurityGroups",
               "apiVersion": "2020-06-01",
-              "location": "[parameters('location')]",
+              "location": "[variables('location')[parameters('moduleRuntime')]]",
               "properties": {
                 "securityRules": [
                   {
@@ -564,7 +563,7 @@
               "name": "[parameters('virtualNetworkName')]",
               "type": "Microsoft.Network/virtualNetworks",
               "apiVersion": "2020-06-01",
-              "location": "[parameters('location')]",
+              "location": "[variables('location')[parameters('moduleRuntime')]]",
               "properties": {
                 "addressSpace": {
                   "addressPrefixes": [
@@ -587,7 +586,7 @@
               "name": "[variables('publicIpAddressName')]",
               "type": "Microsoft.Network/publicIpAddresses",
               "apiVersion": "2020-06-01",
-              "location": "[parameters('location')]",
+              "location": "[variables('location')[parameters('moduleRuntime')]]",
               "sku": {
                 "name": "Basic",
                 "tier": "Regional"
@@ -602,10 +601,10 @@
               }
             },
             {
-              "name": "[concat(parameters('vmName'), '-', parameters('moduleRuntime'))]",
+              "name": "[concat(parameters('vmName'), '-', substring(parameters('moduleRuntime'), 0, 3))]",
               "type": "Microsoft.Compute/virtualMachines",
               "apiVersion": "2020-06-01",
-              "location": "[parameters('location')]",
+              "location": "[variables('location')[parameters('moduleRuntime')]]",
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
               ],
@@ -641,7 +640,31 @@
                     }
                   ]
                 }
-              }
+              },
+              "resources": [
+                {
+                  "condition": "[equals(substring(parameters('moduleRuntime'), 0, 3), 'gpu')]",
+                  "name": "InstallNvidiaGpuDriverLinux",
+                  "type": "extensions",
+                  "apiVersion": "2015-06-15",
+                  "location": "[variables('location')[parameters('moduleRuntime')]]",
+                  "dependsOn": [
+                    "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('vmName'), '-', substring(parameters('moduleRuntime'), 0, 3)))]"
+                  ],
+                  "properties": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                      "fileUris": [
+                        "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/change-custom-arm-template/factory-ai-vision/Deploy/arm/scripts/install-nvidia-driver.sh"
+                      ],
+                      "commandToExecute": "[concat('./install-nvidia-driver.sh ', parameters('adminUsername'))]"
+                    }
+                  }
+                }
+              ]
             }
           ],
           "outputs": {
@@ -658,7 +681,9 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "name": "ResourcesDeployment",
-      "dependsOn": [ "CreateVM" ],
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'CreateVM')]"
+      ],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {

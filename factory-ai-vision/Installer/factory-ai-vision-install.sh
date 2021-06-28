@@ -186,142 +186,18 @@ if [ "$isCfg" != true ]; then
 
     # ############################## Get Streaming Type #####################################
     while true; do
-      read -p "Do you want to use Azure Live Video Analytics? (y or n): " -n 1 -r; echo
+      read -p "Do you want to use Azure Video Analytics? (y or n): " -n 1 -r; echo
       case $REPLY in
-          [Yy]* ) streaming="lva"; break;;
+          [Yy]* ) streaming="ava"; break;;
           [Nn]* ) streaming="opencv"; break;;
           * ) echo "Please answer yes or no.";;
       esac
     done
 
-    # ############################## Get Azure Media SErvice #####################################
+    if [ "$streaming" == "ava" ]; then
+        read -p "Please enter your AVA Provision Token: " avaProvisioningToken; echo
+    fi
 
-    if [ $streaming == "lva" ]; then
-        echo listing Azure Media Services
-        outputams=$(az ams account list --only-show-errors -o table --query [].name)
-        outputarrams=()
-        let cnt=0
-        while read -r line
-        do
-         if [ $cnt -gt 1 ]; then
-            outputarrams+=("$line")
-         fi
-         let cnt++
-        done <<< "$outputams"
-
-        # get length of an array
-        tLen=${#outputarrams[@]}
-
-        if [ $tLen -le 0 ]; then
-          #echo Azure Media Services not found
-          #echo Sorry, this demo requires that you have an existing Azure Media Services
-          #echo Please following this documentation to create it first 
-          #echo https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
-          #read -p "Press <Enter> key to exit..."; echo
-          #exit 1
-          today=`date +%m%d"`
-          newResourceGroup=factoryai${today}`python -c "import random; import string; print(''.join(random.choice(string.ascii_lowercase) for i in range(2)))"`
-          newStorageAccount=${newResourceGroup}sa
-	  amsServiceName=${newResourceGroup}ams
-	  echo "There's no AMS inside the subscription ..."
-	  echo "We'll create a Resource Group with Storage Account and AMS inside"
-
-	  echo Creating Resource Group $newResourceGroup
-          az group create --location westus2 --resource-group $newResourceGroup
-
-	  echo Creating Storage Account $newStorageAccount
-          az storage account create -n $newStorageAccount  -g $newResourceGroup -l westus2 --sku Standard_LRS
-
-	  echo Create Azure Media Service $amsServiceName
-	  az ams account create --location westus2 --name $amsServiceName --resource-group $newResourceGroup --storage-account $newStorageAccount
-
-
-        # Only one option so no need to prompt for choice
-        elif [ $tLen -le 1 ]; then
-          while true; do
-            read -p "please confirm install to ${outputarrams[0]%$CR} ams (y or n): " -n 1 -r;echo
-            case $REPLY in
-                [Yy]* ) break;;
-                [Nn]* ) exit;;
-                * ) echo "Please answer yes or no.";;
-            esac
-          done
-          amsServiceName=${outputarrams[0]%$CR}
-        else
-          PS3='Choose the number corresponding to your Azure Medis Service '
-          select opt in "${outputarrams[@]}"
-          do
-            echo "you chose: " $opt
-            amsServiceName=${opt%$CR}
-            break
-          done
-        fi
-
-	if [ -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg ]; then
-	  if [ `cat factoryai_configs/ams_cfgs/"$amsServiceName".cfg  | grep amsServicePrincipalAppId | wc -l ` -eq 0 ]; then
-		rm -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg
-	  fi
-	fi
-
-
-	if [ -f factoryai_configs/ams_cfgs/"$amsServiceName".cfg ]; then
-		echo "Using Existing Service Principle"
-		source factoryai_configs/ams_cfgs/"$amsServiceName".cfg
-		echo Azure Media Service Parameters:
-		echo "============================================================"
-		echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
-		echo "RESOURCE_GROUP           :" $amsResourceGroup
-		echo "TENANT_ID                :" $amsTenantId
-		echo "SERVICE_NAME             :" $amsServiceName
-		echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
-		echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
-		echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
-		echo "============================================================"
-
-        else
-		amsResourceGroup=$(az ams account list --only-show-errors -o tsv --query '[].[name,resourceGroup]' | grep $amsServiceName | awk '{print $2}')
-
-		amsServicePrincipalName=factoryai_$now
-		outputams=$(az ams account sp create  --name $amsServicePrincipalName --account-name $amsServiceName --resource-group $amsResourceGroup  --query '[SubscriptionId, AadTenantId, AadClientId, AadSecret]' -o tsv)
-		outputamsarr=()
-		while read -r line
-		do
-		    outputamsarr+=("$line")
-		done <<< "$outputams"
-
-		amsSubscriptionId=${outputamsarr[0]}
-		amsTenantId=${outputamsarr[1]}
-		amsServicePrincipalAppId=${outputamsarr[2]}
-		amsServicePrincipalSecret=${outputamsarr[3]}
-
-		isAmsServicePrincipalCreated=True
-		if [[ $amsServicePrincipalSecret == Cannot* ]]; then
-		    isAmsServicePrincipalCreated=False
-		    echo "AMS Service Principal '$amsServicePrincipalName' exists"
-		    echo "Please enter your Principal Secret for 'factoryai'"
-		    read amsServicePrincipalSecret
-		fi
-
-		if [[ $isAmsServicePrincipalCreated == True ]]; then
-		    echo "New Azure Media Service Priniple '$amsServicePrincipalName' is created"
-		    echo "***************************************************************************"
-		    echo "*** Please copy your SERVICE_PRINCIPAL_SECRET, it cannot be shown again ***"
-		    echo "***************************************************************************"
-		    echo "============================================================"
-		    echo "SUBSCRIPTION_ID          :" $amsSubscriptionId
-		    echo "RESOURCE_GROUP           :" $amsResourceGroup
-		    echo "TENANT_ID                :" $amsTenantId
-		    echo "SERVICE_NAME             :" $amsServiceName
-		    echo "SERVICE_PRINCIPAL_NAME   :" $amsServicePrincipalName
-		    echo "SERVICE_PRINCIPAL_APP_ID :" $amsServicePrincipalAppId
-		    echo "SERVICE_PRINCIPAL_SECRET :" $amsServicePrincipalSecret
-		    echo "============================================================"
-		    read -p "Press any key to continue..."
-		fi
-	fi
-
-
-    fi # if [ $streaming == "lva" ]; then
 
     # ############################## Get IoT Hub #####################################
 
@@ -474,8 +350,8 @@ fi #if [ $isCfg != true ]; then
 
 ################################ Check for Platform ###########################################
 
-if [ "$streaming" == "lva" ]; then
-    edgeDeploymentJson=deployment.lva.json
+if [ "$streaming" == "ava" ]; then
+    edgeDeploymentJson=deployment.ava.json
 else
     edgeDeploymentJson=deployment.opencv.json
 fi
@@ -493,12 +369,7 @@ do
     prtline=${prtline//'<Docker Runtime>'/$runtime}
     prtline=${prtline//'<platform>'/$platform}
     prtline=${prtline//'$IOTHUB_CONNECTION_STRING'/$iotHubConnectionString}
-    prtline=${prtline//'$SUBSCRIPTION_ID'/$amsSubscriptionId}
-    prtline=${prtline//'$RESOURCE_GROUP'/$amsResourceGroup}
-    prtline=${prtline//'$TENANT_ID'/$amsTenantId}
-    prtline=${prtline//'$SERVICE_NAME'/$amsServiceName}
-    prtline=${prtline//'$SERVICE_PRINCIPAL_APP_ID'/$amsServicePrincipalAppId}
-    prtline=${prtline//'$SERVICE_PRINCIPAL_SECRET'/$amsServicePrincipalSecret}
+    prtline=${prtline//'$AVA_PROVISIONING_TOKEN'/$avaProvisioningToken}
     echo $prtline
 done < "$input" > ./$edgeDeployJson
 
@@ -514,24 +385,8 @@ if [ "$isCfg" != true ]; then
     echo streaming='"'$streaming'"' >> $factoryaiConfigName
     echo iotHubName='"'$iotHubName'"' >> $factoryaiConfigName
     echo iotHubConnectionString='"'$iotHubConnectionString'"' >> $factoryaiConfigName
-    echo amsSubscriptionId='"'$amsSubscriptionId'"' >> $factoryaiConfigName
-    echo amsServiceName='"'$amsServiceName'"' >> $factoryaiConfigName
-    echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiConfigName
-    echo amsTenantId='"'$amsTenantId'"' >> $factoryaiConfigName
-    echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiConfigName
-    echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiConfigName
-    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiConfigName
+    echo avaProvisioningToken='"'$avaProvisioningToken'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
-
-    mkdir -p factoryai_configs/ams_cfgs
-    factoryaiAmsConfigName=factoryai_configs/ams_cfgs/"$amsServiceName".cfg
-    echo amsSubscriptionId='"'$amsSubscriptionId'"' > $factoryaiAmsConfigName
-    echo amsServiceName='"'$amsServiceName'"' >> $factoryaiAmsConfigName
-    echo amsResourceGroup='"'$amsResourceGroup'"' >> $factoryaiAmsConfigName
-    echo amsTenantId='"'$amsTenantId'"' >> $factoryaiAmsConfigName
-    echo amsServicePrincipalName='"'$amsServicePrincipalName'"' >> $factoryaiAmsConfigName
-    echo amsServicePrincipalAppId='"'$amsServicePrincipalAppId'"' >> $factoryaiAmsConfigName
-    echo amsServicePrincipalSecret='"'$amsServicePrincipalSecret'"' >> $factoryaiAmsConfigName
 fi
 
 
