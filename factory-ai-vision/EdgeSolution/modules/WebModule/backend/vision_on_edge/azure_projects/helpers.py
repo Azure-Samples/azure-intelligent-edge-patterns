@@ -42,7 +42,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "default_model_6parts",
-            "prediction_uri": prediction_module_url(),
+            "prediction_uri": "ovms-app:5010/score",
         },
     )
     # =============================================
@@ -54,7 +54,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/1",
-            "prediction_uri": prediction_module_url(),
+            "prediction_uri": "ovms-app:5010/score",
         },
     )
     # =============================================
@@ -66,7 +66,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/2",
-            "prediction_uri": prediction_module_url(),
+            "prediction_uri": "ovms-app:5010/score",
         },
     )
     # =============================================
@@ -78,7 +78,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/3",
-            "prediction_uri": prediction_module_url(),
+            "prediction_uri": "ovms-app:5010/score",
         },
     )
     logger.info("Create demo project end.")
@@ -92,7 +92,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/4",
-            "prediction_uri": prediction_module_url(),
+            "prediction_uri": "ovms-app:5010/score",
         },
     )
 
@@ -105,7 +105,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/5",
-            "prediction_uri": prediction_module_url(),
+            "prediction_uri": "ovms-app:5010/score",
         },
     )
 
@@ -118,6 +118,6 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/6",
-            "prediction_uri": prediction_module_url(),
+            "prediction_uri": "ovms-app:5010/score",
         },
     )
