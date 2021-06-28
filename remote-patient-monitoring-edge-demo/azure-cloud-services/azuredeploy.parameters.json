@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "param_serviceBus_name": {
+      "value": "test-service-bus"
+    },
+    "param_iotHub_name": {
+      "value": "test-iot-hub"
+    },
+    "param_acr_name": {
+      "value": "test-acr"
+    }
+  }
+}

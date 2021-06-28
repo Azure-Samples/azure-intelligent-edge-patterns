@@ -1,0 +1,26 @@
+# These values under global are intended to be set by the parent chart, but included here in case you want to deploy individually.
+global:
+  fhir_service_name:
+  docker_registry:
+
+deployment:
+  name: dashboard
+  group: dashboard
+  replicaCount: 1
+  pullPolicy: Always
+  imagePullSecrets: acr-secret
+  container:
+    image_name: dashboard
+    tag: latest
+    ports:
+      web: 80
+      api: 8080
+
+service:
+  type: LoadBalancer
+  ports:
+    web: 80
+    api: 8080
+
+nameOverride: ""
+fullnameOverride: ""

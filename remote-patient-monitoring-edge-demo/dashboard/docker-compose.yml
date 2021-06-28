@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  doctor-dashboard:
+    container_name: client
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    ports:
+      - 80:80
+    environment:
+      - CHOKIDAR_USEPOLLING=true

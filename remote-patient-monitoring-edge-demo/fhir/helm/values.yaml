@@ -1,0 +1,42 @@
+# Default values for fhir.
+fhir:
+  name: fhir-server
+  group: fhir
+  replicaCount: 1
+  container:
+    image: mcr.microsoft.com/healthcareapis/r4-fhir-server
+    tag: "latest"
+    port: 8080
+    configMap: 
+      fhir_security_enable: "false"
+      SqlServer__ConnectionString: "Server=localhost,1433;Initial Catalog=FHIR;Persist Security Info=False;User ID=sa;Password=ThisshouldW0rk1!;MultipleActiveResultSets=False;Connection Timeout=30;"
+      SqlServer__AllowDatabaseCreation: "true"
+      SqlServer__Initialize: "true"
+      SqlServer__SchemaOptions__AutomaticUpdatesEnabled: "true"
+      DataStore: "SqlServer"
+
+db:
+  name: fhir-db
+  group: fhir
+  container:
+    image: mcr.microsoft.com/mssql/server
+    tag: latest
+    port: 1433
+    volumeMounts:
+      mountPath: /var/opt/mssql/data
+      name: fhir-db-volume
+  db_username: SA_PASSWORD
+  db_pass: "ThisshouldW0rk1!"
+  eula: "Y"
+  
+service:
+  type: LoadBalancer
+ 
+volume:
+  storageClassName: "ase-node-local"
+  storageSize: 1Gi
+
+pullPolicy: always
+
+nameOverride: ""
+fullnameOverride: ""

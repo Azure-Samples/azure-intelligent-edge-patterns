@@ -56,7 +56,7 @@
                         "version": "1.0",
                         "status": "running",
                         "restartPolicy": "always",
-                        "Env": {
+                        "env": {
                             "ASPNETCORE_URLS": {
                                 "value": "$ASPNETCORE_URLS"
                             },                            
@@ -87,36 +87,39 @@
                             "SqlServer__Initialize":{
                                 "value": "$SqlServer__Initialize"
                             },
+                            "SqlServer__SchemaOptions__AutomaticUpdatesEnabled": {
+                                "value": "$SqlServer__SchemaOptions__AutomaticUpdatesEnabled"
+                            },                            
                             "DataStore":{
                                 "value": "$DataStore"
                             }
                         },
                         "settings": {
-                            "image": "healthplatformregistry.azurecr.io/${FHIR_VERSION}_fhir-server:latest",
+                            "image": "healthplatformregistry.azurecr.io/${FHIR_VERSION}_fhir-server:$FHIR_CONTAINER_RELEASE",
                             "createOptions": {
                                 "ExposedPorts": {
-                                    "8080/tcp": {},
-                                    "8443/tcp": {}
+                                    "9091/tcp": {},
+                                    "9443/tcp": {}
                                 },
                                 "HostConfig": {
                                     "Mounts": [
                                         {
                                             "Target": "/https/",
                                             "Source": "/https/",
-                                            "Type": "bind"
+                                            "Type": "volume"
                                         }
                                     ],                                    
                                     "PortBindings": {
-                                        "8080/tcp": [
+                                        "9091/tcp": [
                                             {
                                                 "HostIp": "0.0.0.0",
-                                                "HostPort": "8080"
+                                                "HostPort": "9091"
                                             }
                                         ],
-                                        "8443/tcp": [
+                                        "9443/tcp": [
                                             {
                                                 "HostIp": "0.0.0.0",
-                                                "HostPort": "8443"
+                                                "HostPort": "9443"
                                             }
                                         ]                                        
                                     }
@@ -154,8 +157,8 @@
                                 "HostConfig": {
                                     "Mounts": [
                                         {
-                                            "Target": "/var/opt/mssql",
-                                            "Source": "sqlVolume",
+                                            "Target": "/var/opt/mssql/data",
+                                            "Source": "sqlvolume",
                                             "Type": "volume"
                                         }
                                     ],
