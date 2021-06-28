@@ -64,7 +64,7 @@ Check out the architecture below to see how Vision on Edge works on both LVA and
 
 ### AVA Module (Recommended)
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/newarch1.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/AVAarch.png)
 
 ### OpenCV Module
 
@@ -94,6 +94,7 @@ Please refer to this tutorial to follow the [instruction](https://github.com/lin
 please follow the document to follow instruction  https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
 
 [![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Fdevelop%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
+
 
 
 ### Option 3: Deploy by Visual studio: 
