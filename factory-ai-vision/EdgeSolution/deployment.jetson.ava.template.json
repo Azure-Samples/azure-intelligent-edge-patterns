@@ -35,15 +35,21 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [{
-                      "HostPort": "5671"
-                    }],
-                    "8883/tcp": [{
-                      "HostPort": "8883"
-                    }],
-                    "443/tcp": [{
-                      "HostPort": "443"
-                    }]
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
                   }
                 }
               }
@@ -61,9 +67,11 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8181/tcp": [{
-                      "HostPort": "8181"
-                    }]
+                    "8181/tcp": [
+                      {
+                        "HostPort": "8181"
+                      }
+                    ]
                   }
                 }
               }
@@ -116,12 +124,16 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [{
-                      "HostPort": "5000"
-                    }],
-                    "5558/tcp": [{
-                      "HostPort": "5558"
-                    }]
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
                   },
                   "IpcMode": "host",
                   "runtime": "nvidia"
@@ -154,9 +166,11 @@
                     }
                   },
                   "PortBindings": {
-                    "7777/tcp": [{
-                      "HostPort": "7777"
-                    }]
+                    "7777/tcp": [
+                      {
+                        "HostPort": "7777"
+                      }
+                    ]
                   },
                   "IpcMode": "host",
                   "runtime": "nvidia"
@@ -180,9 +194,21 @@
                       "max-file": "10"
                     }
                   },
-                  "Binds": [],
-                  "IpcMode": "host"
+                  "Binds": [
+                    "/home/localedgeuser/samples/input:/var/media",
+                    "/var/lib/videoanalyzer/:/var/lib/videoanalyzer"
+                  ],
+                  "IpcMode": "host",
+                  "ShmSize": 1536870912
                 }
+              }
+            },
+            "env": {
+              "LOCAL_USER_ID": {
+                "value": "1010"
+              },
+              "LOCAL_GROUP_ID": {
+                "value": "1011"
               }
             }
           },
@@ -195,11 +221,13 @@
               "image": "${MODULES.RtspSimModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [{
-                    "Target": "/live/mediaServer/media/upload",
-                    "Source": "upload_data",
-                    "Type": "volume"
-                  }],
+                  "Mounts": [
+                    {
+                      "Target": "/live/mediaServer/media/upload",
+                      "Source": "upload_data",
+                      "Type": "volume"
+                    }
+                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -208,9 +236,11 @@
                     }
                   },
                   "PortBindings": {
-                    "554/tcp": [{
-                      "HostPort": "554"
-                    }]
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
                   }
                 }
               }
@@ -225,11 +255,13 @@
               "image": "${MODULES.UploadModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [{
-                    "Target": "/app/upload",
-                    "Source": "upload_data",
-                    "Type": "volume"
-                  }],
+                  "Mounts": [
+                    {
+                      "Target": "/app/upload",
+                      "Source": "upload_data",
+                      "Type": "volume"
+                    }
+                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -238,9 +270,11 @@
                     }
                   },
                   "PortBindings": {
-                    "7000/tcp": [{
-                      "HostPort": "7000"
-                    }]
+                    "7000/tcp": [
+                      {
+                        "HostPort": "7000"
+                      }
+                    ]
                   }
                 }
               }
@@ -270,13 +304,13 @@
     "avaedge": {
       "properties.desired": {
         "ProvisioningToken": "$AVA_PROVISIONING_TOKEN",
-        "ApplicationDataDirectory": "/var/lib/videoanalyzer",
-        "DiagnosticsEventsOutputName": "diagnostics",
-        "OperationalEventsOutputName": "operational",
-        "LogLevel": "information",
+        "applicationDataDirectory": "/var/lib/videoanalyzer",
+        "diagnosticsEventsOutputName": "diagnostics",
+        "operationalEventsOutputName": "operational",
+        "logLevel": "information",
         "LogCategories": "Application,Events",
-        "AllowUnsecuredEndpoints": true,
-        "TelemetryOptOut": false
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
       }
     }
   }

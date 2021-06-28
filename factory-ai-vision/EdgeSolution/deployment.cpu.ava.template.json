@@ -231,8 +231,21 @@
                       "max-file": "10"
                     }
                   },
-                  "IpcMode": "host"
+                  "Binds": [
+                    "/home/localedgeuser/samples/input:/var/media",
+                    "/var/lib/videoanalyzer/:/var/lib/videoanalyzer"
+                  ],
+                  "IpcMode": "host",
+                  "ShmSize": 1536870912
                 }
+              }
+            },
+            "env": {
+              "LOCAL_USER_ID": {
+                "value": "1010"
+              },
+              "LOCAL_GROUP_ID": {
+                "value": "1011"
               }
             }
           },
@@ -348,13 +361,13 @@
     "avaedge": {
       "properties.desired": {
         "ProvisioningToken": "$AVA_PROVISIONING_TOKEN",
-        "ApplicationDataDirectory": "/var/lib/videoanalyzer",
-        "DiagnosticsEventsOutputName": "diagnostics",
-        "OperationalEventsOutputName": "operational",
-        "LogLevel": "information",
+        "applicationDataDirectory": "/var/lib/videoanalyzer",
+        "diagnosticsEventsOutputName": "diagnostics",
+        "operationalEventsOutputName": "operational",
+        "logLevel": "information",
         "LogCategories": "Application,Events",
-        "AllowUnsecuredEndpoints": true,
-        "TelemetryOptOut": false
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
       }
     }
   }
