@@ -35,15 +35,21 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [{
-                      "HostPort": "5671"
-                    }],
-                    "8883/tcp": [{
-                      "HostPort": "8883"
-                    }],
-                    "443/tcp": [{
-                      "HostPort": "443"
-                    }]
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
                   }
                 }
               }
@@ -61,9 +67,11 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8181/tcp": [{
-                      "HostPort": "8181"
-                    }]
+                    "8181/tcp": [
+                      {
+                        "HostPort": "8181"
+                      }
+                    ]
                   }
                 }
               }
@@ -122,12 +130,16 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [{
-                      "HostPort": "5000"
-                    }],
-                    "5558/tcp": [{
-                      "HostPort": "5558"
-                    }]
+                    "5000/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ],
+                    "5558/tcp": [
+                      {
+                        "HostPort": "5558"
+                      }
+                    ]
                   },
                   "runtime": "nvidia"
                 }
@@ -159,9 +171,11 @@
                     }
                   },
                   "PortBindings": {
-                    "7777/tcp": [{
-                      "HostPort": "7777"
-                    }]
+                    "7777/tcp": [
+                      {
+                        "HostPort": "7777"
+                      }
+                    ]
                   },
                   "IpcMode": "host",
                   "runtime": "nvidia"
@@ -194,12 +208,16 @@
                     }
                   },
                   "PortBindings": {
-                    "9000/tcp": [{
-                      "HostPort": "9000"
-                    }],
-                    "5559/tcp": [{
-                      "HostPort": "5559"
-                    }]
+                    "9000/tcp": [
+                      {
+                        "HostPort": "9000"
+                      }
+                    ],
+                    "5559/tcp": [
+                      {
+                        "HostPort": "5559"
+                      }
+                    ]
                   },
                   "runtime": "runc"
                 }
@@ -215,11 +233,13 @@
               "image": "${MODULES.RtspSimModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [{
-                    "Target": "/live/mediaServer/media/upload",
-                    "Source": "upload_data",
-                    "Type": "volume"
-                  }],
+                  "Mounts": [
+                    {
+                      "Target": "/live/mediaServer/media/upload",
+                      "Source": "upload_data",
+                      "Type": "volume"
+                    }
+                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -228,9 +248,11 @@
                     }
                   },
                   "PortBindings": {
-                    "554/tcp": [{
-                      "HostPort": "554"
-                    }]
+                    "554/tcp": [
+                      {
+                        "HostPort": "554"
+                      }
+                    ]
                   }
                 }
               }
@@ -245,11 +267,13 @@
               "image": "${MODULES.UploadModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [{
-                    "Target": "/app/upload",
-                    "Source": "upload_data",
-                    "Type": "volume"
-                  }],
+                  "Mounts": [
+                    {
+                      "Target": "/app/upload",
+                      "Source": "upload_data",
+                      "Type": "volume"
+                    }
+                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -258,13 +282,106 @@
                     }
                   },
                   "PortBindings": {
-                    "7000/tcp": [{
-                      "HostPort": "7000"
-                    }]
+                    "7000/tcp": [
+                      {
+                        "HostPort": "7000"
+                      }
+                    ]
                   }
                 }
               }
             }
+<<<<<<< HEAD
+=======
+          },
+          "ovms-server": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "docker.io/kakalin/ovms-server",
+              "createOptions": {
+                "ExposedPorts": {
+                  "9000/tcp": {}
+                },
+                "Cmd": [
+                  "/ovms/bin/ovms --model_path /models/yolov3 --model_name yolov3 --port 9000"
+                ],
+                "Entrypoint": [
+                  "sh",
+                  "-c"
+                ],
+                "HostConfig": {
+                  "PortBindings": {
+                    "9000/tcp": [
+                      {
+                        "HostIp": "",
+                        "HostPort": "9000"
+                      }
+                    ]
+                  },
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  }
+                },
+                "Labels": {
+                  "com.docker.compose.project": "yolov3-ovms-iotedge",
+                  "com.docker.compose.service": "ovms-server",
+                  "com.docker.compose.oneoff": "False",
+                  "com.docker.compose.container-number": "1",
+                  "com.docker.compose.version": "1.24.0",
+                  "com.docker.compose.config-hash": "7f09e8165c07b4b5d43b0d9ac09a06a4062a31da2ae1e43997ee8e0f4a90fcfd"
+                }
+              }
+            }
+          },
+          "ovms-app": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "docker.io/kakalin/ovms-app",
+              "createOptions": {
+                "ExposedPorts": {
+                  "5010/tcp": {}
+                },
+                "Env": [
+                  "PYTHONUNBUFFERED=1"
+                ],
+                "HostConfig": {
+                  "PortBindings": {
+                    "5010/tcp": [
+                      {
+                        "HostIp": "",
+                        "HostPort": "5010"
+                      }
+                    ]
+                  },
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  }
+                },
+                "Labels": {
+                  "com.docker.compose.project": "yolov3-ovms-iotedge",
+                  "com.docker.compose.service": "ovms-app",
+                  "com.docker.compose.oneoff": "False",
+                  "com.docker.compose.container-number": "1",
+                  "com.docker.compose.version": "1.24.0",
+                  "com.docker.compose.config-hash": "dcdef0702a8e26d7c244eb1fc29534413b8822c98e1db982a604609a5b2e8c1a"
+                }
+              }
+            }
+>>>>>>> eeef4416 (feat: added yolov3 ovms module with rest api)
           }
         }
       }
