@@ -490,6 +490,22 @@ class Stream:
                 logger.warning('No inference result')
                 predictions = []
                 inf_time = 0
+        elif ':5010/score' in self.model.endpoint.lower():
+            # for ovms enpoint testing
+            str_encode = cv2.imencode('.jpg', image)[1].tostring()
+            f4 = BytesIO(str_encode)
+            f5 = BufferedReader(f4)
+            s = time.time()
+            res = requests.post(self.model.endpoint, data=f5)
+            inf_time = time.time() - s
+            logger.warning(res.json())
+            if res.status_code == 200:
+                lva_prediction = res.json()['inferences']
+                predictions = lva_to_customvision_format(lva_prediction)
+            else:
+                logger.warning('No inference result')
+                predictions = []
+            logger.warning('request prediction time: {}'.format(inf_time))
         else:
             # for yolo enpoint testing
             resized_image = cv2.resize(image, (416, 416))
