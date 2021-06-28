@@ -60,7 +60,7 @@ https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge?view=iot
 
 https://portal.azure.com/#create/Microsoft.Template
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot3.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot3-2.png) 
 <br/><br/>
 
 ## Step 1.1: Please fill the below mandatory field and check the below instruction of each field to decide the information needed for go ahead.
@@ -124,10 +124,10 @@ o	If You selected ARM64 in Device Architecture in 1.2.2 then you will see below 
 
 ### 1.2.4: Video Capture Module: 
 Definition:   Select video capture module to deal with the media source.  
-•	Live Video Analytics (LVA): is a series from Microsoft that enables developers to capture, record, analyze live video and publish the results (video  and /or video analytics) to Azure services (in the cloud and/or the edge) 
+•	Azure Video Analyzer (AVA): is a series from Microsoft that enables developers to capture, record, analyze live video and publish the results (video  and /or video analytics) to Azure services (in the cloud and/or the edge) 
 •	OpenCV: is an open source library that includes several hundreds of computer vision Algorithm.
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot10.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot10-2.png) 
 <br/><br/>
 
 ### 1.2.5: IOT HUB Name: 
@@ -161,89 +161,28 @@ Example: factoryai
 ![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot13.png) 
 <br/><br/>
 
-### 1.2.8: Media Service Name: (Optional) 
-Definition: Enter the name of existing Azure Media Service. 
-NOTE: ONLY REQUIRED WHEN choose Media service as LVA in 1.2.4  
-Example:
+### 1.2.8: Edge Token: 
+Definition:   Enter the token of existing AVA Edge Module 
+1. create AVA on Azure
+2. Add Edge Module
+  : Paste the Edge Token
+  
 
-•	Go to Azure portal https://portal.azure.com 
-•	and search media Services to choose the media service name
+learn more from link 
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot14.png) 
-<br/><br/>
-
-### 1.2.9: Media Service Resource Group: 
-Definition: Enter the resource group of existing Azure Media Service. 
-NOTE: ONLY REQUIRED WHEN choose Media service as LVA in 1.2.4  
-Example:
-•	Go to Azure portal https://portal.azure.com 
-•	and search media Services to choose the media service name 
-•	check the Resource group name
-
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot15.png) 
-<br/><br/>
-
-
-### 1.2.10: Media Service Principal Name: 
-Definition: Enter the name of existing Azure Media Principal Name. 
-NOTE: ONLY REQUIRED WHEN choose Media service as LVA in 1.2.4  
-Please follow below links for more information
-
-•	https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/get-started-detect-motion-emit-events-quickstart
-
-•	https://docs.microsoft.com/en-us/azure/media-services/live-video-analytics-edge/detect-motion-record-video-clips-media-services-quickstart
-
-Example:   
-•	Go to Azure portal https://portal.azure.com 
-•	and search media Services to choose the media service name 
-•	click on API Access Tab  
-•	Create New of Select running AAD application  
-•	Choose “select”
-
-
-
-
-### 1.2.11: Media Service Principal Secret: (Optional) 
-Definition: Enter the name of existing Azure Media Principal Secret. 
-NOTE: ONLY REQUIRED WHEN choose Media service as LVA in 1.2.4
-
-Example:   
-•	Go to Azure portal https://portal.azure.com 
-•	and search media Services to choose the media service name 
-•	click on API Access Tab
-•	Create New of secret of selected AAD application  
-•	click “select” after choose Expires  
-o	in one year 
-o	in 2 years 
-o	Never 
-•	Copy AAD Client ID  
-•	Copy AAD Client Secret
-
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot16.png) 
-<br/><br/>
-
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot17.png) 
-<br/><br/>
-
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot18.png) 
-<br/><br/>
-
-### •	Copy AAD client ID and Copy AAD Client Secret in ARM Template Custom Deployment form’s below field
-
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot19.png) 
-<br/><br/>
+https://azure.microsoft.com/en-us/products/video-analyzer/
 
 ## 1.3: After Filled above fields as definition we will have below two filled scenario 
-### 1.3.1: When Video Capture Module = LVA
+### 1.3.1: When Video Capture Module = AVA
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot20.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot20-2.png) 
 <br/><br/>
 
 ### •	Then click “Review + Create”
 
 ### 1.3.2: When Video Capture Module = OpenCV
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot21.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot21-2.png) 
 <br/><br/>
 
 ### •	Then click “Review + Create”  
